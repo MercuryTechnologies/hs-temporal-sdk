@@ -1,0 +1,8 @@
+packages: 
+  temporal-sdk.cabal,
+  protos/temporal-api-protos.cabal
+
+allow-newer: 
+  proto-lens-protoc:base
+constraints: 
+  proto-lens-protoc == 0.7.1.1

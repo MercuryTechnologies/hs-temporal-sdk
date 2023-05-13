@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+mkdir -p ./protos
+nix-shell -p haskell.packages.ghc902.proto-lens-protoc protobuf --run "protoc --plugin=protoc-gen-haskell=`which proto-lens-protoc`" --haskell_out=./protos --proto_path=_____

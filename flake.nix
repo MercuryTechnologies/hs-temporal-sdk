@@ -45,7 +45,8 @@
               '';
             };
           })
-          (final: prev: {
+          (final: prev: let
+          in {
             hs_temporal_sdk =
               final.haskell-nix.project' {
                 src = ./.;
@@ -60,6 +61,11 @@
                   nixpkgs-fmt
                   # Allows Cabal to build the Rust library itself when in the Devshell.
                   cargo
+                  darwin.apple_sdk.frameworks.Security 
+                  darwin.apple_sdk.frameworks.CoreFoundation 
+                  pkgconfig 
+                  openssl 
+                  protobuf
                 ];
               };
           })
@@ -75,6 +81,30 @@
 
         # Built by `nix build .`
         defaultPackage = packages.hs_temporal_sdk;
+        devShells = let 
+            protogen = pkgs.writeShellScriptBin "protogen" ''
+              shopt -s globstar
+              ${pkgs.protobuf}/bin/protoc \
+                --plugin=protoc-gen-haskell=${pkgs.haskellPackages.proto-lens-protoc}/bin/proto-lens-protoc \
+                --haskell_out=./protos/src \
+                --proto_path=${pkgs.protobuf}/include \
+                --proto_path=${temporal-sdk-core}/protos/local \
+                --proto_path=${temporal-sdk-core}/protos/api_upstream \
+                --proto_path=${temporal-sdk-core}/protos/grpc \
+                ${temporal-sdk-core}/protos/local/**/*.proto \
+                ${temporal-sdk-core}/protos/api_upstream/**/*.proto \
+                ${temporal-sdk-core}/protos/grpc/**/*.proto \
+                ${pkgs.protobuf}/include/**/*.proto
+            '';
+          in flake.devShells // {
+            # Used to generate the protobufs. We just need GHC stuff out of the path, or it seems to confuse proto-lens-protoc
+            # Example: nix develop .\#devShells.aarch64-darwin.generator -i --command protogen
+            generator = pkgs.mkShell {
+              packages = [
+                protogen
+              ];
+            };
+          };
       });
 
   # --- Flake Local Nix Configuration ----------------------------

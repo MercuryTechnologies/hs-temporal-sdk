@@ -3,6 +3,7 @@
 module Main (main) where
 
 import Foreign.C.Types
+import Temporal.Runtime
 
 foreign import ccall "add" rsAdd :: CInt -> CInt -> CInt
 foreign import ccall unsafe "say_hello" rsSayHello :: IO ()
@@ -15,4 +16,6 @@ helloRust = do
     putStrLn $ "1 + 2 = " <> show theSum
 
 main :: IO ()
-main = putStrLn "Hello from Haskell!" *> helloRust
+main = do
+  initializeRuntime
+  putStrLn "Hello from Haskell!" *> helloRust

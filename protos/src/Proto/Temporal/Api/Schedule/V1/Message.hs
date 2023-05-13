@@ -1,0 +1,6509 @@
+{- This file was auto-generated from temporal/api/schedule/v1/message.proto by the proto-lens-protoc program. -}
+{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
+{-# OPTIONS_GHC -Wno-unused-imports#-}
+{-# OPTIONS_GHC -Wno-duplicate-exports#-}
+{-# OPTIONS_GHC -Wno-dodgy-exports#-}
+module Proto.Temporal.Api.Schedule.V1.Message (
+        BackfillRequest(), CalendarSpec(), IntervalSpec(), Range(),
+        Schedule(), ScheduleAction(), ScheduleAction'Action(..),
+        _ScheduleAction'StartWorkflow, ScheduleActionResult(),
+        ScheduleInfo(), ScheduleListEntry(), ScheduleListInfo(),
+        SchedulePatch(), SchedulePolicies(), ScheduleSpec(),
+        ScheduleState(), StructuredCalendarSpec(),
+        TriggerImmediatelyRequest()
+    ) where
+import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
+import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
+import qualified Data.ProtoLens.Runtime.Prelude as Prelude
+import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
+import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
+import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
+import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
+import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
+import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
+import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
+import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
+import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
+import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
+import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
+import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
+import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
+import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
+import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
+import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
+import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
+import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
+import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
+import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
+import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
+import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
+import qualified Proto.Dependencies.Gogoproto.Gogo
+import qualified Proto.Google.Protobuf.Duration
+import qualified Proto.Google.Protobuf.Timestamp
+import qualified Proto.Temporal.Api.Common.V1.Message
+import qualified Proto.Temporal.Api.Enums.V1.Schedule
+import qualified Proto.Temporal.Api.Workflow.V1.Message
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.startTime' @:: Lens' BackfillRequest Proto.Google.Protobuf.Timestamp.Timestamp@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'startTime' @:: Lens' BackfillRequest (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.endTime' @:: Lens' BackfillRequest Proto.Google.Protobuf.Timestamp.Timestamp@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'endTime' @:: Lens' BackfillRequest (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.overlapPolicy' @:: Lens' BackfillRequest Proto.Temporal.Api.Enums.V1.Schedule.ScheduleOverlapPolicy@ -}
+data BackfillRequest
+  = BackfillRequest'_constructor {_BackfillRequest'startTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                                  _BackfillRequest'endTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                                  _BackfillRequest'overlapPolicy :: !Proto.Temporal.Api.Enums.V1.Schedule.ScheduleOverlapPolicy,
+                                  _BackfillRequest'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show BackfillRequest where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField BackfillRequest "startTime" Proto.Google.Protobuf.Timestamp.Timestamp where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _BackfillRequest'startTime
+           (\ x__ y__ -> x__ {_BackfillRequest'startTime = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField BackfillRequest "maybe'startTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _BackfillRequest'startTime
+           (\ x__ y__ -> x__ {_BackfillRequest'startTime = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField BackfillRequest "endTime" Proto.Google.Protobuf.Timestamp.Timestamp where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _BackfillRequest'endTime
+           (\ x__ y__ -> x__ {_BackfillRequest'endTime = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField BackfillRequest "maybe'endTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _BackfillRequest'endTime
+           (\ x__ y__ -> x__ {_BackfillRequest'endTime = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField BackfillRequest "overlapPolicy" Proto.Temporal.Api.Enums.V1.Schedule.ScheduleOverlapPolicy where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _BackfillRequest'overlapPolicy
+           (\ x__ y__ -> x__ {_BackfillRequest'overlapPolicy = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message BackfillRequest where
+  messageName _
+    = Data.Text.pack "temporal.api.schedule.v1.BackfillRequest"
+  packedMessageDescriptor _
+    = "\n\
+      \\SIBackfillRequest\DC2?\n\
+      \\n\
+      \start_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTimeB\EOT\144\223\US\SOH\DC2;\n\
+      \\bend_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\aendTimeB\EOT\144\223\US\SOH\DC2S\n\
+      \\SOoverlap_policy\CAN\ETX \SOH(\SO2,.temporal.api.enums.v1.ScheduleOverlapPolicyR\roverlapPolicy"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        startTime__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "start_time"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'startTime")) ::
+              Data.ProtoLens.FieldDescriptor BackfillRequest
+        endTime__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "end_time"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'endTime")) ::
+              Data.ProtoLens.FieldDescriptor BackfillRequest
+        overlapPolicy__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "overlap_policy"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Schedule.ScheduleOverlapPolicy)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"overlapPolicy")) ::
+              Data.ProtoLens.FieldDescriptor BackfillRequest
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, startTime__field_descriptor),
+           (Data.ProtoLens.Tag 2, endTime__field_descriptor),
+           (Data.ProtoLens.Tag 3, overlapPolicy__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _BackfillRequest'_unknownFields
+        (\ x__ y__ -> x__ {_BackfillRequest'_unknownFields = y__})
+  defMessage
+    = BackfillRequest'_constructor
+        {_BackfillRequest'startTime = Prelude.Nothing,
+         _BackfillRequest'endTime = Prelude.Nothing,
+         _BackfillRequest'overlapPolicy = Data.ProtoLens.fieldDefault,
+         _BackfillRequest'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          BackfillRequest
+          -> Data.ProtoLens.Encoding.Bytes.Parser BackfillRequest
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "start_time"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"startTime") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "end_time"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"endTime") y x)
+                        24
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.toEnum
+                                          (Prelude.fmap
+                                             Prelude.fromIntegral
+                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
+                                       "overlap_policy"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"overlapPolicy") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "BackfillRequest"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view
+                    (Data.ProtoLens.Field.field @"maybe'startTime") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'endTime") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just _v)
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage _v))
+                ((Data.Monoid.<>)
+                   (let
+                      _v
+                        = Lens.Family2.view
+                            (Data.ProtoLens.Field.field @"overlapPolicy") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
+                            ((Prelude..)
+                               ((Prelude..)
+                                  Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
+                               Prelude.fromEnum _v))
+                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
+instance Control.DeepSeq.NFData BackfillRequest where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_BackfillRequest'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_BackfillRequest'startTime x__)
+                (Control.DeepSeq.deepseq
+                   (_BackfillRequest'endTime x__)
+                   (Control.DeepSeq.deepseq (_BackfillRequest'overlapPolicy x__) ())))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.second' @:: Lens' CalendarSpec Data.Text.Text@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.minute' @:: Lens' CalendarSpec Data.Text.Text@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.hour' @:: Lens' CalendarSpec Data.Text.Text@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.dayOfMonth' @:: Lens' CalendarSpec Data.Text.Text@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.month' @:: Lens' CalendarSpec Data.Text.Text@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.year' @:: Lens' CalendarSpec Data.Text.Text@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.dayOfWeek' @:: Lens' CalendarSpec Data.Text.Text@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.comment' @:: Lens' CalendarSpec Data.Text.Text@ -}
+data CalendarSpec
+  = CalendarSpec'_constructor {_CalendarSpec'second :: !Data.Text.Text,
+                               _CalendarSpec'minute :: !Data.Text.Text,
+                               _CalendarSpec'hour :: !Data.Text.Text,
+                               _CalendarSpec'dayOfMonth :: !Data.Text.Text,
+                               _CalendarSpec'month :: !Data.Text.Text,
+                               _CalendarSpec'year :: !Data.Text.Text,
+                               _CalendarSpec'dayOfWeek :: !Data.Text.Text,
+                               _CalendarSpec'comment :: !Data.Text.Text,
+                               _CalendarSpec'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show CalendarSpec where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField CalendarSpec "second" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _CalendarSpec'second
+           (\ x__ y__ -> x__ {_CalendarSpec'second = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField CalendarSpec "minute" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _CalendarSpec'minute
+           (\ x__ y__ -> x__ {_CalendarSpec'minute = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField CalendarSpec "hour" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _CalendarSpec'hour (\ x__ y__ -> x__ {_CalendarSpec'hour = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField CalendarSpec "dayOfMonth" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _CalendarSpec'dayOfMonth
+           (\ x__ y__ -> x__ {_CalendarSpec'dayOfMonth = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField CalendarSpec "month" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _CalendarSpec'month (\ x__ y__ -> x__ {_CalendarSpec'month = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField CalendarSpec "year" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _CalendarSpec'year (\ x__ y__ -> x__ {_CalendarSpec'year = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField CalendarSpec "dayOfWeek" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _CalendarSpec'dayOfWeek
+           (\ x__ y__ -> x__ {_CalendarSpec'dayOfWeek = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField CalendarSpec "comment" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _CalendarSpec'comment
+           (\ x__ y__ -> x__ {_CalendarSpec'comment = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message CalendarSpec where
+  messageName _
+    = Data.Text.pack "temporal.api.schedule.v1.CalendarSpec"
+  packedMessageDescriptor _
+    = "\n\
+      \\fCalendarSpec\DC2\SYN\n\
+      \\ACKsecond\CAN\SOH \SOH(\tR\ACKsecond\DC2\SYN\n\
+      \\ACKminute\CAN\STX \SOH(\tR\ACKminute\DC2\DC2\n\
+      \\EOThour\CAN\ETX \SOH(\tR\EOThour\DC2 \n\
+      \\fday_of_month\CAN\EOT \SOH(\tR\n\
+      \dayOfMonth\DC2\DC4\n\
+      \\ENQmonth\CAN\ENQ \SOH(\tR\ENQmonth\DC2\DC2\n\
+      \\EOTyear\CAN\ACK \SOH(\tR\EOTyear\DC2\RS\n\
+      \\vday_of_week\CAN\a \SOH(\tR\tdayOfWeek\DC2\CAN\n\
+      \\acomment\CAN\b \SOH(\tR\acomment"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        second__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "second"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"second")) ::
+              Data.ProtoLens.FieldDescriptor CalendarSpec
+        minute__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "minute"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"minute")) ::
+              Data.ProtoLens.FieldDescriptor CalendarSpec
+        hour__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "hour"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"hour")) ::
+              Data.ProtoLens.FieldDescriptor CalendarSpec
+        dayOfMonth__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "day_of_month"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"dayOfMonth")) ::
+              Data.ProtoLens.FieldDescriptor CalendarSpec
+        month__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "month"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"month")) ::
+              Data.ProtoLens.FieldDescriptor CalendarSpec
+        year__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "year"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"year")) ::
+              Data.ProtoLens.FieldDescriptor CalendarSpec
+        dayOfWeek__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "day_of_week"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"dayOfWeek")) ::
+              Data.ProtoLens.FieldDescriptor CalendarSpec
+        comment__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "comment"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"comment")) ::
+              Data.ProtoLens.FieldDescriptor CalendarSpec
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, second__field_descriptor),
+           (Data.ProtoLens.Tag 2, minute__field_descriptor),
+           (Data.ProtoLens.Tag 3, hour__field_descriptor),
+           (Data.ProtoLens.Tag 4, dayOfMonth__field_descriptor),
+           (Data.ProtoLens.Tag 5, month__field_descriptor),
+           (Data.ProtoLens.Tag 6, year__field_descriptor),
+           (Data.ProtoLens.Tag 7, dayOfWeek__field_descriptor),
+           (Data.ProtoLens.Tag 8, comment__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _CalendarSpec'_unknownFields
+        (\ x__ y__ -> x__ {_CalendarSpec'_unknownFields = y__})
+  defMessage
+    = CalendarSpec'_constructor
+        {_CalendarSpec'second = Data.ProtoLens.fieldDefault,
+         _CalendarSpec'minute = Data.ProtoLens.fieldDefault,
+         _CalendarSpec'hour = Data.ProtoLens.fieldDefault,
+         _CalendarSpec'dayOfMonth = Data.ProtoLens.fieldDefault,
+         _CalendarSpec'month = Data.ProtoLens.fieldDefault,
+         _CalendarSpec'year = Data.ProtoLens.fieldDefault,
+         _CalendarSpec'dayOfWeek = Data.ProtoLens.fieldDefault,
+         _CalendarSpec'comment = Data.ProtoLens.fieldDefault,
+         _CalendarSpec'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          CalendarSpec -> Data.ProtoLens.Encoding.Bytes.Parser CalendarSpec
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                       Data.ProtoLens.Encoding.Bytes.getBytes
+                                                         (Prelude.fromIntegral len)
+                                           Data.ProtoLens.Encoding.Bytes.runEither
+                                             (case Data.Text.Encoding.decodeUtf8' value of
+                                                (Prelude.Left err)
+                                                  -> Prelude.Left (Prelude.show err)
+                                                (Prelude.Right r) -> Prelude.Right r))
+                                       "second"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"second") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                       Data.ProtoLens.Encoding.Bytes.getBytes
+                                                         (Prelude.fromIntegral len)
+                                           Data.ProtoLens.Encoding.Bytes.runEither
+                                             (case Data.Text.Encoding.decodeUtf8' value of
+                                                (Prelude.Left err)
+                                                  -> Prelude.Left (Prelude.show err)
+                                                (Prelude.Right r) -> Prelude.Right r))
+                                       "minute"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"minute") y x)
+                        26
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                       Data.ProtoLens.Encoding.Bytes.getBytes
+                                                         (Prelude.fromIntegral len)
+                                           Data.ProtoLens.Encoding.Bytes.runEither
+                                             (case Data.Text.Encoding.decodeUtf8' value of
+                                                (Prelude.Left err)
+                                                  -> Prelude.Left (Prelude.show err)
+                                                (Prelude.Right r) -> Prelude.Right r))
+                                       "hour"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"hour") y x)
+                        34
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                       Data.ProtoLens.Encoding.Bytes.getBytes
+                                                         (Prelude.fromIntegral len)
+                                           Data.ProtoLens.Encoding.Bytes.runEither
+                                             (case Data.Text.Encoding.decodeUtf8' value of
+                                                (Prelude.Left err)
+                                                  -> Prelude.Left (Prelude.show err)
+                                                (Prelude.Right r) -> Prelude.Right r))
+                                       "day_of_month"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"dayOfMonth") y x)
+                        42
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                       Data.ProtoLens.Encoding.Bytes.getBytes
+                                                         (Prelude.fromIntegral len)
+                                           Data.ProtoLens.Encoding.Bytes.runEither
+                                             (case Data.Text.Encoding.decodeUtf8' value of
+                                                (Prelude.Left err)
+                                                  -> Prelude.Left (Prelude.show err)
+                                                (Prelude.Right r) -> Prelude.Right r))
+                                       "month"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"month") y x)
+                        50
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                       Data.ProtoLens.Encoding.Bytes.getBytes
+                                                         (Prelude.fromIntegral len)
+                                           Data.ProtoLens.Encoding.Bytes.runEither
+                                             (case Data.Text.Encoding.decodeUtf8' value of
+                                                (Prelude.Left err)
+                                                  -> Prelude.Left (Prelude.show err)
+                                                (Prelude.Right r) -> Prelude.Right r))
+                                       "year"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"year") y x)
+                        58
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                       Data.ProtoLens.Encoding.Bytes.getBytes
+                                                         (Prelude.fromIntegral len)
+                                           Data.ProtoLens.Encoding.Bytes.runEither
+                                             (case Data.Text.Encoding.decodeUtf8' value of
+                                                (Prelude.Left err)
+                                                  -> Prelude.Left (Prelude.show err)
+                                                (Prelude.Right r) -> Prelude.Right r))
+                                       "day_of_week"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"dayOfWeek") y x)
+                        66
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                       Data.ProtoLens.Encoding.Bytes.getBytes
+                                                         (Prelude.fromIntegral len)
+                                           Data.ProtoLens.Encoding.Bytes.runEither
+                                             (case Data.Text.Encoding.decodeUtf8' value of
+                                                (Prelude.Left err)
+                                                  -> Prelude.Left (Prelude.show err)
+                                                (Prelude.Right r) -> Prelude.Right r))
+                                       "comment"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"comment") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "CalendarSpec"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"second") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             ((Data.Monoid.<>)
+                (let
+                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"minute") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                         ((Prelude..)
+                            (\ bs
+                               -> (Data.Monoid.<>)
+                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                            Data.Text.Encoding.encodeUtf8 _v))
+                ((Data.Monoid.<>)
+                   (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"hour") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                            ((Prelude..)
+                               (\ bs
+                                  -> (Data.Monoid.<>)
+                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                               Data.Text.Encoding.encodeUtf8 _v))
+                   ((Data.Monoid.<>)
+                      (let
+                         _v
+                           = Lens.Family2.view (Data.ProtoLens.Field.field @"dayOfMonth") _x
+                       in
+                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                             Data.Monoid.mempty
+                         else
+                             (Data.Monoid.<>)
+                               (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
+                               ((Prelude..)
+                                  (\ bs
+                                     -> (Data.Monoid.<>)
+                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                             (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                          (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                  Data.Text.Encoding.encodeUtf8 _v))
+                      ((Data.Monoid.<>)
+                         (let
+                            _v = Lens.Family2.view (Data.ProtoLens.Field.field @"month") _x
+                          in
+                            if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                Data.Monoid.mempty
+                            else
+                                (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
+                                  ((Prelude..)
+                                     (\ bs
+                                        -> (Data.Monoid.<>)
+                                             (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                             (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                     Data.Text.Encoding.encodeUtf8 _v))
+                         ((Data.Monoid.<>)
+                            (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"year") _x
+                             in
+                               if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                   Data.Monoid.mempty
+                               else
+                                   (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
+                                     ((Prelude..)
+                                        (\ bs
+                                           -> (Data.Monoid.<>)
+                                                (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                   (Prelude.fromIntegral
+                                                      (Data.ByteString.length bs)))
+                                                (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                        Data.Text.Encoding.encodeUtf8 _v))
+                            ((Data.Monoid.<>)
+                               (let
+                                  _v
+                                    = Lens.Family2.view (Data.ProtoLens.Field.field @"dayOfWeek") _x
+                                in
+                                  if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                      Data.Monoid.mempty
+                                  else
+                                      (Data.Monoid.<>)
+                                        (Data.ProtoLens.Encoding.Bytes.putVarInt 58)
+                                        ((Prelude..)
+                                           (\ bs
+                                              -> (Data.Monoid.<>)
+                                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                      (Prelude.fromIntegral
+                                                         (Data.ByteString.length bs)))
+                                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                           Data.Text.Encoding.encodeUtf8 _v))
+                               ((Data.Monoid.<>)
+                                  (let
+                                     _v
+                                       = Lens.Family2.view
+                                           (Data.ProtoLens.Field.field @"comment") _x
+                                   in
+                                     if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                         Data.Monoid.mempty
+                                     else
+                                         (Data.Monoid.<>)
+                                           (Data.ProtoLens.Encoding.Bytes.putVarInt 66)
+                                           ((Prelude..)
+                                              (\ bs
+                                                 -> (Data.Monoid.<>)
+                                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                         (Prelude.fromIntegral
+                                                            (Data.ByteString.length bs)))
+                                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                              Data.Text.Encoding.encodeUtf8 _v))
+                                  (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                                     (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))))))
+instance Control.DeepSeq.NFData CalendarSpec where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_CalendarSpec'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_CalendarSpec'second x__)
+                (Control.DeepSeq.deepseq
+                   (_CalendarSpec'minute x__)
+                   (Control.DeepSeq.deepseq
+                      (_CalendarSpec'hour x__)
+                      (Control.DeepSeq.deepseq
+                         (_CalendarSpec'dayOfMonth x__)
+                         (Control.DeepSeq.deepseq
+                            (_CalendarSpec'month x__)
+                            (Control.DeepSeq.deepseq
+                               (_CalendarSpec'year x__)
+                               (Control.DeepSeq.deepseq
+                                  (_CalendarSpec'dayOfWeek x__)
+                                  (Control.DeepSeq.deepseq (_CalendarSpec'comment x__) ()))))))))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.interval' @:: Lens' IntervalSpec Proto.Google.Protobuf.Duration.Duration@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'interval' @:: Lens' IntervalSpec (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.phase' @:: Lens' IntervalSpec Proto.Google.Protobuf.Duration.Duration@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'phase' @:: Lens' IntervalSpec (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@ -}
+data IntervalSpec
+  = IntervalSpec'_constructor {_IntervalSpec'interval :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
+                               _IntervalSpec'phase :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
+                               _IntervalSpec'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show IntervalSpec where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField IntervalSpec "interval" Proto.Google.Protobuf.Duration.Duration where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _IntervalSpec'interval
+           (\ x__ y__ -> x__ {_IntervalSpec'interval = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField IntervalSpec "maybe'interval" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _IntervalSpec'interval
+           (\ x__ y__ -> x__ {_IntervalSpec'interval = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField IntervalSpec "phase" Proto.Google.Protobuf.Duration.Duration where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _IntervalSpec'phase (\ x__ y__ -> x__ {_IntervalSpec'phase = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField IntervalSpec "maybe'phase" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _IntervalSpec'phase (\ x__ y__ -> x__ {_IntervalSpec'phase = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message IntervalSpec where
+  messageName _
+    = Data.Text.pack "temporal.api.schedule.v1.IntervalSpec"
+  packedMessageDescriptor _
+    = "\n\
+      \\fIntervalSpec\DC2;\n\
+      \\binterval\CAN\SOH \SOH(\v2\EM.google.protobuf.DurationR\bintervalB\EOT\152\223\US\SOH\DC25\n\
+      \\ENQphase\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\ENQphaseB\EOT\152\223\US\SOH"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        interval__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "interval"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'interval")) ::
+              Data.ProtoLens.FieldDescriptor IntervalSpec
+        phase__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "phase"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'phase")) ::
+              Data.ProtoLens.FieldDescriptor IntervalSpec
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, interval__field_descriptor),
+           (Data.ProtoLens.Tag 2, phase__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _IntervalSpec'_unknownFields
+        (\ x__ y__ -> x__ {_IntervalSpec'_unknownFields = y__})
+  defMessage
+    = IntervalSpec'_constructor
+        {_IntervalSpec'interval = Prelude.Nothing,
+         _IntervalSpec'phase = Prelude.Nothing,
+         _IntervalSpec'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          IntervalSpec -> Data.ProtoLens.Encoding.Bytes.Parser IntervalSpec
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "interval"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"interval") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "phase"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"phase") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "IntervalSpec"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'interval") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'phase") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just _v)
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData IntervalSpec where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_IntervalSpec'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_IntervalSpec'interval x__)
+                (Control.DeepSeq.deepseq (_IntervalSpec'phase x__) ()))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.start' @:: Lens' Range Data.Int.Int32@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.end' @:: Lens' Range Data.Int.Int32@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.step' @:: Lens' Range Data.Int.Int32@ -}
+data Range
+  = Range'_constructor {_Range'start :: !Data.Int.Int32,
+                        _Range'end :: !Data.Int.Int32,
+                        _Range'step :: !Data.Int.Int32,
+                        _Range'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show Range where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField Range "start" Data.Int.Int32 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Range'start (\ x__ y__ -> x__ {_Range'start = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField Range "end" Data.Int.Int32 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Range'end (\ x__ y__ -> x__ {_Range'end = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField Range "step" Data.Int.Int32 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Range'step (\ x__ y__ -> x__ {_Range'step = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message Range where
+  messageName _ = Data.Text.pack "temporal.api.schedule.v1.Range"
+  packedMessageDescriptor _
+    = "\n\
+      \\ENQRange\DC2\DC4\n\
+      \\ENQstart\CAN\SOH \SOH(\ENQR\ENQstart\DC2\DLE\n\
+      \\ETXend\CAN\STX \SOH(\ENQR\ETXend\DC2\DC2\n\
+      \\EOTstep\CAN\ETX \SOH(\ENQR\EOTstep"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        start__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "start"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.Int32Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int32)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"start")) ::
+              Data.ProtoLens.FieldDescriptor Range
+        end__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "end"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.Int32Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int32)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"end")) ::
+              Data.ProtoLens.FieldDescriptor Range
+        step__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "step"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.Int32Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int32)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"step")) ::
+              Data.ProtoLens.FieldDescriptor Range
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, start__field_descriptor),
+           (Data.ProtoLens.Tag 2, end__field_descriptor),
+           (Data.ProtoLens.Tag 3, step__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _Range'_unknownFields
+        (\ x__ y__ -> x__ {_Range'_unknownFields = y__})
+  defMessage
+    = Range'_constructor
+        {_Range'start = Data.ProtoLens.fieldDefault,
+         _Range'end = Data.ProtoLens.fieldDefault,
+         _Range'step = Data.ProtoLens.fieldDefault,
+         _Range'_unknownFields = []}
+  parseMessage
+    = let
+        loop :: Range -> Data.ProtoLens.Encoding.Bytes.Parser Range
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "start"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"start") y x)
+                        16
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "end"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"end") y x)
+                        24
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "step"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"step") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "Range"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"start") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
+                      ((Prelude..)
+                         Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
+             ((Data.Monoid.<>)
+                (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"end") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
+                         ((Prelude..)
+                            Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
+                ((Data.Monoid.<>)
+                   (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"step") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
+                            ((Prelude..)
+                               Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
+                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
+instance Control.DeepSeq.NFData Range where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_Range'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_Range'start x__)
+                (Control.DeepSeq.deepseq
+                   (_Range'end x__) (Control.DeepSeq.deepseq (_Range'step x__) ())))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.spec' @:: Lens' Schedule ScheduleSpec@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'spec' @:: Lens' Schedule (Prelude.Maybe ScheduleSpec)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.action' @:: Lens' Schedule ScheduleAction@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'action' @:: Lens' Schedule (Prelude.Maybe ScheduleAction)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.policies' @:: Lens' Schedule SchedulePolicies@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'policies' @:: Lens' Schedule (Prelude.Maybe SchedulePolicies)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.state' @:: Lens' Schedule ScheduleState@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'state' @:: Lens' Schedule (Prelude.Maybe ScheduleState)@ -}
+data Schedule
+  = Schedule'_constructor {_Schedule'spec :: !(Prelude.Maybe ScheduleSpec),
+                           _Schedule'action :: !(Prelude.Maybe ScheduleAction),
+                           _Schedule'policies :: !(Prelude.Maybe SchedulePolicies),
+                           _Schedule'state :: !(Prelude.Maybe ScheduleState),
+                           _Schedule'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show Schedule where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField Schedule "spec" ScheduleSpec where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Schedule'spec (\ x__ y__ -> x__ {_Schedule'spec = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField Schedule "maybe'spec" (Prelude.Maybe ScheduleSpec) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Schedule'spec (\ x__ y__ -> x__ {_Schedule'spec = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField Schedule "action" ScheduleAction where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Schedule'action (\ x__ y__ -> x__ {_Schedule'action = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField Schedule "maybe'action" (Prelude.Maybe ScheduleAction) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Schedule'action (\ x__ y__ -> x__ {_Schedule'action = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField Schedule "policies" SchedulePolicies where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Schedule'policies (\ x__ y__ -> x__ {_Schedule'policies = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField Schedule "maybe'policies" (Prelude.Maybe SchedulePolicies) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Schedule'policies (\ x__ y__ -> x__ {_Schedule'policies = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField Schedule "state" ScheduleState where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Schedule'state (\ x__ y__ -> x__ {_Schedule'state = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField Schedule "maybe'state" (Prelude.Maybe ScheduleState) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Schedule'state (\ x__ y__ -> x__ {_Schedule'state = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message Schedule where
+  messageName _ = Data.Text.pack "temporal.api.schedule.v1.Schedule"
+  packedMessageDescriptor _
+    = "\n\
+      \\bSchedule\DC2:\n\
+      \\EOTspec\CAN\SOH \SOH(\v2&.temporal.api.schedule.v1.ScheduleSpecR\EOTspec\DC2@\n\
+      \\ACKaction\CAN\STX \SOH(\v2(.temporal.api.schedule.v1.ScheduleActionR\ACKaction\DC2F\n\
+      \\bpolicies\CAN\ETX \SOH(\v2*.temporal.api.schedule.v1.SchedulePoliciesR\bpolicies\DC2=\n\
+      \\ENQstate\CAN\EOT \SOH(\v2'.temporal.api.schedule.v1.ScheduleStateR\ENQstate"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        spec__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "spec"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor ScheduleSpec)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'spec")) ::
+              Data.ProtoLens.FieldDescriptor Schedule
+        action__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "action"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor ScheduleAction)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'action")) ::
+              Data.ProtoLens.FieldDescriptor Schedule
+        policies__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "policies"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor SchedulePolicies)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'policies")) ::
+              Data.ProtoLens.FieldDescriptor Schedule
+        state__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "state"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor ScheduleState)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'state")) ::
+              Data.ProtoLens.FieldDescriptor Schedule
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, spec__field_descriptor),
+           (Data.ProtoLens.Tag 2, action__field_descriptor),
+           (Data.ProtoLens.Tag 3, policies__field_descriptor),
+           (Data.ProtoLens.Tag 4, state__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _Schedule'_unknownFields
+        (\ x__ y__ -> x__ {_Schedule'_unknownFields = y__})
+  defMessage
+    = Schedule'_constructor
+        {_Schedule'spec = Prelude.Nothing,
+         _Schedule'action = Prelude.Nothing,
+         _Schedule'policies = Prelude.Nothing,
+         _Schedule'state = Prelude.Nothing, _Schedule'_unknownFields = []}
+  parseMessage
+    = let
+        loop :: Schedule -> Data.ProtoLens.Encoding.Bytes.Parser Schedule
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "spec"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"spec") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "action"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"action") y x)
+                        26
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "policies"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"policies") y x)
+                        34
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "state"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"state") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "Schedule"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'spec") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'action") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just _v)
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage _v))
+                ((Data.Monoid.<>)
+                   (case
+                        Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'policies") _x
+                    of
+                      Prelude.Nothing -> Data.Monoid.mempty
+                      (Prelude.Just _v)
+                        -> (Data.Monoid.<>)
+                             (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                             ((Prelude..)
+                                (\ bs
+                                   -> (Data.Monoid.<>)
+                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                Data.ProtoLens.encodeMessage _v))
+                   ((Data.Monoid.<>)
+                      (case
+                           Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'state") _x
+                       of
+                         Prelude.Nothing -> Data.Monoid.mempty
+                         (Prelude.Just _v)
+                           -> (Data.Monoid.<>)
+                                (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
+                                ((Prelude..)
+                                   (\ bs
+                                      -> (Data.Monoid.<>)
+                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                              (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                           (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                   Data.ProtoLens.encodeMessage _v))
+                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
+instance Control.DeepSeq.NFData Schedule where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_Schedule'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_Schedule'spec x__)
+                (Control.DeepSeq.deepseq
+                   (_Schedule'action x__)
+                   (Control.DeepSeq.deepseq
+                      (_Schedule'policies x__)
+                      (Control.DeepSeq.deepseq (_Schedule'state x__) ()))))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'action' @:: Lens' ScheduleAction (Prelude.Maybe ScheduleAction'Action)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'startWorkflow' @:: Lens' ScheduleAction (Prelude.Maybe Proto.Temporal.Api.Workflow.V1.Message.NewWorkflowExecutionInfo)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.startWorkflow' @:: Lens' ScheduleAction Proto.Temporal.Api.Workflow.V1.Message.NewWorkflowExecutionInfo@ -}
+data ScheduleAction
+  = ScheduleAction'_constructor {_ScheduleAction'action :: !(Prelude.Maybe ScheduleAction'Action),
+                                 _ScheduleAction'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show ScheduleAction where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+data ScheduleAction'Action
+  = ScheduleAction'StartWorkflow !Proto.Temporal.Api.Workflow.V1.Message.NewWorkflowExecutionInfo
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.Field.HasField ScheduleAction "maybe'action" (Prelude.Maybe ScheduleAction'Action) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleAction'action
+           (\ x__ y__ -> x__ {_ScheduleAction'action = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleAction "maybe'startWorkflow" (Prelude.Maybe Proto.Temporal.Api.Workflow.V1.Message.NewWorkflowExecutionInfo) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleAction'action
+           (\ x__ y__ -> x__ {_ScheduleAction'action = y__}))
+        (Lens.Family2.Unchecked.lens
+           (\ x__
+              -> case x__ of
+                   (Prelude.Just (ScheduleAction'StartWorkflow x__val))
+                     -> Prelude.Just x__val
+                   _otherwise -> Prelude.Nothing)
+           (\ _ y__ -> Prelude.fmap ScheduleAction'StartWorkflow y__))
+instance Data.ProtoLens.Field.HasField ScheduleAction "startWorkflow" Proto.Temporal.Api.Workflow.V1.Message.NewWorkflowExecutionInfo where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleAction'action
+           (\ x__ y__ -> x__ {_ScheduleAction'action = y__}))
+        ((Prelude..)
+           (Lens.Family2.Unchecked.lens
+              (\ x__
+                 -> case x__ of
+                      (Prelude.Just (ScheduleAction'StartWorkflow x__val))
+                        -> Prelude.Just x__val
+                      _otherwise -> Prelude.Nothing)
+              (\ _ y__ -> Prelude.fmap ScheduleAction'StartWorkflow y__))
+           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
+instance Data.ProtoLens.Message ScheduleAction where
+  messageName _
+    = Data.Text.pack "temporal.api.schedule.v1.ScheduleAction"
+  packedMessageDescriptor _
+    = "\n\
+      \\SOScheduleAction\DC2[\n\
+      \\SOstart_workflow\CAN\SOH \SOH(\v22.temporal.api.workflow.v1.NewWorkflowExecutionInfoH\NULR\rstartWorkflowB\b\n\
+      \\ACKaction"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        startWorkflow__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "start_workflow"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Workflow.V1.Message.NewWorkflowExecutionInfo)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'startWorkflow")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleAction
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, startWorkflow__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _ScheduleAction'_unknownFields
+        (\ x__ y__ -> x__ {_ScheduleAction'_unknownFields = y__})
+  defMessage
+    = ScheduleAction'_constructor
+        {_ScheduleAction'action = Prelude.Nothing,
+         _ScheduleAction'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          ScheduleAction
+          -> Data.ProtoLens.Encoding.Bytes.Parser ScheduleAction
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "start_workflow"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"startWorkflow") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "ScheduleAction"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'action") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just (ScheduleAction'StartWorkflow v))
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData ScheduleAction where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_ScheduleAction'_unknownFields x__)
+             (Control.DeepSeq.deepseq (_ScheduleAction'action x__) ())
+instance Control.DeepSeq.NFData ScheduleAction'Action where
+  rnf (ScheduleAction'StartWorkflow x__) = Control.DeepSeq.rnf x__
+_ScheduleAction'StartWorkflow ::
+  Data.ProtoLens.Prism.Prism' ScheduleAction'Action Proto.Temporal.Api.Workflow.V1.Message.NewWorkflowExecutionInfo
+_ScheduleAction'StartWorkflow
+  = Data.ProtoLens.Prism.prism'
+      ScheduleAction'StartWorkflow
+      (\ p__
+         -> case p__ of
+              (ScheduleAction'StartWorkflow p__val) -> Prelude.Just p__val)
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.scheduleTime' @:: Lens' ScheduleActionResult Proto.Google.Protobuf.Timestamp.Timestamp@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'scheduleTime' @:: Lens' ScheduleActionResult (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.actualTime' @:: Lens' ScheduleActionResult Proto.Google.Protobuf.Timestamp.Timestamp@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'actualTime' @:: Lens' ScheduleActionResult (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.startWorkflowResult' @:: Lens' ScheduleActionResult Proto.Temporal.Api.Common.V1.Message.WorkflowExecution@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'startWorkflowResult' @:: Lens' ScheduleActionResult (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkflowExecution)@ -}
+data ScheduleActionResult
+  = ScheduleActionResult'_constructor {_ScheduleActionResult'scheduleTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                                       _ScheduleActionResult'actualTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                                       _ScheduleActionResult'startWorkflowResult :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkflowExecution),
+                                       _ScheduleActionResult'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show ScheduleActionResult where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField ScheduleActionResult "scheduleTime" Proto.Google.Protobuf.Timestamp.Timestamp where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleActionResult'scheduleTime
+           (\ x__ y__ -> x__ {_ScheduleActionResult'scheduleTime = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField ScheduleActionResult "maybe'scheduleTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleActionResult'scheduleTime
+           (\ x__ y__ -> x__ {_ScheduleActionResult'scheduleTime = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleActionResult "actualTime" Proto.Google.Protobuf.Timestamp.Timestamp where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleActionResult'actualTime
+           (\ x__ y__ -> x__ {_ScheduleActionResult'actualTime = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField ScheduleActionResult "maybe'actualTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleActionResult'actualTime
+           (\ x__ y__ -> x__ {_ScheduleActionResult'actualTime = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleActionResult "startWorkflowResult" Proto.Temporal.Api.Common.V1.Message.WorkflowExecution where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleActionResult'startWorkflowResult
+           (\ x__ y__
+              -> x__ {_ScheduleActionResult'startWorkflowResult = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField ScheduleActionResult "maybe'startWorkflowResult" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkflowExecution) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleActionResult'startWorkflowResult
+           (\ x__ y__
+              -> x__ {_ScheduleActionResult'startWorkflowResult = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message ScheduleActionResult where
+  messageName _
+    = Data.Text.pack "temporal.api.schedule.v1.ScheduleActionResult"
+  packedMessageDescriptor _
+    = "\n\
+      \\DC4ScheduleActionResult\DC2E\n\
+      \\rschedule_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\fscheduleTimeB\EOT\144\223\US\SOH\DC2A\n\
+      \\vactual_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
+      \actualTimeB\EOT\144\223\US\SOH\DC2]\n\
+      \\NAKstart_workflow_result\CAN\v \SOH(\v2).temporal.api.common.v1.WorkflowExecutionR\DC3startWorkflowResult"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        scheduleTime__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "schedule_time"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'scheduleTime")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleActionResult
+        actualTime__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "actual_time"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'actualTime")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleActionResult
+        startWorkflowResult__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "start_workflow_result"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.WorkflowExecution)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'startWorkflowResult")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleActionResult
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, scheduleTime__field_descriptor),
+           (Data.ProtoLens.Tag 2, actualTime__field_descriptor),
+           (Data.ProtoLens.Tag 11, startWorkflowResult__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _ScheduleActionResult'_unknownFields
+        (\ x__ y__ -> x__ {_ScheduleActionResult'_unknownFields = y__})
+  defMessage
+    = ScheduleActionResult'_constructor
+        {_ScheduleActionResult'scheduleTime = Prelude.Nothing,
+         _ScheduleActionResult'actualTime = Prelude.Nothing,
+         _ScheduleActionResult'startWorkflowResult = Prelude.Nothing,
+         _ScheduleActionResult'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          ScheduleActionResult
+          -> Data.ProtoLens.Encoding.Bytes.Parser ScheduleActionResult
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "schedule_time"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"scheduleTime") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "actual_time"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"actualTime") y x)
+                        90
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "start_workflow_result"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"startWorkflowResult") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "ScheduleActionResult"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view
+                    (Data.ProtoLens.Field.field @"maybe'scheduleTime") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view
+                       (Data.ProtoLens.Field.field @"maybe'actualTime") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just _v)
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage _v))
+                ((Data.Monoid.<>)
+                   (case
+                        Lens.Family2.view
+                          (Data.ProtoLens.Field.field @"maybe'startWorkflowResult") _x
+                    of
+                      Prelude.Nothing -> Data.Monoid.mempty
+                      (Prelude.Just _v)
+                        -> (Data.Monoid.<>)
+                             (Data.ProtoLens.Encoding.Bytes.putVarInt 90)
+                             ((Prelude..)
+                                (\ bs
+                                   -> (Data.Monoid.<>)
+                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                Data.ProtoLens.encodeMessage _v))
+                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
+instance Control.DeepSeq.NFData ScheduleActionResult where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_ScheduleActionResult'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_ScheduleActionResult'scheduleTime x__)
+                (Control.DeepSeq.deepseq
+                   (_ScheduleActionResult'actualTime x__)
+                   (Control.DeepSeq.deepseq
+                      (_ScheduleActionResult'startWorkflowResult x__) ())))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.actionCount' @:: Lens' ScheduleInfo Data.Int.Int64@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.missedCatchupWindow' @:: Lens' ScheduleInfo Data.Int.Int64@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.overlapSkipped' @:: Lens' ScheduleInfo Data.Int.Int64@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.runningWorkflows' @:: Lens' ScheduleInfo [Proto.Temporal.Api.Common.V1.Message.WorkflowExecution]@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.vec'runningWorkflows' @:: Lens' ScheduleInfo (Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.WorkflowExecution)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.recentActions' @:: Lens' ScheduleInfo [ScheduleActionResult]@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.vec'recentActions' @:: Lens' ScheduleInfo (Data.Vector.Vector ScheduleActionResult)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.futureActionTimes' @:: Lens' ScheduleInfo [Proto.Google.Protobuf.Timestamp.Timestamp]@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.vec'futureActionTimes' @:: Lens' ScheduleInfo (Data.Vector.Vector Proto.Google.Protobuf.Timestamp.Timestamp)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.createTime' @:: Lens' ScheduleInfo Proto.Google.Protobuf.Timestamp.Timestamp@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'createTime' @:: Lens' ScheduleInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.updateTime' @:: Lens' ScheduleInfo Proto.Google.Protobuf.Timestamp.Timestamp@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'updateTime' @:: Lens' ScheduleInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.invalidScheduleError' @:: Lens' ScheduleInfo Data.Text.Text@ -}
+data ScheduleInfo
+  = ScheduleInfo'_constructor {_ScheduleInfo'actionCount :: !Data.Int.Int64,
+                               _ScheduleInfo'missedCatchupWindow :: !Data.Int.Int64,
+                               _ScheduleInfo'overlapSkipped :: !Data.Int.Int64,
+                               _ScheduleInfo'runningWorkflows :: !(Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.WorkflowExecution),
+                               _ScheduleInfo'recentActions :: !(Data.Vector.Vector ScheduleActionResult),
+                               _ScheduleInfo'futureActionTimes :: !(Data.Vector.Vector Proto.Google.Protobuf.Timestamp.Timestamp),
+                               _ScheduleInfo'createTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                               _ScheduleInfo'updateTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                               _ScheduleInfo'invalidScheduleError :: !Data.Text.Text,
+                               _ScheduleInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show ScheduleInfo where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField ScheduleInfo "actionCount" Data.Int.Int64 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleInfo'actionCount
+           (\ x__ y__ -> x__ {_ScheduleInfo'actionCount = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleInfo "missedCatchupWindow" Data.Int.Int64 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleInfo'missedCatchupWindow
+           (\ x__ y__ -> x__ {_ScheduleInfo'missedCatchupWindow = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleInfo "overlapSkipped" Data.Int.Int64 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleInfo'overlapSkipped
+           (\ x__ y__ -> x__ {_ScheduleInfo'overlapSkipped = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleInfo "runningWorkflows" [Proto.Temporal.Api.Common.V1.Message.WorkflowExecution] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleInfo'runningWorkflows
+           (\ x__ y__ -> x__ {_ScheduleInfo'runningWorkflows = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField ScheduleInfo "vec'runningWorkflows" (Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.WorkflowExecution) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleInfo'runningWorkflows
+           (\ x__ y__ -> x__ {_ScheduleInfo'runningWorkflows = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleInfo "recentActions" [ScheduleActionResult] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleInfo'recentActions
+           (\ x__ y__ -> x__ {_ScheduleInfo'recentActions = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField ScheduleInfo "vec'recentActions" (Data.Vector.Vector ScheduleActionResult) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleInfo'recentActions
+           (\ x__ y__ -> x__ {_ScheduleInfo'recentActions = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleInfo "futureActionTimes" [Proto.Google.Protobuf.Timestamp.Timestamp] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleInfo'futureActionTimes
+           (\ x__ y__ -> x__ {_ScheduleInfo'futureActionTimes = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField ScheduleInfo "vec'futureActionTimes" (Data.Vector.Vector Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleInfo'futureActionTimes
+           (\ x__ y__ -> x__ {_ScheduleInfo'futureActionTimes = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleInfo "createTime" Proto.Google.Protobuf.Timestamp.Timestamp where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleInfo'createTime
+           (\ x__ y__ -> x__ {_ScheduleInfo'createTime = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField ScheduleInfo "maybe'createTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleInfo'createTime
+           (\ x__ y__ -> x__ {_ScheduleInfo'createTime = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleInfo "updateTime" Proto.Google.Protobuf.Timestamp.Timestamp where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleInfo'updateTime
+           (\ x__ y__ -> x__ {_ScheduleInfo'updateTime = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField ScheduleInfo "maybe'updateTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleInfo'updateTime
+           (\ x__ y__ -> x__ {_ScheduleInfo'updateTime = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleInfo "invalidScheduleError" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleInfo'invalidScheduleError
+           (\ x__ y__ -> x__ {_ScheduleInfo'invalidScheduleError = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message ScheduleInfo where
+  messageName _
+    = Data.Text.pack "temporal.api.schedule.v1.ScheduleInfo"
+  packedMessageDescriptor _
+    = "\n\
+      \\fScheduleInfo\DC2!\n\
+      \\faction_count\CAN\SOH \SOH(\ETXR\vactionCount\DC22\n\
+      \\NAKmissed_catchup_window\CAN\STX \SOH(\ETXR\DC3missedCatchupWindow\DC2'\n\
+      \\SIoverlap_skipped\CAN\ETX \SOH(\ETXR\SOoverlapSkipped\DC2V\n\
+      \\DC1running_workflows\CAN\t \ETX(\v2).temporal.api.common.v1.WorkflowExecutionR\DLErunningWorkflows\DC2U\n\
+      \\SOrecent_actions\CAN\EOT \ETX(\v2..temporal.api.schedule.v1.ScheduleActionResultR\rrecentActions\DC2P\n\
+      \\DC3future_action_times\CAN\ENQ \ETX(\v2\SUB.google.protobuf.TimestampR\DC1futureActionTimesB\EOT\144\223\US\SOH\DC2A\n\
+      \\vcreate_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR\n\
+      \createTimeB\EOT\144\223\US\SOH\DC2A\n\
+      \\vupdate_time\CAN\a \SOH(\v2\SUB.google.protobuf.TimestampR\n\
+      \updateTimeB\EOT\144\223\US\SOH\DC28\n\
+      \\SYNinvalid_schedule_error\CAN\b \SOH(\tR\DC4invalidScheduleErrorB\STX\CAN\SOH"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        actionCount__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "action_count"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.Int64Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int64)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"actionCount")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleInfo
+        missedCatchupWindow__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "missed_catchup_window"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.Int64Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int64)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"missedCatchupWindow")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleInfo
+        overlapSkipped__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "overlap_skipped"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.Int64Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int64)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"overlapSkipped")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleInfo
+        runningWorkflows__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "running_workflows"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.WorkflowExecution)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked
+                 (Data.ProtoLens.Field.field @"runningWorkflows")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleInfo
+        recentActions__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "recent_actions"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor ScheduleActionResult)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked
+                 (Data.ProtoLens.Field.field @"recentActions")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleInfo
+        futureActionTimes__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "future_action_times"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked
+                 (Data.ProtoLens.Field.field @"futureActionTimes")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleInfo
+        createTime__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "create_time"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'createTime")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleInfo
+        updateTime__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "update_time"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'updateTime")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleInfo
+        invalidScheduleError__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "invalid_schedule_error"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"invalidScheduleError")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleInfo
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, actionCount__field_descriptor),
+           (Data.ProtoLens.Tag 2, missedCatchupWindow__field_descriptor),
+           (Data.ProtoLens.Tag 3, overlapSkipped__field_descriptor),
+           (Data.ProtoLens.Tag 9, runningWorkflows__field_descriptor),
+           (Data.ProtoLens.Tag 4, recentActions__field_descriptor),
+           (Data.ProtoLens.Tag 5, futureActionTimes__field_descriptor),
+           (Data.ProtoLens.Tag 6, createTime__field_descriptor),
+           (Data.ProtoLens.Tag 7, updateTime__field_descriptor),
+           (Data.ProtoLens.Tag 8, invalidScheduleError__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _ScheduleInfo'_unknownFields
+        (\ x__ y__ -> x__ {_ScheduleInfo'_unknownFields = y__})
+  defMessage
+    = ScheduleInfo'_constructor
+        {_ScheduleInfo'actionCount = Data.ProtoLens.fieldDefault,
+         _ScheduleInfo'missedCatchupWindow = Data.ProtoLens.fieldDefault,
+         _ScheduleInfo'overlapSkipped = Data.ProtoLens.fieldDefault,
+         _ScheduleInfo'runningWorkflows = Data.Vector.Generic.empty,
+         _ScheduleInfo'recentActions = Data.Vector.Generic.empty,
+         _ScheduleInfo'futureActionTimes = Data.Vector.Generic.empty,
+         _ScheduleInfo'createTime = Prelude.Nothing,
+         _ScheduleInfo'updateTime = Prelude.Nothing,
+         _ScheduleInfo'invalidScheduleError = Data.ProtoLens.fieldDefault,
+         _ScheduleInfo'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          ScheduleInfo
+          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Proto.Google.Protobuf.Timestamp.Timestamp
+             -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld ScheduleActionResult
+                -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Proto.Temporal.Api.Common.V1.Message.WorkflowExecution
+                   -> Data.ProtoLens.Encoding.Bytes.Parser ScheduleInfo
+        loop
+          x
+          mutable'futureActionTimes
+          mutable'recentActions
+          mutable'runningWorkflows
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do frozen'futureActionTimes <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                                    (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                                       mutable'futureActionTimes)
+                      frozen'recentActions <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                                (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                                   mutable'recentActions)
+                      frozen'runningWorkflows <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                                   (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                                      mutable'runningWorkflows)
+                      (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
+                           (Lens.Family2.set
+                              (Data.ProtoLens.Field.field @"vec'futureActionTimes")
+                              frozen'futureActionTimes
+                              (Lens.Family2.set
+                                 (Data.ProtoLens.Field.field @"vec'recentActions")
+                                 frozen'recentActions
+                                 (Lens.Family2.set
+                                    (Data.ProtoLens.Field.field @"vec'runningWorkflows")
+                                    frozen'runningWorkflows x))))
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "action_count"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"actionCount") y x)
+                                  mutable'futureActionTimes mutable'recentActions
+                                  mutable'runningWorkflows
+                        16
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "missed_catchup_window"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"missedCatchupWindow") y x)
+                                  mutable'futureActionTimes mutable'recentActions
+                                  mutable'runningWorkflows
+                        24
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "overlap_skipped"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"overlapSkipped") y x)
+                                  mutable'futureActionTimes mutable'recentActions
+                                  mutable'runningWorkflows
+                        74
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "running_workflows"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append
+                                          mutable'runningWorkflows y)
+                                loop x mutable'futureActionTimes mutable'recentActions v
+                        34
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "recent_actions"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append
+                                          mutable'recentActions y)
+                                loop x mutable'futureActionTimes v mutable'runningWorkflows
+                        42
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "future_action_times"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append
+                                          mutable'futureActionTimes y)
+                                loop x v mutable'recentActions mutable'runningWorkflows
+                        50
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "create_time"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"createTime") y x)
+                                  mutable'futureActionTimes mutable'recentActions
+                                  mutable'runningWorkflows
+                        58
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "update_time"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"updateTime") y x)
+                                  mutable'futureActionTimes mutable'recentActions
+                                  mutable'runningWorkflows
+                        66
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                       Data.ProtoLens.Encoding.Bytes.getBytes
+                                                         (Prelude.fromIntegral len)
+                                           Data.ProtoLens.Encoding.Bytes.runEither
+                                             (case Data.Text.Encoding.decodeUtf8' value of
+                                                (Prelude.Left err)
+                                                  -> Prelude.Left (Prelude.show err)
+                                                (Prelude.Right r) -> Prelude.Right r))
+                                       "invalid_schedule_error"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"invalidScheduleError") y x)
+                                  mutable'futureActionTimes mutable'recentActions
+                                  mutable'runningWorkflows
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+                                  mutable'futureActionTimes mutable'recentActions
+                                  mutable'runningWorkflows
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do mutable'futureActionTimes <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                             Data.ProtoLens.Encoding.Growing.new
+              mutable'recentActions <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                         Data.ProtoLens.Encoding.Growing.new
+              mutable'runningWorkflows <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                            Data.ProtoLens.Encoding.Growing.new
+              loop
+                Data.ProtoLens.defMessage mutable'futureActionTimes
+                mutable'recentActions mutable'runningWorkflows)
+          "ScheduleInfo"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view (Data.ProtoLens.Field.field @"actionCount") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
+                      ((Prelude..)
+                         Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
+             ((Data.Monoid.<>)
+                (let
+                   _v
+                     = Lens.Family2.view
+                         (Data.ProtoLens.Field.field @"missedCatchupWindow") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
+                         ((Prelude..)
+                            Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
+                ((Data.Monoid.<>)
+                   (let
+                      _v
+                        = Lens.Family2.view
+                            (Data.ProtoLens.Field.field @"overlapSkipped") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
+                            ((Prelude..)
+                               Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
+                   ((Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                         (\ _v
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt 74)
+                                 ((Prelude..)
+                                    (\ bs
+                                       -> (Data.Monoid.<>)
+                                            (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                               (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                            (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                    Data.ProtoLens.encodeMessage _v))
+                         (Lens.Family2.view
+                            (Data.ProtoLens.Field.field @"vec'runningWorkflows") _x))
+                      ((Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                            (\ _v
+                               -> (Data.Monoid.<>)
+                                    (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
+                                    ((Prelude..)
+                                       (\ bs
+                                          -> (Data.Monoid.<>)
+                                               (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                  (Prelude.fromIntegral
+                                                     (Data.ByteString.length bs)))
+                                               (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                       Data.ProtoLens.encodeMessage _v))
+                            (Lens.Family2.view
+                               (Data.ProtoLens.Field.field @"vec'recentActions") _x))
+                         ((Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                               (\ _v
+                                  -> (Data.Monoid.<>)
+                                       (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
+                                       ((Prelude..)
+                                          (\ bs
+                                             -> (Data.Monoid.<>)
+                                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                     (Prelude.fromIntegral
+                                                        (Data.ByteString.length bs)))
+                                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                          Data.ProtoLens.encodeMessage _v))
+                               (Lens.Family2.view
+                                  (Data.ProtoLens.Field.field @"vec'futureActionTimes") _x))
+                            ((Data.Monoid.<>)
+                               (case
+                                    Lens.Family2.view
+                                      (Data.ProtoLens.Field.field @"maybe'createTime") _x
+                                of
+                                  Prelude.Nothing -> Data.Monoid.mempty
+                                  (Prelude.Just _v)
+                                    -> (Data.Monoid.<>)
+                                         (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
+                                         ((Prelude..)
+                                            (\ bs
+                                               -> (Data.Monoid.<>)
+                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                       (Prelude.fromIntegral
+                                                          (Data.ByteString.length bs)))
+                                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                            Data.ProtoLens.encodeMessage _v))
+                               ((Data.Monoid.<>)
+                                  (case
+                                       Lens.Family2.view
+                                         (Data.ProtoLens.Field.field @"maybe'updateTime") _x
+                                   of
+                                     Prelude.Nothing -> Data.Monoid.mempty
+                                     (Prelude.Just _v)
+                                       -> (Data.Monoid.<>)
+                                            (Data.ProtoLens.Encoding.Bytes.putVarInt 58)
+                                            ((Prelude..)
+                                               (\ bs
+                                                  -> (Data.Monoid.<>)
+                                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                          (Prelude.fromIntegral
+                                                             (Data.ByteString.length bs)))
+                                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                               Data.ProtoLens.encodeMessage _v))
+                                  ((Data.Monoid.<>)
+                                     (let
+                                        _v
+                                          = Lens.Family2.view
+                                              (Data.ProtoLens.Field.field @"invalidScheduleError")
+                                              _x
+                                      in
+                                        if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                            Data.Monoid.mempty
+                                        else
+                                            (Data.Monoid.<>)
+                                              (Data.ProtoLens.Encoding.Bytes.putVarInt 66)
+                                              ((Prelude..)
+                                                 (\ bs
+                                                    -> (Data.Monoid.<>)
+                                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                            (Prelude.fromIntegral
+                                                               (Data.ByteString.length bs)))
+                                                         (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                            bs))
+                                                 Data.Text.Encoding.encodeUtf8 _v))
+                                     (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                                        (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))))))
+instance Control.DeepSeq.NFData ScheduleInfo where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_ScheduleInfo'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_ScheduleInfo'actionCount x__)
+                (Control.DeepSeq.deepseq
+                   (_ScheduleInfo'missedCatchupWindow x__)
+                   (Control.DeepSeq.deepseq
+                      (_ScheduleInfo'overlapSkipped x__)
+                      (Control.DeepSeq.deepseq
+                         (_ScheduleInfo'runningWorkflows x__)
+                         (Control.DeepSeq.deepseq
+                            (_ScheduleInfo'recentActions x__)
+                            (Control.DeepSeq.deepseq
+                               (_ScheduleInfo'futureActionTimes x__)
+                               (Control.DeepSeq.deepseq
+                                  (_ScheduleInfo'createTime x__)
+                                  (Control.DeepSeq.deepseq
+                                     (_ScheduleInfo'updateTime x__)
+                                     (Control.DeepSeq.deepseq
+                                        (_ScheduleInfo'invalidScheduleError x__) ())))))))))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.scheduleId' @:: Lens' ScheduleListEntry Data.Text.Text@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.memo' @:: Lens' ScheduleListEntry Proto.Temporal.Api.Common.V1.Message.Memo@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'memo' @:: Lens' ScheduleListEntry (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Memo)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.searchAttributes' @:: Lens' ScheduleListEntry Proto.Temporal.Api.Common.V1.Message.SearchAttributes@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'searchAttributes' @:: Lens' ScheduleListEntry (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.SearchAttributes)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.info' @:: Lens' ScheduleListEntry ScheduleListInfo@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'info' @:: Lens' ScheduleListEntry (Prelude.Maybe ScheduleListInfo)@ -}
+data ScheduleListEntry
+  = ScheduleListEntry'_constructor {_ScheduleListEntry'scheduleId :: !Data.Text.Text,
+                                    _ScheduleListEntry'memo :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Memo),
+                                    _ScheduleListEntry'searchAttributes :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.SearchAttributes),
+                                    _ScheduleListEntry'info :: !(Prelude.Maybe ScheduleListInfo),
+                                    _ScheduleListEntry'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show ScheduleListEntry where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField ScheduleListEntry "scheduleId" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleListEntry'scheduleId
+           (\ x__ y__ -> x__ {_ScheduleListEntry'scheduleId = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleListEntry "memo" Proto.Temporal.Api.Common.V1.Message.Memo where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleListEntry'memo
+           (\ x__ y__ -> x__ {_ScheduleListEntry'memo = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField ScheduleListEntry "maybe'memo" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Memo) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleListEntry'memo
+           (\ x__ y__ -> x__ {_ScheduleListEntry'memo = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleListEntry "searchAttributes" Proto.Temporal.Api.Common.V1.Message.SearchAttributes where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleListEntry'searchAttributes
+           (\ x__ y__ -> x__ {_ScheduleListEntry'searchAttributes = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField ScheduleListEntry "maybe'searchAttributes" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.SearchAttributes) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleListEntry'searchAttributes
+           (\ x__ y__ -> x__ {_ScheduleListEntry'searchAttributes = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleListEntry "info" ScheduleListInfo where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleListEntry'info
+           (\ x__ y__ -> x__ {_ScheduleListEntry'info = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField ScheduleListEntry "maybe'info" (Prelude.Maybe ScheduleListInfo) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleListEntry'info
+           (\ x__ y__ -> x__ {_ScheduleListEntry'info = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message ScheduleListEntry where
+  messageName _
+    = Data.Text.pack "temporal.api.schedule.v1.ScheduleListEntry"
+  packedMessageDescriptor _
+    = "\n\
+      \\DC1ScheduleListEntry\DC2\US\n\
+      \\vschedule_id\CAN\SOH \SOH(\tR\n\
+      \scheduleId\DC20\n\
+      \\EOTmemo\CAN\STX \SOH(\v2\FS.temporal.api.common.v1.MemoR\EOTmemo\DC2U\n\
+      \\DC1search_attributes\CAN\ETX \SOH(\v2(.temporal.api.common.v1.SearchAttributesR\DLEsearchAttributes\DC2>\n\
+      \\EOTinfo\CAN\EOT \SOH(\v2*.temporal.api.schedule.v1.ScheduleListInfoR\EOTinfo"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        scheduleId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "schedule_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"scheduleId")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleListEntry
+        memo__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "memo"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Memo)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'memo")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleListEntry
+        searchAttributes__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "search_attributes"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.SearchAttributes)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'searchAttributes")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleListEntry
+        info__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "info"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor ScheduleListInfo)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'info")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleListEntry
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, scheduleId__field_descriptor),
+           (Data.ProtoLens.Tag 2, memo__field_descriptor),
+           (Data.ProtoLens.Tag 3, searchAttributes__field_descriptor),
+           (Data.ProtoLens.Tag 4, info__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _ScheduleListEntry'_unknownFields
+        (\ x__ y__ -> x__ {_ScheduleListEntry'_unknownFields = y__})
+  defMessage
+    = ScheduleListEntry'_constructor
+        {_ScheduleListEntry'scheduleId = Data.ProtoLens.fieldDefault,
+         _ScheduleListEntry'memo = Prelude.Nothing,
+         _ScheduleListEntry'searchAttributes = Prelude.Nothing,
+         _ScheduleListEntry'info = Prelude.Nothing,
+         _ScheduleListEntry'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          ScheduleListEntry
+          -> Data.ProtoLens.Encoding.Bytes.Parser ScheduleListEntry
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                       Data.ProtoLens.Encoding.Bytes.getBytes
+                                                         (Prelude.fromIntegral len)
+                                           Data.ProtoLens.Encoding.Bytes.runEither
+                                             (case Data.Text.Encoding.decodeUtf8' value of
+                                                (Prelude.Left err)
+                                                  -> Prelude.Left (Prelude.show err)
+                                                (Prelude.Right r) -> Prelude.Right r))
+                                       "schedule_id"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"scheduleId") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "memo"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"memo") y x)
+                        26
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "search_attributes"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"searchAttributes") y x)
+                        34
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "info"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"info") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "ScheduleListEntry"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view (Data.ProtoLens.Field.field @"scheduleId") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'memo") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just _v)
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage _v))
+                ((Data.Monoid.<>)
+                   (case
+                        Lens.Family2.view
+                          (Data.ProtoLens.Field.field @"maybe'searchAttributes") _x
+                    of
+                      Prelude.Nothing -> Data.Monoid.mempty
+                      (Prelude.Just _v)
+                        -> (Data.Monoid.<>)
+                             (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                             ((Prelude..)
+                                (\ bs
+                                   -> (Data.Monoid.<>)
+                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                Data.ProtoLens.encodeMessage _v))
+                   ((Data.Monoid.<>)
+                      (case
+                           Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'info") _x
+                       of
+                         Prelude.Nothing -> Data.Monoid.mempty
+                         (Prelude.Just _v)
+                           -> (Data.Monoid.<>)
+                                (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
+                                ((Prelude..)
+                                   (\ bs
+                                      -> (Data.Monoid.<>)
+                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                              (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                           (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                   Data.ProtoLens.encodeMessage _v))
+                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
+instance Control.DeepSeq.NFData ScheduleListEntry where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_ScheduleListEntry'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_ScheduleListEntry'scheduleId x__)
+                (Control.DeepSeq.deepseq
+                   (_ScheduleListEntry'memo x__)
+                   (Control.DeepSeq.deepseq
+                      (_ScheduleListEntry'searchAttributes x__)
+                      (Control.DeepSeq.deepseq (_ScheduleListEntry'info x__) ()))))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.spec' @:: Lens' ScheduleListInfo ScheduleSpec@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'spec' @:: Lens' ScheduleListInfo (Prelude.Maybe ScheduleSpec)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.workflowType' @:: Lens' ScheduleListInfo Proto.Temporal.Api.Common.V1.Message.WorkflowType@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'workflowType' @:: Lens' ScheduleListInfo (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkflowType)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.notes' @:: Lens' ScheduleListInfo Data.Text.Text@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.paused' @:: Lens' ScheduleListInfo Prelude.Bool@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.recentActions' @:: Lens' ScheduleListInfo [ScheduleActionResult]@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.vec'recentActions' @:: Lens' ScheduleListInfo (Data.Vector.Vector ScheduleActionResult)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.futureActionTimes' @:: Lens' ScheduleListInfo [Proto.Google.Protobuf.Timestamp.Timestamp]@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.vec'futureActionTimes' @:: Lens' ScheduleListInfo (Data.Vector.Vector Proto.Google.Protobuf.Timestamp.Timestamp)@ -}
+data ScheduleListInfo
+  = ScheduleListInfo'_constructor {_ScheduleListInfo'spec :: !(Prelude.Maybe ScheduleSpec),
+                                   _ScheduleListInfo'workflowType :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkflowType),
+                                   _ScheduleListInfo'notes :: !Data.Text.Text,
+                                   _ScheduleListInfo'paused :: !Prelude.Bool,
+                                   _ScheduleListInfo'recentActions :: !(Data.Vector.Vector ScheduleActionResult),
+                                   _ScheduleListInfo'futureActionTimes :: !(Data.Vector.Vector Proto.Google.Protobuf.Timestamp.Timestamp),
+                                   _ScheduleListInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show ScheduleListInfo where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField ScheduleListInfo "spec" ScheduleSpec where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleListInfo'spec
+           (\ x__ y__ -> x__ {_ScheduleListInfo'spec = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField ScheduleListInfo "maybe'spec" (Prelude.Maybe ScheduleSpec) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleListInfo'spec
+           (\ x__ y__ -> x__ {_ScheduleListInfo'spec = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleListInfo "workflowType" Proto.Temporal.Api.Common.V1.Message.WorkflowType where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleListInfo'workflowType
+           (\ x__ y__ -> x__ {_ScheduleListInfo'workflowType = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField ScheduleListInfo "maybe'workflowType" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkflowType) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleListInfo'workflowType
+           (\ x__ y__ -> x__ {_ScheduleListInfo'workflowType = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleListInfo "notes" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleListInfo'notes
+           (\ x__ y__ -> x__ {_ScheduleListInfo'notes = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleListInfo "paused" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleListInfo'paused
+           (\ x__ y__ -> x__ {_ScheduleListInfo'paused = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleListInfo "recentActions" [ScheduleActionResult] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleListInfo'recentActions
+           (\ x__ y__ -> x__ {_ScheduleListInfo'recentActions = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField ScheduleListInfo "vec'recentActions" (Data.Vector.Vector ScheduleActionResult) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleListInfo'recentActions
+           (\ x__ y__ -> x__ {_ScheduleListInfo'recentActions = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleListInfo "futureActionTimes" [Proto.Google.Protobuf.Timestamp.Timestamp] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleListInfo'futureActionTimes
+           (\ x__ y__ -> x__ {_ScheduleListInfo'futureActionTimes = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField ScheduleListInfo "vec'futureActionTimes" (Data.Vector.Vector Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleListInfo'futureActionTimes
+           (\ x__ y__ -> x__ {_ScheduleListInfo'futureActionTimes = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message ScheduleListInfo where
+  messageName _
+    = Data.Text.pack "temporal.api.schedule.v1.ScheduleListInfo"
+  packedMessageDescriptor _
+    = "\n\
+      \\DLEScheduleListInfo\DC2:\n\
+      \\EOTspec\CAN\SOH \SOH(\v2&.temporal.api.schedule.v1.ScheduleSpecR\EOTspec\DC2I\n\
+      \\rworkflow_type\CAN\STX \SOH(\v2$.temporal.api.common.v1.WorkflowTypeR\fworkflowType\DC2\DC4\n\
+      \\ENQnotes\CAN\ETX \SOH(\tR\ENQnotes\DC2\SYN\n\
+      \\ACKpaused\CAN\EOT \SOH(\bR\ACKpaused\DC2U\n\
+      \\SOrecent_actions\CAN\ENQ \ETX(\v2..temporal.api.schedule.v1.ScheduleActionResultR\rrecentActions\DC2P\n\
+      \\DC3future_action_times\CAN\ACK \ETX(\v2\SUB.google.protobuf.TimestampR\DC1futureActionTimesB\EOT\144\223\US\SOH"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        spec__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "spec"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor ScheduleSpec)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'spec")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleListInfo
+        workflowType__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "workflow_type"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.WorkflowType)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'workflowType")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleListInfo
+        notes__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "notes"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"notes")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleListInfo
+        paused__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "paused"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"paused")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleListInfo
+        recentActions__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "recent_actions"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor ScheduleActionResult)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked
+                 (Data.ProtoLens.Field.field @"recentActions")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleListInfo
+        futureActionTimes__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "future_action_times"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked
+                 (Data.ProtoLens.Field.field @"futureActionTimes")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleListInfo
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, spec__field_descriptor),
+           (Data.ProtoLens.Tag 2, workflowType__field_descriptor),
+           (Data.ProtoLens.Tag 3, notes__field_descriptor),
+           (Data.ProtoLens.Tag 4, paused__field_descriptor),
+           (Data.ProtoLens.Tag 5, recentActions__field_descriptor),
+           (Data.ProtoLens.Tag 6, futureActionTimes__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _ScheduleListInfo'_unknownFields
+        (\ x__ y__ -> x__ {_ScheduleListInfo'_unknownFields = y__})
+  defMessage
+    = ScheduleListInfo'_constructor
+        {_ScheduleListInfo'spec = Prelude.Nothing,
+         _ScheduleListInfo'workflowType = Prelude.Nothing,
+         _ScheduleListInfo'notes = Data.ProtoLens.fieldDefault,
+         _ScheduleListInfo'paused = Data.ProtoLens.fieldDefault,
+         _ScheduleListInfo'recentActions = Data.Vector.Generic.empty,
+         _ScheduleListInfo'futureActionTimes = Data.Vector.Generic.empty,
+         _ScheduleListInfo'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          ScheduleListInfo
+          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Proto.Google.Protobuf.Timestamp.Timestamp
+             -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld ScheduleActionResult
+                -> Data.ProtoLens.Encoding.Bytes.Parser ScheduleListInfo
+        loop x mutable'futureActionTimes mutable'recentActions
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do frozen'futureActionTimes <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                                    (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                                       mutable'futureActionTimes)
+                      frozen'recentActions <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                                (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                                   mutable'recentActions)
+                      (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
+                           (Lens.Family2.set
+                              (Data.ProtoLens.Field.field @"vec'futureActionTimes")
+                              frozen'futureActionTimes
+                              (Lens.Family2.set
+                                 (Data.ProtoLens.Field.field @"vec'recentActions")
+                                 frozen'recentActions x)))
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "spec"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"spec") y x)
+                                  mutable'futureActionTimes mutable'recentActions
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "workflow_type"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"workflowType") y x)
+                                  mutable'futureActionTimes mutable'recentActions
+                        26
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                       Data.ProtoLens.Encoding.Bytes.getBytes
+                                                         (Prelude.fromIntegral len)
+                                           Data.ProtoLens.Encoding.Bytes.runEither
+                                             (case Data.Text.Encoding.decodeUtf8' value of
+                                                (Prelude.Left err)
+                                                  -> Prelude.Left (Prelude.show err)
+                                                (Prelude.Right r) -> Prelude.Right r))
+                                       "notes"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"notes") y x)
+                                  mutable'futureActionTimes mutable'recentActions
+                        32
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "paused"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"paused") y x)
+                                  mutable'futureActionTimes mutable'recentActions
+                        42
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "recent_actions"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append
+                                          mutable'recentActions y)
+                                loop x mutable'futureActionTimes v
+                        50
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "future_action_times"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append
+                                          mutable'futureActionTimes y)
+                                loop x v mutable'recentActions
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+                                  mutable'futureActionTimes mutable'recentActions
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do mutable'futureActionTimes <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                             Data.ProtoLens.Encoding.Growing.new
+              mutable'recentActions <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                         Data.ProtoLens.Encoding.Growing.new
+              loop
+                Data.ProtoLens.defMessage mutable'futureActionTimes
+                mutable'recentActions)
+          "ScheduleListInfo"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'spec") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view
+                       (Data.ProtoLens.Field.field @"maybe'workflowType") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just _v)
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage _v))
+                ((Data.Monoid.<>)
+                   (let
+                      _v = Lens.Family2.view (Data.ProtoLens.Field.field @"notes") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                            ((Prelude..)
+                               (\ bs
+                                  -> (Data.Monoid.<>)
+                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                               Data.Text.Encoding.encodeUtf8 _v))
+                   ((Data.Monoid.<>)
+                      (let
+                         _v = Lens.Family2.view (Data.ProtoLens.Field.field @"paused") _x
+                       in
+                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                             Data.Monoid.mempty
+                         else
+                             (Data.Monoid.<>)
+                               (Data.ProtoLens.Encoding.Bytes.putVarInt 32)
+                               ((Prelude..)
+                                  Data.ProtoLens.Encoding.Bytes.putVarInt
+                                  (\ b -> if b then 1 else 0) _v))
+                      ((Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                            (\ _v
+                               -> (Data.Monoid.<>)
+                                    (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
+                                    ((Prelude..)
+                                       (\ bs
+                                          -> (Data.Monoid.<>)
+                                               (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                  (Prelude.fromIntegral
+                                                     (Data.ByteString.length bs)))
+                                               (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                       Data.ProtoLens.encodeMessage _v))
+                            (Lens.Family2.view
+                               (Data.ProtoLens.Field.field @"vec'recentActions") _x))
+                         ((Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                               (\ _v
+                                  -> (Data.Monoid.<>)
+                                       (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
+                                       ((Prelude..)
+                                          (\ bs
+                                             -> (Data.Monoid.<>)
+                                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                     (Prelude.fromIntegral
+                                                        (Data.ByteString.length bs)))
+                                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                          Data.ProtoLens.encodeMessage _v))
+                               (Lens.Family2.view
+                                  (Data.ProtoLens.Field.field @"vec'futureActionTimes") _x))
+                            (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                               (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))))
+instance Control.DeepSeq.NFData ScheduleListInfo where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_ScheduleListInfo'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_ScheduleListInfo'spec x__)
+                (Control.DeepSeq.deepseq
+                   (_ScheduleListInfo'workflowType x__)
+                   (Control.DeepSeq.deepseq
+                      (_ScheduleListInfo'notes x__)
+                      (Control.DeepSeq.deepseq
+                         (_ScheduleListInfo'paused x__)
+                         (Control.DeepSeq.deepseq
+                            (_ScheduleListInfo'recentActions x__)
+                            (Control.DeepSeq.deepseq
+                               (_ScheduleListInfo'futureActionTimes x__) ()))))))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.triggerImmediately' @:: Lens' SchedulePatch TriggerImmediatelyRequest@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'triggerImmediately' @:: Lens' SchedulePatch (Prelude.Maybe TriggerImmediatelyRequest)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.backfillRequest' @:: Lens' SchedulePatch [BackfillRequest]@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.vec'backfillRequest' @:: Lens' SchedulePatch (Data.Vector.Vector BackfillRequest)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.pause' @:: Lens' SchedulePatch Data.Text.Text@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.unpause' @:: Lens' SchedulePatch Data.Text.Text@ -}
+data SchedulePatch
+  = SchedulePatch'_constructor {_SchedulePatch'triggerImmediately :: !(Prelude.Maybe TriggerImmediatelyRequest),
+                                _SchedulePatch'backfillRequest :: !(Data.Vector.Vector BackfillRequest),
+                                _SchedulePatch'pause :: !Data.Text.Text,
+                                _SchedulePatch'unpause :: !Data.Text.Text,
+                                _SchedulePatch'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show SchedulePatch where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField SchedulePatch "triggerImmediately" TriggerImmediatelyRequest where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _SchedulePatch'triggerImmediately
+           (\ x__ y__ -> x__ {_SchedulePatch'triggerImmediately = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField SchedulePatch "maybe'triggerImmediately" (Prelude.Maybe TriggerImmediatelyRequest) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _SchedulePatch'triggerImmediately
+           (\ x__ y__ -> x__ {_SchedulePatch'triggerImmediately = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField SchedulePatch "backfillRequest" [BackfillRequest] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _SchedulePatch'backfillRequest
+           (\ x__ y__ -> x__ {_SchedulePatch'backfillRequest = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField SchedulePatch "vec'backfillRequest" (Data.Vector.Vector BackfillRequest) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _SchedulePatch'backfillRequest
+           (\ x__ y__ -> x__ {_SchedulePatch'backfillRequest = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField SchedulePatch "pause" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _SchedulePatch'pause
+           (\ x__ y__ -> x__ {_SchedulePatch'pause = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField SchedulePatch "unpause" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _SchedulePatch'unpause
+           (\ x__ y__ -> x__ {_SchedulePatch'unpause = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message SchedulePatch where
+  messageName _
+    = Data.Text.pack "temporal.api.schedule.v1.SchedulePatch"
+  packedMessageDescriptor _
+    = "\n\
+      \\rSchedulePatch\DC2d\n\
+      \\DC3trigger_immediately\CAN\SOH \SOH(\v23.temporal.api.schedule.v1.TriggerImmediatelyRequestR\DC2triggerImmediately\DC2T\n\
+      \\DLEbackfill_request\CAN\STX \ETX(\v2).temporal.api.schedule.v1.BackfillRequestR\SIbackfillRequest\DC2\DC4\n\
+      \\ENQpause\CAN\ETX \SOH(\tR\ENQpause\DC2\CAN\n\
+      \\aunpause\CAN\EOT \SOH(\tR\aunpause"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        triggerImmediately__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "trigger_immediately"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor TriggerImmediatelyRequest)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'triggerImmediately")) ::
+              Data.ProtoLens.FieldDescriptor SchedulePatch
+        backfillRequest__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "backfill_request"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor BackfillRequest)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked
+                 (Data.ProtoLens.Field.field @"backfillRequest")) ::
+              Data.ProtoLens.FieldDescriptor SchedulePatch
+        pause__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "pause"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"pause")) ::
+              Data.ProtoLens.FieldDescriptor SchedulePatch
+        unpause__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "unpause"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"unpause")) ::
+              Data.ProtoLens.FieldDescriptor SchedulePatch
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, triggerImmediately__field_descriptor),
+           (Data.ProtoLens.Tag 2, backfillRequest__field_descriptor),
+           (Data.ProtoLens.Tag 3, pause__field_descriptor),
+           (Data.ProtoLens.Tag 4, unpause__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _SchedulePatch'_unknownFields
+        (\ x__ y__ -> x__ {_SchedulePatch'_unknownFields = y__})
+  defMessage
+    = SchedulePatch'_constructor
+        {_SchedulePatch'triggerImmediately = Prelude.Nothing,
+         _SchedulePatch'backfillRequest = Data.Vector.Generic.empty,
+         _SchedulePatch'pause = Data.ProtoLens.fieldDefault,
+         _SchedulePatch'unpause = Data.ProtoLens.fieldDefault,
+         _SchedulePatch'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          SchedulePatch
+          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld BackfillRequest
+             -> Data.ProtoLens.Encoding.Bytes.Parser SchedulePatch
+        loop x mutable'backfillRequest
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do frozen'backfillRequest <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                                  (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                                     mutable'backfillRequest)
+                      (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
+                           (Lens.Family2.set
+                              (Data.ProtoLens.Field.field @"vec'backfillRequest")
+                              frozen'backfillRequest x))
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "trigger_immediately"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"triggerImmediately") y x)
+                                  mutable'backfillRequest
+                        18
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "backfill_request"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append
+                                          mutable'backfillRequest y)
+                                loop x v
+                        26
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                       Data.ProtoLens.Encoding.Bytes.getBytes
+                                                         (Prelude.fromIntegral len)
+                                           Data.ProtoLens.Encoding.Bytes.runEither
+                                             (case Data.Text.Encoding.decodeUtf8' value of
+                                                (Prelude.Left err)
+                                                  -> Prelude.Left (Prelude.show err)
+                                                (Prelude.Right r) -> Prelude.Right r))
+                                       "pause"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"pause") y x)
+                                  mutable'backfillRequest
+                        34
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                       Data.ProtoLens.Encoding.Bytes.getBytes
+                                                         (Prelude.fromIntegral len)
+                                           Data.ProtoLens.Encoding.Bytes.runEither
+                                             (case Data.Text.Encoding.decodeUtf8' value of
+                                                (Prelude.Left err)
+                                                  -> Prelude.Left (Prelude.show err)
+                                                (Prelude.Right r) -> Prelude.Right r))
+                                       "unpause"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"unpause") y x)
+                                  mutable'backfillRequest
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+                                  mutable'backfillRequest
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do mutable'backfillRequest <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                           Data.ProtoLens.Encoding.Growing.new
+              loop Data.ProtoLens.defMessage mutable'backfillRequest)
+          "SchedulePatch"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view
+                    (Data.ProtoLens.Field.field @"maybe'triggerImmediately") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage _v))
+             ((Data.Monoid.<>)
+                (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                   (\ _v
+                      -> (Data.Monoid.<>)
+                           (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                           ((Prelude..)
+                              (\ bs
+                                 -> (Data.Monoid.<>)
+                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                              Data.ProtoLens.encodeMessage _v))
+                   (Lens.Family2.view
+                      (Data.ProtoLens.Field.field @"vec'backfillRequest") _x))
+                ((Data.Monoid.<>)
+                   (let
+                      _v = Lens.Family2.view (Data.ProtoLens.Field.field @"pause") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                            ((Prelude..)
+                               (\ bs
+                                  -> (Data.Monoid.<>)
+                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                               Data.Text.Encoding.encodeUtf8 _v))
+                   ((Data.Monoid.<>)
+                      (let
+                         _v = Lens.Family2.view (Data.ProtoLens.Field.field @"unpause") _x
+                       in
+                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                             Data.Monoid.mempty
+                         else
+                             (Data.Monoid.<>)
+                               (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
+                               ((Prelude..)
+                                  (\ bs
+                                     -> (Data.Monoid.<>)
+                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                             (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                          (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                  Data.Text.Encoding.encodeUtf8 _v))
+                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
+instance Control.DeepSeq.NFData SchedulePatch where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_SchedulePatch'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_SchedulePatch'triggerImmediately x__)
+                (Control.DeepSeq.deepseq
+                   (_SchedulePatch'backfillRequest x__)
+                   (Control.DeepSeq.deepseq
+                      (_SchedulePatch'pause x__)
+                      (Control.DeepSeq.deepseq (_SchedulePatch'unpause x__) ()))))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.overlapPolicy' @:: Lens' SchedulePolicies Proto.Temporal.Api.Enums.V1.Schedule.ScheduleOverlapPolicy@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.catchupWindow' @:: Lens' SchedulePolicies Proto.Google.Protobuf.Duration.Duration@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'catchupWindow' @:: Lens' SchedulePolicies (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.pauseOnFailure' @:: Lens' SchedulePolicies Prelude.Bool@ -}
+data SchedulePolicies
+  = SchedulePolicies'_constructor {_SchedulePolicies'overlapPolicy :: !Proto.Temporal.Api.Enums.V1.Schedule.ScheduleOverlapPolicy,
+                                   _SchedulePolicies'catchupWindow :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
+                                   _SchedulePolicies'pauseOnFailure :: !Prelude.Bool,
+                                   _SchedulePolicies'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show SchedulePolicies where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField SchedulePolicies "overlapPolicy" Proto.Temporal.Api.Enums.V1.Schedule.ScheduleOverlapPolicy where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _SchedulePolicies'overlapPolicy
+           (\ x__ y__ -> x__ {_SchedulePolicies'overlapPolicy = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField SchedulePolicies "catchupWindow" Proto.Google.Protobuf.Duration.Duration where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _SchedulePolicies'catchupWindow
+           (\ x__ y__ -> x__ {_SchedulePolicies'catchupWindow = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField SchedulePolicies "maybe'catchupWindow" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _SchedulePolicies'catchupWindow
+           (\ x__ y__ -> x__ {_SchedulePolicies'catchupWindow = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField SchedulePolicies "pauseOnFailure" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _SchedulePolicies'pauseOnFailure
+           (\ x__ y__ -> x__ {_SchedulePolicies'pauseOnFailure = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message SchedulePolicies where
+  messageName _
+    = Data.Text.pack "temporal.api.schedule.v1.SchedulePolicies"
+  packedMessageDescriptor _
+    = "\n\
+      \\DLESchedulePolicies\DC2S\n\
+      \\SOoverlap_policy\CAN\SOH \SOH(\SO2,.temporal.api.enums.v1.ScheduleOverlapPolicyR\roverlapPolicy\DC2F\n\
+      \\SOcatchup_window\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\rcatchupWindowB\EOT\152\223\US\SOH\DC2(\n\
+      \\DLEpause_on_failure\CAN\ETX \SOH(\bR\SOpauseOnFailure"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        overlapPolicy__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "overlap_policy"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Schedule.ScheduleOverlapPolicy)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"overlapPolicy")) ::
+              Data.ProtoLens.FieldDescriptor SchedulePolicies
+        catchupWindow__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "catchup_window"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'catchupWindow")) ::
+              Data.ProtoLens.FieldDescriptor SchedulePolicies
+        pauseOnFailure__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "pause_on_failure"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"pauseOnFailure")) ::
+              Data.ProtoLens.FieldDescriptor SchedulePolicies
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, overlapPolicy__field_descriptor),
+           (Data.ProtoLens.Tag 2, catchupWindow__field_descriptor),
+           (Data.ProtoLens.Tag 3, pauseOnFailure__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _SchedulePolicies'_unknownFields
+        (\ x__ y__ -> x__ {_SchedulePolicies'_unknownFields = y__})
+  defMessage
+    = SchedulePolicies'_constructor
+        {_SchedulePolicies'overlapPolicy = Data.ProtoLens.fieldDefault,
+         _SchedulePolicies'catchupWindow = Prelude.Nothing,
+         _SchedulePolicies'pauseOnFailure = Data.ProtoLens.fieldDefault,
+         _SchedulePolicies'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          SchedulePolicies
+          -> Data.ProtoLens.Encoding.Bytes.Parser SchedulePolicies
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.toEnum
+                                          (Prelude.fmap
+                                             Prelude.fromIntegral
+                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
+                                       "overlap_policy"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"overlapPolicy") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "catchup_window"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"catchupWindow") y x)
+                        24
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "pause_on_failure"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"pauseOnFailure") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "SchedulePolicies"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view
+                      (Data.ProtoLens.Field.field @"overlapPolicy") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
+                      ((Prelude..)
+                         ((Prelude..)
+                            Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
+                         Prelude.fromEnum _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view
+                       (Data.ProtoLens.Field.field @"maybe'catchupWindow") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just _v)
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage _v))
+                ((Data.Monoid.<>)
+                   (let
+                      _v
+                        = Lens.Family2.view
+                            (Data.ProtoLens.Field.field @"pauseOnFailure") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
+                            ((Prelude..)
+                               Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
+                               _v))
+                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
+instance Control.DeepSeq.NFData SchedulePolicies where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_SchedulePolicies'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_SchedulePolicies'overlapPolicy x__)
+                (Control.DeepSeq.deepseq
+                   (_SchedulePolicies'catchupWindow x__)
+                   (Control.DeepSeq.deepseq
+                      (_SchedulePolicies'pauseOnFailure x__) ())))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.structuredCalendar' @:: Lens' ScheduleSpec [StructuredCalendarSpec]@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.vec'structuredCalendar' @:: Lens' ScheduleSpec (Data.Vector.Vector StructuredCalendarSpec)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.cronString' @:: Lens' ScheduleSpec [Data.Text.Text]@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.vec'cronString' @:: Lens' ScheduleSpec (Data.Vector.Vector Data.Text.Text)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.calendar' @:: Lens' ScheduleSpec [CalendarSpec]@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.vec'calendar' @:: Lens' ScheduleSpec (Data.Vector.Vector CalendarSpec)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.interval' @:: Lens' ScheduleSpec [IntervalSpec]@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.vec'interval' @:: Lens' ScheduleSpec (Data.Vector.Vector IntervalSpec)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.excludeCalendar' @:: Lens' ScheduleSpec [CalendarSpec]@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.vec'excludeCalendar' @:: Lens' ScheduleSpec (Data.Vector.Vector CalendarSpec)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.excludeStructuredCalendar' @:: Lens' ScheduleSpec [StructuredCalendarSpec]@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.vec'excludeStructuredCalendar' @:: Lens' ScheduleSpec (Data.Vector.Vector StructuredCalendarSpec)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.startTime' @:: Lens' ScheduleSpec Proto.Google.Protobuf.Timestamp.Timestamp@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'startTime' @:: Lens' ScheduleSpec (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.endTime' @:: Lens' ScheduleSpec Proto.Google.Protobuf.Timestamp.Timestamp@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'endTime' @:: Lens' ScheduleSpec (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.jitter' @:: Lens' ScheduleSpec Proto.Google.Protobuf.Duration.Duration@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'jitter' @:: Lens' ScheduleSpec (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.timezoneName' @:: Lens' ScheduleSpec Data.Text.Text@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.timezoneData' @:: Lens' ScheduleSpec Data.ByteString.ByteString@ -}
+data ScheduleSpec
+  = ScheduleSpec'_constructor {_ScheduleSpec'structuredCalendar :: !(Data.Vector.Vector StructuredCalendarSpec),
+                               _ScheduleSpec'cronString :: !(Data.Vector.Vector Data.Text.Text),
+                               _ScheduleSpec'calendar :: !(Data.Vector.Vector CalendarSpec),
+                               _ScheduleSpec'interval :: !(Data.Vector.Vector IntervalSpec),
+                               _ScheduleSpec'excludeCalendar :: !(Data.Vector.Vector CalendarSpec),
+                               _ScheduleSpec'excludeStructuredCalendar :: !(Data.Vector.Vector StructuredCalendarSpec),
+                               _ScheduleSpec'startTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                               _ScheduleSpec'endTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                               _ScheduleSpec'jitter :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
+                               _ScheduleSpec'timezoneName :: !Data.Text.Text,
+                               _ScheduleSpec'timezoneData :: !Data.ByteString.ByteString,
+                               _ScheduleSpec'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show ScheduleSpec where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField ScheduleSpec "structuredCalendar" [StructuredCalendarSpec] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleSpec'structuredCalendar
+           (\ x__ y__ -> x__ {_ScheduleSpec'structuredCalendar = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField ScheduleSpec "vec'structuredCalendar" (Data.Vector.Vector StructuredCalendarSpec) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleSpec'structuredCalendar
+           (\ x__ y__ -> x__ {_ScheduleSpec'structuredCalendar = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleSpec "cronString" [Data.Text.Text] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleSpec'cronString
+           (\ x__ y__ -> x__ {_ScheduleSpec'cronString = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField ScheduleSpec "vec'cronString" (Data.Vector.Vector Data.Text.Text) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleSpec'cronString
+           (\ x__ y__ -> x__ {_ScheduleSpec'cronString = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleSpec "calendar" [CalendarSpec] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleSpec'calendar
+           (\ x__ y__ -> x__ {_ScheduleSpec'calendar = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField ScheduleSpec "vec'calendar" (Data.Vector.Vector CalendarSpec) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleSpec'calendar
+           (\ x__ y__ -> x__ {_ScheduleSpec'calendar = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleSpec "interval" [IntervalSpec] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleSpec'interval
+           (\ x__ y__ -> x__ {_ScheduleSpec'interval = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField ScheduleSpec "vec'interval" (Data.Vector.Vector IntervalSpec) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleSpec'interval
+           (\ x__ y__ -> x__ {_ScheduleSpec'interval = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleSpec "excludeCalendar" [CalendarSpec] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleSpec'excludeCalendar
+           (\ x__ y__ -> x__ {_ScheduleSpec'excludeCalendar = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField ScheduleSpec "vec'excludeCalendar" (Data.Vector.Vector CalendarSpec) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleSpec'excludeCalendar
+           (\ x__ y__ -> x__ {_ScheduleSpec'excludeCalendar = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleSpec "excludeStructuredCalendar" [StructuredCalendarSpec] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleSpec'excludeStructuredCalendar
+           (\ x__ y__ -> x__ {_ScheduleSpec'excludeStructuredCalendar = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField ScheduleSpec "vec'excludeStructuredCalendar" (Data.Vector.Vector StructuredCalendarSpec) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleSpec'excludeStructuredCalendar
+           (\ x__ y__ -> x__ {_ScheduleSpec'excludeStructuredCalendar = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleSpec "startTime" Proto.Google.Protobuf.Timestamp.Timestamp where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleSpec'startTime
+           (\ x__ y__ -> x__ {_ScheduleSpec'startTime = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField ScheduleSpec "maybe'startTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleSpec'startTime
+           (\ x__ y__ -> x__ {_ScheduleSpec'startTime = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleSpec "endTime" Proto.Google.Protobuf.Timestamp.Timestamp where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleSpec'endTime
+           (\ x__ y__ -> x__ {_ScheduleSpec'endTime = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField ScheduleSpec "maybe'endTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleSpec'endTime
+           (\ x__ y__ -> x__ {_ScheduleSpec'endTime = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleSpec "jitter" Proto.Google.Protobuf.Duration.Duration where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleSpec'jitter
+           (\ x__ y__ -> x__ {_ScheduleSpec'jitter = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField ScheduleSpec "maybe'jitter" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleSpec'jitter
+           (\ x__ y__ -> x__ {_ScheduleSpec'jitter = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleSpec "timezoneName" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleSpec'timezoneName
+           (\ x__ y__ -> x__ {_ScheduleSpec'timezoneName = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleSpec "timezoneData" Data.ByteString.ByteString where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleSpec'timezoneData
+           (\ x__ y__ -> x__ {_ScheduleSpec'timezoneData = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message ScheduleSpec where
+  messageName _
+    = Data.Text.pack "temporal.api.schedule.v1.ScheduleSpec"
+  packedMessageDescriptor _
+    = "\n\
+      \\fScheduleSpec\DC2a\n\
+      \\DC3structured_calendar\CAN\a \ETX(\v20.temporal.api.schedule.v1.StructuredCalendarSpecR\DC2structuredCalendar\DC2\US\n\
+      \\vcron_string\CAN\b \ETX(\tR\n\
+      \cronString\DC2B\n\
+      \\bcalendar\CAN\SOH \ETX(\v2&.temporal.api.schedule.v1.CalendarSpecR\bcalendar\DC2B\n\
+      \\binterval\CAN\STX \ETX(\v2&.temporal.api.schedule.v1.IntervalSpecR\binterval\DC2U\n\
+      \\DLEexclude_calendar\CAN\ETX \ETX(\v2&.temporal.api.schedule.v1.CalendarSpecR\SIexcludeCalendarB\STX\CAN\SOH\DC2p\n\
+      \\ESCexclude_structured_calendar\CAN\t \ETX(\v20.temporal.api.schedule.v1.StructuredCalendarSpecR\EMexcludeStructuredCalendar\DC2?\n\
+      \\n\
+      \start_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTimeB\EOT\144\223\US\SOH\DC2;\n\
+      \\bend_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\aendTimeB\EOT\144\223\US\SOH\DC27\n\
+      \\ACKjitter\CAN\ACK \SOH(\v2\EM.google.protobuf.DurationR\ACKjitterB\EOT\152\223\US\SOH\DC2#\n\
+      \\rtimezone_name\CAN\n\
+      \ \SOH(\tR\ftimezoneName\DC2#\n\
+      \\rtimezone_data\CAN\v \SOH(\fR\ftimezoneData"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        structuredCalendar__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "structured_calendar"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor StructuredCalendarSpec)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked
+                 (Data.ProtoLens.Field.field @"structuredCalendar")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleSpec
+        cronString__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "cron_string"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked
+                 (Data.ProtoLens.Field.field @"cronString")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleSpec
+        calendar__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "calendar"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor CalendarSpec)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked
+                 (Data.ProtoLens.Field.field @"calendar")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleSpec
+        interval__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "interval"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor IntervalSpec)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked
+                 (Data.ProtoLens.Field.field @"interval")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleSpec
+        excludeCalendar__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "exclude_calendar"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor CalendarSpec)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked
+                 (Data.ProtoLens.Field.field @"excludeCalendar")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleSpec
+        excludeStructuredCalendar__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "exclude_structured_calendar"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor StructuredCalendarSpec)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked
+                 (Data.ProtoLens.Field.field @"excludeStructuredCalendar")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleSpec
+        startTime__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "start_time"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'startTime")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleSpec
+        endTime__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "end_time"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'endTime")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleSpec
+        jitter__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "jitter"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'jitter")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleSpec
+        timezoneName__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "timezone_name"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"timezoneName")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleSpec
+        timezoneData__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "timezone_data"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BytesField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.ByteString.ByteString)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"timezoneData")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleSpec
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 7, structuredCalendar__field_descriptor),
+           (Data.ProtoLens.Tag 8, cronString__field_descriptor),
+           (Data.ProtoLens.Tag 1, calendar__field_descriptor),
+           (Data.ProtoLens.Tag 2, interval__field_descriptor),
+           (Data.ProtoLens.Tag 3, excludeCalendar__field_descriptor),
+           (Data.ProtoLens.Tag 9, 
+            excludeStructuredCalendar__field_descriptor),
+           (Data.ProtoLens.Tag 4, startTime__field_descriptor),
+           (Data.ProtoLens.Tag 5, endTime__field_descriptor),
+           (Data.ProtoLens.Tag 6, jitter__field_descriptor),
+           (Data.ProtoLens.Tag 10, timezoneName__field_descriptor),
+           (Data.ProtoLens.Tag 11, timezoneData__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _ScheduleSpec'_unknownFields
+        (\ x__ y__ -> x__ {_ScheduleSpec'_unknownFields = y__})
+  defMessage
+    = ScheduleSpec'_constructor
+        {_ScheduleSpec'structuredCalendar = Data.Vector.Generic.empty,
+         _ScheduleSpec'cronString = Data.Vector.Generic.empty,
+         _ScheduleSpec'calendar = Data.Vector.Generic.empty,
+         _ScheduleSpec'interval = Data.Vector.Generic.empty,
+         _ScheduleSpec'excludeCalendar = Data.Vector.Generic.empty,
+         _ScheduleSpec'excludeStructuredCalendar = Data.Vector.Generic.empty,
+         _ScheduleSpec'startTime = Prelude.Nothing,
+         _ScheduleSpec'endTime = Prelude.Nothing,
+         _ScheduleSpec'jitter = Prelude.Nothing,
+         _ScheduleSpec'timezoneName = Data.ProtoLens.fieldDefault,
+         _ScheduleSpec'timezoneData = Data.ProtoLens.fieldDefault,
+         _ScheduleSpec'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          ScheduleSpec
+          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld CalendarSpec
+             -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Data.Text.Text
+                -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld CalendarSpec
+                   -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld StructuredCalendarSpec
+                      -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld IntervalSpec
+                         -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld StructuredCalendarSpec
+                            -> Data.ProtoLens.Encoding.Bytes.Parser ScheduleSpec
+        loop
+          x
+          mutable'calendar
+          mutable'cronString
+          mutable'excludeCalendar
+          mutable'excludeStructuredCalendar
+          mutable'interval
+          mutable'structuredCalendar
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do frozen'calendar <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                           (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                              mutable'calendar)
+                      frozen'cronString <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                             (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                                mutable'cronString)
+                      frozen'excludeCalendar <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                                  (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                                     mutable'excludeCalendar)
+                      frozen'excludeStructuredCalendar <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                                            (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                                               mutable'excludeStructuredCalendar)
+                      frozen'interval <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                           (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                              mutable'interval)
+                      frozen'structuredCalendar <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                                     (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                                        mutable'structuredCalendar)
+                      (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
+                           (Lens.Family2.set
+                              (Data.ProtoLens.Field.field @"vec'calendar") frozen'calendar
+                              (Lens.Family2.set
+                                 (Data.ProtoLens.Field.field @"vec'cronString") frozen'cronString
+                                 (Lens.Family2.set
+                                    (Data.ProtoLens.Field.field @"vec'excludeCalendar")
+                                    frozen'excludeCalendar
+                                    (Lens.Family2.set
+                                       (Data.ProtoLens.Field.field @"vec'excludeStructuredCalendar")
+                                       frozen'excludeStructuredCalendar
+                                       (Lens.Family2.set
+                                          (Data.ProtoLens.Field.field @"vec'interval")
+                                          frozen'interval
+                                          (Lens.Family2.set
+                                             (Data.ProtoLens.Field.field @"vec'structuredCalendar")
+                                             frozen'structuredCalendar x)))))))
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        58
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "structured_calendar"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append
+                                          mutable'structuredCalendar y)
+                                loop
+                                  x mutable'calendar mutable'cronString mutable'excludeCalendar
+                                  mutable'excludeStructuredCalendar mutable'interval v
+                        66
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                        Data.ProtoLens.Encoding.Bytes.getBytes
+                                                          (Prelude.fromIntegral len)
+                                            Data.ProtoLens.Encoding.Bytes.runEither
+                                              (case Data.Text.Encoding.decodeUtf8' value of
+                                                 (Prelude.Left err)
+                                                   -> Prelude.Left (Prelude.show err)
+                                                 (Prelude.Right r) -> Prelude.Right r))
+                                        "cron_string"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append mutable'cronString y)
+                                loop
+                                  x mutable'calendar v mutable'excludeCalendar
+                                  mutable'excludeStructuredCalendar mutable'interval
+                                  mutable'structuredCalendar
+                        10
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "calendar"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append mutable'calendar y)
+                                loop
+                                  x v mutable'cronString mutable'excludeCalendar
+                                  mutable'excludeStructuredCalendar mutable'interval
+                                  mutable'structuredCalendar
+                        18
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "interval"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append mutable'interval y)
+                                loop
+                                  x mutable'calendar mutable'cronString mutable'excludeCalendar
+                                  mutable'excludeStructuredCalendar v mutable'structuredCalendar
+                        26
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "exclude_calendar"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append
+                                          mutable'excludeCalendar y)
+                                loop
+                                  x mutable'calendar mutable'cronString v
+                                  mutable'excludeStructuredCalendar mutable'interval
+                                  mutable'structuredCalendar
+                        74
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "exclude_structured_calendar"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append
+                                          mutable'excludeStructuredCalendar y)
+                                loop
+                                  x mutable'calendar mutable'cronString mutable'excludeCalendar v
+                                  mutable'interval mutable'structuredCalendar
+                        34
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "start_time"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"startTime") y x)
+                                  mutable'calendar mutable'cronString mutable'excludeCalendar
+                                  mutable'excludeStructuredCalendar mutable'interval
+                                  mutable'structuredCalendar
+                        42
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "end_time"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"endTime") y x)
+                                  mutable'calendar mutable'cronString mutable'excludeCalendar
+                                  mutable'excludeStructuredCalendar mutable'interval
+                                  mutable'structuredCalendar
+                        50
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "jitter"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"jitter") y x)
+                                  mutable'calendar mutable'cronString mutable'excludeCalendar
+                                  mutable'excludeStructuredCalendar mutable'interval
+                                  mutable'structuredCalendar
+                        82
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                       Data.ProtoLens.Encoding.Bytes.getBytes
+                                                         (Prelude.fromIntegral len)
+                                           Data.ProtoLens.Encoding.Bytes.runEither
+                                             (case Data.Text.Encoding.decodeUtf8' value of
+                                                (Prelude.Left err)
+                                                  -> Prelude.Left (Prelude.show err)
+                                                (Prelude.Right r) -> Prelude.Right r))
+                                       "timezone_name"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"timezoneName") y x)
+                                  mutable'calendar mutable'cronString mutable'excludeCalendar
+                                  mutable'excludeStructuredCalendar mutable'interval
+                                  mutable'structuredCalendar
+                        90
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getBytes
+                                             (Prelude.fromIntegral len))
+                                       "timezone_data"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"timezoneData") y x)
+                                  mutable'calendar mutable'cronString mutable'excludeCalendar
+                                  mutable'excludeStructuredCalendar mutable'interval
+                                  mutable'structuredCalendar
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+                                  mutable'calendar mutable'cronString mutable'excludeCalendar
+                                  mutable'excludeStructuredCalendar mutable'interval
+                                  mutable'structuredCalendar
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do mutable'calendar <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                    Data.ProtoLens.Encoding.Growing.new
+              mutable'cronString <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                      Data.ProtoLens.Encoding.Growing.new
+              mutable'excludeCalendar <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                           Data.ProtoLens.Encoding.Growing.new
+              mutable'excludeStructuredCalendar <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                                     Data.ProtoLens.Encoding.Growing.new
+              mutable'interval <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                    Data.ProtoLens.Encoding.Growing.new
+              mutable'structuredCalendar <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                              Data.ProtoLens.Encoding.Growing.new
+              loop
+                Data.ProtoLens.defMessage mutable'calendar mutable'cronString
+                mutable'excludeCalendar mutable'excludeStructuredCalendar
+                mutable'interval mutable'structuredCalendar)
+          "ScheduleSpec"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                (\ _v
+                   -> (Data.Monoid.<>)
+                        (Data.ProtoLens.Encoding.Bytes.putVarInt 58)
+                        ((Prelude..)
+                           (\ bs
+                              -> (Data.Monoid.<>)
+                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                           Data.ProtoLens.encodeMessage _v))
+                (Lens.Family2.view
+                   (Data.ProtoLens.Field.field @"vec'structuredCalendar") _x))
+             ((Data.Monoid.<>)
+                (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                   (\ _v
+                      -> (Data.Monoid.<>)
+                           (Data.ProtoLens.Encoding.Bytes.putVarInt 66)
+                           ((Prelude..)
+                              (\ bs
+                                 -> (Data.Monoid.<>)
+                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                              Data.Text.Encoding.encodeUtf8 _v))
+                   (Lens.Family2.view
+                      (Data.ProtoLens.Field.field @"vec'cronString") _x))
+                ((Data.Monoid.<>)
+                   (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                      (\ _v
+                         -> (Data.Monoid.<>)
+                              (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                              ((Prelude..)
+                                 (\ bs
+                                    -> (Data.Monoid.<>)
+                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                            (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                         (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                 Data.ProtoLens.encodeMessage _v))
+                      (Lens.Family2.view
+                         (Data.ProtoLens.Field.field @"vec'calendar") _x))
+                   ((Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                         (\ _v
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                                 ((Prelude..)
+                                    (\ bs
+                                       -> (Data.Monoid.<>)
+                                            (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                               (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                            (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                    Data.ProtoLens.encodeMessage _v))
+                         (Lens.Family2.view
+                            (Data.ProtoLens.Field.field @"vec'interval") _x))
+                      ((Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                            (\ _v
+                               -> (Data.Monoid.<>)
+                                    (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                                    ((Prelude..)
+                                       (\ bs
+                                          -> (Data.Monoid.<>)
+                                               (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                  (Prelude.fromIntegral
+                                                     (Data.ByteString.length bs)))
+                                               (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                       Data.ProtoLens.encodeMessage _v))
+                            (Lens.Family2.view
+                               (Data.ProtoLens.Field.field @"vec'excludeCalendar") _x))
+                         ((Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                               (\ _v
+                                  -> (Data.Monoid.<>)
+                                       (Data.ProtoLens.Encoding.Bytes.putVarInt 74)
+                                       ((Prelude..)
+                                          (\ bs
+                                             -> (Data.Monoid.<>)
+                                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                     (Prelude.fromIntegral
+                                                        (Data.ByteString.length bs)))
+                                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                          Data.ProtoLens.encodeMessage _v))
+                               (Lens.Family2.view
+                                  (Data.ProtoLens.Field.field @"vec'excludeStructuredCalendar") _x))
+                            ((Data.Monoid.<>)
+                               (case
+                                    Lens.Family2.view
+                                      (Data.ProtoLens.Field.field @"maybe'startTime") _x
+                                of
+                                  Prelude.Nothing -> Data.Monoid.mempty
+                                  (Prelude.Just _v)
+                                    -> (Data.Monoid.<>)
+                                         (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
+                                         ((Prelude..)
+                                            (\ bs
+                                               -> (Data.Monoid.<>)
+                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                       (Prelude.fromIntegral
+                                                          (Data.ByteString.length bs)))
+                                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                            Data.ProtoLens.encodeMessage _v))
+                               ((Data.Monoid.<>)
+                                  (case
+                                       Lens.Family2.view
+                                         (Data.ProtoLens.Field.field @"maybe'endTime") _x
+                                   of
+                                     Prelude.Nothing -> Data.Monoid.mempty
+                                     (Prelude.Just _v)
+                                       -> (Data.Monoid.<>)
+                                            (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
+                                            ((Prelude..)
+                                               (\ bs
+                                                  -> (Data.Monoid.<>)
+                                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                          (Prelude.fromIntegral
+                                                             (Data.ByteString.length bs)))
+                                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                               Data.ProtoLens.encodeMessage _v))
+                                  ((Data.Monoid.<>)
+                                     (case
+                                          Lens.Family2.view
+                                            (Data.ProtoLens.Field.field @"maybe'jitter") _x
+                                      of
+                                        Prelude.Nothing -> Data.Monoid.mempty
+                                        (Prelude.Just _v)
+                                          -> (Data.Monoid.<>)
+                                               (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
+                                               ((Prelude..)
+                                                  (\ bs
+                                                     -> (Data.Monoid.<>)
+                                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                             (Prelude.fromIntegral
+                                                                (Data.ByteString.length bs)))
+                                                          (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                             bs))
+                                                  Data.ProtoLens.encodeMessage _v))
+                                     ((Data.Monoid.<>)
+                                        (let
+                                           _v
+                                             = Lens.Family2.view
+                                                 (Data.ProtoLens.Field.field @"timezoneName") _x
+                                         in
+                                           if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                               Data.Monoid.mempty
+                                           else
+                                               (Data.Monoid.<>)
+                                                 (Data.ProtoLens.Encoding.Bytes.putVarInt 82)
+                                                 ((Prelude..)
+                                                    (\ bs
+                                                       -> (Data.Monoid.<>)
+                                                            (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                               (Prelude.fromIntegral
+                                                                  (Data.ByteString.length bs)))
+                                                            (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                               bs))
+                                                    Data.Text.Encoding.encodeUtf8 _v))
+                                        ((Data.Monoid.<>)
+                                           (let
+                                              _v
+                                                = Lens.Family2.view
+                                                    (Data.ProtoLens.Field.field @"timezoneData") _x
+                                            in
+                                              if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                                  Data.Monoid.mempty
+                                              else
+                                                  (Data.Monoid.<>)
+                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt 90)
+                                                    ((\ bs
+                                                        -> (Data.Monoid.<>)
+                                                             (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                (Prelude.fromIntegral
+                                                                   (Data.ByteString.length bs)))
+                                                             (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                bs))
+                                                       _v))
+                                           (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                                              (Lens.Family2.view
+                                                 Data.ProtoLens.unknownFields _x))))))))))))
+instance Control.DeepSeq.NFData ScheduleSpec where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_ScheduleSpec'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_ScheduleSpec'structuredCalendar x__)
+                (Control.DeepSeq.deepseq
+                   (_ScheduleSpec'cronString x__)
+                   (Control.DeepSeq.deepseq
+                      (_ScheduleSpec'calendar x__)
+                      (Control.DeepSeq.deepseq
+                         (_ScheduleSpec'interval x__)
+                         (Control.DeepSeq.deepseq
+                            (_ScheduleSpec'excludeCalendar x__)
+                            (Control.DeepSeq.deepseq
+                               (_ScheduleSpec'excludeStructuredCalendar x__)
+                               (Control.DeepSeq.deepseq
+                                  (_ScheduleSpec'startTime x__)
+                                  (Control.DeepSeq.deepseq
+                                     (_ScheduleSpec'endTime x__)
+                                     (Control.DeepSeq.deepseq
+                                        (_ScheduleSpec'jitter x__)
+                                        (Control.DeepSeq.deepseq
+                                           (_ScheduleSpec'timezoneName x__)
+                                           (Control.DeepSeq.deepseq
+                                              (_ScheduleSpec'timezoneData x__) ())))))))))))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.notes' @:: Lens' ScheduleState Data.Text.Text@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.paused' @:: Lens' ScheduleState Prelude.Bool@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.limitedActions' @:: Lens' ScheduleState Prelude.Bool@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.remainingActions' @:: Lens' ScheduleState Data.Int.Int64@ -}
+data ScheduleState
+  = ScheduleState'_constructor {_ScheduleState'notes :: !Data.Text.Text,
+                                _ScheduleState'paused :: !Prelude.Bool,
+                                _ScheduleState'limitedActions :: !Prelude.Bool,
+                                _ScheduleState'remainingActions :: !Data.Int.Int64,
+                                _ScheduleState'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show ScheduleState where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField ScheduleState "notes" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleState'notes
+           (\ x__ y__ -> x__ {_ScheduleState'notes = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleState "paused" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleState'paused
+           (\ x__ y__ -> x__ {_ScheduleState'paused = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleState "limitedActions" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleState'limitedActions
+           (\ x__ y__ -> x__ {_ScheduleState'limitedActions = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleState "remainingActions" Data.Int.Int64 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleState'remainingActions
+           (\ x__ y__ -> x__ {_ScheduleState'remainingActions = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message ScheduleState where
+  messageName _
+    = Data.Text.pack "temporal.api.schedule.v1.ScheduleState"
+  packedMessageDescriptor _
+    = "\n\
+      \\rScheduleState\DC2\DC4\n\
+      \\ENQnotes\CAN\SOH \SOH(\tR\ENQnotes\DC2\SYN\n\
+      \\ACKpaused\CAN\STX \SOH(\bR\ACKpaused\DC2'\n\
+      \\SIlimited_actions\CAN\ETX \SOH(\bR\SOlimitedActions\DC2+\n\
+      \\DC1remaining_actions\CAN\EOT \SOH(\ETXR\DLEremainingActions"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        notes__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "notes"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"notes")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleState
+        paused__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "paused"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"paused")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleState
+        limitedActions__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "limited_actions"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"limitedActions")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleState
+        remainingActions__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "remaining_actions"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.Int64Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int64)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"remainingActions")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleState
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, notes__field_descriptor),
+           (Data.ProtoLens.Tag 2, paused__field_descriptor),
+           (Data.ProtoLens.Tag 3, limitedActions__field_descriptor),
+           (Data.ProtoLens.Tag 4, remainingActions__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _ScheduleState'_unknownFields
+        (\ x__ y__ -> x__ {_ScheduleState'_unknownFields = y__})
+  defMessage
+    = ScheduleState'_constructor
+        {_ScheduleState'notes = Data.ProtoLens.fieldDefault,
+         _ScheduleState'paused = Data.ProtoLens.fieldDefault,
+         _ScheduleState'limitedActions = Data.ProtoLens.fieldDefault,
+         _ScheduleState'remainingActions = Data.ProtoLens.fieldDefault,
+         _ScheduleState'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          ScheduleState -> Data.ProtoLens.Encoding.Bytes.Parser ScheduleState
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                       Data.ProtoLens.Encoding.Bytes.getBytes
+                                                         (Prelude.fromIntegral len)
+                                           Data.ProtoLens.Encoding.Bytes.runEither
+                                             (case Data.Text.Encoding.decodeUtf8' value of
+                                                (Prelude.Left err)
+                                                  -> Prelude.Left (Prelude.show err)
+                                                (Prelude.Right r) -> Prelude.Right r))
+                                       "notes"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"notes") y x)
+                        16
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "paused"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"paused") y x)
+                        24
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "limited_actions"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"limitedActions") y x)
+                        32
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "remaining_actions"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"remainingActions") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "ScheduleState"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"notes") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             ((Data.Monoid.<>)
+                (let
+                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"paused") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
+                         ((Prelude..)
+                            Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
+                            _v))
+                ((Data.Monoid.<>)
+                   (let
+                      _v
+                        = Lens.Family2.view
+                            (Data.ProtoLens.Field.field @"limitedActions") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
+                            ((Prelude..)
+                               Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
+                               _v))
+                   ((Data.Monoid.<>)
+                      (let
+                         _v
+                           = Lens.Family2.view
+                               (Data.ProtoLens.Field.field @"remainingActions") _x
+                       in
+                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                             Data.Monoid.mempty
+                         else
+                             (Data.Monoid.<>)
+                               (Data.ProtoLens.Encoding.Bytes.putVarInt 32)
+                               ((Prelude..)
+                                  Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
+                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
+instance Control.DeepSeq.NFData ScheduleState where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_ScheduleState'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_ScheduleState'notes x__)
+                (Control.DeepSeq.deepseq
+                   (_ScheduleState'paused x__)
+                   (Control.DeepSeq.deepseq
+                      (_ScheduleState'limitedActions x__)
+                      (Control.DeepSeq.deepseq
+                         (_ScheduleState'remainingActions x__) ()))))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.second' @:: Lens' StructuredCalendarSpec [Range]@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.vec'second' @:: Lens' StructuredCalendarSpec (Data.Vector.Vector Range)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.minute' @:: Lens' StructuredCalendarSpec [Range]@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.vec'minute' @:: Lens' StructuredCalendarSpec (Data.Vector.Vector Range)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.hour' @:: Lens' StructuredCalendarSpec [Range]@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.vec'hour' @:: Lens' StructuredCalendarSpec (Data.Vector.Vector Range)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.dayOfMonth' @:: Lens' StructuredCalendarSpec [Range]@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.vec'dayOfMonth' @:: Lens' StructuredCalendarSpec (Data.Vector.Vector Range)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.month' @:: Lens' StructuredCalendarSpec [Range]@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.vec'month' @:: Lens' StructuredCalendarSpec (Data.Vector.Vector Range)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.year' @:: Lens' StructuredCalendarSpec [Range]@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.vec'year' @:: Lens' StructuredCalendarSpec (Data.Vector.Vector Range)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.dayOfWeek' @:: Lens' StructuredCalendarSpec [Range]@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.vec'dayOfWeek' @:: Lens' StructuredCalendarSpec (Data.Vector.Vector Range)@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.comment' @:: Lens' StructuredCalendarSpec Data.Text.Text@ -}
+data StructuredCalendarSpec
+  = StructuredCalendarSpec'_constructor {_StructuredCalendarSpec'second :: !(Data.Vector.Vector Range),
+                                         _StructuredCalendarSpec'minute :: !(Data.Vector.Vector Range),
+                                         _StructuredCalendarSpec'hour :: !(Data.Vector.Vector Range),
+                                         _StructuredCalendarSpec'dayOfMonth :: !(Data.Vector.Vector Range),
+                                         _StructuredCalendarSpec'month :: !(Data.Vector.Vector Range),
+                                         _StructuredCalendarSpec'year :: !(Data.Vector.Vector Range),
+                                         _StructuredCalendarSpec'dayOfWeek :: !(Data.Vector.Vector Range),
+                                         _StructuredCalendarSpec'comment :: !Data.Text.Text,
+                                         _StructuredCalendarSpec'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show StructuredCalendarSpec where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField StructuredCalendarSpec "second" [Range] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _StructuredCalendarSpec'second
+           (\ x__ y__ -> x__ {_StructuredCalendarSpec'second = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField StructuredCalendarSpec "vec'second" (Data.Vector.Vector Range) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _StructuredCalendarSpec'second
+           (\ x__ y__ -> x__ {_StructuredCalendarSpec'second = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField StructuredCalendarSpec "minute" [Range] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _StructuredCalendarSpec'minute
+           (\ x__ y__ -> x__ {_StructuredCalendarSpec'minute = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField StructuredCalendarSpec "vec'minute" (Data.Vector.Vector Range) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _StructuredCalendarSpec'minute
+           (\ x__ y__ -> x__ {_StructuredCalendarSpec'minute = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField StructuredCalendarSpec "hour" [Range] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _StructuredCalendarSpec'hour
+           (\ x__ y__ -> x__ {_StructuredCalendarSpec'hour = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField StructuredCalendarSpec "vec'hour" (Data.Vector.Vector Range) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _StructuredCalendarSpec'hour
+           (\ x__ y__ -> x__ {_StructuredCalendarSpec'hour = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField StructuredCalendarSpec "dayOfMonth" [Range] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _StructuredCalendarSpec'dayOfMonth
+           (\ x__ y__ -> x__ {_StructuredCalendarSpec'dayOfMonth = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField StructuredCalendarSpec "vec'dayOfMonth" (Data.Vector.Vector Range) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _StructuredCalendarSpec'dayOfMonth
+           (\ x__ y__ -> x__ {_StructuredCalendarSpec'dayOfMonth = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField StructuredCalendarSpec "month" [Range] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _StructuredCalendarSpec'month
+           (\ x__ y__ -> x__ {_StructuredCalendarSpec'month = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField StructuredCalendarSpec "vec'month" (Data.Vector.Vector Range) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _StructuredCalendarSpec'month
+           (\ x__ y__ -> x__ {_StructuredCalendarSpec'month = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField StructuredCalendarSpec "year" [Range] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _StructuredCalendarSpec'year
+           (\ x__ y__ -> x__ {_StructuredCalendarSpec'year = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField StructuredCalendarSpec "vec'year" (Data.Vector.Vector Range) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _StructuredCalendarSpec'year
+           (\ x__ y__ -> x__ {_StructuredCalendarSpec'year = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField StructuredCalendarSpec "dayOfWeek" [Range] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _StructuredCalendarSpec'dayOfWeek
+           (\ x__ y__ -> x__ {_StructuredCalendarSpec'dayOfWeek = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField StructuredCalendarSpec "vec'dayOfWeek" (Data.Vector.Vector Range) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _StructuredCalendarSpec'dayOfWeek
+           (\ x__ y__ -> x__ {_StructuredCalendarSpec'dayOfWeek = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField StructuredCalendarSpec "comment" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _StructuredCalendarSpec'comment
+           (\ x__ y__ -> x__ {_StructuredCalendarSpec'comment = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message StructuredCalendarSpec where
+  messageName _
+    = Data.Text.pack "temporal.api.schedule.v1.StructuredCalendarSpec"
+  packedMessageDescriptor _
+    = "\n\
+      \\SYNStructuredCalendarSpec\DC27\n\
+      \\ACKsecond\CAN\SOH \ETX(\v2\US.temporal.api.schedule.v1.RangeR\ACKsecond\DC27\n\
+      \\ACKminute\CAN\STX \ETX(\v2\US.temporal.api.schedule.v1.RangeR\ACKminute\DC23\n\
+      \\EOThour\CAN\ETX \ETX(\v2\US.temporal.api.schedule.v1.RangeR\EOThour\DC2A\n\
+      \\fday_of_month\CAN\EOT \ETX(\v2\US.temporal.api.schedule.v1.RangeR\n\
+      \dayOfMonth\DC25\n\
+      \\ENQmonth\CAN\ENQ \ETX(\v2\US.temporal.api.schedule.v1.RangeR\ENQmonth\DC23\n\
+      \\EOTyear\CAN\ACK \ETX(\v2\US.temporal.api.schedule.v1.RangeR\EOTyear\DC2?\n\
+      \\vday_of_week\CAN\a \ETX(\v2\US.temporal.api.schedule.v1.RangeR\tdayOfWeek\DC2\CAN\n\
+      \\acomment\CAN\b \SOH(\tR\acomment"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        second__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "second"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Range)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked (Data.ProtoLens.Field.field @"second")) ::
+              Data.ProtoLens.FieldDescriptor StructuredCalendarSpec
+        minute__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "minute"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Range)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked (Data.ProtoLens.Field.field @"minute")) ::
+              Data.ProtoLens.FieldDescriptor StructuredCalendarSpec
+        hour__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "hour"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Range)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked (Data.ProtoLens.Field.field @"hour")) ::
+              Data.ProtoLens.FieldDescriptor StructuredCalendarSpec
+        dayOfMonth__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "day_of_month"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Range)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked
+                 (Data.ProtoLens.Field.field @"dayOfMonth")) ::
+              Data.ProtoLens.FieldDescriptor StructuredCalendarSpec
+        month__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "month"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Range)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked (Data.ProtoLens.Field.field @"month")) ::
+              Data.ProtoLens.FieldDescriptor StructuredCalendarSpec
+        year__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "year"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Range)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked (Data.ProtoLens.Field.field @"year")) ::
+              Data.ProtoLens.FieldDescriptor StructuredCalendarSpec
+        dayOfWeek__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "day_of_week"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Range)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked
+                 (Data.ProtoLens.Field.field @"dayOfWeek")) ::
+              Data.ProtoLens.FieldDescriptor StructuredCalendarSpec
+        comment__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "comment"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"comment")) ::
+              Data.ProtoLens.FieldDescriptor StructuredCalendarSpec
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, second__field_descriptor),
+           (Data.ProtoLens.Tag 2, minute__field_descriptor),
+           (Data.ProtoLens.Tag 3, hour__field_descriptor),
+           (Data.ProtoLens.Tag 4, dayOfMonth__field_descriptor),
+           (Data.ProtoLens.Tag 5, month__field_descriptor),
+           (Data.ProtoLens.Tag 6, year__field_descriptor),
+           (Data.ProtoLens.Tag 7, dayOfWeek__field_descriptor),
+           (Data.ProtoLens.Tag 8, comment__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _StructuredCalendarSpec'_unknownFields
+        (\ x__ y__ -> x__ {_StructuredCalendarSpec'_unknownFields = y__})
+  defMessage
+    = StructuredCalendarSpec'_constructor
+        {_StructuredCalendarSpec'second = Data.Vector.Generic.empty,
+         _StructuredCalendarSpec'minute = Data.Vector.Generic.empty,
+         _StructuredCalendarSpec'hour = Data.Vector.Generic.empty,
+         _StructuredCalendarSpec'dayOfMonth = Data.Vector.Generic.empty,
+         _StructuredCalendarSpec'month = Data.Vector.Generic.empty,
+         _StructuredCalendarSpec'year = Data.Vector.Generic.empty,
+         _StructuredCalendarSpec'dayOfWeek = Data.Vector.Generic.empty,
+         _StructuredCalendarSpec'comment = Data.ProtoLens.fieldDefault,
+         _StructuredCalendarSpec'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          StructuredCalendarSpec
+          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Range
+             -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Range
+                -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Range
+                   -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Range
+                      -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Range
+                         -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Range
+                            -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Range
+                               -> Data.ProtoLens.Encoding.Bytes.Parser StructuredCalendarSpec
+        loop
+          x
+          mutable'dayOfMonth
+          mutable'dayOfWeek
+          mutable'hour
+          mutable'minute
+          mutable'month
+          mutable'second
+          mutable'year
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do frozen'dayOfMonth <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                             (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                                mutable'dayOfMonth)
+                      frozen'dayOfWeek <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                            (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                               mutable'dayOfWeek)
+                      frozen'hour <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.unsafeFreeze mutable'hour)
+                      frozen'minute <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                         (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                            mutable'minute)
+                      frozen'month <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                        (Data.ProtoLens.Encoding.Growing.unsafeFreeze mutable'month)
+                      frozen'second <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                         (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                            mutable'second)
+                      frozen'year <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.unsafeFreeze mutable'year)
+                      (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
+                           (Lens.Family2.set
+                              (Data.ProtoLens.Field.field @"vec'dayOfMonth") frozen'dayOfMonth
+                              (Lens.Family2.set
+                                 (Data.ProtoLens.Field.field @"vec'dayOfWeek") frozen'dayOfWeek
+                                 (Lens.Family2.set
+                                    (Data.ProtoLens.Field.field @"vec'hour") frozen'hour
+                                    (Lens.Family2.set
+                                       (Data.ProtoLens.Field.field @"vec'minute") frozen'minute
+                                       (Lens.Family2.set
+                                          (Data.ProtoLens.Field.field @"vec'month") frozen'month
+                                          (Lens.Family2.set
+                                             (Data.ProtoLens.Field.field @"vec'second")
+                                             frozen'second
+                                             (Lens.Family2.set
+                                                (Data.ProtoLens.Field.field @"vec'year") frozen'year
+                                                x))))))))
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "second"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append mutable'second y)
+                                loop
+                                  x mutable'dayOfMonth mutable'dayOfWeek mutable'hour mutable'minute
+                                  mutable'month v mutable'year
+                        18
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "minute"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append mutable'minute y)
+                                loop
+                                  x mutable'dayOfMonth mutable'dayOfWeek mutable'hour v
+                                  mutable'month mutable'second mutable'year
+                        26
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "hour"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append mutable'hour y)
+                                loop
+                                  x mutable'dayOfMonth mutable'dayOfWeek v mutable'minute
+                                  mutable'month mutable'second mutable'year
+                        34
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "day_of_month"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append mutable'dayOfMonth y)
+                                loop
+                                  x v mutable'dayOfWeek mutable'hour mutable'minute mutable'month
+                                  mutable'second mutable'year
+                        42
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "month"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append mutable'month y)
+                                loop
+                                  x mutable'dayOfMonth mutable'dayOfWeek mutable'hour mutable'minute
+                                  v mutable'second mutable'year
+                        50
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "year"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append mutable'year y)
+                                loop
+                                  x mutable'dayOfMonth mutable'dayOfWeek mutable'hour mutable'minute
+                                  mutable'month mutable'second v
+                        58
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "day_of_week"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append mutable'dayOfWeek y)
+                                loop
+                                  x mutable'dayOfMonth v mutable'hour mutable'minute mutable'month
+                                  mutable'second mutable'year
+                        66
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                       Data.ProtoLens.Encoding.Bytes.getBytes
+                                                         (Prelude.fromIntegral len)
+                                           Data.ProtoLens.Encoding.Bytes.runEither
+                                             (case Data.Text.Encoding.decodeUtf8' value of
+                                                (Prelude.Left err)
+                                                  -> Prelude.Left (Prelude.show err)
+                                                (Prelude.Right r) -> Prelude.Right r))
+                                       "comment"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"comment") y x)
+                                  mutable'dayOfMonth mutable'dayOfWeek mutable'hour mutable'minute
+                                  mutable'month mutable'second mutable'year
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+                                  mutable'dayOfMonth mutable'dayOfWeek mutable'hour mutable'minute
+                                  mutable'month mutable'second mutable'year
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do mutable'dayOfMonth <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                      Data.ProtoLens.Encoding.Growing.new
+              mutable'dayOfWeek <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                     Data.ProtoLens.Encoding.Growing.new
+              mutable'hour <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                Data.ProtoLens.Encoding.Growing.new
+              mutable'minute <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                  Data.ProtoLens.Encoding.Growing.new
+              mutable'month <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                 Data.ProtoLens.Encoding.Growing.new
+              mutable'second <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                  Data.ProtoLens.Encoding.Growing.new
+              mutable'year <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                Data.ProtoLens.Encoding.Growing.new
+              loop
+                Data.ProtoLens.defMessage mutable'dayOfMonth mutable'dayOfWeek
+                mutable'hour mutable'minute mutable'month mutable'second
+                mutable'year)
+          "StructuredCalendarSpec"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                (\ _v
+                   -> (Data.Monoid.<>)
+                        (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                        ((Prelude..)
+                           (\ bs
+                              -> (Data.Monoid.<>)
+                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                           Data.ProtoLens.encodeMessage _v))
+                (Lens.Family2.view (Data.ProtoLens.Field.field @"vec'second") _x))
+             ((Data.Monoid.<>)
+                (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                   (\ _v
+                      -> (Data.Monoid.<>)
+                           (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                           ((Prelude..)
+                              (\ bs
+                                 -> (Data.Monoid.<>)
+                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                              Data.ProtoLens.encodeMessage _v))
+                   (Lens.Family2.view (Data.ProtoLens.Field.field @"vec'minute") _x))
+                ((Data.Monoid.<>)
+                   (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                      (\ _v
+                         -> (Data.Monoid.<>)
+                              (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                              ((Prelude..)
+                                 (\ bs
+                                    -> (Data.Monoid.<>)
+                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                            (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                         (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                 Data.ProtoLens.encodeMessage _v))
+                      (Lens.Family2.view (Data.ProtoLens.Field.field @"vec'hour") _x))
+                   ((Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                         (\ _v
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
+                                 ((Prelude..)
+                                    (\ bs
+                                       -> (Data.Monoid.<>)
+                                            (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                               (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                            (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                    Data.ProtoLens.encodeMessage _v))
+                         (Lens.Family2.view
+                            (Data.ProtoLens.Field.field @"vec'dayOfMonth") _x))
+                      ((Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                            (\ _v
+                               -> (Data.Monoid.<>)
+                                    (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
+                                    ((Prelude..)
+                                       (\ bs
+                                          -> (Data.Monoid.<>)
+                                               (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                  (Prelude.fromIntegral
+                                                     (Data.ByteString.length bs)))
+                                               (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                       Data.ProtoLens.encodeMessage _v))
+                            (Lens.Family2.view (Data.ProtoLens.Field.field @"vec'month") _x))
+                         ((Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                               (\ _v
+                                  -> (Data.Monoid.<>)
+                                       (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
+                                       ((Prelude..)
+                                          (\ bs
+                                             -> (Data.Monoid.<>)
+                                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                     (Prelude.fromIntegral
+                                                        (Data.ByteString.length bs)))
+                                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                          Data.ProtoLens.encodeMessage _v))
+                               (Lens.Family2.view (Data.ProtoLens.Field.field @"vec'year") _x))
+                            ((Data.Monoid.<>)
+                               (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                                  (\ _v
+                                     -> (Data.Monoid.<>)
+                                          (Data.ProtoLens.Encoding.Bytes.putVarInt 58)
+                                          ((Prelude..)
+                                             (\ bs
+                                                -> (Data.Monoid.<>)
+                                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                        (Prelude.fromIntegral
+                                                           (Data.ByteString.length bs)))
+                                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                             Data.ProtoLens.encodeMessage _v))
+                                  (Lens.Family2.view
+                                     (Data.ProtoLens.Field.field @"vec'dayOfWeek") _x))
+                               ((Data.Monoid.<>)
+                                  (let
+                                     _v
+                                       = Lens.Family2.view
+                                           (Data.ProtoLens.Field.field @"comment") _x
+                                   in
+                                     if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                         Data.Monoid.mempty
+                                     else
+                                         (Data.Monoid.<>)
+                                           (Data.ProtoLens.Encoding.Bytes.putVarInt 66)
+                                           ((Prelude..)
+                                              (\ bs
+                                                 -> (Data.Monoid.<>)
+                                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                         (Prelude.fromIntegral
+                                                            (Data.ByteString.length bs)))
+                                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                              Data.Text.Encoding.encodeUtf8 _v))
+                                  (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                                     (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))))))
+instance Control.DeepSeq.NFData StructuredCalendarSpec where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_StructuredCalendarSpec'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_StructuredCalendarSpec'second x__)
+                (Control.DeepSeq.deepseq
+                   (_StructuredCalendarSpec'minute x__)
+                   (Control.DeepSeq.deepseq
+                      (_StructuredCalendarSpec'hour x__)
+                      (Control.DeepSeq.deepseq
+                         (_StructuredCalendarSpec'dayOfMonth x__)
+                         (Control.DeepSeq.deepseq
+                            (_StructuredCalendarSpec'month x__)
+                            (Control.DeepSeq.deepseq
+                               (_StructuredCalendarSpec'year x__)
+                               (Control.DeepSeq.deepseq
+                                  (_StructuredCalendarSpec'dayOfWeek x__)
+                                  (Control.DeepSeq.deepseq
+                                     (_StructuredCalendarSpec'comment x__) ()))))))))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.overlapPolicy' @:: Lens' TriggerImmediatelyRequest Proto.Temporal.Api.Enums.V1.Schedule.ScheduleOverlapPolicy@ -}
+data TriggerImmediatelyRequest
+  = TriggerImmediatelyRequest'_constructor {_TriggerImmediatelyRequest'overlapPolicy :: !Proto.Temporal.Api.Enums.V1.Schedule.ScheduleOverlapPolicy,
+                                            _TriggerImmediatelyRequest'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show TriggerImmediatelyRequest where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField TriggerImmediatelyRequest "overlapPolicy" Proto.Temporal.Api.Enums.V1.Schedule.ScheduleOverlapPolicy where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TriggerImmediatelyRequest'overlapPolicy
+           (\ x__ y__
+              -> x__ {_TriggerImmediatelyRequest'overlapPolicy = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message TriggerImmediatelyRequest where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.schedule.v1.TriggerImmediatelyRequest"
+  packedMessageDescriptor _
+    = "\n\
+      \\EMTriggerImmediatelyRequest\DC2S\n\
+      \\SOoverlap_policy\CAN\SOH \SOH(\SO2,.temporal.api.enums.v1.ScheduleOverlapPolicyR\roverlapPolicy"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        overlapPolicy__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "overlap_policy"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Schedule.ScheduleOverlapPolicy)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"overlapPolicy")) ::
+              Data.ProtoLens.FieldDescriptor TriggerImmediatelyRequest
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, overlapPolicy__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _TriggerImmediatelyRequest'_unknownFields
+        (\ x__ y__
+           -> x__ {_TriggerImmediatelyRequest'_unknownFields = y__})
+  defMessage
+    = TriggerImmediatelyRequest'_constructor
+        {_TriggerImmediatelyRequest'overlapPolicy = Data.ProtoLens.fieldDefault,
+         _TriggerImmediatelyRequest'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          TriggerImmediatelyRequest
+          -> Data.ProtoLens.Encoding.Bytes.Parser TriggerImmediatelyRequest
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.toEnum
+                                          (Prelude.fmap
+                                             Prelude.fromIntegral
+                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
+                                       "overlap_policy"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"overlapPolicy") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "TriggerImmediatelyRequest"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view
+                      (Data.ProtoLens.Field.field @"overlapPolicy") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
+                      ((Prelude..)
+                         ((Prelude..)
+                            Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
+                         Prelude.fromEnum _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData TriggerImmediatelyRequest where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_TriggerImmediatelyRequest'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_TriggerImmediatelyRequest'overlapPolicy x__) ())
+packedFileDescriptor :: Data.ByteString.ByteString
+packedFileDescriptor
+  = "\n\
+    \&temporal/api/schedule/v1/message.proto\DC2\CANtemporal.api.schedule.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\USgoogle/protobuf/timestamp.proto\SUB!dependencies/gogoproto/gogo.proto\SUB$temporal/api/common/v1/message.proto\SUB$temporal/api/enums/v1/schedule.proto\SUB&temporal/api/workflow/v1/message.proto\"\216\SOH\n\
+    \\fCalendarSpec\DC2\SYN\n\
+    \\ACKsecond\CAN\SOH \SOH(\tR\ACKsecond\DC2\SYN\n\
+    \\ACKminute\CAN\STX \SOH(\tR\ACKminute\DC2\DC2\n\
+    \\EOThour\CAN\ETX \SOH(\tR\EOThour\DC2 \n\
+    \\fday_of_month\CAN\EOT \SOH(\tR\n\
+    \dayOfMonth\DC2\DC4\n\
+    \\ENQmonth\CAN\ENQ \SOH(\tR\ENQmonth\DC2\DC2\n\
+    \\EOTyear\CAN\ACK \SOH(\tR\EOTyear\DC2\RS\n\
+    \\vday_of_week\CAN\a \SOH(\tR\tdayOfWeek\DC2\CAN\n\
+    \\acomment\CAN\b \SOH(\tR\acomment\"C\n\
+    \\ENQRange\DC2\DC4\n\
+    \\ENQstart\CAN\SOH \SOH(\ENQR\ENQstart\DC2\DLE\n\
+    \\ETXend\CAN\STX \SOH(\ENQR\ETXend\DC2\DC2\n\
+    \\EOTstep\CAN\ETX \SOH(\ENQR\EOTstep\"\201\ETX\n\
+    \\SYNStructuredCalendarSpec\DC27\n\
+    \\ACKsecond\CAN\SOH \ETX(\v2\US.temporal.api.schedule.v1.RangeR\ACKsecond\DC27\n\
+    \\ACKminute\CAN\STX \ETX(\v2\US.temporal.api.schedule.v1.RangeR\ACKminute\DC23\n\
+    \\EOThour\CAN\ETX \ETX(\v2\US.temporal.api.schedule.v1.RangeR\EOThour\DC2A\n\
+    \\fday_of_month\CAN\EOT \ETX(\v2\US.temporal.api.schedule.v1.RangeR\n\
+    \dayOfMonth\DC25\n\
+    \\ENQmonth\CAN\ENQ \ETX(\v2\US.temporal.api.schedule.v1.RangeR\ENQmonth\DC23\n\
+    \\EOTyear\CAN\ACK \ETX(\v2\US.temporal.api.schedule.v1.RangeR\EOTyear\DC2?\n\
+    \\vday_of_week\CAN\a \ETX(\v2\US.temporal.api.schedule.v1.RangeR\tdayOfWeek\DC2\CAN\n\
+    \\acomment\CAN\b \SOH(\tR\acomment\"\130\SOH\n\
+    \\fIntervalSpec\DC2;\n\
+    \\binterval\CAN\SOH \SOH(\v2\EM.google.protobuf.DurationR\bintervalB\EOT\152\223\US\SOH\DC25\n\
+    \\ENQphase\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\ENQphaseB\EOT\152\223\US\SOH\"\228\ENQ\n\
+    \\fScheduleSpec\DC2a\n\
+    \\DC3structured_calendar\CAN\a \ETX(\v20.temporal.api.schedule.v1.StructuredCalendarSpecR\DC2structuredCalendar\DC2\US\n\
+    \\vcron_string\CAN\b \ETX(\tR\n\
+    \cronString\DC2B\n\
+    \\bcalendar\CAN\SOH \ETX(\v2&.temporal.api.schedule.v1.CalendarSpecR\bcalendar\DC2B\n\
+    \\binterval\CAN\STX \ETX(\v2&.temporal.api.schedule.v1.IntervalSpecR\binterval\DC2U\n\
+    \\DLEexclude_calendar\CAN\ETX \ETX(\v2&.temporal.api.schedule.v1.CalendarSpecR\SIexcludeCalendarB\STX\CAN\SOH\DC2p\n\
+    \\ESCexclude_structured_calendar\CAN\t \ETX(\v20.temporal.api.schedule.v1.StructuredCalendarSpecR\EMexcludeStructuredCalendar\DC2?\n\
+    \\n\
+    \start_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTimeB\EOT\144\223\US\SOH\DC2;\n\
+    \\bend_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\aendTimeB\EOT\144\223\US\SOH\DC27\n\
+    \\ACKjitter\CAN\ACK \SOH(\v2\EM.google.protobuf.DurationR\ACKjitterB\EOT\152\223\US\SOH\DC2#\n\
+    \\rtimezone_name\CAN\n\
+    \ \SOH(\tR\ftimezoneName\DC2#\n\
+    \\rtimezone_data\CAN\v \SOH(\fR\ftimezoneData\"\217\SOH\n\
+    \\DLESchedulePolicies\DC2S\n\
+    \\SOoverlap_policy\CAN\SOH \SOH(\SO2,.temporal.api.enums.v1.ScheduleOverlapPolicyR\roverlapPolicy\DC2F\n\
+    \\SOcatchup_window\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\rcatchupWindowB\EOT\152\223\US\SOH\DC2(\n\
+    \\DLEpause_on_failure\CAN\ETX \SOH(\bR\SOpauseOnFailure\"w\n\
+    \\SOScheduleAction\DC2[\n\
+    \\SOstart_workflow\CAN\SOH \SOH(\v22.temporal.api.workflow.v1.NewWorkflowExecutionInfoH\NULR\rstartWorkflowB\b\n\
+    \\ACKaction\"\255\SOH\n\
+    \\DC4ScheduleActionResult\DC2E\n\
+    \\rschedule_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\fscheduleTimeB\EOT\144\223\US\SOH\DC2A\n\
+    \\vactual_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
+    \actualTimeB\EOT\144\223\US\SOH\DC2]\n\
+    \\NAKstart_workflow_result\CAN\v \SOH(\v2).temporal.api.common.v1.WorkflowExecutionR\DC3startWorkflowResult\"\147\SOH\n\
+    \\rScheduleState\DC2\DC4\n\
+    \\ENQnotes\CAN\SOH \SOH(\tR\ENQnotes\DC2\SYN\n\
+    \\ACKpaused\CAN\STX \SOH(\bR\ACKpaused\DC2'\n\
+    \\SIlimited_actions\CAN\ETX \SOH(\bR\SOlimitedActions\DC2+\n\
+    \\DC1remaining_actions\CAN\EOT \SOH(\ETXR\DLEremainingActions\"p\n\
+    \\EMTriggerImmediatelyRequest\DC2S\n\
+    \\SOoverlap_policy\CAN\SOH \SOH(\SO2,.temporal.api.enums.v1.ScheduleOverlapPolicyR\roverlapPolicy\"\228\SOH\n\
+    \\SIBackfillRequest\DC2?\n\
+    \\n\
+    \start_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTimeB\EOT\144\223\US\SOH\DC2;\n\
+    \\bend_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\aendTimeB\EOT\144\223\US\SOH\DC2S\n\
+    \\SOoverlap_policy\CAN\ETX \SOH(\SO2,.temporal.api.enums.v1.ScheduleOverlapPolicyR\roverlapPolicy\"\251\SOH\n\
+    \\rSchedulePatch\DC2d\n\
+    \\DC3trigger_immediately\CAN\SOH \SOH(\v23.temporal.api.schedule.v1.TriggerImmediatelyRequestR\DC2triggerImmediately\DC2T\n\
+    \\DLEbackfill_request\CAN\STX \ETX(\v2).temporal.api.schedule.v1.BackfillRequestR\SIbackfillRequest\DC2\DC4\n\
+    \\ENQpause\CAN\ETX \SOH(\tR\ENQpause\DC2\CAN\n\
+    \\aunpause\CAN\EOT \SOH(\tR\aunpause\"\207\EOT\n\
+    \\fScheduleInfo\DC2!\n\
+    \\faction_count\CAN\SOH \SOH(\ETXR\vactionCount\DC22\n\
+    \\NAKmissed_catchup_window\CAN\STX \SOH(\ETXR\DC3missedCatchupWindow\DC2'\n\
+    \\SIoverlap_skipped\CAN\ETX \SOH(\ETXR\SOoverlapSkipped\DC2V\n\
+    \\DC1running_workflows\CAN\t \ETX(\v2).temporal.api.common.v1.WorkflowExecutionR\DLErunningWorkflows\DC2U\n\
+    \\SOrecent_actions\CAN\EOT \ETX(\v2..temporal.api.schedule.v1.ScheduleActionResultR\rrecentActions\DC2P\n\
+    \\DC3future_action_times\CAN\ENQ \ETX(\v2\SUB.google.protobuf.TimestampR\DC1futureActionTimesB\EOT\144\223\US\SOH\DC2A\n\
+    \\vcreate_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR\n\
+    \createTimeB\EOT\144\223\US\SOH\DC2A\n\
+    \\vupdate_time\CAN\a \SOH(\v2\SUB.google.protobuf.TimestampR\n\
+    \updateTimeB\EOT\144\223\US\SOH\DC28\n\
+    \\SYNinvalid_schedule_error\CAN\b \SOH(\tR\DC4invalidScheduleErrorB\STX\CAN\SOH\"\143\STX\n\
+    \\bSchedule\DC2:\n\
+    \\EOTspec\CAN\SOH \SOH(\v2&.temporal.api.schedule.v1.ScheduleSpecR\EOTspec\DC2@\n\
+    \\ACKaction\CAN\STX \SOH(\v2(.temporal.api.schedule.v1.ScheduleActionR\ACKaction\DC2F\n\
+    \\bpolicies\CAN\ETX \SOH(\v2*.temporal.api.schedule.v1.SchedulePoliciesR\bpolicies\DC2=\n\
+    \\ENQstate\CAN\EOT \SOH(\v2'.temporal.api.schedule.v1.ScheduleStateR\ENQstate\"\240\STX\n\
+    \\DLEScheduleListInfo\DC2:\n\
+    \\EOTspec\CAN\SOH \SOH(\v2&.temporal.api.schedule.v1.ScheduleSpecR\EOTspec\DC2I\n\
+    \\rworkflow_type\CAN\STX \SOH(\v2$.temporal.api.common.v1.WorkflowTypeR\fworkflowType\DC2\DC4\n\
+    \\ENQnotes\CAN\ETX \SOH(\tR\ENQnotes\DC2\SYN\n\
+    \\ACKpaused\CAN\EOT \SOH(\bR\ACKpaused\DC2U\n\
+    \\SOrecent_actions\CAN\ENQ \ETX(\v2..temporal.api.schedule.v1.ScheduleActionResultR\rrecentActions\DC2P\n\
+    \\DC3future_action_times\CAN\ACK \ETX(\v2\SUB.google.protobuf.TimestampR\DC1futureActionTimesB\EOT\144\223\US\SOH\"\253\SOH\n\
+    \\DC1ScheduleListEntry\DC2\US\n\
+    \\vschedule_id\CAN\SOH \SOH(\tR\n\
+    \scheduleId\DC20\n\
+    \\EOTmemo\CAN\STX \SOH(\v2\FS.temporal.api.common.v1.MemoR\EOTmemo\DC2U\n\
+    \\DC1search_attributes\CAN\ETX \SOH(\v2(.temporal.api.common.v1.SearchAttributesR\DLEsearchAttributes\DC2>\n\
+    \\EOTinfo\CAN\EOT \SOH(\v2*.temporal.api.schedule.v1.ScheduleListInfoR\EOTinfoB\147\SOH\n\
+    \\ESCio.temporal.api.schedule.v1B\fMessageProtoP\SOHZ'go.temporal.io/api/schedule/v1;schedule\170\STX\SUBTemporalio.Api.Schedule.V1\234\STX\GSTemporalio::Api::Schedule::V1J\138\138\SOH\n\
+    \\a\DC2\ENQ\ESC\NUL\250\STX\SOH\n\
+    \\134\v\n\
+    \\SOH\f\DC2\ETX\ESC\NUL\DC22\230\b The MIT License\n\
+    \\n\
+    \ Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.\n\
+    \\n\
+    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
+    \ of this software and associated documentation files (the \"Software\"), to deal\n\
+    \ in the Software without restriction, including without limitation the rights\n\
+    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
+    \ copies of the Software, and to permit persons to whom the Software is\n\
+    \ furnished to do so, subject to the following conditions:\n\
+    \\n\
+    \ The above copyright notice and this permission notice shall be included in\n\
+    \ all copies or substantial portions of the Software.\n\
+    \\n\
+    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
+    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
+    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
+    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
+    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
+    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
+    \ THE SOFTWARE.\n\
+    \2\146\STX (-- api-linter: core::0203::optional=disabled\n\
+    \     aip.dev/not-precedent: field_behavior annotation not available in our gogo fork --)\n\
+    \ (-- api-linter: core::0203::input-only=disabled\n\
+    \     aip.dev/not-precedent: field_behavior annotation not available in our gogo fork --)\n\
+    \\n\
+    \\b\n\
+    \\SOH\STX\DC2\ETX\GS\NUL!\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\US\NUL>\n\
+    \\t\n\
+    \\STX\b\v\DC2\ETX\US\NUL>\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX \NUL4\n\
+    \\t\n\
+    \\STX\b\SOH\DC2\ETX \NUL4\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX!\NUL\"\n\
+    \\t\n\
+    \\STX\b\n\
+    \\DC2\ETX!\NUL\"\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\"\NUL-\n\
+    \\t\n\
+    \\STX\b\b\DC2\ETX\"\NUL-\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX#\NUL6\n\
+    \\t\n\
+    \\STX\b-\DC2\ETX#\NUL6\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX$\NUL7\n\
+    \\t\n\
+    \\STX\b%\DC2\ETX$\NUL7\n\
+    \\t\n\
+    \\STX\ETX\NUL\DC2\ETX&\NUL(\n\
+    \\t\n\
+    \\STX\ETX\SOH\DC2\ETX'\NUL)\n\
+    \\t\n\
+    \\STX\ETX\STX\DC2\ETX)\NUL+\n\
+    \\t\n\
+    \\STX\ETX\ETX\DC2\ETX+\NUL.\n\
+    \\t\n\
+    \\STX\ETX\EOT\DC2\ETX,\NUL.\n\
+    \\t\n\
+    \\STX\ETX\ENQ\DC2\ETX-\NUL0\n\
+    \\231\a\n\
+    \\STX\EOT\NUL\DC2\EOTA\NULT\SOH\SUB\218\a CalendarSpec describes an event specification relative to the calendar,\n\
+    \ similar to a traditional cron specification, but with labeled fields. Each\n\
+    \ field can be one of:\n\
+    \   *: matches always\n\
+    \   x: matches when the field equals x\n\
+    \   x/y : matches when the field equals x+n*y where n is an integer\n\
+    \   x-z: matches when the field is between x and z inclusive\n\
+    \   w,x,y,...: matches when the field is one of the listed values\n\
+    \ Each x, y, z, ... is either a decimal integer, or a month or day of week name\n\
+    \ or abbreviation (in the appropriate fields).\n\
+    \ A timestamp matches if all fields match.\n\
+    \ Note that fields have different default values, for convenience.\n\
+    \ Note that the special case that some cron implementations have for treating\n\
+    \ day_of_month and day_of_week as \"or\" instead of \"and\" when both are set is\n\
+    \ not implemented.\n\
+    \ day_of_week can accept 0 or 7 as Sunday\n\
+    \ CalendarSpec gets compiled into StructuredCalendarSpec, which is what will be\n\
+    \ returned if you describe the schedule.\n\
+    \\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETXA\b\DC4\n\
+    \6\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETXC\EOT\SYN\SUB) Expression to match seconds. Default: 0\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETXC\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETXC\v\DC1\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETXC\DC4\NAK\n\
+    \6\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETXE\EOT\SYN\SUB) Expression to match minutes. Default: 0\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETXE\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETXE\v\DC1\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETXE\DC4\NAK\n\
+    \4\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETXG\EOT\DC4\SUB' Expression to match hours. Default: 0\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETXG\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETXG\v\SI\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETXG\DC2\DC3\n\
+    \\171\SOH\n\
+    \\EOT\EOT\NUL\STX\ETX\DC2\ETXK\EOT\FS\SUB\157\SOH Expression to match days of the month. Default: *\n\
+    \ (-- api-linter: core::0140::prepositions=disabled\n\
+    \     aip.dev/not-precedent: standard name of field --)\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\ETX\ENQ\DC2\ETXK\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETXK\v\ETB\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETXK\SUB\ESC\n\
+    \5\n\
+    \\EOT\EOT\NUL\STX\EOT\DC2\ETXM\EOT\NAK\SUB( Expression to match months. Default: *\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\EOT\ENQ\DC2\ETXM\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETXM\v\DLE\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETXM\DC3\DC4\n\
+    \4\n\
+    \\EOT\EOT\NUL\STX\ENQ\DC2\ETXO\EOT\DC4\SUB' Expression to match years. Default: *\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\ENQ\ENQ\DC2\ETXO\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\ENQ\SOH\DC2\ETXO\v\SI\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\ENQ\ETX\DC2\ETXO\DC2\DC3\n\
+    \?\n\
+    \\EOT\EOT\NUL\STX\ACK\DC2\ETXQ\EOT\ESC\SUB2 Expression to match days of the week. Default: *\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\ACK\ENQ\DC2\ETXQ\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\ACK\SOH\DC2\ETXQ\v\SYN\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\ACK\ETX\DC2\ETXQ\EM\SUB\n\
+    \G\n\
+    \\EOT\EOT\NUL\STX\a\DC2\ETXS\EOT\ETB\SUB: Free-form comment describing the intention of this spec.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\a\ENQ\DC2\ETXS\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\a\SOH\DC2\ETXS\v\DC2\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\a\ETX\DC2\ETXS\NAK\SYN\n\
+    \\185\STX\n\
+    \\STX\EOT\SOH\DC2\EOTZ\NULa\SOH\SUB\172\STX Range represents a set of integer values, used to match fields of a calendar\n\
+    \ time in StructuredCalendarSpec. If end < start, then end is interpreted as\n\
+    \ equal to start. This means you can use a Range with start set to a value, and\n\
+    \ end and step unset (defaulting to 0) to represent a single value.\n\
+    \\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETXZ\b\r\n\
+    \*\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\\\EOT\DC4\SUB\GS Start of range (inclusive).\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX\\\EOT\t\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\\\n\
+    \\SI\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\\\DC2\DC3\n\
+    \(\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX^\EOT\DC2\SUB\ESC End of range (inclusive).\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\SOH\ENQ\DC2\ETX^\EOT\t\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX^\n\
+    \\r\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX^\DLE\DC1\n\
+    \*\n\
+    \\EOT\EOT\SOH\STX\STX\DC2\ETX`\EOT\DC3\SUB\GS Step (optional, default 1).\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\STX\ENQ\DC2\ETX`\EOT\t\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX`\n\
+    \\SO\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX`\DC1\DC2\n\
+    \\136\EOT\n\
+    \\STX\EOT\STX\DC2\EOTl\NUL\DEL\SOH\SUB\251\ETX StructuredCalendarSpec describes an event specification relative to the\n\
+    \ calendar, in a form that's easy to work with programmatically. Each field can\n\
+    \ be one or more ranges.\n\
+    \ A timestamp matches if at least one range of each field matches the\n\
+    \ corresponding fields of the timestamp, except for year: if year is missing,\n\
+    \ that means all years match. For all fields besides year, at least one Range\n\
+    \ must be present to match anything.\n\
+    \ TODO: add relative-to-end-of-month\n\
+    \ TODO: add nth day-of-week in month\n\
+    \\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\STX\SOH\DC2\ETXl\b\RS\n\
+    \#\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETXn\EOT\RS\SUB\SYN Match seconds (0-59)\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\NUL\EOT\DC2\ETXn\EOT\f\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETXn\r\DC2\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXn\DC3\EM\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXn\FS\GS\n\
+    \#\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETXp\EOT\RS\SUB\SYN Match minutes (0-59)\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\SOH\EOT\DC2\ETXp\EOT\f\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETXp\r\DC2\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETXp\DC3\EM\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETXp\FS\GS\n\
+    \!\n\
+    \\EOT\EOT\STX\STX\STX\DC2\ETXr\EOT\FS\SUB\DC4 Match hours (0-23)\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\STX\EOT\DC2\ETXr\EOT\f\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\STX\ACK\DC2\ETXr\r\DC2\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETXr\DC3\ETB\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETXr\SUB\ESC\n\
+    \\152\SOH\n\
+    \\EOT\EOT\STX\STX\ETX\DC2\ETXv\EOT$\SUB\138\SOH Match days of the month (1-31)\n\
+    \ (-- api-linter: core::0140::prepositions=disabled\n\
+    \     aip.dev/not-precedent: standard name of field --)\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\ETX\EOT\DC2\ETXv\EOT\f\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\ETX\ACK\DC2\ETXv\r\DC2\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETXv\DC3\US\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETXv\"#\n\
+    \\"\n\
+    \\EOT\EOT\STX\STX\EOT\DC2\ETXx\EOT\GS\SUB\NAK Match months (1-12)\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\EOT\EOT\DC2\ETXx\EOT\f\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\EOT\ACK\DC2\ETXx\r\DC2\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\EOT\SOH\DC2\ETXx\DC3\CAN\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\EOT\ETX\DC2\ETXx\ESC\FS\n\
+    \\ESC\n\
+    \\EOT\EOT\STX\STX\ENQ\DC2\ETXz\EOT\FS\SUB\SO Match years.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\ENQ\EOT\DC2\ETXz\EOT\f\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\ENQ\ACK\DC2\ETXz\r\DC2\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\ENQ\SOH\DC2\ETXz\DC3\ETB\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\ENQ\ETX\DC2\ETXz\SUB\ESC\n\
+    \9\n\
+    \\EOT\EOT\STX\STX\ACK\DC2\ETX|\EOT#\SUB, Match days of the week (0-6; 0 is Sunday).\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\ACK\EOT\DC2\ETX|\EOT\f\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\ACK\ACK\DC2\ETX|\r\DC2\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\ACK\SOH\DC2\ETX|\DC3\RS\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\ACK\ETX\DC2\ETX|!\"\n\
+    \G\n\
+    \\EOT\EOT\STX\STX\a\DC2\ETX~\EOT\ETB\SUB: Free-form comment describing the intention of this spec.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\a\ENQ\DC2\ETX~\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\a\SOH\DC2\ETX~\v\DC2\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\a\ETX\DC2\ETX~\NAK\SYN\n\
+    \\150\ENQ\n\
+    \\STX\EOT\ETX\DC2\ACK\140\SOH\NUL\143\SOH\SOH\SUB\135\ENQ IntervalSpec matches times that can be expressed as:\n\
+    \ epoch + n * interval + phase\n\
+    \ where n is an integer.\n\
+    \ phase defaults to zero if missing. interval is required.\n\
+    \ Both interval and phase must be non-negative and are truncated to the nearest\n\
+    \ second before any calculations.\n\
+    \ For example, an interval of 1 hour with phase of zero would match every hour,\n\
+    \ on the hour. The same interval but a phase of 19 minutes would match every\n\
+    \ xx:19:00. An interval of 28 days with phase zero would match\n\
+    \ 2022-02-17T00:00:00Z (among other times). The same interval with a phase of 3\n\
+    \ days, 5 hours, and 23 minutes would match 2022-02-20T05:23:00Z instead.\n\
+    \\n\
+    \\v\n\
+    \\ETX\EOT\ETX\SOH\DC2\EOT\140\SOH\b\DC4\n\
+    \\f\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\EOT\141\SOH\EOTK\n\
+    \\r\n\
+    \\ENQ\EOT\ETX\STX\NUL\ACK\DC2\EOT\141\SOH\EOT\FS\n\
+    \\r\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\EOT\141\SOH\GS%\n\
+    \\r\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\EOT\141\SOH()\n\
+    \\r\n\
+    \\ENQ\EOT\ETX\STX\NUL\b\DC2\EOT\141\SOH*J\n\
+    \\DLE\n\
+    \\b\EOT\ETX\STX\NUL\b\243\251\ETX\DC2\EOT\141\SOH+I\n\
+    \\f\n\
+    \\EOT\EOT\ETX\STX\SOH\DC2\EOT\142\SOH\EOTH\n\
+    \\r\n\
+    \\ENQ\EOT\ETX\STX\SOH\ACK\DC2\EOT\142\SOH\EOT\FS\n\
+    \\r\n\
+    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\EOT\142\SOH\GS\"\n\
+    \\r\n\
+    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\EOT\142\SOH%&\n\
+    \\r\n\
+    \\ENQ\EOT\ETX\STX\SOH\b\DC2\EOT\142\SOH'G\n\
+    \\DLE\n\
+    \\b\EOT\ETX\STX\SOH\b\243\251\ETX\DC2\EOT\142\SOH(F\n\
+    \\170\a\n\
+    \\STX\EOT\EOT\DC2\ACK\160\SOH\NUL\224\SOH\SOH\SUB\155\a ScheduleSpec is a complete description of a set of absolute timestamps\n\
+    \ (possibly infinite) that an action should occur at. The meaning of a\n\
+    \ ScheduleSpec depends only on its contents and never changes, except that the\n\
+    \ definition of a time zone can change over time (most commonly, when daylight\n\
+    \ saving time policy changes for an area). To create a totally self-contained\n\
+    \ ScheduleSpec, use UTC or include timezone_data.\n\
+    \\n\
+    \ For input, you can provide zero or more of: structured_calendar, calendar,\n\
+    \ cron_string, interval, and exclude_structured_calendar, and all of them will\n\
+    \ be used (the schedule will take action at the union of all of their times,\n\
+    \ minus the ones that match exclude_structured_calendar).\n\
+    \\n\
+    \ On input, calendar and cron_string fields will be compiled into\n\
+    \ structured_calendar (and maybe interval and timezone_name), so if you\n\
+    \ Describe a schedule, you'll see only structured_calendar, interval, etc.\n\
+    \\n\
+    \\v\n\
+    \\ETX\EOT\EOT\SOH\DC2\EOT\160\SOH\b\DC4\n\
+    \7\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\EOT\162\SOH\EOT<\SUB) Calendar-based specifications of times.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\NUL\EOT\DC2\EOT\162\SOH\EOT\f\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\EOT\162\SOH\r#\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\EOT\162\SOH$7\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\EOT\162\SOH:;\n\
+    \\168\t\n\
+    \\EOT\EOT\EOT\STX\SOH\DC2\EOT\183\SOH\EOT$\SUB\153\t cron_string holds a traditional cron specification as a string. It\n\
+    \ accepts 5, 6, or 7 fields, separated by spaces, and interprets them the\n\
+    \ same way as CalendarSpec.\n\
+    \ 5 fields:         minute, hour, day_of_month, month, day_of_week\n\
+    \ 6 fields:         minute, hour, day_of_month, month, day_of_week, year\n\
+    \ 7 fields: second, minute, hour, day_of_month, month, day_of_week, year\n\
+    \ If year is not given, it defaults to *. If second is not given, it\n\
+    \ defaults to 0.\n\
+    \ Shorthands @yearly, @monthly, @weekly, @daily, and @hourly are also\n\
+    \ accepted instead of the 5-7 time fields.\n\
+    \ Optionally, the string can be preceded by CRON_TZ=<timezone name> or\n\
+    \ TZ=<timezone name>, which will get copied to timezone_name. (There must\n\
+    \ not also be a timezone_name present.)\n\
+    \ Optionally \"#\" followed by a comment can appear at the end of the string.\n\
+    \ Note that the special case that some cron implementations have for\n\
+    \ treating day_of_month and day_of_week as \"or\" instead of \"and\" when both\n\
+    \ are set is not implemented.\n\
+    \ @every <interval>[/<phase>] is accepted and gets compiled into an\n\
+    \ IntervalSpec instead. <interval> and <phase> should be a decimal integer\n\
+    \ with a unit suffix s, m, h, or d.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\SOH\EOT\DC2\EOT\183\SOH\EOT\f\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\SOH\ENQ\DC2\EOT\183\SOH\r\DC3\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\EOT\183\SOH\DC4\US\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\EOT\183\SOH\"#\n\
+    \7\n\
+    \\EOT\EOT\EOT\STX\STX\DC2\EOT\185\SOH\EOT'\SUB) Calendar-based specifications of times.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\STX\EOT\DC2\EOT\185\SOH\EOT\f\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\STX\ACK\DC2\EOT\185\SOH\r\EM\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\STX\SOH\DC2\EOT\185\SOH\SUB\"\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\STX\ETX\DC2\EOT\185\SOH%&\n\
+    \7\n\
+    \\EOT\EOT\EOT\STX\ETX\DC2\EOT\187\SOH\EOT'\SUB) Interval-based specifications of times.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\ETX\EOT\DC2\EOT\187\SOH\EOT\f\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\ETX\ACK\DC2\EOT\187\SOH\r\EM\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\ETX\SOH\DC2\EOT\187\SOH\SUB\"\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\ETX\ETX\DC2\EOT\187\SOH%&\n\
+    \l\n\
+    \\EOT\EOT\EOT\STX\EOT\DC2\EOT\189\SOH\EOTC\SUB; Any timestamps matching any of exclude_* will be skipped.\n\
+    \\"! use exclude_structured_calendar\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\EOT\EOT\DC2\EOT\189\SOH\EOT\f\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\EOT\ACK\DC2\EOT\189\SOH\r\EM\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\EOT\SOH\DC2\EOT\189\SOH\SUB*\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\EOT\ETX\DC2\EOT\189\SOH-.\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\EOT\b\DC2\EOT\189\SOH/B\n\
+    \\SO\n\
+    \\ACK\EOT\EOT\STX\EOT\b\ETX\DC2\EOT\189\SOH0A\n\
+    \\f\n\
+    \\EOT\EOT\EOT\STX\ENQ\DC2\EOT\190\SOH\EOTD\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\ENQ\EOT\DC2\EOT\190\SOH\EOT\f\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\ENQ\ACK\DC2\EOT\190\SOH\r#\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\ENQ\SOH\DC2\EOT\190\SOH$?\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\ENQ\ETX\DC2\EOT\190\SOHBC\n\
+    \\153\SOH\n\
+    \\EOT\EOT\EOT\STX\ACK\DC2\EOT\193\SOH\EOTJ\SUB\138\SOH If start_time is set, any timestamps before start_time will be skipped.\n\
+    \ (Together, start_time and end_time make an inclusive interval.)\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\ACK\ACK\DC2\EOT\193\SOH\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\ACK\SOH\DC2\EOT\193\SOH\RS(\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\ACK\ETX\DC2\EOT\193\SOH+,\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\ACK\b\DC2\EOT\193\SOH-I\n\
+    \\DLE\n\
+    \\b\EOT\EOT\STX\ACK\b\242\251\ETX\DC2\EOT\193\SOH.H\n\
+    \R\n\
+    \\EOT\EOT\EOT\STX\a\DC2\EOT\195\SOH\EOTH\SUBD If end_time is set, any timestamps after end_time will be skipped.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\a\ACK\DC2\EOT\195\SOH\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\a\SOH\DC2\EOT\195\SOH\RS&\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\a\ETX\DC2\EOT\195\SOH)*\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\a\b\DC2\EOT\195\SOH+G\n\
+    \\DLE\n\
+    \\b\EOT\EOT\STX\a\b\242\251\ETX\DC2\EOT\195\SOH,F\n\
+    \q\n\
+    \\EOT\EOT\EOT\STX\b\DC2\EOT\198\SOH\EOTI\SUBc All timestamps will be incremented by a random value from 0 to this\n\
+    \ amount of jitter. Default: 0\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\b\ACK\DC2\EOT\198\SOH\EOT\FS\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\b\SOH\DC2\EOT\198\SOH\GS#\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\b\ETX\DC2\EOT\198\SOH&'\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\b\b\DC2\EOT\198\SOH(H\n\
+    \\DLE\n\
+    \\b\EOT\EOT\STX\b\b\243\251\ETX\DC2\EOT\198\SOH)G\n\
+    \\187\t\n\
+    \\EOT\EOT\EOT\STX\t\DC2\EOT\222\SOH\EOT\RS\SUB\172\t Time zone to interpret all calendar-based specs in.\n\
+    \\n\
+    \ If unset, defaults to UTC. We recommend using UTC for your application if\n\
+    \ at all possible, to avoid various surprising properties of time zones.\n\
+    \\n\
+    \ Time zones may be provided by name, corresponding to names in the IANA\n\
+    \ time zone database (see https://www.iana.org/time-zones). The definition\n\
+    \ will be loaded by the Temporal server from the environment it runs in.\n\
+    \\n\
+    \ If your application requires more control over the time zone definition\n\
+    \ used, it may pass in a complete definition in the form of a TZif file\n\
+    \ from the time zone database. If present, this will be used instead of\n\
+    \ loading anything from the environment. You are then responsible for\n\
+    \ updating timezone_data when the definition changes.\n\
+    \\n\
+    \ Calendar spec matching is based on literal matching of the clock time\n\
+    \ with no special handling of DST: if you write a calendar spec that fires\n\
+    \ at 2:30am and specify a time zone that follows DST, that action will not\n\
+    \ be triggered on the day that has no 2:30am. Similarly, an action that\n\
+    \ fires at 1:30am will be triggered twice on the day that has two 1:30s.\n\
+    \\n\
+    \ Also note that no actions are taken on leap-seconds (e.g. 23:59:60 UTC).\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\t\ENQ\DC2\EOT\222\SOH\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\t\SOH\DC2\EOT\222\SOH\v\CAN\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\t\ETX\DC2\EOT\222\SOH\ESC\GS\n\
+    \\f\n\
+    \\EOT\EOT\EOT\STX\n\
+    \\DC2\EOT\223\SOH\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\n\
+    \\ENQ\DC2\EOT\223\SOH\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\n\
+    \\SOH\DC2\EOT\223\SOH\n\
+    \\ETB\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\n\
+    \\ETX\DC2\EOT\223\SOH\SUB\FS\n\
+    \\f\n\
+    \\STX\EOT\ENQ\DC2\ACK\226\SOH\NUL\244\SOH\SOH\n\
+    \\v\n\
+    \\ETX\EOT\ENQ\SOH\DC2\EOT\226\SOH\b\CAN\n\
+    \\222\SOH\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\EOT\231\SOH\EOTC\SUB\207\SOH Policy for overlaps.\n\
+    \ Note that this can be changed after a schedule has taken some actions,\n\
+    \ and some changes might produce unintuitive results. In general, the later\n\
+    \ policy overrides the earlier policy.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\EOT\231\SOH\EOT/\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\EOT\231\SOH0>\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\EOT\231\SOHAB\n\
+    \\174\STX\n\
+    \\EOT\EOT\ENQ\STX\SOH\DC2\EOT\238\SOH\EOTQ\SUB\159\STX Policy for catchups:\n\
+    \ If the Temporal server misses an action due to one or more components\n\
+    \ being down, and comes back up, the action will be run if the scheduled\n\
+    \ time is within this window from the current time.\n\
+    \ This value defaults to 60 seconds, and can't be less than 10 seconds.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ACK\DC2\EOT\238\SOH\EOT\FS\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\EOT\238\SOH\GS+\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\EOT\238\SOH./\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\SOH\b\DC2\EOT\238\SOH0P\n\
+    \\DLE\n\
+    \\b\EOT\ENQ\STX\SOH\b\243\251\ETX\DC2\EOT\238\SOH1O\n\
+    \\180\SOH\n\
+    \\EOT\EOT\ENQ\STX\STX\DC2\EOT\243\SOH\EOT\RS\SUB\165\SOH If true, and a workflow run fails or times out, turn on \"paused\".\n\
+    \ This applies after retry policies: the full chain of retries must fail to\n\
+    \ trigger a pause here.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\STX\ENQ\DC2\EOT\243\SOH\EOT\b\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\EOT\243\SOH\t\EM\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\EOT\243\SOH\FS\GS\n\
+    \\f\n\
+    \\STX\EOT\ACK\DC2\ACK\246\SOH\NUL\255\SOH\SOH\n\
+    \\v\n\
+    \\ETX\EOT\ACK\SOH\DC2\EOT\246\SOH\b\SYN\n\
+    \\SO\n\
+    \\EOT\EOT\ACK\b\NUL\DC2\ACK\247\SOH\EOT\254\SOH\ENQ\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\b\NUL\SOH\DC2\EOT\247\SOH\n\
+    \\DLE\n\
+    \\241\SOH\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\EOT\253\SOH\bM\SUB\226\SOH All fields of NewWorkflowExecutionInfo are valid except for:\n\
+    \ - workflow_id_reuse_policy\n\
+    \ - cron_schedule\n\
+    \ The workflow id of the started workflow may not match this exactly,\n\
+    \ it may have a timestamp appended for uniqueness.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\NUL\ACK\DC2\EOT\253\SOH\b9\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\EOT\253\SOH:H\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\EOT\253\SOHKL\n\
+    \\f\n\
+    \\STX\EOT\a\DC2\ACK\129\STX\NUL\138\STX\SOH\n\
+    \\v\n\
+    \\ETX\EOT\a\SOH\DC2\EOT\129\STX\b\FS\n\
+    \]\n\
+    \\EOT\EOT\a\STX\NUL\DC2\EOT\131\STX\EOTM\SUBO Time that the action was taken (according to the schedule, including jitter).\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\NUL\ACK\DC2\EOT\131\STX\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\EOT\131\STX\RS+\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\EOT\131\STX./\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\NUL\b\DC2\EOT\131\STX0L\n\
+    \\DLE\n\
+    \\b\EOT\a\STX\NUL\b\242\251\ETX\DC2\EOT\131\STX1K\n\
+    \;\n\
+    \\EOT\EOT\a\STX\SOH\DC2\EOT\134\STX\EOTK\SUB- Time that the action was taken (real time).\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\SOH\ACK\DC2\EOT\134\STX\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\SOH\SOH\DC2\EOT\134\STX\RS)\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\SOH\ETX\DC2\EOT\134\STX,-\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\SOH\b\DC2\EOT\134\STX.J\n\
+    \\DLE\n\
+    \\b\EOT\a\STX\SOH\b\242\251\ETX\DC2\EOT\134\STX/I\n\
+    \-\n\
+    \\EOT\EOT\a\STX\STX\DC2\EOT\137\STX\EOTH\SUB\US If action was start_workflow:\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\STX\ACK\DC2\EOT\137\STX\EOT,\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\STX\SOH\DC2\EOT\137\STX-B\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\STX\ETX\DC2\EOT\137\STXEG\n\
+    \\f\n\
+    \\STX\EOT\b\DC2\ACK\140\STX\NUL\156\STX\SOH\n\
+    \\v\n\
+    \\ETX\EOT\b\SOH\DC2\EOT\140\STX\b\NAK\n\
+    \\211\SOH\n\
+    \\EOT\EOT\b\STX\NUL\DC2\EOT\144\STX\EOT\NAK\SUB\196\SOH Informative human-readable message with contextual notes, e.g. the reason\n\
+    \ a schedule is paused. The system may overwrite this message on certain\n\
+    \ conditions, e.g. when pause-on-failure happens.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\EOT\144\STX\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\EOT\144\STX\v\DLE\n\
+    \\r\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\EOT\144\STX\DC3\DC4\n\
+    \L\n\
+    \\EOT\EOT\b\STX\SOH\DC2\EOT\147\STX\EOT\DC4\SUB> If true, do not take any actions based on the schedule spec.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\EOT\147\STX\EOT\b\n\
+    \\r\n\
+    \\ENQ\EOT\b\STX\SOH\SOH\DC2\EOT\147\STX\t\SI\n\
+    \\r\n\
+    \\ENQ\EOT\b\STX\SOH\ETX\DC2\EOT\147\STX\DC2\DC3\n\
+    \\207\STX\n\
+    \\EOT\EOT\b\STX\STX\DC2\EOT\154\STX\EOT\GS\SUB\192\STX If limited_actions is true, decrement remaining_actions after each\n\
+    \ action, and do not take any more scheduled actions if remaining_actions\n\
+    \ is zero. Actions may still be taken by explicit request (i.e. trigger\n\
+    \ immediately or backfill). Skipped actions (due to overlap policy) do not\n\
+    \ count against remaining actions.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\b\STX\STX\ENQ\DC2\EOT\154\STX\EOT\b\n\
+    \\r\n\
+    \\ENQ\EOT\b\STX\STX\SOH\DC2\EOT\154\STX\t\CAN\n\
+    \\r\n\
+    \\ENQ\EOT\b\STX\STX\ETX\DC2\EOT\154\STX\ESC\FS\n\
+    \\f\n\
+    \\EOT\EOT\b\STX\ETX\DC2\EOT\155\STX\EOT \n\
+    \\r\n\
+    \\ENQ\EOT\b\STX\ETX\ENQ\DC2\EOT\155\STX\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\b\STX\ETX\SOH\DC2\EOT\155\STX\n\
+    \\ESC\n\
+    \\r\n\
+    \\ENQ\EOT\b\STX\ETX\ETX\DC2\EOT\155\STX\RS\US\n\
+    \\f\n\
+    \\STX\EOT\t\DC2\ACK\158\STX\NUL\161\STX\SOH\n\
+    \\v\n\
+    \\ETX\EOT\t\SOH\DC2\EOT\158\STX\b!\n\
+    \=\n\
+    \\EOT\EOT\t\STX\NUL\DC2\EOT\160\STX\EOTC\SUB/ Override overlap policy for this one request.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\NUL\ACK\DC2\EOT\160\STX\EOT/\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\NUL\SOH\DC2\EOT\160\STX0>\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\NUL\ETX\DC2\EOT\160\STXAB\n\
+    \\f\n\
+    \\STX\EOT\n\
+    \\DC2\ACK\163\STX\NUL\169\STX\SOH\n\
+    \\v\n\
+    \\ETX\EOT\n\
+    \\SOH\DC2\EOT\163\STX\b\ETB\n\
+    \3\n\
+    \\EOT\EOT\n\
+    \\STX\NUL\DC2\EOT\165\STX\EOTJ\SUB% Time range to evaluate schedule in.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\NUL\ACK\DC2\EOT\165\STX\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\NUL\SOH\DC2\EOT\165\STX\RS(\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\NUL\ETX\DC2\EOT\165\STX+,\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\NUL\b\DC2\EOT\165\STX-I\n\
+    \\DLE\n\
+    \\b\EOT\n\
+    \\STX\NUL\b\242\251\ETX\DC2\EOT\165\STX.H\n\
+    \\f\n\
+    \\EOT\EOT\n\
+    \\STX\SOH\DC2\EOT\166\STX\EOTH\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\SOH\ACK\DC2\EOT\166\STX\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\SOH\SOH\DC2\EOT\166\STX\RS&\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\SOH\ETX\DC2\EOT\166\STX)*\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\SOH\b\DC2\EOT\166\STX+G\n\
+    \\DLE\n\
+    \\b\EOT\n\
+    \\STX\SOH\b\242\251\ETX\DC2\EOT\166\STX,F\n\
+    \9\n\
+    \\EOT\EOT\n\
+    \\STX\STX\DC2\EOT\168\STX\EOTC\SUB+ Override overlap policy for this request.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\STX\ACK\DC2\EOT\168\STX\EOT/\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\STX\SOH\DC2\EOT\168\STX0>\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\STX\ETX\DC2\EOT\168\STXAB\n\
+    \\f\n\
+    \\STX\EOT\v\DC2\ACK\171\STX\NUL\184\STX\SOH\n\
+    \\v\n\
+    \\ETX\EOT\v\SOH\DC2\EOT\171\STX\b\NAK\n\
+    \7\n\
+    \\EOT\EOT\v\STX\NUL\DC2\EOT\173\STX\EOT6\SUB) If set, trigger one action immediately.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\NUL\ACK\DC2\EOT\173\STX\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\NUL\SOH\DC2\EOT\173\STX\RS1\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\NUL\ETX\DC2\EOT\173\STX45\n\
+    \\203\SOH\n\
+    \\EOT\EOT\v\STX\SOH\DC2\EOT\178\STX\EOT2\SUB\188\SOH If set, runs though the specified time period(s) and takes actions as if that time\n\
+    \ passed by right now, all at once. The overlap policy can be overridden for the\n\
+    \ scope of the backfill.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\SOH\EOT\DC2\EOT\178\STX\EOT\f\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\SOH\ACK\DC2\EOT\178\STX\r\FS\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\SOH\SOH\DC2\EOT\178\STX\GS-\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\SOH\ETX\DC2\EOT\178\STX01\n\
+    \\130\SOH\n\
+    \\EOT\EOT\v\STX\STX\DC2\EOT\182\STX\EOT\NAK\SUBt If set, change the state to paused or unpaused (respectively) and set the\n\
+    \ notes field to the value of the string.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\STX\ENQ\DC2\EOT\182\STX\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\STX\SOH\DC2\EOT\182\STX\v\DLE\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\STX\ETX\DC2\EOT\182\STX\DC3\DC4\n\
+    \\f\n\
+    \\EOT\EOT\v\STX\ETX\DC2\EOT\183\STX\EOT\ETB\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\ETX\ENQ\DC2\EOT\183\STX\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\ETX\SOH\DC2\EOT\183\STX\v\DC2\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\ETX\ETX\DC2\EOT\183\STX\NAK\SYN\n\
+    \\f\n\
+    \\STX\EOT\f\DC2\ACK\186\STX\NUL\214\STX\SOH\n\
+    \\v\n\
+    \\ETX\EOT\f\SOH\DC2\EOT\186\STX\b\DC4\n\
+    \/\n\
+    \\EOT\EOT\f\STX\NUL\DC2\EOT\188\STX\EOT\ESC\SUB! Number of actions taken so far.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\EOT\188\STX\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\NUL\SOH\DC2\EOT\188\STX\n\
+    \\SYN\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\NUL\ETX\DC2\EOT\188\STX\EM\SUB\n\
+    \a\n\
+    \\EOT\EOT\f\STX\SOH\DC2\EOT\191\STX\EOT$\SUBS Number of times a scheduled action was skipped due to missing the catchup window.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\SOH\ENQ\DC2\EOT\191\STX\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\SOH\SOH\DC2\EOT\191\STX\n\
+    \\US\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\SOH\ETX\DC2\EOT\191\STX\"#\n\
+    \9\n\
+    \\EOT\EOT\f\STX\STX\DC2\EOT\194\STX\EOT\RS\SUB+ Number of skipped actions due to overlap.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\STX\ENQ\DC2\EOT\194\STX\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\STX\SOH\DC2\EOT\194\STX\n\
+    \\EM\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\STX\ETX\DC2\EOT\194\STX\FS\GS\n\
+    \\228\STX\n\
+    \\EOT\EOT\f\STX\ETX\DC2\EOT\201\STX\EOTL\SUB\213\STX Currently-running workflows started by this schedule. (There might be\n\
+    \ more than one if the overlap policy allows overlaps.)\n\
+    \ Note that the run_ids in here are the original execution run ids as\n\
+    \ started by the schedule. If the workflows retried, did continue-as-new,\n\
+    \ or were reset, they might still be running but with a different run_id.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\ETX\EOT\DC2\EOT\201\STX\EOT\f\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\ETX\ACK\DC2\EOT\201\STX\r5\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\ETX\SOH\DC2\EOT\201\STX6G\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\ETX\ETX\DC2\EOT\201\STXJK\n\
+    \P\n\
+    \\EOT\EOT\f\STX\EOT\DC2\EOT\204\STX\EOT5\SUBB Most recent ten actual action times (including manual triggers).\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\EOT\EOT\DC2\EOT\204\STX\EOT\f\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\EOT\ACK\DC2\EOT\204\STX\r!\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\EOT\SOH\DC2\EOT\204\STX\"0\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\EOT\ETX\DC2\EOT\204\STX34\n\
+    \0\n\
+    \\EOT\EOT\f\STX\ENQ\DC2\EOT\207\STX\EOT\\\SUB\" Next ten scheduled action times.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\ENQ\EOT\DC2\EOT\207\STX\EOT\f\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\ENQ\ACK\DC2\EOT\207\STX\r&\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\ENQ\SOH\DC2\EOT\207\STX':\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\ENQ\ETX\DC2\EOT\207\STX=>\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\ENQ\b\DC2\EOT\207\STX?[\n\
+    \\DLE\n\
+    \\b\EOT\f\STX\ENQ\b\242\251\ETX\DC2\EOT\207\STX@Z\n\
+    \@\n\
+    \\EOT\EOT\f\STX\ACK\DC2\EOT\210\STX\EOTK\SUB2 Timestamps of schedule creation and last update.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\ACK\ACK\DC2\EOT\210\STX\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\ACK\SOH\DC2\EOT\210\STX\RS)\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\ACK\ETX\DC2\EOT\210\STX,-\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\ACK\b\DC2\EOT\210\STX.J\n\
+    \\DLE\n\
+    \\b\EOT\f\STX\ACK\b\242\251\ETX\DC2\EOT\210\STX/I\n\
+    \\f\n\
+    \\EOT\EOT\f\STX\a\DC2\EOT\211\STX\EOTK\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\a\ACK\DC2\EOT\211\STX\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\a\SOH\DC2\EOT\211\STX\RS)\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\a\ETX\DC2\EOT\211\STX,-\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\a\b\DC2\EOT\211\STX.J\n\
+    \\DLE\n\
+    \\b\EOT\f\STX\a\b\242\251\ETX\DC2\EOT\211\STX/I\n\
+    \\f\n\
+    \\EOT\EOT\f\STX\b\DC2\EOT\213\STX\EOT:\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\b\ENQ\DC2\EOT\213\STX\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\b\SOH\DC2\EOT\213\STX\v!\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\b\ETX\DC2\EOT\213\STX$%\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\b\b\DC2\EOT\213\STX&9\n\
+    \\SO\n\
+    \\ACK\EOT\f\STX\b\b\ETX\DC2\EOT\213\STX'8\n\
+    \\f\n\
+    \\STX\EOT\r\DC2\ACK\216\STX\NUL\221\STX\SOH\n\
+    \\v\n\
+    \\ETX\EOT\r\SOH\DC2\EOT\216\STX\b\DLE\n\
+    \\f\n\
+    \\EOT\EOT\r\STX\NUL\DC2\EOT\217\STX\EOT\SUB\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\NUL\ACK\DC2\EOT\217\STX\EOT\DLE\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\NUL\SOH\DC2\EOT\217\STX\DC1\NAK\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\NUL\ETX\DC2\EOT\217\STX\CAN\EM\n\
+    \\f\n\
+    \\EOT\EOT\r\STX\SOH\DC2\EOT\218\STX\EOT\RS\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\SOH\ACK\DC2\EOT\218\STX\EOT\DC2\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\SOH\SOH\DC2\EOT\218\STX\DC3\EM\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\SOH\ETX\DC2\EOT\218\STX\FS\GS\n\
+    \\f\n\
+    \\EOT\EOT\r\STX\STX\DC2\EOT\219\STX\EOT\"\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\STX\ACK\DC2\EOT\219\STX\EOT\DC4\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\STX\SOH\DC2\EOT\219\STX\NAK\GS\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\STX\ETX\DC2\EOT\219\STX !\n\
+    \\f\n\
+    \\EOT\EOT\r\STX\ETX\DC2\EOT\220\STX\EOT\FS\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\ETX\ACK\DC2\EOT\220\STX\EOT\DC1\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\ETX\SOH\DC2\EOT\220\STX\DC2\ETB\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\ETX\ETX\DC2\EOT\220\STX\SUB\ESC\n\
+    \\130\SOH\n\
+    \\STX\EOT\SO\DC2\ACK\225\STX\NUL\242\STX\SOH\SUBt ScheduleListInfo is an abbreviated set of values from Schedule and ScheduleInfo\n\
+    \ that's returned in ListSchedules.\n\
+    \\n\
+    \\v\n\
+    \\ETX\EOT\SO\SOH\DC2\EOT\225\STX\b\CAN\n\
+    \Y\n\
+    \\EOT\EOT\SO\STX\NUL\DC2\EOT\228\STX\EOT\SUB\SUBK From spec:\n\
+    \ Some fields are dropped from this copy of spec: timezone_data\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\NUL\ACK\DC2\EOT\228\STX\EOT\DLE\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\EOT\228\STX\DC1\NAK\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\EOT\228\STX\CAN\EM\n\
+    \\177\SOH\n\
+    \\EOT\EOT\SO\STX\SOH\DC2\EOT\233\STX\EOT:\SUB\162\SOH From action:\n\
+    \ Action is a oneof field, but we need to encode this in JSON and oneof fields don't work\n\
+    \ well with JSON. If action is start_workflow, this is set:\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\SOH\ACK\DC2\EOT\233\STX\EOT'\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\EOT\233\STX(5\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\EOT\233\STX89\n\
+    \\ESC\n\
+    \\EOT\EOT\SO\STX\STX\DC2\EOT\236\STX\EOT\NAK\SUB\r From state:\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\STX\ENQ\DC2\EOT\236\STX\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\STX\SOH\DC2\EOT\236\STX\v\DLE\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\STX\ETX\DC2\EOT\236\STX\DC3\DC4\n\
+    \\f\n\
+    \\EOT\EOT\SO\STX\ETX\DC2\EOT\237\STX\EOT\DC4\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\ETX\ENQ\DC2\EOT\237\STX\EOT\b\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\ETX\SOH\DC2\EOT\237\STX\t\SI\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\ETX\ETX\DC2\EOT\237\STX\DC2\DC3\n\
+    \0\n\
+    \\EOT\EOT\SO\STX\EOT\DC2\EOT\240\STX\EOT5\SUB\" From info (maybe fewer entries):\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\EOT\EOT\DC2\EOT\240\STX\EOT\f\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\EOT\ACK\DC2\EOT\240\STX\r!\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\EOT\SOH\DC2\EOT\240\STX\"0\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\EOT\ETX\DC2\EOT\240\STX34\n\
+    \\f\n\
+    \\EOT\EOT\SO\STX\ENQ\DC2\EOT\241\STX\EOT\\\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\ENQ\EOT\DC2\EOT\241\STX\EOT\f\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\ENQ\ACK\DC2\EOT\241\STX\r&\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\ENQ\SOH\DC2\EOT\241\STX':\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\ENQ\ETX\DC2\EOT\241\STX=>\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\ENQ\b\DC2\EOT\241\STX?[\n\
+    \\DLE\n\
+    \\b\EOT\SO\STX\ENQ\b\242\251\ETX\DC2\EOT\241\STX@Z\n\
+    \?\n\
+    \\STX\EOT\SI\DC2\ACK\245\STX\NUL\250\STX\SOH\SUB1 ScheduleListEntry is returned by ListSchedules.\n\
+    \\n\
+    \\v\n\
+    \\ETX\EOT\SI\SOH\DC2\EOT\245\STX\b\EM\n\
+    \\f\n\
+    \\EOT\EOT\SI\STX\NUL\DC2\EOT\246\STX\EOT\ESC\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\EOT\246\STX\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\EOT\246\STX\v\SYN\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\EOT\246\STX\EM\SUB\n\
+    \\f\n\
+    \\EOT\EOT\SI\STX\SOH\DC2\EOT\247\STX\EOT)\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\SOH\ACK\DC2\EOT\247\STX\EOT\US\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\SOH\SOH\DC2\EOT\247\STX $\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\SOH\ETX\DC2\EOT\247\STX'(\n\
+    \\f\n\
+    \\EOT\EOT\SI\STX\STX\DC2\EOT\248\STX\EOTB\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\STX\ACK\DC2\EOT\248\STX\EOT+\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\STX\SOH\DC2\EOT\248\STX,=\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\STX\ETX\DC2\EOT\248\STX@A\n\
+    \\f\n\
+    \\EOT\EOT\SI\STX\ETX\DC2\EOT\249\STX\EOT\RS\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\ETX\ACK\DC2\EOT\249\STX\EOT\DC4\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\ETX\SOH\DC2\EOT\249\STX\NAK\EM\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\ETX\ETX\DC2\EOT\249\STX\FS\GSb\ACKproto3"

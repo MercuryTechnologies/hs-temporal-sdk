@@ -17,9 +17,18 @@ custom-setup
     , directory >= 1.3.6.0
     , filepath >= 1.3.0.2
 
-executable hello
+library
   hs-source-dirs: src
-  main-is: Main.hs
-  build-depends: base >= 4.14 && < 5
+  build-depends: base >= 4.14 && < 5, proto-lens, temporal-api-protos
   extra-libraries: hs_temporal_bridge
   default-language: Haskell2010
+  frameworks: Security, CoreFoundation
+  exposed-modules:
+    Temporal.Runtime
+
+executable hello
+  hs-source-dirs: app
+  main-is: Main.hs
+  build-depends: base >= 4.14 && < 5, temporal-sdk
+  default-language: Haskell2010
+  frameworks: Security, CoreFoundation
