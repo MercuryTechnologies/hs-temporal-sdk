@@ -56,6 +56,7 @@
                 }];
                 shell.tools = {
                   cabal = { };
+                  ghcid = { };
                 };
                 shell.buildInputs = with pkgs; [
                   nixpkgs-fmt

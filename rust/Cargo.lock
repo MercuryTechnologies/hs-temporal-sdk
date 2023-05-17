@@ -589,6 +589,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "ffi-convert"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "83979d1b24808a399d1506a7213c3f3c512fa1d8701a27e80141e47ff09aac93"
+dependencies = [
+ "ffi-convert-derive",
+ "libc",
+ "thiserror",
+]
+
+[[package]]
+name = "ffi-convert-derive"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fe9ea801ee0e90ec33e6483df59c4644b89c49be7cd0e50b2a762773e552afba"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "filetime"
 version = "0.2.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -870,7 +892,14 @@ dependencies = [
 name = "hs_temporal_bridge"
 version = "0.1.0"
 dependencies = [
+ "ffi-convert",
+ "libc",
+ "parking_lot",
+ "prost",
+ "prost-types",
  "rustfsm",
+ "serde",
+ "serde_json",
  "temporal-client",
  "temporal-sdk-core",
  "temporal-sdk-core-api",

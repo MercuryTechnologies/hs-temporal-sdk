@@ -1,5 +1,6 @@
 
 pub mod runtime;
+pub mod client;
 
 #[no_mangle]
 pub fn say_hello() {

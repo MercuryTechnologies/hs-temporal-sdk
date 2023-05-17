@@ -19,12 +19,27 @@ custom-setup
 
 library
   hs-source-dirs: src
-  build-depends: base >= 4.14 && < 5, proto-lens, temporal-api-protos
+  build-depends: 
+    base >= 4.14 && < 5, 
+    proto-lens, 
+    temporal-api-protos, 
+    bytestring, 
+    text,
+    aeson,
+    unordered-containers,
+    vector
+
   extra-libraries: hs_temporal_bridge
   default-language: Haskell2010
   frameworks: Security, CoreFoundation
+  other-modules:
+    Temporal.Internal.FFI
   exposed-modules:
+    Temporal.Client,
     Temporal.Runtime
+
+-- test-suite temporal-sdk-tests
+--   type: exitcode-stdio-1.0
 
 executable hello
   hs-source-dirs: app
