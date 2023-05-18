@@ -1,5 +1,9 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Temporal.Client where
@@ -9,12 +13,16 @@ import Data.Aeson
 import Data.Aeson.TH
 import Data.ByteString (ByteString)
 import Data.HashMap.Strict (HashMap)
+import Data.ProtoLens.Service.Types
 import Data.Proxy
 import Data.Text (Text)
 import Data.Word
 import Foreign.C.String
+import Foreign.C.Types
+import Foreign.Marshal
 import Foreign.Ptr
 import Foreign.ForeignPtr
+import Foreign.Marshal
 import Foreign.Storable
 import Temporal.Runtime
 import Temporal.Internal.FFI
@@ -22,6 +30,8 @@ import qualified Data.ByteString          as BS
 import qualified Data.ByteString.Internal as BS
 import qualified Data.ByteString          as BL
 import qualified Data.Vector.Storable     as V
+import Data.ProtoLens.Encoding
+import Data.ProtoLens.Service.Types
 
 foreign import ccall "hs_temporal_connect_client" raw_connectClient :: Ptr Runtime -> CString -> TokioCall RustCStringLen Client
 foreign import ccall "&hs_temporal_drop_client" raw_freeClient :: FunPtr (Ptr Client -> IO ())
@@ -90,7 +100,6 @@ data RpcCall a = RpcCall
 
 data ClientConnectionError = ClientConnectionError Text
   deriving (Show)
-data RpcError = RpcError
 
 defaultClientConfig :: ClientConfig
 defaultClientConfig = ClientConfig
@@ -105,7 +114,6 @@ defaultClientConfig = ClientConfig
 
 connectClient :: Runtime -> ClientConfig -> IO (Either ClientConnectionError Client)
 connectClient rt conf = withRuntime rt $ \rtPtr -> BS.useAsCString (BL.toStrict $ encode conf) $ \confPtr -> do
-  putStrLn "connectClient"
   makeTokioAsyncCall 
     (raw_connectClient rtPtr confPtr)
     (\cstrLen -> do
@@ -114,93 +122,89 @@ connectClient rt conf = withRuntime rt $ \rtPtr -> BS.useAsCString (BL.toStrict 
     )
     (fmap Client . newForeignPtr raw_freeClient)
 
-updateMetadata :: Client -> HashMap String String -> IO ()
-updateMetadata = undefined
+type PrimRpcCall = Ptr Client -> Ptr CRpcCall -> TokioCall RpcError (CArray Word8)
 
-{-
-The following RPC calls use the workflow service:
-count_workflow_executions
-create_schedule
-delete_schedule
-deprecate_namespace
-describe_namespace
-describe_schedule
-describe_task_queue
-describe_workflow_execution
-get_cluster_info
-get_search_attributes
-get_system_info
-get_worker_build_id_compatibility
-get_workflow_execution_history
-get_workflow_execution_history_reverse
-list_archived_workflow_executions
-list_closed_workflow_executions
-list_namespaces
-list_open_workflow_executions
-list_schedule_matching_times
-list_schedules
-list_task_queue_partitions
-list_workflow_executions
-patch_schedule
-poll_activity_task_queue
-poll_workflow_execution_update
-poll_workflow_task_queue
-query_workflow
-record_activity_task_heartbeat
-record_activity_task_heartbeat_by_id
-register_namespace
-request_cancel_workflow_execution
-reset_sticky_task_queue
-reset_workflow_execution
-respond_activity_task_canceled
-respond_activity_task_canceled_by_id
-respond_activity_task_completed
-respond_activity_task_completed_by_id
-respond_activity_task_failed
-respond_activity_task_failed_by_id
-respond_query_task_completed
-respond_workflow_task_completed
-respond_workflow_task_failed
-scan_workflow_executions
-signal_with_start_workflow_execution
-signal_workflow_execution
-start_workflow_execution
-terminate_workflow_execution
-update_namespace
-update_schedule
-update_workflow_execution
-update_worker_build_id_compatibility
--}
--- callWorkflowService :: Client -> RpcCall call -> IO (Either RpcError (MethodOutput call))
--- callWorkflowService c call = undefined
+-- TODO, this would be better as a pair of vectors instead of a linked list
+data HashMapEntries = HashMapEntries
+  { key :: CString
+  , keyLen :: CSize
+  , value :: CString
+  , valueLen :: CSize
+  , next :: Ptr HashMapEntries
+  }
 
-{-
-add_or_update_remote_cluster
-add_search_attributes
-delete_namespace
-delete_workflow_execution
-list_clusters
-list_search_attributes
-remove_remote_cluster
-remove_search_attributes
--}
--- callOperatorService :: Client -> RpcCall OperatorService -> IO (Either RpcError ByteString)
--- callOperatorService = undefined
+instance Storable HashMapEntries where
+  sizeOf _ = 
+    sizeOf (undefined :: CString) + 
+    sizeOf (undefined :: CSize) + 
+    sizeOf (undefined :: CString) + 
+    sizeOf (undefined :: CSize) + 
+    sizeOf (undefined :: Ptr HashMapEntries)
+  alignment _ = 8
+  peek ptr = do
+    key <- peekByteOff ptr 0
+    keyLen <- peekByteOff ptr (sizeOf (undefined :: CString))
+    value <- peekByteOff ptr (sizeOf (undefined :: CString) + sizeOf (undefined :: CSize))
+    valueLen <- peekByteOff ptr (sizeOf (undefined :: CString) + sizeOf (undefined :: CSize) + sizeOf (undefined :: CString))
+    next <- peekByteOff ptr (sizeOf (undefined :: CString) + sizeOf (undefined :: CSize) + sizeOf (undefined :: CString) + sizeOf (undefined :: CSize))
+    pure $ HashMapEntries key keyLen value valueLen next
+  poke ptr (HashMapEntries key keyLen value valueLen next) = do
+    pokeByteOff ptr 0 key
+    pokeByteOff ptr (sizeOf (undefined :: CString)) keyLen
+    pokeByteOff ptr (sizeOf (undefined :: CString) + sizeOf (undefined :: CSize)) value
+    pokeByteOff ptr (sizeOf (undefined :: CString) + sizeOf (undefined :: CSize) + sizeOf (undefined :: CString)) valueLen
+    pokeByteOff ptr (sizeOf (undefined :: CString) + sizeOf (undefined :: CSize) + sizeOf (undefined :: CString) + sizeOf (undefined :: CSize)) next
 
-{-
-get_current_time
-lock_time_skipping
-sleep_until
-sleep
-unlock_time_skipping_with_sleep
-unlock_time_skipping
--}
--- callTestService :: Client -> RpcCall a -> IO (Either RpcError ByteString)
--- callTestService = undefined
+data CRpcCall = CRpcCall
+  { rpcCallReq :: Ptr (CArray Word8)
+  , rpcCallRetry :: Word8
+  , rpcCallMetadata :: Ptr HashMapEntries
+  , rpcCallTimeoutMillis :: Ptr Word64
+  }
 
-{-
-check
--}
--- callHealthService :: Client -> RpcCall a -> IO (Either RpcError ByteString)
--- callHealthService = undefined
+instance Storable CRpcCall where
+  sizeOf _ =
+    sizeOf (undefined :: Ptr (CArray Word8)) +
+    sizeOf (undefined :: Word8) +
+    sizeOf (undefined :: Ptr HashMapEntries) +
+    sizeOf (undefined :: Ptr Word64)
+  alignment _ = 8
+  peek ptr = do
+    rpcCallReq <- peekByteOff ptr 0
+    rpcCallRetry <- peekByteOff ptr (sizeOf (undefined :: Ptr (CArray Word8)))
+    rpcCallMetadata <- peekByteOff ptr (sizeOf (undefined :: Ptr (CArray Word8)) + sizeOf (undefined :: Word8))
+    rpcCallTimeoutMillis <- peekByteOff ptr (sizeOf (undefined :: Ptr (CArray Word8)) + sizeOf (undefined :: Word8) + sizeOf (undefined :: Ptr HashMapEntries))
+    pure $ CRpcCall rpcCallReq rpcCallRetry rpcCallMetadata rpcCallTimeoutMillis
+  poke ptr (CRpcCall rpcCallReq rpcCallRetry rpcCallMetadata rpcCallTimeoutMillis) = do
+    pokeByteOff ptr 0 rpcCallReq
+    pokeByteOff ptr (sizeOf (undefined :: Ptr (CArray Word8))) rpcCallRetry
+    pokeByteOff ptr (sizeOf (undefined :: Ptr (CArray Word8)) + sizeOf (undefined :: Word8)) rpcCallMetadata
+    pokeByteOff ptr (sizeOf (undefined :: Ptr (CArray Word8)) + sizeOf (undefined :: Word8) + sizeOf (undefined :: Ptr HashMapEntries)) rpcCallTimeoutMillis
 
+-- TODO how should we use mask here?
+call :: forall svc t. (HasMethodImpl svc t) => PrimRpcCall -> Client -> MethodInput svc t -> IO (Either RpcError (MethodOutput svc t))
+call f (Client c) req = withForeignPtr c $ \cPtr -> do
+  let msgBytes = encodeMessage req
+  BS.useAsCStringLen msgBytes $ \(msgPtr, msgLen) -> do
+    alloca $ \cArrayPtr -> do
+      poke cArrayPtr (CArray msgPtr (fromIntegral msgLen))
+      let rpcCall = CRpcCall
+            { rpcCallReq = castPtr cArrayPtr
+            , rpcCallRetry = if False then 0 else 1
+            , rpcCallMetadata = nullPtr
+            , rpcCallTimeoutMillis = nullPtr
+            }
+      alloca $ \rpcCallPtr -> do
+        poke rpcCallPtr rpcCall
+        result <- makeTokioAsyncCall
+          (f cPtr rpcCallPtr)
+          (\rpcErr -> do
+            err <- peekCrpcError rpcErr
+            rust_drop_rpc_error rpcErr
+            pure err
+          )
+          (\rp -> do
+            fromRust (Proxy @(CArray Word8)) rp)
+        pure $ case result of
+          Left err -> Left err
+          Right r -> Right $ decodeMessageOrDie r

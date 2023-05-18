@@ -55,7 +55,9 @@ pub struct MVar {
 }
 
 #[repr(C)]
-pub struct Capability(c_int);
+pub struct Capability {
+  pub cap_num: c_int
+}
 
 extern "C" {
   pub fn hs_try_putmvar(capability: Capability, mvar: *mut MVar);
@@ -70,21 +72,17 @@ pub struct HsCallback<A, E> {
 
 impl <A, E> HsCallback<A, E> {
   pub fn put_success(self, result: *mut A) {
-    println!("put_success");
     unsafe {
       *self.result_slot = result;
       *self.error_slot = std::ptr::null_mut();
-      println!("putmvar");
       hs_try_putmvar(self.cap, self.mvar);
     }
   }
 
   pub fn put_failure(self, error: *mut E) {
-    println!("put_failure");
     unsafe {
       *self.error_slot = error;
       *self.result_slot = std::ptr::null_mut();
-      println!("putmvar");
       hs_try_putmvar(self.cap, self.mvar);
     }
   }
@@ -113,7 +111,6 @@ impl Runtime {
       F: Future<Output = Result<*mut T, *mut E>> + Send + 'static,
   {
     let handle = self.core.tokio_handle();
-    println!("_guard");
     let _guard = handle.enter();
     let result = handle.block_on(fut);
     callback.put_result(result);
@@ -122,6 +119,15 @@ impl Runtime {
 
 #[no_mangle]
 pub extern fn hs_temporal_drop_cstring(str: *const HaskellText) {
+  unsafe {
+    drop(CArray::from_raw_pointer(str));
+  }
+}
+
+// Actually the same thing as the above, but we want to be explicit about the
+// type of what we're dropping for clarity.
+#[no_mangle]
+pub extern fn hs_temporal_drop_byte_array(str: *const CArray<u8>) {
   unsafe {
     drop(CArray::from_raw_pointer(str));
   }

@@ -126,11 +126,11 @@ pub struct RpcCall {
   timeout_millis: *const u64,
 }
 
-struct TemporalCall {
-  req: Vec<u8>,
-  retry: bool,
-  metadata: HashMap<String, String>,
-  timeout_millis: Option<u64>,
+pub(crate) struct TemporalCall {
+  pub(crate) req: Vec<u8>,
+  pub(crate) retry: bool,
+  pub(crate) metadata: HashMap<String, String>,
+  pub(crate) timeout_millis: Option<u64>,
 }
 
 impl From<&RpcCall> for TemporalCall {
@@ -154,7 +154,7 @@ impl From<&RpcCall> for TemporalCall {
 
 pub struct ClientRef {
   pub(crate) retry_client: Client,
-  runtime: runtime::Runtime,
+  pub(crate) runtime: runtime::Runtime,
 }
 
 pub fn connect_client(
@@ -229,7 +229,7 @@ pub extern "C" fn hs_temporal_drop_client(client: *mut ClientRef) {
   }
 }
 
-fn rpc_req<P: prost::Message + Default>(call: TemporalCall) -> Result<tonic::Request<P>, String> {
+pub(crate) fn rpc_req<P: prost::Message + Default>(call: TemporalCall) -> Result<tonic::Request<P>, String> {
   let buf = call.req.as_slice();
   let proto = P::decode(buf).map_err(|err| err.to_string())?;
   let mut req = tonic::Request::new(proto);
@@ -255,12 +255,12 @@ pub struct RPCError {
 }
 
 #[repr(C)]
-#[derive(CReprOf, AsRust, CDrop)]
+#[derive(CReprOf, AsRust, CDrop, RawPointerConverter)]
 #[target_type(RPCError)]
 pub struct CRPCError {
   code: u32,
   message: *const libc::c_char,
-  details: CArray<u8>,
+  details: *const CArray<u8>,
 }
 
 impl From<String> for CRPCError {
@@ -275,7 +275,14 @@ impl From<String> for CRPCError {
   }
 }
 
-fn rpc_resp<P>(res: Result<tonic::Response<P>, tonic::Status>) -> Result<Vec<u8>, *mut CRPCError>
+#[no_mangle]
+pub extern "C" fn hs_temporal_drop_rpc_error(error: *mut CRPCError) {
+  unsafe {
+    CRPCError::drop_raw_pointer(error).unwrap();
+  }
+}
+
+pub(crate) fn rpc_resp<P>(res: Result<tonic::Response<P>, tonic::Status>) -> Result<Vec<u8>, *mut CRPCError>
 where
   P: prost::Message,
   P: Default,
@@ -288,42 +295,4 @@ where
         details: err.details().into(),
       }).unwrap())))
   }
-}
-
-macro_rules! rpc_call {
-  ($retry_client:ident, $call:ident, $call_name:ident) => {
-    {
-      if $call.retry {
-        let req = rpc_req($call).map_err(|err| 
-              Box::into_raw(Box::new(CRPCError::c_repr_of(RPCError {
-                code: 0,
-                message: err,
-                details: vec![],
-              }).unwrap())))?;
-        rpc_resp($retry_client.$call_name(req).await)
-      } else {
-        let req = rpc_req($call).map_err(|err| 
-              Box::into_raw(Box::new(CRPCError::c_repr_of(RPCError {
-                code: 0,
-                message: err,
-                details: vec![],
-              }).unwrap())))?;
-        rpc_resp($retry_client.into_inner().$call_name(req).await)
-      }
-    }
-  };
-}
-
-pub extern "C" fn hs_count_workflow_executions(cap: Capability, mvar: *mut MVar, error_slot: *mut*mut CRPCError, result_slot: *mut*mut CArray<u8>, client: *mut ClientRef, c_call: *const RpcCall) -> () {
-  let client = unsafe { &mut *client };
-  let mut retry_client = client.retry_client.clone();
-  let call: TemporalCall = unsafe { (&*c_call).into() };
-
-  let callback: HsCallback<CArray<u8>, CRPCError> = HsCallback { cap, mvar, result_slot, error_slot };
-  client.runtime.future_result_into_hs(callback, async move {
-    match rpc_call!(retry_client, call, count_workflow_executions) {
-      Ok(resp) => Ok(CArray::into_raw_pointer_mut(CArray::c_repr_of(resp).unwrap())),
-      Err(err) => Err(err)
-    }
-  });
 }

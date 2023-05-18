@@ -1,0 +1,12 @@
+module Temporal.Client.OperatorService where
+
+{-
+add_or_update_remote_cluster
+add_search_attributes
+delete_namespace
+delete_workflow_execution
+list_clusters
+list_search_attributes
+remove_remote_cluster
+remove_search_attributes
+-}

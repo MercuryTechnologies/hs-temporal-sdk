@@ -41,8 +41,6 @@ data WorkerConfig = WorkerConfig
   , gracefulShutdownPeriodMillis :: Word64
   }
 
--- These are async in Rust, need to figure out how to get it to play nice with
--- Haskell's RTS.
 pollWorkflowActivation :: Worker -> IO (Either PollError Proto)
 pollWorkflowActivation = undefined
 

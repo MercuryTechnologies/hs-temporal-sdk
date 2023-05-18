@@ -1,4 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
@@ -6,10 +8,13 @@ module Temporal.Internal.FFI where
 import Control.Concurrent
 import Control.Exception
 import Control.Monad
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as ByteString
 import Data.Coerce
 import Data.Proxy
 import Data.Word
 import Data.Text (Text)
+import qualified Data.Text as Text
 import qualified Data.Text.Foreign as Text
 import Foreign.C.String
 import Foreign.C.Types
@@ -37,6 +42,29 @@ instance Storable RustCStringLen where
     pokeByteOff ptr 0 bytes
     pokeByteOff ptr (sizeOf (undefined :: CString)) len
 
+data CArray a = CArray
+  { cArrayPtr :: Ptr a
+  , cArrayLen :: CSize
+  }
+
+instance Storable a => Storable (CArray a) where
+  sizeOf = const (sizeOf (undefined :: Ptr a) + sizeOf (undefined :: CSize))
+  alignment = const 8
+  peek ptr = CArray <$> peekByteOff ptr 0 <*> peekByteOff ptr (sizeOf (undefined :: CString))
+  poke ptr (CArray bytes len) = do
+    pokeByteOff ptr 0 bytes
+    pokeByteOff ptr (sizeOf (undefined :: CString)) len
+
+instance ManagedRustValue (CArray Word8) where
+  type RustRef (CArray Word8) = Ptr (CArray Word8)
+  type HaskellRep (CArray Word8) = ByteString
+  fromRust _ rustPtr = mask_ $ do
+    (CArray bytes len) <- peek rustPtr
+    bs <- ByteString.packCStringLen (castPtr bytes, fromIntegral len)
+    rust_drop_byte_array rustPtr
+    pure bs
+
+foreign import ccall "hs_temporal_drop_byte_array" rust_drop_byte_array :: Ptr (CArray Word8) -> IO ()
 foreign import ccall "hs_temporal_drop_cstring" rust_drop_cstring :: Ptr RustCStringLen -> IO ()
 instance ManagedRustValue RustCStringLen where
   type RustRef RustCStringLen = Ptr RustCStringLen
@@ -63,7 +91,7 @@ peekTokioResult (TokioResult ptr) f = do
 
 type TokioCall e a = StablePtr PrimMVar -> Int -> TokioResult e -> TokioResult a -> IO ()
 
--- Dropping can't be done automatically if the result is returned without async exceptions
+-- | Dropping can't be done automatically if the result is returned without async exceptions
 -- intervening, because we don't want to drop things like `Client` while they're still in use.
 -- So we should return ForeignPtrs for things that need to stay alive, and then we can drop when we're done.
 makeTokioAsyncCall :: (ManagedRustValue e, RustRef e ~ Ptr e, ManagedRustValue a, RustRef a ~ Ptr a) 
@@ -76,11 +104,9 @@ makeTokioAsyncCall call readErr readSuccess = mask_ $ do
   sp <- newStablePtrPrimMVar mvar
   withTokioResult $ \errorSlot -> withTokioResult $ \resultSlot -> do
     let peekEither = do
-          putStrLn "Peeking error"
           e <- peekTokioResult errorSlot readErr
           case e of
             Nothing -> do
-              putStrLn "Peeking result"
               r <- peekTokioResult resultSlot readSuccess
               case r of
                 Nothing -> error "Both error and result are null"
@@ -88,10 +114,31 @@ makeTokioAsyncCall call readErr readSuccess = mask_ $ do
             Just e -> return (Left e)
 
     (cap, _) <- threadCapability =<< myThreadId
-    putStrLn "Calling Rust"
     call sp cap errorSlot resultSlot
-    putStrLn "Waiting for result"
     takeMVar mvar `onException`
       forkIO (takeMVar mvar >> void peekEither)
-    putStrLn "Got result"
     peekEither
+
+data RpcError = RpcError
+  { code :: Word32
+  , message :: Text
+  , details :: ByteString
+  }
+  deriving (Show)
+
+peekCrpcError :: Ptr RpcError -> IO RpcError 
+peekCrpcError ptr = do
+  code <- peekByteOff ptr 0
+  message <- Text.pack <$> (peekByteOff ptr 4 >>= peekCString)
+  details <- peekByteOff ptr 12 >>= \(CArray ptr len) -> ByteString.packCStringLen (ptr, fromIntegral len)
+  pure RpcError{..}
+
+foreign import ccall "hs_temporal_drop_rpc_error" rust_drop_rpc_error :: Ptr RpcError -> IO ()
+
+instance ManagedRustValue RpcError where
+  type RustRef RpcError = Ptr RpcError
+  type HaskellRep RpcError = RpcError
+  fromRust _ ptr = mask_ $ do
+    err <- peekCrpcError ptr
+    rust_drop_rpc_error ptr
+    pure err
