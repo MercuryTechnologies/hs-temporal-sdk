@@ -1,0 +1,71 @@
+cabal-version:      3.0
+name:               temporal-sdk-core
+version:            0.1.0.0
+-- synopsis:
+-- description:
+license:            BSD-3-Clause
+license-file:       LICENSE
+author:             Ian Duncan
+maintainer:         ian@iankduncan.com
+-- copyright:
+category:           Concurrency
+build-type:         Custom
+extra-doc-files:    CHANGELOG.md
+-- extra-source-files:
+
+common warnings
+    ghc-options: -Wall
+
+flag external_lib
+  description:       Use external library (don't compile automatically)
+  default:           False
+
+custom-setup
+  setup-depends:
+      base >= 4.7 && < 5
+    , Cabal >= 3.0.0.0
+    , directory >= 1.3.6.0
+    , filepath >= 1.3.0.2
+
+library
+    import:           warnings
+    exposed-modules: 
+      Temporal.Client.WorkflowService,
+      Temporal.Core.Client,
+      Temporal.Core.Worker,
+      Temporal.Internal.FFI,
+      Temporal.Internal.JobPool,
+      Temporal.Runtime
+
+    -- other-modules:
+    -- other-extensions:
+    extra-libraries: hs_temporal_bridge
+    build-depends:
+      base >= 4.14 && < 5, 
+      proto-lens, 
+      temporal-api-protos, 
+      bytestring, 
+      mtl,
+      text,
+      aeson,
+      unordered-containers,
+      vector,
+      async,
+      unliftio,
+      lens-family,
+      uuid,
+      stm,
+      containers
+    hs-source-dirs:   src
+    default-language: Haskell2010
+    frameworks: Security, CoreFoundation
+
+test-suite temporal-sdk-core-test
+    import:           warnings
+    default-language: Haskell2010
+    -- other-modules:
+    -- other-extensions:
+    type:             exitcode-stdio-1.0
+    hs-source-dirs:   test
+    main-is:          Main.hs
+    build-depends:    temporal-sdk-core

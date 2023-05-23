@@ -89,3 +89,4 @@ applyUnlessM :: FlagName -> ConfigFlags -> (a -> IO a) -> a -> IO a
 applyUnlessM name flags apply a
     | cabalFlag name flags = pure a
     | otherwise = apply a
+

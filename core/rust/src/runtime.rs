@@ -71,23 +71,33 @@ pub struct HsCallback<A, E> {
 }
 
 impl <A, E> HsCallback<A, E> {
-  pub fn put_success(self, result: *mut A) {
+  pub fn put_success(self, result: A) 
+  where
+    A: RawPointerConverter<A>,
+  {
     unsafe {
-      *self.result_slot = result;
+      *self.result_slot = result.into_raw_pointer_mut();
       *self.error_slot = std::ptr::null_mut();
       hs_try_putmvar(self.cap, self.mvar);
     }
   }
 
-  pub fn put_failure(self, error: *mut E) {
+  pub fn put_failure(self, error: E) 
+  where
+    E: RawPointerConverter<E>,
+  {
     unsafe {
-      *self.error_slot = error;
+      *self.error_slot = error.into_raw_pointer_mut();
       *self.result_slot = std::ptr::null_mut();
       hs_try_putmvar(self.cap, self.mvar);
     }
   }
 
-  pub fn put_result(self, result: Result<*mut A, *mut E>) {
+  pub fn put_result(self, result: Result<A, E>) 
+  where
+    A: RawPointerConverter<A>,
+    E: RawPointerConverter<E>,
+  {
     match result {
       Ok(result) => self.put_success(result),
       Err(error) => self.put_failure(error),
@@ -96,19 +106,22 @@ impl <A, E> HsCallback<A, E> {
 }
 
 impl Runtime {
-  pub fn future_into_hs<F, T>(&self, callback: HsCallback<T, ()>, fut: F)
-  where
-      F: Future<Output = *mut T> + Send + 'static,
-  {
-    let handle = self.core.tokio_handle();
-    let _guard = handle.enter();
-    let result = handle.block_on(fut);
-    callback.put_success(result);
-  }
+  // pub fn future_into_hs<F, T>(&self, callback: HsCallback<T, ()>, fut: F)
+  // where
+  //     F: Future<Output = T> + Send + 'static,
+  //     T: RawPointerConverter<T>
+  // {
+  //   let handle = self.core.tokio_handle();
+  //   let _guard = handle.enter();
+  //   let result = handle.block_on(fut);
+  //   callback.put_success(result);
+  // }
 
-  pub fn future_result_into_hs<F, T: , E>(&self, callback: HsCallback<T, E>, fut: F)
+  pub fn future_result_into_hs<F, T, E>(&self, callback: HsCallback<T, E>, fut: F)
   where
-      F: Future<Output = Result<*mut T, *mut E>> + Send + 'static,
+      F: Future<Output = Result<T, E>> + Send + 'static,
+      T: RawPointerConverter<T>,
+      E: RawPointerConverter<E>
   {
     let handle = self.core.tokio_handle();
     let _guard = handle.enter();

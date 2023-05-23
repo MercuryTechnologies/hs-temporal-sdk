@@ -6,7 +6,18 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Temporal.Client where
+module Temporal.Core.Client 
+  ( Client
+  , connectClient
+  , defaultClientConfig
+  , ClientConfig(..)
+  , ClientTlsConfig(..)
+  , ClientRetryConfig(..)
+  , call
+  , PrimRpcCall
+  , RpcCall(..)
+  , withClient
+  ) where
 
 import Control.Exception
 import Data.Aeson
@@ -37,6 +48,10 @@ foreign import ccall "hs_temporal_connect_client" raw_connectClient :: Ptr Runti
 foreign import ccall "&hs_temporal_drop_client" raw_freeClient :: FunPtr (Ptr Client -> IO ())
 
 newtype Client = Client { client :: ForeignPtr Client }
+
+withClient :: Client -> (Ptr Client -> IO a) -> IO a
+withClient (Client c) = withForeignPtr c
+
 instance ManagedRustValue Client where
   type RustRef Client = Ptr Client
   type HaskellRep Client = Client

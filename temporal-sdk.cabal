@@ -4,18 +4,7 @@ version: 1.0.0.0
 license-file: LICENSE
 copyright: (c) Ian Duncan
 author: Ian Duncan
-build-type: Custom
-
-flag external_lib
-  description:       Use external library (don't compile automatically)
-  default:           False
-
-custom-setup
-  setup-depends:
-      base >= 4.7 && < 5
-    , Cabal >= 3.0.0.0
-    , directory >= 1.3.6.0
-    , filepath >= 1.3.0.2
+build-type: Simple
 
 library
   hs-source-dirs: src
@@ -23,31 +12,47 @@ library
     base >= 4.14 && < 5, 
     proto-lens, 
     temporal-api-protos, 
+    temporal-sdk-core,
     bytestring, 
+    mtl,
     text,
     aeson,
     unordered-containers,
-    vector
+    vector,
+    async,
+    unliftio,
+    lens-family,
+    uuid,
+    stm,
+    time,
+    containers,
+    clock
 
   extra-libraries: hs_temporal_bridge
   default-language: Haskell2010
-  frameworks: Security, CoreFoundation
-  other-modules:
-    Temporal.Internal.FFI
+  -- other-modules:
   exposed-modules:
-    Temporal.Client,
-    Temporal.Client.HealthService,
-    Temporal.Client.OperatorService,
-    Temporal.Client.TestService,
-    Temporal.Client.WorkflowService,
-    Temporal.Runtime
+    -- Temporal.Worker,
+    -- Temporal.Workflow
+    Temporal.Payloads,
+    Temporal.Workflow.WorkflowDefinition,
+    Temporal.Workflow,
+    Temporal.Worker
 
 -- test-suite temporal-sdk-tests
 --   type: exitcode-stdio-1.0
 
-executable hello
-  hs-source-dirs: app
-  main-is: Main.hs
-  build-depends: base >= 4.14 && < 5, temporal-sdk, proto-lens
-  default-language: Haskell2010
-  frameworks: Security, CoreFoundation
+-- executable hello
+--   hs-source-dirs: app
+--   main-is: Main.hs
+--   build-depends: 
+--     base >= 4.14 && < 5, 
+--     temporal-sdk, 
+--     proto-lens,
+--     temporal-api-protos,
+--     async,
+--     text,
+--     lens-family,
+--     uuid
+--   default-language: Haskell2010
+--   frameworks: Security, CoreFoundation

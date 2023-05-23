@@ -16,9 +16,11 @@ import Data.Word
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.Foreign as Text
+import qualified Data.Vector.Storable as Vector
 import Foreign.C.String
 import Foreign.C.Types
 import Foreign.Marshal.Alloc
+import qualified Foreign.Marshal.Utils as Marshal
 import Foreign.Ptr
 import Foreign.StablePtr
 import Foreign.Storable
@@ -54,6 +56,19 @@ instance Storable a => Storable (CArray a) where
   poke ptr (CArray bytes len) = do
     pokeByteOff ptr 0 bytes
     pokeByteOff ptr (sizeOf (undefined :: CString)) len
+
+withCArray :: Storable a => Vector.Vector a -> (Ptr (CArray a) -> IO b) -> IO b
+withCArray v f = Vector.unsafeWith v $ \vPtr ->
+  Marshal.with (CArray vPtr (fromIntegral (Vector.length v))) f
+
+withCArrayBS :: ByteString -> (Ptr (CArray Word8) -> IO b) -> IO b
+withCArrayBS bs f = ByteString.useAsCStringLen bs $ \(bytes, len) ->
+  Marshal.with (CArray (castPtr bytes) (fromIntegral len)) f
+
+withCArrayText :: Text -> (Ptr (CArray Word8) -> IO b) -> IO b
+withCArrayText txt f = Text.withCStringLen txt $ \(bytes, len) ->
+  Marshal.with (CArray (castPtr bytes) (fromIntegral len)) f
+
 
 instance ManagedRustValue (CArray Word8) where
   type RustRef (CArray Word8) = Ptr (CArray Word8)
@@ -126,11 +141,12 @@ data RpcError = RpcError
   }
   deriving (Show)
 
+-- nb: Alignment for C repr structs is not packed, so the alignment is based on the largest field size.
 peekCrpcError :: Ptr RpcError -> IO RpcError 
 peekCrpcError ptr = do
   code <- peekByteOff ptr 0
-  message <- Text.pack <$> (peekByteOff ptr 4 >>= peekCString)
-  details <- peekByteOff ptr 12 >>= \(CArray ptr len) -> ByteString.packCStringLen (ptr, fromIntegral len)
+  message <- Text.pack <$> (peekByteOff ptr 8 >>= peekCString)
+  details <- peekByteOff ptr 16 >>= \(CArray ptr len) -> ByteString.packCStringLen (ptr, fromIntegral len)
   pure RpcError{..}
 
 foreign import ccall "hs_temporal_drop_rpc_error" rust_drop_rpc_error :: Ptr RpcError -> IO ()

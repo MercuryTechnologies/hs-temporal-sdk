@@ -1,7 +1,6 @@
 use temporal_client::{
   ClientOptions, ClientOptionsBuilder, ClientOptionsBuilderError, ConfiguredClient,
   RetryClient, RetryConfig, TemporalServiceClientWithMetrics, TlsConfig,
-  WorkflowService,
 };
 use tonic::{metadata::{MetadataKey, errors::InvalidMetadataValue}};
 use ffi_convert::*;
@@ -139,7 +138,7 @@ impl From<&RpcCall> for TemporalCall {
       req: unsafe {
         let req_array = rpc_call.req;
         let rust_vec = (*req_array).as_rust();
-        rust_vec.unwrap()
+        rust_vec.unwrap().clone()
       },
       retry: rpc_call.retry,
       metadata: convert_hashmap(rpc_call.metadata),
@@ -157,40 +156,53 @@ pub struct ClientRef {
   pub(crate) runtime: runtime::Runtime,
 }
 
+impl RawPointerConverter<ClientRef> for ClientRef {
+  fn into_raw_pointer(self) -> *const ClientRef {
+    convert_into_raw_pointer(self)
+  }
+
+  fn into_raw_pointer_mut(self) -> *mut ClientRef {
+    convert_into_raw_pointer_mut(self)
+  }
+
+  unsafe fn from_raw_pointer(ptr: *const ClientRef) -> Result<Self, UnexpectedNullPointerError> {
+    take_back_from_raw_pointer(ptr)
+  }
+
+  unsafe fn from_raw_pointer_mut(ptr: *mut ClientRef) -> Result<Self, UnexpectedNullPointerError> {
+    take_back_from_raw_pointer_mut(ptr)
+  }
+}
+
 pub fn connect_client(
   runtime_ref: &runtime::RuntimeRef,
   config: ClientConfig,
   hs_callback: HsCallback<ClientRef, HaskellText>,
 ) -> () {
-  println!("connect_client");
   let headers = if config.metadata.is_empty() {
       None
   } else {
       Some(Arc::new(RwLock::new(config.metadata.clone())))
   };
 
-  println!("make options");
   let opts: ClientOptions = client_config_to_options(config).unwrap();
   let runtime = runtime_ref.runtime.clone();
   runtime_ref.runtime.future_result_into_hs(hs_callback, async move {
-    println!("construct client");
     let retry_client_result = opts
           .connect_no_namespace(runtime.core.metric_meter().as_deref(), headers)
           .await;
         
     match retry_client_result {
       Ok(retry_client) => {
-        println!("client is good");
-        Ok(Box::into_raw(Box::new(ClientRef {
+        Ok(ClientRef {
           retry_client,
           runtime,
-        })))
+        })
       }
       Err(e) => {
-        println!("client is sad {}", e);
         let err_message = e.to_string().into_bytes();
         Err(
-          CArray::into_raw_pointer_mut(CArray::c_repr_of(err_message).unwrap())
+          CArray::c_repr_of(err_message).unwrap()
         )
       }
     }
@@ -206,11 +218,8 @@ pub extern "C" fn hs_temporal_connect_client(
   error_slot: *mut*mut HaskellText,
   result_slot: *mut*mut ClientRef
 ) {
-  println!("get runtime ref");
   let runtime_ref = unsafe { &*runtime_ref };
-  println!("get json");
   let config_json = unsafe { CStr::from_ptr(config_json) };
-  println!("parse json");
   let config: ClientConfig = serde_json::from_slice(config_json.to_bytes()).unwrap();
   let hs_callback = runtime::HsCallback {
     cap, 
@@ -218,7 +227,6 @@ pub extern "C" fn hs_temporal_connect_client(
     error_slot,
     result_slot
   };
-  println!("call connect");
   connect_client(runtime_ref, config, hs_callback);
 }
 
@@ -282,17 +290,17 @@ pub extern "C" fn hs_temporal_drop_rpc_error(error: *mut CRPCError) {
   }
 }
 
-pub(crate) fn rpc_resp<P>(res: Result<tonic::Response<P>, tonic::Status>) -> Result<Vec<u8>, *mut CRPCError>
+pub(crate) fn rpc_resp<P>(res: Result<tonic::Response<P>, tonic::Status>) -> Result<Vec<u8>, CRPCError>
 where
   P: prost::Message,
   P: Default,
 {
   match res {
       Ok(resp) => Ok(resp.get_ref().encode_to_vec()),
-      Err(err) => Err(Box::into_raw(Box::new(CRPCError::c_repr_of(RPCError {
+      Err(err) => Err(CRPCError::c_repr_of(RPCError {
         code: err.code() as u32,
         message: err.message().to_owned(),
         details: err.details().into(),
-      }).unwrap())))
+      }).unwrap())
   }
 }
