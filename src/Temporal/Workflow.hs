@@ -36,37 +36,7 @@ import Data.Time.Clock (UTCTime)
 import Data.Word (Word32)
 import Data.Vector (Vector)
 import Proto.Temporal.Api.Common.V1.Message (Payload)
-
--- data Sequences = Sequences
---   { nextTimerSequenceNumber :: Word32
---   , nextActivitySequenceNumber :: Word32
---   , nextChildWorkflowSequenceNumber :: Word32
---   , nextCancelExternalWorkflowSequenceNumber :: Word32
---   , nextSignalExternalWorkflowSequenceNumber :: Word32
---   }
-
--- data SharedData = SharedData
---   { changes :: Map Text Bool
---   , isReplaying :: Bool
---   , workflowTime :: Maybe UTCTime
---   , historyLength :: Word32
---   }
-
-data Context env = Context
-  { contextNamespace :: Text
-  -- , contextTaskQueue :: Text
-  -- , contextArgs :: Vector Payload
-  -- , contextCancelled :: IORef Bool
-  -- , contextSequences :: IORef Sequences
-  -- , contextShared :: IORef SharedData
-  -- , contextRandomnessSeed :: IORef Word32
-  -- , contextAppEnv :: env
-  }
-
-newtype Workflow env a = Workflow { unWorkflow :: ReaderT (Context env) IO a }
-
--- execWorkflow :: MonadIO m => Context env -> Workflow env a -> m a
--- execWorkflow env = liftIO . flip runReaderT env . unWorkflow
+import Temporal.Workflow.Unsafe
 
 -- continueAsNew :: () -> Workflow env ()
 -- continueAsNew = undefined

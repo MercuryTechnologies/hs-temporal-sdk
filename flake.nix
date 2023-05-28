@@ -23,7 +23,7 @@
           (final: prev: {
             hs_temporal_bridge = final.rustPlatform.buildRustPackage {
               name = "hs_temporal_bridge";
-              src = ./rust;
+              src = ./core/rust;
               PROTOC = "${pkgs.protobuf}/bin/protoc";
               PROTOC_INCLUDE = "${pkgs.protobuf}/include";
 
@@ -31,7 +31,7 @@
                 pkgs.protobuf
               ];
               cargoLock = {
-                lockFile = ./rust/Cargo.lock;
+                lockFile = ./core/rust/Cargo.lock;
                 outputHashes = {
                   "rustfsm-0.1.0" = "sha256-hGhGm+My3ghaCzEv8ehAm1Mhy1uWVu0mZhiynvFlFDc=";
                 };
@@ -51,6 +51,7 @@
               final.haskell-nix.project' {
                 src = ./.;
                 compiler-nix-name = "ghc961";
+                # projectFileName = "stack.yaml";
                 modules = [{
                   packages.temporal-sdk.flags.external_lib = true;
                 }];

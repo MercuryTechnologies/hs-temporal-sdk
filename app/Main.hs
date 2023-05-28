@@ -1,9 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Main (main) where
 
-import Control.Concurrent.Async
+import Control.Monad.Logger (runStdoutLoggingT)
+import qualified Data.HashMap.Strict as HashMap
 import Data.ProtoLens.Message
+import Data.Proxy
 import qualified Data.Text as T
 import Data.UUID.V4
 import Data.UUID (UUID)
@@ -13,14 +16,16 @@ import Lens.Family2
 import Temporal.Core.Client
 import Temporal.Client.WorkflowService
 import Temporal.Runtime
-import Temporal.Core.Worker
+import Temporal.Core.Worker (defaultWorkerConfig)
+import Temporal.Payloads (JSON)
 import Temporal.Worker
+import Temporal.Workflow
+import Temporal.Workflow.WorkflowDefinition
 import System.Environment
-import System.IO
 import Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as Proto
 import Proto.Temporal.Api.Common.V1.Message_Fields (name)
-
+import UnliftIO
 
 
 main :: IO ()
@@ -47,7 +52,10 @@ main = do
 runWorker :: Client -> IO ()
 runWorker c = do
   putStrLn "Running worker"
-  withWorker c defaultWorkerConfig (Worker mempty) $ \handle -> do
+  let conf = mkConfig defaultWorkerConfig () $ HashMap.fromList
+        [ ("hello", defineWorkflow (Proxy @JSON) "hello" (pure () :: Workflow () ()))
+        ]
+  runStdoutLoggingT $ withWorker c conf $ \handle -> do
     wait handle
 
 runClient :: Client -> String -> IO ()

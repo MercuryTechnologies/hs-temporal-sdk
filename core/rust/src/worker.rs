@@ -286,6 +286,7 @@ impl WorkerRef {
               .complete_workflow_activation(completion)
               .await
               .map_err(|err| {
+                println!("[RUST] completion error: {}", err);
                 CWorkerError::c_repr_of(WorkerError {
                   code: WorkerErrorCode::CompletionFailure,
                   message: format!("{}", err)

@@ -111,18 +111,6 @@ defaultWorkerConfig = WorkerConfig
   , gracefulShutdownPeriodMillis = 0
   }
 
-{-
-  SDKError = 1,
-  InitWorkerFailed = 2,
-  InitReplayWorkerFailed = 3,
-  InvalidProto = 4,
-  ReplayWorkerClosed = 5,
-  PollShutdownError = 6,
-  PollFailure = 7,
-  CompletionFailure = 8,
-  InvalidWorkerConfig = 9,
--}
-
 data WorkerErrorCode 
   = SDKError 
   | InitWorkerFailed 

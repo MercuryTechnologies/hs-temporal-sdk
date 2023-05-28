@@ -16,7 +16,8 @@
   UndecidableInstances,
   TypeApplications #-}
 module Temporal.Workflow.WorkflowDefinition 
-  ( WorkflowDefinition
+  ( WorkflowDefinition(..) -- TODO, only export the type, not the constructor from this module
+  , SomeSerializableFunction(..) -- TODO, move to internal
   , workflowName
   , defineWorkflow
   ) where
@@ -48,10 +49,19 @@ data WorkflowDefinition env = WorkflowDefinition
   , workflowRun :: SomeSerializableFunction env
   }
 
-type ValidWorkflowFunction env fmt f = (ToPayloads fmt (ArgsOf f), Codec fmt (ResultOf f))
+type ValidWorkflowFunction env fmt f = 
+  ( ToPayloads fmt (ArgsOf f)
+  , ApplyPayloads fmt f (Workflow env (ResultOf (Workflow env) f))
+  , Codec fmt (ResultOf (Workflow env) f)
+  )
+
+-- TODO, I think we can avoid keeping the original function around and just use the serialized version
 data SomeSerializableFunction env = 
   forall fmt f. (ValidWorkflowFunction env fmt f) => 
-  SomeSerializableFunction (Proxy fmt) f
+  SomeSerializableFunction 
+    (Proxy fmt) 
+    f
+    (Proxy fmt -> f -> [RawPayload] -> Either String (Workflow env (ResultOf (Workflow env) f)))
 
 defineWorkflow :: 
   ( ValidWorkflowFunction env fmt f
@@ -60,5 +70,5 @@ defineWorkflow p name f = WorkflowDefinition
   { workflowName = name
   , workflowSignals = HashMap.empty
   , workflowQueries = HashMap.empty
-  , workflowRun = SomeSerializableFunction p f
+  , workflowRun = SomeSerializableFunction p f applyPayloads
   }
