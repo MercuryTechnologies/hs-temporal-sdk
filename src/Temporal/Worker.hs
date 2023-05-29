@@ -278,8 +278,11 @@ handleActivation activation = do
           $(logDebug) $ Text.pack ("Workflow completion: " ++ show ok)
           pure ok 
     else do
-      $(logDebug) "Not running workflow."
-      pure defMessage
+      $(logDebug) "Workflow does not need to run."
+      pure $ defMessage 
+        & Completion.runId .~ activation ^. Activation.runId
+        & Completion.successful .~ defMessage
+
   $(logDebug) (Text.pack $ show completion)
   eCompletionResult <- liftIO $ Core.completeWorkflowActivation worker.workerCore completion
   -- Crash the worker

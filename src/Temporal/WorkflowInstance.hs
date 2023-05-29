@@ -162,10 +162,18 @@ activate :: WorkflowInstance env -> WorkflowActivation -> IO WorkflowActivationC
 activate inst act = runInstanceM inst $ do
   $(logDebug) "activate"
   eResult <- applyJobs $ act ^. Activation.vec'jobs
+  -- Have to actually ensure that the primary task is done before we can
+  -- respond to the activation.
+  mPrimaryTask <- readIORef inst.workflowPrimaryTask
+  case mPrimaryTask of
+    Nothing -> pure ()
+    Just primaryTask -> wait primaryTask
   -- Important: the completion can send both successful commands and a failure
   -- message at the same time. This is because we can make partial progress on
   -- a workflow, but still fail at some point.
   successfulCommands <- finalizeCommandsForCompletion <$> readSuccessfulCommands
+  forM_ successfulCommands $ \cmd -> do
+    $(logDebug) $ Text.pack ("Successful command: " <> show cmd)
   case eResult of
     Left err -> do
       $(logWarn) "Failed activation on workflow" -- <> toLogStr (show $ workflowType info) <> " with ID " <> toLogStr (workflowId info) <> " and run ID " <> toLogStr (runId info))
@@ -201,7 +209,8 @@ readSuccessfulCommands = do
 addCommand :: WorkflowCommand -> InstanceM env ()
 addCommand command = do
   inst <- ask
-  liftIO $ modifyIORef inst.workflowCommands (command:)
+  $(logDebug) $ Text.pack ("Adding command: " <> show command)
+  liftIO $ atomicModifyIORef' inst.workflowCommands (\cmds -> (command:cmds, ()))
 
 -- We need to remove any commands that are not query responses after a terminal response.
 -- (note: I don't know how that would happen, but it's in the Python SDK code?)
@@ -308,6 +317,7 @@ applyStartWorkflow startWorkflow = do
                   }
             result <- liftIO $ runWorkflow workflowCtxt $ do
               Temporal.Payloads.encode fmt <$> act
+            $(logDebug) $ Text.pack ("Workflow result: " <> show result)
             -- TODO, the .NET version seems to return payloads from encoding, not just the inner result
             addCommand $ defMessage & Command.completeWorkflowExecution .~ (defMessage & Command.result .~ convertToProtoPayload (RawPayload result mempty))
 
