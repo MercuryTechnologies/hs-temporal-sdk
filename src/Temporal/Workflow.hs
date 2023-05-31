@@ -1,57 +1,195 @@
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE TemplateHaskell #-}
 module Temporal.Workflow 
   ( Workflow
+  , Task
+  , Temporal.Workflow.wait
   -- , execWorkflow
   -- , continueAsNew
-  -- , deprecatePatch
   -- , executeActivity
   -- , executeChildWorkflow
   -- , executeLocalActivity
-  -- , info
+  , Info(..)
+  , RetryPolicy(..)
+  , ParentInfo(..)
+  , info
   -- , memo
   -- , memoValue
-  -- , now
-  -- , patched
+  , patched
+  , deprecatePatch
   -- , query
-  -- , random
   -- , setDynamicQueryHandler
   -- , setDynamicSignalHandler
   -- , setQueryHandler
   -- , setSignalHandler
   -- , signal
-  -- , startActivity
+  , StartActivityOptions(..)
+  , defaultStartActivityOptions
+  , startActivity
+  -- , startLocalActivity
   -- , startChildWorkflow
-  -- , time
-  -- , timeNanoseconds
+  , now
+  , time
   -- , upsertSearchAttributes
-  -- , uuid4
+  , randomGen
+  , uuid4
   -- , waitCondition
+  , WorkflowGenM(..)
   ) where
 
+import Control.Monad.Logger
 import Control.Monad.Reader
 import Control.Monad.IO.Class
-import Data.IORef
+import qualified Data.ByteString.Short as SBS
 import Data.Map.Strict (Map)
+import qualified Data.HashMap.Strict as HashMap
+import Data.Maybe
+import Data.ProtoLens
+import qualified Data.Set as Set
 import Data.Text (Text)
+import qualified Data.Text as Text
 import Data.Time.Clock (UTCTime)
+import Data.UUID (UUID)
+import Data.UUID.Types.Internal ( buildFromBytes )
 import Data.Word (Word32)
 import Data.Vector (Vector)
+import Lens.Family2
 import Proto.Temporal.Api.Common.V1.Message (Payload)
+import System.Clock (TimeSpec)
+import System.Random.Stateful
+import Temporal.Common
 import Temporal.Workflow.Unsafe
+import Temporal.WorkflowInstance
+import Temporal.Workflow.WorkflowInstance
+import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation as Activation
+import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
+import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
+import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult as ActivityResult
+import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields as ActivityResult
+import UnliftIO
 
+data Task env a = Task (Workflow env a)
+
+wait :: Task env a -> Workflow env a
+wait (Task w) = w
+
+ilift :: InstanceM env a -> Workflow env a
+ilift = Workflow . fmap Done . lift
+
+askInstance :: Workflow env (WorkflowInstance env)
+askInstance = ilift ask
+
+raskInstance :: ReaderT (Context env) (InstanceM env) (WorkflowInstance env)
+raskInstance = lift ask
+
+data ContinueAsNewOptions = ContinueAsNewOptions
+  { workflow :: Maybe WorkflowType
+  , args :: (Vector Payload)
+  , taskQueue :: Maybe TaskQueue
+  , runTimeout :: Maybe TimeSpec
+  , taskTimeout :: Maybe TimeSpec
+  , retryPolicy :: Maybe RetryPolicy
+  -- , TODO memo :: 
+  -- , TODO searchAttributes :: Maybe (Map Text Payload)
+  -- , TODO headers
+  }
 -- continueAsNew :: () -> Workflow env ()
 -- continueAsNew = undefined
 
--- deprecatePatch :: () -> Workflow env ()
--- deprecatePatch = undefined
+data StartActivityOptions = StartActivityOptions
+  { activityId :: Maybe ActivityId
+  , taskQueue :: Maybe TaskQueue
+  , scheduleToCloseTimeout :: Maybe TimeSpec
+  , scheduleToStartTimeout :: Maybe TimeSpec
+  , startToCloseTimeout :: Maybe TimeSpec
+  , heartbeatTimeout :: Maybe TimeSpec
+  , retryPolicy :: Maybe RetryPolicy
+  , cancellationType :: ActivityCancellationType
+  -- , headers :: Maybe (Map Text Text) -- TODO payloads
+  , disableEagerExecution :: Bool
+  }
 
--- executeActivity :: () -> Workflow env ()
--- executeActivity = undefined
+defaultStartActivityOptions :: StartActivityOptions
+defaultStartActivityOptions = StartActivityOptions
+  { activityId = Nothing
+  , taskQueue = Nothing
+  , scheduleToCloseTimeout = Nothing
+  , scheduleToStartTimeout = Nothing
+  , startToCloseTimeout = Nothing
+  , heartbeatTimeout = Nothing
+  , retryPolicy = Nothing
+  , cancellationType = ActivityCancellationTryCancel
+  , disableEagerExecution = False
+  }
 
--- executeChildWorkflow :: () -> Workflow env ()
--- executeChildWorkflow = undefined
+-- TODO, this definition doesn't admit for the case where the workflow definition is served by a different service where we don't know the type.
+startActivity :: Text -> StartActivityOptions -> [Payload] -> Workflow env (Task env Payload)
+startActivity n opts ps = ilift $ do
+  inst <- ask
+  s@(Sequence actSeq) <- nextActivitySequence
+  resultSlot <- newIVar
+  modifyMVar inst.workflowSequenceMaps $ \seqMaps -> do
+    pure (seqMaps { activities = HashMap.insert s resultSlot (activities seqMaps) }, ())
 
--- executeLocalActivity :: () -> Workflow env ()
--- executeLocalActivity = undefined
+  let scheduleActivity = defMessage
+        & Command.seq .~ actSeq
+        & Command.activityId .~ maybe (Text.pack $ show actSeq) rawActivityId (opts.activityId)
+        & Command.activityType .~ n
+        & Command.taskQueue .~ rawTaskQueue (fromMaybe inst.workflowInstanceInfo.taskQueue opts.taskQueue)
+        & Command.arguments .~ ps
+        & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts.retryPolicy
+        & Command.cancellationType .~ activityCancellationTypeToProto opts.cancellationType
+        & Command.maybe'scheduleToCloseTimeout .~ fmap timespecToDuration opts.scheduleToCloseTimeout
+        & Command.maybe'scheduleToStartTimeout .~ fmap timespecToDuration opts.scheduleToStartTimeout
+        & Command.maybe'startToCloseTimeout .~ fmap timespecToDuration opts.startToCloseTimeout
+        & Command.maybe'heartbeatTimeout .~ fmap timespecToDuration opts.heartbeatTimeout
+        & Command.headers .~ mempty -- TODO
+
+  let cmd = defMessage & Command.scheduleActivity .~ scheduleActivity
+  $(logDebug) "Add command: scheduleActivity"
+  addCommand inst cmd
+  pure $ Task $ do
+    res <- getIVar resultSlot
+    case res ^. Activation.result . ActivityResult.maybe'status of
+      Nothing -> error "Activity result missing status"
+      Just (ActivityResult.ActivityResolution'Completed success) -> pure $ success ^. ActivityResult.result
+      Just (ActivityResult.ActivityResolution'Failed failure) -> error "not implemented"
+      Just (ActivityResult.ActivityResolution'Cancelled details) -> error "not implemented"
+      Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"
+
+
+
+data StartChildWorkflowOptions = StartChildWorkflowOptions 
+  { childWorkflowId :: Maybe WorkflowId -- TODO should this be maybe?
+  , taskQueue :: Maybe TaskQueue
+  , cancellationType :: ChildWorkflowCancellationType
+  , parentClosePolicy :: ParentClosePolicy
+  , executionTimeout :: Maybe TimeSpec
+  , runTimeout :: Maybe TimeSpec
+  , taskTimeout :: Maybe TimeSpec
+  , retryPolicy :: Maybe RetryPolicy
+  , cronSchedule :: Maybe Text
+  , memo :: Maybe (Map Text Payload)
+  , searchAttributes :: Maybe (Map Text Payload)
+  }
+-- TODO, this definition doesn't admit for the case where the workflow definition is served by a different service where we don't know the type.
+startChildWorkflow :: Text -> StartChildWorkflowOptions -> [Payload] -> Workflow env (Task env Payload)
+startChildWorkflow = undefined
+
+data StartLocalActivityOptions = StartLocalActivityOptions 
+  { -- TODO Activity name
+    -- TODO args
+    activityId :: Maybe ActivityId
+  , scheduleToCloseTimeout :: Maybe TimeSpec
+  , scheduleToStartTimeout :: Maybe TimeSpec
+  , startToCloseTimeout :: Maybe TimeSpec
+  , retryPolicy :: Maybe RetryPolicy
+  , localRetryThreshold :: Maybe TimeSpec
+  , cancellationType :: ActivityCancellationType
+  -- TODO headers
+  }
+startLocalActivity :: StartLocalActivityOptions -> Workflow env ()
+startLocalActivity = undefined
 
 -- {-
 -- Function	get_dynamic_query_handler	Get the dynamic query handler if any.
@@ -62,8 +200,8 @@ import Temporal.Workflow.Unsafe
 -- Function	get_signal_handler	Get the signal handler for the given name if any.
 -- -}
 
--- info :: () -> Workflow env ()
--- info = undefined
+info :: Workflow env Info
+info = workflowInstanceInfo <$> askInstance
 
 -- memo :: () -> Workflow env ()
 -- memo = undefined
@@ -71,17 +209,40 @@ import Temporal.Workflow.Unsafe
 -- memoValue :: () -> Workflow env ()
 -- memoValue = undefined
 
--- now :: () -> Workflow env ()
--- now = undefined
+-- Current time from the workflow perspective.
+--
+-- Equivalent to `getCurrentTime` from the `time` package.
+now :: Workflow env UTCTime
+now = undefined
 
--- patched :: () -> Workflow env ()
--- patched = undefined
+applyPatch :: PatchId -> Bool {- ^ deprecated -} -> Workflow env Bool 
+applyPatch pid deprecated = Workflow $ fmap Done $ do
+  inst <- raskInstance
+  memoized <- readIORef inst.workflowMemoizedPatches
+  case HashMap.lookup pid memoized of
+    Just val -> pure val
+    Nothing -> do
+      isReplaying <- readIORef inst.workflowIsReplaying
+      notifiedPatches <- readIORef inst.workflowNotifiedPatches
+      let usePatch = not isReplaying || Set.member pid notifiedPatches
+      writeIORef inst.workflowMemoizedPatches $ HashMap.insert pid usePatch memoized
+      when usePatch $ do
+        liftIO $ addCommand inst $ defMessage & 
+          Command.setPatchMarker .~ (defMessage & Command.patchId .~ rawPatchId pid & Command.deprecated .~ deprecated)
+      pure usePatch
+
+patched :: PatchId -> Workflow env Bool
+patched pid = applyPatch pid False
+
+deprecatePatch :: PatchId -> Workflow env ()
+deprecatePatch pid = void $ applyPatch pid True
 
 -- query :: () -> Workflow env ()
 -- query = undefined
 
--- random :: () -> Workflow env ()
--- random = undefined
+-- | Get a mutable randomness generator for the workflow.
+randomGen :: Workflow env WorkflowGenM
+randomGen = workflowRandomnessSeed <$> askInstance
 
 -- setDynamicQueryHandler :: () -> Workflow env ()
 -- setDynamicQueryHandler = undefined
@@ -98,23 +259,38 @@ import Temporal.Workflow.Unsafe
 -- signal :: () -> Workflow env ()
 -- signal = undefined
 
--- startActivity :: () -> Workflow env ()
--- startActivity = undefined
-
--- startChildWorkflow :: () -> Workflow env ()
--- startChildWorkflow = undefined
-
--- time :: () -> Workflow env ()
--- time = undefined
-
--- timeNanoseconds :: () -> Workflow env ()
--- timeNanoseconds = undefined
+-- | Current time from the workflow perspective.
+--
+-- The value is relative to epoch time.
+time :: Workflow env TimeSpec
+time = Workflow $ do
+  wft <- workflowTime <$> raskInstance
+  Done <$> readIORef wft
 
 -- upsertSearchAttributes :: () -> Workflow env ()
 -- upsertSearchAttributes = undefined
 
--- uuid4 :: () -> Workflow env ()
--- uuid4 = undefined
+uuid4 :: Workflow env UUID
+uuid4 = do
+  wft <- workflowRandomnessSeed <$> askInstance
+  sbs <- uniformShortByteString 16 wft
+  pure $ buildFromBytes 4
+    (sbs `SBS.index` 0x0)
+    (sbs `SBS.index` 0x1)
+    (sbs `SBS.index` 0x2)
+    (sbs `SBS.index` 0x3)
+    (sbs `SBS.index` 0x4)
+    (sbs `SBS.index` 0x5)
+    (sbs `SBS.index` 0x6)
+    (sbs `SBS.index` 0x7)
+    (sbs `SBS.index` 0x8)
+    (sbs `SBS.index` 0x9)
+    (sbs `SBS.index` 0xA)
+    (sbs `SBS.index` 0xB)
+    (sbs `SBS.index` 0xC)
+    (sbs `SBS.index` 0xD)
+    (sbs `SBS.index` 0xE)
+    (sbs `SBS.index` 0xF)
 
 -- waitCondition :: () -> Workflow env ()
 -- waitCondition = undefined

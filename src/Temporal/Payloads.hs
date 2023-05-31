@@ -41,7 +41,6 @@ import Data.Text (Text)
 import Data.Typeable (Typeable)
 import Data.Typeable
 import GHC.TypeLits
-import Temporal.Workflow (Workflow)
 import Lens.Family2
 import qualified Proto.Temporal.Api.Common.V1.Message as Proto (Payload)
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Proto (data', metadata)

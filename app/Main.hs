@@ -11,7 +11,6 @@ import qualified Data.Text as T
 import Data.UUID.V4
 import Data.UUID (UUID)
 import qualified Data.UUID as UUID
-import Foreign.C.Types
 import Lens.Family2
 import Temporal.Core.Client
 import Temporal.Client.WorkflowService
@@ -19,7 +18,8 @@ import Temporal.Runtime
 import Temporal.Core.Worker (defaultWorkerConfig)
 import Temporal.Payloads (JSON)
 import Temporal.Worker
-import Temporal.Workflow
+import Temporal.Workflow hiding (Info(..), wait)
+import qualified Temporal.Workflow as Workflow
 import Temporal.Workflow.WorkflowDefinition
 import System.Environment
 import Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields
@@ -45,7 +45,7 @@ main = do
       print resp
       case cmd of
         ["worker"] -> runWorker c
-        ["client", id'] -> runClient c id'
+        ["client", taskname, id'] -> runClient c taskname id'
         _ -> error "Unknown command"
   pure ()
 
@@ -54,18 +54,24 @@ runWorker c = do
   putStrLn "Running worker"
   let conf = mkConfig defaultWorkerConfig () $ HashMap.fromList
         [ ("hello", defineWorkflow (Proxy @JSON) "hello" (pure () :: Workflow () ()))
+        , ( "helloActivity"
+          , defineWorkflow (Proxy @JSON) "helloActivity" $ do
+              act <- startActivity "Activate!" defaultStartActivityOptions []
+              Workflow.wait act
+              pure ()
+          )
         ]
   runStdoutLoggingT $ withWorker c conf $ \handle -> do
     wait handle
 
-runClient :: Client -> String -> IO ()
-runClient c id' = do
+runClient :: Client -> String -> String -> IO ()
+runClient c taskname id' = do
   putStrLn "Running client"
   reqId <- nextRandom
   let req = defMessage
         & Proto.namespace .~ "default"
         & Proto.taskQueue .~ (defMessage & name .~ "default")
-        & workflowType .~ (defMessage & name .~ "hello")
+        & workflowType .~ (defMessage & name .~ T.pack taskname)
         & workflowId .~ T.pack id'
         & Proto.requestId .~ UUID.toText reqId
   resp <- startWorkflowExecution c req 

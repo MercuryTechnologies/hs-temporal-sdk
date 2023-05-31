@@ -24,6 +24,7 @@ import qualified Temporal.Core.Worker as Core
 import Temporal.Internal.JobPool
 import Temporal.Workflow.Unsafe
 import Temporal.Workflow.WorkflowDefinition
+import Temporal.Workflow.WorkflowInstance
 import Temporal.WorkflowInstance
 
 import Data.ByteString (ByteString)
@@ -50,10 +51,6 @@ import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as CommonProto
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
-import qualified Proto.Google.Protobuf.Duration as Duration
-import qualified Proto.Google.Protobuf.Duration_Fields as Duration
-import qualified Proto.Google.Protobuf.Timestamp as Timestamp
-import qualified Proto.Google.Protobuf.Timestamp_Fields as Timestamp
 
 data WorkflowWorkerConfig env = WorkflowWorkerConfig
   { deadlockTimeout :: Maybe Int
@@ -84,18 +81,6 @@ data WorkflowWorker env = WorkflowWorker
   , workerConfig :: WorkflowWorkerConfig env
   , workerLogFn :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
   }
-
-data Counters = Counters
-  { timerCounter :: Word64
-  , activityCounter :: Word64
-  , childWorkflowCounter :: Word64
-  , externalSignalCounter :: Word64
-  , externalCancelsCounter :: Word64
-  }
-
-startingCounters :: Counters
-startingCounters = Counters 0 0 0 0 0
-
 
 newtype WorkerM env a = WorkerM { unWorkerM :: ReaderT (WorkflowWorker env) IO a }
   deriving (Functor, Applicative, Monad, MonadIO, MonadReader (WorkflowWorker env), MonadUnliftIO)
@@ -201,25 +186,13 @@ execute worker = runWorkerM worker $ do
 nonEmptyString :: Text -> Maybe Text
 nonEmptyString t = if Text.null t then Nothing else Just t
 
-timespecFromDuration :: Duration.Duration -> Clock.TimeSpec
-timespecFromDuration d = Clock.TimeSpec
-  { Clock.sec = d ^. Duration.seconds
-  , Clock.nsec = fromIntegral (d ^. Duration.nanos)
-  }
-
-timespecFromTimestamp :: Timestamp.Timestamp -> Clock.TimeSpec
-timespecFromTimestamp ts = Clock.TimeSpec
-  { Clock.sec = ts ^. Timestamp.seconds
-  , Clock.nsec = fromIntegral (ts ^. Timestamp.nanos)
-  }
-
 defaultRetryPolicy :: RetryPolicy
 defaultRetryPolicy = RetryPolicy
   { initialInterval = Clock.TimeSpec 1 0
   , backoffCoefficient = 2
   , maximumInterval = Nothing
   , maximumAttempts = 0
-  , nonRetryableErrorTypes = []
+  , nonRetryableErrorTypes = mempty
   }
 
 retryPolicyFromProto :: Message.RetryPolicy -> RetryPolicy
@@ -228,7 +201,7 @@ retryPolicyFromProto p = RetryPolicy
   , backoffCoefficient = p ^. Message.backoffCoefficient
   , maximumInterval = maybe (maximumInterval defaultRetryPolicy) (Just . timespecFromDuration) (p ^. Message.maybe'maximumInterval)
   , maximumAttempts = p ^. Message.maximumAttempts
-  , nonRetryableErrorTypes = p ^. Message.nonRetryableErrorTypes
+  , nonRetryableErrorTypes = p ^. Message.vec'nonRetryableErrorTypes
   }
 
 handleActivation :: Core.WorkflowActivation -> WorkerM env ()
@@ -376,65 +349,4 @@ handleActivation activation = do
               Nothing -> pure $ $(logDebug) $ Text.pack ("Eviction request on an unknown workflow with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
               Just _ -> pure $ $(logDebug) $ Text.pack ("Evicting workflow instance with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
         _ -> pure ()
-
-
-
-
--- applyStartWorkflow :: WorkflowActivation -> StartWorkflow -> WorkerM env ()
--- applyStartWorkflow act startWorkflow = do
---   worker <- ask
---   workflowInstance <- atomically $ do
---     currentWorkflows <- takeTMVar worker.runningWorkflows
---     let mCurrentWorkflow = HashMap.lookup (startWorkflow ^. Activation.workflowId) currentWorkflows
---         currentWorkflow = createWorkflowInstance worker startWorkflow
---     putTMVar worker.runningWorkflows (HashMap.insert (startWorkflow ^. Activation.workflowId) currentWorkflow)
---     pure currentWorkflow
---   enqueueJob worker.workerWorkflowInstancePool $ do
---     -- TODO, don't use async here, use a pool
---       Right ok -> _
---     -- If the worker is unable to complete the activation, we log and crash the worker.
---     eActivationResult <- Core.completeWorkflowActivation worker.workerCore completionMessage
---     case eActivationResult of
---       Left err -> do
---         -- TODO log error
---         -- "Failed completing activation on workflow with run ID %s", act ^. runId
---         throwIO err
---       Right () -> pure ()
-    
---     let mRemoveJob = _
---     forM_ mRemoveJob $ \removeJob -> do
---       -- TODO
---       logMsg <- atomically $ do
---         running <- takeTMVar worker.runningWorkflows
---         resultMessage <- case HashMap.lookup running (act ^. runId) of
---           Nothing -> pure "Eviction request on unknown workflow with run ID %s, message: %s"
---           Just _ -> do
---             --     logger.debug(
---             --         "Evicting workflow with run ID %s, message: %s",
---             --         act.run_id,
---             --         remove_job.remove_from_cache.message,
---             --     )
---             pure "Evicting workflow with run ID %s, message: %s"
---         -- TODO(temporal-staff-question) should we delete from the deadlockedWorkflows map too?
---         putTMVar worker.runningWorkflows $ HashMap.delete (act ^. Activation.runId) running
---         pure resultMessage
---       pure ()
---       -- TODO evicition hook support
---       -- if act.run_id in self._running_workflows:
---       --     del self._running_workflows[act.run_id]
---       -- else:
---       --     logger.debug(
---       --         
---       --         act.run_id,
---       --         remove_job.remove_from_cache.message,
---       --     )
---       -- -- If we are failing on eviction, set the error and shutdown the
---       -- -- entire worker
---       -- if self._on_eviction_hook is not None:
---       --     try:
---       --         self._on_eviction_hook(act.run_id, remove_job.remove_from_cache)
---       --     except Exception as e:
---       --         self._throw_after_activation = e
---       --         logger.debug("Shutting down worker on eviction")
---       --         self._bridge_worker().initiate_shutdown()
 

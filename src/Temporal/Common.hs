@@ -10,27 +10,59 @@ import Control.Monad
 import Control.Monad.IO.Class
 import Data.Hashable (Hashable)
 import Data.Text (Text)
+import Data.ProtoLens
+import Lens.Family2
+import qualified Proto.Google.Protobuf.Duration as Duration
+import qualified Proto.Google.Protobuf.Duration_Fields as Duration
+import qualified Proto.Google.Protobuf.Timestamp as Timestamp
+import qualified Proto.Google.Protobuf.Timestamp_Fields as Timestamp
+import qualified System.Clock as Clock
 
-newtype WorkflowType = WorkflowType Text
+-- | This is generally the name of the function itself
+newtype WorkflowType = WorkflowType { rawWorkflowType :: Text }
   deriving (Eq, Ord, Show, Hashable)
-newtype WorkflowId = WorkflowId Text
+newtype WorkflowId = WorkflowId { rawWorkflowId :: Text }
   deriving (Eq, Ord, Show, Hashable)
-newtype Namespace = Namespace Text
+newtype Namespace = Namespace { rawNamespace :: Text }
   deriving (Eq, Ord, Show, Hashable)
 newtype RunId = RunId { rawRunId :: Text }
   deriving (Eq, Ord, Show, Hashable)
-newtype PatchId = PatchId Text
+newtype PatchId = PatchId { rawPatchId :: Text }
   deriving (Eq, Ord, Show, Hashable)
-newtype TaskQueue = TaskQueue Text
+newtype TaskQueue = TaskQueue { rawTaskQueue :: Text }
   deriving (Eq, Ord, Show, Hashable)
-newtype ActivityId = ActivityId Text
+-- | Unique identifier for an activity within a workflow.
+newtype ActivityId = ActivityId { rawActivityId :: Text }
   deriving (Eq, Ord, Show, Hashable)
-newtype SignalId = SignalId Text
+newtype SignalId = SignalId { rawSignalId :: Text }
   deriving (Eq, Ord, Show, Hashable)
-newtype TimerId = TimerId Text
+newtype TimerId = TimerId { rawTimerId :: Text }
   deriving (Eq, Ord, Show, Hashable)
-newtype CancellationId = CancellationId Text
+newtype CancellationId = CancellationId { rawCancellationId :: Text }
   deriving (Eq, Ord, Show, Hashable)
+
+timespecFromDuration :: Duration.Duration -> Clock.TimeSpec
+timespecFromDuration d = Clock.TimeSpec
+  { Clock.sec = d ^. Duration.seconds
+  , Clock.nsec = fromIntegral (d ^. Duration.nanos)
+  }
+
+timespecToDuration :: Clock.TimeSpec -> Duration.Duration
+timespecToDuration ts = defMessage
+  & Duration.seconds .~ Clock.sec ts
+  & Duration.nanos .~ fromIntegral (Clock.nsec ts)
+
+timespecFromTimestamp :: Timestamp.Timestamp -> Clock.TimeSpec
+timespecFromTimestamp ts = Clock.TimeSpec
+  { Clock.sec = ts ^. Timestamp.seconds
+  , Clock.nsec = fromIntegral (ts ^. Timestamp.nanos)
+  }
+
+timespecToTimestamp :: Clock.TimeSpec -> Timestamp.Timestamp
+timespecToTimestamp ts = defMessage
+  & Timestamp.seconds .~ Clock.sec ts
+  & Timestamp.nanos .~ fromIntegral (Clock.nsec ts)
+
 -- | Errors that are an issue with the worker itself, not the workflow
 --
 -- These errors should cause the worker to exit, and imply an issue with the
