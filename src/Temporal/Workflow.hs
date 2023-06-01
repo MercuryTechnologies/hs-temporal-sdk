@@ -3,6 +3,7 @@
 module Temporal.Workflow 
   ( Workflow
   , Task
+  , TimeoutType(..)
   , Temporal.Workflow.wait
   -- , execWorkflow
   -- , continueAsNew
@@ -99,9 +100,8 @@ data ContinueAsNewOptions = ContinueAsNewOptions
 data StartActivityOptions = StartActivityOptions
   { activityId :: Maybe ActivityId
   , taskQueue :: Maybe TaskQueue
-  , scheduleToCloseTimeout :: Maybe TimeSpec
+  , timeout :: TimeoutType
   , scheduleToStartTimeout :: Maybe TimeSpec
-  , startToCloseTimeout :: Maybe TimeSpec
   , heartbeatTimeout :: Maybe TimeSpec
   , retryPolicy :: Maybe RetryPolicy
   , cancellationType :: ActivityCancellationType
@@ -109,18 +109,22 @@ data StartActivityOptions = StartActivityOptions
   , disableEagerExecution :: Bool
   }
 
-defaultStartActivityOptions :: StartActivityOptions
-defaultStartActivityOptions = StartActivityOptions
+defaultStartActivityOptions :: TimeoutType -> StartActivityOptions
+defaultStartActivityOptions t = StartActivityOptions
   { activityId = Nothing
   , taskQueue = Nothing
-  , scheduleToCloseTimeout = Nothing
+  , timeout = t
   , scheduleToStartTimeout = Nothing
-  , startToCloseTimeout = Nothing
   , heartbeatTimeout = Nothing
   , retryPolicy = Nothing
   , cancellationType = ActivityCancellationTryCancel
   , disableEagerExecution = False
   }
+
+data TimeoutType 
+  = StartToClose TimeSpec 
+  | ScheduleToClose TimeSpec
+  | StartToCloseAndScheduleToClose TimeSpec TimeSpec
 
 -- TODO, this definition doesn't admit for the case where the workflow definition is served by a different service where we don't know the type.
 startActivity :: Text -> StartActivityOptions -> [Payload] -> Workflow env (Task env Payload)
@@ -139,11 +143,15 @@ startActivity n opts ps = ilift $ do
         & Command.arguments .~ ps
         & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts.retryPolicy
         & Command.cancellationType .~ activityCancellationTypeToProto opts.cancellationType
-        & Command.maybe'scheduleToCloseTimeout .~ fmap timespecToDuration opts.scheduleToCloseTimeout
         & Command.maybe'scheduleToStartTimeout .~ fmap timespecToDuration opts.scheduleToStartTimeout
-        & Command.maybe'startToCloseTimeout .~ fmap timespecToDuration opts.startToCloseTimeout
         & Command.maybe'heartbeatTimeout .~ fmap timespecToDuration opts.heartbeatTimeout
         & Command.headers .~ mempty -- TODO
+        & \msg -> case opts.timeout of
+          StartToClose t -> msg & Command.startToCloseTimeout .~ timespecToDuration t
+          ScheduleToClose t -> msg & Command.scheduleToCloseTimeout .~ timespecToDuration t
+          StartToCloseAndScheduleToClose stc stc' -> msg 
+            & Command.startToCloseTimeout .~ timespecToDuration stc
+            & Command.scheduleToCloseTimeout .~ timespecToDuration stc'
 
   let cmd = defMessage & Command.scheduleActivity .~ scheduleActivity
   $(logDebug) "Add command: scheduleActivity"

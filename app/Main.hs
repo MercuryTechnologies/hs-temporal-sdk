@@ -25,6 +25,7 @@ import System.Environment
 import Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as Proto
 import Proto.Temporal.Api.Common.V1.Message_Fields (name)
+import System.Clock
 import UnliftIO
 
 
@@ -56,7 +57,7 @@ runWorker c = do
         [ ("hello", defineWorkflow (Proxy @JSON) "hello" (pure () :: Workflow () ()))
         , ( "helloActivity"
           , defineWorkflow (Proxy @JSON) "helloActivity" $ do
-              act <- startActivity "Activate!" defaultStartActivityOptions []
+              act <- startActivity "Activate!" (defaultStartActivityOptions $ StartToClose $ TimeSpec 10 0) []
               Workflow.wait act
               pure ()
           )

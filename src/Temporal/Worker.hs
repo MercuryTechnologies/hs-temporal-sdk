@@ -174,7 +174,7 @@ execute worker = runWorkerM worker $ do
             throwIO s
           (Left err) -> $(logError) $ Text.pack $ show err
           (Right activation) -> do
-            $(logDebug) $ Text.pack ("Got activation " ++ show activation) 
+            $(logDebug) $ Text.pack ("Got activation " <> show activation) 
             queueAsyncWorkerTask $ handleActivation activation
         
   activationPoller 
@@ -239,7 +239,7 @@ handleActivation activation = do
             Just result -> Right result
       case eResult of
         Left err -> do
-          $(logDebug) "Workflow failure"
+          $(logDebug) ("Workflow failure" <> Text.pack (show err))
           -- TODO there are lots of fields on this failureProto that we probably want to fill in
           let failureProto = defMessage
                 -- & Activation.message .~ (Text.pack $ show err)

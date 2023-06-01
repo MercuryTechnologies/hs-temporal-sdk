@@ -150,7 +150,7 @@ readSuccessfulCommands = do
     case commands of
       FlushActivationCompletion cmds -> do
         writeTVar inst.workflowCommands (RunningActivation [])
-        pure $ finalizeCommandsForCompletion cmds
+        pure cmds
       RunningActivation _cmds -> 
         -- We want to wait until we've explored the entire activation before sending.
         retry

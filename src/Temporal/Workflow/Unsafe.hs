@@ -155,6 +155,11 @@ runWorkflow ctxt wf = do
                 writeTVar inst.workflowCommands new
                 pure new
         $(logDebug) ("flushCommands: " <> Text.pack (show cmds))
+        -- Wait for the main instance thread to complete the activation, we will just spin
+        -- on the run loop without having anything useful to process.
+        atomically $ do
+          c <- readTVar inst.workflowCompletions
+          when (null c) retry
         emptyRunQueue
 
       checkCompletions :: InstanceM env (JobList env)
