@@ -13,11 +13,11 @@
   TypeFamilies,
   UndecidableInstances,
   TypeApplications #-}
-module Temporal.Payloads 
+module Temporal.Payload 
   ( Payload(..)
   , RawPayload(..)
   , Codec(..)
-  , JSON
+  , JSON(..)
   , gatherPayloads
   , ToPayloads
   , applyPayloads
@@ -33,12 +33,14 @@ import Data.Aeson hiding (encode, decode)
 import qualified Data.Aeson as Aeson
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as BL
+import Control.Exception (SomeException)
 import Data.Kind
 import Data.ProtoLens (defMessage)
+import Data.Proxy
 import Data.Map.Strict (Map)
+import qualified Data.Vector as V
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
-import Data.Typeable (Typeable)
 import Data.Typeable
 import GHC.TypeLits
 import Lens.Family2
@@ -56,14 +58,20 @@ as we go. If there are not enough or too many params, we fail.
 
 -- | We want to be able to serialize & deserialize the parameters of a function using an arbitrary serialization format.
 class Codec fmt a where
-  encode :: Proxy fmt -> a -> ByteString
-  decode :: Proxy fmt -> ByteString -> Either String a
+  encode :: fmt -> a -> IO RawPayload
+  decode :: fmt -> RawPayload -> IO (Either String a)
+  encodeException :: fmt -> SomeException -> IO RawPayload
 
-data JSON
+data JSON = JSON
 
 instance (Aeson.ToJSON a, Aeson.FromJSON a) => Codec JSON a where
-  encode _ = BL.toStrict . Aeson.encode
-  decode _ = Aeson.eitherDecodeStrict'
+  encode _ x = do
+    pure $ RawPayload (BL.toStrict $ Aeson.encode x) mempty
+  decode _ = pure . Aeson.eitherDecodeStrict' . inputPayloadData
+  encodeException fmt e = encode fmt $ object
+    [ "message" .= show e
+    , "stack_trace" .= ("" :: String)
+    ]
 
 data Payload fmt = forall a. (Codec fmt a, Typeable a) => Payload 
   { payloadData :: a
@@ -77,7 +85,7 @@ type family ArgsOf f where
 type family ResultOf (m :: * -> *) f where
   ResultOf m (arg -> rest) = ResultOf m rest
   ResultOf m (m result) = result
-  ResultOf m result = TypeError ('Text "A workflow definition must use the " ':<>: 'ShowType m ':<>: 'Text " monad." :$$: ('Text "Current type: " ':<>: 'ShowType result))
+  ResultOf m result = TypeError ('Text "This function must use the (" ':<>: 'ShowType m ':<>: 'Text ") monad." :$$: ('Text "Current type: " ':<>: 'ShowType result))
 
 type family BuildArgs (args :: [*]) result where
   BuildArgs '[] result = result
@@ -98,7 +106,7 @@ gatherPayloads f = toPayloadsAp (Proxy @fmt) (Proxy @args) id
 data RawPayload = RawPayload
   { inputPayloadData :: ByteString
   , inputPayloadMetadata :: Map Text ByteString
-  }
+  } deriving (Eq, Show)
 
 convertFromProtoPayload :: Proto.Payload -> RawPayload
 convertFromProtoPayload p = RawPayload (p ^. Proto.data') (p ^. Proto.metadata)
@@ -109,14 +117,18 @@ convertToProtoPayload (RawPayload d m) = defMessage
   & Proto.metadata .~ m
 
 class ApplyPayloads fmt f r | f -> r where
-  applyPayloads :: Proxy fmt -> f -> [RawPayload] -> Either String r
+  applyPayloads :: fmt -> f -> V.Vector RawPayload -> IO (Either String r)
 
 instance ApplyPayloads fmt f f where
-  applyPayloads _ f [] = Right f
-  applyPayloads _ _ _ = Left "Too many arguments"
+  applyPayloads _ f vec = pure $ if V.null vec
+    then Right f
+    else Left "Too many arguments"
 
 instance (Codec fmt arg, ApplyPayloads fmt rest r) => ApplyPayloads fmt (arg -> rest) r where
-  applyPayloads p f (RawPayload bs _ : rest) = case decode p bs of
-    Right arg -> applyPayloads p (f arg) rest
-    Left err -> Left err
-  applyPayloads _ _ _ = Left "Not enough arguments"
+  applyPayloads p f vec = case V.uncons vec of
+    Nothing -> pure $ Left "Not enough arguments"
+    Just (pl, rest) -> do
+      res <- decode p pl
+      case res of
+        Right arg -> applyPayloads p (f arg) rest
+        Left err -> pure $ Left err

@@ -8,16 +8,28 @@ module Temporal.Workflow.Unsafe where
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Int (Int32)
+import Data.ProtoLens
 import Data.Text (Text)
 import qualified Data.Text as Text
 import GHC.IO.Exception (BlockedIndefinitelyOnSTM(..))
 import GHC.TypeLits
+import Lens.Family2
 import System.Clock (TimeSpec)
 import Temporal.Common
+import Temporal.Exception
+import Temporal.Payload
 import Temporal.Workflow.WorkflowInstance
+import Temporal.Worker.Types
 import UnliftIO
 import Control.Concurrent.STM (retry)
 import Unsafe.Coerce
+import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
+import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
+import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands
+  ( WorkflowCommand
+  , WorkflowCommand'Variant(..)
+  , CompleteWorkflowExecution
+  )
 
 -- How this works:
 --
@@ -39,7 +51,9 @@ import Unsafe.Coerce
 --
 -- Another difference is that workflow signals allow for these handles to be
 -- altered out of band, so we can't just traverse the tree and trust the
--- computation flow to be fully within our control.
+-- computation flow to be fully within our control. I think this is fine,
+-- but it does mean that we might need to update the scheduler code below
+-- to allow injecting these signals into the run queue.
 --
 -- Regardless, once we signal a WorkflowActivationCompletion, we wait in a
 -- suspended state.
@@ -49,14 +63,14 @@ import Unsafe.Coerce
 -- activation jobs to fill any corresponding handles with their
 -- results and continue execution.
 --
--- We follow this process indefinitely until the final result is returned.
--- At this point, the instance is responsible for marking a workflow as
--- successful or failed.
-runWorkflow :: forall env a. Context env -> Workflow env a -> InstanceM env a
-runWorkflow ctxt wf = do
+-- We follow this process indefinitely until the final result is returned
+-- via adding it as a workflow execution command and flushing it.
+runWorkflow :: forall codec env st a. (Codec codec a) => Workflow codec env st a -> InstanceM codec env st ()
+runWorkflow wf = do
+  inst <- ask
   result@IVar{ivarRef = resultRef} <- newIVar -- where to put the final result
   let -- Run a workflow to completion, and put its result in the given IVar.
-      schedule :: JobList env -> Workflow env b -> IVar env b -> InstanceM env ()
+      schedule :: JobList codec env st -> Workflow codec env st b -> IVar codec env st b -> InstanceM codec env st ()
       schedule runQueue (Workflow run) ivar@IVar{ivarRef = !ref} = do
         $(logDebug) "Schedule"
         let {-# INLINE result #-}
@@ -90,7 +104,7 @@ runWorkflow ctxt wf = do
                         modifyIORef' inst.workflowRunQueueRef (appendJobList runQueue)
                   else 
                     reschedule (appendJobList pendingJobs runQueue)
-        r <- UnliftIO.try $ runReaderT run ctxt
+        r <- UnliftIO.try run
         case r of
           Left e -> do
             rethrowAsyncExceptions e
@@ -108,7 +122,7 @@ runWorkflow ctxt wf = do
       -- This is necessary, because we want all commands
       -- added to the WorkflowActivationCompletion before sending
       -- it off.
-      reschedule :: JobList env -> InstanceM env ()
+      reschedule :: JobList codec env st -> InstanceM codec env st ()
       reschedule workflows = case workflows of
         JobNil -> do
           $(logDebug) "reschedule: empty run queue"
@@ -126,7 +140,7 @@ runWorkflow ctxt wf = do
           $(logDebug) "reschedule: non-empty run queue"
           schedule remainingJobs workflow resultSlot
 
-      emptyRunQueue :: InstanceM env ()
+      emptyRunQueue :: InstanceM codec env st ()
       emptyRunQueue = do
         $(logDebug) "emptyRunQueue"
         -- Convert any completions to jobs and reschedule if there is anything useful to process.
@@ -137,7 +151,7 @@ runWorkflow ctxt wf = do
           JobNil -> flushCommands
           _ -> reschedule wfs
 
-      flushCommands :: InstanceM env ()
+      flushCommands :: InstanceM codec env st ()
       flushCommands = do
         $(logDebug) "flushCommands start"
         inst <- ask
@@ -148,7 +162,7 @@ runWorkflow ctxt wf = do
               -- Already trying to flush, so we don't need to do anything.
               retry
             RunningActivation cmds -> case cmds of
-              [] -> pure currentCmds
+              (Reversed []) -> pure currentCmds
               _ -> do
                 -- Signal the main instance thread that it should complete the activation.
                 let new = FlushActivationCompletion cmds
@@ -162,7 +176,7 @@ runWorkflow ctxt wf = do
           when (null c) retry
         emptyRunQueue
 
-      checkCompletions :: InstanceM env (JobList env)
+      checkCompletions :: InstanceM codec env st (JobList codec env st)
       checkCompletions = do
         inst <- ask
         comps <- atomicallyOnBlocking (LogicBug ReadingCompletionsFailedRun) $ do
@@ -191,7 +205,7 @@ runWorkflow ctxt wf = do
             jobs <- mapM getComplete comps
             return (foldr appendJobList JobNil jobs)
 
-      waitCompletions :: InstanceM env ()
+      waitCompletions :: InstanceM codec env st ()
       waitCompletions = do
         $(logDebug) "wait completions"
         inst <- ask
@@ -205,26 +219,52 @@ runWorkflow ctxt wf = do
 
   schedule JobNil wf result
   r <- readIORef resultRef
-  case r of
+  cmd <- case r of
     IVarEmpty _ -> error "runWorkflow: missing result"
-    IVarFull (Ok a) -> pure a
+    IVarFull (Ok a) -> do
+      res <- liftIO $ Temporal.Payload.encode inst.workflowCodec a
+      let completeMessage = defMessage & Command.completeWorkflowExecution .~ (defMessage & Command.result .~ convertToProtoPayload res)
+      pure completeMessage
     -- If a user-facing exception wasn't handled within the workflow, then that
-    -- means the workflow failed, so we can throw it.
-    IVarFull (ThrowWorkflow e) -> throwIO e
+    -- means the workflow failed.
+    IVarFull (ThrowWorkflow e) -> do
+      -- eAttrs <- liftIO $ encodeException inst.workflowCodec (e :: SomeException)
+      let completeMessage = defMessage & Command.failWorkflowExecution .~ 
+            ( defMessage 
+              & Command.failure .~ 
+                ( defMessage
+                  & F.message .~ Text.pack (show e)
+                  & F.stackTrace .~ ""
+                  -- & F.encodedAttributes .~ convertToProtoPayload eAttrs
+                )
+            )
+      pure completeMessage
+    -- Crash the worker if we get an internal exception.
     IVarFull (ThrowInternal e) -> throwIO e
+  addCommand inst cmd
+  flushCommands
+  
 
 atomicallyOnBlocking :: MonadUnliftIO m => Exception e => e -> STM a -> m a
 atomicallyOnBlocking e stm = UnliftIO.catch 
   (atomically stm)
   (\BlockedIndefinitelyOnSTM -> throwIO e)
 
-instance TypeError ('Text "A workflow definition cannot directly perform IO. Use executeActivity or executeLocalActivity instead.") => MonadIO (Workflow env) where
+instance TypeError ('Text "A workflow definition cannot directly perform IO. Use executeActivity or executeLocalActivity instead.") => MonadIO (Workflow codec env st) where
   liftIO = error "Unreachable"
 
-instance TypeError ('Text "A workflow definition cannot directly perform IO. Use executeActivity or executeLocalActivity instead.") => MonadUnliftIO (Workflow env) where
+instance TypeError ('Text "A workflow definition cannot directly perform IO. Use executeActivity or executeLocalActivity instead.") => MonadUnliftIO (Workflow codec env st) where
   withRunInIO _ = error "Unreachable"
 
 rethrowAsyncExceptions :: MonadIO m => SomeException -> m ()
 rethrowAsyncExceptions e
   | Just SomeAsyncException{} <- fromException e = UnliftIO.throwIO e
   | otherwise = return ()
+
+addCommand :: (MonadIO m) => WorkflowInstance codec env st -> WorkflowCommand -> m ()
+addCommand inst command = do
+  -- $(logDebug) $ Text.pack ("Adding command: " <> show command)
+  atomically $ do
+    modifyTVar' inst.workflowCommands $ \case
+      RunningActivation cmds -> RunningActivation $ push command cmds
+      FlushActivationCompletion cmds -> FlushActivationCompletion $ push command cmds

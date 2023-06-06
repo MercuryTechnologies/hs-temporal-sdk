@@ -10,12 +10,16 @@ import Control.Monad
 import Control.Monad.IO.Class
 import Data.Hashable (Hashable)
 import Data.Text (Text)
+import Data.Int (Int32)
 import Data.ProtoLens
+import Data.Vector (Vector)
 import Lens.Family2
 import qualified Proto.Google.Protobuf.Duration as Duration
 import qualified Proto.Google.Protobuf.Duration_Fields as Duration
 import qualified Proto.Google.Protobuf.Timestamp as Timestamp
 import qualified Proto.Google.Protobuf.Timestamp_Fields as Timestamp
+import qualified Proto.Temporal.Api.Common.V1.Message as Message
+import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Message
 import qualified System.Clock as Clock
 
 -- | This is generally the name of the function itself
@@ -63,64 +67,29 @@ timespecToTimestamp ts = defMessage
   & Timestamp.seconds .~ Clock.sec ts
   & Timestamp.nanos .~ fromIntegral (Clock.nsec ts)
 
--- | Errors that are an issue with the worker itself, not the workflow
---
--- These errors should cause the worker to exit, and imply an issue with the
--- SDK itself.
-data RuntimeError = RuntimeError String
-  deriving (Show)
-instance Exception RuntimeError
+data RetryPolicy = RetryPolicy
+  { initialInterval :: Clock.TimeSpec
+  , backoffCoefficient :: Double
+  , maximumInterval :: Maybe Clock.TimeSpec
+  , maximumAttempts :: Int32
+  , nonRetryableErrorTypes :: Vector Text
+  }
 
-data ApplicationError 
-  = WorkflowNotFound String
-  deriving (Show)
-instance Exception ApplicationError
+retryPolicyToProto :: RetryPolicy -> Message.RetryPolicy
+retryPolicyToProto (RetryPolicy initialInterval backoffCoefficient maximumInterval maximumAttempts nonRetryableErrorTypes) = 
+  -- Using a full destructure here to make sure we don't miss any new fields later. ^
+  defMessage
+    & Message.initialInterval .~ timespecToDuration initialInterval
+    & Message.backoffCoefficient .~ backoffCoefficient
+    & Message.maybe'maximumInterval .~ fmap timespecToDuration maximumInterval
+    & Message.maximumAttempts .~ maximumAttempts
+    & Message.vec'nonRetryableErrorTypes .~ nonRetryableErrorTypes
 
-data ValueError
-  = ValueError String
-  deriving (Show)
-instance Exception ValueError
-
-{-
-Class hierarchy of promise-like types:
-
-class 
--}
-
-class Awaitable m a where
-  type AwaitResult a
-  await :: a -> m (AwaitResult a) 
-
-instance MonadIO m => Awaitable m (Async a) where
-  type AwaitResult (Async a) = a
-  await = liftIO . wait
-
-instance MonadIO m => Awaitable m (MVar a) where
-  type AwaitResult (MVar a) = a
-  await = liftIO . readMVar
-
-instance Awaitable STM (TMVar a) where
-  type AwaitResult (TMVar a) = a
-  await = readTMVar
-
-class Monad m => Cancelable m a where
-  cancel :: a -> m ()
-
-instance MonadIO m => Cancelable m (Async a) where
-  cancel = liftIO . Async.cancel
-
-class Monad m => Resolvable m a where
-  resolve :: a -> AwaitResult a -> m ()
-
-instance MonadIO m => Resolvable m (MVar a) where
-  resolve m v = void $ liftIO $ tryPutMVar m v
-
-class Monad m => ResolveFallible m e a where
-  resolveFailure :: a -> e -> m ()
-
-instance (MonadIO m, Exception e) => ResolveFallible m e (Async a) where
-  resolveFailure a e = liftIO $ Async.cancelWith a e
-
-class Monad m => AwaitFallible m e a where
-  type AwaitFailure a
-  awaitEither :: a -> m (Either e (AwaitResult a))
+retryPolicyFromProto :: Message.RetryPolicy -> RetryPolicy
+retryPolicyFromProto p = RetryPolicy
+  { initialInterval = timespecFromDuration (p ^. Message.initialInterval)
+  , backoffCoefficient = p ^. Message.backoffCoefficient
+  , maximumInterval = fmap timespecFromDuration (p ^. Message.maybe'maximumInterval)
+  , maximumAttempts = p ^. Message.maximumAttempts
+  , nonRetryableErrorTypes = p ^. Message.vec'nonRetryableErrorTypes
+  }

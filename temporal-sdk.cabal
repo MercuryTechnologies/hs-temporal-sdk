@@ -36,13 +36,17 @@ library
   extra-libraries: hs_temporal_bridge
   default-language: Haskell2010
   default-extensions:
+    BangPatterns,
+    ConstraintKinds,
     GADTs,
     GeneralizedNewtypeDeriving,
     LambdaCase,
+    FlexibleContexts,
     FlexibleInstances,
     MultiParamTypeClasses,
     OverloadedStrings,
     OverloadedRecordDot,
+    RankNTypes,
     RecordWildCards
 
   -- other-modules:
@@ -50,14 +54,19 @@ library
     -- Temporal.Worker,
     -- Temporal.Workflow
     Temporal.Activity,
+    Temporal.Activity.Definition,
+    Temporal.Activity.Worker,
     Temporal.Common,
-    Temporal.Payloads,
+    Temporal.Exception,
+    Temporal.Payload,
     Temporal.WorkflowInstance,
     Temporal.Workflow.WorkflowDefinition,
     Temporal.Workflow,
+    Temporal.Workflow.Worker,
     Temporal.Workflow.Unsafe,
     Temporal.Workflow.WorkflowInstance,
-    Temporal.Worker
+    Temporal.Worker,
+    Temporal.Worker.Types
 
 -- test-suite temporal-sdk-tests
 --   type: exitcode-stdio-1.0

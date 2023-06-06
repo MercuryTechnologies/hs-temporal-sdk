@@ -16,7 +16,8 @@ import Temporal.Core.Client
 import Temporal.Client.WorkflowService
 import Temporal.Runtime
 import Temporal.Core.Worker (defaultWorkerConfig)
-import Temporal.Payloads (JSON)
+import Temporal.Payload (JSON(..))
+import Temporal.Activity (Activity, defineActivity)
 import Temporal.Worker
 import Temporal.Workflow hiding (Info(..), wait)
 import qualified Temporal.Workflow as Workflow
@@ -53,17 +54,21 @@ main = do
 runWorker :: Client -> IO ()
 runWorker c = do
   putStrLn "Running worker"
-  let conf = mkConfig defaultWorkerConfig () $ HashMap.fromList
-        [ ("hello", defineWorkflow (Proxy @JSON) "hello" (pure () :: Workflow () ()))
+  let workflowDefs = HashMap.fromList
+        [ ("hello", OpaqueWorkflow $ defineWorkflow JSON "hello" () (pure () :: Workflow JSON () () ()))
         , ( "helloActivity"
-          , defineWorkflow (Proxy @JSON) "helloActivity" $ do
+          , OpaqueWorkflow $ defineWorkflow JSON "helloActivity" () $ do
               act <- startActivity "Activate!" (defaultStartActivityOptions $ StartToClose $ TimeSpec 10 0) []
               Workflow.wait act
               pure ()
           )
         ]
-  runStdoutLoggingT $ withWorker c conf $ \handle -> do
-    wait handle
+      activityDefs = HashMap.fromList
+        [ ("Activate!", defineActivity JSON "Activate!" (liftIO (putStrLn "OWKWROKRK") :: Activity () ()))]
+      conf = mkConfig defaultWorkerConfig () workflowDefs () activityDefs
+  runStdoutLoggingT $ do
+    w <- startWorker c conf
+    waitWorker w
 
 runClient :: Client -> String -> String -> IO ()
 runClient c taskname id' = do

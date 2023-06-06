@@ -17,8 +17,8 @@
   TypeApplications #-}
 module Temporal.Workflow.WorkflowDefinition 
   ( WorkflowDefinition(..) -- TODO, only export the type, not the constructor from this module
-  , SomeSerializableFunction(..) -- TODO, move to internal
-  , workflowName
+  , ValidWorkflowFunction(..) -- TODO, move to internal
+  , OpaqueWorkflow(..)
   , defineWorkflow
   ) where
 
@@ -32,15 +32,17 @@ import Data.Typeable (Typeable)
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import Data.Typeable
-import Temporal.Payloads
+import Temporal.Payload
 import Temporal.Workflow.WorkflowInstance
+import Temporal.Worker.Types
 
-defineWorkflow :: 
-  ( ValidWorkflowFunction env fmt f
-  ) => Proxy fmt -> Text -> f -> WorkflowDefinition env
-defineWorkflow p name f = WorkflowDefinition
+defineWorkflow ::
+  ( IsValidWorkflowFunction env st codec f
+  ) => codec -> Text -> st -> f -> WorkflowDefinition codec env st
+defineWorkflow p name st f = WorkflowDefinition
   { workflowName = name
+  , workflowInitialState = st
   , workflowSignals = HashMap.empty
   , workflowQueries = HashMap.empty
-  , workflowRun = SomeSerializableFunction p f applyPayloads
+  , workflowRun = ValidWorkflowFunction p f applyPayloads
   }

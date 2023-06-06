@@ -35,9 +35,12 @@ import Lens.Family2
 import System.Clock (TimeSpec(..))
 import System.Random (mkStdGen)
 import Temporal.Common
-import Temporal.Payloads
-import Temporal.Workflow.Unsafe (runWorkflow)
-import Temporal.Workflow.WorkflowDefinition (WorkflowDefinition(..), SomeSerializableFunction(..))
+import qualified Temporal.Core.Worker as Core
+import Temporal.Exception
+import Temporal.Payload
+import Temporal.Workflow.Unsafe (runWorkflow, addCommand)
+import Temporal.Worker.Types
+import Temporal.Workflow.WorkflowDefinition (WorkflowDefinition(..), ValidWorkflowFunction(..))
 import Temporal.Workflow.WorkflowInstance
 import Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult
   ( ActivityResolution
@@ -78,8 +81,8 @@ import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Field
 import UnliftIO
 
 
-create :: MonadLoggerIO m => Info -> WorkflowDefinition env -> m (WorkflowInstance env)
-create workflowInstanceInfo workflowInstanceDefinition = do
+create :: MonadLoggerIO m => Info -> env -> WorkflowDefinition codec env st -> m (WorkflowInstance codec env st)
+create workflowInstanceInfo workflowEnv workflowInstanceDefinition = do
   workflowInstanceLogger <- askLoggerIO
   workflowRandomnessSeed <- WorkflowGenM <$> newIORef (mkStdGen 0)
   workflowNotifiedPatches <- newIORef mempty
@@ -96,15 +99,16 @@ create workflowInstanceInfo workflowInstanceDefinition = do
   workflowSequenceMaps <- newMVar $ SequenceMaps mempty mempty mempty mempty mempty
   workflowPrimaryTask <- newIORef Nothing
   workflowRunQueueRef <- newIORef JobNil
-  workflowCommands <- newTVarIO $ RunningActivation []
+  workflowCommands <- newTVarIO $ RunningActivation $ Reversed []
   workflowCompletions <- newTVarIO []
+  workflowState <- newIORef workflowInstanceDefinition.workflowInitialState
   pure WorkflowInstance {..}
 
 
 -- | This should never raise an exception, but instead catch all exceptions
 -- and set as completion failure.
-activate :: WorkflowInstance env -> WorkflowActivation -> IO WorkflowActivationCompletion
-activate inst act = runInstanceM inst $ do
+activate :: Worker env actEnv -> WorkflowInstance codec env st -> WorkflowActivation -> IO WorkflowActivationCompletion
+activate w inst act = runInstanceM inst $ do
   $(logDebug) "activate"
   eResult <- applyJobs $ act ^. Activation.vec'jobs
   -- TODO: Can the completion send both successful commands and a failure
@@ -121,8 +125,8 @@ activate inst act = runInstanceM inst $ do
             & Completion.failed .~ failure
       pure completion
     Right () -> do
-      $(logDebug) "Successfully submitted all activation jobs to workflow"
-      successfulCommands <- readSuccessfulCommands
+      $(logDebug) "Applied all activation jobs to workflow"
+      successfulCommands <- fromReversed <$> readSuccessfulCommands
       $(logDebug) $ Text.pack ("got those commands " ++ show successfulCommands)
       forM_ successfulCommands $ \cmd -> do
         $(logDebug) $ Text.pack ("Successful command: " <> show cmd)
@@ -134,14 +138,14 @@ activate inst act = runInstanceM inst $ do
     info = inst.workflowInstanceInfo
     completionBase = defMessage & Completion.runId .~ rawRunId info.runId
 
-runInstanceM :: WorkflowInstance env -> InstanceM env a -> IO a
+runInstanceM :: WorkflowInstance codec env st -> InstanceM codec env st a -> IO a
 runInstanceM worker m = runReaderT (unInstanceM m) worker
 -- createWorkflowInstance :: Worker env -> WorkflowActivation -> IO WorklowInstance
 -- createWorkflowInstance w act = do
 
 -- NB the workflow commands are reversed since we're pushing them onto a stack
 -- as we go.
-readSuccessfulCommands :: InstanceM env [WorkflowCommand]
+readSuccessfulCommands :: InstanceM codec env st (Reversed WorkflowCommand)
 readSuccessfulCommands = do
   $(logDebug) "readSuccessfulCommands"
   inst <- ask
@@ -149,7 +153,7 @@ readSuccessfulCommands = do
     commands <- readTVar inst.workflowCommands
     case commands of
       FlushActivationCompletion cmds -> do
-        writeTVar inst.workflowCommands (RunningActivation [])
+        writeTVar inst.workflowCommands (RunningActivation $ Reversed [])
         pure cmds
       RunningActivation _cmds -> 
         -- We want to wait until we've explored the entire activation before sending.
@@ -157,19 +161,10 @@ readSuccessfulCommands = do
   $(logDebug) $ Text.pack ("readSuccessfulCommands: " <> show cmds)
   pure cmds
 
-addCommand :: (MonadIO m) => WorkflowInstance env -> WorkflowCommand -> m ()
-addCommand inst command = do
-  -- $(logDebug) $ Text.pack ("Adding command: " <> show command)
-  atomically $ do
-    modifyTVar' inst.workflowCommands $ \case
-      RunningActivation cmds -> RunningActivation (command:cmds)
-      FlushActivationCompletion cmds -> FlushActivationCompletion (command:cmds)
-
 -- We need to remove any commands that are not query responses after a terminal response.
 -- (note: I don't know how that would happen, but it's in the Python SDK code?)
--- We need to reverse the commands since we must send them up in the right order
-finalizeCommandsForCompletion :: [WorkflowCommand] -> [WorkflowCommand]
-finalizeCommandsForCompletion commands = go commands [] False
+finalizeCommandsForCompletion :: Reversed WorkflowCommand -> [WorkflowCommand]
+finalizeCommandsForCompletion (Reversed commands) = reverse $ go commands [] False
   where
     go :: [WorkflowCommand] -> [WorkflowCommand] -> Bool -> [WorkflowCommand]
     go [] acc _seenTerminalCommand = acc
@@ -183,35 +178,35 @@ finalizeCommandsForCompletion commands = go commands [] False
         WorkflowCommand'ContinueAsNewWorkflowExecution _ -> go cs (c:acc) True
         WorkflowCommand'FailWorkflowExecution _ -> go cs (c:acc) True
 
-nextExternalCancelSequence :: InstanceM env (Sequence ResolveRequestCancelExternalWorkflow)
+nextExternalCancelSequence :: InstanceM codec env st (Sequence ResolveRequestCancelExternalWorkflow)
 nextExternalCancelSequence = do
   inst <- ask
   atomicModifyIORef' inst.workflowSequences $ \seqs ->
     let seq' = externalCancel seqs
     in (seqs { externalCancel = succ seq' }, Sequence seq')
 
-nextChildWorkflowSequence :: InstanceM env (Sequence ResolveChildWorkflowExecutionStart)
+nextChildWorkflowSequence :: InstanceM codec env st (Sequence ResolveChildWorkflowExecutionStart)
 nextChildWorkflowSequence = do
   inst <- ask
   atomicModifyIORef' inst.workflowSequences $ \seqs ->
     let seq' = childWorkflow seqs
     in (seqs { childWorkflow = succ seq' }, Sequence seq')
 
-nextExternalSignalSequence :: InstanceM env (Sequence ResolveSignalExternalWorkflow)
+nextExternalSignalSequence :: InstanceM codec env st (Sequence ResolveSignalExternalWorkflow)
 nextExternalSignalSequence = do
   inst <- ask
   atomicModifyIORef' inst.workflowSequences $ \seqs ->
     let seq' = externalSignal seqs
     in (seqs { externalSignal = succ seq' }, Sequence seq')
 
-nextTimerSequence :: InstanceM env (Sequence ())
+nextTimerSequence :: InstanceM codec env st (Sequence ())
 nextTimerSequence = do
   inst <- ask
   atomicModifyIORef' inst.workflowSequences $ \seqs ->
     let seq' = timer seqs
     in (seqs { timer = succ seq' }, Sequence seq')
 
-nextActivitySequence :: InstanceM env (Sequence ResolveActivity)
+nextActivitySequence :: InstanceM codec env st (Sequence ResolveActivity)
 nextActivitySequence = do
   inst <- ask
   atomicModifyIORef' inst.workflowSequences $ \seqs ->
@@ -240,53 +235,37 @@ data CancellableId
   | ExternalWorkflow Word32 NamespacedWorkflowExecution Bool
 -}
 
-applyStartWorkflow :: StartWorkflow -> InstanceM env ()
+applyStartWorkflow :: StartWorkflow -> InstanceM codec env st ()
 applyStartWorkflow startWorkflow = do
   act <- async $ runTopLevel $ do
     inst <- ask
     let def = inst.workflowInstanceDefinition
     case def of
-      (WorkflowDefinition _ _ _ (SomeSerializableFunction fmt innerF applyArgs)) -> do
-        let args = fmap convertFromProtoPayload (startWorkflow ^. Command.arguments)
-            eAct = applyArgs fmt innerF args
+      (WorkflowDefinition _ _ _ initialState (ValidWorkflowFunction fmt innerF applyArgs)) -> do
+        let args = fmap convertFromProtoPayload (startWorkflow ^. Command.vec'arguments)
+        eAct <- liftIO $ applyArgs fmt innerF args
         -- TODO make sure that we also catch exceptions from payload processing
         case eAct of
           Left err -> do
             $(logError) $ Text.pack ("Failed to decode workflow arguments: " <> show err)
             throwIO $ ValueError "Failed to decode workflow arguments"
-          Right act -> do
-            -- TODO exception handling liike in the .NET version (RunTopLevelAsync): 
-            -- https://github.com/temporalio/sdk-dotnet/blob/main/src/Temporalio/Worker/WorkflowInstance.cs#L626
-            let workflowCtxt = Context 
-                  { contextNamespace = inst.workflowInstanceInfo.namespace 
-                  }
-            result <- runWorkflow workflowCtxt $ do
-              Temporal.Payloads.encode fmt <$> act
-            $(logDebug) $ Text.pack ("Workflow result: " <> show result)
-            -- TODO, the .NET version seems to return payloads from encoding, not just the inner result
-            addCommand inst $ defMessage & Command.completeWorkflowExecution .~ (defMessage & Command.result .~ convertToProtoPayload (RawPayload result mempty))
+          Right act -> runWorkflow act
 
   primary <- asks workflowPrimaryTask
   writeIORef primary (Just act)
-
-  -- let runWorkflow :: ExecuteWorkflowInput -> InstanceM env ()
-  --     runWorkflow input = do
-  --       result <- await $ executeWorkflow input
-  --       pure ()
-        -- let resultPayloads = 
   pure ()
 
-applyFireTimer :: FireTimer -> InstanceM env ()
+applyFireTimer :: FireTimer -> InstanceM codec env st ()
 applyFireTimer fireTimer = do
   throwIO $ RuntimeError "FireTimer should be handled by applyResolutions"
 
-applyUpdateRandomSeed :: UpdateRandomSeed -> InstanceM env ()
+applyUpdateRandomSeed :: UpdateRandomSeed -> InstanceM codec env st ()
 applyUpdateRandomSeed updateRandomSeed = do
   inst <- ask
   let (WorkflowGenM genRef) = inst.workflowRandomnessSeed
   writeIORef genRef (mkStdGen $ fromIntegral $ updateRandomSeed ^. Activation.randomnessSeed)
 
-applyQueryWorkflow :: QueryWorkflow -> InstanceM env ()
+applyQueryWorkflow :: QueryWorkflow -> InstanceM codec env st ()
 applyQueryWorkflow queryWorkflow = do
   throwIO $ RuntimeError "QueryWorkflow not implemented"
   -- where
@@ -294,38 +273,38 @@ applyQueryWorkflow queryWorkflow = do
   --     let baseCommand = defMessage & Activation.respondToQuery . Activation.queryId .~ (queryWorkflow ^. Activation.queryId)
 
 
-applyCancelWorkflow :: CancelWorkflow -> InstanceM env ()
+applyCancelWorkflow :: CancelWorkflow -> InstanceM codec env st ()
 applyCancelWorkflow cancelWorkflow = do
   mAct <- readIORef =<< asks workflowPrimaryTask
   mapM_ UnliftIO.cancel mAct
 
-applySignalWorkflow :: SignalWorkflow -> InstanceM env ()
+applySignalWorkflow :: SignalWorkflow -> InstanceM codec env st ()
 applySignalWorkflow _ = throwIO $ RuntimeError "SignalWorkflow should be handled by applyResolutions"
 
-applyResolveActivity :: ResolveActivity -> InstanceM env ()
+applyResolveActivity :: ResolveActivity -> InstanceM codec env st ()
 applyResolveActivity resolveActivity = throwIO $ RuntimeError "ResolveActivity should be handled by applyResolutions"
 
-applyNotifyHasPatch :: NotifyHasPatch -> InstanceM env ()
+applyNotifyHasPatch :: NotifyHasPatch -> InstanceM codec env st ()
 applyNotifyHasPatch notifyHasPatch = do
   inst <- ask
   let patches :: IORef (Set PatchId)
       patches = inst.workflowNotifiedPatches
   atomicModifyIORef' patches $ \set -> (Set.insert (notifyHasPatch ^. Activation.patchId . to PatchId) set, ())
 
-applyResolveChildWorkflowExecutionStart :: ResolveChildWorkflowExecutionStart -> InstanceM env ()
+applyResolveChildWorkflowExecutionStart :: ResolveChildWorkflowExecutionStart -> InstanceM codec env st ()
 applyResolveChildWorkflowExecutionStart resolveChildWorkflowExecutionStart = do
   throwIO $ RuntimeError "ResolveChildWorkflowExecutionStart not implemented"
 
-applyResolveChildWorkflowExecution :: ResolveChildWorkflowExecution -> InstanceM env ()
+applyResolveChildWorkflowExecution :: ResolveChildWorkflowExecution -> InstanceM codec env st ()
 applyResolveChildWorkflowExecution resolveChildWorkflowExecution = do
   throwIO $ RuntimeError "ResolveChildWorkflowExecution not implemented"
 
-applyResolveSignalExternalWorkflow :: ResolveSignalExternalWorkflow -> InstanceM env ()
+applyResolveSignalExternalWorkflow :: ResolveSignalExternalWorkflow -> InstanceM codec env st ()
 applyResolveSignalExternalWorkflow resolveSignalExternalWorkflow = do
   throwIO $ RuntimeError "ResolveSignalExternalWorkflow should be handled by applyResolutions"
 
 
-applyResolveRequestCancelExternalWorkflow :: ResolveRequestCancelExternalWorkflow -> InstanceM env ()
+applyResolveRequestCancelExternalWorkflow :: ResolveRequestCancelExternalWorkflow -> InstanceM codec env st ()
 applyResolveRequestCancelExternalWorkflow resolveRequestCancelExternalWorkflow = throwIO $ RuntimeError "ResolveRequestCancelExternalWorkflow should be handled by applyResolutions"
 
 data PendingJob 
@@ -339,7 +318,7 @@ data PendingJob
 
 -- TODO: the .NET SDK implies that this manual sorting derived from the Python SDK is not necessary.
 -- It seems to think that the jobs are already sorted in the correct order by the server.
-applyJobs :: Vector WorkflowActivationJob -> InstanceM env (Either SomeException ())
+applyJobs :: Vector WorkflowActivationJob -> InstanceM codec env st (Either SomeException ())
 applyJobs jobs = UnliftIO.try $ do
   patchNotifications
   signalWorkflows
@@ -368,7 +347,7 @@ applyJobs jobs = UnliftIO.try $ do
       jobs
 
 -- Enum type implemented for completeness, but see 'applyJobs' for shortcuts that avoids pattern matching on the variant type more than necessary.
-applyActivationJob :: WorkflowActivationJob -> InstanceM env ()
+applyActivationJob :: WorkflowActivationJob -> InstanceM codec env st ()
 applyActivationJob job = case job ^. Activation.maybe'variant of
   Nothing -> throwIO $ RuntimeError "Uncrecognized workflow activation job variant"
   Just variant_ -> case variant_ of
@@ -387,7 +366,7 @@ applyActivationJob job = case job ^. Activation.maybe'variant of
     -- Ignore, handled in the worker code.
     WorkflowActivationJob'RemoveFromCache removeFromCache -> pure ()
 
-applyResolutions :: [PendingJob] -> InstanceM env ()
+applyResolutions :: [PendingJob] -> InstanceM codec env st ()
 applyResolutions [] = pure ()
 applyResolutions rs = do
   inst <- ask
@@ -403,6 +382,11 @@ applyResolutions rs = do
                   , sequenceMaps' 
                     { activities = HashMap.insert (msg ^. Activation.seq . to Sequence) new (sequenceMaps'.activities) 
                     }
+                  )
+              Just existing -> do
+                pure 
+                  ( CompleteReq (Ok msg) existing : completions
+                  , sequenceMaps'
                   )
           PendingJobResolveChildWorkflowExecution msg -> error "applyResolutions: PendingJobResolveChildWorkflowExecution not implemented"
           PendingJobResolveSignalExternalWorkflow msg -> error "applyResolutions: PendingJobResolveSignalExternalWorkflow not implemented"
@@ -442,7 +426,7 @@ data CancellableId
 
 -- Note: this is not intended to end up inside of the workflowPrimaryTask value,
 -- or else cancellation will not work properly.
-runTopLevel :: InstanceM env a -> InstanceM env ()
+runTopLevel :: InstanceM codec env st a -> InstanceM codec env st ()
 runTopLevel handle = do
   inst <- ask
   void handle `catches`

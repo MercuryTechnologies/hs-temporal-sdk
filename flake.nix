@@ -58,6 +58,7 @@
                 shell.tools = {
                   cabal = { };
                   ghcid = { };
+                  haskell-language-server = { };
                 };
                 shell.buildInputs = with pkgs; [
                   nixpkgs-fmt
