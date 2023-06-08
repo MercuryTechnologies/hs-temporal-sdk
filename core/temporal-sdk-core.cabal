@@ -33,9 +33,10 @@ library
       Temporal.Client.WorkflowService,
       Temporal.Core.Client,
       Temporal.Core.Worker,
+      Temporal.Runtime,
+      Temporal.Internal.JobPool
+    other-modules:
       Temporal.Internal.FFI,
-      Temporal.Internal.JobPool,
-      Temporal.Runtime
 
     -- other-modules:
     -- other-extensions:
