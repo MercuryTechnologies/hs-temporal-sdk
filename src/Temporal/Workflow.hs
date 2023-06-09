@@ -1,5 +1,15 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeFamilyDependencies #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Temporal.Workflow 
   ( Workflow
   , Task
@@ -27,8 +37,8 @@ module Temporal.Workflow
   , StartActivityOptions(..)
   , defaultStartActivityOptions
   , startActivity
-  -- , startLocalActivity
-  -- , startChildWorkflow
+  , startLocalActivity
+  , startChildWorkflow
   , now
   , time
   -- , upsertSearchAttributes
@@ -42,23 +52,28 @@ import Control.Monad.Logger
 import Control.Monad.Reader
 import Control.Monad.IO.Class
 import qualified Data.ByteString.Short as SBS
+import Data.Functor.Compose
 import Data.Map.Strict (Map)
 import qualified Data.HashMap.Strict as HashMap
 import Data.Maybe
 import Data.ProtoLens
+import Data.Proxy
 import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Time.Clock (UTCTime)
+import Data.Kind
 import Data.UUID (UUID)
 import Data.UUID.Types.Internal ( buildFromBytes )
 import Data.Word (Word32)
 import Data.Vector (Vector)
+import GHC.TypeLits
 import Lens.Family2
 import Proto.Temporal.Api.Common.V1.Message (Payload)
 import System.Clock (TimeSpec)
 import System.Random.Stateful
 import Temporal.Common
+import Temporal.Payload
 import Temporal.Worker.Types
 import Temporal.Workflow.Unsafe
 import Temporal.WorkflowInstance
@@ -83,7 +98,7 @@ askInstance = ilift ask
 
 data ContinueAsNewOptions = ContinueAsNewOptions
   { workflow :: Maybe WorkflowType
-  , args :: (Vector Payload)
+  , args :: (Vector Proto.Temporal.Api.Common.V1.Message.Payload)
   , taskQueue :: Maybe TaskQueue
   , runTimeout :: Maybe TimeSpec
   , taskTimeout :: Maybe TimeSpec
@@ -124,10 +139,77 @@ data TimeoutType
   | ScheduleToClose TimeSpec
   | StartToCloseAndScheduleToClose TimeSpec TimeSpec
 
--- TODO, this definition doesn't admit for the case where the workflow definition is served by a different service where we don't know the type.
-startActivity :: Text -> StartActivityOptions -> [Payload] -> Workflow env st (Task env st Payload)
-startActivity n opts ps = ilift $ do
+type family StartActivity env st baseResult (args :: [*]) = r | r -> env st baseResult args where
+  StartActivity env st baseResult '[] = Workflow env st (Task env st baseResult)
+  StartActivity env st baseResult (a ': as) = a -> StartActivity env st baseResult as 
+
+class StartActivityArgs codec env st (args :: [*]) baseResult where
+  applyArgs_ 
+    :: Proxy args 
+    -> codec
+    -> ([IO RawPayload] -> [IO RawPayload]) 
+    -> ([IO RawPayload] -> Workflow env st (Task env st baseResult))
+    -> StartActivity env st baseResult args 
+    -- ([RawPayload] -> Workflow env st (Task env st RawPayload)) -> StartActivity env st args baseResult
+
+instance StartActivityArgs codec env st '[] baseResult where
+  applyArgs_ argsP _ accum f = f $ accum []
+
+instance (Codec codec a, StartActivityArgs codec env st as baseResult) => StartActivityArgs codec env st (a ': as) baseResult where
+  applyArgs_ argsP c accum f = \arg ->
+    applyArgs_
+    (Proxy @as) 
+    c
+    ((encode c arg :) . accum) 
+    f
+
+gatherArgs :: forall env st args baseResult codec. StartActivityArgs codec env st args baseResult => codec -> ([IO RawPayload] -> Workflow env st (Task env st baseResult)) -> StartActivity env st baseResult args 
+gatherArgs c f = applyArgs_ (Proxy @args) c id f
+
+data KnownActivity localEnv localSt (queue :: Symbol) (name :: Symbol) (args :: [Type]) (result :: Type) = forall codec. 
+  ( Codec codec result
+  , AllArgsSupportCodec codec args
+  , StartActivityArgs codec localEnv localSt args result
+  ) => KnownActivity codec
+
+knownActivityArgsProxy :: KnownActivity localEnv localSt queue name args result -> Proxy args
+knownActivityArgsProxy _ = Proxy
+
+knownActivityQueue :: forall localEnv localSt queue name args result. KnownSymbol queue => KnownActivity localEnv localSt queue name args result -> Text
+knownActivityQueue _ = Text.pack $ symbolVal (Proxy @queue)
+
+knownActivityName :: forall localEnv localSt queue name args result. KnownSymbol name => KnownActivity localEnv localSt queue name args result -> Text
+knownActivityName _ = Text.pack $ symbolVal (Proxy @name)
+
+knownWorkflowExample :: KnownWorkflow "queue" "name" '[Int, Text] Text
+knownWorkflowExample = KnownWorkflow JSON
+
+callKnownWorkflow :: Workflow () () (Task () () Text)
+callKnownWorkflow = startChildWorkflow 
+  undefined
+  knownWorkflowExample
+  1
+  "hello"
+
+knownActivityExample :: KnownActivity () () "queue" "name" '[Int, Text] Text
+knownActivityExample = KnownActivity JSON
+
+callKnownActivity :: Workflow () () (Task () () Text)
+callKnownActivity = startActivity 
+  undefined
+  knownActivityExample
+  1
+  "hello"
+
+startActivity :: 
+  ( KnownSymbol queue
+  , KnownSymbol name
+  ) => StartActivityOptions -> KnownActivity env st queue name args result -> StartActivity env st result args
+startActivity opts k@(KnownActivity codec) = gatherArgs codec $ \typedPayloads -> ilift $ do
   inst <- ask
+  ps <- liftIO $ forM typedPayloads $ \payloadAction -> 
+    fmap convertToProtoPayload payloadAction
+
   s@(Sequence actSeq) <- nextActivitySequence
   resultSlot <- newIVar
   modifyMVar inst.workflowSequenceMaps $ \seqMaps -> do
@@ -136,8 +218,8 @@ startActivity n opts ps = ilift $ do
   let scheduleActivity = defMessage
         & Command.seq .~ actSeq
         & Command.activityId .~ maybe (Text.pack $ show actSeq) rawActivityId (opts.activityId)
-        & Command.activityType .~ n
-        & Command.taskQueue .~ rawTaskQueue (fromMaybe inst.workflowInstanceInfo.taskQueue opts.taskQueue)
+        & Command.activityType .~ knownActivityName k
+        & Command.taskQueue .~ knownActivityQueue k -- rawTaskQueue (fromMaybe inst.workflowInstanceInfo.taskQueue opts.taskQueue)
         & Command.arguments .~ ps
         & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts.retryPolicy
         & Command.cancellationType .~ activityCancellationTypeToProto opts.cancellationType
@@ -158,12 +240,27 @@ startActivity n opts ps = ilift $ do
     res <- getIVar resultSlot
     case res ^. Activation.result . ActivityResult.maybe'status of
       Nothing -> error "Activity result missing status"
-      Just (ActivityResult.ActivityResolution'Completed success) -> pure $ success ^. ActivityResult.result
+      Just (ActivityResult.ActivityResolution'Completed success) -> do
+        result <- ilift $ liftIO $ decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
+        case result of
+          -- TODO handle properly
+          Left err -> error $ "Failed to decode activity result: " <> show err
+          Right val -> pure val
       Just (ActivityResult.ActivityResolution'Failed failure) -> error "not implemented"
       Just (ActivityResult.ActivityResolution'Cancelled details) -> error "not implemented"
       Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"
+  where
+    -- gatherArgs :: BuildArgs args (Compose (Workflow env st) (Task env st)) result
+    -- gatherArgs = toPayloadsAp (pure codec) (knownActivityArgsProxy k) id
 
+type family StartChildWorkflow env st (args :: [*]) baseResult where
+  StartChildWorkflow env st '[] baseResult = Workflow env st (Task env st baseResult)
+  StartChildWorkflow env st (a ': as) baseResult = a -> StartChildWorkflow env st as baseResult
 
+data KnownWorkflow (queue :: Symbol) (name :: Symbol) (args :: [Type]) (result :: Type) = forall codec. 
+  ( Codec codec result
+  , AllArgsSupportCodec codec args
+  ) => KnownWorkflow codec
 
 data StartChildWorkflowOptions = StartChildWorkflowOptions 
   { childWorkflowId :: Maybe WorkflowId -- TODO should this be maybe?
@@ -175,11 +272,14 @@ data StartChildWorkflowOptions = StartChildWorkflowOptions
   , taskTimeout :: Maybe TimeSpec
   , retryPolicy :: Maybe RetryPolicy
   , cronSchedule :: Maybe Text
-  , memo :: Maybe (Map Text Payload)
-  , searchAttributes :: Maybe (Map Text Payload)
+  , memo :: Maybe (Map Text Proto.Temporal.Api.Common.V1.Message.Payload)
+  , searchAttributes :: Maybe (Map Text Proto.Temporal.Api.Common.V1.Message.Payload)
   }
--- TODO, this definition doesn't admit for the case where the workflow definition is served by a different service where we don't know the type.
-startChildWorkflow :: Text -> StartChildWorkflowOptions -> [Payload] -> Workflow env st (Task env st Payload)
+
+startChildWorkflow 
+  :: StartChildWorkflowOptions 
+  -> KnownWorkflow queue name args result 
+  -> StartChildWorkflow env st args result
 startChildWorkflow = undefined
 
 data StartLocalActivityOptions = StartLocalActivityOptions 
@@ -194,7 +294,10 @@ data StartLocalActivityOptions = StartLocalActivityOptions
   , cancellationType :: ActivityCancellationType
   -- TODO headers
   }
-startLocalActivity :: StartLocalActivityOptions -> Workflow env st ()
+startLocalActivity 
+  :: StartLocalActivityOptions 
+  -> KnownActivity env st queue name args result
+  -> Workflow env st ()
 startLocalActivity = undefined
 
 -- {-

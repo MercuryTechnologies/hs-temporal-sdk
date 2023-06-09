@@ -38,11 +38,12 @@ import Temporal.Worker.Types
 
 defineWorkflow ::
   ( IsValidWorkflowFunction codec env st f
+  , AllArgsSupportCodec codec (ArgsOf f)
   ) => codec -> Text -> st -> f -> WorkflowDefinition env st
-defineWorkflow p name st f = WorkflowDefinition
+defineWorkflow codec name st f = WorkflowDefinition
   { workflowName = name
   , workflowInitialState = st
   , workflowSignals = HashMap.empty
   , workflowQueries = HashMap.empty
-  , workflowRun = ValidWorkflowFunction p f (applyPayloads p)
+  , workflowRun = ValidWorkflowFunction codec f (applyPayloads codec)
   }

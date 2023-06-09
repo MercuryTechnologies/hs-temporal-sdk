@@ -17,9 +17,10 @@ module Temporal.Payload
   ( Payload(..)
   , RawPayload(..)
   , Codec(..)
+  , AllArgsSupportCodec
   , JSON(..)
-  , gatherPayloads
-  , ToPayloads
+  -- , gatherPayloads
+  , ToPayloads(..)
   , applyPayloads
   , ApplyPayloads
   , ArgsOf
@@ -34,6 +35,7 @@ import qualified Data.Aeson as Aeson
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as BL
 import Control.Exception (SomeException)
+import Data.Functor
 import Data.Kind
 import Data.ProtoLens (defMessage)
 import Data.Proxy
@@ -73,7 +75,7 @@ instance (Aeson.ToJSON a, Aeson.FromJSON a) => Codec JSON a where
     , "stack_trace" .= ("" :: String)
     ]
 
-data Payload fmt = forall a. (Codec fmt a, Typeable a) => Payload 
+data Payload fmt = forall a. (Codec fmt a) => Payload 
   { payloadData :: a
   , payloadMetadata :: Map Text ByteString
   }
@@ -87,21 +89,31 @@ type family ResultOf (m :: * -> *) f where
   ResultOf m (m result) = result
   ResultOf m result = TypeError ('Text "This function must use the (" ':<>: 'ShowType m ':<>: 'Text ") monad." :$$: ('Text "Current type: " ':<>: 'ShowType result))
 
-type family BuildArgs (args :: [*]) result where
-  BuildArgs '[] result = result
-  BuildArgs (arg ': args) result = arg -> BuildArgs args result
+type family BuildArgs (args :: [*]) f result where
+  BuildArgs '[] f result = f result
+  BuildArgs (arg ': args) f result = arg -> BuildArgs args f result
 
-class ToPayloads codec (f :: [*]) where
-  toPayloadsAp :: Proxy codec -> Proxy f -> ([Payload codec] -> [Payload codec]) -> BuildArgs f [Payload codec]
+type family AllArgsSupportCodec (codec :: *) (args :: [*]) :: Constraint where
+  AllArgsSupportCodec codec '[] = ()
+  AllArgsSupportCodec codec (arg ': args) = (Codec codec arg, AllArgsSupportCodec codec args)
 
-instance ToPayloads codec '[] where
-  toPayloadsAp _ _ f = f []
+class ToPayloads f (args :: [*]) where
+  toPayloadsAp 
+    :: (AllArgsSupportCodec codec args)
+    => codec 
+    -> Proxy args
+    -> ([Payload codec] -> [Payload codec]) 
+    -> ([Payload codec] -> f a)
+    -> BuildArgs args f a
 
-instance (Codec codec arg, Typeable arg, ToPayloads codec args) => ToPayloads codec (arg ': args) where
-  toPayloadsAp p _ f = \arg -> toPayloadsAp p (Proxy @args) ((Payload arg mempty :) . f)
+instance ToPayloads f '[] where
+  toPayloadsAp _ _ f g = g $ f []
 
-gatherPayloads :: forall fmt f args. (args ~ ArgsOf f, ToPayloads fmt args) => Proxy f -> BuildArgs args [Payload fmt]
-gatherPayloads f = toPayloadsAp (Proxy @fmt) (Proxy @args) id
+instance (ToPayloads f args) => ToPayloads f (arg ': args) where
+  toPayloadsAp p _ f g = \arg -> toPayloadsAp p (Proxy @args) ((Payload arg mempty :) . f) g
+
+-- gatherPayloads :: forall f args codec. (args ~ ArgsOf f, ToPayloads [] args) => codec -> Proxy f -> BuildArgs args Identity (Payload codec)
+-- gatherPayloads codec = toPayloadsAp codec (Proxy @args) id id
 
 data RawPayload = RawPayload
   { inputPayloadData :: ByteString
@@ -116,15 +128,15 @@ convertToProtoPayload (RawPayload d m) = defMessage
   & Proto.data' .~ d
   & Proto.metadata .~ m
 
-class ApplyPayloads fmt f r | f -> r where
-  applyPayloads :: fmt -> f -> V.Vector RawPayload -> IO (Either String r)
+class ApplyPayloads codec f r | f -> r where
+  applyPayloads :: codec -> f -> V.Vector RawPayload -> IO (Either String r)
 
-instance ApplyPayloads fmt f f where
+instance ApplyPayloads codec f f where
   applyPayloads _ f vec = pure $ if V.null vec
     then Right f
     else Left "Too many arguments"
 
-instance (Codec fmt arg, ApplyPayloads fmt rest r) => ApplyPayloads fmt (arg -> rest) r where
+instance (Codec codec arg, ApplyPayloads codec rest r) => ApplyPayloads codec (arg -> rest) r where
   applyPayloads p f vec = case V.uncons vec of
     Nothing -> pure $ Left "Not enough arguments"
     Just (pl, rest) -> do

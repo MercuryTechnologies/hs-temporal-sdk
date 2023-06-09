@@ -238,13 +238,13 @@ data WorkflowDefinition env st = WorkflowDefinition
   , workflowRun :: ValidWorkflowFunction env st
   }
 
-type IsValidWorkflowFunction codec env st f = 
-  ( ToPayloads codec (ArgsOf f)
+type IsValidWorkflowFunction (codec :: *) (env :: *) (st :: *) f = 
+  ( AllArgsSupportCodec codec (ArgsOf f)
   , ApplyPayloads codec f (Workflow env st (ResultOf (Workflow env st) f))
   , Codec codec (ResultOf (Workflow env st) f)
   )
 
-data ValidWorkflowFunction env st = forall codec f. (IsValidWorkflowFunction codec env st f, ToPayloads codec (ArgsOf f)) => 
+data ValidWorkflowFunction env st = forall codec f. (IsValidWorkflowFunction codec env st f {-, ToPayloads codec (ArgsOf f) -}) => 
   ValidWorkflowFunction
     codec
     f
@@ -571,8 +571,8 @@ toWorkflowFmap f (g :<$> x) = toWorkflowFmap (f . g) x
 toWorkflowFmap f (Return i) = f <$> getIVar i
 
 type IsValidActivityFunction env codec f = 
-    ( ToPayloads codec (ArgsOf f)
-    , ApplyPayloads codec f (Activity env (ResultOf (Activity env) f))
+    ( -- ToPayloads codec (ArgsOf f)
+      ApplyPayloads codec f (Activity env (ResultOf (Activity env) f))
     , Codec codec (ResultOf (Activity env) f)
     )
 
