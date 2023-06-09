@@ -37,12 +37,12 @@ import Temporal.Workflow.WorkflowInstance
 import Temporal.Worker.Types
 
 defineWorkflow ::
-  ( IsValidWorkflowFunction env st codec f
-  ) => codec -> Text -> st -> f -> WorkflowDefinition codec env st
+  ( IsValidWorkflowFunction codec env st f
+  ) => codec -> Text -> st -> f -> WorkflowDefinition env st
 defineWorkflow p name st f = WorkflowDefinition
   { workflowName = name
   , workflowInitialState = st
   , workflowSignals = HashMap.empty
   , workflowQueries = HashMap.empty
-  , workflowRun = ValidWorkflowFunction p f applyPayloads
+  , workflowRun = ValidWorkflowFunction p f (applyPayloads p)
   }

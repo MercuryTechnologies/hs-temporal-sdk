@@ -70,15 +70,15 @@ import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult as Activi
 import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields as ActivityResult
 import UnliftIO
 
-data Task codec env st a = Task (Workflow codec env st a)
+data Task env st a = Task (Workflow env st a)
 
-wait :: Task codec env st a -> Workflow codec env st a
+wait :: Task env st a -> Workflow env st a
 wait (Task w) = w
 
-ilift :: InstanceM codec env st a -> Workflow codec env st a
+ilift :: InstanceM env st a -> Workflow env st a
 ilift = Workflow . fmap Done
 
-askInstance :: Workflow codec env st (WorkflowInstance codec env st)
+askInstance :: Workflow env st (WorkflowInstance env st)
 askInstance = ilift ask
 
 data ContinueAsNewOptions = ContinueAsNewOptions
@@ -125,7 +125,7 @@ data TimeoutType
   | StartToCloseAndScheduleToClose TimeSpec TimeSpec
 
 -- TODO, this definition doesn't admit for the case where the workflow definition is served by a different service where we don't know the type.
-startActivity :: Text -> StartActivityOptions -> [Payload] -> Workflow codec env st (Task codec env st Payload)
+startActivity :: Text -> StartActivityOptions -> [Payload] -> Workflow env st (Task env st Payload)
 startActivity n opts ps = ilift $ do
   inst <- ask
   s@(Sequence actSeq) <- nextActivitySequence
@@ -179,7 +179,7 @@ data StartChildWorkflowOptions = StartChildWorkflowOptions
   , searchAttributes :: Maybe (Map Text Payload)
   }
 -- TODO, this definition doesn't admit for the case where the workflow definition is served by a different service where we don't know the type.
-startChildWorkflow :: Text -> StartChildWorkflowOptions -> [Payload] -> Workflow codec env st (Task codec env st Payload)
+startChildWorkflow :: Text -> StartChildWorkflowOptions -> [Payload] -> Workflow env st (Task env st Payload)
 startChildWorkflow = undefined
 
 data StartLocalActivityOptions = StartLocalActivityOptions 
@@ -194,7 +194,7 @@ data StartLocalActivityOptions = StartLocalActivityOptions
   , cancellationType :: ActivityCancellationType
   -- TODO headers
   }
-startLocalActivity :: StartLocalActivityOptions -> Workflow codec env st ()
+startLocalActivity :: StartLocalActivityOptions -> Workflow env st ()
 startLocalActivity = undefined
 
 -- {-
@@ -206,7 +206,7 @@ startLocalActivity = undefined
 -- Function	get_signal_handler	Get the signal handler for the given name if any.
 -- -}
 
-info :: Workflow codec env st Info
+info :: Workflow env st Info
 info = workflowInstanceInfo <$> askInstance
 
 -- memo :: () -> Workflow env ()
@@ -218,10 +218,10 @@ info = workflowInstanceInfo <$> askInstance
 -- Current time from the workflow perspective.
 --
 -- Equivalent to `getCurrentTime` from the `time` package.
-now :: Workflow codec env st UTCTime
+now :: Workflow env st UTCTime
 now = undefined
 
-applyPatch :: PatchId -> Bool {- ^ whether the patch is deprecated -} -> Workflow codec env st Bool 
+applyPatch :: PatchId -> Bool {- ^ whether the patch is deprecated -} -> Workflow env st Bool 
 applyPatch pid deprecated = Workflow $ fmap Done $ do
   inst <- ask
   memoized <- readIORef inst.workflowMemoizedPatches
@@ -237,17 +237,17 @@ applyPatch pid deprecated = Workflow $ fmap Done $ do
           Command.setPatchMarker .~ (defMessage & Command.patchId .~ rawPatchId pid & Command.deprecated .~ deprecated)
       pure usePatch
 
-patched :: PatchId -> Workflow codec env st Bool
+patched :: PatchId -> Workflow env st Bool
 patched pid = applyPatch pid False
 
-deprecatePatch :: PatchId -> Workflow codec env st ()
+deprecatePatch :: PatchId -> Workflow env st ()
 deprecatePatch pid = void $ applyPatch pid True
 
 -- query :: () -> Workflow env ()
 -- query = undefined
 
 -- | Get a mutable randomness generator for the workflow.
-randomGen :: Workflow codec env st WorkflowGenM
+randomGen :: Workflow env st WorkflowGenM
 randomGen = workflowRandomnessSeed <$> askInstance
 
 -- setDynamicQueryHandler :: () -> Workflow env ()
@@ -268,7 +268,7 @@ randomGen = workflowRandomnessSeed <$> askInstance
 -- | Current time from the workflow perspective.
 --
 -- The value is relative to epoch time.
-time :: Workflow codec env st TimeSpec
+time :: Workflow env st TimeSpec
 time = Workflow $ do
   wft <- workflowTime <$> ask
   Done <$> readIORef wft
@@ -276,7 +276,7 @@ time = Workflow $ do
 -- upsertSearchAttributes :: () -> Workflow env ()
 -- upsertSearchAttributes = undefined
 
-uuid4 :: Workflow codec env st UUID
+uuid4 :: Workflow env st UUID
 uuid4 = do
   wft <- workflowRandomnessSeed <$> askInstance
   sbs <- uniformShortByteString 16 wft
@@ -305,7 +305,7 @@ uuid4 = do
 Side Effects are used to execute non-deterministic code, such as generating a UUID or a random number, without compromising deterministic in the Workflow. This is done by storing the non-deterministic results of the Side Effect into the Workflow Event History.
 
 -}
-sideEffect :: IO a -> Workflow codec env st a
+sideEffect :: IO a -> Workflow env st a
 sideEffect = undefined
 
 {- |
@@ -320,5 +320,5 @@ If the values are equal, then it returns the value without recording a new Marke
 If the values aren't equal, then it records the new value with the same ID on the History.
 
 -}
-mutableSideEffect :: IO a -> Workflow codec env st a
+mutableSideEffect :: IO a -> Workflow env st a
 mutableSideEffect = undefined

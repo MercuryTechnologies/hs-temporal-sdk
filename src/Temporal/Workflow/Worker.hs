@@ -40,7 +40,7 @@ queueAsyncWorkerTask task = void $ async task
   -- worker <- ask
   -- liftIO $ enqueueJob_ worker.workerJobPool $ runWorkerM worker task
 
-upsertWorkflowInstance :: RunId -> WorkflowInstance codec wfEnv st -> WorkerM wfEnv actEnv (OpaqueWorkflow WorkflowInstance wfEnv)
+upsertWorkflowInstance :: RunId -> WorkflowInstance wfEnv st -> WorkerM wfEnv actEnv (OpaqueWorkflow WorkflowInstance wfEnv)
 upsertWorkflowInstance r inst = do
   worker <- ask
   liftIO $ atomically $ do

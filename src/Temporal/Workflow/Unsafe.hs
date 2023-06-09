@@ -65,12 +65,12 @@ import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands
 --
 -- We follow this process indefinitely until the final result is returned
 -- via adding it as a workflow execution command and flushing it.
-runWorkflow :: forall codec env st a. (Codec codec a) => Workflow codec env st a -> InstanceM codec env st ()
-runWorkflow wf = do
+runWorkflow :: forall codec env st a. (Codec codec a) => codec -> Workflow env st a -> InstanceM env st ()
+runWorkflow codec wf = do
   inst <- ask
   result@IVar{ivarRef = resultRef} <- newIVar -- where to put the final result
   let -- Run a workflow to completion, and put its result in the given IVar.
-      schedule :: JobList codec env st -> Workflow codec env st b -> IVar codec env st b -> InstanceM codec env st ()
+      schedule :: JobList env st -> Workflow env st b -> IVar env st b -> InstanceM env st ()
       schedule runQueue (Workflow run) ivar@IVar{ivarRef = !ref} = do
         $(logDebug) "Schedule"
         let {-# INLINE result #-}
@@ -122,7 +122,7 @@ runWorkflow wf = do
       -- This is necessary, because we want all commands
       -- added to the WorkflowActivationCompletion before sending
       -- it off.
-      reschedule :: JobList codec env st -> InstanceM codec env st ()
+      reschedule :: JobList env st -> InstanceM env st ()
       reschedule workflows = case workflows of
         JobNil -> do
           $(logDebug) "reschedule: empty run queue"
@@ -140,7 +140,7 @@ runWorkflow wf = do
           $(logDebug) "reschedule: non-empty run queue"
           schedule remainingJobs workflow resultSlot
 
-      emptyRunQueue :: InstanceM codec env st ()
+      emptyRunQueue :: InstanceM env st ()
       emptyRunQueue = do
         $(logDebug) "emptyRunQueue"
         -- Convert any completions to jobs and reschedule if there is anything useful to process.
@@ -151,7 +151,7 @@ runWorkflow wf = do
           JobNil -> flushCommands
           _ -> reschedule wfs
 
-      flushCommands :: InstanceM codec env st ()
+      flushCommands :: InstanceM env st ()
       flushCommands = do
         $(logDebug) "flushCommands start"
         inst <- ask
@@ -176,7 +176,7 @@ runWorkflow wf = do
           when (null c) retry
         emptyRunQueue
 
-      checkCompletions :: InstanceM codec env st (JobList codec env st)
+      checkCompletions :: InstanceM env st (JobList env st)
       checkCompletions = do
         inst <- ask
         comps <- atomicallyOnBlocking (LogicBug ReadingCompletionsFailedRun) $ do
@@ -205,7 +205,7 @@ runWorkflow wf = do
             jobs <- mapM getComplete comps
             return (foldr appendJobList JobNil jobs)
 
-      waitCompletions :: InstanceM codec env st ()
+      waitCompletions :: InstanceM env st ()
       waitCompletions = do
         $(logDebug) "wait completions"
         inst <- ask
@@ -222,7 +222,7 @@ runWorkflow wf = do
   cmd <- case r of
     IVarEmpty _ -> error "runWorkflow: missing result"
     IVarFull (Ok a) -> do
-      res <- liftIO $ Temporal.Payload.encode inst.workflowCodec a
+      res <- liftIO $ Temporal.Payload.encode codec a
       let completeMessage = defMessage & Command.completeWorkflowExecution .~ (defMessage & Command.result .~ convertToProtoPayload res)
       pure completeMessage
     -- If a user-facing exception wasn't handled within the workflow, then that
@@ -250,10 +250,10 @@ atomicallyOnBlocking e stm = UnliftIO.catch
   (atomically stm)
   (\BlockedIndefinitelyOnSTM -> throwIO e)
 
-instance TypeError ('Text "A workflow definition cannot directly perform IO. Use executeActivity or executeLocalActivity instead.") => MonadIO (Workflow codec env st) where
+instance TypeError ('Text "A workflow definition cannot directly perform IO. Use executeActivity or executeLocalActivity instead.") => MonadIO (Workflow env st) where
   liftIO = error "Unreachable"
 
-instance TypeError ('Text "A workflow definition cannot directly perform IO. Use executeActivity or executeLocalActivity instead.") => MonadUnliftIO (Workflow codec env st) where
+instance TypeError ('Text "A workflow definition cannot directly perform IO. Use executeActivity or executeLocalActivity instead.") => MonadUnliftIO (Workflow env st) where
   withRunInIO _ = error "Unreachable"
 
 rethrowAsyncExceptions :: MonadIO m => SomeException -> m ()
@@ -261,7 +261,7 @@ rethrowAsyncExceptions e
   | Just SomeAsyncException{} <- fromException e = UnliftIO.throwIO e
   | otherwise = return ()
 
-addCommand :: (MonadIO m) => WorkflowInstance codec env st -> WorkflowCommand -> m ()
+addCommand :: (MonadIO m) => WorkflowInstance env st -> WorkflowCommand -> m ()
 addCommand inst command = do
   -- $(logDebug) $ Text.pack ("Adding command: " <> show command)
   atomically $ do

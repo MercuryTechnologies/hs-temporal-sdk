@@ -85,12 +85,12 @@ instance MonadLoggerIO (WorkerM workflowEnv activityEnv) where
     worker <- ask
     pure worker.workerLogFn
 
-data OpaqueWorkflow f env = forall codec st. OpaqueWorkflow (f codec env st)
+data OpaqueWorkflow f env = forall st. OpaqueWorkflow (f env st)
 
 newtype Sequence a = Sequence { rawSequence :: Word32 }
   deriving (Eq, Ord, Show, Enum, Num, Hashable)
 
-type SequenceMap codec env st a = HashMap (Sequence a) (IVar codec env st a)
+type SequenceMap env st a = HashMap (Sequence a) (IVar env st a)
 
 data Sequences = Sequences
   { externalCancel :: !Word32
@@ -142,17 +142,17 @@ data WorkflowCommands
   | RunningActivation (Reversed WorkflowCommand)
   deriving (Show)
 
-data SequenceMaps codec env st = SequenceMaps 
-  { timers :: {-# UNPACK #-} !(SequenceMap codec env st ())
-  , activities :: {-# UNPACK #-} !(SequenceMap codec env st ResolveActivity)
-  , childWorkflows :: {-# UNPACK #-} !(SequenceMap codec env st ResolveChildWorkflowExecutionStart)
-  , externalSignals :: {-# UNPACK #-} !(SequenceMap codec env st ResolveSignalExternalWorkflow)
-  , externalCancels :: {-# UNPACK #-} !(SequenceMap codec env st ResolveRequestCancelExternalWorkflow)
+data SequenceMaps env st = SequenceMaps 
+  { timers :: {-# UNPACK #-} !(SequenceMap env st ())
+  , activities :: {-# UNPACK #-} !(SequenceMap env st ResolveActivity)
+  , childWorkflows :: {-# UNPACK #-} !(SequenceMap env st ResolveChildWorkflowExecutionStart)
+  , externalSignals :: {-# UNPACK #-} !(SequenceMap env st ResolveSignalExternalWorkflow)
+  , externalCancels :: {-# UNPACK #-} !(SequenceMap env st ResolveRequestCancelExternalWorkflow)
   }
 
-data WorkflowInstance codec env st = WorkflowInstance
+data WorkflowInstance env st = WorkflowInstance
   { workflowInstanceInfo :: Info
-  , workflowInstanceDefinition :: WorkflowDefinition codec env st
+  , workflowInstanceDefinition :: WorkflowDefinition env st
   , workflowInstanceLogger :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
   , workflowRandomnessSeed :: WorkflowGenM
   -- , workflowInstanceJobPool :: JobPool
@@ -161,27 +161,26 @@ data WorkflowInstance codec env st = WorkflowInstance
   , workflowSequences :: {-# UNPACK #-} !(IORef Sequences)
   , workflowTime :: {-# UNPACK #-} !(IORef TimeSpec)
   , workflowIsReplaying :: {-# UNPACK #-} !(IORef Bool)
-  , workflowRunQueueRef :: {-# UNPACK #-} !(IORef (JobList codec env st))
+  , workflowRunQueueRef :: {-# UNPACK #-} !(IORef (JobList env st))
   , workflowPrimaryTask :: {-# UNPACK #-} !(IORef (Maybe (Async ())))
-  , workflowCompletions :: {-# UNPACK #-} !(TVar [CompleteReq codec env st])
+  , workflowCompletions :: {-# UNPACK #-} !(TVar [CompleteReq env st])
   , workflowCommands :: {-# UNPACK #-} !(TVar WorkflowCommands)
-  , workflowSequenceMaps :: {-# UNPACK #-} !(MVar (SequenceMaps codec env st))
+  , workflowSequenceMaps :: {-# UNPACK #-} !(MVar (SequenceMaps env st))
   , workflowState :: {-# UNPACK #-} !(IORef st)
   , workflowEnv :: env
-  , workflowCodec :: codec
   -- , externFunctions
   -- , disableEagerActivityExecution :: Bool
   }
 
-newtype InstanceM (codec :: *) (env :: *) (st :: *) (a :: *) = InstanceM { unInstanceM :: ReaderT (WorkflowInstance codec env st) IO a }
-  deriving (Functor, Applicative, Monad, MonadIO, MonadReader (WorkflowInstance codec env st), MonadUnliftIO)
+newtype InstanceM (env :: *) (st :: *) (a :: *) = InstanceM { unInstanceM :: ReaderT (WorkflowInstance env st) IO a }
+  deriving (Functor, Applicative, Monad, MonadIO, MonadReader (WorkflowInstance env st), MonadUnliftIO)
 
-instance MonadLogger (InstanceM codec env st) where
+instance MonadLogger (InstanceM env st) where
   monadLoggerLog loc src lvl msg = do
     logger <- asks workflowInstanceLogger
     liftIO $ logger loc src lvl (toLogStr msg)
 
-instance MonadLoggerIO (InstanceM codec env st) where
+instance MonadLoggerIO (InstanceM env st) where
   askLoggerIO = asks workflowInstanceLogger
 
 data WorkflowWorker env = WorkflowWorker
@@ -208,7 +207,7 @@ Signals are delivered in the order they are received by the Cluster.
 If multiple deliveries of a Signal would be a problem for your Workflow, add idempotency logic to your Signal handler 
 that checks for duplicates.
 -}
-data WorkflowSignalDefinition codec env st = WorkflowSignalDefinition
+data WorkflowSignalDefinition env st = WorkflowSignalDefinition
   -- { workflowSignalName :: Text
   -- , workflowSignalHandler :: [Payload] -> IO ()
   -- }
@@ -229,27 +228,27 @@ This means, for example, that Query handling logic cannot schedule Activity Exec
 
 Sending Queries to completed Workflow Executions is supported, though Query reject conditions can be configured per Query
 -}
-data WorkflowQueryDefinition codec env st = WorkflowQueryDefinition
+data WorkflowQueryDefinition env st = WorkflowQueryDefinition
 
-data WorkflowDefinition codec env st = WorkflowDefinition
+data WorkflowDefinition env st = WorkflowDefinition
   { workflowName :: Text
-  , workflowSignals :: HashMap Text (WorkflowSignalDefinition codec env st)
-  , workflowQueries :: HashMap Text (WorkflowQueryDefinition codec env st)
+  , workflowSignals :: HashMap Text (WorkflowSignalDefinition env st)
+  , workflowQueries :: HashMap Text (WorkflowQueryDefinition env st)
   , workflowInitialState :: st
-  , workflowRun :: ValidWorkflowFunction codec env st
+  , workflowRun :: ValidWorkflowFunction env st
   }
 
-type IsValidWorkflowFunction env st codec f = 
+type IsValidWorkflowFunction codec env st f = 
   ( ToPayloads codec (ArgsOf f)
-  , ApplyPayloads codec f (Workflow codec env st (ResultOf (Workflow codec env st) f))
-  , Codec codec (ResultOf (Workflow codec env st) f)
+  , ApplyPayloads codec f (Workflow env st (ResultOf (Workflow env st) f))
+  , Codec codec (ResultOf (Workflow env st) f)
   )
 
-data ValidWorkflowFunction codec env st = forall fmt f. (IsValidWorkflowFunction env st codec f) => 
+data ValidWorkflowFunction env st = forall codec f. (IsValidWorkflowFunction codec env st f, ToPayloads codec (ArgsOf f)) => 
   ValidWorkflowFunction
     codec
     f
-    (codec -> f -> Vector RawPayload -> IO (Either String (Workflow codec env st (ResultOf (Workflow codec env st) f))))
+    (f -> Vector RawPayload -> IO (Either String (Workflow env st (ResultOf (Workflow env st) f))))
 
 data ActivityCancelReason
   = GoneFromServer
@@ -279,7 +278,7 @@ data ActivityWorker env = ActivityWorker
 
 newtype WorkflowGenM = WorkflowGenM { unWorkflowGenM :: IORef StdGen }
 
-instance StatefulGen WorkflowGenM (Workflow codec env st) where
+instance StatefulGen WorkflowGenM (Workflow env st) where
   uniformWord32R r = applyWorkflowGen (genWord32R r)
   {-# INLINE uniformWord32R #-}
   uniformWord64R r = applyWorkflowGen (genWord64R r)
@@ -294,27 +293,27 @@ instance StatefulGen WorkflowGenM (Workflow codec env st) where
   {-# INLINE uniformWord64 #-}
   uniformShortByteString n = applyWorkflowGen (genShortByteString n)
 
-applyWorkflowGen :: (StdGen -> (a, StdGen)) -> WorkflowGenM -> Workflow codec env st a
+applyWorkflowGen :: (StdGen -> (a, StdGen)) -> WorkflowGenM -> Workflow env st a
 applyWorkflowGen f (WorkflowGenM ref) = Workflow $ do
   g <- readIORef ref
   case f g of
     (!a, !g') -> Done a <$ writeIORef ref g'
 {-# INLINE applyWorkflowGen #-}
 
-newWorkflowGenM :: StdGen -> Workflow codec env st WorkflowGenM
+newWorkflowGenM :: StdGen -> Workflow env st WorkflowGenM
 newWorkflowGenM = Workflow . fmap (Done . WorkflowGenM) . newIORef
 {-# INLINE newWorkflowGenM #-}
 
-instance RandomGenM WorkflowGenM StdGen (Workflow codec env st) where
+instance RandomGenM WorkflowGenM StdGen (Workflow env st) where
   applyRandomGenM = applyWorkflowGen
 
-instance FrozenGen StdGen (Workflow codec env st) where
-  type MutableGen StdGen (Workflow codec env st) = WorkflowGenM
+instance FrozenGen StdGen (Workflow env st) where
+  type MutableGen StdGen (Workflow env st) = WorkflowGenM
   freezeGen = Workflow . fmap Done . readIORef . unWorkflowGenM
   thawGen g = newWorkflowGenM g
 
 -- | A synchronisation point. It either contains a value, or a list of computations waiting for the value.
-newtype IVar codec env st a = IVar { ivarRef :: IORef (IVarContents codec env st a) }
+newtype IVar env st a = IVar { ivarRef :: IORef (IVarContents env st a) }
 
 
 -- | The contents of a full IVar.  We have to distinguish exceptions
@@ -328,22 +327,22 @@ data ResultVal a
   -- Error in the workflow that should be returned to the caller
   | ThrowWorkflow SomeException
 
-data IVarContents codec env st a
+data IVarContents env st a
   = IVarFull (ResultVal a)
-  | IVarEmpty (JobList codec env st)
+  | IVarEmpty (JobList env st)
 
 {- |
 A list of computations together with the IVar into which they should put their result.
 
 This could be an ordinary list, but the optimised representation saves space and time.
 -}
-data JobList codec env st
+data JobList env st
   = JobNil
   | forall a. JobCons 
     {- (Context env) todo if MonadReader doesn't work we may need to propagate context here. -} 
-    !(Workflow codec env st a) 
-    !(IVar codec env st a)
-    !(JobList codec env st)
+    !(Workflow env st a) 
+    !(IVar env st a)
+    !(JobList env st)
 
 -- | A resolved result from an activation, containing the result,
 -- and the 'IVar' representing the blocked computations. Handling an
@@ -351,14 +350,14 @@ data JobList codec env st
 -- and adding these to a queue ('completions') using
 -- 'putResult'; the scheduler collects them from the queue and unblocks
 -- the relevant computations.
-data CompleteReq codec env st
+data CompleteReq env st
   = forall a. CompleteReq
       (ResultVal a)
-      !(IVar codec env st a)
+      !(IVar env st a)
 
-newtype Workflow codec env st a = Workflow { unWorkflow :: InstanceM codec env st (Result codec env st a) }
+newtype Workflow env st a = Workflow { unWorkflow :: InstanceM env st (Result env st a) }
 
-instance Functor (Workflow codec env st) where
+instance Functor (Workflow env st) where
   fmap f (Workflow m) = Workflow $ do
     r <- m
     case r of
@@ -387,7 +386,7 @@ instance Functor (Workflow codec env st) where
 -- We can also do it the other way around:
 --
 --   (do ff <- f; getIVar i; return (ff a)) <*> (a >>= putIVar i)
-instance Applicative (Workflow codec env st) where
+instance Applicative (Workflow env st) where
   pure = Workflow . pure . Done
   Workflow ff <*> Workflow aa = Workflow $ do
     rf <- ff
@@ -407,11 +406,11 @@ instance Applicative (Workflow codec env st) where
           Blocked ivar' acont -> blockedBlocked ivar fcont ivar' acont
 
 blockedBlocked
-  :: IVar codec env st c
-  -> Cont codec env st (a -> b)
-  -> IVar codec env st d
-  -> Cont codec env st a
-  -> InstanceM codec env st (Result codec env st b)
+  :: IVar env st c
+  -> Cont env st (a -> b)
+  -> IVar env st d
+  -> Cont env st a
+  -> InstanceM env st (Result env st b)
 blockedBlocked _ (Return i) ivar2 acont =
   return (Blocked ivar2 (acont :>>= getIVarApply i))
 blockedBlocked _ (g :<$> Return i) ivar2 acont =
@@ -422,13 +421,13 @@ blockedBlocked ivar1 fcont ivar2 acont = do
   let cont = acont :>>= \a -> getIVarApply i a
   return (Blocked ivar2 cont)
 
-newIVar :: InstanceM codec env st (IVar codec env st a)
+newIVar :: InstanceM env st (IVar env st a)
 newIVar = do
   ivarRef <- newIORef (IVarEmpty JobNil)
   return IVar{..}
 
 {-# INLINE addJob #-}
-addJob :: Workflow codec env st b -> IVar codec env st b -> IVar codec env st a -> InstanceM codec env st ()
+addJob :: Workflow env st b -> IVar env st b -> IVar env st a -> InstanceM env st ()
 addJob !wf !resultIVar IVar{ivarRef = !ref} =
   modifyIORef' ref $ \contents ->
     case contents of
@@ -439,7 +438,7 @@ addJobPanic :: forall a . a
 addJobPanic = error "addJob: not empty"
 
 -- Just a specialised version of getIVar, for efficiency in <*>
-getIVarApply :: IVar codec env st (a -> b) -> a -> Workflow codec env st b
+getIVarApply :: IVar env st (a -> b) -> a -> Workflow env st b
 getIVarApply i@IVar{ivarRef = !ref} a = Workflow $ do
   e <- readIORef ref
   case e of
@@ -449,7 +448,7 @@ getIVarApply i@IVar{ivarRef = !ref} a = Workflow $ do
     IVarEmpty _ ->
       return (Blocked i (Cont (getIVarApply i a)))
 
-getIVar :: IVar codec env st a -> Workflow codec env st a
+getIVar :: IVar env st a -> Workflow env st a
 getIVar i@IVar{ivarRef = !ref} = Workflow $ do
   e <- readIORef ref
   case e of
@@ -458,7 +457,7 @@ getIVar i@IVar{ivarRef = !ref} = Workflow $ do
     IVarFull (ThrowInternal e) -> throwIO e
     IVarEmpty _ -> return (Blocked i (Return i))
 
-instance Monad (Workflow codec env st) where
+instance Monad (Workflow env st) where
   return = pure
   Workflow m >>= k = Workflow $ do
     r <- m
@@ -469,11 +468,11 @@ instance Monad (Workflow codec env st) where
   -- We really want the Applicative version of >>
   (>>) = (*>)
 
-instance MonadReader env (Workflow codec env st) where
+instance MonadReader env (Workflow env st) where
   ask = Workflow (Done <$> asks workflowEnv)
   local f (Workflow m) = Workflow $ local (\inst -> inst { workflowEnv = f $ workflowEnv inst }) m
 
-instance MonadState st (Workflow codec env st) where
+instance MonadState st (Workflow env st) where
   get = Workflow (fmap Done . readIORef . workflowState =<< ask)
   put st = Workflow $ do
     inst <- ask
@@ -485,18 +484,18 @@ instance MonadState st (Workflow codec env st) where
       let (a, st') = f st
       in (st', a)
 
-instance Semigroup a => Semigroup (Workflow codec env st a) where
+instance Semigroup a => Semigroup (Workflow env st a) where
   (<>) = liftA2 (<>)
 
-instance Monoid a => Monoid (Workflow codec env st a) where
+instance Monoid a => Monoid (Workflow env st a) where
   mempty = pure mempty
 
 -- | The result of a computation is either Done with a value, Throw with an exception, 
 -- or Blocked while awaiting the result of a workflow or activity.
-data Result codec env st a 
+data Result env st a 
   = Done a
   | Throw SomeException
-  | forall b. Blocked !(IVar codec env st b) (Cont codec env st a)
+  | forall b. Blocked !(IVar env st b) (Cont env st a)
 
 
 -- | A data representation of a Workflow continuation. 
@@ -504,31 +503,31 @@ data Result codec env st a
 -- leading O(n^2) complexity for some pathalogical cases
 --
 -- -- See "A Smart View on Datatypes", Jaskelioff/Rivas, ICFP'15
-data Cont codec env st a
-  = Cont (Workflow codec env st a)
-  | forall b. (Cont codec env st b) :>>= (b -> Workflow codec env st a)
-  | forall b. (b -> a) :<$> (Cont codec env st b)
-  | Return (IVar codec env st a)
+data Cont env st a
+  = Cont (Workflow env st a)
+  | forall b. (Cont env st b) :>>= (b -> Workflow env st a)
+  | forall b. (b -> a) :<$> (Cont env st b)
+  | Return (IVar env st a)
 
 -- -----------------------------------------------------------------------------
 -- Exceptions
 
 -- | Throw an exception in the Workflow monad
-throw :: Exception e => e -> Workflow codec env st a
+throw :: Exception e => e -> Workflow env st a
 throw = Workflow . raise
 
-raise :: Exception e => e -> InstanceM codec env st (Result codec env st a)
+raise :: Exception e => e -> InstanceM env st (Result env st a)
 raise e = raiseImpl (toException e)
 
 {-# INLINE raiseImpl #-}
-raiseImpl :: SomeException -> InstanceM codec env st (Result codec env st b)
+raiseImpl :: SomeException -> InstanceM env st (Result env st b)
 raiseImpl e = case fromException e of
   Nothing -> pure $ Throw e
   Just (WorkflowException h) ->
     pure $ Throw $ toException $ WorkflowException h
 
 -- | Catch an exception in the Workflow monad
-catch :: Exception e => Workflow codec env st a -> (e -> Workflow codec env st a) -> Workflow codec env st a
+catch :: Exception e => Workflow env st a -> (e -> Workflow env st a) -> Workflow env st a
 catch (Workflow m) h = Workflow $ do
    r <- m
    case r of
@@ -539,33 +538,33 @@ catch (Workflow m) h = Workflow $ do
 
 -- | Catch exceptions that satisfy a predicate
 catchIf
-  :: Exception e => (e -> Bool) -> Workflow codec env st a -> (e -> Workflow codec env st a)
-  -> Workflow codec env st a
+  :: Exception e => (e -> Bool) -> Workflow env st a -> (e -> Workflow env st a)
+  -> Workflow env st a
 catchIf cond m handler =
   Temporal.Worker.Types.catch m $ \e -> if cond e then handler e else throw e
 
 -- | Returns @'Left' e@ if the computation throws an exception @e@, or
 -- @'Right' a@ if it returns a result @a@.
-try :: Exception e => Workflow codec env st a -> Workflow codec env st (Either e a)
+try :: Exception e => Workflow env st a -> Workflow env st (Either e a)
 try m = (Right <$> m) `Temporal.Worker.Types.catch` (return . Left)
 
-instance Catch.MonadThrow (Workflow codec env st) where throwM = Temporal.Worker.Types.throw
-instance Catch.MonadCatch (Workflow codec env st) where catch = Temporal.Worker.Types.catch
+instance Catch.MonadThrow (Workflow env st) where throwM = Temporal.Worker.Types.throw
+instance Catch.MonadCatch (Workflow env st) where catch = Temporal.Worker.Types.catch
 
 
-toWorkflow :: Cont codec env st a -> Workflow codec env st a
+toWorkflow :: Cont env st a -> Workflow env st a
 toWorkflow (Cont wf) = wf
 toWorkflow (m :>>= k) = toWorkflowBind m k
 toWorkflow (f :<$> x) = toWorkflowFmap f x
 toWorkflow (Return i) = getIVar i
 
-toWorkflowBind :: Cont codec env st b -> (b -> Workflow codec env st a) -> Workflow codec env st a
+toWorkflowBind :: Cont env st b -> (b -> Workflow env st a) -> Workflow env st a
 toWorkflowBind (m :>>= k) k2 = toWorkflowBind m (k >=> k2)
 toWorkflowBind (Cont wf) k = wf >>= k
 toWorkflowBind (f :<$> x) k = toWorkflowBind x (k . f)
 toWorkflowBind (Return i) k = getIVar i >>= k
 
-toWorkflowFmap :: (a -> b) -> Cont codec env st a -> Workflow codec env st b
+toWorkflowFmap :: (a -> b) -> Cont env st a -> Workflow env st b
 toWorkflowFmap f (m :>>= k) = toWorkflowBind m (k >=> pure . f)
 toWorkflowFmap f (Cont workflow) = f <$> workflow
 toWorkflowFmap f (g :<$> x) = toWorkflowFmap (f . g) x

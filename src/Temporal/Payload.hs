@@ -91,13 +91,13 @@ type family BuildArgs (args :: [*]) result where
   BuildArgs '[] result = result
   BuildArgs (arg ': args) result = arg -> BuildArgs args result
 
-class ToPayloads fmt (f :: [*]) where
-  toPayloadsAp :: Proxy fmt -> Proxy f -> ([Payload fmt] -> [Payload fmt]) -> BuildArgs f [Payload fmt]
+class ToPayloads codec (f :: [*]) where
+  toPayloadsAp :: Proxy codec -> Proxy f -> ([Payload codec] -> [Payload codec]) -> BuildArgs f [Payload codec]
 
-instance ToPayloads fmt '[] where
+instance ToPayloads codec '[] where
   toPayloadsAp _ _ f = f []
 
-instance (Codec fmt arg, Typeable arg, ToPayloads fmt args) => ToPayloads fmt (arg ': args) where
+instance (Codec codec arg, Typeable arg, ToPayloads codec args) => ToPayloads codec (arg ': args) where
   toPayloadsAp p _ f = \arg -> toPayloadsAp p (Proxy @args) ((Payload arg mempty :) . f)
 
 gatherPayloads :: forall fmt f args. (args ~ ArgsOf f, ToPayloads fmt args) => Proxy f -> BuildArgs args [Payload fmt]
