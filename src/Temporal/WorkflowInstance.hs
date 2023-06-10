@@ -14,6 +14,7 @@ module Temporal.WorkflowInstance
   , nextTimerSequence
   ) where
 
+import Control.Applicative
 import Control.Concurrent.STM (retry)
 import Control.Monad.Logger
 import Control.Monad.Reader
@@ -65,6 +66,10 @@ import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
   , ResolveRequestCancelExternalWorkflow
   , WorkflowActivationJob
   , WorkflowActivationJob'Variant(..)
+  , ResolveChildWorkflowExecutionStart'Status(..)
+  )
+import Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow
+  ( StartChildWorkflowExecutionFailedCause(..)
   )
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
 import Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion
@@ -178,35 +183,35 @@ finalizeCommandsForCompletion (Reversed commands) = reverse $ go commands [] Fal
         WorkflowCommand'ContinueAsNewWorkflowExecution _ -> go cs (c:acc) True
         WorkflowCommand'FailWorkflowExecution _ -> go cs (c:acc) True
 
-nextExternalCancelSequence :: InstanceM env st (Sequence ResolveRequestCancelExternalWorkflow)
+nextExternalCancelSequence :: InstanceM env st Sequence
 nextExternalCancelSequence = do
   inst <- ask
   atomicModifyIORef' inst.workflowSequences $ \seqs ->
     let seq' = externalCancel seqs
     in (seqs { externalCancel = succ seq' }, Sequence seq')
 
-nextChildWorkflowSequence :: InstanceM env st (Sequence ResolveChildWorkflowExecutionStart)
+nextChildWorkflowSequence :: InstanceM env st Sequence
 nextChildWorkflowSequence = do
   inst <- ask
   atomicModifyIORef' inst.workflowSequences $ \seqs ->
     let seq' = childWorkflow seqs
     in (seqs { childWorkflow = succ seq' }, Sequence seq')
 
-nextExternalSignalSequence :: InstanceM env st (Sequence ResolveSignalExternalWorkflow)
+nextExternalSignalSequence :: InstanceM env st Sequence
 nextExternalSignalSequence = do
   inst <- ask
   atomicModifyIORef' inst.workflowSequences $ \seqs ->
     let seq' = externalSignal seqs
     in (seqs { externalSignal = succ seq' }, Sequence seq')
 
-nextTimerSequence :: InstanceM env st (Sequence ())
+nextTimerSequence :: InstanceM env st Sequence
 nextTimerSequence = do
   inst <- ask
   atomicModifyIORef' inst.workflowSequences $ \seqs ->
     let seq' = timer seqs
     in (seqs { timer = succ seq' }, Sequence seq')
 
-nextActivitySequence :: InstanceM env st (Sequence ResolveActivity)
+nextActivitySequence :: InstanceM env st Sequence
 nextActivitySequence = do
   inst <- ask
   atomicModifyIORef' inst.workflowSequences $ \seqs ->
@@ -280,10 +285,6 @@ applyCancelWorkflow cancelWorkflow = do
 
 applySignalWorkflow :: SignalWorkflow -> InstanceM env st ()
 applySignalWorkflow _ = throwIO $ RuntimeError "SignalWorkflow should be handled by applyResolutions"
-
-applyResolveActivity :: ResolveActivity -> InstanceM env st ()
-applyResolveActivity resolveActivity = throwIO $ RuntimeError "ResolveActivity should be handled by applyResolutions"
-
 applyNotifyHasPatch :: NotifyHasPatch -> InstanceM env st ()
 applyNotifyHasPatch notifyHasPatch = do
   inst <- ask
@@ -291,30 +292,13 @@ applyNotifyHasPatch notifyHasPatch = do
       patches = inst.workflowNotifiedPatches
   atomicModifyIORef' patches $ \set -> (Set.insert (notifyHasPatch ^. Activation.patchId . to PatchId) set, ())
 
-applyResolveChildWorkflowExecutionStart :: ResolveChildWorkflowExecutionStart -> InstanceM env st ()
-applyResolveChildWorkflowExecutionStart resolveChildWorkflowExecutionStart = do
-  throwIO $ RuntimeError "ResolveChildWorkflowExecutionStart not implemented"
-
-applyResolveChildWorkflowExecution :: ResolveChildWorkflowExecution -> InstanceM env st ()
-applyResolveChildWorkflowExecution resolveChildWorkflowExecution = do
-  throwIO $ RuntimeError "ResolveChildWorkflowExecution not implemented"
-
-applyResolveSignalExternalWorkflow :: ResolveSignalExternalWorkflow -> InstanceM env st ()
-applyResolveSignalExternalWorkflow resolveSignalExternalWorkflow = do
-  throwIO $ RuntimeError "ResolveSignalExternalWorkflow should be handled by applyResolutions"
-
-
-applyResolveRequestCancelExternalWorkflow :: ResolveRequestCancelExternalWorkflow -> InstanceM env st ()
-applyResolveRequestCancelExternalWorkflow resolveRequestCancelExternalWorkflow = throwIO $ RuntimeError "ResolveRequestCancelExternalWorkflow should be handled by applyResolutions"
-
 data PendingJob 
   = PendingJobResolveActivity ResolveActivity
+  | PendingJobResolveChildWorkflowExecutionStart ResolveChildWorkflowExecutionStart
   | PendingJobResolveChildWorkflowExecution ResolveChildWorkflowExecution
   | PendingJobResolveSignalExternalWorkflow ResolveSignalExternalWorkflow
   | PendingJobResolveRequestCancelExternalWorkflow ResolveRequestCancelExternalWorkflow
   | PendingJobFireTimer FireTimer
-
-
 
 -- TODO: the .NET SDK implies that this manual sorting derived from the Python SDK is not necessary.
 -- It seems to think that the jobs are already sorted in the correct order by the server.
@@ -337,6 +321,7 @@ applyJobs jobs = UnliftIO.try $ do
         -- and it tries to execute further.
         Just (WorkflowActivationJob'FireTimer r) -> (patchNotifications, signalWorkflows, queryWorkflows, PendingJobFireTimer r : resolutions, otherJobs)
         Just (WorkflowActivationJob'ResolveActivity r) -> (patchNotifications, signalWorkflows, queryWorkflows, PendingJobResolveActivity r : resolutions, otherJobs)
+        Just (WorkflowActivationJob'ResolveChildWorkflowExecutionStart r) -> (patchNotifications, signalWorkflows, queryWorkflows, PendingJobResolveChildWorkflowExecutionStart r : resolutions, otherJobs)
         Just (WorkflowActivationJob'ResolveChildWorkflowExecution r) -> (patchNotifications, signalWorkflows, queryWorkflows, PendingJobResolveChildWorkflowExecution r : resolutions, otherJobs)
         Just (WorkflowActivationJob'ResolveSignalExternalWorkflow r) -> (patchNotifications, signalWorkflows, queryWorkflows, PendingJobResolveSignalExternalWorkflow r : resolutions, otherJobs)
         Just (WorkflowActivationJob'ResolveRequestCancelExternalWorkflow r) -> (patchNotifications, signalWorkflows, queryWorkflows, PendingJobResolveRequestCancelExternalWorkflow r : resolutions, otherJobs)
@@ -357,12 +342,12 @@ applyActivationJob job = case job ^. Activation.maybe'variant of
     WorkflowActivationJob'QueryWorkflow queryWorkflow -> applyQueryWorkflow queryWorkflow
     WorkflowActivationJob'CancelWorkflow cancelWorkflow -> applyCancelWorkflow cancelWorkflow
     WorkflowActivationJob'SignalWorkflow signalWorkflow -> applySignalWorkflow signalWorkflow
-    WorkflowActivationJob'ResolveActivity resolveActivity -> applyResolveActivity resolveActivity
     WorkflowActivationJob'NotifyHasPatch notifyHasPatch -> applyNotifyHasPatch notifyHasPatch
-    WorkflowActivationJob'ResolveChildWorkflowExecutionStart resolveChildWorkflowExecutionStart -> applyResolveChildWorkflowExecutionStart resolveChildWorkflowExecutionStart
-    WorkflowActivationJob'ResolveChildWorkflowExecution resolveChildWorkflowExecution -> applyResolveChildWorkflowExecution resolveChildWorkflowExecution
-    WorkflowActivationJob'ResolveSignalExternalWorkflow resolveSignalExternalWorkflow -> applyResolveSignalExternalWorkflow resolveSignalExternalWorkflow
-    WorkflowActivationJob'ResolveRequestCancelExternalWorkflow resolveRequestCancelExternalWorkflow -> applyResolveRequestCancelExternalWorkflow resolveRequestCancelExternalWorkflow
+    WorkflowActivationJob'ResolveActivity resolveActivity -> throwIO $ RuntimeError "ResolveActivity should be handled by applyResolutions"
+    WorkflowActivationJob'ResolveChildWorkflowExecutionStart _ ->  throwIO $ RuntimeError "ResolveChildWorkflowExecutionStart should be handled by applyResolutions"
+    WorkflowActivationJob'ResolveChildWorkflowExecution _ -> throwIO $ RuntimeError "ResolveChildWorkflowExecution should be handled by applyResolutions"
+    WorkflowActivationJob'ResolveSignalExternalWorkflow _ -> throwIO $ RuntimeError "ResolveSignalExternalWorkflow should be handled by applyResolutions"
+    WorkflowActivationJob'ResolveRequestCancelExternalWorkflow _ -> throwIO $ RuntimeError "ResolveRequestCancelExternalWorkflow should be handled by applyResolutions"
     -- Ignore, handled in the worker code.
     WorkflowActivationJob'RemoveFromCache removeFromCache -> pure ()
 
@@ -388,6 +373,61 @@ applyResolutions rs = do
                   ( CompleteReq (Ok msg) existing : completions
                   , sequenceMaps'
                   )
+          PendingJobResolveChildWorkflowExecutionStart msg -> do
+            let existingHandle = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
+            case existingHandle of
+              Nothing -> do
+                throwIO $ RuntimeError "Child workflow not found"
+              Just (SomeChildWorkflowHandle existing) -> case msg ^. Activation.maybe'status of
+                Nothing -> do
+                  throwIO $ RuntimeError "Child workflow start did not have a known status"
+                Just status -> case status of
+                  ResolveChildWorkflowExecutionStart'Succeeded succeeded -> 
+                    pure 
+                      ( CompleteReq (Ok ()) (startHandle existing) : completions
+                      , sequenceMaps'
+                        { childWorkflows = HashMap.adjust 
+                            (\(SomeChildWorkflowHandle cw) -> SomeChildWorkflowHandle $ cw 
+                              { firstExecutionRunId = firstExecutionRunId cw <|> Just (succeeded ^. Activation.runId . to RunId)
+                              }) (msg ^. Activation.seq . to Sequence) 
+                            sequenceMaps'.childWorkflows
+                        }
+                      )
+                  ResolveChildWorkflowExecutionStart'Failed failed ->
+                    let updatedMaps = sequenceMaps'
+                          { childWorkflows = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
+                          }
+                    in case failed ^. Activation.cause of
+                          START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS -> 
+                            pure 
+                              ( CompleteReq 
+                                (
+                                  ThrowWorkflow $ toException $ WorkflowAlreadyStarted
+                                    { workflowAlreadyStartedWorkflowId = failed ^. Activation.workflowId
+                                    , workflowAlreadyStartedWorkflowType = failed ^. Activation.workflowType
+                                    }
+                                ) existing.startHandle 
+                                : completions
+                              , updatedMaps
+                              )
+                          _ ->
+                            pure
+                              ( CompleteReq 
+                                (ThrowInternal $ toException $ RuntimeError ("Unknown child workflow start failure: " <> show (failed ^. Activation.cause)))
+                                existing.startHandle 
+                                : completions
+                              , updatedMaps
+                              )
+                  ResolveChildWorkflowExecutionStart'Cancelled cancelled -> 
+                    pure 
+                      ( CompleteReq 
+                        (ThrowWorkflow $ toException ChildWorkflowCancelled) existing.startHandle
+                            : completions
+                      , sequenceMaps'
+                        { childWorkflows = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
+                        }
+                      )
+
           PendingJobResolveChildWorkflowExecution msg -> error "applyResolutions: PendingJobResolveChildWorkflowExecution not implemented"
           PendingJobResolveSignalExternalWorkflow msg -> error "applyResolutions: PendingJobResolveSignalExternalWorkflow not implemented"
           PendingJobResolveRequestCancelExternalWorkflow msg -> error "applyResolutions: PendingJobResolveRequestCancelExternalWorkflow not implemented"

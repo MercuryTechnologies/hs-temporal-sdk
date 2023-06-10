@@ -1,6 +1,7 @@
 module Temporal.Exception where
 
 import Control.Exception
+import Data.Text
 import Data.Typeable
 
 -- | Used to denote that a payload either failed to encode or decode
@@ -83,6 +84,26 @@ instance Show WorkflowException where
   show (WorkflowException e) = show e
 
 instance Exception WorkflowException where
+  toException = workflowExceptionToException
+  fromException = workflowExceptionFromException
+
+data WorkflowAlreadyStarted = WorkflowAlreadyStarted 
+  { workflowAlreadyStartedWorkflowId :: Text
+  , workflowAlreadyStartedWorkflowType :: Text
+  } deriving (Show)
+
+instance Exception WorkflowAlreadyStarted where
+  toException = workflowExceptionToException
+  fromException = workflowExceptionFromException
+
+data ChildWorkflowCancelled = ChildWorkflowCancelled
+  deriving (Show)
+  -- { childWorkflowCancelledWorkflowId :: Text
+  -- , childWorkflowCancelledWorkflowType :: Text
+  -- , childWorkflowCancelledRunId :: Text
+  -- } deriving (Show)
+
+instance Exception ChildWorkflowCancelled where
   toException = workflowExceptionToException
   fromException = workflowExceptionFromException
 

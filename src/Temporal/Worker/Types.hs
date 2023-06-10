@@ -87,10 +87,10 @@ instance MonadLoggerIO (WorkerM workflowEnv activityEnv) where
 
 data OpaqueWorkflow f env = forall st. OpaqueWorkflow (f env st)
 
-newtype Sequence a = Sequence { rawSequence :: Word32 }
+newtype Sequence = Sequence { rawSequence :: Word32 }
   deriving (Eq, Ord, Show, Enum, Num, Hashable)
 
-type SequenceMap env st a = HashMap (Sequence a) (IVar env st a)
+type SequenceMap a = HashMap Sequence a
 
 data Sequences = Sequences
   { externalCancel :: !Word32
@@ -143,11 +143,11 @@ data WorkflowCommands
   deriving (Show)
 
 data SequenceMaps env st = SequenceMaps 
-  { timers :: {-# UNPACK #-} !(SequenceMap env st ())
-  , activities :: {-# UNPACK #-} !(SequenceMap env st ResolveActivity)
-  , childWorkflows :: {-# UNPACK #-} !(SequenceMap env st ResolveChildWorkflowExecutionStart)
-  , externalSignals :: {-# UNPACK #-} !(SequenceMap env st ResolveSignalExternalWorkflow)
-  , externalCancels :: {-# UNPACK #-} !(SequenceMap env st ResolveRequestCancelExternalWorkflow)
+  { timers :: {-# UNPACK #-} !(SequenceMap (IVar env st ()))
+  , activities :: {-# UNPACK #-} !(SequenceMap (IVar env st ResolveActivity))
+  , childWorkflows :: {-# UNPACK #-} !(SequenceMap (SomeChildWorkflowHandle env st))
+  , externalSignals :: {-# UNPACK #-} !(SequenceMap (IVar env st ResolveSignalExternalWorkflow))
+  , externalCancels :: {-# UNPACK #-} !(SequenceMap (IVar env st ResolveRequestCancelExternalWorkflow))
   }
 
 data WorkflowInstance env st = WorkflowInstance
@@ -587,3 +587,13 @@ runWorkerM worker m = runReaderT (unWorkerM m) worker
 
 nonEmptyString :: Text -> Maybe Text
 nonEmptyString t = if T.null t then Nothing else Just t
+
+data SomeChildWorkflowHandle env st = forall result. SomeChildWorkflowHandle (ChildWorkflowHandle env st result)
+
+data ChildWorkflowHandle env st result = 
+  ChildWorkflowHandle
+    { childWorkflowSequence :: Sequence
+    , startHandle :: IVar env st ()
+    , resultHandle :: IVar env st result
+    , firstExecutionRunId :: Maybe RunId
+    }

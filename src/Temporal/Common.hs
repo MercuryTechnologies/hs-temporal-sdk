@@ -12,6 +12,7 @@ import Data.Hashable (Hashable)
 import Data.Text (Text)
 import Data.Int (Int32)
 import Data.ProtoLens
+import Data.String
 import Data.Vector (Vector)
 import Lens.Family2
 import qualified Proto.Google.Protobuf.Duration as Duration
@@ -20,13 +21,14 @@ import qualified Proto.Google.Protobuf.Timestamp as Timestamp
 import qualified Proto.Google.Protobuf.Timestamp_Fields as Timestamp
 import qualified Proto.Temporal.Api.Common.V1.Message as Message
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Message
+import qualified Proto.Temporal.Api.Enums.V1.Workflow as Workflow
 import qualified System.Clock as Clock
 
 -- | This is generally the name of the function itself
 newtype WorkflowType = WorkflowType { rawWorkflowType :: Text }
-  deriving (Eq, Ord, Show, Hashable)
+  deriving (Eq, Ord, Show, Hashable, IsString)
 newtype WorkflowId = WorkflowId { rawWorkflowId :: Text }
-  deriving (Eq, Ord, Show, Hashable)
+  deriving (Eq, Ord, Show, Hashable, IsString)
 newtype Namespace = Namespace { rawNamespace :: Text }
   deriving (Eq, Ord, Show, Hashable)
 newtype RunId = RunId { rawRunId :: Text }
@@ -93,3 +95,19 @@ retryPolicyFromProto p = RetryPolicy
   , maximumAttempts = p ^. Message.maximumAttempts
   , nonRetryableErrorTypes = p ^. Message.vec'nonRetryableErrorTypes
   }
+
+data WorkflowIdReusePolicy
+  = WorkflowIdReusePolicyUnspecified
+  | WorkflowIdReusePolicyAllowDuplicate
+  | WorkflowIdReusePolicyAllowDuplicateFailedOnly
+  | WorkflowIdReusePolicyRejectDuplicate
+  | WorkflowIdReusePolicyTerminateIfRunning
+  deriving (Eq, Ord, Show, Enum, Bounded)
+
+workflowIdReusePolicyToProto :: WorkflowIdReusePolicy -> Workflow.WorkflowIdReusePolicy
+workflowIdReusePolicyToProto = \case
+  WorkflowIdReusePolicyUnspecified -> Workflow.WORKFLOW_ID_REUSE_POLICY_UNSPECIFIED
+  WorkflowIdReusePolicyAllowDuplicate -> Workflow.WORKFLOW_ID_REUSE_POLICY_ALLOW_DUPLICATE
+  WorkflowIdReusePolicyAllowDuplicateFailedOnly -> Workflow.WORKFLOW_ID_REUSE_POLICY_ALLOW_DUPLICATE_FAILED_ONLY
+  WorkflowIdReusePolicyRejectDuplicate -> Workflow.WORKFLOW_ID_REUSE_POLICY_REJECT_DUPLICATE
+  WorkflowIdReusePolicyTerminateIfRunning -> Workflow.WORKFLOW_ID_REUSE_POLICY_TERMINATE_IF_RUNNING

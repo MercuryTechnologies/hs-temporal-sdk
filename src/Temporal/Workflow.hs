@@ -14,6 +14,15 @@ module Temporal.Workflow
   ( Workflow
   , Task
   , TimeoutType(..)
+  , KnownActivity
+  , StartActivityOptions(..)
+  , defaultStartActivityOptions
+  , StartActivity
+  , startActivity
+  , startLocalActivity
+  , KnownWorkflow
+  , StartChildWorkflow
+  , startChildWorkflow
   , Temporal.Workflow.wait
   -- , execWorkflow
   -- , continueAsNew
@@ -34,11 +43,6 @@ module Temporal.Workflow
   -- , setQueryHandler
   -- , setSignalHandler
   -- , signal
-  , StartActivityOptions(..)
-  , defaultStartActivityOptions
-  , startActivity
-  , startLocalActivity
-  , startChildWorkflow
   , now
   , time
   -- , upsertSearchAttributes
@@ -150,7 +154,6 @@ class StartActivityArgs codec env st (args :: [*]) baseResult where
     -> ([IO RawPayload] -> [IO RawPayload]) 
     -> ([IO RawPayload] -> Workflow env st (Task env st baseResult))
     -> StartActivity env st baseResult args 
-    -- ([RawPayload] -> Workflow env st (Task env st RawPayload)) -> StartActivity env st args baseResult
 
 instance StartActivityArgs codec env st '[] baseResult where
   applyArgs_ argsP _ accum f = f $ accum []
@@ -163,8 +166,8 @@ instance (Codec codec a, StartActivityArgs codec env st as baseResult) => StartA
     ((encode c arg :) . accum) 
     f
 
-gatherArgs :: forall env st args baseResult codec. StartActivityArgs codec env st args baseResult => codec -> ([IO RawPayload] -> Workflow env st (Task env st baseResult)) -> StartActivity env st baseResult args 
-gatherArgs c f = applyArgs_ (Proxy @args) c id f
+gatherStartActivityArgs :: forall env st args baseResult codec. StartActivityArgs codec env st args baseResult => codec -> ([IO RawPayload] -> Workflow env st (Task env st baseResult)) -> StartActivity env st baseResult args 
+gatherStartActivityArgs c f = applyArgs_ (Proxy @args) c id f
 
 data KnownActivity localEnv localSt (queue :: Symbol) (name :: Symbol) (args :: [Type]) (result :: Type) = forall codec. 
   ( Codec codec result
@@ -181,13 +184,14 @@ knownActivityQueue _ = Text.pack $ symbolVal (Proxy @queue)
 knownActivityName :: forall localEnv localSt queue name args result. KnownSymbol name => KnownActivity localEnv localSt queue name args result -> Text
 knownActivityName _ = Text.pack $ symbolVal (Proxy @name)
 
-knownWorkflowExample :: KnownWorkflow "queue" "name" '[Int, Text] Text
-knownWorkflowExample = KnownWorkflow JSON
+knownWorkflowExample :: KnownWorkflow () ()  "name" '[Int, Text] Text
+knownWorkflowExample = KnownWorkflow JSON Nothing Nothing
 
-callKnownWorkflow :: Workflow () () (Task () () Text)
+callKnownWorkflow :: Workflow () () (ChildWorkflowHandle () () Text)
 callKnownWorkflow = startChildWorkflow 
-  undefined
   knownWorkflowExample
+  defaultChildWorkflowOptions
+  "workflowId"
   1
   "hello"
 
@@ -205,7 +209,7 @@ startActivity ::
   ( KnownSymbol queue
   , KnownSymbol name
   ) => StartActivityOptions -> KnownActivity env st queue name args result -> StartActivity env st result args
-startActivity opts k@(KnownActivity codec) = gatherArgs codec $ \typedPayloads -> ilift $ do
+startActivity opts k@(KnownActivity codec) = gatherStartActivityArgs codec $ \typedPayloads -> ilift $ do
   inst <- ask
   ps <- liftIO $ forM typedPayloads $ \payloadAction -> 
     fmap convertToProtoPayload payloadAction
@@ -250,37 +254,129 @@ startActivity opts k@(KnownActivity codec) = gatherArgs codec $ \typedPayloads -
       Just (ActivityResult.ActivityResolution'Cancelled details) -> error "not implemented"
       Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"
   where
-    -- gatherArgs :: BuildArgs args (Compose (Workflow env st) (Task env st)) result
-    -- gatherArgs = toPayloadsAp (pure codec) (knownActivityArgsProxy k) id
 
-type family StartChildWorkflow env st (args :: [*]) baseResult where
-  StartChildWorkflow env st '[] baseResult = Workflow env st (Task env st baseResult)
-  StartChildWorkflow env st (a ': as) baseResult = a -> StartChildWorkflow env st as baseResult
+type family StartChildWorkflow env st baseResult (args :: [*]) = r | r -> env st baseResult args where
+  StartChildWorkflow env st baseResult '[] = Workflow env st (ChildWorkflowHandle env st baseResult)
+  StartChildWorkflow env st baseResult (a ': as) = a -> StartChildWorkflow env st baseResult as 
 
-data KnownWorkflow (queue :: Symbol) (name :: Symbol) (args :: [Type]) (result :: Type) = forall codec. 
+data KnownWorkflow localEnv localSt (name :: Symbol) (args :: [Type]) (result :: Type) = forall codec. 
   ( Codec codec result
   , AllArgsSupportCodec codec args
-  ) => KnownWorkflow codec
+  , StartChildWorkflowArgs codec localEnv localSt args result
+  ) => KnownWorkflow 
+        { knownWorkflowCodec :: codec 
+        , knownWorkflowNamespace :: Maybe Namespace
+        , knownWorkflowQueue :: Maybe TaskQueue
+        }
+
+knownWorkflowName :: forall localEnv localSt name args result. KnownSymbol name => KnownWorkflow localEnv localSt name args result -> Text
+knownWorkflowName _ = Text.pack $ symbolVal (Proxy @name)
+
+class StartChildWorkflowArgs codec env st (args :: [*]) baseResult where
+  applyWfArgs_ 
+    :: Proxy args 
+    -> codec
+    -> ([IO RawPayload] -> [IO RawPayload]) 
+    -> ([IO RawPayload] -> Workflow env st (ChildWorkflowHandle env st baseResult))
+    -> StartChildWorkflow env st baseResult args
+
+instance StartChildWorkflowArgs codec env st '[] baseResult where
+  applyWfArgs_ argsP _ accum f = f $ accum []
+
+instance (Codec codec a, StartChildWorkflowArgs codec env st as baseResult) => StartChildWorkflowArgs codec env st (a ': as) baseResult where
+  applyWfArgs_ argsP c accum f = \arg ->
+    applyWfArgs_
+    (Proxy @as) 
+    c
+    ((encode c arg :) . accum) 
+    f
+
+gatherStartChildWorkflowArgs :: forall env st args baseResult codec. StartChildWorkflowArgs codec env st args baseResult => codec -> ([IO RawPayload] -> Workflow env st (ChildWorkflowHandle env st baseResult)) -> StartChildWorkflow env st baseResult args 
+gatherStartChildWorkflowArgs c f = applyWfArgs_ (Proxy @args) c id f
 
 data StartChildWorkflowOptions = StartChildWorkflowOptions 
-  { childWorkflowId :: Maybe WorkflowId -- TODO should this be maybe?
-  , taskQueue :: Maybe TaskQueue
-  , cancellationType :: ChildWorkflowCancellationType
+  { cancellationType :: ChildWorkflowCancellationType
   , parentClosePolicy :: ParentClosePolicy
   , executionTimeout :: Maybe TimeSpec
   , runTimeout :: Maybe TimeSpec
   , taskTimeout :: Maybe TimeSpec
   , retryPolicy :: Maybe RetryPolicy
   , cronSchedule :: Maybe Text
-  , memo :: Maybe (Map Text Proto.Temporal.Api.Common.V1.Message.Payload)
-  , searchAttributes :: Maybe (Map Text Proto.Temporal.Api.Common.V1.Message.Payload)
+  , memo :: Map Text Proto.Temporal.Api.Common.V1.Message.Payload
+  , searchAttributes :: Map Text Proto.Temporal.Api.Common.V1.Message.Payload
+  , headers :: Map Text Proto.Temporal.Api.Common.V1.Message.Payload
+  , workflowIdReusePolicy :: WorkflowIdReusePolicy
   }
 
+defaultChildWorkflowOptions :: StartChildWorkflowOptions
+defaultChildWorkflowOptions = StartChildWorkflowOptions
+  { cancellationType = ChildWorkflowCancellationAbandon
+  , parentClosePolicy = ParentClosePolicyUnspecified
+  , executionTimeout = Nothing
+  , runTimeout = Nothing
+  , taskTimeout = Nothing
+  , retryPolicy = Nothing
+  , cronSchedule = Nothing
+  , memo = mempty
+  , searchAttributes = mempty
+  , headers = mempty
+  , workflowIdReusePolicy = WorkflowIdReusePolicyUnspecified
+  }
+
+-- TODO signalChildWorkflow support
+-- signalChildWorkflow :: ChildWorkflowHandler env st result -> _ -> Workflow env st ()
+
 startChildWorkflow 
-  :: StartChildWorkflowOptions 
-  -> KnownWorkflow queue name args result 
-  -> StartChildWorkflow env st args result
-startChildWorkflow = undefined
+  :: (KnownSymbol name)
+  => KnownWorkflow env st name args result 
+  -> StartChildWorkflowOptions
+  -> WorkflowId
+  -> StartChildWorkflow env st result args 
+startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue) opts wfId = gatherStartChildWorkflowArgs codec $ \typedPayloads -> ilift $ do
+  inst <- ask
+  ps <- liftIO $ forM typedPayloads $ \payloadAction -> 
+    fmap convertToProtoPayload payloadAction
+  
+  s@(Sequence wfSeq) <- nextChildWorkflowSequence
+  startSlot <- newIVar
+  resultSlot <- newIVar
+  
+  let childWorkflowOptions = defMessage
+        & Command.seq .~ wfSeq
+        & Command.namespace .~ rawNamespace (fromMaybe inst.workflowInstanceInfo.namespace mNamespace)
+        & Command.workflowId .~ rawWorkflowId wfId
+        & Command.workflowType .~ knownWorkflowName k
+        & Command.taskQueue .~ rawTaskQueue (fromMaybe inst.workflowInstanceInfo.taskQueue mTaskQueue)
+        & Command.input .~ ps
+        & Command.maybe'workflowExecutionTimeout .~ fmap timespecToDuration opts.executionTimeout
+        & Command.maybe'workflowRunTimeout .~ fmap timespecToDuration opts.runTimeout
+        & Command.maybe'workflowTaskTimeout .~ fmap timespecToDuration opts.taskTimeout
+        & Command.parentClosePolicy .~ parentClosePolicyToProto opts.parentClosePolicy
+        & Command.workflowIdReusePolicy .~ workflowIdReusePolicyToProto opts.workflowIdReusePolicy
+        & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts.retryPolicy
+        & Command.cronSchedule .~ fromMaybe "" opts.cronSchedule
+        & Command.headers .~ opts.headers
+        & Command.memo .~ opts.memo
+        & Command.searchAttributes .~ opts.searchAttributes
+        & Command.cancellationType .~ childWorkflowCancellationTypeToProto opts.cancellationType
+
+      cmd = defMessage 
+        & Command.startChildWorkflowExecution .~ childWorkflowOptions
+    
+      wfHandle = ChildWorkflowHandle 
+        { childWorkflowSequence = s
+        , startHandle = startSlot 
+        , resultHandle = resultSlot
+        , firstExecutionRunId = Nothing
+        }
+
+  modifyMVar_ inst.workflowSequenceMaps $ \seqMaps -> do
+    pure $ seqMaps { childWorkflows = HashMap.insert s (SomeChildWorkflowHandle wfHandle) seqMaps.childWorkflows }
+
+  $(logDebug) "Add command: startChildWorkflowExecution"
+  addCommand inst cmd
+  pure wfHandle
+
 
 data StartLocalActivityOptions = StartLocalActivityOptions 
   { -- TODO Activity name
