@@ -66,6 +66,7 @@ import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Time.Clock (UTCTime)
+import Data.Time.Clock.System (SystemTime(..), systemToUTCTime)
 import Data.Kind
 import Data.UUID (UUID)
 import Data.UUID.Types.Internal ( buildFromBytes )
@@ -74,7 +75,7 @@ import Data.Vector (Vector)
 import GHC.TypeLits
 import Lens.Family2
 import Proto.Temporal.Api.Common.V1.Message (Payload)
-import System.Clock (TimeSpec)
+import System.Clock (TimeSpec(..))
 import System.Random.Stateful
 import Temporal.Common
 import Temporal.Payload
@@ -169,19 +170,19 @@ instance (Codec codec a, StartActivityArgs codec env st as baseResult) => StartA
 gatherStartActivityArgs :: forall env st args baseResult codec. StartActivityArgs codec env st args baseResult => codec -> ([IO RawPayload] -> Workflow env st (Task env st baseResult)) -> StartActivity env st baseResult args 
 gatherStartActivityArgs c f = applyArgs_ (Proxy @args) c id f
 
-data KnownActivity localEnv localSt (queue :: Symbol) (name :: Symbol) (args :: [Type]) (result :: Type) = forall codec. 
+data KnownActivity localEnv localSt (name :: Symbol) (args :: [Type]) (result :: Type) = forall codec. 
   ( Codec codec result
   , AllArgsSupportCodec codec args
   , StartActivityArgs codec localEnv localSt args result
-  ) => KnownActivity codec
+  ) => KnownActivity 
+        { knownActivityCodec :: codec
+        , knownActivityQueue :: Maybe TaskQueue
+        }
 
-knownActivityArgsProxy :: KnownActivity localEnv localSt queue name args result -> Proxy args
+knownActivityArgsProxy :: KnownActivity localEnv localSt name args result -> Proxy args
 knownActivityArgsProxy _ = Proxy
 
-knownActivityQueue :: forall localEnv localSt queue name args result. KnownSymbol queue => KnownActivity localEnv localSt queue name args result -> Text
-knownActivityQueue _ = Text.pack $ symbolVal (Proxy @queue)
-
-knownActivityName :: forall localEnv localSt queue name args result. KnownSymbol name => KnownActivity localEnv localSt queue name args result -> Text
+knownActivityName :: forall localEnv localSt name args result. KnownSymbol name => KnownActivity localEnv localSt name args result -> Text
 knownActivityName _ = Text.pack $ symbolVal (Proxy @name)
 
 knownWorkflowExample :: KnownWorkflow () ()  "name" '[Int, Text] Text
@@ -195,8 +196,8 @@ callKnownWorkflow = startChildWorkflow
   1
   "hello"
 
-knownActivityExample :: KnownActivity () () "queue" "name" '[Int, Text] Text
-knownActivityExample = KnownActivity JSON
+knownActivityExample :: KnownActivity () () "name" '[Int, Text] Text
+knownActivityExample = KnownActivity JSON Nothing
 
 callKnownActivity :: Workflow () () (Task () () Text)
 callKnownActivity = startActivity 
@@ -206,10 +207,9 @@ callKnownActivity = startActivity
   "hello"
 
 startActivity :: 
-  ( KnownSymbol queue
-  , KnownSymbol name
-  ) => StartActivityOptions -> KnownActivity env st queue name args result -> StartActivity env st result args
-startActivity opts k@(KnownActivity codec) = gatherStartActivityArgs codec $ \typedPayloads -> ilift $ do
+  ( KnownSymbol name
+  ) => StartActivityOptions -> KnownActivity env st name args result -> StartActivity env st result args
+startActivity opts k@(KnownActivity codec mTaskQueue) = gatherStartActivityArgs codec $ \typedPayloads -> ilift $ do
   inst <- ask
   ps <- liftIO $ forM typedPayloads $ \payloadAction -> 
     fmap convertToProtoPayload payloadAction
@@ -223,7 +223,7 @@ startActivity opts k@(KnownActivity codec) = gatherStartActivityArgs codec $ \ty
         & Command.seq .~ actSeq
         & Command.activityId .~ maybe (Text.pack $ show actSeq) rawActivityId (opts.activityId)
         & Command.activityType .~ knownActivityName k
-        & Command.taskQueue .~ knownActivityQueue k -- rawTaskQueue (fromMaybe inst.workflowInstanceInfo.taskQueue opts.taskQueue)
+        & Command.taskQueue .~ rawTaskQueue (fromMaybe inst.workflowInstanceInfo.taskQueue mTaskQueue)
         & Command.arguments .~ ps
         & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts.retryPolicy
         & Command.cancellationType .~ activityCancellationTypeToProto opts.cancellationType
@@ -379,9 +379,7 @@ startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue) opts wfId = gat
 
 
 data StartLocalActivityOptions = StartLocalActivityOptions 
-  { -- TODO Activity name
-    -- TODO args
-    activityId :: Maybe ActivityId
+  { activityId :: Maybe ActivityId
   , scheduleToCloseTimeout :: Maybe TimeSpec
   , scheduleToStartTimeout :: Maybe TimeSpec
   , startToCloseTimeout :: Maybe TimeSpec
@@ -392,7 +390,7 @@ data StartLocalActivityOptions = StartLocalActivityOptions
   }
 startLocalActivity 
   :: StartLocalActivityOptions 
-  -> KnownActivity env st queue name args result
+  -> KnownActivity env st name args result
   -> Workflow env st ()
 startLocalActivity = undefined
 
@@ -418,7 +416,10 @@ info = workflowInstanceInfo <$> askInstance
 --
 -- Equivalent to `getCurrentTime` from the `time` package.
 now :: Workflow env st UTCTime
-now = undefined
+now = Workflow $ do
+  wft <- workflowTime <$> ask
+  TimeSpec{..} <- readIORef wft
+  pure $! Done $! systemToUTCTime $ MkSystemTime sec (fromIntegral nsec)
 
 applyPatch :: PatchId -> Bool {- ^ whether the patch is deprecated -} -> Workflow env st Bool 
 applyPatch pid deprecated = Workflow $ fmap Done $ do
