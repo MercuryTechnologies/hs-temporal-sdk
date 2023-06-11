@@ -277,11 +277,20 @@ requestWorkflowEviction (Worker w _) r = withForeignPtr w $ \wPtr -> do
     raw_requestWorkflowEviction wPtr rPtr
 
 foreign import ccall "hs_temporal_worker_initiate_shutdown" raw_initiateShutdown :: Ptr Worker -> IO ()
+{- | Initiate shutdown.
+-}
 initiateShutdown :: Worker -> IO ()
 initiateShutdown (Worker w _) = withForeignPtr w $ \wPtr -> do
   raw_initiateShutdown wPtr
 
 foreign import ccall "hs_temporal_worker_finalize_shutdown" raw_finalizeShutdown :: Ptr Worker -> TokioCall WorkerError ()
+{- |
+Completes shutdown and frees all resources. You should avoid simply dropping workers, as
+this does not allow async tasks to report any panics that may have occurred cleanly.
+
+This should be called only after 'raw_shutdown' has resolved and/or both polling
+functions have returned `ShutDown` errors.
+-}
 finalizeShutdown :: Worker -> IO (Either WorkerError ())
 finalizeShutdown (Worker w _) = withForeignPtr w $ \wPtr -> do
   makeTokioAsyncCall (raw_finalizeShutdown wPtr)

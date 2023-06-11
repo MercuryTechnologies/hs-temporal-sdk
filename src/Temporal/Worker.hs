@@ -8,6 +8,7 @@ module Temporal.Worker
   ( Temporal.Worker.Worker
   , startWorker
   , waitWorker
+  , shutdown
   , mkConfig
   , WorkerConfig(..)
   ) where
@@ -85,6 +86,7 @@ defaultRetryPolicy = RetryPolicy
 data Worker = Worker
   { workerWorkflowLoop :: Async ()
   , workerActivityLoop :: Async ()
+  , workerCore :: Core.Worker
   }
 
 startWorker :: forall m wfEnv actEnv. (MonadLoggerIO m, MonadUnliftIO m) => Client -> WorkerConfig wfEnv actEnv -> m Temporal.Worker.Worker
@@ -117,5 +119,18 @@ startWorker client conf = do
 
 waitWorker :: MonadIO m => Temporal.Worker.Worker -> m ()
 waitWorker worker = void $ do
+  -- TODO these need to account for expected PollShutdown calls
   wait (workerWorkflowLoop worker)
   wait (workerActivityLoop worker)
+
+shutdown :: MonadIO m => Temporal.Worker.Worker -> m ()
+shutdown worker = liftIO $ do
+  Core.initiateShutdown worker.workerCore
+
+  _ <- waitCatch worker.workerWorkflowLoop
+  _ <- waitCatch worker.workerActivityLoop
+
+  err' <- Core.finalizeShutdown worker.workerCore
+  case err' of
+    Left err -> throwIO err
+    Right () -> pure ()

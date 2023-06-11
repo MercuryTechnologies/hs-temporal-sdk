@@ -87,7 +87,8 @@ executable hello
     unordered-containers,
     monad-logger,
     unliftio,
-    clock
+    clock,
+    unix
   default-language: Haskell2010
   frameworks: Security, CoreFoundation
   ghc-options: -threaded -rtsopts -with-rtsopts=-N

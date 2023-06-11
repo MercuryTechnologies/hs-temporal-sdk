@@ -116,7 +116,6 @@ create workflowInstanceInfo workflowEnv workflowInstanceDefinition = do
 -- and set as completion failure.
 activate :: Worker env actEnv -> WorkflowInstance env st -> WorkflowActivation -> IO WorkflowActivationCompletion
 activate w inst act = runInstanceM inst $ do
-  $(logDebug) "activate"
   eResult <- applyJobs $ act ^. Activation.vec'jobs
   -- TODO: Can the completion send both successful commands and a failure
   -- message at the same time? In theory we can make partial progress on
@@ -132,11 +131,9 @@ activate w inst act = runInstanceM inst $ do
             & Completion.failed .~ failure
       pure completion
     Right () -> do
-      $(logDebug) "Applied all activation jobs to workflow"
       successfulCommands <- fromReversed <$> readSuccessfulCommands
-      $(logDebug) $ Text.pack ("got those commands " ++ show successfulCommands)
       forM_ successfulCommands $ \cmd -> do
-        $(logDebug) $ Text.pack ("Successful command: " <> show cmd)
+        $(logDebug) $ Text.pack ("Sending command: " <> show cmd)
       let success = defMessage & Completion.commands .~ successfulCommands
           completion = completionBase
             & Completion.successful .~ success
@@ -154,7 +151,6 @@ runInstanceM worker m = runReaderT (unInstanceM m) worker
 -- as we go.
 readSuccessfulCommands :: InstanceM env st (Reversed WorkflowCommand)
 readSuccessfulCommands = do
-  $(logDebug) "readSuccessfulCommands"
   inst <- ask
   cmds <- atomically $ do
     commands <- readTVar inst.workflowCommands

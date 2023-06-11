@@ -89,7 +89,9 @@ execute worker = runWorkerM worker $ do
 
 handleActivation :: Core.WorkflowActivation -> WorkerM wfEnv actEnv ()
 handleActivation activation = do
-  $(logDebug) "Handling activation"
+  $(logDebug) ("Handling activation: RunId " <> Text.pack (show (activation ^. Activation.runId)))
+  forM_ (activation ^. Activation.jobs) $ \job -> do
+    $(logDebug) ("Job: " <> Text.pack (show job))
   worker <- ask
   {-
   Run jobs

@@ -41,13 +41,10 @@ module Temporal.Workflow
   , StartChildWorkflow
   , startChildWorkflow
   , ChildWorkflowHandle
-  , waitChildWorkflowStart
   , waitChildWorkflowResult
   , Temporal.Workflow.wait
   -- , execWorkflow
   -- , continueAsNew
-  -- , executeActivity
-  -- , executeChildWorkflow
   -- , executeLocalActivity
   , Info(..)
   , RetryPolicy(..)
@@ -212,27 +209,6 @@ knownActivityArgsProxy _ = Proxy
 knownActivityName :: forall name args result. KnownSymbol name => KnownActivity name args result -> Text
 knownActivityName _ = Text.pack $ symbolVal (Proxy @name)
 
-knownWorkflowExample :: KnownWorkflow "name" '[Int, Text] Text
-knownWorkflowExample = KnownWorkflow JSON Nothing Nothing
-
-callKnownWorkflow :: Workflow () () (ChildWorkflowHandle () () Text)
-callKnownWorkflow = startChildWorkflow 
-  knownWorkflowExample
-  defaultChildWorkflowOptions
-  "workflowId"
-  1
-  "hello"
-
-knownActivityExample :: KnownActivity "name" '[Int, Text] Text
-knownActivityExample = KnownActivity JSON Nothing
-
-callKnownActivity :: Workflow () () (Task () () Text)
-callKnownActivity = startActivity 
-  undefined
-  knownActivityExample
-  1
-  "hello"
-
 startActivity :: 
   ( KnownSymbol name
   ) => StartActivityOptions -> KnownActivity name args result -> StartActivity env st result args
@@ -265,7 +241,6 @@ startActivity opts k@(KnownActivity codec mTaskQueue) = gatherStartActivityArgs 
             & Command.scheduleToCloseTimeout .~ timespecToDuration stc'
 
   let cmd = defMessage & Command.scheduleActivity .~ scheduleActivity
-  $(logDebug) "Add command: scheduleActivity"
   addCommand inst cmd
   pure $ Task $ do
     res <- getIVar resultSlot
@@ -363,54 +338,56 @@ startChildWorkflow
   -> StartChildWorkflowOptions
   -> WorkflowId
   -> StartChildWorkflow env st result args 
-startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue) opts wfId = gatherStartChildWorkflowArgs codec $ \typedPayloads -> ilift $ do
-  inst <- ask
-  ps <- liftIO $ forM typedPayloads $ \payloadAction -> 
-    fmap convertToProtoPayload payloadAction
-  
-  s@(Sequence wfSeq) <- nextChildWorkflowSequence
-  startSlot <- newIVar
-  resultSlot <- newIVar
-  
-  let childWorkflowOptions = defMessage
-        & Command.seq .~ wfSeq
-        & Command.namespace .~ rawNamespace (fromMaybe inst.workflowInstanceInfo.namespace mNamespace)
-        & Command.workflowId .~ rawWorkflowId wfId
-        & Command.workflowType .~ knownWorkflowName k
-        & Command.taskQueue .~ rawTaskQueue (fromMaybe inst.workflowInstanceInfo.taskQueue mTaskQueue)
-        & Command.input .~ ps
-        & Command.maybe'workflowExecutionTimeout .~ fmap timespecToDuration opts.executionTimeout
-        & Command.maybe'workflowRunTimeout .~ fmap timespecToDuration opts.runTimeout
-        & Command.maybe'workflowTaskTimeout .~ fmap timespecToDuration opts.taskTimeout
-        & Command.parentClosePolicy .~ parentClosePolicyToProto opts.parentClosePolicy
-        & Command.workflowIdReusePolicy .~ workflowIdReusePolicyToProto opts.workflowIdReusePolicy
-        & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts.retryPolicy
-        & Command.cronSchedule .~ fromMaybe "" opts.cronSchedule
-        & Command.headers .~ opts.headers
-        & Command.memo .~ opts.memo
-        & Command.searchAttributes .~ opts.searchAttributes
-        & Command.cancellationType .~ childWorkflowCancellationTypeToProto opts.cancellationType
-
-      cmd = defMessage 
-        & Command.startChildWorkflowExecution .~ childWorkflowOptions
-    
-      wfHandle = ChildWorkflowHandle 
-        { childWorkflowSequence = s
-        , startHandle = startSlot 
-        , resultHandle = resultSlot
-        , firstExecutionRunId = Nothing
-        , childWorkflowCodec = codec
-        }
-
-  modifyMVar_ inst.workflowSequenceMaps $ \seqMaps -> do
-    pure $ seqMaps { childWorkflows = HashMap.insert s (SomeChildWorkflowHandle wfHandle) seqMaps.childWorkflows }
-
-  $(logDebug) "Add command: startChildWorkflowExecution"
-  addCommand inst cmd
+startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue) opts wfId = gatherStartChildWorkflowArgs codec $ \typedPayloads -> do
+  wfHandle <- sendChildWorkflowCommand typedPayloads
+  getIVar wfHandle.startHandle
   pure wfHandle
+  where
+    sendChildWorkflowCommand typedPayloads = ilift $ do
+      inst <- ask
+      ps <- liftIO $ forM typedPayloads $ \payloadAction -> 
+        fmap convertToProtoPayload payloadAction
+      
+      s@(Sequence wfSeq) <- nextChildWorkflowSequence
+      startSlot <- newIVar
+      resultSlot <- newIVar
+      
+      let childWorkflowOptions = defMessage
+            & Command.seq .~ wfSeq
+            & Command.namespace .~ rawNamespace (fromMaybe inst.workflowInstanceInfo.namespace mNamespace)
+            & Command.workflowId .~ rawWorkflowId wfId
+            & Command.workflowType .~ knownWorkflowName k
+            & Command.taskQueue .~ rawTaskQueue (fromMaybe inst.workflowInstanceInfo.taskQueue mTaskQueue)
+            & Command.input .~ ps
+            & Command.maybe'workflowExecutionTimeout .~ fmap timespecToDuration opts.executionTimeout
+            & Command.maybe'workflowRunTimeout .~ fmap timespecToDuration opts.runTimeout
+            & Command.maybe'workflowTaskTimeout .~ fmap timespecToDuration opts.taskTimeout
+            & Command.parentClosePolicy .~ parentClosePolicyToProto opts.parentClosePolicy
+            & Command.workflowIdReusePolicy .~ workflowIdReusePolicyToProto opts.workflowIdReusePolicy
+            & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts.retryPolicy
+            & Command.cronSchedule .~ fromMaybe "" opts.cronSchedule
+            & Command.headers .~ opts.headers
+            & Command.memo .~ opts.memo
+            & Command.searchAttributes .~ opts.searchAttributes
+            & Command.cancellationType .~ childWorkflowCancellationTypeToProto opts.cancellationType
 
-waitChildWorkflowStart :: ChildWorkflowHandle env st result -> Workflow env st ()
-waitChildWorkflowStart wfHandle = getIVar wfHandle.startHandle
+          cmd = defMessage 
+            & Command.startChildWorkflowExecution .~ childWorkflowOptions
+        
+          wfHandle = ChildWorkflowHandle 
+            { childWorkflowSequence = s
+            , startHandle = startSlot 
+            , resultHandle = resultSlot
+            , firstExecutionRunId = Nothing
+            , childWorkflowCodec = codec
+            }
+
+      modifyMVar_ inst.workflowSequenceMaps $ \seqMaps -> do
+        pure $ seqMaps { childWorkflows = HashMap.insert s (SomeChildWorkflowHandle wfHandle) seqMaps.childWorkflows }
+
+      $(logDebug) "Add command: startChildWorkflowExecution"
+      addCommand inst cmd
+      pure wfHandle
 
 waitChildWorkflowResult :: ChildWorkflowHandle env st result -> Workflow env st result
 waitChildWorkflowResult wfHandle@(ChildWorkflowHandle{childWorkflowCodec}) = do
@@ -418,7 +395,7 @@ waitChildWorkflowResult wfHandle@(ChildWorkflowHandle{childWorkflowCodec}) = do
   case res ^. Activation.result . ChildWorkflow.maybe'status of
     Nothing -> ilift $ throwIO $ RuntimeError "Unrecognized child workflow result status"
     Just s -> case s of
-      ChildWorkflow.ChildWorkflowResult'Completed res -> do	 
+      ChildWorkflow.ChildWorkflowResult'Completed res -> do
         eVal <- ilift $ liftIO $ decode childWorkflowCodec $ convertFromProtoPayload $ res ^. ChildWorkflow.result
         case eVal of
           Left err -> throw $ ValueError err

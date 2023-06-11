@@ -1,12 +1,13 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
 
 module Main (main) where
 
 import Control.Monad
 import Control.Concurrent
-import Control.Monad.Logger (runStdoutLoggingT)
+import Control.Monad.Logger
 import qualified Data.HashMap.Strict as HashMap
 import Data.ProtoLens.Message
 import Data.Proxy
@@ -29,6 +30,7 @@ import Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as Proto
 import Proto.Temporal.Api.Common.V1.Message_Fields (name)
 import System.Clock
+import System.Posix.Signals
 import UnliftIO
 
 shootMissiles :: Int -> Activity () Int
@@ -53,6 +55,7 @@ requirePresidentialApprovalRef = KnownWorkflow JSON Nothing Nothing
 launchTheMissiles :: Workflow () () Int
 launchTheMissiles = do
   uuid <- uuid4
+  $(logInfo) ("Launching the missiles with UUID " <> T.pack (UUID.toString uuid))
   presidentialApproval <- startChildWorkflow 
     requirePresidentialApprovalRef
     (defaultChildWorkflowOptions 
@@ -60,12 +63,16 @@ launchTheMissiles = do
       , taskTimeout = Just $ TimeSpec 20 0
       })
     (WorkflowId ("presidentialApproval-" <> UUID.toText uuid))
+  $(logInfo) ("Awaiting confirmation from the president: " <> T.pack (UUID.toString uuid))
   waitChildWorkflowResult presidentialApproval
+  $(logInfo) ("Confirmation confirmed, initiating sequence: " <> T.pack (UUID.toString uuid))
   act <- startActivity 
     (defaultStartActivityOptions $ StartToClose $ TimeSpec 40 0) 
     shootMissileRef 
     4
+  $(logInfo) ("Sequence initiated: " <> T.pack (UUID.toString uuid))
   r <- Workflow.wait act
+  $(logInfo) ("Sequence complete: " <> T.pack (UUID.toString uuid))
   pure r
 
 
@@ -96,6 +103,7 @@ runWorker c = do
   let workflowDefs = HashMap.fromList
         [ ("hello", OpaqueWorkflow $ defineWorkflow JSON "hello" () (pure () :: Workflow () () ()))
         , ("launchTheMissiles", OpaqueWorkflow $ defineWorkflow JSON "launchTheMissiles" () launchTheMissiles)
+        , ("requirePresidentialApproval", OpaqueWorkflow $ defineWorkflow JSON "requirePresidentialApproval" () requirePresidentialApproval)
         ]
       activityDefs =
         [ shootMissileDef
@@ -103,6 +111,10 @@ runWorker c = do
       conf = mkConfig defaultWorkerConfig () workflowDefs () activityDefs
   runStdoutLoggingT $ do
     w <- startWorker c conf
+    withRunInIO $ \run -> do
+      _ <- installHandler sigINT (Catch $ run $ shutdown w) Nothing
+      _ <- installHandler sigTERM (Catch $ run $ shutdown w) Nothing
+      pure ()
     waitWorker w
 
 runClient :: Client -> String -> String -> IO ()
@@ -116,7 +128,6 @@ runClient c taskname id' = do
         & workflowId .~ T.pack id'
         & Proto.requestId .~ UUID.toText reqId
   resp <- startWorkflowExecution c req 
-  
   print resp
         -- & workflowRunTimeoutSeconds .~ 100
         -- & workflowTaskTimeoutSeconds .~ 100

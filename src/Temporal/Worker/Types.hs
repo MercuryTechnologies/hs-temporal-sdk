@@ -405,6 +405,12 @@ instance Applicative (Workflow env st) where
           Throw e -> pure $ Blocked ivar (fcont :>>= (\_ -> throw e))
           Blocked ivar' acont -> blockedBlocked ivar fcont ivar' acont
 
+instance MonadLogger (Workflow env st) where
+  monadLoggerLog loc src lvl msg = Workflow $ do
+    logger <- asks workflowInstanceLogger
+    liftIO $ logger loc src lvl (toLogStr msg)
+    pure $ Done ()
+
 blockedBlocked
   :: IVar env st c
   -> Cont env st (a -> b)

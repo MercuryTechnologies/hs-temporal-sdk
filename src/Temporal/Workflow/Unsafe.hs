@@ -72,7 +72,6 @@ runWorkflow codec wf = do
   let -- Run a workflow to completion, and put its result in the given IVar.
       schedule :: JobList env st -> Workflow env st b -> IVar env st b -> InstanceM env st ()
       schedule runQueue (Workflow run) ivar@IVar{ivarRef = !ref} = do
-        $(logDebug) "Schedule"
         let {-# INLINE result #-}
             result r = do
               e <- readIORef ref
@@ -125,7 +124,6 @@ runWorkflow codec wf = do
       reschedule :: JobList env st -> InstanceM env st ()
       reschedule workflows = case workflows of
         JobNil -> do
-          $(logDebug) "reschedule: empty run queue"
           inst <- ask
           runQueue <- readIORef inst.workflowRunQueueRef
           case runQueue of
@@ -137,12 +135,10 @@ runWorkflow codec wf = do
               writeIORef inst.workflowRunQueueRef JobNil
               schedule remainingJobs workflow resultSlot
         JobCons workflow resultSlot remainingJobs -> do
-          $(logDebug) "reschedule: non-empty run queue"
           schedule remainingJobs workflow resultSlot
 
       emptyRunQueue :: InstanceM env st ()
       emptyRunQueue = do
-        $(logDebug) "emptyRunQueue"
         -- Convert any completions to jobs and reschedule if there is anything useful to process.
         wfs <- checkCompletions
         case wfs of
@@ -153,7 +149,6 @@ runWorkflow codec wf = do
 
       flushCommands :: InstanceM env st ()
       flushCommands = do
-        $(logDebug) "flushCommands start"
         inst <- ask
         cmds <- atomically $ do
           currentCmds <- readTVar inst.workflowCommands
@@ -161,9 +156,12 @@ runWorkflow codec wf = do
             FlushActivationCompletion _ -> do
               -- Already trying to flush, so we don't need to do anything.
               retry
-            RunningActivation cmds -> case cmds of
+            RunningActivation cmds -> do
+              {-
+              case cmds of
               (Reversed []) -> pure currentCmds
               _ -> do
+                -}
                 -- Signal the main instance thread that it should complete the activation.
                 let new = FlushActivationCompletion cmds
                 writeTVar inst.workflowCommands new
@@ -207,7 +205,6 @@ runWorkflow codec wf = do
 
       waitCompletions :: InstanceM env st ()
       waitCompletions = do
-        $(logDebug) "wait completions"
         inst <- ask
         let
           wrapped = atomicallyOnBlocking (LogicBug ReadingCompletionsFailedRun)
