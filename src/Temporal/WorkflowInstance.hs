@@ -247,6 +247,10 @@ applyStartWorkflow startWorkflow = do
     let def = inst.workflowInstanceDefinition
     case def of
       (WorkflowDefinition _ _ _ initialState (ValidWorkflowFunction fmt innerF applyArgs)) -> do
+        -- Set the starting randomness seed
+        let (WorkflowGenM genRef) = inst.workflowRandomnessSeed
+        writeIORef genRef (mkStdGen $ fromIntegral $ startWorkflow ^. Activation.randomnessSeed)
+
         let args = fmap convertFromProtoPayload (startWorkflow ^. Command.vec'arguments)
         eAct <- liftIO $ applyArgs innerF args
         -- TODO make sure that we also catch exceptions from payload processing
