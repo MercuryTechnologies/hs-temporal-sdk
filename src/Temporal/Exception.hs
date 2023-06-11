@@ -3,6 +3,7 @@ module Temporal.Exception where
 import Control.Exception
 import Data.Text
 import Data.Typeable
+import qualified Proto.Temporal.Api.Failure.V1.Message as Proto
 
 -- | Used to denote that a payload either failed to encode or decode
 data ValueError
@@ -93,6 +94,13 @@ data WorkflowAlreadyStarted = WorkflowAlreadyStarted
   } deriving (Show)
 
 instance Exception WorkflowAlreadyStarted where
+  toException = workflowExceptionToException
+  fromException = workflowExceptionFromException
+
+data ChildWorkflowFailed = ChildWorkflowFailed Proto.Failure
+  deriving (Show)
+
+instance Exception ChildWorkflowFailed where
   toException = workflowExceptionToException
   fromException = workflowExceptionFromException
 

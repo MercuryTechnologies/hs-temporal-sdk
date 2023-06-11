@@ -83,6 +83,8 @@ import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands
   , CompleteWorkflowExecution
   )
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
+import qualified Proto.Temporal.Api.Failure.V1.Message as F
+import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import UnliftIO
 
 
@@ -432,10 +434,32 @@ applyResolutions rs = do
                         }
                       )
 
-          PendingJobResolveChildWorkflowExecution msg -> error "applyResolutions: PendingJobResolveChildWorkflowExecution not implemented"
+          PendingJobResolveChildWorkflowExecution msg -> do
+            let existingHandle = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
+            case existingHandle of
+              Nothing ->  throwIO $ RuntimeError "Child Workflow Execution not found"
+              Just (SomeChildWorkflowHandle h) -> do
+                pure
+                  ( CompleteReq (Ok msg) h.resultHandle : completions
+                  , sequenceMaps'
+                    { childWorkflows = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
+                    }
+                  )
+
           PendingJobResolveSignalExternalWorkflow msg -> error "applyResolutions: PendingJobResolveSignalExternalWorkflow not implemented"
           PendingJobResolveRequestCancelExternalWorkflow msg -> error "applyResolutions: PendingJobResolveRequestCancelExternalWorkflow not implemented"
-          PendingJobFireTimer msg -> error "applyResolutions: PendingJobFireTimer not implemented"
+          PendingJobFireTimer msg -> do
+            let existingIVar = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.timers
+            case existingIVar of
+              Nothing -> throwIO $ RuntimeError "Timer not found"
+              Just existing -> do
+                pure 
+                  ( CompleteReq (Ok ()) existing : completions
+                  , sequenceMaps'
+                    { timers = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.timers
+                    }
+                  )
+
     -- If an IVar for a sequence number is not present, we create it and add it to the sequence.
     -- This helps any workflow code that increments a sequence number ensure that it picks up the
     -- correct IVar.
@@ -482,5 +506,16 @@ runTopLevel handle = do
     -- TODO this is not really domain specific, but since the running task is an async handle, it's an easy hack to get the right behavior
       Handler $ \AsyncCancelled -> do
         addCommand inst (defMessage & Command.cancelWorkflowExecution .~ defMessage)
-    , Handler $ \(SomeException e) -> $(logError) ("SomeException Not implemented yet" <> Text.pack (show e))
+    , Handler $ \(SomeException e) -> do
+        $(logError) $ Text.pack ("Caught exception: " <> show e)
+        addCommand inst 
+          ( defMessage 
+            & Command.failWorkflowExecution .~ 
+              ( defMessage 
+                & Command.failure .~ 
+                  ( defMessage
+                    & F.message .~ Text.pack (show e)
+                  )
+              )
+          )
     ]

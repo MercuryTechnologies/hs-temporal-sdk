@@ -26,7 +26,10 @@ import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Message
 import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as CommonProto
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
+import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Completion
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
+import qualified Proto.Temporal.Api.Failure.V1.Message as F
+import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 
 pollWorkflowActivation :: WorkerM wfEnv actEnv (Either Core.WorkerError Core.WorkflowActivation)
 pollWorkflowActivation = do
@@ -103,26 +106,32 @@ handleActivation activation = do
         $(logDebug) "About to activate"
         liftIO $ case inst of
           (OpaqueWorkflow inst') -> activate worker inst' activation
-      mCompletion <- case worker.workerConfig.deadlockTimeout of
-        Nothing -> do
-          $(logDebug) "Waiting forever for completion"
-          Just <$> wait completionHandle
-        -- TODO ensure timeout is in microseconds
-        Just microsecs -> do
-          $(logDebug) "Waiting for completion"
-          timeout microsecs $ wait completionHandle
-      let eResult = case mCompletion of
-            -- TODO show correct timeout value
-            Nothing -> Left $ RuntimeError "Potential deadlock detected for workflow" --  <> show (activation ^. Activation.runId) <> " in namespace " <> show (activation ^. Activation.namespace) <> ". Workflow didn't yield within " <> show 1 <> " seconds.")
-            Just result -> Right result
-      case eResult of
-        Left err -> do
-          $(logDebug) ("Workflow failure" <> Text.pack (show err))
+      completion <- UnliftIO.try $ wait completionHandle
+      -- mCompletion <- case worker.workerConfig.deadlockTimeout of
+      --   Nothing -> do
+      --     $(logDebug) "Waiting forever for completion"
+      --     Just <$> wait completionHandle
+      --   -- TODO ensure timeout is in microseconds
+      --   Just microsecs -> do
+      --     $(logDebug) "Waiting for completion"
+      --     timeout microsecs $ wait completionHandle
+      -- let eResult = case mCompletion of
+      --       -- TODO show correct timeout value
+      --       Nothing -> Left $ RuntimeError "Potential deadlock detected for workflow" --  <> show (activation ^. Activation.runId) <> " in namespace " <> show (activation ^. Activation.namespace) <> ". Workflow didn't yield within " <> show 1 <> " seconds.")
+      --       Just result -> Right result
+      case completion of
+        Left (SomeException err) -> do
+          $(logDebug) ("Workflow failure: " <> Text.pack (show err))
           -- TODO there are lots of fields on this failureProto that we probably want to fill in
-          let failureProto = defMessage
+          let innerFailure :: F.Failure
+              innerFailure = defMessage & F.message .~ (Text.pack $ show err)
+
+              failureProto :: Completion.Failure
+              failureProto = defMessage & Completion.failure .~ innerFailure
+                
                 -- & Activation.message .~ (Text.pack $ show err)
               completionMessage = defMessage
-                & Completion.runId .~ activation ^. Activation.runId
+                & Completion.runId .~ (activation ^. Activation.runId)
                 & Completion.failed .~ failureProto
           pure completionMessage
         Right ok -> do

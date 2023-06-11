@@ -2,6 +2,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
@@ -11,18 +12,37 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Temporal.Workflow 
-  ( Workflow
+  ( defineWorkflow
+  -- TODO, this should not be visible to the user
+  , OpaqueWorkflow(..)
+  , Workflow
+  , WorkflowId(..)
+  , Namespace(..)
+  , TaskQueue(..)
+  , ParentClosePolicy(..)
+  , ChildWorkflowCancellationType(..)
+  , WorkflowIdReusePolicy(..)
+  , PatchId(..)
+  , RunId(..)
+  , WorkflowType(..)
   , Task
   , TimeoutType(..)
-  , KnownActivity
+  , KnownActivity(..)
+  , knownActivityName
   , StartActivityOptions(..)
   , defaultStartActivityOptions
   , StartActivity
   , startActivity
+  , StartLocalActivityOptions(..)
   , startLocalActivity
-  , KnownWorkflow
+  , KnownWorkflow(..)
+  , StartChildWorkflowOptions(..)
+  , defaultChildWorkflowOptions
   , StartChildWorkflow
   , startChildWorkflow
+  , ChildWorkflowHandle
+  , waitChildWorkflowStart
+  , waitChildWorkflowResult
   , Temporal.Workflow.wait
   -- , execWorkflow
   -- , continueAsNew
@@ -45,11 +65,13 @@ module Temporal.Workflow
   -- , signal
   , now
   , time
+  , sleep
   -- , upsertSearchAttributes
   , randomGen
   , uuid4
   -- , waitCondition
   , WorkflowGenM(..)
+  , StartActivityArgs
   ) where
 
 import Control.Monad.Logger
@@ -78,16 +100,20 @@ import Proto.Temporal.Api.Common.V1.Message (Payload)
 import System.Clock (TimeSpec(..))
 import System.Random.Stateful
 import Temporal.Common
+import Temporal.Exception
 import Temporal.Payload
 import Temporal.Worker.Types
 import Temporal.Workflow.Unsafe
 import Temporal.WorkflowInstance
 import Temporal.Workflow.WorkflowInstance
+import Temporal.Workflow.WorkflowDefinition
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation as Activation
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
 import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult as ActivityResult
 import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields as ActivityResult
+import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow as ChildWorkflow
+import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow_Fields as ChildWorkflow
 import UnliftIO
 
 data Task env st a = Task (Workflow env st a)
@@ -148,44 +174,45 @@ type family StartActivity env st baseResult (args :: [*]) = r | r -> env st base
   StartActivity env st baseResult '[] = Workflow env st (Task env st baseResult)
   StartActivity env st baseResult (a ': as) = a -> StartActivity env st baseResult as 
 
-class StartActivityArgs codec env st (args :: [*]) baseResult where
+class StartActivityArgs codec (args :: [*]) baseResult where
   applyArgs_ 
     :: Proxy args 
+    -> Proxy env
+    -> Proxy st
     -> codec
     -> ([IO RawPayload] -> [IO RawPayload]) 
     -> ([IO RawPayload] -> Workflow env st (Task env st baseResult))
     -> StartActivity env st baseResult args 
 
-instance StartActivityArgs codec env st '[] baseResult where
-  applyArgs_ argsP _ accum f = f $ accum []
+instance StartActivityArgs codec '[] baseResult where
+  applyArgs_ argsP envP stP _ accum f = f $ accum []
 
-instance (Codec codec a, StartActivityArgs codec env st as baseResult) => StartActivityArgs codec env st (a ': as) baseResult where
-  applyArgs_ argsP c accum f = \arg ->
+instance (Codec codec a, StartActivityArgs codec as baseResult) => StartActivityArgs codec (a ': as) baseResult where
+  applyArgs_ argsP envP stP c accum f = \arg ->
     applyArgs_
     (Proxy @as) 
+    envP
+    stP
     c
     ((encode c arg :) . accum) 
     f
 
-gatherStartActivityArgs :: forall env st args baseResult codec. StartActivityArgs codec env st args baseResult => codec -> ([IO RawPayload] -> Workflow env st (Task env st baseResult)) -> StartActivity env st baseResult args 
-gatherStartActivityArgs c f = applyArgs_ (Proxy @args) c id f
+gatherStartActivityArgs :: forall env st args baseResult codec. StartActivityArgs codec args baseResult => codec -> ([IO RawPayload] -> Workflow env st (Task env st baseResult)) -> StartActivity env st baseResult args 
+gatherStartActivityArgs c f = applyArgs_ (Proxy @args) (Proxy @env) (Proxy @st) c id f
 
-data KnownActivity localEnv localSt (name :: Symbol) (args :: [Type]) (result :: Type) = forall codec. 
-  ( Codec codec result
-  , AllArgsSupportCodec codec args
-  , StartActivityArgs codec localEnv localSt args result
-  ) => KnownActivity 
-        { knownActivityCodec :: codec
-        , knownActivityQueue :: Maybe TaskQueue
-        }
+data KnownActivity (name :: Symbol) (args :: [Type]) (result :: Type) 
+  = forall codec. (Codec codec result, AllArgsSupportCodec codec args, StartActivityArgs codec args result) => KnownActivity
+    { knownActivityCodec :: codec
+    , knownActivityQueue :: Maybe TaskQueue
+    }
 
-knownActivityArgsProxy :: KnownActivity localEnv localSt name args result -> Proxy args
+knownActivityArgsProxy :: KnownActivity name args result -> Proxy args
 knownActivityArgsProxy _ = Proxy
 
-knownActivityName :: forall localEnv localSt name args result. KnownSymbol name => KnownActivity localEnv localSt name args result -> Text
+knownActivityName :: forall name args result. KnownSymbol name => KnownActivity name args result -> Text
 knownActivityName _ = Text.pack $ symbolVal (Proxy @name)
 
-knownWorkflowExample :: KnownWorkflow () ()  "name" '[Int, Text] Text
+knownWorkflowExample :: KnownWorkflow "name" '[Int, Text] Text
 knownWorkflowExample = KnownWorkflow JSON Nothing Nothing
 
 callKnownWorkflow :: Workflow () () (ChildWorkflowHandle () () Text)
@@ -196,7 +223,7 @@ callKnownWorkflow = startChildWorkflow
   1
   "hello"
 
-knownActivityExample :: KnownActivity () () "name" '[Int, Text] Text
+knownActivityExample :: KnownActivity "name" '[Int, Text] Text
 knownActivityExample = KnownActivity JSON Nothing
 
 callKnownActivity :: Workflow () () (Task () () Text)
@@ -208,7 +235,7 @@ callKnownActivity = startActivity
 
 startActivity :: 
   ( KnownSymbol name
-  ) => StartActivityOptions -> KnownActivity env st name args result -> StartActivity env st result args
+  ) => StartActivityOptions -> KnownActivity name args result -> StartActivity env st result args
 startActivity opts k@(KnownActivity codec mTaskQueue) = gatherStartActivityArgs codec $ \typedPayloads -> ilift $ do
   inst <- ask
   ps <- liftIO $ forM typedPayloads $ \payloadAction -> 
@@ -259,40 +286,44 @@ type family StartChildWorkflow env st baseResult (args :: [*]) = r | r -> env st
   StartChildWorkflow env st baseResult '[] = Workflow env st (ChildWorkflowHandle env st baseResult)
   StartChildWorkflow env st baseResult (a ': as) = a -> StartChildWorkflow env st baseResult as 
 
-data KnownWorkflow localEnv localSt (name :: Symbol) (args :: [Type]) (result :: Type) = forall codec. 
+data KnownWorkflow (name :: Symbol) (args :: [Type]) (result :: Type) = forall codec. 
   ( Codec codec result
   , AllArgsSupportCodec codec args
-  , StartChildWorkflowArgs codec localEnv localSt args result
+  , StartChildWorkflowArgs codec args result
   ) => KnownWorkflow 
         { knownWorkflowCodec :: codec 
         , knownWorkflowNamespace :: Maybe Namespace
         , knownWorkflowQueue :: Maybe TaskQueue
         }
 
-knownWorkflowName :: forall localEnv localSt name args result. KnownSymbol name => KnownWorkflow localEnv localSt name args result -> Text
+knownWorkflowName :: forall name args result. KnownSymbol name => KnownWorkflow name args result -> Text
 knownWorkflowName _ = Text.pack $ symbolVal (Proxy @name)
 
-class StartChildWorkflowArgs codec env st (args :: [*]) baseResult where
+class StartChildWorkflowArgs codec (args :: [*]) baseResult where
   applyWfArgs_ 
     :: Proxy args 
+    -> Proxy env
+    -> Proxy st
     -> codec
     -> ([IO RawPayload] -> [IO RawPayload]) 
     -> ([IO RawPayload] -> Workflow env st (ChildWorkflowHandle env st baseResult))
     -> StartChildWorkflow env st baseResult args
 
-instance StartChildWorkflowArgs codec env st '[] baseResult where
-  applyWfArgs_ argsP _ accum f = f $ accum []
+instance StartChildWorkflowArgs codec '[] baseResult where
+  applyWfArgs_ argsP _ _ _ accum f = f $ accum []
 
-instance (Codec codec a, StartChildWorkflowArgs codec env st as baseResult) => StartChildWorkflowArgs codec env st (a ': as) baseResult where
-  applyWfArgs_ argsP c accum f = \arg ->
+instance (Codec codec a, StartChildWorkflowArgs codec as baseResult) => StartChildWorkflowArgs codec (a ': as) baseResult where
+  applyWfArgs_ argsP envP stP c accum f = \arg ->
     applyWfArgs_
     (Proxy @as) 
+    envP
+    stP
     c
     ((encode c arg :) . accum) 
     f
 
-gatherStartChildWorkflowArgs :: forall env st args baseResult codec. StartChildWorkflowArgs codec env st args baseResult => codec -> ([IO RawPayload] -> Workflow env st (ChildWorkflowHandle env st baseResult)) -> StartChildWorkflow env st baseResult args 
-gatherStartChildWorkflowArgs c f = applyWfArgs_ (Proxy @args) c id f
+gatherStartChildWorkflowArgs :: forall env st args baseResult codec. StartChildWorkflowArgs codec args baseResult => codec -> ([IO RawPayload] -> Workflow env st (ChildWorkflowHandle env st baseResult)) -> StartChildWorkflow env st baseResult args 
+gatherStartChildWorkflowArgs c f = applyWfArgs_ (Proxy @args) (Proxy @env) (Proxy @st) c id f
 
 data StartChildWorkflowOptions = StartChildWorkflowOptions 
   { cancellationType :: ChildWorkflowCancellationType
@@ -328,7 +359,7 @@ defaultChildWorkflowOptions = StartChildWorkflowOptions
 
 startChildWorkflow 
   :: (KnownSymbol name)
-  => KnownWorkflow env st name args result 
+  => KnownWorkflow name args result 
   -> StartChildWorkflowOptions
   -> WorkflowId
   -> StartChildWorkflow env st result args 
@@ -368,6 +399,7 @@ startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue) opts wfId = gat
         , startHandle = startSlot 
         , resultHandle = resultSlot
         , firstExecutionRunId = Nothing
+        , childWorkflowCodec = codec
         }
 
   modifyMVar_ inst.workflowSequenceMaps $ \seqMaps -> do
@@ -376,6 +408,24 @@ startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue) opts wfId = gat
   $(logDebug) "Add command: startChildWorkflowExecution"
   addCommand inst cmd
   pure wfHandle
+
+waitChildWorkflowStart :: ChildWorkflowHandle env st result -> Workflow env st ()
+waitChildWorkflowStart wfHandle = getIVar wfHandle.startHandle
+
+waitChildWorkflowResult :: ChildWorkflowHandle env st result -> Workflow env st result
+waitChildWorkflowResult wfHandle@(ChildWorkflowHandle{childWorkflowCodec}) = do
+  res <- getIVar wfHandle.resultHandle
+  case res ^. Activation.result . ChildWorkflow.maybe'status of
+    Nothing -> ilift $ throwIO $ RuntimeError "Unrecognized child workflow result status"
+    Just s -> case s of
+      ChildWorkflow.ChildWorkflowResult'Completed res -> do	 
+        eVal <- ilift $ liftIO $ decode childWorkflowCodec $ convertFromProtoPayload $ res ^. ChildWorkflow.result
+        case eVal of
+          Left err -> throw $ ValueError err
+          Right ok -> pure ok
+      ChildWorkflow.ChildWorkflowResult'Failed res -> throw $ ChildWorkflowFailed $ res ^. ChildWorkflow.failure
+      ChildWorkflow.ChildWorkflowResult'Cancelled _ -> throw ChildWorkflowCancelled
+
 
 
 data StartLocalActivityOptions = StartLocalActivityOptions 
@@ -390,7 +440,7 @@ data StartLocalActivityOptions = StartLocalActivityOptions
   }
 startLocalActivity 
   :: StartLocalActivityOptions 
-  -> KnownActivity env st name args result
+  -> KnownActivity name args result
   -> Workflow env st ()
 startLocalActivity = undefined
 
@@ -522,3 +572,23 @@ If the values aren't equal, then it records the new value with the same ID on th
 -}
 mutableSideEffect :: IO a -> Workflow env st a
 mutableSideEffect = undefined
+
+-- TODO, timer suopport?
+
+sleep :: TimeSpec -> Workflow env st ()
+sleep ts = do
+  res <- ilift $ do
+    inst <- ask
+    s@(Sequence seqId) <- nextTimerSequence
+    let cmd = defMessage & Command.startTimer .~ 
+          ( defMessage 
+            & Command.seq .~ seqId
+            & Command.startToFireTimeout .~ timespecToDuration ts
+          )
+    $(logDebug) "Add command: sleep"
+    res <- newIVar
+    modifyMVar_ inst.workflowSequenceMaps $ \seqMaps -> do
+      pure $ seqMaps { timers = HashMap.insert s res seqMaps.timers }
+    addCommand inst cmd
+    pure res
+  getIVar res

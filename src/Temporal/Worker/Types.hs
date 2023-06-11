@@ -465,8 +465,13 @@ instance Monad (Workflow env st) where
       Done a -> unWorkflow (k a)
       Throw e -> pure $ Throw e
       Blocked ivar cont -> pure $ Blocked ivar (cont :>>= k)
-  -- We really want the Applicative version of >>
-  (>>) = (*>)
+  -- Unlike Haxl, we can't readily use parallel exploration of data fetches
+  -- because we want to be able to block on things like tasks, workflows, etc.
+  -- Maximum parallelism is an anti-goal.
+  --
+  -- TODO: we could probably use (>>=) to implement a fetch barrier for blocking
+  -- operations instead of disabling the parallel fetching entirely
+  -- (>>) = (*>)
 
 instance MonadReader env (Workflow env st) where
   ask = Workflow (Done <$> asks workflowEnv)
@@ -576,11 +581,11 @@ type IsValidActivityFunction env codec f =
     , Codec codec (ResultOf (Activity env) f)
     )
 
-data ValidActivityFunction env = forall fmt f. (IsValidActivityFunction env fmt f) => 
+data ValidActivityFunction env = forall codec f. (IsValidActivityFunction env codec f) => 
   ValidActivityFunction 
-    fmt 
+    codec 
     f
-    (fmt -> f -> Vector RawPayload -> IO (Either String (Activity env (ResultOf (Activity env) f))))
+    (codec -> f -> Vector RawPayload -> IO (Either String (Activity env (ResultOf (Activity env) f))))
 
 runWorkerM :: Worker wfEnv actEnv -> WorkerM wfEnv actEnv a -> IO a
 runWorkerM worker m = runReaderT (unWorkerM m) worker
@@ -590,10 +595,11 @@ nonEmptyString t = if T.null t then Nothing else Just t
 
 data SomeChildWorkflowHandle env st = forall result. SomeChildWorkflowHandle (ChildWorkflowHandle env st result)
 
-data ChildWorkflowHandle env st result = 
+data ChildWorkflowHandle env st result = forall codec. (Codec codec result) =>
   ChildWorkflowHandle
     { childWorkflowSequence :: Sequence
     , startHandle :: IVar env st ()
-    , resultHandle :: IVar env st result
+    , resultHandle :: IVar env st ResolveChildWorkflowExecution
+    , childWorkflowCodec :: codec
     , firstExecutionRunId :: Maybe RunId
     }

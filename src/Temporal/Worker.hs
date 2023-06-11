@@ -63,14 +63,14 @@ mkConfig
   -> wfEnv 
   -> HashMap Text (OpaqueWorkflow WorkflowDefinition wfEnv) 
   -> actEnv
-  -> HashMap Text (ActivityDefinition actEnv)
+  -> [ActivityDefinition actEnv]
   -> WorkerConfig wfEnv actEnv
 mkConfig core wfEnv wfDefs actEnv actDefs = WorkerConfig 
   (Just 2000000) 
   wfEnv
   wfDefs
   actEnv
-  actDefs 
+  (HashMap.fromList $ fmap (\def -> (activityName def, def)) actDefs)
   core
 
 defaultRetryPolicy :: RetryPolicy
