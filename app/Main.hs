@@ -51,7 +51,6 @@ requirePresidentialApproval = do
 requirePresidentialApprovalRef :: KnownWorkflow "requirePresidentialApproval" '[] ()
 requirePresidentialApprovalRef = KnownWorkflow JSON Nothing Nothing
 
-
 launchTheMissiles :: Workflow () () Int
 launchTheMissiles = do
   uuid <- uuid4
@@ -75,6 +74,9 @@ launchTheMissiles = do
   $(logInfo) ("Sequence complete: " <> T.pack (UUID.toString uuid))
   pure r
 
+-- To Run:
+--
+-- temporal workflow start --cron "* * * * *" --type chronicWorkflow --workflow-id chronic-chron-fixed --task-queue default
 chronicWorkflow :: Workflow () () ()
 chronicWorkflow = do
   t <- now
