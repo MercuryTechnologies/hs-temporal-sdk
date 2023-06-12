@@ -75,6 +75,10 @@ launchTheMissiles = do
   $(logInfo) ("Sequence complete: " <> T.pack (UUID.toString uuid))
   pure r
 
+chronicWorkflow :: Workflow () () ()
+chronicWorkflow = do
+  t <- now
+  $(logInfo) (T.pack ("Starting chronic workflow: " ++ show t))
 
 main :: IO ()
 main = do
@@ -104,6 +108,7 @@ runWorker c = do
         [ ("hello", OpaqueWorkflow $ defineWorkflow JSON "hello" () (pure () :: Workflow () () ()))
         , ("launchTheMissiles", OpaqueWorkflow $ defineWorkflow JSON "launchTheMissiles" () launchTheMissiles)
         , ("requirePresidentialApproval", OpaqueWorkflow $ defineWorkflow JSON "requirePresidentialApproval" () requirePresidentialApproval)
+        , ("chronicWorkflow", OpaqueWorkflow $ defineWorkflow JSON "chronicWorkflow" () chronicWorkflow)
         ]
       activityDefs =
         [ shootMissileDef

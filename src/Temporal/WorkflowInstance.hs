@@ -248,6 +248,7 @@ applyStartWorkflow startWorkflow = do
         -- Set the starting randomness seed
         let (WorkflowGenM genRef) = inst.workflowRandomnessSeed
         writeIORef genRef (mkStdGen $ fromIntegral $ startWorkflow ^. Activation.randomnessSeed)
+        writeIORef inst.workflowTime (startWorkflow ^. Activation.startTime . to timespecFromTimestamp)
 
         let args = fmap convertFromProtoPayload (startWorkflow ^. Command.vec'arguments)
         eAct <- liftIO $ applyArgs innerF args
