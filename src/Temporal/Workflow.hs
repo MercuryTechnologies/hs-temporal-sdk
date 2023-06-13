@@ -12,9 +12,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Temporal.Workflow 
-  ( defineWorkflow
-  -- TODO, this should not be visible to the user
-  , OpaqueWorkflow(..)
+  ( provideWorkflow
   , Workflow
   , WorkflowId(..)
   , Namespace(..)
@@ -36,6 +34,7 @@ module Temporal.Workflow
   , StartLocalActivityOptions(..)
   , startLocalActivity
   , KnownWorkflow(..)
+  , StartChildWorkflowArgs(..)
   , StartChildWorkflowOptions(..)
   , defaultChildWorkflowOptions
   , StartChildWorkflow
@@ -112,6 +111,8 @@ import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields as
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow as ChildWorkflow
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow_Fields as ChildWorkflow
 import UnliftIO
+
+
 
 data Task env st a = Task (Workflow env st a)
 
@@ -257,48 +258,6 @@ startActivity opts k@(KnownActivity codec mTaskQueue) = gatherStartActivityArgs 
       Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"
   where
 
-type family StartChildWorkflow env st baseResult (args :: [*]) = r | r -> env st baseResult args where
-  StartChildWorkflow env st baseResult '[] = Workflow env st (ChildWorkflowHandle env st baseResult)
-  StartChildWorkflow env st baseResult (a ': as) = a -> StartChildWorkflow env st baseResult as 
-
-data KnownWorkflow (name :: Symbol) (args :: [Type]) (result :: Type) = forall codec. 
-  ( Codec codec result
-  , AllArgsSupportCodec codec args
-  , StartChildWorkflowArgs codec args result
-  ) => KnownWorkflow 
-        { knownWorkflowCodec :: codec 
-        , knownWorkflowNamespace :: Maybe Namespace
-        , knownWorkflowQueue :: Maybe TaskQueue
-        }
-
-knownWorkflowName :: forall name args result. KnownSymbol name => KnownWorkflow name args result -> Text
-knownWorkflowName _ = Text.pack $ symbolVal (Proxy @name)
-
-class StartChildWorkflowArgs codec (args :: [*]) baseResult where
-  applyWfArgs_ 
-    :: Proxy args 
-    -> Proxy env
-    -> Proxy st
-    -> codec
-    -> ([IO RawPayload] -> [IO RawPayload]) 
-    -> ([IO RawPayload] -> Workflow env st (ChildWorkflowHandle env st baseResult))
-    -> StartChildWorkflow env st baseResult args
-
-instance StartChildWorkflowArgs codec '[] baseResult where
-  applyWfArgs_ argsP _ _ _ accum f = f $ accum []
-
-instance (Codec codec a, StartChildWorkflowArgs codec as baseResult) => StartChildWorkflowArgs codec (a ': as) baseResult where
-  applyWfArgs_ argsP envP stP c accum f = \arg ->
-    applyWfArgs_
-    (Proxy @as) 
-    envP
-    stP
-    c
-    ((encode c arg :) . accum) 
-    f
-
-gatherStartChildWorkflowArgs :: forall env st args baseResult codec. StartChildWorkflowArgs codec args baseResult => codec -> ([IO RawPayload] -> Workflow env st (ChildWorkflowHandle env st baseResult)) -> StartChildWorkflow env st baseResult args 
-gatherStartChildWorkflowArgs c f = applyWfArgs_ (Proxy @args) (Proxy @env) (Proxy @st) c id f
 
 data StartChildWorkflowOptions = StartChildWorkflowOptions 
   { cancellationType :: ChildWorkflowCancellationType

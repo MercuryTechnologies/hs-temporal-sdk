@@ -41,15 +41,12 @@ shootMissiles times = do
     liftIO $ putStrLn "Missile shot"
   pure times
 
-(shootMissileDef, shootMissileRef) = provideActivity JSON (Proxy @"shootMissiles") shootMissiles
 
 requirePresidentialApproval :: Workflow () () ()
 requirePresidentialApproval = do
   sleep $ TimeSpec 10 0
   pure ()
 
-requirePresidentialApprovalRef :: KnownWorkflow "requirePresidentialApproval" '[] ()
-requirePresidentialApprovalRef = KnownWorkflow JSON Nothing Nothing
 
 launchTheMissiles :: Workflow () () Int
 launchTheMissiles = do
@@ -74,6 +71,13 @@ launchTheMissiles = do
   $(logInfo) ("Sequence complete: " <> T.pack (UUID.toString uuid))
   pure r
 
+
+hello :: Workflow () () ()
+hello = do
+  t <- now
+  $(logInfo) (T.pack ("Hello, world! " ++ show t))
+
+
 -- To Run:
 --
 -- temporal workflow start --cron "* * * * *" --type chronicWorkflow --workflow-id chronic-chron-fixed --task-queue default
@@ -81,6 +85,13 @@ chronicWorkflow :: Workflow () () ()
 chronicWorkflow = do
   t <- now
   $(logInfo) (T.pack ("Starting chronic workflow: " ++ show t))
+
+(helloDef, helloRef) = provideWorkflow JSON (Proxy @"hello") () hello
+(requirePresidentialApprovalDef, requirePresidentialApprovalRef) = provideWorkflow JSON (Proxy @"requirePresidentialApproval") () requirePresidentialApproval
+(launchTheMissilesDef, launchTheMissilesRef) = provideWorkflow JSON (Proxy @"launchTheMissiles") () launchTheMissiles
+(chronicWorkflowDef, chronicWorkflowRef) = provideWorkflow JSON (Proxy @"chronicWorkflow") () chronicWorkflow
+
+(shootMissileDef, shootMissileRef) = provideActivity JSON (Proxy @"shootMissiles") shootMissiles
 
 main :: IO ()
 main = do
@@ -106,16 +117,14 @@ main = do
 runWorker :: Client -> IO ()
 runWorker c = do
   putStrLn "Running worker"
-  let workflowDefs = HashMap.fromList
-        [ ("hello", OpaqueWorkflow $ defineWorkflow JSON "hello" () (pure () :: Workflow () () ()))
-        , ("launchTheMissiles", OpaqueWorkflow $ defineWorkflow JSON "launchTheMissiles" () launchTheMissiles)
-        , ("requirePresidentialApproval", OpaqueWorkflow $ defineWorkflow JSON "requirePresidentialApproval" () requirePresidentialApproval)
-        , ("chronicWorkflow", OpaqueWorkflow $ defineWorkflow JSON "chronicWorkflow" () chronicWorkflow)
-        ]
-      activityDefs =
-        [ shootMissileDef
-        ]
-      conf = mkConfig defaultWorkerConfig () workflowDefs () activityDefs
+  let conf = configure () () $ do
+        addWorkflow helloDef
+        addWorkflow launchTheMissilesDef
+        addWorkflow requirePresidentialApprovalDef
+        addWorkflow chronicWorkflowDef
+
+        addActivity shootMissileDef
+
   runStdoutLoggingT $ do
     w <- startWorker c conf
     withRunInIO $ \run -> do

@@ -9,8 +9,28 @@ module Temporal.Worker
   , startWorker
   , waitWorker
   , shutdown
-  , mkConfig
   , WorkerConfig(..)
+  , configure
+  , addWorkflow
+  , addActivity
+  , setNamespace
+  , setTaskQueue
+  , setBuildId
+  , setIdentity
+  , setMaxCachedWorkflows
+  , setMaxOutstandingWorkflowTasks
+  , setMaxOutstandingActivities
+  , setMaxOutstandingLocalActivities
+  , setMaxConcurrentWorkflowTaskPolls
+  , setNonstickyToStickyPollRatio
+  , setMaxConcurrentActivityTaskPolls
+  , setNoRemoteActivities
+  , setStickyQueueScheduleToStartTimeoutMillis
+  , setMaxHeartbeatThrottleIntervalMillis
+  , setDefaultHeartbeatThrottleIntervalMillis
+  , setMaxActivitiesPerSecond
+  , setMaxTaskQueueActivitiesPerSecond
+  , setGracefulShutdownPeriodMillis
   ) where
 import UnliftIO.Exception
 import UnliftIO
@@ -18,6 +38,7 @@ import Control.Monad
 
 import Control.Monad.Logger
 import Control.Monad.Reader
+import Control.Monad.State
 import Control.Monad.IO.Class
 
 import Temporal.Common
@@ -59,20 +80,144 @@ import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_F
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
 
 
-mkConfig 
-  :: Core.WorkerConfig
-  -> wfEnv 
-  -> HashMap Text (OpaqueWorkflow WorkflowDefinition wfEnv) 
-  -> actEnv
-  -> [ActivityDefinition actEnv]
-  -> WorkerConfig wfEnv actEnv
-mkConfig core wfEnv wfDefs actEnv actDefs = WorkerConfig 
-  (Just 2000000) 
-  wfEnv
-  wfDefs
-  actEnv
-  (HashMap.fromList $ fmap (\def -> (activityName def, def)) actDefs)
-  core
+-- mkConfig 
+--   :: Core.WorkerConfig
+--   -> wfEnv 
+--   -> [OpaqueWorkflow WorkflowDefinition wfEnv]
+--   -> actEnv
+--   -> [ActivityDefinition actEnv]
+--   -> WorkerConfig wfEnv actEnv
+-- mkConfig core wfEnv wfDefs actEnv actDefs = WorkerConfig 
+--   (Just 2000000) 
+--   wfEnv
+--   (HashMap.fromList $ fmap (\def -> (workflowName def, def)) wfDefs)
+--   actEnv
+--   (HashMap.fromList $ fmap (\def -> (activityName def, def)) actDefs)
+--   core
+
+newtype ConfigM wfEnv actEnv a = ConfigM { unConfigM :: State (WorkerConfig wfEnv actEnv) a }
+  deriving (Functor, Applicative, Monad)
+
+------------------------------------------------------------------------------------
+-- Configuration
+
+configure :: wfEnv -> actEnv -> ConfigM wfEnv actEnv () -> WorkerConfig wfEnv actEnv
+configure wfEnv actEnv = flip execState defaultConfig . unConfigM
+  where
+    defaultConfig = WorkerConfig
+      { wfDefs = mempty
+      , actDefs = mempty
+      , coreConfig = Core.defaultWorkerConfig
+      , deadlockTimeout = Nothing
+      , ..
+      }
+
+addWorkflow :: WorkflowDefinition env st -> ConfigM env actEnv ()
+addWorkflow def = ConfigM $ modify' $ \conf -> conf
+  { wfDefs = HashMap.insert (workflowName def) (OpaqueWorkflow def) (wfDefs conf) 
+  }
+
+addActivity :: ActivityDefinition env -> ConfigM wfEnv env ()
+addActivity def = ConfigM $ modify' $ \conf -> conf
+  { actDefs = HashMap.insert (activityName def) def (actDefs conf)
+  }
+
+modifyCore :: (Core.WorkerConfig -> Core.WorkerConfig) -> ConfigM wfEnv actEnv ()
+modifyCore f = ConfigM $ modify' $ \conf -> conf
+  { coreConfig = f (coreConfig conf)
+  }
+
+setNamespace :: Text -> ConfigM wfEnv actEnv ()
+setNamespace ns = modifyCore $ \conf -> conf
+  { Core.namespace = ns
+  }
+
+setTaskQueue :: Text -> ConfigM wfEnv actEnv ()
+setTaskQueue tq = modifyCore $ \conf -> conf
+  { Core.taskQueue = tq
+  }
+
+setBuildId :: Text -> ConfigM wfEnv actEnv ()
+setBuildId bid = modifyCore $ \conf -> conf
+  { Core.buildId = bid
+  }
+
+setIdentity :: Text -> ConfigM wfEnv actEnv ()
+setIdentity ident = modifyCore $ \conf -> conf
+  { Core.identityOverride = Just ident
+  }
+
+setMaxCachedWorkflows :: Word64 -> ConfigM wfEnv actEnv ()
+setMaxCachedWorkflows n = modifyCore $ \conf -> conf
+  { Core.maxCachedWorkflows = n
+  }
+
+setMaxOutstandingWorkflowTasks :: Word64 -> ConfigM wfEnv actEnv ()
+setMaxOutstandingWorkflowTasks n = modifyCore $ \conf -> conf
+  { Core.maxOutstandingWorkflowTasks = n
+  }
+
+setMaxOutstandingActivities :: Word64 -> ConfigM wfEnv actEnv ()
+setMaxOutstandingActivities n = modifyCore $ \conf -> conf
+  { Core.maxOutstandingActivities = n
+  }
+
+setMaxOutstandingLocalActivities :: Word64 -> ConfigM wfEnv actEnv ()
+setMaxOutstandingLocalActivities n = modifyCore $ \conf -> conf
+  { Core.maxOutstandingLocalActivities = n
+  }
+
+setMaxConcurrentWorkflowTaskPolls :: Word64 -> ConfigM wfEnv actEnv ()
+setMaxConcurrentWorkflowTaskPolls n = modifyCore $ \conf -> conf
+  { Core.maxConcurrentWorkflowTaskPolls = n
+  }
+
+setNonstickyToStickyPollRatio :: Float -> ConfigM wfEnv actEnv ()
+setNonstickyToStickyPollRatio n = modifyCore $ \conf -> conf
+  { Core.nonstickyToStickyPollRatio = n
+  }
+
+setMaxConcurrentActivityTaskPolls :: Word64 -> ConfigM wfEnv actEnv ()
+setMaxConcurrentActivityTaskPolls n = modifyCore $ \conf -> conf
+  { Core.maxConcurrentActivityTaskPolls = n
+  }
+
+setNoRemoteActivities :: Bool -> ConfigM wfEnv actEnv ()
+setNoRemoteActivities n = modifyCore $ \conf -> conf
+  { Core.noRemoteActivities = n
+  }
+
+setStickyQueueScheduleToStartTimeoutMillis :: Word64 -> ConfigM wfEnv actEnv ()
+setStickyQueueScheduleToStartTimeoutMillis n = modifyCore $ \conf -> conf
+  { Core.stickyQueueScheduleToStartTimeoutMillis = n
+  }
+
+setMaxHeartbeatThrottleIntervalMillis :: Word64 -> ConfigM wfEnv actEnv ()
+setMaxHeartbeatThrottleIntervalMillis n = modifyCore $ \conf -> conf
+  { Core.maxHeartbeatThrottleIntervalMillis = n
+  }
+
+setDefaultHeartbeatThrottleIntervalMillis :: Word64 -> ConfigM wfEnv actEnv ()
+setDefaultHeartbeatThrottleIntervalMillis n = modifyCore $ \conf -> conf
+  { Core.defaultHeartbeatThrottleIntervalMillis = n
+  }
+
+setMaxActivitiesPerSecond :: Double -> ConfigM wfEnv actEnv ()
+setMaxActivitiesPerSecond n = modifyCore $ \conf -> conf
+  { Core.maxActivitiesPerSecond = Just n
+  }
+
+setMaxTaskQueueActivitiesPerSecond :: Double -> ConfigM wfEnv actEnv ()
+setMaxTaskQueueActivitiesPerSecond n = modifyCore $ \conf -> conf
+  { Core.maxTaskQueueActivitiesPerSecond = Just n
+  }
+
+setGracefulShutdownPeriodMillis :: Word64 -> ConfigM wfEnv actEnv ()
+setGracefulShutdownPeriodMillis n = modifyCore $ \conf -> conf
+  { Core.gracefulShutdownPeriodMillis = n
+  }
+
+------------------------------------------------------------------------------------
 
 defaultRetryPolicy :: RetryPolicy
 defaultRetryPolicy = RetryPolicy
