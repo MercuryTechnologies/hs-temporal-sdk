@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ConstraintKinds #-}
 module Temporal.Activity.Worker where
+import Control.Monad
 import Control.Monad.Reader
 import Data.ByteString (ByteString)
 import Data.Hashable

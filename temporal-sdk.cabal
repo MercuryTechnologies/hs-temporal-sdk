@@ -35,7 +35,7 @@ library
     ghc,
     template-haskell
 
-  extra-libraries: hs_temporal_bridge
+  extra-libraries: temporal_bridge
   default-language: Haskell2010
   default-extensions:
     BangPatterns,
@@ -63,6 +63,7 @@ library
     Temporal.Worker.Types
   exposed-modules:
     Temporal.Activity,
+    Temporal.EphemeralServer,
     Temporal.Exception,
     Temporal.Payload,
     Temporal.Workflow,

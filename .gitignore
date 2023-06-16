@@ -14,3 +14,5 @@ target/
 result
 .direnv/
 .DS_Store
+core/rust/build.rs
+core/rust/lib*

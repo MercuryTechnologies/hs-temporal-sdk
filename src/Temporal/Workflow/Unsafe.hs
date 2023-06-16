@@ -5,6 +5,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Temporal.Workflow.Unsafe where
+import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Int (Int32)

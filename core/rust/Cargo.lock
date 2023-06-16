@@ -889,29 +889,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hs_temporal_bridge"
-version = "0.1.0"
-dependencies = [
- "ffi-convert",
- "libc",
- "parking_lot",
- "prost",
- "prost-types",
- "rustfsm",
- "serde",
- "serde_json",
- "temporal-client",
- "temporal-sdk-core",
- "temporal-sdk-core-api",
- "temporal-sdk-core-protos",
- "tokio",
- "tokio-stream",
- "tonic",
- "tracing",
- "url",
-]
-
-[[package]]
 name = "http"
 version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2358,6 +2335,30 @@ dependencies = [
  "tonic",
  "tonic-build",
  "uuid",
+]
+
+[[package]]
+name = "temporal_bridge"
+version = "0.1.0"
+dependencies = [
+ "ffi-convert",
+ "futures",
+ "libc",
+ "parking_lot",
+ "prost",
+ "prost-types",
+ "rustfsm",
+ "serde",
+ "serde_json",
+ "temporal-client",
+ "temporal-sdk-core",
+ "temporal-sdk-core-api",
+ "temporal-sdk-core-protos",
+ "tokio",
+ "tokio-stream",
+ "tonic",
+ "tracing",
+ "url",
 ]
 
 [[package]]

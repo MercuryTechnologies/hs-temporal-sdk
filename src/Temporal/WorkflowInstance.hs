@@ -16,6 +16,7 @@ module Temporal.WorkflowInstance
 
 import Control.Applicative
 import Control.Concurrent.STM (retry)
+import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Control.Monad.IO.Class
@@ -354,6 +355,11 @@ applyActivationJob job = case job ^. Activation.maybe'variant of
     -- Ignore, handled in the worker code.
     WorkflowActivationJob'RemoveFromCache removeFromCache -> pure ()
 
+setFirstExecutionRunId :: ChildWorkflowHandle env st result -> RunId -> ChildWorkflowHandle env st result
+setFirstExecutionRunId cw runId = cw
+  { firstExecutionRunId = firstExecutionRunId cw <|> Just runId
+  }
+
 applyResolutions :: [PendingJob] -> InstanceM env st ()
 applyResolutions [] = pure ()
 applyResolutions rs = do
@@ -390,9 +396,8 @@ applyResolutions rs = do
                       ( CompleteReq (Ok ()) (startHandle existing) : completions
                       , sequenceMaps'
                         { childWorkflows = HashMap.adjust 
-                            (\(SomeChildWorkflowHandle cw) -> SomeChildWorkflowHandle $ cw 
-                              { firstExecutionRunId = firstExecutionRunId cw <|> Just (succeeded ^. Activation.runId . to RunId)
-                              }) (msg ^. Activation.seq . to Sequence) 
+                            (\(SomeChildWorkflowHandle cw) -> SomeChildWorkflowHandle $ setFirstExecutionRunId cw (succeeded ^. Activation.runId . to RunId)) 
+                            (msg ^. Activation.seq . to Sequence) 
                             sequenceMaps'.childWorkflows
                         }
                       )

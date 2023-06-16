@@ -21,14 +21,19 @@
         overlays = [
           haskellNix.overlay
           (final: prev: {
-            hs_temporal_bridge = final.rustPlatform.buildRustPackage {
-              name = "hs_temporal_bridge";
+            temporal_bridge = final.rustPlatform.buildRustPackage {
+              name = "temporal_bridge";
               src = ./core/rust;
               PROTOC = "${pkgs.protobuf}/bin/protoc";
               PROTOC_INCLUDE = "${pkgs.protobuf}/include";
 
-              buildInputs = [
-                pkgs.protobuf
+              buildInputs = with pkgs; [
+                protobuf
+                darwin.apple_sdk.frameworks.Security 
+                darwin.apple_sdk.frameworks.CoreFoundation 
+                pkgconfig 
+                openssl 
+                protobuf
               ];
               cargoLock = {
                 lockFile = ./core/rust/Cargo.lock;
@@ -78,7 +83,7 @@
       in
       flake // rec {
         packages = {
-          inherit (pkgs) hs_temporal_bridge;
+          inherit (pkgs) temporal_bridge;
           hs_temporal_sdk = flake.packages."temporal-sdk:exe:hello";
         };
 

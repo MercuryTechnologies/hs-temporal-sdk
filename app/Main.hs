@@ -18,6 +18,7 @@ import qualified Data.UUID as UUID
 import Lens.Family2
 import Temporal.Core.Client
 import Temporal.Client.WorkflowService
+import Temporal.EphemeralServer
 import Temporal.Runtime
 import Temporal.Core.Worker (defaultWorkerConfig)
 import Temporal.Payload (JSON(..))
@@ -96,6 +97,8 @@ chronicWorkflow = do
 main :: IO ()
 main = do
   hSetBuffering stdout NoBuffering
+  _ephemeral <- startDevServer (defaultTemporalDevServerConfig { exe = ExistingPath "/opt/homebrew/bin/temporal" })
+
 
   putStrLn "Initializing Temporal runtime"
   rt <- initializeRuntime

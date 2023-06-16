@@ -59,6 +59,7 @@ pub struct Capability {
   pub cap_num: c_int
 }
 
+#[link(name ="HSrts", kind="dylib")]
 extern "C" {
   pub fn hs_try_putmvar(capability: Capability, mvar: *mut MVar);
 }

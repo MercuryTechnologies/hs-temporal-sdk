@@ -6,6 +6,7 @@ import Control.Concurrent.Async (Async)
 import Control.Concurrent.STM.TMVar (TMVar)
 import Control.Exception (SomeException)
 import qualified Control.Monad.Catch as Catch
+import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Control.Monad.State
@@ -207,7 +208,13 @@ Signals are delivered in the order they are received by the Cluster.
 If multiple deliveries of a Signal would be a problem for your Workflow, add idempotency logic to your Signal handler 
 that checks for duplicates.
 -}
-data WorkflowSignalDefinition env st = WorkflowSignalDefinition
+data WorkflowSignalDefinition env st = 
+  forall codec f. (IsValidWorkflowFunction codec env st f, ResultOf (Workflow env st) f ~ ()) => 
+  WorkflowSignalDefinition
+    Text -- name
+    codec
+    f
+    (f -> Vector RawPayload -> IO (Either String (Workflow env st ())))
   -- { workflowSignalName :: Text
   -- , workflowSignalHandler :: [Payload] -> IO ()
   -- }
@@ -228,7 +235,12 @@ This means, for example, that Query handling logic cannot schedule Activity Exec
 
 Sending Queries to completed Workflow Executions is supported, though Query reject conditions can be configured per Query
 -}
-data WorkflowQueryDefinition env st = WorkflowQueryDefinition
+data WorkflowQueryDefinition env st = 
+  forall codec f. WorkflowQueryDefinition
+    Text -- name
+    codec
+    f
+    (f -> Vector RawPayload -> IO (Either String (Workflow env st (ResultOf (Workflow env st) f))))
 
 data WorkflowDefinition env st = WorkflowDefinition
   { workflowName :: Text

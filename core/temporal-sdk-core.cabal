@@ -32,6 +32,7 @@ library
     exposed-modules: 
       Temporal.Client.WorkflowService,
       Temporal.Core.Client,
+      Temporal.Core.EphemeralServer,
       Temporal.Core.Worker,
       Temporal.Runtime,
       Temporal.Internal.JobPool
@@ -40,7 +41,7 @@ library
 
     -- other-modules:
     -- other-extensions:
-    extra-libraries: hs_temporal_bridge
+    extra-bundled-libraries: temporal_bridge
     build-depends:
       base >= 4.14 && < 5, 
       proto-lens, 

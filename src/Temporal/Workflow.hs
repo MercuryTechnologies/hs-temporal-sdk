@@ -69,7 +69,7 @@ module Temporal.Workflow
   , WorkflowGenM(..)
   , StartActivityArgs
   ) where
-
+import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Control.Monad.IO.Class
@@ -528,3 +528,11 @@ sleep ts = do
     addCommand inst cmd
     pure res
   getIVar res
+
+-- TODO, would be nice to ensure that the arg types are the same as the workflow args.
+-- continueAsNew 
+--   :: KnownWorkflow name args result 
+--   -> ContinueAsNewOptions 
+--   -> Workflow env st ()
+-- continueAsNew k@(KnownWorkflow codec mNamespace mTaskQueue) opts = do
+  
