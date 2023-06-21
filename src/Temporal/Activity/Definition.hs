@@ -8,12 +8,13 @@ import Data.Vector (Vector)
 import Data.Word (Word32)
 import Temporal.Common
 import Temporal.Payload
+import Temporal.Core.Worker (Worker)
 import System.Clock (TimeSpec(..))
 import UnliftIO
 
 -- | An activity is a unit of work that is executed by a worker. It is a specialized function call
 -- that can be executed one or more times, and can be cancelled while it is running.
-newtype Activity env a = Activity { unActivity :: ReaderT (ActivityInfo, env) IO a }
+newtype Activity env a = Activity { unActivity :: ReaderT (Worker, ActivityInfo, env) IO a }
   deriving (Functor, Applicative, Monad, MonadIO, MonadUnliftIO)
 
 data ActivityInfo = ActivityInfo
@@ -39,6 +40,16 @@ data ActivityInfo = ActivityInfo
   , isLocal :: Bool
   , taskToken :: TaskToken
   }
+
+askActivityInfo :: Activity env ActivityInfo
+askActivityInfo = Activity $ asks (\(_, info, _) -> info)
+
+askActivityWorker :: Activity env Worker
+askActivityWorker = Activity $ asks (\(worker, _, _) -> worker)
+
+instance MonadReader env (Activity env) where
+  ask = Activity $ asks (\(_, _, x) -> x)
+  local f (Activity m) = Activity $ local (\(w, info, x) -> (w, info, f x)) m
 
 newtype TaskToken = TaskToken { rawTaskToken :: ByteString }
   deriving (Eq, Show, Ord, Hashable)

@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["staticlib"]
 
 [dependencies]
 temporal-client = { git = "https://github.com/temporalio/sdk-core", branch = "master" }
@@ -32,4 +32,4 @@ futures = "0.3"
 opt-level = 3
 debug = false
 lto = true
-incremental = false
+incremental = true

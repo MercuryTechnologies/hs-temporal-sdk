@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+cd core/rust
+cargo build --release

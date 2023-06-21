@@ -63,169 +63,25 @@ import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands
 -- point we use Sequence values in the variants of the different workflow
 -- activation jobs to fill any corresponding handles with their
 -- results and continue execution.
---
--- We follow this process indefinitely until the final result is returned
--- via adding it as a workflow execution command and flushing it.
-runWorkflow :: forall codec env st a. (Codec codec a) => codec -> Workflow env st a -> InstanceM env st ()
-runWorkflow codec wf = do
+runWorkflow :: forall env st a. IVar env st a -> Workflow env st a -> InstanceM env st (ResultVal a)
+runWorkflow result@IVar{ivarRef = resultRef} wf = do
   inst <- ask
-  result@IVar{ivarRef = resultRef} <- newIVar -- where to put the final result
-  let -- Run a workflow to completion, and put its result in the given IVar.
-      schedule :: JobList env st -> Workflow env st b -> IVar env st b -> InstanceM env st ()
-      schedule runQueue (Workflow run) ivar@IVar{ivarRef = !ref} = do
-        let {-# INLINE result #-}
-            result r = do
-              e <- readIORef ref
-              case e of
-                IVarFull _ -> 
-                  -- We already have a result for this value, so we
-                  -- just let execution continue. This case happens if
-                  -- we receive multiple writes to the same result,
-                  -- but that's fine for temporal's semantics.
-                  --
-                  -- This is not actually expected to happen in practice,
-                  -- but not a problem if it does.
-                  reschedule runQueue
-                IVarEmpty pendingJobs -> do
-                  writeIORef ref (IVarFull r)
-                  -- Have we got the final result now?
-                  if ref == unsafeCoerce resultRef
-                          -- comparing IORefs of different types is safe, it's
-                          -- pointer-equality on the MutVar#.
-                  then
-                    -- We have a result, but don't discard unfinished
-                    -- computations in the run queue.
-                    -- Nothing can depend on the final IVar, so wfs must
-                    -- be empty.
-                    case runQueue of
-                      JobNil -> return ()
-                      _ -> do
-                        inst <- ask
-                        modifyIORef' inst.workflowRunQueueRef (appendJobList runQueue)
-                  else 
-                    reschedule (appendJobList pendingJobs runQueue)
-        r <- UnliftIO.try run
-        case r of
-          Left e -> do
-            rethrowAsyncExceptions e
-            result (ThrowInternal e)
-          Right (Done a) -> do
-            result (Ok a)
-          Right (Throw ex) -> do
-            result (ThrowWorkflow ex)
-          Right (Blocked i fn) -> do
-            addJob (toWorkflow fn) ivar i
-            reschedule runQueue
-
-      -- execute as much as we can and only complete an 
-      -- activation when we have no more computation to do.
-      -- This is necessary, because we want all commands
-      -- added to the WorkflowActivationCompletion before sending
-      -- it off.
-      reschedule :: JobList env st -> InstanceM env st ()
-      reschedule workflows = case workflows of
-        JobNil -> do
-          inst <- ask
-          runQueue <- readIORef inst.workflowRunQueueRef
-          case runQueue of
-            JobNil -> 
-              -- If we don't have anything in the run queue, then we
-              -- need to flush commands and wait for completions.
-              emptyRunQueue
-            JobCons workflow resultSlot remainingJobs -> do
-              writeIORef inst.workflowRunQueueRef JobNil
-              schedule remainingJobs workflow resultSlot
-        JobCons workflow resultSlot remainingJobs -> do
-          schedule remainingJobs workflow resultSlot
-
-      emptyRunQueue :: InstanceM env st ()
-      emptyRunQueue = do
-        -- Convert any completions to jobs and reschedule if there is anything useful to process.
-        wfs <- checkCompletions
-        case wfs of
-          -- Otherwise, we have no more meaningful work to do, so we need to flush commands and wait
-          -- for new completions.
-          JobNil -> flushCommands
-          _ -> reschedule wfs
-
-      flushCommands :: InstanceM env st ()
-      flushCommands = do
-        inst <- ask
-        cmds <- atomically $ do
-          currentCmds <- readTVar inst.workflowCommands
-          case currentCmds of
-            FlushActivationCompletion _ -> do
-              -- Already trying to flush, so we don't need to do anything.
-              retry
-            RunningActivation cmds -> do
-              {-
-              case cmds of
-              (Reversed []) -> pure currentCmds
-              _ -> do
-                -}
-                -- Signal the main instance thread that it should complete the activation.
-                let new = FlushActivationCompletion cmds
-                writeTVar inst.workflowCommands new
-                pure new
-        $(logDebug) ("flushCommands: " <> Text.pack (show cmds))
-        -- Wait for the main instance thread to complete the activation, we will just spin
-        -- on the run loop without having anything useful to process.
-        atomically $ do
-          c <- readTVar inst.workflowCompletions
-          when (null c) retry
-        emptyRunQueue
-
-      checkCompletions :: InstanceM env st (JobList env st)
-      checkCompletions = do
-        inst <- ask
-        comps <- atomicallyOnBlocking (LogicBug ReadingCompletionsFailedRun) $ do
-          c <- readTVar inst.workflowCompletions
-          writeTVar inst.workflowCompletions []
-          return c
-        $(logDebug) ("checkCompletions: " <> Text.pack (show $ length comps) <> " completions")
-        case comps of
-          [] -> return JobNil
-          _ -> do
-            let
-                getComplete (CompleteReq a IVar{ivarRef = !cr}) = do
-                  r <- readIORef cr
-                  case r of
-                    IVarFull _ -> do
-                      return JobNil
-                      -- this could happen if Temporal reports a result,
-                      -- and then throws an exception. We call putResult
-                      -- a second time for the exception, which comes
-                      -- ahead of the original request (because it is 
-                      -- pushed on the front of the completions list) and
-                      -- therefore overrides it.
-                    IVarEmpty cv -> do
-                      writeIORef cr (IVarFull a)
-                      return cv
-            jobs <- mapM getComplete comps
-            return (foldr appendJobList JobNil jobs)
-
-      waitCompletions :: InstanceM env st ()
-      waitCompletions = do
-        inst <- ask
-        let
-          wrapped = atomicallyOnBlocking (LogicBug ReadingCompletionsFailedRun)
-          doWait = wrapped $ do
-            c <- readTVar inst.workflowCompletions
-            when (null c) retry
-        doWait
-        emptyRunQueue
-
-  schedule JobNil wf result
+  schedule result JobNil wf result
   r <- readIORef resultRef
-  cmd <- case r of
+  case r of
     IVarEmpty _ -> error "runWorkflow: missing result"
-    IVarFull (Ok a) -> do
-      res <- liftIO $ Temporal.Payload.encode codec a
-      let completeMessage = defMessage & Command.completeWorkflowExecution .~ (defMessage & Command.result .~ convertToProtoPayload res)
-      pure completeMessage
+    IVarFull result -> pure result
+
+finishWorkflow :: (Codec codec a) => IVar env st a -> codec -> ResultVal a -> InstanceM env st ()
+finishWorkflow resVar codec result = do
+  cmd <- case result of
+    Ok a -> do
+        res <- liftIO $ Temporal.Payload.encode codec a
+        let completeMessage = defMessage & Command.completeWorkflowExecution .~ (defMessage & Command.result .~ convertToProtoPayload res)
+        pure completeMessage
     -- If a user-facing exception wasn't handled within the workflow, then that
     -- means the workflow failed.
-    IVarFull (ThrowWorkflow e) -> do
+    ThrowWorkflow e -> do
       -- eAttrs <- liftIO $ encodeException inst.workflowCodec (e :: SomeException)
       let completeMessage = defMessage & Command.failWorkflowExecution .~ 
             ( defMessage 
@@ -238,10 +94,10 @@ runWorkflow codec wf = do
             )
       pure completeMessage
     -- Crash the worker if we get an internal exception.
-    IVarFull (ThrowInternal e) -> throwIO e
+    ThrowInternal e -> throwIO e
+  inst <- ask
   addCommand inst cmd
-  flushCommands
-  
+  flushCommands resVar
 
 atomicallyOnBlocking :: MonadUnliftIO m => Exception e => e -> STM a -> m a
 atomicallyOnBlocking e stm = UnliftIO.catch 
@@ -266,3 +122,149 @@ addCommand inst command = do
     modifyTVar' inst.workflowCommands $ \case
       RunningActivation cmds -> RunningActivation $ push command cmds
       FlushActivationCompletion cmds -> FlushActivationCompletion $ push command cmds
+
+flushCommands :: IVar env st a -> InstanceM env st ()
+flushCommands result = do
+  inst <- ask
+  cmds <- atomically $ do
+    currentCmds <- readTVar inst.workflowCommands
+    case currentCmds of
+      FlushActivationCompletion _ -> do
+        -- Already trying to flush, so we don't need to do anything.
+        retry
+      RunningActivation cmds -> do
+        {-
+        case cmds of
+        (Reversed []) -> pure currentCmds
+        _ -> do
+          -}
+          -- Signal the main instance thread that it should complete the activation.
+          let new = FlushActivationCompletion cmds
+          writeTVar inst.workflowCommands new
+          pure new
+  $(logDebug) ("flushCommands: " <> Text.pack (show cmds))
+  -- Wait for the main instance thread to complete the activation, we will just spin
+  -- on the run loop without having anything useful to process.
+  atomically $ do
+    c <- readTVar inst.workflowCompletions
+    when (null c) retry
+  emptyRunQueue result
+
+
+emptyRunQueue :: IVar env st a -> InstanceM env st ()
+emptyRunQueue result = do
+  -- Convert any completions to jobs and reschedule if there is anything useful to process.
+  wfs <- checkCompletions
+  case wfs of
+    -- Otherwise, we have no more meaningful work to do, so we need to flush commands and wait
+    -- for new completions.
+    JobNil -> flushCommands result
+    _ -> reschedule result wfs
+
+checkCompletions :: InstanceM env st (JobList env st)
+checkCompletions = do
+  inst <- ask
+  comps <- atomicallyOnBlocking (LogicBug ReadingCompletionsFailedRun) $ do
+    c <- readTVar inst.workflowCompletions
+    writeTVar inst.workflowCompletions []
+    return c
+  $(logDebug) ("checkCompletions: " <> Text.pack (show $ length comps) <> " completions")
+  case comps of
+    [] -> return JobNil
+    _ -> do
+      let
+          getComplete (CompleteReq a IVar{ivarRef = !cr}) = do
+            r <- readIORef cr
+            case r of
+              IVarFull _ -> do
+                return JobNil
+                -- this could happen if Temporal reports a result,
+                -- and then throws an exception. We call putResult
+                -- a second time for the exception, which comes
+                -- ahead of the original request (because it is 
+                -- pushed on the front of the completions list) and
+                -- therefore overrides it.
+              IVarEmpty cv -> do
+                writeIORef cr (IVarFull a)
+                return cv
+      jobs <- mapM getComplete comps
+      return (foldr appendJobList JobNil jobs)
+
+-- execute as much as we can and only complete an 
+-- activation when we have no more computation to do.
+-- This is necessary, because we want all commands
+-- added to the WorkflowActivationCompletion before sending
+-- it off.
+reschedule :: IVar env st a -> JobList env st -> InstanceM env st ()
+reschedule result workflows = case workflows of
+  JobNil -> do
+    inst <- ask
+    runQueue <- readIORef inst.workflowRunQueueRef
+    case runQueue of
+      JobNil -> 
+        -- If we don't have anything in the run queue, then we
+        -- need to flush commands and wait for completions.
+        emptyRunQueue result
+      JobCons workflow resultSlot remainingJobs -> do
+        writeIORef inst.workflowRunQueueRef JobNil
+        schedule result remainingJobs workflow resultSlot
+  JobCons workflow resultSlot remainingJobs -> do
+    schedule result remainingJobs workflow resultSlot
+
+-- Run a workflow to completion, and put its result in the given IVar.
+schedule :: IVar env st a -> JobList env st -> Workflow env st b -> IVar env st b -> InstanceM env st ()
+schedule finalResult@IVar{ivarRef = !resultRef} runQueue (Workflow run) ivar@IVar{ivarRef = !ref} = do
+  let {-# INLINE result #-}
+      result r = do
+        e <- readIORef ref
+        case e of
+          IVarFull _ -> 
+            -- We already have a result for this value, so we
+            -- just let execution continue. This case happens if
+            -- we receive multiple writes to the same result,
+            -- but that's fine for temporal's semantics.
+            --
+            -- This is not actually expected to happen in practice,
+            -- but not a problem if it does.
+            reschedule finalResult runQueue
+          IVarEmpty pendingJobs -> do
+            writeIORef ref (IVarFull r)
+            -- Have we got the final result now?
+            if ref == unsafeCoerce resultRef
+                    -- comparing IORefs of different types is safe, it's
+                    -- pointer-equality on the MutVar#.
+            then
+              -- We have a result, but don't discard unfinished
+              -- computations in the run queue.
+              -- Nothing can depend on the final IVar, so wfs must
+              -- be empty.
+              case runQueue of
+                JobNil -> return ()
+                _ -> do
+                  inst <- ask
+                  modifyIORef' inst.workflowRunQueueRef (appendJobList runQueue)
+            else 
+              reschedule finalResult (appendJobList pendingJobs runQueue)
+  r <- UnliftIO.try run
+  case r of
+    Left e -> do
+      rethrowAsyncExceptions e
+      result (ThrowInternal e)
+    Right (Done a) -> do
+      result (Ok a)
+    Right (Throw ex) -> do
+      result (ThrowWorkflow ex)
+    Right (Blocked i fn) -> do
+      addJob (toWorkflow fn) ivar i
+      reschedule finalResult runQueue
+
+waitCompletions :: IVar env st a -> InstanceM env st ()
+waitCompletions result = do
+  inst <- ask
+  let
+    wrapped = atomicallyOnBlocking (LogicBug ReadingCompletionsFailedRun)
+    doWait = wrapped $ do
+      c <- readTVar inst.workflowCompletions
+      when (null c) retry
+  doWait
+  emptyRunQueue result

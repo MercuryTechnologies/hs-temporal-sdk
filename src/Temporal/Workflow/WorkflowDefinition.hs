@@ -44,6 +44,8 @@ import Temporal.Payload
 import Temporal.Workflow.WorkflowInstance
 import Temporal.Worker.Types
 
+-- | A 'KnownWorkflow' is a handle that contains all the information needed to start a 
+-- Workflow either as a child workflow or as a top-level workflow via a 'Client'.
 data KnownWorkflow (name :: Symbol) (args :: [Type]) (result :: Type) = forall codec. 
   ( Codec codec result
   , AllArgsSupportCodec codec args
@@ -87,6 +89,19 @@ type family StartChildWorkflow env st baseResult (args :: [*]) = r | r -> env st
   StartChildWorkflow env st baseResult '[] = Workflow env st (ChildWorkflowHandle env st baseResult)
   StartChildWorkflow env st baseResult (a ': as) = a -> StartChildWorkflow env st baseResult as 
 
+-- | A utility function for constructing a 'WorkflowDefinition' from a function as well as
+-- a 'KnownWorkflow' value. This is useful for keeping the argument, codec, and result types
+-- in sync with each other so that changes to the function are reflected at their use sites.
+--
+-- > myWorkflow :: Workflow () () Int
+-- > myWorkflow = pure 1
+-- >
+-- > myWorkflowDef :: (WorkflowDefinition () (), KnownWorkflow "myWorkflow" () Int)
+-- > myWorkflowDef = provideWorkflow 
+-- >   JSON -- codec
+-- >   (Proxy @"myWorkflow") -- visible name of the workflow
+-- >   () -- initial state
+-- >   myWorkflow -- the workflow function
 provideWorkflow ::
   ( IsValidWorkflowFunction codec env st f
   , AllArgsSupportCodec codec (ArgsOf f)
@@ -97,8 +112,6 @@ provideWorkflow codec name st f =
   ( WorkflowDefinition
     { workflowName = Text.pack $ symbolVal name
     , workflowInitialState = st
-    , workflowSignals = HashMap.empty
-    , workflowQueries = HashMap.empty
     , workflowRun = ValidWorkflowFunction codec f (applyPayloads codec)
     }
   , KnownWorkflow

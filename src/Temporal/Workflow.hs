@@ -1,3 +1,26 @@
+{-| Workflows
+
+This module provides the core functionality for defining functions that can be
+executed as Temporal workflows.
+
+> import Temporal.Workflow
+
+Workflow code must be deterministic. This means:
+
+- no threading
+- no randomness
+- no external calls to processes
+- no network I/O
+- no global state mutation
+- no system date or time
+
+This might seem like a lot of restrictions, but Temporal provides a number of
+functions that allow you to use similar functionality in a deterministic way.
+
+A critical aspect of developing Workflow Definitions is ensuring they exhibit certain deterministic traits –
+that is, making sure that the same Commands are emitted in the same sequence,
+whenever a corresponding Workflow Function Execution (instance of the Function Definition) is re-executed.
+-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DuplicateRecordFields #-}
@@ -12,7 +35,8 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Temporal.Workflow 
-  ( provideWorkflow
+  ( WorkflowDefinition
+  , provideWorkflow
   , Workflow
   , WorkflowId(..)
   , Namespace(..)
@@ -25,6 +49,11 @@ module Temporal.Workflow
   , WorkflowType(..)
   , Task
   , TimeoutType(..)
+  -- * Workflow monad operations
+  -- $workflowBasics
+
+  -- ** Activity operations
+  -- $activityBasics
   , KnownActivity(..)
   , knownActivityName
   , StartActivityOptions(..)
@@ -34,6 +63,8 @@ module Temporal.Workflow
   , StartLocalActivityOptions(..)
   , startLocalActivity
   , KnownWorkflow(..)
+  -- ** Child workflow operations
+  -- $childWorkflow
   , StartChildWorkflowArgs(..)
   , StartChildWorkflowOptions(..)
   , defaultChildWorkflowOptions
@@ -51,21 +82,27 @@ module Temporal.Workflow
   , info
   -- , memo
   -- , memoValue
+  -- * Versioning workflows
+  -- $versioning
   , patched
   , deprecatePatch
   -- , query
   -- , setDynamicQueryHandler
   -- , setDynamicSignalHandler
-  -- , setQueryHandler
-  -- , setSignalHandler
+  , QueryDefinition(..)
+  , setQueryHandler
+  , SignalDefinition(..)
+  , setSignalHandler
+  , upsertSearchAttributes
   -- , signal
+  -- * Time and timers
   , now
   , time
   , sleep
-  -- , upsertSearchAttributes
+  -- * Random value generation
+  -- $randomness
   , randomGen
   , uuid4
-  -- , waitCondition
   , WorkflowGenM(..)
   , StartActivityArgs
   ) where
@@ -73,6 +110,8 @@ import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Control.Monad.IO.Class
+import qualified Data.Aeson
+import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Short as SBS
 import Data.Functor.Compose
 import Data.Map.Strict (Map)
@@ -110,6 +149,7 @@ import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult as Activi
 import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields as ActivityResult
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow as ChildWorkflow
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow_Fields as ChildWorkflow
+import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import UnliftIO
 
 
@@ -197,6 +237,23 @@ instance (Codec codec a, StartActivityArgs codec as baseResult) => StartActivity
 
 gatherStartActivityArgs :: forall env st args baseResult codec. StartActivityArgs codec args baseResult => codec -> ([IO RawPayload] -> Workflow env st (Task env st baseResult)) -> StartActivity env st baseResult args 
 gatherStartActivityArgs c f = applyArgs_ (Proxy @args) (Proxy @env) (Proxy @st) c id f
+
+{- $activityBasics
+
+An Activity is an IO-based function that executes a single, well-defined action (either short or long running),
+such as calling another service, transcoding a media file, or sending an email message. 
+Activity code can be non-deterministic. 
+
+We recommend that it be idempotent.
+
+Workflow code orchestrates the execution of Activities, persisting the results. 
+If an Activity Function Execution fails, any future execution starts from initial state (except Heartbeats).
+
+Activity Functions are executed by Worker Processes. When the Activity Function returns,
+the Worker sends the results back to the Temporal Cluster as part of the ActivityTaskCompleted Event. 
+The Event is added to the Workflow Execution's Event History. 
+-}
+
 
 data KnownActivity (name :: Symbol) (args :: [Type]) (result :: Type) 
   = forall codec. (Codec codec result, AllArgsSupportCodec codec args, StartActivityArgs codec args result) => KnownActivity
@@ -288,8 +345,17 @@ defaultChildWorkflowOptions = StartChildWorkflowOptions
   , workflowIdReusePolicy = WorkflowIdReusePolicyUnspecified
   }
 
--- TODO signalChildWorkflow support
--- signalChildWorkflow :: ChildWorkflowHandler env st result -> _ -> Workflow env st ()
+signalChildWorkflow 
+  :: ChildWorkflowHandle env st result 
+  -> QueryDefinition codec args result
+  -> Workflow env st ()
+signalChildWorkflow = undefined
+
+-- $childWorkflow
+--
+-- A Child Workflow Execution is a Workflow Execution that is spawned from within another Workflow.
+--
+-- By default, a child is scheduled on the same Task Queue as the parent.
 
 startChildWorkflow 
   :: (KnownSymbol name)
@@ -380,14 +446,6 @@ startLocalActivity
   -> Workflow env st ()
 startLocalActivity = undefined
 
--- {-
--- Function	get_dynamic_query_handler	Get the dynamic query handler if any.
--- Function	get_dynamic_signal_handler	Get the dynamic signal handler if any.
--- Function	get_external_workflow_handle	Get a workflow handle to an existing workflow by its ID.
--- Function	get_external_workflow_handle_for	Get a typed workflow handle to an existing workflow by its ID.
--- Function	get_query_handler	Get the query handler for the given name if any.
--- Function	get_signal_handler	Get the signal handler for the given name if any.
--- -}
 
 info :: Workflow env st Info
 info = workflowInstanceInfo <$> askInstance
@@ -407,6 +465,15 @@ now = Workflow $ do
   TimeSpec{..} <- readIORef wft
   pure $! Done $! systemToUTCTime $ MkSystemTime sec (fromIntegral nsec)
 
+-- $versioning
+--
+-- Versioning (known as "patching" in the Haskell library) lets you update Workflow Definitions 
+-- without causing non-deterministic behavior in current long-running Workflows.
+--
+-- You may need to patch if:
+--
+-- - You want to change the remaining logic of a Workflow while it is still running
+-- - If your new logic can result in a different execution path
 applyPatch :: PatchId -> Bool {- ^ whether the patch is deprecated -} -> Workflow env st Bool 
 applyPatch pid deprecated = Workflow $ fmap Done $ do
   inst <- ask
@@ -429,8 +496,13 @@ patched pid = applyPatch pid False
 deprecatePatch :: PatchId -> Workflow env st ()
 deprecatePatch pid = void $ applyPatch pid True
 
--- query :: () -> Workflow env ()
--- query = undefined
+type family QueryWorkflow env st baseResult (args :: [*]) = r | r -> env st baseResult args where
+  QueryWorkflow env st baseResult '[] = Workflow env st (ChildWorkflowHandle env st baseResult)
+  QueryWorkflow env st baseResult (a ': as) = a -> StartChildWorkflow env st baseResult as 
+
+-- TODO move the codec value into the QueryDefinition?
+query :: QueryDefinition codec args result -> QueryWorkflow env st result args
+query = undefined
 
 -- | Get a mutable randomness generator for the workflow.
 randomGen :: Workflow env st WorkflowGenM
@@ -442,14 +514,104 @@ randomGen = workflowRandomnessSeed <$> askInstance
 -- setDynamicSignalHandler :: () -> Workflow env ()
 -- setDynamicSignalHandler = undefined
 
--- setQueryHandler :: () -> Workflow env ()
--- setQueryHandler = undefined
+newtype Query env st a = Query (Reader (env, st) a)
 
--- setSignalHandler :: () -> Workflow env ()
--- setSignalHandler = undefined
 
--- signal :: () -> Workflow env ()
--- signal = undefined
+setQueryHandler :: forall codec env st f result.
+  ( AllArgsSupportCodec codec (ArgsOf f)
+  , ResultOf (Query env st) f ~ result
+  , ApplyPayloads codec f (Query env st result)
+  , Codec codec result
+  ) => codec -> QueryDefinition codec (ArgsOf f) result -> f -> Workflow env st ()
+setQueryHandler codec (QueryDefinition n) f = ilift $ do
+  inst <- ask
+  withRunInIO $ \runInIO -> do
+    liftIO $ modifyIORef' inst.workflowQueryHandlers $ \handles ->
+      HashMap.insert (Just n) (\qId vec -> runInIO $ handle qId vec) handles
+  where
+    handle :: QueryId -> Vector RawPayload -> InstanceM env st ()
+    handle (QueryId qId) vec = do
+      eHandler <- liftIO $ applyPayloads codec f vec
+      case eHandler of
+        Left err -> throwIO $ ValueError err
+        Right (Query r) -> do
+          inst <- ask
+          st <- readIORef inst.workflowState
+          eResult <- liftIO $ UnliftIO.try $ encode codec $ runReader r (inst.workflowEnv, st)
+          let cmd = defMessage
+                & Command.respondToQuery .~
+                  ( defMessage
+                    & Command.queryId .~ qId
+                    & case eResult of
+                      Left (SomeException err) ->
+                        Command.failed .~ 
+                          ( defMessage
+                            & F.message .~ Text.pack (show err)
+                            -- TODO, protobuf docs aren't clear on what this should be
+                            & F.source .~ "haskell"
+                            -- TODO, annotated exceptions might be needed for this
+                            & F.stackTrace .~ ""
+                            -- TODO encoded attributes
+                            -- & F.encodedAttributes .~ _
+                            -- & F.cause .~ _
+                            -- & F.activityFailureInfo .~
+                            -- ( defMessage
+                            --   -- & F.scheduledEventId .~ _
+                            --   -- & F.startedEventId .~ _
+                            --   -- TODO, not clear on what this should be
+                            --   -- & F.identity .~ _
+                            --   & F.activityType .~ (defMessage & P.name .~ info.activityType)
+                            --   & F.activityId .~ (msg ^. AT.activityId)
+                            --   -- & F.retryState .~ _
+                            -- )
+                          )
+                      Right result -> do
+                        Command.succeeded .~ (defMessage & Command.response .~ convertToProtoPayload result)
+                  )
+          addCommand inst cmd
+          
+  
+
+setSignalHandler :: forall codec env st f.
+  ( AllArgsSupportCodec codec (ArgsOf f)
+  , ApplyPayloads codec f (Workflow env st ())
+  , ResultOf (Workflow env st) f ~ ()
+  ) => codec -> SignalDefinition codec (ArgsOf f) -> f -> Workflow env st ()
+setSignalHandler codec (SignalDefinition n) f = ilift $ do
+  inst <- ask
+  withRunInIO $ \runInIO -> do
+    liftIO $ modifyIORef' inst.workflowSignalHandlers $ \handlers -> 
+      HashMap.insert (Just n) (runInIO . handle) handlers
+  where
+    handle :: Vector RawPayload -> InstanceM env st ()
+    handle = \vec -> do
+      eWorkflow <- liftIO $ applyPayloads codec f vec
+      case eWorkflow of
+        Left err -> throwIO $ ValueError err
+        Right w -> do
+          result <- newIVar
+          resultVal <- runWorkflow result w
+          cmd <- case resultVal of
+            Ok () -> pure Nothing
+            -- If a user-facing exception wasn't handled within the workflow, then that
+            -- means the workflow failed.
+            ThrowWorkflow e -> do
+              -- eAttrs <- liftIO $ encodeException inst.workflowCodec (e :: SomeException)
+              let completeMessage = defMessage & Command.failWorkflowExecution .~ 
+                    ( defMessage 
+                      & Command.failure .~ 
+                        ( defMessage
+                          & F.message .~ Text.pack (show e)
+                          & F.stackTrace .~ ""
+                          -- & F.encodedAttributes .~ convertToProtoPayload eAttrs
+                        )
+                    )
+              pure $ Just completeMessage
+            -- Crash the worker if we get an internal exception.
+            ThrowInternal e -> throwIO e
+          inst <- ask
+          forM_ cmd (addCommand inst)
+          flushCommands result
 
 -- | Current time from the workflow perspective.
 --
@@ -459,9 +621,25 @@ time = Workflow $ do
   wft <- workflowTime <$> ask
   Done <$> readIORef wft
 
--- upsertSearchAttributes :: () -> Workflow env ()
--- upsertSearchAttributes = undefined
+-- | Updates this Workflow's Search Attributes by merging the provided searchAttributes with the existing Search Attributes
+--
+-- Using this function will overwrite any existing Search Attributes with the same key.
+upsertSearchAttributes :: Map Text Data.Aeson.Value -> Workflow env st ()
+upsertSearchAttributes values = ilift $ do
+  inst <- ask
+  addCommand inst cmd
+  where
+    cmd = defMessage & Command.upsertWorkflowSearchAttributes .~ 
+      ( defMessage
+        & Command.searchAttributes .~ mapValues
+      )
+    mapValues = fmap (convertToProtoPayload . (\x -> RawPayload x mempty) . L.toStrict . Data.Aeson.encode) values
 
+-- | Generate an RFC compliant V4 uuid. 
+--
+-- Uses the workflow's deterministic PRNG, making it safe for use within a workflow.
+--
+-- This function is cryptographically insecure.
 uuid4 :: Workflow env st UUID
 uuid4 = do
   wft <- workflowRandomnessSeed <$> askInstance
@@ -487,14 +665,13 @@ uuid4 = do
 -- waitCondition :: () -> Workflow env ()
 -- waitCondition = undefined
 
-{-
+{- TODO Inquire about these:
+
 Side Effects are used to execute non-deterministic code, such as generating a UUID or a random number, without compromising deterministic in the Workflow. This is done by storing the non-deterministic results of the Side Effect into the Workflow Event History.
 
--}
 sideEffect :: IO a -> Workflow env st a
 sideEffect = undefined
 
-{- |
 Mutable Side Effects execute the provided function once, and then it looks up the History of the value with the given Workflow ID.
 
 If there is no existing value, then it records the function result as a value with the given Workflow Id on the History.
@@ -505,9 +682,9 @@ If the values are equal, then it returns the value without recording a new Marke
 
 If the values aren't equal, then it records the new value with the same ID on the History.
 
--}
 mutableSideEffect :: IO a -> Workflow env st a
 mutableSideEffect = undefined
+-}
 
 -- TODO, timer suopport?
 
@@ -535,4 +712,6 @@ sleep ts = do
 --   -> ContinueAsNewOptions 
 --   -> Workflow env st ()
 -- continueAsNew k@(KnownWorkflow codec mNamespace mTaskQueue) opts = do
-  
+
+getExternalWorkflowHandle :: WorkflowId -> Maybe RunId -> Workflow env st (ChildWorkflowHandle env st result)
+getExternalWorkflowHandle = undefined

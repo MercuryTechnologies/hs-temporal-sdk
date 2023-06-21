@@ -97,11 +97,10 @@ chronicWorkflow = do
 main :: IO ()
 main = do
   hSetBuffering stdout NoBuffering
-  _ephemeral <- startDevServer (defaultTemporalDevServerConfig { exe = ExistingPath "/opt/homebrew/bin/temporal" })
-
-
-  putStrLn "Initializing Temporal runtime"
   rt <- initializeRuntime
+  -- _ephemeral <- startDevServer rt (defaultTemporalDevServerConfig { exe = ExistingPath "/opt/homebrew/bin/temporal" })
+  
+  putStrLn "Initializing Temporal runtime"
   putStrLn "Connecting..."
   c <- connectClient rt defaultClientConfig
   cmd <- getArgs

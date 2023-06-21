@@ -102,7 +102,7 @@ applyActivityTaskStart tt msg = do
             Left err -> throwIO $ RuntimeError ("Failed to apply payloads: " <> err)
             Right f' -> do
               res <- UnliftIO.try $ liftIO $ do
-                runReaderT (unActivity f') (info, env)
+                runReaderT (unActivity f') (w.workerCore, info, env)
               completionResult <- liftIO $ Core.completeActivityTask w.workerCore $ case res of
                 Right ok -> defMessage
                   & C.taskToken .~ rawTaskToken tt

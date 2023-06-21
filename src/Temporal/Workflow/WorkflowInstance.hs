@@ -136,18 +136,37 @@ lengthJobList :: JobList env st -> Int
 lengthJobList JobNil = 0
 lengthJobList (JobCons _ _ j) = 1 + lengthJobList j
 
-data ActivityCancellationType = ActivityCancellationTryCancel | ActivityCancellationWaitCancellationCompleted | ActivityCancellationAbandon
+-- TODO default to WaitCancellationCompleted per protobuf docs
+{- |
+Defines how the workflow will wait (or not) for cancellation of the 
+activity to be confirmed.
+-}
+data ActivityCancellationType 
+  = ActivityCancellationTryCancel 
+  -- ^ Initiate a cancellation request and immediately report cancellation to the workflow.
+  | ActivityCancellationWaitCancellationCompleted 
+  -- ^ Wait for activity cancellation completion. Note that activity must heartbeat to receive a
+  -- cancellation notification. This can block the cancellation for a long time if activity
+  -- doesn't heartbeat or chooses to ignore the cancellation request.
+  | ActivityCancellationAbandon
+  -- ^ Do not request cancellation of the activity and immediately report cancellation to the
+  -- workflow
 
 activityCancellationTypeToProto :: ActivityCancellationType -> Command.ActivityCancellationType
 activityCancellationTypeToProto ActivityCancellationTryCancel = Command.TRY_CANCEL
 activityCancellationTypeToProto ActivityCancellationWaitCancellationCompleted = Command.WAIT_CANCELLATION_COMPLETED
 activityCancellationTypeToProto ActivityCancellationAbandon = Command.ABANDON
 
+-- | Controls at which point to report back when a child workflow is cancelled.
 data ChildWorkflowCancellationType 
   = ChildWorkflowCancellationAbandon 
+  -- ^  Do not request cancellation of the child workflow if already scheduled
   | ChildWorkflowCancellationTryCancel 
+  -- ^ Initiate a cancellation request and immediately report cancellation to the parent workflow
   | ChildWorkflowCancellationWaitCancellationCompleted 
+  -- ^ Wait for child cancellation completion.
   | ChildWorkflowCancellationWaitCancellationRequested
+  -- ^ Request cancellation of the child and wait for confirmation that the request was received.
 
 childWorkflowCancellationTypeToProto :: ChildWorkflowCancellationType -> ChildWorkflow.ChildWorkflowCancellationType
 childWorkflowCancellationTypeToProto ChildWorkflowCancellationAbandon = ChildWorkflow.ABANDON
@@ -155,11 +174,17 @@ childWorkflowCancellationTypeToProto ChildWorkflowCancellationTryCancel = ChildW
 childWorkflowCancellationTypeToProto ChildWorkflowCancellationWaitCancellationCompleted = ChildWorkflow.WAIT_CANCELLATION_COMPLETED
 childWorkflowCancellationTypeToProto ChildWorkflowCancellationWaitCancellationRequested = ChildWorkflow.WAIT_CANCELLATION_REQUESTED
 
+-- | Used by the service to determine the fate of a child workflow
+-- in case its parent is closed.
 data ParentClosePolicy 
   = ParentClosePolicyUnspecified 
+  -- ^ Lets the server set the default.
   | ParentClosePolicyTerminate 
+  -- ^ Terminate the child workflow.
   | ParentClosePolicyAbandon 
+  -- ^ Do not terminate the child workflow. The child workflow continues to run.
   | ParentClosePolicyRequestCancel
+  -- ^ Request cancellation on the child workflow.
 
 parentClosePolicyToProto :: ParentClosePolicy -> ChildWorkflow.ParentClosePolicy
 parentClosePolicyToProto ParentClosePolicyUnspecified = ChildWorkflow.PARENT_CLOSE_POLICY_UNSPECIFIED

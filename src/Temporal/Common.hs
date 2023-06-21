@@ -27,24 +27,38 @@ import qualified System.Clock as Clock
 -- | This is generally the name of the function itself
 newtype WorkflowType = WorkflowType { rawWorkflowType :: Text }
   deriving (Eq, Ord, Show, Hashable, IsString)
+
+-- | A Workflow Id is a customizable, application-level identifier for a Workflow Execution that is unique to an Open Workflow Execution within a Namespace.
 newtype WorkflowId = WorkflowId { rawWorkflowId :: Text }
   deriving (Eq, Ord, Show, Hashable, IsString)
+
+-- | A Namespace is a unit of isolation within the Temporal Platform
 newtype Namespace = Namespace { rawNamespace :: Text }
   deriving (Eq, Ord, Show, Hashable)
+
+-- | A Run Id is a globally unique, platform-level identifier for a Workflow Execution.
 newtype RunId = RunId { rawRunId :: Text }
   deriving (Eq, Ord, Show, Hashable)
+
 newtype PatchId = PatchId { rawPatchId :: Text }
   deriving (Eq, Ord, Show, Hashable)
+
+-- | A Task Queue is a first-in, first-out queue that a Worker Process polls for Tasks.
 newtype TaskQueue = TaskQueue { rawTaskQueue :: Text }
   deriving (Eq, Ord, Show, Hashable)
--- | Unique identifier for an activity within a workflow.
+
+-- | A unique identifier for an Activity Execution.
 newtype ActivityId = ActivityId { rawActivityId :: Text }
   deriving (Eq, Ord, Show, Hashable)
+
 newtype SignalId = SignalId { rawSignalId :: Text }
   deriving (Eq, Ord, Show, Hashable)
 newtype TimerId = TimerId { rawTimerId :: Text }
   deriving (Eq, Ord, Show, Hashable)
 newtype CancellationId = CancellationId { rawCancellationId :: Text }
+  deriving (Eq, Ord, Show, Hashable)
+
+newtype QueryId = QueryId { rawQueryId :: Text }
   deriving (Eq, Ord, Show, Hashable)
 
 timespecFromDuration :: Duration.Duration -> Clock.TimeSpec
@@ -69,6 +83,7 @@ timespecToTimestamp ts = defMessage
   & Timestamp.seconds .~ Clock.sec ts
   & Timestamp.nanos .~ fromIntegral (Clock.nsec ts)
 
+-- | A Retry Policy is a collection of attributes that instructs the Temporal Server how to retry a failure of a Workflow Execution or an Activity Task Execution.
 data RetryPolicy = RetryPolicy
   { initialInterval :: Clock.TimeSpec
   , backoffCoefficient :: Double
@@ -96,12 +111,32 @@ retryPolicyFromProto p = RetryPolicy
   , nonRetryableErrorTypes = p ^. Message.vec'nonRetryableErrorTypes
   }
 
+{- | A Workflow Id Reuse Policy determines whether a Workflow Execution is allowed to spawn with a particular Workflow Id, 
+if that Workflow Id has been used with a previous, and now Closed, Workflow Execution.
+
+It is not possible for a new Workflow Execution to spawn with the same Workflow Id as another Open Workflow Execution, 
+regardless of the Workflow Id Reuse Policy. In some cases, an attempt to spawn a Workflow Execution with a Workflow Id
+that is the same as the Id of a currently Open Workflow Execution results in a Workflow execution already started error.
+-}
 data WorkflowIdReusePolicy
   = WorkflowIdReusePolicyUnspecified
   | WorkflowIdReusePolicyAllowDuplicate
+  -- ^ The Workflow Execution is allowed to exist regardless of the Closed status of a previous Workflow Execution with 
+  -- the same Workflow Id. This is currently the default policy, if one is not specified. 
+  -- Use this when it is OK to have a Workflow Execution with the same Workflow Id as a previous, 
+  -- but now Closed, Workflow Execution.
   | WorkflowIdReusePolicyAllowDuplicateFailedOnly
+  -- ^ The Workflow Execution is allowed to exist only if a previous Workflow Execution with the same Workflow Id does not 
+  -- have a Completed status. Use this policy when there is a need to re-execute a Failed, Timed Out, Terminated or 
+  -- Cancelled Workflow Execution and guarantee that the Completed Workflow Execution will not be re-executed.
   | WorkflowIdReusePolicyRejectDuplicate
+  -- ^ The Workflow Execution cannot exist if a previous Workflow Execution has the same Workflow Id, regardless of the 
+  -- Closed status. Use this when there can only be one Workflow Execution per Workflow Id within a Namespace for 
+  -- the given retention period.
   | WorkflowIdReusePolicyTerminateIfRunning
+  -- ^ Specifies that if a Workflow Execution with the same Workflow Id is already running, 
+  -- it should be terminated and a new Workflow Execution with the same Workflow Id should be started. 
+  -- This policy allows for only one Workflow Execution with a specific Workflow Id to be running at any given time.
   deriving (Eq, Ord, Show, Enum, Bounded)
 
 workflowIdReusePolicyToProto :: WorkflowIdReusePolicy -> Workflow.WorkflowIdReusePolicy

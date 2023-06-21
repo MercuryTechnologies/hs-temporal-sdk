@@ -14,13 +14,10 @@
   UndecidableInstances,
   TypeApplications #-}
 module Temporal.Payload 
-  ( Payload(..)
-  , RawPayload(..)
+  ( RawPayload(..)
   , Codec(..)
   , AllArgsSupportCodec
   , JSON(..)
-  -- , gatherPayloads
-  , ToPayloads(..)
   , applyPayloads
   , ApplyPayloads
   , ArgsOf
@@ -75,11 +72,6 @@ instance (Aeson.ToJSON a, Aeson.FromJSON a) => Codec JSON a where
     , "stack_trace" .= ("" :: String)
     ]
 
-data Payload fmt = forall a. (Codec fmt a) => Payload 
-  { payloadData :: a
-  , payloadMetadata :: Map Text ByteString
-  }
-
 type family ArgsOf f where
   ArgsOf (arg -> rest) = arg ': ArgsOf rest
   ArgsOf result = '[]
@@ -96,24 +88,6 @@ type family BuildArgs (args :: [*]) f result where
 type family AllArgsSupportCodec (codec :: *) (args :: [*]) :: Constraint where
   AllArgsSupportCodec codec '[] = ()
   AllArgsSupportCodec codec (arg ': args) = (Codec codec arg, AllArgsSupportCodec codec args)
-
-class ToPayloads f (args :: [*]) where
-  toPayloadsAp 
-    :: (AllArgsSupportCodec codec args)
-    => codec 
-    -> Proxy args
-    -> ([Payload codec] -> [Payload codec]) 
-    -> ([Payload codec] -> f a)
-    -> BuildArgs args f a
-
-instance ToPayloads f '[] where
-  toPayloadsAp _ _ f g = g $ f []
-
-instance (ToPayloads f args) => ToPayloads f (arg ': args) where
-  toPayloadsAp p _ f g = \arg -> toPayloadsAp p (Proxy @args) ((Payload arg mempty :) . f) g
-
--- gatherPayloads :: forall f args codec. (args ~ ArgsOf f, ToPayloads [] args) => codec -> Proxy f -> BuildArgs args Identity (Payload codec)
--- gatherPayloads codec = toPayloadsAp codec (Proxy @args) id id
 
 data RawPayload = RawPayload
   { inputPayloadData :: ByteString

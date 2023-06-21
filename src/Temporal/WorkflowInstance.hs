@@ -40,7 +40,7 @@ import Temporal.Common
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
 import Temporal.Payload
-import Temporal.Workflow.Unsafe (runWorkflow, addCommand)
+import Temporal.Workflow.Unsafe (runWorkflow, finishWorkflow, addCommand)
 import Temporal.Worker.Types
 import Temporal.Workflow.WorkflowDefinition (WorkflowDefinition(..), ValidWorkflowFunction(..))
 import Temporal.Workflow.WorkflowInstance
@@ -110,6 +110,8 @@ create workflowInstanceInfo workflowEnv workflowInstanceDefinition = do
   workflowCommands <- newTVarIO $ RunningActivation $ Reversed []
   workflowCompletions <- newTVarIO []
   workflowState <- newIORef workflowInstanceDefinition.workflowInitialState
+  workflowSignalHandlers <- newIORef mempty
+  workflowQueryHandlers <- newIORef mempty
   pure WorkflowInstance {..}
 
 
@@ -245,7 +247,7 @@ applyStartWorkflow startWorkflow = do
     inst <- ask
     let def = inst.workflowInstanceDefinition
     case def of
-      (WorkflowDefinition _ _ _ initialState (ValidWorkflowFunction fmt innerF applyArgs)) -> do
+      (WorkflowDefinition _ initialState (ValidWorkflowFunction fmt innerF applyArgs)) -> do
         -- Set the starting randomness seed
         let (WorkflowGenM genRef) = inst.workflowRandomnessSeed
         writeIORef genRef (mkStdGen $ fromIntegral $ startWorkflow ^. Activation.randomnessSeed)
@@ -258,7 +260,9 @@ applyStartWorkflow startWorkflow = do
           Left err -> do
             $(logError) $ Text.pack ("Failed to decode workflow arguments: " <> show err)
             throwIO $ ValueError "Failed to decode workflow arguments"
-          Right act -> runWorkflow fmt act
+          Right act -> do
+            result <- newIVar
+            runWorkflow result act >>= finishWorkflow result fmt
 
   primary <- asks workflowPrimaryTask
   writeIORef primary (Just act)
@@ -288,7 +292,19 @@ applyCancelWorkflow cancelWorkflow = do
   mapM_ UnliftIO.cancel mAct
 
 applySignalWorkflow :: SignalWorkflow -> InstanceM env st ()
-applySignalWorkflow _ = throwIO $ RuntimeError "SignalWorkflow should be handled by applyResolutions"
+applySignalWorkflow signalWorkflow = do
+  inst <- ask
+  handlers <- readIORef inst.workflowSignalHandlers
+  let handlerOrDefault = 
+        HashMap.lookup (Just (signalWorkflow ^. Activation.signalName)) handlers <|>
+        HashMap.lookup Nothing handlers
+  case handlerOrDefault of
+    Nothing -> do
+      $(logWarn) $ Text.pack ("No signal handler found for signal: " <> show (signalWorkflow ^. Activation.signalName))
+    Just handler -> do
+      let args = fmap convertFromProtoPayload (signalWorkflow ^. Command.vec'input)
+      liftIO $ handler args
+
 applyNotifyHasPatch :: NotifyHasPatch -> InstanceM env st ()
 applyNotifyHasPatch notifyHasPatch = do
   inst <- ask

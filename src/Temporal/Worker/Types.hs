@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE TypeFamilies #-}
 module Temporal.Worker.Types where
@@ -14,6 +15,7 @@ import Data.ByteString (ByteString)
 import Data.Hashable (Hashable(..))
 import Data.IORef (IORef)
 import Data.HashMap.Strict (HashMap)
+import Data.Kind
 import Data.Map.Strict (Map)
 import Data.Set (Set)
 import Data.Text (Text)
@@ -169,6 +171,8 @@ data WorkflowInstance env st = WorkflowInstance
   , workflowSequenceMaps :: {-# UNPACK #-} !(MVar (SequenceMaps env st))
   , workflowState :: {-# UNPACK #-} !(IORef st)
   , workflowEnv :: env
+  , workflowSignalHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (Vector RawPayload -> IO ())))
+  , workflowQueryHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (QueryId -> Vector RawPayload -> IO ())))
   -- , externFunctions
   -- , disableEagerActivityExecution :: Bool
   }
@@ -244,8 +248,6 @@ data WorkflowQueryDefinition env st =
 
 data WorkflowDefinition env st = WorkflowDefinition
   { workflowName :: Text
-  , workflowSignals :: HashMap Text (WorkflowSignalDefinition env st)
-  , workflowQueries :: HashMap Text (WorkflowQueryDefinition env st)
   , workflowInitialState :: st
   , workflowRun :: ValidWorkflowFunction env st
   }
@@ -256,7 +258,7 @@ type IsValidWorkflowFunction (codec :: *) (env :: *) (st :: *) f =
   , Codec codec (ResultOf (Workflow env st) f)
   )
 
-data ValidWorkflowFunction env st = forall codec f. (IsValidWorkflowFunction codec env st f {-, ToPayloads codec (ArgsOf f) -}) => 
+data ValidWorkflowFunction env st = forall codec f. (IsValidWorkflowFunction codec env st f) => 
   ValidWorkflowFunction
     codec
     f
@@ -594,8 +596,7 @@ toWorkflowFmap f (g :<$> x) = toWorkflowFmap (f . g) x
 toWorkflowFmap f (Return i) = f <$> getIVar i
 
 type IsValidActivityFunction env codec f = 
-    ( -- ToPayloads codec (ArgsOf f)
-      ApplyPayloads codec f (Activity env (ResultOf (Activity env) f))
+    ( ApplyPayloads codec f (Activity env (ResultOf (Activity env) f))
     , Codec codec (ResultOf (Activity env) f)
     )
 
@@ -621,3 +622,7 @@ data ChildWorkflowHandle env st result = forall codec. (Codec codec result) =>
     , childWorkflowCodec :: codec
     , firstExecutionRunId :: Maybe RunId
     }
+
+data SignalDefinition codec (args :: [Type]) = SignalDefinition { signalName :: Text }
+
+data QueryDefinition codec (args :: [Type]) (result :: Type) = QueryDefinition { queryName :: Text }

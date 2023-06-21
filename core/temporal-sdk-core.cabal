@@ -11,7 +11,10 @@ maintainer:         ian@iankduncan.com
 category:           Concurrency
 build-type:         Custom
 extra-doc-files:    CHANGELOG.md
--- extra-source-files:
+extra-source-files:
+  rust/Cargo.toml,
+  rust/Cargo.lock,
+  rust/src/*.rs
 
 common warnings
     ghc-options: -Wall
@@ -38,6 +41,7 @@ library
       Temporal.Internal.JobPool
     other-modules:
       Temporal.Internal.FFI,
+    extra-libraries:  temporal_bridge
 
     build-depends:
       base >= 4.14 && < 5, 

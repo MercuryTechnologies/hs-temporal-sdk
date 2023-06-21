@@ -79,7 +79,7 @@ defaultTemporalDevServerConfig = TemporalDevServerConfig
   , ip = "127.0.0.1"
   , port = Nothing
   , dbFilename = Nothing
-  , ui = False
+  , ui = True
   , log = ("pretty", "warn")
   , extraArgs = []
   }
@@ -97,6 +97,7 @@ foreign import ccall "hs_temporal_start_dev_server" raw_startDevServer
   -> CString 
   -> TokioCall (CArray Word8) EphemeralServer
 
+-- | TODO: this is broken. I think it is dropping the Runtime on the rust side.
 startDevServer :: Runtime -> TemporalDevServerConfig -> IO (Either ByteString EphemeralServer)
 startDevServer r c = withRuntime r $ \rp -> useAsCString (BL.toStrict (encode c )) $ \cstr -> do
   makeTokioAsyncCall 
