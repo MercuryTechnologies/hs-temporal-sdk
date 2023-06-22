@@ -65,10 +65,9 @@ module Temporal.Workflow
   , KnownWorkflow(..)
   -- ** Child workflow operations
   -- $childWorkflow
-  , StartChildWorkflowArgs(..)
   , StartChildWorkflowOptions(..)
   , defaultChildWorkflowOptions
-  , StartChildWorkflow
+  -- , StartChildWorkflow
   , startChildWorkflow
   , ChildWorkflowHandle
   , waitChildWorkflowResult
@@ -121,6 +120,7 @@ import Data.ProtoLens
 import Data.Proxy
 import qualified Data.Set as Set
 import Data.Text (Text)
+import Data.Type.Equality
 import qualified Data.Text as Text
 import Data.Time.Clock (UTCTime)
 import Data.Time.Clock.System (SystemTime(..), systemToUTCTime)
@@ -255,22 +255,18 @@ The Event is added to the Workflow Execution's Event History.
 -}
 
 
-data KnownActivity (name :: Symbol) (args :: [Type]) (result :: Type) 
-  = forall codec. (Codec codec result, AllArgsSupportCodec codec args, StartActivityArgs codec args result) => KnownActivity
+data KnownActivity (args :: [Type]) (result :: Type) 
+  = forall codec. (Codec codec result, StartActivityArgs codec args result) => KnownActivity
     { knownActivityCodec :: codec
     , knownActivityQueue :: Maybe TaskQueue
+    , knownActivityName :: Text
     }
 
-knownActivityArgsProxy :: KnownActivity name args result -> Proxy args
+knownActivityArgsProxy :: KnownActivity args result -> Proxy args
 knownActivityArgsProxy _ = Proxy
 
-knownActivityName :: forall name args result. KnownSymbol name => KnownActivity name args result -> Text
-knownActivityName _ = Text.pack $ symbolVal (Proxy @name)
-
-startActivity :: 
-  ( KnownSymbol name
-  ) => StartActivityOptions -> KnownActivity name args result -> StartActivity env st result args
-startActivity opts k@(KnownActivity codec mTaskQueue) = gatherStartActivityArgs codec $ \typedPayloads -> ilift $ do
+startActivity :: StartActivityOptions -> KnownActivity args result -> StartActivity env st result args
+startActivity opts k@(KnownActivity codec mTaskQueue name) = gatherStartActivityArgs codec $ \typedPayloads -> ilift $ do
   inst <- ask
   ps <- liftIO $ forM typedPayloads $ \payloadAction -> 
     fmap convertToProtoPayload payloadAction
@@ -283,7 +279,7 @@ startActivity opts k@(KnownActivity codec mTaskQueue) = gatherStartActivityArgs 
   let scheduleActivity = defMessage
         & Command.seq .~ actSeq
         & Command.activityId .~ maybe (Text.pack $ show actSeq) rawActivityId (opts.activityId)
-        & Command.activityType .~ knownActivityName k
+        & Command.activityType .~ name
         & Command.taskQueue .~ rawTaskQueue (fromMaybe inst.workflowInstanceInfo.taskQueue mTaskQueue)
         & Command.arguments .~ ps
         & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts.retryPolicy
@@ -358,16 +354,18 @@ signalChildWorkflow = undefined
 -- By default, a child is scheduled on the same Task Queue as the parent.
 
 startChildWorkflow 
-  :: (KnownSymbol name)
-  => KnownWorkflow name args result 
+  :: forall env st args result. KnownWorkflow args result 
   -> StartChildWorkflowOptions
   -> WorkflowId
-  -> StartChildWorkflow env st result args 
-startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue) opts wfId = gatherStartChildWorkflowArgs codec $ \typedPayloads -> do
-  wfHandle <- sendChildWorkflowCommand typedPayloads
-  getIVar wfHandle.startHandle
-  pure wfHandle
+  -> (args :->: Workflow env st (ChildWorkflowHandle env st result))
+startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId = 
+  gatherStartChildWorkflowArgs @env @st @args @result codec go
   where
+    go :: [IO RawPayload] -> Workflow env st (ChildWorkflowHandle env st result)
+    go typedPayloads = do
+      wfHandle <- sendChildWorkflowCommand typedPayloads
+      getIVar wfHandle.startHandle
+      pure wfHandle
     sendChildWorkflowCommand typedPayloads = ilift $ do
       inst <- ask
       ps <- liftIO $ forM typedPayloads $ \payloadAction -> 
@@ -442,7 +440,7 @@ data StartLocalActivityOptions = StartLocalActivityOptions
   }
 startLocalActivity 
   :: StartLocalActivityOptions 
-  -> KnownActivity name args result
+  -> KnownActivity args result
   -> Workflow env st ()
 startLocalActivity = undefined
 
@@ -496,12 +494,10 @@ patched pid = applyPatch pid False
 deprecatePatch :: PatchId -> Workflow env st ()
 deprecatePatch pid = void $ applyPatch pid True
 
-type family QueryWorkflow env st baseResult (args :: [*]) = r | r -> env st baseResult args where
-  QueryWorkflow env st baseResult '[] = Workflow env st (ChildWorkflowHandle env st baseResult)
-  QueryWorkflow env st baseResult (a ': as) = a -> StartChildWorkflow env st baseResult as 
-
 -- TODO move the codec value into the QueryDefinition?
-query :: QueryDefinition codec args result -> QueryWorkflow env st result args
+query 
+  :: QueryDefinition codec args result 
+  -> (args :->: Workflow env st (ChildWorkflowHandle env st result))
 query = undefined
 
 -- | Get a mutable randomness generator for the workflow.
@@ -518,10 +514,10 @@ newtype Query env st a = Query (Reader (env, st) a)
 
 
 setQueryHandler :: forall codec env st f result.
-  ( AllArgsSupportCodec codec (ArgsOf f)
-  , ResultOf (Query env st) f ~ result
-  , ApplyPayloads codec f (Query env st result)
+  ( ResultOf (Query env st) f ~ result
+  , ApplyPayloads codec (ArgsOf f) (Query env st result)
   , Codec codec result
+  , f ~ (ArgsOf f :->: Query env st result)
   ) => codec -> QueryDefinition codec (ArgsOf f) result -> f -> Workflow env st ()
 setQueryHandler codec (QueryDefinition n) f = ilift $ do
   inst <- ask
@@ -531,9 +527,15 @@ setQueryHandler codec (QueryDefinition n) f = ilift $ do
   where
     handle :: QueryId -> Vector RawPayload -> InstanceM env st ()
     handle (QueryId qId) vec = do
-      eHandler <- liftIO $ applyPayloads codec f vec
+      eHandler <- liftIO $ UnliftIO.try $ applyPayloads 
+        codec 
+        (Proxy @(ArgsOf f))
+        (Proxy @(Query env st (ResultOf (Query env st) f))) 
+        f 
+        vec
+      -- TODO handle exceptions properly
       case eHandler of
-        Left err -> throwIO $ ValueError err
+        Left (ValueError err) -> throwIO $ ValueError err
         Right (Query r) -> do
           inst <- ask
           st <- readIORef inst.workflowState
@@ -572,12 +574,11 @@ setQueryHandler codec (QueryDefinition n) f = ilift $ do
           
   
 
-setSignalHandler :: forall codec env st f.
-  ( AllArgsSupportCodec codec (ArgsOf f)
-  , ApplyPayloads codec f (Workflow env st ())
-  , ResultOf (Workflow env st) f ~ ()
-  ) => codec -> SignalDefinition codec (ArgsOf f) -> f -> Workflow env st ()
-setSignalHandler codec (SignalDefinition n) f = ilift $ do
+setSignalHandler :: forall env st f.
+  ( ResultOf (Workflow env st) f ~ ()
+  , (ArgsOf f :->: Workflow env st ()) ~ f
+  ) => SignalDefinition (ArgsOf f) -> f -> Workflow env st ()
+setSignalHandler (SignalDefinition n codec applyToSignal) f = ilift $ do
   inst <- ask
   withRunInIO $ \runInIO -> do
     liftIO $ modifyIORef' inst.workflowSignalHandlers $ \handlers -> 
@@ -585,9 +586,13 @@ setSignalHandler codec (SignalDefinition n) f = ilift $ do
   where
     handle :: Vector RawPayload -> InstanceM env st ()
     handle = \vec -> do
-      eWorkflow <- liftIO $ applyPayloads codec f vec
+      eWorkflow <- liftIO $ UnliftIO.try $ applyToSignal 
+        (Proxy @(Workflow env st ()))
+        f 
+        vec
+      -- TODO handle exceptions properly
       case eWorkflow of
-        Left err -> throwIO $ ValueError err
+        Left (ValueError err) -> throwIO $ ValueError err
         Right w -> do
           result <- newIVar
           resultVal <- runWorkflow result w

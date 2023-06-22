@@ -141,6 +141,8 @@ data RpcError = RpcError
   }
   deriving (Show)
 
+instance Exception RpcError
+
 -- nb: Alignment for C repr structs is not packed, so the alignment is based on the largest field size.
 peekCrpcError :: Ptr RpcError -> IO RpcError 
 peekCrpcError ptr = do

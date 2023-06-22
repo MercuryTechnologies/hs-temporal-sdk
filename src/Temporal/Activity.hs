@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 module Temporal.Activity 
   ( Activity
   , provideActivity
@@ -23,6 +25,7 @@ import Lens.Family2
 import Temporal.Exception
 import Temporal.Activity.Definition
 import Temporal.Activity.Worker
+import Temporal.Common
 import Temporal.Core.Worker (recordActivityHeartbeat)
 import Temporal.Payload
 import Temporal.Workflow
@@ -32,18 +35,21 @@ import qualified Proto.Temporal.Sdk.Core.CoreInterface_Fields as Proto
 
 provideActivity :: forall codec name env f.
   ( IsValidActivityFunction env codec f
-  , AllArgsSupportCodec codec (ArgsOf f)
-  , KnownSymbol name
   , StartActivityArgs codec (ArgsOf f) (ResultOf (Activity env) f)
-  ) => codec -> Proxy name -> f -> (ActivityDefinition env, KnownActivity name (ArgsOf f) (ResultOf (Activity env) f))
+  , (ArgsOf f :->: Activity env (ResultOf (Activity env) f)) ~ f
+  ) => codec -> Text -> f -> (ActivityDefinition env, KnownActivity (ArgsOf f) (ResultOf (Activity env) f))
 provideActivity codec name f = 
   ( ActivityDefinition
-      { activityName = Text.pack $ symbolVal name
-      , activityRun = ValidActivityFunction codec f applyPayloads
+      { activityName = name
+      , activityRun = ValidActivityFunction 
+          codec 
+          f 
+          (applyPayloads codec (Proxy @(ArgsOf f)) (Proxy @(Activity env (ResultOf (Activity env) f))) f)
       }
   , KnownActivity
       { knownActivityCodec = codec
       , knownActivityQueue = Nothing
+      , knownActivityName = name
       }
   )
 

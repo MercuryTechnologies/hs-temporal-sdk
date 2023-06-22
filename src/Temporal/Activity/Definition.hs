@@ -50,6 +50,3 @@ askActivityWorker = Activity $ asks (\(worker, _, _) -> worker)
 instance MonadReader env (Activity env) where
   ask = Activity $ asks (\(_, _, x) -> x)
   local f (Activity m) = Activity $ local (\(w, info, x) -> (w, info, f x)) m
-
-newtype TaskToken = TaskToken { rawTaskToken :: ByteString }
-  deriving (Eq, Show, Ord, Hashable)

@@ -20,11 +20,10 @@ module Temporal.Workflow.WorkflowDefinition
   ( WorkflowDefinition(..) -- TODO, only export the type, not the constructor from this module
   , ValidWorkflowFunction(..) -- TODO, move to internal
   , KnownWorkflow(..)
-  , knownWorkflowName
-  , StartChildWorkflow(..)
-  , StartChildWorkflowArgs(..)
+  -- , StartChildWorkflow(..)
   , gatherStartChildWorkflowArgs
   , provideWorkflow
+  , GatherArgs(..)
   ) where
 
 import Data.Aeson hiding (encode, decode)
@@ -44,50 +43,43 @@ import Temporal.Payload
 import Temporal.Workflow.WorkflowInstance
 import Temporal.Worker.Types
 
+class GatherArgs codec (args :: [Type]) where
+  gatherArgs 
+    :: Proxy args 
+    -> codec 
+    -> ([IO RawPayload] -> [IO RawPayload]) 
+    -> ([IO RawPayload] -> result)
+    -> (args :->: result)
+
+instance (Codec codec arg, GatherArgs codec args) => GatherArgs codec (arg ': args) where
+  gatherArgs _ c accum f = \arg ->
+    gatherArgs 
+      (Proxy @args) 
+      c 
+      ((encode c arg :) . accum)
+      f
+
+instance GatherArgs codec '[] where
+  gatherArgs _ _ accum f = f $ accum []
+
 -- | A 'KnownWorkflow' is a handle that contains all the information needed to start a 
 -- Workflow either as a child workflow or as a top-level workflow via a 'Client'.
-data KnownWorkflow (name :: Symbol) (args :: [Type]) (result :: Type) = forall codec. 
+data KnownWorkflow (args :: [Type]) (result :: Type) = forall codec. 
   ( Codec codec result
-  , AllArgsSupportCodec codec args
-  , StartChildWorkflowArgs codec args result
+  , GatherArgs codec args
   ) => KnownWorkflow 
         { knownWorkflowCodec :: codec 
         , knownWorkflowNamespace :: Maybe Namespace
         , knownWorkflowQueue :: Maybe TaskQueue
+        , knownWorkflowName :: Text
         }
 
-knownWorkflowName :: forall name args result. KnownSymbol name => KnownWorkflow name args result -> Text
-knownWorkflowName _ = Text.pack $ symbolVal (Proxy @name)
-
-class StartChildWorkflowArgs codec (args :: [*]) baseResult where
-  applyWfArgs_ 
-    :: Proxy args 
-    -> Proxy env
-    -> Proxy st
-    -> codec
-    -> ([IO RawPayload] -> [IO RawPayload]) 
-    -> ([IO RawPayload] -> Workflow env st (ChildWorkflowHandle env st baseResult))
-    -> StartChildWorkflow env st baseResult args
-
-instance StartChildWorkflowArgs codec '[] baseResult where
-  applyWfArgs_ argsP _ _ _ accum f = f $ accum []
-
-instance (Codec codec a, StartChildWorkflowArgs codec as baseResult) => StartChildWorkflowArgs codec (a ': as) baseResult where
-  applyWfArgs_ argsP envP stP c accum f = \arg ->
-    applyWfArgs_
-    (Proxy @as) 
-    envP
-    stP
-    c
-    ((encode c arg :) . accum) 
-    f
-
-gatherStartChildWorkflowArgs :: forall env st args baseResult codec. StartChildWorkflowArgs codec args baseResult => codec -> ([IO RawPayload] -> Workflow env st (ChildWorkflowHandle env st baseResult)) -> StartChildWorkflow env st baseResult args 
-gatherStartChildWorkflowArgs c f = applyWfArgs_ (Proxy @args) (Proxy @env) (Proxy @st) c id f
-
-type family StartChildWorkflow env st baseResult (args :: [*]) = r | r -> env st baseResult args where
-  StartChildWorkflow env st baseResult '[] = Workflow env st (ChildWorkflowHandle env st baseResult)
-  StartChildWorkflow env st baseResult (a ': as) = a -> StartChildWorkflow env st baseResult as 
+gatherStartChildWorkflowArgs 
+  :: forall env st args result codec. GatherArgs codec args
+  => codec 
+  -> ([IO RawPayload] -> Workflow env st (ChildWorkflowHandle env st result)) 
+  -> (args :->: Workflow env st (ChildWorkflowHandle env st result))
+gatherStartChildWorkflowArgs c f = gatherArgs (Proxy @args) c id f
 
 -- | A utility function for constructing a 'WorkflowDefinition' from a function as well as
 -- a 'KnownWorkflow' value. This is useful for keeping the argument, codec, and result types
@@ -102,21 +94,29 @@ type family StartChildWorkflow env st baseResult (args :: [*]) = r | r -> env st
 -- >   (Proxy @"myWorkflow") -- visible name of the workflow
 -- >   () -- initial state
 -- >   myWorkflow -- the workflow function
-provideWorkflow ::
+provideWorkflow :: forall env st name codec f.
   ( IsValidWorkflowFunction codec env st f
-  , AllArgsSupportCodec codec (ArgsOf f)
-  , KnownSymbol name
-  , StartChildWorkflowArgs codec (ArgsOf f) (ResultOf (Workflow env st) f)
-  ) => codec -> Proxy name -> st -> f -> (WorkflowDefinition env st, KnownWorkflow name (ArgsOf f) (ResultOf (Workflow env st) f))
+  -- , StartChildWorkflowArgs codec (ArgsOf f) (ResultOf (Workflow env st) f)
+  , GatherArgs codec (ArgsOf f)
+  , f ~ (ArgsOf f :->: Workflow env st (ResultOf (Workflow env st) f))
+  ) => codec -> Text -> st -> f -> (WorkflowDefinition env st, KnownWorkflow (ArgsOf f) (ResultOf (Workflow env st) f))
 provideWorkflow codec name st f = 
   ( WorkflowDefinition
-    { workflowName = Text.pack $ symbolVal name
+    { workflowName = name
     , workflowInitialState = st
-    , workflowRun = ValidWorkflowFunction codec f (applyPayloads codec)
+    , workflowRun = ValidWorkflowFunction 
+        codec 
+        f 
+        (applyPayloads 
+          codec 
+          (Proxy @(ArgsOf f)) 
+          (Proxy @(Workflow env st (ResultOf (Workflow env st) f)))
+        )
     }
   , KnownWorkflow
     { knownWorkflowCodec = codec
     , knownWorkflowQueue = Nothing
     , knownWorkflowNamespace = Nothing
+    , knownWorkflowName = name
     }
   )

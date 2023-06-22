@@ -9,14 +9,13 @@ import Control.Monad
 import Control.Concurrent
 import Control.Monad.Logger
 import qualified Data.HashMap.Strict as HashMap
-import Data.ProtoLens.Message
 import Data.Proxy
 import qualified Data.Text as T
 import Data.UUID.V4
 import Data.UUID
 import qualified Data.UUID as UUID
-import Lens.Family2
-import Temporal.Core.Client
+import Temporal.Client
+import Temporal.Core.Client (Client, connectClient, defaultClientConfig)
 import Temporal.Client.WorkflowService
 import Temporal.EphemeralServer
 import Temporal.Runtime
@@ -27,9 +26,6 @@ import Temporal.Worker
 import Temporal.Workflow hiding (Info(..), wait)
 import qualified Temporal.Workflow as Workflow
 import System.Environment
-import Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields
-import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as Proto
-import Proto.Temporal.Api.Common.V1.Message_Fields (name)
 import System.Clock
 import System.Posix.Signals
 import UnliftIO
@@ -87,12 +83,12 @@ chronicWorkflow = do
   t <- now
   $(logInfo) (T.pack ("Starting chronic workflow: " ++ show t))
 
-(helloDef, helloRef) = provideWorkflow JSON (Proxy @"hello") () hello
-(requirePresidentialApprovalDef, requirePresidentialApprovalRef) = provideWorkflow JSON (Proxy @"requirePresidentialApproval") () requirePresidentialApproval
-(launchTheMissilesDef, launchTheMissilesRef) = provideWorkflow JSON (Proxy @"launchTheMissiles") () launchTheMissiles
-(chronicWorkflowDef, chronicWorkflowRef) = provideWorkflow JSON (Proxy @"chronicWorkflow") () chronicWorkflow
+(helloDef, helloRef) = provideWorkflow JSON "hello" () hello
+(requirePresidentialApprovalDef, requirePresidentialApprovalRef) = provideWorkflow JSON "requirePresidentialApproval" () requirePresidentialApproval
+(launchTheMissilesDef, launchTheMissilesRef) = provideWorkflow JSON "launchTheMissiles" () launchTheMissiles
+(chronicWorkflowDef, chronicWorkflowRef) = provideWorkflow JSON "chronicWorkflow" () chronicWorkflow
 
-(shootMissileDef, shootMissileRef) = provideActivity JSON (Proxy @"shootMissiles") shootMissiles
+(shootMissileDef, shootMissileRef) = provideActivity JSON "shootMissiles" shootMissiles
 
 main :: IO ()
 main = do
@@ -108,8 +104,6 @@ main = do
     Left err -> error $ "Failed to connect to Temporal server: " <> show err
     Right c -> do
       putStrLn "Connected to Temporal server"
-      resp <- getSystemInfo c defMessage
-      print resp
       case cmd of
         ["worker"] -> runWorker c
         ["client", taskname, id'] -> runClient c taskname id'
@@ -139,13 +133,12 @@ runClient :: Client -> String -> String -> IO ()
 runClient c taskname id' = do
   putStrLn "Running client"
   reqId <- nextRandom
-  let req = defMessage
-        & Proto.namespace .~ "default"
-        & Proto.taskQueue .~ (defMessage & name .~ "default")
-        & workflowType .~ (defMessage & name .~ T.pack taskname)
-        & workflowId .~ T.pack id'
-        & Proto.requestId .~ UUID.toText reqId
-  resp <- startWorkflowExecution c req 
-  print resp
+  ident <- defaultClientIdentity
+  let wfc = WorkflowClient c (Namespace "default") (TaskQueue "default") ident
+  resp <- start 
+    wfc
+    launchTheMissilesRef
+    (WorkflowStartOptions (WorkflowId $ T.pack id'))
+  pure ()
         -- & workflowRunTimeoutSeconds .~ 100
         -- & workflowTaskTimeoutSeconds .~ 100

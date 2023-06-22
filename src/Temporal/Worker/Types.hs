@@ -14,6 +14,7 @@ import Control.Monad.State
 import Data.ByteString (ByteString)
 import Data.Hashable (Hashable(..))
 import Data.IORef (IORef)
+import Data.Proxy
 import Data.HashMap.Strict (HashMap)
 import Data.Kind
 import Data.Map.Strict (Map)
@@ -253,8 +254,7 @@ data WorkflowDefinition env st = WorkflowDefinition
   }
 
 type IsValidWorkflowFunction (codec :: *) (env :: *) (st :: *) f = 
-  ( AllArgsSupportCodec codec (ArgsOf f)
-  , ApplyPayloads codec f (Workflow env st (ResultOf (Workflow env st) f))
+  ( ApplyPayloads codec (ArgsOf f) (Workflow env st (ResultOf (Workflow env st) f))
   , Codec codec (ResultOf (Workflow env st) f)
   )
 
@@ -262,7 +262,7 @@ data ValidWorkflowFunction env st = forall codec f. (IsValidWorkflowFunction cod
   ValidWorkflowFunction
     codec
     f
-    (f -> Vector RawPayload -> IO (Either String (Workflow env st (ResultOf (Workflow env st) f))))
+    (f -> Vector RawPayload -> IO (Workflow env st (ResultOf (Workflow env st) f)))
 
 data ActivityCancelReason
   = GoneFromServer
@@ -596,7 +596,7 @@ toWorkflowFmap f (g :<$> x) = toWorkflowFmap (f . g) x
 toWorkflowFmap f (Return i) = f <$> getIVar i
 
 type IsValidActivityFunction env codec f = 
-    ( ApplyPayloads codec f (Activity env (ResultOf (Activity env) f))
+    ( ApplyPayloads codec (ArgsOf f) (Activity env (ResultOf (Activity env) f))
     , Codec codec (ResultOf (Activity env) f)
     )
 
@@ -604,7 +604,7 @@ data ValidActivityFunction env = forall codec f. (IsValidActivityFunction env co
   ValidActivityFunction 
     codec 
     f
-    (codec -> f -> Vector RawPayload -> IO (Either String (Activity env (ResultOf (Activity env) f))))
+    (Vector RawPayload -> IO (Activity env (ResultOf (Activity env) f)))
 
 runWorkerM :: Worker wfEnv actEnv -> WorkerM wfEnv actEnv a -> IO a
 runWorkerM worker m = runReaderT (unWorkerM m) worker
@@ -623,6 +623,11 @@ data ChildWorkflowHandle env st result = forall codec. (Codec codec result) =>
     , firstExecutionRunId :: Maybe RunId
     }
 
-data SignalDefinition codec (args :: [Type]) = SignalDefinition { signalName :: Text }
+data SignalDefinition (args :: [Type]) = forall codec.
+  SignalDefinition 
+    { signalName :: Text 
+    , signalCodec :: codec
+    , signalApply :: forall res. Proxy res -> (args :->: res) -> Vector RawPayload -> IO res
+    }
 
 data QueryDefinition codec (args :: [Type]) (result :: Type) = QueryDefinition { queryName :: Text }

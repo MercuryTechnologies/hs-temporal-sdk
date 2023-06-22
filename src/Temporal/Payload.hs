@@ -7,22 +7,25 @@
   FlexibleInstances,
   GADTs,
   InstanceSigs,
+  PolyKinds,
   MultiParamTypeClasses,
   ScopedTypeVariables,
   TypeOperators,
   TypeFamilies,
   UndecidableInstances,
-  TypeApplications #-}
+  TypeApplications 
+  #-}
 module Temporal.Payload 
   ( RawPayload(..)
   , Codec(..)
-  , AllArgsSupportCodec
   , JSON(..)
   , applyPayloads
   , ApplyPayloads
   , ArgsOf
   , ResultOf
-  , BuildArgs
+  , resultOf
+  , wrappedResultOf
+  , (:->:)
   , convertToProtoPayload
   , convertFromProtoPayload
   ) where
@@ -81,13 +84,16 @@ type family ResultOf (m :: * -> *) f where
   ResultOf m (m result) = result
   ResultOf m result = TypeError ('Text "This function must use the (" ':<>: 'ShowType m ':<>: 'Text ") monad." :$$: ('Text "Current type: " ':<>: 'ShowType result))
 
-type family BuildArgs (args :: [*]) f result where
-  BuildArgs '[] f result = f result
-  BuildArgs (arg ': args) f result = arg -> BuildArgs args f result
+resultOf :: forall m f. Proxy m -> f -> Proxy (ResultOf m f)
+resultOf _ _ = Proxy
 
-type family AllArgsSupportCodec (codec :: *) (args :: [*]) :: Constraint where
-  AllArgsSupportCodec codec '[] = ()
-  AllArgsSupportCodec codec (arg ': args) = (Codec codec arg, AllArgsSupportCodec codec args)
+wrappedResultOf :: forall m f. Proxy m -> f -> Proxy (m (ResultOf m f))
+wrappedResultOf _ _ = Proxy
+
+-- | Construct a function type from a list of argument types and a result type.
+type family (:->:) (args :: [*]) (result :: *) where
+  (:->:) '[] result = result
+  (:->:) (arg ': args) result = arg -> (args :->: result)
 
 data RawPayload = RawPayload
   { inputPayloadData :: ByteString
@@ -102,19 +108,38 @@ convertToProtoPayload (RawPayload d m) = defMessage
   & Proto.data' .~ d
   & Proto.metadata .~ m
 
-class ApplyPayloads codec f r | f -> r where
-  applyPayloads :: codec -> f -> V.Vector RawPayload -> IO (Either String r)
+class ApplyPayloads codec (args :: [*]) result where
+  applyPayloads 
+    :: codec 
+    -> Proxy args 
+    -> Proxy result 
+    -> (args :->: result)
+    -> V.Vector RawPayload
+    -> IO result
 
-instance ApplyPayloads codec f f where
-  applyPayloads _ f vec = pure $ if V.null vec
-    then Right f
-    else Left "Too many arguments"
+instance ApplyPayloads codec '[] result where
+  applyPayloads _ _ _ f _ = pure f
 
-instance (Codec codec arg, ApplyPayloads codec rest r) => ApplyPayloads codec (arg -> rest) r where
-  applyPayloads p f vec = case V.uncons vec of
-    Nothing -> pure $ Left "Not enough arguments"
+instance (Codec codec ty, ApplyPayloads codec tys result) => ApplyPayloads codec (ty ': tys) result where
+  applyPayloads codec _ _ f vec = case V.uncons vec of
+    Nothing -> error "Not enough arguments"
     Just (pl, rest) -> do
-      res <- decode p pl
+      res <- decode codec pl
       case res of
-        Right arg -> applyPayloads p (f arg) rest
-        Left err -> pure $ Left err
+        Right arg -> applyPayloads codec (Proxy @tys) (Proxy @result) (f arg) rest
+        Left err -> error err
+
+-- class ApplyPayloads codec f r | f -> r where
+--   applyPayloads :: codec -> proxy r -> f -> V.Vector RawPayload -> IO (Either String r)
+
+-- instance ApplyPayloads codec f f where
+--   applyPayloads _ _ f vec = pure $ Right f
+
+-- instance (Codec codec arg, ApplyPayloads codec rest r) => ApplyPayloads codec (arg -> rest) r where
+--   applyPayloads p resultProof f vec = case V.uncons vec of
+--     Nothing -> pure $ Left "Not enough arguments"
+--     Just (pl, rest) -> do
+--       res <- decode p pl
+--       case res of
+--         Right arg -> applyPayloads p resultProof (f arg) rest
+--         Left err -> pure $ Left err

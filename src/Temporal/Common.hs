@@ -9,6 +9,7 @@ import Control.Exception
 import Control.Monad
 import Control.Monad.IO.Class
 import Data.Hashable (Hashable)
+import Data.ByteString (ByteString)
 import Data.Text (Text)
 import Data.Int (Int32)
 import Data.ProtoLens
@@ -51,15 +52,23 @@ newtype TaskQueue = TaskQueue { rawTaskQueue :: Text }
 newtype ActivityId = ActivityId { rawActivityId :: Text }
   deriving (Eq, Ord, Show, Hashable)
 
+newtype ScheduleId = ScheduleId { rawScheduleId :: Text }
+  deriving (Eq, Ord, Show, Hashable)
+
 newtype SignalId = SignalId { rawSignalId :: Text }
   deriving (Eq, Ord, Show, Hashable)
+
 newtype TimerId = TimerId { rawTimerId :: Text }
   deriving (Eq, Ord, Show, Hashable)
+
 newtype CancellationId = CancellationId { rawCancellationId :: Text }
   deriving (Eq, Ord, Show, Hashable)
 
 newtype QueryId = QueryId { rawQueryId :: Text }
   deriving (Eq, Ord, Show, Hashable)
+
+newtype TaskToken = TaskToken { rawTaskToken :: ByteString }
+  deriving (Eq, Show, Ord, Hashable)
 
 timespecFromDuration :: Duration.Duration -> Clock.TimeSpec
 timespecFromDuration d = Clock.TimeSpec

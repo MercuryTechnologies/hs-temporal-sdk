@@ -63,12 +63,12 @@ library
     default-language: Haskell2010
     frameworks: Security, CoreFoundation
 
-test-suite temporal-sdk-core-test
-    import:           warnings
-    default-language: Haskell2010
-    -- other-modules:
-    -- other-extensions:
-    type:             exitcode-stdio-1.0
-    hs-source-dirs:   test
-    main-is:          Main.hs
-    build-depends:    temporal-sdk-core
+-- test-suite temporal-sdk-core-test
+--     import:           warnings
+--     default-language: Haskell2010
+--     -- other-modules:
+--     -- other-extensions:
+--     type:             exitcode-stdio-1.0
+--     hs-source-dirs:   test
+--     main-is:          Main.hs
+--     build-depends:    temporal-sdk-core

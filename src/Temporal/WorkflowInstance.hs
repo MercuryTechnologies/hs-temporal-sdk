@@ -254,10 +254,10 @@ applyStartWorkflow startWorkflow = do
         writeIORef inst.workflowTime (startWorkflow ^. Activation.startTime . to timespecFromTimestamp)
 
         let args = fmap convertFromProtoPayload (startWorkflow ^. Command.vec'arguments)
-        eAct <- liftIO $ applyArgs innerF args
+        eAct <- liftIO $ UnliftIO.try $ applyArgs innerF args
         -- TODO make sure that we also catch exceptions from payload processing
         case eAct of
-          Left err -> do
+          Left (SomeException err) -> do
             $(logError) $ Text.pack ("Failed to decode workflow arguments: " <> show err)
             throwIO $ ValueError "Failed to decode workflow arguments"
           Right act -> do

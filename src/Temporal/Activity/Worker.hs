@@ -96,10 +96,11 @@ applyActivityTaskStart tt msg = do
           Just a -> pure a
         a <- async $ do
           ef <- case activityRun of
-            ValidActivityFunction c f ap -> liftIO $ do
-              fmap (>>= liftIO . encode c) <$> ap c f (fmap convertFromProtoPayload (msg ^. AT.vec'input))
+            ValidActivityFunction c f ap -> liftIO $ UnliftIO.try $ do
+              (>>= liftIO . encode c) <$> ap (fmap convertFromProtoPayload (msg ^. AT.vec'input))
           case ef of
-            Left err -> throwIO $ RuntimeError ("Failed to apply payloads: " <> err)
+            -- TODO proper error handling
+            Left (SomeException err) -> throwIO err
             Right f' -> do
               res <- UnliftIO.try $ liftIO $ do
                 runReaderT (unActivity f') (w.workerCore, info, env)
