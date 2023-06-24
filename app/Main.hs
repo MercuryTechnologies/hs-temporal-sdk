@@ -14,7 +14,7 @@ import qualified Data.Text as T
 import Data.UUID.V4
 import Data.UUID
 import qualified Data.UUID as UUID
-import Temporal.Client
+import qualified Temporal.Client as C
 import Temporal.Core.Client (Client, connectClient, defaultClientConfig)
 import Temporal.Client.WorkflowService
 import Temporal.EphemeralServer
@@ -135,14 +135,16 @@ runClient :: Client -> String -> String -> IO ()
 runClient c taskname id' = do
   putStrLn "Running client"
   reqId <- nextRandom
-  ident <- defaultClientIdentity
-  let wfc = WorkflowClient c (Namespace "default") (TaskQueue "default") ident
-  resp <- start 
-    wfc
+  ident <- C.defaultClientIdentity
+  let namespace = Namespace "default"
+      queue = TaskQueue "default"
+      workflowClient = C.WorkflowClient c (Namespace "default") ident
+  resp <- C.start 
+    workflowClient
     helloRef
-    (WorkflowStartOptions (WorkflowId $ T.pack id'))
+    (C.workflowStartOptions (WorkflowId $ T.pack id') queue)
     "Ian"
-  awaitWorkflowResult resp >>= print
+  C.awaitWorkflowResult resp >>= print
   pure ()
         -- & workflowRunTimeoutSeconds .~ 100
         -- & workflowTaskTimeoutSeconds .~ 100

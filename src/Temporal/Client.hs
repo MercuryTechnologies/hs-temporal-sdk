@@ -21,6 +21,7 @@ import Data.Kind
 import Data.Proxy
 import Data.ProtoLens.Field
 import Data.ProtoLens.Message
+import Data.Map (Map)
 import Data.Maybe
 import Data.Text (Text)
 import Data.Typeable
@@ -28,10 +29,12 @@ import qualified Data.Text as Text
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
 import qualified Data.Vector as V
+import System.Clock (TimeSpec(..))
 
 import Temporal.Client.WorkflowService
 import Temporal.Core.Client
 import Temporal.Workflow.WorkflowDefinition
+import Temporal.Worker.Types
 import Temporal.Common
 import Temporal.Exception
 import Temporal.Payload
@@ -58,7 +61,7 @@ import Unsafe.Coerce
 data WorkflowClient = WorkflowClient 
   { clientCore :: Client
   , clientDefaultNamespace :: Namespace
-  , clientDefaultQueue :: TaskQueue
+  -- , clientDefaultQueue :: TaskQueue
   , clientIdentity :: Text
   }
 
@@ -145,18 +148,38 @@ signalWithStart = undefined
 
 data WorkflowStartOptions = WorkflowStartOptions
   { workflowId :: WorkflowId
+  , taskQueue :: TaskQueue
+  , followRuns :: Bool
+  , workflowIdReusePolicy :: Maybe WorkflowIdReusePolicy
+  , retry :: Maybe RetryPolicy
+  , cronSchedule :: Maybe Text
+  , memo :: Maybe (Map Text RawPayload)
+  , searchAttributes :: Maybe (Map Text RawPayload)
+  , timeouts :: TimeoutOptions
   }
 
-type family InnerStartWorkflow result (args :: [Type]) = r | r -> result args where
-  InnerStartWorkflow result '[] = IO (WorkflowHandle result)
-  InnerStartWorkflow result (a ': as) = a -> InnerStartWorkflow result as
+workflowStartOptions :: WorkflowId -> TaskQueue -> WorkflowStartOptions
+workflowStartOptions wfId tq = WorkflowStartOptions
+  { workflowId = wfId
+  , taskQueue = tq
+  , followRuns = True
+  , workflowIdReusePolicy = Nothing
+  , retry = Nothing
+  , cronSchedule = Nothing
+  , memo = Nothing
+  , searchAttributes = Nothing
+  , timeouts = TimeoutOptions
+    { executionTimeout = Nothing
+    , runTimeout = Nothing
+    , taskTimeout = Nothing
+    }
+  }
 
-type family LiftIOResult m f where
-  LiftIOResult m (IO a) = m a
-  LiftIOResult m (a -> b) = a -> LiftIOResult m b
-
-type family StartWorkflow m result args where
-  StartWorkflow m result args = LiftIOResult m (InnerStartWorkflow result args)
+data TimeoutOptions = TimeoutOptions
+  { executionTimeout :: Maybe TimeSpec
+  , runTimeout :: Maybe TimeSpec
+  , taskTimeout :: Maybe TimeSpec
+  }
 
 start
   :: forall args result m. (MonadIO m)
@@ -175,27 +198,29 @@ start c k@(KnownWorkflow codec _ _ _) opts = gather $ \payloadsIO -> liftIO $ do
           )
         & WF.taskQueue .~ 
           ( defMessage 
-            & Common.name .~ (rawTaskQueue $ fromMaybe c.clientDefaultQueue $ knownWorkflowQueue k)
+            & Common.name .~ (rawTaskQueue opts.taskQueue)
             & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
           )
         & WF.input .~ 
           ( defMessage & Common.payloads .~ (convertToProtoPayload <$> inputs)
           )
-    --     & WF.workflowExecutionTimeout .~
-    --     & WF.workflowRunTimeout .~
-    --     & WF.workflowTaskTimeout .~
+        & WF.maybe'workflowExecutionTimeout .~ (timespecToDuration <$> opts.timeouts.executionTimeout)
+        & WF.maybe'workflowRunTimeout .~ (timespecToDuration <$> opts.timeouts.runTimeout)
+        & WF.maybe'workflowTaskTimeout .~ (timespecToDuration <$> opts.timeouts.taskTimeout)
         & WF.identity .~ c.clientIdentity
         & WF.requestId .~ UUID.toText reqId
-    --     & WF.workflowIdReusePolicy .~
-    --     & WF.retryPolicy .~
-    --     & WF.cronSchedule .~
-    --     & WF.memo .~
-    --     & WF.searchAttributes .~
+        & WF.workflowIdReusePolicy .~ 
+          workflowIdReusePolicyToProto
+            (fromMaybe WorkflowIdReusePolicyAllowDuplicateFailedOnly opts.workflowIdReusePolicy)
+        & WF.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retry)
+        & WF.cronSchedule .~ maybe "" Prelude.id opts.cronSchedule
+        & WF.maybe'memo .~ (convertToProtoMemo <$> opts.memo)
+        & WF.maybe'searchAttributes .~ (convertToProtoSearchAttributes <$> opts.searchAttributes)
+    --     TODO Not sure how to use these yet
     --     & WF.header .~
     --     & WF.requestEagerExecution .~
     --     & WF.continuedFailure .~
     --     & WF.lastCompletionResult .~
-    --     & WF.workflowStartDelay .~
   res <- startWorkflowExecution c.clientCore req
   case res of
     Left err -> throwIO err

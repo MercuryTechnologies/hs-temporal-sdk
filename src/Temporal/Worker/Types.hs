@@ -11,6 +11,7 @@ import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Control.Monad.State
+import Data.ProtoLens
 import Data.ByteString (ByteString)
 import Data.Hashable (Hashable(..))
 import Data.IORef (IORef)
@@ -25,6 +26,7 @@ import Data.Vector (Vector)
 import Data.Word (Word32)
 import Control.Concurrent.MVar (MVar)
 import Control.Concurrent.STM.TVar (TVar)
+import Lens.Family2
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
   ( ResolveActivity
   , ResolveChildWorkflowExecutionStart
@@ -37,7 +39,8 @@ import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands
   , WorkflowCommand'Variant(..)
   , CompleteWorkflowExecution
   )
-import Proto.Temporal.Api.Common.V1.Message (Payload)
+import Proto.Temporal.Api.Common.V1.Message (Payload, Memo, SearchAttributes)
+import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Message
 import Temporal.Activity.Definition
 import Temporal.Common
 import Temporal.Exception
@@ -632,3 +635,9 @@ data SignalDefinition (args :: [Type]) = forall codec.
     }
 
 data QueryDefinition codec (args :: [Type]) (result :: Type) = QueryDefinition { queryName :: Text }
+
+convertToProtoMemo :: Map Text RawPayload -> Memo
+convertToProtoMemo m = defMessage & Message.fields .~ fmap convertToProtoPayload m
+
+convertToProtoSearchAttributes :: Map Text RawPayload -> SearchAttributes
+convertToProtoSearchAttributes m = defMessage & Message.indexedFields .~ fmap convertToProtoPayload m
