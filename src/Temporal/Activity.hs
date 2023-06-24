@@ -20,6 +20,7 @@ import Data.ProtoLens
 import Data.Proxy
 import Data.Text (Text)
 import qualified Data.Text as Text
+import Data.Typeable
 import GHC.TypeLits
 import Lens.Family2
 import Temporal.Exception
@@ -29,14 +30,16 @@ import Temporal.Common
 import Temporal.Core.Worker (recordActivityHeartbeat)
 import Temporal.Payload
 import Temporal.Workflow
+import Temporal.Workflow.WorkflowDefinition
 import Temporal.Worker.Types
 
 import qualified Proto.Temporal.Sdk.Core.CoreInterface_Fields as Proto
 
 provideActivity :: forall codec name env f.
   ( IsValidActivityFunction env codec f
-  , StartActivityArgs codec (ArgsOf f) (ResultOf (Activity env) f)
+  , GatherArgs codec (ArgsOf f)
   , (ArgsOf f :->: Activity env (ResultOf (Activity env) f)) ~ f
+  , Typeable (ResultOf (Activity env) f)
   ) => codec -> Text -> f -> (ActivityDefinition env, KnownActivity (ArgsOf f) (ResultOf (Activity env) f))
 provideActivity codec name f = 
   ( ActivityDefinition

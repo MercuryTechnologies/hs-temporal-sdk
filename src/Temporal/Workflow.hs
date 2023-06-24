@@ -27,6 +27,7 @@ whenever a corresponding Workflow Function Execution (instance of the Function D
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
@@ -57,7 +58,6 @@ module Temporal.Workflow
   , KnownActivity(..)
   , StartActivityOptions(..)
   , defaultStartActivityOptions
-  , StartActivity
   , startActivity
   , StartLocalActivityOptions(..)
   , startLocalActivity
@@ -102,7 +102,6 @@ module Temporal.Workflow
   , randomGen
   , uuid4
   , WorkflowGenM(..)
-  , StartActivityArgs
   ) where
 import Control.Monad
 import Control.Monad.Logger
@@ -207,36 +206,6 @@ data TimeoutType
   | ScheduleToClose TimeSpec
   | StartToCloseAndScheduleToClose TimeSpec TimeSpec
 
-type family StartActivity env st baseResult (args :: [*]) = r | r -> env st baseResult args where
-  StartActivity env st baseResult '[] = Workflow env st (Task env st baseResult)
-  StartActivity env st baseResult (a ': as) = a -> StartActivity env st baseResult as 
-
-class StartActivityArgs codec (args :: [*]) baseResult where
-  applyArgs_ 
-    :: Proxy args 
-    -> Proxy env
-    -> Proxy st
-    -> codec
-    -> ([IO RawPayload] -> [IO RawPayload]) 
-    -> ([IO RawPayload] -> Workflow env st (Task env st baseResult))
-    -> StartActivity env st baseResult args 
-
-instance StartActivityArgs codec '[] baseResult where
-  applyArgs_ argsP envP stP _ accum f = f $ accum []
-
-instance (Codec codec a, StartActivityArgs codec as baseResult) => StartActivityArgs codec (a ': as) baseResult where
-  applyArgs_ argsP envP stP c accum f = \arg ->
-    applyArgs_
-    (Proxy @as) 
-    envP
-    stP
-    c
-    ((encode c arg :) . accum) 
-    f
-
-gatherStartActivityArgs :: forall env st args baseResult codec. StartActivityArgs codec args baseResult => codec -> ([IO RawPayload] -> Workflow env st (Task env st baseResult)) -> StartActivity env st baseResult args 
-gatherStartActivityArgs c f = applyArgs_ (Proxy @args) (Proxy @env) (Proxy @st) c id f
-
 {- $activityBasics
 
 An Activity is an IO-based function that executes a single, well-defined action (either short or long running),
@@ -254,18 +223,25 @@ The Event is added to the Workflow Execution's Event History.
 -}
 
 
-data KnownActivity (args :: [Type]) (result :: Type) 
-  = forall codec. (Codec codec result, StartActivityArgs codec args result) => KnownActivity
-    { knownActivityCodec :: codec
-    , knownActivityQueue :: Maybe TaskQueue
-    , knownActivityName :: Text
-    }
+data KnownActivity (args :: [Type]) (result :: Type) = forall codec. 
+  ( Codec codec result
+  , GatherArgs codec args
+  , Typeable result
+  ) => KnownActivity
+        { knownActivityCodec :: codec
+        , knownActivityQueue :: Maybe TaskQueue
+        , knownActivityName :: Text
+        }
 
 knownActivityArgsProxy :: KnownActivity args result -> Proxy args
 knownActivityArgsProxy _ = Proxy
 
-startActivity :: StartActivityOptions -> KnownActivity args result -> StartActivity env st result args
-startActivity opts k@(KnownActivity codec mTaskQueue name) = gatherStartActivityArgs codec $ \typedPayloads -> ilift $ do
+startActivity 
+  :: forall env st args result.
+     KnownActivity args result 
+  -> StartActivityOptions 
+  -> (args :->: Workflow env st (Task env st result))
+startActivity k@(KnownActivity codec mTaskQueue name) opts = gatherActivityArgs @env @st @args @result codec $ \typedPayloads -> ilift $ do
   inst <- ask
   ps <- liftIO $ forM typedPayloads $ \payloadAction -> 
     fmap convertToProtoPayload payloadAction
@@ -308,8 +284,13 @@ startActivity opts k@(KnownActivity codec mTaskQueue name) = gatherStartActivity
       Just (ActivityResult.ActivityResolution'Failed failure) -> error "not implemented"
       Just (ActivityResult.ActivityResolution'Cancelled details) -> error "not implemented"
       Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"
-  where
 
+gatherActivityArgs 
+  :: forall env st args result codec. GatherArgs codec args
+  => codec 
+  -> ([IO RawPayload] -> Workflow env st (Task env st result)) 
+  -> (args :->: Workflow env st (Task env st result))
+gatherActivityArgs c f = gatherArgs (Proxy @args) c id f
 
 data StartChildWorkflowOptions = StartChildWorkflowOptions 
   { cancellationType :: ChildWorkflowCancellationType

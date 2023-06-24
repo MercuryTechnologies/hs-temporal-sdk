@@ -60,8 +60,8 @@ launchTheMissiles = do
   waitChildWorkflowResult presidentialApproval
   $(logInfo) ("Confirmation confirmed, initiating sequence: " <> T.pack (UUID.toString uuid))
   act <- startActivity 
-    (defaultStartActivityOptions $ StartToClose $ TimeSpec 40 0) 
     shootMissileRef 
+    (defaultStartActivityOptions $ StartToClose $ TimeSpec 40 0) 
     4
   $(logInfo) ("Sequence initiated: " <> T.pack (UUID.toString uuid))
   r <- Workflow.wait act
