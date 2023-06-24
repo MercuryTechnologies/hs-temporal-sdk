@@ -56,7 +56,7 @@ instance (Codec codec arg, GatherArgs codec args) => GatherArgs codec (arg ': ar
     gatherArgs 
       (Proxy @args) 
       c 
-      ((encode c arg :) . accum)
+      (accum . (encode c arg :))
       f
 
 instance GatherArgs codec '[] where
