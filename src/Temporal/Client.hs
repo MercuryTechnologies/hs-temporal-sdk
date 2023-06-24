@@ -12,7 +12,23 @@ They are used to start new workflows and to signal existing workflows.
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE NamedFieldPuns #-}
-module Temporal.Client where
+module Temporal.Client 
+  (
+  -- * Workflow Client
+    WorkflowClient
+  , workflowClient
+  , WorkflowStartOptions(..)
+  , workflowStartOptions
+  , start
+  , WorkflowHandle
+  , awaitWorkflowResult
+  , execute
+  -- * Async Completion Client
+  -- * Schedule Client
+  -- * Miscellaneous
+  , streamEvents
+  , FollowOption(..)
+  ) where
 
 import Conduit
 import Control.Monad
@@ -58,6 +74,24 @@ import Unsafe.Coerce
 ---------------------------------------------------------------------------------
 -- WorkflowClient stuff
 
+workflowClient 
+  :: MonadIO m
+  => Client 
+  -> Namespace 
+  -- ^ Default namespace for all workflows started by this client.
+  -> Maybe Text 
+  -- ^ Identity of the client. 
+  --
+  -- If not provided, a default will be generated from the process ID and hostname.
+  -> m WorkflowClient
+workflowClient c ns mIdent = do
+  ident <- maybe (liftIO defaultClientIdentity) pure mIdent
+  pure WorkflowClient
+    { clientCore = c
+    , clientDefaultNamespace = ns
+    , clientIdentity = ident
+    }
+
 data WorkflowClient = WorkflowClient 
   { clientCore :: Client
   , clientDefaultNamespace :: Namespace
@@ -71,12 +105,19 @@ defaultClientIdentity = do
   host <- getHostName
   pure (Text.pack $ show pid <> "@" <> host)
 
-execute 
-  :: MonadIO m 
+execute
+  :: forall args result m. (MonadIO m )
   => WorkflowClient 
   -> KnownWorkflow args result 
-  -> m result
-execute = undefined
+  -> WorkflowStartOptions
+  -> (args :->: m result)
+execute c k@(KnownWorkflow codec _ _ _) opts = gather $ \payloadsIO -> liftIO $ do
+  inputs <- sequence payloadsIO
+  h <- startFromPayloads c k opts inputs
+  awaitWorkflowResult h
+  where
+    gather :: ([IO RawPayload] -> m result) -> (args :->: m result)
+    gather = gatherArgs (Proxy @args) codec Prelude.id
 
 data GetWorkflowHandleOptions = GetWorkflowHandleOptions
 
@@ -89,7 +130,7 @@ data WorkflowHandle a = forall args. WorkflowHandle
 
 awaitWorkflowResult :: MonadIO m => WorkflowHandle a -> m a
 awaitWorkflowResult h@(WorkflowHandle (KnownWorkflow{knownWorkflowCodec}) c wf r) = do
-  mev <- liftIO $ waitResult c wf r ()
+  mev <- liftIO $ waitResult c wf r c.clientDefaultNamespace
   case mev of
     Nothing -> error "Unexpected empty history"
     Just ev -> case ev ^. History.maybe'attributes of
@@ -98,6 +139,9 @@ awaitWorkflowResult h@(WorkflowHandle (KnownWorkflow{knownWorkflowCodec}) c wf r
         HistoryEvent'WorkflowExecutionCompletedEventAttributes attrs -> do
           let payloads = convertFromProtoPayload <$> (attrs ^. History.result . Common.payloads)
           -- LMAO this is such a comical coercion
+          --
+          -- We just need to ignore payloads if the result type is unit to allow workflows to evolve
+          -- such that they can return something else in the future.
           if typeRep h == typeOf ()
             then pure $ unsafeCoerce ()
             else case payloads of
@@ -113,12 +157,13 @@ awaitWorkflowResult h@(WorkflowHandle (KnownWorkflow{knownWorkflowCodec}) c wf r
         e -> error ("History event not supported " <> show e)
 
 
-signal :: WorkflowHandle a -> m ()
+signal :: MonadIO m => WorkflowHandle a -> SignalDefinition args -> (args :->: m ())
 signal = undefined
 
 getHandle
-  :: MonadIO m
+  :: (MonadIO m, Codec codec a)
   => WorkflowClient
+  -> codec
   -> WorkflowId
   -> Maybe RunId
   -> Maybe GetWorkflowHandleOptions
@@ -143,7 +188,13 @@ result
   -> m (Maybe a)
 result = undefined
 
-signalWithStart :: ()
+signalWithStart 
+  :: MonadIO m 
+  => WorkflowClient 
+  -> WorkflowStartOptions 
+  -> KnownWorkflow wfArgs result 
+  -> SignalDefinition sigArgs 
+  -> (wfArgs :->: (sigArgs :->: m ()))
 signalWithStart = undefined
 
 data WorkflowStartOptions = WorkflowStartOptions
@@ -181,14 +232,14 @@ data TimeoutOptions = TimeoutOptions
   , taskTimeout :: Maybe TimeSpec
   }
 
-start
-  :: forall args result m. (MonadIO m)
+startFromPayloads 
+  :: MonadIO m
   => WorkflowClient
   -> KnownWorkflow args result
   -> WorkflowStartOptions
-  -> (args :->: m (WorkflowHandle result))
-start c k@(KnownWorkflow codec _ _ _) opts = gather $ \payloadsIO -> liftIO $ do
-  inputs <- sequence payloadsIO
+  -> [RawPayload]
+  -> m (WorkflowHandle result)
+startFromPayloads c k@(KnownWorkflow codec _ _ _) opts payloads = liftIO $ do
   reqId <- UUID.nextRandom
   let req = defMessage
         & WF.namespace .~ (rawNamespace $ fromMaybe (c.clientDefaultNamespace) $ knownWorkflowNamespace k)
@@ -202,7 +253,7 @@ start c k@(KnownWorkflow codec _ _ _) opts = gather $ \payloadsIO -> liftIO $ do
             & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
           )
         & WF.input .~ 
-          ( defMessage & Common.payloads .~ (convertToProtoPayload <$> inputs)
+          ( defMessage & Common.payloads .~ (convertToProtoPayload <$> payloads)
           )
         & WF.maybe'workflowExecutionTimeout .~ (timespecToDuration <$> opts.timeouts.executionTimeout)
         & WF.maybe'workflowRunTimeout .~ (timespecToDuration <$> opts.timeouts.runTimeout)
@@ -230,6 +281,16 @@ start c k@(KnownWorkflow codec _ _ _) opts = gather $ \payloadsIO -> liftIO $ do
       , workflowHandleWorkflowId = opts.workflowId
       , workflowHandleRunId = Just (RunId $ swer ^. WF.runId)
       }
+
+start
+  :: forall args result m. (MonadIO m)
+  => WorkflowClient
+  -> KnownWorkflow args result
+  -> WorkflowStartOptions
+  -> (args :->: m (WorkflowHandle result))
+start c k@(KnownWorkflow codec _ _ _) opts = gather $ \payloadsIO -> liftIO $ do
+  inputs <- sequence payloadsIO
+  startFromPayloads c k opts inputs
   where
     gather :: ([IO RawPayload] -> m (WorkflowHandle result)) -> (args :->: m (WorkflowHandle result))
     gather = gatherArgs (Proxy @args) codec Prelude.id
@@ -358,12 +419,12 @@ waitResult
   :: WorkflowClient
   -> WorkflowId 
   -> Maybe RunId 
-  -> () {- options incl namespace -}
+  -> Namespace {- options incl namespace -}
   -> IO (Maybe HistoryEvent)
-waitResult c wfId mrId _ = do
+waitResult c wfId mrId (Namespace ns) = do
   let startingReq :: GetWorkflowExecutionHistoryRequest
       startingReq = defMessage
-        & RR.namespace .~ "default"
+        & RR.namespace .~ ns
         & RR.execution .~ 
           ( defMessage 
             & Common.workflowId .~ rawWorkflowId wfId

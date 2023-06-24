@@ -707,18 +707,14 @@ pub extern "C" fn hs_signal_workflow_execution(client: *mut ClientRef, c_call: *
 
 #[no_mangle]
 pub extern "C" fn hs_start_workflow_execution(client: *mut ClientRef, c_call: *const RpcCall, mvar: *mut MVar, cap: Capability, error_slot: *mut*mut CRPCError, result_slot: *mut*mut CArray<u8>) -> () {
-  println!("hs_start_workflow_execution");
   let client = unsafe { &mut *client };
   let mut retry_client = client.retry_client.clone();
   let call: TemporalCall = unsafe { (&*c_call).into() };
-  println!("got all the things");
 
   let callback: HsCallback<CArray<u8>, CRPCError> = HsCallback { cap, mvar, result_slot, error_slot };
   client.runtime.future_result_into_hs(callback, async move {
-    println!("trying to call start_workflow_execution");
     match rpc_call!(retry_client, call, start_workflow_execution) {
       Ok(resp) => {
-        println!("good");
         Ok(CArray::c_repr_of(resp).unwrap())
       },
       Err(err) => {

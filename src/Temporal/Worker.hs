@@ -128,13 +128,13 @@ modifyCore f = ConfigM $ modify' $ \conf -> conf
   { coreConfig = f (coreConfig conf)
   }
 
-setNamespace :: Text -> ConfigM wfEnv actEnv ()
-setNamespace ns = modifyCore $ \conf -> conf
+setNamespace :: Namespace -> ConfigM wfEnv actEnv ()
+setNamespace (Namespace ns) = modifyCore $ \conf -> conf
   { Core.namespace = ns
   }
 
-setTaskQueue :: Text -> ConfigM wfEnv actEnv ()
-setTaskQueue tq = modifyCore $ \conf -> conf
+setTaskQueue :: TaskQueue -> ConfigM wfEnv actEnv ()
+setTaskQueue (TaskQueue tq) = modifyCore $ \conf -> conf
   { Core.taskQueue = tq
   }
 

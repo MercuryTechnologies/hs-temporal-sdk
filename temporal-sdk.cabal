@@ -75,12 +75,17 @@ library
 
 test-suite temporal-sdk-tests
   type: exitcode-stdio-1.0
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
     base >= 4.14 && < 5,
     temporal-sdk,
+    temporal-sdk-core,
     hspec,
     hspec-discover,
-    clock
+    clock,
+    text,
+    uuid,
+    monad-logger,
   main-is: Main.hs
   hs-source-dirs: test
   other-modules:

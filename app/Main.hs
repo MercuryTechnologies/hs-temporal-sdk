@@ -135,10 +135,9 @@ runClient :: Client -> String -> String -> IO ()
 runClient c taskname id' = do
   putStrLn "Running client"
   reqId <- nextRandom
-  ident <- C.defaultClientIdentity
   let namespace = Namespace "default"
       queue = TaskQueue "default"
-      workflowClient = C.WorkflowClient c (Namespace "default") ident
+  workflowClient <- C.workflowClient c (Namespace "default") Nothing
   resp <- C.start 
     workflowClient
     helloRef
