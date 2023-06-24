@@ -148,3 +148,15 @@ data CompleteAsync = CompleteAsync
 instance Exception CompleteAsync where
   toException = activityExceptionToException
   fromException = activityExceptionFromException
+
+
+
+data WorkflowExecutionClosed 
+  = WorkflowExecutionFailed
+  | WorkflowExecutionTimedOut
+  | WorkflowExecutionCanceled
+  | WorkflowExecutionTerminated
+  | WorkflowExecutionContinuedAsNew
+  deriving (Show)
+
+instance Exception WorkflowExecutionClosed

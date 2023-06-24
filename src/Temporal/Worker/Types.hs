@@ -256,6 +256,7 @@ data WorkflowDefinition env st = WorkflowDefinition
 type IsValidWorkflowFunction (codec :: *) (env :: *) (st :: *) f = 
   ( ApplyPayloads codec (ArgsOf f) (Workflow env st (ResultOf (Workflow env st) f))
   , Codec codec (ResultOf (Workflow env st) f)
+  , Typeable (ResultOf (Workflow env st) f)
   )
 
 data ValidWorkflowFunction env st = forall codec f. (IsValidWorkflowFunction codec env st f) => 

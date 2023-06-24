@@ -55,7 +55,6 @@ module Temporal.Workflow
   -- ** Activity operations
   -- $activityBasics
   , KnownActivity(..)
-  , knownActivityName
   , StartActivityOptions(..)
   , defaultStartActivityOptions
   , StartActivity

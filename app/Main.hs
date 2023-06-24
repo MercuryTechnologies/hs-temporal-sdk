@@ -69,10 +69,12 @@ launchTheMissiles = do
   pure r
 
 
-hello :: Workflow () () ()
-hello = do
+hello :: T.Text -> Workflow () () T.Text
+hello person = do
   t <- now
-  $(logInfo) (T.pack ("Hello, world! " ++ show t))
+  let msg = "Hello, " <> person <> "! " <> T.pack (show t)
+  $(logInfo) msg
+  pure msg
 
 
 -- To Run:
@@ -137,8 +139,10 @@ runClient c taskname id' = do
   let wfc = WorkflowClient c (Namespace "default") (TaskQueue "default") ident
   resp <- start 
     wfc
-    launchTheMissilesRef
+    helloRef
     (WorkflowStartOptions (WorkflowId $ T.pack id'))
+    "Ian"
+  awaitWorkflowResult resp >>= print
   pure ()
         -- & workflowRunTimeoutSeconds .~ 100
         -- & workflowTaskTimeoutSeconds .~ 100

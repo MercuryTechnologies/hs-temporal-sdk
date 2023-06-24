@@ -67,6 +67,7 @@ instance GatherArgs codec '[] where
 data KnownWorkflow (args :: [Type]) (result :: Type) = forall codec. 
   ( Codec codec result
   , GatherArgs codec args
+  , Typeable result
   ) => KnownWorkflow 
         { knownWorkflowCodec :: codec 
         , knownWorkflowNamespace :: Maybe Namespace
