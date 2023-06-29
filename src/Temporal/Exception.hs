@@ -105,7 +105,7 @@ instance Exception ChildWorkflowFailed where
   fromException = workflowExceptionFromException
 
 data ChildWorkflowCancelled = ChildWorkflowCancelled
-  deriving (Show)
+  deriving (Show, Eq)
   -- { childWorkflowCancelledWorkflowId :: Text
   -- , childWorkflowCancelledWorkflowType :: Text
   -- , childWorkflowCancelledRunId :: Text
@@ -157,6 +157,6 @@ data WorkflowExecutionClosed
   | WorkflowExecutionCanceled
   | WorkflowExecutionTerminated
   | WorkflowExecutionContinuedAsNew
-  deriving (Show)
+  deriving (Show, Eq)
 
 instance Exception WorkflowExecutionClosed

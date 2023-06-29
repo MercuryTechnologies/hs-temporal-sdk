@@ -99,46 +99,63 @@ handleActivation activation = do
   completion <- if shouldRun
     then do
       $(logDebug) "Running workflow"
-      inst <- createOrFetchWorkflowInstance
-      $(logDebug) "Creates instance"
-      -- This deadlock code seems suspect, but really it's because the workflow code
-      -- shouldn't be able to block indefinitely on a single thread before returning
-      -- a result. If it does, it's a bug in the workflow code.
-      completionHandle <- async $ do
-        $(logDebug) "About to activate"
-        liftIO $ case inst of
-          (OpaqueWorkflow inst') -> activate worker inst' activation
-      completion <- UnliftIO.try $ wait completionHandle
-      -- mCompletion <- case worker.workerConfig.deadlockTimeout of
-      --   Nothing -> do
-      --     $(logDebug) "Waiting forever for completion"
-      --     Just <$> wait completionHandle
-      --   -- TODO ensure timeout is in microseconds
-      --   Just microsecs -> do
-      --     $(logDebug) "Waiting for completion"
-      --     timeout microsecs $ wait completionHandle
-      -- let eResult = case mCompletion of
-      --       -- TODO show correct timeout value
-      --       Nothing -> Left $ RuntimeError "Potential deadlock detected for workflow" --  <> show (activation ^. Activation.runId) <> " in namespace " <> show (activation ^. Activation.namespace) <> ". Workflow didn't yield within " <> show 1 <> " seconds.")
-      --       Just result -> Right result
-      case completion of
-        Left (SomeException err) -> do
-          $(logDebug) ("Workflow failure: " <> Text.pack (show err))
-          -- TODO there are lots of fields on this failureProto that we probably want to fill in
-          let innerFailure :: F.Failure
-              innerFailure = defMessage & F.message .~ (Text.pack $ show err)
-
-              failureProto :: Completion.Failure
-              failureProto = defMessage & Completion.failure .~ innerFailure
-                
-                -- & Activation.message .~ (Text.pack $ show err)
+      mInst <- createOrFetchWorkflowInstance
+      case mInst of
+        Nothing -> do
+          $logInfo "No workflow definition found"
+          let failureProto = defMessage
+                & Completion.failure .~ 
+                  ( defMessage 
+                    & F.message .~ "No workflow definition found"
+                    & F.applicationFailureInfo .~ 
+                      ( defMessage 
+                        & F.type' .~ "NotFound"
+                        & F.nonRetryable .~ False
+                      )
+                  )
               completionMessage = defMessage
                 & Completion.runId .~ (activation ^. Activation.runId)
                 & Completion.failed .~ failureProto
           pure completionMessage
-        Right ok -> do
-          $(logDebug) $ Text.pack ("Workflow completion: " ++ show ok)
-          pure ok 
+        Just inst -> do
+          -- This deadlock code seems suspect, but really it's because the workflow code
+          -- shouldn't be able to block indefinitely on a single thread before returning
+          -- a result. If it does, it's a bug in the workflow code.
+          completionHandle <- async $ do
+            $(logDebug) "About to activate"
+            liftIO $ case inst of
+              (OpaqueWorkflow inst') -> activate worker inst' activation
+          completion <- waitCatch completionHandle
+          -- mCompletion <- case worker.workerConfig.deadlockTimeout of
+          --   Nothing -> do
+          --     $(logDebug) "Waiting forever for completion"
+          --     Just <$> wait completionHandle
+          --   -- TODO ensure timeout is in microseconds
+          --   Just microsecs -> do
+          --     $(logDebug) "Waiting for completion"
+          --     timeout microsecs $ wait completionHandle
+          -- let eResult = case mCompletion of
+          --       -- TODO show correct timeout value
+          --       Nothing -> Left $ RuntimeError "Potential deadlock detected for workflow" --  <> show (activation ^. Activation.runId) <> " in namespace " <> show (activation ^. Activation.namespace) <> ". Workflow didn't yield within " <> show 1 <> " seconds.")
+          --       Just result -> Right result
+          case completion of
+            Left (SomeException err) -> do
+              $(logDebug) ("Workflow failure: " <> Text.pack (show err))
+              -- TODO there are lots of fields on this failureProto that we probably want to fill in
+              let innerFailure :: F.Failure
+                  innerFailure = defMessage & F.message .~ (Text.pack $ show err)
+
+                  failureProto :: Completion.Failure
+                  failureProto = defMessage & Completion.failure .~ innerFailure
+                    
+                    -- & Activation.message .~ (Text.pack $ show err)
+                  completionMessage = defMessage
+                    & Completion.runId .~ (activation ^. Activation.runId)
+                    & Completion.failed .~ failureProto
+              pure completionMessage
+            Right ok -> do
+              $(logDebug) $ Text.pack ("Workflow completion: " ++ show ok)
+              pure ok 
     else do
       $(logDebug) "Workflow does not need to run."
       pure $ defMessage 
@@ -175,12 +192,12 @@ handleActivation activation = do
       )
       (activation ^. Activation.vec'jobs)
 
-    createOrFetchWorkflowInstance :: WorkerM wfEnv actEnv (OpaqueWorkflow WorkflowInstance wfEnv)
+    createOrFetchWorkflowInstance :: WorkerM wfEnv actEnv (Maybe (OpaqueWorkflow WorkflowInstance wfEnv))
     createOrFetchWorkflowInstance = do
       worker <- ask
       runningWorkflows_ <- atomically $ readTMVar worker.workerWorkflowState.runningWorkflows
       case HashMap.lookup (RunId $ activation ^. Activation.runId) runningWorkflows_ of
-        Just inst -> pure inst
+        Just inst -> pure $ Just inst
         Nothing -> do
           vExistingInstance <- forM activationStartWorkflowJobs $ \(job, startWorkflow) -> do
             let runId_ = RunId $ activation ^. CommonProto.runId
@@ -216,13 +233,11 @@ handleActivation activation = do
                         (startWorkflow ^. Activation.maybe'startTime)
                   }
             case HashMap.lookup (startWorkflow ^. Activation.workflowType) worker.workerWorkflowState.workerWorkflowFunctions of 
-              Nothing -> throwIO $ RuntimeError "No workflow definition found"
+              Nothing -> pure Nothing
               Just (OpaqueWorkflow definition) -> do
                 inst <- create workflowInfo worker.workerWorkflowState.workerEnv definition
-                upsertWorkflowInstance runId_ inst
-          case vExistingInstance V.!? 0 of
-            Nothing -> throwIO $ RuntimeError "No workflow definition found"
-            Just inst -> pure inst
+                Just <$> upsertWorkflowInstance runId_ inst
+          pure $ join (vExistingInstance V.!? 0)
       
     removeEvictedWorkflowInstances :: WorkerM wfEnv actEnv ()
     removeEvictedWorkflowInstances = forM_ (activation ^. Activation.vec'jobs) $ \job -> do
@@ -230,11 +245,13 @@ handleActivation activation = do
         Just (WorkflowActivationJob'RemoveFromCache removeFromCache) -> do
           worker <- ask
           let runId_ = RunId $ activation ^. CommonProto.runId
-          -- TODO figure out if there's anything we need to do to the WorkflowInstance before removing it
           join $ atomically $ do
             currentWorkflows <- takeTMVar worker.workerWorkflowState.runningWorkflows
             putTMVar worker.workerWorkflowState.runningWorkflows $ HashMap.delete runId_ currentWorkflows
             case HashMap.lookup runId_ currentWorkflows of
               Nothing -> pure $ $(logDebug) $ Text.pack ("Eviction request on an unknown workflow with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
-              Just _ -> pure $ $(logDebug) $ Text.pack ("Evicting workflow instance with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
+              Just (OpaqueWorkflow wf) -> pure $ do
+                mTask <- readIORef wf.workflowPrimaryTask
+                mapM_ cancel mTask
+                $(logDebug) $ Text.pack ("Evicting workflow instance with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
         _ -> pure ()

@@ -86,6 +86,7 @@ test-suite temporal-sdk-tests
     text,
     uuid,
     monad-logger,
+    exceptions
   main-is: Main.hs
   hs-source-dirs: test
   other-modules:

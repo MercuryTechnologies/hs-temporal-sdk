@@ -147,23 +147,28 @@ activate w inst act = runInstanceM inst $ do
 
 runInstanceM :: WorkflowInstance env st -> InstanceM env st a -> IO a
 runInstanceM worker m = runReaderT (unInstanceM m) worker
--- createWorkflowInstance :: Worker env -> WorkflowActivation -> IO WorklowInstance
--- createWorkflowInstance w act = do
 
 -- NB the workflow commands are reversed since we're pushing them onto a stack
 -- as we go.
 readSuccessfulCommands :: InstanceM env st (Reversed WorkflowCommand)
 readSuccessfulCommands = do
   inst <- ask
+  primaryTask <- readIORef inst.workflowPrimaryTask
   cmds <- atomically $ do
     commands <- readTVar inst.workflowCommands
     case commands of
       FlushActivationCompletion cmds -> do
         writeTVar inst.workflowCommands (RunningActivation $ Reversed [])
         pure cmds
-      RunningActivation _cmds -> 
+      RunningActivation cmds -> 
         -- We want to wait until we've explored the entire activation before sending.
-        retry
+        case primaryTask of
+          Nothing -> retry
+          Just action -> pollSTM action >>= \case
+            Nothing -> retry
+            Just _ -> do
+              writeTVar inst.workflowCommands (RunningActivation $ Reversed [])
+              pure cmds
   $(logDebug) $ Text.pack ("readSuccessfulCommands: " <> show cmds)
   pure cmds
 

@@ -71,6 +71,7 @@ module Temporal.Workflow
   , ChildWorkflowHandle
   , waitChildWorkflowResult
   , Temporal.Workflow.wait
+  , cancelChildWorkflowExecution
   -- , execWorkflow
   -- , continueAsNew
   -- , executeLocalActivity
@@ -406,7 +407,14 @@ waitChildWorkflowResult wfHandle@(ChildWorkflowHandle{childWorkflowCodec}) = do
       ChildWorkflow.ChildWorkflowResult'Failed res -> throw $ ChildWorkflowFailed $ res ^. ChildWorkflow.failure
       ChildWorkflow.ChildWorkflowResult'Cancelled _ -> throw ChildWorkflowCancelled
 
-
+cancelChildWorkflowExecution :: ChildWorkflowHandle env st result -> Workflow env st ()
+cancelChildWorkflowExecution wfHandle@(ChildWorkflowHandle{childWorkflowSequence}) = ilift $ do
+  inst <- ask
+  addCommand inst $ defMessage 
+    & Command.cancelChildWorkflowExecution .~ 
+      ( defMessage 
+        & Command.childWorkflowSeq .~ rawSequence childWorkflowSequence
+      )
 
 data StartLocalActivityOptions = StartLocalActivityOptions 
   { activityId :: Maybe ActivityId

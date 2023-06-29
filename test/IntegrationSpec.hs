@@ -1,7 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE TypeApplications #-}
 module IntegrationSpec where
 
 import Control.Exception
+import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Data.Text (Text)
 import qualified Data.UUID as UUID
@@ -9,6 +12,7 @@ import qualified Data.UUID.V4 as UUID
 import Test.Hspec
 import Temporal.Core.Client
 import qualified Temporal.Client as C
+import Temporal.Exception
 import qualified Temporal.Workflow as W
 import Temporal.Payload
 import Temporal.Worker
@@ -19,7 +23,7 @@ withWorker conf m = do
   rt <- initializeRuntime
   let clientConfig = defaultClientConfig
   (Right c) <- connectClient rt clientConfig
-  bracket (runNoLoggingT $ startWorker c conf) shutdown (const m)
+  bracket (runStdoutLoggingT $ startWorker c conf) shutdown (const m)
 
 
 makeClient :: IO C.WorkflowClient
@@ -71,9 +75,37 @@ needsClient = do
                 taskQueue
           C.execute client kw opts 1 "two" False
             `shouldReturn` (1, "two", False)
+      specify "args that parse incorrectly should fail a Workflow appropriately" $ \client -> do
+        pending
+      specify "args that parse incorrectly should fail an Activity appropriately" $ \client -> do
+        pending
+      specify "Workflow return values that parse incorrectly should throw a ValueException for Client" $ \client -> do
+        pending
+      specify "ChildWorkflow return values that parse incorrectly should throw a ValueException in a Workflow" $ \client -> do
+        pending
+      specify "Activity return values that parse incorrectly should throw a ValueException in a Workflow" $ \client -> do
+        pending
 
-  --   describe "not found" $ do
-  --     specify "it should result in a task retry" pending
+    -- describe "not found" $ do
+    --   xit "should result in a task retry" $ \client -> do
+    --     taskQueue <- W.TaskQueue <$> uuidText
+    --     let conf = configure () () $ do
+    --           setNamespace $ W.Namespace "test"
+    --           setTaskQueue taskQueue
+    --     withWorker conf $ do
+    --       wfId <- uuidText
+    --       let opts = C.workflowStartOptions
+    --             (W.WorkflowId wfId)
+    --             taskQueue
+    --       -- pending
+    --       let nonExistentWorkflow :: W.KnownWorkflow '[] ()
+    --           nonExistentWorkflow = W.KnownWorkflow JSON Nothing Nothing "foo"
+    --       _wfHandle <- C.start client nonExistentWorkflow opts
+    --       _ <- getLine
+    --       pure ()
+
+
+
           
   --     specify "the workflow should return the correct value" pending
   --   describe "Cancellation" $ do
@@ -87,13 +119,81 @@ needsClient = do
   --     specify "ApplicationFailure exception" pending
   --     specify "ActivityFailure exception" pending
   --     specify "Non-wrapped exception" pending
-  --   describe "Child workflows" $ do
-  --     specify "invoke" pending
-  --     specify "failure" pending
-  --     specify "termination" pending
-  --     specify "timeout" pending
-  --     specify "startFail" pending
-  --     specify "cancel" pending
+    describe "Child workflows" $ do
+      specify "invoke" $ \client -> do
+        parentId <- uuidText
+        let isEven :: Int -> W.Workflow () () Bool
+            isEven x = pure (x `mod` 2 == 0)
+            (def, kw) = W.provideWorkflow JSON "isEven" () isEven
+            parentWorkflow :: W.Workflow () () Bool
+            parentWorkflow = do
+              childWorkflowId <- (W.WorkflowId . UUID.toText) <$> W.uuid4
+              childWorkflow <- W.startChildWorkflow @() @() kw W.defaultChildWorkflowOptions childWorkflowId 2
+              W.waitChildWorkflowResult childWorkflow
+            (parentDef, parentKw) = W.provideWorkflow JSON "parent" () parentWorkflow
+            conf = configure () () $ do
+              setNamespace $ W.Namespace "test"
+              setTaskQueue $ W.TaskQueue "test"
+              addWorkflow def
+              addWorkflow parentDef
+        withWorker conf $ do
+          let opts = C.workflowStartOptions
+                (W.WorkflowId parentId)
+                (W.TaskQueue "test")
+          C.execute client parentKw opts
+            `shouldReturn` True
+
+      specify "failure" $ \client -> do
+        parentId <- uuidText
+        let busted :: W.Workflow () () ()
+            busted = error "busted"
+            (def, kw) = W.provideWorkflow JSON "busted" () busted
+            parentWorkflow :: W.Workflow () () ()
+            parentWorkflow = do
+              childWorkflowId <- (W.WorkflowId . UUID.toText) <$> W.uuid4
+              childWorkflow <- W.startChildWorkflow @() @() kw W.defaultChildWorkflowOptions childWorkflowId
+              W.waitChildWorkflowResult childWorkflow
+            (parentDef, parentKw) = W.provideWorkflow JSON "parent" () parentWorkflow
+            conf = configure () () $ do
+              setNamespace $ W.Namespace "test"
+              setTaskQueue $ W.TaskQueue "test"
+              addWorkflow def
+              addWorkflow parentDef
+        withWorker conf $ do
+          let opts = C.workflowStartOptions
+                (W.WorkflowId parentId)
+                (W.TaskQueue "test")
+          C.execute client parentKw opts
+            `shouldThrow` (== WorkflowExecutionFailed)
+
+      specify "termination" $ \_ -> pending
+      specify "timeout" $ \_ -> pending
+      specify "startFail" $ \_ -> pending
+      specify "cancel" $ \client -> do
+        parentId <- uuidText
+        let cancelTest :: W.Workflow () () ()
+            cancelTest = pure ()
+            (def, kw) = W.provideWorkflow JSON "cancelTest" () cancelTest
+            parentWorkflow :: W.Workflow () () Bool
+            parentWorkflow = do
+              childWorkflowId <- (W.WorkflowId . UUID.toText) <$> W.uuid4
+              childWorkflow <- W.startChildWorkflow @() @() kw W.defaultChildWorkflowOptions childWorkflowId
+              W.cancelChildWorkflowExecution childWorkflow
+              result <- Catch.try $ W.waitChildWorkflowResult childWorkflow
+              pure (result == Left ChildWorkflowCancelled)
+            (parentDef, parentKw) = W.provideWorkflow JSON "parent" () parentWorkflow
+            conf = configure () () $ do
+              setNamespace $ W.Namespace "test"
+              setTaskQueue $ W.TaskQueue "test"
+              addWorkflow def
+              addWorkflow parentDef
+        withWorker conf $ do
+          let opts = C.workflowStartOptions
+                (W.WorkflowId parentId)
+                (W.TaskQueue "test")
+          C.execute client parentKw opts
+            `shouldReturn` True
+
   --     describe "Signals" $ do
   --       specify "send" pending
   --       specify "interrupt" pending
