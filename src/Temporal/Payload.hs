@@ -108,7 +108,7 @@ convertToProtoPayload (RawPayload d m) = defMessage
   & Proto.data' .~ d
   & Proto.metadata .~ m
 
-class ApplyPayloads codec (args :: [*]) result where
+class ApplyPayloads codec (args :: [*]) where
   applyPayloads 
     :: codec 
     -> Proxy args 
@@ -117,29 +117,15 @@ class ApplyPayloads codec (args :: [*]) result where
     -> V.Vector RawPayload
     -> IO result
 
-instance ApplyPayloads codec '[] result where
+instance ApplyPayloads codec '[] where
   applyPayloads _ _ _ f _ = pure f
 
-instance (Codec codec ty, ApplyPayloads codec tys result) => ApplyPayloads codec (ty ': tys) result where
-  applyPayloads codec _ _ f vec = case V.uncons vec of
+instance (Codec codec ty, ApplyPayloads codec tys) => ApplyPayloads codec (ty ': tys) where
+  applyPayloads codec _ resP f vec = case V.uncons vec of
     Nothing -> error "Not enough arguments"
     Just (pl, rest) -> do
       res <- decode codec pl
       case res of
-        Right arg -> applyPayloads codec (Proxy @tys) (Proxy @result) (f arg) rest
+        Right arg -> applyPayloads codec (Proxy @tys) resP (f arg) rest
         Left err -> error err
 
--- class ApplyPayloads codec f r | f -> r where
---   applyPayloads :: codec -> proxy r -> f -> V.Vector RawPayload -> IO (Either String r)
-
--- instance ApplyPayloads codec f f where
---   applyPayloads _ _ f vec = pure $ Right f
-
--- instance (Codec codec arg, ApplyPayloads codec rest r) => ApplyPayloads codec (arg -> rest) r where
---   applyPayloads p resultProof f vec = case V.uncons vec of
---     Nothing -> pure $ Left "Not enough arguments"
---     Just (pl, rest) -> do
---       res <- decode p pl
---       case res of
---         Right arg -> applyPayloads p resultProof (f arg) rest
---         Left err -> pure $ Left err

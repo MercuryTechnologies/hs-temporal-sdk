@@ -130,6 +130,7 @@ import Data.UUID (UUID)
 import Data.UUID.Types.Internal ( buildFromBytes )
 import Data.Word (Word32)
 import Data.Vector (Vector)
+import GHC.Stack
 import GHC.TypeLits
 import Lens.Family2
 import Proto.Temporal.Api.Common.V1.Message (Payload)
@@ -157,7 +158,7 @@ import UnliftIO
 
 data Task env st a = Task (Workflow env st a)
 
-wait :: Task env st a -> Workflow env st a
+wait :: HasCallStack => Task env st a -> Workflow env st a
 wait (Task w) = w
 
 ilift :: InstanceM env st a -> Workflow env st a
@@ -240,8 +241,8 @@ knownActivityArgsProxy :: KnownActivity args result -> Proxy args
 knownActivityArgsProxy _ = Proxy
 
 startActivity 
-  :: forall env st args result.
-     KnownActivity args result 
+  :: forall env st args result. HasCallStack
+  => KnownActivity args result 
   -> StartActivityOptions 
   -> (args :->: Workflow env st (Task env st result))
 startActivity k@(KnownActivity codec mTaskQueue name) opts = gatherActivityArgs @env @st @args @result codec $ \typedPayloads -> ilift $ do
@@ -325,8 +326,9 @@ defaultChildWorkflowOptions = StartChildWorkflowOptions
   }
 
 signalChildWorkflow 
-  :: ChildWorkflowHandle env st result 
-  -> QueryDefinition codec args result
+  :: HasCallStack
+  => ChildWorkflowHandle env st result 
+  -> QueryDefinition args result
   -> Workflow env st ()
 signalChildWorkflow = undefined
 
@@ -337,7 +339,8 @@ signalChildWorkflow = undefined
 -- By default, a child is scheduled on the same Task Queue as the parent.
 
 startChildWorkflow 
-  :: forall env st args result. KnownWorkflow args result 
+  :: forall env st args result. HasCallStack
+  => KnownWorkflow args result 
   -> StartChildWorkflowOptions
   -> WorkflowId
   -> (args :->: Workflow env st (ChildWorkflowHandle env st result))
@@ -395,7 +398,7 @@ startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId =
       addCommand inst cmd
       pure wfHandle
 
-waitChildWorkflowResult :: ChildWorkflowHandle env st result -> Workflow env st result
+waitChildWorkflowResult :: HasCallStack => ChildWorkflowHandle env st result -> Workflow env st result
 waitChildWorkflowResult wfHandle@(ChildWorkflowHandle{childWorkflowCodec}) = do
   res <- getIVar wfHandle.resultHandle
   case res ^. Activation.result . ChildWorkflow.maybe'status of
@@ -409,7 +412,7 @@ waitChildWorkflowResult wfHandle@(ChildWorkflowHandle{childWorkflowCodec}) = do
       ChildWorkflow.ChildWorkflowResult'Failed res -> throw $ ChildWorkflowFailed $ res ^. ChildWorkflow.failure
       ChildWorkflow.ChildWorkflowResult'Cancelled _ -> throw ChildWorkflowCancelled
 
-cancelChildWorkflowExecution :: ChildWorkflowHandle env st result -> Workflow env st ()
+cancelChildWorkflowExecution :: HasCallStack => ChildWorkflowHandle env st result -> Workflow env st ()
 cancelChildWorkflowExecution wfHandle@(ChildWorkflowHandle{childWorkflowSequence}) = ilift $ do
   inst <- ask
   addCommand inst $ defMessage 
@@ -417,6 +420,7 @@ cancelChildWorkflowExecution wfHandle@(ChildWorkflowHandle{childWorkflowSequence
       ( defMessage 
         & Command.childWorkflowSeq .~ rawSequence childWorkflowSequence
       )
+  -- TODO, should this block?
 
 data StartLocalActivityOptions = StartLocalActivityOptions 
   { activityId :: Maybe ActivityId
@@ -429,7 +433,8 @@ data StartLocalActivityOptions = StartLocalActivityOptions
   -- TODO headers
   }
 startLocalActivity 
-  :: StartLocalActivityOptions 
+  :: HasCallStack
+  => StartLocalActivityOptions 
   -> KnownActivity args result
   -> Workflow env st ()
 startLocalActivity = undefined
@@ -462,7 +467,7 @@ now = Workflow $ do
 --
 -- - You want to change the remaining logic of a Workflow while it is still running
 -- - If your new logic can result in a different execution path
-applyPatch :: PatchId -> Bool {- ^ whether the patch is deprecated -} -> Workflow env st Bool 
+applyPatch :: HasCallStack => PatchId -> Bool {- ^ whether the patch is deprecated -} -> Workflow env st Bool 
 applyPatch pid deprecated = Workflow $ fmap Done $ do
   inst <- ask
   memoized <- readIORef inst.workflowMemoizedPatches
@@ -478,15 +483,16 @@ applyPatch pid deprecated = Workflow $ fmap Done $ do
           Command.setPatchMarker .~ (defMessage & Command.patchId .~ rawPatchId pid & Command.deprecated .~ deprecated)
       pure usePatch
 
-patched :: PatchId -> Workflow env st Bool
+patched :: HasCallStack => PatchId -> Workflow env st Bool
 patched pid = applyPatch pid False
 
-deprecatePatch :: PatchId -> Workflow env st ()
+deprecatePatch :: HasCallStack => PatchId -> Workflow env st ()
 deprecatePatch pid = void $ applyPatch pid True
 
 -- TODO move the codec value into the QueryDefinition?
 query 
-  :: QueryDefinition codec args result 
+  :: HasCallStack
+  => QueryDefinition args result 
   -> (args :->: Workflow env st (ChildWorkflowHandle env st result))
 query = undefined
 
@@ -494,22 +500,14 @@ query = undefined
 randomGen :: Workflow env st WorkflowGenM
 randomGen = workflowRandomnessSeed <$> askInstance
 
--- setDynamicQueryHandler :: () -> Workflow env ()
--- setDynamicQueryHandler = undefined
-
--- setDynamicSignalHandler :: () -> Workflow env ()
--- setDynamicSignalHandler = undefined
-
 newtype Query env st a = Query (Reader (env, st) a)
 
-
-setQueryHandler :: forall codec env st f result.
+-- TODO, inner callstack?
+setQueryHandler :: forall env st f result.
   ( ResultOf (Query env st) f ~ result
-  , ApplyPayloads codec (ArgsOf f) (Query env st result)
-  , Codec codec result
   , f ~ (ArgsOf f :->: Query env st result)
-  ) => codec -> QueryDefinition codec (ArgsOf f) result -> f -> Workflow env st ()
-setQueryHandler codec (QueryDefinition n) f = ilift $ do
+  ) => QueryDefinition (ArgsOf f) result -> f -> Workflow env st ()
+setQueryHandler (QueryDefinition n codec) f = ilift $ do
   inst <- ask
   withRunInIO $ \runInIO -> do
     liftIO $ modifyIORef' inst.workflowQueryHandlers $ \handles ->
@@ -563,7 +561,7 @@ setQueryHandler codec (QueryDefinition n) f = ilift $ do
           addCommand inst cmd
           
   
-
+-- TODO inner callstack?
 setSignalHandler :: forall env st f.
   ( ResultOf (Workflow env st) f ~ ()
   , (ArgsOf f :->: Workflow env st ()) ~ f
@@ -619,10 +617,11 @@ time = Workflow $ do
 -- | Updates this Workflow's Search Attributes by merging the provided searchAttributes with the existing Search Attributes
 --
 -- Using this function will overwrite any existing Search Attributes with the same key.
-upsertSearchAttributes :: Map Text Data.Aeson.Value -> Workflow env st ()
+upsertSearchAttributes :: HasCallStack => Map Text Data.Aeson.Value -> Workflow env st ()
 upsertSearchAttributes values = ilift $ do
   inst <- ask
   addCommand inst cmd
+  -- TODO, should we be updating the search attributes here for the WorkflowInstance?
   where
     cmd = defMessage & Command.upsertWorkflowSearchAttributes .~ 
       ( defMessage
@@ -683,7 +682,7 @@ mutableSideEffect = undefined
 
 -- TODO, timer suopport?
 
-sleep :: TimeSpec -> Workflow env st ()
+sleep :: HasCallStack => TimeSpec -> Workflow env st ()
 sleep ts = do
   res <- ilift $ do
     inst <- ask
@@ -708,7 +707,7 @@ sleep ts = do
 --   -> Workflow env st ()
 -- continueAsNew k@(KnownWorkflow codec mNamespace mTaskQueue) opts = do
 
-getExternalWorkflowHandle :: WorkflowId -> Maybe RunId -> Workflow env st (ChildWorkflowHandle env st result)
+getExternalWorkflowHandle :: HasCallStack => WorkflowId -> Maybe RunId -> Workflow env st (ChildWorkflowHandle env st result)
 getExternalWorkflowHandle = undefined
 
 -- | Wait on a condition to become true before continuing.
@@ -720,7 +719,7 @@ getExternalWorkflowHandle = undefined
 -- N.B. this should be used with care, as it can lead to the workflow
 -- suspending indefinitely if the condition is never met. 
 -- (e.g. if there is no signal handler that changes the state appropriately)
-awaitCondition :: (st -> Bool) -> Workflow env st ()
+awaitCondition :: HasCallStack => (st -> Bool) -> Workflow env st ()
 awaitCondition f = do
   st <- get
   if f st

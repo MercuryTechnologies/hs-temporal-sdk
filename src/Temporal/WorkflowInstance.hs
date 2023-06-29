@@ -34,6 +34,7 @@ import Data.IORef (IORef)
 import Data.Vector (Vector)
 import qualified Data.Vector as V
 import Data.Word (Word32, Word64)
+import GHC.Stack (emptyCallStack)
 import Lens.Family2
 import System.Clock (TimeSpec(..))
 import System.Random (mkStdGen)
@@ -114,6 +115,7 @@ create workflowInstanceInfo workflowEnv workflowInstanceDefinition = do
   workflowState <- newIORef workflowInstanceDefinition.workflowInitialState
   workflowSignalHandlers <- newIORef mempty
   workflowQueryHandlers <- newIORef mempty
+  workflowCallStack <- newIORef emptyCallStack
   pure WorkflowInstance {..}
 
 
@@ -121,6 +123,7 @@ create workflowInstanceInfo workflowEnv workflowInstanceDefinition = do
 -- and set as completion failure.
 activate :: Worker env actEnv -> WorkflowInstance env st -> WorkflowActivation -> IO WorkflowActivationCompletion
 activate w inst act = runInstanceM inst $ do
+  writeIORef inst.workflowTime (act ^. Activation.timestamp . to timespecFromTimestamp)
   eResult <- applyJobs $ act ^. Activation.vec'jobs
   -- TODO: Can the completion send both successful commands and a failure
   -- message at the same time? In theory we can make partial progress on
