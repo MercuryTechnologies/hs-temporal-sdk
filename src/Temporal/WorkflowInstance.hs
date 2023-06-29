@@ -236,27 +236,6 @@ nextConditionSequence = do
     let seq' = condition seqs
     in (seqs { condition = succ seq' }, Sequence seq')
 
-{-
-data WorkflowExitValue a
-  = WorkflowContinueAsNew ContinueAsNewWorkflowExecution
-  | WorkflowCancelled
-  | WorkflowEvicted
-  | WorkflowNormal a
-
-data ActivityExitValue a
-  = ActivityWillCompleteAsync
-  | ActivityNormal a
-
-data CancellableId
-  = Timer Word32
-  | Activity Word32
-  | LocalActivity Word32
-  | ChildWorkflow Word32
-  | SignalExternalWorkflow Word32
-  -- seqnuum, execution, only_child
-  | ExternalWorkflow Word32 NamespacedWorkflowExecution Bool
--}
-
 applyStartWorkflow :: StartWorkflow -> InstanceM env st ()
 applyStartWorkflow startWorkflow = do
   act <- async $ runTopLevel $ do
