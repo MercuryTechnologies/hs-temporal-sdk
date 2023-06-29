@@ -12,6 +12,7 @@ module Temporal.WorkflowInstance
   , nextExternalCancelSequence
   , nextExternalSignalSequence
   , nextTimerSequence
+  , nextConditionSequence
   ) where
 
 import Control.Applicative
@@ -101,10 +102,11 @@ create workflowInstanceInfo workflowEnv workflowInstanceDefinition = do
     , externalSignal = 0
     , timer = 0
     , activity = 0
+    , condition = 0
     }
   workflowTime <- newIORef $ TimeSpec 0 0
   workflowIsReplaying <- newIORef False
-  workflowSequenceMaps <- newMVar $ SequenceMaps mempty mempty mempty mempty mempty
+  workflowSequenceMaps <- newMVar $ SequenceMaps mempty mempty mempty mempty mempty mempty
   workflowPrimaryTask <- newIORef Nothing
   workflowRunQueueRef <- newIORef JobNil
   workflowCommands <- newTVarIO $ RunningActivation $ Reversed []
@@ -224,6 +226,12 @@ nextActivitySequence = do
     let seq' = activity seqs
     in (seqs { activity = succ seq' }, Sequence seq')
 
+nextConditionSequence :: InstanceM env st Sequence
+nextConditionSequence = do
+  inst <- ask
+  atomicModifyIORef' inst.workflowSequences $ \seqs ->
+    let seq' = condition seqs
+    in (seqs { condition = succ seq' }, Sequence seq')
 
 {-
 data WorkflowExitValue a
@@ -309,6 +317,15 @@ applySignalWorkflow signalWorkflow = do
     Just handler -> do
       let args = fmap convertFromProtoPayload (signalWorkflow ^. Command.vec'input)
       liftIO $ handler args
+      -- Signal all conditions that are waiting for a signal.
+      -- Realistically, this should only be one condition at a time, 
+      -- but we'll signal all of them just in case.
+      seqMaps <- readMVar inst.workflowSequenceMaps 
+      let newCompletions = 
+            map (CompleteReq (Ok ())) $ HashMap.elems seqMaps.conditionsAwaitingSignal
+      atomically $ do
+        completions <- readTVar inst.workflowCompletions
+        writeTVar inst.workflowCompletions (completions ++ newCompletions)
 
 applyNotifyHasPatch :: NotifyHasPatch -> InstanceM env st ()
 applyNotifyHasPatch notifyHasPatch = do
@@ -449,9 +466,11 @@ applyResolutions rs = do
                               )
                   ResolveChildWorkflowExecutionStart'Cancelled cancelled -> 
                     pure 
-                      ( CompleteReq 
-                        (ThrowWorkflow $ toException ChildWorkflowCancelled) existing.startHandle
-                            : completions
+                      ( CompleteReq
+                        (Ok ()) existing.startHandle :
+                        CompleteReq 
+                        (ThrowWorkflow $ toException ChildWorkflowCancelled) existing.resultHandle : 
+                        completions
                       , sequenceMaps'
                         { childWorkflows = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
                         }

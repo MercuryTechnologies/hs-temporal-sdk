@@ -105,6 +105,7 @@ data Sequences = Sequences
   , externalSignal :: !Word32
   , timer :: !Word32
   , activity :: !Word32
+  , condition :: !Word32
   }
 
 data ParentInfo = ParentInfo
@@ -155,6 +156,7 @@ data SequenceMaps env st = SequenceMaps
   , childWorkflows :: {-# UNPACK #-} !(SequenceMap (SomeChildWorkflowHandle env st))
   , externalSignals :: {-# UNPACK #-} !(SequenceMap (IVar env st ResolveSignalExternalWorkflow))
   , externalCancels :: {-# UNPACK #-} !(SequenceMap (IVar env st ResolveRequestCancelExternalWorkflow))
+  , conditionsAwaitingSignal :: {-# UNPACK #-} !(SequenceMap (IVar env st ()))
   }
 
 data WorkflowInstance env st = WorkflowInstance

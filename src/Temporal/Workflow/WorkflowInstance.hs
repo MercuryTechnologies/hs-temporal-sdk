@@ -56,7 +56,7 @@ import UnliftIO hiding (catch)
 
 
 emptySequences :: SequenceMaps st env
-emptySequences = SequenceMaps mempty mempty mempty mempty mempty
+emptySequences = SequenceMaps mempty mempty mempty mempty mempty mempty
 
 isEmpty :: SequenceMaps env st -> Bool
 isEmpty SequenceMaps{..} = 
@@ -64,7 +64,8 @@ isEmpty SequenceMaps{..} =
   HashMap.null activities &&
   HashMap.null childWorkflows &&
   HashMap.null externalSignals &&
-  HashMap.null externalCancels
+  HashMap.null externalCancels &&
+  HashMap.null conditionsAwaitingSignal
 
 
 -- done :: ResultVal a -> InstanceM env (Result env a)

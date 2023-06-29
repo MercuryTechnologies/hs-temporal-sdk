@@ -92,6 +92,7 @@ module Temporal.Workflow
   , setQueryHandler
   , SignalDefinition(..)
   , setSignalHandler
+  , awaitCondition
   , upsertSearchAttributes
   -- , signal
   -- * Time and timers
@@ -105,6 +106,7 @@ module Temporal.Workflow
   , WorkflowGenM(..)
   ) where
 import Control.Monad
+import Control.Monad.State
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Control.Monad.IO.Class
@@ -708,3 +710,39 @@ sleep ts = do
 
 getExternalWorkflowHandle :: WorkflowId -> Maybe RunId -> Workflow env st (ChildWorkflowHandle env st result)
 getExternalWorkflowHandle = undefined
+
+-- | Wait on a condition to become true before continuing.
+--
+-- This must be used with signals, as that is the only way for
+-- state to change in a workflow while the workflow itself is
+-- in this blocking condition.
+--
+-- N.B. this should be used with care, as it can lead to the workflow
+-- suspending indefinitely if the condition is never met. 
+-- (e.g. if there is no signal handler that changes the state appropriately)
+awaitCondition :: (st -> Bool) -> Workflow env st ()
+awaitCondition f = do
+  st <- get
+  if f st
+    then pure ()
+    else go
+  where
+    go = do
+      (conditionSeq, blockedVar) <- ilift $ do
+        inst <- ask
+        res <- newIVar
+        conditionSeq <- nextConditionSequence
+        modifyMVar_ inst.workflowSequenceMaps $ \seqMaps -> do
+          pure $ seqMaps { conditionsAwaitingSignal = HashMap.insert conditionSeq res seqMaps.conditionsAwaitingSignal }
+        pure (conditionSeq, res)
+      -- Wait for the condition to be signaled.
+      getIVar blockedVar
+      -- Delete the condition from the map so that it doesn't leak memory.
+      ilift $ do
+        inst <- ask
+        modifyMVar_ inst.workflowSequenceMaps $ \seqMaps -> do
+          pure $ seqMaps { conditionsAwaitingSignal = HashMap.delete conditionSeq seqMaps.conditionsAwaitingSignal }
+      st <- get
+      if f st
+        then pure ()
+        else go
