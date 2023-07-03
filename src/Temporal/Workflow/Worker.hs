@@ -181,8 +181,7 @@ handleActivation activation = do
         jobs = activation ^. Activation.vec'jobs
         removeFromCacheJob = V.any (\j -> isJust (j ^. Activation.maybe'removeFromCache)) jobs
         moreThanOneJob = V.length jobs > 1
-    -- Job signaling that a workflow should be removed from the cache
-    -- mRemoveJob = findthing (jobs . maybe'variant_ . just_ . _WorkflowActivationJob'RemoveFromCache) activation
+
     activationStartWorkflowJobs :: V.Vector (WorkflowActivationJob, StartWorkflow)
     activationStartWorkflowJobs = V.mapMaybe 
       (\rawJob -> 
@@ -235,7 +234,10 @@ handleActivation activation = do
             case HashMap.lookup (startWorkflow ^. Activation.workflowType) worker.workerWorkflowState.workerWorkflowFunctions of 
               Nothing -> pure Nothing
               Just (OpaqueWorkflow definition) -> do
-                inst <- create workflowInfo worker.workerWorkflowState.workerEnv definition
+                inst <- create 
+                  workflowInfo 
+                  worker.workerWorkflowState.workerEnv 
+                  definition
                 Just <$> upsertWorkflowInstance runId_ inst
           pure $ join (vExistingInstance V.!? 0)
       

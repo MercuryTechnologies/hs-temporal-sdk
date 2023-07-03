@@ -4,6 +4,7 @@ import Control.Exception
 import Data.Text
 import Data.Typeable
 import qualified Proto.Temporal.Api.Failure.V1.Message as Proto
+import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands (ContinueAsNewWorkflowExecution)
 
 -- | Used to denote that a payload either failed to encode or decode
 data ValueError
@@ -114,6 +115,20 @@ data ChildWorkflowCancelled = ChildWorkflowCancelled
 instance Exception ChildWorkflowCancelled where
   toException = workflowExceptionToException
   fromException = workflowExceptionFromException
+
+data SignalExternalWorkflowFailed = SignalExternalWorkflowFailed Proto.Failure
+  deriving (Show)
+
+instance Exception SignalExternalWorkflowFailed where
+  toException = workflowExceptionToException
+  fromException = workflowExceptionFromException
+
+-- This does not need to be in the exception hierarchy,
+-- since we don't want to catch it in the workflow code.
+data ContinueAsNewException = ContinueAsNewException ContinueAsNewWorkflowExecution
+  deriving (Show)
+
+instance Exception ContinueAsNewException
 
 ---------------------------------------------------------------------
 -- Activity exceptions

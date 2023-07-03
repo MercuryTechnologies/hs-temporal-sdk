@@ -60,6 +60,7 @@ import System.Random
   , genShortByteString
   )
 import System.Random.Stateful (StatefulGen(..), RandomGenM(..), FrozenGen(..))
+import qualified Temporal.Core.Client as C
 import UnliftIO
 
 data WorkerConfig workflowEnv activityEnv = WorkerConfig
@@ -115,6 +116,7 @@ data ParentInfo = ParentInfo
   , parentWorkflowId :: WorkflowId
   }
 
+-- TODO, update this as workflow progresses
 data Info = Info
   { attempt :: Int
   , continuedRunId :: Maybe RunId
@@ -231,7 +233,11 @@ data WorkflowSignalDefinition env st =
   -- , workflowSignalHandler :: [Payload] -> IO ()
   -- }
 
-
+-- | This is a Workflow function that can be called from the outside world.
+--
+-- You can create a definition via 'Temporal.Workflow.provideWorkflow'.
+--
+-- To make a worker use this definition, you must add it to the 'WorkerConfig' via 'Temporal.Workflow.addWorkflow'.
 data WorkflowDefinition env st = WorkflowDefinition
   { workflowName :: Text
   , workflowInitialState :: st
@@ -355,7 +361,23 @@ data CompleteReq env st
       (ResultVal a)
       !(IVar env st a)
 
-newtype Workflow env st a = Workflow { unWorkflow :: InstanceM env st (Result env st a) }
+-- | The Workflow monad is a constrained execution environment that helps
+-- developers write code that can be executed deterministically and reliably.
+--
+-- If a Workflow execution is interrupted, for example due to a server failure,
+-- or otherwise fails to complete, the Temporal service will automatically
+-- replay the Workflow execution up to the point of interruption with the same
+-- inputs at each step in the function.
+--
+-- The Workflow monad also carries an app specific environment, 'env' and state 'st'.
+--
+-- The 'st' state may be used to store information that is needed to respond to
+-- any queries or signals that are received by the Workflow execution.
+newtype Workflow 
+  env 
+  st 
+  a
+  = Workflow { unWorkflow :: InstanceM env st (Result env st a) }
 
 instance Functor (Workflow env st) where
   fmap f (Workflow m) = Workflow $ do
@@ -427,10 +449,10 @@ blockedBlocked ivar1 fcont ivar2 acont = do
   let cont = acont :>>= \a -> getIVarApply i a
   return (Blocked ivar2 cont)
 
-newIVar :: InstanceM env st (IVar env st a)
+newIVar :: MonadIO m => m (IVar env st a)
 newIVar = do
   ivarRef <- newIORef (IVarEmpty JobNil)
-  return IVar{..}
+  pure IVar{..}
 
 {-# INLINE addJob #-}
 addJob :: Workflow env st b -> IVar env st b -> IVar env st a -> InstanceM env st ()
@@ -600,21 +622,28 @@ nonEmptyString t = if T.null t then Nothing else Just t
 
 data SomeChildWorkflowHandle env st = forall result. SomeChildWorkflowHandle (ChildWorkflowHandle env st result)
 
+-- | A client side handle to a single child Workflow instance. 
+--
+-- It can be used to signal, wait for completion, and cancel the workflow.
 data ChildWorkflowHandle env st result = forall codec. (Codec codec result) =>
   ChildWorkflowHandle
     { childWorkflowSequence :: Sequence
     , startHandle :: IVar env st ()
     , resultHandle :: IVar env st ResolveChildWorkflowExecution
     , childWorkflowCodec :: codec
-    , firstExecutionRunId :: Maybe RunId
+    , childWorkflowId :: WorkflowId
+    , firstExecutionRunId :: IVar env st RunId
     }
 
-data SignalDefinition (args :: [Type]) = forall codec.
-  SignalDefinition 
-    { signalName :: Text 
-    , signalCodec :: codec
-    , signalApply :: forall res. Proxy res -> (args :->: res) -> Vector RawPayload -> IO res
-    }
+-- | Handle representing an external Workflow Execution.
+--
+-- This handle can only be cancelled and signalled. 
+--
+-- To call other methods, like query and result, use a WorkflowClient.getHandle inside an Activity.
+data ExternalWorkflowHandle env st result = ExternalWorkflowHandle
+  { externalWorkflowWorkflowId :: WorkflowId
+  , externalWorkflowRunId :: Maybe RunId
+  }
 
 {- |
 Queries are sent from a Temporal Client to a Workflow Execution. The API call is synchronous. The Query is identified at both ends by a Query name. The Workflow must have a Query handler that is developed to handle that Query and provide data that represents the state of the Workflow Execution.

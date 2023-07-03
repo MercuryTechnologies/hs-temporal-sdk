@@ -24,6 +24,7 @@ import Control.Monad.IO.Class
 import Data.Hashable (Hashable)
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
+import Data.Maybe
 import Data.ProtoLens
 import Data.Time.Clock (UTCTime)
 import Data.Set (Set)
@@ -39,6 +40,7 @@ import Lens.Family2
 import System.Clock (TimeSpec(..))
 import System.Random (mkStdGen)
 import Temporal.Common
+import Temporal.Core.Client (Client)
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
 import Temporal.Payload
@@ -91,7 +93,11 @@ import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import UnliftIO
 
 
-create :: MonadLoggerIO m => Info -> env -> WorkflowDefinition env st -> m (WorkflowInstance env st)
+create :: MonadLoggerIO m 
+  => Info 
+  -> env 
+  -> WorkflowDefinition env st 
+  -> m (WorkflowInstance env st)
 create workflowInstanceInfo workflowEnv workflowInstanceDefinition = do
   workflowInstanceLogger <- askLoggerIO
   workflowRandomnessSeed <- WorkflowGenM <$> newIORef (mkStdGen 0)
@@ -375,10 +381,11 @@ applyActivationJob job = case job ^. Activation.maybe'variant of
     -- Ignore, handled in the worker code.
     WorkflowActivationJob'RemoveFromCache removeFromCache -> pure ()
 
-setFirstExecutionRunId :: ChildWorkflowHandle env st result -> RunId -> ChildWorkflowHandle env st result
-setFirstExecutionRunId cw runId = cw
-  { firstExecutionRunId = firstExecutionRunId cw <|> Just runId
-  }
+setFirstExecutionRunId :: ChildWorkflowHandle env st result -> RunId -> InstanceM env st ()
+setFirstExecutionRunId cw runId = do
+  putIVar cw.firstExecutionRunId $ Ok runId
+  -- { firstExecutionRunId = runId
+  -- }
 
 applyResolutions :: [PendingJob] -> InstanceM env st ()
 applyResolutions [] = pure ()
@@ -411,15 +418,11 @@ applyResolutions rs = do
                 Nothing -> do
                   throwIO $ RuntimeError "Child workflow start did not have a known status"
                 Just status -> case status of
-                  ResolveChildWorkflowExecutionStart'Succeeded succeeded -> 
+                  ResolveChildWorkflowExecutionStart'Succeeded succeeded -> do
+                    setFirstExecutionRunId existing (succeeded ^. Activation.runId . to RunId)
                     pure 
                       ( CompleteReq (Ok ()) (startHandle existing) : completions
                       , sequenceMaps'
-                        { childWorkflows = HashMap.adjust 
-                            (\(SomeChildWorkflowHandle cw) -> SomeChildWorkflowHandle $ setFirstExecutionRunId cw (succeeded ^. Activation.runId . to RunId)) 
-                            (msg ^. Activation.seq . to Sequence) 
-                            sequenceMaps'.childWorkflows
-                        }
                       )
                   ResolveChildWorkflowExecutionStart'Failed failed ->
                     let updatedMaps = sequenceMaps'
@@ -470,8 +473,30 @@ applyResolutions rs = do
                     }
                   )
 
-          PendingJobResolveSignalExternalWorkflow msg -> error "applyResolutions: PendingJobResolveSignalExternalWorkflow not implemented"
-          PendingJobResolveRequestCancelExternalWorkflow msg -> error "applyResolutions: PendingJobResolveRequestCancelExternalWorkflow not implemented"
+          PendingJobResolveSignalExternalWorkflow msg -> do
+            let mresVar = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalSignals
+            case mresVar of
+              Nothing -> throwIO $ RuntimeError "External Signal IVar for sequence not found"
+              Just resVar -> do
+                pure
+                  ( CompleteReq (Ok msg) resVar : completions
+                  , sequenceMaps'
+                    { externalSignals = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalSignals
+                    }
+                  )
+
+          PendingJobResolveRequestCancelExternalWorkflow msg -> do
+            let mresVar = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalCancels
+            case mresVar of
+              Nothing -> throwIO $ RuntimeError "External Cancel IVar for sequence not found"
+              Just resVar -> do
+                pure
+                  ( CompleteReq (Ok msg) resVar : completions
+                  , sequenceMaps'
+                    { externalCancels = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalCancels
+                    }
+                  )
+
           PendingJobFireTimer msg -> do
             let existingIVar = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.timers
             case existingIVar of

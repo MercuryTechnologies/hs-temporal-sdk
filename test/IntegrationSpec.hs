@@ -9,6 +9,7 @@ import Control.Monad.Logger
 import Data.Text (Text)
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
+import System.Clock
 import Test.Hspec
 import Temporal.Core.Client
 import qualified Temporal.Client as C
@@ -23,7 +24,7 @@ withWorker conf m = do
   rt <- initializeRuntime
   let clientConfig = defaultClientConfig
   (Right c) <- connectClient rt clientConfig
-  bracket (runStdoutLoggingT $ startWorker c conf) shutdown (const m)
+  bracket (runNoLoggingT $ startWorker c conf) shutdown (const m)
 
 
 makeClient :: IO C.WorkflowClient
@@ -205,8 +206,28 @@ needsClient = do
   --       specify "query and unblock" pending
   --   describe "Await condition" $ do
   --     specify "it works" pending
-  --   describe "Sleep" $ do
-  --     specify "sleep" pending
+    describe "Sleep" $ do
+      specify "sleep" $ \client -> do
+        wfId <- uuidText
+        let workflow :: W.Workflow () () Bool
+            workflow = do
+              earlier <- W.now
+              W.sleep $ TimeSpec 0 1
+              later <- W.now
+              pure (later > earlier) 
+            (def, kw) = W.provideWorkflow JSON "sleepy" () workflow
+            conf = configure () () $ do
+              setNamespace $ W.Namespace "test"
+              setTaskQueue $ W.TaskQueue "test"
+              addWorkflow def
+        withWorker conf $ do
+          let opts = C.workflowStartOptions
+                (W.WorkflowId wfId)
+                (W.TaskQueue "test")
+          C.execute client kw opts
+            `shouldReturn` True
+
+
   --   describe "Timer" $ do
   --     specify "timer" pending
   --     specify "timer and cancel immediately" pending

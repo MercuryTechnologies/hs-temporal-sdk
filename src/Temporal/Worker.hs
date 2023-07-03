@@ -235,7 +235,7 @@ data Worker = Worker
   , workerCore :: Core.Worker
   }
 
-startWorker :: forall m wfEnv actEnv. (MonadLoggerIO m, MonadUnliftIO m) => Client -> WorkerConfig wfEnv actEnv -> m Temporal.Worker.Worker
+startWorker :: (MonadLoggerIO m, MonadUnliftIO m) => Client -> WorkerConfig wfEnv actEnv -> m Temporal.Worker.Worker
 startWorker client conf = do
   $(logDebug) "Starting worker"
   workerCore <- either throwIO pure =<< liftIO (Core.newWorker client conf.coreConfig)

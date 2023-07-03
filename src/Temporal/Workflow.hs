@@ -36,18 +36,10 @@ whenever a corresponding Workflow Function Execution (instance of the Function D
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Temporal.Workflow 
-  ( WorkflowDefinition
+  ( Workflow
+  , WorkflowDefinition
+  , KnownWorkflow(..)
   , provideWorkflow
-  , Workflow
-  , WorkflowId(..)
-  , Namespace(..)
-  , TaskQueue(..)
-  , ParentClosePolicy(..)
-  , ChildWorkflowCancellationType(..)
-  , WorkflowIdReusePolicy(..)
-  , PatchId(..)
-  , RunId(..)
-  , WorkflowType(..)
   , Task
   , TimeoutType(..)
   -- * Workflow monad operations
@@ -61,7 +53,6 @@ module Temporal.Workflow
   , startActivity
   , StartLocalActivityOptions(..)
   , startLocalActivity
-  , KnownWorkflow(..)
   -- ** Child workflow operations
   -- $childWorkflow
   , StartChildWorkflowOptions(..)
@@ -69,6 +60,8 @@ module Temporal.Workflow
   -- , StartChildWorkflow
   , startChildWorkflow
   , ChildWorkflowHandle
+  , ExternalWorkflowHandle
+  , WorkflowHandle(..)
   , waitChildWorkflowResult
   , Temporal.Workflow.wait
   , cancelChildWorkflowExecution
@@ -78,23 +71,26 @@ module Temporal.Workflow
   , Info(..)
   , RetryPolicy(..)
   , ParentInfo(..)
+  -- * Workflow metadata
+  -- 
   , info
-  -- , memo
-  -- , memoValue
+  , memo
+  , memoValue
+  , upsertSearchAttributes
   -- * Versioning workflows
   -- $versioning
   , patched
   , deprecatePatch
-  -- , query
-  -- , setDynamicQueryHandler
-  -- , setDynamicSignalHandler
+  -- * Interacting with running Workflows
+  -- ** Queries
+  -- $queries
   , QueryDefinition(..)
   , setQueryHandler
+  -- ** Signals
+  -- $signals
   , SignalDefinition(..)
   , setSignalHandler
   , awaitCondition
-  , upsertSearchAttributes
-  -- , signal
   -- * Time and timers
   , now
   , time
@@ -103,7 +99,21 @@ module Temporal.Workflow
   -- $randomness
   , randomGen
   , uuid4
-  , WorkflowGenM(..)
+  , WorkflowGenM
+
+  -- * Type definitions
+  , IsValidWorkflowFunction
+  , GatherArgs
+  , ActivityId(..)
+  , WorkflowId(..)
+  , Namespace(..)
+  , TaskQueue(..)
+  , PatchId(..)
+  , RunId(..)
+  , ParentClosePolicy(..)
+  , ChildWorkflowCancellationType(..)
+  , WorkflowIdReusePolicy(..)
+  , WorkflowType(..)
   ) where
 import Control.Monad
 import Control.Monad.State
@@ -144,8 +154,10 @@ import Temporal.Workflow.Unsafe
 import Temporal.WorkflowInstance
 import Temporal.Workflow.WorkflowInstance
 import Temporal.Workflow.WorkflowDefinition
+import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as Common
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation as Activation
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
+import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands as Command
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
 import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult as ActivityResult
 import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields as ActivityResult
@@ -168,9 +180,7 @@ askInstance :: Workflow env st (WorkflowInstance env st)
 askInstance = ilift ask
 
 data ContinueAsNewOptions = ContinueAsNewOptions
-  { workflow :: Maybe WorkflowType
-  , args :: (Vector Proto.Temporal.Api.Common.V1.Message.Payload)
-  , taskQueue :: Maybe TaskQueue
+  { taskQueue :: Maybe TaskQueue
   , runTimeout :: Maybe TimeSpec
   , taskTimeout :: Maybe TimeSpec
   , retryPolicy :: Maybe RetryPolicy
@@ -304,7 +314,7 @@ data StartChildWorkflowOptions = StartChildWorkflowOptions
   , taskTimeout :: Maybe TimeSpec
   , retryPolicy :: Maybe RetryPolicy
   , cronSchedule :: Maybe Text
-  , memo :: Map Text Proto.Temporal.Api.Common.V1.Message.Payload
+  , initialMemo :: Map Text Proto.Temporal.Api.Common.V1.Message.Payload
   , searchAttributes :: Map Text Proto.Temporal.Api.Common.V1.Message.Payload
   , headers :: Map Text Proto.Temporal.Api.Common.V1.Message.Payload
   , workflowIdReusePolicy :: WorkflowIdReusePolicy
@@ -319,25 +329,85 @@ defaultChildWorkflowOptions = StartChildWorkflowOptions
   , taskTimeout = Nothing
   , retryPolicy = Nothing
   , cronSchedule = Nothing
-  , memo = mempty
+  , initialMemo = mempty
   , searchAttributes = mempty
   , headers = mempty
   , workflowIdReusePolicy = WorkflowIdReusePolicyUnspecified
   }
 
-signalChildWorkflow 
-  :: HasCallStack
-  => ChildWorkflowHandle env st result 
-  -> QueryDefinition args result
-  -> Workflow env st ()
-signalChildWorkflow = undefined
+-- | A client side handle to a single Workflow instance. It can be used to signal a workflow execution.
+--
+-- Given the following Workflow definition:
+class WorkflowHandle h where
+  -- | Signal a running Workflow.
+  signal :: HasCallStack => h env st result -> SignalDefinition args -> (args :->: Workflow env st (Task env st ()))
+
+instance WorkflowHandle ChildWorkflowHandle where
+  signal h = signalWorkflow h (Command.childWorkflowId .~ rawWorkflowId h.childWorkflowId)
+
+instance WorkflowHandle ExternalWorkflowHandle where
+  signal h = signalWorkflow h (Command.workflowExecution .~ converted)
+    where
+      converted = defMessage
+        & Common.workflowId .~ rawWorkflowId h.externalWorkflowWorkflowId
+        & Common.runId .~ maybe "" rawRunId h.externalWorkflowRunId
+        -- TODO
+        -- & Common.namespace .~ rawNamespace h.externalNamespace
+
+signalWorkflow 
+  :: forall env st args result h. HasCallStack
+  => h env st result
+  -> (Command.SignalExternalWorkflowExecution -> Command.SignalExternalWorkflowExecution)
+  -> SignalDefinition args
+  -> (args :->: Workflow env st (Task env st ()))
+signalWorkflow _ f (SignalDefinition signalName signalCodec signalApply) = gatherSignalChildWorkflowArgs @env @st @args @() signalCodec $ \ps -> do
+  ilift $ do
+    resVar <- newIVar
+    ps' <- liftIO $ sequence ps
+    inst <- ask
+    s <- nextExternalSignalSequence
+    let cmd = defMessage
+          & Command.signalExternalWorkflowExecution .~
+            ( f 
+              ( defMessage
+                & Command.seq .~ rawSequence s
+                & Command.signalName .~ signalName 
+                & Command.args .~ (convertToProtoPayload <$> ps')
+              -- TODO
+              -- & Command.headers .~ _
+              )
+            )
+    addCommand inst cmd
+    modifyMVar_ inst.workflowSequenceMaps $ \seqMaps -> do
+      pure $ seqMaps { externalSignals = HashMap.insert s resVar seqMaps.externalSignals }
+    pure $ Task $ do
+      res <- getIVar resVar
+      case res ^. Activation.maybe'failure of
+        Nothing -> pure ()
+        Just f -> throw $ SignalExternalWorkflowFailed f
+
+gatherSignalChildWorkflowArgs 
+  :: forall env st args result codec. GatherArgs codec args
+  => codec 
+  -> ([IO RawPayload] -> Workflow env st (Task env st result)) 
+  -> (args :->: Workflow env st (Task env st result))
+gatherSignalChildWorkflowArgs c f = gatherArgs (Proxy @args) c id f
 
 -- $childWorkflow
 --
 -- A Child Workflow Execution is a Workflow Execution that is spawned from within another Workflow.
 --
--- By default, a child is scheduled on the same Task Queue as the parent.
+-- A Workflow Execution can be both a Parent and a Child Workflow Execution because any Workflow can spawn another Workflow.
 
+-- | Start a child Workflow execution
+--
+-- Returns a client-side handle that implements a child Workflow interface.
+--
+-- By default, a child will be scheduled on the same task queue as its parent.
+--
+-- A child Workflow handle supports awaiting completion, signaling and cancellation via the returned handle.
+--
+-- In order to query the child, use a WorkflowClient from an Activity.
 startChildWorkflow 
   :: forall env st args result. HasCallStack
   => KnownWorkflow args result 
@@ -360,6 +430,7 @@ startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId =
       s@(Sequence wfSeq) <- nextChildWorkflowSequence
       startSlot <- newIVar
       resultSlot <- newIVar
+      firstExecutionRunId <- newIVar
       
       let childWorkflowOptions = defMessage
             & Command.seq .~ wfSeq
@@ -376,7 +447,7 @@ startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId =
             & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts.retryPolicy
             & Command.cronSchedule .~ fromMaybe "" opts.cronSchedule
             & Command.headers .~ opts.headers
-            & Command.memo .~ opts.memo
+            & Command.memo .~ opts.initialMemo
             & Command.searchAttributes .~ opts.searchAttributes
             & Command.cancellationType .~ childWorkflowCancellationTypeToProto opts.cancellationType
 
@@ -387,8 +458,9 @@ startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId =
             { childWorkflowSequence = s
             , startHandle = startSlot 
             , resultHandle = resultSlot
-            , firstExecutionRunId = Nothing
+            , firstExecutionRunId = firstExecutionRunId
             , childWorkflowCodec = codec
+            , childWorkflowId = wfId
             }
 
       modifyMVar_ inst.workflowSequenceMaps $ \seqMaps -> do
@@ -424,32 +496,135 @@ cancelChildWorkflowExecution wfHandle@(ChildWorkflowHandle{childWorkflowSequence
 
 data StartLocalActivityOptions = StartLocalActivityOptions 
   { activityId :: Maybe ActivityId
+  -- | Indicates how long the caller is willing to wait for local activity completion. Limits how
+  -- long retries will be attempted. When not specified defaults to the workflow execution
+  -- timeout (which may be unset).
   , scheduleToCloseTimeout :: Maybe TimeSpec
+  -- | Limits time the local activity can idle internally before being executed. That can happen if
+  -- the worker is currently at max concurrent local activity executions. This timeout is always
+  -- non retryable as all a retry would achieve is to put it back into the same queue. Defaults
+  -- to `schedule_to_close_timeout` if not specified and that is set. Must be <=
+  -- `schedule_to_close_timeout` when set, otherwise, it will be clamped down.
   , scheduleToStartTimeout :: Maybe TimeSpec
+  -- | Maximum time the local activity is allowed to execute after the task is dispatched. This
+  -- timeout is always retryable. Either or both of `schedule_to_close_timeout` and this must be
+  -- specified. If set, this must be <= `schedule_to_close_timeout`, otherwise, it will be
+  -- clamped down. 
   , startToCloseTimeout :: Maybe TimeSpec
+  -- | Specify a retry policy for the local activity. By default local activities will be retried
+  -- indefinitely.
   , retryPolicy :: Maybe RetryPolicy
+  -- | If the activity is retrying and backoff would exceed this value, lang will be told to
+  -- schedule a timer and retry the activity after. Otherwise, backoff will happen internally in
+  -- core. Defaults to 1 minute.
   , localRetryThreshold :: Maybe TimeSpec
+  -- | Defines how the workflow will wait (or not) for cancellation of the activity to be
+  -- confirmed. Lang should default this to `WAIT_CANCELLATION_COMPLETED`, even though proto
+  -- will default to `TRY_CANCEL` automatically.
   , cancellationType :: ActivityCancellationType
   -- TODO headers
   }
+
+defaultStartLocalActivityOptions :: StartLocalActivityOptions
+defaultStartLocalActivityOptions = StartLocalActivityOptions
+  { activityId = Nothing
+  , scheduleToCloseTimeout = Nothing
+  , scheduleToStartTimeout = Nothing
+  , startToCloseTimeout = Nothing
+  , retryPolicy = Nothing
+  , localRetryThreshold = Nothing
+  , cancellationType = ActivityCancellationWaitCancellationCompleted
+  }
+
 startLocalActivity 
-  :: HasCallStack
-  => StartLocalActivityOptions 
-  -> KnownActivity args result
-  -> Workflow env st ()
-startLocalActivity = undefined
+  :: forall env st args result. HasCallStack
+  => KnownActivity args result
+  -> StartLocalActivityOptions 
+  -> (args :->: Workflow env st (Task env st result))
+startLocalActivity (KnownActivity codec _ n) opts = gatherActivityArgs @env @st @args @result codec $ \typedPayloads -> do
+  originalTime <- time
+  ilift $ do
+    inst <- ask
+    ps <- liftIO $ forM typedPayloads $ \payloadAction -> 
+      fmap convertToProtoPayload payloadAction
+    s@(Sequence actSeq) <- nextActivitySequence
+    resultSlot <- newIVar
+    modifyMVar inst.workflowSequenceMaps $ \seqMaps -> do
+      pure (seqMaps { activities = HashMap.insert s resultSlot (activities seqMaps) }, ())
+    -- TODO, seems like `attempt` and `originalScheduledTime`
+    -- imply that we are in charge of retrying local activities ourselves?
+    let cmd = defMessage 
+          & Command.scheduleLocalActivity .~
+            ( defMessage
+              & Command.seq .~ actSeq
+              & Command.activityId .~ maybe (Text.pack $ show actSeq) rawActivityId opts.activityId
+              & Command.activityType .~ n
+              -- & attempt .~ _
+              -- & headers .~ _
+              & Command.originalScheduleTime .~ timespecToTimestamp originalTime
+              & Command.arguments .~ ps
+              & Command.maybe'scheduleToCloseTimeout .~ (timespecToDuration <$> opts.scheduleToCloseTimeout)
+              & Command.maybe'scheduleToStartTimeout .~ (timespecToDuration <$> opts.scheduleToStartTimeout)
+              & Command.maybe'startToCloseTimeout .~ (timespecToDuration <$> opts.startToCloseTimeout)
+              & Command.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retryPolicy)
+              & Command.maybe'localRetryThreshold .~ (timespecToDuration <$> opts.localRetryThreshold)
+              & Command.cancellationType .~ activityCancellationTypeToProto opts.cancellationType
+            )
+    addCommand inst cmd
+    pure $ Task $ do
+      res <- getIVar resultSlot
+      case res ^. Activation.result . ActivityResult.maybe'status of
+        Nothing -> error "Activity result missing status"
+        Just (ActivityResult.ActivityResolution'Completed success) -> do
+          result <- ilift $ liftIO $ decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
+          case result of
+            -- TODO handle properly
+            Left err -> error $ "Failed to decode activity result: " <> show err
+            Right val -> pure val
+        Just (ActivityResult.ActivityResolution'Failed failure) -> error "not implemented"
+        Just (ActivityResult.ActivityResolution'Cancelled details) -> error "not implemented"
+        Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"
 
+-- $metadata
+--
+-- Temporal provides a number of ways to access metadata about the current Workflow execution.
+--
+-- Some are useful for debugging (like 'memo', and 'upsertSearchAttributes'), and some are useful for
+-- making decisions about how to proceed (like using 'info' to decide whether to continue-as-new).
 
+-- | We recommend calling 'info' whenever accessing 'Info' fields. Some 'Info' fields change during the lifetime of an Execution—
+-- like historyLength and searchAttributes— and some may be changeable in the future— like taskQueue.
 info :: Workflow env st Info
 info = workflowInstanceInfo <$> askInstance
 
--- memo :: () -> Workflow env ()
--- memo = undefined
+-- | Current workflow's raw memo values.
+memo :: () -> Workflow env st (Maybe (Map Text Payload))
+memo = undefined
 
--- memoValue :: () -> Workflow env ()
--- memoValue = undefined
+-- | Lookup a memo value by key.
+memoValue :: Text -> Workflow env st (Maybe Payload)
+memoValue = undefined
 
--- Current time from the workflow perspective.
+-- | Updates this Workflow's Search Attributes by merging the provided searchAttributes with the existing Search Attributes
+--
+-- Using this function will overwrite any existing Search Attributes with the same key.
+upsertSearchAttributes :: HasCallStack => Map Text Data.Aeson.Value -> Workflow env st ()
+upsertSearchAttributes values = ilift $ do
+  inst <- ask
+  addCommand inst cmd
+  -- TODO, should we be updating the search attributes here for the WorkflowInstance?
+  where
+    cmd = defMessage & Command.upsertWorkflowSearchAttributes .~ 
+      ( defMessage
+        & Command.searchAttributes .~ mapValues
+      )
+    mapValues = fmap (convertToProtoPayload . (\x -> RawPayload x mempty) . L.toStrict . Data.Aeson.encode) values
+
+-- | Current time from the workflow perspective.
+--
+-- The time returned is updated only when the workflow performs an
+-- operation in the Workflow monad that blocks. Examples of such operations
+-- are 'sleep', 'awaitCondition', 'awaitActivity', 'awaitWorkflow', etc.
 --
 -- Equivalent to `getCurrentTime` from the `time` package.
 now :: Workflow env st UTCTime
@@ -483,31 +658,107 @@ applyPatch pid deprecated = Workflow $ fmap Done $ do
           Command.setPatchMarker .~ (defMessage & Command.patchId .~ rawPatchId pid & Command.deprecated .~ deprecated)
       pure usePatch
 
+-- | Patch or upgrade workflow code by checking or stating that this workflow has a certain patch.
+--
+-- See official Temporal docs page for info.
+--
+-- If the workflow is replaying an existing history, then this function returns true if that history 
+-- was produced by a worker which also had a patched call with the same patchId. 
+--
+--If the history was produced by a worker without such a call, then it will return false.
+--
+-- If the workflow is not currently replaying, then this call always returns true.
+--
+-- Your workflow code should run the "new" code if this returns true, if it returns false, 
+-- you should run the "old" code. By doing this, you can maintain determinism.
 patched :: HasCallStack => PatchId -> Workflow env st Bool
 patched pid = applyPatch pid False
 
+-- | Indicate that a patch is being phased out.
+--
+-- See official Temporal docs page for info.
+--
+-- Workflows with this call may be deployed alongside workflows with a patched call, but they must not be deployed while any workers 
+-- still exist running old code without a patched call, or any runs with histories produced by such workers exist. 
+-- If either kind of worker encounters a history produced by the other, their behavior is undefined.
+--
+-- Once all live workflow runs have been produced by workers with this call, you can deploy workers which are free of either kind of 
+-- patch call for this ID. Workers with and without this call may coexist, as long as they are both running the "new" code.
 deprecatePatch :: HasCallStack => PatchId -> Workflow env st ()
 deprecatePatch pid = void $ applyPatch pid True
 
--- TODO move the codec value into the QueryDefinition?
-query 
-  :: HasCallStack
-  => QueryDefinition args result 
-  -> (args :->: Workflow env st (ChildWorkflowHandle env st result))
-query = undefined
+-- $randomness
+--
+-- Workflow executions are deterministic, so you can't use the usual IO-based random number generation.
+--
+-- Instead, each workflow execution is given a seed from the Temporal platform to seed a PRNG. This
+-- allows you to generate random values in a deterministic way.
+--
+-- The 'Workflow' monad provides a 'RandomGen' instance, so you can use the usual 'random' and 'randomR'
+-- functions from the 'System.Random' and 'System.Random.Stateful' modules.
 
 -- | Get a mutable randomness generator for the workflow.
 randomGen :: Workflow env st WorkflowGenM
 randomGen = workflowRandomnessSeed <$> askInstance
 
+-- | Generate an RFC compliant V4 uuid. 
+--
+-- Uses the workflow's deterministic PRNG, making it safe for use within a workflow.
+--
+-- This function is cryptographically insecure.
+uuid4 :: Workflow env st UUID
+uuid4 = do
+  wft <- workflowRandomnessSeed <$> askInstance
+  sbs <- uniformShortByteString 16 wft
+  pure $ buildFromBytes 4
+    (sbs `SBS.index` 0x0)
+    (sbs `SBS.index` 0x1)
+    (sbs `SBS.index` 0x2)
+    (sbs `SBS.index` 0x3)
+    (sbs `SBS.index` 0x4)
+    (sbs `SBS.index` 0x5)
+    (sbs `SBS.index` 0x6)
+    (sbs `SBS.index` 0x7)
+    (sbs `SBS.index` 0x8)
+    (sbs `SBS.index` 0x9)
+    (sbs `SBS.index` 0xA)
+    (sbs `SBS.index` 0xB)
+    (sbs `SBS.index` 0xC)
+    (sbs `SBS.index` 0xD)
+    (sbs `SBS.index` 0xE)
+    (sbs `SBS.index` 0xF)
+
+
 newtype Query env st a = Query (Reader (env, st) a)
 
--- TODO, inner callstack?
+-- $queries
+-- 
+-- A Query is a synchronous operation that is used to get the state of a Workflow Execution. 
+-- The state of a running Workflow Execution is constantly changing. 
+-- You can use Queries to expose the internal Workflow Execution state to the external world. 
+-- Queries are available for running or completed Workflows Executions only if the Worker is 
+-- up and listening on the Task Queue.
+--
+-- Queries are strongly consistent and are guaranteed to return the most recent state. 
+-- This means that the data reflects the state of all confirmed Events that came in before 
+-- the Query was sent. An Event is considered confirmed if the call creating the Event returned 
+-- success. Events that are created while the Query is outstanding may or may not be reflected 
+-- in the Workflow state the Query result is based on.
+--
+-- A Query can carry arguments to specify the data it is requesting. And each Workflow can expose data to multiple types of Queries.
+--
+-- A Query cannot mutate the state of the Workflow Execution— that is, Queries are read-only and cannot contain any blocking code. 
+-- This means, for example, that Query handling logic cannot schedule Activity Executions.
+
+-- | Register a query handler.
+--
+-- The handler will be called when a query with the given name is received.
 setQueryHandler :: forall env st f result.
   ( ResultOf (Query env st) f ~ result
   , f ~ (ArgsOf f :->: Query env st result)
   ) => QueryDefinition (ArgsOf f) result -> f -> Workflow env st ()
 setQueryHandler (QueryDefinition n codec) f = ilift $ do
+  -- TODO, inner callstack?
   inst <- ask
   withRunInIO $ \runInIO -> do
     liftIO $ modifyIORef' inst.workflowQueryHandlers $ \handles ->
@@ -561,12 +812,12 @@ setQueryHandler (QueryDefinition n codec) f = ilift $ do
           addCommand inst cmd
           
   
--- TODO inner callstack?
 setSignalHandler :: forall env st f.
   ( ResultOf (Workflow env st) f ~ ()
   , (ArgsOf f :->: Workflow env st ()) ~ f
   ) => SignalDefinition (ArgsOf f) -> f -> Workflow env st ()
 setSignalHandler (SignalDefinition n codec applyToSignal) f = ilift $ do
+  -- TODO ^ inner callstack?
   inst <- ask
   withRunInIO $ \runInIO -> do
     liftIO $ modifyIORef' inst.workflowSignalHandlers $ \handlers -> 
@@ -614,50 +865,6 @@ time = Workflow $ do
   wft <- workflowTime <$> ask
   Done <$> readIORef wft
 
--- | Updates this Workflow's Search Attributes by merging the provided searchAttributes with the existing Search Attributes
---
--- Using this function will overwrite any existing Search Attributes with the same key.
-upsertSearchAttributes :: HasCallStack => Map Text Data.Aeson.Value -> Workflow env st ()
-upsertSearchAttributes values = ilift $ do
-  inst <- ask
-  addCommand inst cmd
-  -- TODO, should we be updating the search attributes here for the WorkflowInstance?
-  where
-    cmd = defMessage & Command.upsertWorkflowSearchAttributes .~ 
-      ( defMessage
-        & Command.searchAttributes .~ mapValues
-      )
-    mapValues = fmap (convertToProtoPayload . (\x -> RawPayload x mempty) . L.toStrict . Data.Aeson.encode) values
-
--- | Generate an RFC compliant V4 uuid. 
---
--- Uses the workflow's deterministic PRNG, making it safe for use within a workflow.
---
--- This function is cryptographically insecure.
-uuid4 :: Workflow env st UUID
-uuid4 = do
-  wft <- workflowRandomnessSeed <$> askInstance
-  sbs <- uniformShortByteString 16 wft
-  pure $ buildFromBytes 4
-    (sbs `SBS.index` 0x0)
-    (sbs `SBS.index` 0x1)
-    (sbs `SBS.index` 0x2)
-    (sbs `SBS.index` 0x3)
-    (sbs `SBS.index` 0x4)
-    (sbs `SBS.index` 0x5)
-    (sbs `SBS.index` 0x6)
-    (sbs `SBS.index` 0x7)
-    (sbs `SBS.index` 0x8)
-    (sbs `SBS.index` 0x9)
-    (sbs `SBS.index` 0xA)
-    (sbs `SBS.index` 0xB)
-    (sbs `SBS.index` 0xC)
-    (sbs `SBS.index` 0xD)
-    (sbs `SBS.index` 0xE)
-    (sbs `SBS.index` 0xF)
-
--- waitCondition :: () -> Workflow env ()
--- waitCondition = undefined
 
 {- TODO Inquire about these:
 
@@ -682,6 +889,9 @@ mutableSideEffect = undefined
 
 -- TODO, timer suopport?
 
+-- | Asynchronous sleep.
+--
+-- Schedules a timer on the Temporal service.
 sleep :: HasCallStack => TimeSpec -> Workflow env st ()
 sleep ts = do
   res <- ilift $ do
@@ -700,14 +910,52 @@ sleep ts = do
     pure res
   getIVar res
 
--- TODO, would be nice to ensure that the arg types are the same as the workflow args.
--- continueAsNew 
---   :: KnownWorkflow name args result 
---   -> ContinueAsNewOptions 
---   -> Workflow env st ()
--- continueAsNew k@(KnownWorkflow codec mNamespace mTaskQueue) opts = do
+gatherContinueAsNewArgs 
+  :: forall env st args result a codec. GatherArgs codec args
+  => codec 
+  -> ([IO RawPayload] -> Workflow env st a) 
+  -> (args :->: Workflow env st a)
+gatherContinueAsNewArgs c f = gatherArgs (Proxy @args) c id f
 
-getExternalWorkflowHandle :: HasCallStack => WorkflowId -> Maybe RunId -> Workflow env st (ChildWorkflowHandle env st result)
+-- | Continue-As-New is a mechanism by which the latest relevant state is passed to a new Workflow Execution, with a fresh Event History.
+--
+-- As a precautionary measure, the Temporal Platform limits the total Event History to 51,200 Events or 50 MB, and will warn you after 
+-- 10,240 Events or 10 MB. To prevent a Workflow Execution Event History from exceeding this limit and failing, 
+-- use Continue-As-New to start a new Workflow Execution with a fresh Event History.
+--
+-- All values passed to a Workflow Execution through parameters or returned through a result value are recorded into the Event History. 
+-- A Temporal Cluster stores the full Event History of a Workflow Execution for the duration of a Namespace's retention period. 
+-- A Workflow Execution that periodically executes many Activities has the potential of hitting the size limit.
+--
+-- A very large Event History can adversely affect the performance of a Workflow Execution. For example, in the case of a Workflow Worker failure, 
+-- the full Event History must be pulled from the Temporal Cluster and given to another Worker via a Workflow Task. 
+-- If the Event history is very large, it may take some time to load it.
+--
+-- The Continue-As-New feature enables developers to complete the current Workflow Execution and start a new one atomically.
+--
+-- The new Workflow Execution has the same Workflow Id, but a different Run Id, and has its own Event History.
+continueAsNew 
+  :: forall env st args result a. KnownWorkflow args result
+  -- ^ The workflow to continue as new. It doesn't have to be the same as the current workflow.
+  -> ContinueAsNewOptions 
+  -> (args :->: Workflow env st a)
+continueAsNew k@(KnownWorkflow codec _ _ _) opts = gatherContinueAsNewArgs @env @st @args @result @a codec $ \args -> do
+  Workflow $ do
+    ps <- liftIO $ sequence args
+    throwIO $ ContinueAsNewException $ defMessage
+      & Command.workflowType .~ knownWorkflowName k
+      & Command.taskQueue .~ (maybe "" rawTaskQueue opts.taskQueue)
+      & Command.arguments .~ (convertToProtoPayload <$> ps)
+      & Command.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retryPolicy)
+      -- TODO 
+      -- & Command.searchAttributes .~ _
+      -- & Command.headers .~ _
+      -- & Command.memo .~ _
+      & Command.maybe'workflowTaskTimeout .~ (timespecToDuration <$> opts.taskTimeout)
+      & Command.maybe'workflowRunTimeout .~ (timespecToDuration <$> opts.runTimeout)
+
+-- | Returns a client-side handle that can be used to signal and cancel an existing Workflow execution. It takes a Workflow ID and optional run ID.
+getExternalWorkflowHandle :: HasCallStack => WorkflowId -> Maybe RunId -> ExternalWorkflowHandle env st result
 getExternalWorkflowHandle = undefined
 
 -- | Wait on a condition to become true before continuing.

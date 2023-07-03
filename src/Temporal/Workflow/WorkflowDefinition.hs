@@ -20,6 +20,7 @@ module Temporal.Workflow.WorkflowDefinition
   ( WorkflowDefinition(..) -- TODO, only export the type, not the constructor from this module
   , ValidWorkflowFunction(..) -- TODO, move to internal
   , KnownWorkflow(..)
+  , SignalDefinition(..)
   -- , StartChildWorkflow(..)
   , gatherStartChildWorkflowArgs
   , provideWorkflow
@@ -37,6 +38,7 @@ import Data.Typeable (Typeable)
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import Data.Typeable
+import Data.Vector (Vector)
 import GHC.TypeLits
 import Temporal.Common
 import Temporal.Payload
@@ -81,6 +83,13 @@ gatherStartChildWorkflowArgs
   -> ([IO RawPayload] -> Workflow env st (ChildWorkflowHandle env st result)) 
   -> (args :->: Workflow env st (ChildWorkflowHandle env st result))
 gatherStartChildWorkflowArgs c f = gatherArgs (Proxy @args) c id f
+
+data SignalDefinition (args :: [Type]) = forall codec. GatherArgs codec args =>
+  SignalDefinition 
+    { signalName :: Text 
+    , signalCodec :: codec
+    , signalApply :: forall res. Proxy res -> (args :->: res) -> Vector RawPayload -> IO res
+    }
 
 -- | A utility function for constructing a 'WorkflowDefinition' from a function as well as
 -- a 'KnownWorkflow' value. This is useful for keeping the argument, codec, and result types

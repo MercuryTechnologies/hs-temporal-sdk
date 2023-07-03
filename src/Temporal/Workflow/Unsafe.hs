@@ -94,7 +94,13 @@ finishWorkflow resVar codec result = do
             )
       pure completeMessage
     -- Crash the worker if we get an internal exception.
-    ThrowInternal e -> throwIO e
+    -- Except for ContinueAsNew, which we handle specially.
+    ThrowInternal e -> case fromException e of
+      Just (ContinueAsNewException attrs) -> do
+        let completeMessage = defMessage 
+              & Command.continueAsNewWorkflowExecution .~ attrs
+        pure completeMessage
+      Nothing -> throwIO e
   inst <- ask
   addCommand inst cmd
   flushCommands resVar
