@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
 
@@ -50,7 +51,7 @@ launchTheMissiles = do
   uuid <- uuid4
   $(logInfo) ("Launching the missiles with UUID " <> T.pack (UUID.toString uuid))
   presidentialApproval <- startChildWorkflow 
-    requirePresidentialApprovalRef
+    (requirePresidentialApprovalWf.reference)
     (defaultChildWorkflowOptions 
       { runTimeout = Just $ TimeSpec 20 0
       , taskTimeout = Just $ TimeSpec 20 0
@@ -85,10 +86,10 @@ chronicWorkflow = do
   t <- now
   $(logInfo) (T.pack ("Starting chronic workflow: " ++ show t))
 
-(helloDef, helloRef) = provideWorkflow JSON "hello" () hello
-(requirePresidentialApprovalDef, requirePresidentialApprovalRef) = provideWorkflow JSON "requirePresidentialApproval" () requirePresidentialApproval
-(launchTheMissilesDef, launchTheMissilesRef) = provideWorkflow JSON "launchTheMissiles" () launchTheMissiles
-(chronicWorkflowDef, chronicWorkflowRef) = provideWorkflow JSON "chronicWorkflow" () chronicWorkflow
+helloWf = provideWorkflow JSON "hello" () hello
+requirePresidentialApprovalWf = provideWorkflow JSON "requirePresidentialApproval" () requirePresidentialApproval
+launchTheMissilesWf = provideWorkflow JSON "launchTheMissiles" () launchTheMissiles
+chronicWf = provideWorkflow JSON "chronicWorkflow" () chronicWorkflow
 
 (shootMissileDef, shootMissileRef) = provideActivity JSON "shootMissiles" shootMissiles
 
@@ -116,10 +117,10 @@ runWorker :: Client -> IO ()
 runWorker c = do
   putStrLn "Running worker"
   let conf = configure () () $ do
-        addWorkflow helloDef
-        addWorkflow launchTheMissilesDef
-        addWorkflow requirePresidentialApprovalDef
-        addWorkflow chronicWorkflowDef
+        addWorkflow helloWf
+        addWorkflow launchTheMissilesWf
+        addWorkflow requirePresidentialApprovalWf
+        addWorkflow chronicWf
 
         addActivity shootMissileDef
 
@@ -140,7 +141,7 @@ runClient c taskname id' = do
   workflowClient <- C.workflowClient c (Namespace "default") Nothing
   resp <- C.start 
     workflowClient
-    helloRef
+    helloWf.reference
     (C.workflowStartOptions (WorkflowId $ T.pack id') queue)
     "Ian"
   C.awaitWorkflowResult resp >>= print

@@ -113,10 +113,12 @@ configure wfEnv actEnv = flip execState defaultConfig . unConfigM
       , ..
       }
 
-addWorkflow :: WorkflowDefinition env st -> ConfigM env actEnv ()
-addWorkflow def = ConfigM $ modify' $ \conf -> conf
+addWorkflow :: LocalWorkflow env st f -> ConfigM env actEnv ()
+addWorkflow wf = ConfigM $ modify' $ \conf -> conf
   { wfDefs = HashMap.insert (workflowName def) (OpaqueWorkflow def) (wfDefs conf) 
   }
+  where
+    def = wf.definition
 
 addActivity :: ActivityDefinition env -> ConfigM wfEnv env ()
 addActivity def = ConfigM $ modify' $ \conf -> conf

@@ -24,6 +24,7 @@ module Temporal.Workflow.WorkflowDefinition
   -- , StartChildWorkflow(..)
   , gatherStartChildWorkflowArgs
   , provideWorkflow
+  , LocalWorkflow(..)
   , GatherArgs(..)
   ) where
 
@@ -45,6 +46,9 @@ import Temporal.Payload
 import Temporal.Workflow.WorkflowInstance
 import Temporal.Worker.Types
 
+-- | Given a list of function argument types and a codec, produce a function that takes a list of
+-- 'RawPayload's and does something useful with them. This is used to support outbound invocations of
+-- child workflows, activities, queries, and signals.
 class GatherArgs codec (args :: [Type]) where
   gatherArgs 
     :: Proxy args 
@@ -104,14 +108,22 @@ data SignalDefinition (args :: [Type]) = forall codec. GatherArgs codec args =>
 -- >   (Proxy @"myWorkflow") -- visible name of the workflow
 -- >   () -- initial state
 -- >   myWorkflow -- the workflow function
-provideWorkflow :: forall env st name codec f.
+
+data LocalWorkflow env st f = LocalWorkflow
+  { definition :: WorkflowDefinition env st
+  , reference :: KnownWorkflow (ArgsOf f) (ResultOf (Workflow env st) f)
+  }
+
+type IsLocalWorkflow codec env st f =
   ( IsValidWorkflowFunction codec env st f
-  -- , StartChildWorkflowArgs codec (ArgsOf f) (ResultOf (Workflow env st) f)
   , GatherArgs codec (ArgsOf f)
   , f ~ (ArgsOf f :->: Workflow env st (ResultOf (Workflow env st) f))
-  ) => codec -> Text -> st -> f -> (WorkflowDefinition env st, KnownWorkflow (ArgsOf f) (ResultOf (Workflow env st) f))
-provideWorkflow codec name st f = 
-  ( WorkflowDefinition
+  )
+
+provideWorkflow :: forall env st name codec f.
+  (IsLocalWorkflow codec env st f) => codec -> Text -> st -> f -> LocalWorkflow env st f
+provideWorkflow codec name st f = LocalWorkflow
+  { definition = WorkflowDefinition
     { workflowName = name
     , workflowInitialState = st
     , workflowRun = ValidWorkflowFunction 
@@ -123,10 +135,10 @@ provideWorkflow codec name st f =
           (Proxy @(Workflow env st (ResultOf (Workflow env st) f)))
         )
     }
-  , KnownWorkflow
+  , reference = KnownWorkflow
     { knownWorkflowCodec = codec
     , knownWorkflowQueue = Nothing
     , knownWorkflowNamespace = Nothing
     , knownWorkflowName = name
     }
-  )
+  }

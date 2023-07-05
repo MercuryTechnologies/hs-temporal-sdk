@@ -130,6 +130,13 @@ data ContinueAsNewException = ContinueAsNewException ContinueAsNewWorkflowExecut
 
 instance Exception ContinueAsNewException
 
+data AlternativeInstanceFailure = AlternativeInstanceFailure
+  deriving (Show)
+
+instance Exception AlternativeInstanceFailure where
+  toException = workflowExceptionToException
+  fromException = workflowExceptionFromException
+
 ---------------------------------------------------------------------
 -- Activity exceptions
 

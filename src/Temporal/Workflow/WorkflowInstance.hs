@@ -123,9 +123,11 @@ putIVar IVar{ivarRef = !ref} a = do
     IVarEmpty jobs -> do
       writeIORef ref (IVarFull a)
       modifyIORef' (workflowRunQueueRef inst) (appendJobList jobs)
-      -- An IVar is typically only meant to be written to once
-      -- so it would make sense to throw an error here. But there
-      -- are legitimate use-cases for writing several times.
+      -- An IVar is typically only meant to be written to once,
+      -- but are legitimate use-cases for writing several times.
+      --
+      -- An example is the Alternative instance for IVar, which writes to
+      -- a single IVar from either blocked branch
     IVarFull{} -> return ()
 
 appendJobList :: JobList env st -> JobList env st -> JobList env st

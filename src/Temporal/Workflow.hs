@@ -39,6 +39,7 @@ module Temporal.Workflow
   ( Workflow
   , WorkflowDefinition
   , KnownWorkflow(..)
+  , LocalWorkflow(..)
   , provideWorkflow
   , Task
   , TimeoutType(..)
@@ -57,17 +58,14 @@ module Temporal.Workflow
   -- $childWorkflow
   , StartChildWorkflowOptions(..)
   , defaultChildWorkflowOptions
-  -- , StartChildWorkflow
   , startChildWorkflow
   , ChildWorkflowHandle
   , ExternalWorkflowHandle
+  , Wait(..)
+  , Cancel(..)
   , WorkflowHandle(..)
   , waitChildWorkflowResult
-  , Temporal.Workflow.wait
   , cancelChildWorkflowExecution
-  -- , execWorkflow
-  -- , continueAsNew
-  -- , executeLocalActivity
   , Info(..)
   , RetryPolicy(..)
   , ParentInfo(..)
@@ -166,12 +164,11 @@ import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow_Fields as C
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import UnliftIO
 
-
-
-data Task env st a = Task (Workflow env st a)
-
-wait :: HasCallStack => Task env st a -> Workflow env st a
-wait (Task w) = w
+-- | An async action handle that can be awaited or cancelled.
+data Task env st a = Task 
+  { waitAction :: Workflow env st a
+  , cancelAction :: Workflow env st ()
+  }
 
 ilift :: InstanceM env st a -> Workflow env st a
 ilift = Workflow . fmap Done
@@ -285,19 +282,22 @@ startActivity k@(KnownActivity codec mTaskQueue name) opts = gatherActivityArgs 
 
   let cmd = defMessage & Command.scheduleActivity .~ scheduleActivity
   addCommand inst cmd
-  pure $ Task $ do
-    res <- getIVar resultSlot
-    case res ^. Activation.result . ActivityResult.maybe'status of
-      Nothing -> error "Activity result missing status"
-      Just (ActivityResult.ActivityResolution'Completed success) -> do
-        result <- ilift $ liftIO $ decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
-        case result of
-          -- TODO handle properly
-          Left err -> error $ "Failed to decode activity result: " <> show err
-          Right val -> pure val
-      Just (ActivityResult.ActivityResolution'Failed failure) -> error "not implemented"
-      Just (ActivityResult.ActivityResolution'Cancelled details) -> error "not implemented"
-      Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"
+  pure $ Task 
+    { waitAction = do
+      res <- getIVar resultSlot
+      case res ^. Activation.result . ActivityResult.maybe'status of
+        Nothing -> error "Activity result missing status"
+        Just (ActivityResult.ActivityResolution'Completed success) -> do
+          result <- ilift $ liftIO $ decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
+          case result of
+            -- TODO handle properly
+            Left err -> error $ "Failed to decode activity result: " <> show err
+            Right val -> pure val
+        Just (ActivityResult.ActivityResolution'Failed failure) -> error "not implemented"
+        Just (ActivityResult.ActivityResolution'Cancelled details) -> error "not implemented"
+        Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"
+    , cancelAction = undefined
+    }
 
 gatherActivityArgs 
   :: forall env st args result codec. GatherArgs codec args
@@ -334,6 +334,43 @@ defaultChildWorkflowOptions = StartChildWorkflowOptions
   , headers = mempty
   , workflowIdReusePolicy = WorkflowIdReusePolicyUnspecified
   }
+
+class Wait h where
+  -- | Wait for a handle on an an action to complete.
+  wait :: HasCallStack => h env st result -> Workflow env st result
+
+instance Wait Task where
+  wait t = t.waitAction
+
+instance Wait ChildWorkflowHandle where
+  wait h = waitChildWorkflowResult h
+
+class Cancel h where
+  -- | Signal to Temporal that a handle representing an async action should be cancelled.
+  cancel :: HasCallStack => h env st result -> Workflow env st ()
+
+instance Cancel Task where
+  cancel t = t.cancelAction
+
+instance Cancel ChildWorkflowHandle where
+  cancel h = cancelChildWorkflowExecution h
+
+-- instance Cancel ExternalWorkflowHandle where
+--   cancel h = ilift $ do
+--     inst <- ask
+--     addCommand 
+--       inst 
+--       (defMessage 
+--         & Command.requestCancelExternalWorkflowExecution .~ 
+--           ( defMessage 
+--             & Command.seq .~ rawSequence _
+--             & Command.workflowExecution .~ 
+--               ( defMessage 
+--                 & Common.workflowId .~ rawWorkflowId _
+--                 & Common.runId .~ maybe "" rawRunId _
+--               )
+--           )
+--       )
 
 -- | A client side handle to a single Workflow instance. It can be used to signal a workflow execution.
 --
@@ -380,11 +417,16 @@ signalWorkflow _ f (SignalDefinition signalName signalCodec signalApply) = gathe
     addCommand inst cmd
     modifyMVar_ inst.workflowSequenceMaps $ \seqMaps -> do
       pure $ seqMaps { externalSignals = HashMap.insert s resVar seqMaps.externalSignals }
-    pure $ Task $ do
-      res <- getIVar resVar
-      case res ^. Activation.maybe'failure of
-        Nothing -> pure ()
-        Just f -> throw $ SignalExternalWorkflowFailed f
+    pure $ Task 
+      { waitAction = do
+          res <- getIVar resVar
+          case res ^. Activation.maybe'failure of
+            Nothing -> pure ()
+            Just f -> throw $ SignalExternalWorkflowFailed f
+      , cancelAction = 
+          -- TODO defMessage & Command.cancelSignalWorkflow .~ _
+          undefined
+      }
 
 gatherSignalChildWorkflowArgs 
   :: forall env st args result codec. GatherArgs codec args
@@ -571,19 +613,22 @@ startLocalActivity (KnownActivity codec _ n) opts = gatherActivityArgs @env @st 
               & Command.cancellationType .~ activityCancellationTypeToProto opts.cancellationType
             )
     addCommand inst cmd
-    pure $ Task $ do
-      res <- getIVar resultSlot
-      case res ^. Activation.result . ActivityResult.maybe'status of
-        Nothing -> error "Activity result missing status"
-        Just (ActivityResult.ActivityResolution'Completed success) -> do
-          result <- ilift $ liftIO $ decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
-          case result of
-            -- TODO handle properly
-            Left err -> error $ "Failed to decode activity result: " <> show err
-            Right val -> pure val
-        Just (ActivityResult.ActivityResolution'Failed failure) -> error "not implemented"
-        Just (ActivityResult.ActivityResolution'Cancelled details) -> error "not implemented"
-        Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"
+    pure $ Task 
+      { waitAction = do
+        res <- getIVar resultSlot
+        case res ^. Activation.result . ActivityResult.maybe'status of
+          Nothing -> error "Activity result missing status"
+          Just (ActivityResult.ActivityResolution'Completed success) -> do
+            result <- ilift $ liftIO $ decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
+            case result of
+              -- TODO handle properly
+              Left err -> error $ "Failed to decode activity result: " <> show err
+              Right val -> pure val
+          Just (ActivityResult.ActivityResolution'Failed failure) -> error "not implemented"
+          Just (ActivityResult.ActivityResolution'Cancelled details) -> error "not implemented"
+          Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"
+      , cancelAction = undefined
+      }
 
 -- $metadata
 --
@@ -811,10 +856,13 @@ setQueryHandler (QueryDefinition n codec) f = ilift $ do
                   )
           addCommand inst cmd
           
-  
-setSignalHandler :: forall env st f.
+type ValidSignalHandler env st f = 
   ( ResultOf (Workflow env st) f ~ ()
   , (ArgsOf f :->: Workflow env st ()) ~ f
+  )
+
+setSignalHandler :: forall env st f.
+  ( ValidSignalHandler env st f
   ) => SignalDefinition (ArgsOf f) -> f -> Workflow env st ()
 setSignalHandler (SignalDefinition n codec applyToSignal) f = ilift $ do
   -- TODO ^ inner callstack?

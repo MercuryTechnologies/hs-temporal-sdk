@@ -2,7 +2,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE TypeFamilies #-}
 module Temporal.Worker.Types where
-import Control.Applicative (liftA2)
+import Control.Applicative (liftA2, Alternative(..))
 import Control.Concurrent.Async (Async)
 import Control.Concurrent.STM.TMVar (TMVar)
 import Control.Exception (SomeException)
@@ -244,6 +244,7 @@ data WorkflowDefinition env st = WorkflowDefinition
   , workflowRun :: ValidWorkflowFunction env st
   }
 
+-- | This constraint synonym ensures that a workflow function's arguments and result are serializable and use the correct monad.
 type IsValidWorkflowFunction (codec :: *) (env :: *) (st :: *) f = 
   ( ApplyPayloads codec (ArgsOf f)
   , Codec codec (ResultOf (Workflow env st) f)
@@ -427,12 +428,6 @@ instance Applicative (Workflow env st) where
           Throw e -> pure $ Blocked ivar (fcont :>>= (\_ -> throw e))
           Blocked ivar' acont -> blockedBlocked ivar fcont ivar' acont
 
-instance MonadLogger (Workflow env st) where
-  monadLoggerLog loc src lvl msg = Workflow $ do
-    logger <- asks workflowInstanceLogger
-    liftIO $ logger loc src lvl (toLogStr msg)
-    pure $ Done ()
-
 blockedBlocked
   :: IVar env st c
   -> Cont env st (a -> b)
@@ -449,13 +444,81 @@ blockedBlocked ivar1 fcont ivar2 acont = do
   let cont = acont :>>= \a -> getIVarApply i a
   return (Blocked ivar2 cont)
 
+instance Alternative (Workflow env st) where
+  empty = throw AlternativeInstanceFailure
+  (<|>) (Workflow l) (Workflow r) = Workflow $ do
+    rl <- l
+    case rl of
+      Done a -> pure $ Done a
+      Throw e -> do
+        rr <- r
+        case rr of
+          Done a -> pure $ Done a
+          Throw e' -> pure $ Throw e'
+          Blocked ivar cont -> pure $ Blocked ivar cont
+      Blocked ivar cont -> do
+        rr <- r
+        case rr of
+          Done a -> pure $ Done a
+          Throw e -> pure $ Blocked ivar cont
+          Blocked ivar' cont' -> altBlockedBlocked ivar cont ivar' cont'
+
+-- Note Alt [Blocked/Blocked]
+--
+-- This is the tricky case: we're blocked on both sides of the <|>.
+-- We need to divide the computation into two pieces that may continue
+-- independently when the resources they are blocked on become
+-- available.  Moreover, the computation as a whole depends on the two
+-- pieces.  It works like this:
+--
+--   ll <|> rr
+--
+-- becomes
+--
+--   ((ll >>= putIVar i) *> (rr >>= putIVar i)) >>= \_ -> getIVar i
+--
+-- where the IVar i is a new synchronisation point.  If the right side
+-- gets to the `getIVar` first, it will block until the left side has
+-- called 'putIVar'.
+--
+-- We can also do it the other way around:
+--
+--   (do ff <- f; getIVar i; return (ff a)) <*> (a >>= putIVar i)
+--
+-- The first was slightly faster according to tests/MonadBench.hs.
+
+altBlockedBlocked 
+  :: IVar env st b
+  -> Cont env st a
+  -> IVar env st c
+  -> Cont env st a
+  -> InstanceM env st (Result env st a)
+altBlockedBlocked _ (Return i) _ _ = igetIVar i 
+altBlockedBlocked _ _ _ (Return i) = igetIVar i 
+altBlockedBlocked ivar1 lcont ivar2 rcont = do
+  i <- newIVar
+  addJob (toWorkflow lcont) i ivar1
+  addJob (toWorkflow rcont) i ivar2
+  let cont = lcont :<|> rcont
+  return (Blocked i cont)
+
+instance MonadLogger (Workflow env st) where
+  monadLoggerLog loc src lvl msg = Workflow $ do
+    logger <- asks workflowInstanceLogger
+    liftIO $ logger loc src lvl (toLogStr msg)
+    pure $ Done ()
+
 newIVar :: MonadIO m => m (IVar env st a)
 newIVar = do
   ivarRef <- newIORef (IVarEmpty JobNil)
   pure IVar{..}
 
 {-# INLINE addJob #-}
-addJob :: Workflow env st b -> IVar env st b -> IVar env st a -> InstanceM env st ()
+addJob
+  :: Workflow env st b 
+  -> IVar env st b 
+  -> IVar env st a 
+  -> InstanceM env st ()
 addJob !wf !resultIVar IVar{ivarRef = !ref} =
   modifyIORef' ref $ \contents ->
     case contents of
@@ -477,7 +540,10 @@ getIVarApply i@IVar{ivarRef = !ref} a = Workflow $ do
       return (Blocked i (Cont (getIVarApply i a)))
 
 getIVar :: IVar env st a -> Workflow env st a
-getIVar i@IVar{ivarRef = !ref} = Workflow $ do
+getIVar = Workflow . igetIVar
+
+igetIVar :: IVar env st a -> InstanceM env st (Result env st a)
+igetIVar i@IVar{ivarRef = !ref} = do
   e <- readIORef ref
   case e of
     IVarFull (Ok a) -> return (Done a)
@@ -540,6 +606,7 @@ data Cont env st a
   = Cont (Workflow env st a)
   | forall b. (Cont env st b) :>>= (b -> Workflow env st a)
   | forall b. (b -> a) :<$> (Cont env st b)
+  | Cont env st a :<|> Cont env st a
   | Return (IVar env st a)
 
 -- -----------------------------------------------------------------------------
@@ -589,18 +656,21 @@ toWorkflow :: Cont env st a -> Workflow env st a
 toWorkflow (Cont wf) = wf
 toWorkflow (m :>>= k) = toWorkflowBind m k
 toWorkflow (f :<$> x) = toWorkflowFmap f x
+toWorkflow (l :<|> r) = toWorkflow l <|> toWorkflow r
 toWorkflow (Return i) = getIVar i
 
 toWorkflowBind :: Cont env st b -> (b -> Workflow env st a) -> Workflow env st a
 toWorkflowBind (m :>>= k) k2 = toWorkflowBind m (k >=> k2)
 toWorkflowBind (Cont wf) k = wf >>= k
 toWorkflowBind (f :<$> x) k = toWorkflowBind x (k . f)
+toWorkflowBind (l :<|> r) k = toWorkflowBind l k <|> toWorkflowBind r k
 toWorkflowBind (Return i) k = getIVar i >>= k
 
 toWorkflowFmap :: (a -> b) -> Cont env st a -> Workflow env st b
 toWorkflowFmap f (m :>>= k) = toWorkflowBind m (k >=> pure . f)
 toWorkflowFmap f (Cont workflow) = f <$> workflow
 toWorkflowFmap f (g :<$> x) = toWorkflowFmap (f . g) x
+toWorkflowFmap f (l :<|> r) = toWorkflowFmap f l <|> toWorkflowFmap f r
 toWorkflowFmap f (Return i) = f <$> getIVar i
 
 type IsValidActivityFunction env codec f = 

@@ -3,7 +3,59 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
-module Temporal.Client.WorkflowService where
+module Temporal.Client.WorkflowService 
+  ( countWorkflowExecutions
+  , createSchedule
+  , deleteSchedule
+  , deprecateNamespace
+  , describeNamespace
+  , describeSchedule
+  , describeTaskQueue
+  , describeWorkflowExecution
+  , getClusterInfo
+  , getSearchAttributes
+  , getSystemInfo
+  , getWorkerBuildIdCompatibility
+  , getWorkflowExecutionHistory
+  , getWorkflowExecutionHistoryReverse
+  , listArchivedWorkflowExecutions
+  , listClosedWorkflowExecutions
+  , listNamespaces
+  , listOpenWorkflowExecutions
+  , listScheduleMatchingTimes
+  , listSchedules
+  , listTaskQueuePartitions
+  , listWorkflowExecutions
+  , patchSchedule
+  , pollActivityTaskQueue
+  , pollWorkflowExecutionUpdate
+  , pollWorkflowTaskQueue
+  , queryWorkflow
+  , recordActivityTaskHeartbeat
+  , recordActivityTaskHeartbeatById
+  , registerNamespace
+  , requestCancelWorkflowExecution
+  , resetStickyTaskQueue
+  , resetWorkflowExecution
+  , respondActivityTaskCanceled
+  , respondActivityTaskCanceledById
+  , respondActivityTaskCompleted
+  , respondActivityTaskCompletedById
+  , respondActivityTaskFailed
+  , respondActivityTaskFailedById
+  , respondQueryTaskCompleted
+  , respondWorkflowTaskCompleted
+  , respondWorkflowTaskFailed
+  , scanWorkflowExecutions
+  , signalWithStartWorkflowExecution
+  , signalWorkflowExecution
+  , startWorkflowExecution
+  , terminateWorkflowExecution
+  , updateNamespace
+  , updateSchedule
+  , updateWorkflowExecution
+  , updateWorkerBuildIdCompatibility
+  ) where
 import Data.Word
 import Foreign.C.String
 import Foreign.C.Types
