@@ -98,7 +98,7 @@ create :: MonadLoggerIO m
   -> env 
   -> WorkflowDefinition env st 
   -> m (WorkflowInstance env st)
-create workflowInstanceInfo workflowEnv workflowInstanceDefinition = do
+create info workflowEnv workflowInstanceDefinition = do
   workflowInstanceLogger <- askLoggerIO
   workflowRandomnessSeed <- WorkflowGenM <$> newIORef (mkStdGen 0)
   workflowNotifiedPatches <- newIORef mempty
@@ -122,6 +122,7 @@ create workflowInstanceInfo workflowEnv workflowInstanceDefinition = do
   workflowSignalHandlers <- newIORef mempty
   workflowQueryHandlers <- newIORef mempty
   workflowCallStack <- newIORef emptyCallStack
+  workflowInstanceInfo <- newIORef info
   pure WorkflowInstance {..}
 
 
@@ -129,6 +130,10 @@ create workflowInstanceInfo workflowEnv workflowInstanceDefinition = do
 -- and set as completion failure.
 activate :: Worker env actEnv -> WorkflowInstance env st -> WorkflowActivation -> IO WorkflowActivationCompletion
 activate w inst act = runInstanceM inst $ do
+  info <- atomicModifyIORef' inst.workflowInstanceInfo $ \info -> 
+    let info' = info { historyLength = act ^. Activation.historyLength }
+    in (info', info')
+  let completionBase = defMessage & Completion.runId .~ rawRunId info.runId
   writeIORef inst.workflowTime (act ^. Activation.timestamp . to timespecFromTimestamp)
   eResult <- applyJobs $ act ^. Activation.vec'jobs
   -- TODO: Can the completion send both successful commands and a failure
@@ -152,9 +157,6 @@ activate w inst act = runInstanceM inst $ do
           completion = completionBase
             & Completion.successful .~ success
       pure completion
-  where
-    info = inst.workflowInstanceInfo
-    completionBase = defMessage & Completion.runId .~ rawRunId info.runId
 
 runInstanceM :: WorkflowInstance env st -> InstanceM env st a -> IO a
 runInstanceM worker m = runReaderT (unInstanceM m) worker

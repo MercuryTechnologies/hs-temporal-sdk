@@ -89,6 +89,8 @@ module Temporal.Workflow
   , SignalDefinition(..)
   , setSignalHandler
   , awaitCondition
+  -- * Other utilities
+  , race
   -- * Time and timers
   , now
   , time
@@ -113,6 +115,7 @@ module Temporal.Workflow
   , WorkflowIdReusePolicy(..)
   , WorkflowType(..)
   ) where
+import Control.Applicative
 import Control.Monad
 import Control.Monad.State
 import Control.Monad.Logger
@@ -162,7 +165,7 @@ import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields as
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow as ChildWorkflow
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow_Fields as ChildWorkflow
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
-import UnliftIO
+import UnliftIO hiding (race)
 
 -- | An async action handle that can be awaited or cancelled.
 data Task env st a = Task 
@@ -262,11 +265,12 @@ startActivity k@(KnownActivity codec mTaskQueue name) opts = gatherActivityArgs 
   modifyMVar inst.workflowSequenceMaps $ \seqMaps -> do
     pure (seqMaps { activities = HashMap.insert s resultSlot (activities seqMaps) }, ())
 
+  info <- readIORef inst.workflowInstanceInfo
   let scheduleActivity = defMessage
         & Command.seq .~ actSeq
         & Command.activityId .~ maybe (Text.pack $ show actSeq) rawActivityId (opts.activityId)
         & Command.activityType .~ name
-        & Command.taskQueue .~ rawTaskQueue (fromMaybe inst.workflowInstanceInfo.taskQueue mTaskQueue)
+        & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue mTaskQueue)
         & Command.arguments .~ ps
         & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts.retryPolicy
         & Command.cancellationType .~ activityCancellationTypeToProto opts.cancellationType
@@ -473,13 +477,14 @@ startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId =
       startSlot <- newIVar
       resultSlot <- newIVar
       firstExecutionRunId <- newIVar
+      info <- readIORef inst.workflowInstanceInfo
       
       let childWorkflowOptions = defMessage
             & Command.seq .~ wfSeq
-            & Command.namespace .~ rawNamespace (fromMaybe inst.workflowInstanceInfo.namespace mNamespace)
+            & Command.namespace .~ rawNamespace (fromMaybe info.namespace mNamespace)
             & Command.workflowId .~ rawWorkflowId wfId
             & Command.workflowType .~ knownWorkflowName k
-            & Command.taskQueue .~ rawTaskQueue (fromMaybe inst.workflowInstanceInfo.taskQueue mTaskQueue)
+            & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue mTaskQueue)
             & Command.input .~ ps
             & Command.maybe'workflowExecutionTimeout .~ fmap timespecToDuration opts.executionTimeout
             & Command.maybe'workflowRunTimeout .~ fmap timespecToDuration opts.runTimeout
@@ -640,11 +645,14 @@ startLocalActivity (KnownActivity codec _ n) opts = gatherActivityArgs @env @st 
 -- | We recommend calling 'info' whenever accessing 'Info' fields. Some 'Info' fields change during the lifetime of an Execution—
 -- like historyLength and searchAttributes— and some may be changeable in the future— like taskQueue.
 info :: Workflow env st Info
-info = workflowInstanceInfo <$> askInstance
+info = askInstance >>= ilift . readIORef . workflowInstanceInfo
+--(ask >>= readIORef) workflowInstanceInfo <$> askInstance
 
 -- | Current workflow's raw memo values.
-memo :: () -> Workflow env st (Maybe (Map Text Payload))
-memo = undefined
+memo :: Workflow env st (Map Text RawPayload)
+memo = do
+  details <- info
+  pure details.rawMemo
 
 -- | Lookup a memo value by key.
 memoValue :: Text -> Workflow env st (Maybe Payload)
@@ -1041,3 +1049,7 @@ awaitCondition f = do
       if f st
         then pure ()
         else go
+
+-- race :: Workflow env st a -> Workflow env st b -> Workflow env st (Either a b)
+-- race l r = (Left <$> l) <|> (Right <$> r)
+

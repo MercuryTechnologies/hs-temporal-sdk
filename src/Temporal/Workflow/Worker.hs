@@ -209,7 +209,8 @@ handleActivation activation = do
                     , parentWorkflowId = WorkflowId $ parent ^. CommonProto.workflowId
                     }
                 workflowInfo = Info
-                  { attempt = fromIntegral $ startWorkflow ^. Activation.attempt
+                  { historyLength = activation ^. Activation.historyLength
+                  , attempt = fromIntegral $ startWorkflow ^. Activation.attempt
                   , taskQueue = TaskQueue $ worker.workerTaskQueue
                   , workflowId = WorkflowId $ startWorkflow ^. Activation.workflowId
                   , workflowType = startWorkflow ^. Activation.workflowType . to WorkflowType
@@ -221,11 +222,13 @@ handleActivation activation = do
                   , parent = parentInfo
                   -- TODO
                   , headers = mempty
-                  -- , rawMemo :: what is this
+                  -- TODO
+                  , rawMemo = mempty
+                  -- TODO
+                  , searchAttributes = mempty
                   , retryPolicy = retryPolicyFromProto <$> startWorkflow ^. Activation.maybe'retryPolicy
                   , runId = RunId $ activation ^. CommonProto.runId
                   , runTimeout = fmap timespecFromDuration $ startWorkflow ^. Activation.maybe'workflowRunTimeout
-                  -- , searchAttributes =
                   , startTime = timespecFromTimestamp $ 
                       fromMaybe 
                         (activation ^. Activation.timestamp) 

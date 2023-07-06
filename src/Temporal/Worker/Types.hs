@@ -61,7 +61,7 @@ import System.Random
   )
 import System.Random.Stateful (StatefulGen(..), RandomGenM(..), FrozenGen(..))
 import qualified Temporal.Core.Client as C
-import UnliftIO
+import UnliftIO hiding (race)
 
 data WorkerConfig workflowEnv activityEnv = WorkerConfig
   { deadlockTimeout :: Maybe Int
@@ -118,18 +118,19 @@ data ParentInfo = ParentInfo
 
 -- TODO, update this as workflow progresses
 data Info = Info
-  { attempt :: Int
+  { historyLength :: {-# UNPACK #-} !Word32
+  , attempt :: {-# UNPACK #-} Int
   , continuedRunId :: Maybe RunId
   , cronSchedule :: Maybe Text
   , executionTimeout :: Maybe TimeSpec
   , headers :: HashMap Text Text
   , namespace :: Namespace
   , parent :: Maybe ParentInfo
-  -- , rawMemo
+  , rawMemo :: Map Text RawPayload
   , retryPolicy :: Maybe RetryPolicy
   , runId :: RunId
   , runTimeout :: Maybe TimeSpec
-  -- , searchAttributes
+  , searchAttributes :: Map Text RawPayload
   , startTime :: TimeSpec -- Consider using UTCTime?
   , taskQueue :: TaskQueue
   , taskTimeout :: TimeSpec
@@ -163,7 +164,7 @@ data SequenceMaps env st = SequenceMaps
   }
 
 data WorkflowInstance env st = WorkflowInstance
-  { workflowInstanceInfo :: Info
+  { workflowInstanceInfo :: {-# UNPACK #-} !(IORef Info)
   , workflowInstanceDefinition :: WorkflowDefinition env st
   , workflowInstanceLogger :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
   , workflowRandomnessSeed :: WorkflowGenM
@@ -388,27 +389,6 @@ instance Functor (Workflow env st) where
       Throw e -> pure $ Throw e
       Blocked ivar cont -> pure $ Blocked ivar (f :<$> cont)
 
--- Note on 'blockedBlocked'
---
--- This is the tricky case: we're blocked on both sides of the <*>.
--- We need to divide the computation into two pieces that may continue
--- independently when the resources they are blocked on become
--- available.  Moreover, the computation as a whole depends on the two
--- pieces.  It works like this:
---
---   ff <*> aa
---
--- becomes
---
---   (ff >>= putIVar i) <*> (a <- aa; f <- getIVar i; return (f a)
---
--- where the IVar i is a new synchronisation point.  If the right side
--- gets to the `getIVar` first, it will block until the left side has
--- called 'putIVar'.
---
--- We can also do it the other way around:
---
---   (do ff <- f; getIVar i; return (ff a)) <*> (a >>= putIVar i)
 instance Applicative (Workflow env st) where
   pure = Workflow . pure . Done
   Workflow ff <*> Workflow aa = Workflow $ do
@@ -444,62 +424,62 @@ blockedBlocked ivar1 fcont ivar2 acont = do
   let cont = acont :>>= \a -> getIVarApply i a
   return (Blocked ivar2 cont)
 
+-- | If the first computation throws a value that implements 'SomeWorkflowException', 
+-- try the second one.
 instance Alternative (Workflow env st) where
   empty = throw AlternativeInstanceFailure
-  (<|>) (Workflow l) (Workflow r) = Workflow $ do
-    rl <- l
-    case rl of
-      Done a -> pure $ Done a
-      Throw e -> do
-        rr <- r
-        case rr of
-          Done a -> pure $ Done a
-          Throw e' -> pure $ Throw e'
-          Blocked ivar cont -> pure $ Blocked ivar cont
-      Blocked ivar cont -> do
-        rr <- r
-        case rr of
-          Done a -> pure $ Done a
-          Throw e -> pure $ Blocked ivar cont
-          Blocked ivar' cont' -> altBlockedBlocked ivar cont ivar' cont'
+  (<|>) l r = l `Temporal.Worker.Types.catch` \(SomeWorkflowException e) -> r
+  
+-- | Return the first complete result between two Workflow computations.
+-- The first one to complete (left-biased) will return its result. 
+-- If either branch throws an exception, the first encountered exception 
+-- will be thrown.
+--
+-- Note that unchosen branch may or may not continue to execute in the 
+-- background depending on where the computations on either branch block.
+-- Therefore, you should not try to implement any cleanup or compensation
+-- logic in branching Workflow computations.
+race :: Workflow env st a -> Workflow env st a -> Workflow env st a
+race (Workflow l) (Workflow r) = Workflow $ do
+  rl <- l
+  case rl of
+    Done a -> pure $ Done a
+    Throw e -> pure $ Throw e
+    Blocked ivar cont -> do
+      rr <- r
+      case rr of
+        Done a -> pure $ Done a
+        Throw e -> pure $ Throw e
+        Blocked ivar' cont' -> raceBlockedBlocked ivar cont ivar' cont'
 
--- Note Alt [Blocked/Blocked]
+--  Race [Blocked/Blocked]
 --
 -- This is the tricky case: we're blocked on both sides of the <|>.
 -- We need to divide the computation into two pieces that may continue
 -- independently when the resources they are blocked on become
--- available.  Moreover, the computation as a whole depends on the two
--- pieces.  It works like this:
+-- available.
 --
---   ll <|> rr
+--   ll `race` rr
 --
 -- becomes
 --
 --   ((ll >>= putIVar i) *> (rr >>= putIVar i)) >>= \_ -> getIVar i
 --
--- where the IVar i is a new synchronisation point.  If the right side
--- gets to the `getIVar` first, it will block until the left side has
--- called 'putIVar'.
+-- where the IVar i is a new synchronisation point. 
 --
--- We can also do it the other way around:
---
---   (do ff <- f; getIVar i; return (ff a)) <*> (a >>= putIVar i)
---
--- The first was slightly faster according to tests/MonadBench.hs.
-
-altBlockedBlocked 
+raceBlockedBlocked 
   :: IVar env st b
   -> Cont env st a
   -> IVar env st c
   -> Cont env st a
   -> InstanceM env st (Result env st a)
-altBlockedBlocked _ (Return i) _ _ = igetIVar i 
-altBlockedBlocked _ _ _ (Return i) = igetIVar i 
-altBlockedBlocked ivar1 lcont ivar2 rcont = do
+raceBlockedBlocked _ (Return i) _ _ = igetIVar i 
+raceBlockedBlocked _ _ _ (Return i) = igetIVar i 
+raceBlockedBlocked ivar1 lcont ivar2 rcont = do
   i <- newIVar
   addJob (toWorkflow lcont) i ivar1
   addJob (toWorkflow rcont) i ivar2
-  let cont = lcont :<|> rcont
+  let cont = Race lcont rcont
   return (Blocked i cont)
 
 instance MonadLogger (Workflow env st) where
@@ -606,7 +586,7 @@ data Cont env st a
   = Cont (Workflow env st a)
   | forall b. (Cont env st b) :>>= (b -> Workflow env st a)
   | forall b. (b -> a) :<$> (Cont env st b)
-  | Cont env st a :<|> Cont env st a
+  | Race (Cont env st a) (Cont env st a)
   | Return (IVar env st a)
 
 -- -----------------------------------------------------------------------------
@@ -656,21 +636,21 @@ toWorkflow :: Cont env st a -> Workflow env st a
 toWorkflow (Cont wf) = wf
 toWorkflow (m :>>= k) = toWorkflowBind m k
 toWorkflow (f :<$> x) = toWorkflowFmap f x
-toWorkflow (l :<|> r) = toWorkflow l <|> toWorkflow r
+toWorkflow (Race l r) = toWorkflow l `race` toWorkflow r
 toWorkflow (Return i) = getIVar i
 
 toWorkflowBind :: Cont env st b -> (b -> Workflow env st a) -> Workflow env st a
 toWorkflowBind (m :>>= k) k2 = toWorkflowBind m (k >=> k2)
 toWorkflowBind (Cont wf) k = wf >>= k
 toWorkflowBind (f :<$> x) k = toWorkflowBind x (k . f)
-toWorkflowBind (l :<|> r) k = toWorkflowBind l k <|> toWorkflowBind r k
+toWorkflowBind (Race l r) k = toWorkflowBind l k `race` toWorkflowBind r k
 toWorkflowBind (Return i) k = getIVar i >>= k
 
 toWorkflowFmap :: (a -> b) -> Cont env st a -> Workflow env st b
 toWorkflowFmap f (m :>>= k) = toWorkflowBind m (k >=> pure . f)
 toWorkflowFmap f (Cont workflow) = f <$> workflow
 toWorkflowFmap f (g :<$> x) = toWorkflowFmap (f . g) x
-toWorkflowFmap f (l :<|> r) = toWorkflowFmap f l <|> toWorkflowFmap f r
+toWorkflowFmap f (Race l r) = toWorkflowFmap f l `race` toWorkflowFmap f r
 toWorkflowFmap f (Return i) = f <$> getIVar i
 
 type IsValidActivityFunction env codec f = 

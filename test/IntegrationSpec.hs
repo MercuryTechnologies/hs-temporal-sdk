@@ -61,11 +61,11 @@ needsClient = do
               taskQueue
         C.execute client wf.reference opts
           `shouldReturn` True
-    describe "Alternative instance" $ do
+    describe "race" $ do
       it "immediate return works" $ \client -> do
         taskQueue <- W.TaskQueue <$> uuidText
         let testFn :: W.Workflow () () Bool
-            testFn = pure True <|> pure False
+            testFn = pure True `W.race` pure False
             wf = W.provideWorkflow JSON "test" () testFn
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
@@ -83,7 +83,7 @@ needsClient = do
         taskQueue <- W.TaskQueue <$> uuidText
         let testFn :: W.Workflow () () Bool
             testFn = do
-              (W.sleep (TimeSpec 5000 0) >> error "sad") <|> pure True
+              (W.sleep (TimeSpec 5000 0) >> error "sad") `W.race` pure True
             wf = W.provideWorkflow JSON "test" () testFn
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
@@ -101,7 +101,7 @@ needsClient = do
         taskQueue <- W.TaskQueue <$> uuidText
         let testFn :: W.Workflow () () Bool
             testFn = do
-              (W.sleep (TimeSpec 5000 0) >> error "sad") <|> (W.sleep (TimeSpec 1 0) >> pure True)
+              (W.sleep (TimeSpec 5000 0) >> error "sad") `W.race` (W.sleep (TimeSpec 1 0) >> pure True)
             wf = W.provideWorkflow JSON "test" () testFn
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
@@ -115,11 +115,29 @@ needsClient = do
           C.execute client wf.reference opts
             `shouldReturn` True
 
-      it "fmap works" $ \client -> do
+      it "throws immediately when either side throws" $ \client -> do
         taskQueue <- W.TaskQueue <$> uuidText
         let testFn :: W.Workflow () () Bool
-            testFn = not <$> do
-              (W.sleep (TimeSpec 5000 0) >> error "sad") <|> (W.sleep (TimeSpec 1 0) >> pure False)
+            testFn = do
+              (W.sleep (TimeSpec 5000 0) >> error "sad") `W.race` error "foo"
+            wf = W.provideWorkflow JSON "test" () testFn
+            conf = configure () () $ do
+              setNamespace $ W.Namespace "test"
+              setTaskQueue taskQueue
+              addWorkflow wf
+        withWorker conf $ do
+          wfId <- uuidText
+          let opts = C.workflowStartOptions
+                (W.WorkflowId wfId)
+                taskQueue
+          C.execute client wf.reference opts
+            `shouldThrow` (== WorkflowExecutionFailed)
+
+      it "treats error as ok if LHS returns immediately" $ \client -> do
+        taskQueue <- W.TaskQueue <$> uuidText
+        let testFn :: W.Workflow () () Bool
+            testFn = do
+              pure True `W.race` error "foo"
             wf = W.provideWorkflow JSON "test" () testFn
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
