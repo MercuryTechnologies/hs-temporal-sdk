@@ -24,7 +24,7 @@ module Temporal.Workflow.WorkflowDefinition
   -- , StartChildWorkflow(..)
   , gatherStartChildWorkflowArgs
   , provideWorkflow
-  , LocalWorkflow(..)
+  , ProvidedWorkflow(..)
   , GatherArgs(..)
   ) where
 
@@ -109,20 +109,20 @@ data SignalDefinition (args :: [Type]) = forall codec. GatherArgs codec args =>
 -- >   () -- initial state
 -- >   myWorkflow -- the workflow function
 
-data LocalWorkflow env st f = LocalWorkflow
+data ProvidedWorkflow env st f = ProvidedWorkflow
   { definition :: WorkflowDefinition env st
   , reference :: KnownWorkflow (ArgsOf f) (ResultOf (Workflow env st) f)
   }
 
-type IsLocalWorkflow codec env st f =
+type IsProvidedWorkflow codec env st f =
   ( IsValidWorkflowFunction codec env st f
   , GatherArgs codec (ArgsOf f)
   , f ~ (ArgsOf f :->: Workflow env st (ResultOf (Workflow env st) f))
   )
 
 provideWorkflow :: forall env st name codec f.
-  (IsLocalWorkflow codec env st f) => codec -> Text -> st -> f -> LocalWorkflow env st f
-provideWorkflow codec name st f = LocalWorkflow
+  (IsProvidedWorkflow codec env st f) => codec -> Text -> st -> f -> ProvidedWorkflow env st f
+provideWorkflow codec name st f = ProvidedWorkflow
   { definition = WorkflowDefinition
     { workflowName = name
     , workflowInitialState = st

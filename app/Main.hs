@@ -22,7 +22,7 @@ import Temporal.EphemeralServer
 import Temporal.Runtime
 import Temporal.Core.Worker (defaultWorkerConfig)
 import Temporal.Payload (JSON(..))
-import Temporal.Activity (Activity, provideActivity)
+import Temporal.Activity (Activity, ProvidedActivity(..), provideActivity)
 import Temporal.Worker
 import Temporal.Workflow hiding (Info(..), wait)
 import qualified Temporal.Workflow as Workflow
@@ -61,7 +61,7 @@ launchTheMissiles = do
   waitChildWorkflowResult presidentialApproval
   $(logInfo) ("Confirmation confirmed, initiating sequence: " <> T.pack (UUID.toString uuid))
   act <- startActivity 
-    shootMissileRef 
+    shootMissileAct.reference
     (defaultStartActivityOptions $ StartToClose $ TimeSpec 40 0) 
     4
   $(logInfo) ("Sequence initiated: " <> T.pack (UUID.toString uuid))
@@ -91,7 +91,7 @@ requirePresidentialApprovalWf = provideWorkflow JSON "requirePresidentialApprova
 launchTheMissilesWf = provideWorkflow JSON "launchTheMissiles" () launchTheMissiles
 chronicWf = provideWorkflow JSON "chronicWorkflow" () chronicWorkflow
 
-(shootMissileDef, shootMissileRef) = provideActivity JSON "shootMissiles" shootMissiles
+shootMissileAct = provideActivity JSON "shootMissiles" shootMissiles
 
 main :: IO ()
 main = do
@@ -122,7 +122,7 @@ runWorker c = do
         addWorkflow requirePresidentialApprovalWf
         addWorkflow chronicWf
 
-        addActivity shootMissileDef
+        addActivity shootMissileAct
 
   runStdoutLoggingT $ do
     w <- startWorker c conf

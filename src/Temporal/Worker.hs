@@ -47,6 +47,7 @@ import Temporal.Core.Client
 import Temporal.Exception
 import qualified Temporal.Core.Worker as Core
 import Temporal.Internal.JobPool
+import Temporal.Activity (ProvidedActivity(..))
 import qualified Temporal.Activity.Worker as Activity
 import Temporal.Worker.Types
 import Temporal.Workflow.Unsafe
@@ -113,16 +114,19 @@ configure wfEnv actEnv = flip execState defaultConfig . unConfigM
       , ..
       }
 
-addWorkflow :: LocalWorkflow env st f -> ConfigM env actEnv ()
+addWorkflow :: ProvidedWorkflow env st f -> ConfigM env actEnv ()
 addWorkflow wf = ConfigM $ modify' $ \conf -> conf
   { wfDefs = HashMap.insert (workflowName def) (OpaqueWorkflow def) (wfDefs conf) 
   }
   where
     def = wf.definition
 
-addActivity :: ActivityDefinition env -> ConfigM wfEnv env ()
-addActivity def = ConfigM $ modify' $ \conf -> conf
-  { actDefs = HashMap.insert (activityName def) def (actDefs conf)
+addActivity :: ProvidedActivity env f -> ConfigM wfEnv env ()
+addActivity act = ConfigM $ modify' $ \conf -> conf
+  { actDefs = HashMap.insert 
+      act.definition.activityName 
+      act.definition 
+      conf.actDefs
   }
 
 modifyCore :: (Core.WorkerConfig -> Core.WorkerConfig) -> ConfigM wfEnv actEnv ()

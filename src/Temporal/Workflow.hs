@@ -39,7 +39,7 @@ module Temporal.Workflow
   ( Workflow
   , WorkflowDefinition
   , KnownWorkflow(..)
-  , LocalWorkflow(..)
+  , ProvidedWorkflow(..)
   , provideWorkflow
   , Task
   , TimeoutType(..)
