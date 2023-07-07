@@ -95,6 +95,8 @@ module Temporal.Workflow
   , now
   , time
   , sleep
+  , Timer
+  , createTimer
   -- * Random value generation
   -- $randomness
   , randomGen
@@ -188,8 +190,6 @@ data ContinueAsNewOptions = ContinueAsNewOptions
   -- , TODO searchAttributes :: Maybe (Map Text Payload)
   -- , TODO headers
   }
--- continueAsNew :: () -> Workflow env ()
--- continueAsNew = undefined
 
 data StartActivityOptions = StartActivityOptions
   { activityId :: Maybe ActivityId
@@ -300,7 +300,13 @@ startActivity k@(KnownActivity codec mTaskQueue name) opts = gatherActivityArgs 
         Just (ActivityResult.ActivityResolution'Failed failure) -> error "not implemented"
         Just (ActivityResult.ActivityResolution'Cancelled details) -> error "not implemented"
         Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"
-    , cancelAction = undefined
+    , cancelAction = do
+      let cancelCmd = defMessage
+            & Command.requestCancelActivity .~ 
+              ( defMessage
+                & Command.seq .~ actSeq
+              )
+      ilift $ addCommand inst cancelCmd
     }
 
 gatherActivityArgs 
@@ -340,41 +346,60 @@ defaultChildWorkflowOptions = StartChildWorkflowOptions
   }
 
 class Wait h where
+  type WaitResult h :: Type
   -- | Wait for a handle on an an action to complete.
-  wait :: HasCallStack => h env st result -> Workflow env st result
+  wait :: HasCallStack => h -> WaitResult h
 
-instance Wait Task where
+instance Wait (Task env st a) where
+  type WaitResult (Task env st a) = Workflow env st a
   wait t = t.waitAction
 
-instance Wait ChildWorkflowHandle where
+instance Wait (ChildWorkflowHandle env st a) where
+  type WaitResult (ChildWorkflowHandle env st a) = Workflow env st a
   wait h = waitChildWorkflowResult h
 
 class Cancel h where
+  type CancelResult h :: Type
   -- | Signal to Temporal that a handle representing an async action should be cancelled.
-  cancel :: HasCallStack => h env st result -> Workflow env st ()
+  cancel :: HasCallStack => h -> CancelResult h
 
-instance Cancel Task where
+instance Cancel (Task env st a) where
+  type CancelResult (Task env st a) = Workflow env st ()
   cancel t = t.cancelAction
 
-instance Cancel ChildWorkflowHandle where
+instance Cancel (ChildWorkflowHandle env st a) where
+  type CancelResult (ChildWorkflowHandle env st a) = Workflow env st ()
   cancel h = cancelChildWorkflowExecution h
 
--- instance Cancel ExternalWorkflowHandle where
---   cancel h = ilift $ do
---     inst <- ask
---     addCommand 
---       inst 
---       (defMessage 
---         & Command.requestCancelExternalWorkflowExecution .~ 
---           ( defMessage 
---             & Command.seq .~ rawSequence _
---             & Command.workflowExecution .~ 
---               ( defMessage 
---                 & Common.workflowId .~ rawWorkflowId _
---                 & Common.runId .~ maybe "" rawRunId _
---               )
---           )
---       )
+instance Cancel (ExternalWorkflowHandle env st a) where
+  type CancelResult (ExternalWorkflowHandle env st a) = Workflow env st (Workflow env st ())
+  -- | Returns an action that can be used to await cancellation of an external workflow.
+  --
+  -- Throws 'CancelExternalWorkflowFailed' if the cancellation request failed.
+  cancel h = ilift $ do
+    inst <- ask
+    s@(Sequence sVal) <- nextExternalSignalSequence
+    res <- newIVar
+    modifyMVar_ inst.workflowSequenceMaps $ \seqMaps -> do
+      pure $ seqMaps { externalSignals = HashMap.insert s res (externalSignals seqMaps) }
+    addCommand 
+      inst 
+      (defMessage 
+        & Command.requestCancelExternalWorkflowExecution .~ 
+          ( defMessage 
+            & Command.seq .~ sVal
+            & Command.workflowExecution .~ 
+              ( defMessage 
+                & Common.workflowId .~ rawWorkflowId h.externalWorkflowWorkflowId
+                & Common.runId .~ maybe "" rawRunId h.externalWorkflowRunId
+              )
+          )
+      )
+    pure $ do
+      res' <- getIVar res
+      case res' ^. Activation.maybe'failure of
+        Nothing -> pure ()
+        Just f -> throw $ CancelExternalWorkflowFailed f
 
 -- | A client side handle to a single Workflow instance. It can be used to signal a workflow execution.
 --
@@ -427,9 +452,13 @@ signalWorkflow _ f (SignalDefinition signalName signalCodec signalApply) = gathe
           case res ^. Activation.maybe'failure of
             Nothing -> pure ()
             Just f -> throw $ SignalExternalWorkflowFailed f
-      , cancelAction = 
-          -- TODO defMessage & Command.cancelSignalWorkflow .~ _
-          undefined
+      , cancelAction = do
+          let cancelCmd = defMessage 
+                & Command.cancelSignalWorkflow .~ 
+                  ( defMessage 
+                    & Command.seq .~ rawSequence s
+                  )
+          ilift $ addCommand inst cancelCmd
       }
 
 gatherSignalChildWorkflowArgs 
@@ -534,12 +563,14 @@ waitChildWorkflowResult wfHandle@(ChildWorkflowHandle{childWorkflowCodec}) = do
 cancelChildWorkflowExecution :: HasCallStack => ChildWorkflowHandle env st result -> Workflow env st ()
 cancelChildWorkflowExecution wfHandle@(ChildWorkflowHandle{childWorkflowSequence}) = ilift $ do
   inst <- ask
+  -- I don't see a way to block on this? I guess Temporal wants us to rely on the orchestrator
+  -- managing the cancellation. Compare with ResolveRequestCancelExternalWorkflow. I think
+  -- external workflows need a resolution step because they may not even exist.
   addCommand inst $ defMessage 
     & Command.cancelChildWorkflowExecution .~ 
       ( defMessage 
         & Command.childWorkflowSeq .~ rawSequence childWorkflowSequence
       )
-  -- TODO, should this block?
 
 data StartLocalActivityOptions = StartLocalActivityOptions 
   { activityId :: Maybe ActivityId
@@ -632,7 +663,13 @@ startLocalActivity (KnownActivity codec _ n) opts = gatherActivityArgs @env @st 
           Just (ActivityResult.ActivityResolution'Failed failure) -> error "not implemented"
           Just (ActivityResult.ActivityResolution'Cancelled details) -> error "not implemented"
           Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"
-      , cancelAction = undefined
+      , cancelAction = do
+        let cancelCmd = defMessage
+              & Command.requestCancelLocalActivity .~ 
+                ( defMessage
+                  & Command.seq .~ actSeq
+                )
+        ilift $ addCommand inst cancelCmd
       }
 
 -- $metadata
@@ -943,28 +980,57 @@ mutableSideEffect :: IO a -> Workflow env st a
 mutableSideEffect = undefined
 -}
 
--- TODO, timer suopport?
+data Timer env st = Timer
+  { timerSequence :: Sequence
+  , timerHandle :: IVar env st ()
+  }
 
 -- | Asynchronous sleep.
 --
--- Schedules a timer on the Temporal service.
-sleep :: HasCallStack => TimeSpec -> Workflow env st ()
+-- Creates a timer that fires after the specified duration.
+--
+-- The timer is not guaranteed to fire immediately after the duration expires,
+-- but it is intended to fire as close to the expiration as possible.
+--
+-- Note that the timer is started when the command is received by the Temporal Platform,
+-- not when the timer is created. The command is sent as soon as the workflow is blocked
+-- by any operation, such as 'sleep', 'awaitCondition', 'awaitActivity', 'awaitWorkflow', etc.
+createTimer :: HasCallStack => TimeSpec -> Workflow env st (Timer env st)
+createTimer ts = ilift $ do
+  inst <- ask
+  s@(Sequence seqId) <- nextTimerSequence
+  let cmd = defMessage & Command.startTimer .~ 
+        ( defMessage 
+          & Command.seq .~ seqId
+          & Command.startToFireTimeout .~ timespecToDuration ts
+        )
+  $(logDebug) "Add command: sleep"
+  res <- newIVar
+  modifyMVar_ inst.workflowSequenceMaps $ \seqMaps -> do
+    pure $ seqMaps { timers = HashMap.insert s res seqMaps.timers }
+  addCommand inst cmd
+  pure $ Timer { timerSequence = s, timerHandle = res }
+
+sleep :: TimeSpec -> Workflow env st ()
 sleep ts = do
-  res <- ilift $ do
+  t <- createTimer ts
+  Temporal.Workflow.wait t
+
+instance Wait (Timer env st) where
+  type WaitResult (Timer env st) = Workflow env st ()
+  wait t = getIVar $ timerHandle t
+
+instance Cancel (Timer env st) where
+  type CancelResult (Timer env st) = Workflow env st ()
+
+  cancel t = ilift $ do
     inst <- ask
-    s@(Sequence seqId) <- nextTimerSequence
-    let cmd = defMessage & Command.startTimer .~ 
+    let cmd = defMessage & Command.cancelTimer .~ 
           ( defMessage 
-            & Command.seq .~ seqId
-            & Command.startToFireTimeout .~ timespecToDuration ts
+            & Command.seq .~ rawSequence (timerSequence t)
           )
-    $(logDebug) "Add command: sleep"
-    res <- newIVar
-    modifyMVar_ inst.workflowSequenceMaps $ \seqMaps -> do
-      pure $ seqMaps { timers = HashMap.insert s res seqMaps.timers }
     addCommand inst cmd
-    pure res
-  getIVar res
+
 
 gatherContinueAsNewArgs 
   :: forall env st args result a codec. GatherArgs codec args
@@ -1011,8 +1077,11 @@ continueAsNew k@(KnownWorkflow codec _ _ _) opts = gatherContinueAsNewArgs @env 
       & Command.maybe'workflowRunTimeout .~ (timespecToDuration <$> opts.runTimeout)
 
 -- | Returns a client-side handle that can be used to signal and cancel an existing Workflow execution. It takes a Workflow ID and optional run ID.
-getExternalWorkflowHandle :: HasCallStack => WorkflowId -> Maybe RunId -> ExternalWorkflowHandle env st result
-getExternalWorkflowHandle = undefined
+getExternalWorkflowHandle :: HasCallStack => WorkflowId -> Maybe RunId -> Workflow env st (ExternalWorkflowHandle env st result)
+getExternalWorkflowHandle wfId mrId = pure $ ExternalWorkflowHandle
+  { externalWorkflowWorkflowId = wfId
+  , externalWorkflowRunId = mrId
+  }
 
 -- | Wait on a condition to become true before continuing.
 --

@@ -116,10 +116,10 @@ data ParentInfo = ParentInfo
   , parentWorkflowId :: WorkflowId
   }
 
--- TODO, update this as workflow progresses
+-- TODO, update search attributes as workflow progresses
 data Info = Info
   { historyLength :: {-# UNPACK #-} !Word32
-  , attempt :: {-# UNPACK #-} Int
+  , attempt :: {-# UNPACK #-} !Int
   , continuedRunId :: Maybe RunId
   , cronSchedule :: Maybe Text
   , executionTimeout :: Maybe TimeSpec

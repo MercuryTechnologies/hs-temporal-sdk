@@ -120,6 +120,9 @@ retryPolicyFromProto p = RetryPolicy
   , nonRetryableErrorTypes = p ^. Message.vec'nonRetryableErrorTypes
   }
 
+-- memoFromProto :: Message.Memo -> Map Text RawPayload
+-- memoFromProto = fmap rawPayloadFromProto . view Message.fields
+
 {- | A Workflow Id Reuse Policy determines whether a Workflow Execution is allowed to spawn with a particular Workflow Id, 
 if that Workflow Id has been used with a previous, and now Closed, Workflow Execution.
 

@@ -137,6 +137,13 @@ instance Exception AlternativeInstanceFailure where
   toException = workflowExceptionToException
   fromException = workflowExceptionFromException
 
+data CancelExternalWorkflowFailed = CancelExternalWorkflowFailed Proto.Failure
+  deriving (Show)
+
+instance Exception CancelExternalWorkflowFailed where
+  toException = workflowExceptionToException
+  fromException = workflowExceptionFromException
+
 ---------------------------------------------------------------------
 -- Activity exceptions
 
