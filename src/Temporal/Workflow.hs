@@ -373,6 +373,7 @@ instance Cancel (ChildWorkflowHandle env st a) where
 
 instance Cancel (ExternalWorkflowHandle env st a) where
   type CancelResult (ExternalWorkflowHandle env st a) = Workflow env st (Workflow env st ())
+
   -- | Returns an action that can be used to await cancellation of an external workflow.
   --
   -- Throws 'CancelExternalWorkflowFailed' if the cancellation request failed.
@@ -400,6 +401,16 @@ instance Cancel (ExternalWorkflowHandle env st a) where
       case res' ^. Activation.maybe'failure of
         Nothing -> pure ()
         Just f -> throw $ CancelExternalWorkflowFailed f
+
+-- | Handle representing an external Workflow Execution.
+--
+-- This handle can only be cancelled and signalled. 
+--
+-- To call other methods, like query and result, use a WorkflowClient.getHandle inside an Activity.
+data ExternalWorkflowHandle (env :: Type) (st :: Type) (result :: Type) = ExternalWorkflowHandle
+  { externalWorkflowWorkflowId :: WorkflowId
+  , externalWorkflowRunId :: Maybe RunId
+  }
 
 -- | A client side handle to a single Workflow instance. It can be used to signal a workflow execution.
 --

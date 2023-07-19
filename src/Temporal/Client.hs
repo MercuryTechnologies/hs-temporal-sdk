@@ -33,6 +33,7 @@ module Temporal.Client
 import Conduit
 import Control.Monad
 import Control.Monad.IO.Class
+import Data.Int
 import Data.Kind
 import Data.Proxy
 import Data.ProtoLens.Field
@@ -47,7 +48,7 @@ import qualified Data.UUID.V4 as UUID
 import qualified Data.Vector as V
 import System.Clock (TimeSpec(..))
 
-import Temporal.Client.WorkflowService
+import Temporal.Core.Client.WorkflowService
 import Temporal.Core.Client
 import Temporal.Workflow.WorkflowDefinition
 import Temporal.Worker.Types
@@ -64,9 +65,13 @@ import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as
 import Proto.Temporal.Api.Workflowservice.V1.RequestResponse 
   ( GetWorkflowExecutionHistoryRequest
   , GetWorkflowExecutionHistoryResponse
+  , QueryWorkflowRequest
+  , QueryWorkflowResponse
   )
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as WF
-import Proto.Temporal.Api.Enums.V1.Workflow (HistoryEventFilterType(..))
+import qualified Proto.Temporal.Api.Enums.V1.Query as Query
+import qualified Proto.Temporal.Api.Query.V1.Message_Fields as Query
+import Proto.Temporal.Api.Enums.V1.Workflow (HistoryEventFilterType(..), WorkflowExecutionStatus(..))
 import System.Posix.Process
 import Network.BSD
 import UnliftIO
@@ -157,8 +162,99 @@ awaitWorkflowResult h@(WorkflowHandle (KnownWorkflow{knownWorkflowCodec}) c wf r
         e -> error ("History event not supported " <> show e)
 
 
-signal :: MonadIO m => WorkflowHandle a -> SignalDefinition args -> (args :->: m ())
+signal :: forall m args a. MonadIO m => WorkflowHandle a -> SignalDefinition args -> (args :->: m ())
 signal = undefined
+
+-- | QueryRejectCondition can used to reject the query if workflow state does not satisfy condition.
+data QueryRejectCondition
+  = QueryRejectConditionRejectNone
+  -- ^ indicates that query should not be rejected
+  | QueryRejectConditionNotOpen
+  -- ^ indicates that query should be rejected if workflow is not open
+  | QueryRejectConditionNotCompletedCleanly
+  -- ^ indicates that query should be rejected if workflow did not complete cleanly
+
+data QueryOptions = QueryOptions
+  { queryRejectCondition :: QueryRejectCondition
+  }
+
+defaultQueryOptions :: QueryOptions
+defaultQueryOptions = QueryOptions
+  { queryRejectCondition = QueryRejectConditionRejectNone
+  }
+
+data WorkflowExecutionStatus
+  = Running
+  | Completed
+  | Failed
+  | Canceled
+  | Terminated
+  | ContinuedAsNew
+  | TimedOut
+  | UnknownStatus
+
+data QueryRejected
+  = QueryRejected
+    { status :: Temporal.Client.WorkflowExecutionStatus
+    }
+
+query :: forall m args result a. (MonadIO m, Typeable result)
+  => WorkflowClient
+  -> WorkflowHandle a 
+  -> QueryDefinition args result 
+  -> QueryOptions
+  -> (args :->: m (Either QueryRejected result))
+query c h (QueryDefinition qn codec) opts = gather $ \payloadsIO -> liftIO $ do
+  inputs <- sequence payloadsIO
+  let msg :: QueryWorkflowRequest
+      msg = defMessage 
+        & WF.namespace .~ rawNamespace c.clientDefaultNamespace
+        & WF.execution .~
+          (defMessage
+            & Common.workflowId .~ rawWorkflowId h.workflowHandleWorkflowId
+            & Common.runId .~ maybe "" rawRunId h.workflowHandleRunId
+          )
+        & WF.query .~ 
+          (defMessage 
+            & Query.queryType .~ qn
+            & Query.queryArgs .~
+              (defMessage & Common.payloads .~ fmap convertToProtoPayload inputs)
+            -- TODO
+            -- & Q.header .~ _
+          )
+        & WF.queryRejectCondition .~ case opts.queryRejectCondition of
+          QueryRejectConditionRejectNone -> Query.QUERY_REJECT_CONDITION_NONE
+          QueryRejectConditionNotOpen -> Query.QUERY_REJECT_CONDITION_NOT_OPEN
+          QueryRejectConditionNotCompletedCleanly -> Query.QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY
+
+  (res :: QueryWorkflowResponse) <- either throwIO pure =<< queryWorkflow c.clientCore msg
+  case res ^. WF.maybe'queryRejected of
+    Just rejection -> do
+      let status = queryRejectionStatusFromProto (rejection ^. Query.status)
+      pure $ Left $ QueryRejected { .. }
+    Nothing -> if typeRep (Proxy @result) == typeOf ()
+      then pure $ Right $ unsafeCoerce ()
+      else 
+        case (res ^. WF.queryResult . Common.vec'payloads) V.!? 0 of
+          Nothing -> throwIO $ ValueError "No return value payloads provided by query response"
+          Just p -> do
+            res <- decode codec (convertFromProtoPayload p)
+            either (throwIO . ValueError) (pure . Right) res
+
+  where
+    gather :: ([IO RawPayload] -> m (Either QueryRejected result)) -> (args :->: m (Either QueryRejected result))
+    gather = gatherArgs (Proxy @args) codec Prelude.id
+
+    queryRejectionStatusFromProto = \case
+      WORKFLOW_EXECUTION_STATUS_UNSPECIFIED -> UnknownStatus
+      WORKFLOW_EXECUTION_STATUS_RUNNING -> Running
+      WORKFLOW_EXECUTION_STATUS_COMPLETED -> Completed
+      WORKFLOW_EXECUTION_STATUS_FAILED -> Failed
+      WORKFLOW_EXECUTION_STATUS_CANCELED -> Canceled
+      WORKFLOW_EXECUTION_STATUS_TERMINATED -> Temporal.Client.Terminated
+      WORKFLOW_EXECUTION_STATUS_CONTINUED_AS_NEW -> ContinuedAsNew
+      WORKFLOW_EXECUTION_STATUS_TIMED_OUT -> TimedOut
+      WorkflowExecutionStatus'Unrecognized _ -> UnknownStatus 
 
 getHandle
   :: (MonadIO m, Codec codec a)
@@ -438,77 +534,5 @@ waitResult c wfId mrId (Namespace ns) = do
         & RR.skipArchival .~ True
   connect (streamEvents c FollowRuns startingReq) lastC
 
-
-  {-
-      if (ev.workflowExecutionCompletedEventAttributes) {
-        // Note that we can only return one value from our workflow function in JS.
-        // Ignore any other payloads in result
-        const [result] = await decodeArrayFromPayloads(
-          this.dataConverter,
-          ev.workflowExecutionCompletedEventAttributes.result?.payloads
-        );
-        return result as any;
-      } else if (ev.workflowExecutionFailedEventAttributes) {
-        const { failure, retryState } = ev.workflowExecutionFailedEventAttributes;
-        throw new WorkflowFailedError(
-          'Workflow execution failed',
-          await decodeOptionalFailureToOptionalError(this.dataConverter, failure),
-          retryState ?? RetryState.RETRY_STATE_UNSPECIFIED
-        );
-      } else if (ev.workflowExecutionCanceledEventAttributes) {
-        const failure = new CancelledFailure(
-          'Workflow canceled',
-          await decodeArrayFromPayloads(
-            this.dataConverter,
-            ev.workflowExecutionCanceledEventAttributes.details?.payloads
-          )
-        );
-        failure.stack = '';
-        throw new WorkflowFailedError(
-          'Workflow execution cancelled',
-          failure,
-          RetryState.RETRY_STATE_NON_RETRYABLE_FAILURE
-        );
-      } else if (ev.workflowExecutionTerminatedEventAttributes) {
-        const failure = new TerminatedFailure(
-          ev.workflowExecutionTerminatedEventAttributes.reason || 'Workflow execution terminated'
-        );
-        failure.stack = '';
-        throw new WorkflowFailedError(
-          ev.workflowExecutionTerminatedEventAttributes.reason || 'Workflow execution terminated',
-          failure,
-          RetryState.RETRY_STATE_NON_RETRYABLE_FAILURE
-        );
-      } else if (ev.workflowExecutionTimedOutEventAttributes) {
-        if (followRuns && ev.workflowExecutionTimedOutEventAttributes.newExecutionRunId) {
-          execution.runId = ev.workflowExecutionTimedOutEventAttributes.newExecutionRunId;
-          req.nextPageToken = undefined;
-          continue;
-        }
-        const failure = new TimeoutFailure(
-          'Workflow execution timed out',
-          undefined,
-          TimeoutType.TIMEOUT_TYPE_START_TO_CLOSE
-        );
-        failure.stack = '';
-        throw new WorkflowFailedError(
-          'Workflow execution timed out',
-          failure,
-          ev.workflowExecutionTimedOutEventAttributes.retryState || 0
-        );
-      } else if (ev.workflowExecutionContinuedAsNewEventAttributes) {
-        const { newExecutionRunId } = ev.workflowExecutionContinuedAsNewEventAttributes;
-        if (!newExecutionRunId) {
-          throw new TypeError('Expected service to return newExecutionRunId for WorkflowExecutionContinuedAsNewEvent');
-        }
-        if (!followRuns) {
-          throw new WorkflowContinuedAsNewError('Workflow execution continued as new', newExecutionRunId);
-        }
-        execution.runId = newExecutionRunId;
-        req.nextPageToken = undefined;
-        continue;
-      }
-    }
-  -}
 
 

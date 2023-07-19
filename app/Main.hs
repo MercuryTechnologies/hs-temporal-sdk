@@ -17,7 +17,7 @@ import Data.UUID
 import qualified Data.UUID as UUID
 import qualified Temporal.Client as C
 import Temporal.Core.Client (Client, connectClient, defaultClientConfig)
-import Temporal.Client.WorkflowService
+import Temporal.Core.Client.WorkflowService
 import Temporal.EphemeralServer
 import Temporal.Runtime
 import Temporal.Core.Worker (defaultWorkerConfig)

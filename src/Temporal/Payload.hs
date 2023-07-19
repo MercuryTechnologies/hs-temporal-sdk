@@ -21,6 +21,7 @@ module Temporal.Payload
   , JSON(..)
   , applyPayloads
   , ApplyPayloads
+  , GatherArgs(..)
   , ArgsOf
   , ResultOf
   , resultOf
@@ -129,3 +130,24 @@ instance (Codec codec ty, ApplyPayloads codec tys) => ApplyPayloads codec (ty ':
         Right arg -> applyPayloads codec (Proxy @tys) resP (f arg) rest
         Left err -> error err
 
+-- | Given a list of function argument types and a codec, produce a function that takes a list of
+-- 'RawPayload's and does something useful with them. This is used to support outbound invocations of
+-- child workflows, activities, queries, and signals.
+class GatherArgs codec (args :: [Type]) where
+  gatherArgs 
+    :: Proxy args 
+    -> codec 
+    -> ([IO RawPayload] -> [IO RawPayload]) 
+    -> ([IO RawPayload] -> result)
+    -> (args :->: result)
+
+instance (Codec codec arg, GatherArgs codec args) => GatherArgs codec (arg ': args) where
+  gatherArgs _ c accum f = \arg ->
+    gatherArgs 
+      (Proxy @args) 
+      c 
+      (accum . (encode c arg :))
+      f
+
+instance GatherArgs codec '[] where
+  gatherArgs _ _ accum f = f $ accum []

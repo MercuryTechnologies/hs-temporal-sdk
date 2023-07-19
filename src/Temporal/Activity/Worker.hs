@@ -103,7 +103,7 @@ applyActivityTaskStart tt msg = do
             Left (SomeException err) -> throwIO err
             Right f' -> do
               res <- UnliftIO.try $ liftIO $ do
-                runReaderT (unActivity f') (w.workerCore, info, env)
+                runReaderT (unActivity f') $ ActivityEnv w.workerCore info env
               completionResult <- liftIO $ Core.completeActivityTask w.workerCore $ case res of
                 Right ok -> defMessage
                   & C.taskToken .~ rawTaskToken tt

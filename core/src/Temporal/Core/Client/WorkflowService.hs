@@ -3,7 +3,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
-module Temporal.Client.WorkflowService 
+module Temporal.Core.Client.WorkflowService 
   ( countWorkflowExecutions
   , createSchedule
   , deleteSchedule

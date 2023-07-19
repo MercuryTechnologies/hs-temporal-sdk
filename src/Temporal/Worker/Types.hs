@@ -685,15 +685,6 @@ data ChildWorkflowHandle env st result = forall codec. (Codec codec result) =>
     , firstExecutionRunId :: IVar env st RunId
     }
 
--- | Handle representing an external Workflow Execution.
---
--- This handle can only be cancelled and signalled. 
---
--- To call other methods, like query and result, use a WorkflowClient.getHandle inside an Activity.
-data ExternalWorkflowHandle env st result = ExternalWorkflowHandle
-  { externalWorkflowWorkflowId :: WorkflowId
-  , externalWorkflowRunId :: Maybe RunId
-  }
 
 {- |
 Queries are sent from a Temporal Client to a Workflow Execution. The API call is synchronous. The Query is identified at both ends by a Query name. The Workflow must have a Query handler that is developed to handle that Query and provide data that represents the state of the Workflow Execution.
@@ -712,7 +703,7 @@ This means, for example, that Query handling logic cannot schedule Activity Exec
 Sending Queries to completed Workflow Executions is supported, though Query reject conditions can be configured per Query
 -}
 data QueryDefinition (args :: [Type]) (result :: Type) = forall codec.
-  (Codec codec result, ApplyPayloads codec args) =>
+  (Codec codec result, ApplyPayloads codec args, GatherArgs codec args) =>
   QueryDefinition 
     { queryName :: Text
     , queryCodec :: codec 

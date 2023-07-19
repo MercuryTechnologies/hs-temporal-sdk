@@ -13,7 +13,9 @@ module Temporal.Activity
   , CompleteAsync(..)
   , completeAsync
   , ActivityCancelReason(..)
+  , activityWorkflowClient
   , TaskToken
+  , askActivityClient
   ) where
 
 import Control.Exception
@@ -26,6 +28,7 @@ import qualified Data.Text as Text
 import Data.Typeable
 import GHC.TypeLits
 import Lens.Family2
+import Temporal.Client
 import Temporal.Exception
 import Temporal.Activity.Definition
 import Temporal.Activity.Worker
@@ -83,7 +86,7 @@ Heartbeats may not always be sent to the Cluster—they may be throttled by the 
 
 Activity Cancellations are delivered to Activities from the Cluster when they Heartbeat. Activities that don't Heartbeat can't receive a Cancellation. Heartbeat throttling may lead to Cancellation getting delivered later than expected.
 
-Heartbeats can contain a details field describing the Activity's current progress. If an Activity gets retried, the Activity can access the details from the last Heartbeat that was sent to the Cluster.
+Heartbeats can contain payloads describing the Activity's current progress. If an Activity gets retried, the Activity can access the details from the last Heartbeat that was sent to the Cluster.
 -}
 heartbeat :: [RawPayload] -> Activity env ()
 heartbeat baseDetails = do
@@ -94,3 +97,10 @@ heartbeat baseDetails = do
         & Proto.details .~ fmap convertToProtoPayload baseDetails
   -- TODO throw exception if this fails?
   void $ liftIO $ recordActivityHeartbeat worker details
+
+activityWorkflowClient :: Activity env WorkflowClient
+activityWorkflowClient = do
+  c <- askActivityClient
+  i <- askActivityInfo
+  -- TODO, figure the best option for identity here
+  workflowClient c i.workflowNamespace Nothing

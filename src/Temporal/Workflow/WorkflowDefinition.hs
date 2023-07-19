@@ -46,28 +46,6 @@ import Temporal.Payload
 import Temporal.Workflow.WorkflowInstance
 import Temporal.Worker.Types
 
--- | Given a list of function argument types and a codec, produce a function that takes a list of
--- 'RawPayload's and does something useful with them. This is used to support outbound invocations of
--- child workflows, activities, queries, and signals.
-class GatherArgs codec (args :: [Type]) where
-  gatherArgs 
-    :: Proxy args 
-    -> codec 
-    -> ([IO RawPayload] -> [IO RawPayload]) 
-    -> ([IO RawPayload] -> result)
-    -> (args :->: result)
-
-instance (Codec codec arg, GatherArgs codec args) => GatherArgs codec (arg ': args) where
-  gatherArgs _ c accum f = \arg ->
-    gatherArgs 
-      (Proxy @args) 
-      c 
-      (accum . (encode c arg :))
-      f
-
-instance GatherArgs codec '[] where
-  gatherArgs _ _ accum f = f $ accum []
-
 -- | A 'KnownWorkflow' is a handle that contains all the information needed to start a 
 -- Workflow either as a child workflow or as a top-level workflow via a 'Client'.
 data KnownWorkflow (args :: [Type]) (result :: Type) = forall codec. 
@@ -95,20 +73,6 @@ data SignalDefinition (args :: [Type]) = forall codec. GatherArgs codec args =>
     , signalApply :: forall res. Proxy res -> (args :->: res) -> Vector RawPayload -> IO res
     }
 
--- | A utility function for constructing a 'WorkflowDefinition' from a function as well as
--- a 'KnownWorkflow' value. This is useful for keeping the argument, codec, and result types
--- in sync with each other so that changes to the function are reflected at their use sites.
---
--- > myWorkflow :: Workflow () () Int
--- > myWorkflow = pure 1
--- >
--- > myWorkflowDef :: (WorkflowDefinition () (), KnownWorkflow "myWorkflow" () Int)
--- > myWorkflowDef = provideWorkflow 
--- >   JSON -- codec
--- >   (Proxy @"myWorkflow") -- visible name of the workflow
--- >   () -- initial state
--- >   myWorkflow -- the workflow function
-
 data ProvidedWorkflow env st f = ProvidedWorkflow
   { definition :: WorkflowDefinition env st
   , reference :: KnownWorkflow (ArgsOf f) (ResultOf (Workflow env st) f)
@@ -120,6 +84,19 @@ type IsProvidedWorkflow codec env st f =
   , f ~ (ArgsOf f :->: Workflow env st (ResultOf (Workflow env st) f))
   )
 
+-- | A utility function for constructing a 'WorkflowDefinition' from a function as well as
+-- a 'KnownWorkflow' value. This is useful for keeping the argument, codec, and result types
+-- in sync with each other so that changes to the function are reflected at their use sites.
+--
+-- > myWorkflow :: Workflow () () Int
+-- > myWorkflow = pure 1
+-- >
+-- > myWorkflowDef :: ProvidedWorkflow () () Int
+-- > myWorkflowDef = provideWorkflow 
+-- >   JSON -- codec
+-- >   @"myWorkflow" -- visible name of the workflow
+-- >   () -- initial state
+-- >   myWorkflow -- the workflow function
 provideWorkflow :: forall env st name codec f.
   (IsProvidedWorkflow codec env st f) => codec -> Text -> st -> f -> ProvidedWorkflow env st f
 provideWorkflow codec name st f = ProvidedWorkflow

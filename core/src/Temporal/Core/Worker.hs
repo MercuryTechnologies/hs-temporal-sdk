@@ -4,6 +4,7 @@
 {-# LANGUAGE TypeFamilies #-}
 module Temporal.Core.Worker 
   ( Worker
+  , getWorkerClient
   , WorkerConfig(..)
   , getWorkerConfig
   , defaultWorkerConfig
@@ -55,7 +56,11 @@ import Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion (WorkflowAc
 data Worker = Worker 
   { workerPtr :: ForeignPtr Worker 
   , workerConfig :: WorkerConfig
+  , workerClient :: Client
   }
+
+getWorkerClient :: Worker -> Client
+getWorkerClient = workerClient
 
 getWorkerConfig :: Worker -> WorkerConfig
 getWorkerConfig = workerConfig
@@ -198,7 +203,7 @@ newWorker c wc = withClient c $ \cPtr -> do
           then do
             wPtr <- peek wPtrPtr
             fp <- newForeignPtr workerFinalizer wPtr
-            pure $ Right $ Worker fp wc
+            pure $ Right $ Worker fp wc c
           else do
             err <- peekWorkerError errPtr
             pure $ Left err
@@ -228,7 +233,7 @@ newReplayWorker r conf = withRuntime r $ \rPtr -> do
 
 foreign import ccall "hs_temporal_worker_poll_workflow_activation" raw_pollWorkflowActivation :: Ptr Worker -> TokioCall WorkerError (CArray Word8)
 pollWorkflowActivation :: Worker -> IO (Either WorkerError WorkflowActivation)
-pollWorkflowActivation (Worker w _) = do
+pollWorkflowActivation (Worker w _ _) = do
   withForeignPtr w $ \wPtr -> do
     makeTokioAsyncCall (raw_pollWorkflowActivation wPtr)
       (fromRust (Proxy @WorkerError))
@@ -236,7 +241,7 @@ pollWorkflowActivation (Worker w _) = do
 
 foreign import ccall "hs_temporal_worker_poll_activity_task" raw_pollActivityTask :: Ptr Worker -> TokioCall WorkerError (CArray Word8)
 pollActivityTask :: Worker -> IO (Either WorkerError ActivityTask)
-pollActivityTask (Worker w _) = do
+pollActivityTask (Worker w _ _) = do
   withForeignPtr w $ \wPtr -> do
     makeTokioAsyncCall (raw_pollActivityTask wPtr)
       (fromRust (Proxy @WorkerError))
@@ -244,7 +249,7 @@ pollActivityTask (Worker w _) = do
 
 foreign import ccall "hs_temporal_worker_complete_workflow_activation" raw_completeWorkflowActivation :: Ptr Worker -> Ptr (CArray Word8) -> TokioCall WorkerError ()
 completeWorkflowActivation :: Worker -> WorkflowActivationCompletion -> IO (Either WorkerError ())
-completeWorkflowActivation (Worker w _) p = withForeignPtr w $ \wPtr -> do
+completeWorkflowActivation (Worker w _ _) p = withForeignPtr w $ \wPtr -> do
   withCArrayBS (encodeMessage p) $ \pPtr -> do
     makeTokioAsyncCall (raw_completeWorkflowActivation wPtr pPtr)
       (fromRust (Proxy @WorkerError))
@@ -252,7 +257,7 @@ completeWorkflowActivation (Worker w _) p = withForeignPtr w $ \wPtr -> do
 
 foreign import ccall "hs_temporal_worker_complete_activity_task" raw_completeActivityTask :: Ptr Worker -> Ptr (CArray Word8) -> TokioCall WorkerError ()
 completeActivityTask :: Worker -> ActivityTaskCompletion -> IO (Either WorkerError ())
-completeActivityTask (Worker w _) p = withForeignPtr w $ \wPtr -> do
+completeActivityTask (Worker w _ _) p = withForeignPtr w $ \wPtr -> do
   withCArrayBS (encodeMessage p) $ \pPtr -> do
     makeTokioAsyncCall (raw_completeActivityTask wPtr pPtr)
       (fromRust (Proxy @WorkerError))
@@ -260,7 +265,7 @@ completeActivityTask (Worker w _) p = withForeignPtr w $ \wPtr -> do
 
 foreign import ccall "hs_temporal_worker_record_activity_heartbeat" raw_recordActivityHeartbeat :: Ptr Worker -> Ptr (CArray Word8) -> Ptr (Ptr WorkerError) -> Ptr (Ptr ()) -> IO ()
 recordActivityHeartbeat :: Worker -> ActivityHeartbeat -> IO (Either WorkerError ())
-recordActivityHeartbeat (Worker w _) p = withForeignPtr w $ \wPtr -> do
+recordActivityHeartbeat (Worker w _ _) p = withForeignPtr w $ \wPtr -> do
   withCArrayBS (encodeMessage p) $ \pPtr -> do
     alloca $ \errPtrPtr -> do
       alloca $ \resPtrPtr -> do
@@ -272,7 +277,7 @@ recordActivityHeartbeat (Worker w _) p = withForeignPtr w $ \wPtr -> do
 
 foreign import ccall "hs_temporal_worker_request_workflow_eviction" raw_requestWorkflowEviction :: Ptr Worker -> Ptr (CArray Word8) -> IO ()
 requestWorkflowEviction :: Worker -> RunId -> IO ()
-requestWorkflowEviction (Worker w _) r = withForeignPtr w $ \wPtr -> do
+requestWorkflowEviction (Worker w _ _) r = withForeignPtr w $ \wPtr -> do
   withCArrayBS r $ \rPtr -> do
     raw_requestWorkflowEviction wPtr rPtr
 
@@ -280,7 +285,7 @@ foreign import ccall "hs_temporal_worker_initiate_shutdown" raw_initiateShutdown
 {- | Initiate shutdown.
 -}
 initiateShutdown :: Worker -> IO ()
-initiateShutdown (Worker w _) = withForeignPtr w $ \wPtr -> do
+initiateShutdown (Worker w _ _) = withForeignPtr w $ \wPtr -> do
   raw_initiateShutdown wPtr
 
 foreign import ccall "hs_temporal_worker_finalize_shutdown" raw_finalizeShutdown :: Ptr Worker -> TokioCall WorkerError ()
@@ -292,7 +297,7 @@ This should be called only after 'raw_shutdown' has resolved and/or both polling
 functions have returned `ShutDown` errors.
 -}
 finalizeShutdown :: Worker -> IO (Either WorkerError ())
-finalizeShutdown (Worker w _) = withForeignPtr w $ \wPtr -> do
+finalizeShutdown (Worker w _ _) = withForeignPtr w $ \wPtr -> do
   makeTokioAsyncCall (raw_finalizeShutdown wPtr)
     (fromRust (Proxy @WorkerError))
     (fromRust (Proxy @()))

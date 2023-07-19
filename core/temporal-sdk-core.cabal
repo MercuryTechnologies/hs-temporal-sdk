@@ -33,7 +33,7 @@ custom-setup
 library
     import:           warnings
     exposed-modules: 
-      Temporal.Client.WorkflowService,
+      Temporal.Core.Client.WorkflowService,
       Temporal.Core.Client,
       Temporal.Core.EphemeralServer,
       Temporal.Core.Worker,
