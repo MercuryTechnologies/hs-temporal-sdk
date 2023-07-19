@@ -1,6 +1,8 @@
 module Temporal.Activity.Definition where
 import Control.Applicative
+import Control.Monad
 import Control.Monad.Error.Class
+import Control.Monad.Fix
 import Control.Monad.Reader
 import Data.ByteString (ByteString)
 import Data.Hashable (Hashable(..))
