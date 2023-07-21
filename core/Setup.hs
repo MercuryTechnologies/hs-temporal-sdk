@@ -1,48 +1,57 @@
+import Data.Char (toLower)
 import Data.Functor (($>))
 import Data.Maybe (fromMaybe)
 import Distribution.PackageDescription
 import Distribution.Simple
-import Distribution.Simple.LocalBuildInfo (
+import Distribution.Simple.LocalBuildInfo 
+  ( InstallDirs(..),
     LocalBuildInfo (..),
     localPkgDescr,
- )
-import Distribution.Simple.Program.Find (
-    defaultProgramSearchPath,
+    absoluteInstallDirs
+  )
+import Distribution.Simple.Program.Find 
+  ( defaultProgramSearchPath,
     findProgramOnSearchPath,
- )
+  )
 import Distribution.Simple.Setup
-import Distribution.Simple.Utils (
-    IODataMode (IODataModeBinary),
+import Distribution.Simple.Utils 
+  ( IODataMode (IODataModeBinary),
     maybeExit,
     rawSystemStdInOut,
- )
+    installExecutableFile
+  )
 import Distribution.Verbosity (Verbosity)
 import qualified Distribution.Verbosity as Verbosity
-import System.Directory (
-    getCurrentDirectory,
- )
+import System.Directory 
+  ( getCurrentDirectory,
+  )
+import System.Environment (getEnv)
 import System.FilePath ((</>))
 
 main :: IO ()
 main = defaultMainWithHooks hooks
   where
     hooks =
-        simpleUserHooks
-            { preConf = \_ flags -> do
-                unlessFlagM externalLibFlag flags $ rsMake (fromFlag $ configVerbosity flags)
-                pure emptyHookedBuildInfo
-            , confHook = \a flags ->
-                confHook simpleUserHooks a flags
-                    >>= applyUnlessM externalLibFlag flags rsAddDirs
-            , postClean = \_ flags _ _ ->
-                rsClean (fromFlag $ cleanVerbosity flags)
-            }
+      simpleUserHooks
+          { preConf = \_ flags -> do
+              unlessFlagM externalLibFlag flags $ rsMake (fromFlag $ configVerbosity flags)
+              pure emptyHookedBuildInfo
+          , confHook = \a flags ->
+              confHook simpleUserHooks a flags
+                  >>= applyUnlessM externalLibFlag flags rsAddDirs
+          , postClean = \_ flags _ _ ->
+              rsClean (fromFlag $ cleanVerbosity flags)
+          , postCopy = copyTemporalBridge
+          }
 
 rsFolder :: FilePath
 rsFolder = "rust"
 
+externalLibFlagStr :: String
+externalLibFlagStr = "external_lib"
+
 externalLibFlag :: FlagName
-externalLibFlag = mkFlagName "external_lib"
+externalLibFlag = mkFlagName externalLibFlagStr
 
 execCargo :: Verbosity -> String -> [String] -> IO ()
 execCargo verbosity command args = do
@@ -90,3 +99,33 @@ applyUnlessM name flags apply a
     | cabalFlag name flags = pure a
     | otherwise = apply a
 
+copyLib :: ConfigFlags -> LocalBuildInfo -> FilePath -> IO ()
+copyLib fl lbi libPref = do
+  libraryPath <- getLibraryPath
+  installExecutableFile 
+    verb
+    libraryPath
+    (libPref ++ "/libtemporal_bridge." ++ ext)
+  where
+    verb = fromFlag $ configVerbosity fl
+    external = getCabalFlag externalLibFlagStr fl
+    shared = False -- getCabalFlag "sharedLibsass" fl
+    ext = if shared then "so" else "a"
+    getLibraryPath = if external
+      then do
+        bridgeLibDir <- getEnv "TEMPORAL_BRIDGE_LIB_DIR"
+        pure (bridgeLibDir ++ "/libtemporal_bridge." ++ ext)
+      else pure ("rust/target/release/libtemporal_bridge." ++ ext)
+
+copyTemporalBridge :: Args -> CopyFlags -> PackageDescription -> LocalBuildInfo -> IO ()
+copyTemporalBridge _ flags pkg_descr lbi =
+    let libPref = libdir . absoluteInstallDirs pkg_descr lbi
+                . fromFlag . copyDest
+                $ flags
+        config = configFlags lbi
+     in copyLib config lbi libPref
+
+getCabalFlag :: String -> ConfigFlags -> Bool
+getCabalFlag name flags = fromMaybe False (lookupFlagAssignment (mkFlagName name') allFlags)
+    where allFlags = configConfigurationsFlags flags
+          name' = map toLower name
