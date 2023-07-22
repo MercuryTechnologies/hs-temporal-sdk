@@ -1,5 +1,6 @@
 module Temporal.Activity.Definition where
 import Control.Applicative
+import Control.Monad.Catch
 import Control.Monad
 import Control.Monad.Error.Class
 import Control.Monad.Fix
@@ -37,6 +38,9 @@ newtype Activity env a = Activity { unActivity :: ReaderT (ActivityEnv env) IO a
     , MonadIO
     , MonadPlus
     , MonadUnliftIO
+    , MonadThrow
+    , MonadCatch
+    , MonadMask
     )
 
 data ActivityInfo = ActivityInfo
