@@ -91,6 +91,7 @@ module Temporal.Workflow
   , awaitCondition
   -- * Other utilities
   , race
+  , sink
   -- * Time and timers
   , now
   , time
@@ -117,6 +118,7 @@ module Temporal.Workflow
   , WorkflowIdReusePolicy(..)
   , WorkflowType(..)
   ) where
+import Control.Concurrent (forkIO)
 import Control.Applicative
 import Control.Monad
 import Control.Monad.State
@@ -1133,3 +1135,11 @@ awaitCondition f = do
 -- race :: Workflow env st a -> Workflow env st b -> Workflow env st (Either a b)
 -- race l r = (Left <$> l) <|> (Right <$> r)
 
+-- | While workflows are deterministic, there are categories of operational concerns (metrics, logging, tracing, etc.) that require
+-- access to IO operations like the network or filesystem. The 'IO' monad is not generally available in the 'Workflow' monad, but you 
+-- can use 'sink' to run an 'IO' action in a workflow. In order to maintain determinism, the operation will be executed asynchronously 
+-- and does not return a value. Be sure that the sink operation terminates, or else you will leak memory and/or threads.
+--
+-- Do not use 'sink' for any Workflow logic, or else you will violate determinism.
+sink :: IO () -> Workflow env st ()
+sink m = ilift $ liftIO $ void $ forkIO m
