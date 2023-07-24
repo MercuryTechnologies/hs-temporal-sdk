@@ -70,6 +70,7 @@ library
     Temporal.EphemeralServer,
     Temporal.Exception,
     Temporal.Payload,
+    -- Temporal.Schedule,
     Temporal.Workflow,
     Temporal.Worker
 

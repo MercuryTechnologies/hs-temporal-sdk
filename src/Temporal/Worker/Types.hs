@@ -482,7 +482,7 @@ raceBlockedBlocked ivar1 lcont ivar2 rcont = do
   let cont = Race lcont rcont
   return (Blocked i cont)
 
-instance MonadLogger (Workflow env st) where
+instance {-# OVERLAPPABLE #-} MonadLogger (Workflow env st) where
   monadLoggerLog loc src lvl msg = Workflow $ do
     logger <- asks workflowInstanceLogger
     liftIO $ logger loc src lvl (toLogStr msg)

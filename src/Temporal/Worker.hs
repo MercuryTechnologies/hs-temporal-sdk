@@ -9,7 +9,7 @@ module Temporal.Worker
   , startWorker
   , waitWorker
   , shutdown
-  , WorkerConfig
+  , WorkerConfig(..)
   , ConfigM
   , configure
   , addWorkflow
