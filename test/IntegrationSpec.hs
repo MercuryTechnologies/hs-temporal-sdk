@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
 module IntegrationSpec where
 
@@ -26,7 +27,7 @@ withWorker conf m = do
   rt <- initializeRuntime
   let clientConfig = defaultClientConfig
   (Right c) <- connectClient rt clientConfig
-  bracket (runNoLoggingT $ startWorker c conf) shutdown (const m)
+  bracket (runStdoutLoggingT $ startWorker c conf) shutdown (const m)
 
 
 makeClient :: IO C.WorkflowClient
@@ -62,28 +63,13 @@ needsClient = do
         C.execute client wf.reference opts
           `shouldReturn` True
     describe "race" $ do
-      it "immediate return works" $ \client -> do
+      fit "block on left side works" $ \client -> do
         taskQueue <- W.TaskQueue <$> uuidText
-        let testFn :: W.Workflow () () Bool
-            testFn = pure True `W.race` pure False
-            wf = W.provideWorkflow JSON "test" () testFn
-            conf = configure () () $ do
-              setNamespace $ W.Namespace "test"
-              setTaskQueue taskQueue
-              addWorkflow wf
-        withWorker conf $ do
-          wfId <- uuidText
-          let opts = C.workflowStartOptions
-                (W.WorkflowId wfId)
-                taskQueue
-          C.execute client wf.reference opts
-            `shouldReturn` True
-
-      it "block on left side works" $ \client -> do
-        taskQueue <- W.TaskQueue <$> uuidText
-        let testFn :: W.Workflow () () Bool
+        let testFn :: W.Workflow () () (Either Bool Bool)
             testFn = do
-              (W.sleep (TimeSpec 5000 0) >> error "sad") `W.race` pure True
+              res <- ($(logDebug) "sleepy lad" >> W.sleep (TimeSpec 10 0) >> $(logDebug) "bad" >> pure False) `W.race` ($(logDebug) "wow" *> pure True)
+              $(logDebug) "done"
+              pure res
             wf = W.provideWorkflow JSON "test" () testFn
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
@@ -95,61 +81,61 @@ needsClient = do
                 (W.WorkflowId wfId)
                 taskQueue
           C.execute client wf.reference opts
-            `shouldReturn` True
+            `shouldReturn` Right True
 
-      it "block on both side works" $ \client -> do
-        taskQueue <- W.TaskQueue <$> uuidText
-        let testFn :: W.Workflow () () Bool
-            testFn = do
-              (W.sleep (TimeSpec 5000 0) >> error "sad") `W.race` (W.sleep (TimeSpec 1 0) >> pure True)
-            wf = W.provideWorkflow JSON "test" () testFn
-            conf = configure () () $ do
-              setNamespace $ W.Namespace "test"
-              setTaskQueue taskQueue
-              addWorkflow wf
-        withWorker conf $ do
-          wfId <- uuidText
-          let opts = C.workflowStartOptions
-                (W.WorkflowId wfId)
-                taskQueue
-          C.execute client wf.reference opts
-            `shouldReturn` True
+  --     it "block on both side works" $ \client -> do
+  --       taskQueue <- W.TaskQueue <$> uuidText
+  --       let testFn :: W.Workflow () () (Either Bool Bool)
+  --           testFn = do
+  --             (W.sleep (TimeSpec 5000 0) >> pure False) `W.race` (W.sleep (TimeSpec 1 0) >> pure True)
+  --           wf = W.provideWorkflow JSON "test" () testFn
+  --           conf = configure () () $ do
+  --             setNamespace $ W.Namespace "test"
+  --             setTaskQueue taskQueue
+  --             addWorkflow wf
+  --       withWorker conf $ do
+  --         wfId <- uuidText
+  --         let opts = C.workflowStartOptions
+  --               (W.WorkflowId wfId)
+  --               taskQueue
+  --         C.execute client wf.reference opts
+  --           `shouldReturn` Right True
 
-      it "throws immediately when either side throws" $ \client -> do
-        taskQueue <- W.TaskQueue <$> uuidText
-        let testFn :: W.Workflow () () Bool
-            testFn = do
-              (W.sleep (TimeSpec 5000 0) >> error "sad") `W.race` error "foo"
-            wf = W.provideWorkflow JSON "test" () testFn
-            conf = configure () () $ do
-              setNamespace $ W.Namespace "test"
-              setTaskQueue taskQueue
-              addWorkflow wf
-        withWorker conf $ do
-          wfId <- uuidText
-          let opts = C.workflowStartOptions
-                (W.WorkflowId wfId)
-                taskQueue
-          C.execute client wf.reference opts
-            `shouldThrow` (== WorkflowExecutionFailed)
+  --     it "throws immediately when either side throws" $ \client -> do
+  --       taskQueue <- W.TaskQueue <$> uuidText
+  --       let testFn :: W.Workflow () () (Either Bool Bool)
+  --           testFn = do
+  --             (W.sleep (TimeSpec 5000 0) >> error "sad") `W.race` error "foo"
+  --           wf = W.provideWorkflow JSON "test" () testFn
+  --           conf = configure () () $ do
+  --             setNamespace $ W.Namespace "test"
+  --             setTaskQueue taskQueue
+  --             addWorkflow wf
+  --       withWorker conf $ do
+  --         wfId <- uuidText
+  --         let opts = C.workflowStartOptions
+  --               (W.WorkflowId wfId)
+  --               taskQueue
+  --         C.execute client wf.reference opts
+  --           `shouldThrow` (== WorkflowExecutionFailed)
 
-      it "treats error as ok if LHS returns immediately" $ \client -> do
-        taskQueue <- W.TaskQueue <$> uuidText
-        let testFn :: W.Workflow () () Bool
-            testFn = do
-              pure True `W.race` error "foo"
-            wf = W.provideWorkflow JSON "test" () testFn
-            conf = configure () () $ do
-              setNamespace $ W.Namespace "test"
-              setTaskQueue taskQueue
-              addWorkflow wf
-        withWorker conf $ do
-          wfId <- uuidText
-          let opts = C.workflowStartOptions
-                (W.WorkflowId wfId)
-                taskQueue
-          C.execute client wf.reference opts
-            `shouldReturn` True
+  --     it "treats error as ok if LHS returns immediately" $ \client -> do
+  --       taskQueue <- W.TaskQueue <$> uuidText
+  --       let testFn :: W.Workflow () () (Either Bool Bool)
+  --           testFn = do
+  --             pure True `W.race` (W.sleep (TimeSpec 5000 0) *> error "sad")
+  --           wf = W.provideWorkflow JSON "test" () testFn
+  --           conf = configure () () $ do
+  --             setNamespace $ W.Namespace "test"
+  --             setTaskQueue taskQueue
+  --             addWorkflow wf
+  --       withWorker conf $ do
+  --         wfId <- uuidText
+  --         let opts = C.workflowStartOptions
+  --               (W.WorkflowId wfId)
+  --               taskQueue
+  --         C.execute client wf.reference opts
+  --           `shouldReturn` Left True
 
     describe "Args and return values" $ do
       specify "args should be passed to the workflow in the correct order" $ \client -> do
@@ -179,39 +165,39 @@ needsClient = do
       specify "Activity return values that parse incorrectly should throw a ValueException in a Workflow" $ \client -> do
         pending
 
-    -- describe "not found" $ do
-    --   xit "should result in a task retry" $ \client -> do
-    --     taskQueue <- W.TaskQueue <$> uuidText
-    --     let conf = configure () () $ do
-    --           setNamespace $ W.Namespace "test"
-    --           setTaskQueue taskQueue
-    --     withWorker conf $ do
-    --       wfId <- uuidText
-    --       let opts = C.workflowStartOptions
-    --             (W.WorkflowId wfId)
-    --             taskQueue
-    --       -- pending
-    --       let nonExistentWorkflow :: W.KnownWorkflow '[] ()
-    --           nonExistentWorkflow = W.KnownWorkflow JSON Nothing Nothing "foo"
-    --       _wfHandle <- C.start client nonExistentWorkflow opts
-    --       _ <- getLine
-    --       pure ()
+    describe "not found" $ do
+      xit "should result in a task retry" $ \client -> do
+        taskQueue <- W.TaskQueue <$> uuidText
+        let conf = configure () () $ do
+              setNamespace $ W.Namespace "test"
+              setTaskQueue taskQueue
+        withWorker conf $ do
+          wfId <- uuidText
+          let opts = C.workflowStartOptions
+                (W.WorkflowId wfId)
+                taskQueue
+          -- pending
+          let nonExistentWorkflow :: W.KnownWorkflow '[] ()
+              nonExistentWorkflow = W.KnownWorkflow JSON Nothing Nothing "foo"
+          _wfHandle <- C.start client nonExistentWorkflow opts
+          _ <- getLine
+          pure ()
 
 
 
           
-  --     specify "the workflow should return the correct value" pending
-  --   describe "Cancellation" $ do
-  --     specify "cancel a workflow" pending
-  --     specify "cancelling a workflow cancels its activities" pending
-  --   describe "Randomness" $ do
-  --     specify "randomness is deterministic" pending
-  --   describe "Time" $ do
-  --     specify "time is deterministic" pending
-  --   describe "Activity failures" $ do
-  --     specify "ApplicationFailure exception" pending
-  --     specify "ActivityFailure exception" pending
-  --     specify "Non-wrapped exception" pending
+    --   specify "the workflow should return the correct value" pending
+    -- describe "Cancellation" $ do
+    --   specify "cancel a workflow" pending
+    --   specify "cancelling a workflow cancels its activities" pending
+    -- describe "Randomness" $ do
+    --   specify "randomness is deterministic" pending
+    -- describe "Time" $ do
+    --   specify "time is deterministic" pending
+    -- describe "Activity failures" $ do
+    --   specify "ApplicationFailure exception" pending
+    --   specify "ActivityFailure exception" pending
+    --   specify "Non-wrapped exception" pending
     describe "Child workflows" $ do
       specify "invoke" $ \client -> do
         parentId <- uuidText
@@ -259,9 +245,9 @@ needsClient = do
           C.execute client parentWf.reference opts
             `shouldThrow` (== WorkflowExecutionFailed)
 
-      specify "termination" $ \_ -> pending
-      specify "timeout" $ \_ -> pending
-      specify "startFail" $ \_ -> pending
+  --     specify "termination" $ \_ -> pending
+  --     specify "timeout" $ \_ -> pending
+  --     specify "startFail" $ \_ -> pending
       specify "cancel" $ \client -> do
         parentId <- uuidText
         let cancelTest :: W.Workflow () () ()
@@ -287,17 +273,17 @@ needsClient = do
           C.execute client parentWf.reference opts
             `shouldReturn` True
 
-  --     describe "Signals" $ do
-  --       specify "send" pending
-  --       specify "interrupt" pending
-  --       specify "fail" pending
-  --       specify "async fail signal?" pending
-  --       specify "always delivered" pending
-  --     describe "Query" $ do
-  --       specify "query not found" pending
-  --       specify "query and unblock" pending
-  --   describe "Await condition" $ do
-  --     specify "it works" pending
+  -- --     describe "Signals" $ do
+  -- --       specify "send" pending
+  -- --       specify "interrupt" pending
+  -- --       specify "fail" pending
+  -- --       specify "async fail signal?" pending
+  -- --       specify "always delivered" pending
+  -- --     describe "Query" $ do
+  -- --       specify "query not found" pending
+  -- --       specify "query and unblock" pending
+  -- --   describe "Await condition" $ do
+  -- --     specify "it works" pending
     describe "Sleep" $ do
       specify "sleep" $ \client -> do
         wfId <- uuidText

@@ -1,9 +1,11 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 module Temporal.Worker.Types where
 import Control.Applicative (liftA2, Alternative(..))
 import Control.Concurrent.Async (Async)
+import qualified Control.Concurrent.STM as STM
 import Control.Concurrent.STM.TMVar (TMVar)
 import Control.Exception (SomeException)
 import qualified Control.Monad.Catch as Catch
@@ -174,9 +176,7 @@ data WorkflowInstance env st = WorkflowInstance
   , workflowSequences :: {-# UNPACK #-} !(IORef Sequences)
   , workflowTime :: {-# UNPACK #-} !(IORef TimeSpec)
   , workflowIsReplaying :: {-# UNPACK #-} !(IORef Bool)
-  , workflowRunQueueRef :: {-# UNPACK #-} !(IORef (JobList env st))
   , workflowPrimaryTask :: {-# UNPACK #-} !(IORef (Maybe (Async ())))
-  , workflowCompletions :: {-# UNPACK #-} !(TVar [CompleteReq env st])
   , workflowCommands :: {-# UNPACK #-} !(TVar WorkflowCommands)
   , workflowSequenceMaps :: {-# UNPACK #-} !(MVar (SequenceMaps env st))
   , workflowState :: {-# UNPACK #-} !(IORef st)
@@ -305,11 +305,11 @@ applyWorkflowGen :: (StdGen -> (a, StdGen)) -> WorkflowGenM -> Workflow env st a
 applyWorkflowGen f (WorkflowGenM ref) = Workflow $ do
   g <- readIORef ref
   case f g of
-    (!a, !g') -> Done a <$ writeIORef ref g'
+    (!a, !g') -> a <$ writeIORef ref g'
 {-# INLINE applyWorkflowGen #-}
 
 newWorkflowGenM :: StdGen -> Workflow env st WorkflowGenM
-newWorkflowGenM = Workflow . fmap (Done . WorkflowGenM) . newIORef
+newWorkflowGenM = Workflow . fmap WorkflowGenM . newIORef
 {-# INLINE newWorkflowGenM #-}
 
 instance RandomGenM WorkflowGenM StdGen (Workflow env st) where
@@ -317,11 +317,11 @@ instance RandomGenM WorkflowGenM StdGen (Workflow env st) where
 
 instance FrozenGen StdGen (Workflow env st) where
   type MutableGen StdGen (Workflow env st) = WorkflowGenM
-  freezeGen = Workflow . fmap Done . readIORef . unWorkflowGenM
+  freezeGen = Workflow . readIORef . unWorkflowGenM
   thawGen g = newWorkflowGenM g
 
 -- | A synchronisation point. It either contains a value, or a list of computations waiting for the value.
-newtype IVar env st a = IVar { ivarRef :: IORef (IVarContents env st a) }
+newtype IVar env st a = IVar { ivarRef :: MVar (ResultVal a) }
 
 
 -- | The contents of a full IVar.  We have to distinguish exceptions
@@ -335,34 +335,6 @@ data ResultVal a
   -- Error in the workflow that should be returned to the caller
   | ThrowWorkflow SomeException
 
-data IVarContents env st a
-  = IVarFull (ResultVal a)
-  | IVarEmpty (JobList env st)
-
-{- |
-A list of computations together with the IVar into which they should put their result.
-
-This could be an ordinary list, but the optimised representation saves space and time.
--}
-data JobList env st
-  = JobNil
-  | forall a. JobCons 
-    {- (Context env) todo if MonadReader doesn't work we may need to propagate context here. -} 
-    !(Workflow env st a) 
-    !(IVar env st a)
-    !(JobList env st)
-
--- | A resolved result from an activation, containing the result,
--- and the 'IVar' representing the blocked computations. Handling an
--- activation for blocked actions involves looking up the Sequence 
--- and adding these to a queue ('completions') using
--- 'putResult'; the scheduler collects them from the queue and unblocks
--- the relevant computations.
-data CompleteReq env st
-  = forall a. CompleteReq
-      (ResultVal a)
-      !(IVar env st a)
-
 -- | The Workflow monad is a constrained execution environment that helps
 -- developers write code that can be executed deterministically and reliably.
 --
@@ -375,54 +347,8 @@ data CompleteReq env st
 --
 -- The 'st' state may be used to store information that is needed to respond to
 -- any queries or signals that are received by the Workflow execution.
-newtype Workflow 
-  env 
-  st 
-  a
-  = Workflow { unWorkflow :: InstanceM env st (Result env st a) }
-
-instance Functor (Workflow env st) where
-  fmap f (Workflow m) = Workflow $ do
-    r <- m
-    case r of
-      Done a -> pure $ Done $ f a
-      Throw e -> pure $ Throw e
-      Blocked ivar cont -> pure $ Blocked ivar (f :<$> cont)
-
-instance Applicative (Workflow env st) where
-  pure = Workflow . pure . Done
-  Workflow ff <*> Workflow aa = Workflow $ do
-    rf <- ff
-    case rf of
-      Done f -> do
-        ra <- aa
-        case ra of
-          Done a -> pure $ Done $ f a
-          Throw e -> pure $ Throw e
-          Blocked ivar fcont -> pure $ Blocked ivar (f :<$> fcont)
-      Throw e -> pure $ Throw e
-      Blocked ivar fcont -> do
-        ra <- aa
-        case ra of
-          Done a -> pure $ Blocked ivar (($ a) :<$> fcont)
-          Throw e -> pure $ Blocked ivar (fcont :>>= (\_ -> throw e))
-          Blocked ivar' acont -> blockedBlocked ivar fcont ivar' acont
-
-blockedBlocked
-  :: IVar env st c
-  -> Cont env st (a -> b)
-  -> IVar env st d
-  -> Cont env st a
-  -> InstanceM env st (Result env st b)
-blockedBlocked _ (Return i) ivar2 acont =
-  return (Blocked ivar2 (acont :>>= getIVarApply i))
-blockedBlocked _ (g :<$> Return i) ivar2 acont =
-  return (Blocked ivar2 (acont :>>= \ a -> (\f -> g f a) <$> getIVar i))
-blockedBlocked ivar1 fcont ivar2 acont = do
-  i <- newIVar
-  addJob (toWorkflow fcont) i ivar1
-  let cont = acont :>>= \a -> getIVarApply i a
-  return (Blocked ivar2 cont)
+newtype Workflow env st a = Workflow { unWorkflow :: InstanceM env st a }
+  deriving (Functor, Applicative, Monad)
 
 -- | If the first computation throws a value that implements 'SomeWorkflowException', 
 -- try the second one.
@@ -439,125 +365,79 @@ instance Alternative (Workflow env st) where
 -- background depending on where the computations on either branch block.
 -- Therefore, you should not try to implement any cleanup or compensation
 -- logic in branching Workflow computations.
-race :: Workflow env st a -> Workflow env st a -> Workflow env st a
-race (Workflow l) (Workflow r) = Workflow $ do
-  rl <- l
-  case rl of
-    Done a -> pure $ Done a
-    Throw e -> pure $ Throw e
-    Blocked ivar cont -> do
-      rr <- r
-      case rr of
-        Done a -> pure $ Done a
-        Throw e -> pure $ Throw e
-        Blocked ivar' cont' -> raceBlockedBlocked ivar cont ivar' cont'
+--
+-- TODO
+-- race :: Workflow env st a -> Workflow env st a -> Workflow env st a
+-- race (Workflow l) (Workflow r) = Workflow $ do
+--   rl <- l
+--   case rl of
+--     Done a -> pure $ Done a
+--     Throw e -> pure $ Throw e
+--     Blocked ivar cont -> do
+--       rr <- r
+--       case rr of
+--         Done a -> pure $ Done a
+--         Throw e -> pure $ Throw e
+--         Blocked ivar' cont' -> raceBlockedBlocked ivar cont ivar' cont'
 
---  Race [Blocked/Blocked]
---
--- This is the tricky case: we're blocked on both sides of the <|>.
--- We need to divide the computation into two pieces that may continue
--- independently when the resources they are blocked on become
--- available.
---
---   ll `race` rr
---
--- becomes
---
---   ((ll >>= putIVar i) *> (rr >>= putIVar i)) >>= \_ -> getIVar i
---
--- where the IVar i is a new synchronisation point. 
---
-raceBlockedBlocked 
-  :: IVar env st b
-  -> Cont env st a
-  -> IVar env st c
-  -> Cont env st a
-  -> InstanceM env st (Result env st a)
-raceBlockedBlocked _ (Return i) _ _ = igetIVar i 
-raceBlockedBlocked _ _ _ (Return i) = igetIVar i 
-raceBlockedBlocked ivar1 lcont ivar2 rcont = do
-  i <- newIVar
-  addJob (toWorkflow lcont) i ivar1
-  addJob (toWorkflow rcont) i ivar2
-  let cont = Race lcont rcont
-  return (Blocked i cont)
 
 instance {-# OVERLAPPABLE #-} MonadLogger (Workflow env st) where
   monadLoggerLog loc src lvl msg = Workflow $ do
     logger <- asks workflowInstanceLogger
     liftIO $ logger loc src lvl (toLogStr msg)
-    pure $ Done ()
 
 newIVar :: MonadIO m => m (IVar env st a)
 newIVar = do
-  ivarRef <- newIORef (IVarEmpty JobNil)
+  ivarRef <- newEmptyMVar
   pure IVar{..}
 
-{-# INLINE addJob #-}
-addJob
-  :: Workflow env st b 
-  -> IVar env st b 
-  -> IVar env st a 
-  -> InstanceM env st ()
-addJob !wf !resultIVar IVar{ivarRef = !ref} =
-  modifyIORef' ref $ \contents ->
-    case contents of
-      IVarEmpty list -> IVarEmpty (JobCons wf resultIVar list)
-      _ -> addJobPanic
-
-addJobPanic :: forall a . a
-addJobPanic = error "addJob: not empty"
-
--- Just a specialised version of getIVar, for efficiency in <*>
-getIVarApply :: IVar env st (a -> b) -> a -> Workflow env st b
-getIVarApply i@IVar{ivarRef = !ref} a = Workflow $ do
-  e <- readIORef ref
-  case e of
-    IVarFull (Ok f) -> return (Done (f a))
-    IVarFull (ThrowWorkflow e) -> raise e
-    IVarFull (ThrowInternal e) -> throwIO e
-    IVarEmpty _ ->
-      return (Blocked i (Cont (getIVarApply i a)))
-
 getIVar :: IVar env st a -> Workflow env st a
-getIVar = Workflow . igetIVar
+getIVar iv = do
+  res <- Workflow $ igetIVar iv
+  case res of
+    Ok a -> pure a
+    ThrowInternal e -> throw e
+    ThrowWorkflow e -> Workflow $ throwIO e
 
-igetIVar :: IVar env st a -> InstanceM env st (Result env st a)
+igetIVar :: IVar env st a -> InstanceM env st (ResultVal a)
 igetIVar i@IVar{ivarRef = !ref} = do
-  e <- readIORef ref
+  e <- tryReadMVar ref
   case e of
-    IVarFull (Ok a) -> return (Done a)
-    IVarFull (ThrowWorkflow e) -> raise e
-    IVarFull (ThrowInternal e) -> throwIO e
-    IVarEmpty _ -> return (Blocked i (Return i))
+    Nothing -> flushCommands *> readMVar ref
+    Just res -> pure res
 
-instance Monad (Workflow env st) where
-  return = pure
-  Workflow m >>= k = Workflow $ do
-    r <- m
-    case r of
-      Done a -> unWorkflow (k a)
-      Throw e -> pure $ Throw e
-      Blocked ivar cont -> pure $ Blocked ivar (cont :>>= k)
-  -- Unlike Haxl, we can't readily use parallel exploration of data fetches
-  -- because we want to be able to block on things like tasks, workflows, etc.
-  -- Maximum parallelism is an anti-goal.
-  --
-  -- TODO: we could probably use (>>=) to implement a fetch barrier for blocking
-  -- operations instead of disabling the parallel fetching entirely
-  -- (>>) = (*>)
+flushCommands :: InstanceM env st ()
+flushCommands = do
+  inst <- ask
+  cmds <- atomically $ do
+    currentCmds <- readTVar inst.workflowCommands
+    case currentCmds of
+      FlushActivationCompletion _ -> do
+        -- Already trying to flush, so we don't need to do anything.
+        -- STM.retry
+        pure Nothing
+      RunningActivation cmds -> do
+        {-
+        case cmds of
+        (Reversed []) -> pure currentCmds
+        _ -> do
+          -}
+          -- Signal the main instance thread that it should complete the activation.
+          let new = FlushActivationCompletion cmds
+          writeTVar inst.workflowCommands new
+          pure $ Just new
+  $(logDebug) ("flushCommands: " <> T.pack (show cmds))
 
 instance MonadReader env (Workflow env st) where
-  ask = Workflow (Done <$> asks workflowEnv)
+  ask = Workflow (asks workflowEnv)
   local f (Workflow m) = Workflow $ local (\inst -> inst { workflowEnv = f $ workflowEnv inst }) m
 
 instance MonadState st (Workflow env st) where
-  get = Workflow (fmap Done . readIORef . workflowState =<< ask)
+  get = Workflow (readIORef . workflowState =<< ask)
   put st = Workflow $ do
     inst <- ask
     liftIO (writeIORef (workflowState inst) $! st)
-    return $ Done ()
-  state f = Workflow $ fmap Done $ do
+  state f = Workflow $ do
     inst <- ask
     liftIO $ atomicModifyIORef' (workflowState inst) $ \st ->
       let (a, st') = f st
@@ -569,26 +449,6 @@ instance Semigroup a => Semigroup (Workflow env st a) where
 instance Monoid a => Monoid (Workflow env st a) where
   mempty = pure mempty
 
--- | The result of a computation is either Done with a value, Throw with an exception, 
--- or Blocked while awaiting the result of a workflow or activity.
-data Result env st a 
-  = Done a
-  | Throw SomeException
-  | forall b. Blocked !(IVar env st b) (Cont env st a)
-
-
--- | A data representation of a Workflow continuation. 
--- This is to avoid repeatedly traversing a left-biased tree in a continuation, 
--- leading O(n^2) complexity for some pathalogical cases
---
--- -- See "A Smart View on Datatypes", Jaskelioff/Rivas, ICFP'15
-data Cont env st a
-  = Cont (Workflow env st a)
-  | forall b. (Cont env st b) :>>= (b -> Workflow env st a)
-  | forall b. (b -> a) :<$> (Cont env st b)
-  | Race (Cont env st a) (Cont env st a)
-  | Return (IVar env st a)
-
 -- -----------------------------------------------------------------------------
 -- Exceptions
 
@@ -596,25 +456,18 @@ data Cont env st a
 throw :: Exception e => e -> Workflow env st a
 throw = Workflow . raise
 
-raise :: Exception e => e -> InstanceM env st (Result env st a)
-raise e = raiseImpl (toException e)
-
-{-# INLINE raiseImpl #-}
-raiseImpl :: SomeException -> InstanceM env st (Result env st b)
-raiseImpl e = case fromException e of
-  Nothing -> pure $ Throw e
-  Just (WorkflowException h) ->
-    pure $ Throw $ toException $ WorkflowException h
+raise :: Exception e => e -> InstanceM env st a
+raise e = throwIO (toException e)
 
 -- | Catch an exception in the Workflow monad
 catch :: Exception e => Workflow env st a -> (e -> Workflow env st a) -> Workflow env st a
 catch (Workflow m) h = Workflow $ do
-   r <- m
-   case r of
-     Done a    -> pure (Done a)
-     Throw e | Just e' <- fromException e -> unWorkflow $ h e'
-             | otherwise -> pure $ Throw e
-     Blocked ivar k -> pure $ Blocked ivar (Cont (Temporal.Worker.Types.catch (toWorkflow k) h))
+  r <- UnliftIO.try m
+  case r of
+    Right a -> pure a
+    Left e 
+      | Just e' <- fromException e -> unWorkflow $ h e'
+      | otherwise -> raise e
 
 -- | Catch exceptions that satisfy a predicate
 catchIf
@@ -630,28 +483,6 @@ try m = (Right <$> m) `Temporal.Worker.Types.catch` (return . Left)
 
 instance Catch.MonadThrow (Workflow env st) where throwM = Temporal.Worker.Types.throw
 instance Catch.MonadCatch (Workflow env st) where catch = Temporal.Worker.Types.catch
-
-
-toWorkflow :: Cont env st a -> Workflow env st a
-toWorkflow (Cont wf) = wf
-toWorkflow (m :>>= k) = toWorkflowBind m k
-toWorkflow (f :<$> x) = toWorkflowFmap f x
-toWorkflow (Race l r) = toWorkflow l `race` toWorkflow r
-toWorkflow (Return i) = getIVar i
-
-toWorkflowBind :: Cont env st b -> (b -> Workflow env st a) -> Workflow env st a
-toWorkflowBind (m :>>= k) k2 = toWorkflowBind m (k >=> k2)
-toWorkflowBind (Cont wf) k = wf >>= k
-toWorkflowBind (f :<$> x) k = toWorkflowBind x (k . f)
-toWorkflowBind (Race l r) k = toWorkflowBind l k `race` toWorkflowBind r k
-toWorkflowBind (Return i) k = getIVar i >>= k
-
-toWorkflowFmap :: (a -> b) -> Cont env st a -> Workflow env st b
-toWorkflowFmap f (m :>>= k) = toWorkflowBind m (k >=> pure . f)
-toWorkflowFmap f (Cont workflow) = f <$> workflow
-toWorkflowFmap f (g :<$> x) = toWorkflowFmap (f . g) x
-toWorkflowFmap f (Race l r) = toWorkflowFmap f l `race` toWorkflowFmap f r
-toWorkflowFmap f (Return i) = f <$> getIVar i
 
 type IsValidActivityFunction env codec f = 
     ( ApplyPayloads codec (ArgsOf f)

@@ -115,9 +115,7 @@ create info workflowEnv workflowInstanceDefinition = do
   workflowIsReplaying <- newIORef False
   workflowSequenceMaps <- newMVar $ SequenceMaps mempty mempty mempty mempty mempty mempty
   workflowPrimaryTask <- newIORef Nothing
-  workflowRunQueueRef <- newIORef JobNil
   workflowCommands <- newTVarIO $ RunningActivation $ Reversed []
-  workflowCompletions <- newTVarIO []
   workflowState <- newIORef workflowInstanceDefinition.workflowInitialState
   workflowSignalHandlers <- newIORef mempty
   workflowQueryHandlers <- newIORef mempty
@@ -259,13 +257,11 @@ applyStartWorkflow startWorkflow = do
         let args = fmap convertFromProtoPayload (startWorkflow ^. Command.vec'arguments)
         eAct <- liftIO $ UnliftIO.try $ applyArgs innerF args
         -- TODO make sure that we also catch exceptions from payload processing
-        case eAct of
-          Left (SomeException err) -> do
+        finishWorkflow fmt =<< case eAct of
+          Left e@(SomeException err) -> do
             $(logError) $ Text.pack ("Failed to decode workflow arguments: " <> show err)
-            throwIO $ ValueError "Failed to decode workflow arguments"
-          Right act -> do
-            result <- newIVar
-            runWorkflow result act >>= finishWorkflow result fmt
+            pure (ThrowWorkflow e) 
+          Right act -> runWorkflow act 
 
   primary <- asks workflowPrimaryTask
   writeIORef primary (Just act)
@@ -311,11 +307,8 @@ applySignalWorkflow signalWorkflow = do
       -- Realistically, this should only be one condition at a time, 
       -- but we'll signal all of them just in case.
       seqMaps <- readMVar inst.workflowSequenceMaps 
-      let newCompletions = 
-            map (CompleteReq (Ok ())) $ HashMap.elems seqMaps.conditionsAwaitingSignal
-      atomically $ do
-        completions <- readTVar inst.workflowCompletions
-        writeTVar inst.workflowCompletions (completions ++ newCompletions)
+      -- apply completions
+      mapM_ (\ivar -> putIVar ivar (Ok ())) $ HashMap.elems seqMaps.conditionsAwaitingSignal
 
 applyNotifyHasPatch :: NotifyHasPatch -> InstanceM env st ()
 applyNotifyHasPatch notifyHasPatch = do
@@ -399,17 +392,13 @@ applyResolutions rs = do
             let existingIVar = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.activities
             case existingIVar of
               Nothing -> do
-                new <- newIVar
-                pure 
-                  ( CompleteReq (Ok msg) new : completions
-                  , sequenceMaps' 
-                    { activities = HashMap.insert (msg ^. Activation.seq . to Sequence) new (sequenceMaps'.activities) 
-                    }
-                  )
+                throwIO $ RuntimeError "Activity handle not found"
               Just existing -> do
                 pure 
-                  ( CompleteReq (Ok msg) existing : completions
-                  , sequenceMaps'
+                  ( completions *> putIVar existing (Ok msg)
+                  , sequenceMaps' 
+                    { activities = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.activities
+                    }
                   )
           PendingJobResolveChildWorkflowExecutionStart msg -> do
             let existingHandle = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
@@ -423,7 +412,7 @@ applyResolutions rs = do
                   ResolveChildWorkflowExecutionStart'Succeeded succeeded -> do
                     setFirstExecutionRunId existing (succeeded ^. Activation.runId . to RunId)
                     pure 
-                      ( CompleteReq (Ok ()) (startHandle existing) : completions
+                      ( completions *> putIVar existing.startHandle (Ok ())
                       , sequenceMaps'
                       )
                   ResolveChildWorkflowExecutionStart'Failed failed ->
@@ -433,31 +422,24 @@ applyResolutions rs = do
                     in case failed ^. Activation.cause of
                           START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS -> 
                             pure 
-                              ( CompleteReq 
+                              ( completions *> putIVar existing.startHandle 
                                 (
                                   ThrowWorkflow $ toException $ WorkflowAlreadyStarted
                                     { workflowAlreadyStartedWorkflowId = failed ^. Activation.workflowId
                                     , workflowAlreadyStartedWorkflowType = failed ^. Activation.workflowType
                                     }
-                                ) existing.startHandle 
-                                : completions
+                                )
                               , updatedMaps
                               )
                           _ ->
                             pure
-                              ( CompleteReq 
-                                (ThrowInternal $ toException $ RuntimeError ("Unknown child workflow start failure: " <> show (failed ^. Activation.cause)))
-                                existing.startHandle 
-                                : completions
+                              ( completions *> 
+                                putIVar existing.startHandle (ThrowInternal $ toException $ RuntimeError ("Unknown child workflow start failure: " <> show (failed ^. Activation.cause)))
                               , updatedMaps
                               )
                   ResolveChildWorkflowExecutionStart'Cancelled cancelled -> 
                     pure 
-                      ( CompleteReq
-                        (Ok ()) existing.startHandle :
-                        CompleteReq 
-                        (ThrowWorkflow $ toException ChildWorkflowCancelled) existing.resultHandle : 
-                        completions
+                      ( completions *> putIVar existing.startHandle (Ok ()) *> putIVar existing.resultHandle (ThrowWorkflow $ toException ChildWorkflowCancelled)
                       , sequenceMaps'
                         { childWorkflows = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
                         }
@@ -469,7 +451,7 @@ applyResolutions rs = do
               Nothing ->  throwIO $ RuntimeError "Child Workflow Execution not found"
               Just (SomeChildWorkflowHandle h) -> do
                 pure
-                  ( CompleteReq (Ok msg) h.resultHandle : completions
+                  ( completions *> putIVar h.resultHandle (Ok msg)
                   , sequenceMaps'
                     { childWorkflows = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
                     }
@@ -481,7 +463,7 @@ applyResolutions rs = do
               Nothing -> throwIO $ RuntimeError "External Signal IVar for sequence not found"
               Just resVar -> do
                 pure
-                  ( CompleteReq (Ok msg) resVar : completions
+                  ( completions *> putIVar resVar (Ok msg)
                   , sequenceMaps'
                     { externalSignals = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalSignals
                     }
@@ -493,7 +475,7 @@ applyResolutions rs = do
               Nothing -> throwIO $ RuntimeError "External Cancel IVar for sequence not found"
               Just resVar -> do
                 pure
-                  ( CompleteReq (Ok msg) resVar : completions
+                  ( completions *> putIVar resVar (Ok msg)
                   , sequenceMaps'
                     { externalCancels = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalCancels
                     }
@@ -505,7 +487,7 @@ applyResolutions rs = do
               Nothing -> throwIO $ RuntimeError "Timer not found"
               Just existing -> do
                 pure 
-                  ( CompleteReq (Ok ()) existing : completions
+                  ( completions *> putIVar existing (Ok ())
                   , sequenceMaps'
                     { timers = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.timers
                     }
@@ -514,13 +496,8 @@ applyResolutions rs = do
     -- If an IVar for a sequence number is not present, we create it and add it to the sequence.
     -- This helps any workflow code that increments a sequence number ensure that it picks up the
     -- correct IVar.
-    --
-    -- TODO: we can probably clean out the IVar for a sequence number from the corresponding map
-    -- once we know that the workflow code has seen it.
-    (newCompletions, updatedSequenceMaps) <- foldM makeCompletion ([], sequenceMaps) rs
-    atomically $ do
-      completions <- readTVar inst.workflowCompletions
-      writeTVar inst.workflowCompletions (completions ++ newCompletions)
+    (newCompletions, updatedSequenceMaps) <- foldM makeCompletion (pure (), sequenceMaps) rs
+    newCompletions
     pure (updatedSequenceMaps, ())
 {-
 data WorkflowExitValue a

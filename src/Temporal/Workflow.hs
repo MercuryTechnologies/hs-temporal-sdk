@@ -90,7 +90,7 @@ module Temporal.Workflow
   , setSignalHandler
   , awaitCondition
   -- * Other utilities
-  , race
+  , Temporal.Workflow.race
   , sink
   -- * Time and timers
   , now
@@ -169,7 +169,7 @@ import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields as
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow as ChildWorkflow
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow_Fields as ChildWorkflow
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
-import UnliftIO hiding (race)
+import UnliftIO
 
 -- | An async action handle that can be awaited or cancelled.
 data Task env st a = Task 
@@ -178,7 +178,7 @@ data Task env st a = Task
   }
 
 ilift :: InstanceM env st a -> Workflow env st a
-ilift = Workflow . fmap Done
+ilift = Workflow
 
 askInstance :: Workflow env st (WorkflowInstance env st)
 askInstance = ilift ask
@@ -734,7 +734,7 @@ now :: Workflow env st UTCTime
 now = Workflow $ do
   wft <- workflowTime <$> ask
   TimeSpec{..} <- readIORef wft
-  pure $! Done $! systemToUTCTime $ MkSystemTime sec (fromIntegral nsec)
+  pure $! systemToUTCTime $ MkSystemTime sec (fromIntegral nsec)
 
 -- $versioning
 --
@@ -746,7 +746,7 @@ now = Workflow $ do
 -- - You want to change the remaining logic of a Workflow while it is still running
 -- - If your new logic can result in a different execution path
 applyPatch :: HasCallStack => PatchId -> Bool {- ^ whether the patch is deprecated -} -> Workflow env st Bool 
-applyPatch pid deprecated = Workflow $ fmap Done $ do
+applyPatch pid deprecated = Workflow $ do
   inst <- ask
   memoized <- readIORef inst.workflowMemoizedPatches
   case HashMap.lookup pid memoized of
@@ -939,8 +939,7 @@ setSignalHandler (SignalDefinition n codec applyToSignal) f = ilift $ do
       case eWorkflow of
         Left (ValueError err) -> throwIO $ ValueError err
         Right w -> do
-          result <- newIVar
-          resultVal <- runWorkflow result w
+          resultVal <- runWorkflow w
           cmd <- case resultVal of
             Ok () -> pure Nothing
             -- If a user-facing exception wasn't handled within the workflow, then that
@@ -961,7 +960,7 @@ setSignalHandler (SignalDefinition n codec applyToSignal) f = ilift $ do
             ThrowInternal e -> throwIO e
           inst <- ask
           forM_ cmd (addCommand inst)
-          flushCommands result
+          flushCommands
 
 -- | Current time from the workflow perspective.
 --
@@ -969,7 +968,7 @@ setSignalHandler (SignalDefinition n codec applyToSignal) f = ilift $ do
 time :: Workflow env st TimeSpec
 time = Workflow $ do
   wft <- workflowTime <$> ask
-  Done <$> readIORef wft
+  readIORef wft
 
 
 {- TODO Inquire about these:
@@ -1031,7 +1030,7 @@ sleep ts = do
 
 instance Wait (Timer env st) where
   type WaitResult (Timer env st) = Workflow env st ()
-  wait t = getIVar $ timerHandle t
+  wait = getIVar . timerHandle
 
 instance Cancel (Timer env st) where
   type CancelResult (Timer env st) = Workflow env st ()
@@ -1132,8 +1131,8 @@ awaitCondition f = do
         then pure ()
         else go
 
--- race :: Workflow env st a -> Workflow env st b -> Workflow env st (Either a b)
--- race l r = (Left <$> l) <|> (Right <$> r)
+race :: Workflow env st a -> Workflow env st b -> Workflow env st (Either a b)
+race (Workflow l) (Workflow r) = Workflow $ UnliftIO.race l r
 
 -- | While workflows are deterministic, there are categories of operational concerns (metrics, logging, tracing, etc.) that require
 -- access to IO operations like the network or filesystem. The 'IO' monad is not generally available in the 'Workflow' monad, but you 

@@ -112,32 +112,13 @@ except = Left . toException
 
 newFullIVar :: ResultVal a -> InstanceM env st (IVar env st a)
 newFullIVar r = do
-  ivarRef <- newIORef (IVarFull r)
+  ivarRef <- newMVar r
   return IVar{..}
 
 putIVar :: IVar env st a -> ResultVal a -> InstanceM env st ()
 putIVar IVar{ivarRef = !ref} a = do
   inst <- ask
-  e <- readIORef ref
-  case e of
-    IVarEmpty jobs -> do
-      writeIORef ref (IVarFull a)
-      modifyIORef' (workflowRunQueueRef inst) (appendJobList jobs)
-      -- An IVar is typically only meant to be written to once,
-      -- but are legitimate use-cases for writing several times.
-      --
-      -- An example is the Alternative instance for IVar, which writes to
-      -- a single IVar from either blocked branch
-    IVarFull{} -> return ()
-
-appendJobList :: JobList env st -> JobList env st -> JobList env st
-appendJobList JobNil c = c
-appendJobList c JobNil = c
-appendJobList (JobCons a b c) d = JobCons a b $! appendJobList c d 
-
-lengthJobList :: JobList env st -> Int
-lengthJobList JobNil = 0
-lengthJobList (JobCons _ _ j) = 1 + lengthJobList j
+  void $ tryPutMVar ref a
 
 -- TODO default to WaitCancellationCompleted per protobuf docs
 {- |
