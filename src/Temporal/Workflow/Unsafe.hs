@@ -73,6 +73,7 @@ runWorkflow wf = do
 
 finishWorkflow :: (Codec codec a) => codec -> ResultVal a -> InstanceM env st ()
 finishWorkflow codec result = do
+  $logDebug "Calling finishWorkflow"
   cmd <- case result of
     Ok a -> do
         res <- liftIO $ Temporal.Payload.encode codec a

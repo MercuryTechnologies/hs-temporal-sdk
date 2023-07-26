@@ -148,10 +148,10 @@ activate w inst act = runInstanceM inst $ do
             & Completion.failed .~ failure
       pure completion
     Right () -> do
-      successfulCommands <- fromReversed <$> readSuccessfulCommands
-      forM_ successfulCommands $ \cmd -> do
+      commands <- fromReversed <$> readFlushedCommands
+      forM_ commands $ \cmd -> do
         $(logDebug) $ Text.pack ("Sending command: " <> show cmd)
-      let success = defMessage & Completion.commands .~ successfulCommands
+      let success = defMessage & Completion.commands .~ commands
           completion = completionBase
             & Completion.successful .~ success
       pure completion
@@ -161,8 +161,8 @@ runInstanceM worker m = runReaderT (unInstanceM m) worker
 
 -- NB the workflow commands are reversed since we're pushing them onto a stack
 -- as we go.
-readSuccessfulCommands :: InstanceM env st (Reversed WorkflowCommand)
-readSuccessfulCommands = do
+readFlushedCommands :: InstanceM env st (Reversed WorkflowCommand)
+readFlushedCommands = do
   inst <- ask
   primaryTask <- readIORef inst.workflowPrimaryTask
   cmds <- atomically $ do
@@ -172,15 +172,14 @@ readSuccessfulCommands = do
         writeTVar inst.workflowCommands (RunningActivation $ Reversed [])
         pure cmds
       RunningActivation cmds -> 
-        -- We want to wait until we've explored the entire activation before sending.
         case primaryTask of
-          Nothing -> retry
+          Nothing -> retry -- haven't started the workflow yet
           Just action -> pollSTM action >>= \case
-            Nothing -> retry
-            Just _ -> do
+            Nothing -> retry -- workflow is still running and hasn't flushed commands currently
+            Just _ -> do -- workflow has finished, so go ahead and flush any leftover commands
               writeTVar inst.workflowCommands (RunningActivation $ Reversed [])
               pure cmds
-  $(logDebug) $ Text.pack ("readSuccessfulCommands: " <> show cmds)
+  $(logDebug) $ Text.pack ("readFlushedCommands: " <> show cmds)
   pure cmds
 
 -- We need to remove any commands that are not query responses after a terminal response.
