@@ -40,7 +40,7 @@ pub extern fn hs_temporal_init_runtime() -> *mut RuntimeRef {
   Box::into_raw(safe_init_runtime(
     TelemetryOptionsBuilder::default()
       .logging(Logger::Forward {
-        filter: construct_filter_string(Level::DEBUG, Level::ERROR),
+        filter: construct_filter_string(Level::TRACE, Level::ERROR),
       })
       .build()
       .unwrap()
