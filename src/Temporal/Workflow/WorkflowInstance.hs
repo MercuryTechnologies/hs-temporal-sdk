@@ -90,9 +90,6 @@ isEmpty SequenceMaps{..} =
 -- | A sink for the result of a data fetch in 'BlockedFetch'
 newtype ResultVar a =
   ResultVar (Either SomeException a -> IO ())
-  -- The Bool here is True if result was returned by a child thread,
-  -- rather than the main runHaxl thread.  see Note [tracking allocation in
-  -- child threads]
 
 mkResultVar
   :: (Either SomeException a -> IO ())
@@ -110,16 +107,6 @@ putResult (ResultVar io) res = io res
 
 except :: (Exception e) => e -> Either SomeException a
 except = Left . toException
-
-newFullIVar :: ResultVal a -> InstanceM env st (IVar env st a)
-newFullIVar r = do
-  ivarRef <- newMVar r
-  return IVar{..}
-
-putIVar :: IVar env st a -> ResultVal a -> InstanceM env st ()
-putIVar IVar{ivarRef = !ref} a = do
-  inst <- ask
-  void $ tryPutMVar ref a
 
 -- TODO default to WaitCancellationCompleted per protobuf docs
 {- |

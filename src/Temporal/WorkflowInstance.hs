@@ -91,42 +91,45 @@ import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Field
 import qualified Proto.Temporal.Api.Failure.V1.Message as F
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import UnliftIO
+import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Core
 
 
 create :: MonadLoggerIO m 
-  => Info 
+  => (Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
+  -> Info 
   -> env 
   -> WorkflowDefinition env st 
   -> m (WorkflowInstance env st)
-create info workflowEnv workflowInstanceDefinition = do
+create workflowCompleteActivation info workflowEnv workflowInstanceDefinition = do
   workflowInstanceLogger <- askLoggerIO
   workflowRandomnessSeed <- WorkflowGenM <$> newIORef (mkStdGen 0)
   workflowNotifiedPatches <- newIORef mempty
   workflowMemoizedPatches <- newIORef mempty
   workflowSequences <- newIORef Sequences
-    { externalCancel = 0
-    , childWorkflow = 0
-    , externalSignal = 0
-    , timer = 0
-    , activity = 0
-    , condition = 0
+    { externalCancel = 1
+    , childWorkflow = 1
+    , externalSignal = 1
+    , timer = 1
+    , activity = 1
+    , condition = 1
     }
   workflowTime <- newIORef $ TimeSpec 0 0
   workflowIsReplaying <- newIORef False
   workflowSequenceMaps <- newMVar $ SequenceMaps mempty mempty mempty mempty mempty mempty
   workflowPrimaryTask <- newIORef Nothing
-  workflowCommands <- newTVarIO $ RunningActivation $ Reversed []
+  workflowCommands <- newTVarIO $ Reversed []
   workflowState <- newIORef workflowInstanceDefinition.workflowInitialState
   workflowSignalHandlers <- newIORef mempty
   workflowQueryHandlers <- newIORef mempty
   workflowCallStack <- newIORef emptyCallStack
   workflowInstanceInfo <- newIORef info
+  workflowCancellationSignal <- newEmptyMVar
+  workflowInstanceContinuationEnv <- ContinuationEnv <$> newIORef JobNil <*> newTVarIO []
   pure WorkflowInstance {..}
-
 
 -- | This should never raise an exception, but instead catch all exceptions
 -- and set as completion failure.
-activate :: Worker env actEnv -> WorkflowInstance env st -> WorkflowActivation -> IO WorkflowActivationCompletion
+activate :: Worker env actEnv -> WorkflowInstance env st -> WorkflowActivation -> IO ()
 activate w inst act = runInstanceM inst $ do
   info <- atomicModifyIORef' inst.workflowInstanceInfo $ \info -> 
     let info' = info { historyLength = act ^. Activation.historyLength }
@@ -146,41 +149,19 @@ activate w inst act = runInstanceM inst $ do
             & Completion.failure .~ (defMessage & Failure.message .~ Text.pack (show err))
           completion = completionBase
             & Completion.failed .~ failure
-      pure completion
-    Right () -> do
-      commands <- fromReversed <$> readFlushedCommands
-      forM_ commands $ \cmd -> do
-        $(logDebug) $ Text.pack ("Sending command: " <> show cmd)
-      let success = defMessage & Completion.commands .~ commands
-          completion = completionBase
-            & Completion.successful .~ success
-      pure completion
+      liftIO (Core.completeWorkflowActivation w.workerCore completion >>= either throwIO pure)
+    Right () -> pure ()
+
+      -- successfulCommands <- fromReversed <$> readSuccessfulCommands
+      -- forM_ successfulCommands $ \cmd -> do
+      --   $(logDebug) $ Text.pack ("Sending command: " <> show cmd)
+      -- let success = defMessage & Completion.commands .~ successfulCommands
+      --     completion = completionBase
+      --       & Completion.successful .~ success
+      -- pure completion
 
 runInstanceM :: WorkflowInstance env st -> InstanceM env st a -> IO a
 runInstanceM worker m = runReaderT (unInstanceM m) worker
-
--- NB the workflow commands are reversed since we're pushing them onto a stack
--- as we go.
-readFlushedCommands :: InstanceM env st (Reversed WorkflowCommand)
-readFlushedCommands = do
-  inst <- ask
-  primaryTask <- readIORef inst.workflowPrimaryTask
-  cmds <- atomically $ do
-    commands <- readTVar inst.workflowCommands
-    case commands of
-      FlushActivationCompletion cmds -> do
-        writeTVar inst.workflowCommands (RunningActivation $ Reversed [])
-        pure cmds
-      RunningActivation cmds -> 
-        case primaryTask of
-          Nothing -> retry -- haven't started the workflow yet
-          Just action -> pollSTM action >>= \case
-            Nothing -> retry -- workflow is still running and hasn't flushed commands currently
-            Just _ -> do -- workflow has finished, so go ahead and flush any leftover commands
-              writeTVar inst.workflowCommands (RunningActivation $ Reversed [])
-              pure cmds
-  $(logDebug) $ Text.pack ("readFlushedCommands: " <> show cmds)
-  pure cmds
 
 -- We need to remove any commands that are not query responses after a terminal response.
 -- (note: I don't know how that would happen, but it's in the Python SDK code?)
@@ -259,7 +240,7 @@ applyStartWorkflow startWorkflow = do
         finishWorkflow fmt =<< case eAct of
           Left e@(SomeException err) -> do
             $(logError) $ Text.pack ("Failed to decode workflow arguments: " <> show err)
-            pure (ThrowWorkflow e) 
+            throwIO e
           Right act -> runWorkflow act 
 
   primary <- asks workflowPrimaryTask
@@ -307,7 +288,7 @@ applySignalWorkflow signalWorkflow = do
       -- but we'll signal all of them just in case.
       seqMaps <- readMVar inst.workflowSequenceMaps 
       -- apply completions
-      mapM_ (\ivar -> putIVar ivar (Ok ())) $ HashMap.elems seqMaps.conditionsAwaitingSignal
+      liftIO $ mapM_ (\ivar -> putIVar ivar (Ok ()) inst.workflowInstanceContinuationEnv) $ HashMap.elems seqMaps.conditionsAwaitingSignal
 
 applyNotifyHasPatch :: NotifyHasPatch -> InstanceM env st ()
 applyNotifyHasPatch notifyHasPatch = do
@@ -334,7 +315,11 @@ applyJobs jobs = UnliftIO.try $ do
   otherJobs
   -- Resolve these last because otherJobs might have applyStartJob in it?
   -- TODO Need to think hard to ensure that sequences are not messed up by this somehow
-  applyResolutions resolutions
+  activationResults <- applyResolutions resolutions
+  inst <- ask
+  atomically $ do
+    results <- readTVar inst.workflowInstanceContinuationEnv.activationResults
+    writeTVar inst.workflowInstanceContinuationEnv.activationResults (results <> activationResults)
   where
     (patchNotifications, signalWorkflows, queryWorkflows, resolutions, otherJobs) = V.foldr 
       (\job (patchNotifications, signalWorkflows, queryWorkflows, resolutions, otherJobs) -> case job ^. Activation.maybe'variant of
@@ -377,12 +362,16 @@ applyActivationJob job = case job ^. Activation.maybe'variant of
 
 setFirstExecutionRunId :: ChildWorkflowHandle env st result -> RunId -> InstanceM env st ()
 setFirstExecutionRunId cw runId = do
-  putIVar cw.firstExecutionRunId $ Ok runId
+  inst <- ask
+  liftIO $ putIVar 
+    cw.firstExecutionRunId 
+    (Ok runId) 
+    inst.workflowInstanceContinuationEnv
   -- { firstExecutionRunId = runId
   -- }
 
-applyResolutions :: [PendingJob] -> InstanceM env st ()
-applyResolutions [] = pure ()
+applyResolutions :: [PendingJob] -> InstanceM env st [ActivationResult env st]
+applyResolutions [] = pure []
 applyResolutions rs = do
   inst <- ask
   modifyMVar inst.workflowSequenceMaps $ \sequenceMaps -> do
@@ -394,7 +383,7 @@ applyResolutions rs = do
                 throwIO $ RuntimeError "Activity handle not found"
               Just existing -> do
                 pure 
-                  ( completions *> putIVar existing (Ok msg)
+                  ( ActivationResult (Ok msg) existing : completions
                   , sequenceMaps' 
                     { activities = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.activities
                     }
@@ -411,7 +400,7 @@ applyResolutions rs = do
                   ResolveChildWorkflowExecutionStart'Succeeded succeeded -> do
                     setFirstExecutionRunId existing (succeeded ^. Activation.runId . to RunId)
                     pure 
-                      ( completions *> putIVar existing.startHandle (Ok ())
+                      ( ActivationResult (Ok ()) existing.startHandle : completions
                       , sequenceMaps'
                       )
                   ResolveChildWorkflowExecutionStart'Failed failed ->
@@ -421,24 +410,28 @@ applyResolutions rs = do
                     in case failed ^. Activation.cause of
                           START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS -> 
                             pure 
-                              ( completions *> putIVar existing.startHandle 
+                              ( ActivationResult
                                 (
                                   ThrowWorkflow $ toException $ WorkflowAlreadyStarted
                                     { workflowAlreadyStartedWorkflowId = failed ^. Activation.workflowId
                                     , workflowAlreadyStartedWorkflowType = failed ^. Activation.workflowType
                                     }
                                 )
+                                existing.startHandle : completions
                               , updatedMaps
                               )
                           _ ->
                             pure
-                              ( completions *> 
-                                putIVar existing.startHandle (ThrowInternal $ toException $ RuntimeError ("Unknown child workflow start failure: " <> show (failed ^. Activation.cause)))
+                              ( ActivationResult
+                                  (ThrowInternal $ toException $ RuntimeError ("Unknown child workflow start failure: " <> show (failed ^. Activation.cause))) 
+                                  existing.startHandle : completions
                               , updatedMaps
                               )
                   ResolveChildWorkflowExecutionStart'Cancelled cancelled -> 
                     pure 
-                      ( completions *> putIVar existing.startHandle (Ok ()) *> putIVar existing.resultHandle (ThrowWorkflow $ toException ChildWorkflowCancelled)
+                      ( ActivationResult (Ok ()) existing.startHandle :
+                        ActivationResult (ThrowWorkflow $ toException ChildWorkflowCancelled) existing.resultHandle :
+                        completions 
                       , sequenceMaps'
                         { childWorkflows = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
                         }
@@ -450,7 +443,7 @@ applyResolutions rs = do
               Nothing ->  throwIO $ RuntimeError "Child Workflow Execution not found"
               Just (SomeChildWorkflowHandle h) -> do
                 pure
-                  ( completions *> putIVar h.resultHandle (Ok msg)
+                  ( ActivationResult (Ok msg) h.resultHandle : completions
                   , sequenceMaps'
                     { childWorkflows = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
                     }
@@ -462,7 +455,7 @@ applyResolutions rs = do
               Nothing -> throwIO $ RuntimeError "External Signal IVar for sequence not found"
               Just resVar -> do
                 pure
-                  ( completions *> putIVar resVar (Ok msg)
+                  ( ActivationResult (Ok msg) resVar : completions
                   , sequenceMaps'
                     { externalSignals = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalSignals
                     }
@@ -474,7 +467,7 @@ applyResolutions rs = do
               Nothing -> throwIO $ RuntimeError "External Cancel IVar for sequence not found"
               Just resVar -> do
                 pure
-                  ( completions *> putIVar resVar (Ok msg)
+                  ( ActivationResult (Ok msg) resVar : completions
                   , sequenceMaps'
                     { externalCancels = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalCancels
                     }
@@ -486,38 +479,14 @@ applyResolutions rs = do
               Nothing -> throwIO $ RuntimeError "Timer not found"
               Just existing -> do
                 pure 
-                  ( completions *> putIVar existing (Ok ())
+                  ( ActivationResult (Ok ()) existing : completions
                   , sequenceMaps'
                     { timers = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.timers
                     }
                   )
 
-    -- If an IVar for a sequence number is not present, we create it and add it to the sequence.
-    -- This helps any workflow code that increments a sequence number ensure that it picks up the
-    -- correct IVar.
-    (newCompletions, updatedSequenceMaps) <- foldM makeCompletion (pure (), sequenceMaps) rs
-    newCompletions
-    pure (updatedSequenceMaps, ())
-{-
-data WorkflowExitValue a
-  = WorkflowContinueAsNew ContinueAsNewWorkflowExecution
-  | WorkflowCancelled
-  | WorkflowEvicted
-  | WorkflowNormal a
-
-data ActivityExitValue a
-  = ActivityWillCompleteAsync
-  | ActivityNormal a
-
-data CancellableId
-  = Timer Word32
-  | Activity Word32
-  | LocalActivity Word32
-  | ChildWorkflow Word32
-  | SignalExternalWorkflow Word32
-  -- seqnuum, execution, only_child
-  | ExternalWorkflow Word32 NamespacedWorkflowExecution Bool
--}
+    (newCompletions, updatedSequenceMaps) <- foldM makeCompletion ([], sequenceMaps) rs 
+    pure (updatedSequenceMaps, newCompletions)
 
 -- Note: this is not intended to end up inside of the workflowPrimaryTask value,
 -- or else cancellation will not work properly.
@@ -533,6 +502,7 @@ runTopLevel handle = do
     -- TODO this is not really domain specific, but since the running task is an async handle, it's an easy hack to get the right behavior
       Handler $ \AsyncCancelled -> do
         addCommand inst (defMessage & Command.cancelWorkflowExecution .~ defMessage)
+        flushCommands
     , Handler $ \(SomeException e) -> do
         $(logError) $ Text.pack ("Caught exception: " <> show e)
         addCommand inst 
@@ -545,4 +515,5 @@ runTopLevel handle = do
                   )
               )
           )
+        flushCommands
     ]

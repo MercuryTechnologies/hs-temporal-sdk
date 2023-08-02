@@ -18,6 +18,7 @@ module Temporal.Client
     WorkflowClient
   , workflowClient
   , WorkflowStartOptions(..)
+  , TimeoutOptions(..)
   , workflowStartOptions
   , start
   , WorkflowHandle
@@ -102,6 +103,7 @@ data WorkflowClient = WorkflowClient
   , clientDefaultNamespace :: Namespace
   -- , clientDefaultQueue :: TaskQueue
   , clientIdentity :: Text
+  -- , clientHeaders :: Map Text RawPayload
   }
 
 defaultClientIdentity :: IO Text
@@ -176,11 +178,13 @@ data QueryRejectCondition
 
 data QueryOptions = QueryOptions
   { queryRejectCondition :: QueryRejectCondition
+  , queryHeaders :: Map Text RawPayload
   }
 
 defaultQueryOptions :: QueryOptions
 defaultQueryOptions = QueryOptions
   { queryRejectCondition = QueryRejectConditionRejectNone
+  , queryHeaders = mempty
   }
 
 data WorkflowExecutionStatus
@@ -219,8 +223,7 @@ query c h (QueryDefinition qn codec) opts = gather $ \payloadsIO -> liftIO $ do
             & Query.queryType .~ qn
             & Query.queryArgs .~
               (defMessage & Common.payloads .~ fmap convertToProtoPayload inputs)
-            -- TODO
-            -- & Q.header .~ _
+            & Query.header .~ (headerToProto $ fmap convertToProtoPayload opts.queryHeaders)
           )
         & WF.queryRejectCondition .~ case opts.queryRejectCondition of
           QueryRejectConditionRejectNone -> Query.QUERY_REJECT_CONDITION_NONE
@@ -300,9 +303,11 @@ data WorkflowStartOptions = WorkflowStartOptions
   , workflowIdReusePolicy :: Maybe WorkflowIdReusePolicy
   , retry :: Maybe RetryPolicy
   , cronSchedule :: Maybe Text
-  , memo :: Maybe (Map Text RawPayload)
-  , searchAttributes :: Maybe (Map Text RawPayload)
+  , memo :: !(Map Text RawPayload)
+  , searchAttributes :: !(Map Text RawPayload)
+  , headers :: !(Map Text RawPayload)
   , timeouts :: TimeoutOptions
+  , requestEagerExecution :: Bool
   }
 
 workflowStartOptions :: WorkflowId -> TaskQueue -> WorkflowStartOptions
@@ -313,13 +318,15 @@ workflowStartOptions wfId tq = WorkflowStartOptions
   , workflowIdReusePolicy = Nothing
   , retry = Nothing
   , cronSchedule = Nothing
-  , memo = Nothing
-  , searchAttributes = Nothing
+  , memo = mempty
+  , searchAttributes = mempty
+  , headers = mempty
   , timeouts = TimeoutOptions
     { executionTimeout = Nothing
     , runTimeout = Nothing
     , taskTimeout = Nothing
     }
+  , requestEagerExecution = False
   }
 
 data TimeoutOptions = TimeoutOptions
@@ -361,13 +368,21 @@ startFromPayloads c k@(KnownWorkflow codec _ _ _) opts payloads = liftIO $ do
             (fromMaybe WorkflowIdReusePolicyAllowDuplicateFailedOnly opts.workflowIdReusePolicy)
         & WF.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retry)
         & WF.cronSchedule .~ maybe "" Prelude.id opts.cronSchedule
-        & WF.maybe'memo .~ (convertToProtoMemo <$> opts.memo)
-        & WF.maybe'searchAttributes .~ (convertToProtoSearchAttributes <$> opts.searchAttributes)
+        & WF.memo .~ (convertToProtoMemo opts.memo)
+        & WF.searchAttributes .~ (convertToProtoSearchAttributes opts.searchAttributes)
     --     TODO Not sure how to use these yet
-    --     & WF.header .~
-    --     & WF.requestEagerExecution .~
-    --     & WF.continuedFailure .~
-    --     & WF.lastCompletionResult .~
+        & WF.header .~ (headerToProto $ fmap convertToProtoPayload opts.headers)
+        & WF.requestEagerExecution .~ opts.requestEagerExecution
+        {- 
+          These values will be available as ContinuedFailure and LastCompletionResult in the
+          WorkflowExecutionStarted event and through SDKs. The are currently only used by the
+          server itself (for the schedules feature) and are not intended to be exposed in
+          StartWorkflowExecution.
+
+          WF.continuedFailure
+          WF.lastCompletionResult
+
+        -}
   res <- startWorkflowExecution c.clientCore req
   case res of
     Left err -> throwIO err
@@ -410,35 +425,6 @@ heartbeat = undefined
 reportCancellation :: AsyncCompletionClient -> TaskToken -> [RawPayload] -> m ()
 reportCancellation = undefined
 
----------------------------------------------------------------------------------
--- ScheduleClient
-
-data ScheduleClient = ScheduleClient Client
-
-data ScheduleHandle = ScheduleHandle
-
-data CreateScheduleOptions = CreateScheduleOptions
-data ScheduleAlreadyRunning = ScheduleAlreadyRunning
-createSchedule 
-  :: ScheduleClient 
-  -> CreateScheduleOptions
-  -> m (Either ScheduleAlreadyRunning ScheduleHandle)
-createSchedule = undefined
-
-getScheduleHandle
-  :: ScheduleClient
-  -> ScheduleId
-  -> m (Maybe ScheduleHandle)
-getScheduleHandle = undefined
-
-data ListSchedulesOptions = ListSchedulesOptions
-
-listSchedules 
-  :: ScheduleClient
-  -> ListSchedulesOptions
-  -- Popper
-  -> m (m [ScheduleId])
-listSchedules = undefined
 
 data FollowOption = FollowRuns | ThisRunOnly
 

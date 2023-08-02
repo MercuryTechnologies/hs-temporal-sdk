@@ -38,7 +38,7 @@
               cargoLock = {
                 lockFile = ./core/rust/Cargo.lock;
                 outputHashes = {
-                  "rustfsm-0.1.0" = "sha256-hGhGm+My3ghaCzEv8ehAm1Mhy1uWVu0mZhiynvFlFDc=";
+                  "rustfsm-0.1.0" = "sha256-EVF+P+8zTNGsDOlBlttZme84buH+1rAHxez2qXVpXgI=";
                 };
               };
 
@@ -55,7 +55,7 @@
             hs_temporal_sdk =
               final.haskell-nix.project' {
                 src = ./.;
-                compiler-nix-name = "ghc961";
+                compiler-nix-name = "ghc962";
                 # projectFileName = "stack.yaml";
                 modules = [{
                   packages.temporal-sdk.flags.external_lib = true;

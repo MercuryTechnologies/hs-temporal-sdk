@@ -10,6 +10,7 @@ import Control.Monad
 import Control.Monad.IO.Class
 import Data.Hashable (Hashable)
 import Data.ByteString (ByteString)
+import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import Data.Int (Int32)
 import Data.ProtoLens
@@ -158,3 +159,21 @@ workflowIdReusePolicyToProto = \case
   WorkflowIdReusePolicyAllowDuplicateFailedOnly -> Workflow.WORKFLOW_ID_REUSE_POLICY_ALLOW_DUPLICATE_FAILED_ONLY
   WorkflowIdReusePolicyRejectDuplicate -> Workflow.WORKFLOW_ID_REUSE_POLICY_REJECT_DUPLICATE
   WorkflowIdReusePolicyTerminateIfRunning -> Workflow.WORKFLOW_ID_REUSE_POLICY_TERMINATE_IF_RUNNING
+
+searchAttributesToProto :: Map.Map Text Message.Payload -> Message.SearchAttributes
+searchAttributesToProto searchAttrs = defMessage & Message.indexedFields .~ searchAttrs
+
+searchAttributesFromProto :: Message.SearchAttributes -> Map.Map Text Message.Payload
+searchAttributesFromProto = view Message.indexedFields
+
+memoAttributesToProto :: Map.Map Text Message.Payload -> Message.Memo
+memoAttributesToProto memoAttrs = defMessage & Message.fields .~ memoAttrs
+
+memoAttributesFromProto :: Message.Memo -> Map.Map Text Message.Payload
+memoAttributesFromProto = view Message.fields
+
+headerToProto :: Map.Map Text Message.Payload -> Message.Header
+headerToProto header = defMessage & Message.fields .~ header
+
+headerFromProto :: Message.Header -> Map.Map Text Message.Payload
+headerFromProto = view Message.fields

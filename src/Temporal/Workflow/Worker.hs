@@ -36,13 +36,6 @@ pollWorkflowActivation = do
   worker <- ask
   liftIO $ Core.pollWorkflowActivation worker.workerCore
 
-queueAsyncWorkerTask :: WorkerM wfEnv actEnv a -> WorkerM wfEnv actEnv ()
-queueAsyncWorkerTask task = void $ async task
-  -- TODO job pool stuff maybe doesn't work
-  -- do
-  -- worker <- ask
-  -- liftIO $ enqueueJob_ worker.workerJobPool $ runWorkerM worker task
-
 upsertWorkflowInstance :: RunId -> WorkflowInstance wfEnv st -> WorkerM wfEnv actEnv (OpaqueWorkflow WorkflowInstance wfEnv)
 upsertWorkflowInstance r inst = do
   worker <- ask
@@ -68,24 +61,25 @@ upsertWorkflowInstance r inst = do
 
 execute :: Worker wfEnv actEnv -> IO ()
 execute worker = runWorkerM worker $ do
-  let activationPoller = forever $ do
-        $(logDebug) "Polling for activation"
-        eActivation <- pollWorkflowActivation
-        case eActivation of
-          -- TODO would be nice to shut down more gracefully
-          (Left s@(Core.WorkerError Core.PollShutdown _)) -> do
-            $(logDebug) "Polling for activation failed"
-            throwIO s
-          (Left err) -> $(logError) $ Text.pack $ show err
-          (Right activation) -> do
-            $(logDebug) $ Text.pack ("Got activation " <> show activation) 
-            queueAsyncWorkerTask $ handleActivation activation
-        
-  activationPoller 
-  deadlocks <- atomically $ readTVar worker.workerWorkflowState.deadlockedWorkflows
-  when (not $ null deadlocks) $ do
-    -- TODO proper logging
-    $(logWarn) $ Text.pack ("Deadlocked workflows: " ++ show (HashMap.keys deadlocks))
+  $(logInfo) "Starting workflow worker"
+  go
+
+  where
+    go = do
+      $(logDebug) "Polling for activation"
+      eActivation <- pollWorkflowActivation
+      case eActivation of
+        -- TODO should we do anything else on shutdown?
+        (Left s@(Core.WorkerError Core.PollShutdown _)) -> do
+          $(logInfo) "Poller shutting down"
+        (Left err) -> do
+          $(logError) $ Text.pack $ show err
+          go
+        (Right activation) -> do
+          $(logDebug) $ Text.pack ("Got activation " <> show activation) 
+          _ <- async $ handleActivation activation
+          go
+      
 
 handleActivation :: Core.WorkflowActivation -> WorkerM wfEnv actEnv ()
 handleActivation activation = do
@@ -93,10 +87,11 @@ handleActivation activation = do
   forM_ (activation ^. Activation.jobs) $ \job -> do
     $(logDebug) ("Job: " <> Text.pack (show job))
   worker <- ask
+
   {-
   Run jobs
   -}
-  completion <- if shouldRun
+  if shouldRun
     then do
       $(logDebug) "Running workflow"
       mInst <- createOrFetchWorkflowInstance
@@ -116,28 +111,15 @@ handleActivation activation = do
               completionMessage = defMessage
                 & Completion.runId .~ (activation ^. Activation.runId)
                 & Completion.failed .~ failureProto
-          pure completionMessage
-        Just inst -> do
+          
+          liftIO (Core.completeWorkflowActivation worker.workerCore completionMessage >>= either throwIO pure)
+        Just (OpaqueWorkflow inst) -> do
           -- This deadlock code seems suspect, but really it's because the workflow code
           -- shouldn't be able to block indefinitely on a single thread before returning
           -- a result. If it does, it's a bug in the workflow code.
-          completionHandle <- async $ do
-            $(logDebug) "About to activate"
-            liftIO $ case inst of
-              (OpaqueWorkflow inst') -> activate worker inst' activation
-          completion <- waitCatch completionHandle
-          -- mCompletion <- case worker.workerConfig.deadlockTimeout of
-          --   Nothing -> do
-          --     $(logDebug) "Waiting forever for completion"
-          --     Just <$> wait completionHandle
-          --   -- TODO ensure timeout is in microseconds
-          --   Just microsecs -> do
-          --     $(logDebug) "Waiting for completion"
-          --     timeout microsecs $ wait completionHandle
-          -- let eResult = case mCompletion of
-          --       -- TODO show correct timeout value
-          --       Nothing -> Left $ RuntimeError "Potential deadlock detected for workflow" --  <> show (activation ^. Activation.runId) <> " in namespace " <> show (activation ^. Activation.namespace) <> ". Workflow didn't yield within " <> show 1 <> " seconds.")
-          --       Just result -> Right result
+          $(logDebug) "About to activate"
+          completion <- liftIO $ UnliftIO.try $ activate worker inst activation
+
           case completion of
             Left (SomeException err) -> do
               $(logDebug) ("Workflow failure: " <> Text.pack (show err))
@@ -148,29 +130,20 @@ handleActivation activation = do
                   failureProto :: Completion.Failure
                   failureProto = defMessage & Completion.failure .~ innerFailure
                     
-                    -- & Activation.message .~ (Text.pack $ show err)
                   completionMessage = defMessage
                     & Completion.runId .~ (activation ^. Activation.runId)
                     & Completion.failed .~ failureProto
-              pure completionMessage
+              liftIO (Core.completeWorkflowActivation worker.workerCore completionMessage >>= either throwIO pure)
             Right ok -> do
-              $(logDebug) $ Text.pack ("Workflow completion: " ++ show ok)
-              pure ok 
+              -- The workflow is in charge of flushing completions in the regular case
+              -- when it needs to.
+              pure () 
     else do
       $(logDebug) "Workflow does not need to run."
-      pure $ defMessage 
-        & Completion.runId .~ activation ^. Activation.runId
-        & Completion.successful .~ defMessage
-
-  $(logDebug) (Text.pack $ show completion)
-  eCompletionResult <- liftIO $ Core.completeWorkflowActivation worker.workerCore completion
-  -- Crash the worker
-  case eCompletionResult of
-    -- TODO should we shut down more gracefully before escaping?
-    Left err -> do
-      $(logError) $ Text.pack $ show err
-      throwIO err
-    Right () -> $(logDebug) "Completed workflow activation"
+      let completionMessage = defMessage 
+            & Completion.runId .~ activation ^. Activation.runId
+            & Completion.successful .~ defMessage
+      liftIO (Core.completeWorkflowActivation worker.workerCore completionMessage >>= either throwIO pure)
 
   removeEvictedWorkflowInstances
 
@@ -238,6 +211,10 @@ handleActivation activation = do
               Nothing -> pure Nothing
               Just (OpaqueWorkflow definition) -> do
                 inst <- create 
+                  (\wf -> do
+                    putStrLn "Complete activation"
+                    Core.completeWorkflowActivation worker.workerCore wf
+                  )
                   workflowInfo 
                   worker.workerWorkflowState.workerEnv 
                   definition

@@ -80,7 +80,7 @@ type family ArgsOf f where
   ArgsOf (arg -> rest) = arg ': ArgsOf rest
   ArgsOf result = '[]
 
-type family ResultOf (m :: * -> *) f where
+type family ResultOf (m :: Type -> Type) f where
   ResultOf m (arg -> rest) = ResultOf m rest
   ResultOf m (m result) = result
   ResultOf m result = TypeError ('Text "This function must use the (" ':<>: 'ShowType m ':<>: 'Text ") monad." :$$: ('Text "Current type: " ':<>: 'ShowType result))
@@ -92,7 +92,7 @@ wrappedResultOf :: forall m f. Proxy m -> f -> Proxy (m (ResultOf m f))
 wrappedResultOf _ _ = Proxy
 
 -- | Construct a function type from a list of argument types and a result type.
-type family (:->:) (args :: [*]) (result :: *) where
+type family (:->:) (args :: [Type]) (result :: Type) where
   (:->:) '[] result = result
   (:->:) (arg ': args) result = arg -> (args :->: result)
 
@@ -109,7 +109,7 @@ convertToProtoPayload (RawPayload d m) = defMessage
   & Proto.data' .~ d
   & Proto.metadata .~ m
 
-class ApplyPayloads codec (args :: [*]) where
+class ApplyPayloads codec (args :: [Type]) where
   applyPayloads 
     :: codec 
     -> Proxy args 

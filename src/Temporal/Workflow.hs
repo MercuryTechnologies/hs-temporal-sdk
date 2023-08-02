@@ -65,6 +65,7 @@ module Temporal.Workflow
   , Cancel(..)
   , WorkflowHandle(..)
   , waitChildWorkflowResult
+  , waitChildWorkflowStart
   , cancelChildWorkflowExecution
   , Info(..)
   , RetryPolicy(..)
@@ -87,11 +88,12 @@ module Temporal.Workflow
   -- ** Signals
   -- $signals
   , SignalDefinition(..)
-  , setSignalHandler
-  , awaitCondition
+  -- , setSignalHandler
+  , waitCondition
+  -- , waitCancellation
   -- * Other utilities
   , Temporal.Workflow.race
-  , sink
+  , unsafeAsyncEffectSink
   -- * Time and timers
   , now
   , time
@@ -130,6 +132,7 @@ import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Short as SBS
 import Data.Functor.Compose
 import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as Map
 import qualified Data.HashMap.Strict as HashMap
 import Data.Maybe
 import Data.ProtoLens
@@ -178,7 +181,7 @@ data Task env st a = Task
   }
 
 ilift :: InstanceM env st a -> Workflow env st a
-ilift = Workflow
+ilift m = Workflow $ \_ -> Done <$> m
 
 askInstance :: Workflow env st (WorkflowInstance env st)
 askInstance = ilift ask
@@ -201,7 +204,7 @@ data StartActivityOptions = StartActivityOptions
   , heartbeatTimeout :: Maybe TimeSpec
   , retryPolicy :: Maybe RetryPolicy
   , cancellationType :: ActivityCancellationType
-  -- , headers :: Maybe (Map Text Text) -- TODO payloads
+  , headers :: Map Text RawPayload -- TODO payloads
   , disableEagerExecution :: Bool
   }
 
@@ -214,6 +217,7 @@ defaultStartActivityOptions t = StartActivityOptions
   , heartbeatTimeout = Nothing
   , retryPolicy = Nothing
   , cancellationType = ActivityCancellationTryCancel
+  , headers = mempty
   , disableEagerExecution = False
   }
 
@@ -273,18 +277,19 @@ startActivity k@(KnownActivity codec mTaskQueue name) opts = gatherActivityArgs 
         & Command.activityId .~ maybe (Text.pack $ show actSeq) rawActivityId (opts.activityId)
         & Command.activityType .~ name
         & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue mTaskQueue)
+        & Command.headers .~ fmap convertToProtoPayload opts.headers
         & Command.arguments .~ ps
         & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts.retryPolicy
         & Command.cancellationType .~ activityCancellationTypeToProto opts.cancellationType
         & Command.maybe'scheduleToStartTimeout .~ fmap timespecToDuration opts.scheduleToStartTimeout
         & Command.maybe'heartbeatTimeout .~ fmap timespecToDuration opts.heartbeatTimeout
-        & Command.headers .~ mempty -- TODO
         & \msg -> case opts.timeout of
           StartToClose t -> msg & Command.startToCloseTimeout .~ timespecToDuration t
           ScheduleToClose t -> msg & Command.scheduleToCloseTimeout .~ timespecToDuration t
           StartToCloseAndScheduleToClose stc stc' -> msg 
             & Command.startToCloseTimeout .~ timespecToDuration stc
             & Command.scheduleToCloseTimeout .~ timespecToDuration stc'
+        & Command.doNotEagerlyExecute .~ opts.disableEagerExecution
 
   let cmd = defMessage & Command.scheduleActivity .~ scheduleActivity
   addCommand inst cmd
@@ -559,8 +564,12 @@ startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId =
       addCommand inst cmd
       pure wfHandle
 
+waitChildWorkflowStart :: HasCallStack => ChildWorkflowHandle env st result -> Workflow env st ()
+waitChildWorkflowStart wfHandle = getIVar wfHandle.startHandle
+
 waitChildWorkflowResult :: HasCallStack => ChildWorkflowHandle env st result -> Workflow env st result
 waitChildWorkflowResult wfHandle@(ChildWorkflowHandle{childWorkflowCodec}) = do
+  $(logDebug) "Wait child workflow result"
   res <- getIVar wfHandle.resultHandle
   case res ^. Activation.result . ChildWorkflow.maybe'status of
     Nothing -> ilift $ throwIO $ RuntimeError "Unrecognized child workflow result status"
@@ -705,8 +714,11 @@ memo = do
   pure details.rawMemo
 
 -- | Lookup a memo value by key.
-memoValue :: Text -> Workflow env st (Maybe Payload)
-memoValue = undefined
+memoValue :: Text -> Workflow env st (Maybe RawPayload)
+memoValue k = do
+  memoMap <- memo
+  pure $ Map.lookup k memoMap
+
 
 -- | Updates this Workflow's Search Attributes by merging the provided searchAttributes with the existing Search Attributes
 --
@@ -731,7 +743,7 @@ upsertSearchAttributes values = ilift $ do
 --
 -- Equivalent to `getCurrentTime` from the `time` package.
 now :: Workflow env st UTCTime
-now = Workflow $ do
+now = ilift $ do
   wft <- workflowTime <$> ask
   TimeSpec{..} <- readIORef wft
   pure $! systemToUTCTime $ MkSystemTime sec (fromIntegral nsec)
@@ -746,7 +758,7 @@ now = Workflow $ do
 -- - You want to change the remaining logic of a Workflow while it is still running
 -- - If your new logic can result in a different execution path
 applyPatch :: HasCallStack => PatchId -> Bool {- ^ whether the patch is deprecated -} -> Workflow env st Bool 
-applyPatch pid deprecated = Workflow $ do
+applyPatch pid deprecated = ilift $ do
   inst <- ask
   memoized <- readIORef inst.workflowMemoizedPatches
   case HashMap.lookup pid memoized of
@@ -919,54 +931,54 @@ type ValidSignalHandler env st f =
   , (ArgsOf f :->: Workflow env st ()) ~ f
   )
 
-setSignalHandler :: forall env st f.
-  ( ValidSignalHandler env st f
-  ) => SignalDefinition (ArgsOf f) -> f -> Workflow env st ()
-setSignalHandler (SignalDefinition n codec applyToSignal) f = ilift $ do
-  -- TODO ^ inner callstack?
-  inst <- ask
-  withRunInIO $ \runInIO -> do
-    liftIO $ modifyIORef' inst.workflowSignalHandlers $ \handlers -> 
-      HashMap.insert (Just n) (runInIO . handle) handlers
-  where
-    handle :: Vector RawPayload -> InstanceM env st ()
-    handle = \vec -> do
-      eWorkflow <- liftIO $ UnliftIO.try $ applyToSignal 
-        (Proxy @(Workflow env st ()))
-        f 
-        vec
-      -- TODO handle exceptions properly
-      case eWorkflow of
-        Left (ValueError err) -> throwIO $ ValueError err
-        Right w -> do
-          resultVal <- runWorkflow w
-          cmd <- case resultVal of
-            Ok () -> pure Nothing
-            -- If a user-facing exception wasn't handled within the workflow, then that
-            -- means the workflow failed.
-            ThrowWorkflow e -> do
-              -- eAttrs <- liftIO $ encodeException inst.workflowCodec (e :: SomeException)
-              let completeMessage = defMessage & Command.failWorkflowExecution .~ 
-                    ( defMessage 
-                      & Command.failure .~ 
-                        ( defMessage
-                          & F.message .~ Text.pack (show e)
-                          & F.stackTrace .~ ""
-                          -- & F.encodedAttributes .~ convertToProtoPayload eAttrs
-                        )
-                    )
-              pure $ Just completeMessage
-            -- Crash the worker if we get an internal exception.
-            ThrowInternal e -> throwIO e
-          inst <- ask
-          forM_ cmd (addCommand inst)
-          flushCommands
+-- setSignalHandler :: forall env st f.
+--   ( ValidSignalHandler env st f
+--   ) => SignalDefinition (ArgsOf f) -> f -> Workflow env st ()
+-- setSignalHandler (SignalDefinition n codec applyToSignal) f = ilift $ do
+--   -- TODO ^ inner callstack?
+--   inst <- ask
+--   withRunInIO $ \runInIO -> do
+--     liftIO $ modifyIORef' inst.workflowSignalHandlers $ \handlers -> 
+--       HashMap.insert (Just n) (runInIO . handle) handlers
+--   where
+--     handle :: Vector RawPayload -> InstanceM env st ()
+--     handle = \vec -> do
+--       eWorkflow <- liftIO $ UnliftIO.try $ applyToSignal 
+--         (Proxy @(Workflow env st ()))
+--         f 
+--         vec
+--       -- TODO handle exceptions properly
+--       case eWorkflow of
+--         Left (ValueError err) -> throwIO $ ValueError err
+--         Right w -> do
+--           resultVal <- runWorkflow w
+--           cmd <- case resultVal of
+--             Ok () -> pure Nothing
+--             -- If a user-facing exception wasn't handled within the workflow, then that
+--             -- means the workflow failed.
+--             ThrowWorkflow e -> do
+--               -- eAttrs <- liftIO $ encodeException inst.workflowCodec (e :: SomeException)
+--               let completeMessage = defMessage & Command.failWorkflowExecution .~ 
+--                     ( defMessage 
+--                       & Command.failure .~ 
+--                         ( defMessage
+--                           & F.message .~ Text.pack (show e)
+--                           & F.stackTrace .~ ""
+--                           -- & F.encodedAttributes .~ convertToProtoPayload eAttrs
+--                         )
+--                     )
+--               pure $ Just completeMessage
+--             -- Crash the worker if we get an internal exception.
+--             ThrowInternal e -> throwIO e
+--           inst <- ask
+--           forM_ cmd (addCommand inst)
+--           flushCommands
 
 -- | Current time from the workflow perspective.
 --
 -- The value is relative to epoch time.
 time :: Workflow env st TimeSpec
-time = Workflow $ do
+time = ilift $ do
   wft <- workflowTime <$> ask
   readIORef wft
 
@@ -1035,13 +1047,21 @@ instance Wait (Timer env st) where
 instance Cancel (Timer env st) where
   type CancelResult (Timer env st) = Workflow env st ()
 
-  cancel t = ilift $ do
+  cancel t = Workflow $ \env -> do
     inst <- ask
     let cmd = defMessage & Command.cancelTimer .~ 
           ( defMessage 
             & Command.seq .~ rawSequence (timerSequence t)
           )
     addCommand inst cmd
+    $(logDebug) "about to putIVar: cancelTimer"
+    liftIO $ putIVar t.timerHandle (Ok ()) inst.workflowInstanceContinuationEnv
+
+    modifyMVar_ inst.workflowSequenceMaps $ \seqMaps -> do
+      pure $ seqMaps { timers = HashMap.delete t.timerSequence seqMaps.timers }
+
+    $(logDebug) "finished putIVar: cancelTimer"
+    pure $ Done ()
 
 
 gatherContinueAsNewArgs 
@@ -1074,7 +1094,7 @@ continueAsNew
   -> ContinueAsNewOptions 
   -> (args :->: Workflow env st a)
 continueAsNew k@(KnownWorkflow codec _ _ _) opts = gatherContinueAsNewArgs @env @st @args @result @a codec $ \args -> do
-  Workflow $ do
+  Workflow $ \_ -> do
     ps <- liftIO $ sequence args
     throwIO $ ContinueAsNewException $ defMessage
       & Command.workflowType .~ knownWorkflowName k
@@ -1104,8 +1124,8 @@ getExternalWorkflowHandle wfId mrId = pure $ ExternalWorkflowHandle
 -- N.B. this should be used with care, as it can lead to the workflow
 -- suspending indefinitely if the condition is never met. 
 -- (e.g. if there is no signal handler that changes the state appropriately)
-awaitCondition :: HasCallStack => (st -> Bool) -> Workflow env st ()
-awaitCondition f = do
+waitCondition :: HasCallStack => (st -> Bool) -> Workflow env st ()
+waitCondition f = do
   st <- get
   if f st
     then pure ()
@@ -1131,14 +1151,96 @@ awaitCondition f = do
         then pure ()
         else go
 
-race :: Workflow env st a -> Workflow env st b -> Workflow env st (Either a b)
-race (Workflow l) (Workflow r) = Workflow $ UnliftIO.race l r
-
 -- | While workflows are deterministic, there are categories of operational concerns (metrics, logging, tracing, etc.) that require
 -- access to IO operations like the network or filesystem. The 'IO' monad is not generally available in the 'Workflow' monad, but you 
 -- can use 'sink' to run an 'IO' action in a workflow. In order to maintain determinism, the operation will be executed asynchronously 
 -- and does not return a value. Be sure that the sink operation terminates, or else you will leak memory and/or threads.
 --
 -- Do not use 'sink' for any Workflow logic, or else you will violate determinism.
-sink :: IO () -> Workflow env st ()
-sink m = ilift $ liftIO $ void $ forkIO m
+unsafeAsyncEffectSink :: IO () -> Workflow env st ()
+unsafeAsyncEffectSink m = ilift $ liftIO $ void $ forkIO m
+
+
+-- -----------------------------------------------------------------------------
+-- Parallel operations
+
+biselect 
+  :: Workflow env st (Either a b)
+  -> Workflow env st (Either a c)
+  -> Workflow env st (Either a (b, c))
+biselect wfA wfB = biselectOpt id id Left Right wfA wfB
+
+{-# INLINE biselectOpt #-}
+biselectOpt 
+  :: (l -> Either a b)
+  -> (r -> Either a c)
+  -> (a -> t)
+  -> ((b, c) -> t)
+  -> Workflow env st l
+  -> Workflow env st r
+  -> Workflow env st t
+biselectOpt discrimA discrimB left right wfA wfB =
+  let go (Workflow wfA) (Workflow wfB) = Workflow $ \env -> do
+        ra <- wfA env
+        case ra of
+          Done ea ->
+            case discrimA ea of
+              Left a -> return (Done (left a))
+              Right b -> do
+                  rb <- wfB env
+                  case rb of
+                    Done eb ->
+                      case discrimB eb of
+                        Left a -> return (Done (left a))
+                        Right c -> return (Done (right (b,c)))
+                    Throw e -> return (Throw e)
+                    Blocked ib wfB' ->
+                      return (Blocked ib
+                              (wfB' :>>= \b' -> goRight b b'))
+          Throw e -> return (Throw e)
+          Blocked ia wfA' -> do
+            rb <- wfB env
+            case rb of
+              Done eb ->
+                case discrimB eb of
+                  Left a -> return (Done (left a))
+                  Right c ->
+                    return (Blocked ia (wfA' :>>= \a' -> goLeft a' c))
+              Throw e -> return (Throw e)
+              Blocked ib wfB' -> do
+                i <- newIVar
+                addJob env (return ()) i ia
+                addJob env (return ()) i ib
+                return (Blocked i (Cont (go (toWf wfA') (toWf wfB'))))
+                -- The code above makes sure that the computation
+                -- wakes up whenever either 'ia' or 'ib' is filled.
+                -- The ivar 'i' is used as a synchronisation point
+                -- for the whole computation, and we make sure that
+                -- whenever 'ia' or 'ib' are filled in then 'i' will
+                -- also be filled.
+
+      goRight b eb =
+        case discrimB eb of
+          Left a -> return (left a)
+          Right c -> return (right (b, c))
+      goLeft ea c =
+        case discrimA ea of
+          Left a -> return (left a)
+          Right b -> return (right (b, c))
+  in go wfA wfB
+
+-- | This function takes two Workflow computations as input, and returns the
+-- output of whichever computation finished first.
+race
+  :: Workflow env st a
+  -> Workflow env st b
+  -> Workflow env st (Either a b)
+race x y = biselectOpt discrimX discrimY id right x y
+  where
+    discrimX :: a -> Either (Either a b) ()
+    discrimX a = Left (Left a)
+
+    discrimY :: b -> Either (Either a b) ()
+    discrimY b = Left (Right b)
+
+    right _ = error "unsafeChooseFirst: We should never have a 'Right ()'"

@@ -82,7 +82,7 @@ applyActivityTask task = case task ^. AT.maybe'variant of
 
 -- TODO, where should async exception masking happen?
 applyActivityTaskStart :: TaskToken -> AT.Start -> WorkerM wfEnv actEnv ()
-applyActivityTaskStart tt msg = do
+applyActivityTaskStart tt msg = mask $ \unmask -> do
   w <- ask
   modifyMVar_ w.workerActivityState.runningActivities $ \running -> do
     case HashMap.lookup tt running of
