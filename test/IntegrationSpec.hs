@@ -386,9 +386,32 @@ needsClient = do
   -- -- --       specify "fail" pending
   -- -- --       specify "async fail signal?" pending
   -- -- --       specify "always delivered" pending
-  -- -- --     describe "Query" $ do
-  -- -- --       specify "query not found" pending
-  -- -- --       specify "query and unblock" pending
+    describe "Query" $ do
+      fit "works" $ \client -> do
+        let echoQuery :: W.QueryDefinition '[Text] Text
+            echoQuery = W.QueryDefinition "testQuery" JSON
+            workflow :: W.Workflow () () ()
+            workflow = do
+              W.setQueryHandler echoQuery $ \msg -> pure msg
+              W.sleep $ TimeSpec 5000 0
+            wf = W.provideWorkflow JSON "queryWorkflow" () workflow
+            conf = configure () () $ do
+              setNamespace $ W.Namespace "test"
+              setTaskQueue $ W.TaskQueue "test"
+              addWorkflow wf
+        withWorker conf $ do
+          wfId <- uuidText
+          let opts = C.workflowStartOptions
+                (W.WorkflowId wfId)
+                (W.TaskQueue "test")
+          h <- C.start client wf.reference opts
+          result <- C.query client h echoQuery C.defaultQueryOptions "hello"
+          -- C.cancel client h
+          result `shouldBe` Right "hello"
+
+
+      -- specify "query not found" pending
+      -- specify "query and unblock" pending
   -- -- --   describe "Await condition" $ do
   -- -- --     specify "it works" pending
     describe "Sleep" $ do

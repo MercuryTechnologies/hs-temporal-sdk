@@ -24,6 +24,11 @@ module Temporal.Client
   , WorkflowHandle
   , awaitWorkflowResult
   , execute
+  , QueryOptions(..)
+  , QueryRejectCondition(..)
+  , QueryRejected(..)
+  , defaultQueryOptions
+  , query
   -- * Async Completion Client
   -- * Schedule Client
   -- * Miscellaneous
@@ -196,11 +201,12 @@ data WorkflowExecutionStatus
   | ContinuedAsNew
   | TimedOut
   | UnknownStatus
+  deriving (Read, Show, Eq, Ord)
 
 data QueryRejected
   = QueryRejected
     { status :: Temporal.Client.WorkflowExecutionStatus
-    }
+    } deriving (Read, Show, Eq, Ord)
 
 query :: forall m args result a. (MonadIO m, Typeable result)
   => WorkflowClient

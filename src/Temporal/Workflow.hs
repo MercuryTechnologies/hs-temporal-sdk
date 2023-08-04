@@ -855,6 +855,7 @@ uuid4 = do
 
 
 newtype Query env st a = Query (Reader (env, st) a)
+  deriving (Functor, Applicative, Monad)
 
 -- $queries
 -- 
@@ -941,48 +942,46 @@ type ValidSignalHandler env st f =
   , (ArgsOf f :->: Workflow env st ()) ~ f
   )
 
--- setSignalHandler :: forall env st f.
---   ( ValidSignalHandler env st f
---   ) => SignalDefinition (ArgsOf f) -> f -> Workflow env st ()
--- setSignalHandler (SignalDefinition n codec applyToSignal) f = ilift $ do
---   -- TODO ^ inner callstack?
---   inst <- ask
---   withRunInIO $ \runInIO -> do
---     liftIO $ modifyIORef' inst.workflowSignalHandlers $ \handlers -> 
---       HashMap.insert (Just n) (runInIO . handle) handlers
---   where
---     handle :: Vector RawPayload -> InstanceM env st ()
---     handle = \vec -> do
---       eWorkflow <- liftIO $ UnliftIO.try $ applyToSignal 
---         (Proxy @(Workflow env st ()))
---         f 
---         vec
---       -- TODO handle exceptions properly
---       case eWorkflow of
---         Left (ValueError err) -> throwIO $ ValueError err
---         Right w -> do
---           resultVal <- runWorkflow w
---           cmd <- case resultVal of
---             Ok () -> pure Nothing
---             -- If a user-facing exception wasn't handled within the workflow, then that
---             -- means the workflow failed.
---             ThrowWorkflow e -> do
---               -- eAttrs <- liftIO $ encodeException inst.workflowCodec (e :: SomeException)
---               let completeMessage = defMessage & Command.failWorkflowExecution .~ 
---                     ( defMessage 
---                       & Command.failure .~ 
---                         ( defMessage
---                           & F.message .~ Text.pack (show e)
---                           & F.stackTrace .~ ""
---                           -- & F.encodedAttributes .~ convertToProtoPayload eAttrs
---                         )
---                     )
---               pure $ Just completeMessage
---             -- Crash the worker if we get an internal exception.
---             ThrowInternal e -> throwIO e
---           inst <- ask
---           forM_ cmd (addCommand inst)
---           flushCommands
+setSignalHandler :: forall env st f.
+  ( ValidSignalHandler env st f
+  ) => SignalDefinition (ArgsOf f) -> f -> Workflow env st ()
+setSignalHandler (SignalDefinition n codec applyToSignal) f = ilift $ do
+  -- TODO ^ inner callstack?
+  inst <- ask
+  withRunInIO $ \runInIO -> do
+    liftIO $ modifyIORef' inst.workflowSignalHandlers $ \handlers -> 
+      HashMap.insert (Just n) (runInIO . handle) handlers
+  where
+    handle :: Vector RawPayload -> InstanceM env st ()
+    handle = \vec -> do
+      eWorkflow <- liftIO $ UnliftIO.try $ applyToSignal 
+        (Proxy @(Workflow env st ()))
+        f 
+        vec
+      -- TODO handle exceptions properly
+      case eWorkflow of
+        Left (ValueError err) -> throwIO $ ValueError err
+        Right w -> do
+          resultVal <- UnliftIO.try $ runWorkflow w
+          cmd <- case resultVal of
+            Right () -> pure Nothing
+            -- If a user-facing exception wasn't handled within the workflow, then that
+            -- means the workflow failed.
+            Left e -> do
+              -- eAttrs <- liftIO $ encodeException inst.workflowCodec (e :: SomeException)
+              let completeMessage = defMessage & Command.failWorkflowExecution .~ 
+                    ( defMessage 
+                      & Command.failure .~ 
+                        ( defMessage
+                          & F.message .~ Text.pack (show (e :: SomeException))
+                          & F.stackTrace .~ ""
+                          -- & F.encodedAttributes .~ convertToProtoPayload eAttrs
+                        )
+                    )
+              pure $ Just completeMessage
+          inst <- ask
+          forM_ cmd (addCommand inst)
+          flushCommands
 
 -- | Current time from the workflow perspective.
 --
@@ -1253,4 +1252,4 @@ race x y = biselectOpt discrimX discrimY id right x y
     discrimY :: b -> Either (Either a b) ()
     discrimY b = Left (Right b)
 
-    right _ = error "unsafeChooseFirst: We should never have a 'Right ()'"
+    right _ = error "race: We should never have a 'Right ()'"
