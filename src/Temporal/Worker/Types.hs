@@ -26,7 +26,6 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Vector (Vector)
 import Data.Word (Word32)
-import Debug.Trace
 import GHC.Stack (CallStack)
 import Control.Concurrent.MVar (MVar)
 import Control.Concurrent.STM.TVar (TVar)
@@ -206,8 +205,7 @@ instance MonadLoggerIO (InstanceM env st) where
 
 data WorkflowWorker env = WorkflowWorker
   { workerWorkflowFunctions :: HashMap Text (OpaqueWorkflow WorkflowDefinition env)
-  , runningWorkflows :: TMVar (HashMap RunId (OpaqueWorkflow WorkflowInstance env))
-  -- TODO, use a bounded chan or similar for backpressure
+  , runningWorkflows :: TVar (HashMap RunId (OpaqueWorkflow WorkflowInstance env))
   , deadlockedWorkflows :: TVar (HashMap RunId SomeAsync)
   , workerEnv :: env
   }
@@ -447,8 +445,8 @@ data ActivationResult env st = forall a. ActivationResult
 -- | This function can be used to trace a bunch of lines to stdout when
 -- debugging core.
 trace_ :: String -> a -> a
--- trace_ _ = id
-trace_ = Debug.Trace.trace
+trace_ _ = id
+-- trace_ = Debug.Trace.trace
 
 -- | The Workflow monad is a constrained execution environment that helps
 -- developers write code that can be executed deterministically and reliably.
@@ -544,9 +542,12 @@ instance Monad (Workflow env st) where
       Throw e -> return (Throw e)
       Blocked ivar cont -> trace_ ">>= Blocked" $
         return (Blocked ivar (cont :>>= k))
+  -- A note on (>>):
+  --
+  -- Unlike Haxl, we can't use the the Applicative version here, because
+  -- it prevents us from sleeping between two actions. We can use (*>) ourselves
+  -- to opt into the Applicative version when we want to.
 
-  -- We really want the Applicative version of >>
-  -- (>>) = (*>)
 
 -- | If the first computation throws a value that implements 'SomeWorkflowException', 
 -- try the second one.
@@ -637,7 +638,7 @@ flushCommands = do
   res <- liftIO $ inst.workflowCompleteActivation completionMessage
   case res of
     Left err -> do
-      $(logDebug) ("flushCommands: failed: " <> T.pack (show err))
+      $(logError) ("flushCommands: failed: " <> T.pack (show err))
       throwIO err
     Right () -> pure ()
 

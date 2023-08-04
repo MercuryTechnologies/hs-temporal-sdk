@@ -508,14 +508,13 @@ startChildWorkflow
   -> WorkflowId
   -> (args :->: Workflow env st (ChildWorkflowHandle env st result))
 startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId = 
-  gatherStartChildWorkflowArgs @env @st @args @result codec go
+  gatherStartChildWorkflowArgs @env @st @args @result codec $ \typedPayloads -> ilift $ go typedPayloads
   where
-    go :: [IO RawPayload] -> Workflow env st (ChildWorkflowHandle env st result)
+    go :: [IO RawPayload] -> InstanceM env st (ChildWorkflowHandle env st result)
     go typedPayloads = do
       wfHandle <- sendChildWorkflowCommand typedPayloads
-      getIVar wfHandle.startHandle
       pure wfHandle
-    sendChildWorkflowCommand typedPayloads = ilift $ do
+    sendChildWorkflowCommand typedPayloads = do
       inst <- ask
       ps <- liftIO $ forM typedPayloads $ \payloadAction -> 
         fmap convertToProtoPayload payloadAction

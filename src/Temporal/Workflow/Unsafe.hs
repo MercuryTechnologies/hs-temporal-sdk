@@ -34,8 +34,12 @@ import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands
 import qualified Control.Exception
 import Text.Printf
 
-ifTraceLog :: MonadIO m => String -> m ()
-ifTraceLog s = liftIO $ putStr s
+withRunId :: Text -> InstanceM env st Text
+withRunId arg = do
+  inst <- ask
+  info <- readIORef $ inst.workflowInstanceInfo
+  return ("[runId=" <> rawRunId info.runId <> "] " <> arg)
+
 
 -- How this works:
 --
@@ -52,7 +56,7 @@ ifTraceLog s = liftIO $ putStr s
 -- in that we want to treat execution of async tasks 
 -- (executeChildWorkflow, timers, etc.) as awaitable and cancellable. 
 -- That is, we return a handle similar to an Async value and 
--- let the workflow writer choose if/when to suspend. It's also viable (I think)
+-- let the workflow writer choose if/when to suspend. It's also viable
 -- to just start a workflow or activity for its side effects and ignore the result
 --
 -- Another difference is that workflow signals allow for these handles to be
@@ -68,6 +72,53 @@ ifTraceLog s = liftIO $ putStr s
 -- point we use Sequence values in the variants of the different workflow
 -- activation jobs to fill any corresponding handles with their
 -- results and continue execution.
+--                                                              ┌────────────────────┐
+--                               Run a Workflow action that     │                    │
+--                               fills an IVar.                 │                    │
+--                                                              │      schedule      │
+--                               Once we get the result of the  │                    │
+--                               Workflow action, figure out if │                    │
+--                               the full computation is        └────────────────────┘
+--                               completed. If not, reschedule  ▲          │
+--                               to execute more Workflow code. │          │
+--                                                              │          ▼
+--                                                              ┌────────────────────┐
+--                                                              │                    │
+--                                                              │                    │
+--                                ┌────────────────────┐◀────── │     reschedule     │
+--                                │                    │        │                    │
+--                                │                    │        │                    │
+--                  ┌─────────────│   emptyRunQueue    │───────▶└────────────────────┘
+--                  │             │                    │
+--                  │             │                    │
+--                  │             └────────────────────┘◀────────────────────────────────┐
+--                  │             ▲          │                                           │
+--                  │             │          └───────┐                                   │
+--                  │             │                  │                                   │
+--                  ▼             │                  ▼                                   │
+--     ┌────────────────────────┐ ┌────────────────────────────────────┐    ┌────────────────────────┐
+--     │                        │ │                                    │    │                        │
+--     │ checkActivationResults │ │  flushCommandsAndAwaitActivation   │───▶│ waitActivationResults  │
+--     │                        │ │                                    │    │                        │
+--     └────────────────────────┘ └────────────────────────────────────┘    └────────────────────────┘
+-- Look at queued workflow         If we don't have any filled
+-- computations. If we don't have  IVars after calling
+-- any queued computations to      checkActivationResults, and we         The workflow activation logic
+-- run, we need to see if there    also don't have any more               is fully in charge of
+-- are any activation results      scheduled jobs, then we're             resolving pending IVars, so we
+-- that we've received from        blocked. We have to flush what         just hang out until an
+-- polling and used to fill IVars  we've got, then wait for an            activation is registered.
+-- tracked in the sequence maps.   activation to come in to
+--                                 unblock us.
+-- If we fill an IVar, then we
+-- add any blocked computations
+-- to the scheduled jobs list so
+-- we can resume working on them.
+
+-- We hand this back to
+-- emptyRunQueue.
+
+
 runWorkflow :: forall env st a. Workflow env st a -> InstanceM env st a
 runWorkflow wf = do
   inst <- ask
@@ -77,7 +128,8 @@ runWorkflow wf = do
     -- Run a job, and put its result in the given IVar
     schedule :: ContinuationEnv env st -> JobList env st -> Workflow env st b -> IVar env st b -> InstanceM env st ()
     schedule env@ContinuationEnv{..} rq (Workflow run) ivar@IVar{ivarRef = !ref} = do
-      ifTraceLog $ printf "schedule: %d\n" (1 + lengthJobList rq)
+      logMsg <- withRunId (Text.pack $ printf "schedule: %d\n" (1 + lengthJobList rq))
+      $logDebug logMsg
       let {-# INLINE result #-}
           result r = do
             e <- readIORef ref
@@ -88,7 +140,7 @@ runWorkflow wf = do
                 -- are legitimate use-cases for writing several times.
                 -- (See Haxl.Core.Parallel)
                 reschedule env rq
-              IVarEmpty haxls -> do
+              IVarEmpty workflowActions -> do
                 writeIORef ref (IVarFull r)
                 -- Have we got the final result now?
                 if ref == unsafeCoerce resultRef
@@ -99,12 +151,12 @@ runWorkflow wf = do
                     -- We have a result, but don't discard unfinished
                     -- computations in the run queue. See
                     -- Note [runHaxl and unfinished requests].
-                    -- Nothing can depend on the final IVar, so haxls must
+                    -- Nothing can depend on the final IVar, so workflowActions must
                     -- be empty.
                     -- case rq of
                     --   JobNil -> return ()
                     --   _ -> modifyIORef' runQueueRef (appendJobList rq)
-                  else reschedule env $ appendJobList haxls rq
+                  else reschedule env $ appendJobList workflowActions rq
       r <- UnliftIO.try $ run env
       case r of
         Left e -> do
@@ -113,25 +165,13 @@ runWorkflow wf = do
         Right (Done a) -> result $ Ok a
         Right (Throw ex) -> result $ ThrowWorkflow ex
         Right (Blocked i fn) -> do
+          $logDebug =<< withRunId "scheduled job blocked"
           addJob env (toWf fn) ivar i
           reschedule env rq
-    -- Here we have a choice:
-    --   - If the requestStore is non-empty, we could submit those
-    --     requests right away without waiting for more.  This might
-    --     be good for latency, especially if the data source doesn't
-    --     support batching, or if batching is pessimal.
-    --   - To optimise the batch sizes, we want to execute as much as
-    --     we can and only submit requests when we have no more
-    --     computation to do.
-    --   - compromise: wait at least Nms for an outstanding result
-    --     before giving up and submitting new requests.
-    --
-    -- For now we use the batching strategy in the scheduler, but
-    -- individual data sources can request that their requests are
-    -- sent eagerly by using schedulerHint.
-    --
+
     reschedule :: ContinuationEnv env st -> JobList env st -> InstanceM env st ()
     reschedule env@ContinuationEnv{..} jobs = do
+      $logDebug =<< withRunId "reschedule"
       case jobs of
         JobNil -> do
           rq <- readIORef runQueueRef
@@ -145,42 +185,40 @@ runWorkflow wf = do
     
     emptyRunQueue :: ContinuationEnv env st -> InstanceM env st ()
     emptyRunQueue env = do
-      ifTraceLog $ printf "emptyRunQueue\n"
-      haxls <- checkActivationResults env
-      case haxls of
-        JobNil -> checkBlockedFetches env
-        _ -> reschedule env haxls
+      logMsg <- withRunId "emptyRunQueue"
+      $logDebug logMsg
+      workflowActions <- checkActivationResults env
+      case workflowActions of
+        JobNil -> flushCommandsAndAwaitActivation env
+        _ -> reschedule env workflowActions
     
-    checkBlockedFetches :: ContinuationEnv env st -> InstanceM env st ()
-    checkBlockedFetches env@ContinuationEnv{..} = do
+    flushCommandsAndAwaitActivation :: ContinuationEnv env st -> InstanceM env st ()
+    flushCommandsAndAwaitActivation env@ContinuationEnv{..} = do
       inst <- ask
-      ifTraceLog $ printf "checkBlockedFetches\n"
-      blockedFetches <- atomically $ readTVar inst.workflowCommands
-      liftIO $ print blockedFetches
-      if blockedFetches == Reversed []
-      then waitActivationResults env
-      else do
-          flushCommands
-          -- performRequestStore env reqStore
-          emptyRunQueue env
+      $logDebug =<< withRunId "flushCommandsAndAwaitActivation"
+      unflushedWorkflowCommands <- atomically $ readTVar inst.workflowCommands
+      flushCommands
+      waitActivationResults env
 
     checkActivationResults :: ContinuationEnv env st -> InstanceM env st (JobList env st)
     checkActivationResults ContinuationEnv{..} = do
-      ifTraceLog $ printf "checkActivationResults\n"
+      $logDebug =<< withRunId "checkActivationResults"
       comps <- liftIO $ atomicallyOnBlocking (LogicBug ReadingCompletionsFailedRun) $ do
         c <- readTVar activationResults
         writeTVar activationResults []
         return c
       case comps of
-        [] -> return JobNil
+        [] -> do
+          $logDebug =<< withRunId "No new activation results"
+          return JobNil
         _ -> do
-          ifTraceLog $ printf "%d complete\n" (length comps)
+          $logDebug =<< withRunId (Text.pack $ printf "%d complete" (length comps))
           let
               getComplete (ActivationResult a IVar{ivarRef = !cr}) = do
                 r <- readIORef cr
                 case r of
                   IVarFull _ -> do
-                    ifTraceLog $ printf "existing result\n"
+                    $logDebug =<< withRunId "existing result"
                     return JobNil
                     -- this happens if a data source reports a result,
                     -- and then throws an exception.  We call putResult
@@ -196,7 +234,7 @@ runWorkflow wf = do
 
     waitActivationResults :: ContinuationEnv env st -> InstanceM env st ()
     waitActivationResults env@ContinuationEnv{..} = do
-      ifTraceLog $ printf "waitActivationResults\n"
+      $logDebug =<< withRunId "waitActivationResults"
       let
         wrapped = atomicallyOnBlocking (LogicBug ReadingCompletionsFailedRun)
         doWait = wrapped $ do
@@ -214,10 +252,9 @@ runWorkflow wf = do
     IVarFull (ThrowInternal e) -> throwIO e
 
 
-
 finishWorkflow :: (Codec codec a) => codec -> a -> InstanceM env st ()
 finishWorkflow codec result = do
-  $logDebug $ "Finishing workflow"
+  $logDebug =<< withRunId "Finishing workflow"
   res <- liftIO $ Temporal.Payload.encode codec result
   let completeMessage = defMessage & 
         Command.completeWorkflowExecution .~ (defMessage & Command.result .~ convertToProtoPayload res)

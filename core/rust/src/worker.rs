@@ -234,18 +234,20 @@ impl WorkerRef {
   fn poll_workflow_activation(&self, hs: HsCallback<CArray<u8>, CWorkerError>) -> () {
       let worker = self.worker.as_ref().unwrap().clone();
       self.runtime.future_result_into_hs(hs, async move {
-          let bytes = match worker.poll_workflow_activation().await {
-              Ok(act) => Ok(act.encode_to_vec()),
-              Err(PollWfError::ShutDown) => Err(WorkerError {
-                code: WorkerErrorCode::PollShutdownError,
-                message: format!("Poll shutdown error")
-              }),
-              Err(err) => Err(WorkerError {
-                code: WorkerErrorCode::PollFailure,
-                message: format!("{}", err),
-              })
-          };
-          Ok(CArray::c_repr_of(bytes.map_err(|err| CWorkerError::c_repr_of(err).unwrap())?).unwrap())
+        println!("polling workflow activation");
+        let bytes = match worker.poll_workflow_activation().await {
+            Ok(act) => Ok(act.encode_to_vec()),
+            Err(PollWfError::ShutDown) => Err(WorkerError {
+              code: WorkerErrorCode::PollShutdownError,
+              message: format!("Poll shutdown error")
+            }),
+            Err(err) => Err(WorkerError {
+              code: WorkerErrorCode::PollFailure,
+              message: format!("{}", err),
+            })
+        };
+        println!("got workflow activation!");
+        Ok(CArray::c_repr_of(bytes.map_err(|err| CWorkerError::c_repr_of(err).unwrap())?).unwrap())
       })
   }
 
@@ -274,9 +276,10 @@ impl WorkerRef {
       hs: HsCallback<CUnit, CWorkerError>,
       proto: &[u8],
   ) -> () {
-      let worker = self.worker.as_ref().unwrap().clone();
-      let completion = WorkflowActivationCompletion::decode(proto);
+    let worker = self.worker.as_ref().unwrap().clone();
+    let completion = WorkflowActivationCompletion::decode(proto);
       self.runtime.future_result_into_hs(hs, async move {
+        println!("completing workflow activation");
         let completion = completion
               .map_err(|err| CWorkerError::c_repr_of(WorkerError {
                 code: WorkerErrorCode::InvalidProto,
@@ -292,6 +295,7 @@ impl WorkerRef {
                   message: format!("{}", err)
                 }).unwrap()
               })?;
+          println!("completed workflow activation");
           Ok(CUnit{})
       })
   }

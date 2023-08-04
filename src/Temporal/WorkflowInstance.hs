@@ -136,7 +136,15 @@ activate w inst act = runInstanceM inst $ do
     in (info', info')
   let completionBase = defMessage & Completion.runId .~ rawRunId info.runId
   writeIORef inst.workflowTime (act ^. Activation.timestamp . to timespecFromTimestamp)
-  eResult <- applyJobs $ act ^. Activation.vec'jobs
+  eResult <- case w.workerConfig.deadlockTimeout of
+    Nothing -> applyJobs $ act ^. Activation.vec'jobs
+    Just timeoutDuration -> do
+      res <- timeout timeoutDuration $ applyJobs $ act ^. Activation.vec'jobs
+      case res of
+        Nothing -> do
+          $(logError) "Deadlock detected"
+          pure $ Left $ toException $ LogicBug WorkflowActivationDeadlock
+        Just res' -> pure res'
   -- TODO: Can the completion send both successful commands and a failure
   -- message at the same time? In theory we can make partial progress on
   -- a workflow, but still fail at some point?
@@ -360,16 +368,6 @@ applyActivationJob job = case job ^. Activation.maybe'variant of
     -- Ignore, handled in the worker code.
     WorkflowActivationJob'RemoveFromCache removeFromCache -> pure ()
 
-setFirstExecutionRunId :: ChildWorkflowHandle env st result -> RunId -> InstanceM env st ()
-setFirstExecutionRunId cw runId = do
-  inst <- ask
-  liftIO $ putIVar 
-    cw.firstExecutionRunId 
-    (Ok runId) 
-    inst.workflowInstanceContinuationEnv
-  -- { firstExecutionRunId = runId
-  -- }
-
 applyResolutions :: [PendingJob] -> InstanceM env st [ActivationResult env st]
 applyResolutions [] = pure []
 applyResolutions rs = do
@@ -398,9 +396,10 @@ applyResolutions rs = do
                   throwIO $ RuntimeError "Child workflow start did not have a known status"
                 Just status -> case status of
                   ResolveChildWorkflowExecutionStart'Succeeded succeeded -> do
-                    setFirstExecutionRunId existing (succeeded ^. Activation.runId . to RunId)
                     pure 
-                      ( ActivationResult (Ok ()) existing.startHandle : completions
+                      ( ActivationResult (Ok ()) existing.startHandle : 
+                        ActivationResult (Ok $ (succeeded ^. Activation.runId . to RunId)) existing.firstExecutionRunId :
+                        completions
                       , sequenceMaps'
                       )
                   ResolveChildWorkflowExecutionStart'Failed failed ->
@@ -408,16 +407,16 @@ applyResolutions rs = do
                           { childWorkflows = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
                           }
                     in case failed ^. Activation.cause of
-                          START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS -> 
-                            pure 
-                              ( ActivationResult
-                                (
-                                  ThrowWorkflow $ toException $ WorkflowAlreadyStarted
-                                    { workflowAlreadyStartedWorkflowId = failed ^. Activation.workflowId
-                                    , workflowAlreadyStartedWorkflowType = failed ^. Activation.workflowType
-                                    }
-                                )
-                                existing.startHandle : completions
+                          START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS ->
+                            let failure :: forall v. ResultVal v
+                                failure = ThrowWorkflow $ toException $ WorkflowAlreadyStarted
+                                  { workflowAlreadyStartedWorkflowId = failed ^. Activation.workflowId
+                                  , workflowAlreadyStartedWorkflowType = failed ^. Activation.workflowType
+                                  }
+                            in pure 
+                              ( ActivationResult failure existing.startHandle : 
+                                ActivationResult failure existing.firstExecutionRunId :
+                                completions
                               , updatedMaps
                               )
                           _ ->
@@ -430,6 +429,7 @@ applyResolutions rs = do
                   ResolveChildWorkflowExecutionStart'Cancelled cancelled -> 
                     pure 
                       ( ActivationResult (Ok ()) existing.startHandle :
+                        ActivationResult (ThrowWorkflow $ toException ChildWorkflowCancelled) existing.firstExecutionRunId :
                         ActivationResult (ThrowWorkflow $ toException ChildWorkflowCancelled) existing.resultHandle :
                         completions 
                       , sequenceMaps'

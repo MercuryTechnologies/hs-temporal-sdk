@@ -40,15 +40,15 @@ upsertWorkflowInstance :: RunId -> WorkflowInstance wfEnv st -> WorkerM wfEnv ac
 upsertWorkflowInstance r inst = do
   worker <- ask
   liftIO $ atomically $ do
-    workflows <- takeTMVar worker.workerWorkflowState.runningWorkflows
+    workflows <- readTVar worker.workerWorkflowState.runningWorkflows
     case HashMap.lookup r workflows of
       Nothing -> do
         let opaque = OpaqueWorkflow inst
         let workflows' = HashMap.insert r opaque workflows
-        putTMVar worker.workerWorkflowState.runningWorkflows workflows'
+        writeTVar worker.workerWorkflowState.runningWorkflows workflows'
         pure opaque
       Just existingInstance -> do
-        putTMVar worker.workerWorkflowState.runningWorkflows workflows
+        writeTVar worker.workerWorkflowState.runningWorkflows workflows
         pure existingInstance
 
 
@@ -167,7 +167,7 @@ handleActivation activation = do
     createOrFetchWorkflowInstance :: WorkerM wfEnv actEnv (Maybe (OpaqueWorkflow WorkflowInstance wfEnv))
     createOrFetchWorkflowInstance = do
       worker <- ask
-      runningWorkflows_ <- atomically $ readTMVar worker.workerWorkflowState.runningWorkflows
+      runningWorkflows_ <- atomically $ readTVar worker.workerWorkflowState.runningWorkflows
       case HashMap.lookup (RunId $ activation ^. Activation.runId) runningWorkflows_ of
         Just inst -> pure $ Just inst
         Nothing -> do
@@ -228,8 +228,8 @@ handleActivation activation = do
           worker <- ask
           let runId_ = RunId $ activation ^. CommonProto.runId
           join $ atomically $ do
-            currentWorkflows <- takeTMVar worker.workerWorkflowState.runningWorkflows
-            putTMVar worker.workerWorkflowState.runningWorkflows $ HashMap.delete runId_ currentWorkflows
+            currentWorkflows <- readTVar worker.workerWorkflowState.runningWorkflows
+            writeTVar worker.workerWorkflowState.runningWorkflows $ HashMap.delete runId_ currentWorkflows
             case HashMap.lookup runId_ currentWorkflows of
               Nothing -> pure $ $(logDebug) $ Text.pack ("Eviction request on an unknown workflow with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
               Just (OpaqueWorkflow wf) -> pure $ do

@@ -26,6 +26,7 @@ import Temporal.Payload
 import Temporal.Worker
 import Temporal.Runtime
 import System.IO.Unsafe
+import System.Timeout (timeout)
 
 rt :: Runtime
 rt = unsafePerformIO initializeRuntime
@@ -187,10 +188,15 @@ needsClient = do
             
             testFn :: W.Workflow () () Int
             testFn = do
-              h <- W.startActivity 
+              h1 <- W.startActivity 
                 testActivityAct.reference
                 (W.defaultStartActivityOptions $ W.StartToClose $ TimeSpec 1 0)
-              W.wait (h :: W.Task () () Int)
+              h2 <- W.startActivity 
+                testActivityAct.reference
+                (W.defaultStartActivityOptions $ W.StartToClose $ TimeSpec 1 0)
+              W.wait (h1 :: W.Task () () Int)
+              W.wait (h2 :: W.Task () () Int)
+
             wf = W.provideWorkflow JSON "faultyWorkflow" () testFn
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
@@ -291,7 +297,7 @@ needsClient = do
   --   --   specify "ActivityFailure exception" pending
   --   --   specify "Non-wrapped exception" pending
     describe "Child workflows" $ do
-      fspecify "invoke" $ \client -> do
+      specify "invoke" $ \client -> do
         parentId <- uuidText
         let isEven :: Int -> W.Workflow () () Bool
             isEven x = pure (x `mod` 2 == 0)
@@ -300,9 +306,12 @@ needsClient = do
             parentWorkflow = do
               childWorkflowId <- (W.WorkflowId . UUID.toText) <$> W.uuid4
               let opts :: W.StartChildWorkflowOptions
-                  opts = W.defaultChildWorkflowOptions { W.runTimeout = Just $ TimeSpec 2 0 }
+                  opts = W.defaultChildWorkflowOptions { W.runTimeout = Just $ TimeSpec 5 0 }
               childWorkflow <- W.startChildWorkflow @() @() isEventWf.reference opts childWorkflowId 2
-              W.waitChildWorkflowResult childWorkflow
+              $(logDebug) "waiting for child workflow"
+              res <- W.waitChildWorkflowResult childWorkflow
+              $(logDebug) "got child workflow result"
+              pure res
             parentWf = W.provideWorkflow JSON "basicInvokeChildWorkflow" () parentWorkflow
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
@@ -312,7 +321,7 @@ needsClient = do
         withWorker conf $ do
           let opts = (C.workflowStartOptions (W.WorkflowId parentId) (W.TaskQueue "test"))
                 { C.timeouts = C.TimeoutOptions
-                    { C.runTimeout = Just $ TimeSpec 2 0
+                    { C.runTimeout = Just $ TimeSpec 5 0
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
                     }
@@ -320,7 +329,7 @@ needsClient = do
           C.execute client parentWf.reference opts
             `shouldReturn` True
 
-      xspecify "failure" $ \client -> do
+      specify "failure" $ \client -> do
         parentId <- uuidText
         let busted :: W.Workflow () () ()
             busted = error "busted"

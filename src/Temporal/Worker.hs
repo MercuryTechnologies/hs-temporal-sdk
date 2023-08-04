@@ -110,7 +110,7 @@ configure wfEnv actEnv = flip execState defaultConfig . unConfigM
       { wfDefs = mempty
       , actDefs = mempty
       , coreConfig = Core.defaultWorkerConfig
-      , deadlockTimeout = Nothing
+      , deadlockTimeout = Just 1000000
       , ..
       }
 
@@ -246,7 +246,7 @@ startWorker client conf = do
   $(logDebug) "Starting worker"
   workerCore <- either throwIO pure =<< liftIO (Core.newWorker client conf.coreConfig)
   $(logDebug) "Instantiated core"
-  runningWorkflows <- newTMVarIO mempty
+  runningWorkflows <- newTVarIO mempty
   deadlockedWorkflows <- newTVarIO mempty
   runningActivities <- newMVar mempty
   workerLogFn <- askLoggerIO

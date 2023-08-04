@@ -1,3 +1,4 @@
+{-# LANGUAGE InstanceSigs #-}
 module Temporal.Exception where
 
 import Control.Exception
@@ -69,7 +70,9 @@ workflowExceptionFromException x = do
   SomeWorkflowException a <- fromException x
   cast a
 
-data LogicBugType = ReadingCompletionsFailedRun
+data LogicBugType 
+  = ReadingCompletionsFailedRun
+  | WorkflowActivationDeadlock
   deriving (Show)
 
 data LogicBug = LogicBug LogicBugType
