@@ -551,10 +551,10 @@ instance Monad (Workflow env st) where
 
 -- | If the first computation throws a value that implements 'SomeWorkflowException', 
 -- try the second one.
--- instance Alternative (Workflow env st) where
---   empty = throw AlternativeInstanceFailure
---   (<|>) l r = l `Temporal.Worker.Types.catch` \(SomeWorkflowException e) -> r
-  
+instance Alternative (Workflow env st) where
+  empty = throw AlternativeInstanceFailure
+  (<|>) l r = l `Temporal.Worker.Types.catch` \(SomeWorkflowException e) -> r
+
 instance {-# OVERLAPPABLE #-} MonadLogger (Workflow env st) where
   monadLoggerLog loc src lvl msg = Workflow $ \_ -> do
     logger <- asks workflowInstanceLogger

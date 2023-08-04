@@ -560,11 +560,34 @@ needsClient = do
   --     specify "throws exception if remote workflow is terminated" pending
   --     specify "throws if continued as new" pending
   --     specify "follows chain of execution" pending
-  --   describe "ContinueAsNew" $ do
-  --     specify "to different workflow" pending
-  --     specify "to same workflow keeps memo and search attributes" pending
-  --     specify "to different workflow keeps memo and search attributes by default" pending
-  --     specify "to different workflow can set memo and search attributes" pending
+  describe "ContinueAsNew" $ do
+    fit "works" $ \client -> do
+      let workflow :: Int -> W.Workflow () () Text
+          workflow execCount = if execCount < 1
+            then W.continueAsNew wf.reference W.defaultContinueAsNewOptions (execCount + 1)
+            else pure "woohoo"
+
+          wf = W.provideWorkflow JSON "continueAsNewWorks" () workflow
+          conf = configure () () $ do
+            setNamespace $ W.Namespace "test"
+            setTaskQueue $ W.TaskQueue "test"
+            addWorkflow wf
+      withWorker conf $ do
+        wfId <- uuidText
+        let opts = (C.workflowStartOptions (W.WorkflowId wfId) (W.TaskQueue "test"))
+              { C.timeouts = C.TimeoutOptions
+                  { C.runTimeout = Just $ TimeSpec 4 0
+                  , C.executionTimeout = Nothing
+                  , C.taskTimeout = Nothing
+                  }
+              }
+        C.execute client wf.reference opts 0
+          `shouldReturn` "woohoo"
+
+      -- specify "to different workflow" pending
+      -- specify "to same workflow keeps memo and search attributes" pending
+      -- specify "to different workflow keeps memo and search attributes by default" pending
+      -- specify "to different workflow can set memo and search attributes" pending
   --   describe "signalWithStart" $ do
   --     specify "works as intended and returns correct runId" pending
   --   describe "RetryPolicy" $ do

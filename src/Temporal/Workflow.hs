@@ -105,7 +105,10 @@ module Temporal.Workflow
   , randomGen
   , uuid4
   , WorkflowGenM
-
+  -- * Continue as new
+  , ContinueAsNewOptions(..)
+  , defaultContinueAsNewOptions
+  , continueAsNew
   -- * Type definitions
   , IsValidWorkflowFunction
   , GatherArgs
@@ -194,6 +197,14 @@ data ContinueAsNewOptions = ContinueAsNewOptions
   -- , TODO memo :: 
   -- , TODO searchAttributes :: Maybe (Map Text Payload)
   -- , TODO headers
+  }
+
+defaultContinueAsNewOptions :: ContinueAsNewOptions
+defaultContinueAsNewOptions = ContinueAsNewOptions
+  { taskQueue = Nothing
+  , runTimeout = Nothing
+  , taskTimeout = Nothing
+  , retryPolicy = Nothing
   }
 
 data StartActivityOptions = StartActivityOptions

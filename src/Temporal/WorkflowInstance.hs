@@ -494,13 +494,16 @@ runTopLevel :: InstanceM env st a -> InstanceM env st ()
 runTopLevel handle = do
   inst <- ask
   void handle `catches`
-    [ 
-    --   Handler $ \ContinueAsNewException{..} -> putStrLn "ContinueAsNew Not implemented yet"
+    [ Handler $ \(ContinueAsNewException msg) -> do
+      inst <- ask
+      addCommand inst (defMessage & Command.continueAsNewWorkflowExecution .~ msg)
+      flushCommands
+    
     -- , Handler $ \CancelledException{..} -> putStrLn "Cancelled Not implemented yet"
     -- , Handler $ \FailureException{..} -> putStrLn "Failure Not implemented yet"
     -- , Handler $ \OperationCancelledException{..} -> putStrLn "OperationCancelled Not implemented yet"
     -- TODO this is not really domain specific, but since the running task is an async handle, it's an easy hack to get the right behavior
-      Handler $ \AsyncCancelled -> do
+    , Handler $ \AsyncCancelled -> do
         addCommand inst (defMessage & Command.cancelWorkflowExecution .~ defMessage)
         flushCommands
     , Handler $ \(SomeException e) -> do

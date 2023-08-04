@@ -114,11 +114,9 @@ withRunId arg = do
 -- add any blocked computations
 -- to the scheduled jobs list so
 -- we can resume working on them.
-
+--
 -- We hand this back to
 -- emptyRunQueue.
-
-
 runWorkflow :: forall env st a. Workflow env st a -> InstanceM env st a
 runWorkflow wf = do
   inst <- ask
