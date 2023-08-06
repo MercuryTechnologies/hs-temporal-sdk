@@ -279,8 +279,8 @@ startActivity k@(KnownActivity codec mTaskQueue name) opts = gatherActivityArgs 
 
   s@(Sequence actSeq) <- nextActivitySequence
   resultSlot <- newIVar
-  modifyMVar inst.workflowSequenceMaps $ \seqMaps -> do
-    pure (seqMaps { activities = HashMap.insert s resultSlot (activities seqMaps) }, ())
+  atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+    seqMaps { activities = HashMap.insert s resultSlot (activities seqMaps) }
 
   info <- readIORef inst.workflowInstanceInfo
   let scheduleActivity = defMessage
@@ -307,16 +307,16 @@ startActivity k@(KnownActivity codec mTaskQueue name) opts = gatherActivityArgs 
   pure $ Task 
     { waitAction = do
       res <- getIVar resultSlot
-      case res ^. Activation.result . ActivityResult.maybe'status of
+      Workflow $ \_ -> case res ^. Activation.result . ActivityResult.maybe'status of
         Nothing -> error "Activity result missing status"
         Just (ActivityResult.ActivityResolution'Completed success) -> do
-          result <- ilift $ liftIO $ decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
+          result <- liftIO $ decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
           case result of
             -- TODO handle properly
             Left err -> error $ "Failed to decode activity result: " <> show err
-            Right val -> pure val
-        Just (ActivityResult.ActivityResolution'Failed failure) -> error "not implemented"
-        Just (ActivityResult.ActivityResolution'Cancelled details) -> error "not implemented"
+            Right val -> pure $ Done val
+        Just (ActivityResult.ActivityResolution'Failed failure) -> pure $ Throw $ toException $ ActivityFailed (failure ^. ActivityResult.failure)
+        Just (ActivityResult.ActivityResolution'Cancelled details) -> pure $ Throw $ toException $ ActivityCancelled (details ^. ActivityResult.failure)
         Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"
     , cancelAction = do
       let cancelCmd = defMessage
@@ -399,8 +399,8 @@ instance Cancel (ExternalWorkflowHandle env st a) where
     inst <- ask
     s@(Sequence sVal) <- nextExternalSignalSequence
     res <- newIVar
-    modifyMVar_ inst.workflowSequenceMaps $ \seqMaps -> do
-      pure $ seqMaps { externalSignals = HashMap.insert s res (externalSignals seqMaps) }
+    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+      seqMaps { externalSignals = HashMap.insert s res (externalSignals seqMaps) }
     addCommand 
       inst 
       (defMessage 
@@ -473,8 +473,8 @@ signalWorkflow _ f (SignalDefinition signalName signalCodec signalApply) = gathe
               )
             )
     addCommand inst cmd
-    modifyMVar_ inst.workflowSequenceMaps $ \seqMaps -> do
-      pure $ seqMaps { externalSignals = HashMap.insert s resVar seqMaps.externalSignals }
+    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+      seqMaps { externalSignals = HashMap.insert s resVar seqMaps.externalSignals }
     pure $ Task 
       { waitAction = do
           res <- getIVar resVar
@@ -567,8 +567,8 @@ startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId =
             , childWorkflowId = wfId
             }
 
-      modifyMVar_ inst.workflowSequenceMaps $ \seqMaps -> do
-        pure $ seqMaps { childWorkflows = HashMap.insert s (SomeChildWorkflowHandle wfHandle) seqMaps.childWorkflows }
+      atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+        seqMaps { childWorkflows = HashMap.insert s (SomeChildWorkflowHandle wfHandle) seqMaps.childWorkflows }
 
       $(logDebug) "Add command: startChildWorkflowExecution"
       addCommand inst cmd
@@ -659,8 +659,8 @@ startLocalActivity (KnownActivity codec _ n) opts = gatherActivityArgs @env @st 
       fmap convertToProtoPayload payloadAction
     s@(Sequence actSeq) <- nextActivitySequence
     resultSlot <- newIVar
-    modifyMVar inst.workflowSequenceMaps $ \seqMaps -> do
-      pure (seqMaps { activities = HashMap.insert s resultSlot (activities seqMaps) }, ())
+    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+      seqMaps { activities = HashMap.insert s resultSlot (activities seqMaps) }
     -- TODO, seems like `attempt` and `originalScheduledTime`
     -- imply that we are in charge of retrying local activities ourselves?
     let cmd = defMessage 
@@ -684,16 +684,16 @@ startLocalActivity (KnownActivity codec _ n) opts = gatherActivityArgs @env @st 
     pure $ Task 
       { waitAction = do
         res <- getIVar resultSlot
-        case res ^. Activation.result . ActivityResult.maybe'status of
+        Workflow $ \_ -> case res ^. Activation.result . ActivityResult.maybe'status of
           Nothing -> error "Activity result missing status"
           Just (ActivityResult.ActivityResolution'Completed success) -> do
-            result <- ilift $ liftIO $ decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
+            result <- liftIO $ decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
             case result of
               -- TODO handle properly
               Left err -> error $ "Failed to decode activity result: " <> show err
-              Right val -> pure val
-          Just (ActivityResult.ActivityResolution'Failed failure) -> error "not implemented"
-          Just (ActivityResult.ActivityResolution'Cancelled details) -> error "not implemented"
+              Right val -> pure $ Done val
+          Just (ActivityResult.ActivityResolution'Failed failure) -> pure $ Throw $ toException $ ActivityFailed (failure ^. ActivityResult.failure)
+          Just (ActivityResult.ActivityResolution'Cancelled details) -> pure $ Throw $ toException $ ActivityCancelled (details ^. ActivityResult.failure)
           Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"
       , cancelAction = do
         let cancelCmd = defMessage
@@ -1039,8 +1039,8 @@ createTimer ts = ilift $ do
         )
   $(logDebug) "Add command: sleep"
   res <- newIVar
-  modifyMVar_ inst.workflowSequenceMaps $ \seqMaps -> do
-    pure $ seqMaps { timers = HashMap.insert s res seqMaps.timers }
+  atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+    seqMaps { timers = HashMap.insert s res seqMaps.timers }
   addCommand inst cmd
   pure $ Timer { timerSequence = s, timerHandle = res }
 
@@ -1066,8 +1066,8 @@ instance Cancel (Timer env st) where
     $(logDebug) "about to putIVar: cancelTimer"
     liftIO $ putIVar t.timerHandle (Ok ()) inst.workflowInstanceContinuationEnv
 
-    modifyMVar_ inst.workflowSequenceMaps $ \seqMaps -> do
-      pure $ seqMaps { timers = HashMap.delete t.timerSequence seqMaps.timers }
+    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+      seqMaps { timers = HashMap.delete t.timerSequence seqMaps.timers }
 
     $(logDebug) "finished putIVar: cancelTimer"
     pure $ Done ()
@@ -1145,16 +1145,16 @@ waitCondition f = do
         inst <- ask
         res <- newIVar
         conditionSeq <- nextConditionSequence
-        modifyMVar_ inst.workflowSequenceMaps $ \seqMaps -> do
-          pure $ seqMaps { conditionsAwaitingSignal = HashMap.insert conditionSeq res seqMaps.conditionsAwaitingSignal }
+        atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+          seqMaps { conditionsAwaitingSignal = HashMap.insert conditionSeq res seqMaps.conditionsAwaitingSignal }
         pure (conditionSeq, res)
       -- Wait for the condition to be signaled.
       getIVar blockedVar
       -- Delete the condition from the map so that it doesn't leak memory.
       ilift $ do
         inst <- ask
-        modifyMVar_ inst.workflowSequenceMaps $ \seqMaps -> do
-          pure $ seqMaps { conditionsAwaitingSignal = HashMap.delete conditionSeq seqMaps.conditionsAwaitingSignal }
+        atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+          seqMaps { conditionsAwaitingSignal = HashMap.delete conditionSeq seqMaps.conditionsAwaitingSignal }
       st <- get
       if f st
         then pure ()

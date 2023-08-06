@@ -248,7 +248,7 @@ startWorker client conf = do
   $(logDebug) "Instantiated core"
   runningWorkflows <- newTVarIO mempty
   deadlockedWorkflows <- newTVarIO mempty
-  runningActivities <- newMVar mempty
+  runningActivities <- newTVarIO mempty
   workerLogFn <- askLoggerIO
   let workerWorkflowFunctions = conf.wfDefs
       workerConfig = conf
@@ -264,16 +264,19 @@ startWorker client conf = do
   workerWorkflowLoop <- async $ do
     $(logDebug) "Starting workflow worker loop"
     liftIO $ Workflow.execute worker
+    $(logDebug) "Exiting workflow worker loop"
   workerActivityLoop <- async $ do 
     $(logDebug) "Starting activity worker loop"
     liftIO $ Activity.execute worker
+    $(logDebug) "Exiting activity worker loop"
   pure Temporal.Worker.Worker{..}
 
 waitWorker :: MonadIO m => Temporal.Worker.Worker -> m ()
 waitWorker worker = void $ do
   -- TODO these need to account for expected PollShutdown calls
-  wait (workerWorkflowLoop worker)
-  wait (workerActivityLoop worker)
+  _ <- waitCatch (workerWorkflowLoop worker)
+  _ <- waitCatch (workerActivityLoop worker)
+  pure ()
 
 shutdown :: MonadIO m => Temporal.Worker.Worker -> m ()
 shutdown worker = liftIO $ do

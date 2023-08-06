@@ -25,10 +25,11 @@ import Foreign.Ptr
 import Foreign.StablePtr
 import Foreign.Storable
 import GHC.Conc (newStablePtrPrimMVar, PrimMVar)
+import Data.Kind (Type)
 
 class ManagedRustValue r where
-  type RustRef r :: *
-  type HaskellRep r :: *
+  type RustRef r :: Type
+  type HaskellRep r :: Type
   fromRust :: proxy r -> RustRef r -> IO (HaskellRep r)
 
 data RustCStringLen = RustCStringLen
@@ -130,7 +131,7 @@ makeTokioAsyncCall call readErr readSuccess = mask_ $ do
 
     (cap, _) <- threadCapability =<< myThreadId
     call sp cap errorSlot resultSlot
-    takeMVar mvar `onException`
+    () <- takeMVar mvar `onException`
       forkIO (takeMVar mvar >> void peekEither)
     peekEither
 

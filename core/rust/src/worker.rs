@@ -329,11 +329,15 @@ impl WorkerRef {
             code: WorkerErrorCode::InvalidProto,
             message: format!("{}", err)
           });
-      self.worker
-          .as_ref()
-          .unwrap()
-          .record_activity_heartbeat(heartbeat?);
-      Ok(())
+
+      match self.worker.as_ref() {
+        None => Ok(()),
+        Some(worker) => {
+          worker.record_activity_heartbeat(heartbeat?);
+          // TODO return error
+          Ok(())
+        },
+      }
   }
 
   fn request_workflow_eviction(&self, run_id: &str) -> () {

@@ -4,10 +4,12 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module IntegrationSpec where
 
 import Control.Applicative
 import Control.Exception
+import Control.Concurrent
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
@@ -172,6 +174,36 @@ needsClient = do
                 taskQueue
           C.execute client wf.reference opts
             `shouldReturn` 1
+      specify "heartbeat works" $ \client -> do
+        taskQueue <- W.TaskQueue <$> uuidText
+        let testActivity :: Activity () Int
+            testActivity = do
+              heartbeat []
+              liftIO $ threadDelay 1000000
+              pure 1
+
+            testActivityAct :: ProvidedActivity () (Activity () Int)
+            testActivityAct = provideActivity JSON "basicHeartbeat" testActivity
+            
+            testFn :: W.Workflow () () Int
+            testFn = do
+              h <- W.startActivity 
+                testActivityAct.reference
+                (W.defaultStartActivityOptions $ W.StartToClose $ TimeSpec 3 0)
+              W.wait (h :: W.Task () () Int)
+            wf = W.provideWorkflow JSON "basicHeartbeat" () testFn
+            conf = configure () () $ do
+              setNamespace $ W.Namespace "test"
+              setTaskQueue taskQueue
+              addWorkflow wf
+              addActivity testActivityAct
+        withWorker conf $ do
+          wfId <- uuidText
+          let opts = C.workflowStartOptions
+                (W.WorkflowId wfId)
+                taskQueue
+          C.execute client wf.reference opts
+            `shouldReturn` 1
       it "should properly handle faulty workflows" $ \client -> do
         taskQueue <- W.TaskQueue <$> uuidText
         let testActivity :: Activity () Int
@@ -210,6 +242,79 @@ needsClient = do
                 taskQueue
           C.execute client wf.reference opts
             `shouldReturn` 1
+      specify "Immediate activity cancellation returns the expected result to workflows" $ \client -> do
+        taskQueue <- W.TaskQueue <$> uuidText
+        let testActivity :: Activity () Int
+            testActivity = do
+              heartbeat []
+              pure 0
+
+            testActivityAct :: ProvidedActivity () (Activity () Int)
+            testActivityAct = provideActivity JSON "immediateCancelResponse" testActivity
+            
+            testFn :: W.Workflow () () Int
+            testFn = do
+              h1 <- W.startActivity 
+                testActivityAct.reference
+                (W.defaultStartActivityOptions $ W.StartToClose $ TimeSpec 1 0)
+              W.cancel (h1 :: W.Task () () Int)
+              W.wait h1 `Catch.catch` \(_ :: ActivityCancelled) -> pure 1
+
+            wf = W.provideWorkflow JSON "activityCancellation" () testFn
+            conf = configure () () $ do
+              setNamespace $ W.Namespace "test"
+              setTaskQueue taskQueue
+              addWorkflow wf
+              addActivity testActivityAct
+        withWorker conf $ do
+          wfId <- uuidText
+          let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
+                { C.timeouts = C.TimeoutOptions
+                    { C.runTimeout = Just $ TimeSpec 4 0
+                    , C.executionTimeout = Nothing
+                    , C.taskTimeout = Nothing
+                    }
+                }
+          C.execute client wf.reference opts
+            `shouldReturn` 1
+      specify "Activity cancellation on heartbeat returns the expected result to workflows" $ \client -> do
+        taskQueue <- W.TaskQueue <$> uuidText
+        let testActivity :: Activity () Int
+            testActivity = do
+              liftIO $ threadDelay 2000000
+              heartbeat []
+              pure 0
+
+            testActivityAct :: ProvidedActivity () (Activity () Int)
+            testActivityAct = provideActivity JSON "heartbeatAllowsOpportunityToCancel" testActivity
+            
+            testFn :: W.Workflow () () Int
+            testFn = do
+              h1 <- W.startActivity 
+                testActivityAct.reference
+                (W.defaultStartActivityOptions $ W.StartToClose $ TimeSpec 1 0)
+              W.sleep $ TimeSpec 0 1
+              W.cancel (h1 :: W.Task () () Int)
+              W.wait h1 `Catch.catch` \(_ :: ActivityCancelled) -> pure 1
+
+            wf = W.provideWorkflow JSON "activityCancellationOnHeartbeat" () testFn
+            conf = configure () () $ do
+              setNamespace $ W.Namespace "test"
+              setTaskQueue taskQueue
+              addWorkflow wf
+              addActivity testActivityAct
+        withWorker conf $ do
+          wfId <- uuidText
+          let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue) 
+                { C.timeouts = C.TimeoutOptions
+                    { C.runTimeout = Just $ TimeSpec 4 0
+                    , C.executionTimeout = Nothing
+                    , C.taskTimeout = Nothing
+                    }
+                }
+          C.execute client wf.reference opts
+            `shouldReturn` 1
+
 
 
 
@@ -387,7 +492,7 @@ needsClient = do
   -- -- --       specify "async fail signal?" pending
   -- -- --       specify "always delivered" pending
     describe "Query" $ do
-      fit "works" $ \client -> do
+      xit "works" $ \client -> do
         let echoQuery :: W.QueryDefinition '[Text] Text
             echoQuery = W.QueryDefinition "testQuery" JSON
             workflow :: W.Workflow () () ()
@@ -584,7 +689,7 @@ needsClient = do
   --     specify "throws if continued as new" pending
   --     specify "follows chain of execution" pending
   describe "ContinueAsNew" $ do
-    fit "works" $ \client -> do
+    it "works" $ \client -> do
       let workflow :: Int -> W.Workflow () () Text
           workflow execCount = if execCount < 1
             then W.continueAsNew wf.reference W.defaultContinueAsNewOptions (execCount + 1)

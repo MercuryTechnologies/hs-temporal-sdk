@@ -6,6 +6,7 @@ import Data.Text
 import Data.Typeable
 import qualified Proto.Temporal.Api.Failure.V1.Message as Proto
 import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands (ContinueAsNewWorkflowExecution)
+import Proto.Temporal.Api.Failure.V1.Message
 
 -- | Used to denote that a payload either failed to encode or decode
 data ValueError
@@ -147,6 +148,22 @@ instance Exception CancelExternalWorkflowFailed where
   toException = workflowExceptionToException
   fromException = workflowExceptionFromException
 
+
+data ActivityCancelled = ActivityCancelled Proto.Temporal.Api.Failure.V1.Message.Failure
+  deriving (Show, Eq)
+
+instance Exception ActivityCancelled where
+  toException = workflowExceptionToException
+  fromException = workflowExceptionFromException
+
+data ActivityFailed = ActivityFailed Proto.Temporal.Api.Failure.V1.Message.Failure
+  deriving (Show, Eq)
+
+instance Exception ActivityFailed where
+  toException = workflowExceptionToException
+  fromException = workflowExceptionFromException
+
+
 ---------------------------------------------------------------------
 -- Activity exceptions
 
@@ -180,7 +197,6 @@ data CompleteAsync = CompleteAsync
 instance Exception CompleteAsync where
   toException = activityExceptionToException
   fromException = activityExceptionFromException
-
 
 
 data WorkflowExecutionClosed 

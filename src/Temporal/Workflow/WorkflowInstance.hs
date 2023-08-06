@@ -6,7 +6,6 @@
 module Temporal.Workflow.WorkflowInstance where
 import Control.Applicative (liftA2)
 import Control.Concurrent.Async (Async)
-import Control.Concurrent.MVar (MVar)
 import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.Reader

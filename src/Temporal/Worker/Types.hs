@@ -27,7 +27,6 @@ import qualified Data.Text as T
 import Data.Vector (Vector)
 import Data.Word (Word32)
 import GHC.Stack (CallStack)
-import Control.Concurrent.MVar (MVar)
 import Control.Concurrent.STM.TVar (TVar)
 import Lens.Family2
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
@@ -180,7 +179,7 @@ data WorkflowInstance env st = WorkflowInstance
   , workflowIsReplaying :: {-# UNPACK #-} !(IORef Bool)
   , workflowPrimaryTask :: {-# UNPACK #-} !(IORef (Maybe (Async ())))
   , workflowCommands :: {-# UNPACK #-} !(TVar (Reversed WorkflowCommand))
-  , workflowSequenceMaps :: {-# UNPACK #-} !(MVar (SequenceMaps env st))
+  , workflowSequenceMaps :: {-# UNPACK #-} !(TVar (SequenceMaps env st))
   , workflowState :: {-# UNPACK #-} !(IORef st)
   , workflowEnv :: env
   , workflowSignalHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (Vector RawPayload -> IO ())))
@@ -284,7 +283,7 @@ data ActivityDefinition env = ActivityDefinition
 data ActivityWorker env = ActivityWorker
   { initialEnv :: env
   , definitions :: HashMap Text (ActivityDefinition env)
-  , runningActivities :: MVar (HashMap TaskToken (Async ()))
+  , runningActivities :: TVar (HashMap TaskToken (Async ()))
   }
 
 
