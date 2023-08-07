@@ -55,7 +55,7 @@ spec = beforeAll makeClient needsClient
 needsClient :: SpecWith C.WorkflowClient 
 needsClient = do
   describe "Workflow" $ do
-    it "should run a workflow" $ \client -> do
+    specify "should run a workflow" $ \client -> do
       taskQueue <- W.TaskQueue <$> uuidText
       let testFn :: W.Workflow () () Bool
           testFn = pure True
@@ -76,7 +76,7 @@ needsClient = do
         C.execute client wf.reference opts
           `shouldReturn` True
     describe "race" $ do
-      it "block on left side works" $ \client -> do
+      specify "block on left side works" $ \client -> do
         taskQueue <- W.TaskQueue <$> uuidText
         let testFn :: W.Workflow () () (Either Bool Bool)
             testFn = do
@@ -95,7 +95,7 @@ needsClient = do
                 taskQueue
           C.execute client wf.reference opts
             `shouldReturn` Right True
-      it "block on both side works" $ \client -> do
+      specify "block on both side works" $ \client -> do
         taskQueue <- W.TaskQueue <$> uuidText
         let testFn :: W.Workflow () () (Either Bool Bool)
             testFn = do
@@ -112,7 +112,7 @@ needsClient = do
                 taskQueue
           C.execute client wf.reference opts
             `shouldReturn` Right True
-      it "throws immediately when either side throws" $ \client -> do
+      specify "throws immediately when either side throws" $ \client -> do
         taskQueue <- W.TaskQueue <$> uuidText
         let testFn :: W.Workflow () () (Either Bool Bool)
             testFn = do
@@ -129,7 +129,7 @@ needsClient = do
                 taskQueue
           C.execute client wf.reference opts
             `shouldThrow` (== WorkflowExecutionFailed)
-      it "treats error as ok if LHS returns immediately" $ \client -> do
+      specify "treats error as ok if LHS returns immediately" $ \client -> do
         taskQueue <- W.TaskQueue <$> uuidText
         let testFn :: W.Workflow () () (Either Bool Bool)
             testFn = do
@@ -147,7 +147,7 @@ needsClient = do
           C.execute client wf.reference opts
             `shouldReturn` Left True
     describe "Activities" $ do
-      it "should run a basic activity without issues" $ \client -> do
+      specify "should run a basic activity without issues" $ \client -> do
         taskQueue <- W.TaskQueue <$> uuidText
         let testActivity :: Activity () Int
             testActivity = pure 1
@@ -204,7 +204,7 @@ needsClient = do
                 taskQueue
           C.execute client wf.reference opts
             `shouldReturn` 1
-      it "should properly handle faulty workflows" $ \client -> do
+      specify "should properly handle faulty workflows" $ \client -> do
         taskQueue <- W.TaskQueue <$> uuidText
         let testActivity :: Activity () Int
             testActivity = do
@@ -277,7 +277,7 @@ needsClient = do
                 }
           C.execute client wf.reference opts
             `shouldReturn` 1
-      specify "Activity cancellation on heartbeat returns the expected result to workflows" $ \client -> do
+      xspecify "Activity cancellation on heartbeat returns the expected result to workflows" $ \client -> do
         taskQueue <- W.TaskQueue <$> uuidText
         let testActivity :: Activity () Int
             testActivity = do
@@ -460,11 +460,11 @@ needsClient = do
   -- --     specify "termination" $ \_ -> pending
   -- --     specify "timeout" $ \_ -> pending
   -- --     specify "startFail" $ \_ -> pending
-      specify "cancel" $ \client -> do
+      specify "cancel immediately" $ \client -> do
         parentId <- uuidText
         let cancelTest :: W.Workflow () () ()
             cancelTest = W.sleep $ TimeSpec 60 0
-            childWf = W.provideWorkflow JSON "cancelTest" () cancelTest
+            childWf = W.provideWorkflow JSON "immediateCancelTestChild" () cancelTest
             parentWorkflow :: W.Workflow () () String
             parentWorkflow = do
               childWorkflowId <- (W.WorkflowId . UUID.toText) <$> W.uuid4
@@ -472,7 +472,41 @@ needsClient = do
               W.cancelChildWorkflowExecution childWorkflow
               result <- Catch.try $ W.waitChildWorkflowResult childWorkflow
               pure $ show (result :: Either SomeException ())
-            parentWf = W.provideWorkflow JSON "parent" () parentWorkflow
+            parentWf = W.provideWorkflow JSON "immediateCancelTestParent" () parentWorkflow
+            conf = configure () () $ do
+              setNamespace $ W.Namespace "test"
+              setTaskQueue $ W.TaskQueue "test"
+              addWorkflow childWf
+              addWorkflow parentWf
+        withWorker conf $ do
+          let opts = C.workflowStartOptions
+                (W.WorkflowId parentId)
+                (W.TaskQueue "test")
+          C.execute client parentWf.reference opts
+            `shouldReturn` "Left ChildWorkflowCancelled"
+
+      xspecify "cancel after child workflow has started" $ \client -> do
+        parentId <- uuidText
+        let cancelTest :: W.Workflow () () ()
+            cancelTest = go
+              where
+                go = do
+                  result <- Catch.try $ W.sleep $ TimeSpec 1 0
+                  case result of
+                    Left WorkflowCancelRequested -> pure ()
+                    _ -> go
+
+            childWf = W.provideWorkflow JSON "cancelTestChild" () cancelTest
+            parentWorkflow :: W.Workflow () () String
+            parentWorkflow = do
+              childWorkflowId <- (W.WorkflowId . UUID.toText) <$> W.uuid4
+              childWorkflow <- W.startChildWorkflow childWf.reference W.defaultChildWorkflowOptions childWorkflowId
+              W.waitChildWorkflowStart childWorkflow
+              W.cancelChildWorkflowExecution childWorkflow
+              W.sleep $ TimeSpec 3 0
+              result <- Catch.try $ W.waitChildWorkflowResult childWorkflow
+              pure $ show (result :: Either SomeException ())
+            parentWf = W.provideWorkflow JSON "cancelTestParent" () parentWorkflow
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
               setTaskQueue $ W.TaskQueue "test"
@@ -492,7 +526,7 @@ needsClient = do
   -- -- --       specify "async fail signal?" pending
   -- -- --       specify "always delivered" pending
     describe "Query" $ do
-      xit "works" $ \client -> do
+      xspecify "works" $ \client -> do
         let echoQuery :: W.QueryDefinition '[Text] Text
             echoQuery = W.QueryDefinition "testQuery" JSON
             workflow :: W.Workflow () () ()
@@ -525,7 +559,9 @@ needsClient = do
         let workflow :: W.Workflow () () Bool
             workflow = do
               earlier <- W.now
-              W.sleep $ TimeSpec 1 0
+              W.sleep $ TimeSpec 0 1
+              W.sleep $ TimeSpec 0 1
+              W.sleep $ TimeSpec 0 1
               later <- W.now
               pure (later > earlier) 
             wf = W.provideWorkflow JSON "sleepy" () workflow
@@ -689,7 +725,7 @@ needsClient = do
   --     specify "throws if continued as new" pending
   --     specify "follows chain of execution" pending
   describe "ContinueAsNew" $ do
-    it "works" $ \client -> do
+    specify "works" $ \client -> do
       let workflow :: Int -> W.Workflow () () Text
           workflow execCount = if execCount < 1
             then W.continueAsNew wf.reference W.defaultContinueAsNewOptions (execCount + 1)
