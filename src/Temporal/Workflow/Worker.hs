@@ -77,7 +77,10 @@ execute worker = runWorkerM worker $ do
           go
         (Right activation) -> do
           $(logDebug) $ Text.pack ("Got activation " <> show activation) 
-          _ <- async $ handleActivation activation
+          handle <- async $ handleActivation activation
+          -- If we missed some exception, that's a bug. Crash the worker
+          -- so we know about it.
+          link handle
           go
       
 

@@ -166,12 +166,17 @@ data SequenceMaps env st = SequenceMaps
   , conditionsAwaitingSignal :: {-# UNPACK #-} !(SequenceMap (IVar env st ()))
   }
 
+data CancellationState
+  = CancellationNotRequested
+  | CancellationRequested
+  | CancellationSignaledToWorkflow
+  deriving (Show, Eq, Ord, Enum, Bounded)
+
 data WorkflowInstance env st = WorkflowInstance
   { workflowInstanceInfo :: {-# UNPACK #-} !(IORef Info)
   , workflowInstanceDefinition :: WorkflowDefinition env st
   , workflowInstanceLogger :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
   , workflowRandomnessSeed :: WorkflowGenM
-  -- , workflowInstanceJobPool :: JobPool
   , workflowNotifiedPatches :: {-# UNPACK #-} !(IORef (Set PatchId))
   , workflowMemoizedPatches :: {-# UNPACK #-} !(IORef (HashMap PatchId Bool))
   , workflowSequences :: {-# UNPACK #-} !(IORef Sequences)
@@ -187,7 +192,7 @@ data WorkflowInstance env st = WorkflowInstance
   , workflowCallStack :: {-# UNPACK #-} !(IORef CallStack)
   , workflowCompleteActivation :: !(Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
   , workflowInstanceContinuationEnv :: {-# UNPACK #-} !(ContinuationEnv env st)
-  -- , workflowActivationJobs 
+  , workflowCancellationState :: {-# UNPACK #-} !(IORef CancellationState)
   -- , disableEagerActivityExecution :: Bool
   }
 

@@ -126,6 +126,7 @@ create workflowCompleteActivation info workflowEnv workflowInstanceDefinition = 
   workflowCallStack <- newIORef emptyCallStack
   workflowInstanceInfo <- newIORef info
   workflowInstanceContinuationEnv <- ContinuationEnv <$> newIORef JobNil <*> newTVarIO []
+  workflowCancellationState <- newIORef CancellationNotRequested
   pure WorkflowInstance {..}
 
 -- | This should never raise an exception, but instead catch all exceptions
@@ -276,8 +277,11 @@ applyQueryWorkflow queryWorkflow = do
 
 applyCancelWorkflow :: CancelWorkflow -> InstanceM env st ()
 applyCancelWorkflow cancelWorkflow = do
-  mAct <- readIORef =<< asks workflowPrimaryTask
-  mapM_ UnliftIO.cancel mAct
+  inst <- ask
+  modifyIORef' inst.workflowCancellationState $ \old -> if old < CancellationRequested
+    then CancellationRequested
+    else old
+  flushCommands
 
 applySignalWorkflow :: SignalWorkflow -> InstanceM env st ()
 applySignalWorkflow signalWorkflow = do
@@ -499,7 +503,7 @@ runTopLevel handle = do
     -- , Handler $ \FailureException{..} -> putStrLn "Failure Not implemented yet"
     -- , Handler $ \OperationCancelledException{..} -> putStrLn "OperationCancelled Not implemented yet"
     -- TODO this is not really domain specific, but since the running task is an async handle, it's an easy hack to get the right behavior
-    , Handler $ \AsyncCancelled -> do
+    , Handler $ \WorkflowCancelRequested -> do
         addCommand inst (defMessage & Command.cancelWorkflowExecution .~ defMessage)
         flushCommands
     , Handler $ \(SomeException e) -> do

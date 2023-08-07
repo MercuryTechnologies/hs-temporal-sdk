@@ -117,15 +117,17 @@ withRunId arg = do
 --
 -- We hand this back to
 -- emptyRunQueue.
+--
+-- TODO, get some help from Matt P to improve exception masking
 runWorkflow :: forall env st a. Workflow env st a -> InstanceM env st a
-runWorkflow wf = do
+runWorkflow wf = mask $ \unmask -> do
   inst <- ask
   let env = inst.workflowInstanceContinuationEnv
   result@IVar{ivarRef = resultRef} <- newIVar -- where to put the final result
   let
     -- Run a job, and put its result in the given IVar
     schedule :: ContinuationEnv env st -> JobList env st -> Workflow env st b -> IVar env st b -> InstanceM env st ()
-    schedule env@ContinuationEnv{..} rq (Workflow run) ivar@IVar{ivarRef = !ref} = do
+    schedule env@ContinuationEnv{..} rq wf ivar@IVar{ivarRef = !ref} = do
       logMsg <- withRunId (Text.pack $ printf "schedule: %d\n" (1 + lengthJobList rq))
       $logDebug logMsg
       let {-# INLINE result #-}
@@ -155,7 +157,18 @@ runWorkflow wf = do
                     --   JobNil -> return ()
                     --   _ -> modifyIORef' runQueueRef (appendJobList rq)
                   else reschedule env $ appendJobList workflowActions rq
-      r <- UnliftIO.try $ run env
+      r <- UnliftIO.try $ do
+        cancellationState <- readIORef inst.workflowCancellationState
+        let (Workflow run) = case cancellationState of
+              CancellationNotRequested -> wf
+              CancellationRequested -> do
+                Workflow $ \_ -> do
+                  $logDebug "Cancellation requested"
+                  writeIORef inst.workflowCancellationState CancellationSignaledToWorkflow
+                  pure $ Throw $ toException WorkflowCancelRequested
+                wf
+              CancellationSignaledToWorkflow -> wf
+        run env
       case r of
         Left e -> do
           rethrowAsyncExceptions e

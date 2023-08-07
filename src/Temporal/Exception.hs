@@ -148,6 +148,13 @@ instance Exception CancelExternalWorkflowFailed where
   toException = workflowExceptionToException
   fromException = workflowExceptionFromException
 
+-- TODO, include the payload?
+data WorkflowCancelRequested = WorkflowCancelRequested
+  deriving (Show)
+
+instance Exception WorkflowCancelRequested where
+  toException = workflowExceptionToException
+  fromException = workflowExceptionFromException
 
 data ActivityCancelled = ActivityCancelled Proto.Temporal.Api.Failure.V1.Message.Failure
   deriving (Show, Eq)
