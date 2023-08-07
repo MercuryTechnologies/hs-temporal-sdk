@@ -117,10 +117,8 @@ withRunId arg = do
 --
 -- We hand this back to
 -- emptyRunQueue.
---
--- TODO, get some help from Matt P to improve exception masking
 runWorkflow :: forall env st a. Workflow env st a -> InstanceM env st a
-runWorkflow wf = mask $ \unmask -> do
+runWorkflow wf = do
   inst <- ask
   let env = inst.workflowInstanceContinuationEnv
   result@IVar{ivarRef = resultRef} <- newIVar -- where to put the final result
