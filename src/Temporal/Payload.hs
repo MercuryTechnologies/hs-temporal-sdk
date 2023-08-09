@@ -7,18 +7,25 @@
   FlexibleInstances,
   GADTs,
   InstanceSigs,
+  ImpredicativeTypes,
   PolyKinds,
   MultiParamTypeClasses,
   ScopedTypeVariables,
+  RankNTypes,
   TypeOperators,
   TypeFamilies,
   UndecidableInstances,
   TypeApplications 
   #-}
+{-# LANGUAGE DefaultSignatures #-}
 module Temporal.Payload 
   ( RawPayload(..)
   , Codec(..)
+  , defaultCodec
   , JSON(..)
+  , Null(..)
+  , Binary(..)
+  , Protobuf(..)
   , applyPayloads
   , ApplyPayloads
   , GatherArgs(..)
@@ -36,9 +43,10 @@ import qualified Data.Aeson as Aeson
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as BL
 import Control.Exception (SomeException)
+import Data.Constraint.If
 import Data.Functor
 import Data.Kind
-import Data.ProtoLens (defMessage)
+import Data.ProtoLens (defMessage, Message(..))
 import Data.Proxy
 import Data.Map.Strict (Map)
 import qualified Data.Vector as V
@@ -49,6 +57,9 @@ import GHC.TypeLits
 import Lens.Family2
 import qualified Proto.Temporal.Api.Common.V1.Message as Proto (Payload)
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Proto (data', metadata)
+import Data.ProtoLens.Encoding ( encodeMessage, decodeMessage )
+import qualified Data.Text as T
+
 {- * Parameter serialization 
 
 We want to be able to serialize & deserialize the parameters of a function using an arbitrary serialization code. 
@@ -61,20 +72,73 @@ as we go. If there are not enough or too many params, we fail.
 
 -- | We want to be able to serialize & deserialize the parameters of a function using an arbitrary serialization format.
 class Codec fmt a where
+  -- | Similar to a content-type header, this is a string that identifies the format of the payload.
+  -- it will be set on the 'encoding' metadata field of the payload.
+  encodingType :: fmt -> Proxy a -> Text
+  messageType :: fmt -> a -> Text
+  default messageType :: (Typeable a) => fmt -> a -> Text
+  messageType _ _ = T.pack $ show $ typeRep (Proxy @a)
   encode :: fmt -> a -> IO RawPayload
   decode :: fmt -> RawPayload -> IO (Either String a)
-  encodeException :: fmt -> SomeException -> IO RawPayload
 
 data JSON = JSON
 
-instance (Aeson.ToJSON a, Aeson.FromJSON a) => Codec JSON a where
+instance (Typeable a, Aeson.ToJSON a, Aeson.FromJSON a) => Codec JSON a where
+  encodingType _ _ = "json/plain"
   encode _ x = do
     pure $ RawPayload (BL.toStrict $ Aeson.encode x) mempty
   decode _ = pure . Aeson.eitherDecodeStrict' . inputPayloadData
-  encodeException fmt e = encode fmt $ object
-    [ "message" .= show e
-    , "stack_trace" .= ("" :: String)
-    ]
+
+
+data Null = Null
+
+instance Codec Null () where
+  encodingType _ _ = "binary/null"
+  encode _ _ = pure $ RawPayload mempty mempty
+  decode _ _ = pure $ Right ()
+
+data Binary = Binary
+
+instance Codec Binary ByteString where
+  messageType _ _ = "ByteString"
+  encodingType _ _ = "binary/plain"
+  encode _ x = pure $ RawPayload x mempty
+  decode _ = pure . Right . inputPayloadData
+
+data Protobuf = Protobuf
+
+instance (Message a) => Codec Protobuf a where
+  messageType _ x = messageName $ pure x
+  encodingType _ _ = "binary/protobuf"
+  encode _ x = pure $ RawPayload (encodeMessage x) mempty
+  decode _ = pure . decodeMessage . inputPayloadData
+
+data Composite (codecs :: [Type]) where
+  CompositeNil :: Composite '[]
+  CompositeCons :: codec -> Composite codecs -> Composite (codec ': codecs)
+
+instance TypeError (('ShowType a) ':<>: 'Text " is not supported by any of the provided codecs") => Codec (Composite '[]) a where
+  messageType = error "unreachable"
+  encodingType = error "unreachable"
+  encode = error "unreachable"
+  decode = error "unreachable"
+
+instance (Codec fmt a || Codec (Composite codecs) a) => Codec (Composite (fmt ': codecs)) a where
+  messageType fmt = dispatch @(Codec fmt a) @(Codec (Composite codecs) a)
+    (case fmt of CompositeCons codec _ -> messageType codec) 
+    (case fmt of CompositeCons _ codecs -> messageType codecs)
+  encodingType fmt = dispatch @(Codec fmt a) @(Codec (Composite codecs) a)
+    (case fmt of CompositeCons codec _ -> encodingType codec) 
+    (case fmt of CompositeCons _ codecs -> encodingType codecs)
+  encode fmt = dispatch @(Codec fmt a) @(Codec (Composite codecs) a)
+    (case fmt of CompositeCons codec _ -> encode codec)
+    (case fmt of CompositeCons _ codecs -> encode codecs)
+  decode fmt = dispatch @(Codec fmt a) @(Codec (Composite codecs) a)
+    (case fmt of CompositeCons codec _ -> decode codec)
+    (case fmt of CompositeCons _ codecs -> decode codecs)
+
+defaultCodec :: Composite '[Null, Binary, Protobuf, JSON]
+defaultCodec = CompositeCons Temporal.Payload.Null $ CompositeCons Binary $ CompositeCons Protobuf $ CompositeCons JSON CompositeNil
 
 type family ArgsOf f where
   ArgsOf (arg -> rest) = arg ': ArgsOf rest
