@@ -31,6 +31,7 @@ import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import System.Clock
 import Temporal.Activity.Definition
 import Temporal.Common
+import qualified Temporal.Core.Client as Core
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
 import Temporal.Payload
@@ -131,7 +132,7 @@ applyActivityTaskStart tt msg = mask_ $ do
                         -- & F.scheduledEventId .~ _
                         -- & F.startedEventId .~ _
                         -- TODO, not clear on what this should be
-                        -- & F.identity .~ _
+                        & F.identity .~ Core.identity (Core.clientConfig $ Core.getWorkerClient w.workerCore)
                         & F.activityType .~ (defMessage & P.name .~ info.activityType)
                         & F.activityId .~ (msg ^. AT.activityId)
                         -- & F.retryState .~ _
@@ -173,7 +174,7 @@ applyActivityTaskStart tt msg = mask_ $ do
                               -- & F.scheduledEventId .~ _
                               -- & F.startedEventId .~ _
                               -- TODO, not clear on what this should be
-                              -- & F.identity .~ _
+                              & F.identity .~ Core.identity (Core.clientConfig $ Core.getWorkerClient w.workerCore)
                               & F.activityType .~ (defMessage & P.name .~ info.activityType)
                               & F.activityId .~ (msg ^. AT.activityId)
                               -- & F.retryState .~ _
@@ -215,22 +216,6 @@ applyActivityTaskCancel tt msg = do
 
 
 
-
-
--- runningActivityCancel :: RunningActivity -> ActivityCancelReason -> IO ()
--- runningActivityCancel = undefined
-
--- runningActivityServerRequestedCancel :: RunningActivity -> IO Bool
--- runningActivityServerRequestedCancel = undefined
-
--- runningActivityHeartbeatException :: RunningActivity -> IO (Maybe SomeException)
--- runningActivityHeartbeatException = undefined
-
--- runningActivityMarkDone :: RunningActivity -> IO ()
--- runningActivityMarkDone = undefined
-
--- runningActivityWaitForHeartbestFinish :: RunningActivity -> IO ()
--- runningActivityWaitForHeartbestFinish = undefined
 
 -- TODO heartbeat utils
 

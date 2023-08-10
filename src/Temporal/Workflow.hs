@@ -165,6 +165,7 @@ import Temporal.Workflow.Unsafe
 import Temporal.WorkflowInstance
 import Temporal.Workflow.WorkflowInstance
 import Temporal.Workflow.WorkflowDefinition
+import qualified Temporal.Core.Client as Core
 import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as Common
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation as Activation
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
@@ -917,12 +918,12 @@ setQueryHandler (QueryDefinition n codec) f = ilift $ do
                             -- TODO encoded attributes
                             -- & F.encodedAttributes .~ _
                             -- & F.cause .~ _
-                            -- & F.activityFailureInfo .~
-                            -- ( defMessage
+                            & F.activityFailureInfo .~
+                              ( defMessage
                             --   -- & F.scheduledEventId .~ _
                             --   -- & F.startedEventId .~ _
-                            --   -- TODO, not clear on what this should be
-                            --   -- & F.identity .~ _
+                              -- & WF.identity .~ (identity $ clientConfig c.clientCore)
+                              )
                             --   & F.activityType .~ (defMessage & P.name .~ info.activityType)
                             --   & F.activityId .~ (msg ^. AT.activityId)
                             --   -- & F.retryState .~ _

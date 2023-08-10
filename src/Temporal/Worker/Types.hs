@@ -49,10 +49,10 @@ import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_F
 import Temporal.Activity.Definition
 import Temporal.Common
 import qualified Temporal.Core.Worker as Core
+import qualified Temporal.Core.Client as Core
 import Temporal.Exception
 import Temporal.Payload hiding (Payload)
 import Temporal.Internal.JobPool (SomeAsync)
-import qualified Temporal.Core.Worker as Core
 import System.Clock (TimeSpec)
 import System.Random 
   ( StdGen
@@ -211,6 +211,7 @@ data WorkflowWorker env = WorkflowWorker
   { workerWorkflowFunctions :: HashMap Text (OpaqueWorkflow WorkflowDefinition env)
   , runningWorkflows :: TVar (HashMap RunId (OpaqueWorkflow WorkflowInstance env))
   , deadlockedWorkflows :: TVar (HashMap RunId SomeAsync)
+  , workerClient :: C.Client
   , workerEnv :: env
   }
 

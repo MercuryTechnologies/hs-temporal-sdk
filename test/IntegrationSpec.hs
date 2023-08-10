@@ -59,7 +59,7 @@ spec = beforeAll makeClient needsClient
 needsClient :: SpecWith C.WorkflowClient 
 needsClient = do
   describe "Workflow" $ do
-    fspecify "should run a workflow" $ \client -> do
+    specify "should run a workflow" $ \client -> do
       taskQueue <- W.TaskQueue <$> uuidText
       let testFn :: W.Workflow () () ()
           testFn = pure ()
@@ -323,7 +323,7 @@ needsClient = do
 
 
     describe "Args and return values" $ do
-      fspecify "args should be passed to the workflow in the correct order" $ \client -> do
+      specify "args should be passed to the workflow in the correct order" $ \client -> do
         taskQueue <- W.TaskQueue <$> uuidText
         let testFn :: Int -> Text -> Bool -> W.Workflow () () (Int, Text, Bool)
             testFn a b c = pure (a, b, c)
@@ -339,7 +339,7 @@ needsClient = do
                 taskQueue
           C.execute client wf.reference opts 1 "two" False
             `shouldReturn` (1, "two", False)
-      fspecify "binary payloads work" $ \client -> do
+      specify "binary payloads work" $ \client -> do
         taskQueue <- W.TaskQueue <$> uuidText
         let testFn :: ByteString -> W.Workflow () () ByteString
             testFn _ = pure "general kenobi"

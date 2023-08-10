@@ -79,8 +79,6 @@ import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as
 import qualified Proto.Temporal.Api.Enums.V1.Query as Query
 import qualified Proto.Temporal.Api.Query.V1.Message_Fields as Query
 import Proto.Temporal.Api.Enums.V1.Workflow (HistoryEventFilterType(..), WorkflowExecutionStatus(..))
-import System.Posix.Process
-import Network.BSD
 import UnliftIO
 import Unsafe.Coerce
 import Data.ProtoLens (Message(defMessage))
@@ -99,26 +97,17 @@ workflowClient
   -- If not provided, a default will be generated from the process ID and hostname.
   -> m WorkflowClient
 workflowClient c ns mIdent = do
-  ident <- maybe (liftIO defaultClientIdentity) pure mIdent
   pure WorkflowClient
     { clientCore = c
     , clientDefaultNamespace = ns
-    , clientIdentity = ident
     }
 
 data WorkflowClient = WorkflowClient 
   { clientCore :: Client
   , clientDefaultNamespace :: Namespace
   -- , clientDefaultQueue :: TaskQueue
-  , clientIdentity :: Text
   -- , clientHeaders :: Map Text RawPayload
   }
-
-defaultClientIdentity :: IO Text
-defaultClientIdentity = do
-  pid <- getProcessID
-  host <- getHostName
-  pure (Text.pack $ show pid <> "@" <> host)
 
 execute
   :: forall args result m. (MonadIO m )
@@ -187,6 +176,7 @@ defaultSignalOptions :: SignalOptions
 defaultSignalOptions = SignalOptions
   { skipGenerateWorkflowTask = False
   , requestId = Nothing
+  , headers = mempty
   }
 
 signal :: forall m args a. MonadIO m 
@@ -203,7 +193,7 @@ signal h@(WorkflowHandle (KnownWorkflow{knownWorkflowCodec}) c wf r) (SignalDefi
       )
     & WF.signalName .~ sName
     & WF.input .~ (defMessage & Common.payloads .~ fmap convertToProtoPayload inputs)
-    & WF.identity .~ c.clientIdentity
+    & WF.identity .~ (identity $ clientConfig c.clientCore)
     & WF.requestId .~ fromMaybe "" opts.requestId
     -- Deprecated, no need to set
     -- & WF.control .~ _
@@ -401,7 +391,7 @@ startFromPayloads c k@(KnownWorkflow codec _ _ _) opts payloads = liftIO $ do
         & WF.maybe'workflowExecutionTimeout .~ (timespecToDuration <$> opts.timeouts.executionTimeout)
         & WF.maybe'workflowRunTimeout .~ (timespecToDuration <$> opts.timeouts.runTimeout)
         & WF.maybe'workflowTaskTimeout .~ (timespecToDuration <$> opts.timeouts.taskTimeout)
-        & WF.identity .~ c.clientIdentity
+        & WF.identity .~ (identity $ clientConfig c.clientCore)
         & WF.requestId .~ UUID.toText reqId
         & WF.workflowIdReusePolicy .~ 
           workflowIdReusePolicyToProto

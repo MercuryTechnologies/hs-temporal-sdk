@@ -260,6 +260,7 @@ startWorker client conf = do
       definitions = conf.actDefs
       workerActivityState = ActivityWorker{..}
       worker = Temporal.Worker.Types.Worker{..}
+      workerClient = client
 
   workerWorkflowLoop <- async $ do
     $(logDebug) "Starting workflow worker loop"

@@ -187,7 +187,7 @@ instance ManagedRustValue WorkerError where
   fromRust _ rustPtr =
     peekWorkerError rustPtr `finally` rust_dropWorkerError rustPtr
 
-foreign import ccall "hs_temporal_new_worker" raw_newWorker :: Ptr Client -> Ptr (CArray Word8) -> Ptr (Ptr Worker) -> Ptr (Ptr WorkerError) -> IO ()
+foreign import ccall "hs_temporal_new_worker" raw_newWorker :: Ptr CoreClient -> Ptr (CArray Word8) -> Ptr (Ptr Worker) -> Ptr (Ptr WorkerError) -> IO ()
 foreign import ccall "&hs_temporal_drop_worker" workerFinalizer :: FunPtr (Ptr Worker -> IO ())
 
 -- note: removed the Runtime argument from the C function since the runtime can be accessed from the client. Might want to add it back later if

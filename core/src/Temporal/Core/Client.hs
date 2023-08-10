@@ -8,8 +8,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Temporal.Core.Client 
   ( Client
+  , clientConfig
   , connectClient
   , defaultClientConfig
+  , CoreClient
   , ClientConfig(..)
   , ClientTlsConfig(..)
   , ClientRetryConfig(..)
@@ -27,6 +29,7 @@ import Data.HashMap.Strict (HashMap)
 import Data.ProtoLens.Service.Types
 import Data.Proxy
 import Data.Text (Text)
+import qualified Data.Text as T
 import Data.Word
 import Foreign.C.String
 import Foreign.C.Types
@@ -43,21 +46,57 @@ import qualified Data.ByteString          as BL
 import qualified Data.Vector.Storable     as V
 import Data.ProtoLens.Encoding
 import Data.ProtoLens.Service.Types
+import System.Posix.Process
+import Network.BSD
 
-foreign import ccall "hs_temporal_connect_client" raw_connectClient :: Ptr Runtime -> CString -> TokioCall RustCStringLen Client
-foreign import ccall "&hs_temporal_drop_client" raw_freeClient :: FunPtr (Ptr Client -> IO ())
+foreign import ccall "hs_temporal_connect_client" raw_connectClient :: Ptr Runtime -> CString -> TokioCall RustCStringLen CoreClient
+foreign import ccall "&hs_temporal_drop_client" raw_freeClient :: FunPtr (Ptr CoreClient -> IO ())
 
-newtype Client = Client { client :: ForeignPtr Client }
+data ClientConfig = ClientConfig
+  { targetUrl :: Text
+  , clientName :: Text
+  , clientVersion :: Text
+  , metadata :: HashMap Text Text
+  , identity :: Text
+  , tlsConfig :: Maybe ClientTlsConfig
+  , retryConfig :: Maybe ClientRetryConfig
+  }
 
-withClient :: Client -> (Ptr Client -> IO a) -> IO a
-withClient (Client c) = withForeignPtr c
+data ClientTlsConfig = ClientTlsConfig
+  { serverRootCaCert:: Maybe ByteVector
+  , domain:: Maybe Text
+  , clientCert:: Maybe ByteVector
+  , clientPrivateKey:: Maybe ByteVector
+  }
+data ClientRetryConfig = ClientRetryConfig
+  { initialIntervalMillis :: Word64
+  , randomizationFactor :: Double
+  , multiplier :: Double
+  , maxIntervalMillis :: Word64
+  , maxElapsedTimeMillis :: Maybe Word64
+  , maxRetries :: Word64
+  }
+data Client = Client 
+  { client :: ForeignPtr CoreClient 
+  , config :: ClientConfig
+  }
 
-instance ManagedRustValue Client where
-  type RustRef Client = Ptr Client
-  type HaskellRep Client = Client
+clientConfig :: Client -> ClientConfig
+clientConfig = config
+
+withClient :: Client -> (Ptr CoreClient -> IO a) -> IO a
+withClient (Client c _) = withForeignPtr c
+
+newtype CoreClient = CoreClient
+  { coreClientPtr :: ForeignPtr CoreClient
+  }
+
+instance ManagedRustValue CoreClient where
+  type RustRef CoreClient = Ptr CoreClient
+  type HaskellRep CoreClient = CoreClient
   fromRust _ rustPtr = mask_ $ do
     fp <- newForeignPtr raw_freeClient rustPtr
-    pure $ Client fp
+    pure $ CoreClient fp
 
 newtype ByteVector = ByteVector { byteVector :: ByteString }
 
@@ -77,33 +116,10 @@ instance ToJSON ByteVector where
 instance FromJSON ByteVector where
   parseJSON = fmap ByteVector . fmap vectorToByteString . parseJSON
 
-data ClientTlsConfig = ClientTlsConfig
-  { serverRootCaCert:: Maybe ByteVector
-  , domain:: Maybe Text
-  , clientCert:: Maybe ByteVector
-  , clientPrivateKey:: Maybe ByteVector
-  }
 deriveJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''ClientTlsConfig
 
-data ClientRetryConfig = ClientRetryConfig
-  { initialIntervalMillis :: Word64
-  , randomizationFactor :: Double
-  , multiplier :: Double
-  , maxIntervalMillis :: Word64
-  , maxElapsedTimeMillis :: Maybe Word64
-  , maxRetries :: Word64
-  }
 deriveJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''ClientRetryConfig
 
-data ClientConfig = ClientConfig
-  { targetUrl :: Text
-  , clientName :: Text
-  , clientVersion :: Text
-  , metadata :: HashMap Text Text
-  , identity :: Text
-  , tlsConfig :: Maybe ClientTlsConfig
-  , retryConfig :: Maybe ClientRetryConfig
-  }
 deriveJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''ClientConfig
 
 data RpcCall a = RpcCall
@@ -127,17 +143,33 @@ defaultClientConfig = ClientConfig
   , retryConfig = Nothing
   }
 
-connectClient :: Runtime -> ClientConfig -> IO (Either ClientConnectionError Client)
-connectClient rt conf = withRuntime rt $ \rtPtr -> BS.useAsCString (BL.toStrict $ encode conf) $ \confPtr -> do
-  makeTokioAsyncCall 
-    (raw_connectClient rtPtr confPtr)
-    (\cstrLen -> do
-      msg <- fromRust (Proxy :: Proxy RustCStringLen) cstrLen
-      pure $ ClientConnectionError msg
-    )
-    (fmap Client . newForeignPtr raw_freeClient)
+defaultClientIdentity :: IO Text
+defaultClientIdentity = do
+  pid <- getProcessID
+  host <- getHostName
+  pure (T.pack $ show pid <> "@" <> host)
 
-type PrimRpcCall = Ptr Client -> Ptr CRpcCall -> TokioCall RpcError (CArray Word8)
+connectClient :: Runtime -> ClientConfig -> IO (Either ClientConnectionError Client)
+connectClient rt conf = do
+  conf' <- if identity conf == "" 
+    then do
+      ident <- defaultClientIdentity
+      pure $ conf { identity = ident }
+    else pure conf
+
+  withRuntime rt $ \rtPtr -> BS.useAsCString (BL.toStrict $ encode conf') $ \confPtr -> do
+    makeTokioAsyncCall 
+      (raw_connectClient rtPtr confPtr)
+      (\cstrLen -> do
+        msg <- fromRust (Proxy :: Proxy RustCStringLen) cstrLen
+        pure $ ClientConnectionError msg
+      )
+      (\fp -> do
+        clientPtr <- newForeignPtr raw_freeClient fp
+        pure $ Client clientPtr conf'
+      )
+
+type PrimRpcCall = Ptr CoreClient -> Ptr CRpcCall -> TokioCall RpcError (CArray Word8)
 
 -- TODO, this would be better as a pair of vectors instead of a linked list
 data HashMapEntries = HashMapEntries
@@ -198,7 +230,7 @@ instance Storable CRpcCall where
 
 -- TODO how should we use mask here?
 call :: forall svc t. (HasMethodImpl svc t) => PrimRpcCall -> Client -> MethodInput svc t -> IO (Either RpcError (MethodOutput svc t))
-call f (Client c) req = withForeignPtr c $ \cPtr -> do
+call f c req = withClient c $ \cPtr -> do
   let msgBytes = encodeMessage req
   BS.useAsCStringLen msgBytes $ \(msgPtr, msgLen) -> do
     alloca $ \cArrayPtr -> do

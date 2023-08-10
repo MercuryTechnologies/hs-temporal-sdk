@@ -34,8 +34,6 @@ library
     exceptions,
     ghc,
     template-haskell,
-    unix,
-    network-bsd,
     conduit,
     if-instance
 
