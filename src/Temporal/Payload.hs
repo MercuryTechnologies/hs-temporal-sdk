@@ -109,12 +109,27 @@ instance Codec Null () where
   encodePayload _ _ = mempty
   decode _ _ = Right ()
 
+-- | Direct binary serialization.
+--
+-- A generalized instance like the one for JSON is not provided because
+-- there are many possible binary serialization formats and libraries.
+--
+-- You can provide a simple version of this instance for your own codebase
+-- using something like the cereal package:
+--
+-- > import Data.Serialize (Serialize)
+-- > import qualified Data.Serialize as Serialize
+-- > instance {-# OVERLAPPABLE #-} (Typeable a, Serialize a) => Codec Binary a where
+-- >   encodingType _ _ = "binary/plain"
+-- >   encodePayload _ x = Serialize.encode x
+-- >   decode _ = Serialize.decode . inputPayloadData
 data Binary = Binary
 
 instance Codec Binary ByteString where
   encodingType _ _ = "binary/plain"
   encodePayload _ x = x
   decode _ = Right . inputPayloadData
+
 
 data Protobuf = Protobuf
 
@@ -123,6 +138,55 @@ instance (Message a) => Codec Protobuf a where
   encodingType _ _ = "binary/protobuf"
   encodePayload _ x = encodeMessage x
   decode _ = decodeMessage . inputPayloadData
+
+-- | The 'Composite' codec allows you to combine multiple codecs into one.
+--
+-- The codecs are tried in order, and the first one that succeeds is used.
+-- If none of the codecs succeed, the compile-time error message will indicate
+-- the type that didn't satisfy any of the specified codecs.
+--
+-- This Codec is useful when you want to support multiple serialization formats
+-- and choose the best / most performant one for each type.
+--
+-- Note that this Codec relies upon the 'if-instance' package, which supplies
+-- a compiler plugin that allows us to use this. You must add the following
+-- pragma to the module that registers your workflow code:
+--
+-- > {-# OPTIONS_GHC -fplugin=IfSat.Plugin #-}
+-- > -- ^ Put this at the top of the module that registers your workflow code.
+-- >
+-- > let testFn :: Int -> Text -> Bool -> W.Workflow () () (Int, Text, Bool)
+-- >     testFn a b c = pure (a, b, c)
+-- >     wf = W.provideWorkflow defaultCodec "test" () testFn
+-- >     conf = configure () () $ do
+-- >       addWorkflow wf
+--
+-- If you forget to add this pragma, your code will fail to compile with
+-- a message like:
+--
+-- > hs-temporal/test/IntegrationSpec.hs:66:16: error:
+-- >    • No instance for (Codec Null ()
+-- >                       Data.Constraint.If.|| Codec
+-- >                                               (Temporal.Payload.Composite
+-- >                                                  '[Binary, Protobuf, JSON])
+-- >                                               ())
+-- >        arising from a use of ‘W.provideWorkflow’
+-- >    • In the expression:
+-- >        W.provideWorkflow defaultCodec "test" () testFn
+-- >      In an equation for ‘wf’:
+-- >          wf = W.provideWorkflow defaultCodec "test" () testFn
+-- >      In the expression:
+-- >        do taskQueue <- W.TaskQueue <$> uuidText
+-- >           let testFn :: W.Workflow () () ()
+-- >               testFn = pure ()
+-- >               ....
+-- >           withWorker conf
+-- >             $ do wfId <- uuidText
+-- >                  let ...
+-- >                  ....
+-- >   |
+-- >66 |           wf = W.provideWorkflow defaultCodec "test" () testFn
+-- >   |                ^^^^^^^^^^^^^^^^^
 
 data Composite (codecs :: [Type]) where
   CompositeNil :: Composite '[]
