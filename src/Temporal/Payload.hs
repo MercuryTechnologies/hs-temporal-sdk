@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fplugin=IfSat.Plugin #-}
 {-# LANGUAGE
   AllowAmbiguousTypes,
   ConstraintKinds,
@@ -131,7 +132,7 @@ instance TypeError (('ShowType a) ':<>: 'Text " is not supported by any of the p
   messageType = error "unreachable"
   encodingType = error "unreachable"
   encodePayload = error "unreachable"
-  decode = error "unreachable"
+  decode _ _ = Left "No recognized codec for this type"
 
 instance (Codec fmt a || Codec (Composite codecs) a) => Codec (Composite (fmt ': codecs)) a where
   messageType fmt = dispatch @(Codec fmt a) @(Codec (Composite codecs) a)
@@ -143,9 +144,15 @@ instance (Codec fmt a || Codec (Composite codecs) a) => Codec (Composite (fmt ':
   encodePayload fmt = dispatch @(Codec fmt a) @(Codec (Composite codecs) a)
     (case fmt of CompositeCons codec _ -> encodePayload codec)
     (case fmt of CompositeCons _ codecs -> encodePayload codecs)
-  decode fmt = dispatch @(Codec fmt a) @(Codec (Composite codecs) a)
-    (case fmt of CompositeCons codec _ -> decode codec)
-    (case fmt of CompositeCons _ codecs -> decode codecs)
+  decode fmt payload = dispatch @(Codec fmt a) @(Codec (Composite codecs) a)
+    (case fmt of 
+      CompositeCons codec codecs -> if Just (encodingType codec (Proxy @a)) == payload.inputPayloadMetadata Map.!? "encoding"
+        then decode codec payload
+        else ifSat @(Codec (Composite codecs) a)
+          (decode codecs payload)
+          (Left "No codec for this type supports this payload")
+    )
+    (case fmt of CompositeCons _ codecs -> decode codecs payload)
 
 defaultCodec :: Composite '[Null, Binary, Protobuf, JSON]
 defaultCodec = CompositeCons Temporal.Payload.Null $ CompositeCons Binary $ CompositeCons Protobuf $ CompositeCons JSON CompositeNil
