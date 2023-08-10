@@ -85,6 +85,7 @@ test-suite temporal-sdk-tests
     base >= 4.14 && < 5,
     temporal-sdk,
     temporal-sdk-core,
+    bytestring,
     hspec,
     clock,
     text,
@@ -94,7 +95,8 @@ test-suite temporal-sdk-tests
     mtl,
     time,
     unliftio,
-    if-instance
+    if-instance,
+    proto-lens
   main-is: Main.hs
   hs-source-dirs: test
   other-modules:

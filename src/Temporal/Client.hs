@@ -123,12 +123,11 @@ execute
   -> KnownWorkflow args result 
   -> WorkflowStartOptions
   -> (args :->: m result)
-execute c k@(KnownWorkflow codec _ _ _) opts = gather $ \payloadsIO -> liftIO $ do
-  inputs <- sequence payloadsIO
+execute c k@(KnownWorkflow codec _ _ _) opts = gather $ \inputs -> liftIO $ do
   h <- startFromPayloads c k opts inputs
   awaitWorkflowResult h
   where
-    gather :: ([IO RawPayload] -> m result) -> (args :->: m result)
+    gather :: ([RawPayload] -> m result) -> (args :->: m result)
     gather = gatherArgs (Proxy @args) codec Prelude.id
 
 data GetWorkflowHandleOptions = GetWorkflowHandleOptions
@@ -158,7 +157,7 @@ awaitWorkflowResult h@(WorkflowHandle (KnownWorkflow{knownWorkflowCodec}) c wf r
             then pure $ unsafeCoerce ()
             else case payloads of
               (a:_) -> liftIO $ do
-                result <- decode knownWorkflowCodec a
+                let result = decode knownWorkflowCodec a
                 either (throwIO . ValueError) pure result
               _ -> error "Missing result payload"
         HistoryEvent'WorkflowExecutionFailedEventAttributes attrs -> throwIO WorkflowExecutionFailed
@@ -214,8 +213,7 @@ query :: forall m args result a. (MonadIO m, Typeable result)
   -> QueryDefinition args result 
   -> QueryOptions
   -> (args :->: m (Either QueryRejected result))
-query c h (QueryDefinition qn codec) opts = gather $ \payloadsIO -> liftIO $ do
-  inputs <- sequence payloadsIO
+query c h (QueryDefinition qn codec) opts = gather $ \inputs -> liftIO $ do
   let msg :: QueryWorkflowRequest
       msg = defMessage 
         & WF.namespace .~ rawNamespace c.clientDefaultNamespace
@@ -247,11 +245,11 @@ query c h (QueryDefinition qn codec) opts = gather $ \payloadsIO -> liftIO $ do
         case (res ^. WF.queryResult . Common.vec'payloads) V.!? 0 of
           Nothing -> throwIO $ ValueError "No return value payloads provided by query response"
           Just p -> do
-            res <- decode codec (convertFromProtoPayload p)
+            let res = decode codec (convertFromProtoPayload p)
             either (throwIO . ValueError) (pure . Right) res
 
   where
-    gather :: ([IO RawPayload] -> m (Either QueryRejected result)) -> (args :->: m (Either QueryRejected result))
+    gather :: ([RawPayload] -> m (Either QueryRejected result)) -> (args :->: m (Either QueryRejected result))
     gather = gatherArgs (Proxy @args) codec Prelude.id
 
     queryRejectionStatusFromProto = \case
@@ -405,11 +403,10 @@ start
   -> KnownWorkflow args result
   -> WorkflowStartOptions
   -> (args :->: m (WorkflowHandle result))
-start c k@(KnownWorkflow codec _ _ _) opts = gather $ \payloadsIO -> liftIO $ do
-  inputs <- sequence payloadsIO
+start c k@(KnownWorkflow codec _ _ _) opts = gather $ \inputs -> liftIO $ do
   startFromPayloads c k opts inputs
   where
-    gather :: ([IO RawPayload] -> m (WorkflowHandle result)) -> (args :->: m (WorkflowHandle result))
+    gather :: ([RawPayload] -> m (WorkflowHandle result)) -> (args :->: m (WorkflowHandle result))
     gather = gatherArgs (Proxy @args) codec Prelude.id
 
 

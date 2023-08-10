@@ -108,7 +108,7 @@ applyActivityTaskStart tt msg = mask_ $ do
             Nothing -> throwIO $ RuntimeError ("Activity type not found: " <> T.unpack (info.activityType))
             Just ActivityDefinition{..} -> case activityRun of
               ValidActivityFunction c f ap -> 
-                (>>= liftIO . encode c) <$> ap (fmap convertFromProtoPayload (msg ^. AT.vec'input))
+                (fmap $ Temporal.Payload.encode c) <$> ap (fmap convertFromProtoPayload (msg ^. AT.vec'input))
         case ef of
           Left (SomeException err) -> do
             $logError (T.pack (show err))

@@ -62,7 +62,7 @@ data KnownWorkflow (args :: [Type]) (result :: Type) = forall codec.
 gatherStartChildWorkflowArgs 
   :: forall env st args result codec. GatherArgs codec args
   => codec 
-  -> ([IO RawPayload] -> Workflow env st (ChildWorkflowHandle env st result)) 
+  -> ([RawPayload] -> Workflow env st (ChildWorkflowHandle env st result)) 
   -> (args :->: Workflow env st (ChildWorkflowHandle env st result))
 gatherStartChildWorkflowArgs c f = gatherArgs (Proxy @args) c id f
 

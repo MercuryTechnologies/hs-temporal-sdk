@@ -274,8 +274,7 @@ startActivity
   -> (args :->: Workflow env st (Task env st result))
 startActivity k@(KnownActivity codec mTaskQueue name) opts = gatherActivityArgs @env @st @args @result codec $ \typedPayloads -> ilift $ do
   inst <- ask
-  ps <- liftIO $ forM typedPayloads $ \payloadAction -> 
-    fmap convertToProtoPayload payloadAction
+  let ps = convertToProtoPayload <$> typedPayloads
 
   s@(Sequence actSeq) <- nextActivitySequence
   resultSlot <- newIVar
@@ -310,7 +309,7 @@ startActivity k@(KnownActivity codec mTaskQueue name) opts = gatherActivityArgs 
       Workflow $ \_ -> case res ^. Activation.result . ActivityResult.maybe'status of
         Nothing -> error "Activity result missing status"
         Just (ActivityResult.ActivityResolution'Completed success) -> do
-          result <- liftIO $ decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
+          let result = decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
           case result of
             -- TODO handle properly
             Left err -> error $ "Failed to decode activity result: " <> show err
@@ -330,7 +329,7 @@ startActivity k@(KnownActivity codec mTaskQueue name) opts = gatherActivityArgs 
 gatherActivityArgs 
   :: forall env st args result codec. GatherArgs codec args
   => codec 
-  -> ([IO RawPayload] -> Workflow env st (Task env st result)) 
+  -> ([RawPayload] -> Workflow env st (Task env st result)) 
   -> (args :->: Workflow env st (Task env st result))
 gatherActivityArgs c f = gatherArgs (Proxy @args) c id f
 
@@ -458,7 +457,6 @@ signalWorkflow
 signalWorkflow _ f (SignalDefinition signalName signalCodec signalApply) = gatherSignalChildWorkflowArgs @env @st @args @() signalCodec $ \ps -> do
   ilift $ do
     resVar <- newIVar
-    ps' <- liftIO $ sequence ps
     inst <- ask
     s <- nextExternalSignalSequence
     let cmd = defMessage
@@ -467,7 +465,7 @@ signalWorkflow _ f (SignalDefinition signalName signalCodec signalApply) = gathe
               ( defMessage
                 & Command.seq .~ rawSequence s
                 & Command.signalName .~ signalName 
-                & Command.args .~ (convertToProtoPayload <$> ps')
+                & Command.args .~ (convertToProtoPayload <$> ps)
               -- TODO
               -- & Command.headers .~ _
               )
@@ -493,7 +491,7 @@ signalWorkflow _ f (SignalDefinition signalName signalCodec signalApply) = gathe
 gatherSignalChildWorkflowArgs 
   :: forall env st args result codec. GatherArgs codec args
   => codec 
-  -> ([IO RawPayload] -> Workflow env st (Task env st result)) 
+  -> ([RawPayload] -> Workflow env st (Task env st result)) 
   -> (args :->: Workflow env st (Task env st result))
 gatherSignalChildWorkflowArgs c f = gatherArgs (Proxy @args) c id f
 
@@ -521,14 +519,13 @@ startChildWorkflow
 startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId = 
   gatherStartChildWorkflowArgs @env @st @args @result codec $ \typedPayloads -> ilift $ go typedPayloads
   where
-    go :: [IO RawPayload] -> InstanceM env st (ChildWorkflowHandle env st result)
+    go :: [RawPayload] -> InstanceM env st (ChildWorkflowHandle env st result)
     go typedPayloads = do
       wfHandle <- sendChildWorkflowCommand typedPayloads
       pure wfHandle
     sendChildWorkflowCommand typedPayloads = do
       inst <- ask
-      ps <- liftIO $ forM typedPayloads $ \payloadAction -> 
-        fmap convertToProtoPayload payloadAction
+      let ps =  fmap convertToProtoPayload typedPayloads
       
       s@(Sequence wfSeq) <- nextChildWorkflowSequence
       startSlot <- newIVar
@@ -585,7 +582,7 @@ waitChildWorkflowResult wfHandle@(ChildWorkflowHandle{childWorkflowCodec}) = do
     Nothing -> ilift $ throwIO $ RuntimeError "Unrecognized child workflow result status"
     Just s -> case s of
       ChildWorkflow.ChildWorkflowResult'Completed res -> do
-        eVal <- ilift $ liftIO $ decode childWorkflowCodec $ convertFromProtoPayload $ res ^. ChildWorkflow.result
+        let eVal = decode childWorkflowCodec $ convertFromProtoPayload $ res ^. ChildWorkflow.result
         case eVal of
           Left err -> throw $ ValueError err
           Right ok -> pure ok
@@ -655,8 +652,7 @@ startLocalActivity (KnownActivity codec _ n) opts = gatherActivityArgs @env @st 
   originalTime <- time
   ilift $ do
     inst <- ask
-    ps <- liftIO $ forM typedPayloads $ \payloadAction -> 
-      fmap convertToProtoPayload payloadAction
+    let ps = convertToProtoPayload <$> typedPayloads
     s@(Sequence actSeq) <- nextActivitySequence
     resultSlot <- newIVar
     atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
@@ -687,7 +683,7 @@ startLocalActivity (KnownActivity codec _ n) opts = gatherActivityArgs @env @st 
         Workflow $ \_ -> case res ^. Activation.result . ActivityResult.maybe'status of
           Nothing -> error "Activity result missing status"
           Just (ActivityResult.ActivityResolution'Completed success) -> do
-            result <- liftIO $ decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
+            let result = decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
             case result of
               -- TODO handle properly
               Left err -> error $ "Failed to decode activity result: " <> show err
@@ -904,7 +900,7 @@ setQueryHandler (QueryDefinition n codec) f = ilift $ do
         Right (Query r) -> do
           inst <- ask
           st <- readIORef inst.workflowState
-          eResult <- liftIO $ UnliftIO.try $ encode codec $ runReader r (inst.workflowEnv, st)
+          eResult <- liftIO $ UnliftIO.try $ pure $ encode codec $ runReader r (inst.workflowEnv, st)
           let cmd = defMessage
                 & Command.respondToQuery .~
                   ( defMessage
@@ -1076,7 +1072,7 @@ instance Cancel (Timer env st) where
 gatherContinueAsNewArgs 
   :: forall env st args result a codec. GatherArgs codec args
   => codec 
-  -> ([IO RawPayload] -> Workflow env st a) 
+  -> ([RawPayload] -> Workflow env st a) 
   -> (args :->: Workflow env st a)
 gatherContinueAsNewArgs c f = gatherArgs (Proxy @args) c id f
 
@@ -1104,11 +1100,10 @@ continueAsNew
   -> (args :->: Workflow env st a)
 continueAsNew k@(KnownWorkflow codec _ _ _) opts = gatherContinueAsNewArgs @env @st @args @result @a codec $ \args -> do
   Workflow $ \_ -> do
-    ps <- liftIO $ sequence args
     throwIO $ ContinueAsNewException $ defMessage
       & Command.workflowType .~ knownWorkflowName k
       & Command.taskQueue .~ (maybe "" rawTaskQueue opts.taskQueue)
-      & Command.arguments .~ (convertToProtoPayload <$> ps)
+      & Command.arguments .~ (convertToProtoPayload <$> args)
       & Command.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retryPolicy)
       -- TODO 
       -- & Command.searchAttributes .~ _

@@ -20,6 +20,7 @@
 {-# LANGUAGE DefaultSignatures #-}
 module Temporal.Payload 
   ( RawPayload(..)
+  , encode
   , Codec(..)
   , defaultCodec
   , JSON(..)
@@ -41,7 +42,9 @@ module Temporal.Payload
 import Data.Aeson hiding (encode, decode)
 import qualified Data.Aeson as Aeson
 import Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as C
 import qualified Data.ByteString.Lazy as BL
+import Data.Text.Encoding (encodeUtf8)
 import Control.Exception (SomeException)
 import Data.Constraint.If
 import Data.Functor
@@ -74,44 +77,51 @@ as we go. If there are not enough or too many params, we fail.
 class Codec fmt a where
   -- | Similar to a content-type header, this is a string that identifies the format of the payload.
   -- it will be set on the 'encoding' metadata field of the payload.
-  encodingType :: fmt -> Proxy a -> Text
-  messageType :: fmt -> a -> Text
-  default messageType :: (Typeable a) => fmt -> a -> Text
-  messageType _ _ = T.pack $ show $ typeRep (Proxy @a)
-  encode :: fmt -> a -> IO RawPayload
-  decode :: fmt -> RawPayload -> IO (Either String a)
+  encodingType :: fmt -> Proxy a -> ByteString
+  messageType :: fmt -> a -> ByteString
+  default messageType :: (Typeable a) => fmt -> a -> ByteString
+  messageType _ _ = C.pack $ show $ typeRep (Proxy @a)
+  encodePayload :: fmt -> a -> ByteString
+  decode :: fmt -> RawPayload -> Either String a
+
+encode :: forall fmt a. Codec fmt a => fmt -> a -> RawPayload
+encode fmt x = RawPayload 
+  (encodePayload fmt x) 
+  (Map.fromList 
+    [ ("encoding", (encodingType fmt (Proxy @a)))
+    , ("messageType", messageType fmt x)
+    ]
+  )
 
 data JSON = JSON
 
 instance (Typeable a, Aeson.ToJSON a, Aeson.FromJSON a) => Codec JSON a where
   encodingType _ _ = "json/plain"
-  encode _ x = do
-    pure $ RawPayload (BL.toStrict $ Aeson.encode x) mempty
-  decode _ = pure . Aeson.eitherDecodeStrict' . inputPayloadData
+  encodePayload _ x = BL.toStrict $ Aeson.encode x
+  decode _ = Aeson.eitherDecodeStrict' . inputPayloadData
 
 
 data Null = Null
 
 instance Codec Null () where
   encodingType _ _ = "binary/null"
-  encode _ _ = pure $ RawPayload mempty mempty
-  decode _ _ = pure $ Right ()
+  encodePayload _ _ = mempty
+  decode _ _ = Right ()
 
 data Binary = Binary
 
 instance Codec Binary ByteString where
-  messageType _ _ = "ByteString"
   encodingType _ _ = "binary/plain"
-  encode _ x = pure $ RawPayload x mempty
-  decode _ = pure . Right . inputPayloadData
+  encodePayload _ x = x
+  decode _ = Right . inputPayloadData
 
 data Protobuf = Protobuf
 
 instance (Message a) => Codec Protobuf a where
-  messageType _ x = messageName $ pure x
+  messageType _ x = encodeUtf8 $ messageName $ pure x
   encodingType _ _ = "binary/protobuf"
-  encode _ x = pure $ RawPayload (encodeMessage x) mempty
-  decode _ = pure . decodeMessage . inputPayloadData
+  encodePayload _ x = encodeMessage x
+  decode _ = decodeMessage . inputPayloadData
 
 data Composite (codecs :: [Type]) where
   CompositeNil :: Composite '[]
@@ -120,7 +130,7 @@ data Composite (codecs :: [Type]) where
 instance TypeError (('ShowType a) ':<>: 'Text " is not supported by any of the provided codecs") => Codec (Composite '[]) a where
   messageType = error "unreachable"
   encodingType = error "unreachable"
-  encode = error "unreachable"
+  encodePayload = error "unreachable"
   decode = error "unreachable"
 
 instance (Codec fmt a || Codec (Composite codecs) a) => Codec (Composite (fmt ': codecs)) a where
@@ -130,9 +140,9 @@ instance (Codec fmt a || Codec (Composite codecs) a) => Codec (Composite (fmt ':
   encodingType fmt = dispatch @(Codec fmt a) @(Codec (Composite codecs) a)
     (case fmt of CompositeCons codec _ -> encodingType codec) 
     (case fmt of CompositeCons _ codecs -> encodingType codecs)
-  encode fmt = dispatch @(Codec fmt a) @(Codec (Composite codecs) a)
-    (case fmt of CompositeCons codec _ -> encode codec)
-    (case fmt of CompositeCons _ codecs -> encode codecs)
+  encodePayload fmt = dispatch @(Codec fmt a) @(Codec (Composite codecs) a)
+    (case fmt of CompositeCons codec _ -> encodePayload codec)
+    (case fmt of CompositeCons _ codecs -> encodePayload codecs)
   decode fmt = dispatch @(Codec fmt a) @(Codec (Composite codecs) a)
     (case fmt of CompositeCons codec _ -> decode codec)
     (case fmt of CompositeCons _ codecs -> decode codecs)
@@ -188,11 +198,9 @@ instance ApplyPayloads codec '[] where
 instance (Codec codec ty, ApplyPayloads codec tys) => ApplyPayloads codec (ty ': tys) where
   applyPayloads codec _ resP f vec = case V.uncons vec of
     Nothing -> error "Not enough arguments"
-    Just (pl, rest) -> do
-      res <- decode codec pl
-      case res of
-        Right arg -> applyPayloads codec (Proxy @tys) resP (f arg) rest
-        Left err -> error err
+    Just (pl, rest) -> case decode codec pl of
+      Right arg -> applyPayloads codec (Proxy @tys) resP (f arg) rest
+      Left err -> error err
 
 -- | Given a list of function argument types and a codec, produce a function that takes a list of
 -- 'RawPayload's and does something useful with them. This is used to support outbound invocations of
@@ -201,8 +209,8 @@ class GatherArgs codec (args :: [Type]) where
   gatherArgs 
     :: Proxy args 
     -> codec 
-    -> ([IO RawPayload] -> [IO RawPayload]) 
-    -> ([IO RawPayload] -> result)
+    -> ([RawPayload] -> [RawPayload]) 
+    -> ([RawPayload] -> result)
     -> (args :->: result)
 
 instance (Codec codec arg, GatherArgs codec args) => GatherArgs codec (arg ': args) where

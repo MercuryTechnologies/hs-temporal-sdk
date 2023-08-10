@@ -14,6 +14,8 @@ import Control.Concurrent
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
+import Data.ByteString (ByteString)
+import Data.ProtoLens
 import Data.Text (Text)
 import Data.Time.Clock (UTCTime)
 import qualified Data.UUID as UUID
@@ -58,9 +60,9 @@ needsClient = do
   describe "Workflow" $ do
     fspecify "should run a workflow" $ \client -> do
       taskQueue <- W.TaskQueue <$> uuidText
-      let testFn :: W.Workflow () () Bool
-          testFn = pure True
-          wf = W.provideWorkflow defaultCodec "test" () testFn
+      let testFn :: W.Workflow () () ()
+          testFn = pure ()
+          wf = W.provideWorkflow JSON "test" () testFn
           conf = configure () () $ do
             setNamespace $ W.Namespace "test"
             setTaskQueue taskQueue
@@ -75,8 +77,7 @@ needsClient = do
                   }
               }
         C.execute client wf.reference opts
-          `shouldReturn` True
-{-
+          `shouldReturn` ()
     describe "race" $ do
       specify "block on left side works" $ \client -> do
         taskQueue <- W.TaskQueue <$> uuidText
@@ -85,7 +86,7 @@ needsClient = do
               res <- ($(logDebug) "sleepy lad" >> W.sleep (TimeSpec 10 0) >> $(logDebug) "bad" >> pure False) `W.race` ($(logDebug) "wow" *> pure True)
               $(logDebug) "done"
               pure res
-            wf = W.provideWorkflow defaultCodec "test" () testFn
+            wf = W.provideWorkflow JSON "test" () testFn
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
               setTaskQueue taskQueue
@@ -102,7 +103,7 @@ needsClient = do
         let testFn :: W.Workflow () () (Either Bool Bool)
             testFn = do
               (W.sleep (TimeSpec 5000 0) >> pure False) `W.race` (W.sleep (TimeSpec 1 0) >> pure True)
-            wf = W.provideWorkflow defaultCodec "blockBothSides" () testFn
+            wf = W.provideWorkflow JSON "blockBothSides" () testFn
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
               setTaskQueue taskQueue
@@ -119,7 +120,7 @@ needsClient = do
         let testFn :: W.Workflow () () (Either Bool Bool)
             testFn = do
               (W.sleep (TimeSpec 5000 0) >> error "sad") `W.race` error "foo"
-            wf = W.provideWorkflow defaultCodec "test" () testFn
+            wf = W.provideWorkflow JSON "test" () testFn
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
               setTaskQueue taskQueue
@@ -136,7 +137,7 @@ needsClient = do
         let testFn :: W.Workflow () () (Either Bool Bool)
             testFn = do
               pure True `W.race` (W.sleep (TimeSpec 5000 0) *> error "sad")
-            wf = W.provideWorkflow defaultCodec "test" () testFn
+            wf = W.provideWorkflow JSON "test" () testFn
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
               setTaskQueue taskQueue
@@ -155,7 +156,7 @@ needsClient = do
             testActivity = pure 1
 
             testActivityAct :: ProvidedActivity () (Activity () Int)
-            testActivityAct = provideActivity defaultCodec "test" testActivity
+            testActivityAct = provideActivity JSON "test" testActivity
             
             testFn :: W.Workflow () () Int
             testFn = do
@@ -163,7 +164,7 @@ needsClient = do
                 testActivityAct.reference
                 (W.defaultStartActivityOptions $ W.StartToClose $ TimeSpec 3 0)
               W.wait (h :: W.Task () () Int)
-            wf = W.provideWorkflow defaultCodec "test" () testFn
+            wf = W.provideWorkflow JSON "test" () testFn
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
               setTaskQueue taskQueue
@@ -185,7 +186,7 @@ needsClient = do
               pure 1
 
             testActivityAct :: ProvidedActivity () (Activity () Int)
-            testActivityAct = provideActivity defaultCodec "basicHeartbeat" testActivity
+            testActivityAct = provideActivity JSON "basicHeartbeat" testActivity
             
             testFn :: W.Workflow () () Int
             testFn = do
@@ -193,7 +194,7 @@ needsClient = do
                 testActivityAct.reference
                 (W.defaultStartActivityOptions $ W.StartToClose $ TimeSpec 3 0)
               W.wait (h :: W.Task () () Int)
-            wf = W.provideWorkflow defaultCodec "basicHeartbeat" () testFn
+            wf = W.provideWorkflow JSON "basicHeartbeat" () testFn
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
               setTaskQueue taskQueue
@@ -218,7 +219,7 @@ needsClient = do
                 else pure 1
 
             testActivityAct :: ProvidedActivity () (Activity () Int)
-            testActivityAct = provideActivity defaultCodec "faultyWorkflow" testActivity
+            testActivityAct = provideActivity JSON "faultyWorkflow" testActivity
             
             testFn :: W.Workflow () () Int
             testFn = do
@@ -231,7 +232,7 @@ needsClient = do
               W.wait (h1 :: W.Task () () Int)
               W.wait (h2 :: W.Task () () Int)
 
-            wf = W.provideWorkflow defaultCodec "faultyWorkflow" () testFn
+            wf = W.provideWorkflow JSON "faultyWorkflow" () testFn
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
               setTaskQueue taskQueue
@@ -252,7 +253,7 @@ needsClient = do
               pure 0
 
             testActivityAct :: ProvidedActivity () (Activity () Int)
-            testActivityAct = provideActivity defaultCodec "immediateCancelResponse" testActivity
+            testActivityAct = provideActivity JSON "immediateCancelResponse" testActivity
             
             testFn :: W.Workflow () () Int
             testFn = do
@@ -262,7 +263,7 @@ needsClient = do
               W.cancel (h1 :: W.Task () () Int)
               W.wait h1 `Catch.catch` \(_ :: ActivityCancelled) -> pure 1
 
-            wf = W.provideWorkflow defaultCodec "activityCancellation" () testFn
+            wf = W.provideWorkflow JSON "activityCancellation" () testFn
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
               setTaskQueue taskQueue
@@ -288,7 +289,7 @@ needsClient = do
               pure 0
 
             testActivityAct :: ProvidedActivity () (Activity () Int)
-            testActivityAct = provideActivity defaultCodec "heartbeatAllowsOpportunityToCancel" testActivity
+            testActivityAct = provideActivity JSON "heartbeatAllowsOpportunityToCancel" testActivity
             
             testFn :: W.Workflow () () Int
             testFn = do
@@ -299,7 +300,7 @@ needsClient = do
               W.cancel (h1 :: W.Task () () Int)
               W.wait h1 `Catch.catch` \(_ :: ActivityCancelled) -> pure 1
 
-            wf = W.provideWorkflow defaultCodec "activityCancellationOnHeartbeat" () testFn
+            wf = W.provideWorkflow JSON "activityCancellationOnHeartbeat" () testFn
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
               setTaskQueue taskQueue
@@ -321,11 +322,11 @@ needsClient = do
 
 
     describe "Args and return values" $ do
-      specify "args should be passed to the workflow in the correct order" $ \client -> do
+      fspecify "args should be passed to the workflow in the correct order" $ \client -> do
         taskQueue <- W.TaskQueue <$> uuidText
         let testFn :: Int -> Text -> Bool -> W.Workflow () () (Int, Text, Bool)
             testFn a b c = pure (a, b, c)
-            wf = W.provideWorkflow defaultCodec "test" () testFn
+            wf = W.provideWorkflow JSON "test" () testFn
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
               setTaskQueue taskQueue
@@ -337,6 +338,22 @@ needsClient = do
                 taskQueue
           C.execute client wf.reference opts 1 "two" False
             `shouldReturn` (1, "two", False)
+      fspecify "binary payloads work" $ \client -> do
+        taskQueue <- W.TaskQueue <$> uuidText
+        let testFn :: ByteString -> W.Workflow () () ByteString
+            testFn _ = pure "general kenobi"
+            wf = W.provideWorkflow defaultCodec "test" () testFn
+            conf = configure () () $ do
+              setNamespace $ W.Namespace "test"
+              setTaskQueue taskQueue
+              addWorkflow wf
+        withWorker conf $ do
+          wfId <- uuidText
+          let opts = C.workflowStartOptions
+                (W.WorkflowId wfId)
+                taskQueue
+          C.execute client wf.reference opts "hello there."
+            `shouldReturn` "general kenobi"
   --     specify "args that parse incorrectly should fail a Workflow appropriately" $ \client -> do
   --       pending
   --     specify "args that parse incorrectly should fail an Activity appropriately" $ \client -> do
@@ -466,7 +483,7 @@ needsClient = do
         parentId <- uuidText
         let cancelTest :: W.Workflow () () ()
             cancelTest = W.sleep $ TimeSpec 60 0
-            childWf = W.provideWorkflow defaultCodec "immediateCancelTestChild" () cancelTest
+            childWf = W.provideWorkflow JSON "immediateCancelTestChild" () cancelTest
             parentWorkflow :: W.Workflow () () String
             parentWorkflow = do
               childWorkflowId <- (W.WorkflowId . UUID.toText) <$> W.uuid4
@@ -474,7 +491,7 @@ needsClient = do
               W.cancelChildWorkflowExecution childWorkflow
               result <- Catch.try $ W.waitChildWorkflowResult childWorkflow
               pure $ show (result :: Either SomeException ())
-            parentWf = W.provideWorkflow defaultCodec "immediateCancelTestParent" () parentWorkflow
+            parentWf = W.provideWorkflow JSON "immediateCancelTestParent" () parentWorkflow
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
               setTaskQueue $ W.TaskQueue "test"
@@ -498,7 +515,7 @@ needsClient = do
                     Left WorkflowCancelRequested -> pure ()
                     _ -> go
 
-            childWf = W.provideWorkflow defaultCodec "cancelTestChild" () cancelTest
+            childWf = W.provideWorkflow JSON "cancelTestChild" () cancelTest
             parentWorkflow :: W.Workflow () () String
             parentWorkflow = do
               childWorkflowId <- (W.WorkflowId . UUID.toText) <$> W.uuid4
@@ -508,7 +525,7 @@ needsClient = do
               W.sleep $ TimeSpec 3 0
               result <- Catch.try $ W.waitChildWorkflowResult childWorkflow
               pure $ show (result :: Either SomeException ())
-            parentWf = W.provideWorkflow defaultCodec "cancelTestParent" () parentWorkflow
+            parentWf = W.provideWorkflow JSON "cancelTestParent" () parentWorkflow
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
               setTaskQueue $ W.TaskQueue "test"
@@ -566,7 +583,7 @@ needsClient = do
               W.sleep $ TimeSpec 0 1
               later <- W.now
               pure (later > earlier) 
-            wf = W.provideWorkflow defaultCodec "sleepy" () workflow
+            wf = W.provideWorkflow JSON "sleepy" () workflow
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
               setTaskQueue $ W.TaskQueue "test"
@@ -588,7 +605,7 @@ needsClient = do
               W.wait t
               later <- W.now
               pure (later > earlier) 
-            wf = W.provideWorkflow defaultCodec "timer" () workflow
+            wf = W.provideWorkflow JSON "timer" () workflow
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
               setTaskQueue $ W.TaskQueue "test"
@@ -608,7 +625,7 @@ needsClient = do
               W.cancel t
               W.wait t
               pure True
-            wf = W.provideWorkflow defaultCodec "timerAndCancelImmediately" () workflow
+            wf = W.provideWorkflow JSON "timerAndCancelImmediately" () workflow
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
               setTaskQueue $ W.TaskQueue "test"
@@ -633,7 +650,7 @@ needsClient = do
               W.cancel t
               W.wait t
               pure True
-            wf = W.provideWorkflow defaultCodec "timerAndCancelWithDelay" () workflow
+            wf = W.provideWorkflow JSON "timerAndCancelWithDelay" () workflow
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
               setTaskQueue $ W.TaskQueue "test"
@@ -655,7 +672,7 @@ needsClient = do
             workflow = do
               isPatched <- W.patched (W.PatchId "wibble")
               pure isPatched
-            wf = W.provideWorkflow defaultCodec "patchedWorkflow" () workflow
+            wf = W.provideWorkflow JSON "patchedWorkflow" () workflow
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
               setTaskQueue $ W.TaskQueue "test"
@@ -676,7 +693,7 @@ needsClient = do
             workflow = do
               W.deprecatePatch (W.PatchId "wibble")
               pure True
-            wf = W.provideWorkflow defaultCodec "deprecatedPatchedWorkflow" () workflow
+            wf = W.provideWorkflow JSON "deprecatedPatchedWorkflow" () workflow
             conf = configure () () $ do
               setNamespace $ W.Namespace "test"
               setTaskQueue $ W.TaskQueue "test"
@@ -702,7 +719,7 @@ needsClient = do
           workflow = do
             i <- W.info
             pure $ W.rawWorkflowType i.workflowType
-          wf = W.provideWorkflow defaultCodec "readWorkflowInfo" () workflow
+          wf = W.provideWorkflow JSON "readWorkflowInfo" () workflow
           conf = configure () () $ do
             setNamespace $ W.Namespace "test"
             setTaskQueue $ W.TaskQueue "test"
@@ -733,7 +750,7 @@ needsClient = do
             then W.continueAsNew wf.reference W.defaultContinueAsNewOptions (execCount + 1)
             else pure "woohoo"
 
-          wf = W.provideWorkflow defaultCodec "continueAsNewWorks" () workflow
+          wf = W.provideWorkflow JSON "continueAsNewWorks" () workflow
           conf = configure () () $ do
             setNamespace $ W.Namespace "test"
             setTaskQueue $ W.TaskQueue "test"
@@ -767,4 +784,3 @@ needsClient = do
   --   specify "Handle from start terminates run after continue as new" pending
   --   specify "Handle from start does not terminate run after continue as new if given runId" pending
   -- specify "Download and replay multiple executions with client list method" pending
--}

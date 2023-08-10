@@ -264,7 +264,7 @@ runWorkflow wf = do
 finishWorkflow :: (Codec codec a) => codec -> a -> InstanceM env st ()
 finishWorkflow codec result = do
   $logDebug =<< withRunId "Finishing workflow"
-  res <- liftIO $ Temporal.Payload.encode codec result
+  let res = Temporal.Payload.encode codec result
   let completeMessage = defMessage & 
         Command.completeWorkflowExecution .~ (defMessage & Command.result .~ convertToProtoPayload res)
   inst <- ask

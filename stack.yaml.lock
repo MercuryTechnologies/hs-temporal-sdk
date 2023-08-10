@@ -5,19 +5,23 @@
 
 packages:
 - completed:
-    hackage: if-instance-0.3.1.0@sha256:e08f1ccce752264501f307feb68feed34f8ca44f8df72ed44a195318ec240256,2943
+    commit: b0ad0a51ccc1d2ea45cc1c6e8ef753c54efe30a4
+    git: git@github.com:sheaf/if-instance.git
+    name: if-instance
     pantry-tree:
-      sha256: dc3be07692582fcbcb17305703e2927ccc15fa18574a01617fc9881780866a7d
-      size: 401
+      sha256: 3a7a07a2ef7559cf943f6f87ac4ce2bc3767509c101710612657de0db038df4b
+      size: 725
+    version: 0.4.0.0
   original:
-    hackage: if-instance-0.3.1.0
+    commit: b0ad0a51ccc1d2ea45cc1c6e8ef753c54efe30a4
+    git: git@github.com:sheaf/if-instance.git
 - completed:
-    hackage: ghc-tcplugin-api-0.9.0.0@sha256:36301d3175153aa1fa9c3dab5f70692293f09f1f26ef907f42d0f54ef9d3ce6a,4597
+    hackage: ghc-tcplugin-api-0.10.0.0@sha256:e48b4849cf41f1a14c4550600a7f049451c413c317e937c85fe9fea61239382b,4641
     pantry-tree:
-      sha256: a3f8d371dfaf9612e84e1d2aa30b08176c91f7247b07a0616885855cb1d132b6
+      sha256: 6eb15b77c7e82aad03d48efdb417b7e3a65edc9722d195c116c56a42d676e6ac
       size: 498
   original:
-    hackage: ghc-tcplugin-api-0.9.0.0
+    hackage: ghc-tcplugin-api-0.10.0.0
 snapshots:
 - completed:
     sha256: dcf4fc28f12d805480ddbe8eb8c370e11db12f0461d0110a4240af27ac88d725
