@@ -4,6 +4,7 @@ They are used to start new workflows and to signal existing workflows.
 -}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
@@ -82,6 +83,8 @@ import System.Posix.Process
 import Network.BSD
 import UnliftIO
 import Unsafe.Coerce
+import Data.ProtoLens (Message(defMessage))
+import Temporal.Payload (convertToProtoPayload)
 ---------------------------------------------------------------------------------
 -- WorkflowClient stuff
 
@@ -167,9 +170,53 @@ awaitWorkflowResult h@(WorkflowHandle (KnownWorkflow{knownWorkflowCodec}) c wf r
         HistoryEvent'WorkflowExecutionContinuedAsNewEventAttributes attrs -> throwIO WorkflowExecutionContinuedAsNew
         e -> error ("History event not supported " <> show e)
 
+data SignalOptions
+  = SignalOptions
+  { requestId :: Maybe Text
+  -- ^ Used to de-dupe sent signals
+  , skipGenerateWorkflowTask :: Bool
+  -- ^ Indicates that a new workflow task should not be generated when this signal is received.
+  --
+  -- Defaults to False.
+  --
+  -- Generally this is not needed.
+  , headers :: Map Text RawPayload
+  }
 
-signal :: forall m args a. MonadIO m => WorkflowHandle a -> SignalDefinition args -> (args :->: m ())
-signal = undefined
+defaultSignalOptions :: SignalOptions
+defaultSignalOptions = SignalOptions
+  { skipGenerateWorkflowTask = False
+  , requestId = Nothing
+  }
+
+signal :: forall m args a. MonadIO m 
+  => WorkflowHandle a 
+  -> SignalDefinition args 
+  -> SignalOptions
+  -> (args :->: m ())
+signal h@(WorkflowHandle (KnownWorkflow{knownWorkflowCodec}) c wf r) (SignalDefinition sName sCodec sApply) opts = gather $ \inputs -> do
+  result <- liftIO $ signalWorkflowExecution c.clientCore $ defMessage
+    & WF.namespace .~ rawNamespace c.clientDefaultNamespace
+    & WF.workflowExecution .~ (defMessage
+      & Common.workflowId .~ rawWorkflowId wf
+      & Common.runId .~ maybe "" rawRunId r
+      )
+    & WF.signalName .~ sName
+    & WF.input .~ (defMessage & Common.payloads .~ fmap convertToProtoPayload inputs)
+    & WF.identity .~ c.clientIdentity
+    & WF.requestId .~ fromMaybe "" opts.requestId
+    -- Deprecated, no need to set
+    -- & WF.control .~ _
+    -- TODO put other useful headers in here
+    & WF.header .~ (headerToProto $ fmap convertToProtoPayload opts.headers)
+    & WF.skipGenerateWorkflowTask .~ opts.skipGenerateWorkflowTask
+  case result of 
+    Left err -> throwIO err
+    Right _ -> pure ()
+  where
+    gather :: ([RawPayload] -> m ()) -> (args :->: m ())
+    gather = gatherArgs (Proxy @args) sCodec Prelude.id
+    wfClient = clientCore c
 
 -- | QueryRejectCondition can used to reject the query if workflow state does not satisfy condition.
 data QueryRejectCondition
@@ -279,17 +326,6 @@ getHandle = undefined
 --   => WorkflowClient
 --   -> ListWorkflowOptions
 --   -> m [WorkflowId]
-
-data WorkflowResultOptions = WorkflowResultOptions
-
-result
-  :: MonadIO m
-  => WorkflowClient
-  -> WorkflowId
-  -> Maybe RunId
-  -> Maybe WorkflowResultOptions
-  -> m (Maybe a)
-result = undefined
 
 signalWithStart 
   :: MonadIO m 

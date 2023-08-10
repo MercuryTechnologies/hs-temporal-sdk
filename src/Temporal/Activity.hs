@@ -98,6 +98,9 @@ heartbeat baseDetails = do
   -- TODO throw exception if this fails?
   void $ liftIO $ recordActivityHeartbeat worker details
 
+-- | It is very common for an Activity to do things that interact 
+-- with another Workflow, like using 'query' or 'signal'. This function
+-- provides a 'WorkflowClient' that can be used to accomplish that.
 activityWorkflowClient :: Activity env WorkflowClient
 activityWorkflowClient = do
   c <- askActivityClient

@@ -28,6 +28,7 @@ module Temporal.Payload
   , Null(..)
   , Binary(..)
   , Protobuf(..)
+  , Composite(..)
   , applyPayloads
   , ApplyPayloads
   , GatherArgs(..)
