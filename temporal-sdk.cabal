@@ -74,6 +74,7 @@ library
     -- Temporal.Payload.TH,
     -- Temporal.Schedule,
     Temporal.Workflow,
+    Temporal.Workflow.Saga,
     Temporal.Worker
 
 test-suite temporal-sdk-tests
