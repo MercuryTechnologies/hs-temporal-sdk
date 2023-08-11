@@ -122,6 +122,7 @@ module Temporal.Workflow
   , ChildWorkflowCancellationType(..)
   , WorkflowIdReusePolicy(..)
   , WorkflowType(..)
+  , RequireCallStack
   ) where
 import Control.Concurrent (forkIO)
 import Control.Applicative
@@ -155,6 +156,7 @@ import GHC.Stack
 import GHC.TypeLits
 import Lens.Family2
 import Proto.Temporal.Api.Common.V1.Message (Payload)
+import RequireCallStack
 import System.Clock (TimeSpec(..))
 import System.Random.Stateful
 import Temporal.Common
@@ -269,7 +271,7 @@ knownActivityArgsProxy :: KnownActivity args result -> Proxy args
 knownActivityArgsProxy _ = Proxy
 
 startActivity 
-  :: forall env st args result. HasCallStack
+  :: forall env st args result. RequireCallStack
   => KnownActivity args result 
   -> StartActivityOptions 
   -> (args :->: Workflow env st (Task env st result))
@@ -366,7 +368,7 @@ defaultChildWorkflowOptions = StartChildWorkflowOptions
 class Wait h where
   type WaitResult h :: Type
   -- | Wait for a handle on an an action to complete.
-  wait :: HasCallStack => h -> WaitResult h
+  wait :: RequireCallStack => h -> WaitResult h
 
 instance Wait (Task env st a) where
   type WaitResult (Task env st a) = Workflow env st a
@@ -379,7 +381,7 @@ instance Wait (ChildWorkflowHandle env st a) where
 class Cancel h where
   type CancelResult h :: Type
   -- | Signal to Temporal that a handle representing an async action should be cancelled.
-  cancel :: HasCallStack => h -> CancelResult h
+  cancel :: RequireCallStack => h -> CancelResult h
 
 instance Cancel (Task env st a) where
   type CancelResult (Task env st a) = Workflow env st ()
@@ -435,7 +437,7 @@ data ExternalWorkflowHandle (env :: Type) (st :: Type) (result :: Type) = Extern
 -- Given the following Workflow definition:
 class WorkflowHandle h where
   -- | Signal a running Workflow.
-  signal :: HasCallStack => h env st result -> SignalDefinition args -> (args :->: Workflow env st (Task env st ()))
+  signal :: RequireCallStack => h env st result -> SignalDefinition args -> (args :->: Workflow env st (Task env st ()))
 
 instance WorkflowHandle ChildWorkflowHandle where
   signal h = signalWorkflow h (Command.childWorkflowId .~ rawWorkflowId h.childWorkflowId)
@@ -450,7 +452,7 @@ instance WorkflowHandle ExternalWorkflowHandle where
         -- & Common.namespace .~ rawNamespace h.externalNamespace
 
 signalWorkflow 
-  :: forall env st args result h. HasCallStack
+  :: forall env st args result h. RequireCallStack
   => h env st result
   -> (Command.SignalExternalWorkflowExecution -> Command.SignalExternalWorkflowExecution)
   -> SignalDefinition args
@@ -512,7 +514,7 @@ gatherSignalChildWorkflowArgs c f = gatherArgs (Proxy @args) c id f
 --
 -- In order to query the child, use a WorkflowClient from an Activity.
 startChildWorkflow 
-  :: forall env st args result. HasCallStack
+  :: forall env st args result. RequireCallStack
   => KnownWorkflow args result 
   -> StartChildWorkflowOptions
   -> WorkflowId
@@ -572,10 +574,10 @@ startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId =
       addCommand inst cmd
       pure wfHandle
 
-waitChildWorkflowStart :: HasCallStack => ChildWorkflowHandle env st result -> Workflow env st ()
+waitChildWorkflowStart :: RequireCallStack => ChildWorkflowHandle env st result -> Workflow env st ()
 waitChildWorkflowStart wfHandle = getIVar wfHandle.startHandle
 
-waitChildWorkflowResult :: HasCallStack => ChildWorkflowHandle env st result -> Workflow env st result
+waitChildWorkflowResult :: RequireCallStack => ChildWorkflowHandle env st result -> Workflow env st result
 waitChildWorkflowResult wfHandle@(ChildWorkflowHandle{childWorkflowCodec}) = do
   $(logDebug) "Wait child workflow result"
   res <- getIVar wfHandle.resultHandle
@@ -590,7 +592,7 @@ waitChildWorkflowResult wfHandle@(ChildWorkflowHandle{childWorkflowCodec}) = do
       ChildWorkflow.ChildWorkflowResult'Failed res -> throw $ ChildWorkflowFailed $ res ^. ChildWorkflow.failure
       ChildWorkflow.ChildWorkflowResult'Cancelled _ -> throw ChildWorkflowCancelled
 
-cancelChildWorkflowExecution :: HasCallStack => ChildWorkflowHandle env st result -> Workflow env st ()
+cancelChildWorkflowExecution :: RequireCallStack => ChildWorkflowHandle env st result -> Workflow env st ()
 cancelChildWorkflowExecution wfHandle@(ChildWorkflowHandle{childWorkflowSequence}) = ilift $ do
   inst <- ask
   -- I don't see a way to block on this? I guess Temporal wants us to rely on the orchestrator
@@ -645,7 +647,7 @@ defaultStartLocalActivityOptions = StartLocalActivityOptions
   }
 
 startLocalActivity 
-  :: forall env st args result. HasCallStack
+  :: forall env st args result. RequireCallStack
   => KnownActivity args result
   -> StartLocalActivityOptions 
   -> (args :->: Workflow env st (Task env st result))
@@ -730,7 +732,7 @@ memoValue k = do
 -- | Updates this Workflow's Search Attributes by merging the provided searchAttributes with the existing Search Attributes
 --
 -- Using this function will overwrite any existing Search Attributes with the same key.
-upsertSearchAttributes :: HasCallStack => Map Text Data.Aeson.Value -> Workflow env st ()
+upsertSearchAttributes :: RequireCallStack => Map Text Data.Aeson.Value -> Workflow env st ()
 upsertSearchAttributes values = ilift $ do
   inst <- ask
   addCommand inst cmd
@@ -764,7 +766,7 @@ now = ilift $ do
 --
 -- - You want to change the remaining logic of a Workflow while it is still running
 -- - If your new logic can result in a different execution path
-applyPatch :: HasCallStack => PatchId -> Bool {- ^ whether the patch is deprecated -} -> Workflow env st Bool 
+applyPatch :: RequireCallStack => PatchId -> Bool {- ^ whether the patch is deprecated -} -> Workflow env st Bool 
 applyPatch pid deprecated = ilift $ do
   inst <- ask
   memoized <- readIORef inst.workflowMemoizedPatches
@@ -793,7 +795,7 @@ applyPatch pid deprecated = ilift $ do
 --
 -- Your workflow code should run the "new" code if this returns true, if it returns false, 
 -- you should run the "old" code. By doing this, you can maintain determinism.
-patched :: HasCallStack => PatchId -> Workflow env st Bool
+patched :: RequireCallStack => PatchId -> Workflow env st Bool
 patched pid = applyPatch pid False
 
 -- | Indicate that a patch is being phased out.
@@ -806,7 +808,7 @@ patched pid = applyPatch pid False
 --
 -- Once all live workflow runs have been produced by workers with this call, you can deploy workers which are free of either kind of 
 -- patch call for this ID. Workers with and without this call may coexist, as long as they are both running the "new" code.
-deprecatePatch :: HasCallStack => PatchId -> Workflow env st ()
+deprecatePatch :: RequireCallStack => PatchId -> Workflow env st ()
 deprecatePatch pid = void $ applyPatch pid True
 
 -- $randomness
@@ -1003,7 +1005,7 @@ data Timer env st = Timer
 -- Note that the timer is started when the command is received by the Temporal Platform,
 -- not when the timer is created. The command is sent as soon as the workflow is blocked
 -- by any operation, such as 'sleep', 'awaitCondition', 'awaitActivity', 'awaitWorkflow', etc.
-createTimer :: HasCallStack => TimeSpec -> Workflow env st (Timer env st)
+createTimer :: RequireCallStack => TimeSpec -> Workflow env st (Timer env st)
 createTimer ts = ilift $ do
   inst <- ask
   s@(Sequence seqId) <- nextTimerSequence
@@ -1019,7 +1021,7 @@ createTimer ts = ilift $ do
   addCommand inst cmd
   pure $ Timer { timerSequence = s, timerHandle = res }
 
-sleep :: TimeSpec -> Workflow env st ()
+sleep :: RequireCallStack => TimeSpec -> Workflow env st ()
 sleep ts = do
   t <- createTimer ts
   Temporal.Workflow.wait t
@@ -1092,7 +1094,7 @@ continueAsNew k@(KnownWorkflow codec _ _ _) opts = gatherContinueAsNewArgs @env 
       & Command.maybe'workflowRunTimeout .~ (timespecToDuration <$> opts.runTimeout)
 
 -- | Returns a client-side handle that can be used to signal and cancel an existing Workflow execution. It takes a Workflow ID and optional run ID.
-getExternalWorkflowHandle :: HasCallStack => WorkflowId -> Maybe RunId -> Workflow env st (ExternalWorkflowHandle env st result)
+getExternalWorkflowHandle :: RequireCallStack => WorkflowId -> Maybe RunId -> Workflow env st (ExternalWorkflowHandle env st result)
 getExternalWorkflowHandle wfId mrId = pure $ ExternalWorkflowHandle
   { externalWorkflowWorkflowId = wfId
   , externalWorkflowRunId = mrId
@@ -1107,7 +1109,7 @@ getExternalWorkflowHandle wfId mrId = pure $ ExternalWorkflowHandle
 -- N.B. this should be used with care, as it can lead to the workflow
 -- suspending indefinitely if the condition is never met. 
 -- (e.g. if there is no signal handler that changes the state appropriately)
-waitCondition :: HasCallStack => (st -> Bool) -> Workflow env st ()
+waitCondition :: RequireCallStack => (st -> Bool) -> Workflow env st ()
 waitCondition f = do
   st <- get
   if f st
@@ -1148,14 +1150,16 @@ unsafeAsyncEffectSink m = ilift $ liftIO $ void $ forkIO m
 -- Parallel operations
 
 biselect 
-  :: Workflow env st (Either a b)
+  :: HasCallStack
+  => Workflow env st (Either a b)
   -> Workflow env st (Either a c)
   -> Workflow env st (Either a (b, c))
 biselect wfA wfB = biselectOpt id id Left Right wfA wfB
 
 {-# INLINE biselectOpt #-}
 biselectOpt 
-  :: (l -> Either a b)
+  :: HasCallStack
+  => (l -> Either a b)
   -> (r -> Either a c)
   -> (a -> t)
   -> ((b, c) -> t)

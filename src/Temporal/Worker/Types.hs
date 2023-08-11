@@ -26,7 +26,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Vector (Vector)
 import Data.Word (Word32)
-import GHC.Stack (CallStack)
+import GHC.Stack (CallStack, HasCallStack, callStack, withFrozenCallStack)
 import Control.Concurrent.STM.TVar (TVar)
 import Lens.Family2
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
@@ -67,6 +67,7 @@ import System.Random
 import System.Random.Stateful (StatefulGen(..), RandomGenM(..), FrozenGen(..))
 import qualified Temporal.Core.Client as C
 import UnliftIO hiding (race)
+import RequireCallStack
 import Text.Printf
 import Temporal.Core.Worker (completeWorkflowActivation)
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Core
@@ -261,7 +262,7 @@ type IsValidWorkflowFunction (codec :: Type) (env :: Type) (st :: Type) f =
   , Typeable (ResultOf (Workflow env st) f)
   )
 
-data ValidWorkflowFunction env st = forall codec f. (IsValidWorkflowFunction codec env st f) => 
+data ValidWorkflowFunction env st = forall codec f. (IsValidWorkflowFunction codec env st f, RequireCallStack) => 
   ValidWorkflowFunction
     codec
     f
@@ -465,7 +466,7 @@ trace_ _ = id
 --
 -- The 'st' state may be used to store information that is needed to respond to
 -- any queries or signals that are received by the Workflow execution.
-newtype Workflow env st a = Workflow { unWorkflow :: ContinuationEnv env st -> InstanceM env st (Result env st a) }
+newtype Workflow env st a = Workflow { unWorkflow :: (RequireCallStack => ContinuationEnv env st -> InstanceM env st (Result env st a)) }
 
 instance Functor (Workflow env st) where
   fmap f (Workflow m) = Workflow $ \env -> do

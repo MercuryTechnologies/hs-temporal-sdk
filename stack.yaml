@@ -45,6 +45,8 @@ extra-deps:
 - git: git@github.com:sheaf/if-instance.git
   commit: b0ad0a51ccc1d2ea45cc1c6e8ef753c54efe30a4
 - ghc-tcplugin-api-0.10.0.0
+- annotated-exception-0.2.0.3
+- require-callstack-0.1.0.0
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

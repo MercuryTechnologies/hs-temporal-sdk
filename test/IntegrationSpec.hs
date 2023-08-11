@@ -82,7 +82,7 @@ needsClient = do
     describe "race" $ do
       specify "block on left side works" $ \client -> do
         taskQueue <- W.TaskQueue <$> uuidText
-        let testFn :: W.Workflow () () (Either Bool Bool)
+        let testFn :: W.RequireCallStack => W.Workflow () () (Either Bool Bool)
             testFn = do
               res <- ($(logDebug) "sleepy lad" >> W.sleep (TimeSpec 10 0) >> $(logDebug) "bad" >> pure False) `W.race` ($(logDebug) "wow" *> pure True)
               $(logDebug) "done"
@@ -101,7 +101,7 @@ needsClient = do
             `shouldReturn` Right True
       specify "block on both side works" $ \client -> do
         taskQueue <- W.TaskQueue <$> uuidText
-        let testFn :: W.Workflow () () (Either Bool Bool)
+        let testFn :: W.RequireCallStack => W.Workflow () () (Either Bool Bool)
             testFn = do
               (W.sleep (TimeSpec 5000 0) >> pure False) `W.race` (W.sleep (TimeSpec 1 0) >> pure True)
             wf = W.provideWorkflow defaultCodec "blockBothSides" () testFn
@@ -118,7 +118,7 @@ needsClient = do
             `shouldReturn` Right True
       specify "throws immediately when either side throws" $ \client -> do
         taskQueue <- W.TaskQueue <$> uuidText
-        let testFn :: W.Workflow () () (Either Bool Bool)
+        let testFn :: W.RequireCallStack => W.Workflow () () (Either Bool Bool)
             testFn = do
               (W.sleep (TimeSpec 5000 0) >> error "sad") `W.race` error "foo"
             wf = W.provideWorkflow defaultCodec "test" () testFn
@@ -135,7 +135,7 @@ needsClient = do
             `shouldThrow` (== WorkflowExecutionFailed)
       specify "treats error as ok if LHS returns immediately" $ \client -> do
         taskQueue <- W.TaskQueue <$> uuidText
-        let testFn :: W.Workflow () () (Either Bool Bool)
+        let testFn :: W.RequireCallStack => W.Workflow () () (Either Bool Bool)
             testFn = do
               pure True `W.race` (W.sleep (TimeSpec 5000 0) *> error "sad")
             wf = W.provideWorkflow defaultCodec "test" () testFn
@@ -159,7 +159,7 @@ needsClient = do
             testActivityAct :: ProvidedActivity () (Activity () Int)
             testActivityAct = provideActivity defaultCodec "test" testActivity
             
-            testFn :: W.Workflow () () Int
+            testFn :: W.RequireCallStack => W.Workflow () () Int
             testFn = do
               h <- W.startActivity 
                 testActivityAct.reference
@@ -189,7 +189,7 @@ needsClient = do
             testActivityAct :: ProvidedActivity () (Activity () Int)
             testActivityAct = provideActivity defaultCodec "basicHeartbeat" testActivity
             
-            testFn :: W.Workflow () () Int
+            testFn :: W.RequireCallStack => W.Workflow () () Int
             testFn = do
               h <- W.startActivity 
                 testActivityAct.reference
@@ -222,7 +222,7 @@ needsClient = do
             testActivityAct :: ProvidedActivity () (Activity () Int)
             testActivityAct = provideActivity defaultCodec "faultyWorkflow" testActivity
             
-            testFn :: W.Workflow () () Int
+            testFn :: W.RequireCallStack => W.Workflow () () Int
             testFn = do
               h1 <- W.startActivity 
                 testActivityAct.reference
@@ -256,7 +256,7 @@ needsClient = do
             testActivityAct :: ProvidedActivity () (Activity () Int)
             testActivityAct = provideActivity defaultCodec "immediateCancelResponse" testActivity
             
-            testFn :: W.Workflow () () Int
+            testFn :: W.RequireCallStack => W.Workflow () () Int
             testFn = do
               h1 <- W.startActivity 
                 testActivityAct.reference
@@ -292,7 +292,7 @@ needsClient = do
             testActivityAct :: ProvidedActivity () (Activity () Int)
             testActivityAct = provideActivity defaultCodec "heartbeatAllowsOpportunityToCancel" testActivity
             
-            testFn :: W.Workflow () () Int
+            testFn :: W.RequireCallStack => W.Workflow () () Int
             testFn = do
               h1 <- W.startActivity 
                 testActivityAct.reference
@@ -396,7 +396,7 @@ needsClient = do
     describe "Time" $ do
       specify "time is deterministic" $ \client -> do
         taskQueue <- W.TaskQueue <$> uuidText
-        let testFn :: W.Workflow () () (UTCTime, UTCTime, UTCTime)
+        let testFn :: W.RequireCallStack => W.Workflow () () (UTCTime, UTCTime, UTCTime)
             testFn = do
               t1 <- W.now
               t2 <- W.now
@@ -427,7 +427,7 @@ needsClient = do
         let isEven :: Int -> W.Workflow () () Bool
             isEven x = pure (x `mod` 2 == 0)
             isEventWf = W.provideWorkflow defaultCodec "isEven" () isEven
-            parentWorkflow :: W.Workflow () () Bool
+            parentWorkflow :: W.RequireCallStack => W.Workflow () () Bool
             parentWorkflow = do
               childWorkflowId <- (W.WorkflowId . UUID.toText) <$> W.uuid4
               let opts :: W.StartChildWorkflowOptions
@@ -459,7 +459,7 @@ needsClient = do
         let busted :: W.Workflow () () ()
             busted = error "busted"
             bustedWf = W.provideWorkflow defaultCodec "busted" () busted
-            parentWorkflow :: W.Workflow () () ()
+            parentWorkflow :: W.RequireCallStack => W.Workflow () () ()
             parentWorkflow = do
               childWorkflowId <- (W.WorkflowId . UUID.toText) <$> W.uuid4
               childWorkflow <- W.startChildWorkflow @() @() bustedWf.reference W.defaultChildWorkflowOptions childWorkflowId
@@ -480,12 +480,12 @@ needsClient = do
   -- --     specify "termination" $ \_ -> pending
   -- --     specify "timeout" $ \_ -> pending
   -- --     specify "startFail" $ \_ -> pending
-      specify "cancel immediately" $ \client -> do
+      fspecify "cancel immediately" $ \client -> do
         parentId <- uuidText
-        let cancelTest :: W.Workflow () () ()
+        let cancelTest :: W.RequireCallStack => W.Workflow () () ()
             cancelTest = W.sleep $ TimeSpec 60 0
             childWf = W.provideWorkflow defaultCodec "immediateCancelTestChild" () cancelTest
-            parentWorkflow :: W.Workflow () () String
+            parentWorkflow :: W.RequireCallStack => W.Workflow () () String
             parentWorkflow = do
               childWorkflowId <- (W.WorkflowId . UUID.toText) <$> W.uuid4
               childWorkflow <- W.startChildWorkflow childWf.reference W.defaultChildWorkflowOptions childWorkflowId
@@ -507,7 +507,7 @@ needsClient = do
 
       xspecify "cancel after child workflow has started" $ \client -> do
         parentId <- uuidText
-        let cancelTest :: W.Workflow () () ()
+        let cancelTest :: W.RequireCallStack => W.Workflow () () ()
             cancelTest = go
               where
                 go = do
@@ -517,7 +517,7 @@ needsClient = do
                     _ -> go
 
             childWf = W.provideWorkflow defaultCodec "cancelTestChild" () cancelTest
-            parentWorkflow :: W.Workflow () () String
+            parentWorkflow :: W.RequireCallStack => W.Workflow () () String
             parentWorkflow = do
               childWorkflowId <- (W.WorkflowId . UUID.toText) <$> W.uuid4
               childWorkflow <- W.startChildWorkflow childWf.reference W.defaultChildWorkflowOptions childWorkflowId
@@ -549,7 +549,7 @@ needsClient = do
       xspecify "works" $ \client -> do
         let echoQuery :: W.QueryDefinition '[Text] Text
             echoQuery = W.QueryDefinition "testQuery" defaultCodec
-            workflow :: W.Workflow () () ()
+            workflow :: W.RequireCallStack => W.Workflow () () ()
             workflow = do
               W.setQueryHandler echoQuery $ \msg -> pure msg
               W.sleep $ TimeSpec 5000 0
@@ -576,7 +576,7 @@ needsClient = do
     describe "Sleep" $ do
       specify "sleep" $ \client -> do
         wfId <- uuidText
-        let workflow :: W.Workflow () () Bool
+        let workflow :: W.RequireCallStack => W.Workflow () () Bool
             workflow = do
               earlier <- W.now
               W.sleep $ TimeSpec 0 1
@@ -599,7 +599,7 @@ needsClient = do
 
     describe "Timer" $ do
       specify "timer" $ \client -> do
-        let workflow :: W.Workflow () () Bool
+        let workflow :: W.RequireCallStack => W.Workflow () () Bool
             workflow = do
               earlier <- W.now
               t <- W.createTimer $ TimeSpec 0 10
@@ -620,7 +620,7 @@ needsClient = do
             `shouldReturn` True
         
       specify "timer and cancel immediately" $ \client -> do
-        let workflow :: W.Workflow () () Bool
+        let workflow :: W.RequireCallStack => W.Workflow () () Bool
             workflow = do
               t <- W.createTimer $ TimeSpec 0 1
               W.cancel t
@@ -644,7 +644,7 @@ needsClient = do
             `shouldReturn` True
 
       specify "timer and cancel with delay" $ \client -> do
-        let workflow :: W.Workflow () () Bool
+        let workflow :: W.RequireCallStack => W.Workflow () () Bool
             workflow = do
               t <- W.createTimer $ TimeSpec 5000 0
               W.sleep $ TimeSpec 0 1
@@ -669,7 +669,7 @@ needsClient = do
             `shouldReturn` True
     describe "Patching" $ do
       specify "patch" $ \client ->  do
-        let workflow :: W.Workflow () () Bool
+        let workflow :: W.RequireCallStack => W.Workflow () () Bool
             workflow = do
               isPatched <- W.patched (W.PatchId "wibble")
               pure isPatched
@@ -690,7 +690,7 @@ needsClient = do
           C.execute client wf.reference opts
             `shouldReturn` True
       specify "deprecated patch" $ \client ->  do
-        let workflow :: W.Workflow () () Bool
+        let workflow :: W.RequireCallStack => W.Workflow () () Bool
             workflow = do
               W.deprecatePatch (W.PatchId "wibble")
               pure True

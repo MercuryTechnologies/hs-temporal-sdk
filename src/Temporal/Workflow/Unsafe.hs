@@ -13,6 +13,7 @@ import Data.ProtoLens
 import Data.Text (Text)
 import qualified Data.Text as Text
 import GHC.IO.Exception (BlockedIndefinitelyOnSTM(..))
+import GHC.Stack
 import GHC.TypeLits
 import Lens.Family2
 import System.Clock (TimeSpec)
@@ -33,6 +34,7 @@ import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands
   )
 import qualified Control.Exception
 import Text.Printf
+import RequireCallStack
 
 withRunId :: Text -> InstanceM env st Text
 withRunId arg = do
@@ -117,8 +119,8 @@ withRunId arg = do
 --
 -- We hand this back to
 -- emptyRunQueue.
-runWorkflow :: forall env st a. Workflow env st a -> InstanceM env st a
-runWorkflow wf = do
+runWorkflow :: forall env st a. HasCallStack => (RequireCallStackImpl => Workflow env st a) -> InstanceM env st a
+runWorkflow wf = provideCallStack $ do
   inst <- ask
   let env = inst.workflowInstanceContinuationEnv
   result@IVar{ivarRef = resultRef} <- newIVar -- where to put the final result

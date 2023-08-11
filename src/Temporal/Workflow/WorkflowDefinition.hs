@@ -45,6 +45,7 @@ import Temporal.Common
 import Temporal.Payload
 import Temporal.Workflow.WorkflowInstance
 import Temporal.Worker.Types
+import RequireCallStack
 
 -- | A 'KnownWorkflow' is a handle that contains all the information needed to start a 
 -- Workflow either as a child workflow or as a top-level workflow via a 'Client'.
@@ -98,14 +99,14 @@ type IsProvidedWorkflow codec env st f =
 -- >   () -- initial state
 -- >   myWorkflow -- the workflow function
 provideWorkflow :: forall env st name codec f.
-  (IsProvidedWorkflow codec env st f) => codec -> Text -> st -> f -> ProvidedWorkflow env st f
-provideWorkflow codec name st f = ProvidedWorkflow
+  (IsProvidedWorkflow codec env st f) => codec -> Text -> st -> (RequireCallStackImpl => f) -> ProvidedWorkflow env st f
+provideWorkflow codec name st f = provideCallStack $ ProvidedWorkflow
   { definition = WorkflowDefinition
     { workflowName = name
     , workflowInitialState = st
     , workflowRun = ValidWorkflowFunction 
         codec 
-        f 
+        f
         (applyPayloads 
           codec 
           (Proxy @(ArgsOf f)) 
