@@ -26,7 +26,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Vector (Vector)
 import Data.Word (Word32)
-import GHC.Stack (CallStack, HasCallStack, callStack, withFrozenCallStack)
+import GHC.Stack (CallStack, HasCallStack, callStack, withFrozenCallStack, popCallStack)
 import Control.Concurrent.STM.TVar (TVar)
 import Lens.Family2
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
@@ -440,6 +440,18 @@ data ContinuationEnv env st = ContinuationEnv
   , activationResults :: {-# UNPACK #-} !(TVar [ActivationResult env st])
   }
 
+-- Bit of a hack. This needs to be called for each workflow activity in the official SDK
+updateCallStack :: RequireCallStack => InstanceM env st ()
+updateCallStack = do
+  inst <- ask
+  writeIORef inst.workflowCallStack $ popCallStack callStack
+
+updateCallStackW :: RequireCallStack => Workflow env st ()
+updateCallStackW = Workflow $ \_ -> do
+  inst <- ask
+  writeIORef inst.workflowCallStack $ popCallStack callStack
+  pure $ Done ()
+
 -- | Values that were blocking waiting for an activation, and have now
 -- been unblocked.  The worker adds these to a queue ('activationResults') using
 -- 'putResult'; the scheduler collects them from the queue and unblocks
@@ -466,7 +478,7 @@ trace_ _ = id
 --
 -- The 'st' state may be used to store information that is needed to respond to
 -- any queries or signals that are received by the Workflow execution.
-newtype Workflow env st a = Workflow { unWorkflow :: (RequireCallStack => ContinuationEnv env st -> InstanceM env st (Result env st a)) }
+newtype Workflow env st a = Workflow { unWorkflow :: (ContinuationEnv env st -> InstanceM env st (Result env st a)) }
 
 instance Functor (Workflow env st) where
   fmap f (Workflow m) = Workflow $ \env -> do

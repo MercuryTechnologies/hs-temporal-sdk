@@ -128,7 +128,8 @@ runWorkflow wf = provideCallStack $ do
     -- Run a job, and put its result in the given IVar
     schedule :: ContinuationEnv env st -> JobList env st -> Workflow env st b -> IVar env st b -> InstanceM env st ()
     schedule env@ContinuationEnv{..} rq wf ivar@IVar{ivarRef = !ref} = do
-      logMsg <- withRunId (Text.pack $ printf "schedule: %d\n" (1 + lengthJobList rq))
+      cs <- readIORef inst.workflowCallStack
+      logMsg <- withRunId (Text.pack $ printf "schedule: %d\n%s" (1 + lengthJobList rq) $ prettyCallStack cs)
       $logDebug logMsg
       let {-# INLINE result #-}
           result r = do

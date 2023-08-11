@@ -221,6 +221,7 @@ handleActivation activation = do
                   workflowInfo 
                   worker.workerWorkflowState.workerEnv 
                   definition
+                addStackTraceHandler inst
                 Just <$> upsertWorkflowInstance runId_ inst
           pure $ join (vExistingInstance V.!? 0)
       

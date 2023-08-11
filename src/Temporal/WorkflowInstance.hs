@@ -13,6 +13,7 @@ module Temporal.WorkflowInstance
   , nextExternalSignalSequence
   , nextTimerSequence
   , nextConditionSequence
+  , addStackTraceHandler
   ) where
 
 import Control.Applicative
@@ -26,6 +27,7 @@ import Data.Hashable (Hashable)
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import Data.List
+import qualified Data.Map.Strict as Map
 import Data.Maybe
 import Data.ProtoLens
 import Data.Time.Clock (UTCTime)
@@ -33,11 +35,12 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as Text
+import qualified Data.Text.Encoding as Text
 import Data.IORef (IORef)
 import Data.Vector (Vector)
 import qualified Data.Vector as V
 import Data.Word (Word32, Word64)
-import GHC.Stack (emptyCallStack)
+import GHC.Stack (HasCallStack, emptyCallStack, callStack, prettyCallStack)
 import Lens.Family2
 import System.Clock (TimeSpec(..))
 import System.Random (mkStdGen)
@@ -122,12 +125,33 @@ create workflowCompleteActivation info workflowEnv workflowInstanceDefinition = 
   workflowCommands <- newTVarIO $ Reversed []
   workflowState <- newIORef workflowInstanceDefinition.workflowInitialState
   workflowSignalHandlers <- newIORef mempty
-  workflowQueryHandlers <- newIORef mempty
   workflowCallStack <- newIORef emptyCallStack
+  workflowQueryHandlers <- newIORef mempty
   workflowInstanceInfo <- newIORef info
   workflowInstanceContinuationEnv <- ContinuationEnv <$> newIORef JobNil <*> newTVarIO []
   workflowCancellationState <- newIORef CancellationNotRequested
   pure WorkflowInstance {..}
+
+-- | This is a special query handler that is added to every workflow instance.
+--
+-- It allows the Temporal UI to query the current call stack to see what is currently happening
+-- in the workflow.
+addStackTraceHandler :: MonadUnliftIO m => WorkflowInstance env st -> m ()
+addStackTraceHandler inst = do
+  let specialHandler = \qId _ -> do
+        cs <- readIORef inst.workflowCallStack
+        let callStackPayload = RawPayload (Text.encodeUtf8 $ Text.pack $ prettyCallStack cs) (Map.singleton "encoding" "text/plain")
+        let cmd = defMessage
+              & Command.respondToQuery .~
+                ( defMessage
+                  & Command.queryId .~ (rawQueryId qId)
+                  & Command.succeeded .~
+                    ( defMessage
+                      & Command.response .~ convertToProtoPayload callStackPayload
+                    )
+                )
+        addCommand inst cmd
+  modifyIORef' inst.workflowQueryHandlers (HashMap.insert (Just "__stack_trace") specialHandler)
 
 -- | This should never raise an exception, but instead catch all exceptions
 -- and set as completion failure.
@@ -267,9 +291,30 @@ applyUpdateRandomSeed updateRandomSeed = do
   let (WorkflowGenM genRef) = inst.workflowRandomnessSeed
   writeIORef genRef (mkStdGen $ fromIntegral $ updateRandomSeed ^. Activation.randomnessSeed)
 
-applyQueryWorkflow :: QueryWorkflow -> InstanceM env st ()
+applyQueryWorkflow :: HasCallStack => QueryWorkflow -> InstanceM env st ()
 applyQueryWorkflow queryWorkflow = do
-  throwIO $ RuntimeError "QueryWorkflow not implemented"
+  inst <- ask
+  handles <- readIORef inst.workflowQueryHandlers
+  let handlerOrDefault = 
+        HashMap.lookup (Just (queryWorkflow ^. Activation.queryType)) handles <|>
+        HashMap.lookup Nothing handles
+  case handlerOrDefault of
+    Nothing -> do
+      $(logWarn) $ Text.pack ("No query handler found for query: " <> show (queryWorkflow ^. Activation.queryType))
+      let cmd = defMessage & Command.respondToQuery .~
+            ( defMessage
+              & Command.queryId .~ (queryWorkflow ^. Activation.queryId)
+              & Command.failed .~ 
+                (defMessage 
+                  & F.message .~ "No query handler found for query"
+                  -- & Command.source .~ "Temporal.WorkflowInstance.applyQueryWorkflow"
+                  & F.stackTrace .~ (Text.pack $ prettyCallStack callStack)
+                )
+            )
+      addCommand inst cmd
+    Just h -> liftIO $ h 
+      (QueryId $ queryWorkflow ^. Activation.queryId)
+      (fmap convertFromProtoPayload (queryWorkflow ^. Command.vec'arguments))
   -- where
   --   runQuery = do
   --     let baseCommand = defMessage & Activation.respondToQuery . Activation.queryId .~ (queryWorkflow ^. Activation.queryId)
