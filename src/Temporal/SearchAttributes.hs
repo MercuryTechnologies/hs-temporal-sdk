@@ -89,6 +89,7 @@ data SearchAttributeType
   -- - As a Keyword it would be matched only by ProductId = "2dd29ab7-2dd8-4668-83e0-89cae261cfb1"
   -- - As a Text it would be matched by ProductId = 2dd8, which could cause unwanted matches.
   | KeywordList [Text]
+  deriving (Show, Eq)
 
 instance A.ToJSON SearchAttributeType where
   toJSON (Bool b) = A.toJSON b

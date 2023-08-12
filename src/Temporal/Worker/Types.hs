@@ -778,6 +778,3 @@ data QueryDefinition (args :: [Type]) (result :: Type) = forall codec.
 
 convertToProtoMemo :: Map Text RawPayload -> Memo
 convertToProtoMemo m = defMessage & Message.fields .~ fmap convertToProtoPayload m
-
-convertToProtoSearchAttributes :: Map Text RawPayload -> SearchAttributes
-convertToProtoSearchAttributes m = defMessage & Message.indexedFields .~ fmap convertToProtoPayload m

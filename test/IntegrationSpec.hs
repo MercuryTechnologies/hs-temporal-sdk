@@ -16,9 +16,12 @@ import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.ByteString (ByteString)
+import Data.Int
 import Data.ProtoLens
 import Data.Text (Text)
 import Data.Time.Clock (UTCTime)
+import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as Map
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
 import System.Clock
@@ -32,6 +35,7 @@ import Temporal.Activity
 import Temporal.Payload
 import Temporal.Worker
 import Temporal.Runtime
+import Temporal.SearchAttributes
 import System.IO.Unsafe
 import System.Timeout (timeout)
 
@@ -759,6 +763,69 @@ needsClient = do
               }
         C.execute client wf.reference opts
           `shouldReturn` "readWorkflowInfo"
+
+  -- Note, needs the temporal operator to have mapped these attributes up-front:
+  -- >  temporal operator search-attribute create --name attr1 --type Bool --namespace test
+  -- > temporal operator search-attribute create --name attr2 --type Int --namespace test
+  --
+  -- Until we have a way to do this in the SDK, we can't test this without manual intervention.
+  describe "Search Attributes" $ do
+    specify "can read search attributes set at start" $ \client -> do
+      taskQueue <- W.TaskQueue <$> uuidText
+      let workflow :: W.Workflow () () (Map Text SearchAttributeType)
+          workflow = do
+            i <- W.info
+            pure (i.searchAttributes :: Map Text SearchAttributeType)
+          wf = W.provideWorkflow defaultCodec "readWorkflowInfo" () workflow
+          conf = configure () () $ do
+            setNamespace $ W.Namespace "test"
+            setTaskQueue taskQueue
+            addWorkflow wf
+      withWorker conf $ do
+        wfId <- uuidText
+        let initialAttrs = Map.fromList
+              [ ("attr1", toSearchAttribute True)
+              , ("attr2", toSearchAttribute (4 :: Int64))
+              ]
+            opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
+              { C.timeouts = C.TimeoutOptions
+                  { C.runTimeout = Just $ TimeSpec 4 0
+                  , C.executionTimeout = Nothing
+                  , C.taskTimeout = Nothing
+                  }
+              , C.searchAttributes = initialAttrs
+              }
+        C.execute client wf.reference opts
+          `shouldReturn` initialAttrs
+    specify "can read search attributes set at start" $ \client -> do
+      taskQueue <- W.TaskQueue <$> uuidText
+      let expectedAttrs = Map.fromList
+              [ ("attr1", toSearchAttribute True)
+              , ("attr2", toSearchAttribute (4 :: Int64))
+              ]
+          workflow :: MyWorkflow (Map Text SearchAttributeType)
+          workflow = do
+            W.upsertSearchAttributes expectedAttrs
+            i <- W.info
+            pure (i.searchAttributes :: Map Text SearchAttributeType)
+          wf = W.provideWorkflow defaultCodec "upsertWorkflowInfo" () workflow
+          conf = configure () () $ do
+            setNamespace $ W.Namespace "test"
+            setTaskQueue taskQueue
+            addWorkflow wf
+      withWorker conf $ do
+        wfId <- uuidText
+        let 
+            opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
+              { C.timeouts = C.TimeoutOptions
+                  { C.runTimeout = Just $ TimeSpec 4 0
+                  , C.executionTimeout = Nothing
+                  , C.taskTimeout = Nothing
+                  }
+              }
+        C.execute client wf.reference opts
+          `shouldReturn` expectedAttrs
+    
 
   --   describe "WorkflowOptions" $ do
   --     specify "passed correctly with defaults" pending

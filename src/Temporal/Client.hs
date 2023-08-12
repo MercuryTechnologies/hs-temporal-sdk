@@ -83,6 +83,7 @@ import UnliftIO
 import Unsafe.Coerce
 import Data.ProtoLens (Message(defMessage))
 import Temporal.Payload (convertToProtoPayload)
+import Temporal.SearchAttributes
 ---------------------------------------------------------------------------------
 -- WorkflowClient stuff
 
@@ -334,7 +335,7 @@ data WorkflowStartOptions = WorkflowStartOptions
   , retry :: Maybe RetryPolicy
   , cronSchedule :: Maybe Text
   , memo :: !(Map Text RawPayload)
-  , searchAttributes :: !(Map Text RawPayload)
+  , searchAttributes :: !(Map Text SearchAttributeType)
   , headers :: !(Map Text RawPayload)
   , timeouts :: TimeoutOptions
   , requestEagerExecution :: Bool
@@ -399,7 +400,7 @@ startFromPayloads c k@(KnownWorkflow codec _ _ _) opts payloads = liftIO $ do
         & WF.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retry)
         & WF.cronSchedule .~ maybe "" Prelude.id opts.cronSchedule
         & WF.memo .~ (convertToProtoMemo opts.memo)
-        & WF.searchAttributes .~ (convertToProtoSearchAttributes opts.searchAttributes)
+        & WF.searchAttributes .~ searchAttributesToProto opts.searchAttributes
     --     TODO Not sure how to use these yet
         & WF.header .~ (headerToProto $ fmap convertToProtoPayload opts.headers)
         & WF.requestEagerExecution .~ opts.requestEagerExecution

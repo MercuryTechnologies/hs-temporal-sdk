@@ -99,7 +99,8 @@ test-suite temporal-sdk-tests
     time,
     unliftio,
     if-instance,
-    proto-lens
+    proto-lens,
+    containers
   main-is: Main.hs
   hs-source-dirs: test
   other-modules:
