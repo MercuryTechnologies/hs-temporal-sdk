@@ -162,6 +162,7 @@ import System.Random.Stateful
 import Temporal.Common
 import Temporal.Exception
 import Temporal.Payload
+import Temporal.SearchAttributes
 import Temporal.Worker.Types
 import Temporal.Workflow.Unsafe
 import Temporal.WorkflowInstance
@@ -749,18 +750,18 @@ memoValue k = do
 -- | Updates this Workflow's Search Attributes by merging the provided searchAttributes with the existing Search Attributes
 --
 -- Using this function will overwrite any existing Search Attributes with the same key.
-upsertSearchAttributes :: RequireCallStack => Map Text Data.Aeson.Value -> Workflow env st ()
+upsertSearchAttributes :: RequireCallStack => Map Text SearchAttributeType -> Workflow env st ()
 upsertSearchAttributes values = ilift $ do
   updateCallStack
   inst <- ask
   addCommand inst cmd
-  -- TODO, should we be updating the search attributes here for the WorkflowInstance?
+  modifyIORef' inst.workflowInstanceInfo $ \(info :: Info) ->
+    (info { searchAttributes = info.searchAttributes <> values } :: Info)
   where
     cmd = defMessage & Command.upsertWorkflowSearchAttributes .~ 
       ( defMessage
-        & Command.searchAttributes .~ mapValues
+        & Command.searchAttributes .~ fmap (convertToProtoPayload . encode JSON) values
       )
-    mapValues = fmap (convertToProtoPayload . (\x -> RawPayload x mempty) . L.toStrict . Data.Aeson.encode) values
 
 -- | Current time from the workflow perspective.
 --

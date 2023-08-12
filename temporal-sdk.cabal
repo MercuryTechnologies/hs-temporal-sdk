@@ -22,6 +22,7 @@ library
     async,
     unliftio,
     lens-family,
+    scientific,
     uuid,
     uuid-types,
     stm,
@@ -73,6 +74,7 @@ library
     Temporal.Payload,
     -- Temporal.Payload.TH,
     -- Temporal.Schedule,
+    Temporal.SearchAttributes,
     Temporal.Workflow,
     Temporal.Workflow.Saga,
     Temporal.Worker

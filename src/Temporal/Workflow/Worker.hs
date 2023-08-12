@@ -13,9 +13,11 @@ import Temporal.Core.Client
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
 import Temporal.Internal.JobPool
+import Temporal.Payload
 import Temporal.Worker.Types
 import Temporal.WorkflowInstance
 import Temporal.Workflow.Unsafe
+import Temporal.SearchAttributes
 import UnliftIO
 import Lens.Family2
 import Lens.Family2.Stock
@@ -196,12 +198,9 @@ handleActivation activation = do
                   , executionTimeout = fmap timespecFromDuration $ startWorkflow ^. Activation.maybe'workflowExecutionTimeout
                   , namespace = Namespace $ Core.namespace $ Core.getWorkerConfig worker.workerCore
                   , parent = parentInfo
-                  -- TODO
-                  , headers = mempty
-                  -- TODO
-                  , rawMemo = mempty
-                  -- TODO
-                  , searchAttributes = mempty
+                  , headers = startWorkflow ^. Activation.headers . to (fmap convertFromProtoPayload)
+                  , rawMemo = startWorkflow ^. Activation.memo . Message.fields . to (fmap convertFromProtoPayload)
+                  , searchAttributes = startWorkflow ^. Activation.searchAttributes . Message.indexedFields . to searchAttributesFromProto
                   , retryPolicy = retryPolicyFromProto <$> startWorkflow ^. Activation.maybe'retryPolicy
                   , runId = RunId $ activation ^. CommonProto.runId
                   , runTimeout = fmap timespecFromDuration $ startWorkflow ^. Activation.maybe'workflowRunTimeout

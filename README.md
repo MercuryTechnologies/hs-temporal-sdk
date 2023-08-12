@@ -1,6 +1,11 @@
 # Temporal Haskell SDK
 
-Pre-alpha
+This SDK requires Temporal Server >= 1.20
+
+Tested GHC versions:
+
+- GHC 9.2.x
+- GHC 9.6.x
 
 ## Notes
 
@@ -11,6 +16,8 @@ Pre-alpha
 - `nix build .` builds the Haskell program.
 - `nix build .#hs_temporal_bridge` builds the Rust library.
 - `nix develop` enters the development Shell for the Haskell program.
+  - `stack` supports a GHC 9.2.x build environment
+  - `cabal` supports a GHC 9.6.x build environment
 
 ## Brainstorm
 

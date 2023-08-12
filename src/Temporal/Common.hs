@@ -160,12 +160,6 @@ workflowIdReusePolicyToProto = \case
   WorkflowIdReusePolicyRejectDuplicate -> Workflow.WORKFLOW_ID_REUSE_POLICY_REJECT_DUPLICATE
   WorkflowIdReusePolicyTerminateIfRunning -> Workflow.WORKFLOW_ID_REUSE_POLICY_TERMINATE_IF_RUNNING
 
-searchAttributesToProto :: Map.Map Text Message.Payload -> Message.SearchAttributes
-searchAttributesToProto searchAttrs = defMessage & Message.indexedFields .~ searchAttrs
-
-searchAttributesFromProto :: Message.SearchAttributes -> Map.Map Text Message.Payload
-searchAttributesFromProto = view Message.indexedFields
-
 memoAttributesToProto :: Map.Map Text Message.Payload -> Message.Memo
 memoAttributesToProto memoAttrs = defMessage & Message.fields .~ memoAttrs
 

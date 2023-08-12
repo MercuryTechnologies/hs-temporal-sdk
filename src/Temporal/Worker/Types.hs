@@ -53,6 +53,7 @@ import qualified Temporal.Core.Client as Core
 import Temporal.Exception
 import Temporal.Payload hiding (Payload)
 import Temporal.Internal.JobPool (SomeAsync)
+import Temporal.SearchAttributes
 import System.Clock (TimeSpec)
 import System.Random 
   ( StdGen
@@ -132,14 +133,14 @@ data Info = Info
   , continuedRunId :: Maybe RunId
   , cronSchedule :: Maybe Text
   , executionTimeout :: Maybe TimeSpec
-  , headers :: HashMap Text Text
+  , headers :: Map Text RawPayload
   , namespace :: Namespace
   , parent :: Maybe ParentInfo
   , rawMemo :: Map Text RawPayload
   , retryPolicy :: Maybe RetryPolicy
   , runId :: RunId
   , runTimeout :: Maybe TimeSpec
-  , searchAttributes :: Map Text RawPayload
+  , searchAttributes :: Map Text SearchAttributeType
   , startTime :: TimeSpec -- Consider using UTCTime?
   , taskQueue :: TaskQueue
   , taskTimeout :: TimeSpec
