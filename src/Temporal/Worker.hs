@@ -274,7 +274,7 @@ startWorker client conf = do
 
 waitWorker :: MonadIO m => Temporal.Worker.Worker -> m ()
 waitWorker worker = void $ do
-  -- TODO these need to account for expected PollShutdown calls
+  link2 (workerWorkflowLoop worker) (workerActivityLoop worker)
   _ <- waitCatch (workerWorkflowLoop worker)
   _ <- waitCatch (workerActivityLoop worker)
   pure ()
@@ -283,8 +283,7 @@ shutdown :: MonadIO m => Temporal.Worker.Worker -> m ()
 shutdown worker = liftIO $ do
   Core.initiateShutdown worker.workerCore
 
-  _ <- waitCatch worker.workerWorkflowLoop
-  _ <- waitCatch worker.workerActivityLoop
+  waitWorker worker
 
   err' <- Core.finalizeShutdown worker.workerCore
   case err' of

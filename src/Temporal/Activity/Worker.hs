@@ -131,7 +131,6 @@ applyActivityTaskStart tt msg = mask_ $ do
                       ( defMessage
                         -- & F.scheduledEventId .~ _
                         -- & F.startedEventId .~ _
-                        -- TODO, not clear on what this should be
                         & F.identity .~ Core.identity (Core.clientConfig $ Core.getWorkerClient w.workerCore)
                         & F.activityType .~ (defMessage & P.name .~ info.activityType)
                         & F.activityId .~ (msg ^. AT.activityId)
@@ -208,18 +207,3 @@ applyActivityTaskCancel tt msg = do
   running <- readTVarIO w.workerActivityState.runningActivities
   forM_ (HashMap.lookup tt running) $ \a ->
     cancel a `finally` atomically (modifyTVar' w.workerActivityState.runningActivities (HashMap.delete tt))
-
-
-
-
-
-
-
-
-
--- TODO heartbeat utils
-
--- runActivityWorker = forever $ do
---   task <- Core.pollActivityTask worker
---   result <- runTask task
---   completeActivityTask worker result

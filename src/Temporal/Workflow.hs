@@ -73,8 +73,8 @@ module Temporal.Workflow
   -- * Workflow metadata
   -- 
   , info
-  , memo
-  , memoValue
+  , getMemoValues
+  , lookupMemoValue
   , upsertSearchAttributes
   -- * Versioning workflows
   -- $versioning
@@ -169,6 +169,7 @@ import Temporal.WorkflowInstance
 import Temporal.Workflow.WorkflowInstance
 import Temporal.Workflow.WorkflowDefinition
 import qualified Temporal.Core.Client as Core
+import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Message
 import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as Common
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation as Activation
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
@@ -198,9 +199,9 @@ data ContinueAsNewOptions = ContinueAsNewOptions
   , runTimeout :: Maybe TimeSpec
   , taskTimeout :: Maybe TimeSpec
   , retryPolicy :: Maybe RetryPolicy
-  -- , TODO memo :: 
-  -- , TODO searchAttributes :: Maybe (Map Text Payload)
-  -- , TODO headers
+  , memo :: Map Text RawPayload
+  , searchAttributes :: Map Text SearchAttributeType
+  , headers :: Map Text RawPayload
   }
 
 defaultContinueAsNewOptions :: ContinueAsNewOptions
@@ -209,6 +210,9 @@ defaultContinueAsNewOptions = ContinueAsNewOptions
   , runTimeout = Nothing
   , taskTimeout = Nothing
   , retryPolicy = Nothing
+  , memo = mempty
+  , searchAttributes = mempty
+  , headers = mempty
   }
 
 data StartActivityOptions = StartActivityOptions
@@ -347,7 +351,7 @@ data StartChildWorkflowOptions = StartChildWorkflowOptions
   , retryPolicy :: Maybe RetryPolicy
   , cronSchedule :: Maybe Text
   , initialMemo :: Map Text Proto.Temporal.Api.Common.V1.Message.Payload
-  , searchAttributes :: Map Text Proto.Temporal.Api.Common.V1.Message.Payload
+  , searchAttributes :: Map Text SearchAttributeType 
   , headers :: Map Text Proto.Temporal.Api.Common.V1.Message.Payload
   , workflowIdReusePolicy :: WorkflowIdReusePolicy
   }
@@ -564,7 +568,7 @@ startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId =
             & Command.cronSchedule .~ fromMaybe "" opts.cronSchedule
             & Command.headers .~ opts.headers
             & Command.memo .~ opts.initialMemo
-            & Command.searchAttributes .~ opts.searchAttributes
+            & Command.searchAttributes .~ searchAttributesToProto opts.searchAttributes
             & Command.cancellationType .~ childWorkflowCancellationTypeToProto opts.cancellationType
 
           cmd = defMessage 
@@ -649,7 +653,7 @@ data StartLocalActivityOptions = StartLocalActivityOptions
   -- confirmed. Lang should default this to `WAIT_CANCELLATION_COMPLETED`, even though proto
   -- will default to `TRY_CANCEL` automatically.
   , cancellationType :: ActivityCancellationType
-  -- TODO headers
+  , headers :: Map Text RawPayload
   }
 
 defaultStartLocalActivityOptions :: StartLocalActivityOptions
@@ -661,6 +665,7 @@ defaultStartLocalActivityOptions = StartLocalActivityOptions
   , retryPolicy = Nothing
   , localRetryThreshold = Nothing
   , cancellationType = ActivityCancellationWaitCancellationCompleted
+  , headers = mempty
   }
 
 startLocalActivity 
@@ -735,15 +740,15 @@ info = askInstance >>= (\m -> Workflow $ \_ -> Done <$> m) . readIORef . workflo
 --(ask >>= readIORef) workflowInstanceInfo <$> askInstance
 
 -- | Current workflow's raw memo values.
-memo :: Workflow env st (Map Text RawPayload)
-memo = do
+getMemoValues :: Workflow env st (Map Text RawPayload)
+getMemoValues = do
   details <- info
   pure details.rawMemo
 
 -- | Lookup a memo value by key.
-memoValue :: Text -> Workflow env st (Maybe RawPayload)
-memoValue k = do
-  memoMap <- memo
+lookupMemoValue :: Text -> Workflow env st (Maybe RawPayload)
+lookupMemoValue k = do
+  memoMap <- getMemoValues
   pure $ Map.lookup k memoMap
 
 
@@ -1120,10 +1125,9 @@ continueAsNew k@(KnownWorkflow codec _ _ _) opts = gatherContinueAsNewArgs @env 
       & Command.taskQueue .~ (maybe "" rawTaskQueue opts.taskQueue)
       & Command.arguments .~ (convertToProtoPayload <$> args)
       & Command.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retryPolicy)
-      -- TODO 
-      -- & Command.searchAttributes .~ _
-      -- & Command.headers .~ _
-      -- & Command.memo .~ _
+      & Command.searchAttributes .~ searchAttributesToProto opts.searchAttributes
+      & Command.headers .~ fmap convertToProtoPayload opts.headers
+      & Command.memo .~ fmap convertToProtoPayload opts.memo
       & Command.maybe'workflowTaskTimeout .~ (timespecToDuration <$> opts.taskTimeout)
       & Command.maybe'workflowRunTimeout .~ (timespecToDuration <$> opts.runTimeout)
 

@@ -109,8 +109,8 @@ instance A.FromJSON SearchAttributeType where
     A.Array arr -> KeywordList <$> A.parseJSON x
     _ -> fail "Invalid search attribute type"
 
-searchAttributesToProto :: Map.Map Text SearchAttributeType -> Message.SearchAttributes
-searchAttributesToProto searchAttrs = defMessage & Message.indexedFields .~ fmap (convertToProtoPayload . encode JSON) searchAttrs
+searchAttributesToProto :: Map.Map Text SearchAttributeType -> Map.Map Text Message.Payload
+searchAttributesToProto searchAttrs = fmap (convertToProtoPayload . encode JSON) searchAttrs
 
 searchAttributesFromProto :: Map.Map Text Message.Payload -> Map.Map Text SearchAttributeType
 searchAttributesFromProto fs = 
