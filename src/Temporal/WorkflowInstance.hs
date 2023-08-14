@@ -48,6 +48,7 @@ import Temporal.Common
 import Temporal.Core.Client (Client)
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
+import Temporal.Interceptor
 import Temporal.Payload
 import Temporal.Workflow.Unsafe (runWorkflow, finishWorkflow, addCommand)
 import Temporal.Worker.Types
@@ -130,6 +131,7 @@ create workflowCompleteActivation info workflowEnv workflowInstanceDefinition = 
   workflowInstanceInfo <- newIORef info
   workflowInstanceContinuationEnv <- ContinuationEnv <$> newIORef JobNil <*> newTVarIO []
   workflowCancellationState <- newIORef CancellationNotRequested
+  let workflowInterceptors = interceptorBase
   pure WorkflowInstance {..}
 
 -- | This is a special query handler that is added to every workflow instance.
@@ -547,7 +549,6 @@ runTopLevel handle = do
     -- , Handler $ \CancelledException{..} -> putStrLn "Cancelled Not implemented yet"
     -- , Handler $ \FailureException{..} -> putStrLn "Failure Not implemented yet"
     -- , Handler $ \OperationCancelledException{..} -> putStrLn "OperationCancelled Not implemented yet"
-    -- TODO this is not really domain specific, but since the running task is an async handle, it's an easy hack to get the right behavior
     , Handler $ \WorkflowCancelRequested -> do
         addCommand inst (defMessage & Command.cancelWorkflowExecution .~ defMessage)
         flushCommands

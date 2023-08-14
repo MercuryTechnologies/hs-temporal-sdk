@@ -38,7 +38,8 @@ library
     conduit,
     if-instance,
     annotated-exception,
-    require-callstack
+    require-callstack,
+    hs-opentelemetry-api
 
   default-language: Haskell2010
   default-extensions:
@@ -71,6 +72,7 @@ library
     Temporal.Client,
     Temporal.EphemeralServer,
     Temporal.Exception,
+    Temporal.Interceptor,
     Temporal.Payload,
     -- Temporal.Payload.TH,
     -- Temporal.Schedule,

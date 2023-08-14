@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -195,6 +196,7 @@ data WorkflowInstance env st = WorkflowInstance
   , workflowCompleteActivation :: !(Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
   , workflowInstanceContinuationEnv :: {-# UNPACK #-} !(ContinuationEnv env st)
   , workflowCancellationState :: {-# UNPACK #-} !(IORef CancellationState)
+  , workflowInterceptors :: {-# UNPACK #-} !Interceptors
   -- , disableEagerActivityExecution :: Bool
   }
 
@@ -778,3 +780,55 @@ data QueryDefinition (args :: [Type]) (result :: Type) = forall codec.
 
 convertToProtoMemo :: Map Text RawPayload -> Memo
 convertToProtoMemo m = defMessage & Message.fields .~ fmap convertToProtoPayload m
+
+data Interceptors = Interceptors
+  { workflowInbound :: WorkflowInboundInterceptor
+  , workflowOutbound :: WorkflowOutboundInterceptor
+  , activityInbound :: ActivityInboundInterceptor
+  , activityOutbound :: ActivityOutboundInterceptor
+  }
+
+data WorkflowInboundInterceptor = WorkflowInboundInterceptor 
+  { interceptExecuteWorkflow :: ()
+  , interceptHandleSignal :: ()
+  , interceptHandleQuery :: ()
+  }
+
+data ContinueAsNewInput = ContinueAsNewInput
+  { workflow :: Maybe WorkflowType
+  , args :: Vector RawPayload
+  , taskQueue :: Maybe TaskQueue
+  , runTimeout :: Maybe TimeSpec
+  , taskTimeout :: Maybe TimeSpec
+  , retryPolicy :: Maybe RetryPolicy
+  , memo :: Map Text RawPayload
+  , searchAttributes :: Map Text SearchAttributeType
+  , headers :: Map Text RawPayload
+  -- TODO versioningIntent
+  }
+
+data SignalChildWorkflowInput = SignalChildWorkflowInput
+  { signal :: Text
+  , args :: Vector RawPayload
+  , childWorkflowId :: WorkflowId
+  , headers :: Map Text RawPayload
+  }
+
+data WorkflowOutboundInterceptor = WorkflowOutboundInterceptor
+  { interceptContinueAsNew :: ContinueAsNewInput -> IO ()
+  , interceptInfo :: IO Info
+  , interceptSignalChildWorkflow :: SignalChildWorkflowInput -> IO ()
+  , interceptSignalExternalWorkflow :: SignalExternalWorkflowInput -> IO ()
+  , interceptStartActivity :: StartActivityInput -> IO ActivityHandle
+  , interceptStartChildWorkflow :: StartChildWorkflowInput -> IO (ChildWorkflowHandle env st)
+  , interceptStartLocalActivity :: StartLocalActivityInput -> IO ActivityHandle
+  }
+
+data ActivityInboundInterceptor = ActivityInboundInterceptor
+  { interceptExecuteActivity :: ExecuteActivityInput -> IO a
+  }
+
+data ActivityOutboundInterceptor = ActivityOutboundInterceptor
+  { interceptInfo :: IO Info
+  , interceptHeartbeat :: HeartbeatInput -> IO ()
+  }

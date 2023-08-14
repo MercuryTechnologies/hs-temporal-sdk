@@ -47,7 +47,9 @@ extra-deps:
 - ghc-tcplugin-api-0.10.0.0
 - annotated-exception-0.2.0.3
 - require-callstack-0.1.0.0
-
+- hs-opentelemetry-api-0.0.3.8
+- thread-utils-context-0.3.0.3
+- thread-utils-finalizers-0.1.1.0
 # Override default flag values for local packages and extra-deps
 # flags: {}
 

@@ -36,6 +36,27 @@ packages:
       size: 405
   original:
     hackage: require-callstack-0.1.0.0
+- completed:
+    hackage: hs-opentelemetry-api-0.0.3.8@sha256:ac02b4e6873962eb0eab665666197013291e3435fb10280f8c7c8f1e66bbae47,3593
+    pantry-tree:
+      sha256: 6f5674d48e1ffdef81fb93604c52236e835232b3b843c903d9649c838a13e3a9
+      size: 2986
+  original:
+    hackage: hs-opentelemetry-api-0.0.3.8
+- completed:
+    hackage: thread-utils-context-0.3.0.3@sha256:8ca2ee2b09ce3a17b1b8dff8a440b47badefc9418c22b16383f13127c2852ec8,1671
+    pantry-tree:
+      sha256: 2683cb1443943c9a1159f959092228e91bc1c62678a384652c82d95b955e690a
+      size: 397
+  original:
+    hackage: thread-utils-context-0.3.0.3
+- completed:
+    hackage: thread-utils-finalizers-0.1.1.0@sha256:24944b71d9f1d01695a5908b4a3b44838fab870883114a323336d537995e0a5b,1381
+    pantry-tree:
+      sha256: 8c2c2e2e22c20bf3696ee6f30b50b3a9eeae187a22beb536441eefb0a3f9c549
+      size: 400
+  original:
+    hackage: thread-utils-finalizers-0.1.1.0
 snapshots:
 - completed:
     sha256: dcf4fc28f12d805480ddbe8eb8c370e11db12f0461d0110a4240af27ac88d725
