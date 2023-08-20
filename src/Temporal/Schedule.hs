@@ -15,7 +15,6 @@ import Data.Int (Int32)
 import Data.Vector (Vector)
 import Data.Text (Text)
 import Data.Time.Clock (UTCTime)
-import System.Clock
 
 ---------------------------------------------------------------------------------
 -- ScheduleClient

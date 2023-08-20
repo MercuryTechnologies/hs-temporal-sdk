@@ -42,7 +42,6 @@ import qualified Data.Vector as V
 import Data.Word (Word32, Word64)
 import GHC.Stack (HasCallStack, emptyCallStack, callStack, prettyCallStack)
 import Lens.Family2
-import System.Clock (TimeSpec(..))
 import System.Random (mkStdGen)
 import Temporal.Common
 import Temporal.Core.Client (Client)
@@ -97,6 +96,7 @@ import qualified Proto.Temporal.Api.Failure.V1.Message as F
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import UnliftIO
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Core
+import Data.Time.Clock.System (SystemTime(..))
 
 
 create :: MonadLoggerIO m 
@@ -117,7 +117,7 @@ create workflowCompleteActivation info workflowInstanceDefinition = do
     , activity = 1
     , condition = 1
     }
-  workflowTime <- newIORef $ TimeSpec 0 0
+  workflowTime <- newIORef $ MkSystemTime 0 0
   workflowIsReplaying <- newIORef False
   workflowSequenceMaps <- newTVarIO $ SequenceMaps mempty mempty mempty mempty mempty mempty
   workflowPrimaryTask <- newIORef Nothing

@@ -10,6 +10,7 @@ import Control.Monad
 import Control.Monad.IO.Class
 import Data.Hashable (Hashable)
 import Data.ByteString (ByteString)
+import Data.Time.Clock.System
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import Data.Int (Int32)
@@ -24,7 +25,7 @@ import qualified Proto.Google.Protobuf.Timestamp_Fields as Timestamp
 import qualified Proto.Temporal.Api.Common.V1.Message as Message
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Message
 import qualified Proto.Temporal.Api.Enums.V1.Workflow as Workflow
-import qualified System.Clock as Clock
+import Temporal.Duration
 
 -- | This is generally the name of the function itself
 newtype WorkflowType = WorkflowType { rawWorkflowType :: Text }
@@ -80,33 +81,22 @@ newtype QueryId = QueryId { rawQueryId :: Text }
 newtype TaskToken = TaskToken { rawTaskToken :: ByteString }
   deriving (Eq, Show, Ord, Hashable)
 
-timespecFromDuration :: Duration.Duration -> Clock.TimeSpec
-timespecFromDuration d = Clock.TimeSpec
-  { Clock.sec = d ^. Duration.seconds
-  , Clock.nsec = fromIntegral (d ^. Duration.nanos)
+timespecFromTimestamp :: Timestamp.Timestamp -> SystemTime
+timespecFromTimestamp ts = MkSystemTime
+  { systemSeconds = ts ^. Timestamp.seconds
+  , systemNanoseconds = fromIntegral (ts ^. Timestamp.nanos)
   }
 
-timespecToDuration :: Clock.TimeSpec -> Duration.Duration
-timespecToDuration ts = defMessage
-  & Duration.seconds .~ Clock.sec ts
-  & Duration.nanos .~ fromIntegral (Clock.nsec ts)
-
-timespecFromTimestamp :: Timestamp.Timestamp -> Clock.TimeSpec
-timespecFromTimestamp ts = Clock.TimeSpec
-  { Clock.sec = ts ^. Timestamp.seconds
-  , Clock.nsec = fromIntegral (ts ^. Timestamp.nanos)
-  }
-
-timespecToTimestamp :: Clock.TimeSpec -> Timestamp.Timestamp
+timespecToTimestamp :: SystemTime -> Timestamp.Timestamp
 timespecToTimestamp ts = defMessage
-  & Timestamp.seconds .~ Clock.sec ts
-  & Timestamp.nanos .~ fromIntegral (Clock.nsec ts)
+  & Timestamp.seconds .~ systemSeconds ts
+  & Timestamp.nanos .~ fromIntegral (systemNanoseconds ts)
 
 -- | A Retry Policy is a collection of attributes that instructs the Temporal Server how to retry a failure of a Workflow Execution or an Activity Task Execution.
 data RetryPolicy = RetryPolicy
-  { initialInterval :: Clock.TimeSpec
+  { initialInterval :: Duration
   , backoffCoefficient :: Double
-  , maximumInterval :: Maybe Clock.TimeSpec
+  , maximumInterval :: Maybe Duration
   , maximumAttempts :: Int32
   , nonRetryableErrorTypes :: Vector Text
   }
@@ -115,17 +105,17 @@ retryPolicyToProto :: RetryPolicy -> Message.RetryPolicy
 retryPolicyToProto (RetryPolicy initialInterval backoffCoefficient maximumInterval maximumAttempts nonRetryableErrorTypes) = 
   -- Using a full destructure here to make sure we don't miss any new fields later. ^
   defMessage
-    & Message.initialInterval .~ timespecToDuration initialInterval
+    & Message.initialInterval .~ durationToProto initialInterval
     & Message.backoffCoefficient .~ backoffCoefficient
-    & Message.maybe'maximumInterval .~ fmap timespecToDuration maximumInterval
+    & Message.maybe'maximumInterval .~ fmap durationToProto maximumInterval
     & Message.maximumAttempts .~ maximumAttempts
     & Message.vec'nonRetryableErrorTypes .~ nonRetryableErrorTypes
 
 retryPolicyFromProto :: Message.RetryPolicy -> RetryPolicy
 retryPolicyFromProto p = RetryPolicy
-  { initialInterval = timespecFromDuration (p ^. Message.initialInterval)
+  { initialInterval = durationFromProto (p ^. Message.initialInterval)
   , backoffCoefficient = p ^. Message.backoffCoefficient
-  , maximumInterval = fmap timespecFromDuration (p ^. Message.maybe'maximumInterval)
+  , maximumInterval = fmap durationFromProto (p ^. Message.maybe'maximumInterval)
   , maximumAttempts = p ^. Message.maximumAttempts
   , nonRetryableErrorTypes = p ^. Message.vec'nonRetryableErrorTypes
   }

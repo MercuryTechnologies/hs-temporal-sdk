@@ -27,7 +27,6 @@ import Temporal.Worker
 import Temporal.Workflow hiding (Info(..), wait)
 import qualified Temporal.Workflow as Workflow
 import System.Environment
-import System.Clock
 import System.Posix.Signals
 import UnliftIO
 

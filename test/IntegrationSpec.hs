@@ -28,7 +28,6 @@ import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
 import GHC.Generics
 import RequireCallStack
-import System.Clock
 import System.IO
 import Test.Hspec
 import Temporal.Core.Client

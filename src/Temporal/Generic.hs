@@ -131,7 +131,6 @@ import Temporal.Worker.Types
 import Temporal.Workflow.WorkflowDefinition
 import Temporal.Activity
 import Temporal.Workflow (startActivity, defaultStartActivityOptions, TimeoutType (ScheduleToClose), wait, ActivityRef(..), WorkflowRef(..))
-import System.Clock
 import GHC.Base (Any)
 
 type family ApplyRef (args :: [Type]) (f :: Type) where

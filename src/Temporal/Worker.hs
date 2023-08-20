@@ -74,7 +74,6 @@ import Data.Word
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import Data.Maybe
-import qualified System.Clock as Clock
 
 import Lens.Family2
 import Lens.Family2.Stock
@@ -86,6 +85,7 @@ import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as CommonProto
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
+import Temporal.Duration (seconds)
 
 
 -- | A utility class to convert a value into a 'WorkerConfig' using the 'ConfigM' monad.
@@ -285,7 +285,7 @@ setGracefulShutdownPeriodMillis n = modifyCore $ \conf -> conf
 
 defaultRetryPolicy :: RetryPolicy
 defaultRetryPolicy = RetryPolicy
-  { initialInterval = Clock.TimeSpec 1 0
+  { initialInterval = seconds 1
   , backoffCoefficient = 2
   , maximumInterval = Nothing
   , maximumAttempts = 0

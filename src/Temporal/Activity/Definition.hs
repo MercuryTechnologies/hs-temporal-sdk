@@ -15,8 +15,9 @@ import Temporal.Common
 import Temporal.Payload
 import Temporal.Core.Client (Client)
 import Temporal.Core.Worker (Worker, getWorkerClient)
-import System.Clock (TimeSpec(..))
 import UnliftIO
+import Data.Time.Clock.System (SystemTime)
+import Temporal.Duration (Duration)
 
 data ActivityEnv env = ActivityEnv
   { activityWorker :: Worker
@@ -53,15 +54,15 @@ data ActivityInfo = ActivityInfo
   , headerFields :: Map Text RawPayload
   -- input
   , heartbeatDetails :: Vector RawPayload
-  , scheduledTime :: TimeSpec
-  , currentAttemptScheduledTime :: TimeSpec
-  , startedTime :: TimeSpec
+  , scheduledTime :: SystemTime
+  , currentAttemptScheduledTime :: SystemTime
+  , startedTime :: SystemTime
   , attempt :: Word32
   -- TODO, are we in charge of honoring these timeouts?
   -- Or does the server send cancel requests if we don't?
-  , scheduleToCloseTimeout :: Maybe TimeSpec
-  , startToCloseTimeout :: Maybe TimeSpec
-  , heartbeatTimeout :: Maybe TimeSpec
+  , scheduleToCloseTimeout :: Maybe Duration
+  , startToCloseTimeout :: Maybe Duration
+  , heartbeatTimeout :: Maybe Duration
   , retryPolicy :: Maybe RetryPolicy
   , isLocal :: Bool
   , taskToken :: TaskToken

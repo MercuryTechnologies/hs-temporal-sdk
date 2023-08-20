@@ -58,7 +58,6 @@ import Temporal.Exception
 import Temporal.Payload hiding (Payload)
 import Temporal.Internal.JobPool (SomeAsync)
 import Temporal.SearchAttributes
-import System.Clock (TimeSpec)
 import System.Random 
   ( StdGen
   , genWord32R
@@ -76,6 +75,8 @@ import RequireCallStack
 import Text.Printf
 import Temporal.Core.Worker (completeWorkflowActivation)
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Core
+import Data.Time.Clock.System (SystemTime)
+import Temporal.Duration (Duration)
 
 data WorkerConfig activityEnv = WorkerConfig
   { deadlockTimeout :: Maybe Int
@@ -133,18 +134,18 @@ data Info = Info
   , attempt :: {-# UNPACK #-} !Int
   , continuedRunId :: Maybe RunId
   , cronSchedule :: Maybe Text
-  , executionTimeout :: Maybe TimeSpec
+  , executionTimeout :: Maybe Duration
   , headers :: Map Text RawPayload
   , namespace :: Namespace
   , parent :: Maybe ParentInfo
   , rawMemo :: Map Text RawPayload
   , retryPolicy :: Maybe RetryPolicy
   , runId :: RunId
-  , runTimeout :: Maybe TimeSpec
+  , runTimeout :: Maybe Duration
   , searchAttributes :: Map Text SearchAttributeType
-  , startTime :: TimeSpec -- Consider using UTCTime?
+  , startTime :: SystemTime
   , taskQueue :: TaskQueue
-  , taskTimeout :: TimeSpec
+  , taskTimeout :: Duration
   , workflowId :: WorkflowId
   , workflowType :: WorkflowType
   }
@@ -183,7 +184,7 @@ data WorkflowInstance = WorkflowInstance
   , workflowNotifiedPatches :: {-# UNPACK #-} !(IORef (Set PatchId))
   , workflowMemoizedPatches :: {-# UNPACK #-} !(IORef (HashMap PatchId Bool))
   , workflowSequences :: {-# UNPACK #-} !(IORef Sequences)
-  , workflowTime :: {-# UNPACK #-} !(IORef TimeSpec)
+  , workflowTime :: {-# UNPACK #-} !(IORef SystemTime)
   , workflowIsReplaying :: {-# UNPACK #-} !(IORef Bool)
   , workflowPrimaryTask :: {-# UNPACK #-} !(IORef (Maybe (Async ())))
   , workflowCommands :: {-# UNPACK #-} !(TVar (Reversed WorkflowCommand))

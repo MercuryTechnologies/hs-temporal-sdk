@@ -32,6 +32,7 @@ import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion a
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
 import qualified Proto.Temporal.Api.Failure.V1.Message as F
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
+import Temporal.Duration (durationFromProto)
 
 pollWorkflowActivation :: WorkerM actEnv (Either Core.WorkerError Core.WorkflowActivation)
 pollWorkflowActivation = do
@@ -193,8 +194,8 @@ handleActivation activation = do
                   , workflowType = startWorkflow ^. Activation.workflowType . to WorkflowType
                   , continuedRunId = fmap RunId $ startWorkflow ^. Activation.continuedFromExecutionRunId . to nonEmptyString
                   , cronSchedule = startWorkflow ^. Activation.cronSchedule . to nonEmptyString
-                  , taskTimeout = startWorkflow ^. Activation.workflowTaskTimeout . to timespecFromDuration
-                  , executionTimeout = fmap timespecFromDuration $ startWorkflow ^. Activation.maybe'workflowExecutionTimeout
+                  , taskTimeout = startWorkflow ^. Activation.workflowTaskTimeout . to durationFromProto
+                  , executionTimeout = fmap durationFromProto $ startWorkflow ^. Activation.maybe'workflowExecutionTimeout
                   , namespace = Namespace $ Core.namespace $ Core.getWorkerConfig worker.workerCore
                   , parent = parentInfo
                   , headers = startWorkflow ^. Activation.headers . to (fmap convertFromProtoPayload)
@@ -202,7 +203,7 @@ handleActivation activation = do
                   , searchAttributes = startWorkflow ^. Activation.searchAttributes . Message.indexedFields . to searchAttributesFromProto
                   , retryPolicy = retryPolicyFromProto <$> startWorkflow ^. Activation.maybe'retryPolicy
                   , runId = RunId $ activation ^. CommonProto.runId
-                  , runTimeout = fmap timespecFromDuration $ startWorkflow ^. Activation.maybe'workflowRunTimeout
+                  , runTimeout = fmap durationFromProto $ startWorkflow ^. Activation.maybe'workflowRunTimeout
                   , startTime = timespecFromTimestamp $ 
                       fromMaybe 
                         (activation ^. Activation.timestamp) 

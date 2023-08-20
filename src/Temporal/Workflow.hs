@@ -158,7 +158,6 @@ import GHC.TypeLits
 import Lens.Family2
 import Proto.Temporal.Api.Common.V1.Message (Payload)
 import RequireCallStack
-import System.Clock (TimeSpec(..))
 import System.Random.Stateful
 import Temporal.Common
 import Temporal.Exception
@@ -182,6 +181,7 @@ import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow as ChildWor
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow_Fields as ChildWorkflow
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import UnliftIO
+import Temporal.Duration (Duration, durationToProto)
 
 -- | An async action handle that can be awaited or cancelled.
 data Task a = Task 
@@ -197,8 +197,8 @@ askInstance = Workflow $ \_ -> Done <$> ask
 
 data ContinueAsNewOptions = ContinueAsNewOptions
   { taskQueue :: Maybe TaskQueue
-  , runTimeout :: Maybe TimeSpec
-  , taskTimeout :: Maybe TimeSpec
+  , runTimeout :: Maybe Duration
+  , taskTimeout :: Maybe Duration
   , retryPolicy :: Maybe RetryPolicy
   , memo :: Map Text RawPayload
   , searchAttributes :: Map Text SearchAttributeType
@@ -220,8 +220,8 @@ data StartActivityOptions = StartActivityOptions
   { activityId :: Maybe ActivityId
   , taskQueue :: Maybe TaskQueue
   , timeout :: TimeoutType
-  , scheduleToStartTimeout :: Maybe TimeSpec
-  , heartbeatTimeout :: Maybe TimeSpec
+  , scheduleToStartTimeout :: Maybe Duration
+  , heartbeatTimeout :: Maybe Duration
   , retryPolicy :: Maybe RetryPolicy
   , cancellationType :: ActivityCancellationType
   , headers :: Map Text RawPayload -- TODO payloads
@@ -242,9 +242,9 @@ defaultStartActivityOptions t = StartActivityOptions
   }
 
 data TimeoutType 
-  = StartToClose TimeSpec 
-  | ScheduleToClose TimeSpec
-  | StartToCloseAndScheduleToClose TimeSpec TimeSpec
+  = StartToClose Duration 
+  | ScheduleToClose Duration
+  | StartToCloseAndScheduleToClose Duration Duration
 
 {- $activityBasics
 
@@ -310,14 +310,14 @@ startActivity activity opts = case activityRef activity of
             & Command.arguments .~ ps
             & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts.retryPolicy
             & Command.cancellationType .~ activityCancellationTypeToProto opts.cancellationType
-            & Command.maybe'scheduleToStartTimeout .~ fmap timespecToDuration opts.scheduleToStartTimeout
-            & Command.maybe'heartbeatTimeout .~ fmap timespecToDuration opts.heartbeatTimeout
+            & Command.maybe'scheduleToStartTimeout .~ fmap durationToProto opts.scheduleToStartTimeout
+            & Command.maybe'heartbeatTimeout .~ fmap durationToProto opts.heartbeatTimeout
             & \msg -> case opts.timeout of
-              StartToClose t -> msg & Command.startToCloseTimeout .~ timespecToDuration t
-              ScheduleToClose t -> msg & Command.scheduleToCloseTimeout .~ timespecToDuration t
+              StartToClose t -> msg & Command.startToCloseTimeout .~ durationToProto t
+              ScheduleToClose t -> msg & Command.scheduleToCloseTimeout .~ durationToProto t
               StartToCloseAndScheduleToClose stc stc' -> msg 
-                & Command.startToCloseTimeout .~ timespecToDuration stc
-                & Command.scheduleToCloseTimeout .~ timespecToDuration stc'
+                & Command.startToCloseTimeout .~ durationToProto stc
+                & Command.scheduleToCloseTimeout .~ durationToProto stc'
             & Command.doNotEagerlyExecute .~ opts.disableEagerExecution
 
       let cmd = defMessage & Command.scheduleActivity .~ scheduleActivity
@@ -355,9 +355,9 @@ gatherActivityArgs c f = gatherArgs (Proxy @args) c id f
 data StartChildWorkflowOptions = StartChildWorkflowOptions 
   { cancellationType :: ChildWorkflowCancellationType
   , parentClosePolicy :: ParentClosePolicy
-  , executionTimeout :: Maybe TimeSpec
-  , runTimeout :: Maybe TimeSpec
-  , taskTimeout :: Maybe TimeSpec
+  , executionTimeout :: Maybe Duration
+  , runTimeout :: Maybe Duration
+  , taskTimeout :: Maybe Duration
   , retryPolicy :: Maybe RetryPolicy
   , cronSchedule :: Maybe Text
   , initialMemo :: Map Text Proto.Temporal.Api.Common.V1.Message.Payload
@@ -569,9 +569,9 @@ startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId =
             & Command.workflowType .~ knownWorkflowName k
             & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue mTaskQueue)
             & Command.input .~ ps
-            & Command.maybe'workflowExecutionTimeout .~ fmap timespecToDuration opts.executionTimeout
-            & Command.maybe'workflowRunTimeout .~ fmap timespecToDuration opts.runTimeout
-            & Command.maybe'workflowTaskTimeout .~ fmap timespecToDuration opts.taskTimeout
+            & Command.maybe'workflowExecutionTimeout .~ fmap durationToProto opts.executionTimeout
+            & Command.maybe'workflowRunTimeout .~ fmap durationToProto opts.runTimeout
+            & Command.maybe'workflowTaskTimeout .~ fmap durationToProto opts.taskTimeout
             & Command.parentClosePolicy .~ parentClosePolicyToProto opts.parentClosePolicy
             & Command.workflowIdReusePolicy .~ workflowIdReusePolicyToProto opts.workflowIdReusePolicy
             & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts.retryPolicy
@@ -640,25 +640,25 @@ data StartLocalActivityOptions = StartLocalActivityOptions
   -- | Indicates how long the caller is willing to wait for local activity completion. Limits how
   -- long retries will be attempted. When not specified defaults to the workflow execution
   -- timeout (which may be unset).
-  , scheduleToCloseTimeout :: Maybe TimeSpec
+  , scheduleToCloseTimeout :: Maybe Duration
   -- | Limits time the local activity can idle internally before being executed. That can happen if
   -- the worker is currently at max concurrent local activity executions. This timeout is always
   -- non retryable as all a retry would achieve is to put it back into the same queue. Defaults
   -- to `schedule_to_close_timeout` if not specified and that is set. Must be <=
   -- `schedule_to_close_timeout` when set, otherwise, it will be clamped down.
-  , scheduleToStartTimeout :: Maybe TimeSpec
+  , scheduleToStartTimeout :: Maybe Duration
   -- | Maximum time the local activity is allowed to execute after the task is dispatched. This
   -- timeout is always retryable. Either or both of `schedule_to_close_timeout` and this must be
   -- specified. If set, this must be <= `schedule_to_close_timeout`, otherwise, it will be
   -- clamped down. 
-  , startToCloseTimeout :: Maybe TimeSpec
+  , startToCloseTimeout :: Maybe Duration
   -- | Specify a retry policy for the local activity. By default local activities will be retried
   -- indefinitely.
   , retryPolicy :: Maybe RetryPolicy
   -- | If the activity is retrying and backoff would exceed this value, lang will be told to
   -- schedule a timer and retry the activity after. Otherwise, backoff will happen internally in
   -- core. Defaults to 1 minute.
-  , localRetryThreshold :: Maybe TimeSpec
+  , localRetryThreshold :: Maybe Duration
   -- | Defines how the workflow will wait (or not) for cancellation of the activity to be
   -- confirmed. Lang should default this to `WAIT_CANCELLATION_COMPLETED`, even though proto
   -- will default to `TRY_CANCEL` automatically.
@@ -705,11 +705,11 @@ startLocalActivity (KnownActivity codec _ n) opts = gatherActivityArgs  @args @r
               -- & headers .~ _
               & Command.originalScheduleTime .~ timespecToTimestamp originalTime
               & Command.arguments .~ ps
-              & Command.maybe'scheduleToCloseTimeout .~ (timespecToDuration <$> opts.scheduleToCloseTimeout)
-              & Command.maybe'scheduleToStartTimeout .~ (timespecToDuration <$> opts.scheduleToStartTimeout)
-              & Command.maybe'startToCloseTimeout .~ (timespecToDuration <$> opts.startToCloseTimeout)
+              & Command.maybe'scheduleToCloseTimeout .~ (durationToProto <$> opts.scheduleToCloseTimeout)
+              & Command.maybe'scheduleToStartTimeout .~ (durationToProto <$> opts.scheduleToStartTimeout)
+              & Command.maybe'startToCloseTimeout .~ (durationToProto <$> opts.startToCloseTimeout)
               & Command.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retryPolicy)
-              & Command.maybe'localRetryThreshold .~ (timespecToDuration <$> opts.localRetryThreshold)
+              & Command.maybe'localRetryThreshold .~ (durationToProto <$> opts.localRetryThreshold)
               & Command.cancellationType .~ activityCancellationTypeToProto opts.cancellationType
             )
     addCommand inst cmd
@@ -788,8 +788,8 @@ upsertSearchAttributes values = ilift $ do
 now :: Workflow UTCTime
 now = Workflow $ \_ -> Done <$> do
   wft <- workflowTime <$> ask
-  TimeSpec{..} <- readIORef wft
-  pure $! systemToUTCTime $ MkSystemTime sec (fromIntegral nsec)
+  t <- readIORef wft
+  pure $! systemToUTCTime t
 
 -- $versioning
 --
@@ -1026,7 +1026,7 @@ setSignalHandler (SignalDefinition n codec applyToSignal) f = ilift $ do
 -- | Current time from the workflow perspective.
 --
 -- The value is relative to epoch time.
-time :: RequireCallStack => Workflow TimeSpec
+time :: RequireCallStack => Workflow SystemTime
 time = ilift $ do
   updateCallStack
   wft <- workflowTime <$> ask
@@ -1047,7 +1047,7 @@ data Timer = Timer
 -- Note that the timer is started when the command is received by the Temporal Platform,
 -- not when the timer is created. The command is sent as soon as the workflow is blocked
 -- by any operation, such as 'sleep', 'awaitCondition', 'awaitActivity', 'awaitWorkflow', etc.
-createTimer :: RequireCallStack => TimeSpec -> Workflow Timer
+createTimer :: RequireCallStack => Duration -> Workflow Timer
 createTimer ts = ilift $ do
   updateCallStack
   inst <- ask
@@ -1055,7 +1055,7 @@ createTimer ts = ilift $ do
   let cmd = defMessage & Command.startTimer .~ 
         ( defMessage 
           & Command.seq .~ seqId
-          & Command.startToFireTimeout .~ timespecToDuration ts
+          & Command.startToFireTimeout .~ durationToProto ts
         )
   $(logDebug) "Add command: sleep"
   res <- newIVar
@@ -1064,7 +1064,7 @@ createTimer ts = ilift $ do
   addCommand inst cmd
   pure $ Timer { timerSequence = s, timerHandle = res }
 
-sleep :: RequireCallStack => TimeSpec -> Workflow ()
+sleep :: RequireCallStack => Duration -> Workflow ()
 sleep ts = do
   updateCallStackW
   t <- createTimer ts
@@ -1140,8 +1140,8 @@ continueAsNew wf opts = case workflowRef wf of
         & Command.searchAttributes .~ searchAttributesToProto opts.searchAttributes
         & Command.headers .~ fmap convertToProtoPayload opts.headers
         & Command.memo .~ fmap convertToProtoPayload opts.memo
-        & Command.maybe'workflowTaskTimeout .~ (timespecToDuration <$> opts.taskTimeout)
-        & Command.maybe'workflowRunTimeout .~ (timespecToDuration <$> opts.runTimeout)
+        & Command.maybe'workflowTaskTimeout .~ (durationToProto <$> opts.taskTimeout)
+        & Command.maybe'workflowRunTimeout .~ (durationToProto <$> opts.runTimeout)
 
 -- | Returns a client-side handle that can be used to signal and cancel an existing Workflow execution. It takes a Workflow ID and optional run ID.
 getExternalWorkflowHandle :: RequireCallStack => WorkflowId -> Maybe RunId -> Workflow (ExternalWorkflowHandle result)

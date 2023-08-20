@@ -53,7 +53,6 @@ import qualified Data.Text as Text
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
 import qualified Data.Vector as V
-import System.Clock (TimeSpec(..))
 
 import Temporal.Core.Client.WorkflowService
 import Temporal.Core.Client
@@ -85,6 +84,7 @@ import Data.ProtoLens (Message(defMessage))
 import Temporal.Payload (convertToProtoPayload)
 import Temporal.SearchAttributes
 import Temporal.Workflow (WorkflowRef(..))
+import Temporal.Duration (Duration, durationToProto)
 ---------------------------------------------------------------------------------
 -- WorkflowClient stuff
 
@@ -363,9 +363,9 @@ workflowStartOptions wfId tq = WorkflowStartOptions
   }
 
 data TimeoutOptions = TimeoutOptions
-  { executionTimeout :: Maybe TimeSpec
-  , runTimeout :: Maybe TimeSpec
-  , taskTimeout :: Maybe TimeSpec
+  { executionTimeout :: Maybe Duration
+  , runTimeout :: Maybe Duration
+  , taskTimeout :: Maybe Duration
   }
 
 startFromPayloads 
@@ -391,9 +391,9 @@ startFromPayloads c k@(KnownWorkflow codec _ _ _) opts payloads = liftIO $ do
         & WF.input .~ 
           ( defMessage & Common.payloads .~ (convertToProtoPayload <$> payloads)
           )
-        & WF.maybe'workflowExecutionTimeout .~ (timespecToDuration <$> opts.timeouts.executionTimeout)
-        & WF.maybe'workflowRunTimeout .~ (timespecToDuration <$> opts.timeouts.runTimeout)
-        & WF.maybe'workflowTaskTimeout .~ (timespecToDuration <$> opts.timeouts.taskTimeout)
+        & WF.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts.timeouts.executionTimeout)
+        & WF.maybe'workflowRunTimeout .~ (durationToProto <$> opts.timeouts.runTimeout)
+        & WF.maybe'workflowTaskTimeout .~ (durationToProto <$> opts.timeouts.taskTimeout)
         & WF.identity .~ (identity $ clientConfig c.clientCore)
         & WF.requestId .~ UUID.toText reqId
         & WF.workflowIdReusePolicy .~ 

@@ -25,7 +25,6 @@ import Temporal.Common
 import Temporal.Exception
 import Temporal.Payload
 import Temporal.Worker.Types
-import System.Clock
 import qualified Proto.Temporal.Api.Common.V1.Message as Message
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Message
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow as ChildWorkflow

@@ -16,7 +16,6 @@ import GHC.IO.Exception (BlockedIndefinitelyOnSTM(..))
 import GHC.Stack
 import GHC.TypeLits
 import Lens.Family2
-import System.Clock (TimeSpec)
 import Temporal.Common
 import Temporal.Exception
 import Temporal.Payload

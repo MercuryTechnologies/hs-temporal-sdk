@@ -28,7 +28,6 @@ import qualified Proto.Temporal.Api.Common.V1.Message as P
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as P
 import qualified Proto.Temporal.Api.Failure.V1.Message as F
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
-import System.Clock
 import Temporal.Activity.Definition
 import Temporal.Common
 import qualified Temporal.Core.Client as Core
@@ -38,6 +37,7 @@ import Temporal.Payload
 import Temporal.Internal.JobPool
 import Temporal.Worker.Types
 import UnliftIO
+import Temporal.Duration (durationFromProto)
 
 execute :: Worker actEnv -> IO ()
 execute worker = runWorkerM worker $ go
@@ -71,9 +71,9 @@ activityInfoFromProto tt msg = ActivityInfo
   , currentAttemptScheduledTime = msg ^. AT.currentAttemptScheduledTime . to timespecFromTimestamp
   , startedTime = msg ^. AT.startedTime . to timespecFromTimestamp
   , attempt = msg ^. AT.attempt
-  , scheduleToCloseTimeout = fmap timespecFromDuration (msg ^. AT.maybe'scheduleToCloseTimeout)
-  , startToCloseTimeout = fmap timespecFromDuration (msg ^. AT.maybe'startToCloseTimeout)
-  , heartbeatTimeout = fmap timespecFromDuration (msg ^. AT.maybe'heartbeatTimeout)
+  , scheduleToCloseTimeout = fmap durationFromProto (msg ^. AT.maybe'scheduleToCloseTimeout)
+  , startToCloseTimeout = fmap durationFromProto (msg ^. AT.maybe'startToCloseTimeout)
+  , heartbeatTimeout = fmap durationFromProto (msg ^. AT.maybe'heartbeatTimeout)
   , retryPolicy = fmap retryPolicyFromProto (msg ^. AT.maybe'retryPolicy)
   , isLocal = msg ^. AT.isLocal
   , taskToken = tt
