@@ -42,6 +42,7 @@ import Temporal.Runtime
 import Temporal.SearchAttributes
 import System.IO.Unsafe
 import System.Timeout (timeout)
+import Temporal.Duration
 
 rt :: Runtime
 rt = unsafePerformIO initializeRuntime
@@ -95,7 +96,7 @@ testImpls = WorkflowTests
   , raceBlockOnLeftSideWorks = provideCallStack $ do
       let lhs = do
             $(logDebug) "sleepy lad" 
-            W.sleep (TimeSpec 10 0) 
+            W.sleep (seconds 10) 
             $(logDebug) "bad" 
             pure False
           rhs = $(logDebug) "wow" *> pure True
@@ -103,15 +104,15 @@ testImpls = WorkflowTests
       $(logDebug) "done"
       pure res
   , raceBlockOnBothSidesWorks = provideCallStack $ do
-      let lhs = W.sleep (TimeSpec 5000 0) >> pure False 
-          rhs = W.sleep (TimeSpec 1 0) >> pure True
+      let lhs = W.sleep (seconds 5000) >> pure False 
+          rhs = W.sleep (seconds 1) >> pure True
       lhs `W.race` rhs
   , raceThrowsRhsErrorWhenLhsBlocked = provideCallStack $ do
-      let lhs = W.sleep (TimeSpec 5000 0) >> pure False 
+      let lhs = W.sleep (seconds 5000) >> pure False 
           rhs = error "foo"
       lhs `W.race` rhs
   , raceIgnoresRhsErrorOnLhsSuccess = provideCallStack $ do
-      pure True `W.race` (W.sleep (TimeSpec 5000 0) *> error "sad")
+      pure True `W.race` (W.sleep (seconds 5000) *> error "sad")
   , continueAsNewWorks = provideCallStack $ \execCount -> if execCount < 1
       then W.continueAsNew testRefs.continueAsNewWorks W.defaultContinueAsNewOptions (execCount + 1)
       else pure "woohoo"
@@ -119,7 +120,7 @@ testImpls = WorkflowTests
   , basicActivityWf = provideCallStack $ do
       h <- W.startActivity 
         testRefs.basicActivity
-        (W.defaultStartActivityOptions $ W.StartToClose $ TimeSpec 3 0)
+        (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
       W.wait (h :: W.Task Int)
   , basicActivity = pure 1
   , heartbeatWorks = do
@@ -129,7 +130,7 @@ testImpls = WorkflowTests
   , runHeartbeat = provideCallStack $ do
       h <- W.startActivity 
         testRefs.heartbeatWorks
-        (W.defaultStartActivityOptions $ W.StartToClose $ TimeSpec 3 0)
+        (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
       W.wait (h :: W.Task Int) 
   , faultyActivity = do
       res <- askActivityInfo
@@ -141,10 +142,10 @@ testImpls = WorkflowTests
   , faultyWorkflow = provideCallStack $ do
       h1 <- W.startActivity 
         testRefs.faultyActivity
-        (W.defaultStartActivityOptions $ W.StartToClose $ TimeSpec 1 0)
+        (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
       h2 <- W.startActivity 
         testRefs.faultyActivity
-        (W.defaultStartActivityOptions $ W.StartToClose $ TimeSpec 1 0)
+        (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
       W.wait (h1 :: W.Task Int)
       W.wait (h2 :: W.Task Int)
   }
@@ -172,7 +173,7 @@ needsClient = do
         wfId <- uuidText
         let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
               { C.timeouts = C.TimeoutOptions
-                  { C.runTimeout = Just $ TimeSpec 4 0
+                  { C.runTimeout = Just $ seconds 4
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
                   }
@@ -290,7 +291,7 @@ needsClient = do
             testFn = do
               h1 <- W.startActivity 
                 testActivityAct.reference
-                (W.defaultStartActivityOptions $ W.StartToClose $ TimeSpec 1 0)
+                (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
               W.cancel (h1 :: W.Task Int)
               W.wait h1 `Catch.catch` \(_ :: ActivityCancelled) -> pure 1
 
@@ -304,7 +305,7 @@ needsClient = do
           wfId <- uuidText
           let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
                 { C.timeouts = C.TimeoutOptions
-                    { C.runTimeout = Just $ TimeSpec 4 0
+                    { C.runTimeout = Just $ seconds 4
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
                     }
@@ -326,8 +327,8 @@ needsClient = do
             testFn = do
               h1 <- W.startActivity 
                 testActivityAct.reference
-                (W.defaultStartActivityOptions $ W.StartToClose $ TimeSpec 1 0)
-              W.sleep $ TimeSpec 0 1
+                (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
+              W.sleep $ nanoseconds 1
               W.cancel (h1 :: W.Task Int)
               W.wait h1 `Catch.catch` \(_ :: ActivityCancelled) -> pure 1
 
@@ -341,7 +342,7 @@ needsClient = do
           wfId <- uuidText
           let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue) 
                 { C.timeouts = C.TimeoutOptions
-                    { C.runTimeout = Just $ TimeSpec 4 0
+                    { C.runTimeout = Just $ seconds 4
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
                     }
@@ -430,7 +431,7 @@ needsClient = do
             testFn = do
               t1 <- W.now
               t2 <- W.now
-              W.sleep $ TimeSpec 0 1
+              W.sleep $ nanoseconds 1
               t3 <- W.now
               pure (t1, t2, t3)
             wf = W.provideWorkflow defaultCodec "test" testFn
@@ -461,7 +462,7 @@ needsClient = do
             parentWorkflow = do
               childWorkflowId <- (W.WorkflowId . UUID.toText) <$> W.uuid4
               let opts :: W.StartChildWorkflowOptions
-                  opts = W.defaultChildWorkflowOptions { W.runTimeout = Just $ TimeSpec 5 0 }
+                  opts = W.defaultChildWorkflowOptions { W.runTimeout = Just $ seconds 5 }
               childWorkflow <- W.startChildWorkflow isEventWf.reference opts childWorkflowId 2
               $(logDebug) "waiting for child workflow"
               res <- W.waitChildWorkflowResult childWorkflow
@@ -476,7 +477,7 @@ needsClient = do
         withWorker conf $ do
           let opts = (C.workflowStartOptions (W.WorkflowId parentId) (W.TaskQueue "test"))
                 { C.timeouts = C.TimeoutOptions
-                    { C.runTimeout = Just $ TimeSpec 5 0
+                    { C.runTimeout = Just $ seconds 5
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
                     }
@@ -513,7 +514,7 @@ needsClient = do
       specify "cancel immediately" $ \client -> do
         parentId <- uuidText
         let cancelTest :: MyWorkflow ()
-            cancelTest = W.sleep $ TimeSpec 60 0
+            cancelTest = W.sleep $ minutes 1
             childWf = W.provideWorkflow defaultCodec "immediateCancelTestChild" cancelTest
             parentWorkflow :: MyWorkflow String
             parentWorkflow = do
@@ -541,7 +542,7 @@ needsClient = do
             cancelTest = go
               where
                 go = do
-                  result <- Catch.try $ W.sleep $ TimeSpec 1 0
+                  result <- Catch.try $ W.sleep $ seconds 1
                   case result of
                     Left WorkflowCancelRequested -> pure ()
                     _ -> go
@@ -553,7 +554,7 @@ needsClient = do
               childWorkflow <- W.startChildWorkflow childWf.reference W.defaultChildWorkflowOptions childWorkflowId
               W.waitChildWorkflowStart childWorkflow
               W.cancelChildWorkflowExecution childWorkflow
-              W.sleep $ TimeSpec 3 0
+              W.sleep $ seconds 3
               result <- Catch.try $ W.waitChildWorkflowResult childWorkflow
               pure $ show (result :: Either SomeException ())
             parentWf = W.provideWorkflow defaultCodec "cancelTestParent" parentWorkflow
@@ -582,7 +583,7 @@ needsClient = do
             workflow :: MyWorkflow ()
             workflow = do
               -- W.setQueryHandler echoQuery $ \msg -> pure msg
-              W.sleep $ TimeSpec 5 0
+              W.sleep $ seconds 5
             wf = W.provideWorkflow defaultCodec "queryWorkflow" workflow
             conf = configure () $ do
               setNamespace $ W.Namespace "test"
@@ -605,7 +606,7 @@ needsClient = do
             workflow :: MyWorkflow ()
             workflow = do
               W.setQueryHandler echoQuery $ \msg -> pure msg
-              W.sleep $ TimeSpec 5 0
+              W.sleep $ seconds 5
             wf = W.provideWorkflow defaultCodec "notFoundQueryWorkflow" workflow
             conf = configure () $ do
               setNamespace $ W.Namespace "test"
@@ -629,9 +630,7 @@ needsClient = do
         let workflow :: MyWorkflow Bool
             workflow = do
               earlier <- W.now
-              W.sleep $ TimeSpec 0 1
-              W.sleep $ TimeSpec 0 1
-              W.sleep $ TimeSpec 0 1
+              W.sleep $ nanoseconds 1
               later <- W.now
               pure (later > earlier) 
             wf = W.provideWorkflow defaultCodec "sleepy" workflow
@@ -652,7 +651,7 @@ needsClient = do
         let workflow :: MyWorkflow Bool
             workflow = do
               earlier <- W.now
-              t <- W.createTimer $ TimeSpec 0 10
+              t <- W.createTimer $ nanoseconds 10
               W.wait t
               later <- W.now
               pure (later > earlier) 
@@ -672,7 +671,7 @@ needsClient = do
       specify "timer and cancel immediately" $ \client -> do
         let workflow :: MyWorkflow Bool
             workflow = do
-              t <- W.createTimer $ TimeSpec 0 1
+              t <- W.createTimer $ nanoseconds 1
               W.cancel t
               W.wait t
               pure True
@@ -685,7 +684,7 @@ needsClient = do
           wfId <- uuidText
           let opts = (C.workflowStartOptions (W.WorkflowId wfId) (W.TaskQueue "test"))
                 { C.timeouts = C.TimeoutOptions
-                    { C.runTimeout = Just $ TimeSpec 4 0
+                    { C.runTimeout = Just $ seconds 4
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
                     }
@@ -696,8 +695,8 @@ needsClient = do
       specify "timer and cancel with delay" $ \client -> do
         let workflow :: MyWorkflow Bool
             workflow = do
-              t <- W.createTimer $ TimeSpec 5000 0
-              W.sleep $ TimeSpec 0 1
+              t <- W.createTimer $ seconds 5000
+              W.sleep $ nanoseconds 1
               W.cancel t
               W.wait t
               pure True
@@ -710,7 +709,7 @@ needsClient = do
           wfId <- uuidText
           let opts = (C.workflowStartOptions (W.WorkflowId wfId) (W.TaskQueue "test"))
                 { C.timeouts = C.TimeoutOptions
-                    { C.runTimeout = Just $ TimeSpec 4 0
+                    { C.runTimeout = Just $ seconds 4
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
                     }
@@ -732,7 +731,7 @@ needsClient = do
           wfId <- uuidText
           let opts = (C.workflowStartOptions (W.WorkflowId wfId) (W.TaskQueue "test"))
                 { C.timeouts = C.TimeoutOptions
-                    { C.runTimeout = Just $ TimeSpec 4 0
+                    { C.runTimeout = Just $ seconds 4
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
                     }
@@ -753,7 +752,7 @@ needsClient = do
           wfId <- uuidText
           let opts = (C.workflowStartOptions (W.WorkflowId wfId) (W.TaskQueue "test"))
                 { C.timeouts = C.TimeoutOptions
-                    { C.runTimeout = Just $ TimeSpec 4 0
+                    { C.runTimeout = Just $ seconds 4
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
                     }
@@ -779,7 +778,7 @@ needsClient = do
         wfId <- uuidText
         let opts = (C.workflowStartOptions (W.WorkflowId wfId) (W.TaskQueue "test"))
               { C.timeouts = C.TimeoutOptions
-                  { C.runTimeout = Just $ TimeSpec 4 0
+                  { C.runTimeout = Just $ seconds 4
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
                   }
@@ -812,7 +811,7 @@ needsClient = do
               ]
             opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
               { C.timeouts = C.TimeoutOptions
-                  { C.runTimeout = Just $ TimeSpec 4 0
+                  { C.runTimeout = Just $ seconds 4
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
                   }
@@ -841,7 +840,7 @@ needsClient = do
         let 
             opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
               { C.timeouts = C.TimeoutOptions
-                  { C.runTimeout = Just $ TimeSpec 4 0
+                  { C.runTimeout = Just $ seconds 4
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
                   }
@@ -867,7 +866,7 @@ needsClient = do
         wfId <- uuidText
         let opts = (C.workflowStartOptions (W.WorkflowId wfId) (W.TaskQueue "test"))
               { C.timeouts = C.TimeoutOptions
-                  { C.runTimeout = Just $ TimeSpec 4 0
+                  { C.runTimeout = Just $ seconds 4
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
                   }
