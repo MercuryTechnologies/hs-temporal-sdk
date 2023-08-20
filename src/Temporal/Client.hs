@@ -84,6 +84,7 @@ import Unsafe.Coerce
 import Data.ProtoLens (Message(defMessage))
 import Temporal.Payload (convertToProtoPayload)
 import Temporal.SearchAttributes
+import Temporal.Workflow (WorkflowRef(..))
 ---------------------------------------------------------------------------------
 -- WorkflowClient stuff
 
@@ -111,17 +112,18 @@ data WorkflowClient = WorkflowClient
   }
 
 execute
-  :: forall args result m. (MonadIO m )
+  :: forall m wf. (MonadIO m, WorkflowRef wf)
   => WorkflowClient 
-  -> KnownWorkflow args result 
+  -> wf
   -> WorkflowStartOptions
-  -> (args :->: m result)
-execute c k@(KnownWorkflow codec _ _ _) opts = gather $ \inputs -> liftIO $ do
-  h <- startFromPayloads c k opts inputs
-  awaitWorkflowResult h
-  where
-    gather :: ([RawPayload] -> m result) -> (args :->: m result)
-    gather = gatherArgs (Proxy @args) codec Prelude.id
+  -> (WorkflowArgs wf :->: m (WorkflowResult wf))
+execute c wf opts = case workflowRef wf of
+  k@(KnownWorkflow codec _ _ _) -> do
+    let gather :: ([RawPayload] -> m (WorkflowResult wf)) -> (WorkflowArgs wf :->: m (WorkflowResult wf))
+        gather = gatherArgs (Proxy @(WorkflowArgs wf)) codec Prelude.id
+    gather $ \inputs -> liftIO $ do
+      h <- startFromPayloads c k opts inputs
+      awaitWorkflowResult h
 
 data GetWorkflowHandleOptions = GetWorkflowHandleOptions
 
@@ -322,9 +324,9 @@ signalWithStart
   :: MonadIO m 
   => WorkflowClient 
   -> WorkflowStartOptions 
-  -> KnownWorkflow wfArgs result 
+  -> KnownWorkflow args result
   -> SignalDefinition sigArgs 
-  -> (wfArgs :->: (sigArgs :->: m ()))
+  -> (args :->: (sigArgs :->: m ()))
 signalWithStart = undefined
 
 data WorkflowStartOptions = WorkflowStartOptions

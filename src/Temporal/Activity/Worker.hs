@@ -39,7 +39,7 @@ import Temporal.Internal.JobPool
 import Temporal.Worker.Types
 import UnliftIO
 
-execute :: Worker wfEnv actEnv -> IO ()
+execute :: Worker actEnv -> IO ()
 execute worker = runWorkerM worker $ go
   where
     go = do
@@ -83,7 +83,7 @@ activityInfoFromProto tt msg = ActivityInfo
 completeAsync :: MonadIO m => m ()
 completeAsync = throwIO CompleteAsync
 
-applyActivityTask :: AT.ActivityTask -> WorkerM wfEnv actEnv ()
+applyActivityTask :: AT.ActivityTask -> WorkerM actEnv ()
 applyActivityTask task = case task ^. AT.maybe'variant of
   Nothing -> throwIO $ RuntimeError "Activity task has no variant or an unknown variant"
   Just (AT.ActivityTask'Start msg) -> applyActivityTaskStart tt msg
@@ -92,7 +92,7 @@ applyActivityTask task = case task ^. AT.maybe'variant of
     tt = TaskToken $ task ^. AT.taskToken
 
 -- TODO, where should async exception masking happen?
-applyActivityTaskStart :: TaskToken -> AT.Start -> WorkerM wfEnv actEnv ()
+applyActivityTaskStart :: TaskToken -> AT.Start -> WorkerM actEnv ()
 applyActivityTaskStart tt msg = mask_ $ do
   w <- ask
   $logDebug $ "Starting activity: " <> T.pack (show tt)
@@ -108,8 +108,9 @@ applyActivityTaskStart tt msg = mask_ $ do
           case HashMap.lookup info.activityType w.workerConfig.actDefs of
             Nothing -> throwIO $ RuntimeError ("Activity type not found: " <> T.unpack (info.activityType))
             Just ActivityDefinition{..} -> case activityRun of
-              ValidActivityFunction c f ap -> 
-                (fmap $ Temporal.Payload.encode c) <$> ap (fmap convertFromProtoPayload (msg ^. AT.vec'input))
+              ValidActivityFunction c f ap -> case ap f (fmap convertFromProtoPayload (msg ^. AT.vec'input)) of
+                Left err -> throwIO $ ValueError err
+                Right ok -> pure $ fmap (Temporal.Payload.encode c) ok
         case ef of
           Left (SomeException err) -> do
             $logError (T.pack (show err))
@@ -200,7 +201,7 @@ applyActivityTaskStart tt msg = mask_ $ do
       -- We use link here to kill the worker thread if the activity throws an exception.
       link a
 
-applyActivityTaskCancel :: TaskToken -> AT.Cancel -> WorkerM wfEnv actEnv ()
+applyActivityTaskCancel :: TaskToken -> AT.Cancel -> WorkerM actEnv ()
 applyActivityTaskCancel tt msg = do
   w <- ask
   $logDebug $ "Cancelling activity: " <> T.pack (show tt)

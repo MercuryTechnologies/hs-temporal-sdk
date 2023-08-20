@@ -33,9 +33,11 @@ module Temporal.Payload
   , ApplyPayloads
   , GatherArgs(..)
   , ArgsOf
+  , GatherArgsOf(..)
   , ResultOf
-  , resultOf
-  , wrappedResultOf
+  , EncodeResultOf(..)
+  , FunctionSupportsCodec
+  , FunctionSupportsCodec'
   , (:->:)
   , convertToProtoPayload
   , convertFromProtoPayload
@@ -231,11 +233,8 @@ type family ResultOf (m :: Type -> Type) f where
   ResultOf m (m result) = result
   ResultOf m result = TypeError ('Text "This function must use the (" ':<>: 'ShowType m ':<>: 'Text ") monad." :$$: ('Text "Current type: " ':<>: 'ShowType result))
 
-resultOf :: forall m f. Proxy m -> f -> Proxy (ResultOf m f)
-resultOf _ _ = Proxy
-
-wrappedResultOf :: forall m f. Proxy m -> f -> Proxy (m (ResultOf m f))
-wrappedResultOf _ _ = Proxy
+class (Codec codec (ResultOf m f), Typeable (ResultOf m f)) => EncodeResultOf codec (m :: Type -> Type) (f :: Type)
+instance (Codec codec (ResultOf m f), Typeable (ResultOf m f)) => EncodeResultOf codec (m :: Type -> Type) (f :: Type)
 
 -- | Construct a function type from a list of argument types and a result type.
 type family (:->:) (args :: [Type]) (result :: Type) where
@@ -262,17 +261,17 @@ class ApplyPayloads codec (args :: [Type]) where
     -> Proxy result 
     -> (args :->: result)
     -> V.Vector RawPayload
-    -> IO result
+    -> Either String result
 
 instance ApplyPayloads codec '[] where
-  applyPayloads _ _ _ f _ = pure f
+  applyPayloads _ _ _ f _ = Right f
 
 instance (Codec codec ty, ApplyPayloads codec tys) => ApplyPayloads codec (ty ': tys) where
   applyPayloads codec _ resP f vec = case V.uncons vec of
-    Nothing -> error "Not enough arguments"
+    Nothing -> Left "Not enough arguments"
     Just (pl, rest) -> case decode codec pl of
       Right arg -> applyPayloads codec (Proxy @tys) resP (f arg) rest
-      Left err -> error err
+      Left err -> Left err
 
 -- | Given a list of function argument types and a codec, produce a function that takes a list of
 -- 'RawPayload's and does something useful with them. This is used to support outbound invocations of
@@ -295,3 +294,12 @@ instance (Codec codec arg, GatherArgs codec args) => GatherArgs codec (arg ': ar
 
 instance GatherArgs codec '[] where
   gatherArgs _ _ accum f = f $ accum []
+
+class (GatherArgs codec (ArgsOf f)) => GatherArgsOf codec f
+instance (GatherArgs codec (ArgsOf f)) => GatherArgsOf codec f
+
+class (GatherArgs codec args, Codec codec result, Typeable result, ApplyPayloads codec args) => FunctionSupportsCodec codec args result
+instance (GatherArgs codec args, Codec codec result, Typeable result, ApplyPayloads codec args) => FunctionSupportsCodec codec args result
+
+class (FunctionSupportsCodec codec (ArgsOf f) (ResultOf m f), f ~ ArgsOf f :->: m (ResultOf m f)) => FunctionSupportsCodec' (m :: Type -> Type) codec f
+instance (FunctionSupportsCodec codec (ArgsOf f) (ResultOf m f), f ~ ArgsOf f :->: m (ResultOf m f)) => FunctionSupportsCodec' m codec f

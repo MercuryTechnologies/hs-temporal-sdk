@@ -1,5 +1,9 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 module Temporal.Worker.Types where
@@ -73,38 +77,35 @@ import Text.Printf
 import Temporal.Core.Worker (completeWorkflowActivation)
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Core
 
-data WorkerConfig workflowEnv activityEnv = WorkerConfig
+data WorkerConfig activityEnv = WorkerConfig
   { deadlockTimeout :: Maybe Int
-  , wfEnv :: workflowEnv
-  , wfDefs :: HashMap Text (OpaqueWorkflow WorkflowDefinition workflowEnv)
+  , wfDefs :: HashMap Text WorkflowDefinition
   , actEnv :: activityEnv
   , actDefs :: HashMap Text (ActivityDefinition activityEnv)
   , coreConfig :: Core.WorkerConfig
   }
 
-data Worker workflowEnv activityEnv = Worker
+data Worker activityEnv = Worker
   { workerCore :: Core.Worker
   , workerTaskQueue :: Text
-  , workerConfig :: WorkerConfig workflowEnv activityEnv
+  , workerConfig :: WorkerConfig activityEnv
   , workerLogFn :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
-  , workerWorkflowState :: WorkflowWorker workflowEnv
+  , workerWorkflowState :: WorkflowWorker
   , workerActivityState :: ActivityWorker activityEnv
   }
 
-newtype WorkerM workflowEnv activityEnv a = WorkerM { unWorkerM :: ReaderT (Worker workflowEnv activityEnv) IO a }
-  deriving (Functor, Applicative, Monad, MonadIO, MonadReader (Worker workflowEnv activityEnv), MonadUnliftIO)
+newtype WorkerM activityEnv a = WorkerM { unWorkerM :: ReaderT (Worker activityEnv) IO a }
+  deriving (Functor, Applicative, Monad, MonadIO, MonadReader (Worker activityEnv), MonadUnliftIO)
 
-instance MonadLogger (WorkerM workflowEnv activityEnv) where
+instance MonadLogger (WorkerM activityEnv) where
   monadLoggerLog loc src level msg = do
     worker <- ask
     liftIO $ worker.workerLogFn loc src level (toLogStr msg)
 
-instance MonadLoggerIO (WorkerM workflowEnv activityEnv) where
+instance MonadLoggerIO (WorkerM activityEnv) where
   askLoggerIO = do
     worker <- ask
     pure worker.workerLogFn
-
-data OpaqueWorkflow f env = forall st. OpaqueWorkflow (f env st)
 
 newtype Sequence = Sequence { rawSequence :: Word32 }
   deriving (Eq, Ord, Show, Enum, Num, Hashable)
@@ -159,13 +160,13 @@ fromReversed (Reversed xs) = reverse xs
 push :: a -> Reversed a -> Reversed a
 push x (Reversed xs) = Reversed (x:xs)
 
-data SequenceMaps env st = SequenceMaps 
-  { timers :: {-# UNPACK #-} !(SequenceMap (IVar env st ()))
-  , activities :: {-# UNPACK #-} !(SequenceMap (IVar env st ResolveActivity))
-  , childWorkflows :: {-# UNPACK #-} !(SequenceMap (SomeChildWorkflowHandle env st))
-  , externalSignals :: {-# UNPACK #-} !(SequenceMap (IVar env st ResolveSignalExternalWorkflow))
-  , externalCancels :: {-# UNPACK #-} !(SequenceMap (IVar env st ResolveRequestCancelExternalWorkflow))
-  , conditionsAwaitingSignal :: {-# UNPACK #-} !(SequenceMap (IVar env st ()))
+data SequenceMaps = SequenceMaps 
+  { timers :: {-# UNPACK #-} !(SequenceMap (IVar ()))
+  , activities :: {-# UNPACK #-} !(SequenceMap (IVar ResolveActivity))
+  , childWorkflows :: {-# UNPACK #-} !(SequenceMap (SomeChildWorkflowHandle))
+  , externalSignals :: {-# UNPACK #-} !(SequenceMap (IVar ResolveSignalExternalWorkflow))
+  , externalCancels :: {-# UNPACK #-} !(SequenceMap (IVar ResolveRequestCancelExternalWorkflow))
+  , conditionsAwaitingSignal :: {-# UNPACK #-} !(SequenceMap (IVar ()))
   }
 
 data CancellationState
@@ -174,9 +175,9 @@ data CancellationState
   | CancellationSignaledToWorkflow
   deriving (Show, Eq, Ord, Enum, Bounded)
 
-data WorkflowInstance env st = WorkflowInstance
+data WorkflowInstance = WorkflowInstance
   { workflowInstanceInfo :: {-# UNPACK #-} !(IORef Info)
-  , workflowInstanceDefinition :: WorkflowDefinition env st
+  , workflowInstanceDefinition :: WorkflowDefinition
   , workflowInstanceLogger :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
   , workflowRandomnessSeed :: WorkflowGenM
   , workflowNotifiedPatches :: {-# UNPACK #-} !(IORef (Set PatchId))
@@ -186,35 +187,32 @@ data WorkflowInstance env st = WorkflowInstance
   , workflowIsReplaying :: {-# UNPACK #-} !(IORef Bool)
   , workflowPrimaryTask :: {-# UNPACK #-} !(IORef (Maybe (Async ())))
   , workflowCommands :: {-# UNPACK #-} !(TVar (Reversed WorkflowCommand))
-  , workflowSequenceMaps :: {-# UNPACK #-} !(TVar (SequenceMaps env st))
-  , workflowState :: {-# UNPACK #-} !(IORef st)
-  , workflowEnv :: env
+  , workflowSequenceMaps :: {-# UNPACK #-} !(TVar (SequenceMaps))
   , workflowSignalHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (Vector RawPayload -> IO ())))
   , workflowQueryHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (QueryId -> Vector RawPayload -> IO ())))
   , workflowCallStack :: {-# UNPACK #-} !(IORef CallStack)
   , workflowCompleteActivation :: !(Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
-  , workflowInstanceContinuationEnv :: {-# UNPACK #-} !(ContinuationEnv env st)
+  , workflowInstanceContinuationEnv :: {-# UNPACK #-} !(ContinuationEnv)
   , workflowCancellationState :: {-# UNPACK #-} !(IORef CancellationState)
   -- , disableEagerActivityExecution :: Bool
   }
 
-newtype InstanceM (env :: Type) (st :: Type) (a :: Type) = InstanceM { unInstanceM :: ReaderT (WorkflowInstance env st) IO a }
-  deriving (Functor, Applicative, Monad, MonadIO, MonadReader (WorkflowInstance env st), MonadUnliftIO)
+newtype InstanceM (a :: Type) = InstanceM { unInstanceM :: ReaderT WorkflowInstance IO a }
+  deriving (Functor, Applicative, Monad, MonadIO, MonadReader WorkflowInstance, MonadUnliftIO)
 
-instance MonadLogger (InstanceM env st) where
+instance MonadLogger InstanceM where
   monadLoggerLog loc src lvl msg = do
     logger <- asks workflowInstanceLogger
     liftIO $ logger loc src lvl (toLogStr msg)
 
-instance MonadLoggerIO (InstanceM env st) where
+instance MonadLoggerIO InstanceM where
   askLoggerIO = asks workflowInstanceLogger
 
-data WorkflowWorker env = WorkflowWorker
-  { workerWorkflowFunctions :: HashMap Text (OpaqueWorkflow WorkflowDefinition env)
-  , runningWorkflows :: TVar (HashMap RunId (OpaqueWorkflow WorkflowInstance env))
+data WorkflowWorker = WorkflowWorker
+  { workerWorkflowFunctions :: HashMap Text WorkflowDefinition
+  , runningWorkflows :: TVar (HashMap RunId WorkflowInstance)
   , deadlockedWorkflows :: TVar (HashMap RunId SomeAsync)
   , workerClient :: C.Client
-  , workerEnv :: env
   }
 
 {- |
@@ -234,13 +232,13 @@ Signals are delivered in the order they are received by the Cluster.
 If multiple deliveries of a Signal would be a problem for your Workflow, add idempotency logic to your Signal handler 
 that checks for duplicates.
 -}
-data WorkflowSignalDefinition env st = 
-  forall codec f. (IsValidWorkflowFunction codec env st f, ResultOf (Workflow env st) f ~ ()) => 
+data WorkflowSignalDefinition = 
+  forall codec f. (FunctionSupportsCodec codec (ArgsOf f) (ResultOf Workflow f), ResultOf Workflow f ~ ()) => 
   WorkflowSignalDefinition
     Text -- name
     codec
     f
-    (f -> Vector RawPayload -> IO (Either String (Workflow env st ())))
+    (f -> Vector RawPayload -> IO (Either String (Workflow ())))
   -- { workflowSignalName :: Text
   -- , workflowSignalHandler :: [Payload] -> IO ()
   -- }
@@ -250,24 +248,27 @@ data WorkflowSignalDefinition env st =
 -- You can create a definition via 'Temporal.Workflow.provideWorkflow'.
 --
 -- To make a worker use this definition, you must add it to the 'WorkerConfig' via 'Temporal.Workflow.addWorkflow'.
-data WorkflowDefinition env st = WorkflowDefinition
+data WorkflowDefinition = WorkflowDefinition
   { workflowName :: Text
-  , workflowInitialState :: st
-  , workflowRun :: ValidWorkflowFunction env st
+  , workflowRun :: ValidWorkflowFunction
   }
 
--- | This constraint synonym ensures that a workflow function's arguments and result are serializable and use the correct monad.
-type IsValidWorkflowFunction (codec :: Type) (env :: Type) (st :: Type) f = 
-  ( ApplyPayloads codec (ArgsOf f)
-  , Codec codec (ResultOf (Workflow env st) f)
-  , Typeable (ResultOf (Workflow env st) f)
-  )
+class HasWorkflowDefinition a where
+  workflowDefinition :: a -> WorkflowDefinition
 
-data ValidWorkflowFunction env st = forall codec f. (IsValidWorkflowFunction codec env st f, RequireCallStack) => 
+instance HasWorkflowDefinition WorkflowDefinition where
+  workflowDefinition = id
+
+
+data ValidWorkflowFunction = forall codec f. 
+  ( f ~ (ArgsOf f :->: Workflow (ResultOf Workflow f))
+  , FunctionSupportsCodec codec (ArgsOf f) (ResultOf Workflow f)
+  , RequireCallStack
+  ) => 
   ValidWorkflowFunction
     codec
     f
-    (f -> Vector RawPayload -> IO (Workflow env st (ResultOf (Workflow env st) f)))
+    (f -> Vector RawPayload -> Either String (Workflow (ResultOf Workflow f)))
 
 data ActivityCancelReason
   = GoneFromServer
@@ -281,6 +282,14 @@ data ActivityCancelReason
   -- ^ The worker the activity is running is shutting down.
   | HeartbeatRecordFailuer
   -- ^ Failed to record heartbeat. This usually only happens if the payload converter fails.
+
+class HasActivityDefinition a where
+  type ActivityDefinitionEnv a :: Type
+  activityDefinition :: a -> ActivityDefinition (ActivityDefinitionEnv a)
+
+instance HasActivityDefinition (ActivityDefinition env) where
+  type ActivityDefinitionEnv (ActivityDefinition env) = env
+  activityDefinition = id
 
 data ActivityDefinition env = ActivityDefinition
   { activityName :: Text
@@ -297,7 +306,7 @@ data ActivityWorker env = ActivityWorker
 
 newtype WorkflowGenM = WorkflowGenM { unWorkflowGenM :: IORef StdGen }
 
-instance StatefulGen WorkflowGenM (Workflow env st) where
+instance StatefulGen WorkflowGenM Workflow where
   uniformWord32R r = applyWorkflowGen (genWord32R r)
   {-# INLINE uniformWord32R #-}
   uniformWord64R r = applyWorkflowGen (genWord64R r)
@@ -312,22 +321,22 @@ instance StatefulGen WorkflowGenM (Workflow env st) where
   {-# INLINE uniformWord64 #-}
   uniformShortByteString n = applyWorkflowGen (genShortByteString n)
 
-applyWorkflowGen :: (StdGen -> (a, StdGen)) -> WorkflowGenM -> Workflow env st a
+applyWorkflowGen :: (StdGen -> (a, StdGen)) -> WorkflowGenM -> Workflow a
 applyWorkflowGen f (WorkflowGenM ref) = Workflow $ \_ -> do
   g <- readIORef ref
   case f g of
     (!a, !g') -> Done a <$ writeIORef ref g'
 {-# INLINE applyWorkflowGen #-}
 
-newWorkflowGenM :: StdGen -> Workflow env st WorkflowGenM
+newWorkflowGenM :: StdGen -> Workflow WorkflowGenM
 newWorkflowGenM g = Workflow $ \_ -> (Done . WorkflowGenM) <$> newIORef g
 {-# INLINE newWorkflowGenM #-}
 
-instance RandomGenM WorkflowGenM StdGen (Workflow env st) where
+instance RandomGenM WorkflowGenM StdGen Workflow where
   applyRandomGenM = applyWorkflowGen
 
-instance FrozenGen StdGen (Workflow env st) where
-  type MutableGen StdGen (Workflow env st) = WorkflowGenM
+instance FrozenGen StdGen Workflow where
+  type MutableGen StdGen Workflow = WorkflowGenM
   freezeGen g = Workflow $ \_ -> Done <$> readIORef (unWorkflowGenM g)
   thawGen g = newWorkflowGenM g
 
@@ -340,30 +349,30 @@ instance FrozenGen StdGen (Workflow env st) where
 -- This could be an ordinary list, but the optimised representation
 -- saves space and time.
 --
-data JobList env st
+data JobList
   = JobNil
   | forall a . 
     JobCons
-      (ContinuationEnv env st)
-      (Workflow env st a)
-      {-# UNPACK #-} !(IVar env st a)
-      (JobList env st)
+      ContinuationEnv
+      (Workflow a)
+      {-# UNPACK #-} !(IVar a)
+      JobList
 
-appendJobList :: JobList u w -> JobList u w -> JobList u w
+appendJobList :: JobList -> JobList -> JobList
 appendJobList JobNil c = c
 appendJobList c JobNil = c
 appendJobList (JobCons a b c d) e = JobCons a b c $! appendJobList d e
 
-lengthJobList :: JobList u w -> Int
+lengthJobList :: JobList -> Int
 lengthJobList JobNil = 0
 lengthJobList (JobCons _ _ _ j) = 1 + lengthJobList j
 
-data IVarContents env st a
+data IVarContents a
   = IVarFull (ResultVal a)
-  | IVarEmpty (JobList env st)
+  | IVarEmpty JobList
 
 -- | A synchronisation point. It either contains a value, or a list of computations waiting for the value.
-newtype IVar env st a = IVar { ivarRef :: IORef (IVarContents env st a) }
+newtype IVar a = IVar { ivarRef :: IORef (IVarContents a) }
 
 
 -- | The contents of a full IVar.  We have to distinguish exceptions
@@ -386,25 +395,25 @@ data ResultVal a
 -- O(n^2) complexity for some pathalogical cases.
 --
 -- See "A Smart View on Datatypes", Jaskelioff/Rivas, ICFP'15
-data Cont env st a
-  = Cont (Workflow env st a)
-  | forall b. Cont env st b :>>= (b -> Workflow env st a)
-  | forall b. (b -> a) :<$> (Cont env st b)
-  | Return (IVar env st a)
+data Cont a
+  = Cont (Workflow a)
+  | forall b. Cont b :>>= (b -> Workflow a)
+  | forall b. (b -> a) :<$> (Cont b)
+  | Return (IVar a)
 
-toWf :: Cont env st a -> Workflow env st a
+toWf :: Cont a -> Workflow a
 toWf (Cont wf) = wf
 toWf (m :>>= k) = toWfBind m k
 toWf (f :<$> x) = toWfFmap f x
 toWf (Return i) = getIVar i
 
-toWfBind :: Cont env st b -> (b -> Workflow env st a) -> Workflow env st a
+toWfBind :: Cont b -> (b -> Workflow a) -> Workflow a
 toWfBind (m :>>= k) k2 = toWfBind m (k >=> k2)
 toWfBind (Cont wf) k = wf >>= k
 toWfBind (f :<$> x) k = toWfBind x (k . f)
 toWfBind (Return i) k = getIVar i >>= k
 
-toWfFmap :: (a -> b) -> Cont env st a -> Workflow env st b
+toWfFmap :: (a -> b) -> Cont a -> Workflow b
 toWfFmap f (m :>>= k) = toWfBind m (k >=> return . f)
 toWfFmap f (Cont wf) = f <$> wf
 toWfFmap f (g :<$> x) = toWfFmap (f . g) x
@@ -416,38 +425,38 @@ toWfFmap f (Return i) = f <$> getIVar i
 -- | The result of a computation is either 'Done' with a value, 'Throw'
 -- with an exception, or 'Blocked' on the result of a data fetch with
 -- a continuation.
-data Result env st a
+data Result a
   = Done a
   | Throw SomeException
   | forall b . Blocked
-      {-# UNPACK #-} !(IVar env st b)
-      (Cont env st a)
+      {-# UNPACK #-} !(IVar b)
+      (Cont a)
         -- ^ The 'IVar' is what we are blocked on; 'Cont' is the
         -- continuation.  This might be wrapped further if we're
         -- nested inside multiple '>>=', before finally being added
         -- to the 'IVar'.
 
-instance (Show a) => Show (Result u w a) where
+instance (Show a) => Show (Result a) where
   show (Done a) = printf "Done(%s)" $ show a
   show (Throw e) = printf "Throw(%s)" $ show e
   show Blocked{} = "Blocked"
 
-data ContinuationEnv env st = ContinuationEnv
-  { runQueueRef :: {-# UNPACK #-} !(IORef (JobList env st))
+data ContinuationEnv = ContinuationEnv
+  { runQueueRef :: {-# UNPACK #-} !(IORef JobList)
     -- ^ runnable computations. Things get added to here when we wake up
     -- a computation that was waiting for something.  When the list is
     -- empty, either we're finished, or we're waiting for some data fetch
     -- to return. 
-  , activationResults :: {-# UNPACK #-} !(TVar [ActivationResult env st])
+  , activationResults :: {-# UNPACK #-} !(TVar [ActivationResult])
   }
 
 -- Bit of a hack. This needs to be called for each workflow activity in the official SDK
-updateCallStack :: RequireCallStack => InstanceM env st ()
+updateCallStack :: RequireCallStack => InstanceM ()
 updateCallStack = do
   inst <- ask
   writeIORef inst.workflowCallStack $ popCallStack callStack
 
-updateCallStackW :: RequireCallStack => Workflow env st ()
+updateCallStackW :: RequireCallStack => Workflow ()
 updateCallStackW = Workflow $ \_ -> do
   inst <- ask
   writeIORef inst.workflowCallStack $ popCallStack callStack
@@ -457,9 +466,9 @@ updateCallStackW = Workflow $ \_ -> do
 -- been unblocked.  The worker adds these to a queue ('activationResults') using
 -- 'putResult'; the scheduler collects them from the queue and unblocks
 -- the relevant computations.
-data ActivationResult env st = forall a. ActivationResult
+data ActivationResult = forall a. ActivationResult
   (ResultVal a)
-  !(IVar env st a)
+  !(IVar a)
 
 -- | This function can be used to trace a bunch of lines to stdout when
 -- debugging core.
@@ -475,13 +484,11 @@ trace_ _ = id
 -- replay the Workflow execution up to the point of interruption with the same
 -- inputs at each step in the function.
 --
--- The Workflow monad also carries an app specific environment, 'env' and state 'st'.
---
 -- The 'st' state may be used to store information that is needed to respond to
 -- any queries or signals that are received by the Workflow execution.
-newtype Workflow env st a = Workflow { unWorkflow :: (ContinuationEnv env st -> InstanceM env st (Result env st a)) }
+newtype Workflow a = Workflow { unWorkflow :: (ContinuationEnv -> InstanceM (Result a)) }
 
-instance Functor (Workflow env st) where
+instance Functor Workflow where
   fmap f (Workflow m) = Workflow $ \env -> do
     r <- m env
     case r of
@@ -490,7 +497,7 @@ instance Functor (Workflow env st) where
       Blocked ivar cont -> trace_ "fmap Blocked" $
         return (Blocked ivar (f :<$> cont))
 
-instance Applicative (Workflow env st) where
+instance Applicative Workflow where
   pure a = Workflow $ \_env -> return (Done a)
   Workflow ff <*> Workflow aa = Workflow $ \env -> do
     rf <- ff env
@@ -515,12 +522,12 @@ instance Applicative (Workflow env st) where
             -- Note [Blocked/Blocked]
 
 blockedBlocked
-  :: ContinuationEnv env st
-  -> IVar env st c
-  -> Cont env st (a -> b)
-  -> IVar env st d
-  -> Cont env st a
-  -> InstanceM env st (Result env st b)
+  :: ContinuationEnv
+  -> IVar c
+  -> Cont (a -> b)
+  -> IVar d
+  -> Cont a
+  -> InstanceM (Result b)
 blockedBlocked _ _ (Return i) ivar2 acont =
   return (Blocked ivar2 (acont :>>= getIVarApply i))
 blockedBlocked _ _ (g :<$> Return i) ivar2 acont =
@@ -553,7 +560,7 @@ blockedBlocked env ivar1 fcont ivar2 acont = do
 --
 --   (do ff <- f; getIVar i; return (ff a)) <*> (a >>= putIVar i)
 
-instance Monad (Workflow env st) where
+instance Monad Workflow where
   Workflow m >>= k = Workflow $ \env -> do
     e <- m env
     case e of
@@ -570,21 +577,21 @@ instance Monad (Workflow env st) where
 
 -- | If the first computation throws a value that implements 'SomeWorkflowException', 
 -- try the second one.
-instance Alternative (Workflow env st) where
+instance Alternative Workflow where
   empty = throw AlternativeInstanceFailure
   (<|>) l r = l `Temporal.Worker.Types.catch` \(SomeWorkflowException e) -> r
 
-instance {-# OVERLAPPABLE #-} MonadLogger (Workflow env st) where
+instance {-# OVERLAPPABLE #-} MonadLogger Workflow where
   monadLoggerLog loc src lvl msg = Workflow $ \_ -> do
     logger <- asks workflowInstanceLogger
     fmap Done $ liftIO $ logger loc src lvl (toLogStr msg)
 
-newIVar :: MonadIO m => m (IVar env st a)
+newIVar :: MonadIO m => m (IVar a)
 newIVar = do
   ivarRef <- newIORef $ IVarEmpty JobNil
   pure IVar{..}
 
-getIVar :: IVar env st a -> Workflow env st a
+getIVar :: IVar a -> Workflow a
 getIVar i@(IVar {ivarRef = !ref}) = Workflow $ \env -> do
   e <- readIORef ref
   case e of
@@ -594,7 +601,7 @@ getIVar i@(IVar {ivarRef = !ref}) = Workflow $ \env -> do
     IVarEmpty _ -> pure $ Blocked i (Return i)
 
 -- Just a specialised version of getIVar, for efficiency in <*>
-getIVarApply :: IVar env st (a -> b) -> a -> Workflow env st b
+getIVarApply :: IVar (a -> b) -> a -> Workflow b
 getIVarApply i@IVar{ivarRef = !ref} a = Workflow $ \env -> do
   e <- readIORef ref
   case e of
@@ -604,7 +611,7 @@ getIVarApply i@IVar{ivarRef = !ref} a = Workflow $ \env -> do
     IVarEmpty _ ->
       return (Blocked i (Cont (getIVarApply i a)))
 
-putIVar :: IVar env st a -> ResultVal a -> ContinuationEnv env st -> IO ()
+putIVar :: IVar a -> ResultVal a -> ContinuationEnv -> IO ()
 putIVar IVar{ivarRef = !ref} a ContinuationEnv{..} = do
   e <- readIORef ref
   case e of
@@ -616,11 +623,11 @@ putIVar IVar{ivarRef = !ref} a ContinuationEnv{..} = do
       -- are legitimate use-cases for writing several times.
     IVarFull{} -> return ()
 
-raiseFromIVar :: Exception e => ContinuationEnv env st -> IVar env st a -> e -> IO (Result env st b)
+raiseFromIVar :: Exception e => ContinuationEnv -> IVar a -> e -> IO (Result b)
 raiseFromIVar env _ivar e = raiseImpl env (toException e)
 
 {-# INLINE raiseImpl #-}
-raiseImpl :: ContinuationEnv u w -> SomeException -> IO (Result u w b)
+raiseImpl :: ContinuationEnv -> SomeException -> IO (Result b)
 raiseImpl ContinuationEnv{..} e = return $ Throw e
   -- | testReportFlag ReportExceptionLabelStack $ report flags
   -- , Just (HaxlException Nothing h) <- fromException e = do
@@ -629,7 +636,7 @@ raiseImpl ContinuationEnv{..} e = return $ Throw e
   -- | otherwise = return $ Throw e 
 
 {-# INLINE addJob #-}
-addJob :: ContinuationEnv env st -> Workflow env st b -> IVar env st b -> IVar env st a -> InstanceM env st ()
+addJob :: ContinuationEnv -> Workflow b -> IVar b -> IVar a -> InstanceM ()
 addJob env !wf !resultIVar IVar{ivarRef = !ref} =
   modifyIORef' ref $ \contents ->
     case contents of
@@ -639,7 +646,7 @@ addJob env !wf !resultIVar IVar{ivarRef = !ref} =
 addJobPanic :: forall a . a
 addJobPanic = error "addJob: not empty"
 
-flushCommands :: InstanceM env st ()
+flushCommands :: InstanceM ()
 flushCommands = do
   inst <- ask
   info <- readIORef inst.workflowInstanceInfo
@@ -661,41 +668,24 @@ flushCommands = do
       throwIO err
     Right () -> pure ()
 
-instance MonadReader env (Workflow env st) where
-  ask = Workflow $ \_ -> fmap Done $ asks workflowEnv
-  local f (Workflow m) = Workflow $ \env -> local (\inst -> inst { workflowEnv = f $ workflowEnv inst }) (m env)
-
-instance MonadState st (Workflow env st) where
-  get = Workflow $ \env -> do
-    inst <- ask
-    Done <$> readIORef inst.workflowState
-  put st = Workflow $ \env -> do
-    inst <- ask
-    Done <$> liftIO (writeIORef (workflowState inst) $! st)
-  state f = Workflow $ \env -> do
-    inst <- ask
-    liftIO $ atomicModifyIORef' (workflowState inst) $ \st ->
-      let (a, st') = f st
-      in (st', Done a)
-
-instance Semigroup a => Semigroup (Workflow env st a) where
+instance Semigroup a => Semigroup (Workflow a) where
   (<>) = liftA2 (<>)
 
-instance Monoid a => Monoid (Workflow env st a) where
+instance Monoid a => Monoid (Workflow a) where
   mempty = pure mempty
 
 -- -----------------------------------------------------------------------------
 -- Exceptions
 
 -- | Throw an exception in the Workflow monad
-throw :: Exception e => e -> Workflow env st a
+throw :: Exception e => e -> Workflow a
 throw e = Workflow $ \env -> liftIO $ raise env e
 
-raise :: Exception e => ContinuationEnv env st -> e -> IO (Result env st a)
+raise :: Exception e => ContinuationEnv -> e -> IO (Result a)
 raise env e = raiseImpl env (toException e)
 
 -- | Catch an exception in the Workflow monad
-catch :: Exception e => Workflow env st a -> (e -> Workflow env st a) -> Workflow env st a
+catch :: Exception e => Workflow a -> (e -> Workflow a) -> Workflow a
 catch (Workflow m) h = Workflow $ \env -> do
   r <- m env
   case r of
@@ -707,49 +697,47 @@ catch (Workflow m) h = Workflow $ \env -> do
 
 -- | Catch exceptions that satisfy a predicate
 catchIf
-  :: Exception e => (e -> Bool) -> Workflow env st a -> (e -> Workflow env st a)
-  -> Workflow env st a
+  :: Exception e => (e -> Bool) -> Workflow a -> (e -> Workflow a)
+  -> Workflow a
 catchIf cond m handler =
   Temporal.Worker.Types.catch m $ \e -> if cond e then handler e else throw e
 
 -- | Returns @'Left' e@ if the computation throws an exception @e@, or
 -- @'Right' a@ if it returns a result @a@.
-try :: Exception e => Workflow env st a -> Workflow env st (Either e a)
+try :: Exception e => Workflow a -> Workflow (Either e a)
 try m = (Right <$> m) `Temporal.Worker.Types.catch` (return . Left)
 
-instance Catch.MonadThrow (Workflow env st) where throwM = Temporal.Worker.Types.throw
-instance Catch.MonadCatch (Workflow env st) where catch = Temporal.Worker.Types.catch
+instance Catch.MonadThrow Workflow where throwM = Temporal.Worker.Types.throw
+instance Catch.MonadCatch Workflow where catch = Temporal.Worker.Types.catch
 
-type IsValidActivityFunction env codec f = 
-    ( ApplyPayloads codec (ArgsOf f)
-    , Codec codec (ResultOf (Activity env) f)
-    )
-
-data ValidActivityFunction env = forall codec f. (IsValidActivityFunction env codec f) => 
+data ValidActivityFunction env = forall codec f. 
+  ( f ~ (ArgsOf f :->: Activity env (ResultOf (Activity env) f))
+  , FunctionSupportsCodec codec (ArgsOf f) (ResultOf (Activity env) f)
+  ) => 
   ValidActivityFunction 
     codec 
     f
-    (Vector RawPayload -> IO (Activity env (ResultOf (Activity env) f)))
+    (f -> Vector RawPayload -> Either String (Activity env (ResultOf (Activity env) f)))
 
-runWorkerM :: Worker wfEnv actEnv -> WorkerM wfEnv actEnv a -> IO a
+runWorkerM :: Worker actEnv -> WorkerM actEnv a -> IO a
 runWorkerM worker m = runReaderT (unWorkerM m) worker
 
 nonEmptyString :: Text -> Maybe Text
 nonEmptyString t = if T.null t then Nothing else Just t
 
-data SomeChildWorkflowHandle env st = forall result. SomeChildWorkflowHandle (ChildWorkflowHandle env st result)
+data SomeChildWorkflowHandle = forall result. SomeChildWorkflowHandle (ChildWorkflowHandle result)
 
 -- | A client side handle to a single child Workflow instance. 
 --
 -- It can be used to signal, wait for completion, and cancel the workflow.
-data ChildWorkflowHandle env st result = forall codec. (Codec codec result) =>
+data ChildWorkflowHandle result = forall codec. (Codec codec result) =>
   ChildWorkflowHandle
     { childWorkflowSequence :: Sequence
-    , startHandle :: IVar env st ()
-    , resultHandle :: IVar env st ResolveChildWorkflowExecution
+    , startHandle :: IVar ()
+    , resultHandle :: IVar ResolveChildWorkflowExecution
     , childWorkflowCodec :: codec
     , childWorkflowId :: WorkflowId
-    , firstExecutionRunId :: IVar env st RunId
+    , firstExecutionRunId :: IVar RunId
     }
 
 
@@ -778,3 +766,21 @@ data QueryDefinition (args :: [Type]) (result :: Type) = forall codec.
 
 convertToProtoMemo :: Map Text RawPayload -> Memo
 convertToProtoMemo m = defMessage & Message.fields .~ fmap convertToProtoPayload m
+
+class FunctionHoist (args :: [Type]) where
+  hoistFn :: (forall x. m x -> n x) -> Proxy args -> Proxy result -> (args :->: m result) -> (args :->: n result)
+
+instance FunctionHoist '[] where
+  hoistFn trans _ _ f = trans f
+
+instance FunctionHoist args => FunctionHoist (a ': args) where
+  hoistFn trans _ res f = \arg -> hoistFn trans (Proxy @args) res (f arg)
+
+-- | A specalized version of 'hoist' that allows you to change the end result functor of a given function.
+hoist 
+  :: forall m n f. (f ~ ArgsOf f :->: m (ResultOf m f), FunctionHoist (ArgsOf f))
+  => (forall x. m x -> n x) 
+  -> f 
+  -> (ArgsOf f :->: n (ResultOf m f))
+hoist trans f = hoistFn trans (Proxy @(ArgsOf f)) (Proxy @(ResultOf m f)) f
+

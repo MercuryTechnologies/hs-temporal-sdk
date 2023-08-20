@@ -36,7 +36,7 @@ import qualified Control.Exception
 import Text.Printf
 import RequireCallStack
 
-withRunId :: Text -> InstanceM env st Text
+withRunId :: Text -> InstanceM Text
 withRunId arg = do
   inst <- ask
   info <- readIORef $ inst.workflowInstanceInfo
@@ -119,14 +119,14 @@ withRunId arg = do
 --
 -- We hand this back to
 -- emptyRunQueue.
-runWorkflow :: forall env st a. HasCallStack => (RequireCallStackImpl => Workflow env st a) -> InstanceM env st a
+runWorkflow :: forall a. HasCallStack => (RequireCallStackImpl => Workflow a) -> InstanceM a
 runWorkflow wf = provideCallStack $ do
   inst <- ask
   let env = inst.workflowInstanceContinuationEnv
   result@IVar{ivarRef = resultRef} <- newIVar -- where to put the final result
   let
     -- Run a job, and put its result in the given IVar
-    schedule :: ContinuationEnv env st -> JobList env st -> Workflow env st b -> IVar env st b -> InstanceM env st ()
+    schedule :: ContinuationEnv -> JobList -> Workflow b -> IVar b -> InstanceM ()
     schedule env@ContinuationEnv{..} rq wf ivar@IVar{ivarRef = !ref} = do
       cs <- readIORef inst.workflowCallStack
       logMsg <- withRunId (Text.pack $ printf "schedule: %d\n%s" (1 + lengthJobList rq) $ prettyCallStack cs)
@@ -181,7 +181,7 @@ runWorkflow wf = provideCallStack $ do
           addJob env (toWf fn) ivar i
           reschedule env rq
 
-    reschedule :: ContinuationEnv env st -> JobList env st -> InstanceM env st ()
+    reschedule :: ContinuationEnv -> JobList -> InstanceM ()
     reschedule env@ContinuationEnv{..} jobs = do
       $logDebug =<< withRunId "reschedule"
       case jobs of
@@ -195,7 +195,7 @@ runWorkflow wf = provideCallStack $ do
         JobCons env' a b c ->
           schedule env' c a b
     
-    emptyRunQueue :: ContinuationEnv env st -> InstanceM env st ()
+    emptyRunQueue :: ContinuationEnv -> InstanceM ()
     emptyRunQueue env = do
       logMsg <- withRunId "emptyRunQueue"
       $logDebug logMsg
@@ -204,7 +204,7 @@ runWorkflow wf = provideCallStack $ do
         JobNil -> flushCommandsAndAwaitActivation env
         _ -> reschedule env workflowActions
     
-    flushCommandsAndAwaitActivation :: ContinuationEnv env st -> InstanceM env st ()
+    flushCommandsAndAwaitActivation :: ContinuationEnv -> InstanceM ()
     flushCommandsAndAwaitActivation env@ContinuationEnv{..} = do
       inst <- ask
       $logDebug =<< withRunId "flushCommandsAndAwaitActivation"
@@ -212,7 +212,7 @@ runWorkflow wf = provideCallStack $ do
       flushCommands
       waitActivationResults env
 
-    checkActivationResults :: ContinuationEnv env st -> InstanceM env st (JobList env st)
+    checkActivationResults :: ContinuationEnv -> InstanceM JobList
     checkActivationResults ContinuationEnv{..} = do
       $logDebug =<< withRunId "checkActivationResults"
       comps <- liftIO $ atomicallyOnBlocking (LogicBug ReadingCompletionsFailedRun) $ do
@@ -244,7 +244,7 @@ runWorkflow wf = provideCallStack $ do
           jobs <- mapM getComplete comps
           return (foldr appendJobList JobNil jobs)
 
-    waitActivationResults :: ContinuationEnv env st -> InstanceM env st ()
+    waitActivationResults :: ContinuationEnv -> InstanceM ()
     waitActivationResults env@ContinuationEnv{..} = do
       $logDebug =<< withRunId "waitActivationResults"
       let
@@ -264,7 +264,7 @@ runWorkflow wf = provideCallStack $ do
     IVarFull (ThrowInternal e) -> throwIO e
 
 
-finishWorkflow :: (Codec codec a) => codec -> a -> InstanceM env st ()
+finishWorkflow :: (Codec codec a) => codec -> a -> InstanceM ()
 finishWorkflow codec result = do
   $logDebug =<< withRunId "Finishing workflow"
   let res = Temporal.Payload.encode codec result
@@ -274,10 +274,10 @@ finishWorkflow codec result = do
   addCommand inst completeMessage
   flushCommands
 
-instance TypeError ('Text "A workflow definition cannot directly perform IO. Use executeActivity or executeLocalActivity instead.") => MonadIO (Workflow env st) where
+instance TypeError ('Text "A workflow definition cannot directly perform IO. Use executeActivity or executeLocalActivity instead.") => MonadIO Workflow where
   liftIO = error "Unreachable"
 
-instance TypeError ('Text "A workflow definition cannot directly perform IO. Use executeActivity or executeLocalActivity instead.") => MonadUnliftIO (Workflow env st) where
+instance TypeError ('Text "A workflow definition cannot directly perform IO. Use executeActivity or executeLocalActivity instead.") => MonadUnliftIO Workflow where
   withRunInIO _ = error "Unreachable"
 
 rethrowAsyncExceptions :: MonadIO m => SomeException -> m ()
@@ -285,7 +285,7 @@ rethrowAsyncExceptions e
   | Just SomeAsyncException{} <- fromException e = UnliftIO.throwIO e
   | otherwise = return ()
 
-addCommand :: (MonadIO m) => WorkflowInstance env st -> WorkflowCommand -> m ()
+addCommand :: (MonadIO m) => WorkflowInstance -> WorkflowCommand -> m ()
 addCommand inst command = do
   atomically $ do
     modifyTVar' inst.workflowCommands $ \cmds -> push command cmds

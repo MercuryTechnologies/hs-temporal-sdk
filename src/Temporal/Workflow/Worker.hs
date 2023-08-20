@@ -33,22 +33,21 @@ import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_F
 import qualified Proto.Temporal.Api.Failure.V1.Message as F
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 
-pollWorkflowActivation :: WorkerM wfEnv actEnv (Either Core.WorkerError Core.WorkflowActivation)
+pollWorkflowActivation :: WorkerM actEnv (Either Core.WorkerError Core.WorkflowActivation)
 pollWorkflowActivation = do
   worker <- ask
   liftIO $ Core.pollWorkflowActivation worker.workerCore
 
-upsertWorkflowInstance :: RunId -> WorkflowInstance wfEnv st -> WorkerM wfEnv actEnv (OpaqueWorkflow WorkflowInstance wfEnv)
+upsertWorkflowInstance :: RunId -> WorkflowInstance -> WorkerM actEnv WorkflowInstance
 upsertWorkflowInstance r inst = do
   worker <- ask
   liftIO $ atomically $ do
     workflows <- readTVar worker.workerWorkflowState.runningWorkflows
     case HashMap.lookup r workflows of
       Nothing -> do
-        let opaque = OpaqueWorkflow inst
-        let workflows' = HashMap.insert r opaque workflows
+        let workflows' = HashMap.insert r inst workflows
         writeTVar worker.workerWorkflowState.runningWorkflows workflows'
-        pure opaque
+        pure inst
       Just existingInstance -> do
         writeTVar worker.workerWorkflowState.runningWorkflows workflows
         pure existingInstance
@@ -61,7 +60,7 @@ upsertWorkflowInstance r inst = do
 --
 -- The Async handle only completes successfully on poller shutdown.
 
-execute :: Worker wfEnv actEnv -> IO ()
+execute :: Worker actEnv -> IO ()
 execute worker = runWorkerM worker $ do
   $(logInfo) "Starting workflow worker"
   go
@@ -86,7 +85,7 @@ execute worker = runWorkerM worker $ do
           go
       
 
-handleActivation :: Core.WorkflowActivation -> WorkerM wfEnv actEnv ()
+handleActivation :: Core.WorkflowActivation -> WorkerM actEnv ()
 handleActivation activation = do
   $(logDebug) ("Handling activation: RunId " <> Text.pack (show (activation ^. Activation.runId)))
   forM_ (activation ^. Activation.jobs) $ \job -> do
@@ -118,7 +117,7 @@ handleActivation activation = do
                 & Completion.failed .~ failureProto
           
           liftIO (Core.completeWorkflowActivation worker.workerCore completionMessage >>= either throwIO pure)
-        Just (OpaqueWorkflow inst) -> do
+        Just inst -> do
           -- This deadlock code seems suspect, but really it's because the workflow code
           -- shouldn't be able to block indefinitely on a single thread before returning
           -- a result. If it does, it's a bug in the workflow code.
@@ -169,7 +168,7 @@ handleActivation activation = do
       )
       (activation ^. Activation.vec'jobs)
 
-    createOrFetchWorkflowInstance :: WorkerM wfEnv actEnv (Maybe (OpaqueWorkflow WorkflowInstance wfEnv))
+    createOrFetchWorkflowInstance :: WorkerM actEnv (Maybe WorkflowInstance)
     createOrFetchWorkflowInstance = do
       worker <- ask
       runningWorkflows_ <- atomically $ readTVar worker.workerWorkflowState.runningWorkflows
@@ -211,20 +210,19 @@ handleActivation activation = do
                   }
             case HashMap.lookup (startWorkflow ^. Activation.workflowType) worker.workerWorkflowState.workerWorkflowFunctions of 
               Nothing -> pure Nothing
-              Just (OpaqueWorkflow definition) -> do
+              Just definition -> do
                 inst <- create 
                   (\wf -> do
                     putStrLn "Complete activation"
                     Core.completeWorkflowActivation worker.workerCore wf
                   )
                   workflowInfo 
-                  worker.workerWorkflowState.workerEnv 
                   definition
                 addStackTraceHandler inst
                 Just <$> upsertWorkflowInstance runId_ inst
           pure $ join (vExistingInstance V.!? 0)
       
-    removeEvictedWorkflowInstances :: WorkerM wfEnv actEnv ()
+    removeEvictedWorkflowInstances :: WorkerM actEnv ()
     removeEvictedWorkflowInstances = forM_ (activation ^. Activation.vec'jobs) $ \job -> do
       case job ^. Activation.maybe'variant of
         Just (WorkflowActivationJob'RemoveFromCache removeFromCache) -> do
@@ -235,7 +233,7 @@ handleActivation activation = do
             writeTVar worker.workerWorkflowState.runningWorkflows $ HashMap.delete runId_ currentWorkflows
             case HashMap.lookup runId_ currentWorkflows of
               Nothing -> pure $ $(logDebug) $ Text.pack ("Eviction request on an unknown workflow with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
-              Just (OpaqueWorkflow wf) -> pure $ do
+              Just wf -> pure $ do
                 mTask <- readIORef wf.workflowPrimaryTask
                 mapM_ cancel mTask
                 $(logDebug) $ Text.pack ("Evicting workflow instance with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))

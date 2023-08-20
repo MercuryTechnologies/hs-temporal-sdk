@@ -45,7 +45,16 @@ newtype RunId = RunId { rawRunId :: Text }
 newtype PatchId = PatchId { rawPatchId :: Text }
   deriving (Eq, Ord, Show, Hashable)
 
--- | A Task Queue is a first-in, first-out queue that a Worker Process polls for Tasks.
+-- | A Task Queue is a queue that a Worker Process polls for Tasks.
+--
+-- Task Queues do not have any ordering guarantees. 
+-- It is possible to have a Task that stays in a Task Queue for a period of time, if there is a backlog that wasn't drained for that time.
+--
+-- Task Queues are very lightweight components. 
+-- Task Queues do not require explicit registration but instead are created on demand when a Workflow Execution or Activity spawns or 
+-- when a Worker Process subscribes to it. When a Task Queue is created, both a Workflow Task Queue and an Activity Task Queue are 
+-- created under the same name. There is no limit to the number of Task Queues a Temporal Application can use or a Temporal Cluster 
+-- can maintain.
 newtype TaskQueue = TaskQueue { rawTaskQueue :: Text }
   deriving (Eq, Ord, Show, Hashable)
 

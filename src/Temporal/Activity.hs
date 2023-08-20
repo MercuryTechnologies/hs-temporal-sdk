@@ -1,11 +1,12 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 module Temporal.Activity 
   ( Activity
   , provideActivity
   , ProvidedActivity(..)
+  , KnownActivity(..)
   , ActivityDefinition
-  , IsValidActivityFunction
   , ValidActivityFunction
   , heartbeat
   , ActivityInfo(..)
@@ -53,11 +54,11 @@ import qualified Proto.Temporal.Sdk.Core.CoreInterface_Fields as Proto
 -- >   JSON -- codec for serializing arguments and results
 -- >   "myActivity" -- visible name of the workflow
 -- >   myActivity -- the workflow function
-provideActivity :: forall codec name env f.
-  ( IsValidActivityFunction env codec f
-  , GatherArgs codec (ArgsOf f)
-  , (ArgsOf f :->: Activity env (ResultOf (Activity env) f)) ~ f
-  , Typeable (ResultOf (Activity env) f)
+provideActivity :: forall codec env f.
+  ( f ~ ArgsOf f :->: Activity env (ResultOf (Activity env) f)
+  --, f ~ ArgsOf f :->: ResultOf f
+  --, ResultOf f ~ MonadResult (Activity env) f
+  , FunctionSupportsCodec codec (ArgsOf f) (ResultOf (Activity env) f)
   ) => codec -> Text -> f -> ProvidedActivity env f
 provideActivity codec name f = ProvidedActivity
   { definition = ActivityDefinition
@@ -65,7 +66,7 @@ provideActivity codec name f = ProvidedActivity
       , activityRun = ValidActivityFunction 
           codec 
           f 
-          (applyPayloads codec (Proxy @(ArgsOf f)) (Proxy @(Activity env (ResultOf (Activity env) f))) f)
+          (applyPayloads codec (Proxy @(ArgsOf f)) (Proxy @(Activity env (ResultOf (Activity env) f))))
       }
   , reference = KnownActivity
       { knownActivityCodec = codec
@@ -78,6 +79,10 @@ data ProvidedActivity env f = ProvidedActivity
   { definition :: ActivityDefinition env
   , reference :: KnownActivity (ArgsOf f) (ResultOf (Activity env) f)
   }
+
+instance HasActivityDefinition (ProvidedActivity env f) where
+  type ActivityDefinitionEnv (ProvidedActivity env f) = env
+  activityDefinition (ProvidedActivity def _) = def
 
 {- |
 An Activity Heartbeat is a ping from the Worker Process that is executing the Activity to the Temporal Cluster. Each Heartbeat informs the Temporal Cluster that the Activity Execution is making progress and the Worker has not crashed. If the Cluster does not receive a Heartbeat within a Heartbeat Timeout time period, the Activity will be considered failed and another Activity Task Execution may be scheduled according to the Retry Policy.

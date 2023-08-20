@@ -26,6 +26,7 @@ module Temporal.Workflow.WorkflowDefinition
   , provideWorkflow
   , ProvidedWorkflow(..)
   , GatherArgs(..)
+  , WorkflowRef(..)
   ) where
 
 import Data.Aeson hiding (encode, decode)
@@ -47,12 +48,20 @@ import Temporal.Workflow.WorkflowInstance
 import Temporal.Worker.Types
 import RequireCallStack
 
+class WorkflowRef (f :: Type) where
+  type WorkflowArgs f :: [Type]
+  type WorkflowResult f :: Type
+  workflowRef :: f -> KnownWorkflow (WorkflowArgs f) (WorkflowResult f)
+
+instance WorkflowRef (KnownWorkflow args result) where
+  type WorkflowArgs (KnownWorkflow args result) = args
+  type WorkflowResult (KnownWorkflow args result) = result
+  workflowRef = id
+
 -- | A 'KnownWorkflow' is a handle that contains all the information needed to start a 
 -- Workflow either as a child workflow or as a top-level workflow via a 'Client'.
 data KnownWorkflow (args :: [Type]) (result :: Type) = forall codec. 
-  ( Codec codec result
-  , GatherArgs codec args
-  , Typeable result
+  ( FunctionSupportsCodec codec args result
   ) => KnownWorkflow 
         { knownWorkflowCodec :: codec 
         , knownWorkflowNamespace :: Maybe Namespace
@@ -61,10 +70,10 @@ data KnownWorkflow (args :: [Type]) (result :: Type) = forall codec.
         }
 
 gatherStartChildWorkflowArgs 
-  :: forall env st args result codec. GatherArgs codec args
+  :: forall args result codec. GatherArgs codec args
   => codec 
-  -> ([RawPayload] -> Workflow env st (ChildWorkflowHandle env st result)) 
-  -> (args :->: Workflow env st (ChildWorkflowHandle env st result))
+  -> ([RawPayload] -> Workflow (ChildWorkflowHandle result)) 
+  -> (args :->: Workflow (ChildWorkflowHandle result))
 gatherStartChildWorkflowArgs c f = gatherArgs (Proxy @args) c id f
 
 data SignalDefinition (args :: [Type]) = forall codec. GatherArgs codec args =>
@@ -74,16 +83,20 @@ data SignalDefinition (args :: [Type]) = forall codec. GatherArgs codec args =>
     , signalApply :: forall res. Proxy res -> (args :->: res) -> Vector RawPayload -> IO res
     }
 
-data ProvidedWorkflow env st f = ProvidedWorkflow
-  { definition :: WorkflowDefinition env st
-  , reference :: KnownWorkflow (ArgsOf f) (ResultOf (Workflow env st) f)
+data ProvidedWorkflow f = ProvidedWorkflow
+  { definition :: WorkflowDefinition
+  , reference :: KnownWorkflow (ArgsOf f) (ResultOf Workflow f)
   }
 
-type IsProvidedWorkflow codec env st f =
-  ( IsValidWorkflowFunction codec env st f
-  , GatherArgs codec (ArgsOf f)
-  , f ~ (ArgsOf f :->: Workflow env st (ResultOf (Workflow env st) f))
-  )
+instance HasWorkflowDefinition (ProvidedWorkflow f) where
+  workflowDefinition :: ProvidedWorkflow f -> WorkflowDefinition
+  workflowDefinition = definition
+
+instance WorkflowRef (ProvidedWorkflow f) where
+  type WorkflowArgs (ProvidedWorkflow f) = ArgsOf f
+  type WorkflowResult (ProvidedWorkflow f) = ResultOf Workflow f
+  workflowRef :: ProvidedWorkflow f -> KnownWorkflow (WorkflowArgs (ProvidedWorkflow f)) (WorkflowResult (ProvidedWorkflow f))
+  workflowRef = reference
 
 -- | A utility function for constructing a 'WorkflowDefinition' from a function as well as
 -- a 'KnownWorkflow' value. This is useful for keeping the argument, codec, and result types
@@ -98,19 +111,19 @@ type IsProvidedWorkflow codec env st f =
 -- >   @"myWorkflow" -- visible name of the workflow
 -- >   () -- initial state
 -- >   myWorkflow -- the workflow function
-provideWorkflow :: forall env st name codec f.
-  (IsProvidedWorkflow codec env st f) => codec -> Text -> st -> (RequireCallStackImpl => f) -> ProvidedWorkflow env st f
-provideWorkflow codec name st f = provideCallStack $ ProvidedWorkflow
+provideWorkflow :: forall codec f.
+  ( f ~ ArgsOf f :->: Workflow (ResultOf Workflow f)
+  , FunctionSupportsCodec codec (ArgsOf f) (ResultOf Workflow f)) => codec -> Text -> (RequireCallStackImpl => f) -> ProvidedWorkflow f
+provideWorkflow codec name f = provideCallStack $ ProvidedWorkflow
   { definition = WorkflowDefinition
     { workflowName = name
-    , workflowInitialState = st
     , workflowRun = ValidWorkflowFunction 
         codec 
         f
         (applyPayloads 
           codec 
           (Proxy @(ArgsOf f)) 
-          (Proxy @(Workflow env st (ResultOf (Workflow env st) f)))
+          (Proxy @(Workflow (ResultOf Workflow f)))
         )
     }
   , reference = KnownWorkflow

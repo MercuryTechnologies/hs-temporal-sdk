@@ -55,10 +55,10 @@ import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
 import UnliftIO hiding (catch)
 
 
-emptySequences :: SequenceMaps st env
+emptySequences :: SequenceMaps
 emptySequences = SequenceMaps mempty mempty mempty mempty mempty mempty
 
-isEmpty :: SequenceMaps env st -> Bool
+isEmpty :: SequenceMaps -> Bool
 isEmpty SequenceMaps{..} = 
   HashMap.null timers &&
   HashMap.null activities &&

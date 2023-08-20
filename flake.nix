@@ -84,7 +84,7 @@
       flake // rec {
         packages = {
           inherit (pkgs) temporal_bridge;
-          hs_temporal_sdk = flake.packages."temporal-sdk:exe:hello";
+          hs_temporal_sdk = flake.packages."temporal-sdk:test:temporal-sdk-tests";
         };
 
         # Built by `nix build .`
