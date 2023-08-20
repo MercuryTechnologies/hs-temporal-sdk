@@ -6,9 +6,12 @@
 -- Anything longer than a week (Months, Years) becomes ambiguous because they
 -- are variable length. For example, a month can be 28, 29, 30, or 31 days.
 --
--- If you need to represent a longer duration, you may want to use the @time@
+-- If you need to represent a duration as years or months, you may want to use the @time@
 -- library to normalize against a specific time zone and then convert the difference
 -- between now and then into a Duration.
+--
+-- Alternatively, consider using Temporal's scheduling features to schedule a workflow
+-- to run at one or more specific times in the future.
 module Temporal.Duration where
 import Data.Fixed
 import Data.Time.Clock
@@ -25,6 +28,11 @@ data Duration = Duration
   { durationSeconds :: {-# UNPACK #-} !Word64
   , durationNanoseconds :: {-# UNPACK #-} !Word64
   } deriving (Eq, Ord, Show, Data)
+
+addDurations :: Duration -> Duration -> Duration
+addDurations (Duration s1 ns1) (Duration s2 ns2) = Duration (s1 + s2 + s) ns
+    where
+      (s, ns) = (ns1 + ns2) `divMod` 1_000_000_000
 
 -- | Convert a 'DiffTime' to a 'Duration'.
 --
