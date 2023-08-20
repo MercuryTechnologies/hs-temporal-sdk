@@ -1131,13 +1131,17 @@ continueAsNew
   -> (WorkflowArgs wf :->: Workflow (WorkflowResult wf))
 continueAsNew wf opts = case workflowRef wf of
   k@(KnownWorkflow codec _ _ _) -> gatherContinueAsNewArgs @(WorkflowArgs wf) @(WorkflowResult wf) codec $ \args -> do
+    i <- info
     Workflow $ \_ -> do
       throwIO $ ContinueAsNewException $ defMessage
         & Command.workflowType .~ knownWorkflowName k
         & Command.taskQueue .~ (maybe "" rawTaskQueue opts.taskQueue)
         & Command.arguments .~ (convertToProtoPayload <$> args)
         & Command.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retryPolicy)
-        & Command.searchAttributes .~ searchAttributesToProto opts.searchAttributes
+        & Command.searchAttributes .~ searchAttributesToProto 
+          (if opts.searchAttributes == mempty
+            then i.searchAttributes
+            else opts.searchAttributes)
         & Command.headers .~ fmap convertToProtoPayload opts.headers
         & Command.memo .~ fmap convertToProtoPayload opts.memo
         & Command.maybe'workflowTaskTimeout .~ (durationToProto <$> opts.taskTimeout)
