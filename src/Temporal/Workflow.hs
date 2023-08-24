@@ -26,6 +26,7 @@ whenever a corresponding Workflow Function Execution (instance of the Function D
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -92,16 +93,23 @@ module Temporal.Workflow
   , SignalDefinition(..)
   -- , setSignalHandler
   -- , waitCondition
-  -- , waitCancellation
   -- * Other utilities
   , Temporal.Workflow.race
   , unsafeAsyncEffectSink
+  -- * State vars
+  , StateVar
+  , newStateVar
+  , MonadReadStateVar(..)
+  , MonadWriteStateVar(..)
   -- * Time and timers
   , now
   , time
   , sleep
   , Timer
   , createTimer
+  -- * Workflow cancellation
+  , isCancelRequested
+  , waitCancellation
   -- * Random value generation
   -- $randomness
   , randomGen
@@ -182,6 +190,7 @@ import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow_Fields as C
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import UnliftIO
 import Temporal.Duration (Duration, durationToProto)
+import Temporal.Exception (WorkflowCancelRequested(WorkflowCancelRequested))
 
 -- | An async action handle that can be awaited or cancelled.
 data Task a = Task 
@@ -892,7 +901,7 @@ uuid4 = do
     (sbs `SBS.index` 0xF)
 
 
-newtype Query a = Query (Workflow a)
+newtype Query a = Query (InstanceM a)
   deriving (Functor, Applicative, Monad)
 
 -- $queries
@@ -942,7 +951,7 @@ setQueryHandler (QueryDefinition n codec) f = ilift $ do
         Left err -> throwIO $ ValueError err
         Right (Query r) -> do
           inst <- ask
-          eResult <- error "Needs to be rewritten to integrate with scheduler" -- liftIO $ UnliftIO.try $ fmap (encode codec) $ runReaderT r inst.workflowEnv
+          eResult <- UnliftIO.try $ fmap (encode codec) r
           let cmd = defMessage
                 & Command.respondToQuery .~
                   ( defMessage
@@ -1002,9 +1011,18 @@ setSignalHandler (SignalDefinition n codec applyToSignal) f = ilift $ do
       case eWorkflow of
         Left (ValueError err) -> throwIO $ ValueError err
         Right w -> do
-          resultVal <- UnliftIO.try $ runWorkflow w
+          resultVal <- UnliftIO.try $ resume $ runWorkflow w
+          inst <- ask
           cmd <- case resultVal of
-            Right () -> pure Nothing
+            Right evalState -> case evalState of
+              Left (Await suspended) -> do
+                modifyIORef' inst.workflowPrimaryTask $ \currentStatus -> case currentStatus of
+                  ExecutionNotStarted -> ExecutionNotStarted -- shouldn't be possible, probably
+                  -- TODO, whether we should pass resolutions to suspended' is unclear
+                  SuspendedExecution (Await suspended') codec -> SuspendedExecution (Await $ \resolutions -> suspended resolutions *> suspended' []) codec
+                  CompletedExecution -> CompletedExecution
+                pure Nothing
+              Right () -> pure Nothing
             -- If a user-facing exception wasn't handled within the workflow, then that
             -- means the workflow failed.
             Left e -> do
@@ -1021,7 +1039,6 @@ setSignalHandler (SignalDefinition n codec applyToSignal) f = ilift $ do
               pure $ Just completeMessage
           inst <- ask
           forM_ cmd (addCommand inst)
-          flushCommands
 
 -- | Current time from the workflow perspective.
 --
@@ -1296,13 +1313,41 @@ newtype StateVar a = StateVar (IORef a)
 newStateVar :: a -> Workflow (StateVar a)
 newStateVar a = Workflow $ \_ -> (Done . StateVar) <$> newIORef a
 
-readStateVar :: StateVar a -> Workflow a
-readStateVar (StateVar ref) = Workflow $ \_ -> Done <$> readIORef ref
+class MonadReadStateVar m where
+  readStateVar :: StateVar a -> m a
 
-writeStateVar :: StateVar a -> a -> Workflow ()
-writeStateVar (StateVar ref) a = Workflow $ \_ -> Done <$> writeIORef ref a
+class MonadWriteStateVar m where
+  writeStateVar :: StateVar a -> a -> m ()
+  modifyStateVar :: StateVar a -> (a -> a) -> m ()
 
-modifyStateVar :: StateVar a -> (a -> a) -> Workflow ()
-modifyStateVar (StateVar ref) f = Workflow $ \_ -> Done <$> modifyIORef' ref f
+instance MonadReadStateVar Workflow where
+  readStateVar (StateVar ref) = Workflow $ \_ -> Done <$> readIORef ref
 
+instance MonadWriteStateVar Workflow where
+  writeStateVar (StateVar ref) a = Workflow $ \_ -> Done <$> writeIORef ref a
 
+  modifyStateVar (StateVar ref) f = Workflow $ \_ -> Done <$> modifyIORef' ref f
+
+instance MonadReadStateVar Query where
+  readStateVar (StateVar ref) = Query $ readIORef ref
+
+isCancelRequested :: RequireCallStack => Workflow Bool
+isCancelRequested = do
+  updateCallStackW
+  inst <- askInstance
+  res <- tryReadIVar inst.workflowCancellationVar
+  case res of
+    Nothing -> pure False
+    Just () -> pure True
+
+-- | Block the current workflow's main execution thread until the workflow is cancelled.
+--
+-- The workflow can still respond to signals and queries while waiting for cancellation.
+--
+-- Upon cancellation, the workflow will throw a 'WorkflowCancelRequested' exception.
+waitCancellation :: RequireCallStack => Workflow ()
+waitCancellation = do
+  updateCallStackW
+  inst <- askInstance
+  getIVar inst.workflowCancellationVar
+  throw WorkflowCancelRequested

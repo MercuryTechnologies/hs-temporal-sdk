@@ -3,13 +3,16 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Temporal.Workflow.Unsafe where
 import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Int (Int32)
+import Data.List.NonEmpty (NonEmpty)
 import Data.ProtoLens
+import Data.Kind
 import Data.Text (Text)
 import qualified Data.Text as Text
 import GHC.IO.Exception (BlockedIndefinitelyOnSTM(..))
@@ -40,7 +43,6 @@ withRunId arg = do
   inst <- ask
   info <- readIORef $ inst.workflowInstanceInfo
   return ("[runId=" <> rawRunId info.runId <> "] " <> arg)
-
 
 -- How this works:
 --
@@ -118,21 +120,23 @@ withRunId arg = do
 --
 -- We hand this back to
 -- emptyRunQueue.
-runWorkflow :: forall a. HasCallStack => (RequireCallStackImpl => Workflow a) -> InstanceM a
+runWorkflow :: forall a. HasCallStack => (RequireCallStackImpl => Workflow a) -> SuspendableWorkflowExecution a
 runWorkflow wf = provideCallStack $ do
-  inst <- ask
+  inst <- lift ask
+  pendingActivations <- lift $ newTVarIO []
   let env = inst.workflowInstanceContinuationEnv
   result@IVar{ivarRef = resultRef} <- newIVar -- where to put the final result
   let
     -- Run a job, and put its result in the given IVar
-    schedule :: ContinuationEnv -> JobList -> Workflow b -> IVar b -> InstanceM ()
+    schedule :: ContinuationEnv -> JobList -> Workflow b -> IVar b -> SuspendableWorkflowExecution ()
     schedule env@ContinuationEnv{..} rq wf ivar@IVar{ivarRef = !ref} = do
-      cs <- readIORef inst.workflowCallStack
-      logMsg <- withRunId (Text.pack $ printf "schedule: %d\n%s" (1 + lengthJobList rq) $ prettyCallStack cs)
-      $logDebug logMsg
+      lift $ do
+        cs <- readIORef inst.workflowCallStack
+        logMsg <- withRunId (Text.pack $ printf "schedule: %d\n%s" (1 + lengthJobList rq) $ prettyCallStack cs)
+        $logDebug logMsg
       let {-# INLINE result #-}
           result r = do
-            e <- readIORef ref
+            e <- lift $ readIORef ref
             case e of
               IVarFull _ ->
                 -- An IVar is typically only meant to be written to once
@@ -141,7 +145,7 @@ runWorkflow wf = provideCallStack $ do
                 -- (See Haxl.Core.Parallel)
                 reschedule env rq
               IVarEmpty workflowActions -> do
-                writeIORef ref (IVarFull r)
+                lift $ writeIORef ref (IVarFull r)
                 -- Have we got the final result now?
                 if ref == unsafeCoerce resultRef
                         -- comparing IORefs of different types is safe, it's
@@ -157,17 +161,8 @@ runWorkflow wf = provideCallStack $ do
                     --   JobNil -> return ()
                     --   _ -> modifyIORef' runQueueRef (appendJobList rq)
                   else reschedule env $ appendJobList workflowActions rq
-      r <- UnliftIO.try $ do
-        cancellationState <- readIORef inst.workflowCancellationState
-        let (Workflow run) = case cancellationState of
-              CancellationNotRequested -> wf
-              CancellationRequested -> do
-                Workflow $ \_ -> do
-                  $logDebug "Cancellation requested"
-                  writeIORef inst.workflowCancellationState CancellationSignaledToWorkflow
-                  pure $ Throw $ toException WorkflowCancelRequested
-                wf
-              CancellationSignaledToWorkflow -> wf
+      r <- lift $ UnliftIO.try $  do
+        let (Workflow run) = wf
         run env
       case r of
         Left e -> do
@@ -176,54 +171,53 @@ runWorkflow wf = provideCallStack $ do
         Right (Done a) -> result $ Ok a
         Right (Throw ex) -> result $ ThrowWorkflow ex
         Right (Blocked i fn) -> do
-          $logDebug =<< withRunId "scheduled job blocked"
-          addJob env (toWf fn) ivar i
+          lift ($logDebug =<< withRunId "scheduled job blocked")
+          lift $ addJob env (toWf fn) ivar i
           reschedule env rq
 
-    reschedule :: ContinuationEnv -> JobList -> InstanceM ()
+    reschedule :: ContinuationEnv -> JobList -> SuspendableWorkflowExecution ()
     reschedule env@ContinuationEnv{..} jobs = do
-      $logDebug =<< withRunId "reschedule"
+      lift ($logDebug =<< withRunId "reschedule")
       case jobs of
         JobNil -> do
-          rq <- readIORef runQueueRef
+          rq <- lift $ readIORef runQueueRef
           case rq of
             JobNil -> emptyRunQueue env
             JobCons env' a b c -> do
-              writeIORef runQueueRef JobNil
+              lift $ writeIORef runQueueRef JobNil
               schedule env' c a b
         JobCons env' a b c ->
           schedule env' c a b
     
-    emptyRunQueue :: ContinuationEnv -> InstanceM ()
+    emptyRunQueue :: ContinuationEnv -> SuspendableWorkflowExecution ()
     emptyRunQueue env = do
-      logMsg <- withRunId "emptyRunQueue"
-      $logDebug logMsg
+      lift $ do
+        logMsg <- withRunId "emptyRunQueue"
+        $logDebug logMsg
       workflowActions <- checkActivationResults env
       case workflowActions of
         JobNil -> flushCommandsAndAwaitActivation env
         _ -> reschedule env workflowActions
     
-    flushCommandsAndAwaitActivation :: ContinuationEnv -> InstanceM ()
+    flushCommandsAndAwaitActivation :: ContinuationEnv -> SuspendableWorkflowExecution ()
     flushCommandsAndAwaitActivation env@ContinuationEnv{..} = do
-      inst <- ask
-      $logDebug =<< withRunId "flushCommandsAndAwaitActivation"
-      unflushedWorkflowCommands <- atomically $ readTVar inst.workflowCommands
-      flushCommands
+      inst <- lift ask
+      lift ($logDebug =<< withRunId "flushCommandsAndAwaitActivation")
       waitActivationResults env
 
-    checkActivationResults :: ContinuationEnv -> InstanceM JobList
-    checkActivationResults ContinuationEnv{..} = do
+    checkActivationResults :: ContinuationEnv -> SuspendableWorkflowExecution JobList
+    checkActivationResults ContinuationEnv{..} = lift $ do
       $logDebug =<< withRunId "checkActivationResults"
-      comps <- liftIO $ atomicallyOnBlocking (LogicBug ReadingCompletionsFailedRun) $ do
-        c <- readTVar activationResults
-        writeTVar activationResults []
-        return c
+      comps <- atomically $ do
+        c <- readTVar pendingActivations
+        writeTVar pendingActivations []
+        pure c
       case comps of
         [] -> do
           $logDebug =<< withRunId "No new activation results"
           return JobNil
         _ -> do
-          $logDebug =<< withRunId (Text.pack $ printf "%d complete" (length comps))
+          ($logDebug =<< withRunId (Text.pack $ printf "%d complete" (length comps)))
           let
               getComplete (ActivationResult a IVar{ivarRef = !cr}) = do
                 r <- readIORef cr
@@ -243,15 +237,17 @@ runWorkflow wf = provideCallStack $ do
           jobs <- mapM getComplete comps
           return (foldr appendJobList JobNil jobs)
 
-    waitActivationResults :: ContinuationEnv -> InstanceM ()
+    waitActivationResults :: ContinuationEnv -> SuspendableWorkflowExecution ()
     waitActivationResults env@ContinuationEnv{..} = do
-      $logDebug =<< withRunId "waitActivationResults"
-      let
-        wrapped = atomicallyOnBlocking (LogicBug ReadingCompletionsFailedRun)
-        doWait = wrapped $ do
-          c <- readTVar activationResults
-          when (null c) retry
-      liftIO doWait
+      lift ($logDebug =<< withRunId "waitActivationResults")
+      newActivations <- do
+        activations <- lift $ atomically $ readTVar pendingActivations
+        if null activations
+          then await
+          else do
+            lift $ atomically $ writeTVar pendingActivations []
+            return activations
+      atomically $ writeTVar pendingActivations newActivations
       emptyRunQueue env
   
   schedule env JobNil wf result
@@ -271,7 +267,6 @@ finishWorkflow codec result = do
         Command.completeWorkflowExecution .~ (defMessage & Command.result .~ convertToProtoPayload res)
   inst <- ask
   addCommand inst completeMessage
-  flushCommands
 
 instance TypeError ('Text "A workflow definition cannot directly perform IO. Use executeActivity or executeLocalActivity instead.") => MonadIO Workflow where
   liftIO = error "Unreachable"
@@ -288,8 +283,3 @@ addCommand :: (MonadIO m) => WorkflowInstance -> WorkflowCommand -> m ()
 addCommand inst command = do
   atomically $ do
     modifyTVar' inst.workflowCommands $ \cmds -> push command cmds
-
-atomicallyOnBlocking :: Exception e => e -> STM a -> IO a
-atomicallyOnBlocking e stm =
-  Control.Exception.catch (atomically stm)
-        (\BlockedIndefinitelyOnSTM -> Control.Exception.throw e)

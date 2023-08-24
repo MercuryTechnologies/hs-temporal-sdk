@@ -75,6 +75,7 @@ library
     Temporal.Duration,
     Temporal.Exception,
     Temporal.Generic,
+    Temporal.Generic.TyFun,
     Temporal.Payload,
     -- Temporal.Payload.TH,
     -- Temporal.Schedule,
@@ -111,6 +112,7 @@ test-suite temporal-sdk-tests
   other-modules:
     Spec,
     AsyncCompletionSpec,
+    GenericSpec,
     IntegrationSpec,
 
 

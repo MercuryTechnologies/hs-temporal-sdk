@@ -312,7 +312,7 @@ needsClient = do
                 }
           C.execute client wf.reference opts
             `shouldReturn` 1
-      xspecify "Activity cancellation on heartbeat returns the expected result to workflows" $ \client -> do
+      specify "Activity cancellation on heartbeat returns the expected result to workflows" $ \client -> do
         taskQueue <- W.TaskQueue <$> uuidText
         let testActivity :: Activity () Int
             testActivity = do
@@ -536,16 +536,11 @@ needsClient = do
           C.execute client parentWf.reference opts
             `shouldReturn` "Left ChildWorkflowCancelled"
 
-      xspecify "cancel after child workflow has started" $ \client -> do
+      -- TODO, the parent workflow event list doesn't really show the child workflow being cancelled???
+      specify "cancel after child workflow has started" $ \client -> do
         parentId <- uuidText
         let cancelTest :: MyWorkflow ()
-            cancelTest = go
-              where
-                go = do
-                  result <- Catch.try $ W.sleep $ seconds 1
-                  case result of
-                    Left WorkflowCancelRequested -> pure ()
-                    _ -> go
+            cancelTest = W.waitCancellation
 
             childWf = W.provideWorkflow defaultCodec "cancelTestChild" cancelTest
             parentWorkflow :: MyWorkflow String
@@ -554,7 +549,6 @@ needsClient = do
               childWorkflow <- W.startChildWorkflow childWf.reference W.defaultChildWorkflowOptions childWorkflowId
               W.waitChildWorkflowStart childWorkflow
               W.cancelChildWorkflowExecution childWorkflow
-              W.sleep $ seconds 3
               result <- Catch.try $ W.waitChildWorkflowResult childWorkflow
               pure $ show (result :: Either SomeException ())
             parentWf = W.provideWorkflow defaultCodec "cancelTestParent" parentWorkflow
@@ -577,13 +571,13 @@ needsClient = do
   -- -- --       specify "async fail signal?" pending
   -- -- --       specify "always delivered" pending
     describe "Query" $ do
-      xspecify "works" $ \client -> do
+      specify "works" $ \client -> do
         let echoQuery :: W.QueryDefinition '[Text] Text
             echoQuery = W.QueryDefinition "testQuery" defaultCodec
             workflow :: MyWorkflow ()
             workflow = do
-              -- W.setQueryHandler echoQuery $ \msg -> pure msg
-              W.sleep $ seconds 5
+              W.setQueryHandler echoQuery $ \msg -> pure msg
+              W.sleep $ seconds 2
             wf = W.provideWorkflow defaultCodec "queryWorkflow" workflow
             conf = configure () $ do
               setNamespace $ W.Namespace "test"
@@ -600,7 +594,7 @@ needsClient = do
           result `shouldBe` Right "hello"
 
 
-      xspecify "query not found" $ \client -> do
+      specify "query not found" $ \client -> do
         let echoQuery :: W.QueryDefinition '[Text] Text
             echoQuery = W.QueryDefinition "testQuery" defaultCodec
             workflow :: MyWorkflow ()

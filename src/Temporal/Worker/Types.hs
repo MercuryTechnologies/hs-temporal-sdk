@@ -176,6 +176,14 @@ data CancellationState
   | CancellationSignaledToWorkflow
   deriving (Show, Eq, Ord, Enum, Bounded)
 
+data ExecutionState 
+  = ExecutionNotStarted
+  | forall codec a. Codec codec a => SuspendedExecution
+    { suspendedExecution :: Await [ActivationResult] (SuspendableWorkflowExecution a)
+    , completionCodec :: codec
+    }
+  | CompletedExecution
+
 data WorkflowInstance = WorkflowInstance
   { workflowInstanceInfo :: {-# UNPACK #-} !(IORef Info)
   , workflowInstanceDefinition :: WorkflowDefinition
@@ -186,7 +194,7 @@ data WorkflowInstance = WorkflowInstance
   , workflowSequences :: {-# UNPACK #-} !(IORef Sequences)
   , workflowTime :: {-# UNPACK #-} !(IORef SystemTime)
   , workflowIsReplaying :: {-# UNPACK #-} !(IORef Bool)
-  , workflowPrimaryTask :: {-# UNPACK #-} !(IORef (Maybe (Async ())))
+  , workflowPrimaryTask :: {-# UNPACK #-} !(IORef ExecutionState)
   , workflowCommands :: {-# UNPACK #-} !(TVar (Reversed WorkflowCommand))
   , workflowSequenceMaps :: {-# UNPACK #-} !(TVar (SequenceMaps))
   , workflowSignalHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (Vector RawPayload -> IO ())))
@@ -194,8 +202,7 @@ data WorkflowInstance = WorkflowInstance
   , workflowCallStack :: {-# UNPACK #-} !(IORef CallStack)
   , workflowCompleteActivation :: !(Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
   , workflowInstanceContinuationEnv :: {-# UNPACK #-} !(ContinuationEnv)
-  , workflowCancellationState :: {-# UNPACK #-} !(IORef CancellationState)
-  -- , disableEagerActivityExecution :: Bool
+  , workflowCancellationVar :: {-# UNPACK #-} !(IVar ())
   }
 
 newtype InstanceM (a :: Type) = InstanceM { unInstanceM :: ReaderT WorkflowInstance IO a }
@@ -448,7 +455,6 @@ data ContinuationEnv = ContinuationEnv
     -- a computation that was waiting for something.  When the list is
     -- empty, either we're finished, or we're waiting for some data fetch
     -- to return. 
-  , activationResults :: {-# UNPACK #-} !(TVar [ActivationResult])
   }
 
 -- Bit of a hack. This needs to be called for each workflow activity in the official SDK
@@ -624,6 +630,15 @@ putIVar IVar{ivarRef = !ref} a ContinuationEnv{..} = do
       -- are legitimate use-cases for writing several times.
     IVarFull{} -> return ()
 
+tryReadIVar :: IVar a -> Workflow (Maybe a)
+tryReadIVar i@IVar{ivarRef = !ref} = Workflow $ \env -> do
+  e <- readIORef ref
+  case e of
+    IVarFull (Ok a) -> pure $ Done (Just a)
+    IVarFull (ThrowWorkflow e) -> liftIO $ raiseFromIVar env i e
+    IVarFull (ThrowInternal e) -> throwIO e
+    IVarEmpty _ -> pure $ Done Nothing
+
 raiseFromIVar :: Exception e => ContinuationEnv -> IVar a -> e -> IO (Result b)
 raiseFromIVar env _ivar e = raiseImpl env (toException e)
 
@@ -785,3 +800,55 @@ hoist
   -> (ArgsOf f :->: n (ResultOf m f))
 hoist trans f = hoistFn trans (Proxy @(ArgsOf f)) (Proxy @(ResultOf m f)) f
 
+newtype Await x y = Await (x -> y)
+instance Functor (Await x) where
+  fmap f (Await g) = Await (f . g)
+
+-- | Suspending, resumable monadic computations.
+newtype Coroutine s m r = Coroutine 
+  {
+    -- | Run the next step of a `Coroutine` computation. The result of the step execution will be either a suspension or
+    -- the final coroutine result.
+    resume :: m (Either (s (Coroutine s m r)) r)
+  }
+
+instance (Functor s, Functor m) => Functor (Coroutine s m) where
+  fmap f t = Coroutine (fmap (apply f) (resume t))
+    where 
+      apply fc (Right x) = Right (fc x)
+      apply fc (Left s) = Left (fmap (fmap fc) s)
+
+instance (Functor s, Functor m, Monad m) => Applicative (Coroutine s m) where
+  pure x = Coroutine (return (Right x))
+  (<*>) = ap
+  t *> f = Coroutine (resume t >>= apply f)
+    where 
+      apply fc (Right _) = resume fc
+      apply fc (Left s) = return (Left (fmap (>> fc) s))
+
+instance (Functor s, Monad m) => Monad (Coroutine s m) where
+  return = pure
+  t >>= f = Coroutine (resume t >>= apply f)
+    where 
+      apply fc (Right x) = resume (fc x)
+      apply fc (Left s) = return (Left (fmap (>>= fc) s))
+  (>>) = (*>)
+
+instance (Functor s, MonadFail m) => MonadFail (Coroutine s m) where
+  fail msg = Coroutine (Right <$> fail msg)
+
+instance Functor s => MonadTrans (Coroutine s) where
+  lift = Coroutine . liftM Right
+
+instance (Functor s, MonadIO m) => MonadIO (Coroutine s m) where
+  liftIO = lift . liftIO
+
+suspend :: (Monad m, Functor s) => s (Coroutine s m x) -> Coroutine s m x
+suspend s = Coroutine (return (Left s))
+{-# INLINE suspend #-}
+
+-- | Suspend the current coroutine until a value is provided.
+await :: Monad m => Coroutine (Await x) m x
+await = suspend (Await return)
+
+type SuspendableWorkflowExecution a = Coroutine (Await [ActivationResult]) InstanceM a

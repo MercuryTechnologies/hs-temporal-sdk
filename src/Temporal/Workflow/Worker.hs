@@ -98,7 +98,6 @@ handleActivation activation = do
   -}
   if shouldRun
     then do
-      $(logDebug) "Running workflow"
       mInst <- createOrFetchWorkflowInstance
       case mInst of
         Nothing -> do
@@ -122,7 +121,6 @@ handleActivation activation = do
           -- This deadlock code seems suspect, but really it's because the workflow code
           -- shouldn't be able to block indefinitely on a single thread before returning
           -- a result. If it does, it's a bug in the workflow code.
-          $(logDebug) "About to activate"
           completion <- liftIO $ UnliftIO.try $ activate worker inst activation
 
           case completion of
@@ -234,8 +232,5 @@ handleActivation activation = do
             writeTVar worker.workerWorkflowState.runningWorkflows $ HashMap.delete runId_ currentWorkflows
             case HashMap.lookup runId_ currentWorkflows of
               Nothing -> pure $ $(logDebug) $ Text.pack ("Eviction request on an unknown workflow with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
-              Just wf -> pure $ do
-                mTask <- readIORef wf.workflowPrimaryTask
-                mapM_ cancel mTask
-                $(logDebug) $ Text.pack ("Evicting workflow instance with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
+              Just wf -> pure $ $(logDebug) $ Text.pack ("Evicting workflow instance with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
         _ -> pure ()

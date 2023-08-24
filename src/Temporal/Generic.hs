@@ -90,6 +90,7 @@ module Temporal.Generic
   , Def(..)
   , defsToConfig
   , Impl
+  , provide
   -- * Naming schemes for turning record fields into workflow and activity names
   , Labels
   , Labeled(..)
@@ -104,6 +105,8 @@ module Temporal.Generic
   , CanUseAsDefs
   ) where
 
+import Control.Monad
+import Control.Monad.Reader
 import Control.Monad.IO.Class
 import Data.Functor.Const
 import Data.Functor.Compose
@@ -125,7 +128,7 @@ import Barbies.Bare
 -- import Temporal.Generic.GenericN
 -- import Temporal.Generic.GUsing
 -- import Temporal.Generic.Traversable
--- import Temporal.Generic.TyFun
+import Temporal.Generic.TyFun
 import Temporal.Worker
 import Temporal.Worker.Types
 import Temporal.Workflow.WorkflowDefinition
@@ -180,7 +183,7 @@ instance (FnRef f ~ KnownWorkflow (ArgsOf f) (ResultOf Workflow f)) => WorkflowR
   workflowRef = ref
 
 class RefFromFunction' codec (f :: Type) (original :: Type) where
-  refFromFunction :: Proxy f -> codec -> String -> original -> Ref original
+  refFromFunction :: Proxy f -> codec -> String -> Proxy original -> Ref original
 
 instance 
   ( FnRef original ~ KnownWorkflow (ArgsOf original) (ResultOf Workflow original)
@@ -304,28 +307,34 @@ type CanUseAsRefs f codec =
   , ApplicativeB (f Covered)
   )
 
-refs :: forall f codec.
-  ( CanUseAsRefs f codec
-  ) => codec -> Impl f -> Refs f 
+class CoverIfNeeded b t f where
+  coverIfNeeded :: b t f -> b Covered f
+
+instance BareB b => CoverIfNeeded b Bare Identity where
+  coverIfNeeded = bcover
+
+instance CoverIfNeeded b Covered f where
+  coverIfNeeded = id
+
+refs :: forall r t f codec.
+  ( CanUseAsRefs r codec
+  , CoverIfNeeded r t f
+  ) => codec -> r t f -> Refs r 
 refs codec wfrec = result
   where
-    covered :: f Covered Identity
-    covered = bcover wfrec
+    covered = coverIfNeeded wfrec
 
     ns :: String
-    ns = Temporal.Generic.namespace (Proxy @(f Covered (Const String)))
+    ns = Temporal.Generic.namespace (Proxy @(r Covered (Const String)))
 
-    defLabels :: f Covered (Const String)
+    defLabels :: r Covered (Const String)
     defLabels = bmap (\(Const str) -> Const $ concat [ns, ".", str]) fieldNames
 
-    labeledFields :: f Covered Labeled
-    labeledFields = bzipWith (\(Const label) (Identity f) -> Labeled label f) defLabels covered
+    convertToKnownWorkflow :: forall wf. RefFromFunction codec wf => Const String wf -> Ref wf
+    convertToKnownWorkflow = \(Const n) -> refFromFunction (Proxy @wf) codec n (Proxy @wf)
 
-    convertToKnownWorkflow :: forall wf. RefFromFunction codec wf => Labeled wf -> Ref wf
-    convertToKnownWorkflow = \(Labeled n f) -> refFromFunction (pure f) codec n f
-
-    result :: f Covered Ref
-    result = bmapC @(RefFromFunction codec) convertToKnownWorkflow labeledFields
+    result :: r Covered Ref
+    result = bmapC @(RefFromFunction codec) convertToKnownWorkflow defLabels
 
 type CanUseAsDefs f codec env = 
   ( BareB f
@@ -368,4 +377,5 @@ instance ToConfig env (ActivityDefinition env) where
 defsToConfig :: (TraversableB f) => f (Def actEnv) -> ConfigM actEnv ()
 defsToConfig = bfoldMap (\(Def x) -> toConfig x)
 
-
+provide :: FunctorB (r t) => b -> r t (Reader b) -> r t Identity
+provide x = bmap (\r -> Identity $ runReader r x)

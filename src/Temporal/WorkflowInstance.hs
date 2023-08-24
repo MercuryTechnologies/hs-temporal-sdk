@@ -120,14 +120,14 @@ create workflowCompleteActivation info workflowInstanceDefinition = do
   workflowTime <- newIORef $ MkSystemTime 0 0
   workflowIsReplaying <- newIORef False
   workflowSequenceMaps <- newTVarIO $ SequenceMaps mempty mempty mempty mempty mempty mempty
-  workflowPrimaryTask <- newIORef Nothing
+  workflowPrimaryTask <- newIORef ExecutionNotStarted
   workflowCommands <- newTVarIO $ Reversed []
   workflowSignalHandlers <- newIORef mempty
   workflowCallStack <- newIORef emptyCallStack
   workflowQueryHandlers <- newIORef mempty
   workflowInstanceInfo <- newIORef info
-  workflowInstanceContinuationEnv <- ContinuationEnv <$> newIORef JobNil <*> newTVarIO []
-  workflowCancellationState <- newIORef CancellationNotRequested
+  workflowInstanceContinuationEnv <- ContinuationEnv <$> newIORef JobNil
+  workflowCancellationVar <- newIVar
   pure WorkflowInstance {..}
 
 -- | This is a special query handler that is added to every workflow instance.
@@ -138,7 +138,7 @@ addStackTraceHandler :: MonadUnliftIO m => WorkflowInstance -> m ()
 addStackTraceHandler inst = do
   let specialHandler = \qId _ -> do
         cs <- readIORef inst.workflowCallStack
-        let callStackPayload = RawPayload (Text.encodeUtf8 $ Text.pack $ prettyCallStack cs) (Map.singleton "encoding" "text/plain")
+        let callStackPayload = Temporal.Payload.encode JSON (Text.pack $ prettyCallStack cs)
         let cmd = defMessage
               & Command.respondToQuery .~
                 ( defMessage
@@ -256,27 +256,28 @@ nextConditionSequence = do
 
 applyStartWorkflow :: StartWorkflow -> InstanceM ()
 applyStartWorkflow startWorkflow = do
-  act <- async $ runTopLevel $ do
-    inst <- ask
-    let def = inst.workflowInstanceDefinition
-    case def of
-      (WorkflowDefinition _ (ValidWorkflowFunction fmt innerF applyArgs)) -> do
-        -- Set the starting randomness seed
-        let (WorkflowGenM genRef) = inst.workflowRandomnessSeed
-        writeIORef genRef (mkStdGen $ fromIntegral $ startWorkflow ^. Activation.randomnessSeed)
-        writeIORef inst.workflowTime (startWorkflow ^. Activation.startTime . to timespecFromTimestamp)
+  inst <- ask
+  case inst.workflowInstanceDefinition of
+    (WorkflowDefinition _ (ValidWorkflowFunction fmt innerF applyArgs)) -> do
+      -- Set the starting randomness seed
+      let (WorkflowGenM genRef) = inst.workflowRandomnessSeed
+      writeIORef genRef (mkStdGen $ fromIntegral $ startWorkflow ^. Activation.randomnessSeed)
+      writeIORef inst.workflowTime (startWorkflow ^. Activation.startTime . to timespecFromTimestamp)
 
-        let args = fmap convertFromProtoPayload (startWorkflow ^. Command.vec'arguments)
-            eAct = applyArgs innerF args
-        -- TODO make sure that we also catch exceptions from payload processing
-        finishWorkflow fmt =<< case eAct of
-          Left msg -> do
-            $(logError) $ Text.pack ("Failed to decode workflow arguments: " <> msg)
-            throwIO (ValueError msg)
-          Right act -> runWorkflow act 
+      let args = fmap convertFromProtoPayload (startWorkflow ^. Command.vec'arguments)
+          eAct = applyArgs innerF args
+      mExecutionState <- runTopLevel $ case eAct of
+        Left msg -> do
+          $(logError) $ Text.pack ("Failed to decode workflow arguments: " <> msg)
+          throwIO (ValueError msg)
+        Right act -> do
+          resume $ runWorkflow act
 
-  primary <- asks workflowPrimaryTask
-  writeIORef primary (Just act)
+      case mExecutionState of
+        Nothing -> writeIORef inst.workflowPrimaryTask CompletedExecution
+        Just (Left suspension) -> do
+          writeIORef inst.workflowPrimaryTask (SuspendedExecution suspension fmt)
+        Just (Right r) -> finishWorkflow fmt r
   pure ()
 
 applyFireTimer :: FireTimer -> InstanceM ()
@@ -313,18 +314,27 @@ applyQueryWorkflow queryWorkflow = do
     Just h -> liftIO $ h 
       (QueryId $ queryWorkflow ^. Activation.queryId)
       (fmap convertFromProtoPayload (queryWorkflow ^. Command.vec'arguments))
-  -- where
-  --   runQuery = do
-  --     let baseCommand = defMessage & Activation.respondToQuery . Activation.queryId .~ (queryWorkflow ^. Activation.queryId)
+  -- At this point, the query handler should have added a command. However, if the activation is already in a blocked state,
+  -- then we need to flush the commands to unblock it. However, since the main workflow evaluation is run async to this, we
+  -- need to understand if the workflow evaluation has settled.
 
 
 applyCancelWorkflow :: CancelWorkflow -> InstanceM ()
 applyCancelWorkflow cancelWorkflow = do
   inst <- ask
-  modifyIORef' inst.workflowCancellationState $ \old -> if old < CancellationRequested
-    then CancellationRequested
-    else old
-  flushCommands
+  executionState <- readIORef inst.workflowPrimaryTask
+  case executionState of
+    ExecutionNotStarted -> pure ()
+    SuspendedExecution (Await f) c -> do
+      mExecutionState <- runTopLevel $ resume $ f [ActivationResult (Ok ()) inst.workflowCancellationVar]
+      case mExecutionState of
+        Nothing -> writeIORef inst.workflowPrimaryTask CompletedExecution
+        Just (Left suspension) -> do
+          writeIORef inst.workflowPrimaryTask (SuspendedExecution suspension c)
+        Just (Right r) -> do
+          finishWorkflow c r
+          writeIORef inst.workflowPrimaryTask CompletedExecution
+    CompletedExecution -> pure ()
 
 applySignalWorkflow :: SignalWorkflow -> InstanceM ()
 applySignalWorkflow signalWorkflow = do
@@ -365,6 +375,8 @@ data PendingJob
 -- It seems to think that the jobs are already sorted in the correct order by the server.
 applyJobs :: Vector WorkflowActivationJob -> InstanceM (Either SomeException ())
 applyJobs jobs = UnliftIO.try $ do
+  $logDebug $ Text.pack ("Applying jobs: " <> show jobs)
+  inst <- ask
   patchNotifications
   signalWorkflows
   queryWorkflows
@@ -373,9 +385,23 @@ applyJobs jobs = UnliftIO.try $ do
   -- TODO Need to think hard to ensure that sequences are not messed up by this somehow
   activationResults <- applyResolutions resolutions
   inst <- ask
-  atomically $ do
-    results <- readTVar inst.workflowInstanceContinuationEnv.activationResults
-    writeTVar inst.workflowInstanceContinuationEnv.activationResults (results <> activationResults)
+  mWorkflowThread <- readIORef inst.workflowPrimaryTask
+  case mWorkflowThread of
+    ExecutionNotStarted -> do
+      case activationResults of
+        [] -> pure ()
+        _ -> throwIO $ RuntimeError "Resolutions found, but no workflow is running"
+    SuspendedExecution (Await f) c -> do
+      res <- runTopLevel $ resume $ f activationResults
+      case res of
+        Nothing -> writeIORef inst.workflowPrimaryTask CompletedExecution
+        Just (Left suspension) -> writeIORef inst.workflowPrimaryTask (SuspendedExecution suspension c)
+        Just (Right r) -> do
+          finishWorkflow c r
+          writeIORef inst.workflowPrimaryTask CompletedExecution
+    CompletedExecution -> pure ()
+  flushCommands
+
   where
     (patchNotifications, signalWorkflows, queryWorkflows, resolutions, otherJobs) = V.foldr 
       (\job (patchNotifications, signalWorkflows, queryWorkflows, resolutions, otherJobs) -> case job ^. Activation.maybe'variant of
@@ -533,20 +559,18 @@ applyResolutions rs = do
 
 -- Note: this is not intended to end up inside of the workflowPrimaryTask value,
 -- or else cancellation will not work properly.
-runTopLevel :: InstanceM a -> InstanceM ()
+runTopLevel :: InstanceM a -> InstanceM (Maybe a)
 runTopLevel handle = do
   inst <- ask
-  void handle `catches`
+  (Just <$> handle) `catches`
     [ Handler $ \(ContinueAsNewException msg) -> do
       inst <- ask
       addCommand inst (defMessage & Command.continueAsNewWorkflowExecution .~ msg)
-      flushCommands
-    
+      pure Nothing
     -- , Handler $ \FailureException{..} -> putStrLn "Failure Not implemented yet"
-    -- , Handler $ \OperationCancelledException{..} -> putStrLn "OperationCancelled Not implemented yet"
     , Handler $ \WorkflowCancelRequested -> do
         addCommand inst (defMessage & Command.cancelWorkflowExecution .~ defMessage)
-        flushCommands
+        pure Nothing
     , Handler $ \(SomeException e) -> do
         $(logError) $ Text.pack ("Caught exception: " <> show e)
         addCommand inst 
@@ -559,6 +583,5 @@ runTopLevel handle = do
                   )
               )
           )
-        flushCommands
+        pure Nothing
     ]
-  $logDebug "Finished top level of workflow"
