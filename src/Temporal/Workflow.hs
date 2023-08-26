@@ -62,6 +62,7 @@ module Temporal.Workflow
   , defaultChildWorkflowOptions
   , WorkflowRef(..)
   , startChildWorkflow
+  , executeChildWorkflow
   , ChildWorkflowHandle
   , ExternalWorkflowHandle
   , Wait(..)
@@ -532,29 +533,9 @@ gatherSignalChildWorkflowArgs
   -> (args :->: Workflow (Task result))
 gatherSignalChildWorkflowArgs c f = gatherArgs (Proxy @args) c id f
 
--- $childWorkflow
---
--- A Child Workflow Execution is a Workflow Execution that is spawned from within another Workflow.
---
--- A Workflow Execution can be both a Parent and a Child Workflow Execution because any Workflow can spawn another Workflow.
 
--- | Start a child Workflow execution
---
--- Returns a client-side handle that implements a child Workflow interface.
---
--- By default, a child will be scheduled on the same task queue as its parent.
---
--- A child Workflow handle supports awaiting completion, signaling and cancellation via the returned handle.
---
--- In order to query the child, use a WorkflowClient from an Activity.
-startChildWorkflow 
-  :: forall args result. RequireCallStack
-  => KnownWorkflow args result
-  -> StartChildWorkflowOptions
-  -> WorkflowId
-  -> (args :->: Workflow (ChildWorkflowHandle result))
-startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId =
-  gatherStartChildWorkflowArgs @args @result codec $ \typedPayloads -> ilift $ go typedPayloads
+startChildWorkflowFromPayloads :: forall args result. RequireCallStack => KnownWorkflow args result -> StartChildWorkflowOptions -> WorkflowId -> [RawPayload] -> Workflow (ChildWorkflowHandle result)
+startChildWorkflowFromPayloads k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId = ilift . go
   where
     go :: [RawPayload] -> InstanceM (ChildWorkflowHandle result)
     go typedPayloads = do
@@ -608,6 +589,30 @@ startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId =
       $(logDebug) "Add command: startChildWorkflowExecution"
       addCommand inst cmd
       pure wfHandle
+
+-- $childWorkflow
+--
+-- A Child Workflow Execution is a Workflow Execution that is spawned from within another Workflow.
+--
+-- A Workflow Execution can be both a Parent and a Child Workflow Execution because any Workflow can spawn another Workflow.
+
+-- | Start a child Workflow execution
+--
+-- Returns a client-side handle that implements a child Workflow interface.
+--
+-- By default, a child will be scheduled on the same task queue as its parent.
+--
+-- A child Workflow handle supports awaiting completion, signaling and cancellation via the returned handle.
+--
+-- In order to query the child, use a WorkflowClient from an Activity.
+startChildWorkflow 
+  :: forall args result. RequireCallStack
+  => KnownWorkflow args result
+  -> StartChildWorkflowOptions
+  -> WorkflowId
+  -> (args :->: Workflow (ChildWorkflowHandle result))
+startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId =
+  gatherStartChildWorkflowArgs @args @result codec (startChildWorkflowFromPayloads k opts wfId)
 
 waitChildWorkflowStart :: RequireCallStack => ChildWorkflowHandle result -> Workflow ()
 waitChildWorkflowStart wfHandle = do
