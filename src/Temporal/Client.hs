@@ -24,6 +24,8 @@ module Temporal.Client
   , start
   , WorkflowHandle
   , awaitWorkflowResult
+  , TerminationOptions
+  , terminate
   , execute
   , QueryOptions(..)
   , QueryRejectCondition(..)
@@ -111,6 +113,9 @@ data WorkflowClient = WorkflowClient
   -- , clientHeaders :: Map Text RawPayload
   }
 
+throwEither :: (MonadIO m, Exception e) => IO (Either e a) -> m a
+throwEither = either throwIO pure <=< liftIO
+
 execute
   :: forall m wf. (MonadIO m, WorkflowRef wf)
   => WorkflowClient 
@@ -124,8 +129,6 @@ execute c wf opts = case workflowRef wf of
     gather $ \inputs -> liftIO $ do
       h <- startFromPayloads c k opts inputs
       awaitWorkflowResult h
-
-data GetWorkflowHandleOptions = GetWorkflowHandleOptions
 
 data WorkflowHandle a = forall args. WorkflowHandle
   { workflowHandleWorkflow :: KnownWorkflow args a
@@ -248,15 +251,14 @@ data QueryRejected
     } deriving (Read, Show, Eq, Ord)
 
 query :: forall m args result a. (MonadIO m, Typeable result)
-  => WorkflowClient
-  -> WorkflowHandle a 
+  => WorkflowHandle a 
   -> QueryDefinition args result 
   -> QueryOptions
   -> (args :->: m (Either QueryRejected result))
-query c h (QueryDefinition qn codec) opts = gather $ \inputs -> liftIO $ do
+query h (QueryDefinition qn codec) opts = gather $ \inputs -> liftIO $ do
   let msg :: QueryWorkflowRequest
       msg = defMessage 
-        & WF.namespace .~ rawNamespace c.clientDefaultNamespace
+        & WF.namespace .~ rawNamespace h.workflowHandleClient.clientDefaultNamespace
         & WF.execution .~
           (defMessage
             & Common.workflowId .~ rawWorkflowId h.workflowHandleWorkflowId
@@ -274,7 +276,7 @@ query c h (QueryDefinition qn codec) opts = gather $ \inputs -> liftIO $ do
           QueryRejectConditionNotOpen -> Query.QUERY_REJECT_CONDITION_NOT_OPEN
           QueryRejectConditionNotCompletedCleanly -> Query.QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY
 
-  (res :: QueryWorkflowResponse) <- either throwIO pure =<< queryWorkflow c.clientCore msg
+  (res :: QueryWorkflowResponse) <- either throwIO pure =<< queryWorkflow h.workflowHandleClient.clientCore msg
   case res ^. WF.maybe'queryRejected of
     Just rejection -> do
       let status = queryRejectionStatusFromProto (rejection ^. Query.status)
@@ -304,14 +306,18 @@ query c h (QueryDefinition qn codec) opts = gather $ \inputs -> liftIO $ do
       WorkflowExecutionStatus'Unrecognized _ -> UnknownStatus 
 
 getHandle
-  :: (MonadIO m, Codec codec a)
+  :: (MonadIO m)
   => WorkflowClient
-  -> codec
+  -> KnownWorkflow args a
   -> WorkflowId
   -> Maybe RunId
-  -> Maybe GetWorkflowHandleOptions
   -> m (WorkflowHandle a)
-getHandle = undefined
+getHandle c k wfId runId = pure $ WorkflowHandle 
+  { workflowHandleWorkflow = k
+  , workflowHandleClient = c
+  , workflowHandleWorkflowId = wfId
+  , workflowHandleRunId = runId
+  }
 
 -- TODO
 -- list 
@@ -438,6 +444,33 @@ start c k@(KnownWorkflow codec _ _ _) opts = gather $ \inputs -> liftIO $ do
     gather :: ([RawPayload] -> m (WorkflowHandle result)) -> (args :->: m (WorkflowHandle result))
     gather = gatherArgs (Proxy @args) codec Prelude.id
 
+data TerminationOptions = TerminationOptions
+  { terminationReason :: Text
+  , terminationDetails :: [RawPayload]
+  -- | If set, this call will error if the (most recent | specified workflow run id in the WorkflowHandle) is not part of the same
+  -- execution chain as this id.
+  , firstExecutionRunId  :: Maybe RunId
+  }
+
+-- | Terminating a workflow immediately signals to the worker that the workflow should 
+-- cease execution. The workflow will not be given a chance to react to the termination.
+terminate :: MonadIO m => WorkflowHandle a -> TerminationOptions -> m ()
+terminate h req = void $ throwEither $ terminateWorkflowExecution 
+  h.workflowHandleClient.clientCore
+  msg
+  where
+    msg = defMessage
+      & RR.namespace .~ rawNamespace h.workflowHandleClient.clientDefaultNamespace
+      & RR.workflowExecution .~
+        ( defMessage 
+          & Common.workflowId .~ rawWorkflowId h.workflowHandleWorkflowId
+          & Common.runId .~ maybe "" rawRunId h.workflowHandleRunId
+        )
+      & RR.reason .~ req.terminationReason
+      & RR.details .~ 
+        ( defMessage & Common.payloads .~ fmap convertToProtoPayload req.terminationDetails )
+      & RR.identity .~ identity (clientConfig h.workflowHandleClient.clientCore)
+      & RR.firstExecutionRunId .~ maybe "" rawRunId req.firstExecutionRunId
 
 ---------------------------------------------------------------------------------
 -- AsyncCompletionClient
