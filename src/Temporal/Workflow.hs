@@ -54,6 +54,7 @@ module Temporal.Workflow
   , StartActivityOptions(..)
   , defaultStartActivityOptions
   , startActivity
+  , executeActivity
   , StartLocalActivityOptions(..)
   , startLocalActivity
   -- ** Child workflow operations
@@ -293,6 +294,67 @@ instance ActivityRef (KnownActivity args result) where
   type ActivityResult (KnownActivity args result) = result
   activityRef = id
 
+startActivityFromPayloads 
+  :: forall args result. RequireCallStack 
+  => KnownActivity args result 
+  -> StartActivityOptions 
+  -> [RawPayload] 
+  -> Workflow (Task result)
+startActivityFromPayloads k@(KnownActivity codec mTaskQueue name) opts typedPayloads = ilift $ do
+  updateCallStack
+  inst <- ask
+  let ps = convertToProtoPayload <$> typedPayloads
+
+  s@(Sequence actSeq) <- nextActivitySequence
+  resultSlot <- newIVar
+  atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+    seqMaps { activities = HashMap.insert s resultSlot (activities seqMaps) }
+
+  info <- readIORef inst.workflowInstanceInfo
+  let scheduleActivity = defMessage
+        & Command.seq .~ actSeq
+        & Command.activityId .~ maybe (Text.pack $ show actSeq) rawActivityId (opts.activityId)
+        & Command.activityType .~ name
+        & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue mTaskQueue)
+        & Command.headers .~ fmap convertToProtoPayload opts.headers
+        & Command.arguments .~ ps
+        & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts.retryPolicy
+        & Command.cancellationType .~ activityCancellationTypeToProto opts.cancellationType
+        & Command.maybe'scheduleToStartTimeout .~ fmap durationToProto opts.scheduleToStartTimeout
+        & Command.maybe'heartbeatTimeout .~ fmap durationToProto opts.heartbeatTimeout
+        & \msg -> case opts.timeout of
+          StartToClose t -> msg & Command.startToCloseTimeout .~ durationToProto t
+          ScheduleToClose t -> msg & Command.scheduleToCloseTimeout .~ durationToProto t
+          StartToCloseAndScheduleToClose stc stc' -> msg 
+            & Command.startToCloseTimeout .~ durationToProto stc
+            & Command.scheduleToCloseTimeout .~ durationToProto stc'
+        & Command.doNotEagerlyExecute .~ opts.disableEagerExecution
+
+  let cmd = defMessage & Command.scheduleActivity .~ scheduleActivity
+  addCommand inst cmd
+  pure $ Task 
+    { waitAction = do
+      res <- getIVar resultSlot
+      Workflow $ \_ -> case res ^. Activation.result . ActivityResult.maybe'status of
+        Nothing -> error "Activity result missing status"
+        Just (ActivityResult.ActivityResolution'Completed success) -> do
+          let result = decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
+          case result of
+            -- TODO handle properly
+            Left err -> error $ "Failed to decode activity result: " <> show err
+            Right val -> pure $ Done val
+        Just (ActivityResult.ActivityResolution'Failed failure) -> pure $ Throw $ toException $ ActivityFailed (failure ^. ActivityResult.failure)
+        Just (ActivityResult.ActivityResolution'Cancelled details) -> pure $ Throw $ toException $ ActivityCancelled (details ^. ActivityResult.failure)
+        Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"
+    , cancelAction = do
+      let cancelCmd = defMessage
+            & Command.requestCancelActivity .~ 
+              ( defMessage
+                & Command.seq .~ actSeq
+              )
+      ilift $ addCommand inst cancelCmd
+    }
+
 startActivity 
   :: forall activity. (RequireCallStack, ActivityRef activity)
   => activity
@@ -300,60 +362,18 @@ startActivity
   -> (ActivityArgs activity :->: Workflow (Task (ActivityResult activity)))
 startActivity activity opts = case activityRef activity of
   k@(KnownActivity codec mTaskQueue name) -> 
-    gatherActivityArgs @(ActivityArgs activity) @(ActivityResult activity) codec $ \typedPayloads -> ilift $ do
-      updateCallStack
-      inst <- ask
-      let ps = convertToProtoPayload <$> typedPayloads
+    gatherActivityArgs @(ActivityArgs activity) @(ActivityResult activity) codec (startActivityFromPayloads k opts)
 
-      s@(Sequence actSeq) <- nextActivitySequence
-      resultSlot <- newIVar
-      atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-        seqMaps { activities = HashMap.insert s resultSlot (activities seqMaps) }
-
-      info <- readIORef inst.workflowInstanceInfo
-      let scheduleActivity = defMessage
-            & Command.seq .~ actSeq
-            & Command.activityId .~ maybe (Text.pack $ show actSeq) rawActivityId (opts.activityId)
-            & Command.activityType .~ name
-            & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue mTaskQueue)
-            & Command.headers .~ fmap convertToProtoPayload opts.headers
-            & Command.arguments .~ ps
-            & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts.retryPolicy
-            & Command.cancellationType .~ activityCancellationTypeToProto opts.cancellationType
-            & Command.maybe'scheduleToStartTimeout .~ fmap durationToProto opts.scheduleToStartTimeout
-            & Command.maybe'heartbeatTimeout .~ fmap durationToProto opts.heartbeatTimeout
-            & \msg -> case opts.timeout of
-              StartToClose t -> msg & Command.startToCloseTimeout .~ durationToProto t
-              ScheduleToClose t -> msg & Command.scheduleToCloseTimeout .~ durationToProto t
-              StartToCloseAndScheduleToClose stc stc' -> msg 
-                & Command.startToCloseTimeout .~ durationToProto stc
-                & Command.scheduleToCloseTimeout .~ durationToProto stc'
-            & Command.doNotEagerlyExecute .~ opts.disableEagerExecution
-
-      let cmd = defMessage & Command.scheduleActivity .~ scheduleActivity
-      addCommand inst cmd
-      pure $ Task 
-        { waitAction = do
-          res <- getIVar resultSlot
-          Workflow $ \_ -> case res ^. Activation.result . ActivityResult.maybe'status of
-            Nothing -> error "Activity result missing status"
-            Just (ActivityResult.ActivityResolution'Completed success) -> do
-              let result = decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
-              case result of
-                -- TODO handle properly
-                Left err -> error $ "Failed to decode activity result: " <> show err
-                Right val -> pure $ Done val
-            Just (ActivityResult.ActivityResolution'Failed failure) -> pure $ Throw $ toException $ ActivityFailed (failure ^. ActivityResult.failure)
-            Just (ActivityResult.ActivityResolution'Cancelled details) -> pure $ Throw $ toException $ ActivityCancelled (details ^. ActivityResult.failure)
-            Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"
-        , cancelAction = do
-          let cancelCmd = defMessage
-                & Command.requestCancelActivity .~ 
-                  ( defMessage
-                    & Command.seq .~ actSeq
-                  )
-          ilift $ addCommand inst cancelCmd
-        }
+executeActivity
+  ::forall activity. (RequireCallStack, ActivityRef activity)
+  => activity
+  -> StartActivityOptions 
+  -> (ActivityArgs activity :->: Workflow (ActivityResult activity))
+executeActivity activity opts = case activityRef activity of
+  k@(KnownActivity codec mTaskQueue name) -> 
+    gatherArgs (Proxy @(ActivityArgs activity)) codec id $ \typedPayloads -> do
+      actHandle <- startActivityFromPayloads k opts typedPayloads
+      Temporal.Workflow.wait actHandle
 
 gatherActivityArgs 
   :: forall args result codec. GatherArgs codec args
@@ -635,8 +655,17 @@ waitChildWorkflowResult wfHandle@(ChildWorkflowHandle{childWorkflowCodec}) = do
       ChildWorkflow.ChildWorkflowResult'Failed res -> throw $ ChildWorkflowFailed $ res ^. ChildWorkflow.failure
       ChildWorkflow.ChildWorkflowResult'Cancelled _ -> throw ChildWorkflowCancelled
 
-cancelChildWorkflowExecution :: RequireCallStack => ChildWorkflowHandle result -> Workflow ()
+executeChildWorkflow
+  :: forall args result. RequireCallStack
+  => KnownWorkflow args result
+  -> StartChildWorkflowOptions
+  -> WorkflowId
+  -> (args :->: Workflow result)
+executeChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId = gatherArgs (Proxy @args) codec id $ \typedPayloads -> do
+  h <- startChildWorkflowFromPayloads k opts wfId typedPayloads
+  waitChildWorkflowResult h
 
+cancelChildWorkflowExecution :: RequireCallStack => ChildWorkflowHandle result -> Workflow ()
 cancelChildWorkflowExecution wfHandle@(ChildWorkflowHandle{childWorkflowSequence}) = ilift $ do
   updateCallStack
   inst <- ask
