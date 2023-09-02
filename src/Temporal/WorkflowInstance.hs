@@ -44,6 +44,7 @@ import GHC.Stack (HasCallStack, emptyCallStack, callStack, prettyCallStack)
 import Lens.Family2
 import System.Random (mkStdGen)
 import Temporal.Common
+import Temporal.Coroutine
 import Temporal.Core.Client (Client)
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
@@ -97,14 +98,18 @@ import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import UnliftIO
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Core
 import Data.Time.Clock.System (SystemTime(..))
+import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Completion
 
 
 create :: MonadLoggerIO m 
   => (Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
+  -> Maybe Int -- ^ deadlock timeout in seconds
+  -> Interceptors
   -> Info 
   -> WorkflowDefinition
+  -> StartWorkflow
   -> m WorkflowInstance
-create workflowCompleteActivation info workflowInstanceDefinition = do
+create workflowCompleteActivation workflowDeadlockTimeout interceptors info workflowInstanceDefinition start = do
   workflowInstanceLogger <- askLoggerIO
   workflowRandomnessSeed <- WorkflowGenM <$> newIORef (mkStdGen 0)
   workflowNotifiedPatches <- newIORef mempty
@@ -120,7 +125,6 @@ create workflowCompleteActivation info workflowInstanceDefinition = do
   workflowTime <- newIORef $ MkSystemTime 0 0
   workflowIsReplaying <- newIORef False
   workflowSequenceMaps <- newTVarIO $ SequenceMaps mempty mempty mempty mempty mempty mempty
-  workflowPrimaryTask <- newIORef ExecutionNotStarted
   workflowCommands <- newTVarIO $ Reversed []
   workflowSignalHandlers <- newIORef mempty
   workflowCallStack <- newIORef emptyCallStack
@@ -128,7 +132,46 @@ create workflowCompleteActivation info workflowInstanceDefinition = do
   workflowInstanceInfo <- newIORef info
   workflowInstanceContinuationEnv <- ContinuationEnv <$> newIORef JobNil
   workflowCancellationVar <- newIVar
-  pure WorkflowInstance {..}
+  activationChannel <- newChan
+  currentWorkflowState <- newIORef ExecutionNotStarted
+  executionThread <- newIORef (error "Workflow thread not yet started")
+  -- The execution thread is funny because it needs access to the instance, but the instance
+  -- needs access to the execution thread. It's a bit of a funny circular dependency, but
+  -- pretty innocuous since writing to the executionThread var happens before anything else
+  -- is allowed to interact with the instance.
+  let inst = WorkflowInstance {..}
+  workerThread <- liftIO $ async $ runInstanceM inst $ do
+    applyStartWorkflow start
+    let loop = do
+          activation <- readChan activationChannel
+          -- This deadlock code seems suspect, but really it's because the workflow code
+          -- shouldn't be able to block indefinitely on a single thread before returning
+          -- a result. If it does, it's a bug in the workflow code.
+          completion <- liftIO $ UnliftIO.try $ activate inst activation
+
+          case completion of
+            Left (SomeException err) -> do
+              $(logDebug) ("Workflow failure: " <> Text.pack (show err))
+              -- TODO there are lots of fields on this failureProto that we probably want to fill in
+              let innerFailure :: F.Failure
+                  innerFailure = defMessage & F.message .~ (Text.pack $ show err)
+
+                  failureProto :: Completion.Failure
+                  failureProto = defMessage & Completion.failure .~ innerFailure
+                    
+                  completionMessage = defMessage
+                    & Completion.runId .~ (activation ^. Activation.runId)
+                    & Completion.failed .~ failureProto
+              liftIO (workflowCompleteActivation completionMessage >>= either throwIO pure)
+            Right ok -> do
+              -- The workflow is in charge of flushing completions in the regular case
+              -- when it needs to.
+              pure () 
+          loop
+    loop
+  writeIORef executionThread workerThread
+  pure inst
+
 
 -- | This is a special query handler that is added to every workflow instance.
 --
@@ -153,14 +196,14 @@ addStackTraceHandler inst = do
 
 -- | This should never raise an exception, but instead catch all exceptions
 -- and set as completion failure.
-activate :: Worker actEnv -> WorkflowInstance -> WorkflowActivation -> IO ()
-activate w inst act = runInstanceM inst $ do
+activate :: WorkflowInstance -> WorkflowActivation -> IO ()
+activate inst act = runInstanceM inst $ do
   info <- atomicModifyIORef' inst.workflowInstanceInfo $ \info -> 
     let info' = info { historyLength = act ^. Activation.historyLength }
     in (info', info')
   let completionBase = defMessage & Completion.runId .~ rawRunId info.runId
   writeIORef inst.workflowTime (act ^. Activation.timestamp . to timespecFromTimestamp)
-  eResult <- case w.workerConfig.deadlockTimeout of
+  eResult <- case inst.workflowDeadlockTimeout of
     Nothing -> applyJobs $ act ^. Activation.vec'jobs
     Just timeoutDuration -> do
       res <- timeout timeoutDuration $ applyJobs $ act ^. Activation.vec'jobs
@@ -181,7 +224,7 @@ activate w inst act = runInstanceM inst $ do
             & Completion.failure .~ (defMessage & Failure.message .~ Text.pack (show err))
           completion = completionBase
             & Completion.failed .~ failure
-      liftIO (Core.completeWorkflowActivation w.workerCore completion >>= either throwIO pure)
+      liftIO (inst.workflowCompleteActivation completion >>= either throwIO pure)
     Right () -> pure ()
 
       -- successfulCommands <- fromReversed <$> readSuccessfulCommands
@@ -257,28 +300,36 @@ nextConditionSequence = do
 applyStartWorkflow :: StartWorkflow -> InstanceM ()
 applyStartWorkflow startWorkflow = do
   inst <- ask
-  case inst.workflowInstanceDefinition of
-    (WorkflowDefinition _ (ValidWorkflowFunction fmt innerF applyArgs)) -> do
-      -- Set the starting randomness seed
-      let (WorkflowGenM genRef) = inst.workflowRandomnessSeed
-      writeIORef genRef (mkStdGen $ fromIntegral $ startWorkflow ^. Activation.randomnessSeed)
-      writeIORef inst.workflowTime (startWorkflow ^. Activation.startTime . to timespecFromTimestamp)
+  let (WorkflowGenM genRef) = inst.workflowRandomnessSeed
+  writeIORef genRef (mkStdGen $ fromIntegral $ startWorkflow ^. Activation.randomnessSeed)
+  writeIORef inst.workflowTime (startWorkflow ^. Activation.startTime . to timespecFromTimestamp)
 
-      let args = fmap convertFromProtoPayload (startWorkflow ^. Command.vec'arguments)
-          eAct = applyArgs innerF args
-      mExecutionState <- runTopLevel $ case eAct of
-        Left msg -> do
-          $(logError) $ Text.pack ("Failed to decode workflow arguments: " <> msg)
-          throwIO (ValueError msg)
-        Right act -> do
-          resume $ runWorkflow act
+  info <- readIORef inst.workflowInstanceInfo
+  let execInput = ExecuteWorkflowInput
+        { executeWorkflowInputType = startWorkflow ^. Activation.workflowType
+        , executeWorkflowInputArgs = fmap convertFromProtoPayload (startWorkflow ^. Command.vec'arguments)
+        , executeWorkflowInputHeaders = fmap convertFromProtoPayload (startWorkflow ^. Activation.headers)
+        , executeWorkflowInputInfo = info
+        }
 
-      case mExecutionState of
-        Nothing -> writeIORef inst.workflowPrimaryTask CompletedExecution
-        Just (Left suspension) -> do
-          writeIORef inst.workflowPrimaryTask (SuspendedExecution suspension fmt)
-        Just (Right r) -> finishWorkflow fmt r
-  pure ()
+      executeWorkflowBase = \input -> runInstanceM inst $ do
+        case inst.workflowInstanceDefinition of
+          (WorkflowDefinition _ (ValidWorkflowFunction fmt innerF applyArgs)) -> do
+            let eAct = applyArgs innerF input.executeWorkflowInputArgs
+            workflowAction <- case eAct of
+              Left msg -> do
+                $(logError) $ Text.pack ("Failed to decode workflow arguments: " <> msg)
+                throwIO (ValueError msg)
+              Right act -> pure $ fmap (encode fmt) $ runWorkflow act
+            pure (WorkflowExecution workflowAction)
+
+  (WorkflowExecution execution) <- liftIO $ inst.interceptors.workflowInboundInterceptors.executeWorkflow execInput executeWorkflowBase 
+  st <- runTopLevel $ resume execution
+  case st of
+    Nothing -> writeIORef inst.currentWorkflowState CompletedExecution
+    Just (Left suspension) -> do
+      writeIORef inst.currentWorkflowState (SuspendedExecution suspension)
+    Just (Right r) -> finishWorkflow r
 
 applyFireTimer :: FireTimer -> InstanceM ()
 applyFireTimer fireTimer = do
@@ -322,18 +373,18 @@ applyQueryWorkflow queryWorkflow = do
 applyCancelWorkflow :: CancelWorkflow -> InstanceM ()
 applyCancelWorkflow cancelWorkflow = do
   inst <- ask
-  executionState <- readIORef inst.workflowPrimaryTask
+  executionState <- readIORef inst.currentWorkflowState
   case executionState of
     ExecutionNotStarted -> pure ()
-    SuspendedExecution (Await f) c -> do
+    SuspendedExecution (Await f) -> do
       mExecutionState <- runTopLevel $ resume $ f [ActivationResult (Ok ()) inst.workflowCancellationVar]
       case mExecutionState of
-        Nothing -> writeIORef inst.workflowPrimaryTask CompletedExecution
+        Nothing -> writeIORef inst.currentWorkflowState CompletedExecution
         Just (Left suspension) -> do
-          writeIORef inst.workflowPrimaryTask (SuspendedExecution suspension c)
+          writeIORef inst.currentWorkflowState (SuspendedExecution suspension)
         Just (Right r) -> do
-          finishWorkflow c r
-          writeIORef inst.workflowPrimaryTask CompletedExecution
+          finishWorkflow r
+          writeIORef inst.currentWorkflowState CompletedExecution
     CompletedExecution -> pure ()
 
 applySignalWorkflow :: SignalWorkflow -> InstanceM ()
@@ -378,27 +429,28 @@ applyJobs jobs = UnliftIO.try $ do
   $logDebug $ Text.pack ("Applying jobs: " <> show jobs)
   inst <- ask
   patchNotifications
-  signalWorkflows
+  sequence_ signalWorkflows
   queryWorkflows
   otherJobs
   -- Resolve these last because otherJobs might have applyStartJob in it?
   -- TODO Need to think hard to ensure that sequences are not messed up by this somehow
   activationResults <- applyResolutions resolutions
   inst <- ask
-  mWorkflowThread <- readIORef inst.workflowPrimaryTask
+  mWorkflowThread <- readIORef inst.currentWorkflowState
   case mWorkflowThread of
     ExecutionNotStarted -> do
       case activationResults of
         [] -> pure ()
         _ -> throwIO $ RuntimeError "Resolutions found, but no workflow is running"
-    SuspendedExecution (Await f) c -> do
-      res <- runTopLevel $ resume $ f activationResults
+    SuspendedExecution (Await f) -> do
+      seqMaps <- atomically $ readTVar inst.workflowSequenceMaps
+      res <- runTopLevel $ resume $ f (activationResults ++ map (\var -> ActivationResult (Ok ()) var) (HashMap.elems seqMaps.conditionsAwaitingSignal))
       case res of
-        Nothing -> writeIORef inst.workflowPrimaryTask CompletedExecution
-        Just (Left suspension) -> writeIORef inst.workflowPrimaryTask (SuspendedExecution suspension c)
+        Nothing -> writeIORef inst.currentWorkflowState CompletedExecution
+        Just (Left suspension) -> writeIORef inst.currentWorkflowState (SuspendedExecution suspension)
         Just (Right r) -> do
-          finishWorkflow c r
-          writeIORef inst.workflowPrimaryTask CompletedExecution
+          finishWorkflow r
+          writeIORef inst.currentWorkflowState CompletedExecution
     CompletedExecution -> pure ()
   flushCommands
 
@@ -406,7 +458,7 @@ applyJobs jobs = UnliftIO.try $ do
     (patchNotifications, signalWorkflows, queryWorkflows, resolutions, otherJobs) = V.foldr 
       (\job (patchNotifications, signalWorkflows, queryWorkflows, resolutions, otherJobs) -> case job ^. Activation.maybe'variant of
         Just (WorkflowActivationJob'NotifyHasPatch n) -> (applyNotifyHasPatch n *> patchNotifications, signalWorkflows, queryWorkflows, resolutions, otherJobs)
-        Just (WorkflowActivationJob'SignalWorkflow sig) -> (patchNotifications, applySignalWorkflow sig *> signalWorkflows, queryWorkflows, resolutions, otherJobs)
+        Just (WorkflowActivationJob'SignalWorkflow sig) -> (patchNotifications, (applySignalWorkflow sig : signalWorkflows), queryWorkflows, resolutions, otherJobs)
         Just (WorkflowActivationJob'QueryWorkflow q) -> (patchNotifications, signalWorkflows, applyQueryWorkflow q *> queryWorkflows, resolutions, otherJobs)
         -- We collect these in bulk and resolve them in one go by pushing them into the completed queue. This reactivates the suspended workflow
         -- and it tries to execute further.
@@ -419,7 +471,7 @@ applyJobs jobs = UnliftIO.try $ do
         -- Catch-all for anything else that falls through the cracks
         _ -> (patchNotifications, signalWorkflows, queryWorkflows, resolutions, applyActivationJob job *> otherJobs)
       )
-      (pure (), pure (), pure (), [], pure ())
+      (pure (), [], pure (), [], pure ())
       jobs
 
 -- Enum type implemented for completeness, but see 'applyJobs' for shortcuts that avoids pattern matching on the variant type more than necessary.
@@ -427,7 +479,8 @@ applyActivationJob :: WorkflowActivationJob -> InstanceM ()
 applyActivationJob job = case job ^. Activation.maybe'variant of
   Nothing -> throwIO $ RuntimeError "Uncrecognized workflow activation job variant"
   Just variant_ -> case variant_ of
-    WorkflowActivationJob'StartWorkflow startWorkflow -> applyStartWorkflow startWorkflow
+    -- StartWorkflow is handled in 'create' and can be ignored when we're applying other jobs.
+    WorkflowActivationJob'StartWorkflow startWorkflow -> pure () -- 
     WorkflowActivationJob'FireTimer fireTimer -> applyFireTimer fireTimer
     WorkflowActivationJob'UpdateRandomSeed updateRandomSeed -> applyUpdateRandomSeed updateRandomSeed
     WorkflowActivationJob'QueryWorkflow queryWorkflow -> applyQueryWorkflow queryWorkflow

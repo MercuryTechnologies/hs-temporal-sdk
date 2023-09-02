@@ -4,6 +4,7 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE DuplicateRecordFields #-}
 module Temporal.Worker 
   ( Temporal.Worker.Worker
   , startWorker
@@ -117,8 +118,19 @@ configure actEnv = flip execState defaultConfig . unConfigM
       , actDefs = mempty
       , coreConfig = Core.defaultWorkerConfig
       , deadlockTimeout = Just 1000000
+      , interceptorConfig = Interceptors
+        { workflowInboundInterceptors = WorkflowInboundInterceptor { executeWorkflow = \info next -> next info }
+        , workflowOutboundInterceptors = WorkflowOutboundInterceptor
+        , activityInboundInterceptors = ActivityInboundInterceptor
+        , activityOutboundInterceptors = ActivityOutboundInterceptor
+        }
       , ..
       }
+
+addInterceptors :: Interceptors -> ConfigM actEnv ()
+addInterceptors i = ConfigM $ modify' $ \conf -> conf
+  { interceptorConfig = i <> interceptorConfig conf
+  }
 
 -- | Register a 'Workflow' with the worker.
 addWorkflow :: HasWorkflowDefinition def => def -> ConfigM actEnv ()

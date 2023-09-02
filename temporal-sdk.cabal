@@ -39,7 +39,9 @@ library
     if-instance,
     annotated-exception,
     require-callstack,
-    barbies
+    barbies,
+    hs-opentelemetry-api,
+    hs-opentelemetry-propagator-w3c
 
   default-language: Haskell2010
   default-extensions:
@@ -61,6 +63,7 @@ library
     Temporal.Activity.Definition,
     Temporal.Activity.Worker,
     Temporal.Common,
+    Temporal.Coroutine,
     -- Temporal.Generic.GenericN,
     Temporal.Workflow.WorkflowDefinition,
     Temporal.WorkflowInstance,
@@ -70,19 +73,22 @@ library
     Temporal.Worker.Types
   exposed-modules:
     Temporal.Activity,
+    Temporal.Contrib.OpenTelemetry,
     Temporal.Client,
     -- Temporal.EphemeralServer,
     Temporal.Duration,
     Temporal.Exception,
     Temporal.Generic,
     Temporal.Generic.TyFun,
+    Temporal.Interceptor,
     Temporal.Payload,
     -- Temporal.Payload.TH,
     -- Temporal.Schedule,
     Temporal.SearchAttributes,
     Temporal.Workflow,
     Temporal.Workflow.Saga,
-    Temporal.Worker
+    Temporal.Worker,
+    Paths_temporal_sdk
 
 test-suite temporal-sdk-tests
   type: exitcode-stdio-1.0
@@ -103,7 +109,6 @@ test-suite temporal-sdk-tests
     transformers,
     time,
     unliftio,
-    if-instance,
     proto-lens,
     containers,
     require-callstack

@@ -106,3 +106,6 @@ durationToProto :: Duration -> Duration.Duration
 durationToProto ts = defMessage
   & Duration.seconds .~ (fromIntegral $ durationSeconds ts)
   & Duration.nanos .~ (fromIntegral $ durationNanoseconds ts)
+
+durationToMilliseconds :: Duration -> Double
+durationToMilliseconds (Duration secs ns) = fromIntegral secs * 1_000 + fromIntegral ns / 1_000_000

@@ -52,6 +52,7 @@ import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion a
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
 import Temporal.Activity.Definition
 import Temporal.Common
+import Temporal.Coroutine
 import qualified Temporal.Core.Worker as Core
 import qualified Temporal.Core.Client as Core
 import Temporal.Exception
@@ -77,6 +78,7 @@ import Temporal.Core.Worker (completeWorkflowActivation)
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Core
 import Data.Time.Clock.System (SystemTime)
 import Temporal.Duration (Duration)
+import Control.Category (Category)
 
 data WorkerConfig activityEnv = WorkerConfig
   { deadlockTimeout :: Maybe Int
@@ -84,7 +86,51 @@ data WorkerConfig activityEnv = WorkerConfig
   , actEnv :: activityEnv
   , actDefs :: HashMap Text (ActivityDefinition activityEnv)
   , coreConfig :: Core.WorkerConfig
+  , interceptorConfig :: Interceptors
   }
+
+data ActivityInboundInterceptor = ActivityInboundInterceptor { }
+
+instance Semigroup ActivityInboundInterceptor where
+  ActivityInboundInterceptor <> ActivityInboundInterceptor = ActivityInboundInterceptor
+
+data ActivityOutboundInterceptor = ActivityOutboundInterceptor { }
+
+instance Semigroup ActivityOutboundInterceptor where
+  ActivityOutboundInterceptor <> ActivityOutboundInterceptor = ActivityOutboundInterceptor
+
+data ExecuteWorkflowInput = ExecuteWorkflowInput
+  { executeWorkflowInputType :: Text
+  , executeWorkflowInputArgs :: Vector RawPayload
+  , executeWorkflowInputHeaders :: Map Text RawPayload
+  , executeWorkflowInputInfo :: Info
+  }
+
+data WorkflowInboundInterceptor = WorkflowInboundInterceptor 
+  { executeWorkflow 
+    :: ExecuteWorkflowInput 
+    -> (ExecuteWorkflowInput -> IO (WorkflowExecution RawPayload))
+    -> IO (WorkflowExecution RawPayload)
+  }
+
+instance Semigroup WorkflowInboundInterceptor where
+  WorkflowInboundInterceptor a <> WorkflowInboundInterceptor b = WorkflowInboundInterceptor $ \input cont -> a input $ \input' -> b input' cont
+
+data WorkflowOutboundInterceptor = WorkflowOutboundInterceptor { }
+
+instance Semigroup WorkflowOutboundInterceptor where
+  WorkflowOutboundInterceptor <> WorkflowOutboundInterceptor = WorkflowOutboundInterceptor
+
+data Interceptors = Interceptors
+  { workflowInboundInterceptors :: WorkflowInboundInterceptor
+  , workflowOutboundInterceptors :: WorkflowOutboundInterceptor
+  , activityInboundInterceptors :: ActivityInboundInterceptor
+  , activityOutboundInterceptors :: ActivityOutboundInterceptor
+  }
+
+instance Semigroup Interceptors where
+  Interceptors a b c d <> Interceptors a' b' c' d' = Interceptors (a <> a') (b <> b') (c <> c') (d <> d')
+
 
 data Worker activityEnv = Worker
   { workerCore :: Core.Worker
@@ -178,10 +224,7 @@ data CancellationState
 
 data ExecutionState 
   = ExecutionNotStarted
-  | forall codec a. Codec codec a => SuspendedExecution
-    { suspendedExecution :: Await [ActivationResult] (SuspendableWorkflowExecution a)
-    , completionCodec :: codec
-    }
+  | SuspendedExecution (Await [ActivationResult] (SuspendableWorkflowExecution RawPayload))
   | CompletedExecution
 
 data WorkflowInstance = WorkflowInstance
@@ -194,7 +237,6 @@ data WorkflowInstance = WorkflowInstance
   , workflowSequences :: {-# UNPACK #-} !(IORef Sequences)
   , workflowTime :: {-# UNPACK #-} !(IORef SystemTime)
   , workflowIsReplaying :: {-# UNPACK #-} !(IORef Bool)
-  , workflowPrimaryTask :: {-# UNPACK #-} !(IORef ExecutionState)
   , workflowCommands :: {-# UNPACK #-} !(TVar (Reversed WorkflowCommand))
   , workflowSequenceMaps :: {-# UNPACK #-} !(TVar (SequenceMaps))
   , workflowSignalHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (Vector RawPayload -> IO ())))
@@ -203,6 +245,12 @@ data WorkflowInstance = WorkflowInstance
   , workflowCompleteActivation :: !(Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
   , workflowInstanceContinuationEnv :: {-# UNPACK #-} !(ContinuationEnv)
   , workflowCancellationVar :: {-# UNPACK #-} !(IVar ())
+  , workflowDeadlockTimeout :: Maybe Int
+  -- These are how the instance gets its work done
+  , activationChannel :: Chan Core.WorkflowActivation
+  , executionThread :: IORef (Async ())
+  , currentWorkflowState :: IORef ExecutionState
+  , interceptors :: Interceptors
   }
 
 newtype InstanceM (a :: Type) = InstanceM { unInstanceM :: ReaderT WorkflowInstance IO a }
@@ -800,55 +848,17 @@ hoist
   -> (ArgsOf f :->: n (ResultOf m f))
 hoist trans f = hoistFn trans (Proxy @(ArgsOf f)) (Proxy @(ResultOf m f)) f
 
-newtype Await x y = Await (x -> y)
-instance Functor (Await x) where
-  fmap f (Await g) = Await (f . g)
-
--- | Suspending, resumable monadic computations.
-newtype Coroutine s m r = Coroutine 
-  {
-    -- | Run the next step of a `Coroutine` computation. The result of the step execution will be either a suspension or
-    -- the final coroutine result.
-    resume :: m (Either (s (Coroutine s m r)) r)
-  }
-
-instance (Functor s, Functor m) => Functor (Coroutine s m) where
-  fmap f t = Coroutine (fmap (apply f) (resume t))
-    where 
-      apply fc (Right x) = Right (fc x)
-      apply fc (Left s) = Left (fmap (fmap fc) s)
-
-instance (Functor s, Functor m, Monad m) => Applicative (Coroutine s m) where
-  pure x = Coroutine (return (Right x))
-  (<*>) = ap
-  t *> f = Coroutine (resume t >>= apply f)
-    where 
-      apply fc (Right _) = resume fc
-      apply fc (Left s) = return (Left (fmap (>> fc) s))
-
-instance (Functor s, Monad m) => Monad (Coroutine s m) where
-  return = pure
-  t >>= f = Coroutine (resume t >>= apply f)
-    where 
-      apply fc (Right x) = resume (fc x)
-      apply fc (Left s) = return (Left (fmap (>>= fc) s))
-  (>>) = (*>)
-
-instance (Functor s, MonadFail m) => MonadFail (Coroutine s m) where
-  fail msg = Coroutine (Right <$> fail msg)
-
-instance Functor s => MonadTrans (Coroutine s) where
-  lift = Coroutine . liftM Right
-
-instance (Functor s, MonadIO m) => MonadIO (Coroutine s m) where
-  liftIO = lift . liftIO
-
-suspend :: (Monad m, Functor s) => s (Coroutine s m x) -> Coroutine s m x
-suspend s = Coroutine (return (Left s))
-{-# INLINE suspend #-}
-
--- | Suspend the current coroutine until a value is provided.
-await :: Monad m => Coroutine (Await x) m x
-await = suspend (Await return)
-
 type SuspendableWorkflowExecution a = Coroutine (Await [ActivationResult]) InstanceM a
+
+newtype WorkflowExecution a = WorkflowExecution { unWorkflowExecution :: SuspendableWorkflowExecution a }
+  deriving (Functor, Applicative, Monad, MonadIO)
+
+coroutineHoist 
+  :: forall f m n a. (Functor f, Monad m, Monad n) 
+  => (forall b. m b -> n b) -> Coroutine f m a -> Coroutine f n a
+coroutineHoist f routine = Coroutine 
+  { resume = liftM go $ f $ resume routine
+  }
+  where 
+    go (Right r) = Right r
+    go (Left s) = Left (coroutineHoist f <$> s)

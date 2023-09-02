@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -fplugin=IfSat.Plugin #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -81,6 +80,7 @@ data WorkflowTests t f = WorkflowTests
   , runHeartbeat :: Wear t f (W.Workflow Int)
   , faultyActivity :: Wear t f (Activity () Int)
   , faultyWorkflow :: Wear t f (W.Workflow Int)
+  , workflowWaitConditionWorks :: Wear t f (W.Workflow ())
   } deriving (Generic)
 
 instance FunctorB (WorkflowTests Covered)
@@ -89,6 +89,12 @@ instance ApplicativeB (WorkflowTests Covered)
 instance ConstraintsB (WorkflowTests Covered)
 instance Label (WorkflowTests Covered)
 instance BareB WorkflowTests
+
+defaultCodec :: JSON
+defaultCodec = JSON
+
+signalUnblockWorkflow :: W.SignalRef '[]
+signalUnblockWorkflow = W.SignalRef "unblockWorkflow" defaultCodec
 
 testImpls :: Impl WorkflowTests
 testImpls = WorkflowTests
@@ -148,6 +154,11 @@ testImpls = WorkflowTests
         (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
       W.wait (h1 :: W.Task Int)
       W.wait (h2 :: W.Task Int)
+  , workflowWaitConditionWorks = provideCallStack $ do
+      st <- W.newStateVar False
+      let waiter = W.waitCondition (W.readStateVar st)
+      waiter *> W.writeStateVar st True
+      pure ()
   }
 
 testRefs :: Refs WorkflowTests
@@ -370,22 +381,23 @@ needsClient = do
                 taskQueue
           C.execute client wf.reference opts 1 "two" False
             `shouldReturn` (1, "two", False)
-      specify "binary payloads work" $ \client -> do
-        taskQueue <- W.TaskQueue <$> uuidText
-        let testFn :: ByteString -> W.Workflow ByteString
-            testFn _ = pure "general kenobi"
-            wf = W.provideWorkflow defaultCodec "test" testFn
-            conf = configure () $ do
-              setNamespace $ W.Namespace "test"
-              setTaskQueue taskQueue
-              addWorkflow wf
-        withWorker conf $ do
-          wfId <- uuidText
-          let opts = C.workflowStartOptions
-                (W.WorkflowId wfId)
-                taskQueue
-          C.execute client wf.reference opts "hello there."
-            `shouldReturn` "general kenobi"
+      -- TODO, move to composite codec package
+      -- specify "binary payloads work" $ \client -> do
+      --   taskQueue <- W.TaskQueue <$> uuidText
+      --   let testFn :: ByteString -> W.Workflow ByteString
+      --       testFn _ = pure "general kenobi"
+      --       wf = W.provideWorkflow defaultCodec "test" testFn
+      --       conf = configure () $ do
+      --         setNamespace $ W.Namespace "test"
+      --         setTaskQueue taskQueue
+      --         addWorkflow wf
+      --   withWorker conf $ do
+      --     wfId <- uuidText
+      --     let opts = C.workflowStartOptions
+      --           (W.WorkflowId wfId)
+      --           taskQueue
+      --     C.execute client wf.reference opts "hello there."
+      --       `shouldReturn` "general kenobi"
   --     specify "args that parse incorrectly should fail a Workflow appropriately" $ \client -> do
   --       pending
   --     specify "args that parse incorrectly should fail an Activity appropriately" $ \client -> do
@@ -589,7 +601,7 @@ needsClient = do
                 (W.WorkflowId wfId)
                 (W.TaskQueue "test")
           h <- C.start client wf.reference opts
-          result <- C.query client h echoQuery C.defaultQueryOptions "hello"
+          result <- C.query h echoQuery C.defaultQueryOptions "hello"
           C.awaitWorkflowResult h
           result `shouldBe` Right "hello"
 
@@ -612,12 +624,27 @@ needsClient = do
                 (W.WorkflowId wfId)
                 (W.TaskQueue "test")
           h <- C.start client wf.reference opts
-          result <- C.query client h echoQuery C.defaultQueryOptions "hello"
+          result <- C.query h echoQuery C.defaultQueryOptions "hello"
           -- C.cancel client h
           result `shouldBe` Right "hello"
       -- specify "query and unblock" pending
-  -- -- --   describe "Await condition" $ do
-  -- -- --     specify "it works" pending
+    describe "Await condition" $ do
+      xit "works in Workflows" $ \client -> do
+        taskQueue <- W.TaskQueue <$> uuidText
+        let conf = configure () $ do
+              setNamespace $ W.Namespace "test"
+              setTaskQueue taskQueue
+              testConf
+        withWorker conf $ do
+          wfId <- uuidText
+          let opts = C.workflowStartOptions
+                (W.WorkflowId wfId)
+                taskQueue
+          C.execute client testRefs.workflowWaitConditionWorks opts
+            `shouldReturn` ()
+
+      it "works in signal handlers" $ \_ -> pending
+      it "signal handlers can unblock workflows" $ \_ -> pending
     describe "Sleep" $ do
       specify "sleep" $ \client -> do
         wfId <- uuidText

@@ -20,6 +20,7 @@ module Temporal.Workflow.WorkflowDefinition
   ( WorkflowDefinition(..) -- TODO, only export the type, not the constructor from this module
   , ValidWorkflowFunction(..) -- TODO, move to internal
   , KnownWorkflow(..)
+  , SignalRef(..)
   , SignalDefinition(..)
   -- , StartChildWorkflow(..)
   , gatherStartChildWorkflowArgs
@@ -76,10 +77,15 @@ gatherStartChildWorkflowArgs
   -> (args :->: Workflow (ChildWorkflowHandle result))
 gatherStartChildWorkflowArgs c f = gatherArgs (Proxy @args) c id f
 
+data SignalRef (args :: [Type]) = forall codec. (ApplyPayloads codec args, GatherArgs codec args) => 
+  SignalRef
+    { signalName :: Text
+    , signalCodec :: codec
+    }
+
 data SignalDefinition (args :: [Type]) = forall codec. GatherArgs codec args =>
   SignalDefinition 
-    { signalName :: Text 
-    , signalCodec :: codec
+    { signalRef :: SignalRef args
     , signalApply :: forall res. Proxy res -> (args :->: res) -> Vector RawPayload -> IO res
     }
 

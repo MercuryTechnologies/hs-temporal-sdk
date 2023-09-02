@@ -32,8 +32,6 @@ module Temporal.Client
   , QueryRejected(..)
   , defaultQueryOptions
   , query
-  -- * Async Completion Client
-  -- * Schedule Client
   -- * Miscellaneous
   , streamEvents
   , FollowOption(..)
@@ -187,10 +185,10 @@ defaultSignalOptions = SignalOptions
 
 signal :: forall m args a. MonadIO m 
   => WorkflowHandle a 
-  -> SignalDefinition args 
+  -> SignalRef args 
   -> SignalOptions
   -> (args :->: m ())
-signal h@(WorkflowHandle (KnownWorkflow{knownWorkflowCodec}) c wf r) (SignalDefinition sName sCodec sApply) opts = gather $ \inputs -> do
+signal h@(WorkflowHandle (KnownWorkflow{knownWorkflowCodec}) c wf r) (SignalRef sName sCodec) opts = gather $ \inputs -> do
   result <- liftIO $ signalWorkflowExecution c.clientCore $ defMessage
     & WF.namespace .~ rawNamespace c.clientDefaultNamespace
     & WF.workflowExecution .~ (defMessage
@@ -471,24 +469,6 @@ terminate h req = void $ throwEither $ terminateWorkflowExecution
         ( defMessage & Common.payloads .~ fmap convertToProtoPayload req.terminationDetails )
       & RR.identity .~ identity (clientConfig h.workflowHandleClient.clientCore)
       & RR.firstExecutionRunId .~ maybe "" rawRunId req.firstExecutionRunId
-
----------------------------------------------------------------------------------
--- AsyncCompletionClient
-
--- | A client for asynchronous completion and heartbeating of Activities.
-data AsyncCompletionClient = AsyncCompletionClient Client
-
-complete :: AsyncCompletionClient -> TaskToken -> m ()
-complete = undefined
-
-fail :: AsyncCompletionClient -> TaskToken -> SomeException -> m ()
-fail = undefined
-
-heartbeat :: AsyncCompletionClient -> TaskToken -> [RawPayload] -> m ()
-heartbeat = undefined
-
-reportCancellation :: AsyncCompletionClient -> TaskToken -> [RawPayload] -> m ()
-reportCancellation = undefined
 
 
 data FollowOption = FollowRuns | ThisRunOnly

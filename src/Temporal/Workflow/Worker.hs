@@ -79,10 +79,7 @@ execute worker = runWorkerM worker $ do
           go
         (Right activation) -> do
           $(logDebug) $ Text.pack ("Got activation " <> show activation) 
-          handle <- async $ handleActivation activation
-          -- If we missed some exception, that's a bug. Crash the worker
-          -- so we know about it.
-          link handle
+          handle <- handleActivation activation
           go
       
 
@@ -117,30 +114,7 @@ handleActivation activation = do
                 & Completion.failed .~ failureProto
           
           liftIO (Core.completeWorkflowActivation worker.workerCore completionMessage >>= either throwIO pure)
-        Just inst -> do
-          -- This deadlock code seems suspect, but really it's because the workflow code
-          -- shouldn't be able to block indefinitely on a single thread before returning
-          -- a result. If it does, it's a bug in the workflow code.
-          completion <- liftIO $ UnliftIO.try $ activate worker inst activation
-
-          case completion of
-            Left (SomeException err) -> do
-              $(logDebug) ("Workflow failure: " <> Text.pack (show err))
-              -- TODO there are lots of fields on this failureProto that we probably want to fill in
-              let innerFailure :: F.Failure
-                  innerFailure = defMessage & F.message .~ (Text.pack $ show err)
-
-                  failureProto :: Completion.Failure
-                  failureProto = defMessage & Completion.failure .~ innerFailure
-                    
-                  completionMessage = defMessage
-                    & Completion.runId .~ (activation ^. Activation.runId)
-                    & Completion.failed .~ failureProto
-              liftIO (Core.completeWorkflowActivation worker.workerCore completionMessage >>= either throwIO pure)
-            Right ok -> do
-              -- The workflow is in charge of flushing completions in the regular case
-              -- when it needs to.
-              pure () 
+        Just inst -> writeChan inst.activationChannel activation
     else do
       $(logDebug) "Workflow does not need to run."
       let completionMessage = defMessage 
@@ -210,13 +184,16 @@ handleActivation activation = do
             case HashMap.lookup (startWorkflow ^. Activation.workflowType) worker.workerWorkflowState.workerWorkflowFunctions of 
               Nothing -> pure Nothing
               Just definition -> do
-                inst <- create 
+                inst <- create
                   (\wf -> do
                     putStrLn "Complete activation"
                     Core.completeWorkflowActivation worker.workerCore wf
                   )
+                  worker.workerConfig.deadlockTimeout
+                  worker.workerConfig.interceptorConfig
                   workflowInfo 
                   definition
+                  startWorkflow
                 addStackTraceHandler inst
                 Just <$> upsertWorkflowInstance runId_ inst
           pure $ join (vExistingInstance V.!? 0)
@@ -232,5 +209,8 @@ handleActivation activation = do
             writeTVar worker.workerWorkflowState.runningWorkflows $ HashMap.delete runId_ currentWorkflows
             case HashMap.lookup runId_ currentWorkflows of
               Nothing -> pure $ $(logDebug) $ Text.pack ("Eviction request on an unknown workflow with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
-              Just wf -> pure $ $(logDebug) $ Text.pack ("Evicting workflow instance with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
+              Just wf -> do
+                pure $ do
+                  cancel =<< readIORef wf.executionThread
+                  $(logDebug) $ Text.pack ("Evicting workflow instance with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
         _ -> pure ()

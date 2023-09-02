@@ -92,9 +92,10 @@ module Temporal.Workflow
   , setQueryHandler
   -- ** Signals
   -- $signals
+  , SignalRef(..)
   , SignalDefinition(..)
-  -- , setSignalHandler
-  -- , waitCondition
+  , setSignalHandler
+  , waitCondition
   -- * Other utilities
   , Temporal.Workflow.race
   , unsafeAsyncEffectSink
@@ -170,6 +171,7 @@ import Proto.Temporal.Api.Common.V1.Message (Payload)
 import RequireCallStack
 import System.Random.Stateful
 import Temporal.Common
+import Temporal.Coroutine
 import Temporal.Exception
 import Temporal.Payload
 import Temporal.SearchAttributes
@@ -511,7 +513,7 @@ signalWorkflow
   -> (Command.SignalExternalWorkflowExecution -> Command.SignalExternalWorkflowExecution)
   -> SignalDefinition args
   -> (args :->: Workflow (Task ()))
-signalWorkflow _ f (SignalDefinition signalName signalCodec signalApply) = gatherSignalChildWorkflowArgs @args @() signalCodec $ \ps -> do
+signalWorkflow _ f (SignalDefinition (SignalRef signalName signalCodec) signalApply) = gatherSignalChildWorkflowArgs @args @() signalCodec $ \ps -> do
   ilift $ do
     updateCallStack
     resVar <- newIVar
@@ -1026,8 +1028,8 @@ type ValidSignalHandler f =
 setSignalHandler :: forall f.
   ( ValidSignalHandler f
   , RequireCallStack
-  ) => SignalDefinition (ArgsOf f) -> f -> Workflow ()
-setSignalHandler (SignalDefinition n codec applyToSignal) f = ilift $ do
+  ) => SignalRef (ArgsOf f) -> f -> Workflow ()
+setSignalHandler (SignalRef n codec) f = ilift $ do
   updateCallStack
   -- TODO ^ inner callstack?
   inst <- ask
@@ -1037,23 +1039,34 @@ setSignalHandler (SignalDefinition n codec applyToSignal) f = ilift $ do
   where
     handle :: Vector RawPayload -> InstanceM ()
     handle = \vec -> do
-      eWorkflow <- liftIO $ UnliftIO.try $ applyToSignal 
-        (Proxy @(Workflow ()))
-        f 
-        vec
-      -- TODO handle exceptions properly
-      case eWorkflow of
-        Left (ValueError err) -> throwIO $ ValueError err
+      let eWorkflow = applyPayloads 
+            codec
+            (Proxy @(ArgsOf f))
+            (Proxy @(Workflow ()))
+            f
+            vec
+      inst <- ask
+      cmd <- case eWorkflow of
+        Left err -> do
+          let completeMessage = defMessage & Command.failWorkflowExecution .~ 
+                ( defMessage 
+                  & Command.failure .~ 
+                    ( defMessage
+                      & F.message .~ Text.pack err
+                      & F.stackTrace .~ ""
+                      -- & F.encodedAttributes .~ convertToProtoPayload eAttrs
+                    )
+                )
+          pure $ Just completeMessage
         Right w -> do
           resultVal <- UnliftIO.try $ resume $ runWorkflow w
-          inst <- ask
-          cmd <- case resultVal of
+          case resultVal of
             Right evalState -> case evalState of
               Left (Await suspended) -> do
-                modifyIORef' inst.workflowPrimaryTask $ \currentStatus -> case currentStatus of
+                modifyIORef' inst.currentWorkflowState $ \currentStatus -> case currentStatus of
                   ExecutionNotStarted -> ExecutionNotStarted -- shouldn't be possible, probably
                   -- TODO, whether we should pass resolutions to suspended' is unclear
-                  SuspendedExecution (Await suspended') codec -> SuspendedExecution (Await $ \resolutions -> suspended resolutions *> suspended' []) codec
+                  SuspendedExecution (Await suspended') -> SuspendedExecution (Await $ \resolutions -> suspended resolutions *> suspended' [])
                   CompletedExecution -> CompletedExecution
                 pure Nothing
               Right () -> pure Nothing
@@ -1071,8 +1084,7 @@ setSignalHandler (SignalDefinition n codec applyToSignal) f = ilift $ do
                         )
                     )
               pure $ Just completeMessage
-          inst <- ask
-          forM_ cmd (addCommand inst)
+      forM_ cmd (addCommand inst)
 
 -- | Current time from the workflow perspective.
 --
@@ -1207,41 +1219,55 @@ getExternalWorkflowHandle wfId mrId = do
     , externalWorkflowRunId = mrId
     }
 
+newtype Condition a = Condition 
+  { unCondition :: InstanceM a
+  -- ^ We track the sequence number of each accessed StateVar so that we can
+  -- block and retry the condition evaluation if the state changes.
+  }
+  deriving (Functor, Applicative, Monad)
+
+instance MonadReadStateVar Condition where
+  readStateVar StateVar{..} = Condition $ readIORef ref
+
 -- | Wait on a condition to become true before continuing.
 --
--- This must be used with signals, as that is the only way for
--- state to change in a workflow while the workflow itself is
+-- This must be used with signals, steps executed concurrently via the Applicative instance,
+-- or with the `race` command, as those are the only way for
+-- state to change in a workflow while a portion of the workflow itself is
 -- in this blocking condition.
 --
 -- N.B. this should be used with care, as it can lead to the workflow
 -- suspending indefinitely if the condition is never met. 
 -- (e.g. if there is no signal handler that changes the state appropriately)
--- waitCondition :: RequireCallStack => (st -> Bool) -> Workflow ()
--- waitCondition f = do
---   st <- get
---   if f st
---     then pure ()
---     else go
---   where
---     go = do
---       (conditionSeq, blockedVar) <- ilift $ do
---         inst <- ask
---         res <- newIVar
---         conditionSeq <- nextConditionSequence
---         atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
---           seqMaps { conditionsAwaitingSignal = HashMap.insert conditionSeq res seqMaps.conditionsAwaitingSignal }
---         pure (conditionSeq, res)
---       -- Wait for the condition to be signaled.
---       getIVar blockedVar
---       -- Delete the condition from the map so that it doesn't leak memory.
---       ilift $ do
---         inst <- ask
---         atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
---           seqMaps { conditionsAwaitingSignal = HashMap.delete conditionSeq seqMaps.conditionsAwaitingSignal }
---       st <- get
---       if f st
---         then pure ()
---         else go
+waitCondition :: RequireCallStack => Condition Bool -> Workflow ()
+waitCondition (Condition m) = do
+  updateCallStackW
+  conditionSatisfied <- ilift m
+  if conditionSatisfied
+    then pure ()
+    else go
+  where
+    -- When blocked, the condition needs to be re-evaluated every time a signal is received
+    -- or a new resolutions are received from a workflow activation.
+    go = do
+      (conditionSeq, blockedVar) <- ilift $ do
+        inst <- ask
+        res <- newIVar
+        conditionSeq <- nextConditionSequence
+        atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+          seqMaps { conditionsAwaitingSignal = HashMap.insert conditionSeq res seqMaps.conditionsAwaitingSignal }
+        pure (conditionSeq, res)
+      -- Wait for the condition to be signaled.
+      getIVar blockedVar
+      -- Delete the condition from the map so that it doesn't leak memory.
+      conditionSatisfied <- ilift $ do
+        inst <- ask
+        atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+          seqMaps { conditionsAwaitingSignal = HashMap.delete conditionSeq seqMaps.conditionsAwaitingSignal }
+        m
+      if conditionSatisfied
+        then pure ()
+        else go
 
 -- | While workflows are deterministic, there are categories of operational concerns (metrics, logging, tracing, etc.) that require
 -- access to IO operations like the network or filesystem. The 'IO' monad is not generally available in the 'Workflow' monad, but you 
@@ -1342,7 +1368,18 @@ race x y = biselectOpt discrimX discrimY id right x y
 
     right _ = error "race: We should never have a 'Right ()'"
 
-newtype StateVar a = StateVar (IORef a)
+{- 
+=== state vars === 
+
+Since state vars await cause Conditions to await, we need a way to track whether they have
+been updated since the condition suspended. We give each statevar a unique identifier for
+lookups, and a sequence number that updates for each write to the IORef.
+-}
+
+
+newtype StateVar a = StateVar
+  { ref :: IORef a
+  }
 
 newStateVar :: a -> Workflow (StateVar a)
 newStateVar a = Workflow $ \_ -> (Done . StateVar) <$> newIORef a
@@ -1359,7 +1396,6 @@ instance MonadReadStateVar Workflow where
 
 instance MonadWriteStateVar Workflow where
   writeStateVar (StateVar ref) a = Workflow $ \_ -> Done <$> writeIORef ref a
-
   modifyStateVar (StateVar ref) f = Workflow $ \_ -> Done <$> modifyIORef' ref f
 
 instance MonadReadStateVar Query where

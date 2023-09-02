@@ -1,0 +1,64 @@
+verbatim:
+  cabal-version: 3.0
+
+# Intentionally use a very short package name + version number
+# This avoids bloating path arguments passed to tools like Clang, and running over their limits
+name:    temporal-sdk-default-codec
+version: "0.0.1.0"
+
+dependencies:
+- base
+- temporal-sdk
+- if-instance
+- containers
+
+default-extensions:
+- DataKinds
+- FlexibleContexts
+- FlexibleInstances
+- GADTs
+- GeneralizedNewtypeDeriving
+- InstanceSigs
+- LambdaCase
+- MultiParamTypeClasses
+- NamedFieldPuns
+- RankNTypes
+- OverloadedRecordDot
+- OverloadedStrings
+- RecordWildCards
+- ScopedTypeVariables
+- StandaloneDeriving
+- TypeApplications
+- TypeFamilies
+- UndecidableInstances
+- TypeOperators
+
+ghc-options:
+# For details on warnings: https://downloads.haskell.org/~ghc/master/users-guide/using-warnings.html
+# Enable all warnings with -Weverything, then disable the ones we don't care about
+# (Note: The vast majority of the Haskell community uses -Wall, which has less warnings then -Weverything.)
+# For more info on these, see the blog that @maxgabriel wrote: https://medium.com/mercury-bank/enable-all-the-warnings-a0517bc081c3
+- -Weverything
+- -Wno-missing-exported-signatures # missing-exported-signatures turns off the more strict -Wmissing-signatures. See https://ghc.haskell.org/trac/ghc/ticket/14794#ticket
+- -Wno-missing-export-lists # Requires explicit export lists for every module, a pain for large modules
+- -Wno-missing-import-lists # Requires explicit imports of _every_ function (e.g. '$'); too strict
+- -Wno-missed-specialisations # When GHC can't specialize a polymorphic function. No big deal and requires fixing underlying libraries to solve.
+- -Wno-all-missed-specialisations # See missed-specialisations
+- -Wno-unsafe # Don't use Safe Haskell warnings
+- -Wno-missing-local-signatures # Warning for polymorphic local bindings. Don't think this is an issue
+- -Wno-monomorphism-restriction # Don't warn if the monomorphism restriction is used
+- -Wno-missing-safe-haskell-mode # Cabal isn’t setting this currently (introduced in GHC 8.10)
+- -Wno-prepositive-qualified-module # Cabal’s generate Path_*.hs doesn’t do this (fixed in https://github.com/haskell/cabal/pull/7352)
+- -Wno-unused-packages # Some tooling gives this error
+- -Wno-operator-whitespace  # GHC bug? https://gitlab.haskell.org/ghc/ghc/-/issues/23297
+- -fdiagnostics-color=always # Enable color
+- -Wno-missing-kind-signatures # New warning in 9.2
+- -Wno-implicit-lift # New warning in 9.2
+- -Wno-implicit-prelude
+- -fwarn-tabs
+- +RTS -A128m -n2m -RTS
+- -fdefer-diagnostics
+
+library:
+  source-dirs: src
+  other-modules: []

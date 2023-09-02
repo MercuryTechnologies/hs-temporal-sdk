@@ -20,6 +20,7 @@ import GHC.Stack
 import GHC.TypeLits
 import Lens.Family2
 import Temporal.Common
+import Temporal.Coroutine
 import Temporal.Exception
 import Temporal.Payload
 import Temporal.Workflow.WorkflowInstance
@@ -259,12 +260,11 @@ runWorkflow wf = provideCallStack $ do
     IVarFull (ThrowInternal e) -> throwIO e
 
 
-finishWorkflow :: (Codec codec a) => codec -> a -> InstanceM ()
-finishWorkflow codec result = do
+finishWorkflow :: RawPayload -> InstanceM ()
+finishWorkflow result = do
   $logDebug =<< withRunId "Finishing workflow"
-  let res = Temporal.Payload.encode codec result
   let completeMessage = defMessage & 
-        Command.completeWorkflowExecution .~ (defMessage & Command.result .~ convertToProtoPayload res)
+        Command.completeWorkflowExecution .~ (defMessage & Command.result .~ convertToProtoPayload result)
   inst <- ask
   addCommand inst completeMessage
 
