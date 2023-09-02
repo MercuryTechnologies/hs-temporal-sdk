@@ -41,7 +41,8 @@ library
     require-callstack,
     barbies,
     hs-opentelemetry-api,
-    hs-opentelemetry-propagator-w3c
+    hs-opentelemetry-propagator-w3c,
+    base64
 
   default-language: Haskell2010
   default-extensions:

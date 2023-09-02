@@ -62,6 +62,9 @@ import qualified Proto.Temporal.Api.Common.V1.Message as Proto (Payload)
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Proto (data', metadata)
 import Data.ProtoLens.Encoding ( encodeMessage, decodeMessage )
 import qualified Data.Text as T
+import qualified Data.Text.Encoding as Text
+import qualified Data.Text as Text
+import Data.ByteString.Base64 (encodeBase64, decodeBase64)
 
 {- * Parameter serialization 
 
@@ -159,6 +162,29 @@ data RawPayload = RawPayload
   { inputPayloadData :: ByteString
   , inputPayloadMetadata :: Map Text ByteString
   } deriving (Eq, Show)
+
+
+base64DecodeFromText :: MonadFail m => T.Text -> m ByteString
+base64DecodeFromText txt = case decodeBase64 $ Text.encodeUtf8 txt of
+  Left err -> fail $ Text.unpack err
+  Right ok -> pure ok
+
+instance FromJSON RawPayload where
+  parseJSON = withObject "RawPayload" $ \o -> do
+    rawPayloadData <- o .:? "data"
+    rawPayloadMetadata <- o .:? "metadata"
+    inputPayloadData <- maybe (pure mempty) base64DecodeFromText rawPayloadData
+    inputPayloadMetadata <- maybe (pure mempty) (traverse base64DecodeFromText) rawPayloadMetadata
+    pure RawPayload{..}
+
+instance ToJSON RawPayload where
+  toJSON RawPayload{..} = object $
+    (if inputPayloadData == "" then id else (("data" .= encodeBase64 inputPayloadData):)) $
+    (if Map.null inputPayloadMetadata then id else (("metadata" .= fmap encodeBase64 inputPayloadMetadata) :))
+    []
+  toEncoding RawPayload{..} = pairs $
+    (if inputPayloadData == "" then mempty else ("data" .= encodeBase64 inputPayloadData)) <>
+    (if Map.null inputPayloadMetadata then mempty else ("metadata" .= fmap encodeBase64 inputPayloadMetadata))
 
 convertFromProtoPayload :: Proto.Payload -> RawPayload
 convertFromProtoPayload p = RawPayload (p ^. Proto.data') (p ^. Proto.metadata)
