@@ -18,6 +18,7 @@ import Lens.Family2
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Message
 import Temporal.Exception
 import Temporal.Payload
+import Control.Monad.Except
 
 class ToSearchAttribute a where
   toSearchAttribute :: a -> SearchAttributeType
@@ -109,11 +110,8 @@ instance A.FromJSON SearchAttributeType where
     A.Array arr -> KeywordList <$> A.parseJSON x
     _ -> fail "Invalid search attribute type"
 
-searchAttributesToProto :: Map.Map Text SearchAttributeType -> Map.Map Text Message.Payload
-searchAttributesToProto searchAttrs = fmap (convertToProtoPayload . encode JSON) searchAttrs
+searchAttributesToProto :: Map.Map Text SearchAttributeType -> IO (Map.Map Text Message.Payload)
+searchAttributesToProto searchAttrs = traverse (fmap convertToProtoPayload . encode JSON) searchAttrs
 
-searchAttributesFromProto :: Map.Map Text Message.Payload -> Map.Map Text SearchAttributeType
-searchAttributesFromProto fs = 
-  case traverse (decode JSON . convertFromProtoPayload) $ fs of
-    Left err -> throw $ ValueError $ "Failed to decode search attributes: " <> err
-    Right attrs -> attrs
+searchAttributesFromProto :: Map.Map Text Message.Payload -> IO (Either String (Map.Map Text SearchAttributeType))
+searchAttributesFromProto fs = runExceptT $ traverse (ExceptT . decode JSON . convertFromProtoPayload) $ fs

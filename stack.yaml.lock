@@ -71,6 +71,13 @@ packages:
       size: 400
   original:
     hackage: thread-utils-finalizers-0.1.1.0
+- completed:
+    hackage: crypton-0.33@sha256:5e92f29b9b7104d91fcdda1dec9400c9ad1f1791c231cc41ceebd783fb517dee,18202
+    pantry-tree:
+      sha256: 38809499d7f9775ef45cd29ab5c3dc9b283a813f34c1cdc56681b24f8cf8bb4f
+      size: 23148
+  original:
+    hackage: crypton-0.33
 snapshots:
 - completed:
     sha256: dcf4fc28f12d805480ddbe8eb8c370e11db12f0461d0110a4240af27ac88d725

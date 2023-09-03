@@ -181,7 +181,7 @@ addStackTraceHandler :: MonadUnliftIO m => WorkflowInstance -> m ()
 addStackTraceHandler inst = do
   let specialHandler = \qId _ -> do
         cs <- readIORef inst.workflowCallStack
-        let callStackPayload = Temporal.Payload.encode JSON (Text.pack $ prettyCallStack cs)
+        callStackPayload <- Temporal.Payload.encode JSON (Text.pack $ prettyCallStack cs)
         let cmd = defMessage
               & Command.respondToQuery .~
                 ( defMessage
@@ -315,12 +315,12 @@ applyStartWorkflow startWorkflow = do
       executeWorkflowBase = \input -> runInstanceM inst $ do
         case inst.workflowInstanceDefinition of
           (WorkflowDefinition _ (ValidWorkflowFunction fmt innerF applyArgs)) -> do
-            let eAct = applyArgs innerF input.executeWorkflowInputArgs
+            eAct <- liftIO $ applyArgs innerF input.executeWorkflowInputArgs
             workflowAction <- case eAct of
               Left msg -> do
                 $(logError) $ Text.pack ("Failed to decode workflow arguments: " <> msg)
                 throwIO (ValueError msg)
-              Right act -> pure $ fmap (encode fmt) $ runWorkflow act
+              Right act -> pure (runWorkflow act >>= liftIO . encode fmt)
             pure (WorkflowExecution workflowAction)
 
   (WorkflowExecution execution) <- liftIO $ inst.interceptors.workflowInboundInterceptors.executeWorkflow execInput executeWorkflowBase 

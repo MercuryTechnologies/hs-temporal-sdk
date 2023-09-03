@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -fplugin=IfSat.Plugin #-}
-module Temporal.Codec.Composite 
+module Temporal.Codec.Optimal 
   ( defaultCodec
   , Composite(..)
   , module Data.Constraint.If

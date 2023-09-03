@@ -122,10 +122,10 @@ execute
   -> (WorkflowArgs wf :->: m (WorkflowResult wf))
 execute c wf opts = case workflowRef wf of
   k@(KnownWorkflow codec _ _ _) -> do
-    let gather :: ([RawPayload] -> m (WorkflowResult wf)) -> (WorkflowArgs wf :->: m (WorkflowResult wf))
+    let gather :: ([IO RawPayload] -> m (WorkflowResult wf)) -> (WorkflowArgs wf :->: m (WorkflowResult wf))
         gather = gatherArgs (Proxy @(WorkflowArgs wf)) codec Prelude.id
     gather $ \inputs -> liftIO $ do
-      h <- startFromPayloads c k opts inputs
+      h <- startFromPayloads c k opts =<< sequence inputs
       awaitWorkflowResult h
 
 data WorkflowHandle a = forall args. WorkflowHandle
@@ -153,7 +153,7 @@ awaitWorkflowResult h@(WorkflowHandle (KnownWorkflow{knownWorkflowCodec}) c wf r
             then pure $ unsafeCoerce ()
             else case payloads of
               (a:_) -> liftIO $ do
-                let result = decode knownWorkflowCodec a
+                result <- decode knownWorkflowCodec a
                 either (throwIO . ValueError) pure result
               _ -> error "Missing result payload"
         HistoryEvent'WorkflowExecutionFailedEventAttributes attrs -> throwIO WorkflowExecutionFailed
@@ -189,26 +189,28 @@ signal :: forall m args a. MonadIO m
   -> SignalOptions
   -> (args :->: m ())
 signal h@(WorkflowHandle (KnownWorkflow{knownWorkflowCodec}) c wf r) (SignalRef sName sCodec) opts = gather $ \inputs -> do
-  result <- liftIO $ signalWorkflowExecution c.clientCore $ defMessage
-    & WF.namespace .~ rawNamespace c.clientDefaultNamespace
-    & WF.workflowExecution .~ (defMessage
-      & Common.workflowId .~ rawWorkflowId wf
-      & Common.runId .~ maybe "" rawRunId r
-      )
-    & WF.signalName .~ sName
-    & WF.input .~ (defMessage & Common.payloads .~ fmap convertToProtoPayload inputs)
-    & WF.identity .~ (identity $ clientConfig c.clientCore)
-    & WF.requestId .~ fromMaybe "" opts.requestId
-    -- Deprecated, no need to set
-    -- & WF.control .~ _
-    -- TODO put other useful headers in here
-    & WF.header .~ (headerToProto $ fmap convertToProtoPayload opts.headers)
-    & WF.skipGenerateWorkflowTask .~ opts.skipGenerateWorkflowTask
+  result <- liftIO $ do
+    args <- traverse (fmap convertToProtoPayload) inputs
+    signalWorkflowExecution c.clientCore $ defMessage
+      & WF.namespace .~ rawNamespace c.clientDefaultNamespace
+      & WF.workflowExecution .~ (defMessage
+        & Common.workflowId .~ rawWorkflowId wf
+        & Common.runId .~ maybe "" rawRunId r
+        )
+      & WF.signalName .~ sName
+      & WF.input .~ (defMessage & Common.payloads .~ args)
+      & WF.identity .~ (identity $ clientConfig c.clientCore)
+      & WF.requestId .~ fromMaybe "" opts.requestId
+      -- Deprecated, no need to set
+      -- & WF.control .~ _
+      -- TODO put other useful headers in here
+      & WF.header .~ (headerToProto $ fmap convertToProtoPayload opts.headers)
+      & WF.skipGenerateWorkflowTask .~ opts.skipGenerateWorkflowTask
   case result of 
     Left err -> throwIO err
     Right _ -> pure ()
   where
-    gather :: ([RawPayload] -> m ()) -> (args :->: m ())
+    gather :: ([IO RawPayload] -> m ()) -> (args :->: m ())
     gather = gatherArgs (Proxy @args) sCodec Prelude.id
     wfClient = clientCore c
 
@@ -254,6 +256,7 @@ query :: forall m args result a. (MonadIO m, Typeable result)
   -> QueryOptions
   -> (args :->: m (Either QueryRejected result))
 query h (QueryDefinition qn codec) opts = gather $ \inputs -> liftIO $ do
+  args <- traverse (fmap convertToProtoPayload) inputs
   let msg :: QueryWorkflowRequest
       msg = defMessage 
         & WF.namespace .~ rawNamespace h.workflowHandleClient.clientDefaultNamespace
@@ -266,7 +269,7 @@ query h (QueryDefinition qn codec) opts = gather $ \inputs -> liftIO $ do
           (defMessage 
             & Query.queryType .~ qn
             & Query.queryArgs .~
-              (defMessage & Common.payloads .~ fmap convertToProtoPayload inputs)
+              (defMessage & Common.payloads .~ args)
             & Query.header .~ (headerToProto $ fmap convertToProtoPayload opts.queryHeaders)
           )
         & WF.queryRejectCondition .~ case opts.queryRejectCondition of
@@ -285,11 +288,11 @@ query h (QueryDefinition qn codec) opts = gather $ \inputs -> liftIO $ do
         case (res ^. WF.queryResult . Common.vec'payloads) V.!? 0 of
           Nothing -> throwIO $ ValueError "No return value payloads provided by query response"
           Just p -> do
-            let res = decode codec (convertFromProtoPayload p)
+            res <- decode codec (convertFromProtoPayload p)
             either (throwIO . ValueError) (pure . Right) res
 
   where
-    gather :: ([RawPayload] -> m (Either QueryRejected result)) -> (args :->: m (Either QueryRejected result))
+    gather :: ([IO RawPayload] -> m (Either QueryRejected result)) -> (args :->: m (Either QueryRejected result))
     gather = gatherArgs (Proxy @args) codec Prelude.id
 
     queryRejectionStatusFromProto = \case
@@ -381,6 +384,7 @@ startFromPayloads
   -> m (WorkflowHandle result)
 startFromPayloads c k@(KnownWorkflow codec _ _ _) opts payloads = liftIO $ do
   reqId <- UUID.nextRandom
+  searchAttrs <- searchAttributesToProto opts.searchAttributes
   let req = defMessage
         & WF.namespace .~ (rawNamespace $ fromMaybe (c.clientDefaultNamespace) $ knownWorkflowNamespace k)
         & WF.workflowId .~ rawWorkflowId opts.workflowId
@@ -406,7 +410,7 @@ startFromPayloads c k@(KnownWorkflow codec _ _ _) opts payloads = liftIO $ do
         & WF.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retry)
         & WF.cronSchedule .~ maybe "" Prelude.id opts.cronSchedule
         & WF.memo .~ (convertToProtoMemo opts.memo)
-        & WF.searchAttributes .~ (defMessage & Common.indexedFields .~ searchAttributesToProto opts.searchAttributes)
+        & WF.searchAttributes .~ (defMessage & Common.indexedFields .~ searchAttrs)
     --     TODO Not sure how to use these yet
         & WF.header .~ (headerToProto $ fmap convertToProtoPayload opts.headers)
         & WF.requestEagerExecution .~ opts.requestEagerExecution
@@ -437,9 +441,9 @@ start
   -> WorkflowStartOptions
   -> (args :->: m (WorkflowHandle result))
 start c k@(KnownWorkflow codec _ _ _) opts = gather $ \inputs -> liftIO $ do
-  startFromPayloads c k opts inputs
+  startFromPayloads c k opts =<< sequence inputs
   where
-    gather :: ([RawPayload] -> m (WorkflowHandle result)) -> (args :->: m (WorkflowHandle result))
+    gather :: ([IO RawPayload] -> m (WorkflowHandle result)) -> (args :->: m (WorkflowHandle result))
     gather = gatherArgs (Proxy @args) codec Prelude.id
 
 data TerminationOptions = TerminationOptions

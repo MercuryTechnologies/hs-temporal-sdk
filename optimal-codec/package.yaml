@@ -3,7 +3,7 @@ verbatim:
 
 # Intentionally use a very short package name + version number
 # This avoids bloating path arguments passed to tools like Clang, and running over their limits
-name:    temporal-sdk-default-codec
+name:    temporal-sdk-optimal-codec
 version: "0.0.1.0"
 
 dependencies:

@@ -4,13 +4,13 @@ cabal-version: 3.0
 --
 -- see: https://github.com/sol/hpack
 
-name:           temporal-sdk-default-codec
+name:           temporal-codec-encryption
 version:        0.0.1.0
 build-type:     Simple
 
 library
   exposed-modules:
-      Temporal.Codec.Composite
+      Temporal.Codec.Encryption
   hs-source-dirs:
       src
   default-extensions:
@@ -36,7 +36,11 @@ library
   ghc-options: -Weverything -Wno-missing-exported-signatures -Wno-missing-export-lists -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -Wno-unused-packages -Wno-operator-whitespace -fdiagnostics-color=always -Wno-missing-kind-signatures -Wno-implicit-lift -Wno-implicit-prelude -fwarn-tabs +RTS -A128m -n2m -RTS -fdefer-diagnostics
   build-depends:
       base
+    , bytestring
     , containers
-    , if-instance
+    , crypton
+    , memory
+    , proto-lens
     , temporal-sdk
+    , text
   default-language: Haskell2010

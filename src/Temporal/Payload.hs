@@ -84,24 +84,25 @@ class Codec fmt a where
   messageType :: fmt -> a -> ByteString
   default messageType :: (Typeable a) => fmt -> a -> ByteString
   messageType _ _ = C.pack $ show $ typeRep (Proxy @a)
-  encodePayload :: fmt -> a -> ByteString
-  decode :: fmt -> RawPayload -> Either String a
+  encodePayload :: fmt -> a -> IO ByteString
+  encodeExtraMetadata :: fmt -> a -> Map Text ByteString
+  encodeExtraMetadata = mempty
+  decode :: fmt -> RawPayload -> IO (Either String a)
 
-encode :: forall fmt a. Codec fmt a => fmt -> a -> RawPayload
-encode fmt x = RawPayload 
-  (encodePayload fmt x) 
+encode :: forall fmt a. Codec fmt a => fmt -> a -> IO RawPayload
+encode fmt x = RawPayload <$> encodePayload fmt x <*> pure
   (Map.fromList 
     [ ("encoding", (encodingType fmt (Proxy @a)))
     , ("messageType", messageType fmt x)
     ]
-  )
+  <> encodeExtraMetadata fmt x)
 
 data JSON = JSON
 
 instance (Typeable a, Aeson.ToJSON a, Aeson.FromJSON a) => Codec JSON a where
   encodingType _ _ = "json/plain"
-  encodePayload _ x = BL.toStrict $ Aeson.encode x
-  decode _ = Aeson.eitherDecodeStrict' . inputPayloadData
+  encodePayload _ x = pure . BL.toStrict $ Aeson.encode x
+  decode _ = pure . Aeson.eitherDecodeStrict' . inputPayloadData
 
 
 data Null = Null
@@ -109,7 +110,7 @@ data Null = Null
 instance Codec Null () where
   encodingType _ _ = "binary/null"
   encodePayload _ _ = mempty
-  decode _ _ = Right ()
+  decode _ _ = pure $ Right ()
 
 -- | Direct binary serialization.
 --
@@ -129,8 +130,8 @@ data Binary = Binary
 
 instance Codec Binary ByteString where
   encodingType _ _ = "binary/plain"
-  encodePayload _ x = x
-  decode _ = Right . inputPayloadData
+  encodePayload _ x = pure x
+  decode _ = pure . Right . inputPayloadData
 
 
 data Protobuf = Protobuf
@@ -138,8 +139,8 @@ data Protobuf = Protobuf
 instance (Message a) => Codec Protobuf a where
   messageType _ x = encodeUtf8 $ messageName $ pure x
   encodingType _ _ = "binary/protobuf"
-  encodePayload _ x = encodeMessage x
-  decode _ = decodeMessage . inputPayloadData
+  encodePayload _ = pure . encodeMessage
+  decode _ = pure . decodeMessage . inputPayloadData
 
 type family ArgsOf f where
   ArgsOf (arg -> rest) = arg ': ArgsOf rest
@@ -201,17 +202,19 @@ class ApplyPayloads codec (args :: [Type]) where
     -> Proxy result 
     -> (args :->: result)
     -> V.Vector RawPayload
-    -> Either String result
+    -> IO (Either String result)
 
 instance ApplyPayloads codec '[] where
-  applyPayloads _ _ _ f _ = Right f
+  applyPayloads _ _ _ f _ = pure $ Right f
 
 instance (Codec codec ty, ApplyPayloads codec tys) => ApplyPayloads codec (ty ': tys) where
   applyPayloads codec _ resP f vec = case V.uncons vec of
-    Nothing -> Left "Not enough arguments"
-    Just (pl, rest) -> case decode codec pl of
-      Right arg -> applyPayloads codec (Proxy @tys) resP (f arg) rest
-      Left err -> Left err
+    Nothing -> pure $ Left "Not enough arguments"
+    Just (pl, rest) -> do
+      res <- decode codec pl
+      case res of
+        Right arg -> applyPayloads codec (Proxy @tys) resP (f arg) rest
+        Left err -> pure $ Left err
 
 -- | Given a list of function argument types and a codec, produce a function that takes a list of
 -- 'RawPayload's and does something useful with them. This is used to support outbound invocations of
@@ -220,8 +223,8 @@ class GatherArgs codec (args :: [Type]) where
   gatherArgs 
     :: Proxy args 
     -> codec 
-    -> ([RawPayload] -> [RawPayload]) 
-    -> ([RawPayload] -> result)
+    -> ([IO RawPayload] -> [IO RawPayload]) 
+    -> ([IO RawPayload] -> result)
     -> (args :->: result)
 
 instance (Codec codec arg, GatherArgs codec args) => GatherArgs codec (arg ': args) where

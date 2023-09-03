@@ -300,12 +300,12 @@ startActivityFromPayloads
   :: forall args result. RequireCallStack 
   => KnownActivity args result 
   -> StartActivityOptions 
-  -> [RawPayload] 
+  -> [IO RawPayload] 
   -> Workflow (Task result)
 startActivityFromPayloads k@(KnownActivity codec mTaskQueue name) opts typedPayloads = ilift $ do
   updateCallStack
   inst <- ask
-  let ps = convertToProtoPayload <$> typedPayloads
+  ps <- traverse (fmap convertToProtoPayload . liftIO) typedPayloads
 
   s@(Sequence actSeq) <- nextActivitySequence
   resultSlot <- newIVar
@@ -340,7 +340,7 @@ startActivityFromPayloads k@(KnownActivity codec mTaskQueue name) opts typedPayl
       Workflow $ \_ -> case res ^. Activation.result . ActivityResult.maybe'status of
         Nothing -> error "Activity result missing status"
         Just (ActivityResult.ActivityResolution'Completed success) -> do
-          let result = decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
+          result <- liftIO $ decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
           case result of
             -- TODO handle properly
             Left err -> error $ "Failed to decode activity result: " <> show err
@@ -380,7 +380,7 @@ executeActivity activity opts = case activityRef activity of
 gatherActivityArgs 
   :: forall args result codec. GatherArgs codec args
   => codec 
-  -> ([RawPayload] -> Workflow (Task result)) 
+  -> ([IO RawPayload] -> Workflow (Task result)) 
   -> (args :->: Workflow (Task result))
 gatherActivityArgs c f = gatherArgs (Proxy @args) c id f
 
@@ -519,13 +519,14 @@ signalWorkflow _ f (SignalDefinition (SignalRef signalName signalCodec) signalAp
     resVar <- newIVar
     inst <- ask
     s <- nextExternalSignalSequence
+    args <- liftIO $ traverse (fmap convertToProtoPayload) ps
     let cmd = defMessage
           & Command.signalExternalWorkflowExecution .~
             ( f 
               ( defMessage
                 & Command.seq .~ rawSequence s
                 & Command.signalName .~ signalName 
-                & Command.args .~ (convertToProtoPayload <$> ps)
+                & Command.args .~ args
               -- TODO
               -- & Command.headers .~ _
               )
@@ -551,18 +552,19 @@ signalWorkflow _ f (SignalDefinition (SignalRef signalName signalCodec) signalAp
 gatherSignalChildWorkflowArgs 
   :: forall args result codec. GatherArgs codec args
   => codec 
-  -> ([RawPayload] -> Workflow (Task result)) 
+  -> ([IO RawPayload] -> Workflow (Task result)) 
   -> (args :->: Workflow (Task result))
 gatherSignalChildWorkflowArgs c f = gatherArgs (Proxy @args) c id f
 
 
-startChildWorkflowFromPayloads :: forall args result. RequireCallStack => KnownWorkflow args result -> StartChildWorkflowOptions -> WorkflowId -> [RawPayload] -> Workflow (ChildWorkflowHandle result)
+startChildWorkflowFromPayloads :: forall args result. RequireCallStack => KnownWorkflow args result -> StartChildWorkflowOptions -> WorkflowId -> [IO RawPayload] -> Workflow (ChildWorkflowHandle result)
 startChildWorkflowFromPayloads k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId = ilift . go
   where
-    go :: [RawPayload] -> InstanceM (ChildWorkflowHandle result)
+    go :: [IO RawPayload] -> InstanceM (ChildWorkflowHandle result)
     go typedPayloads = do
       updateCallStack
-      wfHandle <- sendChildWorkflowCommand typedPayloads
+      args <- liftIO $ sequence typedPayloads
+      wfHandle <- sendChildWorkflowCommand args
       pure wfHandle
     sendChildWorkflowCommand typedPayloads = do
       inst <- ask
@@ -573,7 +575,7 @@ startChildWorkflowFromPayloads k@(KnownWorkflow codec mNamespace mTaskQueue _) o
       resultSlot <- newIVar
       firstExecutionRunId <- newIVar
       info <- readIORef inst.workflowInstanceInfo
-      
+      searchAttrs <- liftIO $ searchAttributesToProto opts.searchAttributes
       let childWorkflowOptions = defMessage
             & Command.seq .~ wfSeq
             & Command.namespace .~ rawNamespace (fromMaybe info.namespace mNamespace)
@@ -590,7 +592,7 @@ startChildWorkflowFromPayloads k@(KnownWorkflow codec mNamespace mTaskQueue _) o
             & Command.cronSchedule .~ fromMaybe "" opts.cronSchedule
             & Command.headers .~ opts.headers
             & Command.memo .~ opts.initialMemo
-            & Command.searchAttributes .~ searchAttributesToProto opts.searchAttributes
+            & Command.searchAttributes .~ searchAttrs
             & Command.cancellationType .~ childWorkflowCancellationTypeToProto opts.cancellationType
 
           cmd = defMessage 
@@ -650,7 +652,7 @@ waitChildWorkflowResult wfHandle@(ChildWorkflowHandle{childWorkflowCodec}) = do
     Nothing -> ilift $ throwIO $ RuntimeError "Unrecognized child workflow result status"
     Just s -> case s of
       ChildWorkflow.ChildWorkflowResult'Completed res -> do
-        let eVal = decode childWorkflowCodec $ convertFromProtoPayload $ res ^. ChildWorkflow.result
+        eVal <- ilift $ liftIO $ decode childWorkflowCodec $ convertFromProtoPayload $ res ^. ChildWorkflow.result
         case eVal of
           Left err -> throw $ ValueError err
           Right ok -> pure ok
@@ -733,7 +735,7 @@ startLocalActivity (KnownActivity codec _ n) opts = gatherActivityArgs  @args @r
   originalTime <- time
   ilift $ do
     inst <- ask
-    let ps = convertToProtoPayload <$> typedPayloads
+    ps <- liftIO $ traverse (fmap convertToProtoPayload) typedPayloads
     s@(Sequence actSeq) <- nextActivitySequence
     resultSlot <- newIVar
     atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
@@ -764,7 +766,7 @@ startLocalActivity (KnownActivity codec _ n) opts = gatherActivityArgs  @args @r
         Workflow $ \_ -> case res ^. Activation.result . ActivityResult.maybe'status of
           Nothing -> error "Activity result missing status"
           Just (ActivityResult.ActivityResolution'Completed success) -> do
-            let result = decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
+            result <- liftIO $ decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
             case result of
               -- TODO handle properly
               Left err -> error $ "Failed to decode activity result: " <> show err
@@ -814,14 +816,15 @@ upsertSearchAttributes :: RequireCallStack => Map Text SearchAttributeType -> Wo
 upsertSearchAttributes values = ilift $ do
   updateCallStack
   inst <- ask
+  attrs <- liftIO $ traverse (fmap convertToProtoPayload . encode JSON) values
+  let cmd = defMessage & Command.upsertWorkflowSearchAttributes .~ 
+        ( defMessage
+          & Command.searchAttributes .~ attrs
+        )
   addCommand inst cmd
   modifyIORef' inst.workflowInstanceInfo $ \(info :: Info) ->
     (info { searchAttributes = info.searchAttributes <> values } :: Info)
   where
-    cmd = defMessage & Command.upsertWorkflowSearchAttributes .~ 
-      ( defMessage
-        & Command.searchAttributes .~ fmap (convertToProtoPayload . encode JSON) values
-      )
 
 -- | Current time from the workflow perspective.
 --
@@ -976,7 +979,7 @@ setQueryHandler (QueryDefinition n codec) f = ilift $ do
   where
     handle :: QueryId -> Vector RawPayload -> InstanceM ()
     handle (QueryId qId) vec = do
-      let eHandler = applyPayloads 
+      eHandler <- liftIO $ applyPayloads 
             codec 
             (Proxy @(ArgsOf f))
             (Proxy @(Query (ResultOf Query f))) 
@@ -988,35 +991,37 @@ setQueryHandler (QueryDefinition n codec) f = ilift $ do
         Right (Query r) -> do
           inst <- ask
           eResult <- UnliftIO.try $ fmap (encode codec) r
+          commandResult <- case eResult of
+            Left (SomeException err) ->
+              pure $ Command.failed .~ 
+                ( defMessage
+                  & F.message .~ Text.pack (show err)
+                  -- TODO, protobuf docs aren't clear on what this should be
+                  & F.source .~ "haskell"
+                  -- TODO, annotated exceptions might be needed for this
+                  & F.stackTrace .~ ""
+                  -- TODO encoded attributes
+                  -- & F.encodedAttributes .~ _
+                  -- & F.cause .~ _
+                  & F.activityFailureInfo .~
+                    ( defMessage
+                  --   -- & F.scheduledEventId .~ _
+                  --   -- & F.startedEventId .~ _
+                    -- & WF.identity .~ (identity $ clientConfig c.clientCore)
+                    )
+                  --   & F.activityType .~ (defMessage & P.name .~ info.activityType)
+                  --   & F.activityId .~ (msg ^. AT.activityId)
+                  --   -- & F.retryState .~ _
+                  -- )
+                )
+            Right resultM -> do
+              result <- liftIO resultM
+              pure $ Command.succeeded .~ (defMessage & Command.response .~ convertToProtoPayload result)
           let cmd = defMessage
                 & Command.respondToQuery .~
                   ( defMessage
                     & Command.queryId .~ qId
-                    & case eResult of
-                      Left (SomeException err) ->
-                        Command.failed .~ 
-                          ( defMessage
-                            & F.message .~ Text.pack (show err)
-                            -- TODO, protobuf docs aren't clear on what this should be
-                            & F.source .~ "haskell"
-                            -- TODO, annotated exceptions might be needed for this
-                            & F.stackTrace .~ ""
-                            -- TODO encoded attributes
-                            -- & F.encodedAttributes .~ _
-                            -- & F.cause .~ _
-                            & F.activityFailureInfo .~
-                              ( defMessage
-                            --   -- & F.scheduledEventId .~ _
-                            --   -- & F.startedEventId .~ _
-                              -- & WF.identity .~ (identity $ clientConfig c.clientCore)
-                              )
-                            --   & F.activityType .~ (defMessage & P.name .~ info.activityType)
-                            --   & F.activityId .~ (msg ^. AT.activityId)
-                            --   -- & F.retryState .~ _
-                            -- )
-                          )
-                      Right result -> do
-                        Command.succeeded .~ (defMessage & Command.response .~ convertToProtoPayload result)
+                    & commandResult
                   )
           addCommand inst cmd
           
@@ -1039,7 +1044,7 @@ setSignalHandler (SignalRef n codec) f = ilift $ do
   where
     handle :: Vector RawPayload -> InstanceM ()
     handle = \vec -> do
-      let eWorkflow = applyPayloads 
+      eWorkflow <- liftIO $ applyPayloads 
             codec
             (Proxy @(ArgsOf f))
             (Proxy @(Workflow ()))
@@ -1164,7 +1169,7 @@ instance Cancel Timer where
 gatherContinueAsNewArgs 
   :: forall args result codec. GatherArgs codec args
   => codec 
-  -> ([RawPayload] -> Workflow result) 
+  -> ([IO RawPayload] -> Workflow result) 
   -> (args :->: Workflow result)
 gatherContinueAsNewArgs c f = gatherArgs (Proxy @args) c id f
 
@@ -1196,15 +1201,17 @@ continueAsNew wf opts = case workflowRef wf of
   k@(KnownWorkflow codec _ _ _) -> gatherContinueAsNewArgs @(WorkflowArgs wf) @(WorkflowResult wf) codec $ \args -> do
     i <- info
     Workflow $ \_ -> do
-      throwIO $ ContinueAsNewException $ defMessage
-        & Command.workflowType .~ knownWorkflowName k
-        & Command.taskQueue .~ (maybe "" rawTaskQueue opts.taskQueue)
-        & Command.arguments .~ (convertToProtoPayload <$> args)
-        & Command.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retryPolicy)
-        & Command.searchAttributes .~ searchAttributesToProto 
+      searchAttrs <- liftIO $ searchAttributesToProto 
           (if opts.searchAttributes == mempty
             then i.searchAttributes
             else opts.searchAttributes)
+      args <- liftIO $ traverse (fmap convertToProtoPayload) args
+      throwIO $ ContinueAsNewException $ defMessage
+        & Command.workflowType .~ knownWorkflowName k
+        & Command.taskQueue .~ (maybe "" rawTaskQueue opts.taskQueue)
+        & Command.arguments .~ args
+        & Command.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retryPolicy)
+        & Command.searchAttributes .~ searchAttrs
         & Command.headers .~ fmap convertToProtoPayload opts.headers
         & Command.memo .~ fmap convertToProtoPayload opts.memo
         & Command.maybe'workflowTaskTimeout .~ (durationToProto <$> opts.taskTimeout)

@@ -324,7 +324,7 @@ data ValidWorkflowFunction = forall codec f.
   ValidWorkflowFunction
     codec
     f
-    (f -> Vector RawPayload -> Either String (Workflow (ResultOf Workflow f)))
+    (f -> Vector RawPayload -> IO (Either String (Workflow (ResultOf Workflow f))))
 
 data ActivityCancelReason
   = GoneFromServer
@@ -781,7 +781,7 @@ data ValidActivityFunction env = forall codec f.
   ValidActivityFunction 
     codec 
     f
-    (f -> Vector RawPayload -> Either String (Activity env (ResultOf (Activity env) f)))
+    (f -> Vector RawPayload -> IO (Either String (Activity env (ResultOf (Activity env) f))))
 
 runWorkerM :: Worker actEnv -> WorkerM actEnv a -> IO a
 runWorkerM worker m = runReaderT (unWorkerM m) worker

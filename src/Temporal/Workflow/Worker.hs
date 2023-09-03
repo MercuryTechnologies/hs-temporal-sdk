@@ -149,6 +149,9 @@ handleActivation activation = do
         Just inst -> pure $ Just inst
         Nothing -> do
           vExistingInstance <- forM activationStartWorkflowJobs $ \(job, startWorkflow) -> do
+            searchAttrs <- liftIO $ do
+              decodedAttrs <- startWorkflow ^. Activation.searchAttributes . Message.indexedFields . to searchAttributesFromProto
+              either (throwIO . ValueError) pure decodedAttrs
             let runId_ = RunId $ activation ^. CommonProto.runId
                 parentProto = startWorkflow ^. Activation.maybe'parentWorkflowInfo
                 parentInfo = case parentProto of
@@ -172,7 +175,7 @@ handleActivation activation = do
                   , parent = parentInfo
                   , headers = startWorkflow ^. Activation.headers . to (fmap convertFromProtoPayload)
                   , rawMemo = startWorkflow ^. Activation.memo . Message.fields . to (fmap convertFromProtoPayload)
-                  , searchAttributes = startWorkflow ^. Activation.searchAttributes . Message.indexedFields . to searchAttributesFromProto
+                  , searchAttributes = searchAttrs
                   , retryPolicy = retryPolicyFromProto <$> startWorkflow ^. Activation.maybe'retryPolicy
                   , runId = RunId $ activation ^. CommonProto.runId
                   , runTimeout = fmap durationFromProto $ startWorkflow ^. Activation.maybe'workflowRunTimeout
