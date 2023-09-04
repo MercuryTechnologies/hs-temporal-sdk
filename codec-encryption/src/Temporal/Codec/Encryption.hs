@@ -2,11 +2,11 @@ module Temporal.Codec.Encryption where
 
 import Crypto.Cipher.AES (AES256)
 import Crypto.Cipher.Types (BlockCipher(..), Cipher(..), IV, makeIV, ivAdd)
-import Crypto.Error (CryptoFailable(..), CryptoError(..))
+import Crypto.Error (CryptoFailable(..))
 import Control.Monad.IO.Class
 import qualified Crypto.Random.Types as CRT
 
-import Data.ByteArray (ByteArray, ScrubbedBytes, convert)
+import Data.ByteArray (ScrubbedBytes, convert)
 import Data.ByteArray.Encoding
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
@@ -15,11 +15,11 @@ import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.ProtoLens.Encoding (encodeMessage, decodeMessage)
 import Data.Proxy
-import Temporal.Exception
 import Temporal.Payload
 
-encryptionInterceptor :: Interceptors
-encryptionInterceptor = fowefowe
+-- TODO
+-- encryptionInterceptor :: Interceptors
+-- encryptionInterceptor = fowefowe
 
 data Key c where
   Key :: (BlockCipher c) => ScrubbedBytes -> Key c
@@ -80,11 +80,12 @@ mkEncryptionCodec (defaultKeyName, defaultKey) otherKeys = liftIO $ do
         }
 
 instance Codec Encrypted RawPayload where
-  encodingType _ _ = "binary/encrypted"
-  encodePayload Encrypted{..} x = do
+  encoding _ _ = "binary/encrypted"
+  encode Encrypted{..} x = do
     iv <- atomicModifyIORef' ivRef (\iv -> let next = ivAdd iv 1 in (next, iv))
-    pure $ encrypt defaultKey iv $ encodeMessage $ convertToProtoPayload x
-  encodeExtraMetadata Encrypted{..} _ = Map.singleton "encryption-key-id" defaultKeyName
+    pure $ RawPayload 
+      (encrypt defaultKey iv $ encodeMessage $ convertToProtoPayload x) 
+      (Map.fromList [("encryption-key-id", defaultKeyName), ("encoding", "binary/encrypted")])
   decode Encrypted{..} payload = 
     if payload.inputPayloadMetadata Map.!? "encoding" /= (Just "binary/encrypted")
     then pure $ Right payload

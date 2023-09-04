@@ -28,6 +28,10 @@ module Temporal.Payload
   , Zlib(..)
   , zlib
   , applyPayloads
+  , Around(..)
+  , mkPayloadProcessor
+  , addPayloadProcessor
+  , RawPayloadProcessor
   , ApplyPayloads
   , GatherArgs(..)
   , ArgsOf
@@ -42,6 +46,7 @@ module Temporal.Payload
   ) where
 
 import Codec.Compression.Zlib.Internal hiding (Format(..))
+import Control.Monad
 import Data.Aeson hiding (encode, decode)
 import qualified Data.Aeson as Aeson
 import Data.ByteString (ByteString)
@@ -172,6 +177,59 @@ instance Codec Zlib RawPayload where
       decompress zlibFormat decompressParams $ 
       BL.fromStrict p.inputPayloadData
     _ -> pure $ Right p
+
+-- | A codec that post-processes the payload after encoding and pre-processes before decoding.
+--
+-- Combining multiple 'RawPayloadProcessor's will apply them in the order that they are added.
+-- For example, if you want to compress and then encrypt, you would add the compression processor
+-- first, then the encryption processor.
+data RawPayloadProcessor = RawPayloadProcessor
+  { rawPayloadProcessorEncode :: RawPayload -> IO RawPayload
+  , rawPayloadProcessorDecode :: RawPayload -> IO (Either String RawPayload)
+  }
+-- TODO, need to make sure to unit test this before using it. The ordering guarantees have me confused.
+-- instance Semigroup RawPayloadProcessor where
+--   RawPayloadProcessor e1 d1 <> RawPayloadProcessor e2 d2 = RawPayloadProcessor
+--     { rawPayloadProcessorEncode = 
+--     , rawPayloadProcessorDecode = 
+--     }
+-- instance Monoid RawPayloadProcessor where
+--   mempty = RawPayloadProcessor pure (pure . Right)
+
+mkPayloadProcessor :: Codec fmt RawPayload => fmt -> RawPayloadProcessor
+mkPayloadProcessor fmt = RawPayloadProcessor
+  { rawPayloadProcessorEncode = encode fmt
+  , rawPayloadProcessorDecode = decode fmt
+  }
+
+addPayloadProcessor :: Codec fmt RawPayload => fmt -> RawPayloadProcessor -> RawPayloadProcessor
+addPayloadProcessor fmt RawPayloadProcessor{..} = RawPayloadProcessor
+  { rawPayloadProcessorEncode = \p -> do
+      p' <- rawPayloadProcessorEncode p
+      encode fmt p'
+  , rawPayloadProcessorDecode = \p -> do
+      p' <- decode fmt p
+      case p' of
+        Left err -> pure $ Left err
+        Right ok -> rawPayloadProcessorDecode ok
+  }
+
+
+-- | A codec that uses the base codec for actually encoding and decoding, but
+-- supports additional pre- and post-processing. This is useful for adding
+-- compression, encryption, or other transformations to an existing codec.
+data Around base = Around
+  { around :: RawPayloadProcessor
+  , baseCodec :: base
+  }
+
+
+instance (Typeable a, Codec base a) => Codec (Around base) a where
+  encoding (Around _ base) = encoding base
+  encode (Around p base) x = encode base x >>= rawPayloadProcessorEncode p
+  decode (Around p base) x = rawPayloadProcessorDecode p x >>= \case
+    Left err -> pure $ Left err
+    Right x -> decode base x
 
 type family ArgsOf f where
   ArgsOf (arg -> rest) = arg ': ArgsOf rest
