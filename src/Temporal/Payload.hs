@@ -20,12 +20,13 @@
 {-# LANGUAGE DefaultSignatures #-}
 module Temporal.Payload 
   ( RawPayload(..)
-  , encode
   , Codec(..)
   , JSON(..)
   , Null(..)
   , Binary(..)
   , Protobuf(..)
+  , Zlib(..)
+  , zlib
   , applyPayloads
   , ApplyPayloads
   , GatherArgs(..)
@@ -40,10 +41,12 @@ module Temporal.Payload
   , convertFromProtoPayload
   ) where
 
+import Codec.Compression.Zlib.Internal hiding (Format(..))
 import Data.Aeson hiding (encode, decode)
 import qualified Data.Aeson as Aeson
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as C
+import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BL
 import Data.Text.Encoding (encodeUtf8)
 import Control.Exception (SomeException)
@@ -80,36 +83,31 @@ as we go. If there are not enough or too many params, we fail.
 class Codec fmt a where
   -- | Similar to a content-type header, this is a string that identifies the format of the payload.
   -- it will be set on the 'encoding' metadata field of the payload.
-  encodingType :: fmt -> Proxy a -> ByteString
+  encoding :: fmt -> a -> ByteString
   messageType :: fmt -> a -> ByteString
   default messageType :: (Typeable a) => fmt -> a -> ByteString
   messageType _ _ = C.pack $ show $ typeRep (Proxy @a)
-  encodePayload :: fmt -> a -> IO ByteString
-  encodeExtraMetadata :: fmt -> a -> Map Text ByteString
-  encodeExtraMetadata = mempty
+  encode :: fmt -> a -> IO RawPayload
   decode :: fmt -> RawPayload -> IO (Either String a)
 
-encode :: forall fmt a. Codec fmt a => fmt -> a -> IO RawPayload
-encode fmt x = RawPayload <$> encodePayload fmt x <*> pure
-  (Map.fromList 
-    [ ("encoding", (encodingType fmt (Proxy @a)))
-    , ("messageType", messageType fmt x)
-    ]
-  <> encodeExtraMetadata fmt x)
+insertStandardMetadata :: Codec fmt a => fmt -> a -> RawPayload -> RawPayload
+insertStandardMetadata fmt x (RawPayload d m) = RawPayload d $ m <> Map.fromList
+  [ ("encoding", encoding fmt x)
+  , ("messageType", messageType fmt x)
+  ]
 
 data JSON = JSON
 
 instance (Typeable a, Aeson.ToJSON a, Aeson.FromJSON a) => Codec JSON a where
-  encodingType _ _ = "json/plain"
-  encodePayload _ x = pure . BL.toStrict $ Aeson.encode x
+  encoding _ _ = "json/plain"
+  encode c x = pure $ insertStandardMetadata c x $ RawPayload (BL.toStrict $ Aeson.encode x) mempty
   decode _ = pure . Aeson.eitherDecodeStrict' . inputPayloadData
-
 
 data Null = Null
 
 instance Codec Null () where
-  encodingType _ _ = "binary/null"
-  encodePayload _ _ = mempty
+  encoding _ _ = "binary/null"
+  encode c x = pure $ insertStandardMetadata c x $ RawPayload mempty mempty
   decode _ _ = pure $ Right ()
 
 -- | Direct binary serialization.
@@ -129,8 +127,8 @@ instance Codec Null () where
 data Binary = Binary
 
 instance Codec Binary ByteString where
-  encodingType _ _ = "binary/plain"
-  encodePayload _ x = pure x
+  encoding _ _ = "binary/plain"
+  encode c x = pure $ insertStandardMetadata c x $ RawPayload x mempty
   decode _ = pure . Right . inputPayloadData
 
 
@@ -138,9 +136,42 @@ data Protobuf = Protobuf
 
 instance (Message a) => Codec Protobuf a where
   messageType _ x = encodeUtf8 $ messageName $ pure x
-  encodingType _ _ = "binary/protobuf"
-  encodePayload _ = pure . encodeMessage
+  encoding _ _ = "binary/protobuf"
+  encode c x = pure $ insertStandardMetadata c x $ RawPayload (encodeMessage x) mempty
   decode _ = pure . decodeMessage . inputPayloadData
+
+data Zlib = Zlib
+  { -- | Skip compression when the size of the response body is
+    -- below this amount of bytes (default: 860.)
+    --
+    -- /Setting this option to less than 150 will actually increase/
+    -- /the size of outgoing data if its original size is less than 150 bytes/.
+    minimumEncodingSize :: Int
+  , compressParams :: CompressParams
+  , decompressParams :: DecompressParams
+  }
+
+zlib :: Zlib
+zlib = Zlib 860 defaultCompressParams defaultDecompressParams
+
+instance Codec Zlib RawPayload where
+  encoding _ _ = "binary/zlib"
+  -- TODO, if we keep the original compression size, we can allocate the right size buffer for the decompressed data.
+  encode Zlib{..} p = if BS.length msg >= minimumEncodingSize && BS.length compressed < BS.length msg
+    then pure $ RawPayload compressed (Map.singleton "encoding" "binary/zlib")
+    else pure p
+    where
+      msg = encodeMessage $ convertToProtoPayload p
+      compressed = BL.toStrict $ compress zlibFormat compressParams $ BL.fromStrict p.inputPayloadData
+  decode Zlib{..} p = case p.inputPayloadMetadata Map.!? "encoding" of
+  -- TODO, use `decompressIO` instead of `decompress`  so we can return the error in the Left case.
+    Just "binary/zlib" -> pure $ 
+      fmap convertFromProtoPayload $ 
+      decodeMessage $ 
+      BS.toStrict $ 
+      decompress zlibFormat decompressParams $ 
+      BL.fromStrict p.inputPayloadData
+    _ -> pure $ Right p
 
 type family ArgsOf f where
   ArgsOf (arg -> rest) = arg ': ArgsOf rest

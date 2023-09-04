@@ -18,6 +18,9 @@ import Data.Proxy
 import Temporal.Exception
 import Temporal.Payload
 
+encryptionInterceptor :: Interceptors
+encryptionInterceptor = fowefowe
+
 data Key c where
   Key :: (BlockCipher c) => ScrubbedBytes -> Key c
 
