@@ -279,7 +279,6 @@ impl WorkerRef {
     let worker = self.worker.as_ref().unwrap().clone();
     let completion = WorkflowActivationCompletion::decode(proto);
       self.runtime.future_result_into_hs(hs, async move {
-        println!("completing workflow activation");
         let completion = completion
               .map_err(|err| CWorkerError::c_repr_of(WorkerError {
                 code: WorkerErrorCode::InvalidProto,
@@ -295,7 +294,6 @@ impl WorkerRef {
                   message: format!("{}", err)
                 }).unwrap()
               })?;
-          println!("completed workflow activation");
           Ok(CUnit{})
       })
   }
