@@ -39,7 +39,7 @@ import Temporal.Coroutine
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
 import Temporal.Payload
-import Temporal.Workflow.Unsafe (runWorkflow, finishWorkflow, addCommand)
+import Temporal.Workflow.Unsafe (runWorkflow, finishWorkflow, addCommand, injectWorkflowSignal)
 import Temporal.Worker.Types
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as Failure
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
@@ -321,6 +321,7 @@ applyQueryWorkflow :: HasCallStack => QueryWorkflow -> InstanceM ()
 applyQueryWorkflow queryWorkflow = do
   inst <- ask
   handles <- readIORef inst.workflowQueryHandlers
+  $logDebug $ Text.pack ("Applying query: " <> show (queryWorkflow ^. Activation.queryType))
   let handlerOrDefault = 
         HashMap.lookup (Just (queryWorkflow ^. Activation.queryType)) handles <|>
         HashMap.lookup Nothing handles
@@ -401,13 +402,18 @@ applyJobs jobs fAwait = UnliftIO.try $ do
   let activations = activationResults ++ map (\var -> ActivationResult (Ok ()) var) (HashMap.elems seqMaps.conditionsAwaitingSignal)
   pure $
     (\(Await wf) -> 
-      -- If we don't have any activations, then no useful state could have changed.
+      -- If we don't have any activations or signals, then no useful state could have changed.
       -- This happens when we receive non-resolving jobs like queries. If we reactivate
       -- the workflow, it will just block again, which we don't want, because it confuses
       -- the SDK core's state machine.
+
       case activations of
-        [] -> suspend (Await wf)
-        nonEmptyActivations -> wf activations
+        [] -> case signalWorkflows of
+          [] -> suspend (Await wf)
+          sigs -> lift (mapM_ injectWorkflowSignal sigs) *> wf []
+        nonEmptyActivations -> case signalWorkflows of
+          [] -> wf activations
+          sigs -> lift (mapM_ injectWorkflowSignal sigs) *> wf activations
         {- TODO: we need to run the signal workflows without messing up ContinuationEnv: runWorkflow signalWorkflows -}
     ) <$> fAwait
 
@@ -416,7 +422,7 @@ applyJobs jobs fAwait = UnliftIO.try $ do
     jobGroups = V.foldr 
       (\job tup@(!patchNotifications, !signalWorkflows, !queryWorkflows, !resolutions, !otherJobs) -> case job ^. Activation.maybe'variant of
         Just (WorkflowActivationJob'NotifyHasPatch n) -> (applyNotifyHasPatch n *> patchNotifications, signalWorkflows, queryWorkflows, resolutions, otherJobs)
-        Just (WorkflowActivationJob'SignalWorkflow sig) -> (patchNotifications, applySignalWorkflow sig *> signalWorkflows, queryWorkflows, resolutions, otherJobs)
+        Just (WorkflowActivationJob'SignalWorkflow sig) -> (patchNotifications, applySignalWorkflow sig : signalWorkflows, queryWorkflows, resolutions, otherJobs)
         Just (WorkflowActivationJob'QueryWorkflow q) -> (patchNotifications, signalWorkflows, applyQueryWorkflow q *> queryWorkflows, resolutions, otherJobs)
         -- We collect these in bulk and resolve them in one go by pushing them into the completed queue. This reactivates the suspended workflow
         -- and it tries to execute further.
@@ -434,7 +440,7 @@ applyJobs jobs fAwait = UnliftIO.try $ do
         Just (WorkflowActivationJob'RemoveFromCache _removeFromCache) -> tup
         Nothing -> E.throw $ RuntimeError "Uncrecognized workflow activation job variant"
       )
-      (pure (), pure (), pure (), [], pure ())
+      (pure (), [], pure (), [], pure ())
       jobs
 
 applyResolutions :: [PendingJob] -> InstanceM [ActivationResult]

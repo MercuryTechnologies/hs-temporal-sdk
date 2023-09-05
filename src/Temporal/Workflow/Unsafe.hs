@@ -137,16 +137,17 @@ runWorkflow wf = provideCallStack $ do
                 if ref == unsafeCoerce resultRef
                         -- comparing IORefs of different types is safe, it's
                         -- pointer-equality on the MutVar#.
-                  then pure ()
-                    -- TODO- Haxl had the following comment here:
+                  then 
                     -- We have a result, but don't discard unfinished
-                    -- computations in the run queue. See
-                    -- Note [runHaxl and unfinished requests].
+                    -- computations in the run queue.
+                    --
+                    -- In our case, unfinished computations can represent signals.
+                    -- 
                     -- Nothing can depend on the final IVar, so workflowActions must
                     -- be empty.
-                    -- case rq of
-                    --   JobNil -> return ()
-                    --   _ -> modifyIORef' runQueueRef (appendJobList rq)
+                    case rq of
+                      JobNil -> return ()
+                      _ -> modifyIORef' env.runQueueRef (appendJobList rq)
                   else reschedule env $ appendJobList workflowActions rq
       r <- lift $ UnliftIO.try $  do
         let (Workflow run) = wf'
@@ -263,3 +264,12 @@ addCommand command = do
   inst <- ask
   atomically $ do
     modifyTVar' inst.workflowCommands $ \cmds -> push command cmds
+
+-- experimental. should help ensure that signals blocking and resuming interop
+-- properly with the main workflow execution.
+injectWorkflowSignal :: Workflow () -> InstanceM ()
+injectWorkflowSignal signal = do
+  result <- newIVar
+  inst <- ask
+  let env@(ContinuationEnv jobList) = inst.workflowInstanceContinuationEnv
+  modifyIORef' jobList $ \j -> JobCons env signal result j
