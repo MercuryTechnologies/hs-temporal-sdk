@@ -71,7 +71,9 @@ execute worker = runWorkerM worker $ do
           go
         (Right activation) -> do
           $(logDebug) $ Text.pack ("Got activation " <> show activation) 
-          handleActivation activation
+          -- We want to handle activations as fast as possible, so we don't want to block
+          -- on dispatching jobs.
+          async $ handleActivation activation
           go
       
 

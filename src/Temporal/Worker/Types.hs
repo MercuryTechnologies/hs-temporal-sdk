@@ -730,7 +730,7 @@ flushCommands = do
     writeTVar inst.workflowCommands $ Reversed []
     pure currentCmds
   let completionSuccessful :: Core.Success
-      completionSuccessful = defMessage & Completion.commands .~ finalizeCommandsForCompletion cmds
+      completionSuccessful = defMessage & Completion.commands .~ fromReversed cmds
       completionMessage :: Core.WorkflowActivationCompletion
       completionMessage = defMessage
         & Completion.runId .~ rawRunId info.runId

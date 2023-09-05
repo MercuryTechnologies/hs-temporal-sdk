@@ -137,16 +137,11 @@ module Temporal.Workflow
   , RequireCallStack
   ) where
 import Control.Concurrent (forkIO)
-import Control.Applicative
 import Control.Monad
 import Control.Monad.State
 import Control.Monad.Logger
 import Control.Monad.Reader
-import Control.Monad.IO.Class
-import qualified Data.Aeson
-import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Short as SBS
-import Data.Functor.Compose
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import qualified Data.HashMap.Strict as HashMap
@@ -155,23 +150,18 @@ import Data.ProtoLens
 import Data.Proxy
 import qualified Data.Set as Set
 import Data.Text (Text)
-import Data.Type.Equality
 import qualified Data.Text as Text
 import Data.Time.Clock (UTCTime)
 import Data.Time.Clock.System (SystemTime(..), systemToUTCTime)
 import Data.Kind
 import Data.UUID (UUID)
 import Data.UUID.Types.Internal ( buildFromBytes )
-import Data.Word (Word32)
 import Data.Vector (Vector)
-import GHC.Stack
-import GHC.TypeLits
 import Lens.Family2
 import Proto.Temporal.Api.Common.V1.Message (Payload)
 import RequireCallStack
 import System.Random.Stateful
 import Temporal.Common
-import Temporal.Coroutine
 import Temporal.Exception
 import Temporal.Payload
 import Temporal.SearchAttributes
@@ -180,10 +170,7 @@ import Temporal.Workflow.Unsafe
 import Temporal.WorkflowInstance
 import Temporal.Workflow.WorkflowInstance
 import Temporal.Workflow.WorkflowDefinition
-import qualified Temporal.Core.Client as Core
-import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Message
 import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as Common
-import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation as Activation
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands as Command
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
@@ -194,7 +181,6 @@ import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow_Fields as C
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import UnliftIO
 import Temporal.Duration (Duration, durationToProto)
-import Temporal.Exception (WorkflowCancelRequested(WorkflowCancelRequested))
 
 -- | An async action handle that can be awaited or cancelled.
 data Task a = Task 
@@ -302,7 +288,7 @@ startActivityFromPayloads
   -> StartActivityOptions 
   -> [IO RawPayload] 
   -> Workflow (Task result)
-startActivityFromPayloads k@(KnownActivity codec mTaskQueue name) opts typedPayloads = ilift $ do
+startActivityFromPayloads (KnownActivity codec mTaskQueue name) opts typedPayloads = ilift $ do
   updateCallStack
   inst <- ask
   ps <- traverse (fmap convertToProtoPayload . liftIO) typedPayloads
@@ -1040,56 +1026,19 @@ setSignalHandler (SignalRef n codec) f = ilift $ do
   inst <- ask
   withRunInIO $ \runInIO -> do
     liftIO $ modifyIORef' inst.workflowSignalHandlers $ \handlers -> 
-      HashMap.insert (Just n) (runInIO . handle) handlers
+      HashMap.insert (Just n) handle handlers
   where
-    handle :: Vector RawPayload -> InstanceM ()
-    handle = \vec -> do
-      eWorkflow <- liftIO $ applyPayloads 
-            codec
-            (Proxy @(ArgsOf f))
-            (Proxy @(Workflow ()))
-            f
-            vec
-      inst <- ask
-      cmd <- case eWorkflow of
-        Left err -> do
-          let completeMessage = defMessage & Command.failWorkflowExecution .~ 
-                ( defMessage 
-                  & Command.failure .~ 
-                    ( defMessage
-                      & F.message .~ Text.pack err
-                      & F.stackTrace .~ ""
-                      -- & F.encodedAttributes .~ convertToProtoPayload eAttrs
-                    )
-                )
-          pure $ Just completeMessage
-        Right w -> do
-          resultVal <- UnliftIO.try $ resume $ runWorkflow w
-          case resultVal of
-            Right evalState -> case evalState of
-              Left (Await suspended) -> do
-                modifyIORef' inst.currentWorkflowState $ \currentStatus -> case currentStatus of
-                  ExecutionNotStarted -> ExecutionNotStarted -- shouldn't be possible, probably
-                  -- TODO, whether we should pass resolutions to suspended' is unclear
-                  SuspendedExecution (Await suspended') -> SuspendedExecution (Await $ \resolutions -> suspended resolutions *> suspended' [])
-                  CompletedExecution -> CompletedExecution
-                pure Nothing
-              Right () -> pure Nothing
-            -- If a user-facing exception wasn't handled within the workflow, then that
-            -- means the workflow failed.
-            Left e -> do
-              -- eAttrs <- liftIO $ encodeException inst.workflowCodec (e :: SomeException)
-              let completeMessage = defMessage & Command.failWorkflowExecution .~ 
-                    ( defMessage 
-                      & Command.failure .~ 
-                        ( defMessage
-                          & F.message .~ Text.pack (show (e :: SomeException))
-                          & F.stackTrace .~ ""
-                          -- & F.encodedAttributes .~ convertToProtoPayload eAttrs
-                        )
-                    )
-              pure $ Just completeMessage
-      forM_ cmd (addCommand inst)
+    handle :: Vector RawPayload -> Workflow ()
+    handle = \vec ->  do
+      eWorkflow <- Workflow $ \env -> liftIO $ fmap Done $ applyPayloads 
+        codec
+        (Proxy @(ArgsOf f))
+        (Proxy @(Workflow ()))
+        f
+        vec
+      case eWorkflow of
+        Left err -> throw $ ValueError err 
+        Right w -> w
 
 -- | Current time from the workflow perspective.
 --
@@ -1308,7 +1257,7 @@ biselectOpt
   -> Workflow l
   -> Workflow r
   -> Workflow t
-biselectOpt discrimA discrimB left right wfA wfB =
+biselectOpt discrimA discrimB left right wfL wfR =
   let go (Workflow wfA) (Workflow wfB) = Workflow $ \env -> do
         ra <- wfA env
         case ra of
@@ -1356,7 +1305,7 @@ biselectOpt discrimA discrimB left right wfA wfB =
         case discrimA ea of
           Left a -> return (left a)
           Right b -> return (right (b, c))
-  in go wfA wfB
+  in go wfL wfR
 
 -- | This function takes two Workflow computations as input, and returns the
 -- output of whichever computation finished first.
