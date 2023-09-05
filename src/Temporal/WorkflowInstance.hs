@@ -119,9 +119,9 @@ create workflowCompleteActivation workflowDeadlockTimeout interceptors info work
     res <- runWorkflowToCompletion wf
     case res of
       WorkflowExitSuccess result -> finishWorkflow result
-      WorkflowExitContinuedAsNew cmd -> addCommand inst cmd
-      WorkflowExitCancelled cmd -> addCommand inst cmd
-      WorkflowExitFailed _ cmd -> addCommand inst cmd
+      WorkflowExitContinuedAsNew cmd -> addCommand cmd
+      WorkflowExitCancelled cmd -> addCommand cmd
+      WorkflowExitFailed _ cmd -> addCommand cmd
     flushCommands
     handleQueriesAfterCompletion
   writeIORef executionThread workerThread
@@ -180,7 +180,7 @@ handleQueriesAfterCompletion = forever $ do
 --
 -- It allows the Temporal UI to query the current call stack to see what is currently happening
 -- in the workflow.
-addStackTraceHandler :: MonadUnliftIO m => WorkflowInstance -> m ()
+addStackTraceHandler :: WorkflowInstance -> IO ()
 addStackTraceHandler inst = do
   let specialHandler = \qId _ -> do
         cs <- readIORef inst.workflowCallStack
@@ -194,7 +194,7 @@ addStackTraceHandler inst = do
                       & Command.response .~ convertToProtoPayload callStackPayload
                     )
                 )
-        addCommand inst cmd
+        runInstanceM inst $ addCommand cmd
   modifyIORef' inst.workflowQueryHandlers (HashMap.insert (Just "__stack_trace") specialHandler)
 
 -- This should never raise an exception, but instead catch all exceptions
@@ -337,7 +337,7 @@ applyQueryWorkflow queryWorkflow = do
                   & F.stackTrace .~ (Text.pack $ prettyCallStack callStack)
                 )
             )
-      addCommand inst cmd
+      addCommand cmd
     Just h -> liftIO $ h 
       (QueryId $ queryWorkflow ^. Activation.queryId)
       (fmap convertFromProtoPayload (queryWorkflow ^. Command.vec'arguments))

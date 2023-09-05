@@ -319,7 +319,7 @@ startActivityFromPayloads (KnownActivity codec mTaskQueue name) opts typedPayloa
         & Command.doNotEagerlyExecute .~ opts.disableEagerExecution
 
   let cmd = defMessage & Command.scheduleActivity .~ scheduleActivity
-  addCommand inst cmd
+  addCommand cmd
   pure $ Task 
     { waitAction = do
       res <- getIVar resultSlot
@@ -340,7 +340,7 @@ startActivityFromPayloads (KnownActivity codec mTaskQueue name) opts typedPayloa
               ( defMessage
                 & Command.seq .~ actSeq
               )
-      ilift $ addCommand inst cancelCmd
+      ilift $ addCommand cancelCmd
     }
 
 startActivity 
@@ -444,7 +444,6 @@ instance Cancel (ExternalWorkflowHandle a) where
     atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
       seqMaps { externalSignals = HashMap.insert s res (externalSignals seqMaps) }
     addCommand 
-      inst 
       (defMessage 
         & Command.requestCancelExternalWorkflowExecution .~ 
           ( defMessage 
@@ -517,7 +516,7 @@ signalWorkflow _ f (SignalDefinition (SignalRef signalName signalCodec) signalAp
               -- & Command.headers .~ _
               )
             )
-    addCommand inst cmd
+    addCommand cmd
     atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
       seqMaps { externalSignals = HashMap.insert s resVar seqMaps.externalSignals }
     pure $ Task 
@@ -532,7 +531,7 @@ signalWorkflow _ f (SignalDefinition (SignalRef signalName signalCodec) signalAp
                   ( defMessage 
                     & Command.seq .~ rawSequence s
                   )
-          ilift $ addCommand inst cancelCmd
+          ilift $ addCommand cancelCmd
       }
 
 gatherSignalChildWorkflowArgs 
@@ -597,7 +596,7 @@ startChildWorkflowFromPayloads k@(KnownWorkflow codec mNamespace mTaskQueue _) o
         seqMaps { childWorkflows = HashMap.insert s (SomeChildWorkflowHandle wfHandle) seqMaps.childWorkflows }
 
       $(logDebug) "Add command: startChildWorkflowExecution"
-      addCommand inst cmd
+      addCommand cmd
       pure wfHandle
 
 -- $childWorkflow
@@ -658,11 +657,10 @@ executeChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId =
 cancelChildWorkflowExecution :: RequireCallStack => ChildWorkflowHandle result -> Workflow ()
 cancelChildWorkflowExecution wfHandle@(ChildWorkflowHandle{childWorkflowSequence}) = ilift $ do
   updateCallStack
-  inst <- ask
   -- I don't see a way to block on this? I guess Temporal wants us to rely on the orchestrator
   -- managing the cancellation. Compare with ResolveRequestCancelExternalWorkflow. I think
   -- external workflows need a resolution step because they may not even exist.
-  addCommand inst $ defMessage 
+  addCommand $ defMessage 
     & Command.cancelChildWorkflowExecution .~ 
       ( defMessage 
         & Command.childWorkflowSeq .~ rawSequence childWorkflowSequence
@@ -745,7 +743,7 @@ startLocalActivity (KnownActivity codec _ n) opts = gatherActivityArgs  @args @r
               & Command.maybe'localRetryThreshold .~ (durationToProto <$> opts.localRetryThreshold)
               & Command.cancellationType .~ activityCancellationTypeToProto opts.cancellationType
             )
-    addCommand inst cmd
+    addCommand cmd
     pure $ Task 
       { waitAction = do
         res <- getIVar resultSlot
@@ -766,7 +764,7 @@ startLocalActivity (KnownActivity codec _ n) opts = gatherActivityArgs  @args @r
                 ( defMessage
                   & Command.seq .~ actSeq
                 )
-        ilift $ addCommand inst cancelCmd
+        ilift $ addCommand cancelCmd
       }
 
 -- $metadata
@@ -801,13 +799,13 @@ lookupMemoValue k = do
 upsertSearchAttributes :: RequireCallStack => Map Text SearchAttributeType -> Workflow ()
 upsertSearchAttributes values = ilift $ do
   updateCallStack
-  inst <- ask
   attrs <- liftIO $ traverse (fmap convertToProtoPayload . encode JSON) values
   let cmd = defMessage & Command.upsertWorkflowSearchAttributes .~ 
         ( defMessage
           & Command.searchAttributes .~ attrs
         )
-  addCommand inst cmd
+  addCommand cmd
+  inst <- ask
   modifyIORef' inst.workflowInstanceInfo $ \(info :: Info) ->
     (info { searchAttributes = info.searchAttributes <> values } :: Info)
   where
@@ -847,7 +845,7 @@ applyPatch pid deprecated = ilift $ do
       let usePatch = not isReplaying || Set.member pid notifiedPatches
       writeIORef inst.workflowMemoizedPatches $ HashMap.insert pid usePatch memoized
       when usePatch $ do
-        liftIO $ addCommand inst $ defMessage & 
+        addCommand $ defMessage & 
           Command.setPatchMarker .~ (defMessage & Command.patchId .~ rawPatchId pid & Command.deprecated .~ deprecated)
       pure usePatch
 
@@ -1009,7 +1007,7 @@ setQueryHandler (QueryDefinition n codec) f = ilift $ do
                     & Command.queryId .~ qId
                     & commandResult
                   )
-          addCommand inst cmd
+          addCommand cmd
           
 type ValidSignalHandler f = 
   ( ResultOf Workflow f ~ ()
@@ -1078,7 +1076,7 @@ createTimer ts = ilift $ do
   res <- newIVar
   atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
     seqMaps { timers = HashMap.insert s res seqMaps.timers }
-  addCommand inst cmd
+  addCommand cmd
   pure $ Timer { timerSequence = s, timerHandle = res }
 
 sleep :: RequireCallStack => Duration -> Workflow ()
@@ -1101,7 +1099,7 @@ instance Cancel Timer where
           ( defMessage 
             & Command.seq .~ rawSequence (timerSequence t)
           )
-    addCommand inst cmd
+    addCommand cmd
     $(logDebug) "about to putIVar: cancelTimer"
     liftIO $ putIVar 
       t.timerHandle 

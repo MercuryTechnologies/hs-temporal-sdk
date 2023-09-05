@@ -251,15 +251,15 @@ finishWorkflow result = do
   $logDebug =<< withRunId "Finishing workflow"
   let completeMessage = defMessage & 
         Command.completeWorkflowExecution .~ (defMessage & Command.result .~ convertToProtoPayload result)
-  inst <- ask
-  addCommand inst completeMessage
+  addCommand completeMessage
 
 rethrowAsyncExceptions :: MonadIO m => SomeException -> m ()
 rethrowAsyncExceptions e
   | Just SomeAsyncException{} <- fromException e = UnliftIO.throwIO e
   | otherwise = return ()
 
-addCommand :: (MonadIO m) => WorkflowInstance -> WorkflowCommand -> m ()
-addCommand inst command = do
+addCommand :: WorkflowCommand -> InstanceM ()
+addCommand command = do
+  inst <- ask
   atomically $ do
     modifyTVar' inst.workflowCommands $ \cmds -> push command cmds
