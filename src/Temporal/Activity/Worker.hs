@@ -6,27 +6,15 @@ module Temporal.Activity.Worker where
 import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.Reader
-import Data.ByteString (ByteString)
-import Data.Hashable
-import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
-import Data.Map.Strict (Map)
 import Data.ProtoLens
-import Data.Text (Text)
 import qualified Data.Text as T
-import Data.Time.Clock
-import Data.Vector (Vector)
-import Data.Word
 import Lens.Family2
 import qualified Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask as AT
 import qualified Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields as AT
-import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult as AR
 import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields as AR
-import qualified Proto.Temporal.Sdk.Core.CoreInterface as C
 import qualified Proto.Temporal.Sdk.Core.CoreInterface_Fields as C
-import qualified Proto.Temporal.Api.Common.V1.Message as P
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as P
-import qualified Proto.Temporal.Api.Failure.V1.Message as F
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import Temporal.Activity.Definition
 import Temporal.Common
@@ -34,7 +22,6 @@ import qualified Temporal.Core.Client as Core
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
 import Temporal.Payload
-import Temporal.Internal.JobPool
 import Temporal.Worker.Types
 import UnliftIO
 import Temporal.Duration (durationFromProto)
@@ -108,8 +95,8 @@ applyActivityTaskStart tt msg = mask_ $ do
           case HashMap.lookup info.activityType w.workerConfig.actDefs of
             Nothing -> throwIO $ RuntimeError ("Activity type not found: " <> T.unpack (info.activityType))
             Just ActivityDefinition{..} -> case activityRun of
-              ValidActivityFunction c f ap -> do
-                res <- liftIO $ ap f (fmap convertFromProtoPayload (msg ^. AT.vec'input))
+              ValidActivityFunction c f applyArgs -> do
+                res <- liftIO $ applyArgs f (fmap convertFromProtoPayload (msg ^. AT.vec'input))
                 case res of
                   Left err -> throwIO $ ValueError err
                   Right ok -> pure (ok >>= liftIO . Temporal.Payload.encode c)
@@ -187,8 +174,8 @@ applyActivityTaskStart tt msg = mask_ $ do
               liftIO $ Core.completeActivityTask w.workerCore completionMsg
             $logDebug ("Activity completion result: " <> T.pack (show completionResult))
             atomically $ do
-              running <- readTVar w.workerActivityState.runningActivities
-              writeTVar w.workerActivityState.runningActivities $ HashMap.delete tt running
+              running' <- readTVar w.workerActivityState.runningActivities
+              writeTVar w.workerActivityState.runningActivities $ HashMap.delete tt running'
             case completionResult of
               Left err -> throwIO err
               Right _ -> pure ()
@@ -204,7 +191,7 @@ applyActivityTaskStart tt msg = mask_ $ do
       link a
 
 applyActivityTaskCancel :: TaskToken -> AT.Cancel -> WorkerM actEnv ()
-applyActivityTaskCancel tt msg = do
+applyActivityTaskCancel tt _msg = do
   w <- ask
   $logDebug $ "Cancelling activity: " <> T.pack (show tt)
   running <- readTVarIO w.workerActivityState.runningActivities

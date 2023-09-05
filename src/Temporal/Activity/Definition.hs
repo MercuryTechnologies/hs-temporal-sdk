@@ -5,8 +5,6 @@ import Control.Monad
 import Control.Monad.Error.Class
 import Control.Monad.Fix
 import Control.Monad.Reader
-import Data.ByteString (ByteString)
-import Data.Hashable (Hashable(..))
 import Data.Map.Strict (Map)
 import Data.Text (Text)
 import Data.Vector (Vector)

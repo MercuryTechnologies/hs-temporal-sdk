@@ -4,53 +4,10 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeFamilies #-}
 module Temporal.Workflow.WorkflowInstance where
-import Control.Applicative (liftA2)
-import Control.Concurrent.Async (Async)
-import Control.Monad
-import Control.Monad.Logger
-import Control.Monad.Reader
-import Control.Monad.State.Class
-import Data.Hashable (Hashable)
-import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
-import Data.Int
-import Data.IORef (IORef)
-import Data.ProtoLens
-import Data.Set (Set)
-import Data.Text (Text)
-import Data.Vector (Vector)
-import Data.Word
-import Lens.Family2
-import Temporal.Common
-import Temporal.Exception
-import Temporal.Payload
 import Temporal.Worker.Types
-import qualified Proto.Temporal.Api.Common.V1.Message as Message
-import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Message
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow as ChildWorkflow
-import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands
-  ( WorkflowCommand
-  , WorkflowCommand'Variant(..)
-  , CompleteWorkflowExecution
-  )
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands as Command
-import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
-  ( WorkflowActivation
-  , FireTimer
-  , UpdateRandomSeed
-  , QueryWorkflow
-  , CancelWorkflow
-  , StartWorkflow
-  , SignalWorkflow
-  , ResolveActivity
-  , NotifyHasPatch
-  , ResolveChildWorkflowExecutionStart
-  , ResolveChildWorkflowExecution
-  , ResolveSignalExternalWorkflow
-  , ResolveRequestCancelExternalWorkflow
-  , WorkflowActivationJob
-  , WorkflowActivationJob'Variant(..)
-  )
 import UnliftIO hiding (catch)
 
 

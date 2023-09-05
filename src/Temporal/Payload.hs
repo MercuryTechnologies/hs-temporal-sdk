@@ -35,9 +35,9 @@ module Temporal.Payload
   , ApplyPayloads
   , GatherArgs(..)
   , ArgsOf
-  , GatherArgsOf(..)
+  , GatherArgsOf
   , ResultOf
-  , EncodeResultOf(..)
+  , EncodeResultOf
   , FunctionSupportsCodec
   , FunctionSupportsCodec'
   , (:->:)
@@ -46,7 +46,6 @@ module Temporal.Payload
   ) where
 
 import Codec.Compression.Zlib.Internal hiding (Format(..))
-import Control.Monad
 import Data.Aeson hiding (encode, decode)
 import qualified Data.Aeson as Aeson
 import Data.ByteString (ByteString)
@@ -54,8 +53,6 @@ import qualified Data.ByteString.Char8 as C
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BL
 import Data.Text.Encoding (encodeUtf8)
-import Control.Exception (SomeException)
-import Data.Functor
 import Data.Kind
 import Data.ProtoLens (defMessage, Message(..))
 import Data.Proxy
@@ -229,7 +226,7 @@ instance (Typeable a, Codec base a) => Codec (Around base) a where
   encode (Around p base) x = encode base x >>= rawPayloadProcessorEncode p
   decode (Around p base) x = rawPayloadProcessorDecode p x >>= \case
     Left err -> pure $ Left err
-    Right x -> decode base x
+    Right x' -> decode base x'
 
 type family ArgsOf f where
   ArgsOf (arg -> rest) = arg ': ArgsOf rest
@@ -238,7 +235,7 @@ type family ArgsOf f where
 type family ResultOf (m :: Type -> Type) f where
   ResultOf m (arg -> rest) = ResultOf m rest
   ResultOf m (m result) = result
-  ResultOf m result = TypeError ('Text "This function must use the (" ':<>: 'ShowType m ':<>: 'Text ") monad." :$$: ('Text "Current type: " ':<>: 'ShowType result))
+  ResultOf m result = TypeError ('Text "This function must use the (" ':<>: 'ShowType m ':<>: 'Text ") monad." ':$$: ('Text "Current type: " ':<>: 'ShowType result))
 
 class (Codec codec (ResultOf m f), Typeable (ResultOf m f)) => EncodeResultOf codec (m :: Type -> Type) (f :: Type)
 instance (Codec codec (ResultOf m f), Typeable (ResultOf m f)) => EncodeResultOf codec (m :: Type -> Type) (f :: Type)

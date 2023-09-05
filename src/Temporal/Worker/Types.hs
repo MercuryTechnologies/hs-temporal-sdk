@@ -6,21 +6,15 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Temporal.Worker.Types where
 import Control.Applicative (liftA2, Alternative(..))
-import Control.Concurrent.Async (Async)
-import qualified Control.Concurrent.STM as STM
-import Control.Concurrent.STM.TMVar (TMVar)
-import Control.Exception (SomeException)
 import qualified Control.Monad.Catch as Catch
 import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.Reader
-import Control.Monad.State
 import Data.ProtoLens
-import Data.ByteString (ByteString)
 import Data.Hashable (Hashable(..))
-import Data.IORef (IORef)
 import Data.Proxy
 import Data.HashMap.Strict (HashMap)
 import Data.Kind
@@ -30,12 +24,11 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Vector (Vector)
 import Data.Word (Word32)
-import GHC.Stack (CallStack, HasCallStack, callStack, withFrozenCallStack, popCallStack)
-import Control.Concurrent.STM.TVar (TVar)
+import GHC.Stack (CallStack, callStack, popCallStack)
+import GHC.TypeLits
 import Lens.Family2
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
   ( ResolveActivity
-  , ResolveChildWorkflowExecutionStart
   , ResolveChildWorkflowExecution
   , ResolveSignalExternalWorkflow
   , ResolveRequestCancelExternalWorkflow
@@ -43,20 +36,17 @@ import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
 import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands
   ( WorkflowCommand
   , WorkflowCommand'Variant(..)
-  , CompleteWorkflowExecution
   )
-import Proto.Temporal.Api.Common.V1.Message (Payload, Memo, SearchAttributes)
+import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
+import Proto.Temporal.Api.Common.V1.Message (Memo)
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Message
-import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
-import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Completion
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
 import Temporal.Activity.Definition
 import Temporal.Common
 import Temporal.Coroutine
 import qualified Temporal.Core.Worker as Core
-import qualified Temporal.Core.Client as Core
 import Temporal.Exception
-import Temporal.Payload hiding (Payload)
+import Temporal.Payload
 import Temporal.Internal.JobPool (SomeAsync)
 import Temporal.SearchAttributes
 import System.Random 
@@ -74,11 +64,9 @@ import qualified Temporal.Core.Client as C
 import UnliftIO hiding (race)
 import RequireCallStack
 import Text.Printf
-import Temporal.Core.Worker (completeWorkflowActivation)
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Core
 import Data.Time.Clock.System (SystemTime)
 import Temporal.Duration (Duration)
-import Control.Category (Category)
 
 data WorkerConfig activityEnv = WorkerConfig
   { deadlockTimeout :: Maybe Int
@@ -239,7 +227,7 @@ data WorkflowInstance = WorkflowInstance
   , workflowIsReplaying :: {-# UNPACK #-} !(IORef Bool)
   , workflowCommands :: {-# UNPACK #-} !(TVar (Reversed WorkflowCommand))
   , workflowSequenceMaps :: {-# UNPACK #-} !(TVar (SequenceMaps))
-  , workflowSignalHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (Vector RawPayload -> IO ())))
+  , workflowSignalHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (Vector RawPayload -> Workflow ())))
   , workflowQueryHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (QueryId -> Vector RawPayload -> IO ())))
   , workflowCallStack :: {-# UNPACK #-} !(IORef CallStack)
   , workflowCompleteActivation :: !(Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
@@ -249,7 +237,6 @@ data WorkflowInstance = WorkflowInstance
   -- These are how the instance gets its work done
   , activationChannel :: Chan Core.WorkflowActivation
   , executionThread :: IORef (Async ())
-  , currentWorkflowState :: IORef ExecutionState
   , interceptors :: Interceptors
   }
 
@@ -620,7 +607,7 @@ instance Monad Workflow where
     e <- m env
     case e of
       Done a -> unWorkflow (k a) env
-      Throw e -> return (Throw e)
+      Throw e' -> return (Throw e')
       Blocked ivar cont -> trace_ ">>= Blocked" $
         return (Blocked ivar (cont :>>= k))
   -- A note on (>>):
@@ -634,7 +621,13 @@ instance Monad Workflow where
 -- try the second one.
 instance Alternative Workflow where
   empty = throw AlternativeInstanceFailure
-  (<|>) l r = l `Temporal.Worker.Types.catch` \(SomeWorkflowException e) -> r
+  (<|>) l r = l `Temporal.Worker.Types.catch` \(SomeWorkflowException _) -> r
+
+instance TypeError ('Text "A workflow definition cannot directly perform IO. Use executeActivity or executeLocalActivity instead.") => MonadIO Workflow where
+  liftIO = error "Unreachable"
+
+instance TypeError ('Text "A workflow definition cannot directly perform IO. Use executeActivity or executeLocalActivity instead.") => MonadUnliftIO Workflow where
+  withRunInIO _ = error "Unreachable"
 
 instance {-# OVERLAPPABLE #-} MonadLogger Workflow where
   monadLoggerLog loc src lvl msg = Workflow $ \_ -> do
@@ -651,8 +644,8 @@ getIVar i@(IVar {ivarRef = !ref}) = Workflow $ \env -> do
   e <- readIORef ref
   case e of
     IVarFull (Ok a) -> pure $ Done a
-    IVarFull (ThrowWorkflow e) -> liftIO $ raiseFromIVar env i e
-    IVarFull (ThrowInternal e) -> throwIO e
+    IVarFull (ThrowWorkflow e') -> liftIO $ raiseFromIVar env i e'
+    IVarFull (ThrowInternal e') -> throwIO e'
     IVarEmpty _ -> pure $ Blocked i (Return i)
 
 -- Just a specialised version of getIVar, for efficiency in <*>
@@ -661,8 +654,8 @@ getIVarApply i@IVar{ivarRef = !ref} a = Workflow $ \env -> do
   e <- readIORef ref
   case e of
     IVarFull (Ok f) -> return (Done (f a))
-    IVarFull (ThrowWorkflow e) -> liftIO $ raiseFromIVar env i e
-    IVarFull (ThrowInternal e) -> throwIO e
+    IVarFull (ThrowWorkflow e') -> liftIO $ raiseFromIVar env i e'
+    IVarFull (ThrowInternal e') -> throwIO e'
     IVarEmpty _ ->
       return (Blocked i (Cont (getIVarApply i a)))
 
@@ -683,8 +676,8 @@ tryReadIVar i@IVar{ivarRef = !ref} = Workflow $ \env -> do
   e <- readIORef ref
   case e of
     IVarFull (Ok a) -> pure $ Done (Just a)
-    IVarFull (ThrowWorkflow e) -> liftIO $ raiseFromIVar env i e
-    IVarFull (ThrowInternal e) -> throwIO e
+    IVarFull (ThrowWorkflow e') -> liftIO $ raiseFromIVar env i e'
+    IVarFull (ThrowInternal e') -> throwIO e'
     IVarEmpty _ -> pure $ Done Nothing
 
 raiseFromIVar :: Exception e => ContinuationEnv -> IVar a -> e -> IO (Result b)
@@ -692,7 +685,7 @@ raiseFromIVar env _ivar e = raiseImpl env (toException e)
 
 {-# INLINE raiseImpl #-}
 raiseImpl :: ContinuationEnv -> SomeException -> IO (Result b)
-raiseImpl ContinuationEnv{..} e = return $ Throw e
+raiseImpl _ e = return $ Throw e
   -- | testReportFlag ReportExceptionLabelStack $ report flags
   -- , Just (HaxlException Nothing h) <- fromException e = do
   --   let stk = NonEmpty.toList $ profLabelStack profCurrent
@@ -710,6 +703,24 @@ addJob env !wf !resultIVar IVar{ivarRef = !ref} =
 addJobPanic :: forall a . a
 addJobPanic = error "addJob: not empty"
 
+-- We need to remove any commands that are not query responses after a terminal response.
+-- (note: I don't know how that would happen, but it's in the Python SDK code?)
+finalizeCommandsForCompletion :: Reversed WorkflowCommand -> [WorkflowCommand]
+finalizeCommandsForCompletion (Reversed commands) = reverse $ go commands [] False
+  where
+    go :: [WorkflowCommand] -> [WorkflowCommand] -> Bool -> [WorkflowCommand]
+    go [] acc _seenTerminalCommand = acc
+    go (c:cs) acc True = go cs (c:acc) True
+    go (c:cs) acc False = case c ^. Command.maybe'variant of
+      -- TODO, don't have any useful information here
+      Nothing -> error "finalizeCommandsForCompletion: command has no variant"
+      Just variant -> case variant of
+        WorkflowCommand'CompleteWorkflowExecution _ -> go cs (c:acc) True
+        WorkflowCommand'ContinueAsNewWorkflowExecution _ -> go cs (c:acc) True
+        WorkflowCommand'FailWorkflowExecution _ -> go cs (c:acc) True
+        _ -> go cs acc False
+
+
 flushCommands :: InstanceM ()
 flushCommands = do
   inst <- ask
@@ -719,7 +730,7 @@ flushCommands = do
     writeTVar inst.workflowCommands $ Reversed []
     pure currentCmds
   let completionSuccessful :: Core.Success
-      completionSuccessful = defMessage & Completion.commands .~ fromReversed cmds
+      completionSuccessful = defMessage & Completion.commands .~ finalizeCommandsForCompletion cmds
       completionMessage :: Core.WorkflowActivationCompletion
       completionMessage = defMessage
         & Completion.runId .~ rawRunId info.runId

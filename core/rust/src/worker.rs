@@ -234,7 +234,6 @@ impl WorkerRef {
   fn poll_workflow_activation(&self, hs: HsCallback<CArray<u8>, CWorkerError>) -> () {
       let worker = self.worker.as_ref().unwrap().clone();
       self.runtime.future_result_into_hs(hs, async move {
-        println!("polling workflow activation");
         let bytes = match worker.poll_workflow_activation().await {
             Ok(act) => Ok(act.encode_to_vec()),
             Err(PollWfError::ShutDown) => Err(WorkerError {
@@ -246,7 +245,6 @@ impl WorkerRef {
               message: format!("{}", err),
             })
         };
-        println!("got workflow activation!");
         Ok(CArray::c_repr_of(bytes.map_err(|err| CWorkerError::c_repr_of(err).unwrap())?).unwrap())
       })
   }
@@ -288,7 +286,6 @@ impl WorkerRef {
               .complete_workflow_activation(completion)
               .await
               .map_err(|err| {
-                println!("[RUST] completion error: {}", err);
                 CWorkerError::c_repr_of(WorkerError {
                   code: WorkerErrorCode::CompletionFailure,
                   message: format!("{}", err)

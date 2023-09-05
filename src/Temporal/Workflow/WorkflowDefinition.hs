@@ -30,22 +30,12 @@ module Temporal.Workflow.WorkflowDefinition
   , WorkflowRef(..)
   ) where
 
-import Data.Aeson hiding (encode, decode)
-import qualified Data.Aeson as Aeson
-import Data.ByteString (ByteString)
-import qualified Data.ByteString.Lazy as BL
 import Data.Kind
 import Data.Text (Text)
-import qualified Data.Text as Text
-import Data.Typeable (Typeable)
-import Data.HashMap.Strict (HashMap)
-import qualified Data.HashMap.Strict as HashMap
 import Data.Typeable
 import Data.Vector (Vector)
-import GHC.TypeLits
 import Temporal.Common
 import Temporal.Payload
-import Temporal.Workflow.WorkflowInstance
 import Temporal.Worker.Types
 import RequireCallStack
 

@@ -105,15 +105,11 @@ module Temporal.Generic
   , CanUseAsDefs
   ) where
 
-import Control.Monad
 import Control.Monad.Reader
-import Control.Monad.IO.Class
 import Data.Functor.Const
-import Data.Functor.Compose
 import Data.Functor.Identity
 import Data.Kind
 import Data.Proxy
-import Data.Typeable
 import qualified Data.Text as Text
 import GHC.Generics
 import GHC.TypeLits
@@ -134,7 +130,6 @@ import Temporal.Worker.Types
 import Temporal.Workflow.WorkflowDefinition
 import Temporal.Activity
 import Temporal.Workflow (startActivity, defaultStartActivityOptions, TimeoutType (ScheduleToClose), wait, ActivityRef(..), WorkflowRef(..))
-import GHC.Base (Any)
 
 type family ApplyRef (args :: [Type]) (f :: Type) where
   ApplyRef args (Workflow result) = KnownWorkflow args result

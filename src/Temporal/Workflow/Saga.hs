@@ -18,11 +18,9 @@ import Control.Monad.Error.Class (MonadError)
 import Control.Monad.RWS (MonadReader)
 import Control.Monad.State
 import Control.Monad.Writer
-import Control.Monad.Fix
 import Data.Functor.Contravariant
 import Control.Applicative
 import Control.Monad.Cont
-import Data.Foldable (sequenceA_)
 import Control.Monad.Catch (MonadCatch)
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger (MonadLogger)
@@ -108,8 +106,8 @@ compensate compensationExceptionHandler = SagaT $ do
     res <- Catch.try $ action
     case res of
       Left (e :: Catch.SomeException) -> do
-        Catch.catchAll (compensationExceptionHandler e) $ \e -> do
-          $(logError) $ T.pack $ "Saga compensation error handler threw exception: " <> show e
+        Catch.catchAll (compensationExceptionHandler e) $ \e' -> do
+          $(logError) $ T.pack $ "Saga compensation error handler threw exception: " <> show e'
       Right () -> pure ()
 
 addCompensation :: Monad m => m () -> SagaT m ()

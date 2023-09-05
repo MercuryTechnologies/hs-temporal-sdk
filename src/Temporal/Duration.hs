@@ -15,7 +15,6 @@
 module Temporal.Duration where
 import Data.Fixed
 import Data.Time.Clock
-import Data.Time.Clock.System
 import Data.Data
 import Data.Word (Word64, Word32)
 import qualified Proto.Google.Protobuf.Duration as Duration
@@ -42,7 +41,7 @@ addDurations (Duration s1 ns1) (Duration s2 ns2) = Duration (s1 + s2 + s) ns
 diffTimeToDuration :: DiffTime -> Duration
 diffTimeToDuration t = Duration 
   { durationSeconds = fromIntegral ds
-  , durationNanoseconds = fromIntegral remainingNanosFromPicos
+  , durationNanoseconds = remainingNanosFromPicos
   }
   where
     totalPicos = max 0 (diffTimeToPicoseconds t)
@@ -58,7 +57,7 @@ diffTimeToDuration t = Duration
 nominalDiffTimeToDuration :: NominalDiffTime -> Duration
 nominalDiffTimeToDuration t = Duration 
   { durationSeconds = fromIntegral ds
-  , durationNanoseconds = fromIntegral remainingNanosFromPicos
+  , durationNanoseconds = remainingNanosFromPicos
   }
   where
     (MkFixed totalPicos) = max 0 $ nominalDiffTimeToSeconds t

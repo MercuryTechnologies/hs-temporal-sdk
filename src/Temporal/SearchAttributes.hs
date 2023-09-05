@@ -2,21 +2,16 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Temporal.SearchAttributes where
 
-import Control.Exception (throw)
 import qualified Data.Aeson as A
 import Data.Scientific (floatingOrInteger)
 import Data.Text (Text)
 import Data.Time.Clock (UTCTime)
-import Data.Int (Int64)
+import Data.Vector (Vector)
 import qualified Proto.Temporal.Api.Common.V1.Message as Message
 import Data.Int
 import Data.Word
 import qualified Data.Map.Strict as Map
-import Data.ProtoLens
 import GHC.TypeLits
-import Lens.Family2
-import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Message
-import Temporal.Exception
 import Temporal.Payload
 import Control.Monad.Except
 
@@ -89,7 +84,7 @@ data SearchAttributeType
   -- 
   -- - As a Keyword it would be matched only by ProductId = "2dd29ab7-2dd8-4668-83e0-89cae261cfb1"
   -- - As a Text it would be matched by ProductId = 2dd8, which could cause unwanted matches.
-  | KeywordList [Text]
+  | KeywordList (Vector Text)
   deriving (Show, Eq)
 
 instance A.ToJSON SearchAttributeType where
@@ -107,7 +102,7 @@ instance A.FromJSON SearchAttributeType where
     A.Number n -> case floatingOrInteger n of
       Left d -> pure $ Double d
       Right i -> pure $ Int i
-    A.Array arr -> KeywordList <$> A.parseJSON x
+    A.Array arr -> KeywordList <$> mapM A.parseJSON arr
     _ -> fail "Invalid search attribute type"
 
 searchAttributesToProto :: Map.Map Text SearchAttributeType -> IO (Map.Map Text Message.Payload)

@@ -1,13 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TypeFamilies #-}
 module Temporal.Common where
-import Control.Concurrent.Async hiding (cancel)
-import qualified Control.Concurrent.Async as Async
-import Control.Concurrent.MVar
-import Control.Concurrent.STM
-import Control.Exception
-import Control.Monad
-import Control.Monad.IO.Class
 import Data.Hashable (Hashable)
 import Data.ByteString (ByteString)
 import Data.Time.Clock.System
@@ -18,8 +11,6 @@ import Data.ProtoLens
 import Data.String
 import Data.Vector (Vector)
 import Lens.Family2
-import qualified Proto.Google.Protobuf.Duration as Duration
-import qualified Proto.Google.Protobuf.Duration_Fields as Duration
 import qualified Proto.Google.Protobuf.Timestamp as Timestamp
 import qualified Proto.Google.Protobuf.Timestamp_Fields as Timestamp
 import qualified Proto.Temporal.Api.Common.V1.Message as Message

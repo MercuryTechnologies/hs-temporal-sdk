@@ -45,13 +45,10 @@ import Control.Monad
 
 import Control.Applicative
 import Control.Monad.Logger
-import Control.Monad.Reader
 import Control.Monad.State
-import Control.Monad.IO.Class
 
 import Temporal.Common
 import Temporal.Core.Client
-import Temporal.Exception
 import qualified Temporal.Core.Worker as Core
 import Temporal.Internal.JobPool
 import Temporal.Activity (ProvidedActivity(..))

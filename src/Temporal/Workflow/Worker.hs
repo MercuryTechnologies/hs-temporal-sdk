@@ -9,28 +9,20 @@ import Data.Maybe
 import qualified Data.Text as Text
 import qualified Data.Vector as V
 import Temporal.Common
-import Temporal.Core.Client
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
-import Temporal.Internal.JobPool
 import Temporal.Payload
 import Temporal.Worker.Types
 import Temporal.WorkflowInstance
-import Temporal.Workflow.Unsafe
 import Temporal.SearchAttributes
 import UnliftIO
 import Lens.Family2
-import Lens.Family2.Stock
 import Data.ProtoLens
-import Data.ProtoLens.Combinators
-import qualified Proto.Temporal.Api.Common.V1.Message as Message
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Message
 import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as CommonProto
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
-import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Completion
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
-import qualified Proto.Temporal.Api.Failure.V1.Message as F
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import Temporal.Duration (durationFromProto)
 
@@ -72,14 +64,14 @@ execute worker = runWorkerM worker $ do
       eActivation <- pollWorkflowActivation
       case eActivation of
         -- TODO should we do anything else on shutdown?
-        (Left s@(Core.WorkerError Core.PollShutdown _)) -> do
+        (Left (Core.WorkerError Core.PollShutdown _)) -> do
           $(logInfo) "Poller shutting down"
         (Left err) -> do
           $(logError) $ Text.pack $ show err
           go
         (Right activation) -> do
           $(logDebug) $ Text.pack ("Got activation " <> show activation) 
-          handle <- handleActivation activation
+          handleActivation activation
           go
       
 
@@ -148,7 +140,7 @@ handleActivation activation = do
       case HashMap.lookup (RunId $ activation ^. Activation.runId) runningWorkflows_ of
         Just inst -> pure $ Just inst
         Nothing -> do
-          vExistingInstance <- forM activationStartWorkflowJobs $ \(job, startWorkflow) -> do
+          vExistingInstance <- forM activationStartWorkflowJobs $ \(_job, startWorkflow) -> do
             searchAttrs <- liftIO $ do
               decodedAttrs <- startWorkflow ^. Activation.searchAttributes . Message.indexedFields . to searchAttributesFromProto
               either (throwIO . ValueError) pure decodedAttrs
