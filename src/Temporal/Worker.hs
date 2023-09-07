@@ -321,12 +321,15 @@ startWorker client conf = do
   let workerWorkflowFunctions = conf.wfDefs
       workerConfig = conf
       workerTaskQueue = TaskQueue $ Core.taskQueue conf.coreConfig
+      workerInboundInterceptors = conf.interceptorConfig.workflowInboundInterceptors
+      workerOutboundInterceptors = conf.interceptorConfig.workflowOutboundInterceptors
+      workerDeadlockTimeout = conf.deadlockTimeout
       workflowWorker = Workflow.WorkflowWorker{..}
 
       initialEnv = conf.actEnv
       definitions = conf.actDefs
+      logger = workerLogFn
       activityWorker = Activity.ActivityWorker{..}
-      worker = Temporal.Worker.Types.Worker{..}
       workerClient = client
 
   workerWorkflowLoop <- async $ do

@@ -29,13 +29,37 @@ import Data.Text (Text)
 
 data ActivityWorker env = ActivityWorker
   { initialEnv :: env
+  , logger :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
   , definitions :: HashMap Text (ActivityDefinition env)
   , runningActivities :: TVar (HashMap TaskToken (Async ()))
   , workerCore :: Core.Worker
   }
 
+instance MonadLogger (ActivityWorkerM env) where
+  monadLoggerLog loc src lvl msg = do
+    w <- ask
+    liftIO $ logger w loc src lvl (toLogStr msg)
+
+instance MonadLoggerIO (ActivityWorkerM env) where
+  askLoggerIO = do
+    w <- ask
+    pure $ logger w
+
+newtype ActivityWorkerM env a = ActivityWorkerM { unActivityWorkerM :: ReaderT (ActivityWorker env) IO a }
+  deriving
+    ( Functor
+    , Applicative
+    , Monad
+    , MonadIO
+    , MonadReader (ActivityWorker env)
+    , MonadUnliftIO
+    )
+
+runActivityWorker :: ActivityWorker env -> ActivityWorkerM env a -> IO a
+runActivityWorker w m = runReaderT (unActivityWorkerM m) w
+
 execute :: ActivityWorker actEnv -> IO ()
-execute worker = (flip runReaderT) worker go
+execute worker = runActivityWorker worker go
   where
     go = do
       eTask <- liftIO $ Core.pollActivityTask worker.workerCore
@@ -43,7 +67,7 @@ execute worker = (flip runReaderT) worker go
         Left (Core.WorkerError Core.PollShutdown _) -> do
           pure ()
         Left e -> do
-          --  $logError (T.pack (show e))
+          $logError (T.pack (show e))
           throwIO e
         Right task -> do
           applyActivityTask task
@@ -75,7 +99,7 @@ activityInfoFromProto tt msg = ActivityInfo
 completeAsync :: MonadIO m => m ()
 completeAsync = throwIO CompleteAsync
 
-applyActivityTask :: AT.ActivityTask -> ReaderT (ActivityWorker actEnv) IO ()
+applyActivityTask :: AT.ActivityTask -> ActivityWorkerM actEnv ()
 applyActivityTask task = case task ^. AT.maybe'variant of
   Nothing -> throwIO $ RuntimeError "Activity task has no variant or an unknown variant"
   Just (AT.ActivityTask'Start msg) -> applyActivityTaskStart tt msg
@@ -84,10 +108,10 @@ applyActivityTask task = case task ^. AT.maybe'variant of
     tt = TaskToken $ task ^. AT.taskToken
 
 -- TODO, where should async exception masking happen?
-applyActivityTaskStart :: TaskToken -> AT.Start -> ReaderT (ActivityWorker actEnv) IO ()
+applyActivityTaskStart :: TaskToken -> AT.Start -> ActivityWorkerM actEnv ()
 applyActivityTaskStart tt msg = mask_ $ do
   w <- ask
-  --  $logDebug $ "Starting activity: " <> T.pack (show tt)
+  $logDebug $ "Starting activity: " <> T.pack (show tt)
   running <- readTVarIO w.runningActivities
   case HashMap.lookup tt running of
     Just _ -> throwIO $ RuntimeError "Activity task already running"
@@ -107,7 +131,7 @@ applyActivityTaskStart tt msg = mask_ $ do
                   Right ok -> pure (ok >>= liftIO . Temporal.Payload.encode c)
         case ef of
           Left (SomeException err) -> do
-            --  $logError (T.pack (show err))
+            $logError (T.pack (show err))
             void $ liftIO $ Core.completeActivityTask w.workerCore $ defMessage
               & C.taskToken .~ rawTaskToken tt
               & C.result .~
@@ -135,10 +159,10 @@ applyActivityTaskStart tt msg = mask_ $ do
                   )
                 )
           Right f' -> do
-            --  $logDebug "Activity arguments decoded successfully"
+            $logDebug "Activity arguments decoded successfully"
             res <- trySyncOrAsync $ liftIO $ do
               runReaderT (unActivity f') $ ActivityEnv w.workerCore info env
-            --  $logDebug "Got activity result"
+            $logDebug "Got activity result"
             completionResult <- do
               let completionMsg = case res of
                     Right ok -> defMessage
@@ -175,9 +199,9 @@ applyActivityTaskStart tt msg = mask_ $ do
                             )
                           )
                         )
-              --  $logDebug ("Activity completion message: " <> T.pack (show completionMsg))
+              $logDebug ("Activity completion message: " <> T.pack (show completionMsg))
               liftIO $ Core.completeActivityTask w.workerCore completionMsg
-            --  $logDebug ("Activity completion result: " <> T.pack (show completionResult))
+            $logDebug ("Activity completion result: " <> T.pack (show completionResult))
             atomically $ do
               running' <- readTVar w.runningActivities
               writeTVar w.runningActivities $ HashMap.delete tt running'
@@ -195,10 +219,10 @@ applyActivityTaskStart tt msg = mask_ $ do
       -- We use link here to kill the worker thread if the activity throws an exception.
       link a
 
-applyActivityTaskCancel :: TaskToken -> AT.Cancel -> ReaderT (ActivityWorker actEnv) IO ()
+applyActivityTaskCancel :: TaskToken -> AT.Cancel -> ActivityWorkerM actEnv ()
 applyActivityTaskCancel tt _msg = do
   w <- ask
-  --  $logDebug $ "Cancelling activity: " <> T.pack (show tt)
+  $logDebug $ "Cancelling activity: " <> T.pack (show tt)
   running <- readTVarIO w.runningActivities
   forM_ (HashMap.lookup tt running) $ \a ->
     cancel a `finally` atomically (modifyTVar' w.runningActivities (HashMap.delete tt))

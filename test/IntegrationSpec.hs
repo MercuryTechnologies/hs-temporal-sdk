@@ -105,7 +105,7 @@ signalUnblockWorkflow = W.SignalRef "unblockWorkflow" defaultCodec
 
 testImpls :: Impl WorkflowTests
 testImpls = WorkflowTests
-  { shouldRunWorkflowTest = pure ()
+  { shouldRunWorkflowTest = $(logDebug) "oh hi!"
   , raceBlockOnLeftSideWorks = provideCallStack $ do
       let lhs = do
             $(logDebug) "sleepy lad" 
@@ -709,7 +709,7 @@ needsClient = do
               addWorkflow wf
         withWorker conf $ do
           wfId <- uuidText
-          let opts = (C.workflowStartOptions (W.WorkflowId wfId) (W.TaskQueue "test"))
+          let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
                 { C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
                     , C.executionTimeout = Nothing
@@ -730,7 +730,7 @@ needsClient = do
               addWorkflow wf
         withWorker conf $ do
           wfId <- uuidText
-          let opts = (C.workflowStartOptions (W.WorkflowId wfId) (W.TaskQueue "test"))
+          let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
                 { C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
                     , C.executionTimeout = Nothing
@@ -750,7 +750,7 @@ needsClient = do
               addWorkflow wf
         withWorker conf $ do
           wfId <- uuidText
-          let opts = (C.workflowStartOptions (W.WorkflowId wfId) (W.TaskQueue "test"))
+          let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
                 { C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
                     , C.executionTimeout = Nothing
@@ -775,7 +775,7 @@ needsClient = do
             addWorkflow wf
       withWorker conf $ do
         wfId <- uuidText
-        let opts = (C.workflowStartOptions (W.WorkflowId wfId) (W.TaskQueue "test"))
+        let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
               { C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
                   , C.executionTimeout = Nothing
@@ -858,7 +858,7 @@ needsClient = do
             testConf
       withWorker conf $ do
         wfId <- uuidText
-        let opts = (C.workflowStartOptions (W.WorkflowId wfId) (W.TaskQueue "test"))
+        let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
               { C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
                   , C.executionTimeout = Nothing

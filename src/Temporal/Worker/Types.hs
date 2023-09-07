@@ -77,8 +77,8 @@ data Worker activityEnv = Worker
   , workerTaskQueue :: TaskQueue
   , workerConfig :: WorkerConfig activityEnv
   , workerLogFn :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
-  , workerWorkflowState :: WorkflowWorker
-  , workerActivityState :: ActivityWorker activityEnv
+  , workflowWorker :: WorkflowWorker
+  , activityWorker :: ActivityWorker activityEnv
   }
 
 newtype WorkerM activityEnv a = WorkerM { unWorkerM :: ReaderT (Worker activityEnv) IO a }

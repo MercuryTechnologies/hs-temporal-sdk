@@ -90,6 +90,7 @@ create :: MonadLoggerIO m
   -> StartWorkflow
   -> m WorkflowInstance
 create workflowCompleteActivation workflowFn workflowDeadlockTimeout inboundInterceptor outboundInterceptor info start = do
+  $logDebug "Instantiating workflow instance"
   workflowInstanceLogger <- askLoggerIO
   workflowRandomnessSeed <- WorkflowGenM <$> newIORef (mkStdGen 0)
   workflowNotifiedPatches <- newIORef mempty
@@ -120,10 +121,13 @@ create workflowCompleteActivation workflowFn workflowDeadlockTimeout inboundInte
   -- is allowed to interact with the instance.
   let inst = WorkflowInstance {..}
   workerThread <- liftIO $ async $ runInstanceM inst $ do
+    $logDebug "Start workflow execution thread"
     exec <- setUpWorkflowExecution start
     res <- liftIO $ inboundInterceptor.executeWorkflow exec $ \exec' -> runInstanceM inst $ do
-      wf <- applyStartWorkflow exec' workflowFn
+      $logDebug "Executing workflow"
+      wf <- applyStartWorkflow exec' workflowFn 
       runWorkflowToCompletion wf
+    $logDebug "Workflow execution completed"
     case res of
       WorkflowExitSuccess result -> finishWorkflow result
       WorkflowExitContinuedAsNew cmd -> addCommand cmd
@@ -272,7 +276,9 @@ applyStartWorkflow execInput workflowFn = do
               Left msg -> do
                 $(logError) $ Text.pack ("Failed to decode workflow arguments: " <> msg)
                 throwIO (ValueError msg)
-              Right act -> pure (runWorkflow act)
+              Right act -> do
+                $(logDebug) "Calling runWorkflow"
+                pure (runWorkflow act)
 
   liftIO $ executeWorkflowBase execInput
 

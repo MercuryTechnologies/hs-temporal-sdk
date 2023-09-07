@@ -150,6 +150,11 @@ runWorkflow wf = provideCallStack $ do
                         -- comparing IORefs of different types is safe, it's
                         -- pointer-equality on the MutVar#.
                   then 
+                    -- TODO, I don't know if there are any cases where we need
+                    -- to worry about discarding unfinished computations, but
+                    -- I think exiting at the conclusion of a workflow is the
+                    -- right thing to do.
+                    pure ()
                     -- We have a result, but don't discard unfinished
                     -- computations in the run queue.
                     --
@@ -157,9 +162,9 @@ runWorkflow wf = provideCallStack $ do
                     -- 
                     -- Nothing can depend on the final IVar, so workflowActions must
                     -- be empty.
-                    case rq of
-                      JobNil -> return ()
-                      _ -> modifyIORef' env.runQueueRef (appendJobList rq)
+                    -- case rq of
+                    --   JobNil -> return ()
+                    --   _ -> modifyIORef' env.runQueueRef (appendJobList rq)
                   else reschedule env $ appendJobList workflowActions rq
       r <- lift $ UnliftIO.try $  do
         let (Workflow run) = wf'

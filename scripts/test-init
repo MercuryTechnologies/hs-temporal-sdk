@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+temporal operator namespace create test
+
+created=false
+attempt_num=1
+
+# Loop until the command is successful or the maximum number of attempts is reached
+while [ $created = false ]; do
+  # Execute the command
+  temporal operator search-attribute create --name attr1 --type Bool --namespace test
+  # Check the exit code of the command
+  if [ $? -eq 0 ]; then
+    # The command was successful
+    created=true
+  else
+    echo "Attempt failed. Trying again..."
+    sleep 1
+  fi
+done
+
+temporal operator search-attribute create --name attr2 --type Int --namespace test

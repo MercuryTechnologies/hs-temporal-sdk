@@ -81,6 +81,8 @@ execute worker = flip runReaderT worker $ do
         -- TODO should we do anything else on shutdown?
         (Left (Core.WorkerError Core.PollShutdown _)) -> do
           $(logInfo) "Poller shutting down"
+          runningWorkflows <- readTVarIO worker.runningWorkflows
+          mapM_ (cancel <=< readIORef . executionThread) runningWorkflows
         (Left err) -> do
           $(logError) $ Text.pack $ show err
           go
