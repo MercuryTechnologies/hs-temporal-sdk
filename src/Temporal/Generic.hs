@@ -127,9 +127,12 @@ import Barbies.Bare
 import Temporal.Generic.TyFun
 import Temporal.Worker
 import Temporal.Worker.Types
-import Temporal.Workflow.WorkflowDefinition
+import Temporal.Workflow.Definition
 import Temporal.Activity
-import Temporal.Workflow (startActivity, defaultStartActivityOptions, TimeoutType (ScheduleToClose), wait, ActivityRef(..), WorkflowRef(..))
+import Temporal.Activity.Definition
+import Temporal.Workflow 
+  (startActivity, defaultStartActivityOptions, TimeoutType (ScheduleToClose), wait, ActivityRef(..), WorkflowRef(..))
+import Temporal.Workflow.Internal.Monad
 
 type family ApplyRef (args :: [Type]) (f :: Type) where
   ApplyRef args (Workflow result) = KnownWorkflow args result
@@ -210,8 +213,15 @@ instance
   ( ApplyDef original ~ WorkflowDefinition
   , FunctionSupportsCodec' Workflow codec original
   ) => DefFromFunction' codec env (Workflow result) original where
-  defFromFunction _ codec name f = Def $ WorkflowDefinition (Text.pack name) $ 
-    ValidWorkflowFunction codec f (applyPayloads codec (Proxy @(ArgsOf original)) (Proxy @(Workflow (ResultOf Workflow original))))
+  defFromFunction _ codec name f = Def $ WorkflowDefinition (Text.pack name) $ \payloads -> do
+    eWf <- applyPayloads 
+      codec 
+      (Proxy @(ArgsOf original)) 
+      (Proxy @(Workflow (ResultOf Workflow original)))
+      f
+      payloads
+    pure $ fmap (\wf -> wf >>= \result -> ilift (liftIO $ encode codec result)) eWf
+
 
 instance 
   ( ApplyDef original ~ ActivityDefinition env

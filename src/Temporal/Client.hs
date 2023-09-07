@@ -56,7 +56,7 @@ import qualified Data.Vector as V
 
 import Temporal.Core.Client.WorkflowService
 import Temporal.Core.Client
-import Temporal.Workflow.WorkflowDefinition
+import Temporal.Workflow.Definition
 import Temporal.Worker.Types
 import Temporal.Common
 import Temporal.Exception
@@ -83,7 +83,7 @@ import Unsafe.Coerce
 import Data.ProtoLens (Message(defMessage))
 import Temporal.Payload (convertToProtoPayload)
 import Temporal.SearchAttributes
-import Temporal.Workflow (WorkflowRef(..))
+import Temporal.Workflow (WorkflowRef(..), QueryDefinition(..))
 import Temporal.Duration (Duration, durationToProto)
 ---------------------------------------------------------------------------------
 -- WorkflowClient stuff

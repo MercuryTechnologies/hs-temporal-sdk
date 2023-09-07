@@ -103,17 +103,22 @@ A Workflow started by a Schedule can obtain the details of the failure of the mo
 Limitations
 Internally, a Schedule is implemented as a Workflow. If you're using Advanced Visibility (Elasticsearch), these Workflow Executions are hidden from normal views. If you're using Standard Visibility, they are visible, though there's no need to interact with them directly.
 -}
-module Temporal.Schedule
+module Temporal.Client.Schedule
+{-
   ( createSchedule
   , deleteSchedule
   , listSchedules
+  , ScheduleListInfo(..)
+  , ScheduleListEntry(..)
+  , ScheduleActionResult(..)
+  , ListSchedulesOptions(..)
   , listScheduleMatchingTimes
   , describeSchedule
   , patchSchedule
   , updateSchedule
   , ScheduleId
   , module Temporal.Duration 
-  ) where
+  ) -} where
 
 import Control.Monad
 import Control.Monad.IO.Class (MonadIO)
@@ -131,13 +136,15 @@ import Temporal.Payload
 import Temporal.Core.Client
 import qualified Temporal.Core.Client.WorkflowService as Core
 import Lens.Family2
+import qualified Proto.Temporal.Api.Schedule.V1.Message as S
+import qualified Proto.Temporal.Api.Schedule.V1.Message_Fields as S
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse as WF
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as WF
 import Data.Time.Clock.System (SystemTime)
 import UnliftIO
 import Temporal.Common (timespecFromTimestamp, Namespace (rawNamespace), ScheduleId (rawScheduleId))
 
-
+{-
 throwEither :: MonadIO m => m (Either a b) -> m b
 throwEither m = do
   e <- m
@@ -193,6 +200,8 @@ deleteSchedule c sId = do
 data ListSchedulesOptions = ListSchedulesOptions
   { maximumPageSize :: Int32 
   }
+
+data ScheduleActionResult = ScheduleActionResult
 
 data ScheduleListInfo = ScheduleListInfo
   { spec :: !(Maybe ScheduleSpec)
@@ -357,3 +366,4 @@ data IntervalSpec = IntervalSpec
   { interval :: !(Maybe Duration)
   , phase :: !(Maybe Duration)
   }
+-}

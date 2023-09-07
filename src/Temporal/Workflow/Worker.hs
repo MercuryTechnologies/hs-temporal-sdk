@@ -4,15 +4,19 @@ module Temporal.Workflow.Worker where
 import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.Reader
+import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import Data.Maybe
+import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Vector as V
 import Temporal.Common
+import qualified Temporal.Core.Client as C
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
+import Temporal.Workflow.Internal.Monad
 import Temporal.Payload
-import Temporal.Worker.Types
+import Temporal.Workflow.Definition
 import Temporal.WorkflowInstance
 import Temporal.SearchAttributes
 import UnliftIO
@@ -26,23 +30,34 @@ import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_F
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import Temporal.Duration (durationFromProto)
 
-pollWorkflowActivation :: WorkerM actEnv (Either Core.WorkerError Core.WorkflowActivation)
+data WorkflowWorker = WorkflowWorker
+  { workerWorkflowFunctions :: HashMap Text WorkflowDefinition
+  , runningWorkflows :: TVar (HashMap RunId WorkflowInstance)
+  , workerClient :: C.Client
+  , workerCore :: Core.Worker
+  , workerInboundInterceptors :: WorkflowInboundInterceptor
+  , workerOutboundInterceptors :: WorkflowOutboundInterceptor
+  , workerDeadlockTimeout :: Maybe Int
+  , workerTaskQueue :: TaskQueue
+  }
+
+pollWorkflowActivation :: (MonadLoggerIO m) => ReaderT WorkflowWorker m (Either Core.WorkerError Core.WorkflowActivation)
 pollWorkflowActivation = do
   worker <- ask
   liftIO $ Core.pollWorkflowActivation worker.workerCore
 
-upsertWorkflowInstance :: RunId -> WorkflowInstance -> WorkerM actEnv WorkflowInstance
+upsertWorkflowInstance :: (MonadLoggerIO m) => RunId -> WorkflowInstance -> ReaderT WorkflowWorker m WorkflowInstance
 upsertWorkflowInstance r inst = do
   worker <- ask
   liftIO $ atomically $ do
-    workflows <- readTVar worker.workerWorkflowState.runningWorkflows
+    workflows <- readTVar worker.runningWorkflows
     case HashMap.lookup r workflows of
       Nothing -> do
         let workflows' = HashMap.insert r inst workflows
-        writeTVar worker.workerWorkflowState.runningWorkflows workflows'
+        writeTVar worker.runningWorkflows workflows'
         pure inst
       Just existingInstance -> do
-        writeTVar worker.workerWorkflowState.runningWorkflows workflows
+        writeTVar worker.runningWorkflows workflows
         pure existingInstance
 
 
@@ -53,8 +68,8 @@ upsertWorkflowInstance r inst = do
 --
 -- The Async handle only completes successfully on poller shutdown.
 
-execute :: Worker actEnv -> IO ()
-execute worker = runWorkerM worker $ do
+execute :: (MonadLoggerIO m, MonadUnliftIO m) => WorkflowWorker -> m ()
+execute worker = flip runReaderT worker $ do
   $(logInfo) "Starting workflow worker"
   go
 
@@ -77,7 +92,7 @@ execute worker = runWorkerM worker $ do
           go
       
 
-handleActivation :: Core.WorkflowActivation -> WorkerM actEnv ()
+handleActivation :: forall m. (MonadLoggerIO m, MonadUnliftIO m) => Core.WorkflowActivation -> ReaderT WorkflowWorker m ()
 handleActivation activation = do
   $(logDebug) ("Handling activation: RunId " <> Text.pack (show (activation ^. Activation.runId)))
   forM_ (activation ^. Activation.jobs) $ \job -> do
@@ -135,10 +150,10 @@ handleActivation activation = do
       )
       (activation ^. Activation.vec'jobs)
 
-    createOrFetchWorkflowInstance :: WorkerM actEnv (Maybe WorkflowInstance)
+    createOrFetchWorkflowInstance :: ReaderT WorkflowWorker m (Maybe WorkflowInstance)
     createOrFetchWorkflowInstance = do
       worker <- ask
-      runningWorkflows_ <- atomically $ readTVar worker.workerWorkflowState.runningWorkflows
+      runningWorkflows_ <- atomically $ readTVar worker.runningWorkflows
       case HashMap.lookup (RunId $ activation ^. Activation.runId) runningWorkflows_ of
         Just inst -> pure $ Just inst
         Nothing -> do
@@ -158,7 +173,7 @@ handleActivation activation = do
                 workflowInfo = Info
                   { historyLength = activation ^. Activation.historyLength
                   , attempt = fromIntegral $ startWorkflow ^. Activation.attempt
-                  , taskQueue = TaskQueue $ worker.workerTaskQueue
+                  , taskQueue = worker.workerTaskQueue
                   , workflowId = WorkflowId $ startWorkflow ^. Activation.workflowId
                   , workflowType = startWorkflow ^. Activation.workflowType . to WorkflowType
                   , continuedRunId = fmap RunId $ startWorkflow ^. Activation.continuedFromExecutionRunId . to nonEmptyString
@@ -178,32 +193,33 @@ handleActivation activation = do
                         (activation ^. Activation.timestamp) 
                         (startWorkflow ^. Activation.maybe'startTime)
                   }
-            case HashMap.lookup (startWorkflow ^. Activation.workflowType) worker.workerWorkflowState.workerWorkflowFunctions of 
+            case HashMap.lookup (startWorkflow ^. Activation.workflowType) worker.workerWorkflowFunctions of 
               Nothing -> pure Nothing
-              Just definition -> do
+              Just (WorkflowDefinition _ f) -> do
                 inst <- create
                   (\wf -> do
                     putStrLn "Complete activation"
                     Core.completeWorkflowActivation worker.workerCore wf
                   )
-                  worker.workerConfig.deadlockTimeout
-                  worker.workerConfig.interceptorConfig
+                  f
+                  worker.workerDeadlockTimeout
+                  worker.workerInboundInterceptors
+                  worker.workerOutboundInterceptors
                   workflowInfo 
-                  definition
                   startWorkflow
                 liftIO $ addStackTraceHandler inst
                 Just <$> upsertWorkflowInstance runId_ inst
           pure $ join (vExistingInstance V.!? 0)
       
-    removeEvictedWorkflowInstances :: WorkerM actEnv ()
+    removeEvictedWorkflowInstances :: ReaderT WorkflowWorker m ()
     removeEvictedWorkflowInstances = forM_ (activation ^. Activation.vec'jobs) $ \job -> do
       case job ^. Activation.maybe'variant of
         Just (WorkflowActivationJob'RemoveFromCache removeFromCache) -> do
           worker <- ask
           let runId_ = RunId $ activation ^. CommonProto.runId
           join $ atomically $ do
-            currentWorkflows <- readTVar worker.workerWorkflowState.runningWorkflows
-            writeTVar worker.workerWorkflowState.runningWorkflows $ HashMap.delete runId_ currentWorkflows
+            currentWorkflows <- readTVar worker.runningWorkflows
+            writeTVar worker.runningWorkflows $ HashMap.delete runId_ currentWorkflows
             case HashMap.lookup runId_ currentWorkflows of
               Nothing -> pure $ $(logDebug) $ Text.pack ("Eviction request on an unknown workflow with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
               Just wf -> do

@@ -37,8 +37,7 @@ import Temporal.Common
 import Temporal.Core.Worker (recordActivityHeartbeat)
 import Temporal.Payload
 import Temporal.Workflow
-import Temporal.Workflow.WorkflowDefinition
-import Temporal.Worker.Types
+import Temporal.Workflow.Definition
 
 import qualified Proto.Temporal.Sdk.Core.CoreInterface_Fields as Proto
 

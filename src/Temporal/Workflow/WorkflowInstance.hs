@@ -5,85 +5,17 @@
 {-# LANGUAGE TypeFamilies #-}
 module Temporal.Workflow.WorkflowInstance where
 import qualified Data.HashMap.Strict as HashMap
+import Temporal.Common.ActivityOptions
+import Temporal.Common.ContinueAsNewOptions
 import Temporal.Worker.Types
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow as ChildWorkflow
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands as Command
 import UnliftIO hiding (catch)
 
-
-emptySequences :: SequenceMaps
-emptySequences = SequenceMaps mempty mempty mempty mempty mempty mempty
-
-isEmpty :: SequenceMaps -> Bool
-isEmpty SequenceMaps{..} = 
-  HashMap.null timers &&
-  HashMap.null activities &&
-  HashMap.null childWorkflows &&
-  HashMap.null externalSignals &&
-  HashMap.null externalCancels &&
-  HashMap.null conditionsAwaitingSignal
-
-
--- done :: ResultVal a -> InstanceM env (Result env a)
--- done (Ok a _) = return (Done a)
--- done (ThrowWorkflow e _) = raise e
--- done (ThrowInternal e) = throwIO e
-
--- eitherToResultThrowIO :: Either SomeException a -> ResultVal a
--- eitherToResultThrowIO (Right a) = Ok a NilWrites
--- eitherToResultThrowIO (Left e)
---   | Just HaxlException{} <- fromException e = ThrowHaxl e NilWrites
---   | otherwise = ThrowIO e
-
--- eitherToResult :: Either SomeException a -> ResultVal a
--- eitherToResult (Right a) = Ok a NilWrites
--- eitherToResult (Left e) = ThrowWorkflow e NilWrites
-
--- -----------------------------------------------------------------------------
--- ResultVar
-
--- | A sink for the result of a data fetch in 'BlockedFetch'
-newtype ResultVar a =
-  ResultVar (Either SomeException a -> IO ())
-
-mkResultVar
-  :: (Either SomeException a -> IO ())
-  -> ResultVar a
-mkResultVar = ResultVar
-
-putFailure :: (Exception e) => ResultVar a -> e -> IO ()
-putFailure r = putResult r . except
-
-putSuccess :: ResultVar a -> a -> IO ()
-putSuccess r = putResult r . Right
-
-putResult :: ResultVar a -> Either SomeException a -> IO ()
-putResult (ResultVar io) res = io res
-
-except :: (Exception e) => e -> Either SomeException a
-except = Left . toException
-
--- TODO default to WaitCancellationCompleted per protobuf docs
-{- |
-Defines how the workflow will wait (or not) for cancellation of the 
-activity to be confirmed.
--}
-data ActivityCancellationType 
-  = ActivityCancellationTryCancel 
-  -- ^ Initiate a cancellation request and immediately report cancellation to the workflow.
-  | ActivityCancellationWaitCancellationCompleted 
-  -- ^ Wait for activity cancellation completion. Note that activity must heartbeat to receive a
-  -- cancellation notification. This can block the cancellation for a long time if activity
-  -- doesn't heartbeat or chooses to ignore the cancellation request.
-  | ActivityCancellationAbandon
-  -- ^ Do not request cancellation of the activity and immediately report cancellation to the
-  -- workflow
-
 activityCancellationTypeToProto :: ActivityCancellationType -> Command.ActivityCancellationType
 activityCancellationTypeToProto ActivityCancellationTryCancel = Command.TRY_CANCEL
 activityCancellationTypeToProto ActivityCancellationWaitCancellationCompleted = Command.WAIT_CANCELLATION_COMPLETED
 activityCancellationTypeToProto ActivityCancellationAbandon = Command.ABANDON
-
 -- | Controls at which point to report back when a child workflow is cancelled.
 data ChildWorkflowCancellationType 
   = ChildWorkflowCancellationAbandon 

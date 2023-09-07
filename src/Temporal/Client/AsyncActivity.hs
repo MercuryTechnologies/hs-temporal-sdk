@@ -1,5 +1,10 @@
 module Temporal.Client.AsyncActivity where
 
+import Temporal.Common
+import Temporal.Payload
+import Temporal.Core.Client
+import Control.Exception
+
 ---------------------------------------------------------------------------------
 -- AsyncCompletionClient
 

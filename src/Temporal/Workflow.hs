@@ -22,6 +22,7 @@ that is, making sure that the same Commands are emitted in the same sequence,
 whenever a corresponding Workflow Function Execution (instance of the Function Definition) is re-executed.
 -}
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE KindSignatures #-}
@@ -51,7 +52,7 @@ module Temporal.Workflow
   -- $activityBasics
   , ActivityRef(..)
   , KnownActivity(..)
-  , StartActivityOptions(..)
+  , StartActivityOptions -- TODO fields conflict
   , defaultStartActivityOptions
   , startActivity
   , executeActivity
@@ -119,7 +120,7 @@ module Temporal.Workflow
   , uuid4
   , WorkflowGenM
   -- * Continue as new
-  , ContinueAsNewOptions(..)
+  , ContinueAsNewOptions -- TODO, fields conflict
   , defaultContinueAsNewOptions
   , continueAsNew
   -- * Type definitions
@@ -162,14 +163,20 @@ import Proto.Temporal.Api.Common.V1.Message (Payload)
 import RequireCallStack
 import System.Random.Stateful
 import Temporal.Common
+import Temporal.Common.ActivityOptions
+import Temporal.Common.ContinueAsNewOptions
+import Temporal.Common.TimeoutType
 import Temporal.Exception
 import Temporal.Payload
 import Temporal.SearchAttributes
 import Temporal.Worker.Types
-import Temporal.Workflow.Unsafe
 import Temporal.WorkflowInstance
+import Temporal.Workflow.Query
+import Temporal.Workflow.Signal
+import Temporal.Workflow.Internal.Monad
+import Temporal.Workflow.Unsafe.Handle
 import Temporal.Workflow.WorkflowInstance
-import Temporal.Workflow.WorkflowDefinition
+import Temporal.Workflow.Definition
 import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as Common
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands as Command
@@ -181,69 +188,6 @@ import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow_Fields as C
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import UnliftIO
 import Temporal.Duration (Duration, durationToProto)
-
--- | An async action handle that can be awaited or cancelled.
-data Task a = Task 
-  { waitAction :: Workflow a
-  , cancelAction :: Workflow ()
-  }
-
-ilift :: RequireCallStack => InstanceM a -> Workflow a
-ilift m = Workflow $ \_ -> Done <$> m
-
-askInstance :: Workflow WorkflowInstance
-askInstance = Workflow $ \_ -> Done <$> ask
-
-data ContinueAsNewOptions = ContinueAsNewOptions
-  { taskQueue :: Maybe TaskQueue
-  , runTimeout :: Maybe Duration
-  , taskTimeout :: Maybe Duration
-  , retryPolicy :: Maybe RetryPolicy
-  , memo :: Map Text RawPayload
-  , searchAttributes :: Map Text SearchAttributeType
-  , headers :: Map Text RawPayload
-  }
-
-defaultContinueAsNewOptions :: ContinueAsNewOptions
-defaultContinueAsNewOptions = ContinueAsNewOptions
-  { taskQueue = Nothing
-  , runTimeout = Nothing
-  , taskTimeout = Nothing
-  , retryPolicy = Nothing
-  , memo = mempty
-  , searchAttributes = mempty
-  , headers = mempty
-  }
-
-data StartActivityOptions = StartActivityOptions
-  { activityId :: Maybe ActivityId
-  , taskQueue :: Maybe TaskQueue
-  , timeout :: TimeoutType
-  , scheduleToStartTimeout :: Maybe Duration
-  , heartbeatTimeout :: Maybe Duration
-  , retryPolicy :: Maybe RetryPolicy
-  , cancellationType :: ActivityCancellationType
-  , headers :: Map Text RawPayload -- TODO payloads
-  , disableEagerExecution :: Bool
-  }
-
-defaultStartActivityOptions :: TimeoutType -> StartActivityOptions
-defaultStartActivityOptions t = StartActivityOptions
-  { activityId = Nothing
-  , taskQueue = Nothing
-  , timeout = t
-  , scheduleToStartTimeout = Nothing
-  , heartbeatTimeout = Nothing
-  , retryPolicy = Nothing
-  , cancellationType = ActivityCancellationTryCancel
-  , headers = mempty
-  , disableEagerExecution = False
-  }
-
-data TimeoutType 
-  = StartToClose Duration 
-  | ScheduleToClose Duration
-  | StartToCloseAndScheduleToClose Duration Duration
 
 {- $activityBasics
 
@@ -292,7 +236,7 @@ startActivityFromPayloads (KnownActivity codec mTaskQueue name) opts typedPayloa
   updateCallStack
   inst <- ask
   ps <- traverse (fmap convertToProtoPayload . liftIO) typedPayloads
-
+  -- let inst.interceptors.workflouwOutboundInterceptors
   s@(Sequence actSeq) <- nextActivitySequence
   resultSlot <- newIVar
   atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
@@ -361,7 +305,7 @@ executeActivity activity opts = case activityRef activity of
   k@(KnownActivity codec mTaskQueue name) -> 
     gatherArgs (Proxy @(ActivityArgs activity)) codec id $ \typedPayloads -> do
       actHandle <- startActivityFromPayloads k opts typedPayloads
-      Temporal.Workflow.wait actHandle
+      Temporal.Workflow.Unsafe.Handle.wait actHandle
 
 gatherActivityArgs 
   :: forall args result codec. GatherArgs codec args
@@ -397,78 +341,6 @@ defaultChildWorkflowOptions = StartChildWorkflowOptions
   , searchAttributes = mempty
   , headers = mempty
   , workflowIdReusePolicy = WorkflowIdReusePolicyUnspecified
-  }
-
-class Wait h where
-  type WaitResult h :: Type
-  -- | Wait for a handle on an an action to complete.
-  wait :: RequireCallStack => h -> WaitResult h
-
-instance Wait (Task a) where
-  type WaitResult (Task a) = Workflow a
-  wait t = do
-    updateCallStackW
-    t.waitAction
-
-instance Wait (ChildWorkflowHandle a) where
-  type WaitResult (ChildWorkflowHandle a) = Workflow a
-  wait h = waitChildWorkflowResult h
-
-class Cancel h where
-  type CancelResult h :: Type
-  -- | Signal to Temporal that a handle representing an async action should be cancelled.
-  cancel :: RequireCallStack => h -> CancelResult h
-
-instance Cancel (Task a) where
-  type CancelResult (Task a) = Workflow ()
-  cancel t = do
-    updateCallStackW
-    t.cancelAction
-
-instance Cancel (ChildWorkflowHandle a) where
-  type CancelResult (ChildWorkflowHandle a) = Workflow ()
-  cancel h = do
-    updateCallStackW
-    cancelChildWorkflowExecution h
-
-instance Cancel (ExternalWorkflowHandle a) where
-  type CancelResult (ExternalWorkflowHandle a) = Workflow (Workflow ())
-
-  -- | Returns an action that can be used to await cancellation of an external workflow.
-  --
-  -- Throws 'CancelExternalWorkflowFailed' if the cancellation request failed.
-  cancel h = ilift $ do
-    inst <- ask
-    s@(Sequence sVal) <- nextExternalSignalSequence
-    res <- newIVar
-    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-      seqMaps { externalSignals = HashMap.insert s res (externalSignals seqMaps) }
-    addCommand 
-      (defMessage 
-        & Command.requestCancelExternalWorkflowExecution .~ 
-          ( defMessage 
-            & Command.seq .~ sVal
-            & Command.workflowExecution .~ 
-              ( defMessage 
-                & Common.workflowId .~ rawWorkflowId h.externalWorkflowWorkflowId
-                & Common.runId .~ maybe "" rawRunId h.externalWorkflowRunId
-              )
-          )
-      )
-    pure $ do
-      res' <- getIVar res
-      case res' ^. Activation.maybe'failure of
-        Nothing -> pure ()
-        Just f -> throw $ CancelExternalWorkflowFailed f
-
--- | Handle representing an external Workflow Execution.
---
--- This handle can only be cancelled and signalled. 
---
--- To call other methods, like query and result, use a WorkflowClient.getHandle inside an Activity.
-data ExternalWorkflowHandle (result :: Type) = ExternalWorkflowHandle
-  { externalWorkflowWorkflowId :: WorkflowId
-  , externalWorkflowRunId :: Maybe RunId
   }
 
 -- | A client side handle to a single Workflow instance. It can be used to signal a workflow execution.
@@ -623,27 +495,6 @@ startChildWorkflow
 startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId =
   gatherStartChildWorkflowArgs @args @result codec (startChildWorkflowFromPayloads k opts wfId)
 
-waitChildWorkflowStart :: RequireCallStack => ChildWorkflowHandle result -> Workflow ()
-waitChildWorkflowStart wfHandle = do
-  updateCallStackW
-  getIVar wfHandle.startHandle
-
-waitChildWorkflowResult :: RequireCallStack => ChildWorkflowHandle result -> Workflow result
-waitChildWorkflowResult wfHandle@(ChildWorkflowHandle{childWorkflowCodec}) = do
-  updateCallStackW
-  $(logDebug) "Wait child workflow result"
-  res <- getIVar wfHandle.resultHandle
-  case res ^. Activation.result . ChildWorkflow.maybe'status of
-    Nothing -> ilift $ throwIO $ RuntimeError "Unrecognized child workflow result status"
-    Just s -> case s of
-      ChildWorkflow.ChildWorkflowResult'Completed res -> do
-        eVal <- ilift $ liftIO $ decode childWorkflowCodec $ convertFromProtoPayload $ res ^. ChildWorkflow.result
-        case eVal of
-          Left err -> throw $ ValueError err
-          Right ok -> pure ok
-      ChildWorkflow.ChildWorkflowResult'Failed res -> throw $ ChildWorkflowFailed $ res ^. ChildWorkflow.failure
-      ChildWorkflow.ChildWorkflowResult'Cancelled _ -> throw ChildWorkflowCancelled
-
 executeChildWorkflow
   :: forall args result. RequireCallStack
   => KnownWorkflow args result
@@ -654,17 +505,6 @@ executeChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId =
   h <- startChildWorkflowFromPayloads k opts wfId typedPayloads
   waitChildWorkflowResult h
 
-cancelChildWorkflowExecution :: RequireCallStack => ChildWorkflowHandle result -> Workflow ()
-cancelChildWorkflowExecution wfHandle@(ChildWorkflowHandle{childWorkflowSequence}) = ilift $ do
-  updateCallStack
-  -- I don't see a way to block on this? I guess Temporal wants us to rely on the orchestrator
-  -- managing the cancellation. Compare with ResolveRequestCancelExternalWorkflow. I think
-  -- external workflows need a resolution step because they may not even exist.
-  addCommand $ defMessage 
-    & Command.cancelChildWorkflowExecution .~ 
-      ( defMessage 
-        & Command.childWorkflowSeq .~ rawSequence childWorkflowSequence
-      )
 
 data StartLocalActivityOptions = StartLocalActivityOptions 
   { activityId :: Maybe ActivityId
@@ -1083,7 +923,7 @@ sleep :: RequireCallStack => Duration -> Workflow ()
 sleep ts = do
   updateCallStackW
   t <- createTimer ts
-  Temporal.Workflow.wait t
+  Temporal.Workflow.Unsafe.Handle.wait t
 
 instance Wait Timer where
   type WaitResult Timer = Workflow ()

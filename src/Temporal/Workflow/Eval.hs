@@ -5,7 +5,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Temporal.Workflow.Unsafe where
+module Temporal.Workflow.Eval where
+
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.ProtoLens
@@ -15,8 +16,9 @@ import GHC.Stack
 import Lens.Family2
 import Temporal.Common
 import Temporal.Coroutine
+import Temporal.Workflow.Info
+import Temporal.Workflow.Internal.Monad
 import Temporal.Payload
-import Temporal.Worker.Types
 import UnliftIO
 import Unsafe.Coerce
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
@@ -29,8 +31,18 @@ import RequireCallStack
 withRunId :: Text -> InstanceM Text
 withRunId arg = do
   inst <- ask
-  info <- readIORef $ inst.workflowInstanceInfo
+  info <- readIORef inst.workflowInstanceInfo
   return ("[runId=" <> rawRunId info.runId <> "] " <> arg)
+
+type SuspendableWorkflowExecution a = Coroutine (Await [ActivationResult]) InstanceM a
+
+-- | Values that were blocking waiting for an activation, and have now
+-- been unblocked. The worker feeds these into a suspended workflow
+-- after converting workflow activation results.
+-- This unblocks the relevant computations.
+data ActivationResult = forall a. ActivationResult
+  (ResultVal a)
+  !(IVar a)
 
 -- How this works:
 --
@@ -206,7 +218,7 @@ runWorkflow wf = provideCallStack $ do
         _ -> do
           ($logDebug =<< withRunId (Text.pack $ printf "%d complete" (length comps)))
           let
-              getComplete (ActivationResult a IVar{ivarRef = !cr}) = do
+              getComplete (ActivationResult a IVar{ivarRef = cr}) = do
                 r <- readIORef cr
                 case r of
                   IVarFull _ -> do
@@ -247,23 +259,10 @@ runWorkflow wf = provideCallStack $ do
     IVarFull (ThrowInternal e) -> throwIO e
 
 
-finishWorkflow :: RawPayload -> InstanceM ()
-finishWorkflow result = do
-  $logDebug =<< withRunId "Finishing workflow"
-  let completeMessage = defMessage & 
-        Command.completeWorkflowExecution .~ (defMessage & Command.result .~ convertToProtoPayload result)
-  addCommand completeMessage
-
 rethrowAsyncExceptions :: MonadIO m => SomeException -> m ()
 rethrowAsyncExceptions e
   | Just SomeAsyncException{} <- fromException e = UnliftIO.throwIO e
   | otherwise = return ()
-
-addCommand :: WorkflowCommand -> InstanceM ()
-addCommand command = do
-  inst <- ask
-  atomically $ do
-    modifyTVar' inst.workflowCommands $ \cmds -> push command cmds
 
 -- experimental. should help ensure that signals blocking and resuming interop
 -- properly with the main workflow execution.
@@ -273,3 +272,4 @@ injectWorkflowSignal signal = do
   inst <- ask
   let env@(ContinuationEnv jobList) = inst.workflowInstanceContinuationEnv
   modifyIORef' jobList $ \j -> JobCons env signal result j
+

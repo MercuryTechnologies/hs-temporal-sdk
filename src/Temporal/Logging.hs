@@ -1,5 +1,10 @@
 module Temporal.Logging where
 
+import Data.Text (Text)
+import Data.HashMap.Strict (HashMap)
+import Data.Time.Clock
+
+
 data Level = Debug | Info | Warn | Error | Fatal
   deriving (Eq, Ord, Show, Read, Enum, Bounded)
 

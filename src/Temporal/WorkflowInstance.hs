@@ -39,8 +39,11 @@ import Temporal.Coroutine
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
 import Temporal.Payload
-import Temporal.Workflow.Unsafe (runWorkflow, finishWorkflow, addCommand, injectWorkflowSignal)
-import Temporal.Worker.Types
+import Temporal.Workflow.Definition
+import Temporal.Workflow.Eval (ActivationResult(..), SuspendableWorkflowExecution, runWorkflow, injectWorkflowSignal)
+import Temporal.Workflow.Info
+import Temporal.Workflow.Internal.Instance
+import Temporal.Workflow.Internal.Monad
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as Failure
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
   ( WorkflowActivation
@@ -74,17 +77,19 @@ import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import UnliftIO
 import Data.Time.Clock.System (SystemTime(..))
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Completion
+import Temporal.Payload (RawPayload)
 
 
 create :: MonadLoggerIO m 
   => (Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
+  -> (Vector RawPayload -> IO (Either String (Workflow RawPayload)))
   -> Maybe Int -- ^ deadlock timeout in seconds
-  -> Interceptors
+  -> WorkflowInboundInterceptor
+  -> WorkflowOutboundInterceptor
   -> Info 
-  -> WorkflowDefinition
   -> StartWorkflow
   -> m WorkflowInstance
-create workflowCompleteActivation workflowDeadlockTimeout interceptors info workflowInstanceDefinition start = do
+create workflowCompleteActivation workflowFn workflowDeadlockTimeout inboundInterceptor outboundInterceptor info start = do
   workflowInstanceLogger <- askLoggerIO
   workflowRandomnessSeed <- WorkflowGenM <$> newIORef (mkStdGen 0)
   workflowNotifiedPatches <- newIORef mempty
@@ -115,8 +120,10 @@ create workflowCompleteActivation workflowDeadlockTimeout interceptors info work
   -- is allowed to interact with the instance.
   let inst = WorkflowInstance {..}
   workerThread <- liftIO $ async $ runInstanceM inst $ do
-    wf <- applyStartWorkflow start
-    res <- runWorkflowToCompletion wf
+    exec <- setUpWorkflowExecution start
+    res <- liftIO $ inboundInterceptor.executeWorkflow exec $ \exec' -> runInstanceM inst $ do
+      wf <- applyStartWorkflow exec' workflowFn
+      runWorkflowToCompletion wf
     case res of
       WorkflowExitSuccess result -> finishWorkflow result
       WorkflowExitContinuedAsNew cmd -> addCommand cmd
@@ -161,7 +168,7 @@ handleQueriesAfterCompletion = forever $ do
       $(logDebug) ("Workflow failure: " <> Text.pack (show err))
       -- TODO there are lots of fields on this failureProto that we probably want to fill in
       let innerFailure :: F.Failure
-          innerFailure = defMessage & F.message .~ (Text.pack $ show err)
+          innerFailure = defMessage & F.message .~ Text.pack (show err)
 
           failureProto :: Completion.Failure
           failureProto = defMessage & Completion.failure .~ innerFailure
@@ -182,13 +189,13 @@ handleQueriesAfterCompletion = forever $ do
 -- in the workflow.
 addStackTraceHandler :: WorkflowInstance -> IO ()
 addStackTraceHandler inst = do
-  let specialHandler = \qId _ -> do
+  let specialHandler qId _ = do
         cs <- readIORef inst.workflowCallStack
         callStackPayload <- Temporal.Payload.encode JSON (Text.pack $ prettyCallStack cs)
         let cmd = defMessage
               & Command.respondToQuery .~
                 ( defMessage
-                  & Command.queryId .~ (rawQueryId qId)
+                  & Command.queryId .~ rawQueryId qId
                   & Command.succeeded .~
                     ( defMessage
                       & Command.response .~ convertToProtoPayload callStackPayload
@@ -237,79 +244,37 @@ activate act suspension = do
       throwIO err
     Right f -> pure f
 
-runInstanceM :: WorkflowInstance -> InstanceM a -> IO a
-runInstanceM worker m = runReaderT (unInstanceM m) worker
 
-nextExternalCancelSequence :: InstanceM Sequence
-nextExternalCancelSequence = do
-  inst <- ask
-  atomicModifyIORef' inst.workflowSequences $ \seqs ->
-    let seq' = externalCancel seqs
-    in (seqs { externalCancel = succ seq' }, Sequence seq')
-
-nextChildWorkflowSequence :: InstanceM Sequence
-nextChildWorkflowSequence = do
-  inst <- ask
-  atomicModifyIORef' inst.workflowSequences $ \seqs ->
-    let seq' = childWorkflow seqs
-    in (seqs { childWorkflow = succ seq' }, Sequence seq')
-
-nextExternalSignalSequence :: InstanceM Sequence
-nextExternalSignalSequence = do
-  inst <- ask
-  atomicModifyIORef' inst.workflowSequences $ \seqs ->
-    let seq' = externalSignal seqs
-    in (seqs { externalSignal = succ seq' }, Sequence seq')
-
-nextTimerSequence :: InstanceM Sequence
-nextTimerSequence = do
-  inst <- ask
-  atomicModifyIORef' inst.workflowSequences $ \seqs ->
-    let seq' = timer seqs
-    in (seqs { timer = succ seq' }, Sequence seq')
-
-nextActivitySequence :: InstanceM Sequence
-nextActivitySequence = do
-  inst <- ask
-  atomicModifyIORef' inst.workflowSequences $ \seqs ->
-    let seq' = activity seqs
-    in (seqs { activity = succ seq' }, Sequence seq')
-
-nextConditionSequence :: InstanceM Sequence
-nextConditionSequence = do
-  inst <- ask
-  atomicModifyIORef' inst.workflowSequences $ \seqs ->
-    let seq' = condition seqs
-    in (seqs { condition = succ seq' }, Sequence seq')
-
-applyStartWorkflow :: StartWorkflow -> InstanceM (SuspendableWorkflowExecution RawPayload)
-applyStartWorkflow startWorkflow = do
+-- | This gives us the basic state for a workflow instance prior to initial evaluation.
+setUpWorkflowExecution :: StartWorkflow -> InstanceM ExecuteWorkflowInput
+setUpWorkflowExecution startWorkflow = do
   inst <- ask
   let (WorkflowGenM genRef) = inst.workflowRandomnessSeed
   writeIORef genRef (mkStdGen $ fromIntegral $ startWorkflow ^. Activation.randomnessSeed)
   writeIORef inst.workflowTime (startWorkflow ^. Activation.startTime . to timespecFromTimestamp)
-
   info <- readIORef inst.workflowInstanceInfo
-  let execInput = ExecuteWorkflowInput
-        { executeWorkflowInputType = startWorkflow ^. Activation.workflowType
-        , executeWorkflowInputArgs = fmap convertFromProtoPayload (startWorkflow ^. Command.vec'arguments)
-        , executeWorkflowInputHeaders = fmap convertFromProtoPayload (startWorkflow ^. Activation.headers)
-        , executeWorkflowInputInfo = info
-        }
 
-      executeWorkflowBase = \input -> runInstanceM inst $ do
-        case inst.workflowInstanceDefinition of
-          (WorkflowDefinition _ (ValidWorkflowFunction fmt innerF applyArgs)) -> do
-            eAct <- liftIO $ applyArgs innerF input.executeWorkflowInputArgs
-            workflowAction <- case eAct of
+  pure $ ExecuteWorkflowInput
+    { executeWorkflowInputType = startWorkflow ^. Activation.workflowType
+    , executeWorkflowInputArgs = fmap convertFromProtoPayload (startWorkflow ^. Command.vec'arguments)
+    , executeWorkflowInputHeaders = fmap convertFromProtoPayload (startWorkflow ^. Activation.headers)
+    , executeWorkflowInputInfo = info
+    }
+
+applyStartWorkflow :: ExecuteWorkflowInput -> (Vector RawPayload -> IO (Either String (Workflow RawPayload))) -> InstanceM (SuspendableWorkflowExecution RawPayload)
+applyStartWorkflow execInput workflowFn = do
+  inst <- ask
+  let executeWorkflowBase input = runInstanceM inst $ do
+        -- case inst.workflowInstanceDefinition of
+        --   (WorkflowDefinition _ (ValidWorkflowFunction fmt innerF applyArgs)) -> do
+            eAct <- liftIO $ workflowFn input.executeWorkflowInputArgs
+            case eAct of
               Left msg -> do
                 $(logError) $ Text.pack ("Failed to decode workflow arguments: " <> msg)
                 throwIO (ValueError msg)
-              Right act -> pure (runWorkflow act >>= liftIO . encode fmt)
-            pure (WorkflowExecution workflowAction)
+              Right act -> pure (runWorkflow act)
 
-  (WorkflowExecution execution) <- liftIO $ inst.interceptors.workflowInboundInterceptors.executeWorkflow execInput executeWorkflowBase 
-  pure execution
+  liftIO $ executeWorkflowBase execInput
 
 applyUpdateRandomSeed :: UpdateRandomSeed -> InstanceM ()
 applyUpdateRandomSeed updateRandomSeed = do
@@ -335,7 +300,7 @@ applyQueryWorkflow queryWorkflow = do
                 (defMessage 
                   & F.message .~ "No query handler found for query"
                   -- & Command.source .~ "Temporal.WorkflowInstance.applyQueryWorkflow"
-                  & F.stackTrace .~ (Text.pack $ prettyCallStack callStack)
+                  & F.stackTrace .~ Text.pack (prettyCallStack callStack)
                 )
             )
       addCommand cmd
@@ -558,12 +523,6 @@ applyResolutions rs = do
     let (newCompletions, updatedSequenceMaps) = foldl' makeCompletion ([], sequenceMaps) rs 
     writeTVar inst.workflowSequenceMaps updatedSequenceMaps
     pure newCompletions
-
-data WorkflowExitVariant a
-  = WorkflowExitContinuedAsNew WorkflowCommand
-  | WorkflowExitCancelled WorkflowCommand
-  | WorkflowExitFailed SomeException WorkflowCommand
-  | WorkflowExitSuccess a
 
 -- Note: this is intended to exclusively handle top-level workflow execution.
 --

@@ -10,6 +10,7 @@ import Data.Int (Int32)
 import Data.ProtoLens
 import Data.String
 import Data.Vector (Vector)
+import Data.Word (Word32)
 import Lens.Family2
 import qualified Proto.Google.Protobuf.Timestamp as Timestamp
 import qualified Proto.Google.Protobuf.Timestamp_Fields as Timestamp
@@ -17,6 +18,11 @@ import qualified Proto.Temporal.Api.Common.V1.Message as Message
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Message
 import qualified Proto.Temporal.Api.Enums.V1.Workflow as Workflow
 import Temporal.Duration
+import Data.Kind
+import Data.Proxy
+import Temporal.Payload
+import qualified Data.Text as T
+import Data.Map (Map)
 
 -- | This is generally the name of the function itself
 newtype WorkflowType = WorkflowType { rawWorkflowType :: Text }
@@ -48,6 +54,9 @@ newtype PatchId = PatchId { rawPatchId :: Text }
 -- created under the same name. There is no limit to the number of Task Queues a Temporal Application can use or a Temporal Cluster 
 -- can maintain.
 newtype TaskQueue = TaskQueue { rawTaskQueue :: Text }
+  deriving (Eq, Ord, Show, Hashable)
+
+newtype ActivityType = ActivityType { rawActivityType :: Text }
   deriving (Eq, Ord, Show, Hashable)
 
 -- | A unique identifier for an Activity Execution.
@@ -161,3 +170,35 @@ headerToProto header = defMessage & Message.fields .~ header
 
 headerFromProto :: Message.Header -> Map.Map Text Message.Payload
 headerFromProto = view Message.fields
+
+data ParentInfo = ParentInfo
+  { parentNamespace :: Namespace
+  , parentRunId :: RunId
+  , parentWorkflowId :: WorkflowId
+  }
+
+newtype Sequence = Sequence { rawSequence :: Word32 }
+  deriving (Eq, Ord, Show, Enum, Num, Hashable)
+
+class FunctionHoist (args :: [Type]) where
+  hoistFn :: (forall x. m x -> n x) -> Proxy args -> Proxy result -> (args :->: m result) -> (args :->: n result)
+
+instance FunctionHoist '[] where
+  hoistFn trans _ _ f = trans f
+
+instance FunctionHoist args => FunctionHoist (a ': args) where
+  hoistFn trans _ res f = \arg -> hoistFn trans (Proxy @args) res (f arg)
+
+-- | A specalized version of 'hoist' that allows you to change the end result functor of a given function.
+hoist 
+  :: forall m n f. (f ~ ArgsOf f :->: m (ResultOf m f), FunctionHoist (ArgsOf f))
+  => (forall x. m x -> n x) 
+  -> f 
+  -> (ArgsOf f :->: n (ResultOf m f))
+hoist trans f = hoistFn trans (Proxy @(ArgsOf f)) (Proxy @(ResultOf m f)) f
+
+nonEmptyString :: Text -> Maybe Text
+nonEmptyString t = if T.null t then Nothing else Just t
+
+convertToProtoMemo :: Map Text RawPayload -> Message.Memo
+convertToProtoMemo m = defMessage & Message.fields .~ fmap convertToProtoPayload m

@@ -38,6 +38,7 @@ module Temporal.Worker
   , setMaxActivitiesPerSecond
   , setMaxTaskQueueActivitiesPerSecond
   , setGracefulShutdownPeriodMillis
+  , addInterceptors
   ) where
 import UnliftIO.Exception
 import UnliftIO
@@ -52,10 +53,10 @@ import Temporal.Core.Client
 import qualified Temporal.Core.Worker as Core
 import Temporal.Internal.JobPool
 import Temporal.Activity (ProvidedActivity(..))
+import Temporal.Activity.Definition
 import qualified Temporal.Activity.Worker as Activity
 import Temporal.Worker.Types
-import Temporal.Workflow.Unsafe
-import Temporal.Workflow.WorkflowDefinition
+import Temporal.Workflow.Definition
 import Temporal.Workflow.WorkflowInstance
 import qualified Temporal.Workflow.Worker as Workflow
 import Temporal.WorkflowInstance
@@ -84,7 +85,7 @@ import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
 import Temporal.Duration (seconds)
-
+import Temporal.Interceptor
 
 -- | A utility class to convert a value into a 'WorkerConfig' using the 'ConfigM' monad.
 --
@@ -118,6 +119,8 @@ configure actEnv = flip execState defaultConfig . unConfigM
       , interceptorConfig = Interceptors
         { workflowInboundInterceptors = WorkflowInboundInterceptor { executeWorkflow = \info next -> next info }
         , workflowOutboundInterceptors = WorkflowOutboundInterceptor
+          { scheduleActivity = \ty info next -> next ty info
+          }
         , activityInboundInterceptors = ActivityInboundInterceptor
         , activityOutboundInterceptors = ActivityOutboundInterceptor
         }
@@ -313,27 +316,26 @@ startWorker client conf = do
   workerCore <- either throwIO pure =<< liftIO (Core.newWorker client conf.coreConfig)
   $(logDebug) "Instantiated core"
   runningWorkflows <- newTVarIO mempty
-  deadlockedWorkflows <- newTVarIO mempty
   runningActivities <- newTVarIO mempty
   workerLogFn <- askLoggerIO
   let workerWorkflowFunctions = conf.wfDefs
       workerConfig = conf
-      workerTaskQueue = Core.taskQueue conf.coreConfig
-      workerWorkflowState = WorkflowWorker{..}
+      workerTaskQueue = TaskQueue $ Core.taskQueue conf.coreConfig
+      workflowWorker = Workflow.WorkflowWorker{..}
 
       initialEnv = conf.actEnv
       definitions = conf.actDefs
-      workerActivityState = ActivityWorker{..}
+      activityWorker = Activity.ActivityWorker{..}
       worker = Temporal.Worker.Types.Worker{..}
       workerClient = client
 
   workerWorkflowLoop <- async $ do
     $(logDebug) "Starting workflow worker loop"
-    liftIO $ Workflow.execute worker
+    Workflow.execute workflowWorker
     $(logDebug) "Exiting workflow worker loop"
   workerActivityLoop <- async $ do 
     $(logDebug) "Starting activity worker loop"
-    liftIO $ Activity.execute worker
+    liftIO $ Activity.execute activityWorker
     $(logDebug) "Exiting activity worker loop"
   pure Temporal.Worker.Worker{..}
 

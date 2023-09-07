@@ -1,146 +1,190 @@
 cabal-version: 3.0
-name: temporal-sdk
-version: 1.0.0.0
-license-file: LICENSE
-copyright: (c) Ian Duncan
-author: Ian Duncan
-build-type: Simple
+
+-- This file has been generated from package.yaml by hpack version 0.35.2.
+--
+-- see: https://github.com/sol/hpack
+
+name:           temporal-sdk
+version:        0.0.1.0
+license:        BSD-3-Clause
+license-file:   LICENSE
+build-type:     Simple
 
 library
-  hs-source-dirs: src
-  build-depends: 
-    base >= 4.14 && < 5, 
-    proto-lens, 
-    temporal-api-protos, 
-    temporal-sdk-core,
-    bytestring, 
-    mtl,
-    transformers,
-    text,
-    aeson,
-    unordered-containers,
-    vector,
-    async,
-    unliftio,
-    lens-family,
-    scientific,
-    uuid,
-    uuid-types,
-    stm,
-    time,
-    containers,
-    hashable,
-    monad-logger,
-    random,
-    exceptions,
-    ghc,
-    template-haskell,
-    conduit,
-    if-instance,
-    annotated-exception,
-    require-callstack,
-    barbies,
-    hs-opentelemetry-api,
-    hs-opentelemetry-propagator-w3c,
-    base64,
-    zlib
-
-  default-language: Haskell2010
-  default-extensions:
-    BangPatterns,
-    ConstraintKinds,
-    GADTs,
-    GeneralizedNewtypeDeriving,
-    LambdaCase,
-    FlexibleContexts,
-    FlexibleInstances,
-    MultiParamTypeClasses,
-    OverloadedStrings,
-    OverloadedRecordDot,
-    RankNTypes,
-    RecordWildCards,
-    TypeOperators
-
-  other-modules:
-    Temporal.Activity.Definition,
-    Temporal.Activity.Worker,
-    Temporal.Common,
-    Temporal.Coroutine,
-    -- Temporal.Generic.GenericN,
-    Temporal.Workflow.WorkflowDefinition,
-    Temporal.WorkflowInstance,
-    Temporal.Workflow.Worker,
-    Temporal.Workflow.Unsafe,
-    Temporal.Workflow.WorkflowInstance,
-    Temporal.Worker.Types
   exposed-modules:
-    Temporal.Activity,
-    Temporal.Contrib.OpenTelemetry,
-    Temporal.Client,
-    -- Temporal.EphemeralServer,
-    Temporal.Duration,
-    Temporal.Exception,
-    Temporal.Generic,
-    Temporal.Generic.TyFun,
-    Temporal.Interceptor,
-    Temporal.Payload,
-    -- Temporal.Payload.TH,
-    -- Temporal.Schedule,
-    Temporal.SearchAttributes,
-    Temporal.Workflow,
-    Temporal.Workflow.Saga,
-    Temporal.Worker,
-    Paths_temporal_sdk
+      Temporal.Activity
+      Temporal.Client
+      Temporal.Client.AsyncActivity
+      Temporal.Client.Namespace
+      Temporal.Client.Schedule
+      Temporal.Client.Workflow
+      Temporal.Common.ActivityOptions
+      Temporal.Common.ContinueAsNewOptions
+      Temporal.Common.TimeoutType
+      Temporal.Contrib.OpenTelemetry
+      Temporal.Duration
+      Temporal.EphemeralServer
+      Temporal.Exception
+      Temporal.Generic
+      Temporal.Generic.GenericN
+      Temporal.Generic.TyFun
+      Temporal.Interceptor
+      Temporal.Logging
+      Temporal.Payload
+      Temporal.SearchAttributes
+      Temporal.Worker
+      Temporal.Workflow
+      Temporal.Workflow.Info
+      Temporal.Workflow.Internal.Instance
+      Temporal.Workflow.Internal.Monad
+      Temporal.Workflow.Query
+      Temporal.Workflow.Saga
+      Temporal.Workflow.Signal
+      Temporal.Workflow.Unsafe.Handle
+  other-modules:
+      Temporal.Activity.Definition
+      Temporal.Activity.Worker
+      Temporal.Common
+      Temporal.Coroutine
+      Temporal.Workflow.Definition
+      Temporal.WorkflowInstance
+      Temporal.Workflow.Worker
+      Temporal.Workflow.Eval
+      Temporal.Workflow.WorkflowInstance
+      Temporal.Worker.Types
+  hs-source-dirs:
+      src
+  default-extensions:
+      BangPatterns
+      DataKinds
+      FlexibleContexts
+      FlexibleInstances
+      GADTs
+      GeneralizedNewtypeDeriving
+      InstanceSigs
+      LambdaCase
+      MultiParamTypeClasses
+      NamedFieldPuns
+      RankNTypes
+      OverloadedRecordDot
+      OverloadedStrings
+      RecordWildCards
+      ScopedTypeVariables
+      StandaloneDeriving
+      TypeApplications
+      TypeFamilies
+      UndecidableInstances
+      TypeOperators
+  ghc-options: -Weverything -Wno-missing-exported-signatures -Wno-missing-export-lists -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -Wno-unused-packages -Wno-operator-whitespace -fdiagnostics-color=always -Wno-missing-kind-signatures -Wno-implicit-lift -Wno-implicit-prelude -fwarn-tabs +RTS -A128m -n2m -RTS -fdefer-diagnostics
+  build-depends:
+      aeson
+    , annotated-exception
+    , async
+    , barbies
+    , base
+    , base64
+    , bytestring
+    , conduit
+    , containers
+    , exceptions
+    , ghc
+    , hashable
+    , hs-opentelemetry-api
+    , hs-opentelemetry-propagator-w3c
+    , lens-family
+    , monad-logger
+    , mtl
+    , proto-lens
+    , random
+    , require-callstack
+    , scientific
+    , stm
+    , template-haskell
+    , temporal-api-protos
+    , temporal-sdk-core
+    , text
+    , time
+    , transformers
+    , unliftio
+    , unordered-containers
+    , uuid
+    , uuid-types
+    , vector
+    , zlib
+  default-language: Haskell2010
+  if true
+    exposed-modules:
+        Paths_temporal_sdk
+    autogen-modules:
+        Paths_temporal_sdk
 
 test-suite temporal-sdk-tests
   type: exitcode-stdio-1.0
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
-  build-tool-depends:
-    hspec-discover:hspec-discover
-  build-depends:
-    base >= 4.14 && < 5,
-    temporal-sdk,
-    temporal-sdk-core,
-    bytestring,
-    hspec,
-    text,
-    uuid,
-    monad-logger,
-    exceptions,
-    mtl,
-    transformers,
-    time,
-    unliftio,
-    proto-lens,
-    containers,
-    require-callstack
   main-is: Main.hs
-  hs-source-dirs: test
   other-modules:
-    Spec,
-    AsyncCompletionSpec,
-    GenericSpec,
-    IntegrationSpec,
-
-
--- executable hello
---   hs-source-dirs: app
---   main-is: Main.hs
---   build-depends: 
---     base >= 4.14 && < 5, 
---     temporal-sdk, 
---     temporal-sdk-core,
---     proto-lens,
---     temporal-api-protos,
---     async,
---     text,
---     lens-family,
---     uuid,
---     unordered-containers,
---     monad-logger,
---     unliftio,
---     clock,
---     unix
---   default-language: Haskell2010
---   frameworks: Security, CoreFoundation
---   ghc-options: -threaded -rtsopts -with-rtsopts=-N
+      Spec, AsyncCompletionSpec, GenericSpec, IntegrationSpec,
+  hs-source-dirs:
+      test
+  default-extensions:
+      BangPatterns
+      DataKinds
+      FlexibleContexts
+      FlexibleInstances
+      GADTs
+      GeneralizedNewtypeDeriving
+      InstanceSigs
+      LambdaCase
+      MultiParamTypeClasses
+      NamedFieldPuns
+      RankNTypes
+      OverloadedRecordDot
+      OverloadedStrings
+      RecordWildCards
+      ScopedTypeVariables
+      StandaloneDeriving
+      TypeApplications
+      TypeFamilies
+      UndecidableInstances
+      TypeOperators
+  ghc-options: -Weverything -Wno-missing-exported-signatures -Wno-missing-export-lists -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -Wno-unused-packages -Wno-operator-whitespace -fdiagnostics-color=always -Wno-missing-kind-signatures -Wno-implicit-lift -Wno-implicit-prelude -fwarn-tabs +RTS -A128m -n2m -RTS -fdefer-diagnostics -threaded -rtsopts -with-rtsopts=-N
+  build-tool-depends:
+      hspec-discover:hspec-discover
+  build-depends:
+      aeson
+    , annotated-exception
+    , async
+    , barbies
+    , base
+    , base64
+    , bytestring
+    , conduit
+    , containers
+    , exceptions
+    , ghc
+    , hashable
+    , hs-opentelemetry-api
+    , hs-opentelemetry-propagator-w3c
+    , hs-opentelemetry-sdk
+    , hspec
+    , lens-family
+    , monad-logger
+    , mtl
+    , proto-lens
+    , random
+    , require-callstack
+    , scientific
+    , stm
+    , template-haskell
+    , temporal-api-protos
+    , temporal-sdk
+    , temporal-sdk-core
+    , text
+    , time
+    , transformers
+    , unliftio
+    , unordered-containers
+    , uuid
+    , uuid-types
+    , vector
+    , zlib
+  default-language: Haskell2010

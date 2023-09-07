@@ -75,3 +75,13 @@ supplyM :: Monad m => (s (Coroutine s m x) -> m (Coroutine s m x)) -> Coroutine 
 supplyM runStep = loop
   where 
     loop c = resume c >>= either (runStep >=> loop) pure
+
+coroutineHoist 
+  :: forall f m n a. (Functor f, Monad m, Monad n) 
+  => (forall b. m b -> n b) -> Coroutine f m a -> Coroutine f n a
+coroutineHoist f routine = Coroutine 
+  { resume = liftM go $ f $ resume routine
+  }
+  where 
+    go (Right r) = Right r
+    go (Left s) = Left (coroutineHoist f <$> s)
