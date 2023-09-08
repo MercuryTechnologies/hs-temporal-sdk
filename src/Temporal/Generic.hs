@@ -114,9 +114,9 @@ import qualified Data.Text as Text
 import GHC.Generics
 import GHC.TypeLits
 import RequireCallStack
-import Temporal.Payload
 import Barbies
 import Barbies.Bare
+import Temporal.Common.ActivityOptions
 -- import Temporal.Activity
 -- import Temporal.Generic.Applicative
 -- import Temporal.Generic.Constraints
@@ -124,14 +124,12 @@ import Barbies.Bare
 -- import Temporal.Generic.GenericN
 -- import Temporal.Generic.GUsing
 -- import Temporal.Generic.Traversable
-import Temporal.Generic.TyFun
-import Temporal.Worker
-import Temporal.Worker.Types
-import Temporal.Workflow.Definition
+import Temporal.Payload
 import Temporal.Activity
 import Temporal.Activity.Definition
+import Temporal.Worker
 import Temporal.Workflow 
-  (startActivity, defaultStartActivityOptions, TimeoutType (ScheduleToClose), wait, ActivityRef(..), WorkflowRef(..))
+import Temporal.Workflow.Definition
 import Temporal.Workflow.Internal.Monad
 
 type family ApplyRef (args :: [Type]) (f :: Type) where
@@ -227,8 +225,18 @@ instance
   ( ApplyDef original ~ ActivityDefinition env
   , FunctionSupportsCodec' (Activity env) codec original
   ) => DefFromFunction' codec env (Activity env result) original where
-  defFromFunction _ codec name f = Def $ ActivityDefinition (Text.pack name) $ 
-    ValidActivityFunction codec f (applyPayloads codec (Proxy @(ArgsOf original)) (Proxy @(Activity env (ResultOf (Activity env) original))))
+  defFromFunction _ codec name f = Def $ ActivityDefinition 
+    (Text.pack name)
+    (\actEnv input -> do
+      eAct <- applyPayloads 
+        codec 
+        (Proxy @(ArgsOf original)) 
+        (Proxy @(Activity env (ResultOf (Activity env) original)))
+        f
+        input.activityArgs
+      traverse (\act -> runActivity actEnv act >>= encode codec) eAct
+    )
+    -- ValidActivityFunction codec f (applyPayloads codec (Proxy @(ArgsOf original)) (Proxy @(Activity env (ResultOf (Activity env) original))))
 
 instance DefFromFunction' codec env b original => DefFromFunction' codec env (a -> b) original where
   defFromFunction _ codec name f = defFromFunction (Proxy @b) codec name f

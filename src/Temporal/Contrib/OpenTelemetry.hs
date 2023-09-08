@@ -11,12 +11,13 @@ import OpenTelemetry.Propagator
 import OpenTelemetry.Trace.Core
 import qualified Data.Map.Strict as Map
 import Data.Version (showVersion)
+import Data.Word (Word32)
 import Temporal.Common.ActivityOptions
 import Temporal.Duration
 import Temporal.Interceptor
 import Temporal.Payload (RawPayload(..))
 import OpenTelemetry.Propagator.W3CTraceContext
-import OpenTelemetry.Context.ThreadLocal (adjustContext, getContext)
+import OpenTelemetry.Context.ThreadLocal (attachContext, getContext)
 import Temporal.Workflow
   ( WorkflowId(..)
   , RunId(..)
@@ -110,6 +111,7 @@ makeOpenTelemetryInterceptor = do
     { workflowInboundInterceptors = WorkflowInboundInterceptor
       { executeWorkflow = \input next -> do
           ctxt <- extract headersPropagator input.executeWorkflowInputHeaders Ctxt.empty
+          _ <- attachContext ctxt
           let spanArgs = defaultSpanArguments
                 { kind = Server
                 , attributes = HashMap.fromList $
@@ -171,12 +173,35 @@ makeOpenTelemetryInterceptor = do
             pure execution
       }
     , workflowOutboundInterceptors = WorkflowOutboundInterceptor
-      { scheduleActivity = \actName@(ActivityType t) input next -> do
-        inSpan'' tracer ("StartActivity:" <> t) defaultSpanArguments $ \_ -> do
+      { scheduleActivity = \input next -> do
+        let spanArgs = defaultSpanArguments
+              { kind = Client
+              }
+        inSpan'' tracer ("StartActivity:" <> input.activityType) spanArgs $ \_ -> do
           ctxt <- getContext
           hdrs <- inject headersPropagator ctxt input.options.headers 
-          next actName $ input { options = input.options { Temporal.Common.ActivityOptions.headers = hdrs } }
+          next $ input { options = input.options { Temporal.Common.ActivityOptions.headers = hdrs } }
       }
     , activityInboundInterceptors = ActivityInboundInterceptor
+      { executeActivity = \input next -> do
+        let spanArgs = defaultSpanArguments
+              { kind = Server
+              , attributes = HashMap.fromList
+                [ ("temporal.workflow_id", toAttribute $ rawWorkflowId $ input.activityInfo.workflowId)
+                , ("temporal.workflow_type", toAttribute $ rawWorkflowType $ input.activityInfo.workflowType)
+                , ("temporal.run_id", toAttribute $ rawRunId $ input.activityInfo.runId)
+                , ("temporal.activity_id", toAttribute $ rawActivityId $ input.activityInfo.activityId)
+                , ("temporal.activity_type", toAttribute $ input.activityInfo.activityType)
+                , ("temporal.attempt", toAttribute $ fromIntegral @Word32 @Int input.activityInfo.attempt)
+                -- , ("temporal.namespace", toAttribute $ rawNamespace $ input.activityInfo.namespace)
+                , ("temporal.activity_is_local", toAttribute $ input.activityInfo.isLocal)
+                ]
+              }
+        
+        ctxt <- extract headersPropagator input.activityHeaders Ctxt.empty
+        _ <- attachContext ctxt
+        inSpan'' tracer ("RunActivity:" <> input.activityInfo.activityType) spanArgs $ \_span -> do
+          next input
+      }
     , activityOutboundInterceptors = ActivityOutboundInterceptor
     }

@@ -14,15 +14,21 @@ import Data.Map.Strict (Map)
 import Data.Text (Text)
 import Data.Vector (Vector)
 import Temporal.Common
+import Temporal.Common.ActivityOptions
 import Temporal.Payload
 import Temporal.Workflow.Info
 import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands (WorkflowCommand)
 import Temporal.Workflow.Internal.Monad
 
-data ActivityInboundInterceptor = ActivityInboundInterceptor { }
+data ActivityInboundInterceptor = ActivityInboundInterceptor 
+  { executeActivity :: ExecuteActivityInput -> (ExecuteActivityInput -> IO (Either String RawPayload)) -> IO (Either String RawPayload)
+  }
 
 instance Semigroup ActivityInboundInterceptor where
-  ActivityInboundInterceptor <> ActivityInboundInterceptor = ActivityInboundInterceptor
+  l <> r = ActivityInboundInterceptor
+    { executeActivity = \input next -> (executeActivity l) input $ \input' -> (executeActivity r) input' next
+    }
+
 
 data ActivityOutboundInterceptor = ActivityOutboundInterceptor { }
 

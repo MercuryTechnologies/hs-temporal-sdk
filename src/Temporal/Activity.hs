@@ -34,6 +34,7 @@ import Temporal.Exception
 import Temporal.Activity.Definition
 import Temporal.Activity.Worker
 import Temporal.Common
+import Temporal.Common.ActivityOptions
 import Temporal.Core.Worker (recordActivityHeartbeat)
 import Temporal.Payload
 import Temporal.Workflow
@@ -62,10 +63,14 @@ provideActivity :: forall codec env f.
 provideActivity codec name f = ProvidedActivity
   { definition = ActivityDefinition
       { activityName = name
-      , activityRun = ValidActivityFunction 
-          codec 
-          f 
-          (applyPayloads codec (Proxy @(ArgsOf f)) (Proxy @(Activity env (ResultOf (Activity env) f))))
+      , activityRun = \actEnv input -> do
+          eAct <- applyPayloads 
+            codec 
+            (Proxy @(ArgsOf f)) 
+            (Proxy @(Activity env (ResultOf (Activity env) f)))
+            f
+            input.activityArgs
+          traverse (\act -> runActivity actEnv act >>= encode codec) eAct
       }
   , reference = KnownActivity
       { knownActivityCodec = codec

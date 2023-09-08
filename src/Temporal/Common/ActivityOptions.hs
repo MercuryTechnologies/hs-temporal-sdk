@@ -1,10 +1,14 @@
+{-# language DuplicateRecordFields #-}
 module Temporal.Common.ActivityOptions where
+import Data.Map.Strict (Map)
+import Data.Text (Text)
+import Data.Time.Clock.System (SystemTime)
+import Data.Vector (Vector)
+import Data.Word
 import Temporal.Common
 import Temporal.Common.TimeoutType
 import Temporal.Duration
-import Data.Map.Strict (Map)
 import Temporal.Payload
-import Data.Text (Text)
 
 data StartActivityOptions = StartActivityOptions
   { activityId :: Maybe ActivityId
@@ -46,3 +50,33 @@ data ActivityCancellationType
   | ActivityCancellationAbandon
   -- ^ Do not request cancellation of the activity and immediately report cancellation to the
   -- workflow
+
+data ExecuteActivityInput = ExecuteActivityInput
+  { activityArgs :: Vector RawPayload
+  , activityHeaders :: Map Text RawPayload
+  , activityInfo :: ActivityInfo
+  }
+
+data ActivityInfo = ActivityInfo
+  { workflowNamespace :: Namespace
+  , workflowType :: WorkflowType
+  , workflowId :: WorkflowId
+  , runId :: RunId
+  , activityId :: ActivityId
+  , activityType :: Text
+  , headerFields :: Map Text RawPayload
+  -- input
+  , heartbeatDetails :: Vector RawPayload
+  , scheduledTime :: SystemTime
+  , currentAttemptScheduledTime :: SystemTime
+  , startedTime :: SystemTime
+  , attempt :: Word32
+  -- TODO, are we in charge of honoring these timeouts?
+  -- Or does the server send cancel requests if we don't?
+  , scheduleToCloseTimeout :: Maybe Duration
+  , startToCloseTimeout :: Maybe Duration
+  , heartbeatTimeout :: Maybe Duration
+  , retryPolicy :: Maybe RetryPolicy
+  , isLocal :: Bool
+  , taskToken :: TaskToken
+  }

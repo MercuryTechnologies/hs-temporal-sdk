@@ -135,6 +135,9 @@ create workflowCompleteActivation workflowFn workflowDeadlockTimeout inboundInte
       WorkflowExitFailed _ cmd -> addCommand cmd
     flushCommands
     handleQueriesAfterCompletion
+  -- If we have an exception crash the workflow thread, then we need to throw to the worker too,
+  -- otherwise it will just hang forever.
+  link workerThread
   writeIORef executionThread workerThread
   pure inst
 

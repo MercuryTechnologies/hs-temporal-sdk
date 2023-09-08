@@ -122,7 +122,7 @@ module Temporal.Workflow
   -- * Continue as new
   , ContinueAsNewOptions -- TODO, fields conflict
   , defaultContinueAsNewOptions
-  , continueAsNew
+  , Temporal.Workflow.continueAsNew
   -- * Type definitions
   , GatherArgs
   , ActivityId(..)
@@ -158,6 +158,7 @@ import Data.Kind
 import Data.UUID (UUID)
 import Data.UUID.Types.Internal ( buildFromBytes )
 import Data.Vector (Vector)
+import qualified Data.Vector as V
 import Lens.Family2
 import Proto.Temporal.Api.Common.V1.Message (Payload)
 import RequireCallStack
@@ -233,59 +234,66 @@ startActivityFromPayloads
   -> [IO RawPayload] 
   -> Workflow (Task result)
 startActivityFromPayloads (KnownActivity codec mTaskQueue name) opts typedPayloads = ilift $ do
+  runInIO <- askRunInIO
   updateCallStack
   inst <- ask
-  ps <- traverse (fmap convertToProtoPayload . liftIO) typedPayloads
-  -- let inst.interceptors.workflouwOutboundInterceptors
+  ps <- traverse liftIO typedPayloads
+  let intercept :: ActivityInput -> (ActivityInput -> IO (Task RawPayload)) -> IO (Task RawPayload)
+      intercept = inst.outboundInterceptor.scheduleActivity
   s@(Sequence actSeq) <- nextActivitySequence
-  resultSlot <- newIVar
-  atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-    seqMaps { activities = HashMap.insert s resultSlot (activities seqMaps) }
+  rawTask <- liftIO $ intercept (ActivityInput name (V.fromList ps) opts s) $ \activityInput -> runInIO $ do
+    resultSlot <- newIVar
+    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+      seqMaps { activities = HashMap.insert s resultSlot (activities seqMaps) }
 
-  info <- readIORef inst.workflowInstanceInfo
-  let scheduleActivity = defMessage
-        & Command.seq .~ actSeq
-        & Command.activityId .~ maybe (Text.pack $ show actSeq) rawActivityId (opts.activityId)
-        & Command.activityType .~ name
-        & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue mTaskQueue)
-        & Command.headers .~ fmap convertToProtoPayload opts.headers
-        & Command.arguments .~ ps
-        & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts.retryPolicy
-        & Command.cancellationType .~ activityCancellationTypeToProto opts.cancellationType
-        & Command.maybe'scheduleToStartTimeout .~ fmap durationToProto opts.scheduleToStartTimeout
-        & Command.maybe'heartbeatTimeout .~ fmap durationToProto opts.heartbeatTimeout
-        & \msg -> case opts.timeout of
-          StartToClose t -> msg & Command.startToCloseTimeout .~ durationToProto t
-          ScheduleToClose t -> msg & Command.scheduleToCloseTimeout .~ durationToProto t
-          StartToCloseAndScheduleToClose stc stc' -> msg 
-            & Command.startToCloseTimeout .~ durationToProto stc
-            & Command.scheduleToCloseTimeout .~ durationToProto stc'
-        & Command.doNotEagerlyExecute .~ opts.disableEagerExecution
+    info <- readIORef inst.workflowInstanceInfo
+    let scheduleActivity = defMessage
+          & Command.seq .~ actSeq
+          & Command.activityId .~ maybe (Text.pack $ show actSeq) rawActivityId (activityInput.options.activityId)
+          & Command.activityType .~ activityInput.activityType
+          & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue mTaskQueue)
+          & Command.headers .~ fmap convertToProtoPayload activityInput.options.headers
+          & Command.vec'arguments .~ fmap convertToProtoPayload activityInput.args
+          & Command.maybe'retryPolicy .~ fmap retryPolicyToProto activityInput.options.retryPolicy
+          & Command.cancellationType .~ activityCancellationTypeToProto activityInput.options.cancellationType
+          & Command.maybe'scheduleToStartTimeout .~ fmap durationToProto activityInput.options.scheduleToStartTimeout
+          & Command.maybe'heartbeatTimeout .~ fmap durationToProto activityInput.options.heartbeatTimeout
+          & \msg -> case activityInput.options.timeout of
+            StartToClose t -> msg & Command.startToCloseTimeout .~ durationToProto t
+            ScheduleToClose t -> msg & Command.scheduleToCloseTimeout .~ durationToProto t
+            StartToCloseAndScheduleToClose stc stc' -> msg 
+              & Command.startToCloseTimeout .~ durationToProto stc
+              & Command.scheduleToCloseTimeout .~ durationToProto stc'
+          & Command.doNotEagerlyExecute .~ activityInput.options.disableEagerExecution
 
-  let cmd = defMessage & Command.scheduleActivity .~ scheduleActivity
-  addCommand cmd
-  pure $ Task 
-    { waitAction = do
-      res <- getIVar resultSlot
-      Workflow $ \_ -> case res ^. Activation.result . ActivityResult.maybe'status of
-        Nothing -> error "Activity result missing status"
-        Just (ActivityResult.ActivityResolution'Completed success) -> do
-          result <- liftIO $ decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
-          case result of
-            -- TODO handle properly
-            Left err -> error $ "Failed to decode activity result: " <> show err
-            Right val -> pure $ Done val
-        Just (ActivityResult.ActivityResolution'Failed failure) -> pure $ Throw $ toException $ ActivityFailed (failure ^. ActivityResult.failure)
-        Just (ActivityResult.ActivityResolution'Cancelled details) -> pure $ Throw $ toException $ ActivityCancelled (details ^. ActivityResult.failure)
-        Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"
-    , cancelAction = do
-      let cancelCmd = defMessage
-            & Command.requestCancelActivity .~ 
-              ( defMessage
-                & Command.seq .~ actSeq
-              )
-      ilift $ addCommand cancelCmd
-    }
+    let cmd = defMessage & Command.scheduleActivity .~ scheduleActivity
+    addCommand cmd
+    pure $ Task 
+      { waitAction = do
+        res <- getIVar resultSlot
+        Workflow $ \_ -> case res ^. Activation.result . ActivityResult.maybe'status of
+          Nothing -> error "Activity result missing status"
+          Just (ActivityResult.ActivityResolution'Completed success) -> pure $ Done (success ^. ActivityResult.result . to convertFromProtoPayload)
+          Just (ActivityResult.ActivityResolution'Failed failure) -> pure $ Throw $ toException $ ActivityFailed (failure ^. ActivityResult.failure)
+          Just (ActivityResult.ActivityResolution'Cancelled details) -> pure $ Throw $ toException $ ActivityCancelled (details ^. ActivityResult.failure)
+          Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"
+      , cancelAction = do
+        let cancelCmd = defMessage
+              & Command.requestCancelActivity .~ 
+                ( defMessage
+                  & Command.seq .~ actSeq
+                )
+        ilift $ addCommand cancelCmd
+      }
+  pure 
+    ( rawTask `bindTask` (\payload -> Workflow $ \_ -> do
+        result <- liftIO $ decode codec payload
+        case result of
+          -- TODO handle properly
+          Left err -> error $ "Failed to decode activity result: " <> show err
+          Right val -> pure $ Done val
+        )
+    )
 
 startActivity 
   :: forall activity. (RequireCallStack, ActivityRef activity)

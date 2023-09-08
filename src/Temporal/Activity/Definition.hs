@@ -12,6 +12,7 @@ import Data.Text (Text)
 import Data.Vector (Vector)
 import Data.Word (Word32)
 import Temporal.Common
+import Temporal.Common.ActivityOptions
 import Temporal.Payload
 import Temporal.Core.Client (Client)
 import Temporal.Core.Worker (Worker, getWorkerClient)
@@ -38,7 +39,7 @@ instance HasActivityDefinition (ActivityDefinition env) where
 
 data ActivityDefinition env = ActivityDefinition
   { activityName :: Text
-  , activityRun :: ValidActivityFunction env
+  , activityRun :: ActivityEnv env -> ExecuteActivityInput -> IO (Either String RawPayload)
   }
 
 data ActivityEnv env = ActivityEnv
@@ -66,29 +67,8 @@ newtype Activity env a = Activity { unActivity :: ReaderT (ActivityEnv env) IO a
     , MonadMask
     )
 
-data ActivityInfo = ActivityInfo
-  { workflowNamespace :: Namespace
-  , workflowType :: WorkflowType
-  , workflowId :: WorkflowId
-  , runId :: RunId
-  , activityId :: ActivityId
-  , activityType :: Text
-  , headerFields :: Map Text RawPayload
-  -- input
-  , heartbeatDetails :: Vector RawPayload
-  , scheduledTime :: SystemTime
-  , currentAttemptScheduledTime :: SystemTime
-  , startedTime :: SystemTime
-  , attempt :: Word32
-  -- TODO, are we in charge of honoring these timeouts?
-  -- Or does the server send cancel requests if we don't?
-  , scheduleToCloseTimeout :: Maybe Duration
-  , startToCloseTimeout :: Maybe Duration
-  , heartbeatTimeout :: Maybe Duration
-  , retryPolicy :: Maybe RetryPolicy
-  , isLocal :: Bool
-  , taskToken :: TaskToken
-  }
+runActivity :: ActivityEnv env -> Activity env a -> IO a
+runActivity env (Activity m) = runReaderT m env
 
 askActivityInfo :: Activity env ActivityInfo
 askActivityInfo = Activity $ asks (.activityInfo)

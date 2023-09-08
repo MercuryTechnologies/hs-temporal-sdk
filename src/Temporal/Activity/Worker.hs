@@ -6,6 +6,7 @@ module Temporal.Activity.Worker where
 import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.Reader
+import Data.Bifunctor
 import qualified Data.HashMap.Strict as HashMap
 import Data.ProtoLens
 import qualified Data.Text as T
@@ -18,6 +19,7 @@ import qualified Proto.Temporal.Api.Common.V1.Message_Fields as P
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import Temporal.Activity.Definition
 import Temporal.Common
+import Temporal.Common.ActivityOptions
 import qualified Temporal.Core.Client as Core
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
@@ -26,6 +28,7 @@ import UnliftIO
 import Temporal.Duration (durationFromProto)
 import Data.HashMap.Strict (HashMap)
 import Data.Text (Text)
+import Temporal.Interceptor
 
 data ActivityWorker env = ActivityWorker
   { initialEnv :: env
@@ -33,6 +36,8 @@ data ActivityWorker env = ActivityWorker
   , definitions :: HashMap Text (ActivityDefinition env)
   , runningActivities :: TVar (HashMap TaskToken (Async ()))
   , workerCore :: Core.Worker
+  , activityInboundInterceptors :: ActivityInboundInterceptor
+  , activityOutboundInterceptors :: ActivityOutboundInterceptor
   }
 
 instance MonadLogger (ActivityWorkerM env) where
@@ -107,117 +112,93 @@ applyActivityTask task = case task ^. AT.maybe'variant of
   where
     tt = TaskToken $ task ^. AT.taskToken
 
--- TODO, where should async exception masking happen?
-applyActivityTaskStart :: TaskToken -> AT.Start -> ActivityWorkerM actEnv ()
-applyActivityTaskStart tt msg = mask_ $ do
+requireActivityNotRunning :: TaskToken -> ActivityWorkerM actEnv () -> ActivityWorkerM actEnv ()
+requireActivityNotRunning tt m = do
   w <- ask
-  $logDebug $ "Starting activity: " <> T.pack (show tt)
   running <- readTVarIO w.runningActivities
   case HashMap.lookup tt running of
     Just _ -> throwIO $ RuntimeError "Activity task already running"
-    Nothing -> do
-      let info = activityInfoFromProto tt msg
-          env = w.initialEnv
-      
-      a <- async $ do
-        ef <- liftIO $ UnliftIO.try $
-          case HashMap.lookup info.activityType w.definitions of
-            Nothing -> throwIO $ RuntimeError ("Activity type not found: " <> T.unpack info.activityType)
-            Just ActivityDefinition{..} -> case activityRun of
-              ValidActivityFunction c f applyArgs -> do
-                res <- liftIO $ applyArgs f (fmap convertFromProtoPayload (msg ^. AT.vec'input))
-                case res of
-                  Left err -> throwIO $ ValueError err
-                  Right ok -> pure (ok >>= liftIO . Temporal.Payload.encode c)
-        case ef of
-          Left (SomeException err) -> do
+    Nothing -> m
+
+-- TODO, where should async exception masking happen?
+applyActivityTaskStart :: TaskToken -> AT.Start -> ActivityWorkerM actEnv ()
+applyActivityTaskStart tt msg = do
+  w <- ask
+  $logDebug $ "Starting activity: " <> T.pack (show tt)
+  requireActivityNotRunning tt $ do
+    let info = activityInfoFromProto tt msg
+        env = w.initialEnv
+        actEnv = ActivityEnv w.workerCore info env
+        input = ExecuteActivityInput
+          (fmap convertFromProtoPayload (msg ^. AT.vec'input))
+          info.headerFields
+          info
+    -- We mask here to ensure that the activity is definitely registered
+    -- before we start running it. This is important because we need to be able to cancel
+    -- it later if the orchestrator requests it.
+    mask_ $ do
+      syncPoint <- newEmptyMVar
+      runningActivity <- async $ do
+        (ef :: Either SomeException (Either String RawPayload)) <- liftIO $ UnliftIO.trySyncOrAsync $ do
+          w.activityInboundInterceptors.executeActivity input $ \input' -> do
+            case HashMap.lookup info.activityType w.definitions of
+              Nothing -> throwIO $ RuntimeError ("Activity type not found: " <> T.unpack info.activityType)
+              Just ActivityDefinition{..} -> 
+                activityRun actEnv input' `finally` 
+                (takeMVar syncPoint *> atomically (modifyTVar' w.runningActivities (HashMap.delete tt)))
+        completionMsg <- case join $ fmap (first (toException . ValueError)) ef of
+          Left err -> do
             $logError (T.pack (show err))
-            void $ liftIO $ Core.completeActivityTask w.workerCore $ defMessage
+            pure $ defMessage
               & C.taskToken .~ rawTaskToken tt
-              & C.result .~
-                ( defMessage & AR.failed .~ 
-                  ( defMessage & AR.failure .~ 
-                    ( defMessage 
-                      & F.message .~ T.pack (show err)
-                      -- TODO, protobuf docs aren't clear on what this should be
-                      & F.source .~ "haskell"
-                      -- TODO, annotated exceptions might be needed for this
-                      & F.stackTrace .~ ""
-                      -- TODO encoded attributes
-                      -- & F.encodedAttributes .~ _
-                      -- & F.cause .~ _
-                      & F.activityFailureInfo .~
-                      ( defMessage
-                        -- & F.scheduledEventId .~ _
-                        -- & F.startedEventId .~ _
-                        & F.identity .~ Core.identity (Core.clientConfig $ Core.getWorkerClient w.workerCore)
-                        & F.activityType .~ (defMessage & P.name .~ info.activityType)
-                        & F.activityId .~ (msg ^. AT.activityId)
-                        -- & F.retryState .~ _
-                      )
+              & C.result .~ case fromException err of
+              Just AsyncCancelled -> defMessage 
+                & AR.cancelled .~ defMessage
+              Nothing -> defMessage & AR.failed .~ 
+                ( defMessage & AR.failure .~ 
+                  ( defMessage 
+                    & F.message .~ T.pack (show err)
+                    -- TODO, protobuf docs aren't clear on what this should be
+                    & F.source .~ "haskell"
+                    -- TODO, annotated exceptions might be needed for this
+                    & F.stackTrace .~ ""
+                    -- TODO encoded attributes
+                    -- & F.encodedAttributes .~ _
+                    -- & F.cause .~ _
+                    & F.activityFailureInfo .~
+                    ( defMessage
+                      -- & F.scheduledEventId .~ _
+                      -- & F.startedEventId .~ _
+                      -- TODO, not clear on what this should be
+                      & F.identity .~ Core.identity (Core.clientConfig $ Core.getWorkerClient w.workerCore)
+                      & F.activityType .~ (defMessage & P.name .~ info.activityType)
+                      & F.activityId .~ (msg ^. AT.activityId)
+                      -- & F.retryState .~ _
                     )
                   )
                 )
-          Right f' -> do
-            $logDebug "Activity arguments decoded successfully"
-            res <- trySyncOrAsync $ liftIO $ do
-              runReaderT (unActivity f') $ ActivityEnv w.workerCore info env
+          Right ok -> do
             $logDebug "Got activity result"
-            completionResult <- do
-              let completionMsg = case res of
-                    Right ok -> defMessage
-                      & C.taskToken .~ rawTaskToken tt
-                      & C.result .~ 
-                        ( defMessage & AR.completed .~
-                          ( defMessage & AR.result .~ convertToProtoPayload ok )
-                        )
-                    Left err -> defMessage
-                      & C.taskToken .~ rawTaskToken tt
-                      & C.result .~ case fromException err of
-                      Just AsyncCancelled -> defMessage 
-                        & AR.cancelled .~ defMessage
-                      Nothing -> defMessage & AR.failed .~ 
-                        ( defMessage & AR.failure .~ 
-                          ( defMessage 
-                            & F.message .~ T.pack (show err)
-                            -- TODO, protobuf docs aren't clear on what this should be
-                            & F.source .~ "haskell"
-                            -- TODO, annotated exceptions might be needed for this
-                            & F.stackTrace .~ ""
-                            -- TODO encoded attributes
-                            -- & F.encodedAttributes .~ _
-                            -- & F.cause .~ _
-                            & F.activityFailureInfo .~
-                            ( defMessage
-                              -- & F.scheduledEventId .~ _
-                              -- & F.startedEventId .~ _
-                              -- TODO, not clear on what this should be
-                              & F.identity .~ Core.identity (Core.clientConfig $ Core.getWorkerClient w.workerCore)
-                              & F.activityType .~ (defMessage & P.name .~ info.activityType)
-                              & F.activityId .~ (msg ^. AT.activityId)
-                              -- & F.retryState .~ _
-                            )
-                          )
-                        )
-              $logDebug ("Activity completion message: " <> T.pack (show completionMsg))
-              liftIO $ Core.completeActivityTask w.workerCore completionMsg
-            $logDebug ("Activity completion result: " <> T.pack (show completionResult))
-            atomically $ do
-              running' <- readTVar w.runningActivities
-              writeTVar w.runningActivities $ HashMap.delete tt running'
-            case completionResult of
-              Left err -> throwIO err
-              Right _ -> pure ()
+            pure $ defMessage
+              & C.taskToken .~ rawTaskToken tt
+              & C.result .~ 
+                ( defMessage & AR.completed .~
+                  ( defMessage & AR.result .~ convertToProtoPayload ok )
+                )
+        $logDebug ("Activity completion message: " <> T.pack (show completionMsg))
+        completionResult <- liftIO $ Core.completeActivityTask w.workerCore completionMsg
+        case completionResult of
+          Left err -> throwIO err
+          Right _ -> pure ()
 
-      atomically $ do
-        running' <- readTVar w.runningActivities
-        writeTVar w.runningActivities $ HashMap.insert tt a running'
+      atomically $ modifyTVar' w.runningActivities (HashMap.insert tt runningActivity)
       -- We should only be throwing this exception if the activity has a logical error
       -- that is an internal error to the Temporal worker. If the activity throws an
       -- exception, that should be caught and fed to completeActivityTask.
       --
       -- We use link here to kill the worker thread if the activity throws an exception.
-      link a
+      link runningActivity
+      putMVar syncPoint ()
 
 applyActivityTaskCancel :: TaskToken -> AT.Cancel -> ActivityWorkerM actEnv ()
 applyActivityTaskCancel tt _msg = do

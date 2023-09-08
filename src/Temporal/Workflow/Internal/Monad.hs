@@ -534,6 +534,13 @@ instance Applicative Task where
   pure a = Task (pure a) (pure ())
   Task wait cancel <*> Task wait' cancel' = Task (wait <*> wait') (cancel *> cancel')
 
+-- | Sometimes you want to alter the result of a task, but you 'Task' doesn't work as
+-- a monad due to the 'cancel' action. This function lets you alter the result of a task
+-- in the workflow monad.
+bindTask :: Task a -> (a -> Workflow b) -> Task b
+bindTask (Task wait cancel) f = Task (wait >>= f) cancel
+
+
 -- | Handle representing an external Workflow Execution.
 --
 -- This handle can only be cancelled and signalled. 
@@ -588,13 +595,13 @@ data ActivityInput = ActivityInput
   , seq :: Sequence
   }
 
-newtype WorkflowOutboundInterceptor = WorkflowOutboundInterceptor
-  { scheduleActivity :: ActivityType -> ActivityInput -> (ActivityType -> ActivityInput -> IO (Task RawPayload)) -> IO (Task RawPayload)
+data WorkflowOutboundInterceptor = WorkflowOutboundInterceptor
+  { scheduleActivity :: ActivityInput -> (ActivityInput -> IO (Task RawPayload)) -> IO (Task RawPayload)
   -- , startChildWorkflowExecution :: forall a. WorkflowType -> WorkflowInput -> (WorkflowType -> WorkflowInput -> IO a) -> IO a
-  -- , continueAsNew :: ContinueAsNewOp
+  , continueAsNew :: ()
   }
 
 instance Semigroup WorkflowOutboundInterceptor where
   l <> r = WorkflowOutboundInterceptor
-    { scheduleActivity = \ty input cont -> scheduleActivity l ty input $ \ty input' -> scheduleActivity r ty input' cont
+    { scheduleActivity = \input cont -> scheduleActivity l input $ \input' -> scheduleActivity r input' cont
     }

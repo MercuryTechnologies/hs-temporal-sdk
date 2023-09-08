@@ -51,7 +51,6 @@ import Control.Monad.State
 import Temporal.Common
 import Temporal.Core.Client
 import qualified Temporal.Core.Worker as Core
-import Temporal.Internal.JobPool
 import Temporal.Activity (ProvidedActivity(..))
 import Temporal.Activity.Definition
 import qualified Temporal.Activity.Worker as Activity
@@ -119,9 +118,11 @@ configure actEnv = flip execState defaultConfig . unConfigM
       , interceptorConfig = Interceptors
         { workflowInboundInterceptors = WorkflowInboundInterceptor { executeWorkflow = \info next -> next info }
         , workflowOutboundInterceptors = WorkflowOutboundInterceptor
-          { scheduleActivity = \ty info next -> next ty info
+          { scheduleActivity = \info next -> next info
           }
         , activityInboundInterceptors = ActivityInboundInterceptor
+          { executeActivity = \input next -> next input
+          }
         , activityOutboundInterceptors = ActivityOutboundInterceptor
         }
       , ..
@@ -329,6 +330,8 @@ startWorker client conf = do
       initialEnv = conf.actEnv
       definitions = conf.actDefs
       logger = workerLogFn
+      activityInboundInterceptors = conf.interceptorConfig.activityInboundInterceptors
+      activityOutboundInterceptors = conf.interceptorConfig.activityOutboundInterceptors
       activityWorker = Activity.ActivityWorker{..}
       workerClient = client
 
