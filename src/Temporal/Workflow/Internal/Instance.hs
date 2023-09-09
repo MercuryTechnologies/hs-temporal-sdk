@@ -22,8 +22,8 @@ import Control.Monad.Logger
 import Data.ProtoLens
 import qualified Data.Text as T
 import Lens.Family2
-import Temporal.Workflow.Info
 import Temporal.Workflow.Internal.Monad
+import Temporal.Workflow.Types
 import Temporal.Common
 import qualified Temporal.Core.Worker as Core
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Core

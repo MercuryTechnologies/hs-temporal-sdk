@@ -19,7 +19,7 @@ import qualified Proto.Temporal.Api.Common.V1.Message_Fields as P
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import Temporal.Activity.Definition
 import Temporal.Common
-import Temporal.Common.ActivityOptions
+import Temporal.Workflow.Types
 import qualified Temporal.Core.Client as Core
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
@@ -29,6 +29,8 @@ import Temporal.Duration (durationFromProto)
 import Data.HashMap.Strict (HashMap)
 import Data.Text (Text)
 import Temporal.Interceptor
+import Temporal.Activity.Types
+import Temporal.Client.Types
 
 data ActivityWorker env = ActivityWorker
   { initialEnv :: env
@@ -38,6 +40,7 @@ data ActivityWorker env = ActivityWorker
   , workerCore :: Core.Worker
   , activityInboundInterceptors :: ActivityInboundInterceptor
   , activityOutboundInterceptors :: ActivityOutboundInterceptor
+  , clientInterceptors :: ClientInterceptors
   }
 
 instance MonadLogger (ActivityWorkerM env) where
@@ -128,7 +131,7 @@ applyActivityTaskStart tt msg = do
   requireActivityNotRunning tt $ do
     let info = activityInfoFromProto tt msg
         env = w.initialEnv
-        actEnv = ActivityEnv w.workerCore info env
+        actEnv = ActivityEnv w.workerCore info w.clientInterceptors env
         input = ExecuteActivityInput
           (fmap convertFromProtoPayload (msg ^. AT.vec'input))
           info.headerFields

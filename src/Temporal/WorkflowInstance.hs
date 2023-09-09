@@ -41,7 +41,7 @@ import Temporal.Exception
 import Temporal.Payload
 import Temporal.Workflow.Definition
 import Temporal.Workflow.Eval (ActivationResult(..), SuspendableWorkflowExecution, runWorkflow, injectWorkflowSignal)
-import Temporal.Workflow.Info
+import Temporal.Workflow.Types
 import Temporal.Workflow.Internal.Instance
 import Temporal.Workflow.Internal.Monad
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as Failure
@@ -228,7 +228,7 @@ activate act suspension = do
   eResult <- case inst.workflowDeadlockTimeout of
     Nothing -> applyJobs (act ^. Activation.vec'jobs) suspension
     Just timeoutDuration -> do
-      res <- timeout timeoutDuration $ applyJobs (act ^. Activation.vec'jobs) suspension
+      res <- UnliftIO.timeout timeoutDuration $ applyJobs (act ^. Activation.vec'jobs) suspension
       case res of
         Nothing -> do
           $(logError) "Deadlock detected"

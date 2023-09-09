@@ -81,16 +81,16 @@ waitChildWorkflowStart wfHandle = do
   getIVar wfHandle.startHandle
 
 waitChildWorkflowResult :: RequireCallStack => ChildWorkflowHandle result -> Workflow result
-waitChildWorkflowResult wfHandle@(ChildWorkflowHandle{childWorkflowCodec}) = do
+waitChildWorkflowResult wfHandle@(ChildWorkflowHandle{childWorkflowResultConverter}) = do
   updateCallStackW
   res <- getIVar wfHandle.resultHandle
   case res ^. Activation.result . ChildWorkflow.maybe'status of
     Nothing -> ilift $ throwIO $ RuntimeError "Unrecognized child workflow result status"
     Just s -> case s of
       ChildWorkflow.ChildWorkflowResult'Completed res -> do
-        eVal <- ilift $ liftIO $ decode childWorkflowCodec $ convertFromProtoPayload $ res ^. ChildWorkflow.result
+        eVal <- ilift $ liftIO $ UnliftIO.try $ childWorkflowResultConverter $ convertFromProtoPayload $ res ^. ChildWorkflow.result
         case eVal of
-          Left err -> throw $ ValueError err
+          Left err -> throw (err :: SomeException)
           Right ok -> pure ok
       ChildWorkflow.ChildWorkflowResult'Failed res -> throw $ ChildWorkflowFailed $ res ^. ChildWorkflow.failure
       ChildWorkflow.ChildWorkflowResult'Cancelled _ -> throw ChildWorkflowCancelled

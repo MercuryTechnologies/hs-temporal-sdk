@@ -43,6 +43,7 @@ import System.IO.Unsafe
 import System.Timeout (timeout)
 import Temporal.Duration
 import Temporal.Contrib.OpenTelemetry
+import Temporal.Interceptor
 
 rt :: Runtime
 rt = unsafePerformIO initializeRuntime
@@ -54,11 +55,11 @@ withWorker conf m = do
   (Right c) <- connectClient rt clientConfig
   bracket (runStdoutLoggingT $ startWorker c conf) shutdown (const m)
 
-makeClient :: IO C.WorkflowClient
-makeClient = do
+makeClient :: Interceptors -> IO C.WorkflowClient
+makeClient Interceptors{..} = do
   let clientConfig = defaultClientConfig
-  (Right c) <- connectClient rt clientConfig
-  C.workflowClient c (W.Namespace "test") Nothing
+  (Right c) <- connectClient rt clientConfig 
+  C.workflowClient c (W.Namespace "test") clientInterceptors
 
 uuidText :: IO Text
 uuidText = UUID.toText <$> UUID.nextRandom
@@ -68,8 +69,9 @@ spec = beforeAll setup needsClient
   where
     setup :: IO (C.WorkflowClient, ConfigM () (), W.TaskQueue)
     setup = do
-      client <- makeClient 
-      (conf, taskQueue) <- mkBaseConf
+      interceptors <- makeOpenTelemetryInterceptor
+      client <- makeClient interceptors
+      (conf, taskQueue) <- mkBaseConf interceptors
       pure (client, conf, taskQueue)
 
 type MyWorkflow a = W.RequireCallStack => W.Workflow a
@@ -179,15 +181,14 @@ testDefs = defs defaultCodec testImpls
 testConf :: ConfigM () ()
 testConf = defsToConfig testDefs
 
-mkBaseConf :: IO (ConfigM () (), W.TaskQueue)
-mkBaseConf = do
-  interceptor <- makeOpenTelemetryInterceptor
+mkBaseConf :: Interceptors -> IO (ConfigM () (), W.TaskQueue)
+mkBaseConf interceptors = do
   taskQueue <- W.TaskQueue <$> uuidText
   pure
     ( do
       setNamespace $ W.Namespace "test"
       setTaskQueue taskQueue
-      addInterceptors interceptor
+      addInterceptors interceptors
     , taskQueue
     )
 

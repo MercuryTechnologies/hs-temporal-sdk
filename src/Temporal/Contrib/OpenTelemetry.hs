@@ -1,3 +1,4 @@
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeApplications #-}
 module Temporal.Contrib.OpenTelemetry where
 
@@ -12,7 +13,7 @@ import OpenTelemetry.Trace.Core
 import qualified Data.Map.Strict as Map
 import Data.Version (showVersion)
 import Data.Word (Word32)
-import Temporal.Common.ActivityOptions
+import Temporal.Activity.Types
 import Temporal.Duration
 import Temporal.Interceptor
 import Temporal.Payload (RawPayload(..))
@@ -31,6 +32,8 @@ import Temporal.Common
 -- TODO rework WorkflowExitVariant to not expose internals
 import Temporal.Worker.Types
 import Temporal.Workflow.Internal.Monad
+import Temporal.Workflow.Types
+import Temporal.Client.Types (ClientInterceptors(ClientInterceptors), WorkflowStartOptions (..))
 
 -- | "_tracer-data"
 defaultHeaderKey :: T.Text
@@ -174,27 +177,42 @@ makeOpenTelemetryInterceptor = do
       }
     , workflowOutboundInterceptors = WorkflowOutboundInterceptor
       { scheduleActivity = \input next -> do
-        let spanArgs = defaultSpanArguments
+        let StartActivityOptions{..} = input.options
+            spanArgs = defaultSpanArguments
               { kind = Client
               }
         inSpan'' tracer ("StartActivity:" <> input.activityType) spanArgs $ \_ -> do
           ctxt <- getContext
-          hdrs <- inject headersPropagator ctxt input.options.headers 
-          next $ input { options = input.options { Temporal.Common.ActivityOptions.headers = hdrs } }
+          hdrs <- inject headersPropagator ctxt headers 
+          next $ input { options = StartActivityOptions { headers = hdrs, .. } }
+      , continueAsNew = \n ContinueAsNewOptions{..} next -> do
+        ctxt <- getContext
+        hdrs <- inject headersPropagator ctxt headers
+        next n (ContinueAsNewOptions { headers = hdrs, .. })
+      , startChildWorkflowExecution = \wfName input next -> do
+        let StartChildWorkflowOptions{..} = input
+            spanArgs = defaultSpanArguments
+              { kind = Client
+              }
+        inSpan'' tracer ("StartChildWorkflow:" <> wfName) spanArgs $ \_ -> do
+          ctxt <- getContext
+          hdrs <- inject headersPropagator ctxt headers
+          next wfName $ StartChildWorkflowOptions { headers = hdrs, .. }
       }
     , activityInboundInterceptors = ActivityInboundInterceptor
       { executeActivity = \input next -> do
-        let spanArgs = defaultSpanArguments
+        let ActivityInfo{..} = input.activityInfo
+            spanArgs = defaultSpanArguments
               { kind = Server
               , attributes = HashMap.fromList
-                [ ("temporal.workflow_id", toAttribute $ rawWorkflowId $ input.activityInfo.workflowId)
-                , ("temporal.workflow_type", toAttribute $ rawWorkflowType $ input.activityInfo.workflowType)
-                , ("temporal.run_id", toAttribute $ rawRunId $ input.activityInfo.runId)
-                , ("temporal.activity_id", toAttribute $ rawActivityId $ input.activityInfo.activityId)
-                , ("temporal.activity_type", toAttribute $ input.activityInfo.activityType)
-                , ("temporal.attempt", toAttribute $ fromIntegral @Word32 @Int input.activityInfo.attempt)
+                [ ("temporal.workflow_id", toAttribute $ rawWorkflowId workflowId)
+                , ("temporal.workflow_type", toAttribute $ rawWorkflowType workflowType)
+                , ("temporal.run_id", toAttribute $ rawRunId runId)
+                , ("temporal.activity_id", toAttribute $ rawActivityId activityId)
+                , ("temporal.activity_type", toAttribute activityType)
+                , ("temporal.attempt", toAttribute $ fromIntegral @Word32 @Int attempt)
                 -- , ("temporal.namespace", toAttribute $ rawNamespace $ input.activityInfo.namespace)
-                , ("temporal.activity_is_local", toAttribute $ input.activityInfo.isLocal)
+                , ("temporal.activity_is_local", toAttribute isLocal)
                 ]
               }
         
@@ -204,4 +222,14 @@ makeOpenTelemetryInterceptor = do
           next input
       }
     , activityOutboundInterceptors = ActivityOutboundInterceptor
+    , clientInterceptors = ClientInterceptors
+      { start = \ty WorkflowStartOptions{..} ps next -> do
+        let spanArgs = defaultSpanArguments
+              { kind = Client
+              }
+        inSpan'' tracer ("StartWorkflow:" <> rawWorkflowType ty) spanArgs $ \_ -> do
+          ctxt <- getContext
+          hdrs <- inject headersPropagator ctxt headers
+          next ty (WorkflowStartOptions {headers=hdrs, ..}) ps
+      }
     }

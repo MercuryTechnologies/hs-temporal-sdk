@@ -16,8 +16,8 @@ import GHC.Stack
 import Lens.Family2
 import Temporal.Common
 import Temporal.Coroutine
-import Temporal.Workflow.Info
 import Temporal.Workflow.Internal.Monad
+import Temporal.Workflow.Types
 import Temporal.Payload
 import UnliftIO
 import Unsafe.Coerce

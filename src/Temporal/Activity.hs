@@ -1,3 +1,4 @@
+{-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -34,11 +35,12 @@ import Temporal.Exception
 import Temporal.Activity.Definition
 import Temporal.Activity.Worker
 import Temporal.Common
-import Temporal.Common.ActivityOptions
 import Temporal.Core.Worker (recordActivityHeartbeat)
 import Temporal.Payload
+import Temporal.Activity.Types
 import Temporal.Workflow
 import Temporal.Workflow.Definition
+import Temporal.Workflow.Types
 
 import qualified Proto.Temporal.Sdk.Core.CoreInterface_Fields as Proto
 
@@ -114,5 +116,4 @@ activityWorkflowClient :: Activity env WorkflowClient
 activityWorkflowClient = do
   c <- askActivityClient
   i <- askActivityInfo
-  -- TODO, figure the best option for identity here
-  workflowClient c i.workflowNamespace Nothing
+  workflowClient c i.workflowNamespace mempty

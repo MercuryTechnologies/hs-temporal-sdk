@@ -13,13 +13,13 @@ build-type:     Simple
 library
   exposed-modules:
       Temporal.Activity
+      Temporal.Activity.Types
       Temporal.Client
       Temporal.Client.AsyncActivity
       Temporal.Client.Namespace
       Temporal.Client.Schedule
+      Temporal.Client.Types
       Temporal.Client.Workflow
-      Temporal.Common.ActivityOptions
-      Temporal.Common.ContinueAsNewOptions
       Temporal.Common.TimeoutType
       Temporal.Contrib.OpenTelemetry
       Temporal.Duration
@@ -34,12 +34,12 @@ library
       Temporal.SearchAttributes
       Temporal.Worker
       Temporal.Workflow
-      Temporal.Workflow.Info
       Temporal.Workflow.Internal.Instance
       Temporal.Workflow.Internal.Monad
       Temporal.Workflow.Query
       Temporal.Workflow.Saga
       Temporal.Workflow.Signal
+      Temporal.Workflow.Types
       Temporal.Workflow.Unsafe.Handle
   other-modules:
       Temporal.Activity.Definition

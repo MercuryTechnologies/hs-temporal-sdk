@@ -119,11 +119,14 @@ configure actEnv = flip execState defaultConfig . unConfigM
         { workflowInboundInterceptors = WorkflowInboundInterceptor { executeWorkflow = \info next -> next info }
         , workflowOutboundInterceptors = WorkflowOutboundInterceptor
           { scheduleActivity = \info next -> next info
+          , startChildWorkflowExecution = \wfName info next -> next wfName info
+          , continueAsNew = \wfName info next -> next wfName info
           }
         , activityInboundInterceptors = ActivityInboundInterceptor
           { executeActivity = \input next -> next input
           }
         , activityOutboundInterceptors = ActivityOutboundInterceptor
+        , clientInterceptors = mempty
         }
       , ..
       }
@@ -332,6 +335,7 @@ startWorker client conf = do
       logger = workerLogFn
       activityInboundInterceptors = conf.interceptorConfig.activityInboundInterceptors
       activityOutboundInterceptors = conf.interceptorConfig.activityOutboundInterceptors
+      clientInterceptors = conf.interceptorConfig.clientInterceptors
       activityWorker = Activity.ActivityWorker{..}
       workerClient = client
 

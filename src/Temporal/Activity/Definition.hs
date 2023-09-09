@@ -12,13 +12,15 @@ import Data.Text (Text)
 import Data.Vector (Vector)
 import Data.Word (Word32)
 import Temporal.Common
-import Temporal.Common.ActivityOptions
 import Temporal.Payload
 import Temporal.Core.Client (Client)
 import Temporal.Core.Worker (Worker, getWorkerClient)
 import UnliftIO
 import Data.Time.Clock.System (SystemTime)
 import Temporal.Duration (Duration)
+import Temporal.Activity.Types
+import Temporal.Workflow.Types
+import Temporal.Client.Types
 
 data ValidActivityFunction env = forall codec f. 
   ( f ~ (ArgsOf f :->: Activity env (ResultOf (Activity env) f))
@@ -45,6 +47,7 @@ data ActivityDefinition env = ActivityDefinition
 data ActivityEnv env = ActivityEnv
   { activityWorker :: Worker
   , activityInfo :: ActivityInfo
+  , activityClientInterceptors :: ClientInterceptors
   , activityEnv :: env
   }
 

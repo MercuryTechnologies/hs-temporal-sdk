@@ -21,7 +21,7 @@ module Temporal.Client
   , WorkflowStartOptions(..)
   , TimeoutOptions(..)
   , workflowStartOptions
-  , start
+  , Temporal.Client.start
   , WorkflowHandle
   , awaitWorkflowResult
   , TerminationOptions
@@ -57,7 +57,6 @@ import qualified Data.Vector as V
 import Temporal.Core.Client.WorkflowService
 import Temporal.Core.Client
 import Temporal.Workflow.Definition
-import Temporal.Worker.Types
 import Temporal.Common
 import Temporal.Exception
 import Temporal.Payload
@@ -82,6 +81,7 @@ import UnliftIO
 import Unsafe.Coerce
 import Data.ProtoLens (Message(defMessage))
 import Temporal.Payload (convertToProtoPayload)
+import Temporal.Client.Types
 import Temporal.SearchAttributes
 import Temporal.Workflow (WorkflowRef(..), QueryDefinition(..))
 import Temporal.Duration (Duration, durationToProto)
@@ -93,23 +93,18 @@ workflowClient
   => Client 
   -> Namespace 
   -- ^ Default namespace for all workflows started by this client.
-  -> Maybe Text 
+  -> ClientInterceptors
   -- ^ Identity of the client. 
   --
   -- If not provided, a default will be generated from the process ID and hostname.
   -> m WorkflowClient
-workflowClient c ns mIdent = do
+workflowClient c ns int = do
   pure WorkflowClient
     { clientCore = c
     , clientDefaultNamespace = ns
+    , clientInterceptors = int
     }
 
-data WorkflowClient = WorkflowClient 
-  { clientCore :: Client
-  , clientDefaultNamespace :: Namespace
-  -- , clientDefaultQueue :: TaskQueue
-  -- , clientHeaders :: Map Text RawPayload
-  }
 
 throwEither :: (MonadIO m, Exception e) => IO (Either e a) -> m a
 throwEither = either throwIO pure <=< liftIO
@@ -128,15 +123,8 @@ execute c wf opts = case workflowRef wf of
       h <- startFromPayloads c k opts =<< sequence inputs
       awaitWorkflowResult h
 
-data WorkflowHandle a = forall args. WorkflowHandle
-  { workflowHandleWorkflow :: KnownWorkflow args a
-  , workflowHandleClient :: WorkflowClient
-  , workflowHandleWorkflowId :: WorkflowId
-  , workflowHandleRunId :: Maybe RunId
-  }
-
-awaitWorkflowResult :: MonadIO m => WorkflowHandle a -> m a
-awaitWorkflowResult h@(WorkflowHandle (KnownWorkflow{knownWorkflowCodec}) c wf r) = do
+awaitWorkflowResult :: (Typeable a, MonadIO m) => WorkflowHandle a -> m a
+awaitWorkflowResult h@(WorkflowHandle readResult _ c wf r) = do
   mev <- liftIO $ waitResult c wf r c.clientDefaultNamespace
   case mev of
     Nothing -> error "Unexpected empty history"
@@ -152,9 +140,7 @@ awaitWorkflowResult h@(WorkflowHandle (KnownWorkflow{knownWorkflowCodec}) c wf r
           if typeRep h == typeOf ()
             then pure $ unsafeCoerce ()
             else case payloads of
-              (a:_) -> liftIO $ do
-                result <- decode knownWorkflowCodec a
-                either (throwIO . ValueError) pure result
+              (a:_) -> liftIO $ readResult a
               _ -> error "Missing result payload"
         HistoryEvent'WorkflowExecutionFailedEventAttributes attrs -> throwIO WorkflowExecutionFailed
         HistoryEvent'WorkflowExecutionTimedOutEventAttributes attrs -> throwIO WorkflowExecutionTimedOut
@@ -188,7 +174,7 @@ signal :: forall m args a. MonadIO m
   -> SignalRef args 
   -> SignalOptions
   -> (args :->: m ())
-signal h@(WorkflowHandle (KnownWorkflow{knownWorkflowCodec}) c wf r) (SignalRef sName sCodec) opts = gather $ \inputs -> do
+signal h@(WorkflowHandle _ _t c wf r) (SignalRef sName sCodec) opts = gather $ \inputs -> do
   result <- liftIO $ do
     args <- traverse (fmap convertToProtoPayload) inputs
     signalWorkflowExecution c.clientCore $ defMessage
@@ -313,8 +299,10 @@ getHandle
   -> WorkflowId
   -> Maybe RunId
   -> m (WorkflowHandle a)
-getHandle c k wfId runId = pure $ WorkflowHandle 
-  { workflowHandleWorkflow = k
+getHandle c (KnownWorkflow {knownWorkflowCodec}) wfId runId = pure $ WorkflowHandle 
+  { workflowHandleReadResult = \a -> do
+      result <- decode knownWorkflowCodec a
+      either (throwIO . ValueError) pure result
   , workflowHandleClient = c
   , workflowHandleWorkflowId = wfId
   , workflowHandleRunId = runId
@@ -336,44 +324,6 @@ signalWithStart
   -> (args :->: (sigArgs :->: m ()))
 signalWithStart = undefined
 
-data WorkflowStartOptions = WorkflowStartOptions
-  { workflowId :: WorkflowId
-  , taskQueue :: TaskQueue
-  , followRuns :: Bool
-  , workflowIdReusePolicy :: Maybe WorkflowIdReusePolicy
-  , retry :: Maybe RetryPolicy
-  , cronSchedule :: Maybe Text
-  , memo :: !(Map Text RawPayload)
-  , searchAttributes :: !(Map Text SearchAttributeType)
-  , headers :: !(Map Text RawPayload)
-  , timeouts :: TimeoutOptions
-  , requestEagerExecution :: Bool
-  }
-
-workflowStartOptions :: WorkflowId -> TaskQueue -> WorkflowStartOptions
-workflowStartOptions wfId tq = WorkflowStartOptions
-  { workflowId = wfId
-  , taskQueue = tq
-  , followRuns = True
-  , workflowIdReusePolicy = Nothing
-  , retry = Nothing
-  , cronSchedule = Nothing
-  , memo = mempty
-  , searchAttributes = mempty
-  , headers = mempty
-  , timeouts = TimeoutOptions
-    { executionTimeout = Nothing
-    , runTimeout = Nothing
-    , taskTimeout = Nothing
-    }
-  , requestEagerExecution = False
-  }
-
-data TimeoutOptions = TimeoutOptions
-  { executionTimeout :: Maybe Duration
-  , runTimeout :: Maybe Duration
-  , taskTimeout :: Maybe Duration
-  }
 
 startFromPayloads 
   :: MonadIO m
@@ -382,57 +332,63 @@ startFromPayloads
   -> WorkflowStartOptions
   -> [RawPayload]
   -> m (WorkflowHandle result)
-startFromPayloads c k@(KnownWorkflow codec _ _ _) opts payloads = liftIO $ do
-  reqId <- UUID.nextRandom
-  searchAttrs <- searchAttributesToProto opts.searchAttributes
-  let req = defMessage
-        & WF.namespace .~ (rawNamespace $ fromMaybe (c.clientDefaultNamespace) $ knownWorkflowNamespace k)
-        & WF.workflowId .~ rawWorkflowId opts.workflowId
-        & WF.workflowType .~ 
-          ( defMessage & Common.name .~ knownWorkflowName k 
-          )
-        & WF.taskQueue .~ 
-          ( defMessage 
-            & Common.name .~ (rawTaskQueue opts.taskQueue)
-            & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
-          )
-        & WF.input .~ 
-          ( defMessage & Common.payloads .~ (convertToProtoPayload <$> payloads)
-          )
-        & WF.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts.timeouts.executionTimeout)
-        & WF.maybe'workflowRunTimeout .~ (durationToProto <$> opts.timeouts.runTimeout)
-        & WF.maybe'workflowTaskTimeout .~ (durationToProto <$> opts.timeouts.taskTimeout)
-        & WF.identity .~ (identity $ clientConfig c.clientCore)
-        & WF.requestId .~ UUID.toText reqId
-        & WF.workflowIdReusePolicy .~ 
-          workflowIdReusePolicyToProto
-            (fromMaybe WorkflowIdReusePolicyAllowDuplicateFailedOnly opts.workflowIdReusePolicy)
-        & WF.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retry)
-        & WF.cronSchedule .~ maybe "" Prelude.id opts.cronSchedule
-        & WF.memo .~ (convertToProtoMemo opts.memo)
-        & WF.searchAttributes .~ (defMessage & Common.indexedFields .~ searchAttrs)
-    --     TODO Not sure how to use these yet
-        & WF.header .~ (headerToProto $ fmap convertToProtoPayload opts.headers)
-        & WF.requestEagerExecution .~ opts.requestEagerExecution
-        {- 
-          These values will be available as ContinuedFailure and LastCompletionResult in the
-          WorkflowExecutionStarted event and through SDKs. The are currently only used by the
-          server itself (for the schedules feature) and are not intended to be exposed in
-          StartWorkflowExecution.
+startFromPayloads c k@(KnownWorkflow codec _ _ _) opts payloads = do
+  wfH <- liftIO $ (Temporal.Client.Types.start c.clientInterceptors) (WorkflowType $ knownWorkflowName k) opts payloads $ \wfName opts' payloads' -> do
+    reqId <- UUID.nextRandom
+    searchAttrs <- searchAttributesToProto opts'.searchAttributes
+    let req = defMessage
+          & WF.namespace .~ (rawNamespace $ fromMaybe (c.clientDefaultNamespace) $ knownWorkflowNamespace k)
+          & WF.workflowId .~ rawWorkflowId opts'.workflowId
+          & WF.workflowType .~ 
+            ( defMessage & Common.name .~ rawWorkflowType wfName
+            )
+          & WF.taskQueue .~ 
+            ( defMessage 
+              & Common.name .~ (rawTaskQueue opts'.taskQueue)
+              & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
+            )
+          & WF.input .~ 
+            ( defMessage & Common.payloads .~ (convertToProtoPayload <$> payloads')
+            )
+          & WF.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts'.timeouts.executionTimeout)
+          & WF.maybe'workflowRunTimeout .~ (durationToProto <$> opts'.timeouts.runTimeout)
+          & WF.maybe'workflowTaskTimeout .~ (durationToProto <$> opts'.timeouts.taskTimeout)
+          & WF.identity .~ (identity $ clientConfig c.clientCore)
+          & WF.requestId .~ UUID.toText reqId
+          & WF.workflowIdReusePolicy .~ 
+            workflowIdReusePolicyToProto
+              (fromMaybe WorkflowIdReusePolicyAllowDuplicateFailedOnly opts'.workflowIdReusePolicy)
+          & WF.maybe'retryPolicy .~ (retryPolicyToProto <$> opts'.retry)
+          & WF.cronSchedule .~ maybe "" Prelude.id opts'.cronSchedule
+          & WF.memo .~ (convertToProtoMemo opts'.memo)
+          & WF.searchAttributes .~ (defMessage & Common.indexedFields .~ searchAttrs)
+      --     TODO Not sure how to use these yet
+          & WF.header .~ (headerToProto $ fmap convertToProtoPayload opts'.headers)
+          & WF.requestEagerExecution .~ opts'.requestEagerExecution
+          {- 
+            These values will be available as ContinuedFailure and LastCompletionResult in the
+            WorkflowExecutionStarted event and through SDKs. The are currently only used by the
+            server itself (for the schedules feature) and are not intended to be exposed in
+            StartWorkflowExecution.
 
-          WF.continuedFailure
-          WF.lastCompletionResult
+            WF.continuedFailure
+            WF.lastCompletionResult
 
-        -}
-  res <- startWorkflowExecution c.clientCore req
-  case res of
-    Left err -> throwIO err
-    Right swer -> pure $ WorkflowHandle 
-      { workflowHandleWorkflow = k
-      , workflowHandleClient = c
-      , workflowHandleWorkflowId = opts.workflowId
-      , workflowHandleRunId = Just (RunId $ swer ^. WF.runId)
-      }
+          -}
+    res <- startWorkflowExecution c.clientCore req
+    case res of
+      Left err -> throwIO err
+      Right swer -> pure $ WorkflowHandle 
+        { workflowHandleReadResult = pure
+        , workflowHandleClient = c
+        , workflowHandleWorkflowId = opts.workflowId
+        , workflowHandleRunId = Just (RunId $ swer ^. WF.runId)
+        }
+  pure $ wfH 
+    { workflowHandleReadResult = \a -> workflowHandleReadResult wfH a >>= \b -> do
+        result <- decode codec b
+        either (throwIO . ValueError) pure result
+    }
 
 start
   :: forall args result m. (MonadIO m)

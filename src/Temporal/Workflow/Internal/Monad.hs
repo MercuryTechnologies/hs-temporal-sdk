@@ -39,8 +39,6 @@ import Data.Kind
 import Control.Monad.Reader
 import UnliftIO
 import RequireCallStack
-import Temporal.Common.ActivityOptions
-import Temporal.Workflow.Info
 import Text.Printf
 import System.Random
   ( StdGen
@@ -52,6 +50,7 @@ import System.Random
   , genWord64
   , genShortByteString
   )
+import Temporal.Workflow.Types
 -- | The Workflow monad is a constrained execution environment that helps
 -- developers write code that can be executed deterministically and reliably.
 --
@@ -555,15 +554,24 @@ data ExternalWorkflowHandle (result :: Type) = ExternalWorkflowHandle
 -- | A client side handle to a single child Workflow instance. 
 --
 -- It can be used to signal, wait for completion, and cancel the workflow.
-data ChildWorkflowHandle result = forall codec. (Codec codec result) =>
-  ChildWorkflowHandle
-    { childWorkflowSequence :: Sequence
-    , startHandle :: IVar ()
-    , resultHandle :: IVar ResolveChildWorkflowExecution
-    , childWorkflowCodec :: codec
-    , childWorkflowId :: WorkflowId
-    , firstExecutionRunId :: IVar RunId
-    }
+data ChildWorkflowHandle result = ChildWorkflowHandle
+  { childWorkflowSequence :: Sequence
+  , startHandle :: IVar ()
+  , resultHandle :: IVar ResolveChildWorkflowExecution
+  , childWorkflowResultConverter :: RawPayload -> IO result
+  , childWorkflowId :: WorkflowId
+  , firstExecutionRunId :: IVar RunId
+  }
+
+instance Functor ChildWorkflowHandle where
+  fmap f h = h { childWorkflowResultConverter = \r -> f <$> childWorkflowResultConverter h r }
+
+-- | This is only intended for use by interceptors. Normal workflow code should be able to use
+-- the 'fmap' instance for simple transformations or else provide an appropriate codec.
+interceptorConvertChildWorkflowHandle :: ChildWorkflowHandle a -> (a -> IO b) -> ChildWorkflowHandle b
+interceptorConvertChildWorkflowHandle h f = h 
+  { childWorkflowResultConverter = \r -> childWorkflowResultConverter h r >>= f
+  }
 
 data ExecuteWorkflowInput = ExecuteWorkflowInput
   { executeWorkflowInputType :: Text
@@ -597,11 +605,13 @@ data ActivityInput = ActivityInput
 
 data WorkflowOutboundInterceptor = WorkflowOutboundInterceptor
   { scheduleActivity :: ActivityInput -> (ActivityInput -> IO (Task RawPayload)) -> IO (Task RawPayload)
-  -- , startChildWorkflowExecution :: forall a. WorkflowType -> WorkflowInput -> (WorkflowType -> WorkflowInput -> IO a) -> IO a
-  , continueAsNew :: ()
+  , startChildWorkflowExecution :: Text -> StartChildWorkflowOptions -> (Text -> StartChildWorkflowOptions -> IO (ChildWorkflowHandle RawPayload)) -> IO (ChildWorkflowHandle RawPayload)
+  , continueAsNew :: forall a. Text -> ContinueAsNewOptions -> (Text -> ContinueAsNewOptions -> IO a) -> IO a
   }
 
 instance Semigroup WorkflowOutboundInterceptor where
   l <> r = WorkflowOutboundInterceptor
     { scheduleActivity = \input cont -> scheduleActivity l input $ \input' -> scheduleActivity r input' cont
+    , startChildWorkflowExecution = \t input cont -> startChildWorkflowExecution l t input $ \t' input' -> startChildWorkflowExecution r t' input' cont
+    , continueAsNew = \n input cont -> continueAsNew l n input $ \n' input' -> continueAsNew r n' input' cont
     }

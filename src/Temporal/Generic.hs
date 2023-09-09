@@ -116,7 +116,7 @@ import GHC.TypeLits
 import RequireCallStack
 import Barbies
 import Barbies.Bare
-import Temporal.Common.ActivityOptions
+import Temporal.Workflow.Types
 -- import Temporal.Activity
 -- import Temporal.Generic.Applicative
 -- import Temporal.Generic.Constraints

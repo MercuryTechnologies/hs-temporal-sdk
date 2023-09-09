@@ -24,6 +24,7 @@ whenever a corresponding Workflow Function Execution (instance of the Function D
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE NamedFieldPuns #-}
@@ -164,8 +165,6 @@ import Proto.Temporal.Api.Common.V1.Message (Payload)
 import RequireCallStack
 import System.Random.Stateful
 import Temporal.Common
-import Temporal.Common.ActivityOptions
-import Temporal.Common.ContinueAsNewOptions
 import Temporal.Common.TimeoutType
 import Temporal.Exception
 import Temporal.Payload
@@ -178,6 +177,7 @@ import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Unsafe.Handle
 import Temporal.Workflow.WorkflowInstance
 import Temporal.Workflow.Definition
+import Temporal.Workflow.Types
 import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as Common
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands as Command
@@ -322,34 +322,6 @@ gatherActivityArgs
   -> (args :->: Workflow (Task result))
 gatherActivityArgs c f = gatherArgs (Proxy @args) c id f
 
-data StartChildWorkflowOptions = StartChildWorkflowOptions 
-  { cancellationType :: ChildWorkflowCancellationType
-  , parentClosePolicy :: ParentClosePolicy
-  , executionTimeout :: Maybe Duration
-  , runTimeout :: Maybe Duration
-  , taskTimeout :: Maybe Duration
-  , retryPolicy :: Maybe RetryPolicy
-  , cronSchedule :: Maybe Text
-  , initialMemo :: Map Text Proto.Temporal.Api.Common.V1.Message.Payload
-  , searchAttributes :: Map Text SearchAttributeType 
-  , headers :: Map Text Proto.Temporal.Api.Common.V1.Message.Payload
-  , workflowIdReusePolicy :: WorkflowIdReusePolicy
-  }
-
-defaultChildWorkflowOptions :: StartChildWorkflowOptions
-defaultChildWorkflowOptions = StartChildWorkflowOptions
-  { cancellationType = ChildWorkflowCancellationAbandon
-  , parentClosePolicy = ParentClosePolicyUnspecified
-  , executionTimeout = Nothing
-  , runTimeout = Nothing
-  , taskTimeout = Nothing
-  , retryPolicy = Nothing
-  , cronSchedule = Nothing
-  , initialMemo = mempty
-  , searchAttributes = mempty
-  , headers = mempty
-  , workflowIdReusePolicy = WorkflowIdReusePolicyUnspecified
-  }
 
 -- | A client side handle to a single Workflow instance. It can be used to signal a workflow execution.
 --
@@ -422,7 +394,13 @@ gatherSignalChildWorkflowArgs
 gatherSignalChildWorkflowArgs c f = gatherArgs (Proxy @args) c id f
 
 
-startChildWorkflowFromPayloads :: forall args result. RequireCallStack => KnownWorkflow args result -> StartChildWorkflowOptions -> WorkflowId -> [IO RawPayload] -> Workflow (ChildWorkflowHandle result)
+startChildWorkflowFromPayloads 
+  :: forall args result. RequireCallStack 
+  => KnownWorkflow args result 
+  -> StartChildWorkflowOptions 
+  -> WorkflowId 
+  -> [IO RawPayload] 
+  -> Workflow (ChildWorkflowHandle result)
 startChildWorkflowFromPayloads k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId = ilift . go
   where
     go :: [IO RawPayload] -> InstanceM (ChildWorkflowHandle result)
@@ -433,51 +411,59 @@ startChildWorkflowFromPayloads k@(KnownWorkflow codec mNamespace mTaskQueue _) o
       pure wfHandle
     sendChildWorkflowCommand typedPayloads = do
       inst <- ask
-      let ps =  fmap convertToProtoPayload typedPayloads
-      
-      s@(Sequence wfSeq) <- nextChildWorkflowSequence
-      startSlot <- newIVar
-      resultSlot <- newIVar
-      firstExecutionRunId <- newIVar
-      info <- readIORef inst.workflowInstanceInfo
-      searchAttrs <- liftIO $ searchAttributesToProto opts.searchAttributes
-      let childWorkflowOptions = defMessage
-            & Command.seq .~ wfSeq
-            & Command.namespace .~ rawNamespace (fromMaybe info.namespace mNamespace)
-            & Command.workflowId .~ rawWorkflowId wfId
-            & Command.workflowType .~ knownWorkflowName k
-            & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue mTaskQueue)
-            & Command.input .~ ps
-            & Command.maybe'workflowExecutionTimeout .~ fmap durationToProto opts.executionTimeout
-            & Command.maybe'workflowRunTimeout .~ fmap durationToProto opts.runTimeout
-            & Command.maybe'workflowTaskTimeout .~ fmap durationToProto opts.taskTimeout
-            & Command.parentClosePolicy .~ parentClosePolicyToProto opts.parentClosePolicy
-            & Command.workflowIdReusePolicy .~ workflowIdReusePolicyToProto opts.workflowIdReusePolicy
-            & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts.retryPolicy
-            & Command.cronSchedule .~ fromMaybe "" opts.cronSchedule
-            & Command.headers .~ opts.headers
-            & Command.memo .~ opts.initialMemo
-            & Command.searchAttributes .~ searchAttrs
-            & Command.cancellationType .~ childWorkflowCancellationTypeToProto opts.cancellationType
+      -- TODO these need to pass through the interceptor
+      let ps = fmap convertToProtoPayload typedPayloads
+      runInIO <- askRunInIO      
+      wfHandle <- liftIO $ inst.outboundInterceptor.startChildWorkflowExecution (knownWorkflowName k) opts $ \wfName opts' -> runInIO $ do
+        s@(Sequence wfSeq) <- nextChildWorkflowSequence
+        startSlot <- newIVar
+        resultSlot <- newIVar
+        firstExecutionRunId <- newIVar
+        info <- readIORef inst.workflowInstanceInfo
+        searchAttrs <- liftIO $ searchAttributesToProto opts'.searchAttributes
+        let childWorkflowOptions = defMessage
+              & Command.seq .~ wfSeq
+              & Command.namespace .~ rawNamespace (fromMaybe info.namespace mNamespace)
+              & Command.workflowId .~ rawWorkflowId wfId
+              & Command.workflowType .~ knownWorkflowName k
+              & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue mTaskQueue)
+              & Command.input .~ ps
+              & Command.maybe'workflowExecutionTimeout .~ fmap durationToProto opts'.executionTimeout
+              & Command.maybe'workflowRunTimeout .~ fmap durationToProto opts'.runTimeout
+              & Command.maybe'workflowTaskTimeout .~ fmap durationToProto opts'.taskTimeout
+              & Command.parentClosePolicy .~ parentClosePolicyToProto opts'.parentClosePolicy
+              & Command.workflowIdReusePolicy .~ workflowIdReusePolicyToProto opts'.workflowIdReusePolicy
+              & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts'.retryPolicy
+              & Command.cronSchedule .~ fromMaybe "" opts'.cronSchedule
+              & Command.headers .~ fmap convertToProtoPayload opts'.headers
+              & Command.memo .~ fmap convertToProtoPayload opts'.initialMemo
+              & Command.searchAttributes .~ searchAttrs
+              & Command.cancellationType .~ childWorkflowCancellationTypeToProto opts'.cancellationType
 
-          cmd = defMessage 
-            & Command.startChildWorkflowExecution .~ childWorkflowOptions
-        
-          wfHandle = ChildWorkflowHandle 
-            { childWorkflowSequence = s
-            , startHandle = startSlot 
-            , resultHandle = resultSlot
-            , firstExecutionRunId = firstExecutionRunId
-            , childWorkflowCodec = codec
-            , childWorkflowId = wfId
-            }
+            cmd = defMessage 
+              & Command.startChildWorkflowExecution .~ childWorkflowOptions
+          
+            wfHandle = ChildWorkflowHandle 
+              { childWorkflowSequence = s
+              , startHandle = startSlot 
+              , resultHandle = resultSlot
+              , firstExecutionRunId = firstExecutionRunId
+              , childWorkflowResultConverter = pure
+              , childWorkflowId = wfId
+              }
 
-      atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-        seqMaps { childWorkflows = HashMap.insert s (SomeChildWorkflowHandle wfHandle) seqMaps.childWorkflows }
+        atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+          seqMaps { childWorkflows = HashMap.insert s (SomeChildWorkflowHandle wfHandle) seqMaps.childWorkflows }
 
-      $(logDebug) "Add command: startChildWorkflowExecution"
-      addCommand cmd
-      pure wfHandle
+        addCommand cmd
+        pure wfHandle
+      pure $ wfHandle 
+        { childWorkflowResultConverter = \r -> do
+            decodingResult <- decode codec r
+            case decodingResult of
+              Left err -> throwIO $ ValueError err
+              Right val -> pure val
+        }
 
 -- $childWorkflow
 --
@@ -996,21 +982,24 @@ continueAsNew wf opts = case workflowRef wf of
   k@(KnownWorkflow codec _ _ _) -> gatherContinueAsNewArgs @(WorkflowArgs wf) @(WorkflowResult wf) codec $ \args -> do
     i <- info
     Workflow $ \_ -> do
-      searchAttrs <- liftIO $ searchAttributesToProto 
-          (if opts.searchAttributes == mempty
-            then i.searchAttributes
-            else opts.searchAttributes)
-      args <- liftIO $ traverse (fmap convertToProtoPayload) args
-      throwIO $ ContinueAsNewException $ defMessage
-        & Command.workflowType .~ knownWorkflowName k
-        & Command.taskQueue .~ (maybe "" rawTaskQueue opts.taskQueue)
-        & Command.arguments .~ args
-        & Command.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retryPolicy)
-        & Command.searchAttributes .~ searchAttrs
-        & Command.headers .~ fmap convertToProtoPayload opts.headers
-        & Command.memo .~ fmap convertToProtoPayload opts.memo
-        & Command.maybe'workflowTaskTimeout .~ (durationToProto <$> opts.taskTimeout)
-        & Command.maybe'workflowRunTimeout .~ (durationToProto <$> opts.runTimeout)
+      inst <- ask
+      res <- liftIO $ (Temporal.Workflow.Internal.Monad.continueAsNew inst.outboundInterceptor) (knownWorkflowName k) opts $ \wfName (opts' :: ContinueAsNewOptions) -> do
+        searchAttrs <- searchAttributesToProto 
+            (if opts'.searchAttributes == mempty
+              then i.searchAttributes
+              else opts'.searchAttributes)
+        args <- traverse (fmap convertToProtoPayload) args
+        throwIO $ ContinueAsNewException $ defMessage
+          & Command.workflowType .~ wfName
+          & Command.taskQueue .~ (maybe "" rawTaskQueue opts'.taskQueue)
+          & Command.arguments .~ args
+          & Command.maybe'retryPolicy .~ (retryPolicyToProto <$> opts'.retryPolicy)
+          & Command.searchAttributes .~ searchAttrs
+          & Command.headers .~ fmap convertToProtoPayload opts'.headers
+          & Command.memo .~ fmap convertToProtoPayload opts'.memo
+          & Command.maybe'workflowTaskTimeout .~ (durationToProto <$> opts'.taskTimeout)
+          & Command.maybe'workflowRunTimeout .~ (durationToProto <$> opts'.runTimeout)
+      pure $ Done res
 
 -- | Returns a client-side handle that can be used to signal and cancel an existing Workflow execution. It takes a Workflow ID and optional run ID.
 getExternalWorkflowHandle :: RequireCallStack => WorkflowId -> Maybe RunId -> Workflow (ExternalWorkflowHandle result)
