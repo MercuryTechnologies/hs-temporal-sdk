@@ -29,7 +29,7 @@ data ValidActivityFunction env = forall codec f.
   ValidActivityFunction 
     codec 
     f
-    (f -> Vector RawPayload -> IO (Either String (Activity env (ResultOf (Activity env) f))))
+    (f -> Vector Payload -> IO (Either String (Activity env (ResultOf (Activity env) f))))
 
 class HasActivityDefinition a where
   type ActivityDefinitionEnv a :: Type
@@ -41,7 +41,7 @@ instance HasActivityDefinition (ActivityDefinition env) where
 
 data ActivityDefinition env = ActivityDefinition
   { activityName :: Text
-  , activityRun :: ActivityEnv env -> ExecuteActivityInput -> IO (Either String RawPayload)
+  , activityRun :: ActivityEnv env -> ExecuteActivityInput -> IO (Either String Payload)
   }
 
 data ActivityEnv env = ActivityEnv

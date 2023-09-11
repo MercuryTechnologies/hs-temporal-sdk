@@ -76,12 +76,12 @@ import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import UnliftIO
 import Data.Time.Clock.System (SystemTime(..))
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Completion
-import Temporal.Payload (RawPayload)
+import Temporal.Payload (Payload)
 
 
 create :: MonadLoggerIO m 
   => (Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
-  -> (Vector RawPayload -> IO (Either String (Workflow RawPayload)))
+  -> (Vector Payload -> IO (Either String (Workflow Payload)))
   -> Maybe Int -- ^ deadlock timeout in seconds
   -> WorkflowInboundInterceptor
   -> WorkflowOutboundInterceptor
@@ -140,10 +140,10 @@ create workflowCompleteActivation workflowFn workflowDeadlockTimeout inboundInte
   writeIORef executionThread workerThread
   pure inst
 
-runWorkflowToCompletion :: SuspendableWorkflowExecution RawPayload -> InstanceM (WorkflowExitVariant RawPayload)
+runWorkflowToCompletion :: SuspendableWorkflowExecution Payload -> InstanceM (WorkflowExitVariant Payload)
 runWorkflowToCompletion wf = runTopLevel $ do
   inst <- ask
-  let completeStep :: Await [ActivationResult] (SuspendableWorkflowExecution RawPayload) -> InstanceM (SuspendableWorkflowExecution RawPayload)
+  let completeStep :: Await [ActivationResult] (SuspendableWorkflowExecution Payload) -> InstanceM (SuspendableWorkflowExecution Payload)
       completeStep suspension = do
         $logDebug "Awaiting activation results from workflow"
         -- If the workflow is blocked, then we necessarily have to signal the temporal-core
@@ -205,8 +205,8 @@ addStackTraceHandler inst = do
 activate 
   :: Functor f 
   => WorkflowActivation 
-  -> f (Await [ActivationResult] (SuspendableWorkflowExecution RawPayload) )
-  -> InstanceM (f (SuspendableWorkflowExecution RawPayload))
+  -> f (Await [ActivationResult] (SuspendableWorkflowExecution Payload) )
+  -> InstanceM (f (SuspendableWorkflowExecution Payload))
 activate act suspension = do
   inst <- ask
   info <- atomicModifyIORef' inst.workflowInstanceInfo $ \info -> 
@@ -257,7 +257,7 @@ setUpWorkflowExecution startWorkflow = do
     , executeWorkflowInputInfo = info
     }
 
-applyStartWorkflow :: ExecuteWorkflowInput -> (Vector RawPayload -> IO (Either String (Workflow RawPayload))) -> InstanceM (SuspendableWorkflowExecution RawPayload)
+applyStartWorkflow :: ExecuteWorkflowInput -> (Vector Payload -> IO (Either String (Workflow Payload))) -> InstanceM (SuspendableWorkflowExecution Payload)
 applyStartWorkflow execInput workflowFn = do
   inst <- ask
   let executeWorkflowBase input = runInstanceM inst $ do
@@ -363,8 +363,8 @@ applyJobs
   -- We use the functor here because we need to call applyJobs both before and after a workflow has completed.
   -- During workflow execution, identity is the functor, but after a workflow has completed, Proxy is the functor
   -- since we don't actually have any continuation to run.
-  -> f (Await [ActivationResult] (SuspendableWorkflowExecution RawPayload))
-  -> InstanceM (Either SomeException (f (SuspendableWorkflowExecution RawPayload)))
+  -> f (Await [ActivationResult] (SuspendableWorkflowExecution Payload))
+  -> InstanceM (Either SomeException (f (SuspendableWorkflowExecution Payload)))
 applyJobs jobs fAwait = UnliftIO.try $ do
   $logDebug $ Text.pack ("Applying jobs: " <> show jobs)
   inst <- ask

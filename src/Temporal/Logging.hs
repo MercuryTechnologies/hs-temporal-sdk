@@ -6,7 +6,7 @@ import Data.Time.Clock
 
 
 data Level = Debug | Info | Warn | Error | Fatal
-  deriving (Eq, Ord, Show, Read, Enum, Bounded)
+  deriving stock (Eq, Ord, Show, Read, Enum, Bounded)
 
 data LogItem = LogItem
   { message :: !Text

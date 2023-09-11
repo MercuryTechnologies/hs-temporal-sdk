@@ -13,38 +13,29 @@ build-type:     Simple
 library
   exposed-modules:
       Temporal.Activity
-      Temporal.Activity.Types
       Temporal.Client
       Temporal.Client.AsyncActivity
       Temporal.Client.Namespace
       Temporal.Client.Schedule
-      Temporal.Client.Types
       Temporal.Client.Workflow
-      Temporal.Common.TimeoutType
       Temporal.Contrib.OpenTelemetry
       Temporal.Duration
-      Temporal.EphemeralServer
       Temporal.Exception
       Temporal.Generic
-      Temporal.Generic.GenericN
-      Temporal.Generic.TyFun
       Temporal.Interceptor
-      Temporal.Logging
       Temporal.Payload
       Temporal.SearchAttributes
       Temporal.Worker
       Temporal.Workflow
-      Temporal.Workflow.Internal.Instance
-      Temporal.Workflow.Internal.Monad
       Temporal.Workflow.Query
       Temporal.Workflow.Saga
       Temporal.Workflow.Signal
-      Temporal.Workflow.Types
-      Temporal.Workflow.Unsafe.Handle
   other-modules:
       Temporal.Activity.Definition
       Temporal.Activity.Worker
+      Temporal.Client.Types
       Temporal.Common
+      Temporal.Common.TimeoutType
       Temporal.Coroutine
       Temporal.Workflow.Definition
       Temporal.WorkflowInstance
@@ -52,11 +43,22 @@ library
       Temporal.Workflow.Eval
       Temporal.Workflow.WorkflowInstance
       Temporal.Worker.Types
+      Temporal.Activity.Types
+      Temporal.Workflow.Unsafe.Handle
+      Temporal.Workflow.Internal.Instance
+      Temporal.Workflow.Internal.Monad
+      Temporal.Generic.GenericN
+      Temporal.Generic.TyFun
+      Temporal.Workflow.Types
+      Temporal.Logging
+      Temporal.EphemeralServer
+      Temporal.SearchAttributes.Internal
   hs-source-dirs:
       src
   default-extensions:
       BangPatterns
       DataKinds
+      DerivingStrategies
       FlexibleContexts
       FlexibleInstances
       GADTs
@@ -128,6 +130,7 @@ test-suite temporal-sdk-tests
   default-extensions:
       BangPatterns
       DataKinds
+      DerivingStrategies
       FlexibleContexts
       FlexibleInstances
       GADTs

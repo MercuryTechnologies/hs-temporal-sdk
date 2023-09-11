@@ -19,6 +19,7 @@ import Temporal.Payload
 import Temporal.Workflow.Definition
 import Temporal.WorkflowInstance
 import Temporal.SearchAttributes
+import Temporal.SearchAttributes.Internal
 import UnliftIO
 import Lens.Family2
 import Data.ProtoLens

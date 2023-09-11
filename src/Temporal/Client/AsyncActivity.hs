@@ -17,8 +17,8 @@ complete = undefined
 fail :: AsyncCompletionClient -> TaskToken -> SomeException -> m ()
 fail = undefined
 
-heartbeat :: AsyncCompletionClient -> TaskToken -> [RawPayload] -> m ()
+heartbeat :: AsyncCompletionClient -> TaskToken -> [Payload] -> m ()
 heartbeat = undefined
 
-reportCancellation :: AsyncCompletionClient -> TaskToken -> [RawPayload] -> m ()
+reportCancellation :: AsyncCompletionClient -> TaskToken -> [Payload] -> m ()
 reportCancellation = undefined

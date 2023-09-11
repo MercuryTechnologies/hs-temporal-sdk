@@ -142,7 +142,7 @@ applyActivityTaskStart tt msg = do
     mask_ $ do
       syncPoint <- newEmptyMVar
       runningActivity <- async $ do
-        (ef :: Either SomeException (Either String RawPayload)) <- liftIO $ UnliftIO.trySyncOrAsync $ do
+        (ef :: Either SomeException (Either String Payload)) <- liftIO $ UnliftIO.trySyncOrAsync $ do
           w.activityInboundInterceptors.executeActivity input $ \input' -> do
             case HashMap.lookup info.activityType w.definitions of
               Nothing -> throwIO $ RuntimeError ("Activity type not found: " <> T.unpack info.activityType)

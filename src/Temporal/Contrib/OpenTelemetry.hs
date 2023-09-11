@@ -16,7 +16,7 @@ import Data.Word (Word32)
 import Temporal.Activity.Types
 import Temporal.Duration
 import Temporal.Interceptor
-import Temporal.Payload (RawPayload(..))
+import Temporal.Payload (Payload(..))
 import OpenTelemetry.Propagator.W3CTraceContext
 import OpenTelemetry.Context.ThreadLocal (attachContext, getContext)
 import Temporal.Workflow
@@ -55,12 +55,12 @@ defaultOpenTelemetryInterceptorOptions = OpenTelemetryInterceptorOptions
   , headerKey = defaultHeaderKey
   }
 
-headersPropagator :: Propagator Ctxt.Context (Map.Map T.Text RawPayload) (Map.Map T.Text RawPayload)
+headersPropagator :: Propagator Ctxt.Context (Map.Map T.Text Payload) (Map.Map T.Text Payload)
 headersPropagator = Propagator
   { propagatorNames = ["tracecontext"]
   , extractor = \hs c -> do
-    let traceParentHeader = inputPayloadData <$> Map.lookup "traceparent" hs
-        traceStateHeader = inputPayloadData <$> Map.lookup "tracestate" hs
+    let traceParentHeader = payloadData <$> Map.lookup "traceparent" hs
+        traceStateHeader = payloadData <$> Map.lookup "tracestate" hs
         mspanContext = decodeSpanContext traceParentHeader traceStateHeader
     pure $! case mspanContext of
       Nothing -> c
@@ -71,8 +71,8 @@ headersPropagator = Propagator
     Just s -> do
       (traceParentHeader, traceStateHeader) <- encodeSpanContext s
       pure
-        $ Map.insert "traceparent" (RawPayload traceParentHeader mempty)
-        $ Map.insert "tracestate" (RawPayload traceStateHeader mempty) hs
+        $ Map.insert "traceparent" (Payload traceParentHeader mempty)
+        $ Map.insert "tracestate" (Payload traceStateHeader mempty) hs
   }
 
 

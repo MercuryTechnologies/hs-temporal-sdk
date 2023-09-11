@@ -26,22 +26,22 @@ import Data.Map (Map)
 
 -- | This is generally the name of the function itself
 newtype WorkflowType = WorkflowType { rawWorkflowType :: Text }
-  deriving (Eq, Ord, Show, Hashable, IsString)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString)
 
 -- | A Workflow Id is a customizable, application-level identifier for a Workflow Execution that is unique to an Open Workflow Execution within a Namespace.
 newtype WorkflowId = WorkflowId { rawWorkflowId :: Text }
-  deriving (Eq, Ord, Show, Hashable, IsString)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString)
 
 -- | A Namespace is a unit of isolation within the Temporal Platform
 newtype Namespace = Namespace { rawNamespace :: Text }
-  deriving (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable)
 
 -- | A Run Id is a globally unique, platform-level identifier for a Workflow Execution.
 newtype RunId = RunId { rawRunId :: Text }
-  deriving (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable)
 
 newtype PatchId = PatchId { rawPatchId :: Text }
-  deriving (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable)
 
 -- | A Task Queue is a queue that a Worker Process polls for Tasks.
 --
@@ -54,32 +54,32 @@ newtype PatchId = PatchId { rawPatchId :: Text }
 -- created under the same name. There is no limit to the number of Task Queues a Temporal Application can use or a Temporal Cluster 
 -- can maintain.
 newtype TaskQueue = TaskQueue { rawTaskQueue :: Text }
-  deriving (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable)
 
 newtype ActivityType = ActivityType { rawActivityType :: Text }
-  deriving (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable)
 
 -- | A unique identifier for an Activity Execution.
 newtype ActivityId = ActivityId { rawActivityId :: Text }
-  deriving (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable)
 
 newtype ScheduleId = ScheduleId { rawScheduleId :: Text }
-  deriving (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable)
 
 newtype SignalId = SignalId { rawSignalId :: Text }
-  deriving (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable)
 
 newtype TimerId = TimerId { rawTimerId :: Text }
-  deriving (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable)
 
 newtype CancellationId = CancellationId { rawCancellationId :: Text }
-  deriving (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable)
 
 newtype QueryId = QueryId { rawQueryId :: Text }
-  deriving (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable)
 
 newtype TaskToken = TaskToken { rawTaskToken :: ByteString }
-  deriving (Eq, Show, Ord, Hashable)
+  deriving newtype (Eq, Show, Ord, Hashable)
 
 timespecFromTimestamp :: Timestamp.Timestamp -> SystemTime
 timespecFromTimestamp ts = MkSystemTime
@@ -146,7 +146,7 @@ data WorkflowIdReusePolicy
   -- ^ Specifies that if a Workflow Execution with the same Workflow Id is already running, 
   -- it should be terminated and a new Workflow Execution with the same Workflow Id should be started. 
   -- This policy allows for only one Workflow Execution with a specific Workflow Id to be running at any given time.
-  deriving (Eq, Ord, Show, Enum, Bounded)
+  deriving stock (Eq, Ord, Show, Enum, Bounded)
 
 workflowIdReusePolicyToProto :: WorkflowIdReusePolicy -> Workflow.WorkflowIdReusePolicy
 workflowIdReusePolicyToProto = \case
@@ -175,7 +175,8 @@ data ParentInfo = ParentInfo
   }
 
 newtype Sequence = Sequence { rawSequence :: Word32 }
-  deriving (Eq, Ord, Show, Enum, Num, Hashable)
+  deriving stock (Eq, Ord, Show)
+  deriving newtype (Hashable, Enum, Num)
 
 class FunctionHoist (args :: [Type]) where
   hoistFn :: (forall x. m x -> n x) -> Proxy args -> Proxy result -> (args :->: m result) -> (args :->: n result)
@@ -197,5 +198,5 @@ hoist trans f = hoistFn trans (Proxy @(ArgsOf f)) (Proxy @(ResultOf m f)) f
 nonEmptyString :: Text -> Maybe Text
 nonEmptyString t = if T.null t then Nothing else Just t
 
-convertToProtoMemo :: Map Text RawPayload -> Message.Memo
+convertToProtoMemo :: Map Text Payload -> Message.Memo
 convertToProtoMemo m = defMessage & Message.fields .~ fmap convertToProtoPayload m

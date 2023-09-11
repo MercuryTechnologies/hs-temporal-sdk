@@ -70,7 +70,7 @@ ilift m = Workflow $ \_ -> Done <$> m
 askInstance :: Workflow WorkflowInstance
 askInstance = Workflow $ \_ -> asks Done
 
-finishWorkflow :: RawPayload -> InstanceM ()
+finishWorkflow :: Payload -> InstanceM ()
 finishWorkflow result = do
   let completeMessage = defMessage &
         Command.completeWorkflowExecution .~ (defMessage & Command.result .~ convertToProtoPayload result)
@@ -474,8 +474,8 @@ data WorkflowInstance = WorkflowInstance
   , workflowIsReplaying :: {-# UNPACK #-} !(IORef Bool)
   , workflowCommands :: {-# UNPACK #-} !(TVar (Reversed WorkflowCommand))
   , workflowSequenceMaps :: {-# UNPACK #-} !(TVar SequenceMaps)
-  , workflowSignalHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (Vector RawPayload -> Workflow ())))
-  , workflowQueryHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (QueryId -> Vector RawPayload -> Map Text RawPayload -> IO (Either SomeException RawPayload))))
+  , workflowSignalHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (Vector Payload -> Workflow ())))
+  , workflowQueryHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (QueryId -> Vector Payload -> Map Text Payload -> IO (Either SomeException Payload))))
   , workflowCallStack :: {-# UNPACK #-} !(IORef CallStack)
   , workflowCompleteActivation :: !(Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
   , workflowInstanceContinuationEnv :: {-# UNPACK #-} !ContinuationEnv
@@ -559,7 +559,7 @@ data ChildWorkflowHandle result = ChildWorkflowHandle
   { childWorkflowSequence :: Sequence
   , startHandle :: IVar ()
   , resultHandle :: IVar ResolveChildWorkflowExecution
-  , childWorkflowResultConverter :: RawPayload -> IO result
+  , childWorkflowResultConverter :: Payload -> IO result
   , childWorkflowId :: WorkflowId
   , firstExecutionRunId :: IVar RunId
   }
@@ -576,8 +576,8 @@ interceptorConvertChildWorkflowHandle h f = h
 
 data ExecuteWorkflowInput = ExecuteWorkflowInput
   { executeWorkflowInputType :: Text
-  , executeWorkflowInputArgs :: Vector RawPayload
-  , executeWorkflowInputHeaders :: Map Text RawPayload
+  , executeWorkflowInputArgs :: Vector Payload
+  , executeWorkflowInputHeaders :: Map Text Payload
   , executeWorkflowInputInfo :: Info
   }
 
@@ -590,19 +590,19 @@ data WorkflowExitVariant a
 data HandleQueryInput = HandleQueryInput
   { handleQueryId :: Text
   , handleQueryInputType :: Text
-  , handleQueryInputArgs :: Vector RawPayload
-  , handleQueryInputHeaders :: Map Text RawPayload
+  , handleQueryInputArgs :: Vector Payload
+  , handleQueryInputHeaders :: Map Text Payload
   }
 
 data WorkflowInboundInterceptor = WorkflowInboundInterceptor
   { executeWorkflow
     :: ExecuteWorkflowInput
-    -> (ExecuteWorkflowInput -> IO (WorkflowExitVariant RawPayload))
-    -> IO (WorkflowExitVariant RawPayload)
+    -> (ExecuteWorkflowInput -> IO (WorkflowExitVariant Payload))
+    -> IO (WorkflowExitVariant Payload)
   , handleQuery 
     :: HandleQueryInput
-    -> (HandleQueryInput -> IO (Either SomeException RawPayload))
-    -> IO (Either SomeException RawPayload)
+    -> (HandleQueryInput -> IO (Either SomeException Payload))
+    -> IO (Either SomeException Payload)
   }
 
 instance Semigroup WorkflowInboundInterceptor where
@@ -619,14 +619,14 @@ instance Monoid WorkflowInboundInterceptor where
 
 data ActivityInput = ActivityInput
   { activityType :: Text
-  , args :: Vector RawPayload
+  , args :: Vector Payload
   , options :: StartActivityOptions
   , seq :: Sequence
   }
 
 data WorkflowOutboundInterceptor = WorkflowOutboundInterceptor
-  { scheduleActivity :: ActivityInput -> (ActivityInput -> IO (Task RawPayload)) -> IO (Task RawPayload)
-  , startChildWorkflowExecution :: Text -> StartChildWorkflowOptions -> (Text -> StartChildWorkflowOptions -> IO (ChildWorkflowHandle RawPayload)) -> IO (ChildWorkflowHandle RawPayload)
+  { scheduleActivity :: ActivityInput -> (ActivityInput -> IO (Task Payload)) -> IO (Task Payload)
+  , startChildWorkflowExecution :: Text -> StartChildWorkflowOptions -> (Text -> StartChildWorkflowOptions -> IO (ChildWorkflowHandle Payload)) -> IO (ChildWorkflowHandle Payload)
   , continueAsNew :: forall a. Text -> ContinueAsNewOptions -> (Text -> ContinueAsNewOptions -> IO a) -> IO a
   }
 

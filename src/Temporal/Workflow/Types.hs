@@ -20,10 +20,10 @@ data Info = Info
   , continuedRunId :: Maybe RunId
   , cronSchedule :: Maybe Text
   , executionTimeout :: Maybe Duration
-  , headers :: Map Text RawPayload
+  , headers :: Map Text Payload
   , namespace :: Namespace
   , parent :: Maybe ParentInfo
-  , rawMemo :: Map Text RawPayload
+  , rawMemo :: Map Text Payload
   , retryPolicy :: Maybe RetryPolicy
   , runId :: RunId
   , runTimeout :: Maybe Duration
@@ -43,7 +43,7 @@ data StartActivityOptions = StartActivityOptions
   , heartbeatTimeout :: Maybe Duration
   , retryPolicy :: Maybe RetryPolicy
   , cancellationType :: ActivityCancellationType
-  , headers :: Map Text RawPayload -- TODO payloads
+  , headers :: Map Text Payload -- TODO payloads
   , disableEagerExecution :: Bool
   }
 
@@ -77,8 +77,8 @@ data ActivityCancellationType
   -- workflow
 
 data ExecuteActivityInput = ExecuteActivityInput
-  { activityArgs :: Vector RawPayload
-  , activityHeaders :: Map Text RawPayload
+  { activityArgs :: Vector Payload
+  , activityHeaders :: Map Text Payload
   , activityInfo :: ActivityInfo
   }
 
@@ -125,9 +125,9 @@ data StartChildWorkflowOptions = StartChildWorkflowOptions
   , taskTimeout :: Maybe Duration
   , retryPolicy :: Maybe RetryPolicy
   , cronSchedule :: Maybe Text
-  , initialMemo :: Map Text RawPayload
+  , initialMemo :: Map Text Payload
   , searchAttributes :: Map Text SearchAttributeType 
-  , headers :: Map Text RawPayload
+  , headers :: Map Text Payload
   , workflowIdReusePolicy :: WorkflowIdReusePolicy
   }
 
@@ -151,9 +151,9 @@ data ContinueAsNewOptions = ContinueAsNewOptions
   , runTimeout :: Maybe Duration
   , taskTimeout :: Maybe Duration
   , retryPolicy :: Maybe RetryPolicy
-  , memo :: Map Text RawPayload
+  , memo :: Map Text Payload
   , searchAttributes :: Map Text SearchAttributeType
-  , headers :: Map Text RawPayload
+  , headers :: Map Text Payload
   }
 
 defaultContinueAsNewOptions :: ContinueAsNewOptions

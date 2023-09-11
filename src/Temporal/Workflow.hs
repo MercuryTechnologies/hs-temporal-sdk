@@ -67,15 +67,17 @@ module Temporal.Workflow
   , startChildWorkflow
   , executeChildWorkflow
   , ChildWorkflowHandle
-  , ExternalWorkflowHandle
   , Wait(..)
   , Cancel(..)
   , WorkflowHandle(..)
   , waitChildWorkflowResult
   , waitChildWorkflowStart
   , cancelChildWorkflowExecution
+  , ExternalWorkflowHandle
+  , getExternalWorkflowHandle
   , Info(..)
   , RetryPolicy(..)
+  , defaultRetryPolicy
   , ParentInfo(..)
   -- * Workflow metadata
   -- 
@@ -161,7 +163,6 @@ import Data.UUID.Types.Internal ( buildFromBytes )
 import Data.Vector (Vector)
 import qualified Data.Vector as V
 import Lens.Family2
-import Proto.Temporal.Api.Common.V1.Message (Payload)
 import RequireCallStack
 import System.Random.Stateful
 import Temporal.Common
@@ -169,7 +170,7 @@ import Temporal.Common.TimeoutType
 import Temporal.Exception
 import Temporal.Payload
 import Temporal.SearchAttributes
-import Temporal.Worker.Types
+import Temporal.SearchAttributes.Internal
 import Temporal.WorkflowInstance
 import Temporal.Workflow.Query
 import Temporal.Workflow.Signal
@@ -184,11 +185,8 @@ import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands as Co
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
 import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult as ActivityResult
 import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields as ActivityResult
-import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow as ChildWorkflow
-import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow_Fields as ChildWorkflow
-import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import UnliftIO
-import Temporal.Duration (Duration, durationToProto)
+import Temporal.Duration (Duration, durationToProto, seconds)
 
 {- $activityBasics
 
@@ -231,14 +229,14 @@ startActivityFromPayloads
   :: forall args result. RequireCallStack 
   => KnownActivity args result 
   -> StartActivityOptions 
-  -> [IO RawPayload] 
+  -> [IO Payload] 
   -> Workflow (Task result)
 startActivityFromPayloads (KnownActivity codec mTaskQueue name) opts typedPayloads = ilift $ do
   runInIO <- askRunInIO
   updateCallStack
   inst <- ask
   ps <- traverse liftIO typedPayloads
-  let intercept :: ActivityInput -> (ActivityInput -> IO (Task RawPayload)) -> IO (Task RawPayload)
+  let intercept :: ActivityInput -> (ActivityInput -> IO (Task Payload)) -> IO (Task Payload)
       intercept = inst.outboundInterceptor.scheduleActivity
   s@(Sequence actSeq) <- nextActivitySequence
   rawTask <- liftIO $ intercept (ActivityInput name (V.fromList ps) opts s) $ \activityInput -> runInIO $ do
@@ -318,7 +316,7 @@ executeActivity activity opts = case activityRef activity of
 gatherActivityArgs 
   :: forall args result codec. GatherArgs codec args
   => codec 
-  -> ([IO RawPayload] -> Workflow (Task result)) 
+  -> ([IO Payload] -> Workflow (Task result)) 
   -> (args :->: Workflow (Task result))
 gatherActivityArgs c f = gatherArgs (Proxy @args) c id f
 
@@ -389,7 +387,7 @@ signalWorkflow _ f (SignalDefinition (SignalRef signalName signalCodec) signalAp
 gatherSignalChildWorkflowArgs 
   :: forall args result codec. GatherArgs codec args
   => codec 
-  -> ([IO RawPayload] -> Workflow (Task result)) 
+  -> ([IO Payload] -> Workflow (Task result)) 
   -> (args :->: Workflow (Task result))
 gatherSignalChildWorkflowArgs c f = gatherArgs (Proxy @args) c id f
 
@@ -399,11 +397,11 @@ startChildWorkflowFromPayloads
   => KnownWorkflow args result 
   -> StartChildWorkflowOptions 
   -> WorkflowId 
-  -> [IO RawPayload] 
+  -> [IO Payload] 
   -> Workflow (ChildWorkflowHandle result)
 startChildWorkflowFromPayloads k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId = ilift . go
   where
-    go :: [IO RawPayload] -> InstanceM (ChildWorkflowHandle result)
+    go :: [IO Payload] -> InstanceM (ChildWorkflowHandle result)
     go typedPayloads = do
       updateCallStack
       args <- liftIO $ sequence typedPayloads
@@ -528,7 +526,7 @@ data StartLocalActivityOptions = StartLocalActivityOptions
   -- confirmed. Lang should default this to `WAIT_CANCELLATION_COMPLETED`, even though proto
   -- will default to `TRY_CANCEL` automatically.
   , cancellationType :: ActivityCancellationType
-  , headers :: Map Text RawPayload
+  , headers :: Map Text Payload
   }
 
 defaultStartLocalActivityOptions :: StartLocalActivityOptions
@@ -615,13 +613,13 @@ info = askInstance >>= (\m -> Workflow $ \_ -> Done <$> m) . readIORef . workflo
 --(ask >>= readIORef) workflowInstanceInfo <$> askInstance
 
 -- | Current workflow's raw memo values.
-getMemoValues :: Workflow (Map Text RawPayload)
+getMemoValues :: Workflow (Map Text Payload)
 getMemoValues = do
   details <- info
   pure details.rawMemo
 
 -- | Lookup a memo value by key.
-lookupMemoValue :: Text -> Workflow (Maybe RawPayload)
+lookupMemoValue :: Text -> Workflow (Maybe Payload)
 lookupMemoValue k = do
   memoMap <- getMemoValues
   pure $ Map.lookup k memoMap
@@ -759,7 +757,7 @@ uuid4 = do
 
 
 newtype Query a = Query (InstanceM a)
-  deriving (Functor, Applicative, Monad)
+  deriving newtype (Functor, Applicative, Monad)
 
 -- $queries
 -- 
@@ -795,7 +793,7 @@ setQueryHandler (QueryDefinition n codec) f = ilift $ do
     liftIO $ modifyIORef' inst.workflowQueryHandlers $ \handles ->
       HashMap.insert (Just n) (\qId vec hdrs -> runInIO $ qHandler qId vec hdrs) handles
   where
-    qHandler :: QueryId -> Vector RawPayload -> Map Text RawPayload -> InstanceM (Either SomeException RawPayload)
+    qHandler :: QueryId -> Vector Payload -> Map Text Payload -> InstanceM (Either SomeException Payload)
     qHandler (QueryId _) vec _ = do
       eHandler <- liftIO $ applyPayloads 
             codec 
@@ -829,7 +827,7 @@ setSignalHandler (SignalRef n codec) f = ilift $ do
     liftIO $ modifyIORef' inst.workflowSignalHandlers $ \handlers -> 
       HashMap.insert (Just n) handle handlers
   where
-    handle :: Vector RawPayload -> Workflow ()
+    handle :: Vector Payload -> Workflow ()
     handle = \vec ->  do
       eWorkflow <- Workflow $ \env -> liftIO $ fmap Done $ applyPayloads 
         codec
@@ -895,7 +893,7 @@ instance Wait Timer where
 instance Cancel Timer where
   type CancelResult Timer = Workflow ()
 
-  cancel t = Workflow $ \env -> do
+  cancel t = Workflow $ \_ -> do
     updateCallStack
     inst <- ask
     let cmd = defMessage & Command.cancelTimer .~ 
@@ -919,7 +917,7 @@ instance Cancel Timer where
 gatherContinueAsNewArgs 
   :: forall args result codec. GatherArgs codec args
   => codec 
-  -> ([IO RawPayload] -> Workflow result) 
+  -> ([IO Payload] -> Workflow result) 
   -> (args :->: Workflow result)
 gatherContinueAsNewArgs c f = gatherArgs (Proxy @args) c id f
 
@@ -984,7 +982,7 @@ newtype Condition a = Condition
   -- ^ We track the sequence number of each accessed StateVar so that we can
   -- block and retry the condition evaluation if the state changes.
   }
-  deriving (Functor, Applicative, Monad)
+  deriving newtype (Functor, Applicative, Monad)
 
 instance MonadReadStateVar Condition where
   readStateVar StateVar{..} = Condition $ readIORef ref
@@ -1181,3 +1179,13 @@ waitCancellation = do
   inst <- askInstance
   getIVar inst.workflowCancellationVar
   throw WorkflowCancelRequested
+
+
+defaultRetryPolicy :: RetryPolicy
+defaultRetryPolicy = RetryPolicy
+  { initialInterval = seconds 1
+  , backoffCoefficient = 2
+  , maximumInterval = Nothing
+  , maximumAttempts = 0
+  , nonRetryableErrorTypes = mempty
+  }

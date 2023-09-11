@@ -15,9 +15,9 @@ data ActivityInfo = ActivityInfo
   , runId :: RunId
   , activityId :: ActivityId
   , activityType :: Text
-  , headerFields :: Map Text RawPayload
+  , headerFields :: Map Text Payload
   -- input
-  , heartbeatDetails :: Vector RawPayload
+  , heartbeatDetails :: Vector Payload
   , scheduledTime :: SystemTime
   , currentAttemptScheduledTime :: SystemTime
   , startedTime :: SystemTime

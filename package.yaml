@@ -46,6 +46,7 @@ dependencies:
 default-extensions:
 - BangPatterns
 - DataKinds
+- DerivingStrategies
 - FlexibleContexts
 - FlexibleInstances
 - GADTs
@@ -96,7 +97,9 @@ library:
   other-modules:
   - Temporal.Activity.Definition
   - Temporal.Activity.Worker
+  - Temporal.Client.Types
   - Temporal.Common
+  - Temporal.Common.TimeoutType
   - Temporal.Coroutine
   - Temporal.Workflow.Definition
   - Temporal.WorkflowInstance
@@ -104,6 +107,16 @@ library:
   - Temporal.Workflow.Eval
   - Temporal.Workflow.WorkflowInstance
   - Temporal.Worker.Types
+  - Temporal.Activity.Types
+  - Temporal.Workflow.Unsafe.Handle
+  - Temporal.Workflow.Internal.Instance
+  - Temporal.Workflow.Internal.Monad
+  - Temporal.Generic.GenericN
+  - Temporal.Generic.TyFun
+  - Temporal.Workflow.Types
+  - Temporal.Logging
+  - Temporal.EphemeralServer
+  - Temporal.SearchAttributes.Internal
   when:
   - condition: false
     other-modules: Paths_temporal_sdk

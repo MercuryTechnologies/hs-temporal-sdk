@@ -7,13 +7,9 @@ import Data.Scientific (floatingOrInteger)
 import Data.Text (Text)
 import Data.Time.Clock (UTCTime)
 import Data.Vector (Vector)
-import qualified Proto.Temporal.Api.Common.V1.Message as Message
 import Data.Int
 import Data.Word
-import qualified Data.Map.Strict as Map
 import GHC.TypeLits
-import Temporal.Payload
-import Control.Monad.Except
 
 class ToSearchAttribute a where
   toSearchAttribute :: a -> SearchAttributeType
@@ -85,7 +81,7 @@ data SearchAttributeType
   -- - As a Keyword it would be matched only by ProductId = "2dd29ab7-2dd8-4668-83e0-89cae261cfb1"
   -- - As a Text it would be matched by ProductId = 2dd8, which could cause unwanted matches.
   | KeywordList (Vector Text)
-  deriving (Show, Eq)
+  deriving stock (Show, Eq)
 
 instance A.ToJSON SearchAttributeType where
   toJSON (Bool b) = A.toJSON b
@@ -104,9 +100,3 @@ instance A.FromJSON SearchAttributeType where
       Right i -> pure $ Int i
     A.Array arr -> KeywordList <$> mapM A.parseJSON arr
     _ -> fail "Invalid search attribute type"
-
-searchAttributesToProto :: Map.Map Text SearchAttributeType -> IO (Map.Map Text Message.Payload)
-searchAttributesToProto searchAttrs = traverse (fmap convertToProtoPayload . encode JSON) searchAttrs
-
-searchAttributesFromProto :: Map.Map Text Message.Payload -> IO (Either String (Map.Map Text SearchAttributeType))
-searchAttributesFromProto fs = runExceptT $ traverse (ExceptT . decode JSON . convertFromProtoPayload) $ fs

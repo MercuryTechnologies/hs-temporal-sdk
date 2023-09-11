@@ -20,15 +20,11 @@ module Temporal.Activity
   , askActivityClient
   ) where
 
-import Control.Exception
 import Control.Monad
 import Control.Monad.IO.Class
 import Data.ProtoLens
 import Data.Proxy
 import Data.Text (Text)
-import qualified Data.Text as Text
-import Data.Typeable
-import GHC.TypeLits
 import Lens.Family2
 import Temporal.Client
 import Temporal.Exception
@@ -39,7 +35,6 @@ import Temporal.Core.Worker (recordActivityHeartbeat)
 import Temporal.Payload
 import Temporal.Activity.Types
 import Temporal.Workflow
-import Temporal.Workflow.Definition
 import Temporal.Workflow.Types
 
 import qualified Proto.Temporal.Sdk.Core.CoreInterface_Fields as Proto
@@ -99,7 +94,7 @@ Activity Cancellations are delivered to Activities from the Cluster when they He
 
 Heartbeats can contain payloads describing the Activity's current progress. If an Activity gets retried, the Activity can access the details from the last Heartbeat that was sent to the Cluster.
 -}
-heartbeat :: [RawPayload] -> Activity env ()
+heartbeat :: [Payload] -> Activity env ()
 heartbeat baseDetails = do
   (TaskToken token) <- taskToken <$> askActivityInfo
   worker <- askActivityWorker

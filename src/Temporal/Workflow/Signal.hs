@@ -15,5 +15,5 @@ data SignalRef (args :: [Type]) = forall codec. (ApplyPayloads codec args, Gathe
 data SignalDefinition (args :: [Type]) =
   SignalDefinition 
     { signalRef :: SignalRef args
-    , signalApply :: forall res. Proxy res -> (args :->: res) -> Vector RawPayload -> IO res
+    , signalApply :: forall res. Proxy res -> (args :->: res) -> Vector Payload -> IO res
     }

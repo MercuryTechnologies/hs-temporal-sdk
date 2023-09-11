@@ -19,7 +19,7 @@
   #-}
 {-# LANGUAGE DefaultSignatures #-}
 module Temporal.Payload 
-  ( RawPayload(..)
+  ( Payload(..)
   , Codec(..)
   , JSON(..)
   , Null(..)
@@ -31,7 +31,7 @@ module Temporal.Payload
   , Around(..)
   , mkPayloadProcessor
   , addPayloadProcessor
-  , RawPayloadProcessor
+  , PayloadProcessor
   , ApplyPayloads
   , GatherArgs(..)
   , ArgsOf
@@ -89,11 +89,11 @@ class Codec fmt a where
   messageType :: fmt -> a -> ByteString
   default messageType :: (Typeable a) => fmt -> a -> ByteString
   messageType _ _ = C.pack $ show $ typeRep (Proxy @a)
-  encode :: fmt -> a -> IO RawPayload
-  decode :: fmt -> RawPayload -> IO (Either String a)
+  encode :: fmt -> a -> IO Payload
+  decode :: fmt -> Payload -> IO (Either String a)
 
-insertStandardMetadata :: Codec fmt a => fmt -> a -> RawPayload -> RawPayload
-insertStandardMetadata fmt x (RawPayload d m) = RawPayload d $ m <> Map.fromList
+insertStandardMetadata :: Codec fmt a => fmt -> a -> Payload -> Payload
+insertStandardMetadata fmt x (Payload d m) = Payload d $ m <> Map.fromList
   [ ("encoding", encoding fmt x)
   , ("messageType", messageType fmt x)
   ]
@@ -102,14 +102,14 @@ data JSON = JSON
 
 instance (Typeable a, Aeson.ToJSON a, Aeson.FromJSON a) => Codec JSON a where
   encoding _ _ = "json/plain"
-  encode c x = pure $ insertStandardMetadata c x $ RawPayload (BL.toStrict $ Aeson.encode x) mempty
-  decode _ = pure . Aeson.eitherDecodeStrict' . inputPayloadData
+  encode c x = pure $ insertStandardMetadata c x $ Payload (BL.toStrict $ Aeson.encode x) mempty
+  decode _ = pure . Aeson.eitherDecodeStrict' . payloadData
 
 data Null = Null
 
 instance Codec Null () where
   encoding _ _ = "binary/null"
-  encode c x = pure $ insertStandardMetadata c x $ RawPayload mempty mempty
+  encode c x = pure $ insertStandardMetadata c x $ Payload mempty mempty
   decode _ _ = pure $ Right ()
 
 -- | Direct binary serialization.
@@ -130,8 +130,8 @@ data Binary = Binary
 
 instance Codec Binary ByteString where
   encoding _ _ = "binary/plain"
-  encode c x = pure $ insertStandardMetadata c x $ RawPayload x mempty
-  decode _ = pure . Right . inputPayloadData
+  encode c x = pure $ insertStandardMetadata c x $ Payload x mempty
+  decode _ = pure . Right . payloadData
 
 
 data Protobuf = Protobuf
@@ -139,8 +139,8 @@ data Protobuf = Protobuf
 instance (Message a) => Codec Protobuf a where
   messageType _ x = encodeUtf8 $ messageName $ pure x
   encoding _ _ = "binary/protobuf"
-  encode c x = pure $ insertStandardMetadata c x $ RawPayload (encodeMessage x) mempty
-  decode _ = pure . decodeMessage . inputPayloadData
+  encode c x = pure $ insertStandardMetadata c x $ Payload (encodeMessage x) mempty
+  decode _ = pure . decodeMessage . payloadData
 
 data Zlib = Zlib
   { -- | Skip compression when the size of the response body is
@@ -156,59 +156,59 @@ data Zlib = Zlib
 zlib :: Zlib
 zlib = Zlib 860 defaultCompressParams defaultDecompressParams
 
-instance Codec Zlib RawPayload where
+instance Codec Zlib Payload where
   encoding _ _ = "binary/zlib"
   -- TODO, if we keep the original compression size, we can allocate the right size buffer for the decompressed data.
   encode Zlib{..} p = if BS.length msg >= minimumEncodingSize && BS.length compressed < BS.length msg
-    then pure $ RawPayload compressed (Map.singleton "encoding" "binary/zlib")
+    then pure $ Payload compressed (Map.singleton "encoding" "binary/zlib")
     else pure p
     where
       msg = encodeMessage $ convertToProtoPayload p
-      compressed = BL.toStrict $ compress zlibFormat compressParams $ BL.fromStrict p.inputPayloadData
-  decode Zlib{..} p = case p.inputPayloadMetadata Map.!? "encoding" of
+      compressed = BL.toStrict $ compress zlibFormat compressParams $ BL.fromStrict p.payloadData
+  decode Zlib{..} p = case p.payloadMetadata Map.!? "encoding" of
   -- TODO, use `decompressIO` instead of `decompress`  so we can return the error in the Left case.
     Just "binary/zlib" -> pure $ 
       fmap convertFromProtoPayload $ 
       decodeMessage $ 
       BS.toStrict $ 
       decompress zlibFormat decompressParams $ 
-      BL.fromStrict p.inputPayloadData
+      BL.fromStrict p.payloadData
     _ -> pure $ Right p
 
 -- | A codec that post-processes the payload after encoding and pre-processes before decoding.
 --
--- Combining multiple 'RawPayloadProcessor's will apply them in the order that they are added.
+-- Combining multiple 'PayloadProcessor's will apply them in the order that they are added.
 -- For example, if you want to compress and then encrypt, you would add the compression processor
 -- first, then the encryption processor.
-data RawPayloadProcessor = RawPayloadProcessor
-  { rawPayloadProcessorEncode :: RawPayload -> IO RawPayload
-  , rawPayloadProcessorDecode :: RawPayload -> IO (Either String RawPayload)
+data PayloadProcessor = PayloadProcessor
+  { payloadProcessorEncode :: Payload -> IO Payload
+  , payloadProcessorDecode :: Payload -> IO (Either String Payload)
   }
 -- TODO, need to make sure to unit test this before using it. The ordering guarantees have me confused.
--- instance Semigroup RawPayloadProcessor where
---   RawPayloadProcessor e1 d1 <> RawPayloadProcessor e2 d2 = RawPayloadProcessor
---     { rawPayloadProcessorEncode = 
---     , rawPayloadProcessorDecode = 
+-- instance Semigroup PayloadProcessor where
+--   PayloadProcessor e1 d1 <> PayloadProcessor e2 d2 = PayloadProcessor
+--     { PayloadProcessorEncode = 
+--     , PayloadProcessorDecode = 
 --     }
--- instance Monoid RawPayloadProcessor where
---   mempty = RawPayloadProcessor pure (pure . Right)
+-- instance Monoid PayloadProcessor where
+--   mempty = PayloadProcessor pure (pure . Right)
 
-mkPayloadProcessor :: Codec fmt RawPayload => fmt -> RawPayloadProcessor
-mkPayloadProcessor fmt = RawPayloadProcessor
-  { rawPayloadProcessorEncode = encode fmt
-  , rawPayloadProcessorDecode = decode fmt
+mkPayloadProcessor :: Codec fmt Payload => fmt -> PayloadProcessor
+mkPayloadProcessor fmt = PayloadProcessor
+  { payloadProcessorEncode = encode fmt
+  , payloadProcessorDecode = decode fmt
   }
 
-addPayloadProcessor :: Codec fmt RawPayload => fmt -> RawPayloadProcessor -> RawPayloadProcessor
-addPayloadProcessor fmt RawPayloadProcessor{..} = RawPayloadProcessor
-  { rawPayloadProcessorEncode = \p -> do
-      p' <- rawPayloadProcessorEncode p
+addPayloadProcessor :: Codec fmt Payload => fmt -> PayloadProcessor -> PayloadProcessor
+addPayloadProcessor fmt PayloadProcessor{..} = PayloadProcessor
+  { payloadProcessorEncode = \p -> do
+      p' <- payloadProcessorEncode p
       encode fmt p'
-  , rawPayloadProcessorDecode = \p -> do
+  , payloadProcessorDecode = \p -> do
       p' <- decode fmt p
       case p' of
         Left err -> pure $ Left err
-        Right ok -> rawPayloadProcessorDecode ok
+        Right ok -> payloadProcessorDecode ok
   }
 
 
@@ -216,24 +216,24 @@ addPayloadProcessor fmt RawPayloadProcessor{..} = RawPayloadProcessor
 -- supports additional pre- and post-processing. This is useful for adding
 -- compression, encryption, or other transformations to an existing codec.
 data Around base = Around
-  { around :: RawPayloadProcessor
+  { around :: PayloadProcessor
   , baseCodec :: base
   }
 
 
 instance (Typeable a, Codec base a) => Codec (Around base) a where
   encoding (Around _ base) = encoding base
-  encode (Around p base) x = encode base x >>= rawPayloadProcessorEncode p
-  decode (Around p base) x = rawPayloadProcessorDecode p x >>= \case
+  encode (Around p base) x = encode base x >>= payloadProcessorEncode p
+  decode (Around p base) x = payloadProcessorDecode p x >>= \case
     Left err -> pure $ Left err
     Right x' -> decode base x'
 
 type family ArgsOf f where
   ArgsOf (arg -> rest) = arg ': ArgsOf rest
-  ArgsOf result = '[]
+  ArgsOf _ = '[]
 
 type family ResultOf (m :: Type -> Type) f where
-  ResultOf m (arg -> rest) = ResultOf m rest
+  ResultOf m (_ -> rest) = ResultOf m rest
   ResultOf m (m result) = result
   ResultOf m result = TypeError ('Text "This function must use the (" ':<>: 'ShowType m ':<>: 'Text ") monad." ':$$: ('Text "Current type: " ':<>: 'ShowType result))
 
@@ -245,10 +245,10 @@ type family (:->:) (args :: [Type]) (result :: Type) where
   (:->:) '[] result = result
   (:->:) (arg ': args) result = arg -> (args :->: result)
 
-data RawPayload = RawPayload
-  { inputPayloadData :: ByteString
-  , inputPayloadMetadata :: Map Text ByteString
-  } deriving (Eq, Show)
+data Payload = Payload
+  { payloadData :: ByteString
+  , payloadMetadata :: Map Text ByteString
+  } deriving stock (Eq, Show)
 
 
 base64DecodeFromText :: MonadFail m => T.Text -> m ByteString
@@ -256,28 +256,28 @@ base64DecodeFromText txt = case decodeBase64 $ Text.encodeUtf8 txt of
   Left err -> fail $ Text.unpack err
   Right ok -> pure ok
 
-instance FromJSON RawPayload where
-  parseJSON = withObject "RawPayload" $ \o -> do
+instance FromJSON Payload where
+  parseJSON = withObject "Payload" $ \o -> do
     rawPayloadData <- o .:? "data"
     rawPayloadMetadata <- o .:? "metadata"
-    inputPayloadData <- maybe (pure mempty) base64DecodeFromText rawPayloadData
-    inputPayloadMetadata <- maybe (pure mempty) (traverse base64DecodeFromText) rawPayloadMetadata
-    pure RawPayload{..}
+    payloadData <- maybe (pure mempty) base64DecodeFromText rawPayloadData
+    payloadMetadata <- maybe (pure mempty) (traverse base64DecodeFromText) rawPayloadMetadata
+    pure Payload{..}
 
-instance ToJSON RawPayload where
-  toJSON RawPayload{..} = object $
-    (if inputPayloadData == "" then id else (("data" .= encodeBase64 inputPayloadData):)) $
-    (if Map.null inputPayloadMetadata then id else (("metadata" .= fmap encodeBase64 inputPayloadMetadata) :))
+instance ToJSON Payload where
+  toJSON Payload{..} = object $
+    (if payloadData == "" then id else (("data" .= encodeBase64 payloadData):)) $
+    (if Map.null payloadMetadata then id else (("metadata" .= fmap encodeBase64 payloadMetadata) :))
     []
-  toEncoding RawPayload{..} = pairs $
-    (if inputPayloadData == "" then mempty else ("data" .= encodeBase64 inputPayloadData)) <>
-    (if Map.null inputPayloadMetadata then mempty else ("metadata" .= fmap encodeBase64 inputPayloadMetadata))
+  toEncoding Payload{..} = pairs $
+    (if payloadData == "" then mempty else ("data" .= encodeBase64 payloadData)) <>
+    (if Map.null payloadMetadata then mempty else ("metadata" .= fmap encodeBase64 payloadMetadata))
 
-convertFromProtoPayload :: Proto.Payload -> RawPayload
-convertFromProtoPayload p = RawPayload (p ^. Proto.data') (p ^. Proto.metadata)
+convertFromProtoPayload :: Proto.Payload -> Payload
+convertFromProtoPayload p = Payload (p ^. Proto.data') (p ^. Proto.metadata)
 
-convertToProtoPayload :: RawPayload -> Proto.Payload
-convertToProtoPayload (RawPayload d m) = defMessage
+convertToProtoPayload :: Payload -> Proto.Payload
+convertToProtoPayload (Payload d m) = defMessage
   & Proto.data' .~ d
   & Proto.metadata .~ m
 
@@ -287,7 +287,7 @@ class ApplyPayloads codec (args :: [Type]) where
     -> Proxy args 
     -> Proxy result 
     -> (args :->: result)
-    -> V.Vector RawPayload
+    -> V.Vector Payload
     -> IO (Either String result)
 
 instance ApplyPayloads codec '[] where
@@ -303,14 +303,14 @@ instance (Codec codec ty, ApplyPayloads codec tys) => ApplyPayloads codec (ty ':
         Left err -> pure $ Left err
 
 -- | Given a list of function argument types and a codec, produce a function that takes a list of
--- 'RawPayload's and does something useful with them. This is used to support outbound invocations of
+-- 'Payload's and does something useful with them. This is used to support outbound invocations of
 -- child workflows, activities, queries, and signals.
 class GatherArgs codec (args :: [Type]) where
   gatherArgs 
     :: Proxy args 
     -> codec 
-    -> ([IO RawPayload] -> [IO RawPayload]) 
-    -> ([IO RawPayload] -> result)
+    -> ([IO Payload] -> [IO Payload]) 
+    -> ([IO Payload] -> result)
     -> (args :->: result)
 
 instance (Codec codec arg, GatherArgs codec args) => GatherArgs codec (arg ': args) where

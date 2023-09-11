@@ -51,7 +51,7 @@ import RequireCallStack
 -- To make a worker use this definition, you must add it to the 'WorkerConfig' via 'Temporal.Workflow.addWorkflow'.
 data WorkflowDefinition = WorkflowDefinition
   { workflowName :: Text
-  , workflowRun :: Vector RawPayload -> IO (Either String (Workflow RawPayload))
+  , workflowRun :: Vector Payload -> IO (Either String (Workflow Payload))
   }
 
 class HasWorkflowDefinition a where
@@ -92,7 +92,7 @@ data KnownWorkflow (args :: [Type]) (result :: Type) = forall codec.
 gatherStartChildWorkflowArgs 
   :: forall args result codec. GatherArgs codec args
   => codec 
-  -> ([IO RawPayload] -> Workflow (ChildWorkflowHandle result)) 
+  -> ([IO Payload] -> Workflow (ChildWorkflowHandle result)) 
   -> (args :->: Workflow (ChildWorkflowHandle result))
 gatherStartChildWorkflowArgs c f = gatherArgs (Proxy @args) c id f
 
@@ -170,7 +170,7 @@ data WorkflowSignalDefinition =
     Text -- name
     codec
     f
-    (f -> Vector RawPayload -> IO (Either String (Workflow ())))
+    (f -> Vector Payload -> IO (Either String (Workflow ())))
   -- { workflowSignalName :: Text
   -- , workflowSignalHandler :: [Payload] -> IO ()
   -- }

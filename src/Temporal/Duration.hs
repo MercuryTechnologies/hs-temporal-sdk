@@ -26,7 +26,7 @@ import Data.ProtoLens (defMessage)
 data Duration = Duration
   { durationSeconds :: {-# UNPACK #-} !Word64
   , durationNanoseconds :: {-# UNPACK #-} !Word64
-  } deriving (Eq, Ord, Show, Data)
+  } deriving stock (Eq, Ord, Show, Data)
 
 addDurations :: Duration -> Duration -> Duration
 addDurations (Duration s1 ns1) (Duration s2 ns2) = Duration (s1 + s2 + s) ns

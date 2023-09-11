@@ -11,7 +11,7 @@ import Proto.Temporal.Api.Failure.V1.Message
 -- | Used to denote that a payload either failed to encode or decode
 data ValueError
   = ValueError String
-  deriving (Show)
+  deriving stock (Show)
 instance Exception ValueError
 
 ---------------------------------------------------------------------
@@ -37,7 +37,7 @@ workerExceptionFromException x = do
 -- These errors should cause the worker to exit, and imply an issue with the
 -- SDK itself.
 data RuntimeError = RuntimeError String
-  deriving (Show)
+  deriving stock (Show)
 
 instance Exception RuntimeError where
   toException = workerExceptionToException
@@ -48,7 +48,7 @@ data ApplicationError
   = WorkflowNotFound String
   | ActivityNotFound String
   | QueryNotFound String
-  deriving (Show)
+  deriving stock (Show)
 
 instance Exception ApplicationError where
   toException = workerExceptionToException
@@ -75,10 +75,10 @@ workflowExceptionFromException x = do
 data LogicBugType 
   = ReadingCompletionsFailedRun
   | WorkflowActivationDeadlock
-  deriving (Show)
+  deriving stock (Show)
 
 data LogicBug = LogicBug LogicBugType
-  deriving (Show)
+  deriving stock (Show)
 
 instance Exception LogicBug where
   toException = workflowExceptionToException
@@ -97,21 +97,21 @@ instance Exception WorkflowException where
 data WorkflowAlreadyStarted = WorkflowAlreadyStarted 
   { workflowAlreadyStartedWorkflowId :: Text
   , workflowAlreadyStartedWorkflowType :: Text
-  } deriving (Show)
+  } deriving stock (Show)
 
 instance Exception WorkflowAlreadyStarted where
   toException = workflowExceptionToException
   fromException = workflowExceptionFromException
 
 data ChildWorkflowFailed = ChildWorkflowFailed Proto.Failure
-  deriving (Show)
+  deriving stock (Show)
 
 instance Exception ChildWorkflowFailed where
   toException = workflowExceptionToException
   fromException = workflowExceptionFromException
 
 data ChildWorkflowCancelled = ChildWorkflowCancelled
-  deriving (Show, Eq)
+  deriving stock (Show, Eq)
   -- { childWorkflowCancelledWorkflowId :: Text
   -- , childWorkflowCancelledWorkflowType :: Text
   -- , childWorkflowCancelledRunId :: Text
@@ -122,7 +122,7 @@ instance Exception ChildWorkflowCancelled where
   fromException = workflowExceptionFromException
 
 data SignalExternalWorkflowFailed = SignalExternalWorkflowFailed Proto.Failure
-  deriving (Show)
+  deriving stock (Show)
 
 instance Exception SignalExternalWorkflowFailed where
   toException = workflowExceptionToException
@@ -131,19 +131,19 @@ instance Exception SignalExternalWorkflowFailed where
 -- This does not need to be in the exception hierarchy,
 -- since we don't want to catch it in the workflow code.
 data ContinueAsNewException = ContinueAsNewException ContinueAsNewWorkflowExecution
-  deriving (Show)
+  deriving stock (Show)
 
 instance Exception ContinueAsNewException
 
 data AlternativeInstanceFailure = AlternativeInstanceFailure
-  deriving (Show)
+  deriving stock (Show)
 
 instance Exception AlternativeInstanceFailure where
   toException = workflowExceptionToException
   fromException = workflowExceptionFromException
 
 data CancelExternalWorkflowFailed = CancelExternalWorkflowFailed Proto.Failure
-  deriving (Show)
+  deriving stock (Show)
 
 instance Exception CancelExternalWorkflowFailed where
   toException = workflowExceptionToException
@@ -151,21 +151,21 @@ instance Exception CancelExternalWorkflowFailed where
 
 -- TODO, include the payload?
 data WorkflowCancelRequested = WorkflowCancelRequested
-  deriving (Show)
+  deriving stock (Show)
 
 instance Exception WorkflowCancelRequested where
   toException = workflowExceptionToException
   fromException = workflowExceptionFromException
 
 data ActivityCancelled = ActivityCancelled Proto.Temporal.Api.Failure.V1.Message.Failure
-  deriving (Show, Eq)
+  deriving stock (Show, Eq)
 
 instance Exception ActivityCancelled where
   toException = workflowExceptionToException
   fromException = workflowExceptionFromException
 
 data ActivityFailed = ActivityFailed Proto.Temporal.Api.Failure.V1.Message.Failure
-  deriving (Show, Eq)
+  deriving stock (Show, Eq)
 
 instance Exception ActivityFailed where
   toException = workflowExceptionToException
@@ -200,7 +200,7 @@ Consider using Asynchronous Activities instead of Signals if the external proces
 Consider using Signals as an alternative to Asynchronous Activities to return data back to a Workflow Execution if there is a human in the process loop. The reason is that a human in the loop means multiple steps in the process. The first is the Activity Function that stores state in an external system and at least one other step where a human would “complete” the activity. If the first step fails, you want to detect that quickly and retry instead of waiting for the entire process, which could be significantly longer when humans are involved.
 -}
 data CompleteAsync = CompleteAsync
-  deriving (Show)
+  deriving stock (Show)
 
 instance Exception CompleteAsync where
   toException = activityExceptionToException
@@ -213,6 +213,6 @@ data WorkflowExecutionClosed
   | WorkflowExecutionCanceled
   | WorkflowExecutionTerminated
   | WorkflowExecutionContinuedAsNew
-  deriving (Show, Eq)
+  deriving stock (Show, Eq)
 
 instance Exception WorkflowExecutionClosed

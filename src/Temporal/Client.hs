@@ -83,6 +83,7 @@ import Data.ProtoLens (Message(defMessage))
 import Temporal.Payload (convertToProtoPayload)
 import Temporal.Client.Types
 import Temporal.SearchAttributes
+import Temporal.SearchAttributes.Internal
 import Temporal.Workflow (WorkflowRef(..), QueryDefinition(..))
 import Temporal.Duration (Duration, durationToProto)
 ---------------------------------------------------------------------------------
@@ -117,7 +118,7 @@ execute
   -> (WorkflowArgs wf :->: m (WorkflowResult wf))
 execute c wf opts = case workflowRef wf of
   k@(KnownWorkflow codec _ _ _) -> do
-    let gather :: ([IO RawPayload] -> m (WorkflowResult wf)) -> (WorkflowArgs wf :->: m (WorkflowResult wf))
+    let gather :: ([IO Payload] -> m (WorkflowResult wf)) -> (WorkflowArgs wf :->: m (WorkflowResult wf))
         gather = gatherArgs (Proxy @(WorkflowArgs wf)) codec Prelude.id
     gather $ \inputs -> liftIO $ do
       h <- startFromPayloads c k opts =<< sequence inputs
@@ -159,7 +160,7 @@ data SignalOptions
   -- Defaults to False.
   --
   -- Generally this is not needed.
-  , headers :: Map Text RawPayload
+  , headers :: Map Text Payload
   }
 
 defaultSignalOptions :: SignalOptions
@@ -196,14 +197,14 @@ signal h@(WorkflowHandle _ _t c wf r) (SignalRef sName sCodec) opts = gather $ \
     Left err -> throwIO err
     Right _ -> pure ()
   where
-    gather :: ([IO RawPayload] -> m ()) -> (args :->: m ())
+    gather :: ([IO Payload] -> m ()) -> (args :->: m ())
     gather = gatherArgs (Proxy @args) sCodec Prelude.id
 
 
 data QueryOptions = QueryOptions
   { queryId :: Text
   , queryRejectCondition :: QueryRejectCondition
-  , queryHeaders :: Map Text RawPayload
+  , queryHeaders :: Map Text Payload
   }
 
 defaultQueryOptions :: QueryOptions
@@ -260,7 +261,7 @@ query h (QueryDefinition qn codec) opts = gather $ \inputs -> liftIO $ do
   forM eRes $ \p ->
     decode codec p >>= either (throwIO . ValueError) pure
   where
-    gather :: ([IO RawPayload] -> m (Either QueryRejected result)) -> (args :->: m (Either QueryRejected result))
+    gather :: ([IO Payload] -> m (Either QueryRejected result)) -> (args :->: m (Either QueryRejected result))
     gather = gatherArgs (Proxy @args) codec Prelude.id
 
     queryRejectionStatusFromProto = \case
@@ -313,7 +314,7 @@ startFromPayloads
   => WorkflowClient
   -> KnownWorkflow args result
   -> WorkflowStartOptions
-  -> [RawPayload]
+  -> [Payload]
   -> m (WorkflowHandle result)
 startFromPayloads c k@(KnownWorkflow codec _ _ _) opts payloads = do
   wfH <- liftIO $ (Temporal.Client.Types.start c.clientInterceptors) (WorkflowType $ knownWorkflowName k) opts payloads $ \wfName opts' payloads' -> do
@@ -383,12 +384,12 @@ start
 start c k@(KnownWorkflow codec _ _ _) opts = gather $ \inputs -> liftIO $ do
   startFromPayloads c k opts =<< sequence inputs
   where
-    gather :: ([IO RawPayload] -> m (WorkflowHandle result)) -> (args :->: m (WorkflowHandle result))
+    gather :: ([IO Payload] -> m (WorkflowHandle result)) -> (args :->: m (WorkflowHandle result))
     gather = gatherArgs (Proxy @args) codec Prelude.id
 
 data TerminationOptions = TerminationOptions
   { terminationReason :: Text
-  , terminationDetails :: [RawPayload]
+  , terminationDetails :: [Payload]
   -- | If set, this call will error if the (most recent | specified workflow run id in the WorkflowHandle) is not part of the same
   -- execution chain as this id.
   , firstExecutionRunId  :: Maybe RunId

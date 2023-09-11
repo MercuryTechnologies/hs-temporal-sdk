@@ -42,48 +42,25 @@ module Temporal.Worker
   ) where
 import UnliftIO.Exception
 import UnliftIO
+import Control.Applicative
 import Control.Monad
 
-import Control.Applicative
 import Control.Monad.Logger
 import Control.Monad.State
 
 import Temporal.Common
 import Temporal.Core.Client
 import qualified Temporal.Core.Worker as Core
-import Temporal.Activity (ProvidedActivity(..))
 import Temporal.Activity.Definition
 import qualified Temporal.Activity.Worker as Activity
 import Temporal.Worker.Types
 import Temporal.Workflow.Definition
-import Temporal.Workflow.WorkflowInstance
 import qualified Temporal.Workflow.Worker as Workflow
-import Temporal.WorkflowInstance
 
-import Data.ByteString (ByteString)
 import Data.Text (Text)
-import qualified Data.Text as Text
-import Data.Time.Clock (UTCTime)
-import Data.Vector (Vector)
-import qualified Data.Vector as V
-import Data.Int
-import Data.IORef
 import Data.Word
-import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
-import Data.Maybe
 
-import Lens.Family2
-import Lens.Family2.Stock
-import Data.ProtoLens
-import Data.ProtoLens.Combinators
-import qualified Proto.Temporal.Api.Common.V1.Message as Message
-import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Message
-import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as CommonProto
-import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
-import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
-import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
-import Temporal.Duration (seconds)
 import Temporal.Interceptor
 
 -- | A utility class to convert a value into a 'WorkerConfig' using the 'ConfigM' monad.
@@ -95,7 +72,7 @@ class ToConfig env a where
   toConfig :: a -> ConfigM env ()
 
 newtype ConfigM actEnv a = ConfigM { unConfigM :: State (WorkerConfig actEnv) a }
-  deriving (Functor, Applicative, Monad)
+  deriving newtype (Functor, Applicative, Monad)
 
 instance Semigroup a => Semigroup (ConfigM actEnv a) where
   (<>) = liftA2 (<>)
@@ -286,16 +263,6 @@ setGracefulShutdownPeriodMillis n = modifyCore $ \conf -> conf
   }
 
 ------------------------------------------------------------------------------------
-
-defaultRetryPolicy :: RetryPolicy
-defaultRetryPolicy = RetryPolicy
-  { initialInterval = seconds 1
-  , backoffCoefficient = 2
-  , maximumInterval = Nothing
-  , maximumAttempts = 0
-  , nonRetryableErrorTypes = mempty
-  }
-
 data Worker = Worker
   { workerWorkflowLoop :: Async ()
   , workerActivityLoop :: Async ()
@@ -311,7 +278,6 @@ startWorker client conf = do
   runningActivities <- newTVarIO mempty
   workerLogFn <- askLoggerIO
   let workerWorkflowFunctions = conf.wfDefs
-      workerConfig = conf
       workerTaskQueue = TaskQueue $ Core.taskQueue conf.coreConfig
       workerInboundInterceptors = conf.interceptorConfig.workflowInboundInterceptors
       workerOutboundInterceptors = conf.interceptorConfig.workflowOutboundInterceptors

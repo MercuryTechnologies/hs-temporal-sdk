@@ -57,7 +57,7 @@ instance (Functor s, Catch.MonadCatch m) => Catch.MonadCatch (Coroutine s m) whe
       Right x -> return (Right x)
       Left s -> return (Left (fmap (`Catch.catch` h) s))
 
-suspend :: (Monad m, Functor s) => s (Coroutine s m x) -> Coroutine s m x
+suspend :: (Monad m) => s (Coroutine s m x) -> Coroutine s m x
 suspend s = Coroutine (return (Left s))
 {-# INLINE suspend #-}
 

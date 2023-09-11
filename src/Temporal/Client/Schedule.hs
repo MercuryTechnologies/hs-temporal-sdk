@@ -169,8 +169,8 @@ data CreateScheduleOptions = CreateScheduleOptions
   , initialPatch :: !(Maybe ScheduleSpec)
   -- TODO, not sure what the point of this is. Idempotency?
   , requestId :: !Text
-  , memo :: !(Map Text RawPayload)
-  , searchAttributes :: !(Map Text RawPayload)
+  , memo :: !(Map Text Payload)
+  , searchAttributes :: !(Map Text Payload)
   }
 
 data ScheduleAlreadyRunning = ScheduleAlreadyRunning
@@ -214,8 +214,8 @@ data ScheduleListInfo = ScheduleListInfo
 
 data ScheduleListEntry = ScheduleListEntry
   { scheduleId :: !ScheduleId
-  , memo :: !(Map Text RawPayload)
-  , searchAttributes :: !(Map Text RawPayload)
+  , memo :: !(Map Text Payload)
+  , searchAttributes :: !(Map Text Payload)
   , info :: !(Maybe ScheduleListInfo)
   }
 

@@ -23,7 +23,7 @@ import Temporal.Workflow.Internal.Monad
 import Temporal.Client.Types
 
 data ActivityInboundInterceptor = ActivityInboundInterceptor 
-  { executeActivity :: ExecuteActivityInput -> (ExecuteActivityInput -> IO (Either String RawPayload)) -> IO (Either String RawPayload)
+  { executeActivity :: ExecuteActivityInput -> (ExecuteActivityInput -> IO (Either String Payload)) -> IO (Either String Payload)
   }
 
 instance Semigroup ActivityInboundInterceptor where

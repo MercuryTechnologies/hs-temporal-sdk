@@ -15,9 +15,9 @@ data WorkflowStartOptions = WorkflowStartOptions
   , workflowIdReusePolicy :: Maybe WorkflowIdReusePolicy
   , retry :: Maybe RetryPolicy
   , cronSchedule :: Maybe Text
-  , memo :: !(Map Text RawPayload)
+  , memo :: !(Map Text Payload)
   , searchAttributes :: !(Map Text SearchAttributeType)
-  , headers :: !(Map Text RawPayload)
+  , headers :: !(Map Text Payload)
   , timeouts :: TimeoutOptions
   , requestEagerExecution :: Bool
   }
@@ -52,11 +52,11 @@ data WorkflowClient = WorkflowClient
   , clientDefaultNamespace :: Namespace
   , clientInterceptors :: ClientInterceptors
   -- , clientDefaultQueue :: TaskQueue
-  -- , clientHeaders :: Map Text RawPayload
+  -- , clientHeaders :: Map Text Payload
   }
 
 data WorkflowHandle a = WorkflowHandle
-  { workflowHandleReadResult :: RawPayload -> IO a
+  { workflowHandleReadResult :: Payload -> IO a
   , workflowHandleType :: WorkflowType
   , workflowHandleClient :: WorkflowClient
   , workflowHandleWorkflowId :: WorkflowId
@@ -78,10 +78,10 @@ data QueryRejectCondition
 data QueryWorkflowInput = QueryWorkflowInput 
   { queryWorkflowWorkflowId :: WorkflowId
   , queryWorkflowRejectCondition :: QueryRejectCondition
-  , queryWorkflowHeaders :: Map Text RawPayload
+  , queryWorkflowHeaders :: Map Text Payload
   , queryWorkflowType :: Text
   , queryWorkflowRunId :: Maybe RunId
-  , queryWorkflowArgs :: [RawPayload]
+  , queryWorkflowArgs :: [Payload]
   }
 
 data WorkflowExecutionStatus
@@ -101,8 +101,8 @@ data QueryRejected
     } deriving (Read, Show, Eq, Ord)
 
 data ClientInterceptors = ClientInterceptors
-  { start :: WorkflowType -> WorkflowStartOptions -> [RawPayload] -> (WorkflowType -> WorkflowStartOptions -> [RawPayload] -> IO (WorkflowHandle RawPayload)) -> IO (WorkflowHandle RawPayload)
-  , queryWorkflow :: QueryWorkflowInput -> (QueryWorkflowInput -> IO (Either QueryRejected RawPayload)) -> IO (Either QueryRejected RawPayload)
+  { start :: WorkflowType -> WorkflowStartOptions -> [Payload] -> (WorkflowType -> WorkflowStartOptions -> [Payload] -> IO (WorkflowHandle Payload)) -> IO (WorkflowHandle Payload)
+  , queryWorkflow :: QueryWorkflowInput -> (QueryWorkflowInput -> IO (Either QueryRejected Payload)) -> IO (Either QueryRejected Payload)
   }
 
 instance Semigroup ClientInterceptors where

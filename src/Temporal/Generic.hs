@@ -259,7 +259,7 @@ type Labels f = f Covered (Const String)
 data Labeled a = Labeled
   { label :: String
   , value :: a
-  } deriving ( Functor )
+  } deriving stock ( Functor )
 
 -- | A definition of a workflow or activity.
 --
@@ -335,8 +335,6 @@ refs :: forall r t f codec.
   ) => codec -> r t f -> Refs r 
 refs codec wfrec = result
   where
-    covered = coverIfNeeded wfrec
-
     ns :: String
     ns = Temporal.Generic.namespace (Proxy @(r Covered (Const String)))
 
