@@ -14,10 +14,6 @@ library
   exposed-modules:
       Temporal.Activity
       Temporal.Client
-      Temporal.Client.AsyncActivity
-      Temporal.Client.Namespace
-      Temporal.Client.Schedule
-      Temporal.Client.Workflow
       Temporal.Contrib.OpenTelemetry
       Temporal.Duration
       Temporal.Exception
@@ -27,13 +23,15 @@ library
       Temporal.SearchAttributes
       Temporal.Worker
       Temporal.Workflow
-      Temporal.Workflow.Query
       Temporal.Workflow.Saga
-      Temporal.Workflow.Signal
   other-modules:
       Temporal.Activity.Definition
       Temporal.Activity.Worker
       Temporal.Client.Types
+      Temporal.Client.AsyncActivity
+      Temporal.Client.Namespace
+      Temporal.Client.Schedule
+      Temporal.Client.Workflow
       Temporal.Common
       Temporal.Common.TimeoutType
       Temporal.Coroutine
@@ -49,6 +47,8 @@ library
       Temporal.Workflow.Internal.Monad
       Temporal.Generic.GenericN
       Temporal.Generic.TyFun
+      Temporal.Workflow.Signal
+      Temporal.Workflow.Query
       Temporal.Workflow.Types
       Temporal.Logging
       Temporal.EphemeralServer

@@ -2,22 +2,52 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
+-- |
+-- Module: Temporal.Activity
+-- Description: Define and work with Temporal activities.
+--
+-- Temporal activities are units of work in a Temporal workflow. They encapsulate
+-- a specific task or operation that needs to be executed within a workflow
+-- instance. Activities can be synchronous or asynchronous and are designed to
+-- perform external actions, such as interacting with databases, sending emails,
+-- or invoking external services.
+--
+-- When writing activities to execute withing a workflow, we recommend writing
+-- them while keeping the following principles in mind:
+--
+-- 1. **Retryable**: Activities can be automatically retried by the Temporal
+--    system in case of failures. You can configure the retry behavior, such as
+--    the maximum number of retries and retry intervals.
+--
+-- 2. **Idempotency**: Since Activities are designed to be retryable,
+--    executing an activity multiple times should not have unintended side
+--    effects. This is crucial for ensuring the reliability of workflow
+--    executions.
+--
+-- 3. **Cancellable**: Activities can be cancelled, which means that they can
+--    be stopped before they complete execution. This is useful for handling
+--    long-running activities that need to be aborted in certain situations.
+--    As a consequence, activities should to be written to receive 'ActivityCancelReason'
+--    exceptions asynchronously.
 module Temporal.Activity 
   ( Activity
+  -- * Built-in Acitivity primitives
+  , heartbeat
+  , ActivityInfo(..)
+  , askActivityInfo
+  , ActivityCancelReason(..)
+  , activityWorkflowClient
+  , askActivityClient
+  -- * Defining Activities
   , provideActivity
   , ProvidedActivity(..)
   , KnownActivity(..)
   , ActivityDefinition
   , ValidActivityFunction
-  , heartbeat
-  , ActivityInfo(..)
-  , askActivityInfo
+  -- * Asynchronous Completion
+  , TaskToken(..)
   , CompleteAsync(..)
   , completeAsync
-  , ActivityCancelReason(..)
-  , activityWorkflowClient
-  , TaskToken
-  , askActivityClient
   ) where
 
 import Control.Monad

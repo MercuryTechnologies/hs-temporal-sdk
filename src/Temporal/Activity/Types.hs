@@ -8,6 +8,9 @@ import Data.Vector (Vector)
 import Data.Time.Clock.System (SystemTime)
 import Temporal.Duration
 
+-- | 'ActivityInfo' provides information about the currently executing activity.
+--
+-- It can be used for logging, introspection, etc.
 data ActivityInfo = ActivityInfo
   { workflowNamespace :: Namespace
   , workflowType :: WorkflowType

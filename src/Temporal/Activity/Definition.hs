@@ -5,19 +5,13 @@ import Control.Monad
 import Control.Monad.Error.Class
 import Control.Monad.Fix
 import Control.Monad.Reader
-import Data.HashMap.Strict (HashMap)
 import Data.Kind
-import Data.Map.Strict (Map)
 import Data.Text (Text)
 import Data.Vector (Vector)
-import Data.Word (Word32)
-import Temporal.Common
 import Temporal.Payload
 import Temporal.Core.Client (Client)
 import Temporal.Core.Worker (Worker, getWorkerClient)
 import UnliftIO
-import Data.Time.Clock.System (SystemTime)
-import Temporal.Duration (Duration)
 import Temporal.Activity.Types
 import Temporal.Workflow.Types
 import Temporal.Client.Types
@@ -54,7 +48,7 @@ data ActivityEnv env = ActivityEnv
 -- | An activity is a unit of work that is executed by a worker. It is a specialized function call
 -- that can be executed one or more times, and can be cancelled while it is running.
 newtype Activity env a = Activity { unActivity :: ReaderT (ActivityEnv env) IO a }
-  deriving 
+  deriving newtype
     ( Functor
     , Applicative
     , Alternative
@@ -79,6 +73,14 @@ askActivityInfo = Activity $ asks (.activityInfo)
 askActivityWorker :: Activity env Worker
 askActivityWorker = Activity $ asks (.activityWorker)
 
+-- | The Activity monad provides access to the underlying Temporal client
+-- since it is very common for an Activity to interact with other Workflows.
+--
+-- A common use-case is to use 'Temporal.Client.signal' to signal another Workflow
+-- from an Activity.
+--
+-- Using the provided client ensures that a consistent set of interceptors are used
+-- for all relevant actions.
 askActivityClient :: Activity env Client
 askActivityClient = Activity $ asks (getWorkerClient . (.activityWorker))
 
