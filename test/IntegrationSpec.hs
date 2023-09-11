@@ -26,6 +26,7 @@ import qualified Data.Map.Strict as Map
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
 import GHC.Generics
+import OpenTelemetry.Trace
 import RequireCallStack
 import System.IO
 import Test.Hspec
@@ -574,6 +575,9 @@ needsClient = do
   -- -- --       specify "always delivered" pending
     describe "Query" $ do
       specify "works" $ \(client, baseConf, taskQueue) -> do
+        tp <- getGlobalTracerProvider
+        let testTracer = makeTracer tp "testTracer" tracerOptions
+
         let echoQuery :: W.QueryDefinition '[Text] Text
             echoQuery = W.QueryDefinition "testQuery" defaultCodec
             workflow :: MyWorkflow ()
@@ -584,15 +588,16 @@ needsClient = do
             conf = configure () $ do
               baseConf
               addWorkflow wf
-        withWorker conf $ do
-          wfId <- uuidText
-          let opts = C.workflowStartOptions
-                (W.WorkflowId wfId)
-                taskQueue
-          h <- C.start client wf.reference opts
-          result <- C.query h echoQuery C.defaultQueryOptions "hello"
-          C.awaitWorkflowResult h
-          result `shouldBe` Right "hello"
+        inSpan testTracer "Query.works" defaultSpanArguments $ do
+          withWorker conf $ do
+            wfId <- uuidText
+            let opts = C.workflowStartOptions
+                  (W.WorkflowId wfId)
+                  taskQueue
+            h <- C.start client wf.reference opts
+            result <- C.query h echoQuery C.defaultQueryOptions "hello"
+            C.awaitWorkflowResult h
+            result `shouldBe` Right "hello"
 
 
       xspecify "query not found" $ \(client, baseConf, taskQueue) -> do

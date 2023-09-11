@@ -793,10 +793,10 @@ setQueryHandler (QueryDefinition n codec) f = ilift $ do
   inst <- ask
   withRunInIO $ \runInIO -> do
     liftIO $ modifyIORef' inst.workflowQueryHandlers $ \handles ->
-      HashMap.insert (Just n) (\qId vec -> runInIO $ handle qId vec) handles
+      HashMap.insert (Just n) (\qId vec hdrs -> runInIO $ qHandler qId vec hdrs) handles
   where
-    handle :: QueryId -> Vector RawPayload -> InstanceM ()
-    handle (QueryId qId) vec = do
+    qHandler :: QueryId -> Vector RawPayload -> Map Text RawPayload -> InstanceM (Either SomeException RawPayload)
+    qHandler (QueryId _) vec _ = do
       eHandler <- liftIO $ applyPayloads 
             codec 
             (Proxy @(ArgsOf f))
@@ -805,44 +805,13 @@ setQueryHandler (QueryDefinition n codec) f = ilift $ do
             vec
       -- TODO handle exceptions properly
       case eHandler of
-        Left err -> throwIO $ ValueError err
+        Left err -> pure $ Left $ toException $ ValueError err
         Right (Query r) -> do
-          inst <- ask
-          eResult <- UnliftIO.try $ fmap (encode codec) r
-          commandResult <- case eResult of
-            Left (SomeException err) ->
-              pure $ Command.failed .~ 
-                ( defMessage
-                  & F.message .~ Text.pack (show err)
-                  -- TODO, protobuf docs aren't clear on what this should be
-                  & F.source .~ "haskell"
-                  -- TODO, annotated exceptions might be needed for this
-                  & F.stackTrace .~ ""
-                  -- TODO encoded attributes
-                  -- & F.encodedAttributes .~ _
-                  -- & F.cause .~ _
-                  & F.activityFailureInfo .~
-                    ( defMessage
-                  --   -- & F.scheduledEventId .~ _
-                  --   -- & F.startedEventId .~ _
-                    -- & WF.identity .~ (identity $ clientConfig c.clientCore)
-                    )
-                  --   & F.activityType .~ (defMessage & P.name .~ info.activityType)
-                  --   & F.activityId .~ (msg ^. AT.activityId)
-                  --   -- & F.retryState .~ _
-                  -- )
-                )
-            Right resultM -> do
-              result <- liftIO resultM
-              pure $ Command.succeeded .~ (defMessage & Command.response .~ convertToProtoPayload result)
-          let cmd = defMessage
-                & Command.respondToQuery .~
-                  ( defMessage
-                    & Command.queryId .~ qId
-                    & commandResult
-                  )
-          addCommand cmd
-          
+          eResult <- UnliftIO.try r
+          case eResult of
+            Left err -> pure $ Left err
+            Right result -> liftIO $ UnliftIO.try $ encode codec result
+
 type ValidSignalHandler f = 
   ( ResultOf Workflow f ~ ()
   , (ArgsOf f :->: Workflow ()) ~ f

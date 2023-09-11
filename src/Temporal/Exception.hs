@@ -47,6 +47,7 @@ instance Exception RuntimeError where
 data ApplicationError 
   = WorkflowNotFound String
   | ActivityNotFound String
+  | QueryNotFound String
   deriving (Show)
 
 instance Exception ApplicationError where

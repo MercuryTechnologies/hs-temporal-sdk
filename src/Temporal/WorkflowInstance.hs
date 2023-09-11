@@ -39,7 +39,6 @@ import Temporal.Coroutine
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
 import Temporal.Payload
-import Temporal.Workflow.Definition
 import Temporal.Workflow.Eval (ActivationResult(..), SuspendableWorkflowExecution, runWorkflow, injectWorkflowSignal)
 import Temporal.Workflow.Types
 import Temporal.Workflow.Internal.Instance
@@ -196,19 +195,9 @@ handleQueriesAfterCompletion = forever $ do
 -- in the workflow.
 addStackTraceHandler :: WorkflowInstance -> IO ()
 addStackTraceHandler inst = do
-  let specialHandler qId _ = do
+  let specialHandler _ _ _ = do
         cs <- readIORef inst.workflowCallStack
-        callStackPayload <- Temporal.Payload.encode JSON (Text.pack $ prettyCallStack cs)
-        let cmd = defMessage
-              & Command.respondToQuery .~
-                ( defMessage
-                  & Command.queryId .~ rawQueryId qId
-                  & Command.succeeded .~
-                    ( defMessage
-                      & Command.response .~ convertToProtoPayload callStackPayload
-                    )
-                )
-        runInstanceM inst $ addCommand cmd
+        Right <$> Temporal.Payload.encode JSON (Text.pack $ prettyCallStack cs)
   modifyIORef' inst.workflowQueryHandlers (HashMap.insert (Just "__stack_trace") specialHandler)
 
 -- This should never raise an exception, but instead catch all exceptions
@@ -296,26 +285,38 @@ applyQueryWorkflow queryWorkflow = do
   inst <- ask
   handles <- readIORef inst.workflowQueryHandlers
   $logDebug $ Text.pack ("Applying query: " <> show (queryWorkflow ^. Activation.queryType))
-  let handlerOrDefault = 
-        HashMap.lookup (Just (queryWorkflow ^. Activation.queryType)) handles <|>
-        HashMap.lookup Nothing handles
-  case handlerOrDefault of
-    Nothing -> do
-      $(logWarn) $ Text.pack ("No query handler found for query: " <> show (queryWorkflow ^. Activation.queryType))
-      let cmd = defMessage & Command.respondToQuery .~
-            ( defMessage
-              & Command.queryId .~ (queryWorkflow ^. Activation.queryId)
-              & Command.failed .~ 
-                (defMessage 
-                  & F.message .~ "No query handler found for query"
-                  -- & Command.source .~ "Temporal.WorkflowInstance.applyQueryWorkflow"
-                  & F.stackTrace .~ Text.pack (prettyCallStack callStack)
-                )
-            )
-      addCommand cmd
-    Just h -> liftIO $ h 
-      (QueryId $ queryWorkflow ^. Activation.queryId)
-      (fmap convertFromProtoPayload (queryWorkflow ^. Command.vec'arguments))
+  let baseInput = HandleQueryInput
+        { handleQueryId = queryWorkflow ^. Activation.queryId
+        , handleQueryInputType = queryWorkflow ^. Activation.queryType
+        , handleQueryInputArgs = fmap convertFromProtoPayload (queryWorkflow ^. Command.vec'arguments)
+        , handleQueryInputHeaders = fmap convertFromProtoPayload (queryWorkflow ^. Activation.headers)
+        }
+  res <- liftIO $ inst.inboundInterceptor.handleQuery baseInput $ \input -> do
+    let handlerOrDefault = 
+          HashMap.lookup (Just (input.handleQueryInputType)) handles <|>
+          HashMap.lookup Nothing handles
+    case handlerOrDefault of
+      Nothing -> do
+        pure $ Left $ toException $ QueryNotFound $ Text.unpack input.handleQueryInputType
+      Just h -> liftIO $ h
+        (QueryId input.handleQueryId)
+        input.handleQueryInputArgs
+        input.handleQueryInputHeaders
+  let cmd = defMessage & Command.respondToQuery .~ case res of
+        Left err -> 
+          defMessage 
+            & Command.failed .~ 
+              ( defMessage
+                & F.message .~ Text.pack (show err)
+              )
+        Right ok ->
+          defMessage 
+            & Command.queryId .~ baseInput.handleQueryId
+            & Command.succeeded .~
+              ( defMessage
+                & Command.response .~ convertToProtoPayload ok
+              )
+  addCommand cmd
 
 applySignalWorkflow :: SignalWorkflow -> Workflow ()
 applySignalWorkflow signalWorkflow = do

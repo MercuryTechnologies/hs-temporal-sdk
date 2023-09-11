@@ -31,11 +31,18 @@ instance Semigroup ActivityInboundInterceptor where
     { executeActivity = \input next -> (executeActivity l) input $ \input' -> (executeActivity r) input' next
     }
 
+instance Monoid ActivityInboundInterceptor where
+  mempty = ActivityInboundInterceptor
+    { executeActivity = \input next -> next input
+    }
 
 data ActivityOutboundInterceptor = ActivityOutboundInterceptor { }
 
 instance Semigroup ActivityOutboundInterceptor where
   ActivityOutboundInterceptor <> ActivityOutboundInterceptor = ActivityOutboundInterceptor
+
+instance Monoid ActivityOutboundInterceptor where
+  mempty = ActivityOutboundInterceptor
 
 data Interceptors = Interceptors
   { workflowInboundInterceptors :: WorkflowInboundInterceptor
@@ -45,5 +52,10 @@ data Interceptors = Interceptors
   , clientInterceptors :: ClientInterceptors
   }
 
+
 instance Semigroup Interceptors where
   Interceptors a b c d e <> Interceptors a' b' c' d' e' = Interceptors (a <> a') (b <> b') (c <> c') (d <> d') (e <> e')
+
+
+instance Monoid Interceptors where
+  mempty = Interceptors mempty mempty mempty mempty mempty

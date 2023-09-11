@@ -36,6 +36,7 @@ import GHC.Stack
 import Data.Vector (Vector)
 import Data.Set (Set)
 import Data.Kind
+import Control.Monad
 import Control.Monad.Reader
 import UnliftIO
 import RequireCallStack
@@ -474,7 +475,7 @@ data WorkflowInstance = WorkflowInstance
   , workflowCommands :: {-# UNPACK #-} !(TVar (Reversed WorkflowCommand))
   , workflowSequenceMaps :: {-# UNPACK #-} !(TVar SequenceMaps)
   , workflowSignalHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (Vector RawPayload -> Workflow ())))
-  , workflowQueryHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (QueryId -> Vector RawPayload -> IO ())))
+  , workflowQueryHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (QueryId -> Vector RawPayload -> Map Text RawPayload -> IO (Either SomeException RawPayload))))
   , workflowCallStack :: {-# UNPACK #-} !(IORef CallStack)
   , workflowCompleteActivation :: !(Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
   , workflowInstanceContinuationEnv :: {-# UNPACK #-} !ContinuationEnv
@@ -586,15 +587,35 @@ data WorkflowExitVariant a
   | WorkflowExitFailed SomeException WorkflowCommand
   | WorkflowExitSuccess a
 
+data HandleQueryInput = HandleQueryInput
+  { handleQueryId :: Text
+  , handleQueryInputType :: Text
+  , handleQueryInputArgs :: Vector RawPayload
+  , handleQueryInputHeaders :: Map Text RawPayload
+  }
+
 data WorkflowInboundInterceptor = WorkflowInboundInterceptor
   { executeWorkflow
     :: ExecuteWorkflowInput
     -> (ExecuteWorkflowInput -> IO (WorkflowExitVariant RawPayload))
     -> IO (WorkflowExitVariant RawPayload)
+  , handleQuery 
+    :: HandleQueryInput
+    -> (HandleQueryInput -> IO (Either SomeException RawPayload))
+    -> IO (Either SomeException RawPayload)
   }
 
 instance Semigroup WorkflowInboundInterceptor where
-  WorkflowInboundInterceptor a <> WorkflowInboundInterceptor b = WorkflowInboundInterceptor $ \input cont -> a input $ \input' -> b input' cont
+  a <> b = WorkflowInboundInterceptor 
+    { executeWorkflow = \input cont -> a.executeWorkflow input $ \input' -> b.executeWorkflow input' cont
+    , handleQuery = \input cont -> a.handleQuery input $ \input' -> b.handleQuery input' cont
+    }
+
+instance Monoid WorkflowInboundInterceptor where
+  mempty = WorkflowInboundInterceptor
+    { executeWorkflow = \input cont -> cont input
+    , handleQuery = \input cont -> cont input
+    }
 
 data ActivityInput = ActivityInput
   { activityType :: Text
@@ -614,4 +635,11 @@ instance Semigroup WorkflowOutboundInterceptor where
     { scheduleActivity = \input cont -> scheduleActivity l input $ \input' -> scheduleActivity r input' cont
     , startChildWorkflowExecution = \t input cont -> startChildWorkflowExecution l t input $ \t' input' -> startChildWorkflowExecution r t' input' cont
     , continueAsNew = \n input cont -> continueAsNew l n input $ \n' input' -> continueAsNew r n' input' cont
+    }
+
+instance Monoid WorkflowOutboundInterceptor where
+  mempty = WorkflowOutboundInterceptor
+    { scheduleActivity = \input cont -> cont input
+    , startChildWorkflowExecution = \t input cont -> cont t input
+    , continueAsNew = \n input cont -> cont n input
     }

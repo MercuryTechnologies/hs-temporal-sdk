@@ -115,19 +115,7 @@ configure actEnv = flip execState defaultConfig . unConfigM
       , actDefs = mempty
       , coreConfig = Core.defaultWorkerConfig
       , deadlockTimeout = Just 1000000
-      , interceptorConfig = Interceptors
-        { workflowInboundInterceptors = WorkflowInboundInterceptor { executeWorkflow = \info next -> next info }
-        , workflowOutboundInterceptors = WorkflowOutboundInterceptor
-          { scheduleActivity = \info next -> next info
-          , startChildWorkflowExecution = \wfName info next -> next wfName info
-          , continueAsNew = \wfName info next -> next wfName info
-          }
-        , activityInboundInterceptors = ActivityInboundInterceptor
-          { executeActivity = \input next -> next input
-          }
-        , activityOutboundInterceptors = ActivityOutboundInterceptor
-        , clientInterceptors = mempty
-        }
+      , interceptorConfig = mempty
       , ..
       }
 

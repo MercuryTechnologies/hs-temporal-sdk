@@ -198,19 +198,11 @@ signal h@(WorkflowHandle _ _t c wf r) (SignalRef sName sCodec) opts = gather $ \
   where
     gather :: ([IO RawPayload] -> m ()) -> (args :->: m ())
     gather = gatherArgs (Proxy @args) sCodec Prelude.id
-    wfClient = clientCore c
 
--- | QueryRejectCondition can used to reject the query if workflow state does not satisfy condition.
-data QueryRejectCondition
-  = QueryRejectConditionRejectNone
-  -- ^ indicates that query should not be rejected
-  | QueryRejectConditionNotOpen
-  -- ^ indicates that query should be rejected if workflow is not open
-  | QueryRejectConditionNotCompletedCleanly
-  -- ^ indicates that query should be rejected if workflow did not complete cleanly
 
 data QueryOptions = QueryOptions
-  { queryRejectCondition :: QueryRejectCondition
+  { queryId :: Text
+  , queryRejectCondition :: QueryRejectCondition
   , queryHeaders :: Map Text RawPayload
   }
 
@@ -220,21 +212,6 @@ defaultQueryOptions = QueryOptions
   , queryHeaders = mempty
   }
 
-data WorkflowExecutionStatus
-  = Running
-  | Completed
-  | Failed
-  | Canceled
-  | Terminated
-  | ContinuedAsNew
-  | TimedOut
-  | UnknownStatus
-  deriving (Read, Show, Eq, Ord)
-
-data QueryRejected
-  = QueryRejected
-    { status :: Temporal.Client.WorkflowExecutionStatus
-    } deriving (Read, Show, Eq, Ord)
 
 query :: forall m args result a. (MonadIO m, Typeable result)
   => WorkflowHandle a 
@@ -242,41 +219,46 @@ query :: forall m args result a. (MonadIO m, Typeable result)
   -> QueryOptions
   -> (args :->: m (Either QueryRejected result))
 query h (QueryDefinition qn codec) opts = gather $ \inputs -> liftIO $ do
-  args <- traverse (fmap convertToProtoPayload) inputs
-  let msg :: QueryWorkflowRequest
-      msg = defMessage 
-        & WF.namespace .~ rawNamespace h.workflowHandleClient.clientDefaultNamespace
-        & WF.execution .~
-          (defMessage
-            & Common.workflowId .~ rawWorkflowId h.workflowHandleWorkflowId
-            & Common.runId .~ maybe "" rawRunId h.workflowHandleRunId
-          )
-        & WF.query .~ 
-          (defMessage 
-            & Query.queryType .~ qn
-            & Query.queryArgs .~
-              (defMessage & Common.payloads .~ args)
-            & Query.header .~ (headerToProto $ fmap convertToProtoPayload opts.queryHeaders)
-          )
-        & WF.queryRejectCondition .~ case opts.queryRejectCondition of
-          QueryRejectConditionRejectNone -> Query.QUERY_REJECT_CONDITION_NONE
-          QueryRejectConditionNotOpen -> Query.QUERY_REJECT_CONDITION_NOT_OPEN
-          QueryRejectConditionNotCompletedCleanly -> Query.QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY
+  args <- sequence inputs
+  let baseInput = QueryWorkflowInput 
+        { queryWorkflowType = qn
+        , queryWorkflowRunId = h.workflowHandleRunId
+        , queryWorkflowRejectCondition = opts.queryRejectCondition
+        , queryWorkflowWorkflowId = h.workflowHandleWorkflowId
+        , queryWorkflowHeaders = opts.queryHeaders
+        , queryWorkflowArgs = args
+        }
+  eRes <- h.workflowHandleClient.clientInterceptors.queryWorkflow baseInput $ \input -> do
+    let msg :: QueryWorkflowRequest
+        msg = defMessage 
+          & WF.namespace .~ rawNamespace h.workflowHandleClient.clientDefaultNamespace
+          & WF.execution .~
+            (defMessage
+              & Common.workflowId .~ rawWorkflowId input.queryWorkflowWorkflowId
+              & Common.runId .~ maybe "" rawRunId input.queryWorkflowRunId
+            )
+          & WF.query .~ 
+            (defMessage 
+              & Query.queryType .~ input.queryWorkflowType
+              & Query.queryArgs .~
+                (defMessage & Common.payloads .~ fmap convertToProtoPayload input.queryWorkflowArgs)
+              & Query.header .~ (headerToProto $ fmap convertToProtoPayload input.queryWorkflowHeaders)
+            )
+          & WF.queryRejectCondition .~ case opts.queryRejectCondition of
+            QueryRejectConditionRejectNone -> Query.QUERY_REJECT_CONDITION_NONE
+            QueryRejectConditionNotOpen -> Query.QUERY_REJECT_CONDITION_NOT_OPEN
+            QueryRejectConditionNotCompletedCleanly -> Query.QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY
 
-  (res :: QueryWorkflowResponse) <- either throwIO pure =<< queryWorkflow h.workflowHandleClient.clientCore msg
-  case res ^. WF.maybe'queryRejected of
-    Just rejection -> do
-      let status = queryRejectionStatusFromProto (rejection ^. Query.status)
-      pure $ Left $ QueryRejected { .. }
-    Nothing -> if typeRep (Proxy @result) == typeOf ()
-      then pure $ Right $ unsafeCoerce ()
-      else 
-        case (res ^. WF.queryResult . Common.vec'payloads) V.!? 0 of
-          Nothing -> throwIO $ ValueError "No return value payloads provided by query response"
-          Just p -> do
-            res <- decode codec (convertFromProtoPayload p)
-            either (throwIO . ValueError) (pure . Right) res
-
+    (res :: QueryWorkflowResponse) <- either throwIO pure =<< Temporal.Core.Client.WorkflowService.queryWorkflow h.workflowHandleClient.clientCore msg
+    case res ^. WF.maybe'queryRejected of
+      Just rejection -> do
+        let status = queryRejectionStatusFromProto (rejection ^. Query.status)
+        pure $ Left $ QueryRejected { .. }
+      Nothing -> case (res ^. WF.queryResult . Common.vec'payloads) V.!? 0 of
+        Nothing -> throwIO $ ValueError "No return value payloads provided by query response"
+        Just p -> pure $ Right $ convertFromProtoPayload p
+  forM eRes $ \p ->
+    decode codec p >>= either (throwIO . ValueError) pure
   where
     gather :: ([IO RawPayload] -> m (Either QueryRejected result)) -> (args :->: m (Either QueryRejected result))
     gather = gatherArgs (Proxy @args) codec Prelude.id
@@ -287,7 +269,7 @@ query h (QueryDefinition qn codec) opts = gather $ \inputs -> liftIO $ do
       WORKFLOW_EXECUTION_STATUS_COMPLETED -> Completed
       WORKFLOW_EXECUTION_STATUS_FAILED -> Failed
       WORKFLOW_EXECUTION_STATUS_CANCELED -> Canceled
-      WORKFLOW_EXECUTION_STATUS_TERMINATED -> Temporal.Client.Terminated
+      WORKFLOW_EXECUTION_STATUS_TERMINATED -> Terminated
       WORKFLOW_EXECUTION_STATUS_CONTINUED_AS_NEW -> ContinuedAsNew
       WORKFLOW_EXECUTION_STATUS_TIMED_OUT -> TimedOut
       WorkflowExecutionStatus'Unrecognized _ -> UnknownStatus 
@@ -299,13 +281,14 @@ getHandle
   -> WorkflowId
   -> Maybe RunId
   -> m (WorkflowHandle a)
-getHandle c (KnownWorkflow {knownWorkflowCodec}) wfId runId = pure $ WorkflowHandle 
+getHandle c (KnownWorkflow {knownWorkflowCodec, knownWorkflowName}) wfId runId = pure $ WorkflowHandle 
   { workflowHandleReadResult = \a -> do
       result <- decode knownWorkflowCodec a
       either (throwIO . ValueError) pure result
   , workflowHandleClient = c
   , workflowHandleWorkflowId = wfId
   , workflowHandleRunId = runId
+  , workflowHandleType = WorkflowType knownWorkflowName
   }
 
 -- TODO
@@ -380,6 +363,7 @@ startFromPayloads c k@(KnownWorkflow codec _ _ _) opts payloads = do
       Left err -> throwIO err
       Right swer -> pure $ WorkflowHandle 
         { workflowHandleReadResult = pure
+        , workflowHandleType = WorkflowType $ knownWorkflowName k
         , workflowHandleClient = c
         , workflowHandleWorkflowId = opts.workflowId
         , workflowHandleRunId = Just (RunId $ swer ^. WF.runId)

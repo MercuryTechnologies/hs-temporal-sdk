@@ -33,7 +33,12 @@ import Temporal.Common
 import Temporal.Worker.Types
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
-import Temporal.Client.Types (ClientInterceptors(ClientInterceptors), WorkflowStartOptions (..))
+import Temporal.Client.Types 
+  ( ClientInterceptors(ClientInterceptors)
+  , WorkflowStartOptions (..)
+  , QueryWorkflowInput(..)
+  )
+import Prelude hiding (span)
 
 -- | "_tracer-data"
 defaultHeaderKey :: T.Text
@@ -174,6 +179,29 @@ makeOpenTelemetryInterceptor = do
                 recordException span mempty Nothing e
               _ -> pure ()
             pure execution
+      , handleQuery = \input next -> do
+        -- Only trace this if there is a header, and make that span the parent.
+        -- We do not put anything that happens in a query handler on the workflow
+        -- span.
+        --
+        -- However, we do _link_ the query span to the workflow span if we have the
+        -- context for it.
+        let spanArgs = defaultSpanArguments
+              { kind = Server
+              , attributes = mempty
+              -- HashMap.fromList
+              --   [ ("temporal.workflow_id", toAttribute $ rawWorkflowId $ input.handleQueryInputInfo.workflowId)
+              --   , ("temporal.run_id", toAttribute $ rawRunId $ input.handleQueryInputInfo.runId)
+              --   , ("temporal.workflow_type", toAttribute $ input.handleQueryInputType)
+              --   ]
+              }
+        ctxt <- extract headersPropagator input.handleQueryInputHeaders Ctxt.empty
+        _ <- attachContext ctxt
+        case Ctxt.lookupSpan ctxt of
+          Nothing -> next input
+          Just _ -> 
+            inSpan'' tracer ("HandleQuery:" <> input.handleQueryInputType) spanArgs $ \_ -> do
+              next input
       }
     , workflowOutboundInterceptors = WorkflowOutboundInterceptor
       { scheduleActivity = \input next -> do
@@ -231,5 +259,13 @@ makeOpenTelemetryInterceptor = do
           ctxt <- getContext
           hdrs <- inject headersPropagator ctxt headers
           next ty (WorkflowStartOptions {headers=hdrs, ..}) ps
+      , queryWorkflow = \input next -> do
+        let spanArgs = defaultSpanArguments
+              { kind = Client
+              }
+        inSpan'' tracer ("QueryWorkflow:" <> queryWorkflowType input) spanArgs $ \_ -> do
+          ctxt <- getContext
+          hdrs <- inject headersPropagator ctxt input.queryWorkflowHeaders
+          next (input { queryWorkflowHeaders = hdrs })
       }
     }

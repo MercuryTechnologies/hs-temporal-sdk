@@ -66,16 +66,55 @@ data WorkflowHandle a = WorkflowHandle
 instance Functor WorkflowHandle where
   fmap f w = w { workflowHandleReadResult = fmap f . workflowHandleReadResult w }
 
+-- | QueryRejectCondition can used to reject the query if workflow state does not satisfy condition.
+data QueryRejectCondition
+  = QueryRejectConditionRejectNone
+  -- ^ indicates that query should not be rejected
+  | QueryRejectConditionNotOpen
+  -- ^ indicates that query should be rejected if workflow is not open
+  | QueryRejectConditionNotCompletedCleanly
+  -- ^ indicates that query should be rejected if workflow did not complete cleanly
+
+data QueryWorkflowInput = QueryWorkflowInput 
+  { queryWorkflowWorkflowId :: WorkflowId
+  , queryWorkflowRejectCondition :: QueryRejectCondition
+  , queryWorkflowHeaders :: Map Text RawPayload
+  , queryWorkflowType :: Text
+  , queryWorkflowRunId :: Maybe RunId
+  , queryWorkflowArgs :: [RawPayload]
+  }
+
+data WorkflowExecutionStatus
+  = Running
+  | Completed
+  | Failed
+  | Canceled
+  | Terminated
+  | ContinuedAsNew
+  | TimedOut
+  | UnknownStatus
+  deriving (Read, Show, Eq, Ord)
+
+data QueryRejected
+  = QueryRejected
+    { status :: WorkflowExecutionStatus
+    } deriving (Read, Show, Eq, Ord)
+
 data ClientInterceptors = ClientInterceptors
   { start :: WorkflowType -> WorkflowStartOptions -> [RawPayload] -> (WorkflowType -> WorkflowStartOptions -> [RawPayload] -> IO (WorkflowHandle RawPayload)) -> IO (WorkflowHandle RawPayload)
+  , queryWorkflow :: QueryWorkflowInput -> (QueryWorkflowInput -> IO (Either QueryRejected RawPayload)) -> IO (Either QueryRejected RawPayload)
   }
 
 instance Semigroup ClientInterceptors where
-  ClientInterceptors a <> ClientInterceptors b = ClientInterceptors $ \t o ps next -> a t o ps $ \t' o' ps' -> b t' o' ps' next
+  a <> b = ClientInterceptors 
+    { start = \t o ps next -> a.start t o ps $ \t' o' ps' -> b.start t' o' ps' next
+    , queryWorkflow = \i next -> a.queryWorkflow i $ \i' -> b.queryWorkflow i' next
+    }
 
 instance Monoid ClientInterceptors where
   mempty = ClientInterceptors
     (\t o ps next -> next t o ps)
+    (\i next -> next i)
 
 -- , signal :: SignalWorkflowInput -> (SignalWorkflowInput -> IO ()) -> IO ()
 --   -- , signalWithStart :: SignalWithStartWorkflowInput -> (SignalWithStartWorkflowInput -> IO ()) -> IO ()
