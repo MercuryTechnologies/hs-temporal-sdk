@@ -90,7 +90,7 @@ as we go. If there are not enough or too many params, we fail.
 class Codec fmt a where
   -- | Similar to a content-type header, this is a string that identifies the format of the payload.
   -- it will be set on the 'encoding' metadata field of the payload.
-  encoding :: fmt -> a -> ByteString
+  encoding :: fmt -> Proxy a -> ByteString
   messageType :: fmt -> a -> ByteString
   default messageType :: (Typeable a) => fmt -> a -> ByteString
   messageType _ _ = C.pack $ show $ typeRep (Proxy @a)
@@ -99,7 +99,7 @@ class Codec fmt a where
 
 insertStandardMetadata :: Codec fmt a => fmt -> a -> Payload -> Payload
 insertStandardMetadata fmt x (Payload d m) = Payload d $ m <> Map.fromList
-  [ ("encoding", encoding fmt x)
+  [ ("encoding", encoding fmt $ pure x)
   , ("messageType", messageType fmt x)
   ]
 

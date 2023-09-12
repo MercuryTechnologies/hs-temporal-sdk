@@ -19,7 +19,7 @@ import Temporal.Workflow (Namespace(..))
 import Temporal.Payload
 
 data Body = Body
-  { payloads :: Vector RawPayload
+  { payloads :: Vector Payload
   }
 
 instance ToJSON Body where
@@ -37,8 +37,8 @@ data ErrorResponse = ErrorResponse
   }
 
 data CodecServerConfig = CodecServerConfig
-  { codecServerDecoder :: {-# UNPACK #-} !(Namespace -> Maybe AuthorizationHeaderValue -> RawPayload -> ExceptT ErrorResponse IO RawPayload)
-  , codecServerEncoder :: {-# UNPACK #-} !(Namespace -> Maybe AuthorizationHeaderValue -> RawPayload -> ExceptT ErrorResponse IO RawPayload)
+  { codecServerDecoder :: {-# UNPACK #-} !(Namespace -> Maybe AuthorizationHeaderValue -> Payload -> ExceptT ErrorResponse IO Payload)
+  , codecServerEncoder :: {-# UNPACK #-} !(Namespace -> Maybe AuthorizationHeaderValue -> Payload -> ExceptT ErrorResponse IO Payload)
   , endpointBase :: [Text] -- ^ Path segments
   , corsPolicy :: CorsResourcePolicy
   }

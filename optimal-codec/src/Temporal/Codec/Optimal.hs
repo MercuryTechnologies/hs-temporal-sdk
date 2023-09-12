@@ -69,25 +69,25 @@ instance TypeError (('ShowType a) ':<>: 'Text " is not supported by any of the p
   messageType = error "unreachable"
   encoding = error "unreachable"
   encode = error "unreachable"
-  decode _ _ = Left "No recognized codec for this type"
+  decode _ _ = pure $ Left "No recognized codec for this type"
 
 instance (Codec fmt a || Codec (Composite codecs) a) => Codec (Composite (fmt ': codecs)) a where
+  encoding fmt = dispatch @(Codec fmt a) @(Codec (Composite codecs) a)
+    (case fmt of CompositeCons codec _ -> encoding codec) 
+    (case fmt of CompositeCons _ codecs -> encoding codecs)
   messageType fmt = dispatch @(Codec fmt a) @(Codec (Composite codecs) a)
     (case fmt of CompositeCons codec _ -> messageType codec) 
     (case fmt of CompositeCons _ codecs -> messageType codecs)
-  encodingType fmt = dispatch @(Codec fmt a) @(Codec (Composite codecs) a)
-    (case fmt of CompositeCons codec _ -> encodingType codec) 
-    (case fmt of CompositeCons _ codecs -> encodingType codecs)
-  encodePayload fmt = dispatch @(Codec fmt a) @(Codec (Composite codecs) a)
-    (case fmt of CompositeCons codec _ -> encodePayload codec)
-    (case fmt of CompositeCons _ codecs -> encodePayload codecs)
+  encode fmt = dispatch @(Codec fmt a) @(Codec (Composite codecs) a)
+    (case fmt of CompositeCons codec _ -> encode codec)
+    (case fmt of CompositeCons _ codecs -> encode codecs)
   decode fmt payload = dispatch @(Codec fmt a) @(Codec (Composite codecs) a)
     (case fmt of 
-      CompositeCons codec codecs -> if Just (encodingType codec (Proxy @a)) == payload.inputPayloadMetadata Map.!? "encoding"
+      CompositeCons codec codecs -> if Just (encoding codec (Proxy @a)) == payload.payloadMetadata Map.!? "encoding"
         then decode codec payload
         else ifSat @(Codec (Composite codecs) a)
           (decode codecs payload)
-          (Left "No codec for this type supports this payload")
+          (pure $ Left "No codec for this type supports this payload")
     )
     (case fmt of CompositeCons _ codecs -> decode codecs payload)
 

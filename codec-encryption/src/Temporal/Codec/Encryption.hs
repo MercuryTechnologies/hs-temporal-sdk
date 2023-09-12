@@ -79,22 +79,22 @@ mkEncryptionCodec (defaultKeyName, defaultKey) otherKeys = liftIO $ do
         , ..
         }
 
-instance Codec Encrypted RawPayload where
+instance Codec Encrypted Payload where
   encoding _ _ = "binary/encrypted"
   encode Encrypted{..} x = do
     iv <- atomicModifyIORef' ivRef (\iv -> let next = ivAdd iv 1 in (next, iv))
-    pure $ RawPayload 
+    pure $ Payload 
       (encrypt defaultKey iv $ encodeMessage $ convertToProtoPayload x) 
       (Map.fromList [("encryption-key-id", defaultKeyName), ("encoding", "binary/encrypted")])
   decode Encrypted{..} payload = 
-    if payload.inputPayloadMetadata Map.!? "encoding" /= (Just "binary/encrypted")
+    if payload.payloadMetadata Map.!? "encoding" /= (Just "binary/encrypted")
     then pure $ Right payload
     else 
-      if payload.inputPayloadData == ""
+      if payload.payloadData == ""
       then pure $ Left "Payload data is missing"
       else
-        case payload.inputPayloadMetadata Map.!? "encryption-key-id" of
+        case payload.payloadMetadata Map.!? "encryption-key-id" of
           Nothing -> pure $ Left "Unable to decrypt Payload without encryption key id'"
           Just keyName -> case encryptionKeys Map.!? keyName of
             Nothing -> pure $ Left ("Could not find encryption key: " <> show keyName)
-            Just k -> pure $ fmap convertFromProtoPayload (decrypt k payload.inputPayloadData >>= decodeMessage)
+            Just k -> pure $ fmap convertFromProtoPayload (decrypt k payload.payloadData >>= decodeMessage)
