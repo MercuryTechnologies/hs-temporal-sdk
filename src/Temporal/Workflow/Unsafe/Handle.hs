@@ -19,11 +19,17 @@ import Temporal.Workflow.Internal.Instance
 import Temporal.Workflow.Internal.Monad
 import UnliftIO
 
+-- | Some tasks in a Workflow return a handle that can be used to wait for the task to complete.
+--
+-- This class provides a common interface for waiting on these handles.
 class Wait h where
   type WaitResult h :: Type
   -- | Wait for a handle on an an action to complete.
   wait :: RequireCallStack => h -> WaitResult h
 
+-- | Some tasks in a Workflow return a handle that can be used to cancel a task.
+--
+-- This class provides a common interface for performing cancellation on these handles.
 class Cancel h where
   type CancelResult h :: Type
   -- | Signal to Temporal that a handle representing an async action should be cancelled.

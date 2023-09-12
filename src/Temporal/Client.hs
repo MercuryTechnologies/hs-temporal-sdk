@@ -18,20 +18,30 @@ module Temporal.Client
   -- * Workflow Client
     WorkflowClient
   , workflowClient
+  -- * Running Workflows
   , WorkflowStartOptions(..)
   , TimeoutOptions(..)
   , workflowStartOptions
   , Temporal.Client.start
   , WorkflowHandle
-  , awaitWorkflowResult
-  , TerminationOptions
-  , terminate
   , execute
+  , waitWorkflowResult
+  -- * Closing Workflows
+  , TerminationOptions(..)
+  , terminate
+  -- * Querying Workflows
   , QueryOptions(..)
   , QueryRejectCondition(..)
   , QueryRejected(..)
+  , Temporal.Client.Types.WorkflowExecutionStatus(..)
   , defaultQueryOptions
   , query
+  -- * Sending Signals to Workflows
+  , SignalOptions(..)
+  , signal
+  , signalWithStart
+  -- * Producing handles for existing workflows
+  , getHandle
   -- * Miscellaneous
   , streamEvents
   , FollowOption(..)
@@ -110,6 +120,10 @@ workflowClient c ns int = do
 throwEither :: (MonadIO m, Exception e) => IO (Either e a) -> m a
 throwEither = either throwIO pure <=< liftIO
 
+-- | Run a workflow, synchronously waiting for it to complete.
+--
+-- This function will block until the workflow completes, and will return the result of the workflow
+-- or throw a 'WorkflowExecutionClosed' exception if the workflow was closed without returning a result.
 execute
   :: forall m wf. (MonadIO m, WorkflowRef wf)
   => WorkflowClient 
@@ -122,10 +136,14 @@ execute c wf opts = case workflowRef wf of
         gather = gatherArgs (Proxy @(WorkflowArgs wf)) codec Prelude.id
     gather $ \inputs -> liftIO $ do
       h <- startFromPayloads c k opts =<< sequence inputs
-      awaitWorkflowResult h
+      waitWorkflowResult h
 
-awaitWorkflowResult :: (Typeable a, MonadIO m) => WorkflowHandle a -> m a
-awaitWorkflowResult h@(WorkflowHandle readResult _ c wf r) = do
+-- | Given a 'WorkflowHandle', wait for the workflow to complete and return the result.
+--
+-- This function will block until the workflow completes, and will return the result of the workflow
+-- or throw a 'WorkflowExecutionClosed' exception if the workflow was closed without returning a result.
+waitWorkflowResult :: (Typeable a, MonadIO m) => WorkflowHandle a -> m a
+waitWorkflowResult h@(WorkflowHandle readResult _ c wf r) = do
   mev <- liftIO $ waitResult c wf r c.clientDefaultNamespace
   case mev of
     Nothing -> error "Unexpected empty history"
@@ -170,6 +188,18 @@ defaultSignalOptions = SignalOptions
   , headers = mempty
   }
 
+-- | A Signal is an asynchronous request to a Workflow Execution.
+--
+-- A Signal delivers data to a running Workflow Execution. It cannot return data to the caller; 
+-- to do so, use a Query instead. The Workflow code that handles a Signal can mutate Workflow state. 
+-- A Signal can be sent from a Temporal Client or a Workflow. When a Signal is sent, it is received 
+-- by the Cluster and recorded as an Event to the Workflow Execution Event History. A successful 
+-- response from the Cluster means that the Signal has been persisted and will be delivered at least 
+-- once to the Workflow Execution. The next scheduled Workflow Task will contain the Signal Event.
+--
+-- Signal handlers are Workflow functions that listen for Signals by the Signal name. Signals are delivered 
+-- in the order they are received by the Cluster. If multiple deliveries of a Signal would be a problem for 
+-- your Workflow, add idempotency logic to your Signal handler that checks for duplicates.
 signal :: forall m args a. MonadIO m 
   => WorkflowHandle a 
   -> SignalRef args 
@@ -213,7 +243,19 @@ defaultQueryOptions = QueryOptions
   , queryHeaders = mempty
   }
 
-
+-- | A Query is a synchronous operation that is used to get the state of a Workflow Execution. The state of a running Workflow Execution is constantly changing. You can use Queries to expose the internal Workflow Execution state to the external world. Queries are available for running or completed Workflows Executions only if the Worker is up and listening on the Task Queue.
+--
+-- Queries are sent from a Temporal Client to a Workflow Execution. The API call is synchronous. The Query is identified at both ends by a Query name. The Workflow must have a Query handler that is developed to handle that Query and provide data that represents the state of the Workflow Execution.
+--
+-- Queries are strongly consistent and are guaranteed to return the most recent state. This means that the data reflects the state of all confirmed Events that came in before the Query was sent. An Event is considered confirmed if the call creating the Event returned success. Events that are created while the Query is outstanding may or may not be reflected in the Workflow state the Query result is based on.
+--
+-- A Query can carry arguments to specify the data it is requesting. And each Workflow can expose data to multiple types of Queries.
+--
+-- A Query must never mutate the state of the Workflow Execution—that is, Queries are read-only and cannot contain any blocking code. This means, for example, that Query handling logic cannot schedule Activity Executions.
+--
+-- For the Haskell library, this means that the only state that is accessible to a Query is 'Info' and values in 'StateVar's.
+--
+-- Sending Queries to completed Workflow Executions is supported, though Query reject conditions can be configured per Query.
 query :: forall m args result a. (MonadIO m, Typeable result)
   => WorkflowHandle a 
   -> QueryDefinition args result 
@@ -275,6 +317,12 @@ query h (QueryDefinition qn codec) opts = gather $ \inputs -> liftIO $ do
       WORKFLOW_EXECUTION_STATUS_TIMED_OUT -> TimedOut
       WorkflowExecutionStatus'Unrecognized _ -> UnknownStatus 
 
+-- | Sometimes you know that a Workflow exists or existed, but you didn't create the workflow from
+-- the current process or code path. In this case, you can use 'getHandle' to get a handle to the
+-- workflow so that you can interact with it.
+--
+-- Note that it is possible for a workflow to be closed or archived by the time you get a handle,
+-- so you should be prepared to handle 'WorkflowExecutionClosed' exceptions.
 getHandle
   :: (MonadIO m)
   => WorkflowClient
@@ -299,6 +347,9 @@ getHandle c (KnownWorkflow {knownWorkflowCodec, knownWorkflowName}) wfId runId =
 --   -> ListWorkflowOptions
 --   -> m [WorkflowId]
 
+-- | If there is a running Workflow Execution with the given Workflow Id, it will be Signaled. 
+--
+-- Otherwise, a new Workflow Execution is started and immediately sent the Signal.
 signalWithStart 
   :: MonadIO m 
   => WorkflowClient 
@@ -375,6 +426,12 @@ startFromPayloads c k@(KnownWorkflow codec _ _ _) opts payloads = do
         either (throwIO . ValueError) pure result
     }
 
+-- | Begin a new Workflow Execution.
+--
+-- This function does not wait for the Workflow to complete. Instead, it returns a 'WorkflowHandle'
+-- that can be used to wait for the Workflow to complete or perform other operations.
+--
+-- This can be used to "fire-and-forget" a Workflow by discarding the handle.
 start
   :: forall args result m. (MonadIO m)
   => WorkflowClient
@@ -421,7 +478,7 @@ data FollowOption = FollowRuns | ThisRunOnly
 -- | Thrown when 'FollowOption' is 'ThisRunOnly' and the workflow continues as new.
 data WorkflowContinuedAsNewException = WorkflowContinuedAsNewException
   { workflowContinuedAsNewExceptionRunId :: RunId
-  } deriving (Show)
+  } deriving stock (Show)
 
 instance Exception WorkflowContinuedAsNewException
 
@@ -440,6 +497,9 @@ applyNewExecutionRunId attrs req alt = if attrs ^. History.newExecutionRunId == 
           & RR.nextPageToken .~ "" 
       )
 
+-- | Workflow execution history is represented as a series of events. This function allows you to
+-- subscribe to those events and process them as they are received. As an example, this is used to implement
+-- 'waitWorkflowResult'.
 streamEvents 
   :: MonadIO m 
   => WorkflowClient 

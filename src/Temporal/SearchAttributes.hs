@@ -1,5 +1,21 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE UndecidableInstances #-}
+-- | A Search Attribute is an indexed field used in a List Filter to filter a list of Workflow Executions that have the Search Attribute in their metadata.
+--
+-- Each Search Attribute is a key-value pair metadata object included in a Workflow Execution's Visibility information. This information is available in the Visibility store.
+--
+-- Note: Search Attribute values are not encrypted because the Temporal Server must be able to read these values from the Visibility store when retrieving Workflow Execution details.
+--
+-- Temporal provides some default Search Attributes, such as ExecutionStatus, the current state of your Workflow Executions. You can also create custom Search Attribute keys in your Visibility store and assign values when starting a Workflow Execution or in Workflow code.
+--
+-- When using Continue-As-New or a Temporal Cron Job, Search Attribute keys are carried over to the new Workflow Run by default. Search Attribute values are only available for as long as the Workflow is.
+-- 
+-- Search Attributes are most effective for search purposes or tasks requiring collection-based result sets. For business logic in which you need to get information about a Workflow Execution, consider one of the following:
+--
+-- * Storing state in a local variable and exposing it with a Query.
+-- * Storing state in an external datastore through Activities and fetching it directly from the store.
+--
+-- If your business logic requires high throughput or low latency, store and fetch the data through Activities. You might experience lag due to time passing between the Workflow's state change and the Activity updating the Visibility store.
 module Temporal.SearchAttributes where
 
 import qualified Data.Aeson as A

@@ -102,6 +102,8 @@ module Temporal.Workflow
   , waitCondition
   -- * Other utilities
   , Temporal.Workflow.race
+  , biselect
+  , biselectOpt
   , unsafeAsyncEffectSink
   -- * State vars
   , StateVar
@@ -1134,7 +1136,16 @@ been updated since the condition suspended. We give each statevar a unique ident
 lookups, and a sequence number that updates for each write to the IORef.
 -}
 
-
+-- | 'StateVar' values are mutable variables scoped to a Workflow run.
+--
+-- 'Workflow's are deterministic, so you may not use normal IORefs, since the IORef
+-- could have been created outside of the workflow and cause nondeterminism.
+--
+-- However, it is totally safe to mutate state variables as long as they are scoped
+-- to a workflow and derive their state transitions from the workflow's deterministic
+-- execution.
+--
+-- StateVar values may also be read from within a query and mutated within signal handlers.
 newtype StateVar a = StateVar
   { ref :: IORef a
   }
@@ -1159,6 +1170,12 @@ instance MonadWriteStateVar Workflow where
 instance MonadReadStateVar Query where
   readStateVar (StateVar ref) = Query $ readIORef ref
 
+-- | 'Workflow's may be sent a cancellation request from the Temporal Platform,
+-- but Workflow code is not required to respond to the cancellation request.
+--
+-- In order to opt in to cancellation handling, you can call 'isCancelRequested'
+-- periodically within your workflow code to check whether a cancellation request
+-- has been received.
 isCancelRequested :: RequireCallStack => Workflow Bool
 isCancelRequested = do
   updateCallStackW
@@ -1173,13 +1190,17 @@ isCancelRequested = do
 -- The workflow can still respond to signals and queries while waiting for cancellation.
 --
 -- Upon cancellation, the workflow will throw a 'WorkflowCancelRequested' exception.
+--
+-- This function is useful for actor-style workflows that perform work in response to signals
+-- and/or respond to queries, but otherwise need to remain idle on their main codepath.
+--
+-- N.B. It is likely not safe to call this in a signal handler.
 waitCancellation :: RequireCallStack => Workflow ()
 waitCancellation = do
   updateCallStackW
   inst <- askInstance
   getIVar inst.workflowCancellationVar
   throw WorkflowCancelRequested
-
 
 defaultRetryPolicy :: RetryPolicy
 defaultRetryPolicy = RetryPolicy

@@ -5,6 +5,21 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE DuplicateRecordFields #-}
+-- |
+-- Module: Temporal.Worker
+-- Description: Define and manage Temporal workers for executing workflows and activities.
+--
+-- Temporal workers are responsible for executing workflows and activities by polling
+-- the Temporal service for tasks in specific task queues. This module provides
+-- types and functions for defining and configuring Temporal workers, including
+-- both workflow and activity workers.
+--
+-- Types and functions for configuring workers, adding workflows and activities,
+-- and setting worker options are included in this module.
+--
+-- Note: workers only poll from a single task queue. If you need to poll from
+-- multiple task queues, you will need to start multiple workers. Multiple workers
+-- may run in the same process.
 module Temporal.Worker 
   ( Temporal.Worker.Worker
   , startWorker
@@ -263,6 +278,21 @@ setGracefulShutdownPeriodMillis n = modifyCore $ \conf -> conf
   }
 
 ------------------------------------------------------------------------------------
+
+-- | A Worker is responsible for polling a Task Queue, dequeueing a Task, executing 
+-- your code in response to a Task, and responding to the Temporal Cluster with the results.
+--
+-- Worker Processes are external to a Temporal Cluster. Temporal Application developers are 
+-- responsible for developing Worker Programs and operating Worker Processes. Said another way, 
+-- the Temporal Cluster (including the Temporal Cloud) doesn't execute any of your code 
+-- (Workflow and Activity Definitions) on Temporal Cluster machines. The Cluster is solely 
+-- responsible for orchestrating State Transitions and providing Tasks to the next available 
+-- Worker Entity.
+--
+-- A Worker Process can be both a Workflow Worker Process and an Activity Worker Process. 
+-- Haskell the ability to have multiple Worker Entities in a single Worker Process. 
+--
+-- A single Worker Entity can listen to only a single Task Queue. But if a Worker Process has multiple Worker Entities, the Worker Process could be listening to multiple Task Queues.
 data Worker = Worker
   { workerWorkflowLoop :: Async ()
   , workerActivityLoop :: Async ()
@@ -303,6 +333,11 @@ startWorker client conf = do
     $(logDebug) "Exiting activity worker loop"
   pure Temporal.Worker.Worker{..}
 
+-- | Wait for a worker to exit. This waits for both the workflow and activity loops to complete.
+--
+-- Any exceptions thrown by the workflow or activity loops will be rethrown.
+--
+-- This function is generally not needed, as 'shutdown' will wait for the worker to exit.
 waitWorker :: MonadIO m => Temporal.Worker.Worker -> m ()
 waitWorker worker = void $ do
   link2 (workerWorkflowLoop worker) (workerActivityLoop worker)
@@ -310,6 +345,8 @@ waitWorker worker = void $ do
   _ <- waitCatch (workerActivityLoop worker)
   pure ()
 
+-- | Shut down a worker. This will initiate a graceful shutdown of the worker, waiting for all
+-- in-flight tasks to complete before finalizing the shutdown.
 shutdown :: MonadIO m => Temporal.Worker.Worker -> m ()
 shutdown worker = liftIO $ do
   Core.initiateShutdown worker.workerCore

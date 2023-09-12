@@ -3,7 +3,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Temporal.Workflow.Internal.Monad where
 import Control.Applicative
-import Control.Exception (Exception, SomeException)
 import qualified Control.Monad.Catch as Catch
 import System.Random.Stateful (StdGen, StatefulGen(..), RandomGenM(..), FrozenGen(..))
 import Temporal.Common
@@ -14,7 +13,6 @@ import Temporal.Payload
 import Data.ProtoLens
 import Data.Map.Strict (Map)
 import Data.Time.Clock.System (SystemTime)
-import Temporal.SearchAttributes (SearchAttributeType)
 import Data.Word (Word32)
 import Data.Hashable
 import Control.Concurrent.Async
