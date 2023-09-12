@@ -14,6 +14,7 @@ import Control.Monad
 import Control.Monad.Accum
 import Control.Monad.Select
 #endif
+import Control.Monad.Fix (MonadFix)
 import Control.Monad.Error.Class (MonadError)
 import Control.Monad.RWS (MonadReader)
 import Control.Monad.State
