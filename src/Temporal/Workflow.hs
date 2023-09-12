@@ -486,7 +486,7 @@ startChildWorkflow
   -> StartChildWorkflowOptions
   -> WorkflowId
   -> (args :->: Workflow (ChildWorkflowHandle result))
-startChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId =
+startChildWorkflow k@(KnownWorkflow codec _ _ _) opts wfId =
   gatherStartChildWorkflowArgs @args @result codec (startChildWorkflowFromPayloads k opts wfId)
 
 executeChildWorkflow
@@ -495,7 +495,7 @@ executeChildWorkflow
   -> StartChildWorkflowOptions
   -> WorkflowId
   -> (args :->: Workflow result)
-executeChildWorkflow k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId = gatherArgs (Proxy @args) codec id $ \typedPayloads -> do
+executeChildWorkflow k@(KnownWorkflow codec _ _ _) opts wfId = gatherArgs (Proxy @args) codec id $ \typedPayloads -> do
   h <- startChildWorkflowFromPayloads k opts wfId typedPayloads
   waitChildWorkflowResult h
 
