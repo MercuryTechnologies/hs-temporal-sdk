@@ -2,6 +2,7 @@ import Data.Char (toLower)
 import Data.Functor (($>))
 import Data.Maybe (fromMaybe)
 import Distribution.PackageDescription
+import Distribution.System
 import Distribution.Simple
 import Distribution.Simple.LocalBuildInfo 
   ( InstallDirs(..),
@@ -109,8 +110,13 @@ copyLib fl lbi libPref = do
   where
     verb = fromFlag $ configVerbosity fl
     external = getCabalFlag externalLibFlagStr fl
-    shared = False -- getCabalFlag "sharedLibsass" fl
-    ext = if shared then "so" else "a"
+    shared = True -- getCabalFlag "sharedLibsass" fl
+    ext = if shared 
+      then case buildOS of
+        Windows -> "dll"
+        OSX -> "dylib"
+        _ -> "so"
+      else "a"
     getLibraryPath = if external
       then do
         bridgeLibDir <- getEnv "TEMPORAL_BRIDGE_LIB_DIR"

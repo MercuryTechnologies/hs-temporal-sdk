@@ -596,7 +596,7 @@ needsClient = do
                   taskQueue
             h <- C.start client wf.reference opts
             result <- C.query h echoQuery C.defaultQueryOptions "hello"
-            C.awaitWorkflowResult h
+            C.waitWorkflowResult h
             result `shouldBe` Right "hello"
 
 

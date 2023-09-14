@@ -9,6 +9,7 @@ import Control.Concurrent
 import Control.Exception
 import qualified Data.Vector as V
 import GHC.Conc (newStablePtrPrimMVar, PrimMVar)
+import Foreign.C.Types (CInt)
 import Foreign.C.String
 import Foreign.ForeignPtr
 import Foreign.Ptr
@@ -19,11 +20,14 @@ import Temporal.Internal.FFI
 
 newtype Runtime = Runtime { runtime :: ForeignPtr Runtime }
 
-foreign import ccall "hs_temporal_init_runtime" initRuntime :: IO (Ptr Runtime)
+type TryPutMVarFFI = FunPtr (Ptr CInt -> Ptr (MVar ()) -> IO ())
+foreign import ccall "&hs_try_putmvar" tryPutMVarPtr :: TryPutMVarFFI
+
+foreign import ccall "hs_temporal_init_runtime" initRuntime :: TryPutMVarFFI -> IO (Ptr Runtime)
 foreign import ccall "&hs_temporal_free_runtime" freeRuntime :: FunPtr (Ptr Runtime -> IO ())
 
 initializeRuntime :: IO Runtime
-initializeRuntime = Runtime <$> (newForeignPtr freeRuntime =<< initRuntime)
+initializeRuntime = Runtime <$> (newForeignPtr freeRuntime =<< initRuntime tryPutMVarPtr)
 
 withRuntime :: Runtime -> (Ptr Runtime -> IO a) -> IO a
 withRuntime (Runtime r) = withForeignPtr r
