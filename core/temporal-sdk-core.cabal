@@ -29,6 +29,7 @@ custom-setup
     , Cabal >= 3.0.0.0
     , directory >= 1.3.6.0
     , filepath >= 1.3.0.2
+    , unix
 
 library
     import:           warnings
@@ -41,8 +42,6 @@ library
       Temporal.Internal.JobPool
     other-modules:
       Temporal.Internal.FFI,
-    extra-libraries:  temporal_bridge
-
     build-depends:
       base >= 4.14 && < 5, 
       proto-lens, 

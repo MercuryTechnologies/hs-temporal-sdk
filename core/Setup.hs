@@ -28,6 +28,7 @@ import System.Directory
   )
 import System.Environment (getEnv)
 import System.FilePath ((</>))
+import System.Posix.Files (createSymbolicLink)
 
 main :: IO ()
 main = defaultMainWithHooks hooks
@@ -37,12 +38,13 @@ main = defaultMainWithHooks hooks
           { preConf = \_ flags -> do
               unlessFlagM externalLibFlag flags $ rsMake (fromFlag $ configVerbosity flags)
               pure emptyHookedBuildInfo
-          , confHook = \a flags ->
-              confHook simpleUserHooks a flags
-                  >>= applyUnlessM externalLibFlag flags rsAddDirs
+          , confHook = \a flags -> do
+              lbi <- confHook simpleUserHooks a flags >>= rsAddLibraryInfo flags
+              copyTemporalBridge lbi (buildDir lbi)
+              pure lbi
           , postClean = \_ flags _ _ ->
               rsClean (fromFlag $ cleanVerbosity flags)
-          , postCopy = copyTemporalBridge
+          , postCopy = installTemporalBridge
           }
 
 rsFolder :: FilePath
@@ -69,19 +71,29 @@ execCargo verbosity command args = do
 rsMake :: Verbosity -> IO ()
 rsMake verbosity = execCargo verbosity "build" ["--release", "--lib"]
 
-rsAddDirs :: LocalBuildInfo -> IO LocalBuildInfo
-rsAddDirs lbi' = do
+rsAddLibraryInfo :: ConfigFlags -> LocalBuildInfo -> IO LocalBuildInfo
+rsAddLibraryInfo fl lbi' = do
     dir <- getCurrentDirectory
-    let rustIncludeDir = dir </> rsFolder
-        rustLibDir = dir </> rsFolder </> "target/release"
-        updateLbi lbi = lbi{localPkgDescr = updatePkgDescr (localPkgDescr lbi)}
-        updatePkgDescr pkgDescr = pkgDescr{library = updateLib <$> library pkgDescr}
-        updateLib lib = lib{libBuildInfo = updateLibBi (libBuildInfo lib)}
-        updateLibBi libBuild =
-            libBuild
-                { includeDirs = rustIncludeDir : includeDirs libBuild
-                , extraLibDirs = rustLibDir : extraLibDirs libBuild
-                }
+    let external = getCabalFlag externalLibFlagStr fl
+    -- extraDir <- if external
+    --   then do
+    --     bridgeLibDir <- getEnv "TEMPORAL_BRIDGE_LIB_DIR"
+    --     pure bridgeLibDir
+    --   else pure "rust/target/release"
+    let updateLbi lbi = lbi
+          { localPkgDescr = updatePkgDescr (localPkgDescr lbi)
+          }
+        updatePkgDescr pkgDescr = pkgDescr
+          { library = updateLib <$> library pkgDescr
+          }
+        updateLib lib = lib
+          { libBuildInfo = updateLibBi (libBuildInfo lib)
+          }
+        updateLibBi libBuild = libBuild
+          { -- extraBundledLibs = "temporal_bridge" : extraBundledLibs libBuild
+            extraLibs = "temporal_bridge" : extraLibs libBuild
+          , extraLibDirs = (dir </> buildDir lbi') : extraLibDirs libBuild
+          }
     pure $ updateLbi lbi'
 
 rsClean :: Verbosity -> IO ()
@@ -95,13 +107,8 @@ unlessFlagM name flags action
     | cabalFlag name flags = pure ()
     | otherwise = action
 
-applyUnlessM :: FlagName -> ConfigFlags -> (a -> IO a) -> a -> IO a
-applyUnlessM name flags apply a
-    | cabalFlag name flags = pure a
-    | otherwise = apply a
-
-copyLib :: ConfigFlags -> LocalBuildInfo -> FilePath -> IO ()
-copyLib fl lbi libPref = do
+copyLib :: ConfigFlags -> FilePath -> Bool -> IO ()
+copyLib fl libPref shared = do
   libraryPath <- getLibraryPath
   installExecutableFile 
     verb
@@ -110,7 +117,6 @@ copyLib fl lbi libPref = do
   where
     verb = fromFlag $ configVerbosity fl
     external = getCabalFlag externalLibFlagStr fl
-    shared = True -- getCabalFlag "sharedLibsass" fl
     ext = if shared 
       then case buildOS of
         Windows -> "dll"
@@ -123,13 +129,25 @@ copyLib fl lbi libPref = do
         pure (bridgeLibDir ++ "/libtemporal_bridge." ++ ext)
       else pure ("rust/target/release/libtemporal_bridge." ++ ext)
 
-copyTemporalBridge :: Args -> CopyFlags -> PackageDescription -> LocalBuildInfo -> IO ()
-copyTemporalBridge _ flags pkg_descr lbi =
-    let libPref = libdir . absoluteInstallDirs pkg_descr lbi
-                . fromFlag . copyDest
-                $ flags
-        config = configFlags lbi
-     in copyLib config lbi libPref
+copyTemporalBridge :: LocalBuildInfo -> FilePath -> IO ()
+copyTemporalBridge lbi fp = do
+  copyLib config fp True
+  copyLib config fp False
+  where
+    config = configFlags lbi
+
+installTemporalBridge :: Args -> CopyFlags -> PackageDescription -> LocalBuildInfo -> IO ()
+installTemporalBridge _ flags pkg_descr lbi = do
+  let 
+    libPref = 
+      libdir . 
+      absoluteInstallDirs pkg_descr lbi . 
+      fromFlag . 
+      copyDest $ flags
+    config = configFlags lbi
+
+  copyLib config libPref True
+  copyLib config libPref False
 
 getCabalFlag :: String -> ConfigFlags -> Bool
 getCabalFlag name flags = fromMaybe False (lookupFlagAssignment (mkFlagName name') allFlags)
