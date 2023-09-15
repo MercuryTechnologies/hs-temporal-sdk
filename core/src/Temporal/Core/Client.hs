@@ -7,20 +7,41 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Temporal.Core.Client 
-  ( Client
+  ( 
+  -- * Connecting to the server
+    Client
   , clientConfig
   , connectClient
+  , connectClient'
   , defaultClientConfig
   , CoreClient
   , ClientConfig(..)
   , ClientTlsConfig(..)
+  , ByteVector(..)
   , ClientRetryConfig(..)
+  -- * Making calls to the server
+  --
+  -- Generally you should not need to use 'call' directly, but instead should
+  -- use the supplied functions in 'Temporal.Core.Client.WorkflowService' and
+  -- other service modules.
+  --
+  -- For higher-level access, see the@@temporal-sdk@ package for a more
+  -- idiomatic Haskell API.
   , call
-  , PrimRpcCall
   , RpcCall(..)
+  , RpcError(..)
+  , ClientConnectionError(..)
+  -- * Primitive access
+  , CRpcCall
+  , TokioCall
+  , TokioResult
+  , PrimRpcCall
+  -- | Use the underlying Rust client pointer
   , withClient
   ) where
 
+import Control.Concurrent
+import Control.Concurrent.MVar
 import Control.Exception
 import Data.Aeson
 import Data.Aeson.TH
@@ -76,8 +97,18 @@ data ClientRetryConfig = ClientRetryConfig
   , maxElapsedTimeMillis :: Maybe Word64
   , maxRetries :: Word64
   }
+
+-- | A client connection to the Temporal server.
+--
+-- The client is thread-safe and can be shared across threads.
+--
+-- Clients are expensive to create, so you should generally create one per
+-- process and share it across your application..
+--
+-- The client doesn't have an explicit close method, but will be cleaned up
+-- when it is garbage collected.
 data Client = Client 
-  { client :: ForeignPtr CoreClient 
+  { client :: MVar CoreClient 
   , config :: ClientConfig
   }
 
@@ -85,7 +116,9 @@ clientConfig :: Client -> ClientConfig
 clientConfig = config
 
 withClient :: Client -> (Ptr CoreClient -> IO a) -> IO a
-withClient (Client c _) = withForeignPtr c
+withClient (Client cvar _) f = do
+  (CoreClient c) <- readMVar cvar
+  withForeignPtr c f
 
 newtype CoreClient = CoreClient
   { coreClientPtr :: ForeignPtr CoreClient
@@ -132,6 +165,8 @@ data RpcCall a = RpcCall
 data ClientConnectionError = ClientConnectionError Text
   deriving (Show)
 
+instance Exception ClientConnectionError
+
 defaultClientConfig :: ClientConfig
 defaultClientConfig = ClientConfig
   { targetUrl = "http://localhost:7233"
@@ -149,25 +184,60 @@ defaultClientIdentity = do
   host <- getHostName
   pure (T.pack $ show pid <> "@" <> host)
 
-connectClient :: Runtime -> ClientConfig -> IO (Either ClientConnectionError Client)
-connectClient rt conf = do
+-- | Connect to the Temporal server using the global runtime.
+--
+-- Throws 'ClientConnectionError' if the connection fails.
+connectClient :: ClientConfig -> IO Client
+connectClient = connectClient' globalRuntime
+
+-- | Connect to the Temporal server using a given runtime.
+--
+-- Usually you should use 'connectClient' instead, which uses the global runtime.
+--
+-- Throws 'ClientConnectionError' if the connection fails.
+connectClient' :: Runtime -> ClientConfig -> IO Client
+connectClient' rt conf = do
   conf' <- if identity conf == "" 
     then do
       ident <- defaultClientIdentity
       pure $ conf { identity = ident }
     else pure conf
 
-  withRuntime rt $ \rtPtr -> BS.useAsCString (BL.toStrict $ encode conf') $ \confPtr -> do
-    makeTokioAsyncCall 
-      (raw_connectClient rtPtr confPtr)
-      (\cstrLen -> do
-        msg <- fromRust (Proxy :: Proxy RustCStringLen) cstrLen
-        pure $ ClientConnectionError msg
-      )
-      (\fp -> do
-        clientPtr <- newForeignPtr raw_freeClient fp
-        pure $ Client clientPtr conf'
-      )
+  clientPtrSlot <- newEmptyMVar
+  forkIO $ do
+    withRuntime rt $ \rtPtr -> BS.useAsCString (BL.toStrict $ encode conf') $ \confPtr -> do
+      let tryConnect = makeTokioAsyncCall 
+            (raw_connectClient rtPtr confPtr)
+            (\cstrLen -> do
+              msg <- fromRust (Proxy :: Proxy RustCStringLen) cstrLen
+              pure msg
+            )
+            (\fp -> do
+              clientPtr <- newForeignPtr raw_freeClient fp
+              pure (CoreClient clientPtr)
+            )
+          go attempt = do
+            result <- tryConnect
+            case result of
+              Left err -> case retryConfig conf of
+                Nothing -> putMVar clientPtrSlot (throw $ ClientConnectionError err)
+                Just retryConf -> do
+                  let delayMillis = fromIntegral (initialIntervalMillis retryConf) * multiplier retryConf ^ attempt
+                      delayMicros = delayMillis * 1000
+                  if (fmap fromIntegral (maxElapsedTimeMillis retryConf) < Just delayMillis) || (maxRetries retryConf <= attempt)
+                    then putMVar clientPtrSlot (throw $ ClientConnectionError err)
+                    else do
+                      threadDelay $ round delayMicros
+                      go (attempt + 1)
+              Right client -> putMVar clientPtrSlot client
+      go 1
+  pure $ Client clientPtrSlot conf'
+
+reconnectClient :: Client -> IO ()
+reconnectClient (Client clientPtrSlot conf) = do
+  _ <- tryTakeMVar clientPtrSlot
+  (Client newClientPtr _ ) <- connectClient conf `catch` (\c -> putMVar clientPtrSlot (throw (c :: ClientConnectionError)) >> throwIO c)
+  mask_ (takeMVar newClientPtr >>= putMVar clientPtrSlot)
 
 type PrimRpcCall = Ptr CoreClient -> Ptr CRpcCall -> TokioCall RpcError (CArray Word8)
 

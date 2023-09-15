@@ -38,7 +38,6 @@ import Temporal.Activity
 import Temporal.Generic
 import Temporal.Payload
 import Temporal.Worker
-import Temporal.Runtime
 import Temporal.SearchAttributes
 import System.IO.Unsafe
 import System.Timeout (timeout)
@@ -46,20 +45,28 @@ import Temporal.Duration
 import Temporal.Contrib.OpenTelemetry
 import Temporal.Interceptor
 
-rt :: Runtime
-rt = unsafePerformIO initializeRuntime
-{-# NOINLINE rt #-}
+configWithRetry :: ClientConfig
+configWithRetry = defaultClientConfig 
+  { retryConfig = Just $ ClientRetryConfig
+      { initialIntervalMillis = 500
+      , randomizationFactor = 0.2
+      , multiplier = 1.5
+      , maxIntervalMillis = 10000
+      , maxRetries = 5
+      , maxElapsedTimeMillis = Just 60000
+      }
+  }
 
 withWorker :: WorkerConfig actEnv -> IO a -> IO a
 withWorker conf m = do
-  let clientConfig = defaultClientConfig
-  (Right c) <- connectClient rt clientConfig
+  let clientConfig = configWithRetry
+  c <- connectClient clientConfig
   bracket (runStdoutLoggingT $ startWorker c conf) shutdown (const m)
 
 makeClient :: Interceptors -> IO C.WorkflowClient
 makeClient Interceptors{..} = do
-  let clientConfig = defaultClientConfig
-  (Right c) <- connectClient rt clientConfig 
+  let clientConfig = configWithRetry
+  c <- connectClient clientConfig 
   C.workflowClient c (W.Namespace "test") clientInterceptors
 
 uuidText :: IO Text

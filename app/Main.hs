@@ -95,10 +95,9 @@ shootMissileAct = provideActivity JSON "shootMissiles" shootMissiles
 main :: IO ()
 main = do
   hSetBuffering stdout NoBuffering
-  rt <- initializeRuntime
   forkIO $ do
     threadDelay 1000000
-    logs <- fetchLogs rt
+    logs <- fetchLogs globalRuntime
     forM_ logs $ \log -> do
       putStrLn $ show (coreLogLevel log) <> ": " <> show (coreLogMessage log)
   -- _ephemeral <- startDevServer rt (defaultTemporalDevServerConfig { exe = ExistingPath "/opt/homebrew/bin/temporal" })

@@ -7,7 +7,6 @@ import Test.Hspec.Runner
 import Test.Hspec.Formatters
 import qualified Spec
 import Temporal.Runtime
-import IntegrationSpec (rt)
 import OpenTelemetry.Trace
 
 main :: IO ()

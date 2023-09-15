@@ -1,5 +1,6 @@
 module Temporal.Runtime
   ( Runtime
+  , globalRuntime
   , initializeRuntime
   , withRuntime
   , fetchLogs
@@ -17,7 +18,12 @@ import Foreign.StablePtr
 import Foreign.Marshal
 import Foreign.Storable
 import Temporal.Internal.FFI
+import System.IO.Unsafe
 
+-- | A handle to the Rust Tokio runtime and thread-pool.
+--
+-- You almost always should use the 'globalRuntime' value, which is initialized
+-- once for the entire process.
 newtype Runtime = Runtime { runtime :: ForeignPtr Runtime }
 
 type TryPutMVarFFI = FunPtr (Ptr CInt -> Ptr (MVar ()) -> IO ())
@@ -26,15 +32,23 @@ foreign import ccall "&hs_try_putmvar" tryPutMVarPtr :: TryPutMVarFFI
 foreign import ccall "hs_temporal_init_runtime" initRuntime :: TryPutMVarFFI -> IO (Ptr Runtime)
 foreign import ccall "&hs_temporal_free_runtime" freeRuntime :: FunPtr (Ptr Runtime -> IO ())
 
+globalRuntime :: Runtime
+globalRuntime = unsafePerformIO initializeRuntime
+{-# NOINLINE globalRuntime #-}
+
+-- | Initialize the Rust runtime and thread-pool.
 initializeRuntime :: IO Runtime
 initializeRuntime = Runtime <$> (newForeignPtr freeRuntime =<< initRuntime tryPutMVarPtr)
 
+-- | Access the underlying 'Runtime' pointer for calling out to Rust.
 withRuntime :: Runtime -> (Ptr Runtime -> IO a) -> IO a
 withRuntime (Runtime r) = withForeignPtr r
 
 foreign import ccall "hs_temporal_runtime_fetch_logs" raw_fetchLogs :: Ptr Runtime -> IO (Ptr (CArray CCoreLog))
 foreign import ccall "hs_temporal_runtime_free_logs" raw_freeLogs :: Ptr (CArray CCoreLog) -> IO ()
 
+-- | The Rust runtime exports logs to the Haskell runtime. This function fetches
+-- those logs so they can be fed through a logging framework.
 fetchLogs :: Runtime -> IO (V.Vector CoreLog)
 fetchLogs r = withRuntime r $ \p -> do
   bracket (raw_fetchLogs p) raw_freeLogs $ \clogs -> do
