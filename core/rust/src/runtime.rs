@@ -38,7 +38,7 @@ fn init_runtime(telemetry_config: TelemetryOptions, try_put_mvar: extern fn(capa
 }
 
 #[no_mangle]
-pub extern fn hs_temporal_init_runtime(try_put_mvar: extern fn(Capability, *mut MVar) -> ()) -> *mut RuntimeRef {
+pub extern "C" fn hs_temporal_init_runtime(try_put_mvar: extern fn(Capability, *mut MVar) -> ()) -> *mut RuntimeRef {
   Box::into_raw(init_runtime(
     TelemetryOptionsBuilder::default()
       .logging(Logger::Forward {

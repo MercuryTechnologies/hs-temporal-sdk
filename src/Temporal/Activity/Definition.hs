@@ -10,7 +10,7 @@ import Data.Text (Text)
 import Data.Vector (Vector)
 import Temporal.Payload
 import Temporal.Core.Client (Client)
-import Temporal.Core.Worker (Worker, getWorkerClient)
+import Temporal.Core.Worker (Worker, getWorkerClient, WorkerType(Real))
 import UnliftIO
 import Temporal.Activity.Types
 import Temporal.Workflow.Types
@@ -39,7 +39,7 @@ data ActivityDefinition env = ActivityDefinition
   }
 
 data ActivityEnv env = ActivityEnv
-  { activityWorker :: Worker
+  { activityWorker :: Worker 'Real
   , activityInfo :: ActivityInfo
   , activityClientInterceptors :: ClientInterceptors
   , activityEnv :: env
@@ -70,7 +70,7 @@ runActivity env (Activity m) = runReaderT m env
 askActivityInfo :: Activity env ActivityInfo
 askActivityInfo = Activity $ asks (.activityInfo)
 
-askActivityWorker :: Activity env Worker
+askActivityWorker :: Activity env (Worker 'Real)
 askActivityWorker = Activity $ asks (.activityWorker)
 
 -- | The Activity monad provides access to the underlying Temporal client

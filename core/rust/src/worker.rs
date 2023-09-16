@@ -154,7 +154,7 @@ pub extern "C" fn hs_temporal_drop_unit(unit: *mut CUnit) -> () {
   unsafe { drop(CUnit::from_raw_pointer_mut(unit)) }
 }
 
-pub fn new_worker(
+fn new_worker(
   client: &client::ClientRef,
   config: WorkerConfig,
 ) -> Result<WorkerRef, WorkerError> {
@@ -207,8 +207,7 @@ pub extern "C" fn hs_temporal_new_worker(client: *mut client::ClientRef, config:
   }
 }
 
-
-pub fn new_replay_worker(
+fn new_replay_worker(
   runtime_ref: &runtime::RuntimeRef,
   config: WorkerConfig,
 ) -> Result<(WorkerRef, HistoryPusher), WorkerError> {
@@ -228,6 +227,36 @@ pub fn new_replay_worker(
   };
 
   Ok((worker, history_pusher))
+}
+
+#[no_mangle]
+pub extern "C" fn hs_temporal_new_replay_worker(runtime: *mut runtime::RuntimeRef, config: *const CArray<u8>, worker_slot: *mut*mut WorkerRef, history_slot: *mut*mut HistoryPusher, error_slot: *mut*mut CWorkerError) -> () {
+  let runtime_ref = unsafe { runtime.as_ref() }.expect("client is null");
+  let config_json = unsafe { CArray::raw_borrow(config).unwrap() };
+  let config = serde_json::from_slice(&config_json.as_rust().unwrap()).map_err(|err| WorkerError {
+    code: WorkerErrorCode::InvalidWorkerConfig,
+    message: format!("{}", err),
+  });
+
+  match config {
+    Ok(config) => {
+      let result = new_replay_worker(runtime_ref, config);
+      match result {
+        Ok((worker_ref, history_pusher)) => {
+          unsafe { 
+            *worker_slot = Box::into_raw(Box::new(worker_ref));
+            *history_slot = Box::into_raw(Box::new(history_pusher));
+          }
+        },
+        Err(worker_error) => {
+          unsafe { *error_slot = CWorkerError::c_repr_of(worker_error).unwrap().into_raw_pointer_mut() };
+        }
+      }
+    },
+    Err(worker_error) => {
+      unsafe { *error_slot = CWorkerError::c_repr_of(worker_error).unwrap().into_raw_pointer_mut() };
+    }
+  }
 }
 
 impl WorkerRef {

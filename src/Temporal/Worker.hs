@@ -30,6 +30,17 @@ module Temporal.Worker
   , ToConfig(..)
   , ConfigM
   , configure
+  -- * Replay
+  --
+  -- A replay worker is a worker that is used to replay a workflow execution.
+  -- It is not used for real-world execution of workflows, but is used to
+  -- replay a workflow execution from history. This is useful for test suites,
+  -- as it allows you to ensure that changes to your workflow code do not
+  -- break determinism.
+  , startReplayWorker
+  , Core.HistoryPusher
+  , Core.pushHistory
+  , Core.closeHistory
   -- ** Worker options
   , HasWorkflowDefinition(..)
   , addWorkflow
@@ -77,6 +88,7 @@ import Data.Word
 import qualified Data.HashMap.Strict as HashMap
 
 import Temporal.Interceptor
+import Temporal.Core.Worker (InactiveForReplay)
 
 -- | A utility class to convert a value into a 'WorkerConfig' using the 'ConfigM' monad.
 --
@@ -293,11 +305,33 @@ setGracefulShutdownPeriodMillis n = modifyCore $ \conf -> conf
 -- Haskell the ability to have multiple Worker Entities in a single Worker Process. 
 --
 -- A single Worker Entity can listen to only a single Task Queue. But if a Worker Process has multiple Worker Entities, the Worker Process could be listening to multiple Task Queues.
-data Worker = Worker
-  { workerWorkflowLoop :: Async ()
-  , workerActivityLoop :: Async ()
-  , workerCore :: Core.Worker
+data Worker = forall ty. Worker
+  { workerType :: Core.SWorkerType ty 
+  , workerWorkflowLoop :: Async ()
+  , workerActivityLoop :: InactiveForReplay ty (Async ())
+  , workerCore :: Core.Worker ty
   }
+
+startReplayWorker :: (MonadLoggerIO m, MonadUnliftIO m) => WorkerConfig actEnv -> m (Temporal.Worker.Worker, Core.HistoryPusher)
+startReplayWorker conf = do
+  $(logDebug) "Starting worker"
+  (workerCore, replay) <- either throwIO pure =<< liftIO (Core.newReplayWorker conf.coreConfig)
+  $(logDebug) "Instantiated core"
+  runningWorkflows <- newTVarIO mempty
+  let workerWorkflowFunctions = conf.wfDefs
+      workerTaskQueue = TaskQueue $ Core.taskQueue conf.coreConfig
+      workerInboundInterceptors = conf.interceptorConfig.workflowInboundInterceptors
+      workerOutboundInterceptors = conf.interceptorConfig.workflowOutboundInterceptors
+      workerDeadlockTimeout = conf.deadlockTimeout
+      workerClient = error "Cannot use workflow client in replay worker"
+      workflowWorker = Workflow.WorkflowWorker{..}
+      workerActivityLoop = error "Cannot use activity worker in replay worker"
+  let workerType = Core.SReplay
+  workerWorkflowLoop <- async $ do
+    $(logDebug) "Starting workflow worker loop"
+    Workflow.execute workflowWorker
+    $(logDebug) "Exiting workflow worker loop"
+  pure (Temporal.Worker.Worker{..}, replay)
 
 startWorker :: (MonadLoggerIO m, MonadUnliftIO m) => Client -> WorkerConfig actEnv -> m Temporal.Worker.Worker
 startWorker client conf = do
@@ -322,7 +356,7 @@ startWorker client conf = do
       clientInterceptors = conf.interceptorConfig.clientInterceptors
       activityWorker = Activity.ActivityWorker{..}
       workerClient = client
-
+  let workerType = Core.SReal
   workerWorkflowLoop <- async $ do
     $(logDebug) "Starting workflow worker loop"
     Workflow.execute workflowWorker
@@ -339,21 +373,29 @@ startWorker client conf = do
 --
 -- This function is generally not needed, as 'shutdown' will wait for the worker to exit.
 waitWorker :: MonadIO m => Temporal.Worker.Worker -> m ()
-waitWorker worker = void $ do
-  link2 (workerWorkflowLoop worker) (workerActivityLoop worker)
-  _ <- waitCatch (workerWorkflowLoop worker)
-  _ <- waitCatch (workerActivityLoop worker)
-  pure ()
+waitWorker (Temporal.Worker.Worker{workerType, workerWorkflowLoop, workerActivityLoop}) = do
+  case workerType of
+    Core.SReal -> do
+      link workerWorkflowLoop
+      link workerActivityLoop
+      _ <- wait workerWorkflowLoop
+      _ <- wait workerActivityLoop
+      pure ()
+    Core.SReplay -> do
+      link workerWorkflowLoop
+      _ <- waitCatch workerWorkflowLoop
+      pure ()
+
 
 -- | Shut down a worker. This will initiate a graceful shutdown of the worker, waiting for all
 -- in-flight tasks to complete before finalizing the shutdown.
 shutdown :: MonadIO m => Temporal.Worker.Worker -> m ()
-shutdown worker = liftIO $ do
-  Core.initiateShutdown worker.workerCore
+shutdown worker@Temporal.Worker.Worker{workerCore} = liftIO $ do
+  Core.initiateShutdown workerCore
 
   waitWorker worker
 
-  err' <- Core.finalizeShutdown worker.workerCore
+  err' <- Core.finalizeShutdown workerCore
   case err' of
     Left err -> throwIO err
     Right () -> pure ()

@@ -30,12 +30,13 @@ import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_F
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import Temporal.Duration (durationFromProto)
+import Temporal.Core.Worker (InactiveForReplay)
 
-data WorkflowWorker = WorkflowWorker
+data WorkflowWorker = forall ty. WorkflowWorker
   { workerWorkflowFunctions :: HashMap Text WorkflowDefinition
   , runningWorkflows :: TVar (HashMap RunId WorkflowInstance)
-  , workerClient :: C.Client
-  , workerCore :: Core.Worker
+  , workerClient :: InactiveForReplay ty C.Client
+  , workerCore :: Core.Worker ty
   , workerInboundInterceptors :: WorkflowInboundInterceptor
   , workerOutboundInterceptors :: WorkflowOutboundInterceptor
   , workerDeadlockTimeout :: Maybe Int
@@ -44,8 +45,8 @@ data WorkflowWorker = WorkflowWorker
 
 pollWorkflowActivation :: (MonadLoggerIO m) => ReaderT WorkflowWorker m (Either Core.WorkerError Core.WorkflowActivation)
 pollWorkflowActivation = do
-  worker <- ask
-  liftIO $ Core.pollWorkflowActivation worker.workerCore
+  WorkflowWorker{workerCore} <- ask
+  liftIO $ Core.pollWorkflowActivation workerCore
 
 upsertWorkflowInstance :: (MonadLoggerIO m) => RunId -> WorkflowInstance -> ReaderT WorkflowWorker m WorkflowInstance
 upsertWorkflowInstance r inst = do
@@ -100,7 +101,7 @@ handleActivation activation = do
   $(logDebug) ("Handling activation: RunId " <> Text.pack (show (activation ^. Activation.runId)))
   forM_ (activation ^. Activation.jobs) $ \job -> do
     $(logDebug) ("Job: " <> Text.pack (show job))
-  worker <- ask
+  WorkflowWorker{workerCore} <- ask
 
   {-
   Run jobs
@@ -125,14 +126,14 @@ handleActivation activation = do
                 & Completion.runId .~ (activation ^. Activation.runId)
                 & Completion.failed .~ failureProto
           
-          liftIO (Core.completeWorkflowActivation worker.workerCore completionMessage >>= either throwIO pure)
+          liftIO (Core.completeWorkflowActivation workerCore completionMessage >>= either throwIO pure)
         Just inst -> writeChan inst.activationChannel activation
     else do
       $(logDebug) "Workflow does not need to run."
       let completionMessage = defMessage 
             & Completion.runId .~ activation ^. Activation.runId
             & Completion.successful .~ defMessage
-      liftIO (Core.completeWorkflowActivation worker.workerCore completionMessage >>= either throwIO pure)
+      liftIO (Core.completeWorkflowActivation workerCore completionMessage >>= either throwIO pure)
 
   removeEvictedWorkflowInstances
 
@@ -155,7 +156,7 @@ handleActivation activation = do
 
     createOrFetchWorkflowInstance :: ReaderT WorkflowWorker m (Maybe WorkflowInstance)
     createOrFetchWorkflowInstance = do
-      worker <- ask
+      worker@WorkflowWorker{workerCore} <- ask
       runningWorkflows_ <- atomically $ readTVar worker.runningWorkflows
       case HashMap.lookup (RunId $ activation ^. Activation.runId) runningWorkflows_ of
         Just inst -> pure $ Just inst
@@ -183,7 +184,7 @@ handleActivation activation = do
                   , cronSchedule = startWorkflow ^. Activation.cronSchedule . to nonEmptyString
                   , taskTimeout = startWorkflow ^. Activation.workflowTaskTimeout . to durationFromProto
                   , executionTimeout = fmap durationFromProto $ startWorkflow ^. Activation.maybe'workflowExecutionTimeout
-                  , namespace = Namespace $ Core.namespace $ Core.getWorkerConfig worker.workerCore
+                  , namespace = Namespace $ Core.namespace $ Core.getWorkerConfig workerCore
                   , parent = parentInfo
                   , headers = startWorkflow ^. Activation.headers . to (fmap convertFromProtoPayload)
                   , rawMemo = startWorkflow ^. Activation.memo . Message.fields . to (fmap convertFromProtoPayload)
@@ -202,7 +203,7 @@ handleActivation activation = do
                 inst <- create
                   (\wf -> do
                     putStrLn "Complete activation"
-                    Core.completeWorkflowActivation worker.workerCore wf
+                    Core.completeWorkflowActivation workerCore wf
                   )
                   f
                   worker.workerDeadlockTimeout

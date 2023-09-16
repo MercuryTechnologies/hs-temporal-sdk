@@ -2,6 +2,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE GADTs #-}
 module Temporal.Core.Worker 
   ( Worker
   , getWorkerClient
@@ -10,8 +12,12 @@ module Temporal.Core.Worker
   , defaultWorkerConfig
   , WorkerError(..)
   , WorkerErrorCode(..)
+  , WorkerType(..)
+  , SWorkerType(..)
+  , SomeWorkerType(..)
   , newWorker
-  -- , newReplayWorker
+  , newReplayWorker
+  , InactiveForReplay
   , WorkflowActivation
   , pollWorkflowActivation
   , ActivityTask
@@ -52,17 +58,33 @@ import Proto.Temporal.Sdk.Core.CoreInterface (ActivityHeartbeat, ActivityTaskCom
 import Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask (ActivityTask)
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation (WorkflowActivation)
 import Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion (WorkflowActivationCompletion)
+import Data.Void (Void)
 
-data Worker = Worker 
-  { workerPtr :: ForeignPtr Worker 
+data WorkerType = Real | Replay
+
+-- | A singleton type for 'WorkerType'.
+data SWorkerType (ty :: WorkerType) where
+  SReal :: SWorkerType 'Real
+  SReplay :: SWorkerType 'Replay
+
+-- Promote a 'WorkerType' to a singleton type.
+data SomeWorkerType where
+  SomeWorkerType :: SWorkerType ty -> SomeWorkerType
+
+type family InactiveForReplay (ty :: WorkerType) a where
+  InactiveForReplay 'Real a = a
+  InactiveForReplay 'Replay _ = Void
+
+data Worker (ty :: WorkerType) = Worker 
+  { workerPtr :: ForeignPtr (Worker ty)
   , workerConfig :: WorkerConfig
-  , workerClient :: Client
+  , workerClient :: InactiveForReplay ty Client
   }
 
-getWorkerClient :: Worker -> Client
+getWorkerClient :: Worker 'Real -> Client
 getWorkerClient = workerClient
 
-getWorkerConfig :: Worker -> WorkerConfig
+getWorkerConfig :: Worker ty -> WorkerConfig
 getWorkerConfig = workerConfig
 
 newtype HistoryPusher = HistoryPusher { historyPusher :: ForeignPtr HistoryPusher }
@@ -187,12 +209,12 @@ instance ManagedRustValue WorkerError where
   fromRust _ rustPtr =
     peekWorkerError rustPtr `finally` rust_dropWorkerError rustPtr
 
-foreign import ccall "hs_temporal_new_worker" raw_newWorker :: Ptr CoreClient -> Ptr (CArray Word8) -> Ptr (Ptr Worker) -> Ptr (Ptr WorkerError) -> IO ()
-foreign import ccall "&hs_temporal_drop_worker" workerFinalizer :: FunPtr (Ptr Worker -> IO ())
+foreign import ccall "hs_temporal_new_worker" raw_newWorker :: Ptr CoreClient -> Ptr (CArray Word8) -> Ptr (Ptr (Worker 'Real)) -> Ptr (Ptr WorkerError) -> IO ()
+foreign import ccall "&hs_temporal_drop_worker" workerFinalizer :: FunPtr (Ptr (Worker ty) -> IO ())
 
 -- note: removed the Runtime argument from the C function since the runtime can be accessed from the client. Might want to add it back later if
 -- it is some sort of load-bearing memory management thing.
-newWorker :: Client -> WorkerConfig -> IO (Either WorkerError Worker)
+newWorker :: Client -> WorkerConfig -> IO (Either WorkerError (Worker 'Real))
 newWorker c wc = withClient c $ \cPtr -> do
   withCArrayBS (BL.toStrict $ encode wc) $ \wcPtr -> do
     alloca $ \wPtrPtr -> do
@@ -208,11 +230,13 @@ newWorker c wc = withClient c $ \cPtr -> do
             err <- peekWorkerError errPtr
             pure $ Left err
 
-{-
-foreign import ccall "hs_temporal_new_replay_worker" raw_newReplayWorker :: Ptr Runtime -> Ptr (CArray Word8) -> Ptr (Ptr Worker) -> Ptr (Ptr HistoryPusher) -> Ptr (Ptr WorkerError) -> IO ()
+foreign import ccall "hs_temporal_new_replay_worker" raw_newReplayWorker :: Ptr Runtime -> Ptr (CArray Word8) -> Ptr (Ptr (Worker 'Replay)) -> Ptr (Ptr HistoryPusher) -> Ptr (Ptr WorkerError) -> IO ()
 
-newReplayWorker :: Runtime -> WorkerConfig -> IO (Either WorkerError (Worker, HistoryPusher))
-newReplayWorker r conf = withRuntime r $ \rPtr -> do
+newReplayWorker :: WorkerConfig -> IO (Either WorkerError (Worker 'Replay, HistoryPusher))
+newReplayWorker = newReplayWorker' globalRuntime
+
+newReplayWorker' :: Runtime -> WorkerConfig -> IO (Either WorkerError (Worker 'Replay, HistoryPusher))
+newReplayWorker' r conf = withRuntime r $ \rPtr -> do
   alloca $ \wPtrPtr -> do
     alloca $ \hpPtrPtr -> do
       withCArrayBS (BL.toStrict $ encode conf) $ \confPtr -> do
@@ -225,46 +249,45 @@ newReplayWorker r conf = withRuntime r $ \rPtr -> do
               hpPtr <- peek hpPtrPtr
               w <- newForeignPtr workerFinalizer wPtr
               hp <- newForeignPtr historyPusherFinalizer hpPtr
-              pure $ Right (Worker w, HistoryPusher hp)
+              pure $ Right (Worker w conf (error "Void"), HistoryPusher hp)
             else do
               err <- peekWorkerError errPtr
               pure $ Left err
--}
 
-foreign import ccall "hs_temporal_worker_poll_workflow_activation" raw_pollWorkflowActivation :: Ptr Worker -> TokioCall WorkerError (CArray Word8)
-pollWorkflowActivation :: Worker -> IO (Either WorkerError WorkflowActivation)
+foreign import ccall "hs_temporal_worker_poll_workflow_activation" raw_pollWorkflowActivation :: Ptr (Worker ty) -> TokioCall WorkerError (CArray Word8)
+pollWorkflowActivation :: Worker ty -> IO (Either WorkerError WorkflowActivation)
 pollWorkflowActivation (Worker w _ _) = do
   withForeignPtr w $ \wPtr -> do
     makeTokioAsyncCall (raw_pollWorkflowActivation wPtr)
       (fromRust (Proxy @WorkerError))
       (fmap decodeMessageOrDie . fromRust (Proxy @(CArray Word8)))
 
-foreign import ccall "hs_temporal_worker_poll_activity_task" raw_pollActivityTask :: Ptr Worker -> TokioCall WorkerError (CArray Word8)
-pollActivityTask :: Worker -> IO (Either WorkerError ActivityTask)
+foreign import ccall "hs_temporal_worker_poll_activity_task" raw_pollActivityTask :: Ptr (Worker ty) -> TokioCall WorkerError (CArray Word8)
+pollActivityTask :: Worker ty -> IO (Either WorkerError ActivityTask)
 pollActivityTask (Worker w _ _) = do
   withForeignPtr w $ \wPtr -> do
     makeTokioAsyncCall (raw_pollActivityTask wPtr)
       (fromRust (Proxy @WorkerError))
       (fmap decodeMessageOrDie . fromRust (Proxy @(CArray Word8)))
 
-foreign import ccall "hs_temporal_worker_complete_workflow_activation" raw_completeWorkflowActivation :: Ptr Worker -> Ptr (CArray Word8) -> TokioCall WorkerError ()
-completeWorkflowActivation :: Worker -> WorkflowActivationCompletion -> IO (Either WorkerError ())
+foreign import ccall "hs_temporal_worker_complete_workflow_activation" raw_completeWorkflowActivation :: Ptr (Worker ty) -> Ptr (CArray Word8) -> TokioCall WorkerError ()
+completeWorkflowActivation :: Worker ty -> WorkflowActivationCompletion -> IO (Either WorkerError ())
 completeWorkflowActivation (Worker w _ _) p = withForeignPtr w $ \wPtr -> do
   withCArrayBS (encodeMessage p) $ \pPtr -> do
     makeTokioAsyncCall (raw_completeWorkflowActivation wPtr pPtr)
       (fromRust (Proxy @WorkerError))
       (fromRust (Proxy @()))
 
-foreign import ccall "hs_temporal_worker_complete_activity_task" raw_completeActivityTask :: Ptr Worker -> Ptr (CArray Word8) -> TokioCall WorkerError ()
-completeActivityTask :: Worker -> ActivityTaskCompletion -> IO (Either WorkerError ())
+foreign import ccall "hs_temporal_worker_complete_activity_task" raw_completeActivityTask :: Ptr (Worker ty) -> Ptr (CArray Word8) -> TokioCall WorkerError ()
+completeActivityTask :: Worker ty -> ActivityTaskCompletion -> IO (Either WorkerError ())
 completeActivityTask (Worker w _ _) p = withForeignPtr w $ \wPtr -> do
   withCArrayBS (encodeMessage p) $ \pPtr -> do
     makeTokioAsyncCall (raw_completeActivityTask wPtr pPtr)
       (fromRust (Proxy @WorkerError))
       (fromRust (Proxy @()))
 
-foreign import ccall "hs_temporal_worker_record_activity_heartbeat" raw_recordActivityHeartbeat :: Ptr Worker -> Ptr (CArray Word8) -> Ptr (Ptr WorkerError) -> Ptr (Ptr ()) -> IO ()
-recordActivityHeartbeat :: Worker -> ActivityHeartbeat -> IO (Either WorkerError ())
+foreign import ccall "hs_temporal_worker_record_activity_heartbeat" raw_recordActivityHeartbeat :: Ptr (Worker ty) -> Ptr (CArray Word8) -> Ptr (Ptr WorkerError) -> Ptr (Ptr ()) -> IO ()
+recordActivityHeartbeat :: Worker ty -> ActivityHeartbeat -> IO (Either WorkerError ())
 recordActivityHeartbeat (Worker w _ _) p = withForeignPtr w $ \wPtr -> do
   withCArrayBS (encodeMessage p) $ \pPtr -> do
     alloca $ \errPtrPtr -> do
@@ -275,20 +298,20 @@ recordActivityHeartbeat (Worker w _ _) p = withForeignPtr w $ \wPtr -> do
           then pure $ Right ()
           else Left <$> fromRust (Proxy @WorkerError) errPtr
 
-foreign import ccall "hs_temporal_worker_request_workflow_eviction" raw_requestWorkflowEviction :: Ptr Worker -> Ptr (CArray Word8) -> IO ()
-requestWorkflowEviction :: Worker -> RunId -> IO ()
+foreign import ccall "hs_temporal_worker_request_workflow_eviction" raw_requestWorkflowEviction :: Ptr (Worker ty) -> Ptr (CArray Word8) -> IO ()
+requestWorkflowEviction :: Worker ty -> RunId -> IO ()
 requestWorkflowEviction (Worker w _ _) r = withForeignPtr w $ \wPtr -> do
   withCArrayBS r $ \rPtr -> do
     raw_requestWorkflowEviction wPtr rPtr
 
-foreign import ccall "hs_temporal_worker_initiate_shutdown" raw_initiateShutdown :: Ptr Worker -> IO ()
+foreign import ccall "hs_temporal_worker_initiate_shutdown" raw_initiateShutdown :: Ptr (Worker ty) -> IO ()
 {- | Initiate shutdown.
 -}
-initiateShutdown :: Worker -> IO ()
+initiateShutdown :: Worker ty -> IO ()
 initiateShutdown (Worker w _ _) = withForeignPtr w $ \wPtr -> do
   raw_initiateShutdown wPtr
 
-foreign import ccall "hs_temporal_worker_finalize_shutdown" raw_finalizeShutdown :: Ptr Worker -> TokioCall WorkerError ()
+foreign import ccall "hs_temporal_worker_finalize_shutdown" raw_finalizeShutdown :: Ptr (Worker ty) -> TokioCall WorkerError ()
 {- |
 Completes shutdown and frees all resources. You should avoid simply dropping workers, as
 this does not allow async tasks to report any panics that may have occurred cleanly.
@@ -296,7 +319,7 @@ this does not allow async tasks to report any panics that may have occurred clea
 This should be called only after 'raw_shutdown' has resolved and/or both polling
 functions have returned `ShutDown` errors.
 -}
-finalizeShutdown :: Worker -> IO (Either WorkerError ())
+finalizeShutdown :: Worker ty -> IO (Either WorkerError ())
 finalizeShutdown (Worker w _ _) = withForeignPtr w $ \wPtr -> do
   makeTokioAsyncCall (raw_finalizeShutdown wPtr)
     (fromRust (Proxy @WorkerError))

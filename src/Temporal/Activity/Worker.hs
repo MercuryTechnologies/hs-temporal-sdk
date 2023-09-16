@@ -30,14 +30,13 @@ import Data.HashMap.Strict (HashMap)
 import Data.Text (Text)
 import Temporal.Interceptor
 import Temporal.Activity.Types
-import Temporal.Client.Types
 
 data ActivityWorker env = ActivityWorker
   { initialEnv :: env
   , logger :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
   , definitions :: HashMap Text (ActivityDefinition env)
   , runningActivities :: TVar (HashMap TaskToken (Async ()))
-  , workerCore :: Core.Worker
+  , workerCore :: Core.Worker 'Core.Real
   , activityInboundInterceptors :: ActivityInboundInterceptor
   , activityOutboundInterceptors :: ActivityOutboundInterceptor
   , clientInterceptors :: ClientInterceptors
