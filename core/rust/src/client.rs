@@ -58,12 +58,14 @@ fn client_config_to_options(client_config: ClientConfig) -> Result<ClientOptions
       let tls_config = TlsConfig {
         server_root_ca_cert: tls_config.server_root_ca_cert,
         domain: tls_config.domain,
-        client_tls_config: None 
-        // TODO!
-        // ClientTlsConfig {
-        //   client_cert: tls_config.client_cert,
-        //   client_private_key: tls_config.client_private_key,
-        // }
+        client_tls_config: match (tls_config.client_cert, tls_config.client_private_key) {
+          (Some(client_cert), Some(client_private_key)) => {
+            Some(temporal_client::ClientTlsConfig {
+              client_cert, client_private_key
+            })
+          }
+          _ => None,
+        },
       };
       options_builder = options_builder.tls_cfg(tls_config);
     }
