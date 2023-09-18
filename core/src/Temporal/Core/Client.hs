@@ -84,10 +84,10 @@ data ClientConfig = ClientConfig
   }
 
 data ClientTlsConfig = ClientTlsConfig
-  { serverRootCaCert:: Maybe ByteVector
-  , domain:: Maybe Text
-  , clientCert:: Maybe ByteVector
-  , clientPrivateKey:: Maybe ByteVector
+  { serverRootCaCert :: Maybe ByteVector
+  , domain :: Maybe Text
+  , clientCert :: Maybe ByteVector
+  , clientPrivateKey :: Maybe ByteVector
   }
 data ClientRetryConfig = ClientRetryConfig
   { initialIntervalMillis :: Word64

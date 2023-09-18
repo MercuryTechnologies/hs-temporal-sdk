@@ -92,7 +92,7 @@ rsAddLibraryInfo fl lbi' = do
         updateLibBi libBuild = libBuild
           { -- extraBundledLibs = "temporal_bridge" : extraBundledLibs libBuild
             extraLibs = "temporal_bridge" : extraLibs libBuild
-          , extraLibDirs = (dir </> buildDir lbi') : extraLibDirs libBuild
+          -- , extraLibDirs = (dir </> buildDir lbi') : extraLibDirs libBuild
           }
     pure $ updateLbi lbi'
 
