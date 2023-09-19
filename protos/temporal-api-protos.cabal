@@ -38,6 +38,10 @@ library
     Proto.Temporal.Api.Schedule.V1.Message
     Proto.Temporal.Api.Update.V1.Message_Fields
     Proto.Temporal.Api.Update.V1.Message
+    Proto.Temporal.Api.Testservice.V1.RequestResponse
+    Proto.Temporal.Api.Testservice.V1.RequestResponse_Fields
+    Proto.Temporal.Api.Testservice.V1.Service_Fields
+    Proto.Temporal.Api.Testservice.V1.Service
     Proto.Temporal.Api.Workflowservice.V1.RequestResponse
     Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields
     Proto.Temporal.Api.Workflowservice.V1.Service_Fields

@@ -35,6 +35,7 @@ library
     import:           warnings
     exposed-modules: 
       Temporal.Core.Client.WorkflowService,
+      Temporal.Core.Client.TestService,
       Temporal.Core.Client,
       Temporal.Core.EphemeralServer,
       Temporal.Core.Worker,
