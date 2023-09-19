@@ -8,7 +8,8 @@ module Proto.Temporal.Api.Errordetails.V1.Message (
         ClientVersionNotSupportedFailure(),
         NamespaceAlreadyExistsFailure(), NamespaceInvalidStateFailure(),
         NamespaceNotActiveFailure(), NamespaceNotFoundFailure(),
-        NotFoundFailure(), PermissionDeniedFailure(), QueryFailedFailure(),
+        NewerBuildExistsFailure(), NotFoundFailure(),
+        PermissionDeniedFailure(), QueryFailedFailure(),
         ResourceExhaustedFailure(), ServerVersionNotSupportedFailure(),
         SystemWorkflowFailure(), WorkflowExecutionAlreadyStartedFailure(),
         WorkflowNotReadyFailure()
@@ -1056,6 +1057,132 @@ instance Control.DeepSeq.NFData NamespaceNotFoundFailure where
              (_NamespaceNotFoundFailure'_unknownFields x__)
              (Control.DeepSeq.deepseq
                 (_NamespaceNotFoundFailure'namespace x__) ())
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Errordetails.V1.Message_Fields.defaultBuildId' @:: Lens' NewerBuildExistsFailure Data.Text.Text@ -}
+data NewerBuildExistsFailure
+  = NewerBuildExistsFailure'_constructor {_NewerBuildExistsFailure'defaultBuildId :: !Data.Text.Text,
+                                          _NewerBuildExistsFailure'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show NewerBuildExistsFailure where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField NewerBuildExistsFailure "defaultBuildId" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _NewerBuildExistsFailure'defaultBuildId
+           (\ x__ y__ -> x__ {_NewerBuildExistsFailure'defaultBuildId = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message NewerBuildExistsFailure where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.errordetails.v1.NewerBuildExistsFailure"
+  packedMessageDescriptor _
+    = "\n\
+      \\ETBNewerBuildExistsFailure\DC2(\n\
+      \\DLEdefault_build_id\CAN\SOH \SOH(\tR\SOdefaultBuildId"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        defaultBuildId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "default_build_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"defaultBuildId")) ::
+              Data.ProtoLens.FieldDescriptor NewerBuildExistsFailure
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, defaultBuildId__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _NewerBuildExistsFailure'_unknownFields
+        (\ x__ y__ -> x__ {_NewerBuildExistsFailure'_unknownFields = y__})
+  defMessage
+    = NewerBuildExistsFailure'_constructor
+        {_NewerBuildExistsFailure'defaultBuildId = Data.ProtoLens.fieldDefault,
+         _NewerBuildExistsFailure'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          NewerBuildExistsFailure
+          -> Data.ProtoLens.Encoding.Bytes.Parser NewerBuildExistsFailure
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                       Data.ProtoLens.Encoding.Bytes.getBytes
+                                                         (Prelude.fromIntegral len)
+                                           Data.ProtoLens.Encoding.Bytes.runEither
+                                             (case Data.Text.Encoding.decodeUtf8' value of
+                                                (Prelude.Left err)
+                                                  -> Prelude.Left (Prelude.show err)
+                                                (Prelude.Right r) -> Prelude.Right r))
+                                       "default_build_id"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"defaultBuildId") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "NewerBuildExistsFailure"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view
+                      (Data.ProtoLens.Field.field @"defaultBuildId") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData NewerBuildExistsFailure where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_NewerBuildExistsFailure'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_NewerBuildExistsFailure'defaultBuildId x__) ())
 {- | Fields :
      
          * 'Proto.Temporal.Api.Errordetails.V1.Message_Fields.currentCluster' @:: Lens' NotFoundFailure Data.Text.Text@
@@ -2195,9 +2322,11 @@ packedFileDescriptor
     \\NAKSystemWorkflowFailure\DC2X\n\
     \\DC2workflow_execution\CAN\SOH \SOH(\v2).temporal.api.common.v1.WorkflowExecutionR\DC1workflowExecution\DC2%\n\
     \\SOworkflow_error\CAN\STX \SOH(\tR\rworkflowError\"\EM\n\
-    \\ETBWorkflowNotReadyFailureB\167\SOH\n\
-    \\USio.temporal.api.errordetails.v1B\fMessageProtoP\SOHZ/go.temporal.io/api/errordetails/v1;errordetails\170\STX\RSTemporalio.Api.ErrorDetails.V1\234\STX!Temporalio::Api::ErrorDetails::V1J\223\ESC\n\
-    \\ACK\DC2\EOT\SYN\NULk\SOH\n\
+    \\ETBWorkflowNotReadyFailure\"C\n\
+    \\ETBNewerBuildExistsFailure\DC2(\n\
+    \\DLEdefault_build_id\CAN\SOH \SOH(\tR\SOdefaultBuildIdB\167\SOH\n\
+    \\USio.temporal.api.errordetails.v1B\fMessageProtoP\SOHZ/go.temporal.io/api/errordetails/v1;errordetails\170\STX\RSTemporalio.Api.ErrorDetails.V1\234\STX!Temporalio::Api::ErrorDetails::V1J\242\FS\n\
+    \\ACK\DC2\EOT\SYN\NULp\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -2529,4 +2658,20 @@ packedFileDescriptor
     \\STX\EOT\r\DC2\EOTj\NULk\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\r\SOH\DC2\ETXj\b\USb\ACKproto3"
+    \\ETX\EOT\r\SOH\DC2\ETXj\b\US\n\
+    \\n\
+    \\n\
+    \\STX\EOT\SO\DC2\EOTm\NULp\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\SO\SOH\DC2\ETXm\b\US\n\
+    \O\n\
+    \\EOT\EOT\SO\STX\NUL\DC2\ETXo\EOT \SUBB The current default compatible build ID which will receive tasks\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\SO\STX\NUL\ENQ\DC2\ETXo\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\ETXo\v\ESC\n\
+    \\f\n\
+    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\ETXo\RS\USb\ACKproto3"

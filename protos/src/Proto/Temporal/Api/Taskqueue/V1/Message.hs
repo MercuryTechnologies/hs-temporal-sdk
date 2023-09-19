@@ -4,9 +4,10 @@
 {-# OPTIONS_GHC -Wno-duplicate-exports#-}
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
 module Proto.Temporal.Api.Taskqueue.V1.Message (
-        CompatibleVersionSet(), PollerInfo(), StickyExecutionAttributes(),
-        TaskIdBlock(), TaskQueue(), TaskQueueMetadata(),
-        TaskQueuePartitionMetadata(), TaskQueueStatus()
+        BuildIdReachability(), CompatibleVersionSet(), PollerInfo(),
+        StickyExecutionAttributes(), TaskIdBlock(), TaskQueue(),
+        TaskQueueMetadata(), TaskQueuePartitionMetadata(),
+        TaskQueueReachability(), TaskQueueStatus()
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -41,12 +42,203 @@ import qualified Proto.Temporal.Api.Common.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.TaskQueue
 {- | Fields :
      
-         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.versionSetId' @:: Lens' CompatibleVersionSet Data.Text.Text@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.buildId' @:: Lens' BuildIdReachability Data.Text.Text@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.taskQueueReachability' @:: Lens' BuildIdReachability [TaskQueueReachability]@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.vec'taskQueueReachability' @:: Lens' BuildIdReachability (Data.Vector.Vector TaskQueueReachability)@ -}
+data BuildIdReachability
+  = BuildIdReachability'_constructor {_BuildIdReachability'buildId :: !Data.Text.Text,
+                                      _BuildIdReachability'taskQueueReachability :: !(Data.Vector.Vector TaskQueueReachability),
+                                      _BuildIdReachability'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show BuildIdReachability where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField BuildIdReachability "buildId" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _BuildIdReachability'buildId
+           (\ x__ y__ -> x__ {_BuildIdReachability'buildId = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField BuildIdReachability "taskQueueReachability" [TaskQueueReachability] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _BuildIdReachability'taskQueueReachability
+           (\ x__ y__
+              -> x__ {_BuildIdReachability'taskQueueReachability = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField BuildIdReachability "vec'taskQueueReachability" (Data.Vector.Vector TaskQueueReachability) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _BuildIdReachability'taskQueueReachability
+           (\ x__ y__
+              -> x__ {_BuildIdReachability'taskQueueReachability = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message BuildIdReachability where
+  messageName _
+    = Data.Text.pack "temporal.api.taskqueue.v1.BuildIdReachability"
+  packedMessageDescriptor _
+    = "\n\
+      \\DC3BuildIdReachability\DC2\EM\n\
+      \\bbuild_id\CAN\SOH \SOH(\tR\abuildId\DC2h\n\
+      \\ETBtask_queue_reachability\CAN\STX \ETX(\v20.temporal.api.taskqueue.v1.TaskQueueReachabilityR\NAKtaskQueueReachability"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        buildId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "build_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"buildId")) ::
+              Data.ProtoLens.FieldDescriptor BuildIdReachability
+        taskQueueReachability__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "task_queue_reachability"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor TaskQueueReachability)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked
+                 (Data.ProtoLens.Field.field @"taskQueueReachability")) ::
+              Data.ProtoLens.FieldDescriptor BuildIdReachability
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, buildId__field_descriptor),
+           (Data.ProtoLens.Tag 2, taskQueueReachability__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _BuildIdReachability'_unknownFields
+        (\ x__ y__ -> x__ {_BuildIdReachability'_unknownFields = y__})
+  defMessage
+    = BuildIdReachability'_constructor
+        {_BuildIdReachability'buildId = Data.ProtoLens.fieldDefault,
+         _BuildIdReachability'taskQueueReachability = Data.Vector.Generic.empty,
+         _BuildIdReachability'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          BuildIdReachability
+          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld TaskQueueReachability
+             -> Data.ProtoLens.Encoding.Bytes.Parser BuildIdReachability
+        loop x mutable'taskQueueReachability
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do frozen'taskQueueReachability <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                                        (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                                           mutable'taskQueueReachability)
+                      (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
+                           (Lens.Family2.set
+                              (Data.ProtoLens.Field.field @"vec'taskQueueReachability")
+                              frozen'taskQueueReachability x))
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                       Data.ProtoLens.Encoding.Bytes.getBytes
+                                                         (Prelude.fromIntegral len)
+                                           Data.ProtoLens.Encoding.Bytes.runEither
+                                             (case Data.Text.Encoding.decodeUtf8' value of
+                                                (Prelude.Left err)
+                                                  -> Prelude.Left (Prelude.show err)
+                                                (Prelude.Right r) -> Prelude.Right r))
+                                       "build_id"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"buildId") y x)
+                                  mutable'taskQueueReachability
+                        18
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "task_queue_reachability"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append
+                                          mutable'taskQueueReachability y)
+                                loop x v
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+                                  mutable'taskQueueReachability
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do mutable'taskQueueReachability <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                                 Data.ProtoLens.Encoding.Growing.new
+              loop Data.ProtoLens.defMessage mutable'taskQueueReachability)
+          "BuildIdReachability"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"buildId") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             ((Data.Monoid.<>)
+                (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                   (\ _v
+                      -> (Data.Monoid.<>)
+                           (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                           ((Prelude..)
+                              (\ bs
+                                 -> (Data.Monoid.<>)
+                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                              Data.ProtoLens.encodeMessage _v))
+                   (Lens.Family2.view
+                      (Data.ProtoLens.Field.field @"vec'taskQueueReachability") _x))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData BuildIdReachability where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_BuildIdReachability'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_BuildIdReachability'buildId x__)
+                (Control.DeepSeq.deepseq
+                   (_BuildIdReachability'taskQueueReachability x__) ()))
+{- | Fields :
+     
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.buildIds' @:: Lens' CompatibleVersionSet [Data.Text.Text]@
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.vec'buildIds' @:: Lens' CompatibleVersionSet (Data.Vector.Vector Data.Text.Text)@ -}
 data CompatibleVersionSet
-  = CompatibleVersionSet'_constructor {_CompatibleVersionSet'versionSetId :: !Data.Text.Text,
-                                       _CompatibleVersionSet'buildIds :: !(Data.Vector.Vector Data.Text.Text),
+  = CompatibleVersionSet'_constructor {_CompatibleVersionSet'buildIds :: !(Data.Vector.Vector Data.Text.Text),
                                        _CompatibleVersionSet'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show CompatibleVersionSet where
@@ -55,13 +247,6 @@ instance Prelude.Show CompatibleVersionSet where
         '{'
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField CompatibleVersionSet "versionSetId" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _CompatibleVersionSet'versionSetId
-           (\ x__ y__ -> x__ {_CompatibleVersionSet'versionSetId = y__}))
-        Prelude.id
 instance Data.ProtoLens.Field.HasField CompatibleVersionSet "buildIds" [Data.Text.Text] where
   fieldOf _
     = (Prelude..)
@@ -83,21 +268,11 @@ instance Data.ProtoLens.Message CompatibleVersionSet where
     = Data.Text.pack "temporal.api.taskqueue.v1.CompatibleVersionSet"
   packedMessageDescriptor _
     = "\n\
-      \\DC4CompatibleVersionSet\DC2$\n\
-      \\SOversion_set_id\CAN\SOH \SOH(\tR\fversionSetId\DC2\ESC\n\
-      \\tbuild_ids\CAN\STX \ETX(\tR\bbuildIds"
+      \\DC4CompatibleVersionSet\DC2\ESC\n\
+      \\tbuild_ids\CAN\SOH \ETX(\tR\bbuildIds"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
-        versionSetId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "version_set_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"versionSetId")) ::
-              Data.ProtoLens.FieldDescriptor CompatibleVersionSet
         buildIds__field_descriptor
           = Data.ProtoLens.FieldDescriptor
               "build_ids"
@@ -109,16 +284,14 @@ instance Data.ProtoLens.Message CompatibleVersionSet where
               Data.ProtoLens.FieldDescriptor CompatibleVersionSet
       in
         Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, versionSetId__field_descriptor),
-           (Data.ProtoLens.Tag 2, buildIds__field_descriptor)]
+          [(Data.ProtoLens.Tag 1, buildIds__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _CompatibleVersionSet'_unknownFields
         (\ x__ y__ -> x__ {_CompatibleVersionSet'_unknownFields = y__})
   defMessage
     = CompatibleVersionSet'_constructor
-        {_CompatibleVersionSet'versionSetId = Data.ProtoLens.fieldDefault,
-         _CompatibleVersionSet'buildIds = Data.Vector.Generic.empty,
+        {_CompatibleVersionSet'buildIds = Data.Vector.Generic.empty,
          _CompatibleVersionSet'_unknownFields = []}
   parseMessage
     = let
@@ -150,21 +323,6 @@ instance Data.ProtoLens.Message CompatibleVersionSet where
                    do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
                       case tag of
                         10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
-                                       "version_set_id"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"versionSetId") y x)
-                                  mutable'buildIds
-                        18
                           -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                         (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
                                                         Data.ProtoLens.Encoding.Bytes.getBytes
@@ -194,46 +352,27 @@ instance Data.ProtoLens.Message CompatibleVersionSet where
   buildMessage
     = \ _x
         -> (Data.Monoid.<>)
-             (let
-                _v
-                  = Lens.Family2.view (Data.ProtoLens.Field.field @"versionSetId") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                   (\ _v
-                      -> (Data.Monoid.<>)
-                           (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                           ((Prelude..)
-                              (\ bs
-                                 -> (Data.Monoid.<>)
-                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                              Data.Text.Encoding.encodeUtf8 _v))
-                   (Lens.Family2.view
-                      (Data.ProtoLens.Field.field @"vec'buildIds") _x))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+             (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                (\ _v
+                   -> (Data.Monoid.<>)
+                        (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                        ((Prelude..)
+                           (\ bs
+                              -> (Data.Monoid.<>)
+                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                           Data.Text.Encoding.encodeUtf8 _v))
+                (Lens.Family2.view
+                   (Data.ProtoLens.Field.field @"vec'buildIds") _x))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
 instance Control.DeepSeq.NFData CompatibleVersionSet where
   rnf
     = \ x__
         -> Control.DeepSeq.deepseq
              (_CompatibleVersionSet'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_CompatibleVersionSet'versionSetId x__)
-                (Control.DeepSeq.deepseq (_CompatibleVersionSet'buildIds x__) ()))
+             (Control.DeepSeq.deepseq (_CompatibleVersionSet'buildIds x__) ())
 {- | Fields :
      
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.lastAccessTime' @:: Lens' PollerInfo Proto.Google.Protobuf.Timestamp.Timestamp@
@@ -848,10 +987,12 @@ instance Control.DeepSeq.NFData TaskIdBlock where
 {- | Fields :
      
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.name' @:: Lens' TaskQueue Data.Text.Text@
-         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.kind' @:: Lens' TaskQueue Proto.Temporal.Api.Enums.V1.TaskQueue.TaskQueueKind@ -}
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.kind' @:: Lens' TaskQueue Proto.Temporal.Api.Enums.V1.TaskQueue.TaskQueueKind@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.normalName' @:: Lens' TaskQueue Data.Text.Text@ -}
 data TaskQueue
   = TaskQueue'_constructor {_TaskQueue'name :: !Data.Text.Text,
                             _TaskQueue'kind :: !Proto.Temporal.Api.Enums.V1.TaskQueue.TaskQueueKind,
+                            _TaskQueue'normalName :: !Data.Text.Text,
                             _TaskQueue'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show TaskQueue where
@@ -872,6 +1013,13 @@ instance Data.ProtoLens.Field.HasField TaskQueue "kind" Proto.Temporal.Api.Enums
         (Lens.Family2.Unchecked.lens
            _TaskQueue'kind (\ x__ y__ -> x__ {_TaskQueue'kind = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField TaskQueue "normalName" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueue'normalName
+           (\ x__ y__ -> x__ {_TaskQueue'normalName = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message TaskQueue where
   messageName _
     = Data.Text.pack "temporal.api.taskqueue.v1.TaskQueue"
@@ -879,7 +1027,9 @@ instance Data.ProtoLens.Message TaskQueue where
     = "\n\
       \\tTaskQueue\DC2\DC2\n\
       \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC28\n\
-      \\EOTkind\CAN\STX \SOH(\SO2$.temporal.api.enums.v1.TaskQueueKindR\EOTkind"
+      \\EOTkind\CAN\STX \SOH(\SO2$.temporal.api.enums.v1.TaskQueueKindR\EOTkind\DC2\US\n\
+      \\vnormal_name\CAN\ETX \SOH(\tR\n\
+      \normalName"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -899,10 +1049,20 @@ instance Data.ProtoLens.Message TaskQueue where
               (Data.ProtoLens.PlainField
                  Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"kind")) ::
               Data.ProtoLens.FieldDescriptor TaskQueue
+        normalName__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "normal_name"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"normalName")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueue
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, name__field_descriptor),
-           (Data.ProtoLens.Tag 2, kind__field_descriptor)]
+           (Data.ProtoLens.Tag 2, kind__field_descriptor),
+           (Data.ProtoLens.Tag 3, normalName__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _TaskQueue'_unknownFields
@@ -911,6 +1071,7 @@ instance Data.ProtoLens.Message TaskQueue where
     = TaskQueue'_constructor
         {_TaskQueue'name = Data.ProtoLens.fieldDefault,
          _TaskQueue'kind = Data.ProtoLens.fieldDefault,
+         _TaskQueue'normalName = Data.ProtoLens.fieldDefault,
          _TaskQueue'_unknownFields = []}
   parseMessage
     = let
@@ -954,6 +1115,19 @@ instance Data.ProtoLens.Message TaskQueue where
                                              Data.ProtoLens.Encoding.Bytes.getVarInt))
                                        "kind"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"kind") y x)
+                        26
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                       Data.ProtoLens.Encoding.Bytes.getBytes
+                                                         (Prelude.fromIntegral len)
+                                           Data.ProtoLens.Encoding.Bytes.runEither
+                                             (case Data.Text.Encoding.decodeUtf8' value of
+                                                (Prelude.Left err)
+                                                  -> Prelude.Left (Prelude.show err)
+                                                (Prelude.Right r) -> Prelude.Right r))
+                                       "normal_name"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"normalName") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -992,8 +1166,25 @@ instance Data.ProtoLens.Message TaskQueue where
                             ((Prelude..)
                                Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
                             Prelude.fromEnum _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+                ((Data.Monoid.<>)
+                   (let
+                      _v
+                        = Lens.Family2.view (Data.ProtoLens.Field.field @"normalName") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                            ((Prelude..)
+                               (\ bs
+                                  -> (Data.Monoid.<>)
+                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                               Data.Text.Encoding.encodeUtf8 _v))
+                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
 instance Control.DeepSeq.NFData TaskQueue where
   rnf
     = \ x__
@@ -1001,7 +1192,9 @@ instance Control.DeepSeq.NFData TaskQueue where
              (_TaskQueue'_unknownFields x__)
              (Control.DeepSeq.deepseq
                 (_TaskQueue'name x__)
-                (Control.DeepSeq.deepseq (_TaskQueue'kind x__) ()))
+                (Control.DeepSeq.deepseq
+                   (_TaskQueue'kind x__)
+                   (Control.DeepSeq.deepseq (_TaskQueue'normalName x__) ())))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maxTasksPerSecond' @:: Lens' TaskQueueMetadata Proto.Google.Protobuf.Wrappers.DoubleValue@
@@ -1306,6 +1499,233 @@ instance Control.DeepSeq.NFData TaskQueuePartitionMetadata where
                    (_TaskQueuePartitionMetadata'ownerHostName x__) ()))
 {- | Fields :
      
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.taskQueue' @:: Lens' TaskQueueReachability Data.Text.Text@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.reachability' @:: Lens' TaskQueueReachability [Proto.Temporal.Api.Enums.V1.TaskQueue.TaskReachability]@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.vec'reachability' @:: Lens' TaskQueueReachability (Data.Vector.Vector Proto.Temporal.Api.Enums.V1.TaskQueue.TaskReachability)@ -}
+data TaskQueueReachability
+  = TaskQueueReachability'_constructor {_TaskQueueReachability'taskQueue :: !Data.Text.Text,
+                                        _TaskQueueReachability'reachability :: !(Data.Vector.Vector Proto.Temporal.Api.Enums.V1.TaskQueue.TaskReachability),
+                                        _TaskQueueReachability'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show TaskQueueReachability where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField TaskQueueReachability "taskQueue" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueReachability'taskQueue
+           (\ x__ y__ -> x__ {_TaskQueueReachability'taskQueue = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField TaskQueueReachability "reachability" [Proto.Temporal.Api.Enums.V1.TaskQueue.TaskReachability] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueReachability'reachability
+           (\ x__ y__ -> x__ {_TaskQueueReachability'reachability = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField TaskQueueReachability "vec'reachability" (Data.Vector.Vector Proto.Temporal.Api.Enums.V1.TaskQueue.TaskReachability) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueReachability'reachability
+           (\ x__ y__ -> x__ {_TaskQueueReachability'reachability = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message TaskQueueReachability where
+  messageName _
+    = Data.Text.pack "temporal.api.taskqueue.v1.TaskQueueReachability"
+  packedMessageDescriptor _
+    = "\n\
+      \\NAKTaskQueueReachability\DC2\GS\n\
+      \\n\
+      \task_queue\CAN\SOH \SOH(\tR\ttaskQueue\DC2K\n\
+      \\freachability\CAN\STX \ETX(\SO2'.temporal.api.enums.v1.TaskReachabilityR\freachability"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        taskQueue__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "task_queue"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"taskQueue")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueReachability
+        reachability__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "reachability"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.TaskQueue.TaskReachability)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Packed
+                 (Data.ProtoLens.Field.field @"reachability")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueReachability
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, taskQueue__field_descriptor),
+           (Data.ProtoLens.Tag 2, reachability__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _TaskQueueReachability'_unknownFields
+        (\ x__ y__ -> x__ {_TaskQueueReachability'_unknownFields = y__})
+  defMessage
+    = TaskQueueReachability'_constructor
+        {_TaskQueueReachability'taskQueue = Data.ProtoLens.fieldDefault,
+         _TaskQueueReachability'reachability = Data.Vector.Generic.empty,
+         _TaskQueueReachability'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          TaskQueueReachability
+          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Proto.Temporal.Api.Enums.V1.TaskQueue.TaskReachability
+             -> Data.ProtoLens.Encoding.Bytes.Parser TaskQueueReachability
+        loop x mutable'reachability
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do frozen'reachability <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                               (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                                  mutable'reachability)
+                      (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
+                           (Lens.Family2.set
+                              (Data.ProtoLens.Field.field @"vec'reachability")
+                              frozen'reachability x))
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                       Data.ProtoLens.Encoding.Bytes.getBytes
+                                                         (Prelude.fromIntegral len)
+                                           Data.ProtoLens.Encoding.Bytes.runEither
+                                             (case Data.Text.Encoding.decodeUtf8' value of
+                                                (Prelude.Left err)
+                                                  -> Prelude.Left (Prelude.show err)
+                                                (Prelude.Right r) -> Prelude.Right r))
+                                       "task_queue"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"taskQueue") y x)
+                                  mutable'reachability
+                        16
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (Prelude.fmap
+                                           Prelude.toEnum
+                                           (Prelude.fmap
+                                              Prelude.fromIntegral
+                                              Data.ProtoLens.Encoding.Bytes.getVarInt))
+                                        "reachability"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append
+                                          mutable'reachability y)
+                                loop x v
+                        18
+                          -> do y <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                        Data.ProtoLens.Encoding.Bytes.isolate
+                                          (Prelude.fromIntegral len)
+                                          ((let
+                                              ploop qs
+                                                = do packedEnd <- Data.ProtoLens.Encoding.Bytes.atEnd
+                                                     if packedEnd then
+                                                         Prelude.return qs
+                                                     else
+                                                         do !q <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                                                    (Prelude.fmap
+                                                                       Prelude.toEnum
+                                                                       (Prelude.fmap
+                                                                          Prelude.fromIntegral
+                                                                          Data.ProtoLens.Encoding.Bytes.getVarInt))
+                                                                    "reachability"
+                                                            qs' <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                                                     (Data.ProtoLens.Encoding.Growing.append
+                                                                        qs q)
+                                                            ploop qs'
+                                            in ploop)
+                                             mutable'reachability)
+                                loop x y
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+                                  mutable'reachability
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do mutable'reachability <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                        Data.ProtoLens.Encoding.Growing.new
+              loop Data.ProtoLens.defMessage mutable'reachability)
+          "TaskQueueReachability"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"taskQueue") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             ((Data.Monoid.<>)
+                (let
+                   p = Lens.Family2.view
+                         (Data.ProtoLens.Field.field @"vec'reachability") _x
+                 in
+                   if Data.Vector.Generic.null p then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                         ((\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                            (Data.ProtoLens.Encoding.Bytes.runBuilder
+                               (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                                  ((Prelude..)
+                                     ((Prelude..)
+                                        Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        Prelude.fromIntegral)
+                                     Prelude.fromEnum)
+                                  p))))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData TaskQueueReachability where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_TaskQueueReachability'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_TaskQueueReachability'taskQueue x__)
+                (Control.DeepSeq.deepseq
+                   (_TaskQueueReachability'reachability x__) ()))
+{- | Fields :
+     
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.backlogCountHint' @:: Lens' TaskQueueStatus Data.Int.Int64@
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.readLevel' @:: Lens' TaskQueueStatus Data.Int.Int64@
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.ackLevel' @:: Lens' TaskQueueStatus Data.Int.Int64@
@@ -1605,10 +2025,12 @@ instance Control.DeepSeq.NFData TaskQueueStatus where
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \'temporal/api/taskqueue/v1/message.proto\DC2\EMtemporal.api.taskqueue.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\USgoogle/protobuf/timestamp.proto\SUB\RSgoogle/protobuf/wrappers.proto\SUB!dependencies/gogoproto/gogo.proto\SUB&temporal/api/enums/v1/task_queue.proto\SUB$temporal/api/common/v1/message.proto\"Y\n\
+    \'temporal/api/taskqueue/v1/message.proto\DC2\EMtemporal.api.taskqueue.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\USgoogle/protobuf/timestamp.proto\SUB\RSgoogle/protobuf/wrappers.proto\SUB!dependencies/gogoproto/gogo.proto\SUB&temporal/api/enums/v1/task_queue.proto\SUB$temporal/api/common/v1/message.proto\"z\n\
     \\tTaskQueue\DC2\DC2\n\
     \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC28\n\
-    \\EOTkind\CAN\STX \SOH(\SO2$.temporal.api.enums.v1.TaskQueueKindR\EOTkind\"b\n\
+    \\EOTkind\CAN\STX \SOH(\SO2$.temporal.api.enums.v1.TaskQueueKindR\EOTkind\DC2\US\n\
+    \\vnormal_name\CAN\ETX \SOH(\tR\n\
+    \normalName\"b\n\
     \\DC1TaskQueueMetadata\DC2M\n\
     \\DC4max_tasks_per_second\CAN\SOH \SOH(\v2\FS.google.protobuf.DoubleValueR\DC1maxTasksPerSecond\"\239\SOH\n\
     \\SITaskQueueStatus\DC2,\n\
@@ -1632,12 +2054,18 @@ packedFileDescriptor
     \\ESCworker_version_capabilities\CAN\EOT \SOH(\v21.temporal.api.common.v1.WorkerVersionCapabilitiesR\EMworkerVersionCapabilities\"\201\SOH\n\
     \\EMStickyExecutionAttributes\DC2P\n\
     \\DC1worker_task_queue\CAN\SOH \SOH(\v2$.temporal.api.taskqueue.v1.TaskQueueR\SIworkerTaskQueue\DC2Z\n\
-    \\EMschedule_to_start_timeout\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\SYNscheduleToStartTimeoutB\EOT\152\223\US\SOH\"Y\n\
-    \\DC4CompatibleVersionSet\DC2$\n\
-    \\SOversion_set_id\CAN\SOH \SOH(\tR\fversionSetId\DC2\ESC\n\
-    \\tbuild_ids\CAN\STX \ETX(\tR\bbuildIdsB\152\SOH\n\
-    \\FSio.temporal.api.taskqueue.v1B\fMessageProtoP\SOHZ)go.temporal.io/api/taskqueue/v1;taskqueue\170\STX\ESCTemporalio.Api.TaskQueue.V1\234\STX\RSTemporalio::Api::TaskQueue::V1J\216\ESC\n\
-    \\ACK\DC2\EOT\SYN\NULa\SOH\n\
+    \\EMschedule_to_start_timeout\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\SYNscheduleToStartTimeoutB\EOT\152\223\US\SOH\"3\n\
+    \\DC4CompatibleVersionSet\DC2\ESC\n\
+    \\tbuild_ids\CAN\SOH \ETX(\tR\bbuildIds\"\131\SOH\n\
+    \\NAKTaskQueueReachability\DC2\GS\n\
+    \\n\
+    \task_queue\CAN\SOH \SOH(\tR\ttaskQueue\DC2K\n\
+    \\freachability\CAN\STX \ETX(\SO2'.temporal.api.enums.v1.TaskReachabilityR\freachability\"\154\SOH\n\
+    \\DC3BuildIdReachability\DC2\EM\n\
+    \\bbuild_id\CAN\SOH \SOH(\tR\abuildId\DC2h\n\
+    \\ETBtask_queue_reachability\CAN\STX \ETX(\v20.temporal.api.taskqueue.v1.TaskQueueReachabilityR\NAKtaskQueueReachabilityB\152\SOH\n\
+    \\FSio.temporal.api.taskqueue.v1B\fMessageProtoP\SOHZ)go.temporal.io/api/taskqueue/v1;taskqueue\170\STX\ESCTemporalio.Api.TaskQueue.V1\234\STX\RSTemporalio::Api::TaskQueue::V1J\225!\n\
+    \\ACK\DC2\EOT\SYN\NULr\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -1701,7 +2129,7 @@ packedFileDescriptor
     \\t\n\
     \\STX\ETX\ENQ\DC2\ETX(\NUL.\n\
     \E\n\
-    \\STX\EOT\NUL\DC2\EOT+\NUL/\SOH\SUB9 See https://docs.temporal.io/docs/concepts/task-queues/\n\
+    \\STX\EOT\NUL\DC2\EOT+\NUL2\SOH\SUB9 See https://docs.temporal.io/docs/concepts/task-queues/\n\
     \\n\
     \\n\
     \\n\
@@ -1724,219 +2152,274 @@ packedFileDescriptor
     \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX.(,\n\
     \\f\n\
     \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX./0\n\
+    \\149\SOH\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX1\EOT\ESC\SUB\135\SOH Iff kind == TASK_QUEUE_KIND_STICKY, then this field contains the name of\n\
+    \ the normal task queue that the sticky worker is running on.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX1\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX1\v\SYN\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX1\EM\SUB\n\
     \2\n\
-    \\STX\EOT\SOH\DC2\EOT2\NUL5\SOH\SUB& Only applies to activity task queues\n\
+    \\STX\EOT\SOH\DC2\EOT5\NUL8\SOH\SUB& Only applies to activity task queues\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX2\b\EM\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX5\b\EM\n\
     \B\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX4\EOT9\SUB5 Allows throttling dispatch of tasks from this queue\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX7\EOT9\SUB5 Allows throttling dispatch of tasks from this queue\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX4\EOT\US\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX7\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX4 4\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX7 4\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX478\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX778\n\
     \\n\
     \\n\
-    \\STX\EOT\STX\DC2\EOT7\NUL=\SOH\n\
+    \\STX\EOT\STX\DC2\EOT:\NUL@\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX7\b\ETB\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX:\b\ETB\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX8\EOT!\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX;\EOT!\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX8\EOT\t\n\
+    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX;\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX8\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX;\n\
     \\FS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX8\US \n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX;\US \n\
     \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX9\EOT\EM\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX<\EOT\EM\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX9\EOT\t\n\
+    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX<\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX9\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX<\n\
     \\DC4\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX9\ETB\CAN\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX<\ETB\CAN\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\STX\DC2\ETX:\EOT\CAN\n\
+    \\EOT\EOT\STX\STX\STX\DC2\ETX=\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETX:\EOT\t\n\
+    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETX=\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX:\n\
+    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX=\n\
     \\DC3\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX:\SYN\ETB\n\
+    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX=\SYN\ETB\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\ETX\DC2\ETX;\EOT\US\n\
+    \\EOT\EOT\STX\STX\ETX\DC2\ETX>\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ENQ\DC2\ETX;\EOT\n\
+    \\ENQ\EOT\STX\STX\ETX\ENQ\DC2\ETX>\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETX;\v\SUB\n\
+    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETX>\v\SUB\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETX;\GS\RS\n\
+    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETX>\GS\RS\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\EOT\DC2\ETX<\EOT\"\n\
+    \\EOT\EOT\STX\STX\EOT\DC2\ETX?\EOT\"\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ACK\DC2\ETX<\EOT\SI\n\
+    \\ENQ\EOT\STX\STX\EOT\ACK\DC2\ETX?\EOT\SI\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\SOH\DC2\ETX<\DLE\GS\n\
+    \\ENQ\EOT\STX\STX\EOT\SOH\DC2\ETX?\DLE\GS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ETX\DC2\ETX< !\n\
+    \\ENQ\EOT\STX\STX\EOT\ETX\DC2\ETX? !\n\
     \\n\
     \\n\
-    \\STX\EOT\ETX\DC2\EOT?\NULB\SOH\n\
+    \\STX\EOT\ETX\DC2\EOTB\NULE\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX?\b\DC3\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETXB\b\DC3\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETX@\EOT\ETB\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETXC\EOT\ETB\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX@\EOT\t\n\
+    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETXC\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX@\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETXC\n\
     \\DC2\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX@\NAK\SYN\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETXC\NAK\SYN\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\SOH\DC2\ETXA\EOT\NAK\n\
+    \\EOT\EOT\ETX\STX\SOH\DC2\ETXD\EOT\NAK\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETXA\EOT\t\n\
+    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETXD\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETXA\n\
+    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETXD\n\
     \\DLE\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETXA\DC3\DC4\n\
+    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETXD\DC3\DC4\n\
     \\n\
     \\n\
-    \\STX\EOT\EOT\DC2\EOTD\NULG\SOH\n\
+    \\STX\EOT\EOT\DC2\EOTG\NULJ\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETXD\b\"\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETXG\b\"\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETXE\EOT\DC3\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETXH\EOT\DC3\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETXE\EOT\n\
+    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETXH\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXE\v\SO\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXH\v\SO\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXE\DC1\DC2\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXH\DC1\DC2\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\SOH\DC2\ETXF\EOT\US\n\
+    \\EOT\EOT\EOT\STX\SOH\DC2\ETXI\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ENQ\DC2\ETXF\EOT\n\
+    \\ENQ\EOT\EOT\STX\SOH\ENQ\DC2\ETXI\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETXF\v\SUB\n\
+    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETXI\v\SUB\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETXF\GS\RS\n\
+    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETXI\GS\RS\n\
     \\n\
     \\n\
-    \\STX\EOT\ENQ\DC2\EOTI\NULP\SOH\n\
+    \\STX\EOT\ENQ\DC2\EOTL\NULS\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETXI\b\DC2\n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETXL\b\DC2\n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXJ\EOTP\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXM\EOTP\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETXJ\EOT\GS\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETXM\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXJ\RS.\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXM\RS.\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXJ12\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXM12\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\b\DC2\ETXJ3O\n\
+    \\ENQ\EOT\ENQ\STX\NUL\b\DC2\ETXM3O\n\
     \\SI\n\
-    \\b\EOT\ENQ\STX\NUL\b\242\251\ETX\DC2\ETXJ4N\n\
+    \\b\EOT\ENQ\STX\NUL\b\242\251\ETX\DC2\ETXM4N\n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\SOH\DC2\ETXK\EOT\CAN\n\
+    \\EOT\EOT\ENQ\STX\SOH\DC2\ETXN\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ENQ\DC2\ETXK\EOT\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ENQ\DC2\ETXN\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETXK\v\DC3\n\
+    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETXN\v\DC3\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETXK\SYN\ETB\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETXN\SYN\ETB\n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\STX\DC2\ETXL\EOT\US\n\
+    \\EOT\EOT\ENQ\STX\STX\DC2\ETXO\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\ENQ\DC2\ETXL\EOT\n\
+    \\ENQ\EOT\ENQ\STX\STX\ENQ\DC2\ETXO\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\ETXL\v\SUB\n\
+    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\ETXO\v\SUB\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\ETXL\GS\RS\n\
+    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\ETXO\GS\RS\n\
     \z\n\
-    \\EOT\EOT\ENQ\STX\ETX\DC2\ETXO\EOTU\SUBm If a worker has opted into the worker versioning feature while polling, its capabilities will\n\
+    \\EOT\EOT\ENQ\STX\ETX\DC2\ETXR\EOTU\SUBm If a worker has opted into the worker versioning feature while polling, its capabilities will\n\
     \ appear here.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\ACK\DC2\ETXO\EOT4\n\
+    \\ENQ\EOT\ENQ\STX\ETX\ACK\DC2\ETXR\EOT4\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\SOH\DC2\ETXO5P\n\
+    \\ENQ\EOT\ENQ\STX\ETX\SOH\DC2\ETXR5P\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\ETX\DC2\ETXOST\n\
+    \\ENQ\EOT\ENQ\STX\ETX\ETX\DC2\ETXRST\n\
     \\n\
     \\n\
-    \\STX\EOT\ACK\DC2\EOTR\NULW\SOH\n\
+    \\STX\EOT\ACK\DC2\EOTU\NULZ\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETXR\b!\n\
+    \\ETX\EOT\ACK\SOH\DC2\ETXU\b!\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\ETXS\EOT$\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\ETXV\EOT$\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ACK\DC2\ETXS\EOT\r\n\
+    \\ENQ\EOT\ACK\STX\NUL\ACK\DC2\ETXV\EOT\r\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXS\SO\US\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXV\SO\US\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXS\"#\n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXV\"#\n\
     \\131\SOH\n\
-    \\EOT\EOT\ACK\STX\SOH\DC2\ETXV\EOT\\\SUBv (-- api-linter: core::0140::prepositions=disabled\n\
+    \\EOT\EOT\ACK\STX\SOH\DC2\ETXY\EOT\\\SUBv (-- api-linter: core::0140::prepositions=disabled\n\
     \     aip.dev/not-precedent: \"to\" is used to indicate interval. --)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ACK\DC2\ETXV\EOT\FS\n\
+    \\ENQ\EOT\ACK\STX\SOH\ACK\DC2\ETXY\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXV\GS6\n\
+    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXY\GS6\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXV9:\n\
+    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXY9:\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\b\DC2\ETXV;[\n\
+    \\ENQ\EOT\ACK\STX\SOH\b\DC2\ETXY;[\n\
     \\SI\n\
-    \\b\EOT\ACK\STX\SOH\b\243\251\ETX\DC2\ETXV<Z\n\
-    \\205\SOH\n\
-    \\STX\EOT\a\DC2\EOT[\NULa\SOH\SUB\192\SOH Used by the worker versioning APIs, represents an ordering of one or more versions which are\n\
-    \ considered to be compatible with each other. Currently the versions are always worker build ids.\n\
+    \\b\EOT\ACK\STX\SOH\b\243\251\ETX\DC2\ETXY<Z\n\
+    \\210\SOH\n\
+    \\STX\EOT\a\DC2\EOT^\NULa\SOH\SUB\197\SOH Used by the worker versioning APIs, represents an unordered set of one or more versions which are\n\
+    \ considered to be compatible with each other. Currently the versions are always worker build IDs.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\a\SOH\DC2\ETX[\b\FS\n\
-    \\156\SOH\n\
-    \\EOT\EOT\a\STX\NUL\DC2\ETX^\EOT\RS\SUB\142\SOH A unique identifier for this version set. Users don't need to understand or care about this\n\
-    \ value, but it has value for debugging purposes.\n\
+    \\ETX\EOT\a\SOH\DC2\ETX^\b\FS\n\
+    \z\n\
+    \\EOT\EOT\a\STX\NUL\DC2\ETX`\EOT\"\SUBm All the compatible versions, unordered, except for the last element, which is considered the set \"default\".\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETX^\EOT\n\
+    \\ENQ\EOT\a\STX\NUL\EOT\DC2\ETX`\EOT\f\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETX`\r\DC3\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETX`\DC4\GS\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETX` !\n\
+    \H\n\
+    \\STX\EOT\b\DC2\EOTd\NULj\SOH\SUB< Reachability of tasks for a worker on a single task queue.\n\
+    \\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\b\SOH\DC2\ETXd\b\GS\n\
+    \\v\n\
+    \\EOT\EOT\b\STX\NUL\DC2\ETXe\EOT\SUB\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\ETXe\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETX^\v\EM\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETXe\v\NAK\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETX^\FS\GS\n\
-    \I\n\
-    \\EOT\EOT\a\STX\SOH\DC2\ETX`\EOT\"\SUB< All the compatible versions, ordered from oldest to newest\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETXe\CAN\EM\n\
+    \\232\SOH\n\
+    \\EOT\EOT\b\STX\SOH\DC2\ETXi\EOTE\SUB\218\SOH Task reachability for a worker in a single task queue.\n\
+    \ See the TaskReachability docstring for information about each enum variant.\n\
+    \ If reachability is empty, this worker is considered unreachable in this task queue.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\EOT\DC2\ETX`\EOT\f\n\
+    \\ENQ\EOT\b\STX\SOH\EOT\DC2\ETXi\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\ENQ\DC2\ETX`\r\DC3\n\
+    \\ENQ\EOT\b\STX\SOH\ACK\DC2\ETXi\r3\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\SOH\DC2\ETX`\DC4\GS\n\
+    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETXi4@\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\ETX\DC2\ETX` !b\ACKproto3"
+    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETXiCD\n\
+    \Y\n\
+    \\STX\EOT\t\DC2\EOTm\NULr\SOH\SUBM Reachability of tasks for a worker by build id, in one or more task queues.\n\
+    \\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\t\SOH\DC2\ETXm\b\ESC\n\
+    \2\n\
+    \\EOT\EOT\t\STX\NUL\DC2\ETXo\EOT\CAN\SUB% A build id or empty if unversioned.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\t\STX\NUL\ENQ\DC2\ETXo\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\t\STX\NUL\SOH\DC2\ETXo\v\DC3\n\
+    \\f\n\
+    \\ENQ\EOT\t\STX\NUL\ETX\DC2\ETXo\SYN\ETB\n\
+    \+\n\
+    \\EOT\EOT\t\STX\SOH\DC2\ETXq\EOT?\SUB\RS Reachability per task queue.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\t\STX\SOH\EOT\DC2\ETXq\EOT\f\n\
+    \\f\n\
+    \\ENQ\EOT\t\STX\SOH\ACK\DC2\ETXq\r\"\n\
+    \\f\n\
+    \\ENQ\EOT\t\STX\SOH\SOH\DC2\ETXq#:\n\
+    \\f\n\
+    \\ENQ\EOT\t\STX\SOH\ETX\DC2\ETXq=>b\ACKproto3"

@@ -5,7 +5,8 @@
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
 module Proto.Temporal.Api.Enums.V1.Reset (
         ResetReapplyType(..), ResetReapplyType(),
-        ResetReapplyType'UnrecognizedValue
+        ResetReapplyType'UnrecognizedValue, ResetType(..), ResetType(),
+        ResetType'UnrecognizedValue
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -105,4 +106,74 @@ instance Prelude.Enum ResetReapplyType where
 instance Data.ProtoLens.FieldDefault ResetReapplyType where
   fieldDefault = RESET_REAPPLY_TYPE_UNSPECIFIED
 instance Control.DeepSeq.NFData ResetReapplyType where
+  rnf x__ = Prelude.seq x__ ()
+newtype ResetType'UnrecognizedValue
+  = ResetType'UnrecognizedValue Data.Int.Int32
+  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+data ResetType
+  = RESET_TYPE_UNSPECIFIED |
+    RESET_TYPE_FIRST_WORKFLOW_TASK |
+    RESET_TYPE_LAST_WORKFLOW_TASK |
+    ResetType'Unrecognized !ResetType'UnrecognizedValue
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.MessageEnum ResetType where
+  maybeToEnum 0 = Prelude.Just RESET_TYPE_UNSPECIFIED
+  maybeToEnum 1 = Prelude.Just RESET_TYPE_FIRST_WORKFLOW_TASK
+  maybeToEnum 2 = Prelude.Just RESET_TYPE_LAST_WORKFLOW_TASK
+  maybeToEnum k
+    = Prelude.Just
+        (ResetType'Unrecognized
+           (ResetType'UnrecognizedValue (Prelude.fromIntegral k)))
+  showEnum RESET_TYPE_UNSPECIFIED = "RESET_TYPE_UNSPECIFIED"
+  showEnum RESET_TYPE_FIRST_WORKFLOW_TASK
+    = "RESET_TYPE_FIRST_WORKFLOW_TASK"
+  showEnum RESET_TYPE_LAST_WORKFLOW_TASK
+    = "RESET_TYPE_LAST_WORKFLOW_TASK"
+  showEnum (ResetType'Unrecognized (ResetType'UnrecognizedValue k))
+    = Prelude.show k
+  readEnum k
+    | (Prelude.==) k "RESET_TYPE_UNSPECIFIED"
+    = Prelude.Just RESET_TYPE_UNSPECIFIED
+    | (Prelude.==) k "RESET_TYPE_FIRST_WORKFLOW_TASK"
+    = Prelude.Just RESET_TYPE_FIRST_WORKFLOW_TASK
+    | (Prelude.==) k "RESET_TYPE_LAST_WORKFLOW_TASK"
+    = Prelude.Just RESET_TYPE_LAST_WORKFLOW_TASK
+    | Prelude.otherwise
+    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
+instance Prelude.Bounded ResetType where
+  minBound = RESET_TYPE_UNSPECIFIED
+  maxBound = RESET_TYPE_LAST_WORKFLOW_TASK
+instance Prelude.Enum ResetType where
+  toEnum k__
+    = Prelude.maybe
+        (Prelude.error
+           ((Prelude.++)
+              "toEnum: unknown value for enum ResetType: " (Prelude.show k__)))
+        Prelude.id (Data.ProtoLens.maybeToEnum k__)
+  fromEnum RESET_TYPE_UNSPECIFIED = 0
+  fromEnum RESET_TYPE_FIRST_WORKFLOW_TASK = 1
+  fromEnum RESET_TYPE_LAST_WORKFLOW_TASK = 2
+  fromEnum (ResetType'Unrecognized (ResetType'UnrecognizedValue k))
+    = Prelude.fromIntegral k
+  succ RESET_TYPE_LAST_WORKFLOW_TASK
+    = Prelude.error
+        "ResetType.succ: bad argument RESET_TYPE_LAST_WORKFLOW_TASK. This value would be out of bounds."
+  succ RESET_TYPE_UNSPECIFIED = RESET_TYPE_FIRST_WORKFLOW_TASK
+  succ RESET_TYPE_FIRST_WORKFLOW_TASK = RESET_TYPE_LAST_WORKFLOW_TASK
+  succ (ResetType'Unrecognized _)
+    = Prelude.error "ResetType.succ: bad argument: unrecognized value"
+  pred RESET_TYPE_UNSPECIFIED
+    = Prelude.error
+        "ResetType.pred: bad argument RESET_TYPE_UNSPECIFIED. This value would be out of bounds."
+  pred RESET_TYPE_FIRST_WORKFLOW_TASK = RESET_TYPE_UNSPECIFIED
+  pred RESET_TYPE_LAST_WORKFLOW_TASK = RESET_TYPE_FIRST_WORKFLOW_TASK
+  pred (ResetType'Unrecognized _)
+    = Prelude.error "ResetType.pred: bad argument: unrecognized value"
+  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
+  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
+  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
+  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
+instance Data.ProtoLens.FieldDefault ResetType where
+  fieldDefault = RESET_TYPE_UNSPECIFIED
+instance Control.DeepSeq.NFData ResetType where
   rnf x__ = Prelude.seq x__ ()

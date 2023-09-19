@@ -131,6 +131,7 @@ data BatchOperationType
     BATCH_OPERATION_TYPE_CANCEL |
     BATCH_OPERATION_TYPE_SIGNAL |
     BATCH_OPERATION_TYPE_DELETE |
+    BATCH_OPERATION_TYPE_RESET |
     BatchOperationType'Unrecognized !BatchOperationType'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum BatchOperationType where
@@ -139,6 +140,7 @@ instance Data.ProtoLens.MessageEnum BatchOperationType where
   maybeToEnum 2 = Prelude.Just BATCH_OPERATION_TYPE_CANCEL
   maybeToEnum 3 = Prelude.Just BATCH_OPERATION_TYPE_SIGNAL
   maybeToEnum 4 = Prelude.Just BATCH_OPERATION_TYPE_DELETE
+  maybeToEnum 5 = Prelude.Just BATCH_OPERATION_TYPE_RESET
   maybeToEnum k
     = Prelude.Just
         (BatchOperationType'Unrecognized
@@ -153,6 +155,7 @@ instance Data.ProtoLens.MessageEnum BatchOperationType where
     = "BATCH_OPERATION_TYPE_SIGNAL"
   showEnum BATCH_OPERATION_TYPE_DELETE
     = "BATCH_OPERATION_TYPE_DELETE"
+  showEnum BATCH_OPERATION_TYPE_RESET = "BATCH_OPERATION_TYPE_RESET"
   showEnum
     (BatchOperationType'Unrecognized (BatchOperationType'UnrecognizedValue k))
     = Prelude.show k
@@ -167,11 +170,13 @@ instance Data.ProtoLens.MessageEnum BatchOperationType where
     = Prelude.Just BATCH_OPERATION_TYPE_SIGNAL
     | (Prelude.==) k "BATCH_OPERATION_TYPE_DELETE"
     = Prelude.Just BATCH_OPERATION_TYPE_DELETE
+    | (Prelude.==) k "BATCH_OPERATION_TYPE_RESET"
+    = Prelude.Just BATCH_OPERATION_TYPE_RESET
     | Prelude.otherwise
     = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
 instance Prelude.Bounded BatchOperationType where
   minBound = BATCH_OPERATION_TYPE_UNSPECIFIED
-  maxBound = BATCH_OPERATION_TYPE_DELETE
+  maxBound = BATCH_OPERATION_TYPE_RESET
 instance Prelude.Enum BatchOperationType where
   toEnum k__
     = Prelude.maybe
@@ -185,17 +190,19 @@ instance Prelude.Enum BatchOperationType where
   fromEnum BATCH_OPERATION_TYPE_CANCEL = 2
   fromEnum BATCH_OPERATION_TYPE_SIGNAL = 3
   fromEnum BATCH_OPERATION_TYPE_DELETE = 4
+  fromEnum BATCH_OPERATION_TYPE_RESET = 5
   fromEnum
     (BatchOperationType'Unrecognized (BatchOperationType'UnrecognizedValue k))
     = Prelude.fromIntegral k
-  succ BATCH_OPERATION_TYPE_DELETE
+  succ BATCH_OPERATION_TYPE_RESET
     = Prelude.error
-        "BatchOperationType.succ: bad argument BATCH_OPERATION_TYPE_DELETE. This value would be out of bounds."
+        "BatchOperationType.succ: bad argument BATCH_OPERATION_TYPE_RESET. This value would be out of bounds."
   succ BATCH_OPERATION_TYPE_UNSPECIFIED
     = BATCH_OPERATION_TYPE_TERMINATE
   succ BATCH_OPERATION_TYPE_TERMINATE = BATCH_OPERATION_TYPE_CANCEL
   succ BATCH_OPERATION_TYPE_CANCEL = BATCH_OPERATION_TYPE_SIGNAL
   succ BATCH_OPERATION_TYPE_SIGNAL = BATCH_OPERATION_TYPE_DELETE
+  succ BATCH_OPERATION_TYPE_DELETE = BATCH_OPERATION_TYPE_RESET
   succ (BatchOperationType'Unrecognized _)
     = Prelude.error
         "BatchOperationType.succ: bad argument: unrecognized value"
@@ -207,6 +214,7 @@ instance Prelude.Enum BatchOperationType where
   pred BATCH_OPERATION_TYPE_CANCEL = BATCH_OPERATION_TYPE_TERMINATE
   pred BATCH_OPERATION_TYPE_SIGNAL = BATCH_OPERATION_TYPE_CANCEL
   pred BATCH_OPERATION_TYPE_DELETE = BATCH_OPERATION_TYPE_SIGNAL
+  pred BATCH_OPERATION_TYPE_RESET = BATCH_OPERATION_TYPE_DELETE
   pred (BatchOperationType'Unrecognized _)
     = Prelude.error
         "BatchOperationType.pred: bad argument: unrecognized value"

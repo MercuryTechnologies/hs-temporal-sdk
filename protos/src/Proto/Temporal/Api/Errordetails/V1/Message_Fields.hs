@@ -72,6 +72,12 @@ currentCluster ::
    Data.ProtoLens.Field.HasField s "currentCluster" a) =>
   Lens.Family2.LensLike' f s a
 currentCluster = Data.ProtoLens.Field.field @"currentCluster"
+defaultBuildId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "defaultBuildId" a) =>
+  Lens.Family2.LensLike' f s a
+defaultBuildId = Data.ProtoLens.Field.field @"defaultBuildId"
 maybe'workflowExecution ::
   forall f s a.
   (Prelude.Functor f,

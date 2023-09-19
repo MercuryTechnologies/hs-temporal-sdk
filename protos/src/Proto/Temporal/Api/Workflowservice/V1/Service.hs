@@ -50,6 +50,7 @@ instance Data.ProtoLens.Service.Types.Service WorkflowService where
                                           "getSearchAttributes",
                                           "getSystemInfo",
                                           "getWorkerBuildIdCompatibility",
+                                          "getWorkerTaskReachability",
                                           "getWorkflowExecutionHistory",
                                           "getWorkflowExecutionHistoryReverse",
                                           "listArchivedWorkflowExecutions",
@@ -144,7 +145,8 @@ instance Data.ProtoLens.Service.Types.Service WorkflowService where
       \\SODeleteSchedule\DC26.temporal.api.workflowservice.v1.DeleteScheduleRequest\SUB7.temporal.api.workflowservice.v1.DeleteScheduleResponse\"\NUL\DC2\128\SOH\n\
       \\rListSchedules\DC25.temporal.api.workflowservice.v1.ListSchedulesRequest\SUB6.temporal.api.workflowservice.v1.ListSchedulesResponse\"\NUL\DC2\185\SOH\n\
       \ UpdateWorkerBuildIdCompatibility\DC2H.temporal.api.workflowservice.v1.UpdateWorkerBuildIdCompatibilityRequest\SUBI.temporal.api.workflowservice.v1.UpdateWorkerBuildIdCompatibilityResponse\"\NUL\DC2\176\SOH\n\
-      \\GSGetWorkerBuildIdCompatibility\DC2E.temporal.api.workflowservice.v1.GetWorkerBuildIdCompatibilityRequest\SUBF.temporal.api.workflowservice.v1.GetWorkerBuildIdCompatibilityResponse\"\NUL\DC2\158\SOH\n\
+      \\GSGetWorkerBuildIdCompatibility\DC2E.temporal.api.workflowservice.v1.GetWorkerBuildIdCompatibilityRequest\SUBF.temporal.api.workflowservice.v1.GetWorkerBuildIdCompatibilityResponse\"\NUL\DC2\164\SOH\n\
+      \\EMGetWorkerTaskReachability\DC2A.temporal.api.workflowservice.v1.GetWorkerTaskReachabilityRequest\SUBB.temporal.api.workflowservice.v1.GetWorkerTaskReachabilityResponse\"\NUL\DC2\158\SOH\n\
       \\ETBUpdateWorkflowExecution\DC2?.temporal.api.workflowservice.v1.UpdateWorkflowExecutionRequest\SUB@.temporal.api.workflowservice.v1.UpdateWorkflowExecutionResponse\"\NUL\DC2\170\SOH\n\
       \\ESCPollWorkflowExecutionUpdate\DC2C.temporal.api.workflowservice.v1.PollWorkflowExecutionUpdateRequest\SUBD.temporal.api.workflowservice.v1.PollWorkflowExecutionUpdateResponse\"\NUL\DC2\146\SOH\n\
       \\DC3StartBatchOperation\DC2;.temporal.api.workflowservice.v1.StartBatchOperationRequest\SUB<.temporal.api.workflowservice.v1.StartBatchOperationResponse\"\NUL\DC2\143\SOH\n\
@@ -401,6 +403,11 @@ instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "getWorkerBu
   type MethodInput WorkflowService "getWorkerBuildIdCompatibility" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.GetWorkerBuildIdCompatibilityRequest
   type MethodOutput WorkflowService "getWorkerBuildIdCompatibility" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.GetWorkerBuildIdCompatibilityResponse
   type MethodStreamingType WorkflowService "getWorkerBuildIdCompatibility" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "getWorkerTaskReachability" where
+  type MethodName WorkflowService "getWorkerTaskReachability" = "GetWorkerTaskReachability"
+  type MethodInput WorkflowService "getWorkerTaskReachability" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.GetWorkerTaskReachabilityRequest
+  type MethodOutput WorkflowService "getWorkerTaskReachability" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.GetWorkerTaskReachabilityResponse
+  type MethodStreamingType WorkflowService "getWorkerTaskReachability" = 'Data.ProtoLens.Service.Types.NonStreaming
 instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "updateWorkflowExecution" where
   type MethodName WorkflowService "updateWorkflowExecution" = "UpdateWorkflowExecution"
   type MethodInput WorkflowService "updateWorkflowExecution" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.UpdateWorkflowExecutionRequest

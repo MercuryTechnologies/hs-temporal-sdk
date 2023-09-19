@@ -2155,9 +2155,11 @@ instance Control.DeepSeq.NFData SearchAttributes'IndexedFieldsEntry where
                    (_SearchAttributes'IndexedFieldsEntry'value x__) ()))
 {- | Fields :
      
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.buildId' @:: Lens' WorkerVersionCapabilities Data.Text.Text@ -}
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.buildId' @:: Lens' WorkerVersionCapabilities Data.Text.Text@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.useVersioning' @:: Lens' WorkerVersionCapabilities Prelude.Bool@ -}
 data WorkerVersionCapabilities
   = WorkerVersionCapabilities'_constructor {_WorkerVersionCapabilities'buildId :: !Data.Text.Text,
+                                            _WorkerVersionCapabilities'useVersioning :: !Prelude.Bool,
                                             _WorkerVersionCapabilities'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show WorkerVersionCapabilities where
@@ -2173,13 +2175,22 @@ instance Data.ProtoLens.Field.HasField WorkerVersionCapabilities "buildId" Data.
            _WorkerVersionCapabilities'buildId
            (\ x__ y__ -> x__ {_WorkerVersionCapabilities'buildId = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField WorkerVersionCapabilities "useVersioning" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkerVersionCapabilities'useVersioning
+           (\ x__ y__
+              -> x__ {_WorkerVersionCapabilities'useVersioning = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message WorkerVersionCapabilities where
   messageName _
     = Data.Text.pack "temporal.api.common.v1.WorkerVersionCapabilities"
   packedMessageDescriptor _
     = "\n\
       \\EMWorkerVersionCapabilities\DC2\EM\n\
-      \\bbuild_id\CAN\SOH \SOH(\tR\abuildId"
+      \\bbuild_id\CAN\SOH \SOH(\tR\abuildId\DC2%\n\
+      \\SOuse_versioning\CAN\STX \SOH(\bR\ruseVersioning"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -2191,9 +2202,19 @@ instance Data.ProtoLens.Message WorkerVersionCapabilities where
               (Data.ProtoLens.PlainField
                  Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"buildId")) ::
               Data.ProtoLens.FieldDescriptor WorkerVersionCapabilities
+        useVersioning__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "use_versioning"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"useVersioning")) ::
+              Data.ProtoLens.FieldDescriptor WorkerVersionCapabilities
       in
         Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, buildId__field_descriptor)]
+          [(Data.ProtoLens.Tag 1, buildId__field_descriptor),
+           (Data.ProtoLens.Tag 2, useVersioning__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _WorkerVersionCapabilities'_unknownFields
@@ -2202,6 +2223,7 @@ instance Data.ProtoLens.Message WorkerVersionCapabilities where
   defMessage
     = WorkerVersionCapabilities'_constructor
         {_WorkerVersionCapabilities'buildId = Data.ProtoLens.fieldDefault,
+         _WorkerVersionCapabilities'useVersioning = Data.ProtoLens.fieldDefault,
          _WorkerVersionCapabilities'_unknownFields = []}
   parseMessage
     = let
@@ -2238,6 +2260,14 @@ instance Data.ProtoLens.Message WorkerVersionCapabilities where
                                                 (Prelude.Right r) -> Prelude.Right r))
                                        "build_id"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"buildId") y x)
+                        16
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "use_versioning"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"useVersioning") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -2265,22 +2295,40 @@ instance Data.ProtoLens.Message WorkerVersionCapabilities where
                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                          Data.Text.Encoding.encodeUtf8 _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+             ((Data.Monoid.<>)
+                (let
+                   _v
+                     = Lens.Family2.view
+                         (Data.ProtoLens.Field.field @"useVersioning") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
+                         ((Prelude..)
+                            Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
+                            _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
 instance Control.DeepSeq.NFData WorkerVersionCapabilities where
   rnf
     = \ x__
         -> Control.DeepSeq.deepseq
              (_WorkerVersionCapabilities'_unknownFields x__)
              (Control.DeepSeq.deepseq
-                (_WorkerVersionCapabilities'buildId x__) ())
+                (_WorkerVersionCapabilities'buildId x__)
+                (Control.DeepSeq.deepseq
+                   (_WorkerVersionCapabilities'useVersioning x__) ()))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Common.V1.Message_Fields.buildId' @:: Lens' WorkerVersionStamp Data.Text.Text@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.bundleId' @:: Lens' WorkerVersionStamp Data.Text.Text@ -}
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.bundleId' @:: Lens' WorkerVersionStamp Data.Text.Text@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.useVersioning' @:: Lens' WorkerVersionStamp Prelude.Bool@ -}
 data WorkerVersionStamp
   = WorkerVersionStamp'_constructor {_WorkerVersionStamp'buildId :: !Data.Text.Text,
                                      _WorkerVersionStamp'bundleId :: !Data.Text.Text,
+                                     _WorkerVersionStamp'useVersioning :: !Prelude.Bool,
                                      _WorkerVersionStamp'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show WorkerVersionStamp where
@@ -2303,6 +2351,13 @@ instance Data.ProtoLens.Field.HasField WorkerVersionStamp "bundleId" Data.Text.T
            _WorkerVersionStamp'bundleId
            (\ x__ y__ -> x__ {_WorkerVersionStamp'bundleId = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField WorkerVersionStamp "useVersioning" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkerVersionStamp'useVersioning
+           (\ x__ y__ -> x__ {_WorkerVersionStamp'useVersioning = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message WorkerVersionStamp where
   messageName _
     = Data.Text.pack "temporal.api.common.v1.WorkerVersionStamp"
@@ -2310,7 +2365,8 @@ instance Data.ProtoLens.Message WorkerVersionStamp where
     = "\n\
       \\DC2WorkerVersionStamp\DC2\EM\n\
       \\bbuild_id\CAN\SOH \SOH(\tR\abuildId\DC2\ESC\n\
-      \\tbundle_id\CAN\STX \SOH(\tR\bbundleId"
+      \\tbundle_id\CAN\STX \SOH(\tR\bbundleId\DC2%\n\
+      \\SOuse_versioning\CAN\ETX \SOH(\bR\ruseVersioning"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -2331,10 +2387,20 @@ instance Data.ProtoLens.Message WorkerVersionStamp where
                  Data.ProtoLens.Optional
                  (Data.ProtoLens.Field.field @"bundleId")) ::
               Data.ProtoLens.FieldDescriptor WorkerVersionStamp
+        useVersioning__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "use_versioning"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"useVersioning")) ::
+              Data.ProtoLens.FieldDescriptor WorkerVersionStamp
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, buildId__field_descriptor),
-           (Data.ProtoLens.Tag 2, bundleId__field_descriptor)]
+           (Data.ProtoLens.Tag 2, bundleId__field_descriptor),
+           (Data.ProtoLens.Tag 3, useVersioning__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _WorkerVersionStamp'_unknownFields
@@ -2343,6 +2409,7 @@ instance Data.ProtoLens.Message WorkerVersionStamp where
     = WorkerVersionStamp'_constructor
         {_WorkerVersionStamp'buildId = Data.ProtoLens.fieldDefault,
          _WorkerVersionStamp'bundleId = Data.ProtoLens.fieldDefault,
+         _WorkerVersionStamp'useVersioning = Data.ProtoLens.fieldDefault,
          _WorkerVersionStamp'_unknownFields = []}
   parseMessage
     = let
@@ -2392,6 +2459,14 @@ instance Data.ProtoLens.Message WorkerVersionStamp where
                                        "bundle_id"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"bundleId") y x)
+                        24
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "use_versioning"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"useVersioning") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -2435,8 +2510,22 @@ instance Data.ProtoLens.Message WorkerVersionStamp where
                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                             Data.Text.Encoding.encodeUtf8 _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+                ((Data.Monoid.<>)
+                   (let
+                      _v
+                        = Lens.Family2.view
+                            (Data.ProtoLens.Field.field @"useVersioning") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
+                            ((Prelude..)
+                               Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
+                               _v))
+                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
 instance Control.DeepSeq.NFData WorkerVersionStamp where
   rnf
     = \ x__
@@ -2444,7 +2533,10 @@ instance Control.DeepSeq.NFData WorkerVersionStamp where
              (_WorkerVersionStamp'_unknownFields x__)
              (Control.DeepSeq.deepseq
                 (_WorkerVersionStamp'buildId x__)
-                (Control.DeepSeq.deepseq (_WorkerVersionStamp'bundleId x__) ()))
+                (Control.DeepSeq.deepseq
+                   (_WorkerVersionStamp'bundleId x__)
+                   (Control.DeepSeq.deepseq
+                      (_WorkerVersionStamp'useVersioning x__) ())))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Common.V1.Message_Fields.workflowId' @:: Lens' WorkflowExecution Data.Text.Text@
@@ -2778,14 +2870,16 @@ packedFileDescriptor
     \\DLEmaximum_attempts\CAN\EOT \SOH(\ENQR\SImaximumAttempts\DC29\n\
     \\EMnon_retryable_error_types\CAN\ENQ \ETX(\tR\SYNnonRetryableErrorTypes\"n\n\
     \\DLEMeteringMetadata\DC2Z\n\
-    \*nonfirst_local_activity_execution_attempts\CAN\r \SOH(\rR&nonfirstLocalActivityExecutionAttempts\"L\n\
+    \*nonfirst_local_activity_execution_attempts\CAN\r \SOH(\rR&nonfirstLocalActivityExecutionAttempts\"s\n\
     \\DC2WorkerVersionStamp\DC2\EM\n\
     \\bbuild_id\CAN\SOH \SOH(\tR\abuildId\DC2\ESC\n\
-    \\tbundle_id\CAN\STX \SOH(\tR\bbundleId\"6\n\
+    \\tbundle_id\CAN\STX \SOH(\tR\bbundleId\DC2%\n\
+    \\SOuse_versioning\CAN\ETX \SOH(\bR\ruseVersioning\"]\n\
     \\EMWorkerVersionCapabilities\DC2\EM\n\
-    \\bbuild_id\CAN\SOH \SOH(\tR\abuildIdB\137\SOH\n\
-    \\EMio.temporal.api.common.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/common/v1;common\170\STX\CANTemporalio.Api.Common.V1\234\STX\ESCTemporalio::Api::Common::V1J\248,\n\
-    \\a\DC2\ENQ\SYN\NUL\139\SOH\SOH\n\
+    \\bbuild_id\CAN\SOH \SOH(\tR\abuildId\DC2%\n\
+    \\SOuse_versioning\CAN\STX \SOH(\bR\ruseVersioningB\137\SOH\n\
+    \\EMio.temporal.api.common.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/common/v1;common\170\STX\CANTemporalio.Api.Common.V1\234\STX\ESCTemporalio::Api::Common::V1J\161\&2\n\
+    \\a\DC2\ENQ\SYN\NUL\150\SOH\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -3104,44 +3198,67 @@ packedFileDescriptor
     \\ENQ\EOT\n\
     \\STX\NUL\ETX\DC2\ETXy8:\n\
     \J\n\
-    \\STX\EOT\v\DC2\ENQ}\NUL\131\SOH\SOH\SUB= Identifies the version(s) of a worker that processed a task\n\
+    \\STX\EOT\v\DC2\ENQ}\NUL\136\SOH\SOH\SUB= Identifies the version(s) of a worker that processed a task\n\
     \\n\
     \\n\
     \\n\
     \\ETX\EOT\v\SOH\DC2\ETX}\b\SUB\n\
-    \0\n\
-    \\EOT\EOT\v\STX\NUL\DC2\ETX\DEL\EOT\CAN\SUB# An opaque whole-worker identifier\n\
+    \\170\SOH\n\
+    \\EOT\EOT\v\STX\NUL\DC2\EOT\128\SOH\EOT\CAN\SUB\155\SOH An opaque whole-worker identifier. Replaces the deprecated `binary_checksum` field when this\n\
+    \ message is included in requests which previously used that.\n\
     \\n\
-    \\f\n\
-    \\ENQ\EOT\v\STX\NUL\ENQ\DC2\ETX\DEL\EOT\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\NUL\ENQ\DC2\EOT\128\SOH\EOT\n\
     \\n\
-    \\f\n\
-    \\ENQ\EOT\v\STX\NUL\SOH\DC2\ETX\DEL\v\DC3\n\
-    \\f\n\
-    \\ENQ\EOT\v\STX\NUL\ETX\DC2\ETX\DEL\SYN\ETB\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\NUL\SOH\DC2\EOT\128\SOH\v\DC3\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\NUL\ETX\DC2\EOT\128\SOH\SYN\ETB\n\
     \\139\SOH\n\
-    \\EOT\EOT\v\STX\SOH\DC2\EOT\130\SOH\EOT\EM\SUB} Set if the worker used a dynamically loadable bundle to process\n\
+    \\EOT\EOT\v\STX\SOH\DC2\EOT\131\SOH\EOT\EM\SUB} Set if the worker used a dynamically loadable bundle to process\n\
     \ the task. The bundle could be a WASM blob, JS bundle, etc.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\ENQ\DC2\EOT\130\SOH\EOT\n\
+    \\ENQ\EOT\v\STX\SOH\ENQ\DC2\EOT\131\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\SOH\DC2\EOT\130\SOH\v\DC4\n\
+    \\ENQ\EOT\v\STX\SOH\SOH\DC2\EOT\131\SOH\v\DC4\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\ETX\DC2\EOT\130\SOH\ETB\CAN\n\
-    \m\n\
-    \\STX\EOT\f\DC2\ACK\134\SOH\NUL\139\SOH\SOH\SUB_ Identifies the version(s) that a worker is compatible with when polling or identifying itself\n\
+    \\ENQ\EOT\v\STX\SOH\ETX\DC2\EOT\131\SOH\ETB\CAN\n\
+    \\173\SOH\n\
+    \\EOT\EOT\v\STX\STX\DC2\EOT\135\SOH\EOT\FS\SUB\158\SOH If set, the worker is opting in to worker versioning. Otherwise, this is used only as a\n\
+    \ marker for workflow reset points and the BuildIDs search attribute.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\STX\ENQ\DC2\EOT\135\SOH\EOT\b\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\STX\SOH\DC2\EOT\135\SOH\t\ETB\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\STX\ETX\DC2\EOT\135\SOH\SUB\ESC\n\
+    \\151\STX\n\
+    \\STX\EOT\f\DC2\ACK\141\SOH\NUL\150\SOH\SOH\SUB\136\STX Identifies the version(s) that a worker is compatible with when polling or identifying itself,\n\
+    \ and whether or not this worker is opting into the build-id based versioning feature. This is\n\
+    \ used by matching to determine which workers ought to receive what tasks.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\f\SOH\DC2\EOT\134\SOH\b!\n\
+    \\ETX\EOT\f\SOH\DC2\EOT\141\SOH\b!\n\
     \1\n\
-    \\EOT\EOT\f\STX\NUL\DC2\EOT\136\SOH\EOT\CAN\SUB# An opaque whole-worker identifier\n\
+    \\EOT\EOT\f\STX\NUL\DC2\EOT\143\SOH\EOT\CAN\SUB# An opaque whole-worker identifier\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\EOT\136\SOH\EOT\n\
+    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\EOT\143\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\SOH\DC2\EOT\136\SOH\v\DC3\n\
+    \\ENQ\EOT\f\STX\NUL\SOH\DC2\EOT\143\SOH\v\DC3\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\ETX\DC2\EOT\136\SOH\SYN\ETBb\ACKproto3"
+    \\ENQ\EOT\f\STX\NUL\ETX\DC2\EOT\143\SOH\SYN\ETB\n\
+    \t\n\
+    \\EOT\EOT\f\STX\SOH\DC2\EOT\147\SOH\EOT\FS\SUBf If set, the worker is opting in to worker versioning, and wishes to only receive appropriate\n\
+    \ tasks.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\SOH\ENQ\DC2\EOT\147\SOH\EOT\b\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\SOH\SOH\DC2\EOT\147\SOH\t\ETB\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\SOH\ETX\DC2\EOT\147\SOH\SUB\ESCb\ACKproto3"

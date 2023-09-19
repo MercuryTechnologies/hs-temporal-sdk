@@ -683,6 +683,12 @@ vec'input ::
    Data.ProtoLens.Field.HasField s "vec'input" a) =>
   Lens.Family2.LensLike' f s a
 vec'input = Data.ProtoLens.Field.field @"vec'input"
+versioningIntent ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "versioningIntent" a) =>
+  Lens.Family2.LensLike' f s a
+versioningIntent = Data.ProtoLens.Field.field @"versioningIntent"
 workflowExecution ::
   forall f s a.
   (Prelude.Functor f,

@@ -45,6 +45,11 @@ backlogCountHint ::
    Data.ProtoLens.Field.HasField s "backlogCountHint" a) =>
   Lens.Family2.LensLike' f s a
 backlogCountHint = Data.ProtoLens.Field.field @"backlogCountHint"
+buildId ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "buildId" a) =>
+  Lens.Family2.LensLike' f s a
+buildId = Data.ProtoLens.Field.field @"buildId"
 buildIds ::
   forall f s a.
   (Prelude.Functor f,
@@ -130,6 +135,12 @@ name ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "name" a) =>
   Lens.Family2.LensLike' f s a
 name = Data.ProtoLens.Field.field @"name"
+normalName ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "normalName" a) =>
+  Lens.Family2.LensLike' f s a
+normalName = Data.ProtoLens.Field.field @"normalName"
 ownerHostName ::
   forall f s a.
   (Prelude.Functor f,
@@ -142,6 +153,12 @@ ratePerSecond ::
    Data.ProtoLens.Field.HasField s "ratePerSecond" a) =>
   Lens.Family2.LensLike' f s a
 ratePerSecond = Data.ProtoLens.Field.field @"ratePerSecond"
+reachability ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "reachability" a) =>
+  Lens.Family2.LensLike' f s a
+reachability = Data.ProtoLens.Field.field @"reachability"
 readLevel ::
   forall f s a.
   (Prelude.Functor f,
@@ -166,18 +183,38 @@ taskIdBlock ::
    Data.ProtoLens.Field.HasField s "taskIdBlock" a) =>
   Lens.Family2.LensLike' f s a
 taskIdBlock = Data.ProtoLens.Field.field @"taskIdBlock"
+taskQueue ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "taskQueue" a) =>
+  Lens.Family2.LensLike' f s a
+taskQueue = Data.ProtoLens.Field.field @"taskQueue"
+taskQueueReachability ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "taskQueueReachability" a) =>
+  Lens.Family2.LensLike' f s a
+taskQueueReachability
+  = Data.ProtoLens.Field.field @"taskQueueReachability"
 vec'buildIds ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "vec'buildIds" a) =>
   Lens.Family2.LensLike' f s a
 vec'buildIds = Data.ProtoLens.Field.field @"vec'buildIds"
-versionSetId ::
+vec'reachability ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "versionSetId" a) =>
+   Data.ProtoLens.Field.HasField s "vec'reachability" a) =>
   Lens.Family2.LensLike' f s a
-versionSetId = Data.ProtoLens.Field.field @"versionSetId"
+vec'reachability = Data.ProtoLens.Field.field @"vec'reachability"
+vec'taskQueueReachability ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'taskQueueReachability" a) =>
+  Lens.Family2.LensLike' f s a
+vec'taskQueueReachability
+  = Data.ProtoLens.Field.field @"vec'taskQueueReachability"
 workerTaskQueue ::
   forall f s a.
   (Prelude.Functor f,

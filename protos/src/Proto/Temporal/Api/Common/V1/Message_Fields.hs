@@ -150,6 +150,12 @@ runId ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "runId" a) =>
   Lens.Family2.LensLike' f s a
 runId = Data.ProtoLens.Field.field @"runId"
+useVersioning ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "useVersioning" a) =>
+  Lens.Family2.LensLike' f s a
+useVersioning = Data.ProtoLens.Field.field @"useVersioning"
 value ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "value" a) =>

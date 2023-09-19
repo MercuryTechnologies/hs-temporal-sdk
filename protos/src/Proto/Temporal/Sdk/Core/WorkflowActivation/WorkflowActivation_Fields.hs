@@ -70,6 +70,13 @@ cause ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "cause" a) =>
   Lens.Family2.LensLike' f s a
 cause = Data.ProtoLens.Field.field @"cause"
+continueAsNewSuggested ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "continueAsNewSuggested" a) =>
+  Lens.Family2.LensLike' f s a
+continueAsNewSuggested
+  = Data.ProtoLens.Field.field @"continueAsNewSuggested"
 continuedFailure ::
   forall f s a.
   (Prelude.Functor f,
@@ -142,6 +149,12 @@ historyLength ::
    Data.ProtoLens.Field.HasField s "historyLength" a) =>
   Lens.Family2.LensLike' f s a
 historyLength = Data.ProtoLens.Field.field @"historyLength"
+historySizeBytes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "historySizeBytes" a) =>
+  Lens.Family2.LensLike' f s a
+historySizeBytes = Data.ProtoLens.Field.field @"historySizeBytes"
 identity ::
   forall f s a.
   (Prelude.Functor f,

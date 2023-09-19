@@ -6,7 +6,9 @@
 module Proto.Temporal.Api.Enums.V1.TaskQueue (
         TaskQueueKind(..), TaskQueueKind(),
         TaskQueueKind'UnrecognizedValue, TaskQueueType(..),
-        TaskQueueType(), TaskQueueType'UnrecognizedValue
+        TaskQueueType(), TaskQueueType'UnrecognizedValue,
+        TaskReachability(..), TaskReachability(),
+        TaskReachability'UnrecognizedValue
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -180,4 +182,106 @@ instance Prelude.Enum TaskQueueType where
 instance Data.ProtoLens.FieldDefault TaskQueueType where
   fieldDefault = TASK_QUEUE_TYPE_UNSPECIFIED
 instance Control.DeepSeq.NFData TaskQueueType where
+  rnf x__ = Prelude.seq x__ ()
+newtype TaskReachability'UnrecognizedValue
+  = TaskReachability'UnrecognizedValue Data.Int.Int32
+  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+data TaskReachability
+  = TASK_REACHABILITY_UNSPECIFIED |
+    TASK_REACHABILITY_NEW_WORKFLOWS |
+    TASK_REACHABILITY_EXISTING_WORKFLOWS |
+    TASK_REACHABILITY_OPEN_WORKFLOWS |
+    TASK_REACHABILITY_CLOSED_WORKFLOWS |
+    TaskReachability'Unrecognized !TaskReachability'UnrecognizedValue
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.MessageEnum TaskReachability where
+  maybeToEnum 0 = Prelude.Just TASK_REACHABILITY_UNSPECIFIED
+  maybeToEnum 1 = Prelude.Just TASK_REACHABILITY_NEW_WORKFLOWS
+  maybeToEnum 2 = Prelude.Just TASK_REACHABILITY_EXISTING_WORKFLOWS
+  maybeToEnum 3 = Prelude.Just TASK_REACHABILITY_OPEN_WORKFLOWS
+  maybeToEnum 4 = Prelude.Just TASK_REACHABILITY_CLOSED_WORKFLOWS
+  maybeToEnum k
+    = Prelude.Just
+        (TaskReachability'Unrecognized
+           (TaskReachability'UnrecognizedValue (Prelude.fromIntegral k)))
+  showEnum TASK_REACHABILITY_UNSPECIFIED
+    = "TASK_REACHABILITY_UNSPECIFIED"
+  showEnum TASK_REACHABILITY_NEW_WORKFLOWS
+    = "TASK_REACHABILITY_NEW_WORKFLOWS"
+  showEnum TASK_REACHABILITY_EXISTING_WORKFLOWS
+    = "TASK_REACHABILITY_EXISTING_WORKFLOWS"
+  showEnum TASK_REACHABILITY_OPEN_WORKFLOWS
+    = "TASK_REACHABILITY_OPEN_WORKFLOWS"
+  showEnum TASK_REACHABILITY_CLOSED_WORKFLOWS
+    = "TASK_REACHABILITY_CLOSED_WORKFLOWS"
+  showEnum
+    (TaskReachability'Unrecognized (TaskReachability'UnrecognizedValue k))
+    = Prelude.show k
+  readEnum k
+    | (Prelude.==) k "TASK_REACHABILITY_UNSPECIFIED"
+    = Prelude.Just TASK_REACHABILITY_UNSPECIFIED
+    | (Prelude.==) k "TASK_REACHABILITY_NEW_WORKFLOWS"
+    = Prelude.Just TASK_REACHABILITY_NEW_WORKFLOWS
+    | (Prelude.==) k "TASK_REACHABILITY_EXISTING_WORKFLOWS"
+    = Prelude.Just TASK_REACHABILITY_EXISTING_WORKFLOWS
+    | (Prelude.==) k "TASK_REACHABILITY_OPEN_WORKFLOWS"
+    = Prelude.Just TASK_REACHABILITY_OPEN_WORKFLOWS
+    | (Prelude.==) k "TASK_REACHABILITY_CLOSED_WORKFLOWS"
+    = Prelude.Just TASK_REACHABILITY_CLOSED_WORKFLOWS
+    | Prelude.otherwise
+    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
+instance Prelude.Bounded TaskReachability where
+  minBound = TASK_REACHABILITY_UNSPECIFIED
+  maxBound = TASK_REACHABILITY_CLOSED_WORKFLOWS
+instance Prelude.Enum TaskReachability where
+  toEnum k__
+    = Prelude.maybe
+        (Prelude.error
+           ((Prelude.++)
+              "toEnum: unknown value for enum TaskReachability: "
+              (Prelude.show k__)))
+        Prelude.id (Data.ProtoLens.maybeToEnum k__)
+  fromEnum TASK_REACHABILITY_UNSPECIFIED = 0
+  fromEnum TASK_REACHABILITY_NEW_WORKFLOWS = 1
+  fromEnum TASK_REACHABILITY_EXISTING_WORKFLOWS = 2
+  fromEnum TASK_REACHABILITY_OPEN_WORKFLOWS = 3
+  fromEnum TASK_REACHABILITY_CLOSED_WORKFLOWS = 4
+  fromEnum
+    (TaskReachability'Unrecognized (TaskReachability'UnrecognizedValue k))
+    = Prelude.fromIntegral k
+  succ TASK_REACHABILITY_CLOSED_WORKFLOWS
+    = Prelude.error
+        "TaskReachability.succ: bad argument TASK_REACHABILITY_CLOSED_WORKFLOWS. This value would be out of bounds."
+  succ TASK_REACHABILITY_UNSPECIFIED
+    = TASK_REACHABILITY_NEW_WORKFLOWS
+  succ TASK_REACHABILITY_NEW_WORKFLOWS
+    = TASK_REACHABILITY_EXISTING_WORKFLOWS
+  succ TASK_REACHABILITY_EXISTING_WORKFLOWS
+    = TASK_REACHABILITY_OPEN_WORKFLOWS
+  succ TASK_REACHABILITY_OPEN_WORKFLOWS
+    = TASK_REACHABILITY_CLOSED_WORKFLOWS
+  succ (TaskReachability'Unrecognized _)
+    = Prelude.error
+        "TaskReachability.succ: bad argument: unrecognized value"
+  pred TASK_REACHABILITY_UNSPECIFIED
+    = Prelude.error
+        "TaskReachability.pred: bad argument TASK_REACHABILITY_UNSPECIFIED. This value would be out of bounds."
+  pred TASK_REACHABILITY_NEW_WORKFLOWS
+    = TASK_REACHABILITY_UNSPECIFIED
+  pred TASK_REACHABILITY_EXISTING_WORKFLOWS
+    = TASK_REACHABILITY_NEW_WORKFLOWS
+  pred TASK_REACHABILITY_OPEN_WORKFLOWS
+    = TASK_REACHABILITY_EXISTING_WORKFLOWS
+  pred TASK_REACHABILITY_CLOSED_WORKFLOWS
+    = TASK_REACHABILITY_OPEN_WORKFLOWS
+  pred (TaskReachability'Unrecognized _)
+    = Prelude.error
+        "TaskReachability.pred: bad argument: unrecognized value"
+  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
+  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
+  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
+  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
+instance Data.ProtoLens.FieldDefault TaskReachability where
+  fieldDefault = TASK_REACHABILITY_UNSPECIFIED
+instance Control.DeepSeq.NFData TaskReachability where
   rnf x__ = Prelude.seq x__ ()

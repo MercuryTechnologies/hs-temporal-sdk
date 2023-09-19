@@ -2,6 +2,7 @@ use crate::client::{rpc_req, rpc_resp, RPCError, CRPCError, TemporalCall, RpcCal
 use crate::runtime::{HsCallback, Capability, MVar};
 use ffi_convert::{CArray, CReprOf};
 use temporal_client::WorkflowService;
+use temporal_client::TestService;
 
 macro_rules! rpc_call {
   ($retry_client:ident, $call:ident, $call_name:ident) => {
@@ -798,3 +799,94 @@ pub extern "C" fn hs_update_worker_build_id_compatibility(client: *mut ClientRef
     }
   });
 }
+
+#[no_mangle]
+pub extern "C" fn hs_get_current_time(client: *mut ClientRef, c_call: *const RpcCall, mvar: *mut MVar, cap: Capability, error_slot: *mut*mut CRPCError, result_slot: *mut*mut CArray<u8>) -> () {
+  let client = unsafe { &mut *client };
+  let mut retry_client = client.retry_client.clone();
+  let call: TemporalCall = unsafe { (&*c_call).into() };
+
+  let callback: HsCallback<CArray<u8>, CRPCError> = HsCallback { cap, mvar, result_slot, error_slot };
+  client.runtime.future_result_into_hs(callback, async move {
+    match rpc_call!(retry_client, call, get_current_time) {
+      Ok(resp) => Ok(CArray::c_repr_of(resp).unwrap()),
+      Err(err) => Err(err)
+    }
+  });
+}
+
+#[no_mangle]
+pub extern "C" fn hs_lock_time_skipping(client: *mut ClientRef, c_call: *const RpcCall, mvar: *mut MVar, cap: Capability, error_slot: *mut*mut CRPCError, result_slot: *mut*mut CArray<u8>) -> () {
+  let client = unsafe { &mut *client };
+  let mut retry_client = client.retry_client.clone();
+  let call: TemporalCall = unsafe { (&*c_call).into() };
+
+  let callback: HsCallback<CArray<u8>, CRPCError> = HsCallback { cap, mvar, result_slot, error_slot };
+  client.runtime.future_result_into_hs(callback, async move {
+    match rpc_call!(retry_client, call, lock_time_skipping) {
+      Ok(resp) => Ok(CArray::c_repr_of(resp).unwrap()),
+      Err(err) => Err(err)
+    }
+  });
+}
+
+#[no_mangle]
+pub extern "C" fn hs_sleep_until(client: *mut ClientRef, c_call: *const RpcCall, mvar: *mut MVar, cap: Capability, error_slot: *mut*mut CRPCError, result_slot: *mut*mut CArray<u8>) -> () {
+  let client = unsafe { &mut *client };
+  let mut retry_client = client.retry_client.clone();
+  let call: TemporalCall = unsafe { (&*c_call).into() };
+
+  let callback: HsCallback<CArray<u8>, CRPCError> = HsCallback { cap, mvar, result_slot, error_slot };
+  client.runtime.future_result_into_hs(callback, async move {
+    match rpc_call!(retry_client, call, sleep_until) {
+      Ok(resp) => Ok(CArray::c_repr_of(resp).unwrap()),
+      Err(err) => Err(err)
+    }
+  });
+}
+
+#[no_mangle]
+pub extern "C" fn hs_sleep(client: *mut ClientRef, c_call: *const RpcCall, mvar: *mut MVar, cap: Capability, error_slot: *mut*mut CRPCError, result_slot: *mut*mut CArray<u8>) -> () {
+  let client = unsafe { &mut *client };
+  let mut retry_client = client.retry_client.clone();
+  let call: TemporalCall = unsafe { (&*c_call).into() };
+
+  let callback: HsCallback<CArray<u8>, CRPCError> = HsCallback { cap, mvar, result_slot, error_slot };
+  client.runtime.future_result_into_hs(callback, async move {
+    match rpc_call!(retry_client, call, sleep) {
+      Ok(resp) => Ok(CArray::c_repr_of(resp).unwrap()),
+      Err(err) => Err(err)
+    }
+  });
+}
+
+#[no_mangle]
+pub extern "C" fn hs_unlock_time_skipping_with_sleep(client: *mut ClientRef, c_call: *const RpcCall, mvar: *mut MVar, cap: Capability, error_slot: *mut*mut CRPCError, result_slot: *mut*mut CArray<u8>) -> () {
+  let client = unsafe { &mut *client };
+  let mut retry_client = client.retry_client.clone();
+  let call: TemporalCall = unsafe { (&*c_call).into() };
+
+  let callback: HsCallback<CArray<u8>, CRPCError> = HsCallback { cap, mvar, result_slot, error_slot };
+  client.runtime.future_result_into_hs(callback, async move {
+    match rpc_call!(retry_client, call, unlock_time_skipping_with_sleep) {
+      Ok(resp) => Ok(CArray::c_repr_of(resp).unwrap()),
+      Err(err) => Err(err)
+    }
+  });
+}
+
+#[no_mangle]
+pub extern "C" fn hs_unlock_time_skipping(client: *mut ClientRef, c_call: *const RpcCall, mvar: *mut MVar, cap: Capability, error_slot: *mut*mut CRPCError, result_slot: *mut*mut CArray<u8>) -> () {
+  let client = unsafe { &mut *client };
+  let mut retry_client = client.retry_client.clone();
+  let call: TemporalCall = unsafe { (&*c_call).into() };
+
+  let callback: HsCallback<CArray<u8>, CRPCError> = HsCallback { cap, mvar, result_slot, error_slot };
+  client.runtime.future_result_into_hs(callback, async move {
+    match rpc_call!(retry_client, call, unlock_time_skipping) {
+      Ok(resp) => Ok(CArray::c_repr_of(resp).unwrap()),
+      Err(err) => Err(err)
+    }
+  });
+}
+

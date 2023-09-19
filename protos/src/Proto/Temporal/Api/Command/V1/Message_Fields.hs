@@ -643,6 +643,13 @@ upsertedMemo ::
    Data.ProtoLens.Field.HasField s "upsertedMemo" a) =>
   Lens.Family2.LensLike' f s a
 upsertedMemo = Data.ProtoLens.Field.field @"upsertedMemo"
+useCompatibleVersion ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "useCompatibleVersion" a) =>
+  Lens.Family2.LensLike' f s a
+useCompatibleVersion
+  = Data.ProtoLens.Field.field @"useCompatibleVersion"
 value ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "value" a) =>

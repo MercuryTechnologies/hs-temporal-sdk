@@ -39,6 +39,12 @@ import qualified Proto.Temporal.Api.Sdk.V1.TaskCompleteMetadata
 import qualified Proto.Temporal.Api.Taskqueue.V1.Message
 import qualified Proto.Temporal.Api.Update.V1.Message
 import qualified Proto.Temporal.Api.Workflow.V1.Message
+acceptedEventId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "acceptedEventId" a) =>
+  Lens.Family2.LensLike' f s a
+acceptedEventId = Data.ProtoLens.Field.field @"acceptedEventId"
 acceptedRequest ::
   forall f s a.
   (Prelude.Functor f,
@@ -776,6 +782,13 @@ maybe'signalExternalWorkflowExecutionInitiatedEventAttributes ::
 maybe'signalExternalWorkflowExecutionInitiatedEventAttributes
   = Data.ProtoLens.Field.field
       @"maybe'signalExternalWorkflowExecutionInitiatedEventAttributes"
+maybe'sourceVersionStamp ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'sourceVersionStamp" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'sourceVersionStamp
+  = Data.ProtoLens.Field.field @"maybe'sourceVersionStamp"
 maybe'startChildWorkflowExecutionFailedEventAttributes ::
   forall f s a.
   (Prelude.Functor f,
@@ -1321,6 +1334,13 @@ skipGenerateWorkflowTask ::
   Lens.Family2.LensLike' f s a
 skipGenerateWorkflowTask
   = Data.ProtoLens.Field.field @"skipGenerateWorkflowTask"
+sourceVersionStamp ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "sourceVersionStamp" a) =>
+  Lens.Family2.LensLike' f s a
+sourceVersionStamp
+  = Data.ProtoLens.Field.field @"sourceVersionStamp"
 startChildWorkflowExecutionFailedEventAttributes ::
   forall f s a.
   (Prelude.Functor f,
@@ -1421,6 +1441,13 @@ upsertedMemo ::
    Data.ProtoLens.Field.HasField s "upsertedMemo" a) =>
   Lens.Family2.LensLike' f s a
 upsertedMemo = Data.ProtoLens.Field.field @"upsertedMemo"
+useCompatibleVersion ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "useCompatibleVersion" a) =>
+  Lens.Family2.LensLike' f s a
+useCompatibleVersion
+  = Data.ProtoLens.Field.field @"useCompatibleVersion"
 value ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "value" a) =>

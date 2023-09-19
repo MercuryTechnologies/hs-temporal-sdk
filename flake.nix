@@ -99,9 +99,11 @@
                 --proto_path=${temporal-sdk-core}/protos/local \
                 --proto_path=${temporal-sdk-core}/protos/api_upstream \
                 --proto_path=${temporal-sdk-core}/protos/grpc \
+                --proto_path=${temporal-sdk-core}/protos/testsrv_upstream \
                 ${temporal-sdk-core}/protos/local/**/*.proto \
                 ${temporal-sdk-core}/protos/api_upstream/**/*.proto \
                 ${temporal-sdk-core}/protos/grpc/**/*.proto \
+                ${temporal-sdk-core}/protos/testsrv_upstream/temporal/**/*.proto \
                 ${pkgs.protobuf}/include/**/*.proto
             '';
           in flake.devShells // {

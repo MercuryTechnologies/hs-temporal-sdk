@@ -31,6 +31,7 @@ import qualified Proto.Dependencies.Gogoproto.Gogo
 import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Temporal.Api.Common.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.BatchOperation
+import qualified Proto.Temporal.Api.Enums.V1.Reset
 closeTime ::
   forall f s a.
   (Prelude.Functor f,
@@ -93,6 +94,18 @@ maybe'startTime ::
    Data.ProtoLens.Field.HasField s "maybe'startTime" a) =>
   Lens.Family2.LensLike' f s a
 maybe'startTime = Data.ProtoLens.Field.field @"maybe'startTime"
+resetReapplyType ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "resetReapplyType" a) =>
+  Lens.Family2.LensLike' f s a
+resetReapplyType = Data.ProtoLens.Field.field @"resetReapplyType"
+resetType ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "resetType" a) =>
+  Lens.Family2.LensLike' f s a
+resetType = Data.ProtoLens.Field.field @"resetType"
 signal ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "signal" a) =>

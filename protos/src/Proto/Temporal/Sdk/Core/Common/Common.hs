@@ -4,7 +4,8 @@
 {-# OPTIONS_GHC -Wno-duplicate-exports#-}
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
 module Proto.Temporal.Sdk.Core.Common.Common (
-        NamespacedWorkflowExecution()
+        NamespacedWorkflowExecution(), VersioningIntent(..),
+        VersioningIntent(), VersioningIntent'UnrecognizedValue
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -259,6 +260,76 @@ instance Control.DeepSeq.NFData NamespacedWorkflowExecution where
                    (_NamespacedWorkflowExecution'workflowId x__)
                    (Control.DeepSeq.deepseq
                       (_NamespacedWorkflowExecution'runId x__) ())))
+newtype VersioningIntent'UnrecognizedValue
+  = VersioningIntent'UnrecognizedValue Data.Int.Int32
+  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+data VersioningIntent
+  = UNSPECIFIED |
+    COMPATIBLE |
+    DEFAULT |
+    VersioningIntent'Unrecognized !VersioningIntent'UnrecognizedValue
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.MessageEnum VersioningIntent where
+  maybeToEnum 0 = Prelude.Just UNSPECIFIED
+  maybeToEnum 1 = Prelude.Just COMPATIBLE
+  maybeToEnum 2 = Prelude.Just DEFAULT
+  maybeToEnum k
+    = Prelude.Just
+        (VersioningIntent'Unrecognized
+           (VersioningIntent'UnrecognizedValue (Prelude.fromIntegral k)))
+  showEnum UNSPECIFIED = "UNSPECIFIED"
+  showEnum COMPATIBLE = "COMPATIBLE"
+  showEnum DEFAULT = "DEFAULT"
+  showEnum
+    (VersioningIntent'Unrecognized (VersioningIntent'UnrecognizedValue k))
+    = Prelude.show k
+  readEnum k
+    | (Prelude.==) k "UNSPECIFIED" = Prelude.Just UNSPECIFIED
+    | (Prelude.==) k "COMPATIBLE" = Prelude.Just COMPATIBLE
+    | (Prelude.==) k "DEFAULT" = Prelude.Just DEFAULT
+    | Prelude.otherwise
+    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
+instance Prelude.Bounded VersioningIntent where
+  minBound = UNSPECIFIED
+  maxBound = DEFAULT
+instance Prelude.Enum VersioningIntent where
+  toEnum k__
+    = Prelude.maybe
+        (Prelude.error
+           ((Prelude.++)
+              "toEnum: unknown value for enum VersioningIntent: "
+              (Prelude.show k__)))
+        Prelude.id (Data.ProtoLens.maybeToEnum k__)
+  fromEnum UNSPECIFIED = 0
+  fromEnum COMPATIBLE = 1
+  fromEnum DEFAULT = 2
+  fromEnum
+    (VersioningIntent'Unrecognized (VersioningIntent'UnrecognizedValue k))
+    = Prelude.fromIntegral k
+  succ DEFAULT
+    = Prelude.error
+        "VersioningIntent.succ: bad argument DEFAULT. This value would be out of bounds."
+  succ UNSPECIFIED = COMPATIBLE
+  succ COMPATIBLE = DEFAULT
+  succ (VersioningIntent'Unrecognized _)
+    = Prelude.error
+        "VersioningIntent.succ: bad argument: unrecognized value"
+  pred UNSPECIFIED
+    = Prelude.error
+        "VersioningIntent.pred: bad argument UNSPECIFIED. This value would be out of bounds."
+  pred COMPATIBLE = UNSPECIFIED
+  pred DEFAULT = COMPATIBLE
+  pred (VersioningIntent'Unrecognized _)
+    = Prelude.error
+        "VersioningIntent.pred: bad argument: unrecognized value"
+  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
+  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
+  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
+  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
+instance Data.ProtoLens.FieldDefault VersioningIntent where
+  fieldDefault = UNSPECIFIED
+instance Control.DeepSeq.NFData VersioningIntent where
+  rnf x__ = Prelude.seq x__ ()
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
@@ -267,8 +338,13 @@ packedFileDescriptor
     \\tnamespace\CAN\SOH \SOH(\tR\tnamespace\DC2\US\n\
     \\vworkflow_id\CAN\STX \SOH(\tR\n\
     \workflowId\DC2\NAK\n\
-    \\ACKrun_id\CAN\ETX \SOH(\tR\ENQrunIdB\"\234\STX\USTemporalio::Bridge::Api::CommonJ\236\ETX\n\
-    \\ACK\DC2\EOT\NUL\NUL\SI\SOH\n\
+    \\ACKrun_id\CAN\ETX \SOH(\tR\ENQrunId*@\n\
+    \\DLEVersioningIntent\DC2\SI\n\
+    \\vUNSPECIFIED\DLE\NUL\DC2\SO\n\
+    \\n\
+    \COMPATIBLE\DLE\SOH\DC2\v\n\
+    \\aDEFAULT\DLE\STXB\"\234\STX\USTemporalio::Bridge::Api::CommonJ\236\t\n\
+    \\ACK\DC2\EOT\NUL\NUL\US\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
@@ -318,4 +394,37 @@ packedFileDescriptor
     \\f\n\
     \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\SO\v\DC1\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\SO\DC4\NAKb\ACKproto3"
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\SO\DC4\NAK\n\
+    \\128\SOH\n\
+    \\STX\ENQ\NUL\DC2\EOT\DC3\NUL\US\SOH\SUBt An indication of user's intent concerning what Build ID versioning approach should be used for\n\
+    \ a specific command\n\
+    \\n\
+    \\n\
+    \\n\
+    \\ETX\ENQ\NUL\SOH\DC2\ETX\DC3\ENQ\NAK\n\
+    \\204\SOH\n\
+    \\EOT\ENQ\NUL\STX\NUL\DC2\ETX\ETB\EOT\DC4\SUB\190\SOH Indicates that core should choose the most sensible default behavior for the type of\n\
+    \ command, accounting for whether the command will be run on the same task queue as the current\n\
+    \ worker.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\ENQ\NUL\STX\NUL\SOH\DC2\ETX\ETB\EOT\SI\n\
+    \\f\n\
+    \\ENQ\ENQ\NUL\STX\NUL\STX\DC2\ETX\ETB\DC2\DC3\n\
+    \\215\SOH\n\
+    \\EOT\ENQ\NUL\STX\SOH\DC2\ETX\ESC\EOT\DC3\SUB\201\SOH Indicates that the command should run on a worker with compatible version if possible. It may\n\
+    \ not be possible if the target task queue does not also have knowledge of the current worker's\n\
+    \ build ID.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\ENQ\NUL\STX\SOH\SOH\DC2\ETX\ESC\EOT\SO\n\
+    \\f\n\
+    \\ENQ\ENQ\NUL\STX\SOH\STX\DC2\ETX\ESC\DC1\DC2\n\
+    \r\n\
+    \\EOT\ENQ\NUL\STX\STX\DC2\ETX\RS\EOT\DLE\SUBe Indicates that the command should run on the target task queue's current overall-default\n\
+    \ build ID.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\ENQ\NUL\STX\STX\SOH\DC2\ETX\RS\EOT\v\n\
+    \\f\n\
+    \\ENQ\ENQ\NUL\STX\STX\STX\DC2\ETX\RS\SO\SIb\ACKproto3"
