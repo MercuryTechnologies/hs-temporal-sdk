@@ -6,11 +6,11 @@ import Temporal.Core.Client
 import Temporal.Internal.FFI
 import Proto.Temporal.Api.Testservice.V1.Service
 import Proto.Temporal.Api.Testservice.V1.RequestResponse
-import Proto.Google.Protobuf.Empty (Empty)
+import Data.ProtoLens (Message(defMessage))
 
 foreign import ccall "hs_get_current_time" hs_get_current_time :: PrimRpcCall
-getCurrentTime :: Client -> Empty -> IO (Either RpcError GetCurrentTimeResponse)
-getCurrentTime = call @TestService @"getCurrentTime" hs_get_current_time
+getCurrentTime :: Client -> IO (Either RpcError GetCurrentTimeResponse)
+getCurrentTime client = call @TestService @"getCurrentTime" hs_get_current_time client defMessage
 
 foreign import ccall "hs_lock_time_skipping" hs_lock_time_skipping :: PrimRpcCall
 lockTimeSkipping :: Client -> LockTimeSkippingRequest -> IO (Either RpcError LockTimeSkippingResponse)

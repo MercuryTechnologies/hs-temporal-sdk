@@ -42,6 +42,7 @@ dependencies:
 - hs-opentelemetry-propagator-w3c
 - base64
 - zlib
+- network
 
 default-extensions:
 - BangPatterns

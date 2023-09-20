@@ -19,109 +19,116 @@ import Foreign.ForeignPtr
 import Temporal.Runtime
 import Temporal.Internal.FFI
 
--- data SDKDefault = SDKDefault { sdkName :: String, sdkVersion :: String }
+data SDKDefault = SDKDefault { sdkName :: String, sdkVersion :: String }
 
--- data EphemeralExeVersion 
---   = Default SDKDefault
---     -- ^ Use a default version for the given SDK name and version.
---   | Fixed String
---     -- ^ Specific version.
+data EphemeralExeVersion 
+  = Default SDKDefault
+    -- ^ Use a default version for the given SDK name and version.
+  | Fixed String
+    -- ^ Specific version.
 
--- instance ToJSON EphemeralExeVersion where
---   toJSON (Default (SDKDefault name version)) = object 
---     [ "type" .=  String "Default"
---     , "contents" .= object
---       [ "sdk_name" .= name
---       , "sdk_version" .= version
---       ]
---     ]
---   toJSON (Fixed version) = object 
---     [ "type" .=  String "Fixed"
---     , "contents" .= version
---     ]
+instance ToJSON EphemeralExeVersion where
+  toJSON (Default (SDKDefault name version)) = object 
+    [ "type" .=  String "SDKDefault"
+    , "contents" .= object
+      [ "sdk_name" .= name
+      , "sdk_version" .= version
+      ]
+    ]
+  toJSON (Fixed version) = object 
+    [ "type" .=  String "Fixed"
+    , "contents" .= version
+    ]
 
--- data EphemeralExe 
---   = ExistingPath FilePath
---     -- ^ Existing path on the filesystem for the executable.
---   | CachedDownload EphemeralExeVersion (Maybe FilePath)
---     -- ^ Download the executable if not already there.
+data EphemeralExe 
+  = ExistingPath FilePath
+    -- ^ Existing path on the filesystem for the executable.
+  | CachedDownload EphemeralExeVersion (Maybe FilePath)
+    -- ^ Download the executable if not already there.
 
--- instance ToJSON EphemeralExe where
---   toJSON (ExistingPath path) = object 
---     [ "type" .=  String "ExistingPath"
---     , "contents" .= path
---     ]
---   toJSON (CachedDownload version destDir) = object 
---     [ "type" .=  String "CachedDownload"
---     , "contents" .= object
---       [ "version" .= version
---       , "dest_dir" .= destDir
---       ]
---     ]
+instance ToJSON EphemeralExe where
+  toJSON (ExistingPath path) = object 
+    [ "type" .=  String "ExistingPath"
+    , "contents" .= path
+    ]
+  toJSON (CachedDownload version destDir) = object 
+    [ "type" .=  String "CachedDownload"
+    , "contents" .= object
+      [ "version" .= version
+      , "dest_dir" .= destDir
+      ]
+    ]
 
--- data TemporalDevServerConfig = TemporalDevServerConfig
---   { exe :: EphemeralExe
---   , namespace :: FilePath
---   , ip :: String
---   , port :: Maybe Word16
---   , dbFilename :: Maybe FilePath
---   , ui :: Bool
---   , log :: (String, String)
---   , extraArgs :: [String]
---   }
+data TemporalDevServerConfig = TemporalDevServerConfig
+  { exe :: EphemeralExe
+  , namespace :: FilePath
+  , ip :: String
+  , port :: Maybe Word16
+  , dbFilename :: Maybe FilePath
+  , ui :: Bool
+  , log :: (String, String)
+  , extraArgs :: [String]
+  }
 
--- deriveToJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''TemporalDevServerConfig
+deriveToJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''TemporalDevServerConfig
 
--- defaultTemporalDevServerConfig :: TemporalDevServerConfig
--- defaultTemporalDevServerConfig = TemporalDevServerConfig
---   { exe = ExistingPath "temporal"
---   , namespace = "default"
---   , ip = "127.0.0.1"
---   , port = Nothing
---   , dbFilename = Nothing
---   , ui = True
---   , log = ("pretty", "warn")
---   , extraArgs = []
---   }
+defaultTemporalDevServerConfig :: TemporalDevServerConfig
+defaultTemporalDevServerConfig = TemporalDevServerConfig
+  { exe = ExistingPath "temporal"
+  , namespace = "default"
+  , ip = "127.0.0.1"
+  , port = Nothing
+  , dbFilename = Nothing
+  , ui = True
+  , log = ("pretty", "warn")
+  , extraArgs = []
+  }
 
--- newtype EphemeralServer = EphemeralServer { ephemeralServerPtr :: ForeignPtr EphemeralServer }
+newtype EphemeralServer = EphemeralServer { ephemeralServerPtr :: ForeignPtr EphemeralServer }
 
--- instance ManagedRustValue EphemeralServer where
---   type RustRef EphemeralServer = Ptr EphemeralServer
---   type HaskellRep EphemeralServer = EphemeralServer
---   fromRust _ ptr = 
---     EphemeralServer <$> newForeignPtr raw_shutdownEphemeralServer ptr
+instance ManagedRustValue EphemeralServer where
+  type RustRef EphemeralServer = Ptr EphemeralServer
+  type HaskellRep EphemeralServer = EphemeralServer
+  fromRust _ ptr = 
+    EphemeralServer <$> newForeignPtr raw_shutdownEphemeralServer ptr
 
--- foreign import ccall "hs_temporal_start_dev_server" raw_startDevServer 
---   :: Ptr Runtime
---   -> CString 
---   -> TokioCall (CArray Word8) EphemeralServer
+foreign import ccall "hs_temporal_start_dev_server" raw_startDevServer 
+  :: Ptr Runtime
+  -> CString 
+  -> TokioCall (CArray Word8) EphemeralServer
 
--- -- | TODO: this is broken. I think it is dropping the Runtime on the rust side.
--- startDevServer :: Runtime -> TemporalDevServerConfig -> IO (Either ByteString EphemeralServer)
--- startDevServer r c = withRuntime r $ \rp -> useAsCString (BL.toStrict (encode c )) $ \cstr -> do
---   makeTokioAsyncCall 
---     (raw_startDevServer rp cstr)
---     (fromRust (Proxy @(CArray Word8)))
---     (fromRust (Proxy @EphemeralServer))
+-- | TODO: this is broken. I think it is dropping the Runtime on the rust side.
+startDevServer :: Runtime -> TemporalDevServerConfig -> IO (Either ByteString EphemeralServer)
+startDevServer r c = withRuntime r $ \rp -> useAsCString (BL.toStrict (encode c )) $ \cstr -> do
+  makeTokioAsyncCall 
+    (raw_startDevServer rp cstr)
+    (fromRust (Proxy @(CArray Word8)))
+    (fromRust (Proxy @EphemeralServer))
 
--- foreign import ccall "&hs_temporal_shutdown_ephemeral_server" raw_shutdownEphemeralServer :: FunPtr (Ptr EphemeralServer -> IO ())
+foreign import ccall "&hs_temporal_shutdown_ephemeral_server" raw_shutdownEphemeralServer :: FunPtr (Ptr EphemeralServer -> IO ())
 
--- shutdownEphemeralServer :: EphemeralServer -> IO ()
--- shutdownEphemeralServer (EphemeralServer e) = finalizeForeignPtr e
+shutdownEphemeralServer :: EphemeralServer -> IO ()
+shutdownEphemeralServer (EphemeralServer e) = finalizeForeignPtr e
 
--- -- TODO
--- -- startDevServerWithOutput
+-- TODO
+-- startDevServerWithOutput
 
--- data TestServerConfig = TestServerConfig
---   { serverConfig :: EphemeralExe
---   , port :: Maybe Word16
---   , extraArgs :: [String]
---   }
+data TestServerConfig = TestServerConfig
+  { exe :: EphemeralExe
+  , port :: Maybe Word16
+  , extraArgs :: [String]
+  }
 
--- deriveToJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''TestServerConfig
+deriveToJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''TestServerConfig
 
--- foreign import ccall "hs_temporal_start_test_server" raw_startTestServer :: CString -> IO (Ptr EphemeralServer)
+foreign import ccall "hs_temporal_start_test_server" raw_startTestServer 
+  :: Ptr Runtime 
+  -> CString 
+  -> TokioCall (CArray Word8) EphemeralServer
 
--- startTestServer :: TestServerConfig -> IO EphemeralServer
--- startTestServer = undefined
+startTestServer :: Runtime -> TestServerConfig -> IO (Either ByteString EphemeralServer)
+startTestServer r conf = withRuntime r $ \rp -> useAsCString (BL.toStrict $ encode conf) $ \cstr -> do
+  makeTokioAsyncCall
+    (raw_startTestServer rp cstr)
+    (fromRust (Proxy @(CArray Word8)))
+    (fromRust (Proxy @EphemeralServer))

@@ -182,7 +182,7 @@ data WorkflowIdReusePolicy
   -- ^ Specifies that if a Workflow Execution with the same Workflow Id is already running, 
   -- it should be terminated and a new Workflow Execution with the same Workflow Id should be started. 
   -- This policy allows for only one Workflow Execution with a specific Workflow Id to be running at any given time.
-  deriving stock (Eq, Ord, Show, Enum, Bounded)
+  deriving stock (Eq, Ord, Read, Show, Enum, Bounded)
 
 workflowIdReusePolicyToProto :: WorkflowIdReusePolicy -> Workflow.WorkflowIdReusePolicy
 workflowIdReusePolicyToProto = \case

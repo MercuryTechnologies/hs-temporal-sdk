@@ -10,7 +10,7 @@ crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 temporal-client = { git = "https://github.com/temporalio/sdk-core", branch = "master" }
-temporal-sdk-core = { git = "https://github.com/temporalio/sdk-core", branch = "master" }
+temporal-sdk-core = { git = "https://github.com/temporalio/sdk-core", branch = "master", features = ["ephemeral-server"] }
 temporal-sdk-core-api = { git = "https://github.com/temporalio/sdk-core", branch = "master" }
 temporal-sdk-core-protos = { git = "https://github.com/temporalio/sdk-core", branch = "master" }
 rustfsm = { git = "https://github.com/temporalio/sdk-core", branch = "master" }
