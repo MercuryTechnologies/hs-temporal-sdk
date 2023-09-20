@@ -48,7 +48,7 @@ launchTestServer = do
   bimap EphemeralServerError (\srv -> (freePort, srv)) <$> startTestServer globalRuntime (hackyConfig freePort)
   where
     hackyConfig port = TestServerConfig 
-      { exe = CachedDownload (Default $ SDKDefault "sdk-typescript" "1.8.6") Nothing 
+      { exe = CachedDownload (Default $ SDKDefault "community-haskell" "0.1.0.0") Nothing 
       , port = Just $ fromIntegral port
       , extraArgs = []
       }

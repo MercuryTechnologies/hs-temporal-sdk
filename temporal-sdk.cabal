@@ -96,6 +96,7 @@ library
     , lens-family
     , monad-logger
     , mtl
+    , network
     , proto-lens
     , random
     , require-callstack
@@ -172,6 +173,7 @@ test-suite temporal-sdk-tests
     , lens-family
     , monad-logger
     , mtl
+    , network
     , proto-lens
     , random
     , require-callstack
