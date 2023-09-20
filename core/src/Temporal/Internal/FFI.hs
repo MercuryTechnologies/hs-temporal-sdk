@@ -32,6 +32,15 @@ class ManagedRustValue r where
   type HaskellRep r :: Type
   fromRust :: proxy r -> RustRef r -> IO (HaskellRep r)
 
+-- | See CUnit in the rust side. I'm not sure about the semantics of an empty
+-- struct in Rust/C, so we'll just call a drop function on it to be safe.
+instance ManagedRustValue () where
+  type RustRef () = Ptr ()
+  type HaskellRep () = ()
+  fromRust _ = rust_dropUnit
+
+foreign import ccall "hs_temporal_drop_unit" rust_dropUnit :: Ptr () -> IO ()
+
 data RustCStringLen = RustCStringLen
   { rustCStringLenBytes :: CString
   , rustCStringLenLen :: CSize

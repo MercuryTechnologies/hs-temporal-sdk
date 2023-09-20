@@ -1,6 +1,10 @@
 module Temporal.EphemeralServer 
   ( launchTestServer
   , launchDevServer
+  , withDevServer
+  , withDevServer'
+  , withTestServer
+  , withTestServer'
   , getFreePort
   , openFreePort
   , EphemeralServerError(..)
@@ -22,11 +26,28 @@ import Data.Bifunctor
 import qualified Network.Socket as N
 import qualified Control.Exception as E
 import qualified System.IO.Error as Error
+import UnliftIO
 
 data EphemeralServerError = EphemeralServerError ByteString
   deriving stock (Show)
 
 instance E.Exception EphemeralServerError
+
+withDevServer :: MonadUnliftIO m => TemporalDevServerConfig -> (EphemeralServer -> m a) -> m a
+withDevServer = withDevServer' globalRuntime
+
+withDevServer' :: MonadUnliftIO m => Runtime -> TemporalDevServerConfig -> (EphemeralServer -> m a) -> m a
+withDevServer' rt conf = bracket 
+  (liftIO (startDevServer rt conf) >>= either (throwIO . EphemeralServerError) pure) 
+  (\e -> liftIO (shutdownEphemeralServer e) >>= either (throwIO . EphemeralServerError) pure)
+
+withTestServer :: MonadUnliftIO m => TestServerConfig -> (EphemeralServer -> m a) -> m a
+withTestServer = withTestServer' globalRuntime
+
+withTestServer' :: MonadUnliftIO m => Runtime -> TestServerConfig -> (EphemeralServer -> m a) -> m a
+withTestServer' rt conf = bracket 
+  (liftIO (startTestServer rt conf) >>= either (throwIO . EphemeralServerError) pure) 
+  (\e -> liftIO (shutdownEphemeralServer e) >>= either (throwIO . EphemeralServerError) pure)
 
 -- | Open a TCP socket on a random free port. This is like 'warp''s
 --   openFreePort.

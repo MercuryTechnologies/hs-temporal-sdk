@@ -1,5 +1,6 @@
 use temporal_sdk_core::ephemeral_server::*;
 use crate::runtime::{RuntimeRef, Runtime, HsCallback, Capability, MVar};
+use crate::worker::{CUnit, Unit};
 use std::ffi::{CStr, c_char};
 use serde::Deserialize;
 use ffi_convert::*;
@@ -108,12 +109,17 @@ pub extern "C" fn hs_temporal_start_dev_server(
 }
 
 #[no_mangle]
-pub extern "C" fn hs_temporal_shutdown_ephemeral_server(server: *mut EphemeralServerRef) {
+pub extern "C" fn hs_temporal_shutdown_ephemeral_server(server: *mut EphemeralServerRef, mvar: *mut MVar, cap: Capability, error_slot: *mut*mut CArray<u8>, result_slot: *mut*mut CUnit) {
   let server_ref = unsafe { Box::from_raw(server) };
   let mut server = server_ref.server;
-  let handle = server_ref.runtime.core.tokio_handle();
-  let _guard = handle.enter();
-  let _result = handle.block_on(server.shutdown());
+  let hs: HsCallback<CUnit, CArray<u8>> = HsCallback { cap, mvar, error_slot, result_slot };
+  server_ref.runtime.future_result_into_hs(hs, async move {
+    let result = server.shutdown().await;
+    match result {
+      Ok(()) => Ok(CUnit::c_repr_of(Unit {}).unwrap()),
+      Err(e) => Err(CArray::c_repr_of(format!("Failed to shutdown server: {}", e).into_bytes()).expect("Failed to convert error to CArray"))
+    }
+  })
 }
 
 /// Configuration for the test server.

@@ -85,35 +85,29 @@ data TestEnv = TestEnv
   }
 
 spec :: Spec
-spec = beforeAll setup needsClient
+spec = aroundAll setup needsClient
   where
-    setup :: IO TestEnv
-    setup = do
-      -- fp <- getFreePort
-      let fp = 8233
-      -- res <- launchDevServer $ defaultTemporalDevServerConfig { port = Just 7294 }
-      -- threadDelay 20000000
-      -- case res of
-      --   Left err -> throwIO err
-      --   Right srv -> pure (fp, srv)
+    setup :: (TestEnv -> IO ()) -> IO ()
+    setup go = do
+      fp <- getFreePort
+      withDevServer (defaultTemporalDevServerConfig { port = Just $ fromIntegral fp }) $ \_ -> do
+        interceptors <- makeOpenTelemetryInterceptor
+        (client, coreClient) <- makeClient fp interceptors
 
-      interceptors <- makeOpenTelemetryInterceptor
-      (client, coreClient) <- makeClient fp interceptors
+        SearchAttributes{customAttributes} <- either throwIO pure =<< listSearchAttributes coreClient (W.Namespace "default")
+        let allTestAttributes = Map.fromList
+              [ ("attr1", Temporal.Operator.Bool)
+              , ("attr2", Temporal.Operator.Int)
+              ]
+        addSearchAttributes coreClient (W.Namespace "default") (allTestAttributes `Map.difference` customAttributes)
 
-      SearchAttributes{customAttributes} <- either throwIO pure =<< listSearchAttributes coreClient (W.Namespace "default")
-      let allTestAttributes = Map.fromList
-            [ ("attr1", Temporal.Operator.Bool)
-            , ("attr2", Temporal.Operator.Int)
-            ]
-      addSearchAttributes coreClient (W.Namespace "default") (allTestAttributes `Map.difference` customAttributes)
-
-      (conf, taskQueue) <- mkBaseConf interceptors
-      pure TestEnv
-        { client
-        , withWorker = mkWithWorker fp
-        , baseConf = conf
-        , taskQueue
-        }
+        (conf, taskQueue) <- mkBaseConf interceptors
+        go TestEnv
+          { client
+          , withWorker = mkWithWorker fp
+          , baseConf = conf
+          , taskQueue
+          }
 
 type MyWorkflow a = W.RequireCallStack => W.Workflow a
 

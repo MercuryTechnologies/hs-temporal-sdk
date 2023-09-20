@@ -7,15 +7,12 @@ module Temporal.Core.EphemeralServer where
 
 import Data.Aeson
 import Data.Aeson.TH
-import Data.Text
-import Data.Text.Foreign
 import Data.ByteString (ByteString, useAsCString)
 import qualified Data.ByteString.Lazy as BL
 import Data.Proxy
 import Data.Word
 import Foreign.C.String hiding (withCString)
 import Foreign.Ptr
-import Foreign.ForeignPtr
 import Temporal.Runtime
 import Temporal.Internal.FFI
 
@@ -84,13 +81,12 @@ defaultTemporalDevServerConfig = TemporalDevServerConfig
   , extraArgs = []
   }
 
-newtype EphemeralServer = EphemeralServer { ephemeralServerPtr :: ForeignPtr EphemeralServer }
+newtype EphemeralServer = EphemeralServer { ephemeralServerPtr :: Ptr EphemeralServer }
 
 instance ManagedRustValue EphemeralServer where
   type RustRef EphemeralServer = Ptr EphemeralServer
   type HaskellRep EphemeralServer = EphemeralServer
-  fromRust _ ptr = 
-    EphemeralServer <$> newForeignPtr raw_shutdownEphemeralServer ptr
+  fromRust _ ptr = pure $ EphemeralServer ptr
 
 foreign import ccall "hs_temporal_start_dev_server" raw_startDevServer 
   :: Ptr Runtime
@@ -104,10 +100,13 @@ startDevServer r c = withRuntime r $ \rp -> useAsCString (BL.toStrict (encode c 
     (fromRust (Proxy @(CArray Word8)))
     (fromRust (Proxy @EphemeralServer))
 
-foreign import ccall "&hs_temporal_shutdown_ephemeral_server" raw_shutdownEphemeralServer :: FunPtr (Ptr EphemeralServer -> IO ())
+foreign import ccall "hs_temporal_shutdown_ephemeral_server" raw_shutdownEphemeralServer :: Ptr EphemeralServer -> TokioCall (CArray Word8) ()
 
-shutdownEphemeralServer :: EphemeralServer -> IO ()
-shutdownEphemeralServer (EphemeralServer e) = finalizeForeignPtr e
+shutdownEphemeralServer :: EphemeralServer -> IO (Either ByteString ())
+shutdownEphemeralServer (EphemeralServer e) = do
+  makeTokioAsyncCall (raw_shutdownEphemeralServer e)
+    (fromRust (Proxy @(CArray Word8)))
+    (fromRust (Proxy @()))
 
 -- TODO
 -- startDevServerWithOutput
