@@ -19,7 +19,7 @@ import Control.Monad.Reader
 import Data.ByteString (ByteString)
 import Data.Int
 import Data.ProtoLens
-import Data.Text (Text)
+import Data.Text (Text, pack)
 import Data.Time.Clock (UTCTime)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
@@ -44,9 +44,11 @@ import System.Timeout (timeout)
 import Temporal.Duration
 import Temporal.Contrib.OpenTelemetry
 import Temporal.Interceptor
+import Temporal.EphemeralServer
+import Temporal.Operator (IndexedValueType(..), SearchAttributes(..), listSearchAttributes, addSearchAttributes)
 
-configWithRetry :: ClientConfig
-configWithRetry = defaultClientConfig 
+configWithRetry :: PortNumber -> ClientConfig
+configWithRetry pn = defaultClientConfig 
   { retryConfig = Just $ ClientRetryConfig
       { initialIntervalMillis = 500
       , randomizationFactor = 0.2
@@ -55,32 +57,63 @@ configWithRetry = defaultClientConfig
       , maxRetries = 5
       , maxElapsedTimeMillis = Just 60000
       }
+  -- , targetUrl = pack ("http://localhost:" <> show pn)
   }
 
-withWorker :: WorkerConfig actEnv -> IO a -> IO a
-withWorker conf m = do
-  let clientConfig = configWithRetry
+mkWithWorker :: PortNumber -> WorkerConfig actEnv -> IO a -> IO a
+mkWithWorker pn conf m = do
+  let clientConfig = configWithRetry pn
   c <- connectClient clientConfig
   bracket (runStdoutLoggingT $ startWorker c conf) shutdown (const m)
 
-makeClient :: Interceptors -> IO C.WorkflowClient
-makeClient Interceptors{..} = do
-  let clientConfig = configWithRetry
+makeClient :: PortNumber -> Interceptors -> IO (C.WorkflowClient, Client)
+makeClient pn Interceptors{..} = do
+  let clientConfig = configWithRetry pn
   c <- connectClient clientConfig 
-  C.workflowClient c (W.Namespace "test") clientInterceptors
+  (,) 
+    <$> C.workflowClient c (W.Namespace "default") clientInterceptors
+    <*> pure c
 
 uuidText :: IO Text
 uuidText = UUID.toText <$> UUID.nextRandom
 
+data TestEnv = TestEnv
+  { client :: C.WorkflowClient
+  , baseConf :: ConfigM () ()
+  , taskQueue :: W.TaskQueue
+  , withWorker :: forall a. WorkerConfig () -> IO a -> IO a
+  }
+
 spec :: Spec
 spec = beforeAll setup needsClient
   where
-    setup :: IO (C.WorkflowClient, ConfigM () (), W.TaskQueue)
+    setup :: IO TestEnv
     setup = do
+      -- fp <- getFreePort
+      let fp = 8233
+      -- res <- launchDevServer $ defaultTemporalDevServerConfig { port = Just 7294 }
+      -- threadDelay 20000000
+      -- case res of
+      --   Left err -> throwIO err
+      --   Right srv -> pure (fp, srv)
+
       interceptors <- makeOpenTelemetryInterceptor
-      client <- makeClient interceptors
+      (client, coreClient) <- makeClient fp interceptors
+
+      SearchAttributes{customAttributes} <- either throwIO pure =<< listSearchAttributes coreClient (W.Namespace "default")
+      let allTestAttributes = Map.fromList
+            [ ("attr1", Temporal.Operator.Bool)
+            , ("attr2", Temporal.Operator.Int)
+            ]
+      addSearchAttributes coreClient (W.Namespace "default") (allTestAttributes `Map.difference` customAttributes)
+
       (conf, taskQueue) <- mkBaseConf interceptors
-      pure (client, conf, taskQueue)
+      pure TestEnv
+        { client
+        , withWorker = mkWithWorker fp
+        , baseConf = conf
+        , taskQueue
+        }
 
 type MyWorkflow a = W.RequireCallStack => W.Workflow a
 
@@ -194,16 +227,16 @@ mkBaseConf interceptors = do
   taskQueue <- W.TaskQueue <$> uuidText
   pure
     ( do
-      setNamespace $ W.Namespace "test"
+      setNamespace $ W.Namespace "default"
       setTaskQueue taskQueue
       addInterceptors interceptors
     , taskQueue
     )
 
-needsClient :: SpecWith (C.WorkflowClient, ConfigM () (), W.TaskQueue)
+needsClient :: SpecWith TestEnv
 needsClient = do
   describe "Workflow" $ do
-    specify "should run a workflow" $ \(client, baseConf, taskQueue) -> do
+    specify "should run a workflow" $ \TestEnv{..} -> do
       let conf = configure () $ do
             baseConf
             testConf
@@ -220,7 +253,7 @@ needsClient = do
         C.execute client testRefs.shouldRunWorkflowTest opts
           `shouldReturn` ()
     describe "race" $ do
-      specify "block on left side works" $ \(client, baseConf, taskQueue) -> do
+      specify "block on left side works" $ \TestEnv{..} -> do
         let conf = configure () $ do
               baseConf
               testConf
@@ -232,7 +265,7 @@ needsClient = do
           C.execute client testRefs.raceBlockOnLeftSideWorks opts
             `shouldReturn` Right True
 
-      specify "block on both side works" $ \(client, baseConf, taskQueue) -> do
+      specify "block on both side works" $ \TestEnv{..} -> do
         let conf = configure () $ do
               baseConf
               testConf
@@ -244,7 +277,7 @@ needsClient = do
           C.execute client testRefs.raceBlockOnBothSidesWorks opts
             `shouldReturn` Right True
 
-      specify "throws immediately when either side throws" $ \(client, baseConf, taskQueue) -> do
+      specify "throws immediately when either side throws" $ \TestEnv{..} -> do
         let conf = configure () $ do
               baseConf
               testConf
@@ -256,7 +289,7 @@ needsClient = do
           C.execute client testRefs.raceThrowsRhsErrorWhenLhsBlocked opts
             `shouldThrow` (== WorkflowExecutionFailed)
 
-      specify "treats error as ok if LHS returns immediately" $ \(client, baseConf, taskQueue) -> do
+      specify "treats error as ok if LHS returns immediately" $ \TestEnv{..} -> do
         let conf = configure () $ do
               baseConf
               testConf
@@ -268,7 +301,7 @@ needsClient = do
           C.execute client testRefs.raceIgnoresRhsErrorOnLhsSuccess opts
             `shouldReturn` Left True
     describe "Activities" $ do
-      specify "should run a basic activity without issues" $ \(client, baseConf, taskQueue) -> do
+      specify "should run a basic activity without issues" $ \TestEnv{..} -> do
         let conf = configure () $ do
               baseConf
               testConf
@@ -279,7 +312,7 @@ needsClient = do
                 taskQueue
           C.execute client testRefs.basicActivityWf opts
             `shouldReturn` 1
-      specify "heartbeat works" $ \(client, baseConf, taskQueue) -> do
+      specify "heartbeat works" $ \TestEnv{..} -> do
         let conf = configure () $ do
               baseConf
               testConf
@@ -291,7 +324,7 @@ needsClient = do
                 taskQueue
           C.execute client testRefs.runHeartbeat opts
             `shouldReturn` 1
-      specify "should properly handle faulty workflows" $ \(client, baseConf, taskQueue) -> do
+      specify "should properly handle faulty workflows" $ \TestEnv{..} -> do
         let conf = configure () $ do
               baseConf
               testConf
@@ -302,7 +335,7 @@ needsClient = do
                 taskQueue
           C.execute client testRefs.faultyWorkflow opts
             `shouldReturn` 1
-      xspecify "Immediate activity cancellation returns the expected result to workflows" $ \(client, baseConf, taskQueue) -> do
+      xspecify "Immediate activity cancellation returns the expected result to workflows" $ \TestEnv{..} -> do
         let testActivity :: Activity () Int
             testActivity = do
               heartbeat []
@@ -335,7 +368,7 @@ needsClient = do
                 }
           C.execute client wf.reference opts
             `shouldReturn` 1
-      xspecify "Activity cancellation on heartbeat returns the expected result to workflows" $ \(client, baseConf, taskQueue) -> do
+      xspecify "Activity cancellation on heartbeat returns the expected result to workflows" $ \TestEnv{..} -> do
         let testActivity :: Activity () Int
             testActivity = do
               liftIO $ threadDelay 2000000
@@ -375,7 +408,7 @@ needsClient = do
 
 
     describe "Args and return values" $ do
-      specify "args should be passed to the workflow in the correct order" $ \(client, baseConf, taskQueue) -> do
+      specify "args should be passed to the workflow in the correct order" $ \TestEnv{..} -> do
         let testFn :: Int -> Text -> Bool -> MyWorkflow (Int, Text, Bool)
             testFn a b c = pure (a, b, c)
             wf = W.provideWorkflow defaultCodec "test" testFn
@@ -390,7 +423,7 @@ needsClient = do
           C.execute client wf.reference opts 1 "two" False
             `shouldReturn` (1, "two", False)
       -- TODO, move to composite codec package
-      -- specify "binary payloads work" $ \(client, baseConf, taskQueue) -> do
+      -- specify "binary payloads work" $ \TestEnv{..} -> do
       --   let testFn :: ByteString -> W.Workflow ByteString
       --       testFn _ = pure "general kenobi"
       --       wf = W.provideWorkflow defaultCodec "test" testFn
@@ -404,19 +437,19 @@ needsClient = do
       --           taskQueue
       --     C.execute client wf.reference opts "hello there."
       --       `shouldReturn` "general kenobi"
-  --     specify "args that parse incorrectly should fail a Workflow appropriately" $ \(client, baseConf, taskQueue) -> do
+  --     specify "args that parse incorrectly should fail a Workflow appropriately" $ \TestEnv{..} -> do
   --       pending
-  --     specify "args that parse incorrectly should fail an Activity appropriately" $ \(client, baseConf, taskQueue) -> do
+  --     specify "args that parse incorrectly should fail an Activity appropriately" $ \TestEnv{..} -> do
   --       pending
-  --     specify "Workflow return values that parse incorrectly should throw a ValueException for Client" $ \(client, baseConf, taskQueue) -> do
+  --     specify "Workflow return values that parse incorrectly should throw a ValueException for Client" $ \TestEnv{..} -> do
   --       pending
-  --     specify "ChildWorkflow return values that parse incorrectly should throw a ValueException in a Workflow" $ \(client, baseConf, taskQueue) -> do
+  --     specify "ChildWorkflow return values that parse incorrectly should throw a ValueException in a Workflow" $ \TestEnv{..} -> do
   --       pending
-  --     specify "Activity return values that parse incorrectly should throw a ValueException in a Workflow" $ \(client, baseConf, taskQueue) -> do
+  --     specify "Activity return values that parse incorrectly should throw a ValueException in a Workflow" $ \TestEnv{..} -> do
   --       pending
 
   --   describe "not found" $ do
-  --     xit "should result in a task retry" $ \(client, baseConf, taskQueue) -> do
+  --     xit "should result in a task retry" $ \TestEnv{..} -> do
   --       let conf = configure () () $ do
   --             baseConf
   --       withWorker conf $ do
@@ -441,7 +474,7 @@ needsClient = do
   --   -- describe "Randomness" $ do
   --   --   specify "randomness is deterministic" pending
     describe "Time" $ do
-      specify "time is deterministic" $ \(client, baseConf, taskQueue) -> do
+      specify "time is deterministic" $ \TestEnv{..} -> do
         let testFn :: MyWorkflow (UTCTime, UTCTime, UTCTime)
             testFn = do
               t1 <- W.now
@@ -467,7 +500,7 @@ needsClient = do
   --   --   specify "ActivityFailure exception" pending
   --   --   specify "Non-wrapped exception" pending
     describe "Child workflows" $ do
-      specify "invoke" $ \(client, baseConf, taskQueue) -> do
+      specify "invoke" $ \TestEnv{..} -> do
         parentId <- uuidText
         let isEven :: Int -> W.Workflow Bool
             isEven x = pure (x `mod` 2 == 0)
@@ -498,7 +531,7 @@ needsClient = do
           C.execute client parentWf.reference opts
             `shouldReturn` True
 
-      specify "failure" $ \(client, baseConf, taskQueue) -> do
+      specify "failure" $ \TestEnv{..} -> do
         parentId <- uuidText
         let busted :: W.Workflow ()
             busted = error "busted"
@@ -523,7 +556,7 @@ needsClient = do
   -- --     specify "termination" $ \_ -> pending
   -- --     specify "timeout" $ \_ -> pending
   -- --     specify "startFail" $ \_ -> pending
-      xspecify "cancel immediately" $ \(client, baseConf, taskQueue) -> do
+      xspecify "cancel immediately" $ \TestEnv{..} -> do
         parentId <- uuidText
         let cancelTest :: MyWorkflow ()
             cancelTest = W.sleep $ minutes 1
@@ -548,7 +581,7 @@ needsClient = do
             `shouldReturn` "Left ChildWorkflowCancelled"
 
       -- TODO, the parent workflow event list doesn't really show the child workflow being cancelled???
-      xspecify "cancel after child workflow has started" $ \(client, baseConf, taskQueue) -> do
+      xspecify "cancel after child workflow has started" $ \TestEnv{..} -> do
         parentId <- uuidText
         let cancelTest :: MyWorkflow ()
             cancelTest = W.waitCancellation
@@ -581,7 +614,7 @@ needsClient = do
   -- -- --       specify "async fail signal?" pending
   -- -- --       specify "always delivered" pending
     describe "Query" $ do
-      specify "works" $ \(client, baseConf, taskQueue) -> do
+      specify "works" $ \TestEnv{..} -> do
         tp <- getGlobalTracerProvider
         let testTracer = makeTracer tp "testTracer" tracerOptions
 
@@ -607,7 +640,7 @@ needsClient = do
             result `shouldBe` Right "hello"
 
 
-      xspecify "query not found" $ \(client, baseConf, taskQueue) -> do
+      xspecify "query not found" $ \TestEnv{..} -> do
         let echoQuery :: W.QueryDefinition '[Text] Text
             echoQuery = W.QueryDefinition "testQuery" defaultCodec
             workflow :: MyWorkflow ()
@@ -629,7 +662,7 @@ needsClient = do
           result `shouldBe` Right "hello"
       -- specify "query and unblock" pending
     describe "Await condition" $ do
-      xit "works in Workflows" $ \(client, baseConf, taskQueue) -> do
+      xit "works in Workflows" $ \TestEnv{..} -> do
         let conf = configure () $ do
               baseConf
               testConf
@@ -644,7 +677,7 @@ needsClient = do
       it "works in signal handlers" $ \_ -> pending
       it "signal handlers can unblock workflows" $ \_ -> pending
     describe "Sleep" $ do
-      specify "sleep" $ \(client, baseConf, taskQueue) -> do
+      specify "sleep" $ \TestEnv{..} -> do
         wfId <- uuidText
         let workflow :: MyWorkflow Bool
             workflow = do
@@ -665,7 +698,7 @@ needsClient = do
 
 
     describe "Timer" $ do
-      specify "timer" $ \(client, baseConf, taskQueue) -> do
+      specify "timer" $ \TestEnv{..} -> do
         let workflow :: MyWorkflow Bool
             workflow = do
               earlier <- W.now
@@ -685,7 +718,7 @@ needsClient = do
           C.execute client wf.reference opts
             `shouldReturn` True
         
-      specify "timer and cancel immediately" $ \(client, baseConf, taskQueue) -> do
+      specify "timer and cancel immediately" $ \TestEnv{..} -> do
         let workflow :: MyWorkflow Bool
             workflow = do
               t <- W.createTimer $ nanoseconds 1
@@ -708,7 +741,7 @@ needsClient = do
           C.execute client wf.reference opts
             `shouldReturn` True
 
-      specify "timer and cancel with delay" $ \(client, baseConf, taskQueue) -> do
+      specify "timer and cancel with delay" $ \TestEnv{..} -> do
         let workflow :: MyWorkflow Bool
             workflow = do
               t <- W.createTimer $ seconds 5000
@@ -732,7 +765,7 @@ needsClient = do
           C.execute client wf.reference opts
             `shouldReturn` True
     describe "Patching" $ do
-      specify "patch" $ \(client, baseConf, taskQueue) ->  do
+      specify "patch" $ \TestEnv{..} ->  do
         let workflow :: MyWorkflow Bool
             workflow = do
               isPatched <- W.patched (W.PatchId "wibble")
@@ -752,7 +785,7 @@ needsClient = do
                 }
           C.execute client wf.reference opts
             `shouldReturn` True
-      specify "deprecated patch" $ \(client, baseConf, taskQueue) ->  do
+      specify "deprecated patch" $ \TestEnv{..} ->  do
         let workflow :: MyWorkflow Bool
             workflow = do
               W.deprecatePatch (W.PatchId "wibble")
@@ -777,7 +810,7 @@ needsClient = do
   --     specify "can read search attributes set at start" pending
   --     specify "can upsert search attributes" pending
   describe "Info" $ do
-    specify "can read workflow info" $ \(client, baseConf, taskQueue) -> do
+    specify "can read workflow info" $ \TestEnv{..} -> do
       let workflow :: W.Workflow Text
           workflow = do
             i <- W.info
@@ -804,7 +837,7 @@ needsClient = do
   --
   -- Until we have a way to do this in the SDK, we can't test this without manual intervention.
   describe "Search Attributes" $ do
-    specify "can read search attributes set at start" $ \(client, baseConf, taskQueue) -> do
+    xspecify "can read search attributes set at start" $ \TestEnv{..} -> do
       let workflow :: W.Workflow (Map Text SearchAttributeType)
           workflow = do
             i <- W.info
@@ -829,7 +862,7 @@ needsClient = do
               }
         C.execute client wf.reference opts
           `shouldReturn` initialAttrs
-    specify "can read search attributes set at start" $ \(client, baseConf, taskQueue) -> do
+    xspecify "can upsert search attributes" $ \TestEnv{..} -> do
       let expectedAttrs = Map.fromList
               [ ("attr1", toSearchAttribute True)
               , ("attr2", toSearchAttribute (4 :: Int64))
@@ -865,7 +898,7 @@ needsClient = do
   --     specify "throws if continued as new" pending
   --     specify "follows chain of execution" pending
   describe "ContinueAsNew" $ do
-    specify "works" $ \(client, baseConf, taskQueue) -> do
+    specify "works" $ \TestEnv{..} -> do
       let conf = configure () $ do
             baseConf
             testConf

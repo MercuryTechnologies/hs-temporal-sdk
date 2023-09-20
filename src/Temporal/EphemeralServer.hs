@@ -1,6 +1,18 @@
 module Temporal.EphemeralServer 
   ( launchTestServer
-  , module Temporal.Core.EphemeralServer
+  , launchDevServer
+  , getFreePort
+  , openFreePort
+  , EphemeralServerError(..)
+  -- * Core configuration
+  , EphemeralExeVersion(..)
+  , EphemeralExe(..)
+  , SDKDefault(..)
+  , TemporalDevServerConfig(..)
+  , defaultTemporalDevServerConfig
+  , EphemeralServer
+  , shutdownEphemeralServer
+  , N.PortNumber
   ) where
 
 import Temporal.Core.EphemeralServer
@@ -12,6 +24,9 @@ import qualified Control.Exception as E
 import qualified System.IO.Error as Error
 
 data EphemeralServerError = EphemeralServerError ByteString
+  deriving stock (Show)
+
+instance E.Exception EphemeralServerError
 
 -- | Open a TCP socket on a random free port. This is like 'warp''s
 --   openFreePort.
@@ -42,13 +57,16 @@ getFreePort = do
   N.close socket
   pure port
 
-launchTestServer :: IO (Either EphemeralServerError (N.PortNumber, EphemeralServer))
-launchTestServer = do
+launchTestServer :: [String] -> IO (Either EphemeralServerError (N.PortNumber, EphemeralServer))
+launchTestServer extraArgs = do
   freePort <- getFreePort
   bimap EphemeralServerError (\srv -> (freePort, srv)) <$> startTestServer globalRuntime (hackyConfig freePort)
   where
     hackyConfig port = TestServerConfig 
       { exe = CachedDownload (Default $ SDKDefault "community-haskell" "0.1.0.0") Nothing 
       , port = Just $ fromIntegral port
-      , extraArgs = []
+      , extraArgs
       }
+
+launchDevServer :: TemporalDevServerConfig -> IO (Either EphemeralServerError EphemeralServer)
+launchDevServer conf = first EphemeralServerError <$> startDevServer globalRuntime conf

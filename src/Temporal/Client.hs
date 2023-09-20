@@ -564,7 +564,7 @@ waitResult c wfId mrId (Namespace ns) = do
                 Nothing -> Prelude.id
                 Just rId -> (Common.runId .~ rawRunId rId)
           )
-        & RR.maximumPageSize .~ 1000
+        & RR.maximumPageSize .~ 100
         & RR.waitNewEvent .~ True
         & RR.historyEventFilterType .~ HISTORY_EVENT_FILTER_TYPE_CLOSE_EVENT
         & RR.skipArchival .~ True

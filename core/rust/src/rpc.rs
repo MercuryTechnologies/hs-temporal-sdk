@@ -3,6 +3,7 @@ use crate::runtime::{HsCallback, Capability, MVar};
 use ffi_convert::{CArray, CReprOf};
 use temporal_client::WorkflowService;
 use temporal_client::TestService;
+use temporal_client::OperatorService;
 
 macro_rules! rpc_call {
   ($retry_client:ident, $call:ident, $call_name:ident) => {
@@ -884,6 +885,112 @@ pub extern "C" fn hs_unlock_time_skipping(client: *mut ClientRef, c_call: *const
   let callback: HsCallback<CArray<u8>, CRPCError> = HsCallback { cap, mvar, result_slot, error_slot };
   client.runtime.future_result_into_hs(callback, async move {
     match rpc_call!(retry_client, call, unlock_time_skipping) {
+      Ok(resp) => Ok(CArray::c_repr_of(resp).unwrap()),
+      Err(err) => Err(err)
+    }
+  });
+}
+
+
+#[no_mangle]
+pub extern "C" fn hs_add_or_update_remote_cluster(client: *mut ClientRef, c_call: *const RpcCall, mvar: *mut MVar, cap: Capability, error_slot: *mut*mut CRPCError, result_slot: *mut*mut CArray<u8>) -> () {
+  let client = unsafe { &mut *client };
+  let mut retry_client = client.retry_client.clone();
+  let call: TemporalCall = unsafe { (&*c_call).into() };
+
+  let callback: HsCallback<CArray<u8>, CRPCError> = HsCallback { cap, mvar, result_slot, error_slot };
+  client.runtime.future_result_into_hs(callback, async move {
+    match rpc_call!(retry_client, call, add_or_update_remote_cluster) {
+      Ok(resp) => Ok(CArray::c_repr_of(resp).unwrap()),
+      Err(err) => Err(err)
+    }
+  });
+}
+
+#[no_mangle]
+pub extern "C" fn hs_add_search_attributes(client: *mut ClientRef, c_call: *const RpcCall, mvar: *mut MVar, cap: Capability, error_slot: *mut*mut CRPCError, result_slot: *mut*mut CArray<u8>) -> () {
+  let client = unsafe { &mut *client };
+  let mut retry_client = client.retry_client.clone();
+  let call: TemporalCall = unsafe { (&*c_call).into() };
+
+  let callback: HsCallback<CArray<u8>, CRPCError> = HsCallback { cap, mvar, result_slot, error_slot };
+  client.runtime.future_result_into_hs(callback, async move {
+    match rpc_call!(retry_client, call, add_search_attributes) {
+      Ok(resp) => Ok(CArray::c_repr_of(resp).unwrap()),
+      Err(err) => Err(err)
+    }
+  });
+}
+
+#[no_mangle]
+pub extern "C" fn hs_delete_namespace(client: *mut ClientRef, c_call: *const RpcCall, mvar: *mut MVar, cap: Capability, error_slot: *mut*mut CRPCError, result_slot: *mut*mut CArray<u8>) -> () {
+  let client = unsafe { &mut *client };
+  let mut retry_client = client.retry_client.clone();
+  let call: TemporalCall = unsafe { (&*c_call).into() };
+
+  let callback: HsCallback<CArray<u8>, CRPCError> = HsCallback { cap, mvar, result_slot, error_slot };
+  client.runtime.future_result_into_hs(callback, async move {
+    match rpc_call!(retry_client, call, delete_namespace) {
+      Ok(resp) => Ok(CArray::c_repr_of(resp).unwrap()),
+      Err(err) => Err(err)
+    }
+  });
+}
+
+#[no_mangle]
+pub extern "C" fn hs_list_clusters(client: *mut ClientRef, c_call: *const RpcCall, mvar: *mut MVar, cap: Capability, error_slot: *mut*mut CRPCError, result_slot: *mut*mut CArray<u8>) -> () {
+  let client = unsafe { &mut *client };
+  let mut retry_client = client.retry_client.clone();
+  let call: TemporalCall = unsafe { (&*c_call).into() };
+
+  let callback: HsCallback<CArray<u8>, CRPCError> = HsCallback { cap, mvar, result_slot, error_slot };
+  client.runtime.future_result_into_hs(callback, async move {
+    match rpc_call!(retry_client, call, list_clusters) {
+      Ok(resp) => Ok(CArray::c_repr_of(resp).unwrap()),
+      Err(err) => Err(err)
+    }
+  });
+}
+
+#[no_mangle]
+pub extern "C" fn hs_list_search_attributes(client: *mut ClientRef, c_call: *const RpcCall, mvar: *mut MVar, cap: Capability, error_slot: *mut*mut CRPCError, result_slot: *mut*mut CArray<u8>) -> () {
+  let client = unsafe { &mut *client };
+  let mut retry_client = client.retry_client.clone();
+  let call: TemporalCall = unsafe { (&*c_call).into() };
+
+  let callback: HsCallback<CArray<u8>, CRPCError> = HsCallback { cap, mvar, result_slot, error_slot };
+  client.runtime.future_result_into_hs(callback, async move {
+    match rpc_call!(retry_client, call, list_search_attributes) {
+      Ok(resp) => Ok(CArray::c_repr_of(resp).unwrap()),
+      Err(err) => Err(err)
+    }
+  });
+}
+
+#[no_mangle]
+pub extern "C" fn hs_remove_remote_cluster(client: *mut ClientRef, c_call: *const RpcCall, mvar: *mut MVar, cap: Capability, error_slot: *mut*mut CRPCError, result_slot: *mut*mut CArray<u8>) -> () {
+  let client = unsafe { &mut *client };
+  let mut retry_client = client.retry_client.clone();
+  let call: TemporalCall = unsafe { (&*c_call).into() };
+
+  let callback: HsCallback<CArray<u8>, CRPCError> = HsCallback { cap, mvar, result_slot, error_slot };
+  client.runtime.future_result_into_hs(callback, async move {
+    match rpc_call!(retry_client, call, remove_remote_cluster) {
+      Ok(resp) => Ok(CArray::c_repr_of(resp).unwrap()),
+      Err(err) => Err(err)
+    }
+  });
+}
+
+#[no_mangle]
+pub extern "C" fn hs_remove_search_attributes(client: *mut ClientRef, c_call: *const RpcCall, mvar: *mut MVar, cap: Capability, error_slot: *mut*mut CRPCError, result_slot: *mut*mut CArray<u8>) -> () {
+  let client = unsafe { &mut *client };
+  let mut retry_client = client.retry_client.clone();
+  let call: TemporalCall = unsafe { (&*c_call).into() };
+
+  let callback: HsCallback<CArray<u8>, CRPCError> = HsCallback { cap, mvar, result_slot, error_slot };
+  client.runtime.future_result_into_hs(callback, async move {
+    match rpc_call!(retry_client, call, remove_search_attributes) {
       Ok(resp) => Ok(CArray::c_repr_of(resp).unwrap()),
       Err(err) => Err(err)
     }

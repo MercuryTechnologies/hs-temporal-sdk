@@ -16,9 +16,11 @@ library
       Temporal.Client
       Temporal.Contrib.OpenTelemetry
       Temporal.Duration
+      Temporal.EphemeralServer
       Temporal.Exception
       Temporal.Generic
       Temporal.Interceptor
+      Temporal.Operator
       Temporal.Payload
       Temporal.SearchAttributes
       Temporal.Worker
@@ -51,7 +53,6 @@ library
       Temporal.Workflow.Query
       Temporal.Workflow.Types
       Temporal.Logging
-      Temporal.EphemeralServer
       Temporal.SearchAttributes.Internal
   hs-source-dirs:
       src
