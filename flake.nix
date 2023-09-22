@@ -76,14 +76,17 @@
           
           (final: prev: let
           in {
-            hs_temporal_sdk =  final.haskell-nix.project' {
+            hs_temporal_sdk = final.haskell-nix.project' {
                 src = ./.;
                 # compiler-nix-name = "ghc962";
                 projectFileName = "stack.yaml";
                 modules = [{
                   packages = {
                     temporal-sdk.flags.external_lib = true;
-                    proto-lens-setup.components.library.buildInputs = [
+                    proto-lens-setup.components.library.build-tools = [
+                      pkgs.protobuf
+                    ];
+                    proto-lens-protobuf-types.components.library.build-tools = [
                       pkgs.protobuf
                     ];
                   };
