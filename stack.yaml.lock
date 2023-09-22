@@ -99,6 +99,84 @@ packages:
       size: 23148
   original:
     hackage: crypton-0.33
+- completed:
+    commit: 38b1ab1d6785c36694245b19ce6a85ee6869b04a
+    git: git@github.com:iand675/proto-lens.git
+    name: proto-lens
+    pantry-tree:
+      sha256: f58a4ed915699f7da7b520eb38d747f4f8c3be4409b7fccbca3c271fd0fa9723
+      size: 59451
+    subdir: proto-lens
+    version: 0.7.1.3
+  original:
+    commit: 38b1ab1d6785c36694245b19ce6a85ee6869b04a
+    git: git@github.com:iand675/proto-lens.git
+    subdir: proto-lens
+- completed:
+    commit: 38b1ab1d6785c36694245b19ce6a85ee6869b04a
+    git: git@github.com:iand675/proto-lens.git
+    name: proto-lens-protoc
+    pantry-tree:
+      sha256: 14e8d975c11e4287b3f874c5a0d34537a1280bbe2825ecbf98e4b698772cbfab
+      size: 1271
+    subdir: proto-lens-protoc
+    version: 0.7.1.1
+  original:
+    commit: 38b1ab1d6785c36694245b19ce6a85ee6869b04a
+    git: git@github.com:iand675/proto-lens.git
+    subdir: proto-lens-protoc
+- completed:
+    commit: 38b1ab1d6785c36694245b19ce6a85ee6869b04a
+    git: git@github.com:iand675/proto-lens.git
+    name: proto-lens-protobuf-types
+    pantry-tree:
+      sha256: 26e8b388b44bb5754b1be3bd1d196a452d0f5c67214d5e4dde3ced16fb8320cc
+      size: 53512
+    subdir: proto-lens-protobuf-types
+    version: 0.8.0.0
+  original:
+    commit: 38b1ab1d6785c36694245b19ce6a85ee6869b04a
+    git: git@github.com:iand675/proto-lens.git
+    subdir: proto-lens-protobuf-types
+- completed:
+    commit: 38b1ab1d6785c36694245b19ce6a85ee6869b04a
+    git: git@github.com:iand675/proto-lens.git
+    name: proto-lens-runtime
+    pantry-tree:
+      sha256: 64ff7cb58d8a042da417cec8f3891f3267554eeeda949ce7678f14ec5cf08c39
+      size: 221
+    subdir: proto-lens-runtime
+    version: 0.7.0.4
+  original:
+    commit: 38b1ab1d6785c36694245b19ce6a85ee6869b04a
+    git: git@github.com:iand675/proto-lens.git
+    subdir: proto-lens-runtime
+- completed:
+    commit: 38b1ab1d6785c36694245b19ce6a85ee6869b04a
+    git: git@github.com:iand675/proto-lens.git
+    name: proto-lens-setup
+    pantry-tree:
+      sha256: a7c846769de414d42b05652ebd8293ec8c64d107dea2bc397418aa1de0a5e7b4
+      size: 288
+    subdir: proto-lens-setup
+    version: 0.4.0.6
+  original:
+    commit: 38b1ab1d6785c36694245b19ce6a85ee6869b04a
+    git: git@github.com:iand675/proto-lens.git
+    subdir: proto-lens-setup
+- completed:
+    commit: 38b1ab1d6785c36694245b19ce6a85ee6869b04a
+    git: git@github.com:iand675/proto-lens.git
+    name: proto-lens-json
+    pantry-tree:
+      sha256: 319d62752965cafaf12c7218517f4afe91340761cb299b9a16fb91456bfac9c7
+      size: 329
+    subdir: proto-lens-json
+    version: 0.0.1.0
+  original:
+    commit: 38b1ab1d6785c36694245b19ce6a85ee6869b04a
+    git: git@github.com:iand675/proto-lens.git
+    subdir: proto-lens-json
 snapshots:
 - completed:
     sha256: dcf4fc28f12d805480ddbe8eb8c370e11db12f0461d0110a4240af27ac88d725

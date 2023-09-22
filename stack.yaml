@@ -17,7 +17,7 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: lts-20.22
+resolver: lts-21.12
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -52,16 +52,30 @@ extra-deps:
 - require-callstack-0.1.0.0
 
 # Used for OTel contrib
-- hs-opentelemetry-api-0.1.0.0
-- hs-opentelemetry-sdk-0.0.3.6
-- hs-opentelemetry-otlp-0.0.1.0
-- hs-opentelemetry-exporter-otlp-0.0.1.5
-- hs-opentelemetry-propagator-b3-0.0.1.1
-- hs-opentelemetry-propagator-w3c-0.0.1.3
 - thread-utils-context-0.3.0.4
 - thread-utils-finalizers-0.1.1.0
 - crypton-0.33
 
+- git: git@github.com:iand675/proto-lens.git
+  commit: 38b1ab1d6785c36694245b19ce6a85ee6869b04a
+  subdirs:
+  - proto-lens
+  - proto-lens-protoc
+  - proto-lens-protobuf-types
+  - proto-lens-runtime
+  - proto-lens-setup
+  - proto-lens-json
+- git: git@github.com:iand675/hs-opentelemetry.git
+  commit: 9929874f7353343ec830d7cdaf268f49cf804ca1
+  subdirs:
+  - api
+  - sdk
+  - otlp
+  - exporters/otlp
+  - propagators/b3
+  - propagators/w3c
+- git: git@github.com:circuithub/ghc-source-gen.git
+  commit: 7a6aac047b706508e85ba2054b5bedbecfd7eb7a
 # Override default flag values for local packages and extra-deps
 # flags: {}
 

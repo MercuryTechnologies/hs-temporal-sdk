@@ -1,6 +1,6 @@
 {
   description = "Example of a Rust library built and used by a Haskell package";
-  inputs.haskellNix.url = "github:input-output-hk/haskell.nix";
+  inputs.haskellNix.url = "github:iand675/haskell.nix";
   inputs.nixpkgs.follows = "haskellNix/nixpkgs-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.temporal-sdk-core = {
@@ -50,15 +50,43 @@
               '';
             };
           })
+          #   proto-lens-protoc = prev.proto-lens-protoc.overrideAttrs (attrs: {
+          #     preBuild = ''
+          #       export PATH=${pkgs.protobuf}/bin:$PATH
+          #       ${attrs.preBuild or ""}
+          #     '';
+          #     propagatedBuildInputs = attrs.propagatedBuildInputs ++ [ pkgs.protoc ];
+          #   });
+          #   proto-lens-setup = prev.proto-lens-setup.overrideAttrs (attrs: {
+          #     preBuild = ''
+          #       export PATH=${pkgs.protobuf}/bin:$PATH
+          #       ${attrs.preBuild or ""}
+          #     '';
+          #     propagatedBuildInputs = attrs.propagatedBuildInputs ++ [ pkgs.protoc ];
+          #   });
+          #   proto-lens-protobuf-types = prev.proto-lens-protobuf-types.overrideAttrs (attrs: {
+          #     preBuild = ''
+          #       export PATH=${pkgs.protobuf}/bin:$PATH
+          #       ${attrs.preBuild or ""}
+          #     '';
+          #     buildInputs = attrs.propagatedBuildInputs ++ [ pkgs.protoc ];
+          #   });
+          # })
+
+          
           (final: prev: let
           in {
-            hs_temporal_sdk =
-              final.haskell-nix.project' {
+            hs_temporal_sdk =  final.haskell-nix.project' {
                 src = ./.;
-                compiler-nix-name = "ghc962";
-                # projectFileName = "stack.yaml";
+                # compiler-nix-name = "ghc962";
+                projectFileName = "stack.yaml";
                 modules = [{
-                  packages.temporal-sdk.flags.external_lib = true;
+                  packages = {
+                    temporal-sdk.flags.external_lib = true;
+                    proto-lens-setup.components.library.buildInputs = [
+                      pkgs.protobuf
+                    ];
+                  };
                 }];
                 shell.tools = {
                   cabal = { };
