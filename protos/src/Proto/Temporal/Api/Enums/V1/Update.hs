@@ -44,6 +44,7 @@ data UpdateWorkflowExecutionLifecycleStage
     UpdateWorkflowExecutionLifecycleStage'Unrecognized !UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum UpdateWorkflowExecutionLifecycleStage where
+  enumName _ = Data.Text.pack "UpdateWorkflowExecutionLifecycleStage"
   maybeToEnum 0
     = Prelude.Just
         UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED

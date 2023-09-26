@@ -145,14 +145,9 @@ instance Data.ProtoLens.Message CancelTimerCommandAttributes where
                       case tag of
                         10
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "timer_id"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"timerId") y x)
                         wire
@@ -2334,14 +2329,9 @@ instance Data.ProtoLens.Message ContinueAsNewWorkflowExecutionCommandAttributes 
                                      (Data.ProtoLens.Field.field @"lastCompletionResult") y x)
                         90
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "cron_schedule"
                                 loop
                                   (Lens.Family2.set
@@ -3048,14 +3038,9 @@ instance Data.ProtoLens.Message ProtocolMessageCommandAttributes where
                       case tag of
                         10
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "message_id"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"messageId") y x)
@@ -3193,6 +3178,9 @@ instance Data.ProtoLens.Message RecordMarkerCommandAttributes where
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                  Data.ProtoLens.FieldTypeDescriptor RecordMarkerCommandAttributes'DetailsEntry)
               (Data.ProtoLens.MapField
+                 Data.ProtoLens.MapStringKey
+                 (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                    Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payloads)
                  (Data.ProtoLens.Field.field @"key")
                  (Data.ProtoLens.Field.field @"value")
                  (Data.ProtoLens.Field.field @"details")) ::
@@ -3256,14 +3244,9 @@ instance Data.ProtoLens.Message RecordMarkerCommandAttributes where
                       case tag of
                         10
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "marker_name"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"markerName") y x)
@@ -3500,14 +3483,9 @@ instance Data.ProtoLens.Message RecordMarkerCommandAttributes'DetailsEntry where
                       case tag of
                         10
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "key"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"key") y x)
                         18
@@ -3883,52 +3861,32 @@ instance Data.ProtoLens.Message RequestCancelExternalWorkflowExecutionCommandAtt
                       case tag of
                         10
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "namespace"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"namespace") y x)
                         18
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "workflow_id"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"workflowId") y x)
                         26
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "run_id"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"runId") y x)
                         34
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "control"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"control") y x)
                         40
@@ -3941,14 +3899,9 @@ instance Data.ProtoLens.Message RequestCancelExternalWorkflowExecutionCommandAtt
                                      (Data.ProtoLens.Field.field @"childWorkflowOnly") y x)
                         50
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "reason"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"reason") y x)
                         wire
@@ -4494,14 +4447,9 @@ instance Data.ProtoLens.Message ScheduleActivityTaskCommandAttributes where
                       case tag of
                         10
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "activity_id"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"activityId") y x)
@@ -5092,14 +5040,9 @@ instance Data.ProtoLens.Message SignalExternalWorkflowExecutionCommandAttributes
                       case tag of
                         10
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "namespace"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"namespace") y x)
@@ -5113,14 +5056,9 @@ instance Data.ProtoLens.Message SignalExternalWorkflowExecutionCommandAttributes
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"execution") y x)
                         26
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "signal_name"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"signalName") y x)
@@ -5133,14 +5071,9 @@ instance Data.ProtoLens.Message SignalExternalWorkflowExecutionCommandAttributes
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"input") y x)
                         42
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "control"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"control") y x)
                         48
@@ -5843,27 +5776,17 @@ instance Data.ProtoLens.Message StartChildWorkflowExecutionCommandAttributes whe
                       case tag of
                         10
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "namespace"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"namespace") y x)
                         18
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "workflow_id"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"workflowId") y x)
@@ -5931,14 +5854,9 @@ instance Data.ProtoLens.Message StartChildWorkflowExecutionCommandAttributes whe
                                      (Data.ProtoLens.Field.field @"parentClosePolicy") y x)
                         82
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "control"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"control") y x)
                         88
@@ -5962,14 +5880,9 @@ instance Data.ProtoLens.Message StartChildWorkflowExecutionCommandAttributes whe
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"retryPolicy") y x)
                         106
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "cron_schedule"
                                 loop
                                   (Lens.Family2.set
@@ -6499,14 +6412,9 @@ instance Data.ProtoLens.Message StartTimerCommandAttributes where
                       case tag of
                         10
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "timer_id"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"timerId") y x)
                         18

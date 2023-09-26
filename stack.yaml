@@ -57,16 +57,15 @@ extra-deps:
 - crypton-0.33
 
 - git: git@github.com:iand675/proto-lens.git
-  commit: 38b1ab1d6785c36694245b19ce6a85ee6869b04a
+  commit: 191f384b5329f0231844ae8405695fcdc29eab44
   subdirs:
   - proto-lens
   - proto-lens-protoc
   - proto-lens-protobuf-types
   - proto-lens-runtime
-  - proto-lens-setup
   - proto-lens-json
 - git: git@github.com:iand675/hs-opentelemetry.git
-  commit: 9929874f7353343ec830d7cdaf268f49cf804ca1
+  commit: e07f598b6ec1e36ad2f6e597bd0bd6342c166093
   subdirs:
   - api
   - sdk
@@ -99,6 +98,6 @@ arch: aarch64
 #
 # Allow a newer minor version of GHC than the snapshot specifies
 # compiler-check: newer-minor
-nix:
-  enable: true
-  packages: [zlib]
+# nix:
+#   enable: true
+#   packages: [zlib]

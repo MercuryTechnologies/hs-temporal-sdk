@@ -269,27 +269,17 @@ instance Data.ProtoLens.Message LocalActivityMarkerData where
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"attempt") y x)
                         26
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "activity_id"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"activityId") y x)
                         34
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "activity_type"
                                 loop
                                   (Lens.Family2.set
@@ -552,14 +542,9 @@ instance Data.ProtoLens.Message PatchedMarkerData where
                       case tag of
                         10
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "id"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"id") y x)
                         16

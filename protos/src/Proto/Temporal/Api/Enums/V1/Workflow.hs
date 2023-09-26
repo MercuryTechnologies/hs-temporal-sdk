@@ -56,6 +56,7 @@ data ContinueAsNewInitiator
     ContinueAsNewInitiator'Unrecognized !ContinueAsNewInitiator'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum ContinueAsNewInitiator where
+  enumName _ = Data.Text.pack "ContinueAsNewInitiator"
   maybeToEnum 0 = Prelude.Just CONTINUE_AS_NEW_INITIATOR_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just CONTINUE_AS_NEW_INITIATOR_WORKFLOW
   maybeToEnum 2 = Prelude.Just CONTINUE_AS_NEW_INITIATOR_RETRY
@@ -148,6 +149,7 @@ data HistoryEventFilterType
     HistoryEventFilterType'Unrecognized !HistoryEventFilterType'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum HistoryEventFilterType where
+  enumName _ = Data.Text.pack "HistoryEventFilterType"
   maybeToEnum 0 = Prelude.Just HISTORY_EVENT_FILTER_TYPE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just HISTORY_EVENT_FILTER_TYPE_ALL_EVENT
   maybeToEnum 2 = Prelude.Just HISTORY_EVENT_FILTER_TYPE_CLOSE_EVENT
@@ -230,6 +232,7 @@ data ParentClosePolicy
     ParentClosePolicy'Unrecognized !ParentClosePolicy'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum ParentClosePolicy where
+  enumName _ = Data.Text.pack "ParentClosePolicy"
   maybeToEnum 0 = Prelude.Just PARENT_CLOSE_POLICY_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just PARENT_CLOSE_POLICY_TERMINATE
   maybeToEnum 2 = Prelude.Just PARENT_CLOSE_POLICY_ABANDON
@@ -319,6 +322,7 @@ data PendingActivityState
     PendingActivityState'Unrecognized !PendingActivityState'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum PendingActivityState where
+  enumName _ = Data.Text.pack "PendingActivityState"
   maybeToEnum 0 = Prelude.Just PENDING_ACTIVITY_STATE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just PENDING_ACTIVITY_STATE_SCHEDULED
   maybeToEnum 2 = Prelude.Just PENDING_ACTIVITY_STATE_STARTED
@@ -410,6 +414,7 @@ data PendingWorkflowTaskState
     PendingWorkflowTaskState'Unrecognized !PendingWorkflowTaskState'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum PendingWorkflowTaskState where
+  enumName _ = Data.Text.pack "PendingWorkflowTaskState"
   maybeToEnum 0
     = Prelude.Just PENDING_WORKFLOW_TASK_STATE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just PENDING_WORKFLOW_TASK_STATE_SCHEDULED
@@ -497,6 +502,7 @@ data RetryState
     RetryState'Unrecognized !RetryState'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum RetryState where
+  enumName _ = Data.Text.pack "RetryState"
   maybeToEnum 0 = Prelude.Just RETRY_STATE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just RETRY_STATE_IN_PROGRESS
   maybeToEnum 2 = Prelude.Just RETRY_STATE_NON_RETRYABLE_FAILURE
@@ -613,6 +619,7 @@ data TimeoutType
     TimeoutType'Unrecognized !TimeoutType'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum TimeoutType where
+  enumName _ = Data.Text.pack "TimeoutType"
   maybeToEnum 0 = Prelude.Just TIMEOUT_TYPE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just TIMEOUT_TYPE_START_TO_CLOSE
   maybeToEnum 2 = Prelude.Just TIMEOUT_TYPE_SCHEDULE_TO_START
@@ -709,6 +716,7 @@ data WorkflowExecutionStatus
     WorkflowExecutionStatus'Unrecognized !WorkflowExecutionStatus'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum WorkflowExecutionStatus where
+  enumName _ = Data.Text.pack "WorkflowExecutionStatus"
   maybeToEnum 0 = Prelude.Just WORKFLOW_EXECUTION_STATUS_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just WORKFLOW_EXECUTION_STATUS_RUNNING
   maybeToEnum 2 = Prelude.Just WORKFLOW_EXECUTION_STATUS_COMPLETED
@@ -843,6 +851,7 @@ data WorkflowIdReusePolicy
     WorkflowIdReusePolicy'Unrecognized !WorkflowIdReusePolicy'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum WorkflowIdReusePolicy where
+  enumName _ = Data.Text.pack "WorkflowIdReusePolicy"
   maybeToEnum 0 = Prelude.Just WORKFLOW_ID_REUSE_POLICY_UNSPECIFIED
   maybeToEnum 1
     = Prelude.Just WORKFLOW_ID_REUSE_POLICY_ALLOW_DUPLICATE

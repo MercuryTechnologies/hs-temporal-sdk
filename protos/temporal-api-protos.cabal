@@ -7,9 +7,10 @@ author: Ian Duncan
 
 library
   hs-source-dirs: src
-  build-depends: base >= 4.14 && < 5, proto-lens-runtime
+  build-depends: base >= 4.14 && < 5, proto-lens-runtime, proto-lens-protobuf-types
   default-language: Haskell2010
   exposed-modules:
+    Proto.Dependencies.Gogoproto.Gogo
     Proto.Temporal.Sdk.Core.CoreInterface_Fields
     Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow_Fields
     Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow
@@ -98,29 +99,3 @@ library
     Proto.Temporal.Api.Query.V1.Message
     Proto.Temporal.Api.Errordetails.V1.Message_Fields
     Proto.Temporal.Api.Errordetails.V1.Message
-    Proto.Google.Protobuf.Api_Fields
-    Proto.Google.Protobuf.FieldMask_Fields
-    Proto.Google.Protobuf.SourceContext
-    Proto.Google.Protobuf.Wrappers
-    Proto.Google.Protobuf.Api
-    Proto.Google.Protobuf.Descriptor_Fields
-    Proto.Google.Protobuf.Type_Fields
-    Proto.Google.Protobuf.Struct_Fields
-    Proto.Google.Protobuf.Struct
-    Proto.Google.Protobuf.Empty_Fields
-    Proto.Google.Protobuf.Any
-    Proto.Google.Protobuf.Timestamp
-    Proto.Google.Protobuf.Wrappers_Fields
-    Proto.Google.Protobuf.SourceContext_Fields
-    Proto.Google.Protobuf.Duration_Fields
-    Proto.Google.Protobuf.Descriptor
-    Proto.Google.Protobuf.Type
-    Proto.Google.Protobuf.Timestamp_Fields
-    Proto.Google.Protobuf.Any_Fields
-    Proto.Google.Protobuf.Empty
-    Proto.Google.Protobuf.Duration
-    Proto.Google.Protobuf.FieldMask
-    Proto.Health.V1.Health_Fields
-    Proto.Health.V1.Health
-    Proto.Dependencies.Gogoproto.Gogo_Fields
-    Proto.Dependencies.Gogoproto.Gogo

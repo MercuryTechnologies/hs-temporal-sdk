@@ -85,6 +85,7 @@ data EventType
     EventType'Unrecognized !EventType'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum EventType where
+  enumName _ = Data.Text.pack "EventType"
   maybeToEnum 0 = Prelude.Just EVENT_TYPE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just EVENT_TYPE_WORKFLOW_EXECUTION_STARTED
   maybeToEnum 2

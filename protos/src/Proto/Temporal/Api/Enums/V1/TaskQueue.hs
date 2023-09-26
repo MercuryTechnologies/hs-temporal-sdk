@@ -45,6 +45,7 @@ data TaskQueueKind
     TaskQueueKind'Unrecognized !TaskQueueKind'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum TaskQueueKind where
+  enumName _ = Data.Text.pack "TaskQueueKind"
   maybeToEnum 0 = Prelude.Just TASK_QUEUE_KIND_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just TASK_QUEUE_KIND_NORMAL
   maybeToEnum 2 = Prelude.Just TASK_QUEUE_KIND_STICKY
@@ -119,6 +120,7 @@ data TaskQueueType
     TaskQueueType'Unrecognized !TaskQueueType'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum TaskQueueType where
+  enumName _ = Data.Text.pack "TaskQueueType"
   maybeToEnum 0 = Prelude.Just TASK_QUEUE_TYPE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just TASK_QUEUE_TYPE_WORKFLOW
   maybeToEnum 2 = Prelude.Just TASK_QUEUE_TYPE_ACTIVITY
@@ -195,6 +197,7 @@ data TaskReachability
     TaskReachability'Unrecognized !TaskReachability'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum TaskReachability where
+  enumName _ = Data.Text.pack "TaskReachability"
   maybeToEnum 0 = Prelude.Just TASK_REACHABILITY_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just TASK_REACHABILITY_NEW_WORKFLOWS
   maybeToEnum 2 = Prelude.Just TASK_REACHABILITY_EXISTING_WORKFLOWS

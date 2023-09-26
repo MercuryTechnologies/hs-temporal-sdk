@@ -44,6 +44,7 @@ data QueryRejectCondition
     QueryRejectCondition'Unrecognized !QueryRejectCondition'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum QueryRejectCondition where
+  enumName _ = Data.Text.pack "QueryRejectCondition"
   maybeToEnum 0 = Prelude.Just QUERY_REJECT_CONDITION_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just QUERY_REJECT_CONDITION_NONE
   maybeToEnum 2 = Prelude.Just QUERY_REJECT_CONDITION_NOT_OPEN
@@ -133,6 +134,7 @@ data QueryResultType
     QueryResultType'Unrecognized !QueryResultType'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum QueryResultType where
+  enumName _ = Data.Text.pack "QueryResultType"
   maybeToEnum 0 = Prelude.Just QUERY_RESULT_TYPE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just QUERY_RESULT_TYPE_ANSWERED
   maybeToEnum 2 = Prelude.Just QUERY_RESULT_TYPE_FAILED

@@ -54,6 +54,7 @@ data CommandType
     CommandType'Unrecognized !CommandType'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum CommandType where
+  enumName _ = Data.Text.pack "CommandType"
   maybeToEnum 0 = Prelude.Just COMMAND_TYPE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just COMMAND_TYPE_SCHEDULE_ACTIVITY_TASK
   maybeToEnum 2

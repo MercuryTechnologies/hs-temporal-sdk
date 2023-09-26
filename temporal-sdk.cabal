@@ -1,6 +1,6 @@
 cabal-version: 3.0
 
--- This file has been generated from package.yaml by hpack version 0.35.2.
+-- This file has been generated from package.yaml by hpack version 0.35.5.
 --
 -- see: https://github.com/sol/hpack
 
@@ -22,6 +22,7 @@ library
       Temporal.Interceptor
       Temporal.Operator
       Temporal.Payload
+      Temporal.Replay
       Temporal.SearchAttributes
       Temporal.Worker
       Temporal.Workflow
@@ -99,9 +100,12 @@ library
     , mtl
     , network
     , proto-lens
+    , proto-lens-json
+    , proto-lens-protobuf-types
     , random
     , require-callstack
     , scientific
+    , split
     , stm
     , template-haskell
     , temporal-api-protos
@@ -176,9 +180,12 @@ test-suite temporal-sdk-tests
     , mtl
     , network
     , proto-lens
+    , proto-lens-json
+    , proto-lens-protobuf-types
     , random
     , require-callstack
     , scientific
+    , split
     , stm
     , template-haskell
     , temporal-api-protos

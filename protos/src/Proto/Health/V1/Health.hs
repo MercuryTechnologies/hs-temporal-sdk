@@ -107,14 +107,9 @@ instance Data.ProtoLens.Message HealthCheckRequest where
                       case tag of
                         10
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
                                        "service"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"service") y x)
                         wire
@@ -279,6 +274,7 @@ data HealthCheckResponse'ServingStatus
     HealthCheckResponse'ServingStatus'Unrecognized !HealthCheckResponse'ServingStatus'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum HealthCheckResponse'ServingStatus where
+  enumName _ = Data.Text.pack "ServingStatus"
   maybeToEnum 0 = Prelude.Just HealthCheckResponse'UNKNOWN
   maybeToEnum 1 = Prelude.Just HealthCheckResponse'SERVING
   maybeToEnum 2 = Prelude.Just HealthCheckResponse'NOT_SERVING

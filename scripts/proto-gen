@@ -1,4 +1,17 @@
 #!/usr/bin/env bash
 
-mkdir -p ./protos
-nix-shell -p haskell.packages.ghc902.proto-lens-protoc protobuf --run "protoc --plugin=protoc-gen-haskell=`which proto-lens-protoc`" --haskell_out=./protos --proto_path=_____
+shopt -s globstar
+
+set -x
+stack exec -- protoc \
+  --plugin=protoc-gen-haskell=`which proto-lens-protoc` \
+  --haskell_out=$PWD/protos/src \
+  --proto_path=$PWD/sdk-core/protos/local \
+  --proto_path=$PWD/sdk-core/protos/api_upstream \
+  --proto_path=$PWD/sdk-core/protos/grpc \
+  --proto_path=$PWD/sdk-core/protos/testsrv_upstream \
+  $PWD/sdk-core/protos/local/**/*.proto \
+  $PWD/sdk-core/protos/api_upstream/**/*.proto \
+  $PWD/sdk-core/protos/grpc/**/*.proto \
+  $PWD/sdk-core/protos/testsrv_upstream/temporal/**/*.proto
+
