@@ -43,6 +43,7 @@ data ResetReapplyType
     ResetReapplyType'Unrecognized !ResetReapplyType'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum ResetReapplyType where
+  enumName _ = Data.Text.pack "ResetReapplyType"
   maybeToEnum 0 = Prelude.Just RESET_REAPPLY_TYPE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just RESET_REAPPLY_TYPE_SIGNAL
   maybeToEnum 2 = Prelude.Just RESET_REAPPLY_TYPE_NONE
@@ -117,6 +118,7 @@ data ResetType
     ResetType'Unrecognized !ResetType'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum ResetType where
+  enumName _ = Data.Text.pack "ResetType"
   maybeToEnum 0 = Prelude.Just RESET_TYPE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just RESET_TYPE_FIRST_WORKFLOW_TASK
   maybeToEnum 2 = Prelude.Just RESET_TYPE_LAST_WORKFLOW_TASK

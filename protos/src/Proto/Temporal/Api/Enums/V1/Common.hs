@@ -44,6 +44,7 @@ data EncodingType
     EncodingType'Unrecognized !EncodingType'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum EncodingType where
+  enumName _ = Data.Text.pack "EncodingType"
   maybeToEnum 0 = Prelude.Just ENCODING_TYPE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just ENCODING_TYPE_PROTO3
   maybeToEnum 2 = Prelude.Just ENCODING_TYPE_JSON
@@ -122,6 +123,7 @@ data IndexedValueType
     IndexedValueType'Unrecognized !IndexedValueType'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum IndexedValueType where
+  enumName _ = Data.Text.pack "IndexedValueType"
   maybeToEnum 0 = Prelude.Just INDEXED_VALUE_TYPE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just INDEXED_VALUE_TYPE_TEXT
   maybeToEnum 2 = Prelude.Just INDEXED_VALUE_TYPE_KEYWORD
@@ -234,6 +236,7 @@ data Severity
     Severity'Unrecognized !Severity'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum Severity where
+  enumName _ = Data.Text.pack "Severity"
   maybeToEnum 0 = Prelude.Just SEVERITY_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just SEVERITY_HIGH
   maybeToEnum 2 = Prelude.Just SEVERITY_MEDIUM

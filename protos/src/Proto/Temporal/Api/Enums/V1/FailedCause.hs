@@ -53,6 +53,8 @@ data CancelExternalWorkflowExecutionFailedCause
     CancelExternalWorkflowExecutionFailedCause'Unrecognized !CancelExternalWorkflowExecutionFailedCause'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum CancelExternalWorkflowExecutionFailedCause where
+  enumName _
+    = Data.Text.pack "CancelExternalWorkflowExecutionFailedCause"
   maybeToEnum 0
     = Prelude.Just
         CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
@@ -167,6 +169,7 @@ data ResourceExhaustedCause
     ResourceExhaustedCause'Unrecognized !ResourceExhaustedCause'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum ResourceExhaustedCause where
+  enumName _ = Data.Text.pack "ResourceExhaustedCause"
   maybeToEnum 0 = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_RPS_LIMIT
   maybeToEnum 2
@@ -282,6 +285,8 @@ data SignalExternalWorkflowExecutionFailedCause
     SignalExternalWorkflowExecutionFailedCause'Unrecognized !SignalExternalWorkflowExecutionFailedCause'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum SignalExternalWorkflowExecutionFailedCause where
+  enumName _
+    = Data.Text.pack "SignalExternalWorkflowExecutionFailedCause"
   maybeToEnum 0
     = Prelude.Just
         SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
@@ -413,6 +418,8 @@ data StartChildWorkflowExecutionFailedCause
     StartChildWorkflowExecutionFailedCause'Unrecognized !StartChildWorkflowExecutionFailedCause'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum StartChildWorkflowExecutionFailedCause where
+  enumName _
+    = Data.Text.pack "StartChildWorkflowExecutionFailedCause"
   maybeToEnum 0
     = Prelude.Just
         START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
@@ -549,6 +556,7 @@ data WorkflowTaskFailedCause
     WorkflowTaskFailedCause'Unrecognized !WorkflowTaskFailedCause'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum WorkflowTaskFailedCause where
+  enumName _ = Data.Text.pack "WorkflowTaskFailedCause"
   maybeToEnum 0 = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_UNSPECIFIED
   maybeToEnum 1
     = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_COMMAND

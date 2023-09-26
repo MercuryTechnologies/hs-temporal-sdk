@@ -37,48 +37,6 @@ packages:
   original:
     hackage: require-callstack-0.1.0.0
 - completed:
-    hackage: hs-opentelemetry-api-0.1.0.0@sha256:8af01d0c81dd1af6d3293b105178fd9bfa0057c9eb88ac24d3c440bff660abe3,3705
-    pantry-tree:
-      sha256: 7c332e7241636097fe199bd87f57db333830bed416296e7ebf944497557f46be
-      size: 3221
-  original:
-    hackage: hs-opentelemetry-api-0.1.0.0
-- completed:
-    hackage: hs-opentelemetry-sdk-0.0.3.6@sha256:6776705a4e0c06c6a4bfa16a9bed3ba353901f52d214ac737f57ea7f8e1ed465,3746
-    pantry-tree:
-      sha256: 154663d933a44c350db6c98d2c14db192c14fd04a10c17d0ebb8090707bd359b
-      size: 1430
-  original:
-    hackage: hs-opentelemetry-sdk-0.0.3.6
-- completed:
-    hackage: hs-opentelemetry-otlp-0.0.1.0@sha256:88bb6b68f172a336f78018b0823f47363fb7408eb19f7301489f81ad4d5c0f33,2307
-    pantry-tree:
-      sha256: e56292fc693805babed3c7ba7fc54e59d2e9adbc38de6bcc659009e8b10b9a1b
-      size: 2252
-  original:
-    hackage: hs-opentelemetry-otlp-0.0.1.0
-- completed:
-    hackage: hs-opentelemetry-exporter-otlp-0.0.1.5@sha256:89b0a6481096a338fa6383fbdf08ccaa0eb7bb009c4cbb340894eac33e55c5de,2214
-    pantry-tree:
-      sha256: 744146043f5818ad2b7577a32862affcbf6ed400b097723eae9f6941d739365e
-      size: 400
-  original:
-    hackage: hs-opentelemetry-exporter-otlp-0.0.1.5
-- completed:
-    hackage: hs-opentelemetry-propagator-b3-0.0.1.1@sha256:f0e9da77a888b89f81e5f5186788d5ace2a665e8914f6b446712a1c2edf17743,1854
-    pantry-tree:
-      sha256: 7ed0b0433837946d86f2ab364ef284dfc17fdcef9b4ea5fc48577a9441deeade
-      size: 482
-  original:
-    hackage: hs-opentelemetry-propagator-b3-0.0.1.1
-- completed:
-    hackage: hs-opentelemetry-propagator-w3c-0.0.1.3@sha256:5dc2dbdd6b0a4e434ca5fd949e9ebe5611a5d513ef58009b935e9e810cc85d1b,1852
-    pantry-tree:
-      sha256: 84a8e40facf8df13084682a6e4852d940acc9d9abeaf2d716dbc9415258f4cc5
-      size: 496
-  original:
-    hackage: hs-opentelemetry-propagator-w3c-0.0.1.3
-- completed:
     hackage: thread-utils-context-0.3.0.4@sha256:e763da1c6cab3b6d378fb670ca74aa9bf03c9b61b6fcf7628c56363fb0e3e71e,1671
     pantry-tree:
       sha256: 57d909a991b5e0b4c7a28121cb52ee9c2db6c09e0419b89af6c82fae52be88d4
@@ -99,9 +57,163 @@ packages:
       size: 23148
   original:
     hackage: crypton-0.33
+- completed:
+    commit: 191f384b5329f0231844ae8405695fcdc29eab44
+    git: git@github.com:iand675/proto-lens.git
+    name: proto-lens
+    pantry-tree:
+      sha256: d8259b577c0ee18a1ae8ff0da84951d472ca7d272a57a0d76237046dc2e4804a
+      size: 1720
+    subdir: proto-lens
+    version: 0.7.1.3
+  original:
+    commit: 191f384b5329f0231844ae8405695fcdc29eab44
+    git: git@github.com:iand675/proto-lens.git
+    subdir: proto-lens
+- completed:
+    commit: 191f384b5329f0231844ae8405695fcdc29eab44
+    git: git@github.com:iand675/proto-lens.git
+    name: proto-lens-protoc
+    pantry-tree:
+      sha256: 57853a9f4dedc08dd42ca7144edea2597a766780e5f6ab4fd194e38198dd3dc3
+      size: 1271
+    subdir: proto-lens-protoc
+    version: 0.7.1.1
+  original:
+    commit: 191f384b5329f0231844ae8405695fcdc29eab44
+    git: git@github.com:iand675/proto-lens.git
+    subdir: proto-lens-protoc
+- completed:
+    commit: 191f384b5329f0231844ae8405695fcdc29eab44
+    git: git@github.com:iand675/proto-lens.git
+    name: proto-lens-protobuf-types
+    pantry-tree:
+      sha256: 90212d646dd426ab8be6a2b10c448b859abec3e4a966efb49f7c31a665072d2e
+      size: 1013530
+    subdir: proto-lens-protobuf-types
+    version: 0.8.0.0
+  original:
+    commit: 191f384b5329f0231844ae8405695fcdc29eab44
+    git: git@github.com:iand675/proto-lens.git
+    subdir: proto-lens-protobuf-types
+- completed:
+    commit: 191f384b5329f0231844ae8405695fcdc29eab44
+    git: git@github.com:iand675/proto-lens.git
+    name: proto-lens-runtime
+    pantry-tree:
+      sha256: 64ff7cb58d8a042da417cec8f3891f3267554eeeda949ce7678f14ec5cf08c39
+      size: 221
+    subdir: proto-lens-runtime
+    version: 0.7.0.4
+  original:
+    commit: 191f384b5329f0231844ae8405695fcdc29eab44
+    git: git@github.com:iand675/proto-lens.git
+    subdir: proto-lens-runtime
+- completed:
+    commit: 191f384b5329f0231844ae8405695fcdc29eab44
+    git: git@github.com:iand675/proto-lens.git
+    name: proto-lens-json
+    pantry-tree:
+      sha256: e301e072ea4b3cc2f84766f12d32f7693d37ea1e8b878bd5015b9a4a9dc0da41
+      size: 329
+    subdir: proto-lens-json
+    version: 0.0.1.0
+  original:
+    commit: 191f384b5329f0231844ae8405695fcdc29eab44
+    git: git@github.com:iand675/proto-lens.git
+    subdir: proto-lens-json
+- completed:
+    commit: e07f598b6ec1e36ad2f6e597bd0bd6342c166093
+    git: git@github.com:iand675/hs-opentelemetry.git
+    name: hs-opentelemetry-api
+    pantry-tree:
+      sha256: 0d0c5c22b3a4d4162e8ced0b0df66def2ddc692cc10eddb80ae6bd0edfc37552
+      size: 3323
+    subdir: api
+    version: 0.1.0.0
+  original:
+    commit: e07f598b6ec1e36ad2f6e597bd0bd6342c166093
+    git: git@github.com:iand675/hs-opentelemetry.git
+    subdir: api
+- completed:
+    commit: e07f598b6ec1e36ad2f6e597bd0bd6342c166093
+    git: git@github.com:iand675/hs-opentelemetry.git
+    name: hs-opentelemetry-sdk
+    pantry-tree:
+      sha256: 8218e50db9e7dc865ebd75a7c9240ff81dc74f2c47ae43c89ae3c51d4a8a72d8
+      size: 1532
+    subdir: sdk
+    version: 0.0.3.7
+  original:
+    commit: e07f598b6ec1e36ad2f6e597bd0bd6342c166093
+    git: git@github.com:iand675/hs-opentelemetry.git
+    subdir: sdk
+- completed:
+    commit: e07f598b6ec1e36ad2f6e597bd0bd6342c166093
+    git: git@github.com:iand675/hs-opentelemetry.git
+    name: hs-opentelemetry-otlp
+    pantry-tree:
+      sha256: b6a5bedb5342b44d0509e2a3795b39dfff1cc31f79be895ce1ff30761b8cb74b
+      size: 10424
+    subdir: otlp
+    version: 0.0.2.0
+  original:
+    commit: e07f598b6ec1e36ad2f6e597bd0bd6342c166093
+    git: git@github.com:iand675/hs-opentelemetry.git
+    subdir: otlp
+- completed:
+    commit: e07f598b6ec1e36ad2f6e597bd0bd6342c166093
+    git: git@github.com:iand675/hs-opentelemetry.git
+    name: hs-opentelemetry-exporter-otlp
+    pantry-tree:
+      sha256: eaaded5514dd3a7a37f6baffc8a27da1b47072294d43b08a5b5007a9bfaee8d0
+      size: 502
+    subdir: exporters/otlp
+    version: 0.0.2.0
+  original:
+    commit: e07f598b6ec1e36ad2f6e597bd0bd6342c166093
+    git: git@github.com:iand675/hs-opentelemetry.git
+    subdir: exporters/otlp
+- completed:
+    commit: e07f598b6ec1e36ad2f6e597bd0bd6342c166093
+    git: git@github.com:iand675/hs-opentelemetry.git
+    name: hs-opentelemetry-propagator-b3
+    pantry-tree:
+      sha256: 5fe5479ce227168904921716f468fb7ba76f43a370c6de52e72eff42bc101967
+      size: 584
+    subdir: propagators/b3
+    version: 0.0.1.1
+  original:
+    commit: e07f598b6ec1e36ad2f6e597bd0bd6342c166093
+    git: git@github.com:iand675/hs-opentelemetry.git
+    subdir: propagators/b3
+- completed:
+    commit: e07f598b6ec1e36ad2f6e597bd0bd6342c166093
+    git: git@github.com:iand675/hs-opentelemetry.git
+    name: hs-opentelemetry-propagator-w3c
+    pantry-tree:
+      sha256: 5e01af30d8c1702608dcfc4b8c3a56549a2e33359b3fa9ea3fd1abc63215ced5
+      size: 598
+    subdir: propagators/w3c
+    version: 0.0.1.3
+  original:
+    commit: e07f598b6ec1e36ad2f6e597bd0bd6342c166093
+    git: git@github.com:iand675/hs-opentelemetry.git
+    subdir: propagators/w3c
+- completed:
+    commit: 7a6aac047b706508e85ba2054b5bedbecfd7eb7a
+    git: git@github.com:circuithub/ghc-source-gen.git
+    name: ghc-source-gen
+    pantry-tree:
+      sha256: 4ba36ca22269ea5c9f56921182785817c23a4f4bc3811a39edd584f6876d4555
+      size: 3952
+    version: 0.4.3.0
+  original:
+    commit: 7a6aac047b706508e85ba2054b5bedbecfd7eb7a
+    git: git@github.com:circuithub/ghc-source-gen.git
 snapshots:
 - completed:
-    sha256: dcf4fc28f12d805480ddbe8eb8c370e11db12f0461d0110a4240af27ac88d725
-    size: 650255
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/20/22.yaml
-  original: lts-20.22
+    sha256: 9313df78f49519315342f4c51ffc5da12659d3735f8ac3c54a1fb98ff874474e
+    size: 640036
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/21/12.yaml
+  original: lts-21.12

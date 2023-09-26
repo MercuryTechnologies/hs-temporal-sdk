@@ -10,6 +10,8 @@ build-type: Simple
 dependencies:
 - base
 - proto-lens
+- proto-lens-protobuf-types
+- proto-lens-json
 - temporal-api-protos
 - temporal-sdk-core
 - bytestring
@@ -43,6 +45,7 @@ dependencies:
 - base64
 - zlib
 - network
+- split
 
 default-extensions:
 - BangPatterns
