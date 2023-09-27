@@ -16,13 +16,15 @@
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RecordWildCards #-}
 module Temporal.Bundle.TH 
-  ( FieldNamesB(..)
-  , declareBareB
+  ( temporalBundle
+  , temporalBundleWithoutSynonyms
   , declareBareBWith
   , declareBareBWithOtherBarbies
-  , passthroughBareB
+  , DeclareBareBConfig(..)
   ) where
-
+-- This file is a modified version of Barbies.TH from the barbies-th package.
+-- The original license is reproduced below.
+--
 -- Copyright Fumiaki Kinoshita (c) 2019
 
 -- All rights reserved.
@@ -70,6 +72,7 @@ import Data.Functor.Identity (Identity(..))
 import Data.Functor.Compose (Compose(..))
 import Data.List.Split
 import Data.Maybe
+import Temporal.Bundle
 
 data DeclareBareBConfig = DeclareBareBConfig
   { friends :: [Name] -- ^ Members with these types won't be wrapped with 'Wear'
@@ -108,13 +111,6 @@ passthrough = DeclareBareBConfig
   , wrapperName = newName "h"
   }
 
--- | barbies doesn't care about field names, but they are useful in many use cases
-class FieldNamesB b where
-  -- | A collection of field names.
-  bfieldNames :: IsString a => b (Const a)
-
-  -- | A collection of field names, prefixed by the names of the parent.
-  bnestedFieldNames :: IsString a => b (Const (NE.NonEmpty a))
 
 -- | Transform a regular Haskell record declaration into HKD form.
 -- 'BareB', 'FieldNamesB', 'FunctorB', 'DistributiveB',
@@ -129,13 +125,13 @@ class FieldNamesB b where
 --
 -- @data User t f = User { uid :: Wear t f Int, name :: Wear t f String }@
 --
-declareBareB :: DecsQ -> DecsQ
-declareBareB = declareBareBWith classic
+temporalBundleWithoutSynonyms :: DecsQ -> DecsQ
+temporalBundleWithoutSynonyms = declareBareBWith classic
 
 -- | Defines a synonym for the bare type with the same name.
 -- The strippable definition is suffixed by B, and the covered type is suffixed by H.
-passthroughBareB :: DecsQ -> DecsQ
-passthroughBareB = declareBareBWith passthrough
+temporalBundle :: DecsQ -> DecsQ
+temporalBundle = declareBareBWith passthrough
 
 -- | Like 'declareBareB' except that one can specify the 'Name's of other
 -- barbies. Members with these types won't be wrapped with 'Wear'.
@@ -227,6 +223,8 @@ declareBareBWith DeclareBareBConfig{..} decsQ = do
         instance FieldNamesB $(pure coveredType) where
           bfieldNames = $(fieldNamesE)
           bnestedFieldNames = $(nestedFieldNamesE)
+        instance Label $(pure coveredType) where
+          fieldNames = bfieldNames
         instance FunctorB $(pure coveredType) where
           bmap f $(conP nDataCon $ map varP xs)
             = $(reconE (mapMembers (appE (varE 'f)) (appE [|bmap f|]) (varE <$> xs)))

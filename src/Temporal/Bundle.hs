@@ -130,6 +130,7 @@ module Temporal.Bundle
   , module Barbies
   -- | Provides 'BareB' type class, 'Wear', 'Bare', and 'Covered' needed to use the functions in this module.
   , module Barbies.Bare
+  , FieldNamesB(..)
   -- * Constraints
   , CanUseAsRefs
   , CanUseAsDefs
@@ -146,6 +147,9 @@ import GHC.TypeLits
 import RequireCallStack
 import Barbies
 import Barbies.Bare
+import Data.String (IsString)
+import Data.Typeable
+import qualified Data.List.NonEmpty as NE
 import Temporal.Workflow.Types
 import Temporal.Payload
 import Temporal.Activity
@@ -296,44 +300,50 @@ data Def env a = ToConfig env (FnDef a) => Def
   { defVal :: FnDef a
   }
 
-class Label f where
+-- | barbies doesn't care about field names, but they are useful in many use cases
+class FieldNamesB b where
+  -- | A collection of field names.
+  bfieldNames :: IsString a => b (Const a)
+
+  -- A collection of field names, prefixed by the names of the parent.
+  bnestedFieldNames :: IsString a => b (Const (NE.NonEmpty a))
+
+-- | A temporal-specific version of 'FieldNamesB' that is used to provide
+-- workflow and activity names to Temporal.
+class Label (f :: (* -> *) -> *) where
   -- | Used to prefix workflow types to disambiguate them between modules.
   --
   -- Override this for a given record to provide different naming functionality
-  namespace :: Proxy (f (Const String)) -> String
-  default namespace :: (Generic (f (Const String)), GLabel (Rep (f (Const String)))) => Proxy (f (Const String)) -> String
-  namespace _ = gTypeName (Proxy @(Rep (f (Const String))))
+  typeName :: Proxy (f (Const String)) -> String
+  default typeName :: Typeable f => Proxy (f (Const String)) -> String
+  typeName p = concat [tyConModule tc, ".", tyConName tc]
+    where
+      tc = typeRepTyCon $ typeRep p
 
   fieldNames :: f (Const String)
   default fieldNames :: (Generic (f (Const String)), GLabel (Rep (f (Const String)))) => f (Const String)
-  fieldNames = to $ glabel @(Rep (f (Const String)))
+  fieldNames = to $ gfieldNames @(Rep (f (Const String)))
 
 class GLabel (structure :: Type -> Type) where
-  gTypeName :: Proxy (structure) -> String
-  glabel :: structure x
+  gfieldNames :: structure x
 
 instance (KnownSymbol tyName, KnownSymbol moduleName, GLabel inner) => GLabel (D1 ('MetaData tyName moduleName packageName isNewtype) inner) where
-  gTypeName _ = concat [symbolVal (Proxy @moduleName), ".", symbolVal (Proxy @tyName)]
-  glabel = M1 glabel
+  gfieldNames = M1 gfieldNames
 
 instance GLabel inner
     => GLabel (C1 ('MetaCons name fixity 'True) inner) where
-  gTypeName = undefined
-  glabel = M1 glabel
+  gfieldNames = M1 gfieldNames
 
 instance TypeError ('Text "You can't collect labels for a non-record type!")
     => GLabel (C1 ('MetaCons name fixity 'False) inner) where
-  gTypeName = undefined
-  glabel = undefined
+  gfieldNames = undefined
 
 instance KnownSymbol name
     => GLabel (S1 ('MetaSel ('Just name) i d c) (K1 index (Const String inner))) where
-  gTypeName = undefined
-  glabel = M1 (K1 (Const (symbolVal (Proxy @name))))
+  gfieldNames = M1 (K1 (Const (symbolVal (Proxy @name))))
 
 instance (GLabel left, GLabel right) => GLabel (left :*: right) where
-  gTypeName = undefined
-  glabel = glabel :*: glabel
+  gfieldNames = gfieldNames :*: gfieldNames
 
 type CanUseAsRefs f codec = 
   ( BareB f
@@ -359,7 +369,7 @@ refs :: forall r t f codec.
 refs codec wfrec = result
   where
     ns :: String
-    ns = Temporal.Bundle.namespace (Proxy @(r Covered (Const String)))
+    ns = Temporal.Bundle.typeName (Proxy @(r Covered (Const String)))
 
     defLabels :: r Covered (Const String)
     defLabels = bmap (\(Const str) -> Const $ concat [ns, ".", str]) fieldNames
@@ -387,7 +397,7 @@ defs codec wfrec = result
     covered = bcover wfrec
 
     ns :: String
-    ns = Temporal.Bundle.namespace (Proxy @(f Covered (Const String)))
+    ns = Temporal.Bundle.typeName (Proxy @(f Covered (Const String)))
 
     defLabels :: f Covered (Const String)
     defLabels = bmap (\(Const str) -> Const $ concat [ns, ".", str]) fieldNames

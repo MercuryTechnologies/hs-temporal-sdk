@@ -49,7 +49,7 @@ import Temporal.Interceptor
 import Temporal.EphemeralServer
 import Temporal.Operator (IndexedValueType(..), SearchAttributes(..), listSearchAttributes, addSearchAttributes)
 
-passthroughBareB [d|
+temporalBundle [d|
   data WorkflowTests = WorkflowTests
     { shouldRunWorkflowTest :: W.Workflow ()
     , raceBlockOnLeftSideWorks :: W.Workflow (Either Bool Bool)
@@ -66,13 +66,6 @@ passthroughBareB [d|
     , workflowWaitConditionWorks :: W.Workflow ()
     } deriving (Generic)
   |]
-
--- instance FunctorB (WorkflowTests Covered)
--- instance TraversableB (WorkflowTests Covered)
--- instance ApplicativeB (WorkflowTests Covered)
--- instance ConstraintsB (WorkflowTests Covered)
-instance Label (WorkflowTestsB Covered)
--- instance BareB WorkflowTests
 
 configWithRetry :: PortNumber -> ClientConfig
 configWithRetry pn = defaultClientConfig 
