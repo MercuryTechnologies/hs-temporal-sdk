@@ -21,11 +21,14 @@
 -- that contains all of the workflows and activities that you want to define:
 --
 -- @
--- data EmailWorkflows t f = Workflows
+-- data EmailWorkflowsB t f = Workflows
 --  { emailNewUser :: Wear t f (Int -> Workflow ())
 --  , sendEmail :: Wear t f (String -> Activity () ())
 --  , emailPasswordReset :: Wear t f (String -> Workflow ())
 --  } deriving (Generic)
+--
+-- type EmailWorkflows = EmailWorkflowsB Bare Identity
+-- type EmailWorkflowsH = EmailWorkflowsB Covered
 -- @
 -- 
 -- We define all of our fields using the 'Wear' type, which is a type family
@@ -35,27 +38,54 @@
 -- Next, we will need some boilerplate instances for this type:
 --
 -- @
--- instance FunctorB (EmailWorkflows Covered)
--- instance TraversableB (EmailWorkflows Covered)
--- instance ApplicativeB (EmailWorkflows Covered)
--- instance ConstraintsB (EmailWorkflows Covered)
--- instance BareB EmailWorkflows
--- instance Label (EmailWorkflows Covered)
+-- instance FunctorB (EmailWorkflowsB Covered)
+-- instance TraversableB (EmailWorkflowsB Covered)
+-- instance ApplicativeB (EmailWorkflowsB Covered)
+-- instance ConstraintsB (EmailWorkflowsB Covered)
+-- instance BareB EmailWorkflowsB
+-- instance Label (EmailWorkflowsB Covered)
 -- @
+--
+-- As an alternative to using 'Generic' and deriving these instances, you can use
+-- 'Temporal.Bundle.TH' to generate them for you. With this style, you don't have
+-- to introduce the type parameters manually:
+--
+-- @
+-- import Temporal.Bundle.TH
+--
+-- passthroughBareB [d|
+--   data EmailWorkflows = Workflows
+--     { emailNewUser :: Int -> Workflow ()
+--     , sendEmail :: String -> Activity () ()
+--     , emailPasswordReset :: String -> Workflow ()
+--     }
+--   |]
+-- @
+--
+-- This will generate the same instances as the manual version above,
+-- with the following type synonyms:
+--
+-- @
+-- data EmailWorkflowsB = Workflows {..}
+-- type EmailWorkflows = EmailWorkflowsB Bare Identity
+-- type EmailWorkflowsH = EmailWorkflowsB Covered
+-- @
+--
+-- Now that we have our record type, we can turn it into references and definitions:
 --
 -- Using 'refs', we can use our record type to provide references to our workflows and activities.
 -- References are essentially identifiers that we can use across application / process boundaries
 -- to invoke our workflows and activities with Temporal.
 --
 -- @
--- wfRefs :: Refs EmailWorkflows
+-- wfRefs :: Refs EmailWorkflowsB
 -- wfRefs = refs JSON workflowsImpl
 -- @
 --
 -- Now, we can implement our workflows and activities:
 --
 -- @
--- workflowsImpl :: Impl EmailWorkflows
+-- workflowsImpl :: EmailWorkflows
 -- workflowsImpl = Workflows
 --   { emailNewUser = \userId -> provideCallStack $ do
 --       h <- startActivity 
@@ -79,7 +109,7 @@
 -- This will produce a 'ConfigM' that we can use to register our workflows and activities with the Temporal worker
 -- as part of a larger 'ConfigM' that we pass to 'startWorker'.
 --
-module Temporal.Generic 
+module Temporal.Bundle 
   ( 
   -- * Turning implementations into references and definitions
     refs
@@ -117,13 +147,6 @@ import RequireCallStack
 import Barbies
 import Barbies.Bare
 import Temporal.Workflow.Types
--- import Temporal.Activity
--- import Temporal.Generic.Applicative
--- import Temporal.Generic.Constraints
--- import Temporal.Generic.Functor
--- import Temporal.Generic.GenericN
--- import Temporal.Generic.GUsing
--- import Temporal.Generic.Traversable
 import Temporal.Payload
 import Temporal.Activity
 import Temporal.Activity.Definition
@@ -336,7 +359,7 @@ refs :: forall r t f codec.
 refs codec wfrec = result
   where
     ns :: String
-    ns = Temporal.Generic.namespace (Proxy @(r Covered (Const String)))
+    ns = Temporal.Bundle.namespace (Proxy @(r Covered (Const String)))
 
     defLabels :: r Covered (Const String)
     defLabels = bmap (\(Const str) -> Const $ concat [ns, ".", str]) fieldNames
@@ -364,7 +387,7 @@ defs codec wfrec = result
     covered = bcover wfrec
 
     ns :: String
-    ns = Temporal.Generic.namespace (Proxy @(f Covered (Const String)))
+    ns = Temporal.Bundle.namespace (Proxy @(f Covered (Const String)))
 
     defLabels :: f Covered (Const String)
     defLabels = bmap (\(Const str) -> Const $ concat [ns, ".", str]) fieldNames

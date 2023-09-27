@@ -8,7 +8,7 @@ module GenericSpec where
 import Control.Monad.Reader
 import Data.Kind
 import GHC.Generics
-import Temporal.Generic
+import Temporal.Bundle
 import Temporal.Activity
 import Temporal.Duration (seconds)
 import Temporal.Payload (JSON(..))

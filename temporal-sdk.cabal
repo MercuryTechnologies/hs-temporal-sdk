@@ -13,12 +13,13 @@ build-type:     Simple
 library
   exposed-modules:
       Temporal.Activity
+      Temporal.Bundle
+      Temporal.Bundle.TH
       Temporal.Client
       Temporal.Contrib.OpenTelemetry
       Temporal.Duration
       Temporal.EphemeralServer
       Temporal.Exception
-      Temporal.Generic
       Temporal.Interceptor
       Temporal.Operator
       Temporal.Payload
@@ -48,8 +49,6 @@ library
       Temporal.Workflow.Unsafe.Handle
       Temporal.Workflow.Internal.Instance
       Temporal.Workflow.Internal.Monad
-      Temporal.Generic.GenericN
-      Temporal.Generic.TyFun
       Temporal.Workflow.Signal
       Temporal.Workflow.Query
       Temporal.Workflow.Types

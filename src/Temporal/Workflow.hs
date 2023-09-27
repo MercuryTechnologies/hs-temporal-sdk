@@ -163,10 +163,12 @@ import Data.Kind
 import Data.UUID (UUID)
 import Data.UUID.Types.Internal ( buildFromBytes )
 import Data.Vector (Vector)
+import GHC.TypeLits
 import qualified Data.Vector as V
 import Lens.Family2
 import RequireCallStack
 import System.Random.Stateful
+import Temporal.Activity.Definition (Activity)
 import Temporal.Common
 import Temporal.Common.TimeoutType
 import Temporal.Exception
@@ -226,6 +228,25 @@ instance ActivityRef (KnownActivity args result) where
   type ActivityArgs (KnownActivity args result) = args
   type ActivityResult (KnownActivity args result) = result
   activityRef = id
+
+type DirectActivityReferenceMsg =
+  'Text "You can't run an 'Activity' directly in a 'Workflow' like this."
+    ':$$: 'Text "A 'Workflow' must be deterministic, and 'Activity' values execute arbitrary IO."
+    ':$$: 'Text "You will want to use a reference to a registered activity like 'KnownActivity' or 'RefFromFunction' to invoke the activity here."
+    ':$$: 'Text "Then, you'll be able to call 'startActivity' or 'executeActivity' on it. So, instead of writing:"
+    ':$$: 'Text "    > executeActivity myActivity ..."
+    ':$$: 'Text "write:"
+    ':$$: 'Text "    > executeActivity myActivityRef ..."
+
+instance {-# OVERLAPPABLE #-} (f ~ (ArgsOf f :->: Activity env (ResultOf (Activity env) f)), TypeError DirectActivityReferenceMsg) => ActivityRef (a -> f) where
+  type ActivityArgs (a -> f) = '[]
+  type ActivityResult (a -> f) = ()
+  activityRef _ = error "Should never be called"
+
+instance TypeError DirectActivityReferenceMsg => ActivityRef (Activity env a) where
+  type ActivityArgs (Activity env a) = '[]
+  type ActivityResult (Activity env a) = a
+  activityRef _ = error "Should never be called"
 
 startActivityFromPayloads 
   :: forall args result. RequireCallStack 

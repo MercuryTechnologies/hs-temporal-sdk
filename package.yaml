@@ -119,8 +119,6 @@ library:
   - Temporal.Workflow.Unsafe.Handle
   - Temporal.Workflow.Internal.Instance
   - Temporal.Workflow.Internal.Monad
-  - Temporal.Generic.GenericN
-  - Temporal.Generic.TyFun
   - Temporal.Workflow.Signal
   - Temporal.Workflow.Query
   - Temporal.Workflow.Types

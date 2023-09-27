@@ -5,6 +5,7 @@
 {-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -35,7 +36,8 @@ import qualified Temporal.Client as C
 import Temporal.Exception
 import qualified Temporal.Workflow as W
 import Temporal.Activity
-import Temporal.Generic
+import Temporal.Bundle
+import Temporal.Bundle.TH
 import Temporal.Payload
 import Temporal.Worker
 import Temporal.SearchAttributes
@@ -46,6 +48,31 @@ import Temporal.Contrib.OpenTelemetry
 import Temporal.Interceptor
 import Temporal.EphemeralServer
 import Temporal.Operator (IndexedValueType(..), SearchAttributes(..), listSearchAttributes, addSearchAttributes)
+
+passthroughBareB [d|
+  data WorkflowTests = WorkflowTests
+    { shouldRunWorkflowTest :: W.Workflow ()
+    , raceBlockOnLeftSideWorks :: W.Workflow (Either Bool Bool)
+    , raceBlockOnBothSidesWorks :: W.Workflow (Either Bool Bool)
+    , raceThrowsRhsErrorWhenLhsBlocked :: W.Workflow (Either Bool Bool)
+    , raceIgnoresRhsErrorOnLhsSuccess :: W.Workflow (Either Bool Bool)
+    , continueAsNewWorks :: Int -> W.Workflow Text
+    , basicActivityWf :: W.Workflow Int
+    , basicActivity :: Activity () Int
+    , heartbeatWorks :: Activity () Int
+    , runHeartbeat :: W.Workflow Int
+    , faultyActivity :: Activity () Int
+    , faultyWorkflow :: W.Workflow Int
+    , workflowWaitConditionWorks :: W.Workflow ()
+    } deriving (Generic)
+  |]
+
+-- instance FunctorB (WorkflowTests Covered)
+-- instance TraversableB (WorkflowTests Covered)
+-- instance ApplicativeB (WorkflowTests Covered)
+-- instance ConstraintsB (WorkflowTests Covered)
+instance Label (WorkflowTestsB Covered)
+-- instance BareB WorkflowTests
 
 configWithRetry :: PortNumber -> ClientConfig
 configWithRetry pn = defaultClientConfig 
@@ -111,36 +138,13 @@ spec = aroundAll setup needsClient
 
 type MyWorkflow a = W.RequireCallStack => W.Workflow a
 
-data WorkflowTests t f = WorkflowTests
-  { shouldRunWorkflowTest :: Wear t f (W.Workflow ())
-  , raceBlockOnLeftSideWorks :: Wear t f (W.Workflow (Either Bool Bool))
-  , raceBlockOnBothSidesWorks :: Wear t f (W.Workflow (Either Bool Bool))
-  , raceThrowsRhsErrorWhenLhsBlocked :: Wear t f (W.Workflow (Either Bool Bool))
-  , raceIgnoresRhsErrorOnLhsSuccess :: Wear t f (W.Workflow (Either Bool Bool))
-  , continueAsNewWorks :: Wear t f (Int -> W.Workflow Text)
-  , basicActivityWf :: Wear t f (W.Workflow Int)
-  , basicActivity :: Wear t f (Activity () Int)
-  , heartbeatWorks :: Wear t f (Activity () Int)
-  , runHeartbeat :: Wear t f (W.Workflow Int)
-  , faultyActivity :: Wear t f (Activity () Int)
-  , faultyWorkflow :: Wear t f (W.Workflow Int)
-  , workflowWaitConditionWorks :: Wear t f (W.Workflow ())
-  } deriving (Generic)
-
-instance FunctorB (WorkflowTests Covered)
-instance TraversableB (WorkflowTests Covered)
-instance ApplicativeB (WorkflowTests Covered)
-instance ConstraintsB (WorkflowTests Covered)
-instance Label (WorkflowTests Covered)
-instance BareB WorkflowTests
-
 defaultCodec :: JSON
 defaultCodec = JSON
 
 signalUnblockWorkflow :: W.SignalRef '[]
 signalUnblockWorkflow = W.SignalRef "unblockWorkflow" defaultCodec
 
-testImpls :: Impl WorkflowTests
+testImpls :: WorkflowTests
 testImpls = WorkflowTests
   { shouldRunWorkflowTest = $(logDebug) "oh hi!"
   , raceBlockOnLeftSideWorks = provideCallStack $ do
@@ -207,10 +211,10 @@ testImpls = WorkflowTests
       pure ()
   }
 
-testRefs :: Refs WorkflowTests
+testRefs :: Refs WorkflowTestsB
 testRefs = refs defaultCodec testImpls
 
-testDefs :: Defs () WorkflowTests
+testDefs :: Defs () WorkflowTestsB
 testDefs = defs defaultCodec testImpls
 
 testConf :: ConfigM () ()
