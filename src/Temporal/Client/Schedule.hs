@@ -1,11 +1,12 @@
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE OverloadedLabels #-}
 {- |
 A Schedule contains instructions for starting a Workflow Execution at specific times. Schedules provide a more flexible and user-friendly approach than Temporal Cron Jobs.
 
-How to enable Schedules
+= How to enable Schedules
 A Schedule has an identity and is independent of a Workflow Execution. This differs from a Temporal Cron Job, which relies on a cron schedule as a property of the Workflow Execution.
 
-Action
+== Action
 The Action of a Schedule is where the Workflow Execution properties are established, such as Workflow Type, Task Queue, parameters, and timeouts.
 
 Workflow Executions started by a Schedule have the following additional properties:
@@ -35,35 +36,45 @@ The comment field is optional and can be used to include a free-form description
 
 No matter which form you supply, calendar and interval specs are converted to canonical representations. What you see when you "describe" or "list" a Schedule might not look exactly like what you entered, but it has the same meaning.
 
-Other Spec features:
+== Other Spec features
 
-Multiple intervals/calendar expressions: A Spec can have combinations of multiple intervals and/or calendar expressions to define a specific Schedule.
+=== Multiple intervals/calendar expressions
 
-Time bounds: Provide an absolute start or end time (or both) with a Spec to ensure that no actions are taken before the start time or after the end time.
+A Spec can have combinations of multiple intervals and/or calendar expressions to define a specific Schedule.
 
-Exclusions: A Spec can contain exclusions in the form of zero or more calendar expressions. This can be used to express scheduling like "each Monday at noon except for holidays. You'll have to provide your own set of exclusions and include it in each schedule; there are no pre-defined sets. (This feature isn't currently exposed in tctl or the Temporal Web UI.)
+=== Time bounds
 
-Jitter: If given, a random offset between zero and the maximum jitter is added to each Action time (but bounded by the time until the next scheduled Action).
+Provide an absolute start or end time (or both) with a Spec to ensure that no actions are taken before the start time or after the end time.
 
-Time zones: By default, calendar-based expressions are interpreted in UTC. Temporal recommends using UTC to avoid various surprising properties of time zones. If you don't want to use UTC, you can provide the name of a time zone. The time zone definition is loaded on the Temporal Server Worker Service from either disk or the fallback embedded in the binary.
+=== Exclusions
+
+A Spec can contain exclusions in the form of zero or more calendar expressions. This can be used to express scheduling like "each Monday at noon except for holidays. You'll have to provide your own set of exclusions and include it in each schedule; there are no pre-defined sets. (This feature isn't currently exposed in tctl or the Temporal Web UI.)
+
+=== Jitter
+
+If given, a random offset between zero and the maximum jitter is added to each Action time (but bounded by the time until the next scheduled Action).
+
+== Time zones
+
+By default, calendar-based expressions are interpreted in UTC. Temporal recommends using UTC to avoid various surprising properties of time zones. If you don't want to use UTC, you can provide the name of a time zone. The time zone definition is loaded on the Temporal Server Worker Service from either disk or the fallback embedded in the binary.
 
 For more operational control, embed the contents of the time zone database file in the Schedule Spec itself. (Note: this isn't currently exposed in tctl or the web UI.)
 
-Pause
+== Pause
 A Schedule can be Paused. When a Schedule is Paused, the Spec has no effect. However, you can still force manual actions by using the tctl schedule trigger command.
 
 To assist communication among developers and operators, a “notes” field can be updated on pause or resume to store an explanation for the current state.
 
-Backfill
+== Backfill
 A Schedule can be Backfilled. When a Schedule is Backfilled, all the Actions that would have been taken over a specified time period are taken now (in parallel if the AllowAll Overlap Policy is used; sequentially if BufferAll is used). You might use this to fill in runs from a time period when the Schedule was paused due to an external condition that's now resolved, or a period before the Schedule was created.
 
-Limit number of Actions
+== Limit number of Actions
 A Schedule can be limited to a certain number of scheduled Actions (that is, not trigger immediately). After that it will act as if it were paused.
 
-Policies
+== Policies
 A Schedule supports a set of Policies that enable customizing behavior.
 
-Overlap Policy
+=== Overlap Policy
 The Overlap Policy controls what happens when it is time to start a Workflow Execution but a previously started Workflow Execution is still running. The following options are available:
 
 Skip: Default. Nothing happens; the Workflow Execution is not started.
@@ -75,12 +86,12 @@ AllowAll Starts any number of concurrent Workflow Executions. With this policy (
 Catchup Window
 The Temporal Cluster might be down or unavailable at the time when a Schedule should take an Action. When it comes back up, the Catchup Window controls which missed Actions should be taken at that point. The default is one minute, which means that the Schedule attempts to take any Actions that wouldn't be more than one minute late. An outage that lasts longer than the Catchup Window could lead to missed Actions. (But you can always Backfill.)
 
-Pause-on-failure
+=== Pause-on-failure
 If this policy is set, a Workflow Execution started by a Schedule that ends with a failure or timeout (but not Cancellation or Termination) causes the Schedule to automatically pause.
 
 Note that with the AllowAll Overlap Policy, this pause might not apply to the next Workflow Execution, because the next Workflow Execution might have started before the failed one finished. It applies only to Workflow Executions that were scheduled to start after the failed one finished.
 
-Last completion result
+== Last completion result
 A Workflow started by a Schedule can obtain the completion result from the most recent successful run. (How you do this depends on the SDK you're using.)
 
 For overlap policies that don't allow overlap, “the most recent successful run” is straightforward to define. For the AllowAll policy, it refers to the run that completed most recently, at the time that the run in question is started. Consider the following overlapping runs:
@@ -104,48 +115,75 @@ Limitations
 Internally, a Schedule is implemented as a Workflow. If you're using Advanced Visibility (Elasticsearch), these Workflow Executions are hidden from normal views. If you're using Standard Visibility, they are visible, though there's no need to interact with them directly.
 -}
 module Temporal.Client.Schedule
-{-
-  ( createSchedule
+  ( ScheduleClient
+  , CreateScheduleRequest(..)
+  , createSchedule
   , deleteSchedule
   , listSchedules
   , ScheduleListInfo(..)
   , ScheduleListEntry(..)
   , ScheduleActionResult(..)
   , ListSchedulesOptions(..)
+  , ListScheduleMatchingTimesOptions(..)
   , listScheduleMatchingTimes
   , describeSchedule
+  , DescribeScheduleResponse(..)
   , patchSchedule
+  , SchedulePatch(..)
   , updateSchedule
-  , ScheduleId
+  , UpdateScheduleRequest(..)
+  , ScheduleId(..)
+  , ScheduleSpec(..)
+  , Schedule(..)
+  , TriggerImmediatelyRequest(..)
+  , BackfillRequest(..)
+  , StructuredCalendarSpec(..)
+  , CalendarSpec(..)
+  , IntervalSpec(..)
+  , WorkflowExecution(..)
+  , ScheduleInfo(..)
+  , ScheduleAction(..)
+  , SchedulePolicies(..)
+  , ScheduleState(..)
+  , OverlapPolicy(..)
+  , Range(..)
   , module Temporal.Duration 
-  ) -} where
+  ) where
 
 import Control.Monad
 import Control.Monad.IO.Class (MonadIO)
 import Data.Conduit
-import Data.Int (Int32)
+import Data.Bifunctor
+import Data.ByteString (ByteString)
+import Data.Int (Int32, Int64)
 import Data.Map.Strict (Map)
+import Data.Maybe (fromMaybe)
 import Data.ProtoLens
 import Data.Vector (Vector)
 import qualified Data.Vector as V
 import Data.Text (Text)
-import Data.Time.Clock (UTCTime)
 import Temporal.Duration
 import Temporal.Common
 import Temporal.Payload
 import Temporal.Core.Client
+import Temporal.Exception
 import qualified Temporal.Core.Client.WorkflowService as Core
+import Temporal.SearchAttributes
+import Temporal.SearchAttributes.Internal
 import Lens.Family2
+import qualified Proto.Temporal.Api.Common.V1.Message as C
+import qualified Proto.Temporal.Api.Common.V1.Message_Fields as C
+import qualified Proto.Temporal.Api.Enums.V1.Schedule as S
 import qualified Proto.Temporal.Api.Schedule.V1.Message as S
 import qualified Proto.Temporal.Api.Schedule.V1.Message_Fields as S
+import qualified Proto.Temporal.Api.Workflow.V1.Message as W
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse as WF
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as WF
 import Data.Time.Clock.System (SystemTime)
 import UnliftIO
 import Temporal.Common (timespecFromTimestamp, Namespace (rawNamespace), ScheduleId (rawScheduleId))
 
-{-
-throwEither :: MonadIO m => m (Either a b) -> m b
+throwEither :: (MonadIO m, Exception e) => m (Either e a) -> m a
 throwEither m = do
   e <- m
   case e of
@@ -161,27 +199,43 @@ data ScheduleClient = ScheduleClient
   , scheduleClientIdentity :: Text
   }
 
-data ScheduleHandle = ScheduleHandle
-
-data CreateScheduleOptions = CreateScheduleOptions
+data CreateScheduleRequest = CreateScheduleRequest
   { scheduleId :: !ScheduleId
-  , schedule :: !ScheduleSpec
-  , initialPatch :: !(Maybe ScheduleSpec)
-  -- TODO, not sure what the point of this is. Idempotency?
-  , requestId :: !Text
+  -- ^ The id of the new schedule.
+  , schedule :: !Schedule
+  -- ^ The schedule spec, policies, action, and initial state.
+  , initialPatch :: !(Maybe SchedulePatch)
+  -- ^ Optional initial patch (e.g. to run the action once immediately).
   , memo :: !(Map Text Payload)
-  , searchAttributes :: !(Map Text Payload)
+  -- ^ Memo attached to the schedule itself.
+  , requestId :: !Text
+  -- ^ A unique identifier for this create request for idempotence. Typically UUIDv4.
+  , searchAttributes :: !(Map Text SearchAttributeType)
+  -- ^ Search attributes attached to the schedule itself.
   }
 
-data ScheduleAlreadyRunning = ScheduleAlreadyRunning
-
+-- | Creates a new schedule.
 createSchedule 
   :: MonadIO m
   => ScheduleClient 
-  -> CreateScheduleOptions
-  -> m (Either ScheduleAlreadyRunning ScheduleHandle)
-createSchedule = undefined
+  -> CreateScheduleRequest
+  -> m ByteString
+createSchedule s opts = liftIO $ do
+  searchAttributes <- searchAttributesToProto opts.searchAttributes
+  resp <- throwEither $ Core.createSchedule 
+    (scheduleClient s) 
+    (defMessage 
+      & WF.namespace .~ rawNamespace s.scheduleClientNamespace
+      & WF.scheduleId .~ rawScheduleId opts.scheduleId
+      & WF.schedule .~ scheduleToProto opts.schedule
+      & WF.maybe'initialPatch .~ fmap schedulePatchToProto opts.initialPatch
+      & WF.memo .~ convertToProtoMemo opts.memo
+      & WF.requestId .~ opts.requestId
+      & WF.searchAttributes .~ (defMessage & C.indexedFields .~ searchAttributes)
+    )
+  pure $ resp ^. WF.conflictToken
 
+-- | Deletes a schedule, removing it from the system.
 deleteSchedule 
   :: MonadIO m
   => ScheduleClient
@@ -201,11 +255,20 @@ data ListSchedulesOptions = ListSchedulesOptions
   { maximumPageSize :: Int32 
   }
 
-data ScheduleActionResult = ScheduleActionResult
+data WorkflowExecution = WorkflowExecution
+  { workflowId :: !WorkflowId
+  , runId :: !RunId
+  }
+
+workflowExecutionFromProto :: C.WorkflowExecution -> WorkflowExecution
+workflowExecutionFromProto p = WorkflowExecution
+  { workflowId = WorkflowId (p ^. C.workflowId)
+  , runId = RunId (p ^. C.runId)
+  }
 
 data ScheduleListInfo = ScheduleListInfo
   { spec :: !(Maybe ScheduleSpec)
-  , workflowType :: !Text
+  , workflowType :: !WorkflowType
   , notes :: !Text
   , paused :: !Bool
   , recentActions :: !(Vector ScheduleActionResult)
@@ -215,18 +278,33 @@ data ScheduleListInfo = ScheduleListInfo
 data ScheduleListEntry = ScheduleListEntry
   { scheduleId :: !ScheduleId
   , memo :: !(Map Text Payload)
-  , searchAttributes :: !(Map Text Payload)
+  , searchAttributes :: !(Map Text SearchAttributeType)
   , info :: !(Maybe ScheduleListInfo)
   }
 
-scheduleListEntryFromProto :: S.ScheduleListEntry -> ScheduleListEntry
-scheduleListEntryFromProto p = ScheduleListEntry
-  { scheduleId = ScheduleId (p ^. S.scheduleId)
-  , memo = maybe mempty _ (p ^. S.memo)
-  , searchAttributes = maybe mempty _ (p ^. S.searchAttributes)
-  , info = fmap scheduleListInfoFromProto (p ^. S.maybe'info)
+scheduleListInfoFromProto :: S.ScheduleListInfo -> ScheduleListInfo
+scheduleListInfoFromProto p = ScheduleListInfo
+  { spec = fmap scheduleSpecFromProto (p ^. S.maybe'spec)
+  , workflowType = WorkflowType (p ^. S.workflowType . C.name)
+  , notes = p ^. S.notes
+  , paused = p ^. S.paused
+  , recentActions = fmap scheduleActionResultFromProto (p ^. S.vec'recentActions)
+  , futureActionTimes = fmap timespecFromTimestamp (p ^. S.vec'futureActionTimes)
   }
 
+scheduleListEntryFromProto :: S.ScheduleListEntry -> IO ScheduleListEntry
+scheduleListEntryFromProto p = do
+  let searchAttrs :: Map Text C.Payload
+      searchAttrs = p ^. S.searchAttributes . C.indexedFields
+  searchAttributes <- throwEither $ do
+    res <- searchAttributesFromProto searchAttrs
+    pure $ first ValueError res
+  let info = fmap scheduleListInfoFromProto (p ^. S.maybe'info)
+      scheduleId = ScheduleId (p ^. S.scheduleId)
+      memo = convertFromProtoMemo (p ^. S.memo)
+  pure $ ScheduleListEntry{..}
+
+-- | List all schedules in a namespace.
 listSchedules 
   :: MonadIO m
   => ScheduleClient
@@ -239,10 +317,11 @@ listSchedules c opts = go ""
         c.scheduleClient 
         (defMessage 
           & WF.namespace .~ rawNamespace c.scheduleClientNamespace
-          & WF.identity .~ c.scheduleClientIdentity
           & WF.maximumPageSize .~ opts.maximumPageSize
+          & WF.nextPageToken .~ tok
         )
-      unless (V.null (resp ^. WF.vec'schedules)) $ yield (resp ^. WF.vec'schedules)
+      unless (V.null (resp ^. WF.vec'schedules)) $ do
+        liftIO (traverse scheduleListEntryFromProto (resp ^. WF.vec'schedules)) >>= yield
       if resp ^. WF.nextPageToken == "" || V.null (resp ^. WF.vec'schedules)
         then pure ()
         else go (resp ^. WF.nextPageToken)
@@ -253,10 +332,11 @@ data ListScheduleMatchingTimesOptions = ListScheduleMatchingTimesOptions
   , endTime :: !SystemTime
   }
 
+-- | Lists matching times within a range.
 listScheduleMatchingTimes
   :: MonadIO m
   => ScheduleClient 
-  -> ListSchedulesOptions 
+  -> ListScheduleMatchingTimesOptions 
   -> m (Vector SystemTime)
 listScheduleMatchingTimes c opts = do
   resp <- liftIO $ throwEither $ Core.listScheduleMatchingTimes 
@@ -268,30 +348,359 @@ listScheduleMatchingTimes c opts = do
       & WF.endTime .~ timespecToTimestamp (opts.endTime)
     )
   pure $ fmap timespecFromTimestamp (resp ^. WF.vec'startTime) 
-      
 
+data ScheduleActionResult = ScheduleActionResult
+  { scheduleTime :: !SystemTime
+  , actualTime :: !SystemTime
+  , startWorkflowResult :: !WorkflowExecution
+  }
+
+scheduleActionResultFromProto :: S.ScheduleActionResult -> ScheduleActionResult
+scheduleActionResultFromProto p = ScheduleActionResult
+  { scheduleTime = timespecFromTimestamp (p ^. S.scheduleTime)
+  , actualTime = timespecFromTimestamp (p ^. S.actualTime)
+  , startWorkflowResult = workflowExecutionFromProto (p ^. S.startWorkflowResult)
+  }
+
+data ScheduleInfo = ScheduleInfo
+  { actionCount :: !Int64
+  -- ^ Number of actions taken so far.
+  , missedCatchupWindow :: !Int64
+  -- ^ Number of times a scheduled action was skipped due to missing the catchup window.
+  , overlapSkipped :: !Int64
+  -- ^ Number of skipped actions due to overlap.
+  , runningWorkflows :: !(Vector WorkflowExecution)
+  -- ^ Currently-running workflows started by this schedule. (There might be
+  -- more than one if the overlap policy allows overlaps.)
+  -- Note that the run_ids in here are the original execution run ids as
+  -- started by the schedule. If the workflows retried, did continue-as-new,
+  -- or were reset, they might still be running but with a different run_id.
+  , recentActions :: !(Vector ScheduleActionResult)
+  -- ^ Most recent ten actual action times (including manual triggers).
+  , futureActionTimes :: !(Vector SystemTime)
+  -- ^ Next ten scheduled action times.
+  , createTime :: !(Maybe SystemTime)
+  -- ^ Timestamp of schedule creation.
+  , updateTime :: !(Maybe SystemTime)
+  -- ^ Timestamp of last update.
+  , invalidScheduleError :: !Text
+  -- ^ deprecated
+  }
+
+scheduleInfoFromProto :: S.ScheduleInfo -> ScheduleInfo
+scheduleInfoFromProto p = ScheduleInfo
+  { actionCount = p ^. S.actionCount
+  , missedCatchupWindow = p ^. S.missedCatchupWindow
+  , overlapSkipped = p ^. S.overlapSkipped
+  , runningWorkflows = fmap workflowExecutionFromProto (p ^. S.vec'runningWorkflows)
+  , recentActions = fmap scheduleActionResultFromProto (p ^. S.vec'recentActions)
+  , futureActionTimes = fmap timespecFromTimestamp (p ^. S.vec'futureActionTimes)
+  , createTime = fmap timespecFromTimestamp (p ^. S.maybe'createTime)
+  , updateTime = fmap timespecFromTimestamp (p ^. S.maybe'updateTime)
+  , invalidScheduleError = p ^. S.invalidScheduleError
+  }
+
+data Schedule = Schedule
+  { spec :: !ScheduleSpec
+  , action :: !ScheduleAction
+  , policies :: !SchedulePolicies
+  , state :: !ScheduleState
+  }
+
+scheduleToProto :: Schedule -> S.Schedule
+scheduleToProto p = defMessage
+  & S.spec .~ scheduleSpecToProto p.spec
+  & S.action .~ scheduleActionToProto p.action
+  & S.policies .~ schedulePoliciesToProto p.policies
+  & S.state .~ scheduleStateToProto p.state
+
+data SchedulePolicies = SchedulePolicies
+  { overlapPolicy :: !OverlapPolicy
+  -- ^ Policy for overlaps.
+  -- Note that this can be changed after a schedule has taken some actions,
+  -- and some changes might produce unintuitive results. In general, the later
+  -- policy overrides the earlier policy.
+  , catchupWindow :: !(Maybe Duration)
+  -- ^ Policy for catchups:
+  -- If the Temporal server misses an action due to one or more components
+  -- being down, and comes back up, the action will be run if the scheduled
+  -- time is within this window from the current time.
+  -- This value defaults to 60 seconds, and can't be less than 10 seconds.
+  , pauseOnFailure :: !Bool
+  -- ^ If true, and a workflow run fails or times out, turn on "paused".
+  -- This applies after retry policies: the full chain of retries must fail to
+  -- trigger a pause here.
+  }
+
+schedulePoliciesToProto :: SchedulePolicies -> S.SchedulePolicies
+schedulePoliciesToProto p = defMessage
+  & S.overlapPolicy .~ overlapPolicyToProto p.overlapPolicy
+  & S.maybe'catchupWindow .~ fmap durationToProto p.catchupWindow
+  & S.pauseOnFailure .~ p.pauseOnFailure
+
+schedulePoliciesFromProto :: S.SchedulePolicies -> SchedulePolicies
+schedulePoliciesFromProto p = SchedulePolicies
+  { overlapPolicy = overlapPolicyFromProto (p ^. S.overlapPolicy)
+  , catchupWindow = fmap durationFromProto (p ^. S.maybe'catchupWindow)
+  , pauseOnFailure = p ^. S.pauseOnFailure
+  }
+
+data OverlapPolicy
+  = Unspecified
+  | Skip
+  -- ^ Skip (default) means don't start anything. When the
+  -- workflow completes, the next scheduled event after that time will be considered.
+  | BufferOne
+  -- ^ BufferOne means start the workflow again soon as the
+  -- current one completes, but only buffer one start in this way. If another start is
+  -- supposed to happen when the workflow is running, and one is already buffered, then
+  -- only the first one will be started after the running workflow finishes.
+  | BufferAll
+  -- ^ BufferAll means buffer up any number of starts to all
+  -- happen sequentially, immediately after the running workflow completes.
+  | CancelOther
+  -- ^ CancelOther means that if there is another workflow
+  -- running, cancel it, and start the new one after the old one completes cancellation.
+  | TerminateOther
+  -- ^ TerminateOther means that if there is another workflow
+  -- running, terminate it and start the new one immediately.
+  | AllowAll
+  -- ^ AllowAll means start any number of concurrent workflows.
+  -- Note that with this policy, last completion result and last failure will not be
+  -- available since workflows are not sequential.
+  | OverlapPolicyUnrecognized
+
+overlapPolicyToProto :: OverlapPolicy -> S.ScheduleOverlapPolicy
+overlapPolicyToProto p = case p of
+  Unspecified -> S.SCHEDULE_OVERLAP_POLICY_UNSPECIFIED
+  Skip -> S.SCHEDULE_OVERLAP_POLICY_SKIP
+  BufferOne -> S.SCHEDULE_OVERLAP_POLICY_BUFFER_ONE
+  BufferAll -> S.SCHEDULE_OVERLAP_POLICY_BUFFER_ALL
+  CancelOther -> S.SCHEDULE_OVERLAP_POLICY_CANCEL_OTHER
+  TerminateOther -> S.SCHEDULE_OVERLAP_POLICY_TERMINATE_OTHER
+  AllowAll -> S.SCHEDULE_OVERLAP_POLICY_ALLOW_ALL
+  OverlapPolicyUnrecognized -> S.SCHEDULE_OVERLAP_POLICY_UNSPECIFIED
+
+overlapPolicyFromProto :: S.ScheduleOverlapPolicy -> OverlapPolicy
+overlapPolicyFromProto p = case p of
+  S.SCHEDULE_OVERLAP_POLICY_UNSPECIFIED -> Unspecified
+  S.SCHEDULE_OVERLAP_POLICY_SKIP -> Skip
+  S.SCHEDULE_OVERLAP_POLICY_BUFFER_ONE -> BufferOne
+  S.SCHEDULE_OVERLAP_POLICY_BUFFER_ALL -> BufferAll
+  S.SCHEDULE_OVERLAP_POLICY_CANCEL_OTHER -> CancelOther
+  S.SCHEDULE_OVERLAP_POLICY_TERMINATE_OTHER -> TerminateOther
+  S.SCHEDULE_OVERLAP_POLICY_ALLOW_ALL -> AllowAll
+  _ -> OverlapPolicyUnrecognized
+
+data ScheduleState = ScheduleState
+  { notes :: !Text
+  -- ^ Informative human-readable message with contextual notes, e.g. the reason
+  -- a schedule is paused. The system may overwrite this message on certain
+  -- conditions, e.g. when pause-on-failure happens.
+  , paused :: !Bool
+  -- ^ If true, do not take any actions based on the schedule spec.
+  , limitedActions :: !Bool
+  -- ^ If limited_actions is true, decrement remaining_actions after each
+  -- action, and do not take any more scheduled actions if remaining_actions
+  -- is zero. Actions may still be taken by explicit request (i.e. trigger
+  -- immediately or backfill). Skipped actions (due to overlap policy) do not
+  -- count against remaining actions.
+  , remainingActions :: !Int64
+  }
+
+scheduleStateToProto :: ScheduleState -> S.ScheduleState
+scheduleStateToProto p = defMessage
+  & S.notes .~ p.notes
+  & S.paused .~ p.paused
+  & S.limitedActions .~ p.limitedActions
+  & S.remainingActions .~ p.remainingActions
+
+scheduleStateFromProto :: S.ScheduleState -> ScheduleState
+scheduleStateFromProto p = ScheduleState
+  { notes = p ^. S.notes
+  , paused = p ^. S.paused
+  , limitedActions = p ^. S.limitedActions
+  , remainingActions = p ^. S.remainingActions
+  }
+
+data ScheduleAction
+  = StartWorkflow W.NewWorkflowExecutionInfo
+  | ScheduleActionUnrecognized
+  deriving (Eq, Show)
+
+scheduleActionToProto :: ScheduleAction -> S.ScheduleAction
+scheduleActionToProto a = case a of
+  StartWorkflow wf -> defMessage & S.maybe'action .~ Just (S.ScheduleAction'StartWorkflow wf)
+  ScheduleActionUnrecognized -> defMessage
+
+scheduleActionFromProto :: S.ScheduleAction -> ScheduleAction
+scheduleActionFromProto a = case a ^. S.maybe'action of
+  Nothing -> ScheduleActionUnrecognized
+  Just a' -> case a' of
+    S.ScheduleAction'StartWorkflow wf -> StartWorkflow wf
+
+scheduleFromProto :: S.Schedule -> Schedule
+scheduleFromProto p = Schedule
+  { spec = scheduleSpecFromProto (p ^. S.spec)
+  , action = scheduleActionFromProto (p ^. S.action)
+  , policies = schedulePoliciesFromProto (p ^. S.policies)
+  , state = scheduleStateFromProto (p ^. S.state)
+  }
+
+data DescribeScheduleResponse = DescribeScheduleResponse 
+  { schedule :: !Schedule
+  -- ^ 
+  -- The complete current schedule details. This may not match the schedule as
+  -- created because:
+  -- - some types of schedule specs may get compiled into others (e.g. CronString into StructuredCalendarSpec)
+  -- - some unspecified fields may be replaced by defaults
+  -- - some fields in the state are modified automatically
+  -- - the schedule may have been modified by UpdateSchedule or PatchSchedule
+  , info :: !ScheduleInfo
+  -- ^ Extra schedule state info.
+  , memo :: !(Map Text Payload)
+  -- ^ The memo that the schedule was created with.
+  , searchAttributes :: !(Map Text SearchAttributeType)
+  -- ^ The search attributes that the schedule was created with.
+  , conflictToken :: !ByteString
+  -- ^ This value can be passed back to UpdateSchedule to ensure that the
+  -- schedule was not modified between a Describe and an Update, which could
+  -- lead to lost updates and other confusion.
+  }
+
+-- | Returns the schedule description and current state of an existing schedule.
 describeSchedule 
   :: MonadIO m
   => ScheduleClient
   -> ScheduleId
-  -> m (Maybe ScheduleSpec)
-describeSchedule = undefined
+  -> m DescribeScheduleResponse
+describeSchedule c (ScheduleId s) = liftIO $ do
+  res <- throwEither $ Core.describeSchedule 
+    c.scheduleClient 
+    (defMessage 
+      & WF.namespace .~ rawNamespace c.scheduleClientNamespace
+      & WF.scheduleId .~ s
+    )
+  searchAttributes <- throwEither $ do
+    resp <- searchAttributesFromProto (res ^. S.searchAttributes . C.indexedFields)
+    pure $ first ValueError resp
+  pure $ DescribeScheduleResponse 
+    { schedule = scheduleFromProto (res ^. WF.schedule)
+    , info = scheduleInfoFromProto (res ^. S.info)
+    , memo = convertFromProtoMemo (res ^. WF.memo)
+    , searchAttributes = searchAttributes
+    , conflictToken = res ^. WF.conflictToken
+    }
 
+data TriggerImmediatelyRequest = TriggerImmediatelyRequest
+  { overlapPolicy :: !OverlapPolicy
+  }
+
+triggerImmediatelyRequestToProto :: TriggerImmediatelyRequest -> S.TriggerImmediatelyRequest
+triggerImmediatelyRequestToProto p = defMessage
+  & S.overlapPolicy .~ overlapPolicyToProto p.overlapPolicy
+
+triggerImmediatelyRequestFromProto :: S.TriggerImmediatelyRequest -> TriggerImmediatelyRequest
+triggerImmediatelyRequestFromProto p = TriggerImmediatelyRequest
+  { overlapPolicy = overlapPolicyFromProto (p ^. S.overlapPolicy)
+  }
+
+data BackfillRequest = BackfillRequest
+  { startTime :: !SystemTime
+  -- ^ Start of time range to evaluate schedule in.
+  , endTime :: !SystemTime
+  -- ^ End of time range to evaluate schedule in.
+  , overlapPolicy :: !OverlapPolicy
+  -- ^ Override overlap policy for this request.
+  }
+
+backfillRequestToProto :: BackfillRequest -> S.BackfillRequest
+backfillRequestToProto p = defMessage
+  & S.startTime .~ timespecToTimestamp p.startTime
+  & S.endTime .~ timespecToTimestamp p.endTime
+  & S.overlapPolicy .~ overlapPolicyToProto p.overlapPolicy
+
+backfillRequestFromProto :: S.BackfillRequest -> BackfillRequest
+backfillRequestFromProto p = BackfillRequest
+  { startTime = timespecFromTimestamp (p ^. S.startTime)
+  , endTime = timespecFromTimestamp (p ^. S.endTime)
+  , overlapPolicy = overlapPolicyFromProto (p ^. S.overlapPolicy)
+  }
+
+data SchedulePatch = SchedulePatch
+  { triggerImmediately :: !(Maybe TriggerImmediatelyRequest)
+  -- ^ If set, trigger one action immediately.
+  , backfillRequest :: !(Vector BackfillRequest)
+  -- ^ If set, runs though the specified time period(s) and takes actions as if that time
+  -- passed by right now, all at once. The overlap policy can be overridden for the
+  -- scope of the backfill.
+  , pause :: !Text
+  -- ^ If set, change the state to paused and set the
+  -- notes field to the value of the string.
+  , unpause :: !Text
+  -- ^ If set, change the state to unpaused and set the
+  -- notes field to the value of the string.
+  , requestId :: !Text
+  }
+
+schedulePatchToProto :: SchedulePatch -> S.SchedulePatch
+schedulePatchToProto p = defMessage
+  & S.maybe'triggerImmediately .~ fmap triggerImmediatelyRequestToProto p.triggerImmediately
+  & S.vec'backfillRequest .~ fmap backfillRequestToProto p.backfillRequest
+  & S.pause .~ p.pause
+  & S.unpause .~ p.unpause
+
+-- | Makes a specific change to a schedule or triggers an immediate action.
 patchSchedule 
   :: MonadIO m
   => ScheduleClient
   -> ScheduleId
-  -> ScheduleSpec
+  -> SchedulePatch
   -> m ()
-patchSchedule = undefined
+patchSchedule c (ScheduleId s) p = liftIO $ do
+  _resp <- throwEither $ Core.patchSchedule 
+    c.scheduleClient 
+    (defMessage 
+      & WF.namespace .~ rawNamespace c.scheduleClientNamespace
+      & WF.scheduleId .~ s
+      & WF.patch .~ schedulePatchToProto p
+      & WF.identity .~ c.scheduleClientIdentity
+      -- TODO
+      & WF.requestId .~ p.requestId
+    )
+  pure ()
+
+data UpdateScheduleRequest = UpdateScheduleRequest
+  { schedule :: !Schedule
+  -- ^ The new schedule. The four main fields of the schedule (spec, action,
+  -- policies, state) are replaced completely by the values in this message.
+  , conflictToken :: !(Maybe ByteString)
+  -- ^ This can be the value of conflict_token from a DescribeScheduleResponse,
+  -- which will cause this request to fail if the schedule has been modified
+  -- between the Describe and this Update.
+  -- If missing, the schedule will be updated unconditionally.
+  , requestId :: !Text
+  -- ^ A unique identifier for this update request for idempotence. Typically UUIDv4.
+  }
 
 updateSchedule 
   :: MonadIO m
   => ScheduleClient
   -> ScheduleId
-  -> ScheduleSpec
+  -> UpdateScheduleRequest
   -> m ()
-updateSchedule = undefined
+updateSchedule c (ScheduleId s) u = liftIO $ do
+  _resp <- throwEither $ Core.updateSchedule 
+    c.scheduleClient 
+    (defMessage 
+      & WF.namespace .~ rawNamespace c.scheduleClientNamespace
+      & WF.scheduleId .~ s
+      & WF.schedule .~ scheduleToProto u.schedule
+      & WF.conflictToken .~ fromMaybe "" u.conflictToken
+      & WF.identity .~ c.scheduleClientIdentity
+      & WF.requestId .~ u.requestId
+    )
+  pure ()
 
 scheduleSpec :: ScheduleSpec
 scheduleSpec = ScheduleSpec
@@ -308,35 +717,171 @@ scheduleSpec = ScheduleSpec
   , timezoneData = ""
   }
 
+-- | ScheduleSpec is a complete description of a set of absolute timestamps
+-- (possibly infinite) that an action should occur at. The meaning of a
+-- ScheduleSpec depends only on its contents and never changes, except that the
+-- definition of a time zone can change over time (most commonly, when daylight
+-- saving time policy changes for an area). To create a totally self-contained
+-- ScheduleSpec, use UTC or include timezone_data.
+--
+-- For input, you can provide zero or more of: structured_calendar, calendar,
+-- cron_string, interval, and exclude_structured_calendar, and all of them will
+-- be used (the schedule will take action at the union of all of their times,
+-- minus the ones that match exclude_structured_calendar).
+--
+-- On input, calendar and cron_string fields will be compiled into
+-- structured_calendar (and maybe interval and timezone_name), so if you
+-- Describe a schedule, you'll see only structured_calendar, interval, etc.
 data ScheduleSpec = ScheduleSpec
   { structuredCalendar :: !(Vector StructuredCalendarSpec)
+  -- ^ Calendar-based specifications of times.
   , cronString :: !(Vector Text)
+  -- ^ cron_string holds a traditional cron specification as a string. It
+  -- accepts 5, 6, or 7 fields, separated by spaces, and interprets them the
+  -- same way as CalendarSpec.
+  --
+  -- * 5 fields:         minute, hour, day_of_month, month, day_of_week
+  -- * 6 fields:         minute, hour, day_of_month, month, day_of_week, year
+  -- * 7 fields: second, minute, hour, day_of_month, month, day_of_week, year
+  --
+  -- If year is not given, it defaults to *. If second is not given, it
+  -- defaults to 0.
+  --
+  -- Shorthands @yearly, @monthly, @weekly, @daily, and @hourly are also
+  -- accepted instead of the 5-7 time fields.
+  --
+  -- Optionally, the string can be preceded by CRON_TZ=<timezone name> or
+  -- TZ=<timezone name>, which will get copied to timezone_name. (There must
+  -- not also be a timezone_name present.)
+  -- Optionally "#" followed by a comment can appear at the end of the string.
+  -- Note that the special case that some cron implementations have for
+  -- treating day_of_month and day_of_week as "or" instead of "and" when both
+  -- are set is not implemented.
+  -- @every <interval>[/<phase>] is accepted and gets compiled into an
+  -- IntervalSpec instead. <interval> and <phase> should be a decimal integer
+  -- with a unit suffix s, m, h, or d.
   , calendar :: !(Vector CalendarSpec)
+  -- ^ Calendar-based specifications of times.
   , interval :: !(Vector IntervalSpec)
+  -- ^ Interval-based specifications of times.
   , excludeCalendar :: !(Vector CalendarSpec)
+  -- ^ Any timestamps matching any of exclude_* will be skipped.
   , excludeStructuredCalendar :: !(Vector StructuredCalendarSpec)
-  , startTime :: !(Maybe UTCTime)
-  , endTime :: !(Maybe UTCTime)
+  -- ^ Any timestamps matching any of exclude_* will be skipped.
+  , startTime :: !(Maybe SystemTime)
+  -- ^ If start_time is set, any timestamps before start_time will be skipped.
+  -- (Together, start_time and end_time make an inclusive interval.)
+  , endTime :: !(Maybe SystemTime)
+  -- ^ If end_time is set, any timestamps after end_time will be skipped.
   , jitter :: !(Maybe Duration)
+  -- ^ All timestamps will be incremented by a random value from 0 to this
+  -- amount of jitter. Default: 0
   , timezoneName :: !Text
-  , timezoneData :: !Text
+  -- ^ Time zone to interpret all calendar-based specs in.
+  --
+  -- If unset, defaults to UTC. We recommend using UTC for your application if
+  -- at all possible, to avoid various surprising properties of time zones.
+  --
+  -- Time zones may be provided by name, corresponding to names in the IANA
+  -- time zone database (see https://www.iana.org/time-zones). The definition
+  -- will be loaded by the Temporal server from the environment it runs in.
+  --
+  -- If your application requires more control over the time zone definition
+  -- used, it may pass in a complete definition in the form of a TZif file
+  -- from the time zone database. If present, this will be used instead of
+  -- loading anything from the environment. You are then responsible for
+  -- updating timezone_data when the definition changes.
+  --
+  -- Calendar spec matching is based on literal matching of the clock time
+  -- with no special handling of DST: if you write a calendar spec that fires
+  -- at 2:30am and specify a time zone that follows DST, that action will not
+  -- be triggered on the day that has no 2:30am. Similarly, an action that
+  -- fires at 1:30am will be triggered twice on the day that has two 1:30s.
+  --
+  -- Also note that no actions are taken on leap-seconds (e.g. 23:59:60 UTC).
+  , timezoneData :: !ByteString
   }
 
+scheduleSpecToProto :: ScheduleSpec -> S.ScheduleSpec
+scheduleSpecToProto p = defMessage
+  & S.vec'structuredCalendar .~ fmap structuredCalendarSpecToProto p.structuredCalendar
+  & S.vec'cronString .~ p.cronString
+  & S.vec'calendar .~ fmap calendarSpecToProto p.calendar
+  & S.vec'interval .~ fmap intervalSpecToProto p.interval
+  & S.vec'excludeCalendar .~ fmap calendarSpecToProto p.excludeCalendar
+  & S.vec'excludeStructuredCalendar .~ fmap structuredCalendarSpecToProto p.excludeStructuredCalendar
+  & S.maybe'startTime .~ fmap timespecToTimestamp p.startTime
+  & S.maybe'endTime .~ fmap timespecToTimestamp p.endTime
+  & S.maybe'jitter .~ fmap durationToProto p.jitter
+  & S.timezoneName .~ p.timezoneName
+  & S.timezoneData .~ p.timezoneData
+
+scheduleSpecFromProto :: S.ScheduleSpec -> ScheduleSpec
+scheduleSpecFromProto p = ScheduleSpec
+  { structuredCalendar = fmap structuredCalendarSpecFromProto (p ^. S.vec'structuredCalendar)
+  , cronString = p ^. S.vec'cronString
+  , calendar = fmap calendarSpecFromProto (p ^. S.vec'calendar)
+  , interval = fmap intervalSpecFromProto (p ^. S.vec'interval)
+  , excludeCalendar = fmap calendarSpecFromProto (p ^. S.vec'excludeCalendar)
+  , excludeStructuredCalendar = fmap structuredCalendarSpecFromProto (p ^. S.vec'excludeStructuredCalendar)
+  , startTime = fmap timespecFromTimestamp (p ^. S.maybe'startTime)
+  , endTime = fmap timespecFromTimestamp (p ^. S.maybe'endTime)
+  , jitter = fmap durationFromProto (p ^. S.maybe'jitter)
+  , timezoneName = p ^. S.timezoneName
+  , timezoneData = p ^. S.timezoneData
+  }
+
+-- | Range represents a set of integer values, used to match fields of a calendar
+-- time in StructuredCalendarSpec. If end < start, then end is interpreted as
+-- equal to start. This means you can use a Range with start set to a value, and
+-- end and step unset (defaulting to 0) to represent a single value.
 data Range = Range
   { start :: !Int32
+  -- ^ Start of range (inclusive).
   , end :: !Int32
+  -- ^ End of range (inclusive).
   , step :: !Int32
+  -- ^ Step (optional, default 1).
   }
 
+rangeToProto :: Range -> S.Range
+rangeToProto p = defMessage
+  & S.start .~ p.start
+  & S.end .~ p.end
+  & S.step .~ p.step
+
+rangeFromProto :: S.Range -> Range
+rangeFromProto p = Range
+  { start = p ^. S.start
+  , end = p ^. S.end
+  , step = p ^. S.step
+  }
+
+-- | StructuredCalendarSpec describes an event specification relative to the
+-- calendar, in a form that's easy to work with programmatically. Each field can
+-- be one or more ranges.
+--
+-- A timestamp matches if at least one range of each field matches the
+-- corresponding fields of the timestamp, except for year: if year is missing,
+-- that means all years match. For all fields besides year, at least one Range
+-- must be present to match anything.
 data StructuredCalendarSpec = StructuredCalendarSpec
   { second :: !(Vector Range)
+  -- ^ Match seconds (0-59)
   , minute :: !(Vector Range)
+  -- ^ Match minutes (0-59)
   , hour :: !(Vector Range)
+  -- ^ Match hours (0-23)
   , dayOfMonth :: !(Vector Range)
+  -- ^ Match days of the month (1-31)
   , month :: !(Vector Range)
+  -- ^ Match months (1-12)
   , year :: !(Vector Range)
+  -- ^ Match years.
   , dayOfWeek :: !(Vector Range)
+  -- ^ Match days of the week (0-6; 0 is Sunday).
   , comment :: !Text
+  -- ^ Free-form comment describing the intention of this spec.
   }
 
 structuredCalendarSpec :: StructuredCalendarSpec
@@ -351,19 +896,96 @@ structuredCalendarSpec = StructuredCalendarSpec
   , comment = mempty
   }
 
-data CalendarSpec = CalendarSpec
-  { second :: !Text
-  , minute :: !Text
-  , hour :: !Text
-  , dayOfMonth :: !Text
-  , month :: !Text
-  , year :: !Text
-  , dayOfWeek :: !Text
-  , comment :: !Text
+structuredCalendarSpecToProto :: StructuredCalendarSpec -> S.StructuredCalendarSpec
+structuredCalendarSpecToProto p = defMessage
+  & S.vec'second .~ fmap rangeToProto p.second
+  & S.vec'minute .~ fmap rangeToProto p.minute
+  & S.vec'hour .~ fmap rangeToProto p.hour
+  & S.vec'dayOfMonth .~ fmap rangeToProto p.dayOfMonth
+  & S.vec'month .~ fmap rangeToProto p.month
+  & S.vec'year .~ fmap rangeToProto p.year
+  & S.vec'dayOfWeek .~ fmap rangeToProto p.dayOfWeek
+  & S.comment .~ p.comment
+
+structuredCalendarSpecFromProto :: S.StructuredCalendarSpec -> StructuredCalendarSpec
+structuredCalendarSpecFromProto p = StructuredCalendarSpec
+  { second = fmap rangeFromProto (p ^. S.vec'second)
+  , minute = fmap rangeFromProto (p ^. S.vec'minute)
+  , hour = fmap rangeFromProto (p ^. S.vec'hour)
+  , dayOfMonth = fmap rangeFromProto (p ^. S.vec'dayOfMonth)
+  , month = fmap rangeFromProto (p ^. S.vec'month)
+  , year = fmap rangeFromProto (p ^. S.vec'year)
+  , dayOfWeek = fmap rangeFromProto (p ^. S.vec'dayOfWeek)
+  , comment = p ^. S.comment
   }
 
+data CalendarSpec = CalendarSpec
+  { second :: !Text
+-- ^ Expression to match seconds. Default: 0
+  , minute :: !Text
+  -- ^ Expression to match minutes. Default: 0
+  , hour :: !Text
+  -- ^ Expression to match hours. Default: 0
+  , dayOfMonth :: !Text
+  -- ^ Expression to match days of the month. Default: *
+  , month :: !Text
+  -- ^ Expression to match months. Default: *
+  , year :: !Text
+  -- ^ Expression to match years. Default: *
+  , dayOfWeek :: !Text
+  -- ^ Expression to match days of the week. Default: *
+  , comment :: !Text
+  -- ^ Free-form comment describing the intention of this spec.
+  }
+
+calendarSpecToProto :: CalendarSpec -> S.CalendarSpec
+calendarSpecToProto p = defMessage
+  & S.second .~ p.second
+  & S.minute .~ p.minute
+  & S.hour .~ p.hour
+  & S.dayOfMonth .~ p.dayOfMonth
+  & S.month .~ p.month
+  & S.year .~ p.year
+  & S.dayOfWeek .~ p.dayOfWeek
+  & S.comment .~ p.comment
+
+calendarSpecFromProto :: S.CalendarSpec -> CalendarSpec
+calendarSpecFromProto p = CalendarSpec
+  { second = p ^. S.second
+  , minute = p ^. S.minute
+  , hour = p ^. S.hour
+  , dayOfMonth = p ^. S.dayOfMonth
+  , month = p ^. S.month
+  , year = p ^. S.year
+  , dayOfWeek = p ^. S.dayOfWeek
+  , comment = p ^. S.comment
+  }
+
+-- | IntervalSpec matches times that can be expressed as:
+--
+-- > epoch + n * interval + phase
+-- 
+-- where n is an integer.
+-- phase defaults to zero if missing. interval is required.
+-- Both interval and phase must be non-negative and are truncated to the nearest
+-- second before any calculations.
+-- For example, an interval of 1 hour with phase of zero would match every hour,
+-- on the hour. The same interval but a phase of 19 minutes would match every
+-- xx:19:00. An interval of 28 days with phase zero would match
+-- 2022-02-17T00:00:00Z (among other times). The same interval with a phase of 3
+-- days, 5 hours, and 23 minutes would match 2022-02-20T05:23:00Z instead.
 data IntervalSpec = IntervalSpec
-  { interval :: !(Maybe Duration)
+  { interval :: !Duration
   , phase :: !(Maybe Duration)
   }
--}
+
+intervalSpecToProto :: IntervalSpec -> S.IntervalSpec
+intervalSpecToProto p = defMessage
+  & S.interval .~ durationToProto p.interval
+  & S.maybe'phase .~ fmap durationToProto p.phase
+
+intervalSpecFromProto :: S.IntervalSpec -> IntervalSpec
+intervalSpecFromProto p = IntervalSpec
+  { interval = durationFromProto (p ^. S.interval)
+  , phase = fmap durationFromProto (p ^. S.maybe'phase)
+  }
