@@ -39,6 +39,7 @@ module Temporal.Client
   -- * Sending Signals to Workflows
   , SignalOptions(..)
   , signal
+  , defaultSignalOptions
   , signalWithStart
   -- * Producing handles for existing workflows
   , getHandle
@@ -351,12 +352,12 @@ getHandle c (KnownWorkflow {knownWorkflowCodec, knownWorkflowName}) wfId runId =
 --
 -- Otherwise, a new Workflow Execution is started and immediately sent the Signal.
 signalWithStart 
-  :: MonadIO m 
+  :: (MonadIO m, WorkflowRef wf)
   => WorkflowClient 
+  -> wf
   -> WorkflowStartOptions 
-  -> KnownWorkflow args result
   -> SignalDefinition sigArgs 
-  -> (args :->: (sigArgs :->: m ()))
+  -> (WorkflowArgs wf :->: (sigArgs :->: m (WorkflowHandle result)))
 signalWithStart = undefined
 
 
@@ -433,16 +434,17 @@ startFromPayloads c k@(KnownWorkflow codec _ _ _) opts payloads = do
 --
 -- This can be used to "fire-and-forget" a Workflow by discarding the handle.
 start
-  :: forall args result m. (MonadIO m)
+  :: forall m wf. (MonadIO m, WorkflowRef wf)
   => WorkflowClient
-  -> KnownWorkflow args result
+  -> wf
   -> WorkflowStartOptions
-  -> (args :->: m (WorkflowHandle result))
-start c k@(KnownWorkflow codec _ _ _) opts = gather $ \inputs -> liftIO $ do
-  startFromPayloads c k opts =<< sequence inputs
-  where
-    gather :: ([IO Payload] -> m (WorkflowHandle result)) -> (args :->: m (WorkflowHandle result))
-    gather = gatherArgs (Proxy @args) codec Prelude.id
+  -> (WorkflowArgs wf :->: m (WorkflowHandle (WorkflowResult wf)))
+start c wf opts = case workflowRef wf of 
+  k@(KnownWorkflow codec _ _ _) -> do
+    let gather :: ([IO Payload] -> m (WorkflowHandle (WorkflowResult wf))) -> (WorkflowArgs wf :->: m (WorkflowHandle (WorkflowResult wf)))
+        gather = gatherArgs (Proxy @(WorkflowArgs wf)) codec Prelude.id
+    gather $ \inputs -> liftIO $ do
+      startFromPayloads c k opts =<< sequence inputs
 
 data TerminationOptions = TerminationOptions
   { terminationReason :: Text
