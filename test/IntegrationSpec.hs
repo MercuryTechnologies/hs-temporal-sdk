@@ -49,6 +49,9 @@ import Temporal.Interceptor
 import Temporal.EphemeralServer
 import Temporal.Operator (IndexedValueType(..), SearchAttributes(..), listSearchAttributes, addSearchAttributes)
 
+unblockWorkflowSignal :: W.SignalRef '[]
+unblockWorkflowSignal = W.SignalRef "unblockWorkflow" JSON
+
 temporalBundle [d|
   data WorkflowTests = WorkflowTests
     { shouldRunWorkflowTest :: W.Workflow ()
@@ -110,7 +113,8 @@ spec = aroundAll setup needsClient
     setup :: (TestEnv -> IO ()) -> IO ()
     setup go = do
       fp <- getFreePort
-      withDevServer (defaultTemporalDevServerConfig { port = Just $ fromIntegral fp }) $ \_ -> do
+      -- withDevServer (defaultTemporalDevServerConfig { port = Just $ fromIntegral fp }) $ \_ -> do
+      do
         interceptors <- makeOpenTelemetryInterceptor
         (client, coreClient) <- makeClient fp interceptors
 
@@ -199,8 +203,10 @@ testImpls = WorkflowTests
       W.wait (h2 :: W.Task Int)
   , workflowWaitConditionWorks = provideCallStack $ do
       st <- W.newStateVar False
-      let waiter = W.waitCondition (W.readStateVar st)
-      waiter *> W.writeStateVar st True
+      W.setSignalHandler unblockWorkflowSignal $ do
+        $(logDebug) "unblocking workflow"
+        W.writeStateVar st True
+      W.waitCondition (W.readStateVar st)
       pure ()
   }
 
@@ -326,7 +332,7 @@ needsClient = do
                 taskQueue
           C.execute client testRefs.faultyWorkflow opts
             `shouldReturn` 1
-      xspecify "Immediate activity cancellation returns the expected result to workflows" $ \TestEnv{..} -> do
+      specify "Immediate activity cancellation returns the expected result to workflows" $ \TestEnv{..} -> do
         let testActivity :: Activity () Int
             testActivity = do
               heartbeat []
@@ -359,7 +365,7 @@ needsClient = do
                 }
           C.execute client wf.reference opts
             `shouldReturn` 1
-      xspecify "Activity cancellation on heartbeat returns the expected result to workflows" $ \TestEnv{..} -> do
+      specify "Activity cancellation on heartbeat returns the expected result to workflows" $ \TestEnv{..} -> do
         let testActivity :: Activity () Int
             testActivity = do
               liftIO $ threadDelay 2000000
@@ -547,7 +553,7 @@ needsClient = do
   -- --     specify "termination" $ \_ -> pending
   -- --     specify "timeout" $ \_ -> pending
   -- --     specify "startFail" $ \_ -> pending
-      xspecify "cancel immediately" $ \TestEnv{..} -> do
+      specify "cancel immediately" $ \TestEnv{..} -> do
         parentId <- uuidText
         let cancelTest :: MyWorkflow ()
             cancelTest = W.sleep $ minutes 1
@@ -572,7 +578,7 @@ needsClient = do
             `shouldReturn` "Left ChildWorkflowCancelled"
 
       -- TODO, the parent workflow event list doesn't really show the child workflow being cancelled???
-      xspecify "cancel after child workflow has started" $ \TestEnv{..} -> do
+      specify "cancel after child workflow has started" $ \TestEnv{..} -> do
         parentId <- uuidText
         let cancelTest :: MyWorkflow ()
             cancelTest = W.waitCancellation
@@ -598,12 +604,12 @@ needsClient = do
           C.execute client parentWf.reference opts
             `shouldReturn` "Left ChildWorkflowCancelled"
 
-  -- -- --     describe "Signals" $ do
-  -- -- --       specify "send" pending
-  -- -- --       specify "interrupt" pending
-  -- -- --       specify "fail" pending
-  -- -- --       specify "async fail signal?" pending
-  -- -- --       specify "always delivered" pending
+    describe "Signals" $ do
+      specify "send" $ \_ -> pending
+      specify "interrupt" $ \_ -> pending
+      specify "fail" $ \_ -> pending
+      specify "async fail signal?" $ \_ -> pending
+      specify "always delivered" $ \_ -> pending
     describe "Query" $ do
       specify "works" $ \TestEnv{..} -> do
         tp <- getGlobalTracerProvider
@@ -631,7 +637,7 @@ needsClient = do
             result `shouldBe` Right "hello"
 
 
-      xspecify "query not found" $ \TestEnv{..} -> do
+      specify "query not found" $ \TestEnv{..} -> do
         let echoQuery :: W.QueryDefinition '[Text] Text
             echoQuery = W.QueryDefinition "testQuery" defaultCodec
             workflow :: MyWorkflow ()
@@ -653,17 +659,18 @@ needsClient = do
           result `shouldBe` Right "hello"
       -- specify "query and unblock" pending
     describe "Await condition" $ do
-      xit "works in Workflows" $ \TestEnv{..} -> do
+      fit "works in Workflows" $ \TestEnv{..} -> do
         let conf = configure () $ do
               baseConf
               testConf
         withWorker conf $ do
-          wfId <- uuidText
+          wfId <- W.WorkflowId <$> uuidText
           let opts = C.workflowStartOptions
-                (W.WorkflowId wfId)
+                wfId
                 taskQueue
-          C.execute client testRefs.workflowWaitConditionWorks opts
-            `shouldReturn` ()
+          wfH <- C.start client testRefs.workflowWaitConditionWorks opts
+          C.signal wfH unblockWorkflowSignal C.defaultSignalOptions
+          C.waitWorkflowResult wfH `shouldReturn` ()
 
       it "works in signal handlers" $ \_ -> pending
       it "signal handlers can unblock workflows" $ \_ -> pending
@@ -828,7 +835,7 @@ needsClient = do
   --
   -- Until we have a way to do this in the SDK, we can't test this without manual intervention.
   describe "Search Attributes" $ do
-    xspecify "can read search attributes set at start" $ \TestEnv{..} -> do
+    specify "can read search attributes set at start" $ \TestEnv{..} -> do
       let workflow :: W.Workflow (Map Text SearchAttributeType)
           workflow = do
             i <- W.info
@@ -853,7 +860,7 @@ needsClient = do
               }
         C.execute client wf.reference opts
           `shouldReturn` initialAttrs
-    xspecify "can upsert search attributes" $ \TestEnv{..} -> do
+    specify "can upsert search attributes" $ \TestEnv{..} -> do
       let expectedAttrs = Map.fromList
               [ ("attr1", toSearchAttribute True)
               , ("attr2", toSearchAttribute (4 :: Int64))

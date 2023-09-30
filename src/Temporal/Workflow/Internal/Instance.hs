@@ -21,6 +21,7 @@ import Control.Monad.Reader
 import Control.Monad.Logger
 import Data.ProtoLens
 import qualified Data.Text as T
+import GHC.Stack
 import Lens.Family2
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
@@ -33,7 +34,7 @@ import UnliftIO
 runInstanceM :: WorkflowInstance -> InstanceM a -> IO a
 runInstanceM worker m = runReaderT (unInstanceM m) worker
 
-flushCommands :: InstanceM ()
+flushCommands :: HasCallStack => InstanceM ()
 flushCommands = do
   inst <- ask
   info <- readIORef inst.workflowInstanceInfo
@@ -47,7 +48,7 @@ flushCommands = do
       completionMessage = defMessage
         & Completion.runId .~ rawRunId info.runId
         & Completion.successful .~ completionSuccessful
-  $(logDebug) ("flushCommands: " <> T.pack (show completionMessage))
+  $(logDebug) ("flushCommands: " <> T.pack (show completionMessage) <> " " <> T.pack (prettyCallStack callStack))
   res <- liftIO $ inst.workflowCompleteActivation completionMessage
   case res of
     Left err -> do

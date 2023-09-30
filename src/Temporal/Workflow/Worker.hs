@@ -127,7 +127,11 @@ handleActivation activation = do
                 & Completion.failed .~ failureProto
           
           liftIO (Core.completeWorkflowActivation workerCore completionMessage >>= either throwIO pure)
-        Just inst -> writeChan inst.activationChannel activation
+        Just inst -> do
+          let withoutStart = filter (\job -> not $ isJust (job ^. Activation.maybe'startWorkflow)) (activation ^. Activation.jobs)
+          case withoutStart of
+            [] -> pure ()
+            otherJobs -> writeChan inst.activationChannel (activation & Activation.jobs .~ otherJobs)
     else do
       $(logDebug) "Workflow does not need to run."
       let completionMessage = defMessage 

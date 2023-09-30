@@ -292,6 +292,7 @@ startActivityFromPayloads (KnownActivity codec mTaskQueue name) opts typedPayloa
     pure $ Task 
       { waitAction = do
         res <- getIVar resultSlot
+        $(logInfo) ("Activity result: " <> Text.pack (show res))
         Workflow $ \_ -> case res ^. Activation.result . ActivityResult.maybe'status of
           Nothing -> error "Activity result missing status"
           Just (ActivityResult.ActivityResolution'Completed success) -> pure $ Done (success ^. ActivityResult.result . to convertFromProtoPayload)
@@ -1028,7 +1029,7 @@ waitCondition (Condition m) = do
     then pure ()
     else go
   where
-    -- When blocked, the condition needs to be re-evaluated every time a signal is received
+    -- When blocked, the condition needs to be rechecked every time a signal is received
     -- or a new resolutions are received from a workflow activation.
     go = do
       (conditionSeq, blockedVar) <- ilift $ do
@@ -1036,19 +1037,15 @@ waitCondition (Condition m) = do
         res <- newIVar
         conditionSeq <- nextConditionSequence
         atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-          seqMaps { conditionsAwaitingSignal = HashMap.insert conditionSeq res seqMaps.conditionsAwaitingSignal }
+          seqMaps { conditionsAwaitingSignal = HashMap.insert conditionSeq (res, m) seqMaps.conditionsAwaitingSignal }
         pure (conditionSeq, res)
       -- Wait for the condition to be signaled.
       getIVar blockedVar
       -- Delete the condition from the map so that it doesn't leak memory.
-      conditionSatisfied <- ilift $ do
+      ilift $ do
         inst <- ask
         atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
           seqMaps { conditionsAwaitingSignal = HashMap.delete conditionSeq seqMaps.conditionsAwaitingSignal }
-        m
-      if conditionSatisfied
-        then pure ()
-        else go
 
 -- | While workflows are deterministic, there are categories of operational concerns (metrics, logging, tracing, etc.) that require
 -- access to IO operations like the network or filesystem. The 'IO' monad is not generally available in the 'Workflow' monad, but you 

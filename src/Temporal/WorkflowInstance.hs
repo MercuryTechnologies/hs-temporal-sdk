@@ -79,7 +79,7 @@ import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion a
 import Temporal.Payload (Payload)
 
 
-create :: MonadLoggerIO m 
+create :: (HasCallStack, MonadLoggerIO m)
   => (Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
   -> (Vector Payload -> IO (Either String (Workflow Payload)))
   -> Maybe Int -- ^ deadlock timeout in seconds
@@ -140,7 +140,7 @@ create workflowCompleteActivation workflowFn workflowDeadlockTimeout inboundInte
   writeIORef executionThread workerThread
   pure inst
 
-runWorkflowToCompletion :: SuspendableWorkflowExecution Payload -> InstanceM (WorkflowExitVariant Payload)
+runWorkflowToCompletion :: HasCallStack => SuspendableWorkflowExecution Payload -> InstanceM (WorkflowExitVariant Payload)
 runWorkflowToCompletion wf = runTopLevel $ do
   inst <- ask
   let completeStep :: Await [ActivationResult] (SuspendableWorkflowExecution Payload) -> InstanceM (SuspendableWorkflowExecution Payload)
@@ -153,7 +153,6 @@ runWorkflowToCompletion wf = runTopLevel $ do
         -- AFAICT it should be a 1:1 relationship between flushing and receiving an activation.
         flushCommands
         activation <- readChan inst.activationChannel
-        $logDebug "Awaiting activation results from workflow"
         fmap runIdentity $ activate activation $ Identity suspension
   supplyM completeStep wf
 
@@ -329,17 +328,26 @@ applySignalWorkflow signalWorkflow = do
   case handlerOrDefault of
     Nothing -> do
       $(logWarn) $ Text.pack ("No signal handler found for signal: " <> show (signalWorkflow ^. Activation.signalName))
+      pure ()
     Just handler -> do
       let args = fmap convertFromProtoPayload (signalWorkflow ^. Command.vec'input)
+      $(logDebug) $ Text.pack ("Applying signal handler for signal: " <> show (signalWorkflow ^. Activation.signalName))
       handler args
-      Workflow $ \_ -> do
+      Workflow $ \env -> do
         inst <- ask
         -- Signal all conditions that are waiting for a signal.
         -- Realistically, this should only be one condition at a time, 
         -- but we'll signal all of them just in case.
         seqMaps <- readTVarIO inst.workflowSequenceMaps 
-        -- apply completions
-        liftIO $ fmap Done $ mapM_ (\ivar -> putIVar ivar (Ok ()) inst.workflowInstanceContinuationEnv) $ HashMap.elems seqMaps.conditionsAwaitingSignal
+        let go (ix, (ivar, cond)) = do
+              conditionPassed <- cond
+              if conditionPassed
+              then do
+                $(logDebug) $ Text.pack ("Condition " <> show ix <> " evaluated to true")
+                liftIO $ putIVar ivar (Ok ()) env 
+              else do
+                $(logDebug) $ Text.pack ("Condition " <> show ix <> " evaluate to false")
+        Done <$> mapM_ go (HashMap.toList seqMaps.conditionsAwaitingSignal)
 
 applyNotifyHasPatch :: NotifyHasPatch -> InstanceM ()
 applyNotifyHasPatch notifyHasPatch = do
@@ -374,7 +382,7 @@ applyJobs jobs fAwait = UnliftIO.try $ do
   otherJobs
   activationResults <- applyResolutions resolutions
   seqMaps <- atomically $ readTVar inst.workflowSequenceMaps
-  let activations = activationResults ++ map (\var -> ActivationResult (Ok ()) var) (HashMap.elems seqMaps.conditionsAwaitingSignal)
+  let activations = activationResults
   pure $
     (\(Await wf) -> 
       -- If we don't have any activations or signals, then no useful state could have changed.
@@ -385,7 +393,9 @@ applyJobs jobs fAwait = UnliftIO.try $ do
       case activations of
         [] -> case signalWorkflows of
           [] -> suspend (Await wf)
-          sigs -> lift (mapM_ injectWorkflowSignal sigs) *> wf []
+          sigs -> do
+            lift $ $logDebug "We get signal"
+            lift (mapM_ injectWorkflowSignal sigs) *> wf []
         nonEmptyActivations -> case signalWorkflows of
           [] -> wf activations
           sigs -> lift (mapM_ injectWorkflowSignal sigs) *> wf activations

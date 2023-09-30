@@ -515,7 +515,7 @@ data SequenceMaps = SequenceMaps
   , childWorkflows :: {-# UNPACK #-} !(SequenceMap SomeChildWorkflowHandle)
   , externalSignals :: {-# UNPACK #-} !(SequenceMap (IVar ResolveSignalExternalWorkflow))
   , externalCancels :: {-# UNPACK #-} !(SequenceMap (IVar ResolveRequestCancelExternalWorkflow))
-  , conditionsAwaitingSignal :: {-# UNPACK #-} !(SequenceMap (IVar ()))
+  , conditionsAwaitingSignal :: {-# UNPACK #-} !(SequenceMap (IVar (), InstanceM Bool))
   }
 
 

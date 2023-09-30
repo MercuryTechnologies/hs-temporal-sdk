@@ -236,3 +236,6 @@ nonEmptyString t = if T.null t then Nothing else Just t
 
 convertToProtoMemo :: Map Text Payload -> Message.Memo
 convertToProtoMemo m = defMessage & Message.fields .~ fmap convertToProtoPayload m
+
+convertFromProtoMemo :: Message.Memo -> Map Text Payload
+convertFromProtoMemo m = fmap convertFromProtoPayload (m ^. Message.fields)
