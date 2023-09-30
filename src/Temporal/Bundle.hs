@@ -149,6 +149,7 @@ import Barbies
 import Barbies.Bare
 import Data.String (IsString)
 import Data.Typeable
+import Data.Kind
 import qualified Data.List.NonEmpty as NE
 import Temporal.Workflow.Types
 import Temporal.Payload
@@ -163,7 +164,7 @@ type family ApplyRef (args :: [Type]) (f :: Type) where
   ApplyRef args (Workflow result) = KnownWorkflow args result
   ApplyRef args (Activity env result) = KnownActivity args result
   ApplyRef args (a -> b) = ApplyRef (a ': args) b
-  ApplyRef args a = TypeError ('Text "Expected a Workflow or Activity, but got " ':<>: 'ShowType a)
+  ApplyRef _ a = TypeError ('Text "Expected a Workflow or Activity, but got " ':<>: 'ShowType a)
 
 type FnRef f = ApplyRef '[] f
 
@@ -190,7 +191,7 @@ newtype Ref fn = Ref
 
 type family InnerActivityResult (f :: Type) where
   InnerActivityResult (Activity env result) = result
-  InnerActivityResult (a -> b) = InnerActivityResult b
+  InnerActivityResult (_ -> b) = InnerActivityResult b
   InnerActivityResult a = TypeError ('Text "Expected an Activity, but got " ':<>: 'ShowType a)
 
 instance (FnRef f ~ KnownActivity (ArgsOf f) (InnerActivityResult f)) => ActivityRef (Ref f) where
@@ -263,15 +264,9 @@ instance
         input.activityArgs
       traverse (\act -> runActivity actEnv act >>= encode codec) eAct
     )
-    -- ValidActivityFunction codec f (applyPayloads codec (Proxy @(ArgsOf original)) (Proxy @(Activity env (ResultOf (Activity env) original))))
 
 instance DefFromFunction' codec env b original => DefFromFunction' codec env (a -> b) original where
   defFromFunction _ codec name f = defFromFunction (Proxy @b) codec name f
-
--- data KnownWorkflowFromFn (fn :: Type) a = KnownWorkflowFromFn
---   { workflowFromFn :: KnownWorkflow (ArgsOf fn) (ResultOf Workflow fn)
---   }
-
 
 -- | A bare record type that supplies the actual implementation of workflows and activities.
 type Impl f = f Bare Identity
@@ -310,7 +305,7 @@ class FieldNamesB b where
 
 -- | A temporal-specific version of 'FieldNamesB' that is used to provide
 -- workflow and activity names to Temporal.
-class Label (f :: (* -> *) -> *) where
+class Label (f :: (Type -> Type) -> Type) where
   -- | Used to prefix workflow types to disambiguate them between modules.
   --
   -- Override this for a given record to provide different naming functionality
