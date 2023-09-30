@@ -10,7 +10,11 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
--- | ToJSON/FromJSON instances for protocol buffer Messages to use with aeson.
+-- | Temporal.Replay supports replaying a workflow from its event history. Use for troubleshooting and backwards compatibility unit tests. 
+--
+-- For example, if a workflow fails, in production, then its history can be downloaded through the UI or CLI and replayed in a debugger as many times as necessary. 
+--
+-- Use 'newReplayWorker' to create unit tests that check if workflow changes are backwards compatible. It is important to maintain backwards compatibility to ensure that new deployments are not going to break open workflows. 
 module Temporal.Replay 
   ( newReplayWorker
   , pushHistory
