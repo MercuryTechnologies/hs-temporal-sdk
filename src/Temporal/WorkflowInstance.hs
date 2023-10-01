@@ -133,7 +133,9 @@ create workflowCompleteActivation workflowFn workflowDeadlockTimeout inboundInte
       WorkflowExitCancelled cmd -> addCommand cmd
       WorkflowExitFailed _ cmd -> addCommand cmd
     flushCommands
+    $logDebug "Handling leftover queries"
     handleQueriesAfterCompletion
+    
   -- If we have an exception crash the workflow thread, then we need to throw to the worker too,
   -- otherwise it will just hang forever.
   link workerThread

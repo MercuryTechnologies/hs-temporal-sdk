@@ -139,9 +139,9 @@ runWorkflow wf = provideCallStack $ do
             case e of
               IVarFull _ ->
                 -- An IVar is typically only meant to be written to once
-                -- so it would make sense to throw an error here. But there
-                -- are legitimate use-cases for writing several times.
-                -- (See Haxl.Core.Parallel)
+                -- so it's tempting to think we should throw an error here. But there
+                -- are legitimate use-cases for writing several times– namely
+                -- when using race, biselect, etc.
                 reschedule env rq
               IVarEmpty workflowActions -> do
                 lift $ writeIORef ref (IVarFull r)
@@ -252,7 +252,14 @@ runWorkflow wf = provideCallStack $ do
             lift $ atomically $ writeTVar pendingActivations []
             return activations
       atomically $ writeTVar pendingActivations newActivations
-      emptyRunQueue env
+      jobs <- lift $ readIORef env.runQueueRef 
+      case jobs of
+        JobNil -> do
+          emptyRunQueue env
+        _ -> do
+          lift $ writeIORef env.runQueueRef JobNil
+          reschedule env jobs
+
   
   let env = inst.workflowInstanceContinuationEnv
   schedule env JobNil wf finalResult
