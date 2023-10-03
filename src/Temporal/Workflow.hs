@@ -779,10 +779,6 @@ uuid4 = do
     (sbs `SBS.index` 0xE)
     (sbs `SBS.index` 0xF)
 
-
-newtype Query a = Query (InstanceM a)
-  deriving newtype (Functor, Applicative, Monad)
-
 -- $queries
 -- 
 -- A Query is a synchronous operation that is used to get the state of a Workflow Execution. 
@@ -1001,16 +997,6 @@ getExternalWorkflowHandle wfId mrId = do
     , externalWorkflowRunId = mrId
     }
 
-newtype Condition a = Condition 
-  { unCondition :: InstanceM a
-  -- ^ We track the sequence number of each accessed StateVar so that we can
-  -- block and retry the condition evaluation if the state changes.
-  }
-  deriving newtype (Functor, Applicative, Monad)
-
-instance MonadReadStateVar Condition where
-  readStateVar StateVar{..} = Condition $ readIORef ref
-
 -- | Wait on a condition to become true before continuing.
 --
 -- This must be used with signals, steps executed concurrently via the Applicative instance,
@@ -1022,30 +1008,37 @@ instance MonadReadStateVar Condition where
 -- suspending indefinitely if the condition is never met. 
 -- (e.g. if there is no signal handler that changes the state appropriately)
 waitCondition :: RequireCallStack => Condition Bool -> Workflow ()
-waitCondition (Condition m) = do
+waitCondition c@(Condition m) = do
   updateCallStackW
-  conditionSatisfied <- ilift m
+  (conditionSatisfied, touchedVars) <- ilift $ do
+    sRef <- newIORef mempty
+    sat <- runReaderT m sRef 
+    (,) <$> pure sat <*> readIORef sRef
   if conditionSatisfied
     then pure ()
-    else go
+    -- TODO, we don't really want nub here for big workflows, as it could
+    -- lead to some nasty performance regressions. Unfortunately, IORef
+    -- only has an Eq instance. We will need to introduce a new sequence
+    -- type for workflows used when creating a StateVar. That would let us
+    -- ensure that we use an appropriate type like IntSet or something
+    -- that has better perf characteristics.
+    else go touchedVars
   where
     -- When blocked, the condition needs to be rechecked every time a signal is received
     -- or a new resolutions are received from a workflow activation.
-    go = do
+    go touchedVars = do
       (conditionSeq, blockedVar) <- ilift $ do
         inst <- ask
         res <- newIVar
         conditionSeq <- nextConditionSequence
         atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-          seqMaps { conditionsAwaitingSignal = HashMap.insert conditionSeq (res, m) seqMaps.conditionsAwaitingSignal }
+          seqMaps 
+            { conditionsAwaitingSignal = HashMap.insert conditionSeq (res, touchedVars) seqMaps.conditionsAwaitingSignal }
         pure (conditionSeq, res)
-      -- Wait for the condition to be signaled.
+      -- Wait for the condition to be signaled. Once signalled, we just try again.
+      -- writeStateVar and friends are in charge of filling the ivar and clearing out the seqmaps between rechecks
       getIVar blockedVar
-      -- Delete the condition from the map so that it doesn't leak memory.
-      ilift $ do
-        inst <- ask
-        atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-          seqMaps { conditionsAwaitingSignal = HashMap.delete conditionSeq seqMaps.conditionsAwaitingSignal }
+      waitCondition c
 
 -- | While workflows are deterministic, there are categories of operational concerns (metrics, logging, tracing, etc.) that require
 -- access to IO operations like the network or filesystem. The 'IO' monad is not generally available in the 'Workflow' monad, but you 
@@ -1154,39 +1147,6 @@ been updated since the condition suspended. We give each statevar a unique ident
 lookups, and a sequence number that updates for each write to the IORef.
 -}
 
--- | 'StateVar' values are mutable variables scoped to a Workflow run.
---
--- 'Workflow's are deterministic, so you may not use normal IORefs, since the IORef
--- could have been created outside of the workflow and cause nondeterminism.
---
--- However, it is totally safe to mutate state variables as long as they are scoped
--- to a workflow and derive their state transitions from the workflow's deterministic
--- execution.
---
--- StateVar values may also be read from within a query and mutated within signal handlers.
-newtype StateVar a = StateVar
-  { ref :: IORef a
-  }
-
-newStateVar :: a -> Workflow (StateVar a)
-newStateVar a = Workflow $ \_ -> (Done . StateVar) <$> newIORef a
-
-class MonadReadStateVar m where
-  readStateVar :: StateVar a -> m a
-
-class MonadWriteStateVar m where
-  writeStateVar :: StateVar a -> a -> m ()
-  modifyStateVar :: StateVar a -> (a -> a) -> m ()
-
-instance MonadReadStateVar Workflow where
-  readStateVar (StateVar ref) = Workflow $ \_ -> Done <$> readIORef ref
-
-instance MonadWriteStateVar Workflow where
-  writeStateVar (StateVar ref) a = Workflow $ \_ -> Done <$> writeIORef ref a
-  modifyStateVar (StateVar ref) f = Workflow $ \_ -> Done <$> modifyIORef' ref f
-
-instance MonadReadStateVar Query where
-  readStateVar (StateVar ref) = Query $ readIORef ref
 
 -- | 'Workflow's may be sent a cancellation request from the Temporal Platform,
 -- but Workflow code is not required to respond to the cancellation request.

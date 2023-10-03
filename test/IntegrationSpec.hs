@@ -67,6 +67,7 @@ temporalBundle [d|
     , faultyActivity :: Activity () Int
     , faultyWorkflow :: W.Workflow Int
     , workflowWaitConditionWorks :: W.Workflow ()
+    , simpleWait :: W.Workflow ()
     } deriving (Generic)
   |]
 
@@ -142,9 +143,9 @@ signalUnblockWorkflow :: W.SignalRef '[]
 signalUnblockWorkflow = W.SignalRef "unblockWorkflow" defaultCodec
 
 testImpls :: WorkflowTests
-testImpls = WorkflowTests
+testImpls = provideCallStack $ WorkflowTests
   { shouldRunWorkflowTest = $(logDebug) "oh hi!"
-  , raceBlockOnLeftSideWorks = provideCallStack $ do
+  , raceBlockOnLeftSideWorks = do
       let lhs = do
             $(logDebug) "sleepy lad" 
             W.sleep (seconds 10) 
@@ -154,21 +155,21 @@ testImpls = WorkflowTests
       res <- lhs `W.race` rhs
       $(logDebug) "done"
       pure res
-  , raceBlockOnBothSidesWorks = provideCallStack $ do
+  , raceBlockOnBothSidesWorks = do
       let lhs = W.sleep (seconds 5000) >> pure False 
           rhs = W.sleep (seconds 1) >> pure True
       lhs `W.race` rhs
-  , raceThrowsRhsErrorWhenLhsBlocked = provideCallStack $ do
+  , raceThrowsRhsErrorWhenLhsBlocked = do
       let lhs = W.sleep (seconds 5000) >> pure False 
           rhs = error "foo"
       lhs `W.race` rhs
-  , raceIgnoresRhsErrorOnLhsSuccess = provideCallStack $ do
+  , raceIgnoresRhsErrorOnLhsSuccess = do
       pure True `W.race` (W.sleep (seconds 5000) *> error "sad")
-  , continueAsNewWorks = provideCallStack $ \execCount -> if execCount < 1
+  , continueAsNewWorks = \execCount -> if execCount < 1
       then W.continueAsNew testRefs.continueAsNewWorks W.defaultContinueAsNewOptions (execCount + 1)
       else pure "woohoo"
   -- should run a basic activity without issues
-  , basicActivityWf = provideCallStack $ do
+  , basicActivityWf = do
       $logDebug "starting activity"
       h <- W.startActivity 
         testRefs.basicActivity
@@ -180,7 +181,7 @@ testImpls = WorkflowTests
       heartbeat []
       liftIO $ threadDelay 1000000
       pure 1
-  , runHeartbeat = provideCallStack $ do
+  , runHeartbeat = do
       h <- W.startActivity 
         testRefs.heartbeatWorks
         (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
@@ -192,7 +193,7 @@ testImpls = WorkflowTests
           liftIO $ putStrLn "failing"
           error "sad"
         else pure 1
-  , faultyWorkflow = provideCallStack $ do
+  , faultyWorkflow = do
       h1 <- W.startActivity 
         testRefs.faultyActivity
         (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
@@ -201,13 +202,16 @@ testImpls = WorkflowTests
         (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
       W.wait (h1 :: W.Task Int)
       W.wait (h2 :: W.Task Int)
-  , workflowWaitConditionWorks = provideCallStack $ do
+  , workflowWaitConditionWorks = do
       st <- W.newStateVar False
       W.setSignalHandler unblockWorkflowSignal $ do
         $(logDebug) "unblocking workflow"
         W.writeStateVar st True
       W.waitCondition (W.readStateVar st)
       pure ()
+  , simpleWait = do
+      st <- W.newStateVar False
+      (W.waitCondition (W.readStateVar st) <* W.writeStateVar st True)
   }
 
 testRefs :: Refs WorkflowTestsB
@@ -659,7 +663,7 @@ needsClient = do
           result `shouldBe` Right "hello"
       -- specify "query and unblock" pending
     describe "Await condition" $ do
-      fit "works in Workflows" $ \TestEnv{..} -> do
+      xit "signal handlers can unblock workflows" $ \TestEnv{..} -> do
         let conf = configure () $ do
               baseConf
               testConf
@@ -673,7 +677,16 @@ needsClient = do
           C.waitWorkflowResult wfH `shouldReturn` ()
 
       it "works in signal handlers" $ \_ -> pending
-      it "signal handlers can unblock workflows" $ \_ -> pending
+      it "works in Workflows" $ \TestEnv{..} -> do
+        let conf = configure () $ do
+              baseConf
+              testConf
+        withWorker conf $ do
+          wfId <- W.WorkflowId <$> uuidText
+          let opts = C.workflowStartOptions
+                wfId
+                taskQueue
+          C.execute client testRefs.simpleWait opts `shouldReturn` ()
     describe "Sleep" $ do
       specify "sleep" $ \TestEnv{..} -> do
         wfId <- uuidText

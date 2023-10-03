@@ -101,6 +101,7 @@ create workflowCompleteActivation workflowFn workflowDeadlockTimeout inboundInte
     , timer = 1
     , activity = 1
     , condition = 1
+    , varId = 1
     }
   workflowTime <- newIORef $ MkSystemTime 0 0
   workflowIsReplaying <- newIORef False
@@ -335,21 +336,6 @@ applySignalWorkflow signalWorkflow = do
       let args = fmap convertFromProtoPayload (signalWorkflow ^. Command.vec'input)
       $(logDebug) $ Text.pack ("Applying signal handler for signal: " <> show (signalWorkflow ^. Activation.signalName))
       handler args
-      Workflow $ \env -> do
-        inst <- ask
-        -- Signal all conditions that are waiting for a signal.
-        -- Realistically, this should only be one condition at a time, 
-        -- but we'll signal all of them just in case.
-        seqMaps <- readTVarIO inst.workflowSequenceMaps 
-        let go (ix, (ivar, cond)) = do
-              conditionPassed <- cond
-              if conditionPassed
-              then do
-                $(logDebug) $ Text.pack ("Condition " <> show ix <> " evaluated to true")
-                liftIO $ putIVar ivar (Ok ()) env 
-              else do
-                $(logDebug) $ Text.pack ("Condition " <> show ix <> " evaluate to false")
-        Done <$> mapM_ go (HashMap.toList seqMaps.conditionsAwaitingSignal)
 
 applyNotifyHasPatch :: NotifyHasPatch -> InstanceM ()
 applyNotifyHasPatch notifyHasPatch = do

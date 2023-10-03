@@ -33,7 +33,9 @@ import GHC.TypeLits
 import GHC.Stack
 import Data.Vector (Vector)
 import Data.Set (Set)
+import qualified Data.Set as Set
 import Data.Kind
+import Debug.Trace
 import Control.Monad
 import Control.Monad.Reader
 import UnliftIO
@@ -138,7 +140,7 @@ blockedBlocked
 blockedBlocked _ _ (Return i) ivar2 acont =
   return (Blocked ivar2 (acont :>>= getIVarApply i))
 blockedBlocked _ _ (g :<$> Return i) ivar2 acont =
-  return (Blocked ivar2 (acont :>>= \ a -> (\f -> g f a) <$> getIVar i))
+  return (Blocked ivar2 (acont :>>= \a -> (\f -> g f a) <$> getIVar i))
 blockedBlocked env ivar1 fcont ivar2 acont = do
   i <- newIVar
   addJob env (toWf fcont) i ivar1
@@ -284,9 +286,9 @@ instance FrozenGen StdGen Workflow where
 {-# INLINE addJob #-}
 addJob :: ContinuationEnv -> Workflow b -> IVar b -> IVar a -> InstanceM ()
 addJob env !wf !resultIVar IVar{ivarRef = !ref} =
-  modifyIORef' ref $ \case
-    IVarEmpty list -> IVarEmpty (JobCons env wf resultIVar list)
-    _ -> addJobPanic
+  join $ atomicModifyIORef' ref $ \case
+    IVarEmpty list -> (IVarEmpty (JobCons env wf resultIVar list), pure ())
+    full -> (full, modifyIORef' env.runQueueRef (JobCons env wf resultIVar))
 
 addJobPanic :: forall a . a
 addJobPanic = error "addJob: not empty"
@@ -417,13 +419,13 @@ putIVar :: IVar a -> ResultVal a -> ContinuationEnv -> IO ()
 putIVar IVar{ivarRef = !ref} a ContinuationEnv{..} = do
   e <- readIORef ref
   case e of
-    IVarEmpty jobs -> do
+    IVarEmpty jobs -> trace_ "putIVar/Empty" $ do
       writeIORef ref (IVarFull a)
       modifyIORef' runQueueRef (appendJobList jobs)
       -- An IVar is typically only meant to be written to once
       -- so it would make sense to throw an error here. But there
       -- are legitimate use-cases for writing several times.
-    IVarFull{} -> return ()
+    IVarFull{} -> trace_ "putIVar/Full" return ()
 
 tryReadIVar :: IVar a -> Workflow (Maybe a)
 tryReadIVar i@IVar{ivarRef = !ref} = Workflow $ \env -> do
@@ -437,6 +439,92 @@ tryReadIVar i@IVar{ivarRef = !ref} = Workflow $ \env -> do
 raiseFromIVar :: Exception e => ContinuationEnv -> IVar a -> e -> IO (Result b)
 raiseFromIVar env _ivar e = raiseImpl env (toException e)
 
+newtype Condition a = Condition 
+  { unCondition :: ReaderT (IORef (Set Sequence)) InstanceM a
+  -- ^ We track the sequence number of each accessed StateVar so that we can
+  -- block and retry the condition evaluation if the state changes.
+  }
+  deriving newtype (Functor, Applicative, Monad)
+
+-- | 'StateVar' values are mutable variables scoped to a Workflow run.
+--
+-- 'Workflow's are deterministic, so you may not use normal IORefs, since the IORef
+-- could have been created outside of the workflow and cause nondeterminism.
+--
+-- However, it is totally safe to mutate state variables as long as they are scoped
+-- to a workflow and derive their state transitions from the workflow's deterministic
+-- execution.
+--
+-- StateVar values may also be read from within a query and mutated within signal handlers.
+data StateVar a = StateVar
+  { stateVarId :: !Sequence
+  , stateVarRef :: !(IORef a)
+  }
+
+instance Eq (StateVar a) where
+  a == b = stateVarId a == stateVarId b
+
+instance Ord (StateVar a) where
+  compare a b = compare (stateVarId a) (stateVarId b)
+
+newStateVar :: a -> Workflow (StateVar a)
+newStateVar a = Workflow $ \_ -> do
+  Done <$> (StateVar <$> nextVarIdSequence <*> newIORef a)
+
+reevaluateDependentConditions :: StateVar a -> InstanceM ()
+reevaluateDependentConditions cref = do
+  inst <- ask
+  join $ atomically $ do
+    seqMaps <- readTVar inst.workflowSequenceMaps
+    let pendingConds = seqMaps.conditionsAwaitingSignal
+        (reactivateConds, unactivatedConds) = HashMap.foldlWithKey'
+          (\(reactivateConds, unactivatedConds) k v@(ivar, varDependencies) -> 
+            if cref.stateVarId `Set.member` varDependencies
+            then
+              ( reactivateConds >> liftIO (putIVar ivar (Ok ()) inst.workflowInstanceContinuationEnv)
+              , unactivatedConds
+              )
+            else
+              ( reactivateConds
+              , HashMap.insert k v unactivatedConds
+              )
+          )
+          (pure (), mempty)
+          pendingConds
+    writeTVar inst.workflowSequenceMaps (seqMaps { conditionsAwaitingSignal = unactivatedConds })
+    pure reactivateConds
+
+class MonadReadStateVar m where
+  readStateVar :: StateVar a -> m a
+
+class MonadWriteStateVar m where
+  writeStateVar :: StateVar a -> a -> m ()
+  modifyStateVar :: StateVar a -> (a -> a) -> m ()
+
+instance MonadReadStateVar Condition where
+  readStateVar var = Condition $ do
+    touchedVars <- ask
+    modifyIORef' touchedVars (Set.insert var.stateVarId)
+    readIORef var.stateVarRef
+
+instance MonadReadStateVar Workflow where
+  readStateVar var = Workflow $ \_ -> Done <$> readIORef var.stateVarRef
+
+instance MonadWriteStateVar Workflow where
+  writeStateVar var a = Workflow $ \_ -> do
+    writeIORef var.stateVarRef a
+    reevaluateDependentConditions var
+    pure $ Done ()
+  modifyStateVar var f = Workflow $ \_ -> do
+    res <- modifyIORef' var.stateVarRef f
+    reevaluateDependentConditions var
+    pure $ Done res
+
+newtype Query a = Query (InstanceM a)
+  deriving newtype (Functor, Applicative, Monad)
+
+instance MonadReadStateVar Query where
+  readStateVar var = Query $ readIORef var.stateVarRef
 
 newtype InstanceM (a :: Type) = InstanceM { unInstanceM :: ReaderT WorkflowInstance IO a }
   deriving (Functor, Applicative, Monad, MonadIO, MonadReader WorkflowInstance, MonadUnliftIO)
@@ -497,6 +585,7 @@ data Sequences = Sequences
   , timer :: !Word32
   , activity :: !Word32
   , condition :: !Word32
+  , varId :: !Word32
   }
 
 -- Newtyped because the list is reversed
@@ -515,7 +604,7 @@ data SequenceMaps = SequenceMaps
   , childWorkflows :: {-# UNPACK #-} !(SequenceMap SomeChildWorkflowHandle)
   , externalSignals :: {-# UNPACK #-} !(SequenceMap (IVar ResolveSignalExternalWorkflow))
   , externalCancels :: {-# UNPACK #-} !(SequenceMap (IVar ResolveRequestCancelExternalWorkflow))
-  , conditionsAwaitingSignal :: {-# UNPACK #-} !(SequenceMap (IVar (), InstanceM Bool))
+  , conditionsAwaitingSignal :: {-# UNPACK #-} !(SequenceMap (IVar (), Set Sequence))
   }
 
 
@@ -641,3 +730,10 @@ instance Monoid WorkflowOutboundInterceptor where
     , startChildWorkflowExecution = \t input cont -> cont t input
     , continueAsNew = \n input cont -> cont n input
     }
+
+nextVarIdSequence :: InstanceM Sequence
+nextVarIdSequence = do
+  inst <- ask
+  atomicModifyIORef' inst.workflowSequences $ \seqs ->
+    let seq' = varId seqs
+    in (seqs { varId = succ seq' }, Sequence seq')
