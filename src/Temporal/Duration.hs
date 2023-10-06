@@ -95,6 +95,9 @@ days n = Duration (fromIntegral n * 60 * 60 * 24) 0
 weeks :: Word32 -> Duration
 weeks n = Duration (fromIntegral n * 60 * 60 * 24 * 7) 0
 
+infinity :: Duration
+infinity = Duration 0 0
+
 durationFromProto :: Duration.Duration -> Duration
 durationFromProto d = Duration
   { durationSeconds = fromIntegral (d ^. Duration.seconds)

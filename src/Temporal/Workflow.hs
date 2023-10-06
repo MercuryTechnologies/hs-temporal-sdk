@@ -53,7 +53,7 @@ module Temporal.Workflow
   -- $activityBasics
   , ActivityRef(..)
   , KnownActivity(..)
-  , StartActivityOptions -- TODO fields conflict
+  , StartActivityOptions(..) -- TODO fields conflict
   , defaultStartActivityOptions
   , startActivity
   , executeActivity
