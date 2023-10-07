@@ -16,7 +16,7 @@ module Temporal.Duration where
 import Data.Fixed
 import Data.Time.Clock
 import Data.Data
-import Data.Word (Word64, Word32)
+import Data.Int (Int64, Int32)
 import qualified Proto.Google.Protobuf.Duration as Duration
 import qualified Proto.Google.Protobuf.Duration_Fields as Duration
 import Lens.Family2 ((^.), (.~), (&))
@@ -24,12 +24,12 @@ import Data.ProtoLens (defMessage)
 
 -- | A duration of time. Durations are always positive.
 data Duration = Duration
-  { durationSeconds :: {-# UNPACK #-} !Word64
-  , durationNanoseconds :: {-# UNPACK #-} !Word64
+  { durationSeconds :: {-# UNPACK #-} !Int64
+  , durationNanoseconds :: {-# UNPACK #-} !Int32
   } deriving stock (Eq, Ord, Show, Data)
 
 addDurations :: Duration -> Duration -> Duration
-addDurations (Duration s1 ns1) (Duration s2 ns2) = Duration (s1 + s2 + s) ns
+addDurations (Duration s1 ns1) (Duration s2 ns2) = Duration (s1 + s2 + fromIntegral s) $ fromIntegral ns
     where
       (s, ns) = (ns1 + ns2) `divMod` 1_000_000_000
 
@@ -65,34 +65,34 @@ nominalDiffTimeToDuration t = Duration
     (ds, remainingPicos) = totalPicos `quotRem` picosPerSecond
     remainingNanosFromPicos = fromIntegral remainingPicos `div` 1_000
 
-nanoseconds :: Word64 -> Duration
-nanoseconds n = Duration secs ns
+nanoseconds :: Int64 -> Duration
+nanoseconds n = Duration secs $ fromIntegral ns
   where
     (secs, ns) = n `quotRem` 1_000_000_000
 
-microseconds :: Word64 -> Duration
-microseconds n = Duration secs ns
+microseconds :: Int64 -> Duration
+microseconds n = Duration secs $ fromIntegral ns
   where
     (secs, ns) = n `quotRem` 1_000_000
 
-milliseconds :: Word64 -> Duration
-milliseconds n = Duration secs ns
+milliseconds :: Int64 -> Duration
+milliseconds n = Duration secs $ fromIntegral ns
   where
     (secs, ns) = n `quotRem` 1_000
 
-seconds :: Word64 -> Duration
+seconds :: Int64 -> Duration
 seconds n = Duration n 0
 
-minutes :: Word32 -> Duration
+minutes :: Int32 -> Duration
 minutes n = Duration (fromIntegral n * 60) 0
 
-hours :: Word32 -> Duration
+hours :: Int32 -> Duration
 hours n = Duration (fromIntegral n * 60 * 60) 0
 
-days :: Word32 -> Duration
+days :: Int32 -> Duration
 days n = Duration (fromIntegral n * 60 * 60 * 24) 0
 
-weeks :: Word32 -> Duration
+weeks :: Int32 -> Duration
 weeks n = Duration (fromIntegral n * 60 * 60 * 24 * 7) 0
 
 infinity :: Duration
@@ -106,8 +106,8 @@ durationFromProto d = Duration
 
 durationToProto :: Duration -> Duration.Duration
 durationToProto ts = defMessage
-  & Duration.seconds .~ (fromIntegral $ durationSeconds ts)
-  & Duration.nanos .~ (fromIntegral $ durationNanoseconds ts)
+  & Duration.seconds .~ durationSeconds ts
+  & Duration.nanos .~ durationNanoseconds ts
 
 durationToMilliseconds :: Duration -> Double
 durationToMilliseconds (Duration secs ns) = fromIntegral secs * 1_000 + fromIntegral ns / 1_000_000
