@@ -82,9 +82,7 @@ import qualified Proto.Temporal.Sdk.Core.CoreInterface_Fields as Proto
 -- >   "myActivity" -- visible name of the workflow
 -- >   myActivity -- the workflow function
 provideActivity :: forall codec env f.
-  ( f ~ ArgsOf f :->: Activity env (ResultOf (Activity env) f)
-  --, f ~ ArgsOf f :->: ResultOf f
-  --, ResultOf f ~ MonadResult (Activity env) f
+  ( f ~ (ArgsOf f :->: Activity env (ResultOf (Activity env) f))
   , FunctionSupportsCodec codec (ArgsOf f) (ResultOf (Activity env) f)
   ) => codec -> Text -> f -> ProvidedActivity env f
 provideActivity codec name f = ProvidedActivity

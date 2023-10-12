@@ -250,6 +250,8 @@ type family (:->:) (args :: [Type]) (result :: Type) where
   (:->:) '[] result = result
   (:->:) (arg ': args) result = arg -> (args :->: result)
 
+infixr 0 :->: 
+
 data Payload = Payload
   { payloadData :: ByteString
   , payloadMetadata :: Map Text ByteString
@@ -335,5 +337,5 @@ instance (GatherArgs codec (ArgsOf f)) => GatherArgsOf codec f
 class (GatherArgs codec args, Codec codec result, Typeable result, ApplyPayloads codec args) => FunctionSupportsCodec codec args result
 instance (GatherArgs codec args, Codec codec result, Typeable result, ApplyPayloads codec args) => FunctionSupportsCodec codec args result
 
-class (FunctionSupportsCodec codec (ArgsOf f) (ResultOf m f), f ~ ArgsOf f :->: m (ResultOf m f)) => FunctionSupportsCodec' (m :: Type -> Type) codec f
-instance (FunctionSupportsCodec codec (ArgsOf f) (ResultOf m f), f ~ ArgsOf f :->: m (ResultOf m f)) => FunctionSupportsCodec' m codec f
+class (FunctionSupportsCodec codec (ArgsOf f) (ResultOf m f), f ~ (ArgsOf f :->: m (ResultOf m f))) => FunctionSupportsCodec' (m :: Type -> Type) codec f
+instance (FunctionSupportsCodec codec (ArgsOf f) (ResultOf m f), f ~ (ArgsOf f :->: m (ResultOf m f))) => FunctionSupportsCodec' m codec f

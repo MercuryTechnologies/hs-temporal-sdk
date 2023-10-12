@@ -125,7 +125,7 @@ instance WorkflowRef (ProvidedWorkflow f) where
 -- >   () -- initial state
 -- >   myWorkflow -- the workflow function
 provideWorkflow :: forall codec f.
-  ( f ~ ArgsOf f :->: Workflow (ResultOf Workflow f)
+  ( f ~ (ArgsOf f :->: Workflow (ResultOf Workflow f))
   , FunctionSupportsCodec codec (ArgsOf f) (ResultOf Workflow f)) => codec -> Text -> (RequireCallStackImpl => f) -> ProvidedWorkflow f
 provideWorkflow codec name f = provideCallStack $ ProvidedWorkflow
   { definition = WorkflowDefinition

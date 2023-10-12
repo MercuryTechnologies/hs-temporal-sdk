@@ -100,20 +100,36 @@ data QueryRejected
     { status :: WorkflowExecutionStatus
     } deriving (Read, Show, Eq, Ord)
 
+data SignalWithStartWorkflowInput = SignalWithStartWorkflowInput
+  { signalWithStartWorkflowType :: WorkflowType
+  , signalWithStartArgs :: [Payload]
+  , signalWithStartSignalName :: Text
+  , signalWithStartSignalArgs :: [Payload]
+  , signalWithStartOptions :: WorkflowStartOptions
+  }
+
 data ClientInterceptors = ClientInterceptors
   { start :: WorkflowType -> WorkflowStartOptions -> [Payload] -> (WorkflowType -> WorkflowStartOptions -> [Payload] -> IO (WorkflowHandle Payload)) -> IO (WorkflowHandle Payload)
   , queryWorkflow :: QueryWorkflowInput -> (QueryWorkflowInput -> IO (Either QueryRejected Payload)) -> IO (Either QueryRejected Payload)
+  , signalWithStart :: SignalWithStartWorkflowInput -> (SignalWithStartWorkflowInput -> IO (WorkflowHandle Payload)) -> IO (WorkflowHandle Payload)
+  -- TODO
+  -- signal
+  -- terminate
+  -- cancel
+  -- describe
   }
 
 instance Semigroup ClientInterceptors where
   a <> b = ClientInterceptors 
     { start = \t o ps next -> a.start t o ps $ \t' o' ps' -> b.start t' o' ps' next
     , queryWorkflow = \i next -> a.queryWorkflow i $ \i' -> b.queryWorkflow i' next
+    , signalWithStart = \i next -> a.signalWithStart i $ \i' -> b.signalWithStart i' next
     }
 
 instance Monoid ClientInterceptors where
   mempty = ClientInterceptors
     (\t o ps next -> next t o ps)
+    (\i next -> next i)
     (\i next -> next i)
 
 -- , signal :: SignalWorkflowInput -> (SignalWorkflowInput -> IO ()) -> IO ()

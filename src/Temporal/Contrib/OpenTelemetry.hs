@@ -37,6 +37,7 @@ import Temporal.Client.Types
   ( ClientInterceptors(ClientInterceptors)
   , WorkflowStartOptions (..)
   , QueryWorkflowInput(..)
+  , SignalWithStartWorkflowInput(..)
   )
 import Prelude hiding (span)
 
@@ -267,5 +268,13 @@ makeOpenTelemetryInterceptor = do
           ctxt <- getContext
           hdrs <- inject headersPropagator ctxt input.queryWorkflowHeaders
           next (input { queryWorkflowHeaders = hdrs })
+      , signalWithStart = \input next -> do
+        let spanArgs = defaultSpanArguments
+              { kind = Client
+              }
+        inSpan'' tracer ("SignalWithStartWorkflow:" <> rawWorkflowType (signalWithStartWorkflowType input)) spanArgs $ \_ -> do
+          ctxt <- getContext
+          hdrs <- inject headersPropagator ctxt $ input.signalWithStartOptions.headers
+          next (input { signalWithStartOptions = (signalWithStartOptions input) { Temporal.Client.Types.headers = hdrs } })
       }
     }

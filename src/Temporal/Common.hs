@@ -225,7 +225,7 @@ instance FunctionHoist args => FunctionHoist (a ': args) where
 
 -- | A specalized version of 'hoist' that allows you to change the end result functor of a given function.
 hoist 
-  :: forall m n f. (f ~ ArgsOf f :->: m (ResultOf m f), FunctionHoist (ArgsOf f))
+  :: forall m n f. (f ~ (ArgsOf f :->: m (ResultOf m f)), FunctionHoist (ArgsOf f))
   => (forall x. m x -> n x) 
   -> f 
   -> (ArgsOf f :->: n (ResultOf m f))
