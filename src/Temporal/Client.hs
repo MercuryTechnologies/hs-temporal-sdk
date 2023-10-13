@@ -438,7 +438,7 @@ start c wf opts = case workflowRef wf of
 
 -- | If there is a running Workflow Execution with the given Workflow Id, it will be Signaled. 
 --
--- Otherwise, a new Workflow Execution is started and immediately sent the Signal.
+-- Otherwise, a new Workflow Execution is started and immediately send the Signal.
 signalWithStart 
   :: forall wf sigArgs m. (MonadIO m, WorkflowRef wf)
   => WorkflowClient 
