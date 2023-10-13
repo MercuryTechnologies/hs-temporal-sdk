@@ -102,7 +102,14 @@ activityInfoFromProto tt msg = ActivityInfo
   , taskToken = tt
   }
 
-
+-- | Signal to the Temporal worker that the activity will be completed asynchronously (out of band).
+--
+-- In order to complete the activity once it has been moved to async, use 'Temporal.Client.AsyncActivity.complete', 'Temporal.Client.AsyncActivity.fail', or 'Temporal.Client.AsyncActivity.reportCancellation'.
+--
+-- Note: Under the hood, this throws a 'CompleteAsync' exception, which is caught and handled by the Temporal worker.
+--
+-- Make sure that your own code does not swallow or rewrap this exception, otherwise the activity will fail instead
+-- of signalling that it will be completed asynchronously.
 completeAsync :: MonadIO m => m ()
 completeAsync = throwIO CompleteAsync
 

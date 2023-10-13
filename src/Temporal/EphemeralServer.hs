@@ -1,3 +1,9 @@
+{- |
+Module: Temporal.EphemeralServer
+Description: Run an Temporal server in a programatically for testing and development.
+
+Run an Temporal server in a programatically for testing and development.
+-}
 module Temporal.EphemeralServer 
   ( launchTestServer
   , launchDevServer

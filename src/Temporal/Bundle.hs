@@ -15,7 +15,11 @@
 {-# LANGUAGE TypeFamilyDependencies #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 {-# LANGUAGE InstanceSigs #-}
--- | Define and reference workflows and activities using records.
+-- | 
+-- Module: Temporal.Bundle
+-- Description: Utilities to define and reference workflows and activities using records.
+--
+-- Define and reference workflows and activities using records.
 --
 -- The usage of this module is best explained by example. First, define a record type
 -- that contains all of the workflows and activities that you want to define:

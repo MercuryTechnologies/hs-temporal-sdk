@@ -18,7 +18,11 @@
   TypeApplications 
   #-}
 {-# LANGUAGE DefaultSignatures #-}
--- | A Payload represents binary data such as input and output from Activities and Workflows. Payloads contain metadata that describe the binary data, such as its data type or other arbitrary values for use by custom encoders/converters.
+-- | 
+-- Module: Temporal.Payload
+-- Description: Payloads are the binary data that is sent to and from the Temporal Server.
+--
+-- A Payload represents binary data such as input and output from Activities and Workflows. Payloads contain metadata that describe the binary data, such as its data type or other arbitrary values for use by custom encoders/converters.
 --
 -- When processed through the SDK, the default Data Converter serializes your data/value to a Payload before sending it to the Temporal Server. The default Data Converter processes supported type values to Payloads, and you can create a custom Payload Converter to convert your custom object types.
 -- 

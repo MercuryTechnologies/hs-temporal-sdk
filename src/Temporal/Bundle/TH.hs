@@ -15,6 +15,17 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RecordWildCards #-}
+-- | 
+-- Module: Temporal.Bundle.TH
+-- Description: Reduce Temporal.Bundle boilerplate with Template Haskell.
+--
+-- This module provides Template Haskell functions for generating the
+-- boilerplate required to use the Temporal.Bundle module.
+--
+-- This is generally the easiest way to define groups of related
+-- activities and workflows with minimal boilerplate.
+--
+-- See 'Temporal.Bundle' for more example code.
 module Temporal.Bundle.TH 
   ( temporalBundle
   , temporalBundleWithoutSynonyms

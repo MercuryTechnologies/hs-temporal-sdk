@@ -62,6 +62,22 @@ import Temporal.Workflow.Types
 --
 -- The 'st' state may be used to store information that is needed to respond to
 -- any queries or signals that are received by the Workflow execution.
+--
+-- Workflow code must be deterministic. This means:
+--
+-- - no threading
+-- - no randomness
+-- - no external calls to processes
+-- - no network I/O
+-- - no global state mutation
+-- - no system date or time
+--
+-- This might seem like a lot of restrictions, but Temporal provides a number of
+-- functions that allow you to use similar functionality in a deterministic way.
+--
+-- A critical aspect of developing Workflow Definitions is ensuring they exhibit certain deterministic traits –
+-- that is, making sure that the same Commands are emitted in the same sequence,
+-- whenever a corresponding Workflow Function Execution (instance of the Function Definition) is re-executed.
 newtype Workflow a = Workflow { unWorkflow :: ContinuationEnv -> InstanceM (Result a) }
 
 ilift :: RequireCallStack => InstanceM a -> Workflow a

@@ -37,6 +37,12 @@ newtype Namespace = Namespace { rawNamespace :: Text }
   deriving newtype (Eq, Ord, Show, Hashable)
 
 -- | A Run Id is a globally unique, platform-level identifier for a Workflow Execution.
+--
+-- The current Run Id is mutable and can change during a Workflow Retry. You shouldn't rely on storing the current Run Id, or using it for any logical choices, because a Workflow Retry changes the Run Id and can lead to non-determinism issues.
+--
+-- Temporal guarantees that only one Workflow Execution with a given Workflow Id can be in an Open state at any given time. But when a Workflow Execution reaches a Closed state, it is possible to have another Workflow Execution in an Open state with the same Workflow Id. For example, a Temporal Cron Job is a chain of Workflow Executions that all have the same Workflow Id. Each Workflow Execution within the chain is considered a Run.
+--
+-- A Run Id uniquely identifies a Workflow Execution even if it shares a Workflow Id with other Workflow Executions.
 newtype RunId = RunId { rawRunId :: Text }
   deriving newtype (Eq, Ord, Show, Hashable)
 
@@ -78,7 +84,11 @@ newtype CancellationId = CancellationId { rawCancellationId :: Text }
 newtype QueryId = QueryId { rawQueryId :: Text }
   deriving newtype (Eq, Ord, Show, Hashable)
 
-newtype TaskToken = TaskToken { rawTaskToken :: ByteString }
+-- | A Task Token is a unique identifier for a Task. It can be used with the 'Temporal.Client.AsyncActivity' API to signal activity completion or failure.
+newtype TaskToken = TaskToken 
+  { rawTaskToken :: ByteString 
+  -- ^ An opaque token that can be used to uniquely identify a Task. This token should not be modified by consumers, but is exposed here as a raw ByteString for transport purposes.
+  }
   deriving newtype (Eq, Show, Ord, Hashable)
 
 timespecFromTimestamp :: Timestamp.Timestamp -> SystemTime

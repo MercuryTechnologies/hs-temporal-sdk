@@ -28,6 +28,7 @@ data Duration = Duration
   , durationNanoseconds :: {-# UNPACK #-} !Int32
   } deriving stock (Eq, Ord, Show, Data)
 
+-- | Add two durations together. Durations are subject to integer overflow.
 addDurations :: Duration -> Duration -> Duration
 addDurations (Duration s1 ns1) (Duration s2 ns2) = Duration (s1 + s2 + fromIntegral s) $ fromIntegral ns
     where
@@ -65,49 +66,62 @@ nominalDiffTimeToDuration t = Duration
     (ds, remainingPicos) = totalPicos `quotRem` picosPerSecond
     remainingNanosFromPicos = fromIntegral remainingPicos `div` 1_000
 
-nanoseconds :: Int64 -> Duration
-nanoseconds n = Duration secs $ fromIntegral ns
+-- | Create a 'Duration' from a given number of nanoseconds.
+nanoseconds :: Integer -> Duration
+nanoseconds n = Duration (fromIntegral secs) (fromIntegral ns)
   where
     (secs, ns) = n `quotRem` 1_000_000_000
 
-microseconds :: Int64 -> Duration
-microseconds n = Duration secs $ fromIntegral ns
+-- | Create a 'Duration' from a given number of microseconds.
+microseconds :: Integer -> Duration
+microseconds n = Duration (fromIntegral secs) (fromIntegral ns)
   where
     (secs, ns) = n `quotRem` 1_000_000
 
+-- | Create a 'Duration' from a given number of milliseconds.
 milliseconds :: Int64 -> Duration
 milliseconds n = Duration secs $ fromIntegral ns
   where
     (secs, ns) = n `quotRem` 1_000
 
+-- | Create a 'Duration' from a given number of seconds.
 seconds :: Int64 -> Duration
 seconds n = Duration n 0
 
+-- | Create a 'Duration' from a given number of minutes.
 minutes :: Int32 -> Duration
 minutes n = Duration (fromIntegral n * 60) 0
 
+-- | Create a 'Duration' from a given number of hours.
 hours :: Int32 -> Duration
 hours n = Duration (fromIntegral n * 60 * 60) 0
 
+-- | Create a 'Duration' from a given number of days.
 days :: Int32 -> Duration
 days n = Duration (fromIntegral n * 60 * 60 * 24) 0
 
+-- | Create a 'Duration' from a given number of weeks.
 weeks :: Int32 -> Duration
 weeks n = Duration (fromIntegral n * 60 * 60 * 24 * 7) 0
 
+-- | A 'Duration' representing the maximum possible length of time. (Approximately 293 billion years.)
 infinity :: Duration
-infinity = Duration 0 0
+infinity = Duration maxBound maxBound
 
+-- | Convert a protocol buffer duration to a 'Duration'.
 durationFromProto :: Duration.Duration -> Duration
 durationFromProto d = Duration
   { durationSeconds = fromIntegral (d ^. Duration.seconds)
   , durationNanoseconds = fromIntegral (d ^. Duration.nanos)
   }
 
+-- | Convert a 'Duration' to a protocol buffer duration.
 durationToProto :: Duration -> Duration.Duration
 durationToProto ts = defMessage
   & Duration.seconds .~ durationSeconds ts
   & Duration.nanos .~ durationNanoseconds ts
 
+-- | Convert a 'Duration' to a milliseconds represented as a 'Double'. This is mostly useful for
+-- human-readable values emitted by logs, metrics, traces, etc.
 durationToMilliseconds :: Duration -> Double
 durationToMilliseconds (Duration secs ns) = fromIntegral secs * 1_000 + fromIntegral ns / 1_000_000

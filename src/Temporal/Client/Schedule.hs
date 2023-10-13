@@ -1,6 +1,9 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE OverloadedLabels #-}
 {- |
+Module: Temporal.Client.Schedule
+Description: Schedule Workflow executions
+
 A Schedule contains instructions for starting a Workflow Execution at specific times. Schedules provide a more flexible and user-friendly approach than Temporal Cron Jobs.
 
 = How to enable Schedules
@@ -20,14 +23,15 @@ Workflow Executions started by a Schedule have the following additional properti
 
 The following calendar JSON fields are available:
 
-year
-month
-dayOfMonth
-dayOfWeek
-hour
-minute
-second
-comment
+- year
+- month
+- dayOfMonth
+- dayOfWeek
+- hour
+- minute
+- second
+- comment
+
 Each field can contain a comma-separated list of ranges (or the * wildcard), and each range can include a slash followed by a skip value. The hour, minute, and second fields default to 0 while the others default to *, so you can describe many useful specs with only a few fields.
 
 For month, names of months may be used instead of integers (case-insensitive, abbreviations permitted). For dayOfWeek, day-of-week names may be used.

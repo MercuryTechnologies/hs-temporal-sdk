@@ -1,3 +1,10 @@
+-- |
+-- Module: Temporal.Operator
+-- Description: Operator API bindings for Temporal.
+-- 
+-- This module provides bindings for the Temporal Operator API. The Operator API
+-- is used to manage Temporal namespaces, clusters, and other administrative
+-- tasks.
 module Temporal.Operator where
 
 import qualified Temporal.Core.Client.OperatorService as Core

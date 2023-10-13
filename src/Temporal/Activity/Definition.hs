@@ -45,8 +45,31 @@ data ActivityEnv env = ActivityEnv
   , activityEnv :: env
   }
 
--- | An activity is a unit of work that is executed by a worker. It is a specialized function call
+-- | 
+-- = What is an Activity?
+--
+-- An activity is a unit of work that is executed by a worker. It is a specialized function call
 -- that can be executed one or more times, and can be cancelled while it is running.
+--
+-- Activity Definitions are executed as normal functions.
+--
+-- In the event of failure, the function begins at its initial state when retried (except when Activity Heartbeats are established).
+--
+-- Therefore, an Activity Definition has no restrictions on the code it contains.
+--
+-- = Idempotency
+--
+-- Temporal recommends that Activities be idempotent.
+--
+-- Idempotent means that performing an operation multiple times has the same result as performing it once. In the context of Temporal, Activities should be designed to be safely executed multiple times without causing unexpected or undesired side effects.
+--
+-- An Activity is idempotent if multiple Activity Task Executions do not change the state of the system beyond the first Activity Task Execution.
+--
+-- We recommend using idempotency keys for critical side effects.
+--
+-- The lack of idempotency might affect the correctness of your application but does not affect the Temporal Platform. In other words, lack of idempotency doesn't lead to a platform error.
+--
+-- In some cases, whether something is idempotent doesn't affect the correctness of an application. For example, if you have a monotonically incrementing counter, you might not care that retries increment the counter because you don’t care about the actual value, only that the current value is greater than a previous value.
 newtype Activity env a = Activity { unActivity :: ReaderT (ActivityEnv env) IO a }
   deriving newtype
     ( Functor

@@ -1,6 +1,10 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE UndecidableInstances #-}
--- | A Search Attribute is an indexed field used in a List Filter to filter a list of Workflow Executions that have the Search Attribute in their metadata.
+-- | 
+-- Module: Temporal.SearchAttributes
+-- Description: Annotate Workflow Executions with key-value pairs for filtering and searching.
+--
+-- A Search Attribute is an indexed field used in a List Filter to filter a list of Workflow Executions that have the Search Attribute in their metadata.
 --
 -- Each Search Attribute is a key-value pair metadata object included in a Workflow Execution's Visibility information. This information is available in the Visibility store.
 --
@@ -16,6 +20,112 @@
 -- * Storing state in an external datastore through Activities and fetching it directly from the store.
 --
 -- If your business logic requires high throughput or low latency, store and fetch the data through Activities. You might experience lag due to time passing between the Workflow's state change and the Activity updating the Visibility store.
+--
+-- = Default Search Attributes
+--
+-- A Temporal Cluster has a set of default Search Attributes already available. Default Search Attributes are set globally in any Namespace. These Search Attributes are created when the initial index is created.
+--
+-- +--------------------------+--------------+--------------------------+
+-- | NAME                     | TYPE         | DEFINITION               |
+-- +==========================+==============+==========================+
+-- | BatcherUser              | Keyword      | Used by internal batcher |
+-- |                          |              | Workflow that runs in    |
+-- |                          |              | @TemporalBatcher@        |
+-- |                          |              | Namespace division to    |
+-- |                          |              | indicate the user who    |
+-- |                          |              | started the batch        |
+-- |                          |              | operation.               |
+-- +--------------------------+--------------+--------------------------+
+-- | BinaryChecksums          | Keyword List | List of binary Ids of    |
+-- |                          |              | Workers that run the     |
+-- |                          |              | Workflow Execution.      |
+-- |                          |              | Deprecated since server  |
+-- |                          |              | version 1.21 in favor of |
+-- |                          |              | the @BuildIds@ search    |
+-- |                          |              | attribute.               |
+-- +--------------------------+--------------+--------------------------+
+-- | BuildIds                 | Keyword List | List of Worker Build Ids |
+-- |                          |              | that have processed the  |
+-- |                          |              | Workflow Execution,      |
+-- |                          |              | formatted as             |
+-- |                          |              | @versioned:{BuildId}@ or |
+-- |                          |              | @unversioned:{BuildId}@, |
+-- |                          |              | or the sentinel          |
+-- |                          |              | @unversioned@ value.     |
+-- |                          |              | Available from server    |
+-- |                          |              | version 1.21.            |
+-- +--------------------------+--------------+--------------------------+
+-- | CloseTime                | Datetime     | The time at which the    |
+-- |                          |              | Workflow Execution       |
+-- |                          |              | completed.               |
+-- +--------------------------+--------------+--------------------------+
+-- | ExecutionDuration        | Int          | The time needed to run   |
+-- |                          |              | the Workflow Execution   |
+-- |                          |              | (in nanoseconds).        |
+-- |                          |              | Available only for       |
+-- |                          |              | closed Workflows.        |
+-- +--------------------------+--------------+--------------------------+
+-- | ExecutionStatus          | Keyword      | The current state of the |
+-- |                          |              | Workflow Execution.      |
+-- +--------------------------+--------------+--------------------------+
+-- | ExecutionTime            | Datetime     | The time at which the    |
+-- |                          |              | Workflow Execution       |
+-- |                          |              | actually begins running; |
+-- |                          |              | same as @StartTime@ for  |
+-- |                          |              | most cases but different |
+-- |                          |              | for Cron Workflows and   |
+-- |                          |              | retried Workflows.       |
+-- +--------------------------+--------------+--------------------------+
+-- | HistoryLength            | Int          | The number of events in  |
+-- |                          |              | the history of Workflow  |
+-- |                          |              | Execution. Available     |
+-- |                          |              | only for closed          |
+-- |                          |              | Workflows.               |
+-- +--------------------------+--------------+--------------------------+
+-- | HistorySizeBytes         | Long         | The size of the Event    |
+-- |                          |              | History.                 |
+-- +--------------------------+--------------+--------------------------+
+-- | RunId                    | Keyword      | Identifies the current   |
+-- |                          |              | Workflow Execution Run.  |
+-- +--------------------------+--------------+--------------------------+
+-- | StartTime                | Datetime     | The time at which the    |
+-- |                          |              | Workflow Execution       |
+-- |                          |              | started.                 |
+-- +--------------------------+--------------+--------------------------+
+-- | StateTransitionCount     | Int          | The number of times that |
+-- |                          |              | Workflow Execution has   |
+-- |                          |              | persisted its state.     |
+-- |                          |              | Available only for       |
+-- |                          |              | closed Workflows.        |
+-- +--------------------------+--------------+--------------------------+
+-- | TaskQueue                | Keyword      | Task Queue used by       |
+-- |                          |              | Workflow Execution.      |
+-- +--------------------------+--------------+--------------------------+
+-- | TemporalChangeVersion    | Keyword List | Stores change\/version   |
+-- |                          |              | pairs if the GetVersion  |
+-- |                          |              | API is enabled.          |
+-- +--------------------------+--------------+--------------------------+
+-- | Te                       | Datetime     | The time that the        |
+-- | mporalScheduledStartTime |              | Workflow is schedule to  |
+-- |                          |              | start according to the   |
+-- |                          |              | Schedule Spec. Can be    |
+-- |                          |              | manually triggered. Set  |
+-- |                          |              | on Schedules.            |
+-- +--------------------------+--------------+--------------------------+
+-- | TemporalScheduledById    | Keyword      | The Id of the Schedule   |
+-- |                          |              | that started the         |
+-- |                          |              | Workflow.                |
+-- +--------------------------+--------------+--------------------------+
+-- | TemporalSchedulePaused   | Boolean      | Indicates whether the    |
+-- |                          |              | Schedule has been        |
+-- |                          |              | paused. Set on           |
+-- |                          |              | Schedules.               |
+-- +--------------------------+--------------+--------------------------+
+-- | WorkflowId               | Keyword      | Identifies the Workflow  |
+-- |                          |              | Execution.               |
+-- +--------------------------+--------------+--------------------------+
+-- | WorkflowType             | Keyword      | The type of Workflow.    |
+-- +--------------------------+--------------+--------------------------+
 module Temporal.SearchAttributes where
 
 import qualified Data.Aeson as A

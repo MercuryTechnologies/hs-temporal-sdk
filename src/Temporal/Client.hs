@@ -1,4 +1,8 @@
-{- | Workflow Clients are embedded in your application code and connect to a Temporal Server.
+{- | 
+Module: Temporal.Client
+Description: Invoke and interact with Temporal Workflows.
+
+Workflow Clients are embedded in your application code and connect to a Temporal Server.
 
 They are used to start new workflows and to signal existing workflows.
 -}

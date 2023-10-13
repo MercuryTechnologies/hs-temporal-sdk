@@ -1,5 +1,19 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeApplications #-}
+{- |
+Module: Temporal.Contrib.OpenTelemetry
+Description: OpenTelemetry instrumentation for Temporal workflows and activities.
+
+OpenTelemetry instrumentation for Temporal workflows and activities.
+
+This module provides an interceptor for Temporal workflows and activities that
+automatically instruments them with OpenTelemetry tracing. It also provides
+functions for extracting and injecting OpenTelemetry context from and to
+Temporal headers.
+
+To use, initialize the OpenTelemetry 'globalTracerProvider'. Then, add
+the interceptor to your Temporal client and worker configuration.
+-}
 module Temporal.Contrib.OpenTelemetry where
 
 import Control.Monad.IO.Class

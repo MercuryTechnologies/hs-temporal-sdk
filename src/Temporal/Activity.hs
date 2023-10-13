@@ -15,16 +15,16 @@
 -- When writing activities to execute withing a workflow, we recommend writing
 -- them while keeping the following principles in mind:
 --
--- 1. **Retryable**: Activities can be automatically retried by the Temporal
+-- 1. __Retryable__: Activities can be automatically retried by the Temporal
 --    system in case of failures. You can configure the retry behavior, such as
 --    the maximum number of retries and retry intervals.
 --
--- 2. **Idempotency**: Since Activities are designed to be retryable,
+-- 2. __Idempotency__: Since Activities are designed to be retryable,
 --    executing an activity multiple times should not have unintended side
 --    effects. This is crucial for ensuring the reliability of workflow
 --    executions.
 --
--- 3. **Cancellable**: Activities can be cancelled, which means that they can
+-- 3. __Cancellable__: Activities can be cancelled, which means that they can
 --    be stopped before they complete execution. This is useful for handling
 --    long-running activities that need to be aborted in certain situations.
 --    As a consequence, activities should to be written to receive 'ActivityCancelReason'
