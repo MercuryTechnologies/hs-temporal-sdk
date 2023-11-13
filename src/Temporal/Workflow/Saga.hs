@@ -32,7 +32,9 @@ import qualified Data.Text as T
 and coordinates transactions between multiple services to attempt to maintain data consistency.
 
 If you’re wondering if the saga pattern is right for your scenario, ask yourself: 
-does your logic involve multiple steps, some of which span machines, services, shards, or databases, for which partial execution is undesirable? 
+
+Does your logic involve multiple steps, some of which span machines, services, shards, or databases, for which partial execution is undesirable? 
+
 Turns out, this is exactly where sagas are useful. Maybe you are checking inventory, charging a user’s credit card, and then fulfilling the order. 
 Maybe you are managing a supply chain. 
 
@@ -42,11 +44,12 @@ in a consistent state in the event of power loss.
 
 There are many “do it all, or don’t bother” software applications in the real-world: 
 
-if you successfully charge the user for an item but your fulfillment service reports that the item is out of stock, you’re going to have upset 
-users if you don’t refund the charge. If you have the opposite problem and accidentally deliver items “for free,” you’ll be out of business. 
-
-If the machine coordinating a machine learning data processing pipeline crashes but the follower machines carry on processing the data with 
-nowhere to report their data to, you may have a very expensive compute resources bill on your hands. In all of these cases having some sort of “progress tracking” and compensation code to deal with these “do-it-all-or-don’t-do-any-of-it” tasks is exactly what the saga pattern provides. In saga parlance, these sorts of “all or nothing” tasks are called long-running transactions. This doesn’t necessarily mean such actions run for a “long” time, just that they require more steps in 
+- If you successfully charge the user for an item but your fulfillment service reports that the item is out of stock, you’re going to have upset 
+  users if you don’t refund the charge. If you have the opposite problem and accidentally deliver items “for free,” you’ll be out of business. 
+- If the machine coordinating a machine learning data processing pipeline crashes but the follower machines carry on processing the data with 
+  nowhere to report their data to, you may have a very expensive compute resources bill on your hands. 
+  
+In all of these cases having some sort of “progress tracking” and compensation code to deal with these “do-it-all-or-don’t-do-any-of-it” tasks is exactly what the saga pattern provides. In saga parlance, these sorts of “all or nothing” tasks are called long-running transactions. This doesn’t necessarily mean such actions run for a “long” time, just that they require more steps in 
 logical time than something running locally interacting with a single database.
 
 A saga is composed of two parts:

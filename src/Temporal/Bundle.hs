@@ -361,6 +361,10 @@ instance BareB b => CoverIfNeeded b Bare Identity where
 instance CoverIfNeeded b Covered f where
   coverIfNeeded = id
 
+-- | Produce a record of references to workflows and activities from a record of implementations.
+--
+-- The fields in the records produced by this function can be used to invoke the workflows and activities
+-- via the Temporal client or within Temporal workflows.
 refs :: forall r t f codec.
   ( CanUseAsRefs r codec
   , CoverIfNeeded r t f
@@ -379,6 +383,10 @@ refs codec wfrec = result
     result :: r Covered Ref
     result = bmapC @(RefFromFunction codec) convertToKnownWorkflow defLabels
 
+-- | Constraints needed to turn a record of implementations into a record of definitions.
+--
+-- That is, all of the fields (Workflows, Activities) in the record support the supplied codec,
+-- and the activities have an environment of type @env@.
 type CanUseAsDefs f codec env = 
   ( BareB f
   , ConstraintsB (f Covered)
@@ -387,6 +395,7 @@ type CanUseAsDefs f codec env =
   , ApplicativeB (f Covered)
   )
 
+-- | Produce a record of definitions from a record of implementations, using the supplied codec.
 defs :: forall f codec env. 
   ( CanUseAsDefs f codec env
   ) => codec -> Impl f -> Defs env f

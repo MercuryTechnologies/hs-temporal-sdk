@@ -1,7 +1,11 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NumericUnderscores #-}
--- | Convenient units of time for use with timers and timeouts.
+-- | 
+-- Module: Temporal.Duration
+-- Description: Effecient and user-friendly time durations
+--
+--Convenient units of time for use with timers and timeouts.
 --
 -- Anything longer than a week (Months, Years) becomes ambiguous because they
 -- are variable length. For example, a month can be 28, 29, 30, or 31 days.
