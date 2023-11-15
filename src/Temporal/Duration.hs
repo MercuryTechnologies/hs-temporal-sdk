@@ -108,9 +108,9 @@ days n = Duration (fromIntegral n * 60 * 60 * 24) 0
 weeks :: Int32 -> Duration
 weeks n = Duration (fromIntegral n * 60 * 60 * 24 * 7) 0
 
--- | A 'Duration' representing the maximum possible length of time. (Approximately 293 billion years.)
+-- | A 'Duration' representing the maximum possible length of time. (Approximately 132 years.)
 infinity :: Duration
-infinity = Duration maxBound maxBound
+infinity = Duration (2 ^ 32) 0
 
 -- | Convert a protocol buffer duration to a 'Duration'.
 durationFromProto :: Duration.Duration -> Duration

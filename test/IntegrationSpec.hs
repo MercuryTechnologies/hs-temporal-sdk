@@ -945,7 +945,7 @@ needsClient = do
             x <- W.uuid4
             W.executeActivity
               taskMainActivity.reference
-              ((W.defaultStartActivityOptions $ W.StartToClose $ Duration maxBound maxBound) { W.activityId = Just $ W.ActivityId "woejfwoefijweof"})
+              ((W.defaultStartActivityOptions $ W.StartToClose infinity) { W.activityId = Just $ W.ActivityId "woejfwoefijweof"})
               command
 
           conf = configure () $ do
@@ -959,7 +959,7 @@ needsClient = do
         wfId <- uuidText
         let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
               { C.timeouts = C.TimeoutOptions
-                  { C.runTimeout = Just $ seconds 4
+                  { C.runTimeout = Nothing
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
                   }
