@@ -17,6 +17,7 @@ import Control.Concurrent
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
+import Data.Aeson (FromJSON, ToJSON)
 import Data.ByteString (ByteString)
 import Data.Int
 import Data.ProtoLens
@@ -138,6 +139,12 @@ type MyWorkflow a = W.RequireCallStack => W.Workflow a
 
 defaultCodec :: JSON
 defaultCodec = JSON
+
+data RegressionTask = Foo | Bar
+  deriving (Eq, Show, Generic)
+
+instance ToJSON RegressionTask
+instance FromJSON RegressionTask
 
 signalUnblockWorkflow :: W.SignalRef '[]
 signalUnblockWorkflow = W.SignalRef "unblockWorkflow" defaultCodec
@@ -924,6 +931,41 @@ needsClient = do
               }
         C.execute client testRefs.continueAsNewWorks opts 0
           `shouldReturn` "woohoo"
+
+  describe "Regression tests" $ do
+    fspecify "immediate activity start works" $ \TestEnv{..} -> do
+      let taskMainActivity :: ProvidedActivity () (RegressionTask -> Activity () ())
+          taskMainActivity = provideCallStack $ provideActivity JSON "legacyTaskMainAct" $ \command -> do
+            app <- ask
+            liftIO $ putStrLn "hi"
+
+          taskMainWorkflow :: W.ProvidedWorkflow (RegressionTask -> W.Workflow ())
+          taskMainWorkflow = provideCallStack $ W.provideWorkflow JSON "legacyTaskMain" $ \command -> do
+            -- Info{..} <- info
+            x <- W.uuid4
+            W.executeActivity
+              taskMainActivity.reference
+              ((W.defaultStartActivityOptions $ W.StartToClose $ Duration maxBound maxBound) { W.activityId = Just $ W.ActivityId "woejfwoefijweof"})
+              command
+
+          conf = configure () $ do
+            baseConf
+            testConf
+
+            addActivity taskMainActivity
+            addWorkflow taskMainWorkflow
+
+      withWorker conf $ do
+        wfId <- uuidText
+        let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
+              { C.timeouts = C.TimeoutOptions
+                  { C.runTimeout = Just $ seconds 4
+                  , C.executionTimeout = Nothing
+                  , C.taskTimeout = Nothing
+                  }
+              }
+        C.execute client taskMainWorkflow.reference opts Foo
+          `shouldReturn` ()
 
       -- specify "to different workflow" pending
       -- specify "to same workflow keeps memo and search attributes" pending
