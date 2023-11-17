@@ -283,10 +283,13 @@ declareBareBWith DeclareBareBConfig{..} decsQ = do
         [d|deriving via Barbie $(datC) $(varT nWrap)
             instance ($(cls) (Barbie $(datC) $(varT nWrap))) => $(cls) ($(datC) $(varT nWrap))|])
         [ pure t | (_, DerivClause _ preds) <- classes', t <- preds ]
+
+      specifyStockStrategy <- isExtEnabled DerivingStrategies
       -- Redefine instances of the bare type with the original strategy
       bareDrvs <- traverse (\(strat, cls) ->
         standaloneDerivWithStrategyD strat (pure []) [t|$(cls) $(pure bareType)|])
         [ (strat, pure t) | (_, DerivClause strat preds) <- classes', t <- preds ]
+
       return $ DataD [] dataName
 #if MIN_VERSION_template_haskell(2,17,0)
         (tvbs ++ [PlainTV nSwitch (), PlainTV nWrap ()])
@@ -295,7 +298,7 @@ declareBareBWith DeclareBareBConfig{..} decsQ = do
 #endif
         Nothing
         [transformed]
-        [DerivClause Nothing $ concatMap fst classes']
+        [DerivClause (if specifyStockStrategy then Just StockStrategy else Nothing) $ concatMap fst classes']
         : decs ++ concat coverDrvs ++ bareDrvs
         ++ [ TySynD (mkName name) tvbs bareType | name <- maybeToList $ bareName $ nameBase dataName0]
         ++ [ TySynD (mkName name) tvbs coveredType | name <- maybeToList $ coveredName $ nameBase dataName0]

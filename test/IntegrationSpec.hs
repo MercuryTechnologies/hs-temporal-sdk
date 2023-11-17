@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -71,6 +72,13 @@ temporalBundle [d|
     , simpleWait :: W.Workflow ()
     , multipleArgs :: Int -> Text -> Bool -> W.Workflow (Int, Text, Bool)
     } deriving (Generic)
+  |]
+
+temporalBundle [d|
+  data DerivingStrategiesWork = DerivingStrategiesWork
+    { derivingStrategyExampleThing :: Int
+    } 
+    deriving (Show)
   |]
 
 configWithRetry :: PortNumber -> ClientConfig
