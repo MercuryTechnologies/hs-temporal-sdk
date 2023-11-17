@@ -138,6 +138,8 @@ module Temporal.Bundle
   -- * Constraints
   , CanUseAsRefs
   , CanUseAsDefs
+  , RefFromFunction(..)
+  , RefFromFunction'(..)
   ) where
 
 import Control.Monad.Reader
@@ -164,18 +166,18 @@ import Temporal.Workflow
 import Temporal.Workflow.Definition
 import Temporal.Workflow.Internal.Monad
 
-type family ApplyRef (args :: [Type]) (f :: Type) where
-  ApplyRef args (Workflow result) = KnownWorkflow args result
-  ApplyRef args (Activity env result) = KnownActivity args result
-  ApplyRef args (a -> b) = ApplyRef (a ': args) b
+type family ApplyRef (original :: Type) (f :: Type) where
+  ApplyRef original (Workflow result) = KnownWorkflow (ArgsOf original) result
+  ApplyRef original (Activity env result) = KnownActivity (ArgsOf original) result
+  ApplyRef original (_ -> b) = ApplyRef original b
   ApplyRef _ a = TypeError ('Text "Expected a Workflow or Activity, but got " ':<>: 'ShowType a)
 
-type FnRef f = ApplyRef '[] f
+type FnRef f = ApplyRef f f
 
 type family ApplyDef (f :: Type) where
   ApplyDef (Workflow result) = WorkflowDefinition
   ApplyDef (Activity env result) = ActivityDefinition env
-  ApplyDef (a -> b) = ApplyDef b
+  ApplyDef (_ -> b) = ApplyDef b
   ApplyDef a = TypeError ('Text "Expected a Workflow or Activity, but got " ':<>: 'ShowType a)
 
 type FnDef f = ApplyDef f
@@ -230,8 +232,6 @@ instance RefFromFunction' codec b original => RefFromFunction' codec (a -> b) or
 
 class RefFromFunction' codec f f => RefFromFunction codec f
 instance RefFromFunction' codec f f => RefFromFunction codec f
-
-
 
 class DefFromFunction' codec env (f :: Type) (original :: Type) where
   defFromFunction :: RequireCallStack => Proxy f -> codec -> String -> original -> Def env original

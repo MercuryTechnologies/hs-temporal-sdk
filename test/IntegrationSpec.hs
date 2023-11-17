@@ -69,6 +69,7 @@ temporalBundle [d|
     , faultyWorkflow :: W.Workflow Int
     , workflowWaitConditionWorks :: W.Workflow ()
     , simpleWait :: W.Workflow ()
+    , multipleArgs :: Int -> Text -> Bool -> W.Workflow (Int, Text, Bool)
     } deriving (Generic)
   |]
 
@@ -219,6 +220,7 @@ testImpls = provideCallStack $ WorkflowTests
   , simpleWait = do
       st <- W.newStateVar False
       (W.waitCondition (W.readStateVar st) <* W.writeStateVar st True)
+  , multipleArgs = \foo bar baz -> pure (foo, bar, baz)
   }
 
 testRefs :: Refs WorkflowTestsB
