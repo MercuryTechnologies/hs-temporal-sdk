@@ -107,6 +107,7 @@ module Temporal.Workflow
   , ActivityRef(..)
   , KnownActivity(..)
   , StartActivityOptions(..) -- TODO fields conflict
+  , ActivityCancellationType(..)
   , defaultStartActivityOptions
   , startActivity
   , executeActivity
@@ -152,6 +153,8 @@ module Temporal.Workflow
   , SignalRef(..)
   , SignalDefinition(..)
   , setSignalHandler
+  , ValidSignalHandler
+  , Condition
   , waitCondition
   -- * Other utilities
   , Temporal.Workflow.race
@@ -178,7 +181,7 @@ module Temporal.Workflow
   , uuid4
   , WorkflowGenM
   -- * Continue as new
-  , ContinueAsNewOptions -- TODO, fields conflict
+  , ContinueAsNewOptions(..) -- TODO, fields conflict
   , defaultContinueAsNewOptions
   , Temporal.Workflow.continueAsNew
   -- * Type definitions

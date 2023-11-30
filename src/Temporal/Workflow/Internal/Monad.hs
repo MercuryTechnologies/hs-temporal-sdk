@@ -455,7 +455,10 @@ tryReadIVar i@IVar{ivarRef = !ref} = Workflow $ \env -> do
 raiseFromIVar :: Exception e => ContinuationEnv -> IVar a -> e -> IO (Result b)
 raiseFromIVar env _ivar e = raiseImpl env (toException e)
 
-newtype Condition a = Condition 
+-- | A very restricted Monad that allows for reading 'StateVar' values. This Monad
+-- keeps track of which 'StateVar' values are read so that it can block and retry
+-- the computation if any of the values change.
+newtype Condition a = Condition
   { unCondition :: ReaderT (IORef (Set Sequence)) InstanceM a
   -- ^ We track the sequence number of each accessed StateVar so that we can
   -- block and retry the condition evaluation if the state changes.

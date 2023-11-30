@@ -77,6 +77,7 @@ data WorkflowStartOptions = WorkflowStartOptions
   , requestEagerExecution :: Bool
   -- ^ Eager activity execution is an optimization on some servers that sends activities 
   -- back to the same worker as the calling workflow if they can run there.
+  , workflowStartDelay :: Maybe Duration
   }
 
 -- | Smart constructor for 'WorkflowStartOptions'.

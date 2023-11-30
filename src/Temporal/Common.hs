@@ -34,7 +34,7 @@ newtype WorkflowId = WorkflowId { rawWorkflowId :: Text }
 
 -- | A Namespace is a unit of isolation within the Temporal Platform
 newtype Namespace = Namespace { rawNamespace :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString)
 
 -- | A Run Id is a globally unique, platform-level identifier for a Workflow Execution.
 --
@@ -44,10 +44,10 @@ newtype Namespace = Namespace { rawNamespace :: Text }
 --
 -- A Run Id uniquely identifies a Workflow Execution even if it shares a Workflow Id with other Workflow Executions.
 newtype RunId = RunId { rawRunId :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString)
 
 newtype PatchId = PatchId { rawPatchId :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString)
 
 -- | A Task Queue is a queue that a Worker Process polls for Tasks.
 --
@@ -60,36 +60,36 @@ newtype PatchId = PatchId { rawPatchId :: Text }
 -- created under the same name. There is no limit to the number of Task Queues a Temporal Application can use or a Temporal Cluster 
 -- can maintain.
 newtype TaskQueue = TaskQueue { rawTaskQueue :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString)
 
 newtype ActivityType = ActivityType { rawActivityType :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString)
 
 -- | A unique identifier for an Activity Execution.
 newtype ActivityId = ActivityId { rawActivityId :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString)
 
 newtype ScheduleId = ScheduleId { rawScheduleId :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString)
 
 newtype SignalId = SignalId { rawSignalId :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString)
 
 newtype TimerId = TimerId { rawTimerId :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString)
 
 newtype CancellationId = CancellationId { rawCancellationId :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString)
 
 newtype QueryId = QueryId { rawQueryId :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString)
 
 -- | A Task Token is a unique identifier for a Task. It can be used with the 'Temporal.Client.AsyncActivity' API to signal activity completion or failure.
 newtype TaskToken = TaskToken 
   { rawTaskToken :: ByteString 
   -- ^ An opaque token that can be used to uniquely identify a Task. This token should not be modified by consumers, but is exposed here as a raw ByteString for transport purposes.
   }
-  deriving newtype (Eq, Show, Ord, Hashable)
+  deriving newtype (Eq, Show, Ord, Hashable, IsString)
 
 timespecFromTimestamp :: Timestamp.Timestamp -> SystemTime
 timespecFromTimestamp ts = MkSystemTime

@@ -402,8 +402,8 @@ startFromPayloads c k@(KnownWorkflow codec _ _ _) opts payloads = do
 
             WF.continuedFailure
             WF.lastCompletionResult
-
           -}
+          & WF.maybe'workflowStartDelay .~ (durationToProto <$> workflowStartDelay opts')
     res <- startWorkflowExecution c.clientCore req
     case res of
       Left err -> throwIO err
