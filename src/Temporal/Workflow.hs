@@ -239,6 +239,8 @@ import Temporal.Workflow.Unsafe.Handle
 import Temporal.Workflow.WorkflowInstance
 import Temporal.Workflow.Definition
 import Temporal.Workflow.Types
+import qualified Proto.Temporal.Api.Failure.V1.Message as Failure
+import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as Failure
 import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as Common
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands as Command
@@ -324,9 +326,11 @@ startActivityFromPayloads (KnownActivity codec mTaskQueue name) opts typedPayloa
       seqMaps { activities = HashMap.insert s resultSlot (activities seqMaps) }
 
     info <- readIORef inst.workflowInstanceInfo
-    let scheduleActivity = defMessage
+    
+    let actId = maybe (Text.pack $ show actSeq) rawActivityId (activityInput.options.activityId)
+        scheduleActivity = defMessage
           & Command.seq .~ actSeq
-          & Command.activityId .~ maybe (Text.pack $ show actSeq) rawActivityId (activityInput.options.activityId)
+          & Command.activityId .~ actId
           & Command.activityType .~ activityInput.activityType
           & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue mTaskQueue)
           & Command.headers .~ fmap convertToProtoPayload activityInput.options.headers
@@ -352,7 +356,14 @@ startActivityFromPayloads (KnownActivity codec mTaskQueue name) opts typedPayloa
         Workflow $ \_ -> case res ^. Activation.result . ActivityResult.maybe'status of
           Nothing -> error "Activity result missing status"
           Just (ActivityResult.ActivityResolution'Completed success) -> pure $ Done (success ^. ActivityResult.result . to convertFromProtoPayload)
-          Just (ActivityResult.ActivityResolution'Failed failure) -> pure $ Throw $ toException $ ActivityFailed (failure ^. ActivityResult.failure)
+          Just (ActivityResult.ActivityResolution'Failed failure_) -> let failure = failure_ ^. ActivityResult.failure in pure $ Throw $ toException $ ActivityFailure
+            { message = failure  ^. Failure.message
+            , activityType = ActivityType $ activityInput.activityType
+            , activityId = ActivityId actId
+            , retryState = retryStateFromProto $ failure ^. Failure.activityFailureInfo . Failure.retryState
+            , identity = failure ^. Failure.activityFailureInfo . Failure.identity
+            , cause = failure ^. Failure.cause
+            }
           Just (ActivityResult.ActivityResolution'Cancelled details) -> pure $ Throw $ toException $ ActivityCancelled (details ^. ActivityResult.failure)
           Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"
       , cancelAction = do
@@ -638,11 +649,12 @@ startLocalActivity (KnownActivity codec _ n) opts = gatherActivityArgs  @args @r
       seqMaps { activities = HashMap.insert s resultSlot (activities seqMaps) }
     -- TODO, seems like `attempt` and `originalScheduledTime`
     -- imply that we are in charge of retrying local activities ourselves?
-    let cmd = defMessage 
+    let actId = maybe (Text.pack $ show actSeq) rawActivityId opts.activityId
+        cmd = defMessage 
           & Command.scheduleLocalActivity .~
             ( defMessage
               & Command.seq .~ actSeq
-              & Command.activityId .~ maybe (Text.pack $ show actSeq) rawActivityId opts.activityId
+              & Command.activityId .~ actId
               & Command.activityType .~ n
               -- & attempt .~ _
               -- & headers .~ _
@@ -667,7 +679,14 @@ startLocalActivity (KnownActivity codec _ n) opts = gatherActivityArgs  @args @r
               -- TODO handle properly
               Left err -> error $ "Failed to decode activity result: " <> show err
               Right val -> pure $ Done val
-          Just (ActivityResult.ActivityResolution'Failed failure) -> pure $ Throw $ toException $ ActivityFailed (failure ^. ActivityResult.failure)
+          Just (ActivityResult.ActivityResolution'Failed failure_) -> let failure = failure_ ^. ActivityResult.failure in pure $ Throw $ toException $ ActivityFailure
+            { message = failure ^. Failure.message
+            , activityType = ActivityType n
+            , activityId = ActivityId actId
+            , retryState = retryStateFromProto $ failure ^. Failure.activityFailureInfo . Failure.retryState
+            , identity = failure ^. Failure.activityFailureInfo . Failure.identity
+            , cause = failure ^. Failure.cause
+            }
           Just (ActivityResult.ActivityResolution'Cancelled details) -> pure $ Throw $ toException $ ActivityCancelled (details ^. ActivityResult.failure)
           Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"
       , cancelAction = do

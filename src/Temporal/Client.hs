@@ -222,7 +222,7 @@ signal h@(WorkflowHandle _ _t c wf r) (SignalRef sName sCodec) opts = gather $ \
         )
       & WF.signalName .~ sName
       & WF.input .~ (defMessage & Common.payloads .~ args)
-      & WF.identity .~ (identity $ clientConfig c.clientCore)
+      & WF.identity .~ (Temporal.Core.Client.identity $ clientConfig c.clientCore)
       & WF.requestId .~ fromMaybe "" opts.requestId
       -- Deprecated, no need to set
       -- & WF.control .~ _
@@ -382,7 +382,7 @@ startFromPayloads c k@(KnownWorkflow codec _ _ _) opts payloads = do
           & WF.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts'.timeouts.executionTimeout)
           & WF.maybe'workflowRunTimeout .~ (durationToProto <$> opts'.timeouts.runTimeout)
           & WF.maybe'workflowTaskTimeout .~ (durationToProto <$> opts'.timeouts.taskTimeout)
-          & WF.identity .~ (identity $ clientConfig c.clientCore)
+          & WF.identity .~ (Temporal.Core.Client.identity $ clientConfig c.clientCore)
           & WF.requestId .~ UUID.toText reqId
           & WF.workflowIdReusePolicy .~ 
             workflowIdReusePolicyToProto
@@ -491,7 +491,7 @@ signalWithStart c wf opts (SignalRef n sigCodec) = case workflowRef wf of
               & RR.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts'.signalWithStartOptions.timeouts.executionTimeout)
               & RR.maybe'workflowRunTimeout .~ (durationToProto <$> opts'.signalWithStartOptions.timeouts.runTimeout)
               & RR.maybe'workflowTaskTimeout .~ (durationToProto <$> opts'.signalWithStartOptions.timeouts.taskTimeout)
-              & RR.identity .~ (identity $ clientConfig c.clientCore)
+              & RR.identity .~ (Temporal.Core.Client.identity $ clientConfig c.clientCore)
               & RR.requestId .~ UUID.toText reqId
               & RR.workflowIdReusePolicy .~
                   workflowIdReusePolicyToProto
@@ -550,7 +550,7 @@ terminate h req = void $ throwEither $ terminateWorkflowExecution
       & RR.reason .~ req.terminationReason
       & RR.details .~ 
         ( defMessage & Common.payloads .~ fmap convertToProtoPayload req.terminationDetails )
-      & RR.identity .~ identity (clientConfig h.workflowHandleClient.clientCore)
+      & RR.identity .~ Temporal.Core.Client.identity (clientConfig h.workflowHandleClient.clientCore)
       & RR.firstExecutionRunId .~ maybe "" rawRunId req.firstExecutionRunId
 
 

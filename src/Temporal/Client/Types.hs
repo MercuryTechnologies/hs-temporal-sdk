@@ -100,6 +100,7 @@ workflowStartOptions wfId tq = WorkflowStartOptions
     , taskTimeout = Nothing
     }
   , requestEagerExecution = False
+  , workflowStartDelay = Nothing
   }
 
 data TimeoutOptions = TimeoutOptions

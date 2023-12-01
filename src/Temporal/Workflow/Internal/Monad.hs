@@ -227,7 +227,7 @@ instance Monoid a => Monoid (Workflow a) where
 -- Exceptions
 
 -- | Throw an exception in the Workflow monad
-throw :: Exception e => e -> Workflow a
+throw :: (HasCallStack, Exception e) => e -> Workflow a
 throw e = Workflow $ \env -> liftIO $ raise env e
 
 {-# INLINE raiseImpl #-}

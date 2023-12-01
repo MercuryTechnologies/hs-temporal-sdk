@@ -2,11 +2,13 @@
 module Temporal.Exception where
 
 import Control.Exception
+import Control.Exception.Annotated
 import Data.Text
 import Data.Typeable
 import qualified Proto.Temporal.Api.Failure.V1.Message as Proto
 import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands (ContinueAsNewWorkflowExecution)
 import Proto.Temporal.Api.Failure.V1.Message
+import Temporal.Common
 
 -- | Used to denote that a payload either failed to encode or decode
 data ValueError
@@ -164,13 +166,25 @@ instance Exception ActivityCancelled where
   toException = workflowExceptionToException
   fromException = workflowExceptionFromException
 
-data ActivityFailed = ActivityFailed Proto.Temporal.Api.Failure.V1.Message.Failure
+data ActivityFailure = ActivityFailure 
+  { message :: Text
+  , activityType :: ActivityType
+  , activityId :: ActivityId
+  , retryState :: RetryState
+  , identity :: Text
+  , cause :: Proto.Temporal.Api.Failure.V1.Message.Failure
+  } -- Proto.Temporal.Api.Failure.V1.Message.Failure
   deriving stock (Show, Eq)
 
-instance Exception ActivityFailed where
+instance Exception ActivityFailure where
   toException = workflowExceptionToException
   fromException = workflowExceptionFromException
 
+data NonRetryableErrorAnnotation = NonRetryableErrorAnnotation Bool
+  deriving stock (Show, Eq)
+
+nonRetryableError :: Annotation
+nonRetryableError = Annotation $ NonRetryableErrorAnnotation True
 
 ---------------------------------------------------------------------
 -- Activity exceptions

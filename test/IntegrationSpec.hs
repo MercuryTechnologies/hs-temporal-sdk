@@ -14,6 +14,7 @@ module IntegrationSpec where
 
 import Control.Applicative
 import Control.Exception
+import Control.Exception.Annotated
 import Control.Concurrent
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
@@ -40,6 +41,7 @@ import qualified Temporal.Workflow as W
 import Temporal.Activity
 import Temporal.Bundle
 import Temporal.Bundle.TH
+import Temporal.Exception (nonRetryableError)
 import Temporal.Payload
 import Temporal.Worker
 import Temporal.SearchAttributes
@@ -71,6 +73,10 @@ temporalBundle [d|
     , workflowWaitConditionWorks :: W.Workflow ()
     , simpleWait :: W.Workflow ()
     , multipleArgs :: Int -> Text -> Bool -> W.Workflow (Int, Text, Bool)
+    , nonRetryableFailureTest :: W.Workflow ()
+    , nonRetryableFailureAct :: Activity () ()
+    , retryableFailureTest :: W.Workflow ()
+    , retryableFailureAct :: Activity () ()
     } deriving (Generic)
   |]
 
@@ -229,6 +235,27 @@ testImpls = provideCallStack $ WorkflowTests
       st <- W.newStateVar False
       (W.waitCondition (W.readStateVar st) <* W.writeStateVar st True)
   , multipleArgs = \foo bar baz -> pure (foo, bar, baz)
+  , nonRetryableFailureTest = do
+      h <- W.startActivity 
+        testRefs.nonRetryableFailureAct
+        (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
+      W.wait (h :: W.Task ())
+  , nonRetryableFailureAct = checkpoint nonRetryableError $ do
+      error "sad"
+  , retryableFailureTest = do
+      h <- W.startActivity 
+        testRefs.retryableFailureAct
+        (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
+          -- { retryPolicy = Just $ defaultRetryPolicy 
+          --   { nonRetryableErrorTypes = [ "ErrorCall" ]
+          --   }
+          -- })
+      W.wait (h :: W.Task ())
+  , retryableFailureAct = do
+      i <- askActivityInfo
+      if attempt i > 1 
+        then pure ()
+        else error "sad"
   }
 
 testRefs :: Refs WorkflowTestsB
@@ -943,7 +970,7 @@ needsClient = do
           `shouldReturn` "woohoo"
 
   describe "Regression tests" $ do
-    fspecify "immediate activity start works" $ \TestEnv{..} -> do
+    specify "immediate activity start works" $ \TestEnv{..} -> do
       let taskMainActivity :: ProvidedActivity () (RegressionTask -> Activity () ())
           taskMainActivity = provideCallStack $ provideActivity JSON "legacyTaskMainAct" $ \command -> do
             app <- ask
@@ -983,9 +1010,39 @@ needsClient = do
       -- specify "to different workflow can set memo and search attributes" pending
   --   describe "signalWithStart" $ do
   --     specify "works as intended and returns correct runId" pending
-  --   describe "RetryPolicy" $ do
-  --     specify "is used for retryable failures" pending
-  --     specify "ignored for non-retryable failures" pending
+  describe "RetryPolicy" $ do
+    specify "is used for retryable failures" $ \TestEnv{..} -> do
+      let conf = configure () $ do
+            baseConf
+            testConf
+      withWorker conf $ do
+        wfId <- uuidText
+        let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
+              { C.timeouts = C.TimeoutOptions
+                  { C.runTimeout = Just $ seconds 4
+                  , C.executionTimeout = Nothing
+                  , C.taskTimeout = Nothing
+                  }
+              }
+        C.execute client testRefs.retryableFailureTest opts
+          -- `shouldThrow` (== WorkflowExecutionFailed)
+
+    specify "ignored for non-retryable failures" $ \TestEnv{..} -> do
+      let conf = configure () $ do
+            baseConf
+            testConf
+      withWorker conf $ do
+        wfId <- uuidText
+        let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
+              { C.timeouts = C.TimeoutOptions
+                  { C.runTimeout = Just $ seconds 4
+                  , C.executionTimeout = Nothing
+                  , C.taskTimeout = Nothing
+                  }
+              }
+        C.execute client testRefs.nonRetryableFailureTest opts
+          `shouldThrow` (== WorkflowExecutionFailed)
+
   -- describe "WorkflowClient" $ do
   --   specify "WorkflowExecutionAlreadyStartedError" pending
   --   specify "follows only own execution chain" pending

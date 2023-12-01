@@ -6,6 +6,7 @@ import Data.ByteString (ByteString)
 import Data.Time.Clock.System
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
+import Data.Typeable
 import Data.Int (Int32)
 import Data.ProtoLens
 import Data.String
@@ -147,6 +148,9 @@ data RetryPolicy = RetryPolicy
   -- If one of those errors occurs, a retry does not occur.
   }
 
+errorType :: Typeable e => proxy e -> Text
+errorType = T.pack . show . typeRep
+
 retryPolicyToProto :: RetryPolicy -> Message.RetryPolicy
 retryPolicyToProto (RetryPolicy initialInterval backoffCoefficient maximumInterval maximumAttempts nonRetryableErrorTypes) = 
   -- Using a full destructure here to make sure we don't miss any new fields later. ^
@@ -165,6 +169,29 @@ retryPolicyFromProto p = RetryPolicy
   , maximumAttempts = p ^. Message.maximumAttempts
   , nonRetryableErrorTypes = p ^. Message.vec'nonRetryableErrorTypes
   }
+
+data RetryState
+  = RetryStateUnspecified
+  | RetryStateInProgress
+  | RetryStateNonRetryableFailure
+  | RetryStateTimeout
+  | RetryStateMaximumAttemptsReached
+  | RetryStateRetryPolicyNotSet
+  | RetryStateInternalServerError
+  | RetryStateCancelRequested
+  deriving stock (Show, Eq)
+
+retryStateFromProto :: Workflow.RetryState -> RetryState
+retryStateFromProto = \case
+  Workflow.RETRY_STATE_UNSPECIFIED -> RetryStateUnspecified
+  Workflow.RETRY_STATE_IN_PROGRESS -> RetryStateInProgress
+  Workflow.RETRY_STATE_NON_RETRYABLE_FAILURE -> RetryStateNonRetryableFailure
+  Workflow.RETRY_STATE_TIMEOUT -> RetryStateTimeout
+  Workflow.RETRY_STATE_MAXIMUM_ATTEMPTS_REACHED -> RetryStateMaximumAttemptsReached
+  Workflow.RETRY_STATE_RETRY_POLICY_NOT_SET -> RetryStateRetryPolicyNotSet
+  Workflow.RETRY_STATE_INTERNAL_SERVER_ERROR -> RetryStateInternalServerError
+  Workflow.RETRY_STATE_CANCEL_REQUESTED -> RetryStateCancelRequested
+  (Workflow.RetryState'Unrecognized _) -> error "retryStateFromProto: invalid retry state"
 
 {- | A Workflow Id Reuse Policy determines whether a Workflow Execution is allowed to spawn with a particular Workflow Id, 
 if that Workflow Id has been used with a previous, and now Closed, Workflow Execution.

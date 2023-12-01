@@ -3,13 +3,17 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE TemplateHaskell #-}
 module Temporal.Activity.Worker where
+import Control.Exception.Annotated
 import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.Reader
+import Data.Annotation
 import Data.Bifunctor
 import qualified Data.HashMap.Strict as HashMap
 import Data.ProtoLens
 import qualified Data.Text as T
+import Data.Typeable
+import GHC.Stack
 import Lens.Family2
 import qualified Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask as AT
 import qualified Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields as AT
@@ -116,7 +120,7 @@ completeAsync = throwIO CompleteAsync
 applyActivityTask :: AT.ActivityTask -> ActivityWorkerM actEnv ()
 applyActivityTask task = case task ^. AT.maybe'variant of
   Nothing -> throwIO $ RuntimeError "Activity task has no variant or an unknown variant"
-  Just (AT.ActivityTask'Start msg) -> applyActivityTaskStart tt msg
+  Just (AT.ActivityTask'Start msg) -> applyActivityTaskStart task tt msg
   Just (AT.ActivityTask'Cancel msg) -> applyActivityTaskCancel tt msg
   where
     tt = TaskToken $ task ^. AT.taskToken
@@ -130,10 +134,10 @@ requireActivityNotRunning tt m = do
     Nothing -> m
 
 -- TODO, where should async exception masking happen?
-applyActivityTaskStart :: TaskToken -> AT.Start -> ActivityWorkerM actEnv ()
-applyActivityTaskStart tt msg = do
+applyActivityTaskStart :: AT.ActivityTask -> TaskToken -> AT.Start -> ActivityWorkerM actEnv ()
+applyActivityTaskStart tsk tt msg = do
   w <- ask
-  $logDebug $ "Starting activity: " <> T.pack (show tt)
+  $logDebug $ "Starting activity: " <> T.pack (show tsk)
   requireActivityNotRunning tt $ do
     let info = activityInfoFromProto tt msg
         env = w.initialEnv
@@ -156,8 +160,27 @@ applyActivityTaskStart tt msg = do
                 activityRun actEnv input' `finally` 
                 (takeMVar syncPoint *> atomically (modifyTVar' w.runningActivities (HashMap.delete tt)))
         completionMsg <- case join $ fmap (first (toException . ValueError)) ef of
-          Left err -> do
-            $logError (T.pack (show err))
+          Left err@(SomeException wrappedErr) -> do
+            $logDebug (T.pack (show err))
+            let enrichApplicationFailure = case fromException err of
+                  -- Note: I don't think this will ever resolve to Nothing in practice.
+                  Nothing -> id
+                  Just annEx@(AnnotatedException anns (SomeException innerErr)) -> \msg -> msg
+                    & F.message .~ T.pack (displayException innerErr)
+                    & maybe id (\cs -> F.stackTrace .~ T.pack (prettyCallStack cs)) (annotatedExceptionCallStack annEx)
+                    & over F.applicationFailureInfo 
+                      (\failureInfo -> failureInfo
+                        & F.type' .~ T.pack (show $ typeOf innerErr)
+                        -- TODO, pull out details wherest possible
+                        -- & F.details .~ T.pack (show anns)
+                        & F.nonRetryable .~ case tryAnnotations anns of
+                          (NonRetryableErrorAnnotation b:_, _) -> b
+                          _ -> False
+                      )
+
+                baseFailure = defMessage
+                  & F.message .~ T.pack (displayException err)
+                  & F.source .~ "hs-temporal-sdk"
             pure $ defMessage
               & C.taskToken .~ rawTaskToken tt
               & C.result .~ case fromException err of
@@ -165,25 +188,12 @@ applyActivityTaskStart tt msg = do
                 & AR.cancelled .~ defMessage
               Nothing -> defMessage & AR.failed .~ 
                 ( defMessage & AR.failure .~ 
-                  ( defMessage 
-                    & F.message .~ T.pack (show err)
-                    -- TODO, protobuf docs aren't clear on what this should be
-                    & F.source .~ "haskell"
-                    -- TODO, annotated exceptions might be needed for this
-                    & F.stackTrace .~ ""
-                    -- TODO encoded attributes
-                    -- & F.encodedAttributes .~ _
-                    -- & F.cause .~ _
-                    & F.activityFailureInfo .~
-                    ( defMessage
-                      -- & F.scheduledEventId .~ _
-                      -- & F.startedEventId .~ _
-                      -- TODO, not clear on what this should be
-                      & F.identity .~ Core.identity (Core.clientConfig $ Core.getWorkerClient w.workerCore)
-                      & F.activityType .~ (defMessage & P.name .~ info.activityType)
-                      & F.activityId .~ (msg ^. AT.activityId)
-                      -- & F.retryState .~ _
-                    )
+                  ( baseFailure 
+                    & F.applicationFailureInfo .~ 
+                      ( defMessage
+                        & F.type' .~ T.pack (show $ typeOf wrappedErr)
+                      )
+                    & enrichApplicationFailure
                   )
                 )
           Right ok -> do
