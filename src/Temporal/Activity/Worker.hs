@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE TemplateHaskell #-}
 module Temporal.Activity.Worker where
 import Control.Exception.Annotated
@@ -27,6 +28,7 @@ import Temporal.Workflow.Types
 import qualified Temporal.Core.Client as Core
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
+import qualified Temporal.Exception as Err
 import Temporal.Payload
 import UnliftIO
 import Temporal.Duration (durationFromProto)
@@ -44,6 +46,7 @@ data ActivityWorker env = ActivityWorker
   , activityInboundInterceptors :: ActivityInboundInterceptor
   , activityOutboundInterceptors :: ActivityOutboundInterceptor
   , clientInterceptors :: ClientInterceptors
+  , activityErrorConverters :: [ApplicationFailureHandler]
   }
 
 instance MonadLogger (ActivityWorkerM env) where
@@ -162,40 +165,23 @@ applyActivityTaskStart tsk tt msg = do
         completionMsg <- case join $ fmap (first (toException . ValueError)) ef of
           Left err@(SomeException wrappedErr) -> do
             $logDebug (T.pack (show err))
-            let enrichApplicationFailure = case fromException err of
-                  -- Note: I don't think this will ever resolve to Nothing in practice.
-                  Nothing -> id
-                  Just annEx@(AnnotatedException anns (SomeException innerErr)) -> \msg -> msg
-                    & F.message .~ T.pack (displayException innerErr)
-                    & maybe id (\cs -> F.stackTrace .~ T.pack (prettyCallStack cs)) (annotatedExceptionCallStack annEx)
-                    & over F.applicationFailureInfo 
-                      (\failureInfo -> failureInfo
-                        & F.type' .~ T.pack (show $ typeOf innerErr)
-                        -- TODO, pull out details wherest possible
-                        -- & F.details .~ T.pack (show anns)
-                        & F.nonRetryable .~ case tryAnnotations anns of
-                          (NonRetryableErrorAnnotation b:_, _) -> b
-                          _ -> False
-                      )
-
-                baseFailure = defMessage
-                  & F.message .~ T.pack (displayException err)
+            let appFailure = mkApplicationFailure err w.activityErrorConverters
+                enrichedApplicationFailure = defMessage
+                  & F.message .~ appFailure.message
                   & F.source .~ "hs-temporal-sdk"
+                  & F.stackTrace .~ appFailure.stack
+                  & F.applicationFailureInfo .~ 
+                    ( defMessage
+                      & F.type' .~ Err.type' appFailure
+                      & F.nonRetryable .~ Err.nonRetryable appFailure
+                    )
             pure $ defMessage
               & C.taskToken .~ rawTaskToken tt
               & C.result .~ case fromException err of
               Just AsyncCancelled -> defMessage 
                 & AR.cancelled .~ defMessage
               Nothing -> defMessage & AR.failed .~ 
-                ( defMessage & AR.failure .~ 
-                  ( baseFailure 
-                    & F.applicationFailureInfo .~ 
-                      ( defMessage
-                        & F.type' .~ T.pack (show $ typeOf wrappedErr)
-                      )
-                    & enrichApplicationFailure
-                  )
-                )
+                ( defMessage & AR.failure .~ enrichedApplicationFailure )
           Right ok -> do
             $logDebug "Got activity result"
             pure $ defMessage

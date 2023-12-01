@@ -46,6 +46,7 @@ module Temporal.Worker
   , addWorkflow
   , HasActivityDefinition(..)
   , addActivity
+  , addErrorConverter
   , setNamespace
   , setTaskQueue
   , setBuildId
@@ -69,7 +70,6 @@ module Temporal.Worker
 import UnliftIO.Exception
 import UnliftIO
 import Control.Applicative
-import Control.Monad
 
 import Control.Monad.Logger
 import Control.Monad.State
@@ -77,6 +77,7 @@ import Control.Monad.State
 import Temporal.Common
 import Temporal.Core.Client
 import qualified Temporal.Core.Worker as Core
+import Temporal.Exception
 import Temporal.Activity.Definition
 import qualified Temporal.Activity.Worker as Activity
 import Temporal.Worker.Types
@@ -120,6 +121,7 @@ configure actEnv = flip execState defaultConfig . unConfigM
       , coreConfig = Core.defaultWorkerConfig
       , deadlockTimeout = Just 1000000
       , interceptorConfig = mempty
+      , applicationErrorConverters = standardApplicationFailureHandlers
       , ..
       }
 
@@ -135,6 +137,11 @@ addWorkflow hasDef = ConfigM $ modify' $ \conf -> conf
   }
   where
     def = workflowDefinition hasDef
+
+addErrorConverter :: (Exception e) => (e -> ApplicationFailure) -> ConfigM actEnv ()
+addErrorConverter f = ConfigM $ modify' $ \conf -> conf
+  { applicationErrorConverters = ApplicationFailureHandler f : applicationErrorConverters conf
+  }
 
 -- | Register an 'Activity' with the worker.
 addActivity :: HasActivityDefinition def => def -> ConfigM (ActivityDefinitionEnv def) ()
@@ -324,6 +331,7 @@ startReplayWorker conf = do
       workerOutboundInterceptors = conf.interceptorConfig.workflowOutboundInterceptors
       workerDeadlockTimeout = conf.deadlockTimeout
       workerClient = error "Cannot use workflow client in replay worker"
+      workerErrorConverters = conf.applicationErrorConverters
       workflowWorker = Workflow.WorkflowWorker{..}
       workerActivityLoop = error "Cannot use activity worker in replay worker"
   let workerType = Core.SReplay
@@ -341,11 +349,13 @@ startWorker client conf = do
   runningWorkflows <- newTVarIO mempty
   runningActivities <- newTVarIO mempty
   workerLogFn <- askLoggerIO
-  let workerWorkflowFunctions = conf.wfDefs
+  let errorConverters = mkAnnotatedHandlers conf.applicationErrorConverters
+      workerWorkflowFunctions = conf.wfDefs
       workerTaskQueue = TaskQueue $ Core.taskQueue conf.coreConfig
       workerInboundInterceptors = conf.interceptorConfig.workflowInboundInterceptors
       workerOutboundInterceptors = conf.interceptorConfig.workflowOutboundInterceptors
       workerDeadlockTimeout = conf.deadlockTimeout
+      workerErrorConverters = errorConverters
       workflowWorker = Workflow.WorkflowWorker{..}
 
       initialEnv = conf.actEnv
@@ -354,6 +364,7 @@ startWorker client conf = do
       activityInboundInterceptors = conf.interceptorConfig.activityInboundInterceptors
       activityOutboundInterceptors = conf.interceptorConfig.activityOutboundInterceptors
       clientInterceptors = conf.interceptorConfig.clientInterceptors
+      activityErrorConverters = errorConverters
       activityWorker = Activity.ActivityWorker{..}
       workerClient = client
   let workerType = Core.SReal

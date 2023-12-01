@@ -219,6 +219,7 @@ import Data.Kind
 import Data.UUID (UUID)
 import Data.UUID.Types.Internal ( buildFromBytes )
 import Data.Vector (Vector)
+import GHC.Stack
 import GHC.TypeLits
 import qualified Data.Vector as V
 import Lens.Family2
@@ -239,6 +240,8 @@ import Temporal.Workflow.Unsafe.Handle
 import Temporal.Workflow.WorkflowInstance
 import Temporal.Workflow.Definition
 import Temporal.Workflow.Types
+import qualified Proto.Temporal.Api.Common.V1.Message as Payloads
+import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Payloads
 import qualified Proto.Temporal.Api.Failure.V1.Message as Failure
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as Failure
 import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as Common
@@ -362,7 +365,17 @@ startActivityFromPayloads (KnownActivity codec mTaskQueue name) opts typedPayloa
             , activityId = ActivityId actId
             , retryState = retryStateFromProto $ failure ^. Failure.activityFailureInfo . Failure.retryState
             , identity = failure ^. Failure.activityFailureInfo . Failure.identity
-            , cause = failure ^. Failure.cause
+            , cause = let cause_ = failure ^. Failure.cause in ApplicationFailure
+                { type' = cause_ ^. Failure.applicationFailureInfo . Failure.type'
+                , message = cause_ ^. Failure.message
+                , nonRetryable = cause_ ^. Failure.applicationFailureInfo . Failure.nonRetryable
+                , details = cause_ ^. Failure.applicationFailureInfo . Failure.details . Payloads.payloads . to (fmap convertFromProtoPayload)
+                , stack = cause_ ^. Failure.stackTrace
+                }
+            , scheduledEventId = failure ^. Failure.activityFailureInfo . Failure.scheduledEventId
+            , startedEventId = failure ^. Failure.activityFailureInfo . Failure.startedEventId
+            , original = failure ^. Failure.activityFailureInfo
+            , stack = Text.pack $ prettyCallStack callStack
             }
           Just (ActivityResult.ActivityResolution'Cancelled details) -> pure $ Throw $ toException $ ActivityCancelled (details ^. ActivityResult.failure)
           Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"
@@ -685,7 +698,17 @@ startLocalActivity (KnownActivity codec _ n) opts = gatherActivityArgs  @args @r
             , activityId = ActivityId actId
             , retryState = retryStateFromProto $ failure ^. Failure.activityFailureInfo . Failure.retryState
             , identity = failure ^. Failure.activityFailureInfo . Failure.identity
-            , cause = failure ^. Failure.cause
+            , cause = let cause_ = failure ^. Failure.cause in ApplicationFailure
+                { type' = cause_ ^. Failure.applicationFailureInfo . Failure.type'
+                , message = cause_ ^. Failure.message
+                , nonRetryable = cause_ ^. Failure.applicationFailureInfo . Failure.nonRetryable
+                , details = cause_ ^. Failure.applicationFailureInfo . Failure.details . Payloads.payloads . to (fmap convertFromProtoPayload)
+                , stack = cause_ ^. Failure.stackTrace
+                }
+            , scheduledEventId = failure ^. Failure.activityFailureInfo . Failure.scheduledEventId
+            , startedEventId = failure ^. Failure.activityFailureInfo . Failure.startedEventId
+            , original = failure ^. Failure.activityFailureInfo
+            , stack = Text.pack $ prettyCallStack callStack
             }
           Just (ActivityResult.ActivityResolution'Cancelled details) -> pure $ Throw $ toException $ ActivityCancelled (details ^. ActivityResult.failure)
           Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> error "not implemented"

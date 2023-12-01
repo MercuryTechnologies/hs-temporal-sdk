@@ -200,11 +200,11 @@ instance Monad Workflow where
   -- to opt into the Applicative version when we want to.
 
 
--- | If the first computation throws a value that implements 'SomeWorkflowException', 
+-- TODO If the first computation throws a value that implements 'SomeWorkflowException', 
 -- try the second one.
 instance Alternative Workflow where
   empty = throw AlternativeInstanceFailure
-  (<|>) l r = l `Temporal.Workflow.Internal.Monad.catch` \(SomeWorkflowException _) -> r
+  (<|>) l r = l `Temporal.Workflow.Internal.Monad.catch` \(SomeException _) -> r
 
 instance TypeError ('Text "A workflow definition cannot directly perform IO. Use executeActivity or executeLocalActivity instead.") => MonadIO Workflow where
   liftIO = error "Unreachable"
@@ -591,6 +591,8 @@ data WorkflowInstance = WorkflowInstance
   , executionThread :: IORef (Async ())
   , inboundInterceptor :: WorkflowInboundInterceptor
   , outboundInterceptor :: WorkflowOutboundInterceptor
+  -- Improves error reporting
+  , errorConverters :: [ApplicationFailureHandler]
   }
 
 data SomeChildWorkflowHandle = forall result. SomeChildWorkflowHandle (ChildWorkflowHandle result)

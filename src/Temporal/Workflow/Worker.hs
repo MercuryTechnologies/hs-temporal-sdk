@@ -18,7 +18,6 @@ import Temporal.Workflow.Internal.Monad
 import Temporal.Payload
 import Temporal.Workflow.Definition
 import Temporal.WorkflowInstance
-import Temporal.SearchAttributes
 import Temporal.SearchAttributes.Internal
 import UnliftIO
 import Lens.Family2
@@ -41,6 +40,7 @@ data WorkflowWorker = forall ty. WorkflowWorker
   , workerOutboundInterceptors :: WorkflowOutboundInterceptor
   , workerDeadlockTimeout :: Maybe Int
   , workerTaskQueue :: TaskQueue
+  , workerErrorConverters :: [ApplicationFailureHandler]
   }
 
 pollWorkflowActivation :: (MonadLoggerIO m) => ReaderT WorkflowWorker m (Either Core.WorkerError Core.WorkflowActivation)
@@ -92,11 +92,11 @@ execute worker = flip runReaderT worker $ do
           $(logDebug) $ Text.pack ("Got activation " <> show activation) 
           -- We want to handle activations as fast as possible, so we don't want to block
           -- on dispatching jobs.
-          async $ handleActivation activation
+          _ <- async $ handleActivation activation
           go
       
 
-handleActivation :: forall m. (MonadLoggerIO m, MonadUnliftIO m) => Core.WorkflowActivation -> ReaderT WorkflowWorker m ()
+handleActivation :: forall m. (MonadLoggerIO m) => Core.WorkflowActivation -> ReaderT WorkflowWorker m ()
 handleActivation activation = do
   $(logDebug) ("Handling activation: RunId " <> Text.pack (show (activation ^. Activation.runId)))
   forM_ (activation ^. Activation.jobs) $ \job -> do
@@ -211,6 +211,7 @@ handleActivation activation = do
                   )
                   f
                   worker.workerDeadlockTimeout
+                  worker.workerErrorConverters
                   worker.workerInboundInterceptors
                   worker.workerOutboundInterceptors
                   workflowInfo 

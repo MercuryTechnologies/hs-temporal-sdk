@@ -20,6 +20,7 @@ import Temporal.Workflow.Definition (WorkflowDefinition)
 import Temporal.Workflow.Worker (WorkflowWorker)
 import Temporal.Activity.Definition (ActivityDefinition)
 import Temporal.Activity.Worker (ActivityWorker)
+import Temporal.Exception (ApplicationFailureHandler, standardApplicationFailureHandlers)
 import Temporal.Interceptor
 import Temporal.Core.Worker (InactiveForReplay)
 
@@ -30,6 +31,7 @@ data WorkerConfig activityEnv = WorkerConfig
   , actDefs :: HashMap Text (ActivityDefinition activityEnv)
   , coreConfig :: Core.WorkerConfig
   , interceptorConfig :: Interceptors
+  , applicationErrorConverters :: [ApplicationFailureHandler]
   }
 
 data Worker (ty :: Core.WorkerType) activityEnv = Worker

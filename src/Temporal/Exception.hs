@@ -1,14 +1,19 @@
+{-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE InstanceSigs #-}
 module Temporal.Exception where
 
 import Control.Exception
 import Control.Exception.Annotated
+import Data.Annotation
+import Data.Int
 import Data.Text
 import Data.Typeable
+import GHC.Stack
 import qualified Proto.Temporal.Api.Failure.V1.Message as Proto
 import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands (ContinueAsNewWorkflowExecution)
 import Proto.Temporal.Api.Failure.V1.Message
 import Temporal.Common
+import Temporal.Payload
 
 -- | Used to denote that a payload either failed to encode or decode
 data ValueError
@@ -46,33 +51,29 @@ instance Exception RuntimeError where
   fromException = workerExceptionFromException
 
 -- | Errors that are the fault of the developer, not the SDK.
-data ApplicationError 
-  = WorkflowNotFound String
-  | ActivityNotFound String
-  | QueryNotFound String
+data WorkflowNotFound = WorkflowNotFound String
   deriving stock (Show)
 
-instance Exception ApplicationError where
+instance Exception WorkflowNotFound where
+  toException = workerExceptionToException
+  fromException = workerExceptionFromException
+
+data ActivityNotFound = ActivityNotFound String
+  deriving stock (Show)
+
+instance Exception ActivityNotFound where
+  toException = workerExceptionToException
+  fromException = workerExceptionFromException
+
+data QueryNotFound = QueryNotFound String
+  deriving stock (Show)
+
+instance Exception QueryNotFound where
   toException = workerExceptionToException
   fromException = workerExceptionFromException
 
 ---------------------------------------------------------------------
 -- Workflow exceptions
-
-data SomeWorkflowException = forall e. Exception e => SomeWorkflowException e
-
-instance Show SomeWorkflowException where
-  show (SomeWorkflowException e) = show e
-
-instance Exception SomeWorkflowException
-
-workflowExceptionToException :: Exception e => e -> SomeException
-workflowExceptionToException = toException . SomeWorkflowException
-
-workflowExceptionFromException :: Exception e => SomeException -> Maybe e
-workflowExceptionFromException x = do
-  SomeWorkflowException a <- fromException x
-  cast a
 
 data LogicBugType 
   = ReadingCompletionsFailedRun
@@ -82,35 +83,19 @@ data LogicBugType
 data LogicBug = LogicBug LogicBugType
   deriving stock (Show)
 
-instance Exception LogicBug where
-  toException = workflowExceptionToException
-  fromException = workflowExceptionFromException
-
--- | Errors intentionally thrown by the developer in the workflow code.
-data WorkflowException = forall e. Exception e => WorkflowException e
-
-instance Show WorkflowException where
-  show (WorkflowException e) = show e
-
-instance Exception WorkflowException where
-  toException = workflowExceptionToException
-  fromException = workflowExceptionFromException
+instance Exception LogicBug
 
 data WorkflowAlreadyStarted = WorkflowAlreadyStarted 
   { workflowAlreadyStartedWorkflowId :: Text
   , workflowAlreadyStartedWorkflowType :: Text
   } deriving stock (Show)
 
-instance Exception WorkflowAlreadyStarted where
-  toException = workflowExceptionToException
-  fromException = workflowExceptionFromException
+instance Exception WorkflowAlreadyStarted
 
 data ChildWorkflowFailed = ChildWorkflowFailed Proto.Failure
   deriving stock (Show)
 
-instance Exception ChildWorkflowFailed where
-  toException = workflowExceptionToException
-  fromException = workflowExceptionFromException
+instance Exception ChildWorkflowFailed
 
 data ChildWorkflowCancelled = ChildWorkflowCancelled
   deriving stock (Show, Eq)
@@ -119,16 +104,12 @@ data ChildWorkflowCancelled = ChildWorkflowCancelled
   -- , childWorkflowCancelledRunId :: Text
   -- } deriving (Show)
 
-instance Exception ChildWorkflowCancelled where
-  toException = workflowExceptionToException
-  fromException = workflowExceptionFromException
+instance Exception ChildWorkflowCancelled
 
 data SignalExternalWorkflowFailed = SignalExternalWorkflowFailed Proto.Failure
   deriving stock (Show)
 
-instance Exception SignalExternalWorkflowFailed where
-  toException = workflowExceptionToException
-  fromException = workflowExceptionFromException
+instance Exception SignalExternalWorkflowFailed
 
 -- This does not need to be in the exception hierarchy,
 -- since we don't want to catch it in the workflow code.
@@ -141,30 +122,85 @@ data AlternativeInstanceFailure = AlternativeInstanceFailure
   deriving stock (Show)
 
 instance Exception AlternativeInstanceFailure where
-  toException = workflowExceptionToException
-  fromException = workflowExceptionFromException
 
 data CancelExternalWorkflowFailed = CancelExternalWorkflowFailed Proto.Failure
   deriving stock (Show)
 
 instance Exception CancelExternalWorkflowFailed where
-  toException = workflowExceptionToException
-  fromException = workflowExceptionFromException
 
 -- TODO, include the payload?
 data WorkflowCancelRequested = WorkflowCancelRequested
   deriving stock (Show)
 
 instance Exception WorkflowCancelRequested where
-  toException = workflowExceptionToException
-  fromException = workflowExceptionFromException
 
 data ActivityCancelled = ActivityCancelled Proto.Temporal.Api.Failure.V1.Message.Failure
   deriving stock (Show, Eq)
 
 instance Exception ActivityCancelled where
-  toException = workflowExceptionToException
-  fromException = workflowExceptionFromException
+
+data ApplicationFailure = ApplicationFailure
+  { type' :: Text
+  , message :: Text
+  , nonRetryable :: Bool
+  , details :: [Payload]
+  , stack :: Text
+  } 
+  deriving stock (Show, Eq)
+
+instance Exception ApplicationFailure where
+
+class ToApplicationFailure e where
+  toApplicationFailure :: e -> ApplicationFailure
+
+data ApplicationFailureHandler where 
+  ApplicationFailureHandler :: Exception e => (e -> ApplicationFailure) -> ApplicationFailureHandler
+
+mkApplicationFailure :: SomeException -> [ApplicationFailureHandler] -> ApplicationFailure
+mkApplicationFailure e handlers = Prelude.foldr tryHandler (ApplicationFailure "" "" False [] "") handlers
+  where
+    tryHandler (ApplicationFailureHandler hndlr) acc = case fromException e of
+      Just e' -> hndlr e'
+      Nothing -> acc
+
+mkAnnotatedHandlers :: HasCallStack => [ApplicationFailureHandler] -> [ApplicationFailureHandler]
+mkAnnotatedHandlers xs =
+  xs >>= \(ApplicationFailureHandler hndlr) ->
+    [ ApplicationFailureHandler $ \e -> hndlr e
+    , ApplicationFailureHandler $ \(AnnotatedException anns e) -> let base = (hndlr e) in base
+      { stack = if base.stack == "" 
+        then case callStackInAnnotations anns of
+          (cs : _, _) -> pack $ prettyCallStack cs
+          (_, _) -> base.stack
+        else base.stack
+      -- TODO, convert other annotations to details
+      -- , details = if not $ null (details base) then _ else details base
+      , nonRetryable = case tryAnnotations anns of
+          (NonRetryableErrorAnnotation b : _, _) -> b || nonRetryable base
+          (_, _) -> nonRetryable base
+      }
+    ]
+
+standardApplicationFailureHandlers :: [ApplicationFailureHandler]
+standardApplicationFailureHandlers =
+  [ ApplicationFailureHandler $ \(h@ApplicationFailure{}) -> h
+  , ApplicationFailureHandler $ \(ErrorCallWithLocation msg loc) ->
+      ApplicationFailure
+        { type' = "ErrorCallWithLocation"
+        , message = pack msg
+        , nonRetryable = False
+        , details = []
+        , stack = pack loc
+        }
+  , ApplicationFailureHandler $ \(SomeException e) ->
+      ApplicationFailure
+        { type' = pack $ show $ typeOf e
+        , message = pack $ displayException e
+        , nonRetryable = False
+        , details = []
+        , stack = ""
+        }
+  ]
 
 data ActivityFailure = ActivityFailure 
   { message :: Text
@@ -172,13 +208,15 @@ data ActivityFailure = ActivityFailure
   , activityId :: ActivityId
   , retryState :: RetryState
   , identity :: Text
-  , cause :: Proto.Temporal.Api.Failure.V1.Message.Failure
-  } -- Proto.Temporal.Api.Failure.V1.Message.Failure
+  , cause :: ApplicationFailure
+  , scheduledEventId :: Int64
+  , startedEventId :: Int64
+  , original :: ActivityFailureInfo
+  , stack :: Text
+  }
   deriving stock (Show, Eq)
 
 instance Exception ActivityFailure where
-  toException = workflowExceptionToException
-  fromException = workflowExceptionFromException
 
 data NonRetryableErrorAnnotation = NonRetryableErrorAnnotation Bool
   deriving stock (Show, Eq)

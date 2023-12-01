@@ -38,6 +38,7 @@ import Temporal.Common
 import Temporal.Coroutine
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
+import qualified Temporal.Exception as Err
 import Temporal.Payload
 import Temporal.Workflow.Eval (ActivationResult(..), SuspendableWorkflowExecution, runWorkflow, injectWorkflowSignal)
 import Temporal.Workflow.Types
@@ -83,12 +84,13 @@ create :: (HasCallStack, MonadLoggerIO m)
   => (Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
   -> (Vector Payload -> IO (Either String (Workflow Payload)))
   -> Maybe Int -- ^ deadlock timeout in seconds
+  -> [ApplicationFailureHandler]
   -> WorkflowInboundInterceptor
   -> WorkflowOutboundInterceptor
   -> Info 
   -> StartWorkflow
   -> m WorkflowInstance
-create workflowCompleteActivation workflowFn workflowDeadlockTimeout inboundInterceptor outboundInterceptor info start = do
+create workflowCompleteActivation workflowFn workflowDeadlockTimeout errorConverters inboundInterceptor outboundInterceptor info start = do
   $logDebug "Instantiating workflow instance"
   workflowInstanceLogger <- askLoggerIO
   workflowRandomnessSeed <- WorkflowGenM <$> newIORef (mkStdGen 0)
@@ -168,18 +170,26 @@ runWorkflowToCompletion wf = runTopLevel $ do
 -- to the command queue before we exit this loop?
 handleQueriesAfterCompletion :: InstanceM ()
 handleQueriesAfterCompletion = forever $ do
+  w <- ask
   activation <- readChan =<< asks activationChannel
   completion <- UnliftIO.try $ activate activation Proxy
 
   case completion of
-    Left (SomeException err) -> do
+    Left err -> do
       $(logDebug) ("Workflow failure: " <> Text.pack (show err))
-      -- TODO there are lots of fields on this failureProto that we probably want to fill in
-      let innerFailure :: F.Failure
-          innerFailure = defMessage & F.message .~ Text.pack (show err)
+      let appFailure = mkApplicationFailure err w.errorConverters
+          enrichedApplicationFailure = defMessage
+            & F.message .~ appFailure.message
+            & F.source .~ "hs-temporal-sdk"
+            & F.stackTrace .~ appFailure.stack
+            & F.applicationFailureInfo .~ 
+              ( defMessage
+                & F.type' .~ Err.type' appFailure
+                & F.nonRetryable .~ Err.nonRetryable appFailure
+              )
 
           failureProto :: Completion.Failure
-          failureProto = defMessage & Completion.failure .~ innerFailure
+          failureProto = defMessage & Completion.failure .~ enrichedApplicationFailure
             
           completionMessage = defMessage
             & Completion.runId .~ (activation ^. Activation.runId)
@@ -542,14 +552,47 @@ runTopLevel m = do
         pure $ WorkflowExitContinuedAsNew $ defMessage & Command.continueAsNewWorkflowExecution .~ msg
     , Handler $ \WorkflowCancelRequested -> do
         pure $ WorkflowExitCancelled $ defMessage & Command.cancelWorkflowExecution .~ defMessage
+    , Handler $ \(actFailure :: ActivityFailure) -> do
+        w <- ask
+        let appFailure = actFailure.cause
+            enrichedApplicationFailure = defMessage
+              & F.message .~ actFailure.message
+              & F.source .~ "hs-temporal-sdk"
+              & F.activityFailureInfo .~ actFailure.original
+              & F.stackTrace .~ actFailure.stack
+              & F.cause .~ 
+                ( defMessage
+                  & F.message .~ appFailure.message
+                  & F.source .~ "hs-temporal-sdk"
+                  & F.stackTrace .~ appFailure.stack
+                  & F.applicationFailureInfo .~ 
+                    ( defMessage
+                      & F.type' .~ Err.type' appFailure
+                      & F.nonRetryable .~ Err.nonRetryable appFailure
+                    )
+                )
+        pure $ WorkflowExitFailed (toException actFailure) $
+          defMessage 
+            & Command.failWorkflowExecution .~ 
+              ( defMessage 
+                & Command.failure .~ enrichedApplicationFailure
+              )
     , Handler $ \e -> do
+        w <- ask
+        let appFailure = mkApplicationFailure e w.errorConverters
+            enrichedApplicationFailure = defMessage
+              & F.message .~ appFailure.message
+              & F.source .~ "hs-temporal-sdk"
+              & F.stackTrace .~ appFailure.stack
+              & F.applicationFailureInfo .~ 
+                ( defMessage
+                  & F.type' .~ Err.type' appFailure
+                  & F.nonRetryable .~ Err.nonRetryable appFailure
+                )
         pure $ WorkflowExitFailed e $
           defMessage 
             & Command.failWorkflowExecution .~ 
               ( defMessage 
-                & Command.failure .~ 
-                  ( defMessage
-                    & F.message .~ Text.pack (show e)
-                  )
+                & Command.failure .~ enrichedApplicationFailure
               )
     ]
