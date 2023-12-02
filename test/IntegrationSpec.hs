@@ -19,7 +19,7 @@ import Control.Concurrent
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
-import Data.Aeson (FromJSON, ToJSON)
+import Data.Aeson (Value, FromJSON, ToJSON, encode, eitherDecode)
 import Data.ByteString (ByteString)
 import Data.Int
 import Data.ProtoLens
@@ -124,8 +124,30 @@ data TestEnv = TestEnv
   , withWorker :: forall a. WorkerConfig () -> IO a -> IO a
   }
 
+data TemporalWorkflowJobPayload = TemporalWorkflowJobPayload
+  { workflowId :: W.WorkflowId
+  , workflowType :: W.WorkflowType
+  , workflowArgs :: [Data.Aeson.Value]
+  , workflowNamespace :: W.Namespace
+  , workflowTaskQueue :: W.TaskQueue
+  , workflowRetryPolicy :: Maybe W.RetryPolicy
+  , workflowIdReusePolicy :: Maybe W.WorkflowIdReusePolicy
+  , workflowSearchAttributes :: Map Text SearchAttributeType
+  } deriving (Eq, Show, Generic)
+
+instance ToJSON TemporalWorkflowJobPayload
+instance FromJSON TemporalWorkflowJobPayload
+
 spec :: Spec
-spec = aroundAll setup needsClient
+spec = do
+  describe "Duration parsing" $ do
+    it "should parse a duration" $ do
+      let d = "\"1.000000001s\""
+      Data.Aeson.eitherDecode d `shouldBe` Right (Duration 1 1)
+    it "should parse a duration from a data type" $ do
+      let d = Data.Aeson.encode $ Duration 2 4
+      Data.Aeson.eitherDecode d `shouldBe` Right (Duration 2 4)
+  aroundAll setup needsClient
   where
     setup :: (TestEnv -> IO ()) -> IO ()
     setup go = do

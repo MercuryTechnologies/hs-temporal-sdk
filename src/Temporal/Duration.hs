@@ -17,20 +17,37 @@
 -- Alternatively, consider using Temporal's scheduling features to schedule a workflow
 -- to run at one or more specific times in the future.
 module Temporal.Duration where
+import Data.Aeson
+import Data.Aeson.Types (Parser)
 import Data.Fixed
+import Data.ProtoLens (defMessage)
+import qualified Data.Text as T
 import Data.Time.Clock
 import Data.Data
 import Data.Int (Int64, Int32)
 import qualified Proto.Google.Protobuf.Duration as Duration
 import qualified Proto.Google.Protobuf.Duration_Fields as Duration
 import Lens.Family2 ((^.), (.~), (&))
-import Data.ProtoLens (defMessage)
+import Text.Printf
 
 -- | A duration of time. Durations are always positive.
 data Duration = Duration
   { durationSeconds :: {-# UNPACK #-} !Int64
   , durationNanoseconds :: {-# UNPACK #-} !Int32
   } deriving stock (Eq, Ord, Show, Data)
+
+-- | 	Generated output always contains 0, 3, 6, or 9 fractional digits, depending on required precision, followed by the suffix "s". Accepted are any fractional digits (also none) as long as they fit into nano-seconds precision and the suffix "s" is required.
+instance ToJSON Duration where
+  toJSON Duration{..} = String $ T.pack $ printf "%d.%09ds" durationSeconds durationNanoseconds
+
+instance FromJSON Duration where
+  parseJSON = withText "Duration" parseDuration
+
+parseDuration :: T.Text -> Parser Duration
+parseDuration t 
+  | T.last t == 's' = pure $ nominalDiffTimeToDuration $ secondsToNominalDiffTime $ read $ T.unpack (T.init t)
+  | otherwise = fail "Duration must end with 's'"
+    
 
 -- | Add two durations together. Durations are subject to integer overflow.
 addDurations :: Duration -> Duration -> Duration

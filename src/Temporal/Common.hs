@@ -1,6 +1,8 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TypeFamilies #-}
 module Temporal.Common where
+import Data.Aeson (ToJSON, FromJSON)
 import Data.Hashable (Hashable)
 import Data.ByteString (ByteString)
 import Data.Time.Clock.System
@@ -12,6 +14,7 @@ import Data.ProtoLens
 import Data.String
 import Data.Vector (Vector)
 import Data.Word (Word32)
+import GHC.Generics (Generic)
 import Lens.Family2
 import qualified Proto.Google.Protobuf.Timestamp as Timestamp
 import qualified Proto.Google.Protobuf.Timestamp_Fields as Timestamp
@@ -27,15 +30,15 @@ import Data.Map (Map)
 
 -- | This is generally the name of the function itself
 newtype WorkflowType = WorkflowType { rawWorkflowType :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable, IsString)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 -- | A Workflow Id is a customizable, application-level identifier for a Workflow Execution that is unique to an Open Workflow Execution within a Namespace.
 newtype WorkflowId = WorkflowId { rawWorkflowId :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable, IsString)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 -- | A Namespace is a unit of isolation within the Temporal Platform
 newtype Namespace = Namespace { rawNamespace :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable, IsString)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 -- | A Run Id is a globally unique, platform-level identifier for a Workflow Execution.
 --
@@ -45,10 +48,10 @@ newtype Namespace = Namespace { rawNamespace :: Text }
 --
 -- A Run Id uniquely identifies a Workflow Execution even if it shares a Workflow Id with other Workflow Executions.
 newtype RunId = RunId { rawRunId :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable, IsString)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 newtype PatchId = PatchId { rawPatchId :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable, IsString)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 -- | A Task Queue is a queue that a Worker Process polls for Tasks.
 --
@@ -61,29 +64,29 @@ newtype PatchId = PatchId { rawPatchId :: Text }
 -- created under the same name. There is no limit to the number of Task Queues a Temporal Application can use or a Temporal Cluster 
 -- can maintain.
 newtype TaskQueue = TaskQueue { rawTaskQueue :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable, IsString)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 newtype ActivityType = ActivityType { rawActivityType :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable, IsString)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 -- | A unique identifier for an Activity Execution.
 newtype ActivityId = ActivityId { rawActivityId :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable, IsString)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 newtype ScheduleId = ScheduleId { rawScheduleId :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable, IsString)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 newtype SignalId = SignalId { rawSignalId :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable, IsString)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 newtype TimerId = TimerId { rawTimerId :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable, IsString)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 newtype CancellationId = CancellationId { rawCancellationId :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable, IsString)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 newtype QueryId = QueryId { rawQueryId :: Text }
-  deriving newtype (Eq, Ord, Show, Hashable, IsString)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 -- | A Task Token is a unique identifier for a Task. It can be used with the 'Temporal.Client.AsyncActivity' API to signal activity completion or failure.
 newtype TaskToken = TaskToken 
@@ -146,7 +149,10 @@ data RetryPolicy = RetryPolicy
   -- The default is an empty vector.
   -- Errors are matched against the @type@ field of the Application Failure.
   -- If one of those errors occurs, a retry does not occur.
-  }
+  } deriving (Show, Eq, Generic)
+
+instance ToJSON RetryPolicy
+instance FromJSON RetryPolicy
 
 errorType :: Typeable e => proxy e -> Text
 errorType = T.pack . show . typeRep
@@ -219,7 +225,10 @@ data WorkflowIdReusePolicy
   -- ^ Specifies that if a Workflow Execution with the same Workflow Id is already running, 
   -- it should be terminated and a new Workflow Execution with the same Workflow Id should be started. 
   -- This policy allows for only one Workflow Execution with a specific Workflow Id to be running at any given time.
-  deriving stock (Eq, Ord, Read, Show, Enum, Bounded)
+  deriving stock (Eq, Ord, Read, Show, Enum, Bounded, Generic)
+
+instance ToJSON WorkflowIdReusePolicy
+instance FromJSON WorkflowIdReusePolicy
 
 workflowIdReusePolicyToProto :: WorkflowIdReusePolicy -> Workflow.WorkflowIdReusePolicy
 workflowIdReusePolicyToProto = \case
