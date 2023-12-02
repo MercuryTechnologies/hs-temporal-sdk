@@ -27,6 +27,7 @@ module Temporal.Client
   , TimeoutOptions(..)
   , workflowStartOptions
   , Temporal.Client.start
+  , startFromPayloads
   , WorkflowHandle
   , execute
   , waitWorkflowResult
@@ -353,7 +354,9 @@ getHandle c (KnownWorkflow {knownWorkflowCodec, knownWorkflowName}) wfId runId =
 --   -> ListWorkflowOptions
 --   -> m [WorkflowId]
 
-
+-- | Start a new Workflow Execution from an unchecked list of payloads. This can be useful if you are forwarding
+-- execution from another Workflow or from an external source, but no checking to make sure that the input
+-- types are correct is performed.
 startFromPayloads 
   :: MonadIO m
   => WorkflowClient
