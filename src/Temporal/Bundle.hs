@@ -140,6 +140,8 @@ module Temporal.Bundle
   , CanUseAsDefs
   , RefFromFunction(..)
   , RefFromFunction'(..)
+  , WorkflowRef(..)
+  , ActivityRef(..)
   ) where
 
 import Control.Monad.Reader

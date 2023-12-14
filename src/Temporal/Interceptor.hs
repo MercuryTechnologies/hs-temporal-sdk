@@ -61,6 +61,7 @@ module Temporal.Interceptor
   , WorkflowExitVariant(..)
   , ClientInterceptors(..)
   , QueryWorkflowInput(..)
+  , SignalWithStartWorkflowInput(..)
   , interceptorConvertChildWorkflowHandle
   )
 where

@@ -10,7 +10,7 @@ import Temporal.Core.Client (Client)
 
 -- | Configuration parameters for starting a workflow execution.
 data WorkflowStartOptions = WorkflowStartOptions
-  { workflowId :: WorkflowId
+  { workflowId :: Maybe WorkflowId
   -- ^ A Workflow Id is a customizable, application-level identifier for a Workflow Execution that is unique to an Open Workflow Execution within a Namespace.
   --
   -- A Workflow Id is meant to be a business-process identifier such as customer identifier or order identifier.
@@ -18,7 +18,7 @@ data WorkflowStartOptions = WorkflowStartOptions
   -- A Workflow Id Reuse Policy can be used to manage whether a Workflow Id can be re-used. The Temporal Platform guarantees uniqueness of the Workflow Id within a Namespace based on the Workflow Id Reuse Policy.
   --
   -- A Workflow Execution can be uniquely identified across all Namespaces by its Namespace, Workflow Id, and Run Id.
-  , taskQueue :: TaskQueue
+  , taskQueue :: Maybe TaskQueue
   -- ^ A Task Queue is a lightweight, dynamically allocated queue that one or more Worker Entities poll for Tasks.
   --
   -- Task Queues are very lightweight components. Task Queues do not require explicit registration but instead are created on demand when 
@@ -83,10 +83,13 @@ data WorkflowStartOptions = WorkflowStartOptions
 -- | Smart constructor for 'WorkflowStartOptions'.
 --
 -- At a minimum, a 'Workflow' execution requires a 'WorkflowId' and a 'TaskQueue'.
-workflowStartOptions :: WorkflowId -> TaskQueue -> WorkflowStartOptions
-workflowStartOptions wfId tq = WorkflowStartOptions
-  { workflowId = wfId
-  , taskQueue = tq
+--
+-- It is recommend to specify 'WorkflowId' in most cases, as it is used to uniquely identify a 'Workflow' execution,
+-- but if one is not specified then a random UUID will be generated.
+workflowStartOptions :: WorkflowStartOptions
+workflowStartOptions = WorkflowStartOptions
+  { workflowId = Nothing
+  , taskQueue = Nothing
   , followRuns = True
   , workflowIdReusePolicy = Nothing
   , retry = Nothing
@@ -124,7 +127,7 @@ data WorkflowClient = WorkflowClient
   { clientCore :: Client
   , clientDefaultNamespace :: Namespace
   , clientInterceptors :: ClientInterceptors
-  -- , clientDefaultQueue :: TaskQueue
+  , clientDefaultQueue :: TaskQueue
   -- , clientHeaders :: Map Text Payload
   }
 

@@ -139,6 +139,9 @@ data StartChildWorkflowOptions = StartChildWorkflowOptions
   , searchAttributes :: Map Text SearchAttributeType 
   , headers :: Map Text Payload
   , workflowIdReusePolicy :: WorkflowIdReusePolicy
+  , workflowId :: Maybe WorkflowId
+  , taskQueue :: Maybe TaskQueue
+  -- TODO, wonder if we should allow escaping the namespace of the parent workflow
   }
 
 defaultChildWorkflowOptions :: StartChildWorkflowOptions
@@ -154,6 +157,8 @@ defaultChildWorkflowOptions = StartChildWorkflowOptions
   , searchAttributes = mempty
   , headers = mempty
   , workflowIdReusePolicy = WorkflowIdReusePolicyUnspecified
+  , workflowId = Nothing
+  , taskQueue = Nothing
   }
 
 data ContinueAsNewOptions = ContinueAsNewOptions

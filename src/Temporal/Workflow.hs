@@ -198,6 +198,7 @@ module Temporal.Workflow
   , WorkflowType(..)
   , RequireCallStack
   ) where
+import Control.Applicative
 import Control.Concurrent (forkIO)
 import Control.Monad
 import Control.Monad.State
@@ -217,6 +218,7 @@ import Data.Time.Clock (UTCTime)
 import Data.Time.Clock.System (SystemTime(..), systemToUTCTime)
 import Data.Kind
 import Data.UUID (UUID)
+import qualified Data.UUID as UUID
 import Data.UUID.Types.Internal ( buildFromBytes )
 import Data.Vector (Vector)
 import GHC.Stack
@@ -500,18 +502,21 @@ startChildWorkflowFromPayloads
   :: forall args result. RequireCallStack 
   => KnownWorkflow args result 
   -> StartChildWorkflowOptions 
-  -> WorkflowId 
   -> [IO Payload] 
   -> Workflow (ChildWorkflowHandle result)
-startChildWorkflowFromPayloads k@(KnownWorkflow codec mNamespace mTaskQueue _) opts wfId = ilift . go
+startChildWorkflowFromPayloads k@(KnownWorkflow codec mNamespace mTaskQueue _) opts ps = do
+  wfId <- case opts.workflowId of
+    Nothing -> (WorkflowId . UUID.toText) <$> uuid4
+    Just wfId -> pure wfId
+  ilift $ go ps wfId
   where
-    go :: [IO Payload] -> InstanceM (ChildWorkflowHandle result)
-    go typedPayloads = do
+    go :: [IO Payload] -> WorkflowId -> InstanceM (ChildWorkflowHandle result)
+    go typedPayloads wfId = do
       updateCallStack
       args <- liftIO $ sequence typedPayloads
-      wfHandle <- sendChildWorkflowCommand args
+      wfHandle <- sendChildWorkflowCommand args wfId
       pure wfHandle
-    sendChildWorkflowCommand typedPayloads = do
+    sendChildWorkflowCommand typedPayloads wfId = do
       inst <- ask
       -- TODO these need to pass through the interceptor
       let ps = fmap convertToProtoPayload typedPayloads
@@ -528,7 +533,7 @@ startChildWorkflowFromPayloads k@(KnownWorkflow codec mNamespace mTaskQueue _) o
               & Command.namespace .~ rawNamespace (fromMaybe info.namespace mNamespace)
               & Command.workflowId .~ rawWorkflowId wfId
               & Command.workflowType .~ knownWorkflowName k
-              & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue mTaskQueue)
+              & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue (opts.taskQueue <|> mTaskQueue))
               & Command.input .~ ps
               & Command.maybe'workflowExecutionTimeout .~ fmap durationToProto opts'.executionTimeout
               & Command.maybe'workflowRunTimeout .~ fmap durationToProto opts'.runTimeout
@@ -586,19 +591,17 @@ startChildWorkflow
   :: forall args result. RequireCallStack
   => KnownWorkflow args result
   -> StartChildWorkflowOptions
-  -> WorkflowId
   -> (args :->: Workflow (ChildWorkflowHandle result))
-startChildWorkflow k@(KnownWorkflow codec _ _ _) opts wfId =
-  gatherStartChildWorkflowArgs @args @result codec (startChildWorkflowFromPayloads k opts wfId)
+startChildWorkflow k@(KnownWorkflow codec _ _ _) opts =
+  gatherStartChildWorkflowArgs @args @result codec (startChildWorkflowFromPayloads k opts)
 
 executeChildWorkflow
   :: forall args result. RequireCallStack
   => KnownWorkflow args result
   -> StartChildWorkflowOptions
-  -> WorkflowId
   -> (args :->: Workflow result)
-executeChildWorkflow k@(KnownWorkflow codec _ _ _) opts wfId = gatherArgs (Proxy @args) codec id $ \typedPayloads -> do
-  h <- startChildWorkflowFromPayloads k opts wfId typedPayloads
+executeChildWorkflow k@(KnownWorkflow codec _ _ _) opts = gatherArgs (Proxy @args) codec id $ \typedPayloads -> do
+  h <- startChildWorkflowFromPayloads k opts typedPayloads
   waitChildWorkflowResult h
 
 

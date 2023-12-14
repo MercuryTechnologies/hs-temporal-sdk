@@ -364,19 +364,27 @@ startFromPayloads
   -> WorkflowStartOptions
   -> [Payload]
   -> m (WorkflowHandle result)
-startFromPayloads c k@(KnownWorkflow codec _ _ _) opts payloads = do
+startFromPayloads c k@(KnownWorkflow codec _ mwfQ _) opts payloads = do
   wfH <- liftIO $ (Temporal.Client.Types.start c.clientInterceptors) (WorkflowType $ knownWorkflowName k) opts payloads $ \wfName opts' payloads' -> do
     reqId <- UUID.nextRandom
     searchAttrs <- searchAttributesToProto opts'.searchAttributes
-    let req = defMessage
+    let wfId = case opts'.workflowId of
+          Nothing -> UUID.toText reqId
+          Just wfId -> rawWorkflowId wfId
+        tq = rawTaskQueue $ case opts'.taskQueue of
+          Nothing -> case mwfQ of
+            Nothing -> c.clientDefaultQueue
+            Just wfQ -> wfQ
+          Just taskQ -> taskQ
+        req = defMessage
           & WF.namespace .~ (rawNamespace $ fromMaybe (c.clientDefaultNamespace) $ knownWorkflowNamespace k)
-          & WF.workflowId .~ rawWorkflowId opts'.workflowId
+          & WF.workflowId .~ wfId
           & WF.workflowType .~ 
             ( defMessage & Common.name .~ rawWorkflowType wfName
             )
           & WF.taskQueue .~ 
             ( defMessage 
-              & Common.name .~ (rawTaskQueue opts'.taskQueue)
+              & Common.name .~ tq
               & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
             )
           & WF.input .~ 
@@ -414,7 +422,7 @@ startFromPayloads c k@(KnownWorkflow codec _ _ _) opts payloads = do
         { workflowHandleReadResult = pure
         , workflowHandleType = WorkflowType $ knownWorkflowName k
         , workflowHandleClient = c
-        , workflowHandleWorkflowId = opts.workflowId
+        , workflowHandleWorkflowId = WorkflowId wfId
         , workflowHandleRunId = Just (RunId $ swer ^. WF.runId)
         }
   pure $ wfH 
@@ -454,7 +462,7 @@ signalWithStart
   -> SignalRef sigArgs 
   -> (WorkflowArgs wf :->: (sigArgs :->: m (WorkflowHandle (WorkflowResult wf))))
 signalWithStart c wf opts (SignalRef n sigCodec) = case workflowRef wf of
-  k@(KnownWorkflow codec _ _ _) -> do
+  k@(KnownWorkflow codec _ mwfQ _) -> do
     let gatherWf :: ([IO Payload] -> (sigArgs :->: m (WorkflowHandle (WorkflowResult wf)))) -> (WorkflowArgs wf :->: sigArgs :->: m (WorkflowHandle (WorkflowResult wf)))
         gatherWf = gatherArgs (Proxy @(WorkflowArgs wf)) codec Prelude.id
 
@@ -475,9 +483,17 @@ signalWithStart c wf opts (SignalRef n sigCodec) = case workflowRef wf of
         reqId <- UUID.nextRandom
         searchAttrs <- searchAttributesToProto opts'.signalWithStartOptions.searchAttributes
 
-        let msg = defMessage
+        let wfId = case opts'.signalWithStartOptions.workflowId of
+              Nothing -> UUID.toText reqId
+              Just wfId -> rawWorkflowId wfId
+            tq = rawTaskQueue $ case opts'.signalWithStartOptions.taskQueue of
+              Nothing -> case mwfQ of
+                Nothing -> c.clientDefaultQueue
+                Just wfQ -> wfQ
+              Just taskQ -> taskQ
+            msg = defMessage
               & RR.namespace .~ (rawNamespace $ fromMaybe (c.clientDefaultNamespace) $ knownWorkflowNamespace k)
-              & RR.workflowId .~ rawWorkflowId opts'.signalWithStartOptions.workflowId
+              & RR.workflowId .~ wfId
               & RR.workflowType .~
                 ( defMessage & Common.name .~ rawWorkflowType opts'.signalWithStartWorkflowType
                 )
@@ -485,7 +501,7 @@ signalWithStart c wf opts (SignalRef n sigCodec) = case workflowRef wf of
               & RR.searchAttributes .~ (defMessage & Common.indexedFields .~ searchAttrs)
               & RR.taskQueue .~
                 ( defMessage 
-                  & Common.name .~ (rawTaskQueue opts'.signalWithStartOptions.taskQueue)
+                  & Common.name .~ tq
                   & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
                 )
               & RR.input .~
@@ -519,7 +535,7 @@ signalWithStart c wf opts (SignalRef n sigCodec) = case workflowRef wf of
             { workflowHandleReadResult = pure
             , workflowHandleType = WorkflowType $ knownWorkflowName k
             , workflowHandleClient = c
-            , workflowHandleWorkflowId = opts.workflowId
+            , workflowHandleWorkflowId = WorkflowId wfId
             , workflowHandleRunId = Just (RunId $ swer ^. WF.runId)
             }
       pure $ wfH 

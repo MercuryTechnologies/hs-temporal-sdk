@@ -309,9 +309,9 @@ needsClient = do
             testConf
 
       withWorker conf $ do
-        wfId <- uuidText
-        let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
-              { C.timeouts = C.TimeoutOptions
+        let opts = C.workflowStartOptions
+              { C.taskQueue = Just taskQueue
+              , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
@@ -325,10 +325,7 @@ needsClient = do
               baseConf
               testConf
         withWorker conf $ do
-          wfId <- uuidText
-          let opts = C.workflowStartOptions
-                (W.WorkflowId wfId)
-                taskQueue
+          let opts = C.workflowStartOptions { C.taskQueue = Just taskQueue }
           C.execute client testRefs.raceBlockOnLeftSideWorks opts
             `shouldReturn` Right True
 
@@ -337,10 +334,7 @@ needsClient = do
               baseConf
               testConf
         withWorker conf $ do
-          wfId <- uuidText
-          let opts = C.workflowStartOptions
-                (W.WorkflowId wfId)
-                taskQueue
+          let opts = C.workflowStartOptions { C.taskQueue = Just taskQueue }
           C.execute client testRefs.raceBlockOnBothSidesWorks opts
             `shouldReturn` Right True
 
@@ -349,10 +343,7 @@ needsClient = do
               baseConf
               testConf
         withWorker conf $ do
-          wfId <- uuidText
-          let opts = C.workflowStartOptions
-                (W.WorkflowId wfId)
-                taskQueue
+          let opts = C.workflowStartOptions { C.taskQueue = Just taskQueue }
           C.execute client testRefs.raceThrowsRhsErrorWhenLhsBlocked opts
             `shouldThrow` (== WorkflowExecutionFailed)
 
@@ -361,10 +352,7 @@ needsClient = do
               baseConf
               testConf
         withWorker conf $ do
-          wfId <- uuidText
-          let opts = C.workflowStartOptions
-                (W.WorkflowId wfId)
-                taskQueue
+          let opts = C.workflowStartOptions { C.taskQueue = Just taskQueue }
           C.execute client testRefs.raceIgnoresRhsErrorOnLhsSuccess opts
             `shouldReturn` Left True
     describe "Activities" $ do
@@ -373,10 +361,7 @@ needsClient = do
               baseConf
               testConf
         withWorker conf $ do
-          wfId <- uuidText
-          let opts = C.workflowStartOptions
-                (W.WorkflowId wfId)
-                taskQueue
+          let opts = C.workflowStartOptions { C.taskQueue = Just taskQueue }
           C.execute client testRefs.basicActivityWf opts
             `shouldReturn` 1
       specify "heartbeat works" $ \TestEnv{..} -> do
@@ -385,10 +370,7 @@ needsClient = do
               testConf
               
         withWorker conf $ do
-          wfId <- uuidText
-          let opts = C.workflowStartOptions
-                (W.WorkflowId wfId)
-                taskQueue
+          let opts = C.workflowStartOptions { C.taskQueue = Just taskQueue }
           C.execute client testRefs.runHeartbeat opts
             `shouldReturn` 1
       specify "should properly handle faulty workflows" $ \TestEnv{..} -> do
@@ -396,10 +378,7 @@ needsClient = do
               baseConf
               testConf
         withWorker conf $ do
-          wfId <- uuidText
-          let opts = C.workflowStartOptions
-                (W.WorkflowId wfId)
-                taskQueue
+          let opts = C.workflowStartOptions { C.taskQueue = Just taskQueue }
           C.execute client testRefs.faultyWorkflow opts
             `shouldReturn` 1
       specify "Immediate activity cancellation returns the expected result to workflows" $ \TestEnv{..} -> do
@@ -425,9 +404,9 @@ needsClient = do
               addWorkflow wf
               addActivity testActivityAct
         withWorker conf $ do
-          wfId <- uuidText
-          let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
-                { C.timeouts = C.TimeoutOptions
+          let opts = C.workflowStartOptions
+                { C.taskQueue = Just taskQueue
+                , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
@@ -460,9 +439,9 @@ needsClient = do
               addWorkflow wf
               addActivity testActivityAct
         withWorker conf $ do
-          wfId <- uuidText
-          let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue) 
-                { C.timeouts = C.TimeoutOptions
+          let opts = C.workflowStartOptions
+                { C.taskQueue = Just taskQueue
+                , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
@@ -483,10 +462,7 @@ needsClient = do
               baseConf
               addWorkflow wf
         withWorker conf $ do
-          wfId <- uuidText
-          let opts = C.workflowStartOptions
-                (W.WorkflowId wfId)
-                taskQueue
+          let opts = C.workflowStartOptions { C.taskQueue = Just taskQueue }
           C.execute client wf.reference opts 1 "two" False
             `shouldReturn` (1, "two", False)
       -- TODO, move to composite codec package
@@ -554,10 +530,7 @@ needsClient = do
               baseConf
               addWorkflow wf
         withWorker conf $ do
-          wfId <- uuidText
-          let opts = C.workflowStartOptions
-                (W.WorkflowId wfId)
-                taskQueue
+          let opts = C.workflowStartOptions { C.taskQueue = Just taskQueue }
           (t1, t2, t3) <- C.execute client wf.reference opts
           t1 `shouldBe` t2
           t3 `shouldSatisfy` (> t2)
@@ -574,10 +547,9 @@ needsClient = do
             isEventWf = W.provideWorkflow defaultCodec "isEven" isEven
             parentWorkflow :: MyWorkflow Bool
             parentWorkflow = do
-              childWorkflowId <- (W.WorkflowId . UUID.toText) <$> W.uuid4
               let opts :: W.StartChildWorkflowOptions
                   opts = W.defaultChildWorkflowOptions { W.runTimeout = Just $ seconds 5 }
-              childWorkflow <- W.startChildWorkflow isEventWf.reference opts childWorkflowId 2
+              childWorkflow <- W.startChildWorkflow isEventWf.reference opts 2
               $(logDebug) "waiting for child workflow"
               res <- W.waitChildWorkflowResult childWorkflow
               $(logDebug) "got child workflow result"
@@ -588,8 +560,10 @@ needsClient = do
               addWorkflow isEventWf
               addWorkflow parentWf
         withWorker conf $ do
-          let opts = (C.workflowStartOptions (W.WorkflowId parentId) taskQueue)
-                { C.timeouts = C.TimeoutOptions
+          let opts = C.workflowStartOptions
+                { C.workflowId = Just $ W.WorkflowId parentId
+                , C.taskQueue = Just taskQueue
+                , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 5
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
@@ -605,8 +579,7 @@ needsClient = do
             bustedWf = W.provideWorkflow defaultCodec "busted" busted
             parentWorkflow :: MyWorkflow ()
             parentWorkflow = do
-              childWorkflowId <- (W.WorkflowId . UUID.toText) <$> W.uuid4
-              childWorkflow <- W.startChildWorkflow bustedWf.reference W.defaultChildWorkflowOptions childWorkflowId
+              childWorkflow <- W.startChildWorkflow bustedWf.reference W.defaultChildWorkflowOptions
               W.waitChildWorkflowResult childWorkflow
             parentWf = W.provideWorkflow defaultCodec "parent" parentWorkflow
             conf = configure () $ do
@@ -615,8 +588,9 @@ needsClient = do
               addWorkflow parentWf
         withWorker conf $ do
           let opts = C.workflowStartOptions
-                (W.WorkflowId parentId)
-                taskQueue
+                { C.workflowId = Just $ W.WorkflowId parentId
+                , C.taskQueue = Just taskQueue
+                }
           C.execute client parentWf.reference opts
             `shouldThrow` (== WorkflowExecutionFailed)
 
@@ -630,8 +604,7 @@ needsClient = do
             childWf = W.provideWorkflow defaultCodec "immediateCancelTestChild" cancelTest
             parentWorkflow :: MyWorkflow String
             parentWorkflow = do
-              childWorkflowId <- (W.WorkflowId . UUID.toText) <$> W.uuid4
-              childWorkflow <- W.startChildWorkflow childWf.reference W.defaultChildWorkflowOptions childWorkflowId
+              childWorkflow <- W.startChildWorkflow childWf.reference W.defaultChildWorkflowOptions
               W.cancelChildWorkflowExecution childWorkflow
               result <- Catch.try $ W.waitChildWorkflowResult childWorkflow
               pure $ show (result :: Either SomeException ())
@@ -642,8 +615,9 @@ needsClient = do
               addWorkflow parentWf
         withWorker conf $ do
           let opts = C.workflowStartOptions
-                (W.WorkflowId parentId)
-                taskQueue
+                { C.workflowId = Just $ W.WorkflowId parentId
+                , C.taskQueue = Just taskQueue
+                }
           C.execute client parentWf.reference opts
             `shouldReturn` "Left ChildWorkflowCancelled"
 
@@ -656,8 +630,7 @@ needsClient = do
             childWf = W.provideWorkflow defaultCodec "cancelTestChild" cancelTest
             parentWorkflow :: MyWorkflow String
             parentWorkflow = do
-              childWorkflowId <- (W.WorkflowId . UUID.toText) <$> W.uuid4
-              childWorkflow <- W.startChildWorkflow childWf.reference W.defaultChildWorkflowOptions childWorkflowId
+              childWorkflow <- W.startChildWorkflow childWf.reference W.defaultChildWorkflowOptions
               W.waitChildWorkflowStart childWorkflow
               W.cancelChildWorkflowExecution childWorkflow
               result <- Catch.try $ W.waitChildWorkflowResult childWorkflow
@@ -669,8 +642,9 @@ needsClient = do
               addWorkflow parentWf
         withWorker conf $ do
           let opts = C.workflowStartOptions
-                (W.WorkflowId parentId)
-                taskQueue
+                { C.workflowId = Just $ W.WorkflowId parentId
+                , C.taskQueue = Just taskQueue
+                }
           C.execute client parentWf.reference opts
             `shouldReturn` "Left ChildWorkflowCancelled"
 
@@ -697,10 +671,7 @@ needsClient = do
               addWorkflow wf
         inSpan testTracer "Query.works" defaultSpanArguments $ do
           withWorker conf $ do
-            wfId <- uuidText
-            let opts = C.workflowStartOptions
-                  (W.WorkflowId wfId)
-                  taskQueue
+            let opts = C.workflowStartOptions { C.taskQueue = Just taskQueue }
             h <- C.start client wf.reference opts
             result <- C.query h echoQuery C.defaultQueryOptions "hello"
             C.waitWorkflowResult h
@@ -719,10 +690,7 @@ needsClient = do
               baseConf
               addWorkflow wf
         withWorker conf $ do
-          wfId <- uuidText
-          let opts = C.workflowStartOptions
-                (W.WorkflowId wfId)
-                taskQueue
+          let opts = C.workflowStartOptions { C.taskQueue = Just taskQueue }
           h <- C.start client wf.reference opts
           result <- C.query h echoQuery C.defaultQueryOptions "hello"
           -- C.cancel client h
@@ -734,10 +702,7 @@ needsClient = do
               baseConf
               testConf
         withWorker conf $ do
-          wfId <- W.WorkflowId <$> uuidText
-          let opts = C.workflowStartOptions
-                wfId
-                taskQueue
+          let opts = C.workflowStartOptions { C.taskQueue = Just taskQueue }
           wfH <- C.start client testRefs.workflowWaitConditionWorks opts
           C.signal wfH unblockWorkflowSignal C.defaultSignalOptions
           C.waitWorkflowResult wfH `shouldReturn` ()
@@ -748,14 +713,10 @@ needsClient = do
               baseConf
               testConf
         withWorker conf $ do
-          wfId <- W.WorkflowId <$> uuidText
-          let opts = C.workflowStartOptions
-                wfId
-                taskQueue
+          let opts = C.workflowStartOptions { C.taskQueue = Just taskQueue }
           C.execute client testRefs.simpleWait opts `shouldReturn` ()
     describe "Sleep" $ do
       specify "sleep" $ \TestEnv{..} -> do
-        wfId <- uuidText
         let workflow :: MyWorkflow Bool
             workflow = do
               earlier <- W.now
@@ -767,9 +728,7 @@ needsClient = do
               baseConf
               addWorkflow wf
         withWorker conf $ do
-          let opts = C.workflowStartOptions
-                (W.WorkflowId wfId)
-                taskQueue
+          let opts = C.workflowStartOptions { C.taskQueue = Just taskQueue }
           C.execute client wf.reference opts
             `shouldReturn` True
 
@@ -788,10 +747,7 @@ needsClient = do
               baseConf
               addWorkflow wf
         withWorker conf $ do
-          wfId <- uuidText
-          let opts = C.workflowStartOptions
-                (W.WorkflowId wfId)
-                taskQueue
+          let opts = C.workflowStartOptions { C.taskQueue = Just taskQueue }
           C.execute client wf.reference opts
             `shouldReturn` True
         
@@ -807,9 +763,9 @@ needsClient = do
               baseConf
               addWorkflow wf
         withWorker conf $ do
-          wfId <- uuidText
-          let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
-                { C.timeouts = C.TimeoutOptions
+          let opts = C.workflowStartOptions
+                { C.taskQueue = Just taskQueue
+                , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
@@ -831,9 +787,9 @@ needsClient = do
               baseConf
               addWorkflow wf
         withWorker conf $ do
-          wfId <- uuidText
-          let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
-                { C.timeouts = C.TimeoutOptions
+          let opts = C.workflowStartOptions
+                { C.taskQueue = Just taskQueue
+                , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
@@ -852,9 +808,9 @@ needsClient = do
               baseConf
               addWorkflow wf
         withWorker conf $ do
-          wfId <- uuidText
-          let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
-                { C.timeouts = C.TimeoutOptions
+          let opts = C.workflowStartOptions
+                { C.taskQueue = Just taskQueue
+                , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
@@ -872,9 +828,9 @@ needsClient = do
               baseConf
               addWorkflow wf
         withWorker conf $ do
-          wfId <- uuidText
-          let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
-                { C.timeouts = C.TimeoutOptions
+          let opts = C.workflowStartOptions
+                { C.taskQueue = Just taskQueue
+                , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
@@ -897,9 +853,9 @@ needsClient = do
             baseConf
             addWorkflow wf
       withWorker conf $ do
-        wfId <- uuidText
-        let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
-              { C.timeouts = C.TimeoutOptions
+        let opts = C.workflowStartOptions
+              { C.taskQueue = Just taskQueue
+              , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
@@ -924,13 +880,13 @@ needsClient = do
             baseConf
             addWorkflow wf
       withWorker conf $ do
-        wfId <- uuidText
         let initialAttrs = Map.fromList
               [ ("attr1", toSearchAttribute True)
               , ("attr2", toSearchAttribute (4 :: Int64))
               ]
-            opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
-              { C.timeouts = C.TimeoutOptions
+            opts = C.workflowStartOptions
+              { C.taskQueue = Just taskQueue
+              , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
@@ -954,10 +910,9 @@ needsClient = do
             baseConf
             addWorkflow wf
       withWorker conf $ do
-        wfId <- uuidText
-        let 
-            opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
-              { C.timeouts = C.TimeoutOptions
+        let opts = C.workflowStartOptions
+              { C.taskQueue = Just taskQueue
+              , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
@@ -980,9 +935,9 @@ needsClient = do
             baseConf
             testConf
       withWorker conf $ do
-        wfId <- uuidText
-        let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
-              { C.timeouts = C.TimeoutOptions
+        let opts = C.workflowStartOptions
+              { C.taskQueue = Just taskQueue
+              , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
@@ -1015,9 +970,9 @@ needsClient = do
             addWorkflow taskMainWorkflow
 
       withWorker conf $ do
-        wfId <- uuidText
-        let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
-              { C.timeouts = C.TimeoutOptions
+        let opts = C.workflowStartOptions
+              { C.taskQueue = Just taskQueue
+              , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Nothing
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
@@ -1038,9 +993,9 @@ needsClient = do
             baseConf
             testConf
       withWorker conf $ do
-        wfId <- uuidText
-        let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
-              { C.timeouts = C.TimeoutOptions
+        let opts = C.workflowStartOptions
+              { C.taskQueue = Just taskQueue 
+              , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
@@ -1054,9 +1009,9 @@ needsClient = do
             baseConf
             testConf
       withWorker conf $ do
-        wfId <- uuidText
-        let opts = (C.workflowStartOptions (W.WorkflowId wfId) taskQueue)
-              { C.timeouts = C.TimeoutOptions
+        let opts = C.workflowStartOptions
+              { C.taskQueue = Just taskQueue
+              , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
