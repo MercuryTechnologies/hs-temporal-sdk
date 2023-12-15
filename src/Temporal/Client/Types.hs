@@ -18,7 +18,9 @@ data WorkflowStartOptions = WorkflowStartOptions
   -- A Workflow Id Reuse Policy can be used to manage whether a Workflow Id can be re-used. The Temporal Platform guarantees uniqueness of the Workflow Id within a Namespace based on the Workflow Id Reuse Policy.
   --
   -- A Workflow Execution can be uniquely identified across all Namespaces by its Namespace, Workflow Id, and Run Id.
-  , taskQueue :: Maybe TaskQueue
+  --
+  -- If a Workflow Id is not provided, a random UUID is generated.
+  , taskQueue :: TaskQueue
   -- ^ A Task Queue is a lightweight, dynamically allocated queue that one or more Worker Entities poll for Tasks.
   --
   -- Task Queues are very lightweight components. Task Queues do not require explicit registration but instead are created on demand when 
@@ -86,10 +88,10 @@ data WorkflowStartOptions = WorkflowStartOptions
 --
 -- It is recommend to specify 'WorkflowId' in most cases, as it is used to uniquely identify a 'Workflow' execution,
 -- but if one is not specified then a random UUID will be generated.
-workflowStartOptions :: WorkflowStartOptions
-workflowStartOptions = WorkflowStartOptions
+workflowStartOptions :: TaskQueue -> WorkflowStartOptions
+workflowStartOptions tq = WorkflowStartOptions
   { workflowId = Nothing
-  , taskQueue = Nothing
+  , taskQueue = tq
   , followRuns = True
   , workflowIdReusePolicy = Nothing
   , retry = Nothing

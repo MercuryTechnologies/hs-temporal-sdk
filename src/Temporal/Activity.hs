@@ -99,7 +99,6 @@ provideActivity codec name f = ProvidedActivity
       }
   , reference = KnownActivity
       { knownActivityCodec = codec
-      , knownActivityQueue = Nothing
       , knownActivityName = name
       }
   }

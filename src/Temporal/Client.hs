@@ -371,9 +371,7 @@ startFromPayloads c k@(KnownWorkflow codec _) opts payloads = do
     let wfId = case opts'.workflowId of
           Nothing -> UUID.toText reqId
           Just wfId -> rawWorkflowId wfId
-        tq = rawTaskQueue $ case opts'.taskQueue of
-          Nothing -> _
-          Just taskQ -> taskQ
+        tq = rawTaskQueue opts'.taskQueue
         req = defMessage
           & WF.namespace .~ (rawNamespace c.clientDefaultNamespace)
           & WF.workflowId .~ wfId
@@ -484,9 +482,7 @@ signalWithStart c wf opts (SignalRef n sigCodec) = case workflowRef wf of
         let wfId = case opts'.signalWithStartOptions.workflowId of
               Nothing -> UUID.toText reqId
               Just wfId -> rawWorkflowId wfId
-            tq = rawTaskQueue $ case opts'.signalWithStartOptions.taskQueue of
-              Nothing -> c.clientDefaultQueue
-              Just taskQ -> taskQ
+            tq = rawTaskQueue opts'.signalWithStartOptions.taskQueue
             msg = defMessage
               & RR.namespace .~ (rawNamespace c.clientDefaultNamespace)
               & RR.workflowId .~ wfId

@@ -221,13 +221,13 @@ instance
   ( FnRef original ~ KnownWorkflow (ArgsOf original) (ResultOf Workflow original)
   , FunctionSupportsCodec' Workflow codec original
   ) => RefFromFunction' codec (Workflow result) original where
-  refFromFunction _ codec name f = Ref $ KnownWorkflow codec Nothing Nothing $ Text.pack name
+  refFromFunction _ codec name f = Ref $ KnownWorkflow codec $ Text.pack name
 
 instance 
   ( FnRef original ~ KnownActivity (ArgsOf original) (ResultOf (Activity env) original)
   , FunctionSupportsCodec' (Activity env) codec original
   ) => RefFromFunction' codec (Activity env result) original where
-  refFromFunction _ codec name f = Ref $ KnownActivity codec Nothing $ Text.pack name
+  refFromFunction _ codec name f = Ref $ KnownActivity codec $ Text.pack name
 
 instance RefFromFunction' codec b original => RefFromFunction' codec (a -> b) original where
   refFromFunction _ codec name f = refFromFunction (Proxy @b) codec name f
