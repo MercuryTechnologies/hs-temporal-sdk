@@ -278,7 +278,6 @@ data KnownActivity (args :: [Type]) (result :: Type) = forall codec.
   , Typeable result
   ) => KnownActivity
         { knownActivityCodec :: codec
-        , knownActivityQueue :: Maybe TaskQueue
         , knownActivityName :: Text
         }
 
@@ -317,7 +316,7 @@ startActivityFromPayloads
   -> StartActivityOptions 
   -> [IO Payload] 
   -> Workflow (Task result)
-startActivityFromPayloads (KnownActivity codec mTaskQueue name) opts typedPayloads = ilift $ do
+startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift $ do
   runInIO <- askRunInIO
   updateCallStack
   inst <- ask
@@ -337,7 +336,7 @@ startActivityFromPayloads (KnownActivity codec mTaskQueue name) opts typedPayloa
           & Command.seq .~ actSeq
           & Command.activityId .~ actId
           & Command.activityType .~ activityInput.activityType
-          & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue mTaskQueue)
+          & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue opts.taskQueue)
           & Command.headers .~ fmap convertToProtoPayload activityInput.options.headers
           & Command.vec'arguments .~ fmap convertToProtoPayload activityInput.args
           & Command.maybe'retryPolicy .~ fmap retryPolicyToProto activityInput.options.retryPolicy
@@ -405,7 +404,7 @@ startActivity
   -> StartActivityOptions 
   -> (ActivityArgs activity :->: Workflow (Task (ActivityResult activity)))
 startActivity activity opts = case activityRef activity of
-  k@(KnownActivity codec mTaskQueue name) -> 
+  k@(KnownActivity codec name) -> 
     gatherActivityArgs @(ActivityArgs activity) @(ActivityResult activity) codec (startActivityFromPayloads k opts)
 
 executeActivity
@@ -414,7 +413,7 @@ executeActivity
   -> StartActivityOptions 
   -> (ActivityArgs activity :->: Workflow (ActivityResult activity))
 executeActivity activity opts = case activityRef activity of
-  k@(KnownActivity codec mTaskQueue name) -> 
+  k@(KnownActivity codec name) -> 
     gatherArgs (Proxy @(ActivityArgs activity)) codec id $ \typedPayloads -> do
       actHandle <- startActivityFromPayloads k opts typedPayloads
       Temporal.Workflow.Unsafe.Handle.wait actHandle
@@ -504,7 +503,7 @@ startChildWorkflowFromPayloads
   -> StartChildWorkflowOptions 
   -> [IO Payload] 
   -> Workflow (ChildWorkflowHandle result)
-startChildWorkflowFromPayloads k@(KnownWorkflow codec mNamespace mTaskQueue _) opts ps = do
+startChildWorkflowFromPayloads k@(KnownWorkflow codec _) opts ps = do
   wfId <- case opts.workflowId of
     Nothing -> (WorkflowId . UUID.toText) <$> uuid4
     Just wfId -> pure wfId
@@ -530,10 +529,10 @@ startChildWorkflowFromPayloads k@(KnownWorkflow codec mNamespace mTaskQueue _) o
         searchAttrs <- liftIO $ searchAttributesToProto opts'.searchAttributes
         let childWorkflowOptions = defMessage
               & Command.seq .~ wfSeq
-              & Command.namespace .~ rawNamespace (fromMaybe info.namespace mNamespace)
+              & Command.namespace .~ rawNamespace info.namespace
               & Command.workflowId .~ rawWorkflowId wfId
               & Command.workflowType .~ knownWorkflowName k
-              & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue (opts.taskQueue <|> mTaskQueue))
+              & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue opts.taskQueue)
               & Command.input .~ ps
               & Command.maybe'workflowExecutionTimeout .~ fmap durationToProto opts'.executionTimeout
               & Command.maybe'workflowRunTimeout .~ fmap durationToProto opts'.runTimeout
@@ -592,7 +591,7 @@ startChildWorkflow
   => KnownWorkflow args result
   -> StartChildWorkflowOptions
   -> (args :->: Workflow (ChildWorkflowHandle result))
-startChildWorkflow k@(KnownWorkflow codec _ _ _) opts =
+startChildWorkflow k@(KnownWorkflow codec _) opts =
   gatherStartChildWorkflowArgs @args @result codec (startChildWorkflowFromPayloads k opts)
 
 executeChildWorkflow
@@ -600,7 +599,7 @@ executeChildWorkflow
   => KnownWorkflow args result
   -> StartChildWorkflowOptions
   -> (args :->: Workflow result)
-executeChildWorkflow k@(KnownWorkflow codec _ _ _) opts = gatherArgs (Proxy @args) codec id $ \typedPayloads -> do
+executeChildWorkflow k@(KnownWorkflow codec _) opts = gatherArgs (Proxy @args) codec id $ \typedPayloads -> do
   h <- startChildWorkflowFromPayloads k opts typedPayloads
   waitChildWorkflowResult h
 
@@ -653,7 +652,7 @@ startLocalActivity
   => KnownActivity args result
   -> StartLocalActivityOptions 
   -> (args :->: Workflow (Task result))
-startLocalActivity (KnownActivity codec _ n) opts = gatherActivityArgs  @args @result codec $ \typedPayloads -> do
+startLocalActivity (KnownActivity codec n) opts = gatherActivityArgs  @args @result codec $ \typedPayloads -> do
   updateCallStackW
   originalTime <- time
   ilift $ do
@@ -1067,7 +1066,7 @@ continueAsNew
   -> ContinueAsNewOptions 
   -> (WorkflowArgs wf :->: Workflow (WorkflowResult wf))
 continueAsNew wf opts = case workflowRef wf of
-  k@(KnownWorkflow codec _ _ _) -> gatherContinueAsNewArgs @(WorkflowArgs wf) @(WorkflowResult wf) codec $ \args -> do
+  k@(KnownWorkflow codec _) -> gatherContinueAsNewArgs @(WorkflowArgs wf) @(WorkflowResult wf) codec $ \args -> do
     i <- info
     Workflow $ \_ -> do
       inst <- ask

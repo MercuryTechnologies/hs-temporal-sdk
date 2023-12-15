@@ -138,7 +138,7 @@ execute
   -> WorkflowStartOptions
   -> (WorkflowArgs wf :->: m (WorkflowResult wf))
 execute c wf opts = case workflowRef wf of
-  k@(KnownWorkflow codec _ _ _) -> do
+  k@(KnownWorkflow codec _) -> do
     let gather :: ([IO Payload] -> m (WorkflowResult wf)) -> (WorkflowArgs wf :->: m (WorkflowResult wf))
         gather = gatherArgs (Proxy @(WorkflowArgs wf)) codec Prelude.id
     gather $ \inputs -> liftIO $ do
@@ -364,7 +364,7 @@ startFromPayloads
   -> WorkflowStartOptions
   -> [Payload]
   -> m (WorkflowHandle result)
-startFromPayloads c k@(KnownWorkflow codec _ mwfQ _) opts payloads = do
+startFromPayloads c k@(KnownWorkflow codec _) opts payloads = do
   wfH <- liftIO $ (Temporal.Client.Types.start c.clientInterceptors) (WorkflowType $ knownWorkflowName k) opts payloads $ \wfName opts' payloads' -> do
     reqId <- UUID.nextRandom
     searchAttrs <- searchAttributesToProto opts'.searchAttributes
@@ -372,12 +372,10 @@ startFromPayloads c k@(KnownWorkflow codec _ mwfQ _) opts payloads = do
           Nothing -> UUID.toText reqId
           Just wfId -> rawWorkflowId wfId
         tq = rawTaskQueue $ case opts'.taskQueue of
-          Nothing -> case mwfQ of
-            Nothing -> c.clientDefaultQueue
-            Just wfQ -> wfQ
+          Nothing -> _
           Just taskQ -> taskQ
         req = defMessage
-          & WF.namespace .~ (rawNamespace $ fromMaybe (c.clientDefaultNamespace) $ knownWorkflowNamespace k)
+          & WF.namespace .~ (rawNamespace c.clientDefaultNamespace)
           & WF.workflowId .~ wfId
           & WF.workflowType .~ 
             ( defMessage & Common.name .~ rawWorkflowType wfName
@@ -444,7 +442,7 @@ start
   -> WorkflowStartOptions
   -> (WorkflowArgs wf :->: m (WorkflowHandle (WorkflowResult wf)))
 start c wf opts = case workflowRef wf of 
-  k@(KnownWorkflow codec _ _ _) -> do
+  k@(KnownWorkflow codec _) -> do
     let gather :: ([IO Payload] -> m (WorkflowHandle (WorkflowResult wf))) -> (WorkflowArgs wf :->: m (WorkflowHandle (WorkflowResult wf)))
         gather = gatherArgs (Proxy @(WorkflowArgs wf)) codec Prelude.id
     gather $ \inputs -> liftIO $ do
@@ -462,7 +460,7 @@ signalWithStart
   -> SignalRef sigArgs 
   -> (WorkflowArgs wf :->: (sigArgs :->: m (WorkflowHandle (WorkflowResult wf))))
 signalWithStart c wf opts (SignalRef n sigCodec) = case workflowRef wf of
-  k@(KnownWorkflow codec _ mwfQ _) -> do
+  k@(KnownWorkflow codec _) -> do
     let gatherWf :: ([IO Payload] -> (sigArgs :->: m (WorkflowHandle (WorkflowResult wf)))) -> (WorkflowArgs wf :->: sigArgs :->: m (WorkflowHandle (WorkflowResult wf)))
         gatherWf = gatherArgs (Proxy @(WorkflowArgs wf)) codec Prelude.id
 
@@ -487,12 +485,10 @@ signalWithStart c wf opts (SignalRef n sigCodec) = case workflowRef wf of
               Nothing -> UUID.toText reqId
               Just wfId -> rawWorkflowId wfId
             tq = rawTaskQueue $ case opts'.signalWithStartOptions.taskQueue of
-              Nothing -> case mwfQ of
-                Nothing -> c.clientDefaultQueue
-                Just wfQ -> wfQ
+              Nothing -> c.clientDefaultQueue
               Just taskQ -> taskQ
             msg = defMessage
-              & RR.namespace .~ (rawNamespace $ fromMaybe (c.clientDefaultNamespace) $ knownWorkflowNamespace k)
+              & RR.namespace .~ (rawNamespace c.clientDefaultNamespace)
               & RR.workflowId .~ wfId
               & RR.workflowType .~
                 ( defMessage & Common.name .~ rawWorkflowType opts'.signalWithStartWorkflowType

@@ -84,8 +84,6 @@ data KnownWorkflow (args :: [Type]) (result :: Type) = forall codec.
   ( FunctionSupportsCodec codec args result
   ) => KnownWorkflow 
         { knownWorkflowCodec :: codec 
-        , knownWorkflowNamespace :: Maybe Namespace
-        , knownWorkflowQueue :: Maybe TaskQueue
         , knownWorkflowName :: Text
         }
 
@@ -141,8 +139,6 @@ provideWorkflow codec name f = provideCallStack $ ProvidedWorkflow
     }
   , reference = KnownWorkflow
     { knownWorkflowCodec = codec
-    , knownWorkflowQueue = Nothing
-    , knownWorkflowNamespace = Nothing
     , knownWorkflowName = name
     }
   }

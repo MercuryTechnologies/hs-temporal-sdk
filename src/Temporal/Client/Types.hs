@@ -127,7 +127,6 @@ data WorkflowClient = WorkflowClient
   { clientCore :: Client
   , clientDefaultNamespace :: Namespace
   , clientInterceptors :: ClientInterceptors
-  , clientDefaultQueue :: TaskQueue
   -- , clientHeaders :: Map Text Payload
   }
 

@@ -148,6 +148,7 @@ data WorkerErrorCode
   | PollFailure 
   | CompletionFailure 
   | InvalidWorkerConfig
+  | UnknownError Word8
   deriving (Show)
 
 instance Storable WorkerErrorCode where
@@ -165,7 +166,7 @@ instance Storable WorkerErrorCode where
       7 -> pure PollFailure
       8 -> pure CompletionFailure
       9 -> pure InvalidWorkerConfig
-      _ -> error "invalid worker error code"
+      _ -> pure $ UnknownError code
   poke ptr_ code = case code of
     SDKError -> poke ptr 1
     InitWorkerFailed -> poke ptr 2
@@ -176,6 +177,7 @@ instance Storable WorkerErrorCode where
     PollFailure -> poke ptr 7
     CompletionFailure -> poke ptr 8
     InvalidWorkerConfig -> poke ptr 9
+    (UnknownError code) -> poke ptr code
     where
       ptr = castPtr ptr_ :: Ptr Word8
 
