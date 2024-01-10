@@ -1,5 +1,24 @@
-{-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE OverloadedLabels #-}
+{-# LANGUAGE
+  AllowAmbiguousTypes,
+  ConstraintKinds,
+  DataKinds,
+  DuplicateRecordFields,
+  OverloadedLabels,
+  ScopedTypeVariables,
+  FunctionalDependencies,
+  FlexibleContexts,
+  FlexibleInstances,
+  GADTs,
+  InstanceSigs,
+  MultiParamTypeClasses,
+  QuantifiedConstraints,
+  RankNTypes,
+  ScopedTypeVariables,
+  TypeOperators,
+  TypeFamilies,
+  TypeFamilyDependencies,
+  UndecidableInstances,
+  TypeApplications #-}
 {- |
 Module: Temporal.Client.Schedule
 Description: Schedule Workflow executions
@@ -119,7 +138,8 @@ Limitations
 Internally, a Schedule is implemented as a Workflow. If you're using Advanced Visibility (Elasticsearch), these Workflow Executions are hidden from normal views. If you're using Standard Visibility, they are visible, though there's no need to interact with them directly.
 -}
 module Temporal.Client.Schedule
-  ( ScheduleClient
+  ( mkScheduleClient
+  , ScheduleClient
   , CreateScheduleRequest(..)
   , createSchedule
   , deleteSchedule
@@ -137,15 +157,18 @@ module Temporal.Client.Schedule
   , updateSchedule
   , UpdateScheduleRequest(..)
   , ScheduleId(..)
+  , scheduleSpec
   , ScheduleSpec(..)
   , Schedule(..)
   , TriggerImmediatelyRequest(..)
   , BackfillRequest(..)
   , StructuredCalendarSpec(..)
+  , structuredCalendarSpec
   , CalendarSpec(..)
   , IntervalSpec(..)
   , WorkflowExecution(..)
   , ScheduleInfo(..)
+  , mkScheduleAction
   , ScheduleAction(..)
   , SchedulePolicies(..)
   , ScheduleState(..)
@@ -163,6 +186,7 @@ import Data.Int (Int32, Int64)
 import Data.Map.Strict (Map)
 import Data.Maybe (fromMaybe)
 import Data.ProtoLens
+import Data.Proxy (Proxy(..))
 import Data.Vector (Vector)
 import qualified Data.Vector as V
 import Data.Text (Text)
@@ -174,6 +198,9 @@ import Temporal.Exception
 import qualified Temporal.Core.Client.WorkflowService as Core
 import Temporal.SearchAttributes
 import Temporal.SearchAttributes.Internal
+import Temporal.Client (WorkflowStartOptions(..), TimeoutOptions(..))
+import Temporal.Client
+import Temporal.Workflow
 import Lens.Family2
 import qualified Proto.Temporal.Api.Common.V1.Message as C
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as C
@@ -181,8 +208,12 @@ import qualified Proto.Temporal.Api.Enums.V1.Schedule as S
 import qualified Proto.Temporal.Api.Schedule.V1.Message as S
 import qualified Proto.Temporal.Api.Schedule.V1.Message_Fields as S
 import qualified Proto.Temporal.Api.Workflow.V1.Message as W
+import qualified Proto.Temporal.Api.Workflow.V1.Message_Fields as W
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse as WF
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as WF
+import qualified Proto.Temporal.Api.Taskqueue.V1.Message_Fields as TQ
+import Proto.Temporal.Api.Enums.V1.TaskQueue (TaskQueueKind(..))
+
 import Data.Time.Clock.System (SystemTime)
 import UnliftIO
 import Temporal.Common (timespecFromTimestamp, Namespace (rawNamespace), ScheduleId (rawScheduleId))
@@ -196,6 +227,13 @@ throwEither m = do
 
 ---------------------------------------------------------------------------------
 -- ScheduleClient
+
+mkScheduleClient :: Client -> Namespace -> Text -> ScheduleClient
+mkScheduleClient c ns i = ScheduleClient
+  { scheduleClient = c
+  , scheduleClientNamespace = ns
+  , scheduleClientIdentity = i
+  }
 
 data ScheduleClient = ScheduleClient 
   { scheduleClient :: Client
@@ -531,6 +569,42 @@ data ScheduleAction
   = StartWorkflow W.NewWorkflowExecutionInfo
   | ScheduleActionUnrecognized
   deriving (Eq, Show)
+
+mkScheduleAction :: forall wf m. (MonadIO m, WorkflowRef wf) 
+  => wf 
+  -> WorkflowStartOptions 
+  -- ^ All fields of WorkflowStartOptions are valid except for the workflow id reuse policy and cron string.
+  --
+  -- The workflow id will generally have a timestamp appended for uniqueness.
+  -> (WorkflowArgs wf :->: m ScheduleAction)
+mkScheduleAction wf opts = case workflowRef wf of
+  k@(KnownWorkflow codec wfName) -> do
+    let gather :: ([IO Payload] -> m ScheduleAction) -> (WorkflowArgs wf :->: m ScheduleAction)
+        gather = gatherArgs (Proxy @(WorkflowArgs wf)) codec Prelude.id
+    gather $ \inputs -> liftIO $ do
+      is <- sequence inputs
+      searchAttrs <- searchAttributesToProto opts.searchAttributes
+      let tq = rawTaskQueue opts.taskQueue
+          executionInfo = defMessage
+            & W.workflowId .~ case opts.workflowId of
+              Nothing -> wfName
+              Just (WorkflowId wId) -> wId
+            & W.workflowType .~ (defMessage & C.name .~ wfName)
+            & W.taskQueue .~ 
+              ( defMessage
+                & C.name .~ tq
+                & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
+              )
+            & W.input .~ (defMessage & C.payloads .~ (convertToProtoPayload <$> is))
+            & W.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts.timeouts.executionTimeout)
+            & W.maybe'workflowRunTimeout .~ (durationToProto <$> opts.timeouts.runTimeout)
+            & W.maybe'workflowTaskTimeout .~ (durationToProto <$> opts.timeouts.taskTimeout)
+            & W.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retry)
+            & W.memo .~ convertToProtoMemo opts.memo
+            & W.searchAttributes .~ (defMessage & C.indexedFields .~ searchAttrs)
+            & W.header .~ (defMessage & C.fields .~ fmap convertToProtoPayload opts.headers)
+      pure $ StartWorkflow executionInfo
+
 
 scheduleActionToProto :: ScheduleAction -> S.ScheduleAction
 scheduleActionToProto a = case a of
@@ -941,6 +1015,19 @@ data CalendarSpec = CalendarSpec
   , comment :: !Text
   -- ^ Free-form comment describing the intention of this spec.
   }
+
+calendarSpec :: CalendarSpec
+calendarSpec = CalendarSpec
+  { second = "0"
+  , minute = "0"
+  , hour = "0"
+  , dayOfMonth = "*"
+  , month = "*"
+  , year = "*"
+  , dayOfWeek = "*"
+  , comment = ""
+  }
+
 
 calendarSpecToProto :: CalendarSpec -> S.CalendarSpec
 calendarSpecToProto p = defMessage
