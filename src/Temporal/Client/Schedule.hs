@@ -164,6 +164,7 @@ module Temporal.Client.Schedule
   , BackfillRequest(..)
   , StructuredCalendarSpec(..)
   , structuredCalendarSpec
+  , calendarSpec
   , CalendarSpec(..)
   , IntervalSpec(..)
   , WorkflowExecution(..)
