@@ -33,25 +33,12 @@ import Temporal.Interceptor
 import Temporal.Payload (Payload(..))
 import OpenTelemetry.Propagator.W3CTraceContext
 import OpenTelemetry.Context.ThreadLocal (attachContext, getContext)
-import Temporal.Workflow
-  ( WorkflowId(..)
-  , RunId(..)
-  , Info(..)
-  , WorkflowType (..)
-  , Namespace(..)
-  , TaskQueue(..)
-  , ParentInfo(..)
-  )
+import Temporal.Workflow()
 import Temporal.Common
 -- TODO rework WorkflowExitVariant to not expose internals
-import Temporal.Worker.Types
-import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
 import Temporal.Client.Types 
-  ( ClientInterceptors(ClientInterceptors)
-  , WorkflowStartOptions (..)
-  , QueryWorkflowInput(..)
-  , SignalWithStartWorkflowInput(..)
+  ( WorkflowStartOptions (..)
   )
 import Prelude hiding (span)
 
@@ -291,4 +278,6 @@ makeOpenTelemetryInterceptor = do
           hdrs <- inject headersPropagator ctxt $ input.signalWithStartOptions.headers
           next (input { signalWithStartOptions = (signalWithStartOptions input) { Temporal.Client.Types.headers = hdrs } })
       }
+      -- Not really anything to do here since new cron jobs should be in their own context
+    , scheduleClientInterceptors = mempty
     }

@@ -1,5 +1,5 @@
 {
-  description = "Example of a Rust library built and used by a Haskell package";
+  description = "Haskell bindings to the Temporal Core library as well as an SDK built on top of it.";
   inputs.haskellNix.url = "github:iand675/haskell.nix";
   inputs.nixpkgs.follows = "haskellNix/nixpkgs-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
@@ -29,12 +29,13 @@
 
               buildInputs = with pkgs; [
                 protobuf
-                darwin.apple_sdk.frameworks.Security 
-                darwin.apple_sdk.frameworks.CoreFoundation 
                 pkgconfig 
                 openssl 
                 protobuf
-              ];
+              ] ++ lib.optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [
+                Security
+                CoreFoundation
+              ]);
               cargoLock = {
                 lockFile = ./core/rust/Cargo.lock;
                 outputHashes = {
@@ -115,11 +116,10 @@
       flake // rec {
         packages = {
           inherit (pkgs) temporal_bridge;
-          hs_temporal_sdk = flake.packages."temporal-sdk:test:temporal-sdk-tests";
+          # Built by `nix build .`
+          default = flake.packages."temporal-sdk:test:temporal-sdk-tests";
         };
 
-        # Built by `nix build .`
-        defaultPackage = packages.hs_temporal_sdk;
         devShells = let 
             protogen = pkgs.writeShellScriptBin "protogen" ''
               shopt -s globstar

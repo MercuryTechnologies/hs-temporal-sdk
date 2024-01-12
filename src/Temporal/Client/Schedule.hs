@@ -442,6 +442,7 @@ scheduleInfoFromProto p = ScheduleInfo
   , invalidScheduleError = p ^. S.invalidScheduleError
   }
 
+
 data Schedule = Schedule
   { spec :: !ScheduleSpec
   , action :: !ScheduleAction
@@ -792,7 +793,7 @@ scheduleSpec = ScheduleSpec
   , endTime = Nothing
   , jitter = Nothing
   , timezoneName = "UTC"
-  , timezoneData = ""
+  , timezoneData = Nothing
   }
 
 -- | ScheduleSpec is a complete description of a set of absolute timestamps
@@ -847,10 +848,10 @@ data ScheduleSpec = ScheduleSpec
   , excludeStructuredCalendar :: !(Vector StructuredCalendarSpec)
   -- ^ Any timestamps matching any of exclude_* will be skipped.
   , startTime :: !(Maybe SystemTime)
-  -- ^ If start_time is set, any timestamps before start_time will be skipped.
-  -- (Together, start_time and end_time make an inclusive interval.)
+  -- ^ If startTime is set, any timestamps before startTime will be skipped.
+  -- (Together, startTime and endTime make an inclusive interval.)
   , endTime :: !(Maybe SystemTime)
-  -- ^ If end_time is set, any timestamps after end_time will be skipped.
+  -- ^ If endTime is set, any timestamps after endTime will be skipped.
   , jitter :: !(Maybe Duration)
   -- ^ All timestamps will be incremented by a random value from 0 to this
   -- amount of jitter. Default: 0
@@ -877,7 +878,13 @@ data ScheduleSpec = ScheduleSpec
   -- fires at 1:30am will be triggered twice on the day that has two 1:30s.
   --
   -- Also note that no actions are taken on leap-seconds (e.g. 23:59:60 UTC).
-  , timezoneData :: !ByteString
+  , timezoneData :: !(Maybe ByteString)
+  -- ^ Some time zone definitions are not available in the IANA database, or
+  -- are not available in the version of the database that the Temporal
+  -- server is using. In this case, you can provide a complete definition in
+  -- the form of a TZif file from the time zone database. If present, this
+  -- will be used instead of loading anything from the environment. You are
+  -- then responsible for updating timezone_data when the definition changes.
   }
 
 scheduleSpecToProto :: ScheduleSpec -> S.ScheduleSpec
@@ -892,7 +899,9 @@ scheduleSpecToProto p = defMessage
   & S.maybe'endTime .~ fmap timespecToTimestamp p.endTime
   & S.maybe'jitter .~ fmap durationToProto p.jitter
   & S.timezoneName .~ p.timezoneName
-  & S.timezoneData .~ p.timezoneData
+  & S.timezoneData .~ case p.timezoneData of
+    Just tz -> tz
+    Nothing -> ""
 
 scheduleSpecFromProto :: S.ScheduleSpec -> ScheduleSpec
 scheduleSpecFromProto p = ScheduleSpec
@@ -906,7 +915,9 @@ scheduleSpecFromProto p = ScheduleSpec
   , endTime = fmap timespecFromTimestamp (p ^. S.maybe'endTime)
   , jitter = fmap durationFromProto (p ^. S.maybe'jitter)
   , timezoneName = p ^. S.timezoneName
-  , timezoneData = p ^. S.timezoneData
+  , timezoneData = if p ^. S.timezoneData == ""
+    then Nothing
+    else Just (p ^. S.timezoneData)
   }
 
 -- | Range represents a set of integer values, used to match fields of a calendar

@@ -62,6 +62,7 @@ module Temporal.Interceptor
   , ClientInterceptors(..)
   , QueryWorkflowInput(..)
   , SignalWithStartWorkflowInput(..)
+  , ScheduleClientInterceptors(..)
   , interceptorConvertChildWorkflowHandle
   )
 where
@@ -99,12 +100,30 @@ data Interceptors = Interceptors
   , activityInboundInterceptors :: ActivityInboundInterceptor
   , activityOutboundInterceptors :: ActivityOutboundInterceptor
   , clientInterceptors :: ClientInterceptors
+  , scheduleClientInterceptors :: ScheduleClientInterceptors
   }
 
 
 instance Semigroup Interceptors where
-  Interceptors a b c d e <> Interceptors a' b' c' d' e' = Interceptors (a <> a') (b <> b') (c <> c') (d <> d') (e <> e')
-
+  Interceptors a b c d e f <> Interceptors a' b' c' d' e' f' = Interceptors (a <> a') (b <> b') (c <> c') (d <> d') (e <> e') (f <> f')
 
 instance Monoid Interceptors where
-  mempty = Interceptors mempty mempty mempty mempty mempty
+  mempty = Interceptors mempty mempty mempty mempty mempty mempty
+
+
+data ScheduleClientInterceptors = ScheduleClientInterceptors
+  { -- | Unlike the other interceptors, this one is invoked on the construction of the workflow start options
+    scheduleWorkflowAction :: WorkflowStartOptions -> [Payload] -> IO WorkflowStartOptions
+  }
+
+instance Semigroup ScheduleClientInterceptors where
+  ScheduleClientInterceptors a <> ScheduleClientInterceptors b = ScheduleClientInterceptors
+    { scheduleWorkflowAction = \opts input -> do
+        opts' <- a opts input
+        b opts' input
+    }
+
+instance Monoid ScheduleClientInterceptors where
+  mempty = ScheduleClientInterceptors
+    { scheduleWorkflowAction = \opts input -> return opts
+    }

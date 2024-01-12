@@ -75,11 +75,6 @@ rsAddLibraryInfo :: ConfigFlags -> LocalBuildInfo -> IO LocalBuildInfo
 rsAddLibraryInfo fl lbi' = do
     dir <- getCurrentDirectory
     let external = getCabalFlag externalLibFlagStr fl
-    -- extraDir <- if external
-    --   then do
-    --     bridgeLibDir <- getEnv "TEMPORAL_BRIDGE_LIB_DIR"
-    --     pure bridgeLibDir
-    --   else pure "rust/target/release"
     let updateLbi lbi = lbi
           { localPkgDescr = updatePkgDescr (localPkgDescr lbi)
           }
@@ -90,8 +85,7 @@ rsAddLibraryInfo fl lbi' = do
           { libBuildInfo = updateLibBi (libBuildInfo lib)
           }
         updateLibBi libBuild = libBuild
-          { -- extraBundledLibs = "temporal_bridge" : extraBundledLibs libBuild
-            extraLibs = "temporal_bridge" : extraLibs libBuild
+          { extraLibs = "temporal_bridge" : extraLibs libBuild
           , extraLibDirs = if external
             then extraLibDirs libBuild
             else (dir </> buildDir lbi') : extraLibDirs libBuild
@@ -106,8 +100,12 @@ cabalFlag name = fromMaybe False . lookupFlagAssignment name . configConfigurati
 
 unlessFlagM :: FlagName -> ConfigFlags -> IO () -> IO ()
 unlessFlagM name flags action
-    | cabalFlag name flags = pure ()
-    | otherwise = action
+    | cabalFlag name flags = do
+      putStrLn "Skipping cargo action because external_lib flag is set"
+      pure ()
+    | otherwise = do
+      putStrLn ("Running cargo action because we don't have the flag: " ++ show name)
+      action
 
 copyLib :: ConfigFlags -> FilePath -> Bool -> IO ()
 copyLib fl libPref shared = do

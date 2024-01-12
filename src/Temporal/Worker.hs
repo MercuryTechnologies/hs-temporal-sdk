@@ -66,6 +66,7 @@ module Temporal.Worker
   , setMaxTaskQueueActivitiesPerSecond
   , setGracefulShutdownPeriodMillis
   , addInterceptors
+  , WorkflowId(..)
   ) where
 import UnliftIO.Exception
 import UnliftIO

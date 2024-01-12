@@ -142,6 +142,12 @@ module Temporal.Bundle
   , RefFromFunction'(..)
   , WorkflowRef(..)
   , ActivityRef(..)
+  , CoverIfNeeded(..)
+  , FnDef(..)
+  , InnerActivityResult
+  , FnRef
+  , ApplyDef
+  , ApplyRef
   ) where
 
 import Control.Monad.Reader
