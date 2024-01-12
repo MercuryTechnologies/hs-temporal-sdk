@@ -1,0 +1,77 @@
+packages: . */*.cabal
+
+source-repository-package
+  type: git
+  location: git@github.com:sheaf/if-instance.git
+  tag: b0ad0a51ccc1d2ea45cc1c6e8ef753c54efe30a4
+
+source-repository-package
+  type: git
+  location: git@github.com:iand675/proto-lens.git
+  tag: 191f384b5329f0231844ae8405695fcdc29eab44
+  subdir: proto-lens
+
+source-repository-package
+  type: git
+  location: git@github.com:iand675/proto-lens.git
+  tag: 191f384b5329f0231844ae8405695fcdc29eab44
+  subdir: proto-lens-protoc
+
+source-repository-package
+  type: git
+  location: git@github.com:iand675/proto-lens.git
+  tag: 191f384b5329f0231844ae8405695fcdc29eab44
+  subdir: proto-lens-protobuf-types
+
+source-repository-package
+  type: git
+  location: git@github.com:iand675/proto-lens.git
+  tag: 191f384b5329f0231844ae8405695fcdc29eab44
+  subdir: proto-lens-runtime
+
+source-repository-package
+  type: git
+  location: git@github.com:iand675/proto-lens.git
+  tag: 191f384b5329f0231844ae8405695fcdc29eab44
+  subdir: proto-lens-json
+
+source-repository-package
+  type: git
+  location: git@github.com:iand675/hs-opentelemetry.git
+  tag: e07f598b6ec1e36ad2f6e597bd0bd6342c166093
+  subdir: api
+
+source-repository-package
+  type: git
+  location: git@github.com:iand675/hs-opentelemetry.git
+  tag: e07f598b6ec1e36ad2f6e597bd0bd6342c166093
+  subdir: sdk
+
+source-repository-package
+  type: git
+  location: git@github.com:iand675/hs-opentelemetry.git
+  tag: e07f598b6ec1e36ad2f6e597bd0bd6342c166093
+  subdir: otlp
+
+source-repository-package
+  type: git
+  location: git@github.com:iand675/hs-opentelemetry.git
+  tag: e07f598b6ec1e36ad2f6e597bd0bd6342c166093
+  subdir: exporters/otlp
+
+source-repository-package
+  type: git
+  location: git@github.com:iand675/hs-opentelemetry.git
+  tag: e07f598b6ec1e36ad2f6e597bd0bd6342c166093
+  subdir: propagators/b3
+
+source-repository-package
+  type: git
+  location: git@github.com:iand675/hs-opentelemetry.git
+  tag: e07f598b6ec1e36ad2f6e597bd0bd6342c166093
+  subdir: propagators/w3c
+
+source-repository-package
+  type: git
+  location: git@github.com:circuithub/ghc-source-gen.git
+  tag: 7a6aac047b706508e85ba2054b5bedbecfd7eb7a

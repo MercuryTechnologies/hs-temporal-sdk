@@ -73,8 +73,7 @@ extra-deps:
   - exporters/otlp
   - propagators/b3
   - propagators/w3c
-- git: git@github.com:circuithub/ghc-source-gen.git
-  commit: 7a6aac047b706508e85ba2054b5bedbecfd7eb7a
+- ghc-source-gen-0.4.4.0
 # Override default flag values for local packages and extra-deps
 # flags: {}
 
