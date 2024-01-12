@@ -313,8 +313,8 @@ data ScheduleListInfo = ScheduleListInfo
   , workflowType :: !WorkflowType
   , notes :: !Text
   , paused :: !Bool
-  , recentActions :: !(Vector ScheduleActionResult)
-  , futureActionTimes :: !(Vector SystemTime)
+  , recentActions :: ![ScheduleActionResult]
+  , futureActionTimes :: ![SystemTime]
   }
 
 data ScheduleListEntry = ScheduleListEntry
@@ -330,8 +330,8 @@ scheduleListInfoFromProto p = ScheduleListInfo
   , workflowType = WorkflowType (p ^. S.workflowType . C.name)
   , notes = p ^. S.notes
   , paused = p ^. S.paused
-  , recentActions = fmap scheduleActionResultFromProto (p ^. S.vec'recentActions)
-  , futureActionTimes = fmap timespecFromTimestamp (p ^. S.vec'futureActionTimes)
+  , recentActions = fmap scheduleActionResultFromProto (p ^. S.recentActions)
+  , futureActionTimes = fmap timespecFromTimestamp (p ^. S.futureActionTimes)
   }
 
 scheduleListEntryFromProto :: S.ScheduleListEntry -> IO ScheduleListEntry
@@ -411,15 +411,15 @@ data ScheduleInfo = ScheduleInfo
   -- ^ Number of times a scheduled action was skipped due to missing the catchup window.
   , overlapSkipped :: !Int64
   -- ^ Number of skipped actions due to overlap.
-  , runningWorkflows :: !(Vector WorkflowExecution)
+  , runningWorkflows :: [WorkflowExecution]
   -- ^ Currently-running workflows started by this schedule. (There might be
   -- more than one if the overlap policy allows overlaps.)
   -- Note that the run_ids in here are the original execution run ids as
   -- started by the schedule. If the workflows retried, did continue-as-new,
   -- or were reset, they might still be running but with a different run_id.
-  , recentActions :: !(Vector ScheduleActionResult)
+  , recentActions :: [ScheduleActionResult]
   -- ^ Most recent ten actual action times (including manual triggers).
-  , futureActionTimes :: !(Vector SystemTime)
+  , futureActionTimes :: [SystemTime]
   -- ^ Next ten scheduled action times.
   , createTime :: !(Maybe SystemTime)
   -- ^ Timestamp of schedule creation.
@@ -434,9 +434,9 @@ scheduleInfoFromProto p = ScheduleInfo
   { actionCount = p ^. S.actionCount
   , missedCatchupWindow = p ^. S.missedCatchupWindow
   , overlapSkipped = p ^. S.overlapSkipped
-  , runningWorkflows = fmap workflowExecutionFromProto (p ^. S.vec'runningWorkflows)
-  , recentActions = fmap scheduleActionResultFromProto (p ^. S.vec'recentActions)
-  , futureActionTimes = fmap timespecFromTimestamp (p ^. S.vec'futureActionTimes)
+  , runningWorkflows = fmap workflowExecutionFromProto (p ^. S.runningWorkflows)
+  , recentActions = fmap scheduleActionResultFromProto (p ^. S.recentActions)
+  , futureActionTimes = fmap timespecFromTimestamp (p ^. S.futureActionTimes)
   , createTime = fmap timespecFromTimestamp (p ^. S.maybe'createTime)
   , updateTime = fmap timespecFromTimestamp (p ^. S.maybe'updateTime)
   , invalidScheduleError = p ^. S.invalidScheduleError
@@ -709,7 +709,7 @@ backfillRequestFromProto p = BackfillRequest
 data SchedulePatch = SchedulePatch
   { triggerImmediately :: !(Maybe TriggerImmediatelyRequest)
   -- ^ If set, trigger one action immediately.
-  , backfillRequest :: !(Vector BackfillRequest)
+  , backfillRequest :: ![BackfillRequest]
   -- ^ If set, runs though the specified time period(s) and takes actions as if that time
   -- passed by right now, all at once. The overlap policy can be overridden for the
   -- scope of the backfill.
@@ -725,7 +725,7 @@ data SchedulePatch = SchedulePatch
 schedulePatchToProto :: SchedulePatch -> S.SchedulePatch
 schedulePatchToProto p = defMessage
   & S.maybe'triggerImmediately .~ fmap triggerImmediatelyRequestToProto p.triggerImmediately
-  & S.vec'backfillRequest .~ fmap backfillRequestToProto p.backfillRequest
+  & S.backfillRequest .~ fmap backfillRequestToProto p.backfillRequest
   & S.pause .~ p.pause
   & S.unpause .~ p.unpause
 
@@ -812,9 +812,9 @@ scheduleSpec = ScheduleSpec
 -- structured_calendar (and maybe interval and timezone_name), so if you
 -- Describe a schedule, you'll see only structured_calendar, interval, etc.
 data ScheduleSpec = ScheduleSpec
-  { structuredCalendar :: !(Vector StructuredCalendarSpec)
+  { structuredCalendar :: [StructuredCalendarSpec]
   -- ^ Calendar-based specifications of times.
-  , cronString :: !(Vector Text)
+  , cronString :: [Text]
   -- ^ cron_string holds a traditional cron specification as a string. It
   -- accepts 5, 6, or 7 fields, separated by spaces, and interprets them the
   -- same way as CalendarSpec.
@@ -839,23 +839,23 @@ data ScheduleSpec = ScheduleSpec
   -- @every <interval>[/<phase>] is accepted and gets compiled into an
   -- IntervalSpec instead. <interval> and <phase> should be a decimal integer
   -- with a unit suffix s, m, h, or d.
-  , calendar :: !(Vector CalendarSpec)
+  , calendar :: [CalendarSpec]
   -- ^ Calendar-based specifications of times.
-  , interval :: !(Vector IntervalSpec)
+  , interval :: [IntervalSpec]
   -- ^ Interval-based specifications of times.
-  , excludeCalendar :: !(Vector CalendarSpec)
+  , excludeCalendar :: [CalendarSpec]
   -- ^ Any timestamps matching any of exclude_* will be skipped.
-  , excludeStructuredCalendar :: !(Vector StructuredCalendarSpec)
+  , excludeStructuredCalendar :: [StructuredCalendarSpec]
   -- ^ Any timestamps matching any of exclude_* will be skipped.
-  , startTime :: !(Maybe SystemTime)
+  , startTime :: Maybe SystemTime
   -- ^ If startTime is set, any timestamps before startTime will be skipped.
   -- (Together, startTime and endTime make an inclusive interval.)
-  , endTime :: !(Maybe SystemTime)
+  , endTime :: Maybe SystemTime
   -- ^ If endTime is set, any timestamps after endTime will be skipped.
-  , jitter :: !(Maybe Duration)
+  , jitter :: Maybe Duration
   -- ^ All timestamps will be incremented by a random value from 0 to this
   -- amount of jitter. Default: 0
-  , timezoneName :: !Text
+  , timezoneName :: Text
   -- ^ Time zone to interpret all calendar-based specs in.
   --
   -- If unset, defaults to UTC. We recommend using UTC for your application if
@@ -878,7 +878,7 @@ data ScheduleSpec = ScheduleSpec
   -- fires at 1:30am will be triggered twice on the day that has two 1:30s.
   --
   -- Also note that no actions are taken on leap-seconds (e.g. 23:59:60 UTC).
-  , timezoneData :: !(Maybe ByteString)
+  , timezoneData :: Maybe ByteString
   -- ^ Some time zone definitions are not available in the IANA database, or
   -- are not available in the version of the database that the Temporal
   -- server is using. In this case, you can provide a complete definition in
@@ -889,12 +889,12 @@ data ScheduleSpec = ScheduleSpec
 
 scheduleSpecToProto :: ScheduleSpec -> S.ScheduleSpec
 scheduleSpecToProto p = defMessage
-  & S.vec'structuredCalendar .~ fmap structuredCalendarSpecToProto p.structuredCalendar
-  & S.vec'cronString .~ p.cronString
-  & S.vec'calendar .~ fmap calendarSpecToProto p.calendar
-  & S.vec'interval .~ fmap intervalSpecToProto p.interval
-  & S.vec'excludeCalendar .~ fmap calendarSpecToProto p.excludeCalendar
-  & S.vec'excludeStructuredCalendar .~ fmap structuredCalendarSpecToProto p.excludeStructuredCalendar
+  & S.structuredCalendar .~ fmap structuredCalendarSpecToProto p.structuredCalendar
+  & S.cronString .~ p.cronString
+  & S.calendar .~ fmap calendarSpecToProto p.calendar
+  & S.interval .~ fmap intervalSpecToProto p.interval
+  & S.excludeCalendar .~ fmap calendarSpecToProto p.excludeCalendar
+  & S.excludeStructuredCalendar .~ fmap structuredCalendarSpecToProto p.excludeStructuredCalendar
   & S.maybe'startTime .~ fmap timespecToTimestamp p.startTime
   & S.maybe'endTime .~ fmap timespecToTimestamp p.endTime
   & S.maybe'jitter .~ fmap durationToProto p.jitter
@@ -905,12 +905,12 @@ scheduleSpecToProto p = defMessage
 
 scheduleSpecFromProto :: S.ScheduleSpec -> ScheduleSpec
 scheduleSpecFromProto p = ScheduleSpec
-  { structuredCalendar = fmap structuredCalendarSpecFromProto (p ^. S.vec'structuredCalendar)
-  , cronString = p ^. S.vec'cronString
-  , calendar = fmap calendarSpecFromProto (p ^. S.vec'calendar)
-  , interval = fmap intervalSpecFromProto (p ^. S.vec'interval)
-  , excludeCalendar = fmap calendarSpecFromProto (p ^. S.vec'excludeCalendar)
-  , excludeStructuredCalendar = fmap structuredCalendarSpecFromProto (p ^. S.vec'excludeStructuredCalendar)
+  { structuredCalendar = fmap structuredCalendarSpecFromProto (p ^. S.structuredCalendar)
+  , cronString = p ^. S.cronString
+  , calendar = fmap calendarSpecFromProto (p ^. S.calendar)
+  , interval = fmap intervalSpecFromProto (p ^. S.interval)
+  , excludeCalendar = fmap calendarSpecFromProto (p ^. S.excludeCalendar)
+  , excludeStructuredCalendar = fmap structuredCalendarSpecFromProto (p ^. S.excludeStructuredCalendar)
   , startTime = fmap timespecFromTimestamp (p ^. S.maybe'startTime)
   , endTime = fmap timespecFromTimestamp (p ^. S.maybe'endTime)
   , jitter = fmap durationFromProto (p ^. S.maybe'jitter)
@@ -955,21 +955,21 @@ rangeFromProto p = Range
 -- that means all years match. For all fields besides year, at least one Range
 -- must be present to match anything.
 data StructuredCalendarSpec = StructuredCalendarSpec
-  { second :: !(Vector Range)
+  { second :: [Range]
   -- ^ Match seconds (0-59)
-  , minute :: !(Vector Range)
+  , minute :: [Range]
   -- ^ Match minutes (0-59)
-  , hour :: !(Vector Range)
+  , hour :: [Range]
   -- ^ Match hours (0-23)
-  , dayOfMonth :: !(Vector Range)
+  , dayOfMonth :: [Range]
   -- ^ Match days of the month (1-31)
-  , month :: !(Vector Range)
+  , month :: [Range]
   -- ^ Match months (1-12)
-  , year :: !(Vector Range)
+  , year :: [Range]
   -- ^ Match years.
-  , dayOfWeek :: !(Vector Range)
+  , dayOfWeek :: [Range]
   -- ^ Match days of the week (0-6; 0 is Sunday).
-  , comment :: !Text
+  , comment :: Text
   -- ^ Free-form comment describing the intention of this spec.
   }
 
@@ -987,24 +987,24 @@ structuredCalendarSpec = StructuredCalendarSpec
 
 structuredCalendarSpecToProto :: StructuredCalendarSpec -> S.StructuredCalendarSpec
 structuredCalendarSpecToProto p = defMessage
-  & S.vec'second .~ fmap rangeToProto p.second
-  & S.vec'minute .~ fmap rangeToProto p.minute
-  & S.vec'hour .~ fmap rangeToProto p.hour
-  & S.vec'dayOfMonth .~ fmap rangeToProto p.dayOfMonth
-  & S.vec'month .~ fmap rangeToProto p.month
-  & S.vec'year .~ fmap rangeToProto p.year
-  & S.vec'dayOfWeek .~ fmap rangeToProto p.dayOfWeek
+  & S.second .~ fmap rangeToProto p.second
+  & S.minute .~ fmap rangeToProto p.minute
+  & S.hour .~ fmap rangeToProto p.hour
+  & S.dayOfMonth .~ fmap rangeToProto p.dayOfMonth
+  & S.month .~ fmap rangeToProto p.month
+  & S.year .~ fmap rangeToProto p.year
+  & S.dayOfWeek .~ fmap rangeToProto p.dayOfWeek
   & S.comment .~ p.comment
 
 structuredCalendarSpecFromProto :: S.StructuredCalendarSpec -> StructuredCalendarSpec
 structuredCalendarSpecFromProto p = StructuredCalendarSpec
-  { second = fmap rangeFromProto (p ^. S.vec'second)
-  , minute = fmap rangeFromProto (p ^. S.vec'minute)
-  , hour = fmap rangeFromProto (p ^. S.vec'hour)
-  , dayOfMonth = fmap rangeFromProto (p ^. S.vec'dayOfMonth)
-  , month = fmap rangeFromProto (p ^. S.vec'month)
-  , year = fmap rangeFromProto (p ^. S.vec'year)
-  , dayOfWeek = fmap rangeFromProto (p ^. S.vec'dayOfWeek)
+  { second = fmap rangeFromProto (p ^. S.second)
+  , minute = fmap rangeFromProto (p ^. S.minute)
+  , hour = fmap rangeFromProto (p ^. S.hour)
+  , dayOfMonth = fmap rangeFromProto (p ^. S.dayOfMonth)
+  , month = fmap rangeFromProto (p ^. S.month)
+  , year = fmap rangeFromProto (p ^. S.year)
+  , dayOfWeek = fmap rangeFromProto (p ^. S.dayOfWeek)
   , comment = p ^. S.comment
   }
 
