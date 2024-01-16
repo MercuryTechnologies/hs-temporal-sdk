@@ -291,7 +291,9 @@ declareBareBWith DeclareBareBConfig{..} decsQ = do
         [ (strat, pure t) | (_, DerivClause strat preds) <- classes', t <- preds ]
 
       return $ DataD [] dataName
-#if MIN_VERSION_template_haskell(2,17,0)
+#if MIN_VERSION_template_haskell(2,21,0)
+        (tvbs ++ [PlainTV nSwitch BndrReq, PlainTV nWrap BndrReq])
+#elif MIN_VERSION_template_haskell(2,17,0)
         (tvbs ++ [PlainTV nSwitch (), PlainTV nWrap ()])
 #else
         (tvbs ++ [PlainTV nSwitch, PlainTV nWrap])
