@@ -336,7 +336,7 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift 
           & Command.seq .~ actSeq
           & Command.activityId .~ actId
           & Command.activityType .~ activityInput.activityType
-          & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue opts.taskQueue)
+          & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue activityInput.options.taskQueue)
           & Command.headers .~ fmap convertToProtoPayload activityInput.options.headers
           & Command.vec'arguments .~ fmap convertToProtoPayload activityInput.args
           & Command.maybe'retryPolicy .~ fmap retryPolicyToProto activityInput.options.retryPolicy
@@ -532,7 +532,7 @@ startChildWorkflowFromPayloads k@(KnownWorkflow codec _) opts ps = do
               & Command.namespace .~ rawNamespace info.namespace
               & Command.workflowId .~ rawWorkflowId wfId
               & Command.workflowType .~ knownWorkflowName k
-              & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue opts.taskQueue)
+              & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue opts'.taskQueue)
               & Command.input .~ ps
               & Command.maybe'workflowExecutionTimeout .~ fmap durationToProto opts'.executionTimeout
               & Command.maybe'workflowRunTimeout .~ fmap durationToProto opts'.runTimeout
