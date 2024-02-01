@@ -12,6 +12,8 @@ build-type:     Simple
 
 library
   exposed-modules:
+      Data.EvalRecord
+      Data.EvalRecord.TH
       Temporal.Activity
       Temporal.Bundle
       Temporal.Bundle.TH
@@ -83,13 +85,13 @@ library
       aeson
     , annotated-exception
     , async
-    , barbies
     , base
     , base64
     , bytestring
     , conduit
     , containers
     , exceptions
+    , first-class-families
     , ghc
     , hashable
     , hs-opentelemetry-api
@@ -129,7 +131,7 @@ test-suite temporal-sdk-tests
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
-      Spec, AsyncCompletionSpec, GenericSpec, IntegrationSpec,
+      Spec, AsyncCompletionSpec, IntegrationSpec,
   hs-source-dirs:
       test
   default-extensions:
@@ -161,13 +163,13 @@ test-suite temporal-sdk-tests
       aeson
     , annotated-exception
     , async
-    , barbies
     , base
     , base64
     , bytestring
     , conduit
     , containers
     , exceptions
+    , first-class-families
     , ghc
     , hashable
     , hs-opentelemetry-api

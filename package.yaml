@@ -39,13 +39,13 @@ dependencies:
 - conduit
 - annotated-exception
 - require-callstack
-- barbies
 - hs-opentelemetry-api
 - hs-opentelemetry-propagator-w3c
 - base64
 - zlib
 - network
 - split
+- first-class-families
 
 default-extensions:
 - BangPatterns
@@ -157,5 +157,4 @@ tests:
     other-modules:
       Spec,
       AsyncCompletionSpec,
-      GenericSpec,
       IntegrationSpec,

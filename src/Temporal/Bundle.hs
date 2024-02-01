@@ -1,3 +1,4 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DefaultSignatures #-}
@@ -124,17 +125,7 @@ module Temporal.Bundle
   , Def(..)
   , defsToConfig
   , Impl
-  , provide
-  -- * Naming schemes for turning record fields into workflow and activity names
-  , Labels
-  , Labeled(..)
-  , Label(..)
   -- * Reexports
-  -- | Provides 'FunctorB', 'TraversableB', 'ApplicativeB', 'ConstraintsB' type classes needed to use the functions in 'Temporal.Generic'.
-  , module Barbies
-  -- | Provides 'BareB' type class, 'Wear', 'Bare', and 'Covered' needed to use the functions in this module.
-  , module Barbies.Bare
-  , FieldNamesB(..)
   -- * Constraints
   , CanUseAsRefs
   , CanUseAsDefs
@@ -142,13 +133,16 @@ module Temporal.Bundle
   , RefFromFunction'(..)
   , WorkflowRef(..)
   , ActivityRef(..)
-  , CoverIfNeeded(..)
-  , FnDef(..)
   , InnerActivityResult
-  , FnRef
   , ApplyDef
   , ApplyRef
   ) where
+
+import Data.EvalRecord 
+  ( FunctorRec, ApplicativeRec, TraversableRec, ConstraintsRec, AllRec
+  )
+import qualified Data.EvalRecord as Rec
+import Fcf
 
 import Control.Monad.Reader
 import Data.Functor.Const
@@ -159,8 +153,6 @@ import qualified Data.Text as Text
 import GHC.Generics
 import GHC.TypeLits
 import RequireCallStack
-import Barbies
-import Barbies.Bare
 import Data.String (IsString)
 import Data.Typeable
 import Data.Kind
@@ -180,7 +172,13 @@ type family ApplyRef (original :: Type) (f :: Type) where
   ApplyRef original (_ -> b) = ApplyRef original b
   ApplyRef _ a = TypeError ('Text "Expected a Workflow or Activity, but got " ':<>: 'ShowType a)
 
-type FnRef f = ApplyRef f f
+-- | A reference to a workflow or activity.
+--
+-- Depending on whether the result monad is 'Workflow' or 'Activity',
+-- the 'Eval' instance will resolve to either a 'KnownWorkflow' or 'KnownActivity'.
+data Ref :: Type -> Exp Type 
+
+type instance Eval (Ref f) = ApplyRef f f
 
 type family ApplyDef (f :: Type) where
   ApplyDef (Workflow result) = WorkflowDefinition
@@ -188,52 +186,29 @@ type family ApplyDef (f :: Type) where
   ApplyDef (_ -> b) = ApplyDef b
   ApplyDef a = TypeError ('Text "Expected a Workflow or Activity, but got " ':<>: 'ShowType a)
 
-type FnDef f = ApplyDef f
+data Def :: Type -> Type -> Exp Type
 
--- | A reference to a workflow or activity.
---
--- Depending on whether the result monad is 'Workflow' or 'Activity',
--- this will be a 'KnownWorkflow' or 'KnownActivity'.
---
--- Callsites that invoke workflows or activities can use the 'ActivityRef'
--- and 'WorkflowRef' typeclasses to treat this type as the underlying
--- value, so you can generally use values of this type as if they were the underlying
--- workflow or activity reference.
-newtype Ref fn = Ref
-  { ref :: FnRef fn
-  }
+type instance Eval (Def _ f) = ApplyDef f
 
 type family InnerActivityResult (f :: Type) where
   InnerActivityResult (Activity env result) = result
   InnerActivityResult (_ -> b) = InnerActivityResult b
   InnerActivityResult a = TypeError ('Text "Expected an Activity, but got " ':<>: 'ShowType a)
 
-instance (FnRef f ~ KnownActivity (ArgsOf f) (InnerActivityResult f)) => ActivityRef (Ref f) where
-  type ActivityArgs (Ref f) = ArgsOf f
-  type ActivityResult (Ref f) = InnerActivityResult f
-  activityRef :: Ref f -> KnownActivity (ActivityArgs (Ref f)) (ActivityResult (Ref f))
-  activityRef = ref
-
-instance (FnRef f ~ KnownWorkflow (ArgsOf f) (ResultOf Workflow f)) => WorkflowRef (Ref f) where
-  type WorkflowArgs (Ref f) = ArgsOf f
-  type WorkflowResult (Ref f) = ResultOf Workflow f
-  workflowRef :: Ref f -> KnownWorkflow (WorkflowArgs (Ref f)) (WorkflowResult (Ref f))
-  workflowRef = ref
-
-class RefFromFunction' codec (f :: Type) (original :: Type) where
-  refFromFunction :: Proxy f -> codec -> String -> Proxy original -> Ref original
+class RefFromFunction' codec (f :: Type) original where
+  refFromFunction :: Proxy f -> codec -> String -> Proxy original -> Ref @@ original
 
 instance 
-  ( FnRef original ~ KnownWorkflow (ArgsOf original) (ResultOf Workflow original)
-  , FunctionSupportsCodec' Workflow codec original
+  ( FunctionSupportsCodec' Workflow codec original
+  , Ref @@ original ~ KnownWorkflow (ArgsOf original) (ResultOf Workflow original)
   ) => RefFromFunction' codec (Workflow result) original where
-  refFromFunction _ codec name f = Ref $ KnownWorkflow codec $ Text.pack name
+  refFromFunction _ codec name f = KnownWorkflow codec $ Text.pack name
 
 instance 
-  ( FnRef original ~ KnownActivity (ArgsOf original) (ResultOf (Activity env) original)
-  , FunctionSupportsCodec' (Activity env) codec original
+  ( FunctionSupportsCodec' (Activity env) codec original
+  , Ref @@ original ~ KnownActivity (ArgsOf original) (ResultOf (Activity env) original)
   ) => RefFromFunction' codec (Activity env result) original where
-  refFromFunction _ codec name f = Ref $ KnownActivity codec $ Text.pack name
+  refFromFunction _ codec name f = KnownActivity codec $ Text.pack name
 
 instance RefFromFunction' codec b original => RefFromFunction' codec (a -> b) original where
   refFromFunction _ codec name f = refFromFunction (Proxy @b) codec name f
@@ -242,16 +217,16 @@ class RefFromFunction' codec f f => RefFromFunction codec f
 instance RefFromFunction' codec f f => RefFromFunction codec f
 
 class DefFromFunction' codec env (f :: Type) (original :: Type) where
-  defFromFunction :: RequireCallStack => Proxy f -> codec -> String -> original -> Def env original
+  defFromFunction :: RequireCallStack => Proxy f -> codec -> String -> original -> Def env @@ original
 
 class DefFromFunction' codec env f f => DefFromFunction codec env f
 instance DefFromFunction' codec env f f => DefFromFunction codec env f
 
 instance 
-  ( ApplyDef original ~ WorkflowDefinition
-  , FunctionSupportsCodec' Workflow codec original
+  ( FunctionSupportsCodec' Workflow codec original
+  , Def env @@ original ~ WorkflowDefinition 
   ) => DefFromFunction' codec env (Workflow result) original where
-  defFromFunction _ codec name f = Def $ WorkflowDefinition (Text.pack name) $ \payloads -> do
+  defFromFunction _ codec name f = WorkflowDefinition (Text.pack name) $ \payloads -> do
     eWf <- applyPayloads 
       codec 
       (Proxy @(ArgsOf original)) 
@@ -262,10 +237,10 @@ instance
 
 
 instance 
-  ( ApplyDef original ~ ActivityDefinition env
-  , FunctionSupportsCodec' (Activity env) codec original
+  ( FunctionSupportsCodec' (Activity env) codec original
+  , Def env @@ original ~ ActivityDefinition env
   ) => DefFromFunction' codec env (Activity env result) original where
-  defFromFunction _ codec name f = Def $ ActivityDefinition 
+  defFromFunction _ codec name f = ActivityDefinition 
     (Text.pack name)
     (\actEnv input -> do
       eAct <- applyPayloads 
@@ -278,129 +253,50 @@ instance
     )
 
 instance DefFromFunction' codec env b original => DefFromFunction' codec env (a -> b) original where
-  defFromFunction _ codec name f = defFromFunction (Proxy @b) codec name f
+  defFromFunction _ codec name f = defFromFunction @codec @env (Proxy @b) codec name f
 
 -- | A bare record type that supplies the actual implementation of workflows and activities.
-type Impl f = f Bare Identity
+type Impl f = f Pure
 -- | References to workflows and activities that can be used at invokation callsites.
-type Refs f = f Covered Ref
+type Refs f = f Ref
 -- | A wrapped version of the implementations that carries information needed to register workflows and activities with the Temporal worker.
-type Defs env f = f Covered (Def env)
-
--- | A record of each field's name.
-type Labels f = f Covered (Const String)
-
-data Labeled a = Labeled
-  { label :: String
-  , value :: a
-  } deriving stock ( Functor )
-
--- | A definition of a workflow or activity.
---
--- Depending on whether the result monad is 'Workflow' or 'Activity', 
--- this will be a 'WorkflowDefinition' or 'ActivityDefinition'.
---
--- Using this directly is generally not needed. Instead, call 'defsToConfig'
--- on a record of 'Def' values to produce a 'ConfigM' that you can pass to
--- 'startWorker'.
-data Def env a = ToConfig env (FnDef a) => Def
-  { defVal :: FnDef a
-  }
-
--- | barbies doesn't care about field names, but they are useful in many use cases
-class FieldNamesB b where
-  -- | A collection of field names.
-  bfieldNames :: IsString a => b (Const a)
-
-  -- A collection of field names, prefixed by the names of the parent.
-  bnestedFieldNames :: IsString a => b (Const (NE.NonEmpty a))
-
--- | A temporal-specific version of 'FieldNamesB' that is used to provide
--- workflow and activity names to Temporal.
-class Label (f :: (Type -> Type) -> Type) where
-  -- | Used to prefix workflow types to disambiguate them between modules.
-  --
-  -- Override this for a given record to provide different naming functionality
-  typeName :: Proxy (f (Const String)) -> String
-  default typeName :: Typeable f => Proxy (f (Const String)) -> String
-  typeName p = concat [tyConModule tc, ".", tyConName tc]
-    where
-      tc = typeRepTyCon $ typeRep p
-
-  fieldNames :: f (Const String)
-  default fieldNames :: (Generic (f (Const String)), GLabel (Rep (f (Const String)))) => f (Const String)
-  fieldNames = to $ gfieldNames @(Rep (f (Const String)))
-
-class GLabel (structure :: Type -> Type) where
-  gfieldNames :: structure x
-
-instance (KnownSymbol tyName, KnownSymbol moduleName, GLabel inner) => GLabel (D1 ('MetaData tyName moduleName packageName isNewtype) inner) where
-  gfieldNames = M1 gfieldNames
-
-instance GLabel inner
-    => GLabel (C1 ('MetaCons name fixity 'True) inner) where
-  gfieldNames = M1 gfieldNames
-
-instance TypeError ('Text "You can't collect labels for a non-record type!")
-    => GLabel (C1 ('MetaCons name fixity 'False) inner) where
-  gfieldNames = undefined
-
-instance KnownSymbol name
-    => GLabel (S1 ('MetaSel ('Just name) i d c) (K1 index (Const String inner))) where
-  gfieldNames = M1 (K1 (Const (symbolVal (Proxy @name))))
-
-instance (GLabel left, GLabel right) => GLabel (left :*: right) where
-  gfieldNames = gfieldNames :*: gfieldNames
+type Defs env f = f (Def env)
 
 type CanUseAsRefs f codec = 
-  ( BareB f
-  , ConstraintsB (f Covered)
-  , AllB (RefFromFunction codec) (f Covered)
-  , Label (f Covered)
-  , ApplicativeB (f Covered)
+  ( ConstraintsRec f
+  , AllRec (RefFromFunction codec) f
+  , ApplicativeRec f
   )
-
-class CoverIfNeeded b t f where
-  coverIfNeeded :: b t f -> b Covered f
-
-instance BareB b => CoverIfNeeded b Bare Identity where
-  coverIfNeeded = bcover
-
-instance CoverIfNeeded b Covered f where
-  coverIfNeeded = id
 
 -- | Produce a record of references to workflows and activities from a record of implementations.
 --
 -- The fields in the records produced by this function can be used to invoke the workflows and activities
 -- via the Temporal client or within Temporal workflows.
-refs :: forall r t f codec.
+refs :: forall r f codec.
   ( CanUseAsRefs r codec
-  , CoverIfNeeded r t f
-  ) => codec -> r t f -> Refs r 
+  ) => codec -> r f -> Refs r 
 refs codec wfrec = result
   where
     ns :: String
-    ns = Temporal.Bundle.typeName (Proxy @(r Covered (Const String)))
+    ns = Rec.typeName (Proxy @r)
 
-    defLabels :: r Covered (Const String)
-    defLabels = bmap (\(Const str) -> Const $ concat [ns, ".", str]) fieldNames
+    defLabels :: r (ConstFn String)
+    defLabels = Rec.pure (\meta -> concat [ns, ".", Rec.name meta])
 
-    convertToKnownWorkflow :: forall wf. RefFromFunction codec wf => Const String wf -> Ref wf
-    convertToKnownWorkflow = \(Const n) -> refFromFunction (Proxy @wf) codec n (Proxy @wf)
+    convertToKnownWorkflow :: forall wf. RefFromFunction codec wf => Rec.Metadata wf -> String -> Ref @@ wf
+    convertToKnownWorkflow = \_ n -> refFromFunction (Proxy @wf) codec n (Proxy @wf)
 
-    result :: r Covered Ref
-    result = bmapC @(RefFromFunction codec) convertToKnownWorkflow defLabels
+    result :: r Ref
+    result = Rec.mapC @(RefFromFunction codec) convertToKnownWorkflow defLabels
 
 -- | Constraints needed to turn a record of implementations into a record of definitions.
 --
 -- That is, all of the fields (Workflows, Activities) in the record support the supplied codec,
 -- and the activities have an environment of type @env@.
 type CanUseAsDefs f codec env = 
-  ( BareB f
-  , ConstraintsB (f Covered)
-  , AllB (DefFromFunction codec env) (f Covered)
-  , Label (f Covered)
-  , ApplicativeB (f Covered)
+  ( ConstraintsRec f
+  , AllRec (DefFromFunction codec env) f
+  , ApplicativeRec f
   )
 
 -- | Produce a record of definitions from a record of implementations, using the supplied codec.
@@ -409,23 +305,20 @@ defs :: forall f codec env.
   ) => codec -> Impl f -> Defs env f
 defs codec wfrec = result
   where
-    covered :: f Covered Identity
-    covered = bcover wfrec
-
     ns :: String
-    ns = Temporal.Bundle.typeName (Proxy @(f Covered (Const String)))
+    ns = Rec.typeName (Proxy @f)
 
-    defLabels :: f Covered (Const String)
-    defLabels = bmap (\(Const str) -> Const $ concat [ns, ".", str]) fieldNames
+    defLabels :: f (ConstFn String)
+    defLabels = Rec.pure (\meta -> concat [ns, ".", Rec.name meta])
 
-    labeledFields :: f Covered Labeled
-    labeledFields = bzipWith (\(Const label) (Identity f) -> Labeled label f) defLabels covered
+    labeledFields :: f (Rec.Tuple2 (ConstFn String) Pure)
+    labeledFields = Rec.zipWith (\_ label f -> (label, f)) defLabels wfrec
 
-    convertToWorkflowDefinition :: forall wf. (DefFromFunction codec env wf) => Labeled wf -> Def env wf
-    convertToWorkflowDefinition = (\(Labeled n f) -> provideCallStack $ defFromFunction (pure f) codec n f) 
+    convertToWorkflowDefinition :: forall wf. (DefFromFunction codec env wf) => Rec.Metadata wf -> (String, wf) -> Def env @@ wf
+    convertToWorkflowDefinition = (\_ (n, f) -> provideCallStack $ defFromFunction @codec @env (pure f) codec n f) 
 
-    result :: f Covered (Def env)
-    result = bmapC @(DefFromFunction codec env) convertToWorkflowDefinition labeledFields
+    result :: f (Def env)
+    result = Rec.mapC @(DefFromFunction codec env) convertToWorkflowDefinition labeledFields
 
 instance ToConfig env WorkflowDefinition where
   toConfig = addWorkflow
@@ -434,8 +327,80 @@ instance ToConfig env (ActivityDefinition env) where
   toConfig = addActivity
 
 -- | Convert a record of 'Def' values into a 'ConfigM' that you can pass to 'startWorker'.
-defsToConfig :: (TraversableB f) => f (Def actEnv) -> ConfigM actEnv ()
-defsToConfig = bfoldMap (\(Def x) -> toConfig x)
+defsToConfig :: forall rec actEnv f. (TraversableRec rec, ConstraintsRec rec, Rec.AllRecF (ToConfig actEnv) f rec) => rec f -> ConfigM actEnv ()
+defsToConfig = Rec.foldMapC @(Rec.ClassF (ToConfig actEnv) f) mkConf
+  where
+    mkConf :: forall a. ToConfig actEnv (f @@ a) => Rec.Metadata a -> f @@ a -> ConfigM actEnv ()
+    mkConf _ = toConfig
 
-provide :: FunctorB (r t) => b -> r t (Reader b) -> r t Identity
-provide x = bmap (\r -> Identity $ runReader r x)
+-- data ProxyActivity :: k -> Exp k
+
+-- type family ConvertActivity (f :: k) :: k where
+--   ConvertActivity (Activity env result) = Workflow result
+--   ConvertActivity (a -> b) = a -> ConvertActivity b
+--   ConvertActivity a = a
+
+-- type instance Eval (ProxyActivity f) = (Eval (WrapperOf f)) (ConvertActivity (Eval (Unwrap f)))
+
+-- data WorkflowsAsMonadIO :: m -> k -> Exp k
+
+-- type family ConvertWorkflow (m :: Type -> Type) (f :: Type) :: Type where
+--   ConvertWorkflow m (Workflow result) = m result
+--   ConvertWorkflow m (a -> b) = a -> ConvertWorkflow m b
+--   ConvertWorkflow _ a = a
+
+-- type instance Eval (WorkflowsAsMonadIO m f) = (Eval (WrapperOf f)) (ConvertWorkflow m (Eval (Unwrap f)))
+
+
+
+{-
+data Wrap :: (k -> k) -> k -> Exp k
+type instance Eval (Wrap f a) = f a
+
+data WrapperOf :: k -> Exp (k -> k)
+type instance Eval (WrapperOf (f x)) = f
+
+fiddleConcrete :: Fiddle Unwrap Identity
+fiddleConcrete = Fiddle
+  { fiddle = \x -> pure ()
+  , faddle = \x -> pure ()
+  }
+
+fiddleProxyActivities :: Fiddle (Unwrap <=< WorkflowsAsMonadIO IO <=< ProxyActivity) Identity
+fiddleProxyActivities = Fiddle
+  { fiddle = \x -> pure ()
+  , faddle = \x -> pure ()
+  }
+
+class EvalB b where
+  bunwrap :: b Pure Identity -> b Unwrap Identity
+  bwrap :: b Unwrap Identity -> b Pure Identity
+
+instance EvalB (Fiddle Pure) where
+  bunwrap = id
+  bwrap = id
+
+bunwrapFrom :: EvalB b => (forall a. f a -> a) -> b Pure f -> b Unwrap Identity
+bwrapWith :: EvalB b => (forall a. a -> f a) -> b Unwrap Identity -> b Pure f
+-}
+
+-- {-
+-- TODO figure out how to support startActivity, executeActivity, and startLocalActivity
+-- from this typeclass. 
+-- -}
+-- class ConvertActivityToProxyWorkflow (f :: Type) where
+--   convertActivityToProxyWorkflow :: f -> ConvertActivity f
+
+-- instance ConvertActivityToProxyWorkflow (Activity env result) where
+--   convertActivityToProxyWorkflow = undefined
+
+-- instance ConvertActivityToProxyWorkflow b => ConvertActivityToProxyWorkflow (a -> b) where
+--   convertActivityToProxyWorkflow = undefined
+
+-- instance (ConvertActivity a ~ a) => ConvertActivityToProxyWorkflow a where
+--   convertActivityToProxyWorkflow = id
+
+-- -- TODO, similar to ConvertActivityToProxyWorkflow, figure out how to support
+-- -- execute, start, and signalWithStart
+-- class ConvertWorkflowToClientInvocation (f :: Type) where
+--   -- convertWorkflowToClientInvocation :: MonadIO m => Client -> f -> ConvertWorkflow IO f

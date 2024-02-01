@@ -186,7 +186,7 @@ instance FromJSON RegressionTask
 signalUnblockWorkflow :: W.SignalRef '[]
 signalUnblockWorkflow = W.SignalRef "unblockWorkflow" defaultCodec
 
-testImpls :: WorkflowTests
+testImpls :: Impl WorkflowTests
 testImpls = provideCallStack $ WorkflowTests
   { shouldRunWorkflowTest = $(logDebug) "oh hi!"
   , raceBlockOnLeftSideWorks = do
@@ -280,10 +280,10 @@ testImpls = provideCallStack $ WorkflowTests
         else error "sad"
   }
 
-testRefs :: Refs WorkflowTestsB
+testRefs :: Refs WorkflowTests
 testRefs = refs defaultCodec testImpls
 
-testDefs :: Defs () WorkflowTestsB
+testDefs :: Defs () WorkflowTests
 testDefs = defs defaultCodec testImpls
 
 testConf :: ConfigM () ()
