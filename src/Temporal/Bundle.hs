@@ -123,7 +123,7 @@ module Temporal.Bundle
   , defs
   , Defs
   , Def(..)
-  , defsToConfig
+  , collectTemporalDefinitions
   , Impl
   -- * Reexports
   -- * Constraints
@@ -147,6 +147,7 @@ import Fcf
 import Control.Monad.Reader
 import Data.Functor.Const
 import Data.Functor.Identity
+import qualified Data.HashMap.Strict as HashMap
 import Data.Kind
 import Data.Proxy
 import qualified Data.Text as Text
@@ -320,18 +321,20 @@ defs codec wfrec = result
     result :: f (Def env)
     result = Rec.mapC @(DefFromFunction codec env) convertToWorkflowDefinition labeledFields
 
-instance ToConfig env WorkflowDefinition where
-  toConfig = addWorkflow
 
-instance ToConfig env (ActivityDefinition env) where
-  toConfig = addActivity
-
--- | Convert a record of 'Def' values into a 'ConfigM' that you can pass to 'startWorker'.
-defsToConfig :: forall rec actEnv f. (TraversableRec rec, ConstraintsRec rec, Rec.AllRecF (ToConfig actEnv) f rec) => rec f -> ConfigM actEnv ()
-defsToConfig = Rec.foldMapC @(Rec.ClassF (ToConfig actEnv) f) mkConf
+-- | Convert a record of 'Def' values into a worker and  that you can pass to 'startWorker'.
+collectTemporalDefinitions :: forall rec actEnv f. (TraversableRec rec, ConstraintsRec rec, Rec.AllRecF (ToDefinitions actEnv) f rec) => rec f -> Definitions actEnv
+collectTemporalDefinitions = Rec.foldMapC @(Rec.ClassF (ToDefinitions actEnv) f) mkConf
   where
-    mkConf :: forall a. ToConfig actEnv (f @@ a) => Rec.Metadata a -> f @@ a -> ConfigM actEnv ()
-    mkConf _ = toConfig
+    mkConf :: forall a. ToDefinitions actEnv (f @@ a) => Rec.Metadata a -> f @@ a -> Definitions actEnv
+    mkConf _ = toDefinitions
+
+-- class UseActivityAsWorkflow (f :: Type) where
+--   useActivityAsWorkflow :: f -> Workflow (InnerActivityResult f)
+--   useActivityAsWorkflow = undefined
+--   use
+
+-- proxyActivities :: StartActivityOptions -> 
 
 -- data ProxyActivity :: k -> Exp k
 

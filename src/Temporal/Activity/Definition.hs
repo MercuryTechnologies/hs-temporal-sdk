@@ -33,6 +33,24 @@ instance HasActivityDefinition (ActivityDefinition env) where
   type ActivityDefinitionEnv (ActivityDefinition env) = env
   activityDefinition = id
 
+data ProvidedActivity env f = ProvidedActivity
+  { definition :: ActivityDefinition env
+  , reference :: KnownActivity (ArgsOf f) (ResultOf (Activity env) f)
+  }
+
+instance HasActivityDefinition (ProvidedActivity env f) where
+  type ActivityDefinitionEnv (ProvidedActivity env f) = env
+  activityDefinition (ProvidedActivity def _) = def
+
+data KnownActivity (args :: [Type]) (result :: Type) = forall codec. 
+  ( Codec codec result
+  , GatherArgs codec args
+  , Typeable result
+  ) => KnownActivity
+        { knownActivityCodec :: codec
+        , knownActivityName :: Text
+        }
+
 data ActivityDefinition env = ActivityDefinition
   { activityName :: Text
   , activityRun :: ActivityEnv env -> ExecuteActivityInput -> IO (Either String Payload)

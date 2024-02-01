@@ -103,14 +103,6 @@ provideActivity codec name f = ProvidedActivity
       }
   }
 
-data ProvidedActivity env f = ProvidedActivity
-  { definition :: ActivityDefinition env
-  , reference :: KnownActivity (ArgsOf f) (ResultOf (Activity env) f)
-  }
-
-instance HasActivityDefinition (ProvidedActivity env f) where
-  type ActivityDefinitionEnv (ProvidedActivity env f) = env
-  activityDefinition (ProvidedActivity def _) = def
 
 {- |
 An Activity Heartbeat is a ping from the Worker Process that is executing the Activity to the Temporal Cluster. Each Heartbeat informs the Temporal Cluster that the Activity Execution is making progress and the Worker has not crashed. If the Cluster does not receive a Heartbeat within a Heartbeat Timeout time period, the Activity will be considered failed and another Activity Task Execution may be scheduled according to the Retry Policy.

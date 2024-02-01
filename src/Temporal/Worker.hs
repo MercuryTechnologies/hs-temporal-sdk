@@ -27,7 +27,8 @@ module Temporal.Worker
   , shutdown
   -- * Configuration
   , WorkerConfig(..)
-  , ToConfig(..)
+  , Definitions(..)
+  , ToDefinitions(..)
   , ConfigM
   , configure
   -- * Replay
@@ -43,9 +44,7 @@ module Temporal.Worker
   , Core.closeHistory
   -- ** Worker options
   , HasWorkflowDefinition(..)
-  , addWorkflow
   , HasActivityDefinition(..)
-  , addActivity
   , addErrorConverter
   , setNamespace
   , setTaskQueue
@@ -74,6 +73,7 @@ import Control.Applicative
 
 import Control.Monad.Logger
 import Control.Monad.State
+import Data.HashMap.Strict (HashMap)
 
 import Temporal.Common
 import Temporal.Core.Client
@@ -92,14 +92,6 @@ import qualified Data.HashMap.Strict as HashMap
 import Temporal.Interceptor
 import Temporal.Core.Worker (InactiveForReplay)
 
--- | A utility class to convert a value into a 'WorkerConfig' using the 'ConfigM' monad.
---
--- This is useful for defining a 'WorkerConfig' in a modular way.
---
--- See 'Temporal.Generic.defsToConfig' as an example.
-class ToConfig env a where
-  toConfig :: a -> ConfigM env ()
-
 newtype ConfigM actEnv a = ConfigM { unConfigM :: State (WorkerConfig actEnv) a }
   deriving newtype (Functor, Applicative, Monad)
 
@@ -113,47 +105,64 @@ instance Monoid a => Monoid (ConfigM actEnv a) where
 -- Configuration
 
 -- | Turn a configuration block into the final configuration.
-configure :: actEnv -> ConfigM actEnv () -> WorkerConfig actEnv
-configure actEnv = flip execState defaultConfig . unConfigM
-  where
-    defaultConfig = WorkerConfig
-      { wfDefs = mempty
-      , actDefs = mempty
-      , coreConfig = Core.defaultWorkerConfig
+configure :: ToDefinitions actEnv defs => actEnv -> defs -> ConfigM actEnv () -> WorkerConfig actEnv
+configure actEnv defs = flip execState defaultConfig . unConfigM
+  where 
+    defaultConfig = let (Definitions wfDefs actDefs) = toDefinitions defs in WorkerConfig
+      { coreConfig = Core.defaultWorkerConfig
       , deadlockTimeout = Just 1000000
       , interceptorConfig = mempty
       , applicationErrorConverters = standardApplicationFailureHandlers
       , ..
       }
 
+data Definitions env = Definitions
+  { workflowDefinitions :: HashMap Text WorkflowDefinition
+  , activityDefinitions :: HashMap Text (ActivityDefinition env)
+  }
+
+instance Semigroup (Definitions env) where
+  (Definitions w1 a1) <> (Definitions w2 a2) = Definitions (w1 <> w2) (a1 <> a2)
+
+instance Monoid (Definitions env) where
+  mempty = Definitions mempty mempty
+
+instance ToDefinitions env (Definitions env) where
+  toDefinitions = id
+
+class ToDefinitions env f where
+  toDefinitions :: f -> Definitions env
+
+instance ToDefinitions env WorkflowDefinition where
+  toDefinitions wf = Definitions (HashMap.singleton (workflowName wf) wf) mempty
+
+instance ToDefinitions env (ProvidedWorkflow f) where
+  toDefinitions wf = toDefinitions wf.definition
+
+instance ToDefinitions env (ActivityDefinition env) where
+  toDefinitions act = Definitions mempty (HashMap.singleton (activityName act) act)
+
+instance ToDefinitions env (ProvidedActivity env f) where
+  toDefinitions act = toDefinitions act.definition
+
+instance (ToDefinitions env _1, ToDefinitions env _2) => ToDefinitions env (_1, _2) where
+  toDefinitions (a, b) = toDefinitions a <> toDefinitions b
+
+instance (ToDefinitions env _1, ToDefinitions env _2, ToDefinitions env _3) => ToDefinitions env (_1, _2, _3) where
+  toDefinitions (a, b, c) = toDefinitions a <> toDefinitions b <> toDefinitions c
+
+instance (ToDefinitions env _1, ToDefinitions env _2, ToDefinitions env _3, ToDefinitions env _4) => ToDefinitions env (_1, _2, _3, _4) where
+  toDefinitions (a, b, c, d) = toDefinitions a <> toDefinitions b <> toDefinitions c <> toDefinitions d
+
 addInterceptors :: Interceptors -> ConfigM actEnv ()
 addInterceptors i = ConfigM $ modify' $ \conf -> conf
   { interceptorConfig = i <> interceptorConfig conf
   }
 
--- | Register a 'Workflow' with the worker.
-addWorkflow :: HasWorkflowDefinition def => def -> ConfigM actEnv ()
-addWorkflow hasDef = ConfigM $ modify' $ \conf -> conf
-  { wfDefs = HashMap.insert (workflowName def) def (wfDefs conf) 
-  }
-  where
-    def = workflowDefinition hasDef
-
 addErrorConverter :: (Exception e) => (e -> ApplicationFailure) -> ConfigM actEnv ()
 addErrorConverter f = ConfigM $ modify' $ \conf -> conf
   { applicationErrorConverters = ApplicationFailureHandler f : applicationErrorConverters conf
   }
-
--- | Register an 'Activity' with the worker.
-addActivity :: HasActivityDefinition def => def -> ConfigM (ActivityDefinitionEnv def) ()
-addActivity def = ConfigM $ modify' $ \conf -> conf
-  { actDefs = HashMap.insert 
-      act.activityName 
-      act
-      conf.actDefs
-  }
-  where
-    act = activityDefinition def
 
 modifyCore :: (Core.WorkerConfig -> Core.WorkerConfig) -> ConfigM actEnv ()
 modifyCore f = ConfigM $ modify' $ \conf -> conf

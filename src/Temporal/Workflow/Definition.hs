@@ -19,7 +19,6 @@
 module Temporal.Workflow.Definition 
   ( HasWorkflowDefinition(..)
   , WorkflowDefinition(..) -- TODO, only export the type, not the constructor from this module
-  , ValidWorkflowFunction(..) -- TODO, move to internal
   , KnownWorkflow(..)
   , SignalRef(..)
   , SignalDefinition(..)
@@ -59,14 +58,6 @@ class HasWorkflowDefinition a where
 
 instance HasWorkflowDefinition WorkflowDefinition where
   workflowDefinition = id
-
-
-data ValidWorkflowFunction = forall codec f. 
-  ( f ~ (ArgsOf f :->: Workflow (ResultOf Workflow f))
-  , FunctionSupportsCodec codec (ArgsOf f) (ResultOf Workflow f)
-  , RequireCallStack
-  ) => 
-  ValidWorkflowFunction
 
 class WorkflowRef (f :: Type) where
   type WorkflowArgs f :: [Type]

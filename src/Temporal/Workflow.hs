@@ -227,7 +227,7 @@ import qualified Data.Vector as V
 import Lens.Family2
 import RequireCallStack
 import System.Random.Stateful
-import Temporal.Activity.Definition (Activity)
+import Temporal.Activity.Definition (Activity, KnownActivity(..))
 import Temporal.Common
 import Temporal.Common.TimeoutType
 import Temporal.Exception
@@ -271,15 +271,6 @@ the Worker sends the results back to the Temporal Cluster as part of the Activit
 The Event is added to the Workflow Execution's Event History. 
 -}
 
-
-data KnownActivity (args :: [Type]) (result :: Type) = forall codec. 
-  ( Codec codec result
-  , GatherArgs codec args
-  , Typeable result
-  ) => KnownActivity
-        { knownActivityCodec :: codec
-        , knownActivityName :: Text
-        }
 
 class ActivityRef (f :: Type) where
   type ActivityArgs f :: [Type]

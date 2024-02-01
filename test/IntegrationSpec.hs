@@ -286,8 +286,8 @@ testRefs = refs defaultCodec testImpls
 testDefs :: Defs () WorkflowTests
 testDefs = defs defaultCodec testImpls
 
-testConf :: ConfigM () ()
-testConf = defsToConfig testDefs
+testConf :: Definitions ()
+testConf = collectTemporalDefinitions testDefs
 
 mkBaseConf :: Interceptors -> IO (ConfigM () (), W.TaskQueue)
 mkBaseConf interceptors = do
@@ -304,10 +304,8 @@ needsClient :: SpecWith TestEnv
 needsClient = do
   describe "Workflow" $ do
     specify "should run a workflow" $ \TestEnv{..} -> do
-      let conf = configure () $ do
+      let conf = configure () testConf $ do
             baseConf
-            testConf
-
       withWorker conf $ do
         let opts = (C.workflowStartOptions taskQueue)
               { C.timeouts = C.TimeoutOptions
@@ -320,62 +318,55 @@ needsClient = do
           `shouldReturn` ()
     describe "race" $ do
       specify "block on left side works" $ \TestEnv{..} -> do
-        let conf = configure () $ do
+        let conf = configure () testConf $ do
               baseConf
-              testConf
         withWorker conf $ do
           let opts = C.workflowStartOptions taskQueue 
           C.execute client testRefs.raceBlockOnLeftSideWorks opts
             `shouldReturn` Right True
 
       specify "block on both side works" $ \TestEnv{..} -> do
-        let conf = configure () $ do
+        let conf = configure () testConf $ do
               baseConf
-              testConf
         withWorker conf $ do
           let opts = C.workflowStartOptions taskQueue
           C.execute client testRefs.raceBlockOnBothSidesWorks opts
             `shouldReturn` Right True
 
       specify "throws immediately when either side throws" $ \TestEnv{..} -> do
-        let conf = configure () $ do
+        let conf = configure () testConf $ do
               baseConf
-              testConf
         withWorker conf $ do
           let opts = C.workflowStartOptions taskQueue
           C.execute client testRefs.raceThrowsRhsErrorWhenLhsBlocked opts
             `shouldThrow` (== WorkflowExecutionFailed)
 
       specify "treats error as ok if LHS returns immediately" $ \TestEnv{..} -> do
-        let conf = configure () $ do
+        let conf = configure () testConf $ do
               baseConf
-              testConf
         withWorker conf $ do
           let opts = C.workflowStartOptions taskQueue
           C.execute client testRefs.raceIgnoresRhsErrorOnLhsSuccess opts
             `shouldReturn` Left True
     describe "Activities" $ do
       specify "should run a basic activity without issues" $ \TestEnv{..} -> do
-        let conf = configure () $ do
+        let conf = configure () testConf $ do
               baseConf
-              testConf
+              
         withWorker conf $ do
           let opts = C.workflowStartOptions taskQueue
           C.execute client testRefs.basicActivityWf opts
             `shouldReturn` 1
       specify "heartbeat works" $ \TestEnv{..} -> do
-        let conf = configure () $ do
+        let conf = configure () testConf $ do
               baseConf
-              testConf
-              
         withWorker conf $ do
           let opts = C.workflowStartOptions taskQueue
           C.execute client testRefs.runHeartbeat opts
             `shouldReturn` 1
       specify "should properly handle faulty workflows" $ \TestEnv{..} -> do
-        let conf = configure () $ do
+        let conf = configure () testConf $ do
               baseConf
-              testConf
         withWorker conf $ do
           let opts = C.workflowStartOptions taskQueue
           C.execute client testRefs.faultyWorkflow opts
@@ -398,10 +389,8 @@ needsClient = do
               W.wait h1 `Catch.catch` \(_ :: ActivityCancelled) -> pure 1
 
             wf = W.provideWorkflow defaultCodec "activityCancellation" testFn
-            conf = configure () $ do
+            conf = configure () (wf, testActivityAct) $ do
               baseConf
-              addWorkflow wf
-              addActivity testActivityAct
         withWorker conf $ do
           let opts = (C.workflowStartOptions taskQueue)
                 { C.timeouts = C.TimeoutOptions
@@ -432,10 +421,8 @@ needsClient = do
               W.wait h1 `Catch.catch` \(_ :: ActivityCancelled) -> pure 1
 
             wf = W.provideWorkflow defaultCodec "activityCancellationOnHeartbeat" testFn
-            conf = configure () $ do
+            conf = configure () (wf, testActivityAct) $ do
               baseConf
-              addWorkflow wf
-              addActivity testActivityAct
         withWorker conf $ do
           let opts = (C.workflowStartOptions taskQueue)
                 { C.timeouts = C.TimeoutOptions
@@ -455,9 +442,9 @@ needsClient = do
         let testFn :: Int -> Text -> Bool -> MyWorkflow (Int, Text, Bool)
             testFn a b c = pure (a, b, c)
             wf = W.provideWorkflow defaultCodec "test" testFn
-            conf = configure () $ do
+            conf = configure () wf $ do
               baseConf
-              addWorkflow wf
+              
         withWorker conf $ do
           let opts = C.workflowStartOptions taskQueue
           C.execute client wf.reference opts 1 "two" False
@@ -523,9 +510,8 @@ needsClient = do
               t3 <- W.now
               pure (t1, t2, t3)
             wf = W.provideWorkflow defaultCodec "test" testFn
-            conf = configure () $ do
+            conf = configure () wf $ do
               baseConf
-              addWorkflow wf
         withWorker conf $ do
           let opts = C.workflowStartOptions taskQueue
           (t1, t2, t3) <- C.execute client wf.reference opts
@@ -552,10 +538,9 @@ needsClient = do
               $(logDebug) "got child workflow result"
               pure res
             parentWf = W.provideWorkflow defaultCodec "basicInvokeChildWorkflow" parentWorkflow
-            conf = configure () $ do
+            conf = configure () (isEventWf, parentWf) $ do
               baseConf
-              addWorkflow isEventWf
-              addWorkflow parentWf
+              
         withWorker conf $ do
           let opts = (C.workflowStartOptions taskQueue)
                 { C.workflowId = Just $ W.WorkflowId parentId
@@ -578,10 +563,9 @@ needsClient = do
               childWorkflow <- W.startChildWorkflow bustedWf.reference W.defaultChildWorkflowOptions
               W.waitChildWorkflowResult childWorkflow
             parentWf = W.provideWorkflow defaultCodec "parent" parentWorkflow
-            conf = configure () $ do
+            conf = configure () (bustedWf, parentWf) $ do
               baseConf
-              addWorkflow bustedWf
-              addWorkflow parentWf
+              
         withWorker conf $ do
           let opts = (C.workflowStartOptions taskQueue)
                 { C.workflowId = Just $ W.WorkflowId parentId
@@ -604,10 +588,9 @@ needsClient = do
               result <- Catch.try $ W.waitChildWorkflowResult childWorkflow
               pure $ show (result :: Either SomeException ())
             parentWf = W.provideWorkflow defaultCodec "immediateCancelTestParent" parentWorkflow
-            conf = configure () $ do
+            conf = configure () (childWf, parentWf) $ do
               baseConf
-              addWorkflow childWf
-              addWorkflow parentWf
+              
         withWorker conf $ do
           let opts = (C.workflowStartOptions taskQueue)
                 { C.workflowId = Just $ W.WorkflowId parentId
@@ -630,10 +613,8 @@ needsClient = do
               result <- Catch.try $ W.waitChildWorkflowResult childWorkflow
               pure $ show (result :: Either SomeException ())
             parentWf = W.provideWorkflow defaultCodec "cancelTestParent" parentWorkflow
-            conf = configure () $ do
+            conf = configure () (childWf, parentWf) $ do
               baseConf
-              addWorkflow childWf
-              addWorkflow parentWf
         withWorker conf $ do
           let opts = (C.workflowStartOptions taskQueue)
                 { C.workflowId = Just $ W.WorkflowId parentId
@@ -659,9 +640,9 @@ needsClient = do
               W.setQueryHandler echoQuery $ \msg -> pure msg
               W.sleep $ seconds 2
             wf = W.provideWorkflow defaultCodec "queryWorkflow" workflow
-            conf = configure () $ do
+            conf = configure () wf $ do
               baseConf
-              addWorkflow wf
+              
         inSpan testTracer "Query.works" defaultSpanArguments $ do
           withWorker conf $ do
             let opts = C.workflowStartOptions taskQueue
@@ -679,9 +660,8 @@ needsClient = do
               W.setQueryHandler echoQuery $ \msg -> pure msg
               W.sleep $ seconds 5
             wf = W.provideWorkflow defaultCodec "notFoundQueryWorkflow" workflow
-            conf = configure () $ do
+            conf = configure () wf $ do
               baseConf
-              addWorkflow wf
         withWorker conf $ do
           let opts = C.workflowStartOptions taskQueue
           h <- C.start client wf.reference opts
@@ -691,9 +671,8 @@ needsClient = do
       -- specify "query and unblock" pending
     describe "Await condition" $ do
       xit "signal handlers can unblock workflows" $ \TestEnv{..} -> do
-        let conf = configure () $ do
+        let conf = configure () testConf $ do
               baseConf
-              testConf
         withWorker conf $ do
           let opts = C.workflowStartOptions taskQueue
           wfH <- C.start client testRefs.workflowWaitConditionWorks opts
@@ -702,9 +681,9 @@ needsClient = do
 
       it "works in signal handlers" $ \_ -> pending
       it "works in Workflows" $ \TestEnv{..} -> do
-        let conf = configure () $ do
+        let conf = configure () testConf $ do
               baseConf
-              testConf
+              
         withWorker conf $ do
           let opts = C.workflowStartOptions taskQueue
           C.execute client testRefs.simpleWait opts `shouldReturn` ()
@@ -717,9 +696,8 @@ needsClient = do
               later <- W.now
               pure (later > earlier) 
             wf = W.provideWorkflow defaultCodec "sleepy" workflow
-            conf = configure () $ do
+            conf = configure () wf $ do
               baseConf
-              addWorkflow wf
         withWorker conf $ do
           let opts = C.workflowStartOptions taskQueue
           C.execute client wf.reference opts
@@ -736,9 +714,9 @@ needsClient = do
               later <- W.now
               pure (later > earlier) 
             wf = W.provideWorkflow defaultCodec "timer" workflow
-            conf = configure () $ do
+            conf = configure () wf $ do
               baseConf
-              addWorkflow wf
+              
         withWorker conf $ do
           let opts = C.workflowStartOptions taskQueue
           C.execute client wf.reference opts
@@ -752,9 +730,8 @@ needsClient = do
               W.wait t
               pure True
             wf = W.provideWorkflow defaultCodec "timerAndCancelImmediately" workflow
-            conf = configure () $ do
+            conf = configure () wf $ do
               baseConf
-              addWorkflow wf
         withWorker conf $ do
           let opts = (C.workflowStartOptions taskQueue)
                 { C.timeouts = C.TimeoutOptions
@@ -775,9 +752,9 @@ needsClient = do
               W.wait t
               pure True
             wf = W.provideWorkflow defaultCodec "timerAndCancelWithDelay" workflow
-            conf = configure () $ do
+            conf = configure () wf $ do
               baseConf
-              addWorkflow wf
+              
         withWorker conf $ do
           let opts = (C.workflowStartOptions taskQueue)
                 { C.timeouts = C.TimeoutOptions
@@ -795,9 +772,8 @@ needsClient = do
               isPatched <- W.patched (W.PatchId "wibble")
               pure isPatched
             wf = W.provideWorkflow defaultCodec "patchedWorkflow" workflow
-            conf = configure () $ do
+            conf = configure () wf $ do
               baseConf
-              addWorkflow wf
         withWorker conf $ do
           let opts = (C.workflowStartOptions taskQueue)
                 { C.timeouts = C.TimeoutOptions
@@ -814,9 +790,9 @@ needsClient = do
               W.deprecatePatch (W.PatchId "wibble")
               pure True
             wf = W.provideWorkflow defaultCodec "deprecatedPatchedWorkflow" workflow
-            conf = configure () $ do
+            conf = configure () wf $ do
               baseConf
-              addWorkflow wf
+              
         withWorker conf $ do
           let opts = (C.workflowStartOptions taskQueue)
                 { C.timeouts = C.TimeoutOptions
@@ -838,9 +814,9 @@ needsClient = do
             i <- W.info
             pure $ W.rawWorkflowType i.workflowType
           wf = W.provideWorkflow defaultCodec "readWorkflowInfo" workflow
-          conf = configure () $ do
+          conf = configure () wf $ do
             baseConf
-            addWorkflow wf
+            
       withWorker conf $ do
         let opts = (C.workflowStartOptions taskQueue)
               { C.timeouts = C.TimeoutOptions
@@ -864,9 +840,8 @@ needsClient = do
             i <- W.info
             pure (i.searchAttributes :: Map Text SearchAttributeType)
           wf = W.provideWorkflow defaultCodec "readWorkflowInfo" workflow
-          conf = configure () $ do
+          conf = configure () wf $ do
             baseConf
-            addWorkflow wf
       withWorker conf $ do
         let initialAttrs = Map.fromList
               [ ("attr1", toSearchAttribute True)
@@ -893,9 +868,9 @@ needsClient = do
             i <- W.info
             pure (i.searchAttributes :: Map Text SearchAttributeType)
           wf = W.provideWorkflow defaultCodec "upsertWorkflowInfo" workflow
-          conf = configure () $ do
+          conf = configure () wf $ do
             baseConf
-            addWorkflow wf
+            
       withWorker conf $ do
         let opts = (C.workflowStartOptions taskQueue)
               { C.timeouts = C.TimeoutOptions
@@ -917,9 +892,8 @@ needsClient = do
   --     specify "follows chain of execution" pending
   describe "ContinueAsNew" $ do
     specify "works" $ \TestEnv{..} -> do
-      let conf = configure () $ do
+      let conf = configure () testConf $ do
             baseConf
-            testConf
       withWorker conf $ do
         let opts = (C.workflowStartOptions taskQueue)
               { C.timeouts = C.TimeoutOptions
@@ -947,12 +921,14 @@ needsClient = do
               ((W.defaultStartActivityOptions $ W.StartToClose infinity) { W.activityId = Just $ W.ActivityId "woejfwoefijweof"})
               command
 
-          conf = configure () $ do
+          defs = 
+            ( activityDefinition taskMainActivity
+            , workflowDefinition taskMainWorkflow
+            , testConf
+            )
+          conf = configure () defs $ do
             baseConf
-            testConf
 
-            addActivity taskMainActivity
-            addWorkflow taskMainWorkflow
 
       withWorker conf $ do
         let opts = (C.workflowStartOptions taskQueue)
@@ -973,9 +949,9 @@ needsClient = do
   --     specify "works as intended and returns correct runId" pending
   describe "RetryPolicy" $ do
     specify "is used for retryable failures" $ \TestEnv{..} -> do
-      let conf = configure () $ do
+      let conf = configure () testConf $ do
             baseConf
-            testConf
+            
       withWorker conf $ do
         let opts = (C.workflowStartOptions taskQueue)
               { C.timeouts = C.TimeoutOptions
@@ -988,9 +964,9 @@ needsClient = do
           -- `shouldThrow` (== WorkflowExecutionFailed)
 
     specify "ignored for non-retryable failures" $ \TestEnv{..} -> do
-      let conf = configure () $ do
+      let conf = configure () testConf $ do
             baseConf
-            testConf
+            
       withWorker conf $ do
         let opts = (C.workflowStartOptions taskQueue)
               { C.timeouts = C.TimeoutOptions
