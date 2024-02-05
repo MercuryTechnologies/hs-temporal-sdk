@@ -23,7 +23,7 @@ module Temporal.Client
     WorkflowClient
   , workflowClient
   -- * Running Workflows
-  , WorkflowStartOptions(..)
+  , StartWorkflowOptions(..)
   , TimeoutOptions(..)
   , workflowStartOptions
   , Temporal.Client.start
@@ -135,7 +135,7 @@ execute
   :: forall m wf. (MonadIO m, WorkflowRef wf)
   => WorkflowClient 
   -> wf
-  -> WorkflowStartOptions
+  -> StartWorkflowOptions
   -> (WorkflowArgs wf :->: m (WorkflowResult wf))
 execute c wf opts = case workflowRef wf of
   k@(KnownWorkflow codec _) -> do
@@ -361,7 +361,7 @@ startFromPayloads
   :: MonadIO m
   => WorkflowClient
   -> KnownWorkflow args result
-  -> WorkflowStartOptions
+  -> StartWorkflowOptions
   -> [Payload]
   -> m (WorkflowHandle result)
 startFromPayloads c k@(KnownWorkflow codec _) opts payloads = do
@@ -437,7 +437,7 @@ start
   :: forall m wf. (MonadIO m, WorkflowRef wf)
   => WorkflowClient
   -> wf
-  -> WorkflowStartOptions
+  -> StartWorkflowOptions
   -> (WorkflowArgs wf :->: m (WorkflowHandle (WorkflowResult wf)))
 start c wf opts = case workflowRef wf of 
   k@(KnownWorkflow codec _) -> do
@@ -454,7 +454,7 @@ signalWithStart
   :: forall wf sigArgs m. (MonadIO m, WorkflowRef wf)
   => WorkflowClient 
   -> wf
-  -> WorkflowStartOptions 
+  -> StartWorkflowOptions 
   -> SignalRef sigArgs 
   -> (WorkflowArgs wf :->: (sigArgs :->: m (WorkflowHandle (WorkflowResult wf))))
 signalWithStart c wf opts (SignalRef n sigCodec) = case workflowRef wf of

@@ -9,7 +9,7 @@ import Temporal.Workflow.Definition
 import Temporal.Core.Client (Client)
 
 -- | Configuration parameters for starting a workflow execution.
-data WorkflowStartOptions = WorkflowStartOptions
+data StartWorkflowOptions = StartWorkflowOptions
   { workflowId :: Maybe WorkflowId
   -- ^ A Workflow Id is a customizable, application-level identifier for a Workflow Execution that is unique to an Open Workflow Execution within a Namespace.
   --
@@ -88,8 +88,8 @@ data WorkflowStartOptions = WorkflowStartOptions
 --
 -- It is recommend to specify 'WorkflowId' in most cases, as it is used to uniquely identify a 'Workflow' execution,
 -- but if one is not specified then a random UUID will be generated.
-workflowStartOptions :: TaskQueue -> WorkflowStartOptions
-workflowStartOptions tq = WorkflowStartOptions
+workflowStartOptions :: TaskQueue -> StartWorkflowOptions
+workflowStartOptions tq = StartWorkflowOptions
   { workflowId = Nothing
   , taskQueue = tq
   , followRuns = True
@@ -182,11 +182,11 @@ data SignalWithStartWorkflowInput = SignalWithStartWorkflowInput
   , signalWithStartArgs :: [Payload]
   , signalWithStartSignalName :: Text
   , signalWithStartSignalArgs :: [Payload]
-  , signalWithStartOptions :: WorkflowStartOptions
+  , signalWithStartOptions :: StartWorkflowOptions
   }
 
 data ClientInterceptors = ClientInterceptors
-  { start :: WorkflowType -> WorkflowStartOptions -> [Payload] -> (WorkflowType -> WorkflowStartOptions -> [Payload] -> IO (WorkflowHandle Payload)) -> IO (WorkflowHandle Payload)
+  { start :: WorkflowType -> StartWorkflowOptions -> [Payload] -> (WorkflowType -> StartWorkflowOptions -> [Payload] -> IO (WorkflowHandle Payload)) -> IO (WorkflowHandle Payload)
   , queryWorkflow :: QueryWorkflowInput -> (QueryWorkflowInput -> IO (Either QueryRejected Payload)) -> IO (Either QueryRejected Payload)
   , signalWithStart :: SignalWithStartWorkflowInput -> (SignalWithStartWorkflowInput -> IO (WorkflowHandle Payload)) -> IO (WorkflowHandle Payload)
   -- TODO

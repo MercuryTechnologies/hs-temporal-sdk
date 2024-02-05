@@ -1107,12 +1107,6 @@ waitCondition c@(Condition m) = do
     (,) <$> pure sat <*> readIORef sRef
   if conditionSatisfied
     then pure ()
-    -- TODO, we don't really want nub here for big workflows, as it could
-    -- lead to some nasty performance regressions. Unfortunately, IORef
-    -- only has an Eq instance. We will need to introduce a new sequence
-    -- type for workflows used when creating a StateVar. That would let us
-    -- ensure that we use an appropriate type like IntSet or something
-    -- that has better perf characteristics.
     else go touchedVars
   where
     -- When blocked, the condition needs to be rechecked every time a signal is received

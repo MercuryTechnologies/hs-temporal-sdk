@@ -199,7 +199,7 @@ import Temporal.Exception
 import qualified Temporal.Core.Client.WorkflowService as Core
 import Temporal.SearchAttributes
 import Temporal.SearchAttributes.Internal
-import Temporal.Client (WorkflowStartOptions(..), TimeoutOptions(..))
+import Temporal.Client (StartWorkflowOptions(..), TimeoutOptions(..))
 import Temporal.Client
 import Temporal.Workflow
 import Lens.Family2
@@ -574,7 +574,7 @@ data ScheduleAction
 
 mkScheduleAction :: forall wf m. (MonadIO m, WorkflowRef wf) 
   => wf 
-  -> WorkflowStartOptions 
+  -> StartWorkflowOptions 
   -- ^ All fields of WorkflowStartOptions are valid except for the workflow id reuse policy and cron string.
   --
   -- The workflow id will generally have a timestamp appended for uniqueness.

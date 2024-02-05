@@ -113,7 +113,7 @@ instance Monoid Interceptors where
 
 data ScheduleClientInterceptors = ScheduleClientInterceptors
   { -- | Unlike the other interceptors, this one is invoked on the construction of the workflow start options
-    scheduleWorkflowAction :: WorkflowStartOptions -> [Payload] -> IO WorkflowStartOptions
+    scheduleWorkflowAction :: StartWorkflowOptions -> [Payload] -> IO StartWorkflowOptions 
   }
 
 instance Semigroup ScheduleClientInterceptors where

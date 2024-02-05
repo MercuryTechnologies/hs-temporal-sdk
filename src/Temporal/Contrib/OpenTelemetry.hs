@@ -38,7 +38,7 @@ import Temporal.Common
 -- TODO rework WorkflowExitVariant to not expose internals
 import Temporal.Workflow.Types
 import Temporal.Client.Types 
-  ( WorkflowStartOptions (..)
+  ( StartWorkflowOptions (..)
   )
 import Prelude hiding (span)
 
@@ -253,14 +253,14 @@ makeOpenTelemetryInterceptor = do
       }
     , activityOutboundInterceptors = ActivityOutboundInterceptor
     , clientInterceptors = ClientInterceptors
-      { start = \ty WorkflowStartOptions{..} ps next -> do
+      { start = \ty StartWorkflowOptions{..} ps next -> do
         let spanArgs = defaultSpanArguments
               { kind = Client
               }
         inSpan'' tracer ("StartWorkflow:" <> rawWorkflowType ty) spanArgs $ \_ -> do
           ctxt <- getContext
           hdrs <- inject headersPropagator ctxt headers
-          next ty (WorkflowStartOptions {headers=hdrs, ..}) ps
+          next ty (StartWorkflowOptions {headers=hdrs, ..}) ps
       , queryWorkflow = \input next -> do
         let spanArgs = defaultSpanArguments
               { kind = Client
