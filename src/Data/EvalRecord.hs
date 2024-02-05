@@ -160,6 +160,7 @@ module Data.EvalRecord
   , zipWithC
   , zipWith3C
   , zipWith4C
+  , pureC
   , Data.EvalRecord.mempty
     -- * Reexports
   , module Fcf
