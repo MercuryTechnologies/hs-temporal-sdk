@@ -305,7 +305,7 @@ startActivityFromPayloads
   :: forall args result. RequireCallStack 
   => KnownActivity args result 
   -> StartActivityOptions 
-  -> [IO Payload] 
+  -> [IO Payload]
   -> Workflow (Task result)
 startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift $ do
   runInIO <- askRunInIO

@@ -141,7 +141,6 @@ data StartChildWorkflowOptions = StartChildWorkflowOptions
   , workflowIdReusePolicy :: WorkflowIdReusePolicy
   , workflowId :: Maybe WorkflowId
   , taskQueue :: Maybe TaskQueue
-  -- TODO, wonder if we should allow escaping the namespace of the parent workflow
   }
 
 defaultChildWorkflowOptions :: StartChildWorkflowOptions
