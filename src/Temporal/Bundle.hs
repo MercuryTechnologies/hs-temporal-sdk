@@ -14,6 +14,7 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 {-# LANGUAGE InstanceSigs #-}
 -- | 
@@ -144,6 +145,8 @@ import Data.EvalRecord
 import qualified Data.EvalRecord as Rec
 import Fcf
 
+import Control.Monad.Catch
+import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Functor.Const
 import Data.Functor.Identity
@@ -162,10 +165,12 @@ import Temporal.Workflow.Types
 import Temporal.Payload
 import Temporal.Activity
 import Temporal.Activity.Definition
+import Temporal.Core.Client
 import Temporal.Worker
 import Temporal.Workflow 
 import Temporal.Workflow.Definition
 import Temporal.Workflow.Internal.Monad
+import UnliftIO
 
 type family ApplyRef (original :: Type) (f :: Type) where
   ApplyRef original (Workflow result) = KnownWorkflow (ArgsOf original) result
@@ -329,12 +334,132 @@ collectTemporalDefinitions = Rec.foldMapC @(Rec.ClassF (ToDefinitions actEnv) f)
     mkConf :: forall a. ToDefinitions actEnv (f @@ a) => Rec.Metadata a -> f @@ a -> Definitions actEnv
     mkConf _ = toDefinitions
 
--- class UseActivityAsWorkflow (f :: Type) where
---   useActivityAsWorkflow :: f -> Workflow (InnerActivityResult f)
---   useActivityAsWorkflow = undefined
---   use
+type family ActivityOptionsFieldType (f :: Type) :: Type where
+  ActivityOptionsFieldType (Activity env result) = StartActivityOptions
+  ActivityOptionsFieldType (_ -> b) = ActivityOptionsFieldType b
+  ActivityOptionsFieldType (Workflow a) = StartChildWorkflowOptions
 
--- proxyActivities :: StartActivityOptions -> 
+class FieldToActivityOptionDefaults f where
+  activityOptionDefaults 
+    :: Proxy f 
+    -> StartActivityOptions 
+    -> StartChildWorkflowOptions
+    -> ActivityOptionsFieldType f
+
+instance FieldToActivityOptionDefaults b => FieldToActivityOptionDefaults (a -> b) where
+  activityOptionDefaults _ act wf = activityOptionDefaults (Proxy @b) act wf
+
+instance FieldToActivityOptionDefaults (Activity env result) where
+  activityOptionDefaults _ opts _ = opts
+
+instance FieldToActivityOptionDefaults (Workflow a) where
+  activityOptionDefaults _ _ opts = opts
+
+
+data ActivityOptionDefaults :: Type -> Exp Type
+
+type instance Eval (ActivityOptionDefaults f) = ActivityOptionsFieldType f
+
+-- | Define a record that provides the same default options for all activities in the a record.
+--
+-- This is useful when you want to provide the same default options for all activities in a record.
+-- For example, you might want to provide a default timeout or non-retryable error type list for all activities.
+provideDefaultOptions 
+  :: forall rec
+  .  (ApplicativeRec rec, ConstraintsRec rec, AllRec FieldToActivityOptionDefaults rec) 
+  => StartActivityOptions 
+  -> StartChildWorkflowOptions
+  -> rec ActivityOptionDefaults
+provideDefaultOptions act wf = Rec.mapC 
+  @FieldToActivityOptionDefaults 
+  mkDefaults 
+  emptyBase
+  where
+    mkDefaults :: forall a. FieldToActivityOptionDefaults a => Rec.Metadata a -> () -> ActivityOptionDefaults @@ a
+    mkDefaults meta _ = activityOptionDefaults (proxyFromMeta meta) act wf 
+    proxyFromMeta :: forall a. Rec.Metadata a -> Proxy a
+    proxyFromMeta = const Proxy
+    emptyBase :: rec (ConstFn ())
+    emptyBase = Rec.pure $ \_ -> ()
+
+data InWorkflowProxies :: Type -> Type -> Exp Type
+
+type instance Eval (InWorkflowProxies ProxySync (KnownWorkflow args res)) = args :->: Workflow res
+type instance Eval (InWorkflowProxies ProxyAsync (KnownWorkflow args res)) = args :->: Workflow (ChildWorkflowHandle res)
+type instance Eval (InWorkflowProxies ProxySync (KnownActivity args res)) = args :->: Workflow res
+type instance Eval (InWorkflowProxies ProxyAsync (KnownActivity args res)) = args :->: Workflow (Task res)
+
+data RefStartOptions :: Type -> Exp Type
+type instance Eval (RefStartOptions (KnownWorkflow _ _)) = StartChildWorkflowOptions
+type instance Eval (RefStartOptions (KnownActivity _ _)) = StartActivityOptions
+
+class UseAsInWorkflowProxy synchronicity ref where
+  useAsInWorkflowProxy 
+    :: RequireCallStack 
+    => synchronicity 
+    -> ref 
+    -> RefStartOptions @@ ref 
+    -> InWorkflowProxies synchronicity @@ ref
+
+instance UseAsInWorkflowProxy ProxySync (KnownActivity args res) where
+  useAsInWorkflowProxy _ = executeActivity 
+instance UseAsInWorkflowProxy ProxyAsync (KnownActivity args res) where
+  useAsInWorkflowProxy _ = startActivity 
+
+instance UseAsInWorkflowProxy ProxySync (KnownWorkflow args res) where
+  useAsInWorkflowProxy _ = executeChildWorkflow
+instance UseAsInWorkflowProxy ProxyAsync (KnownWorkflow args res) where
+  useAsInWorkflowProxy _ = startChildWorkflow
+
+data ProxySync = ProxySync
+data ProxyAsync = ProxyAsync
+
+-- | Combine a record of references with a record of default options to give a record of
+-- functions that can be used to start activities and workflows. This is just a convenience
+-- function that makes it so that you don't have to call 'executeActivity' or 'executeChildWorkflow'
+-- directly as often.
+--
+-- 
+-- inWorkflowProxies 
+--   :: forall synchronicity rec
+--   .  (ConstraintsRec rec, Rec.AllRecF (UseAsInWorkflowProxy synchronicity) Ref rec, ApplicativeRec rec)
+--   => synchronicity
+--   -> rec ActivityOptionDefaults 
+--   -> rec Ref 
+--   -> rec (InWorkflowProxies synchronicity)
+-- inWorkflowProxies s = Rec.zipWithC @(UseAsInWorkflowProxy synchronicity) $ \meta opt ref -> 
+--   useAsInWorkflowProxy s ref opt
+
+
+type Workers rec = rec (ConstFn Worker)
+type WorkerConfigs env rec = rec (ConstFn (WorkerConfig env))
+
+
+-- | Start a Temporal worker for each task queue specified in the MercuryTaskQueues record.
+--
+-- This function starts each worker concurrently, waits for them to initialize, and then returns
+-- a worker for each task queue.
+startTaskQueues :: forall rec m env. (TraversableRec rec, MonadLoggerIO m, MonadUnliftIO m, MonadCatch m) => Client -> WorkerConfigs env rec -> m (Workers rec)
+startTaskQueues client conf = startWorkers conf >>= awaitWorkersStart
+  where
+    startWorkers :: rec (ConstFn (WorkerConfig env)) -> m (rec (ConstFn (Async Worker)))
+    startWorkers = Rec.traverse (\_ workerConfig -> async (startWorker client workerConfig))
+    awaitWorkersStart :: rec (ConstFn (Async Worker)) -> m (rec (ConstFn Worker))
+    awaitWorkersStart = Rec.traverse (\_ workerStartupThread -> UnliftIO.wait workerStartupThread)
+
+-- | Stop each Temporal worker for each task queue specified in the MercuryTaskQueues record.
+--
+-- This function stops each worker concurrently, waits for them to complete shutdown (gracefully or not), and then returns.
+shutdownTaskQueues :: forall rec. (TraversableRec rec) => Workers rec -> IO ()
+shutdownTaskQueues workers =
+  stopWorkers workers
+    >>= awaitWorkersStop
+  where
+    stopWorkers :: rec (ConstFn Worker) -> IO (rec (ConstFn (Async ())))
+    stopWorkers = Rec.traverse (\_ worker -> async (shutdown worker))
+    awaitWorkersStop :: rec (ConstFn (Async ())) -> IO ()
+    awaitWorkersStop = Rec.traverse_ (\_ workerShutdownThread -> UnliftIO.wait workerShutdownThread)
+
 
 -- data ProxyActivity :: k -> Exp k
 
