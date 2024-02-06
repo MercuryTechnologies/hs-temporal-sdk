@@ -96,6 +96,7 @@ ghc-options:
 - +RTS -A128m -n2m -RTS
 - -fdefer-diagnostics
 - -fprint-explicit-kinds
+- -Wno-redundant-constraints
 library:
   source-dirs: src
   other-modules:

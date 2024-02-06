@@ -126,12 +126,31 @@ module Temporal.Bundle
   , Def(..)
   , collectTemporalDefinitions
   , Impl
+  , inWorkflowProxies
+  , InWorkflowProxies
+  , RefStartOptions
+  , UseAsInWorkflowProxy(..)
+  , provideDefaultOptions
+  , FieldToStartOptionDefaults(..)
+  , RefStartOptionsType
+  -- * Worker management
+  , startTaskQueues
+  , shutdownTaskQueues
+  , WorkerConfigs
+  , Workers
+  -- * Other utilities
+  , coerceRec
+  , Equate
+  , ProxySync(..)
+  , ProxyAsync(..)
   -- * Reexports
   -- * Constraints
   , CanUseAsRefs
   , CanUseAsDefs
   , RefFromFunction(..)
   , RefFromFunction'(..)
+  , DefFromFunction(..)
+  , DefFromFunction'(..)
   , WorkflowRef(..)
   , ActivityRef(..)
   , InnerActivityResult
@@ -160,7 +179,6 @@ import RequireCallStack
 import Data.String (IsString)
 import Data.Typeable
 import Data.Kind
-import qualified Data.List.NonEmpty as NE
 import Temporal.Workflow.Types
 import Temporal.Payload
 import Temporal.Activity
@@ -209,13 +227,13 @@ instance
   ( FunctionSupportsCodec' Workflow codec original
   , Ref @@ original ~ KnownWorkflow (ArgsOf original) (ResultOf Workflow original)
   ) => RefFromFunction' codec (Workflow result) original where
-  refFromFunction _ codec name f = KnownWorkflow codec $ Text.pack name
+  refFromFunction _ codec name _ = KnownWorkflow codec $ Text.pack name
 
 instance 
   ( FunctionSupportsCodec' (Activity env) codec original
   , Ref @@ original ~ KnownActivity (ArgsOf original) (ResultOf (Activity env) original)
   ) => RefFromFunction' codec (Activity env result) original where
-  refFromFunction _ codec name f = KnownActivity codec $ Text.pack name
+  refFromFunction _ codec name _ = KnownActivity codec $ Text.pack name
 
 instance RefFromFunction' codec b original => RefFromFunction' codec (a -> b) original where
   refFromFunction _ codec name f = refFromFunction (Proxy @b) codec name f
@@ -338,7 +356,7 @@ collectTemporalDefinitions = Rec.foldMapC @(Rec.ClassF (ToDefinitions actEnv) f)
 type family RefStartOptionsType (f :: Type) :: Type where
   RefStartOptionsType (Activity env result) = StartActivityOptions
   RefStartOptionsType (_ -> b) = RefStartOptionsType b
-  RefStartOptionsType (Workflow a) = StartChildWorkflowOptions
+  RefStartOptionsType (Workflow _) = StartChildWorkflowOptions
   RefStartOptionsType (KnownWorkflow _ _) = StartChildWorkflowOptions
   RefStartOptionsType (KnownActivity _ _) = StartActivityOptions
 
@@ -444,7 +462,7 @@ inWorkflowProxies s = Rec.zipWithC @(Rec.ClassF (UseAsInWorkflowProxy synchronic
       -> (RefStartOptions <=< Ref) @@ a 
       -> Ref @@ a 
       -> (InWorkflowProxies synchronicity <=< Ref) @@ a
-    convertToProxies meta opt ref = useAsInWorkflowProxy s ref opt
+    convertToProxies _ opt ref = useAsInWorkflowProxy s ref opt
 
 
 type Workers rec = rec (ConstFn Worker)
@@ -455,7 +473,7 @@ type WorkerConfigs env rec = rec (ConstFn (WorkerConfig env))
 --
 -- This function starts each worker concurrently, waits for them to initialize, and then returns
 -- a worker for each task queue.
-startTaskQueues :: forall rec m env. (TraversableRec rec, MonadLoggerIO m, MonadUnliftIO m, MonadCatch m) => Client -> WorkerConfigs env rec -> m (Workers rec)
+startTaskQueues :: forall rec m env. (TraversableRec rec, MonadLoggerIO m, MonadUnliftIO m) => Client -> WorkerConfigs env rec -> m (Workers rec)
 startTaskQueues client conf = startWorkers conf >>= awaitWorkersStart
   where
     startWorkers :: rec (ConstFn (WorkerConfig env)) -> m (rec (ConstFn (Async Worker)))

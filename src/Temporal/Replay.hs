@@ -22,8 +22,7 @@ module Temporal.Replay
   , readHistoryFromJSONFile
   , feedWorkflowHistoryFromJSONFile
   , HistoryEvent
-
-  , WorkflowId
+  , WorkflowId(..)
   ) where
 import Control.Monad.IO.Class
 import Data.Aeson
