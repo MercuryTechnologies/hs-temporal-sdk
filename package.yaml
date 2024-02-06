@@ -95,7 +95,7 @@ ghc-options:
 - -fwarn-tabs
 - +RTS -A128m -n2m -RTS
 - -fdefer-diagnostics
-
+- -fprint-explicit-kinds
 library:
   source-dirs: src
   other-modules:

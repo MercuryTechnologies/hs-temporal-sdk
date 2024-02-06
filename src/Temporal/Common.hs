@@ -285,3 +285,20 @@ convertToProtoMemo m = defMessage & Message.fields .~ fmap convertToProtoPayload
 
 convertFromProtoMemo :: Message.Memo -> Map Text Payload
 convertFromProtoMemo m = fmap convertFromProtoPayload (m ^. Message.fields)
+
+data TimeoutOptions = TimeoutOptions
+  { executionTimeout :: Maybe Duration
+  -- ^ A Workflow Execution Timeout is the maximum time that a Workflow Execution can be executing (have an Open status) including retries and any usage of Continue As New.
+  --
+  -- The default value is ∞ (infinite). If this timeout is reached, the Workflow Execution changes to a Timed Out status. This timeout is different from the Workflow Run Timeout. This timeout is most commonly used for stopping the execution of a Temporal Cron Job after a certain amount of time has passed.
+  , runTimeout :: Maybe Duration
+  -- ^ A Workflow Run Timeout is the maximum amount of time that a single Workflow Run is restricted to.
+  --
+  -- The default is set to the same value as the Workflow Execution Timeout. This timeout is most commonly used to limit the execution time of a single Temporal Cron Job Execution.
+  --
+  -- If the Workflow Run Timeout is reached, the Workflow Execution is Terminated.
+  , taskTimeout :: Maybe Duration
+  -- ^ A Workflow Task Timeout is the maximum amount of time allowed for a Worker to execute a Workflow Task after the Worker has pulled that Workflow Task from the Task Queue.
+  --
+  -- The default value is 10 seconds. This timeout is primarily available to recognize whether a Worker has gone down so that the Workflow Execution can be recovered on a different Worker. The main reason for increasing the default value would be to accommodate a Workflow Execution that has a very long Workflow Execution History that could take longer than 10 seconds for the Worker to load.
+  }

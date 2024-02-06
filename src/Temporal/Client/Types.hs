@@ -10,17 +10,7 @@ import Temporal.Core.Client (Client)
 
 -- | Configuration parameters for starting a workflow execution.
 data StartWorkflowOptions = StartWorkflowOptions
-  { workflowId :: Maybe WorkflowId
-  -- ^ A Workflow Id is a customizable, application-level identifier for a Workflow Execution that is unique to an Open Workflow Execution within a Namespace.
-  --
-  -- A Workflow Id is meant to be a business-process identifier such as customer identifier or order identifier.
-  --
-  -- A Workflow Id Reuse Policy can be used to manage whether a Workflow Id can be re-used. The Temporal Platform guarantees uniqueness of the Workflow Id within a Namespace based on the Workflow Id Reuse Policy.
-  --
-  -- A Workflow Execution can be uniquely identified across all Namespaces by its Namespace, Workflow Id, and Run Id.
-  --
-  -- If a Workflow Id is not provided, a random UUID is generated.
-  , taskQueue :: TaskQueue
+  { taskQueue :: TaskQueue
   -- ^ A Task Queue is a lightweight, dynamically allocated queue that one or more Worker Entities poll for Tasks.
   --
   -- Task Queues are very lightweight components. Task Queues do not require explicit registration but instead are created on demand when 
@@ -90,8 +80,7 @@ data StartWorkflowOptions = StartWorkflowOptions
 -- but if one is not specified then a random UUID will be generated.
 workflowStartOptions :: TaskQueue -> StartWorkflowOptions
 workflowStartOptions tq = StartWorkflowOptions
-  { workflowId = Nothing
-  , taskQueue = tq
+  { taskQueue = tq
   , followRuns = True
   , workflowIdReusePolicy = Nothing
   , retry = Nothing
@@ -106,23 +95,6 @@ workflowStartOptions tq = StartWorkflowOptions
     }
   , requestEagerExecution = False
   , workflowStartDelay = Nothing
-  }
-
-data TimeoutOptions = TimeoutOptions
-  { executionTimeout :: Maybe Duration
-  -- ^ A Workflow Execution Timeout is the maximum time that a Workflow Execution can be executing (have an Open status) including retries and any usage of Continue As New.
-  --
-  -- The default value is ∞ (infinite). If this timeout is reached, the Workflow Execution changes to a Timed Out status. This timeout is different from the Workflow Run Timeout. This timeout is most commonly used for stopping the execution of a Temporal Cron Job after a certain amount of time has passed.
-  , runTimeout :: Maybe Duration
-  -- ^ A Workflow Run Timeout is the maximum amount of time that a single Workflow Run is restricted to.
-  --
-  -- The default is set to the same value as the Workflow Execution Timeout. This timeout is most commonly used to limit the execution time of a single Temporal Cron Job Execution.
-  --
-  -- If the Workflow Run Timeout is reached, the Workflow Execution is Terminated.
-  , taskTimeout :: Maybe Duration
-  -- ^ A Workflow Task Timeout is the maximum amount of time allowed for a Worker to execute a Workflow Task after the Worker has pulled that Workflow Task from the Task Queue.
-  --
-  -- The default value is 10 seconds. This timeout is primarily available to recognize whether a Worker has gone down so that the Workflow Execution can be recovered on a different Worker. The main reason for increasing the default value would be to accommodate a Workflow Execution that has a very long Workflow Execution History that could take longer than 10 seconds for the Worker to load.
   }
 
 data WorkflowClient = WorkflowClient 
@@ -179,6 +151,7 @@ data QueryRejected
 
 data SignalWithStartWorkflowInput = SignalWithStartWorkflowInput
   { signalWithStartWorkflowType :: WorkflowType
+  , signalWithStartWorkflowId :: WorkflowId
   , signalWithStartArgs :: [Payload]
   , signalWithStartSignalName :: Text
   , signalWithStartSignalArgs :: [Payload]
@@ -186,7 +159,7 @@ data SignalWithStartWorkflowInput = SignalWithStartWorkflowInput
   }
 
 data ClientInterceptors = ClientInterceptors
-  { start :: WorkflowType -> StartWorkflowOptions -> [Payload] -> (WorkflowType -> StartWorkflowOptions -> [Payload] -> IO (WorkflowHandle Payload)) -> IO (WorkflowHandle Payload)
+  { start :: WorkflowType -> WorkflowId -> StartWorkflowOptions -> [Payload] -> (WorkflowType -> WorkflowId -> StartWorkflowOptions -> [Payload] -> IO (WorkflowHandle Payload)) -> IO (WorkflowHandle Payload)
   , queryWorkflow :: QueryWorkflowInput -> (QueryWorkflowInput -> IO (Either QueryRejected Payload)) -> IO (Either QueryRejected Payload)
   , signalWithStart :: SignalWithStartWorkflowInput -> (SignalWithStartWorkflowInput -> IO (WorkflowHandle Payload)) -> IO (WorkflowHandle Payload)
   -- TODO
@@ -198,14 +171,14 @@ data ClientInterceptors = ClientInterceptors
 
 instance Semigroup ClientInterceptors where
   a <> b = ClientInterceptors 
-    { start = \t o ps next -> a.start t o ps $ \t' o' ps' -> b.start t' o' ps' next
+    { start = \t wfId o ps next -> a.start t wfId o ps $ \t' wfId' o' ps' -> b.start t' wfId' o' ps' next
     , queryWorkflow = \i next -> a.queryWorkflow i $ \i' -> b.queryWorkflow i' next
     , signalWithStart = \i next -> a.signalWithStart i $ \i' -> b.signalWithStart i' next
     }
 
 instance Monoid ClientInterceptors where
   mempty = ClientInterceptors
-    (\t o ps next -> next t o ps)
+    (\t wf o ps next -> next t wf o ps)
     (\i next -> next i)
     (\i next -> next i)
 

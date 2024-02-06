@@ -253,14 +253,18 @@ makeOpenTelemetryInterceptor = do
       }
     , activityOutboundInterceptors = ActivityOutboundInterceptor
     , clientInterceptors = ClientInterceptors
-      { start = \ty StartWorkflowOptions{..} ps next -> do
+      { start = \ty wfId StartWorkflowOptions{..} ps next -> do
         let spanArgs = defaultSpanArguments
               { kind = Client
+              , attributes = HashMap.fromList
+                [ ("temporal.workflow_id", toAttribute $ rawWorkflowId wfId)
+                , ("temporal.workflow_type", toAttribute $ rawWorkflowType ty)
+                ]
               }
         inSpan'' tracer ("StartWorkflow:" <> rawWorkflowType ty) spanArgs $ \_ -> do
           ctxt <- getContext
           hdrs <- inject headersPropagator ctxt headers
-          next ty (StartWorkflowOptions {headers=hdrs, ..}) ps
+          next ty wfId (StartWorkflowOptions {headers=hdrs, ..}) ps
       , queryWorkflow = \input next -> do
         let spanArgs = defaultSpanArguments
               { kind = Client

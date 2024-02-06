@@ -308,45 +308,54 @@ needsClient = do
             baseConf
       withWorker conf $ do
         let opts = (C.workflowStartOptions taskQueue)
-              { C.timeouts = C.TimeoutOptions
+              { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+              , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
                   }
               }
-        C.execute client testRefs.shouldRunWorkflowTest opts
+        C.execute client testRefs.shouldRunWorkflowTest "basicWf" opts
           `shouldReturn` ()
     describe "race" $ do
       specify "block on left side works" $ \TestEnv{..} -> do
         let conf = configure () testConf $ do
               baseConf
         withWorker conf $ do
-          let opts = C.workflowStartOptions taskQueue 
-          C.execute client testRefs.raceBlockOnLeftSideWorks opts
+          let opts = (C.workflowStartOptions taskQueue )
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                }
+          C.execute client testRefs.raceBlockOnLeftSideWorks "blockLeftWorks" opts
             `shouldReturn` Right True
 
       specify "block on both side works" $ \TestEnv{..} -> do
         let conf = configure () testConf $ do
               baseConf
         withWorker conf $ do
-          let opts = C.workflowStartOptions taskQueue
-          C.execute client testRefs.raceBlockOnBothSidesWorks opts
+          let opts = (C.workflowStartOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                }
+          C.execute client testRefs.raceBlockOnBothSidesWorks "blockBothWorks" opts
             `shouldReturn` Right True
 
       specify "throws immediately when either side throws" $ \TestEnv{..} -> do
         let conf = configure () testConf $ do
               baseConf
         withWorker conf $ do
-          let opts = C.workflowStartOptions taskQueue
-          C.execute client testRefs.raceThrowsRhsErrorWhenLhsBlocked opts
+          let opts = (C.workflowStartOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                }
+          C.execute client testRefs.raceThrowsRhsErrorWhenLhsBlocked "eitherSideThrows" opts
             `shouldThrow` (== WorkflowExecutionFailed)
 
       specify "treats error as ok if LHS returns immediately" $ \TestEnv{..} -> do
         let conf = configure () testConf $ do
               baseConf
         withWorker conf $ do
-          let opts = C.workflowStartOptions taskQueue
-          C.execute client testRefs.raceIgnoresRhsErrorOnLhsSuccess opts
+          let opts = (C.workflowStartOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                }
+          C.execute client testRefs.raceIgnoresRhsErrorOnLhsSuccess "lhsError" opts
             `shouldReturn` Left True
     describe "Activities" $ do
       specify "should run a basic activity without issues" $ \TestEnv{..} -> do
@@ -354,22 +363,28 @@ needsClient = do
               baseConf
               
         withWorker conf $ do
-          let opts = C.workflowStartOptions taskQueue
-          C.execute client testRefs.basicActivityWf opts
+          let opts = (C.workflowStartOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                }
+          C.execute client testRefs.basicActivityWf "basicActivity" opts
             `shouldReturn` 1
       specify "heartbeat works" $ \TestEnv{..} -> do
         let conf = configure () testConf $ do
               baseConf
         withWorker conf $ do
-          let opts = C.workflowStartOptions taskQueue
-          C.execute client testRefs.runHeartbeat opts
+          let opts = (C.workflowStartOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                }
+          C.execute client testRefs.runHeartbeat "heartbeatWorks" opts
             `shouldReturn` 1
       specify "should properly handle faulty workflows" $ \TestEnv{..} -> do
         let conf = configure () testConf $ do
               baseConf
         withWorker conf $ do
-          let opts = C.workflowStartOptions taskQueue
-          C.execute client testRefs.faultyWorkflow opts
+          let opts = (C.workflowStartOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                }
+          C.execute client testRefs.faultyWorkflow "faultyWorkflow" opts
             `shouldReturn` 1
       specify "Immediate activity cancellation returns the expected result to workflows" $ \TestEnv{..} -> do
         let testActivity :: Activity () Int
@@ -393,13 +408,14 @@ needsClient = do
               baseConf
         withWorker conf $ do
           let opts = (C.workflowStartOptions taskQueue)
-                { C.timeouts = C.TimeoutOptions
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
                     }
                 }
-          C.execute client wf.reference opts
+          C.execute client wf.reference "immediateActivityCancellation" opts
             `shouldReturn` 1
       specify "Activity cancellation on heartbeat returns the expected result to workflows" $ \TestEnv{..} -> do
         let testActivity :: Activity () Int
@@ -425,13 +441,14 @@ needsClient = do
               baseConf
         withWorker conf $ do
           let opts = (C.workflowStartOptions taskQueue)
-                { C.timeouts = C.TimeoutOptions
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
                     }
                 }
-          C.execute client wf.reference opts
+          C.execute client wf.reference "activityCancellationOnHeartbeat" opts
             `shouldReturn` 1
 
 
@@ -446,8 +463,10 @@ needsClient = do
               baseConf
               
         withWorker conf $ do
-          let opts = C.workflowStartOptions taskQueue
-          C.execute client wf.reference opts 1 "two" False
+          let opts = (C.workflowStartOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                }
+          C.execute client wf.reference "argOrderingIsCorrect" opts 1 "two" False
             `shouldReturn` (1, "two", False)
       -- TODO, move to composite codec package
       -- specify "binary payloads work" $ \TestEnv{..} -> do
@@ -513,8 +532,10 @@ needsClient = do
             conf = configure () wf $ do
               baseConf
         withWorker conf $ do
-          let opts = C.workflowStartOptions taskQueue
-          (t1, t2, t3) <- C.execute client wf.reference opts
+          let opts = (C.workflowStartOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                }
+          (t1, t2, t3) <- C.execute client wf.reference "deterministicTime" opts
           t1 `shouldBe` t2
           t3 `shouldSatisfy` (> t2)
 
@@ -530,8 +551,13 @@ needsClient = do
             isEventWf = W.provideWorkflow defaultCodec "isEven" isEven
             parentWorkflow :: MyWorkflow Bool
             parentWorkflow = do
-              let opts :: W.StartChildWorkflowOptions
-                  opts = W.defaultChildWorkflowOptions { W.runTimeout = Just $ seconds 5 }
+              let childTimeout = C.TimeoutOptions
+                    { C.runTimeout = Just $ seconds 5
+                    , C.executionTimeout = Nothing
+                    , C.taskTimeout = Nothing
+                    }
+                  opts :: W.StartChildWorkflowOptions
+                  opts = W.defaultChildWorkflowOptions { W.timeoutOptions = childTimeout }
               childWorkflow <- W.startChildWorkflow isEventWf.reference opts 2
               $(logDebug) "waiting for child workflow"
               res <- W.waitChildWorkflowResult childWorkflow
@@ -543,14 +569,14 @@ needsClient = do
               
         withWorker conf $ do
           let opts = (C.workflowStartOptions taskQueue)
-                { C.workflowId = Just $ W.WorkflowId parentId
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 5
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
                     }
                 }
-          C.execute client parentWf.reference opts
+          C.execute client parentWf.reference (W.WorkflowId parentId) opts
             `shouldReturn` True
 
       specify "failure" $ \TestEnv{..} -> do
@@ -568,9 +594,9 @@ needsClient = do
               
         withWorker conf $ do
           let opts = (C.workflowStartOptions taskQueue)
-                { C.workflowId = Just $ W.WorkflowId parentId
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
-          C.execute client parentWf.reference opts
+          C.execute client parentWf.reference (W.WorkflowId parentId) opts
             `shouldThrow` (== WorkflowExecutionFailed)
 
   -- --     specify "termination" $ \_ -> pending
@@ -593,9 +619,9 @@ needsClient = do
               
         withWorker conf $ do
           let opts = (C.workflowStartOptions taskQueue)
-                { C.workflowId = Just $ W.WorkflowId parentId
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
-          C.execute client parentWf.reference opts
+          C.execute client parentWf.reference (W.WorkflowId parentId) opts
             `shouldReturn` "Left ChildWorkflowCancelled"
 
       -- TODO, the parent workflow event list doesn't really show the child workflow being cancelled???
@@ -617,9 +643,9 @@ needsClient = do
               baseConf
         withWorker conf $ do
           let opts = (C.workflowStartOptions taskQueue)
-                { C.workflowId = Just $ W.WorkflowId parentId
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
-          C.execute client parentWf.reference opts
+          C.execute client parentWf.reference (W.WorkflowId parentId) opts
             `shouldReturn` "Left ChildWorkflowCancelled"
 
     describe "Signals" $ do
@@ -645,14 +671,17 @@ needsClient = do
               
         inSpan testTracer "Query.works" defaultSpanArguments $ do
           withWorker conf $ do
-            let opts = C.workflowStartOptions taskQueue
-            h <- C.start client wf.reference opts
+            let opts = (C.workflowStartOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  }
+            h <- C.start client wf.reference "queryWorks" opts
             result <- C.query h echoQuery C.defaultQueryOptions "hello"
             C.waitWorkflowResult h
             result `shouldBe` Right "hello"
 
 
       specify "query not found" $ \TestEnv{..} -> do
+        uuid <- uuidText
         let echoQuery :: W.QueryDefinition '[Text] Text
             echoQuery = W.QueryDefinition "testQuery" defaultCodec
             workflow :: MyWorkflow ()
@@ -663,8 +692,10 @@ needsClient = do
             conf = configure () wf $ do
               baseConf
         withWorker conf $ do
-          let opts = C.workflowStartOptions taskQueue
-          h <- C.start client wf.reference opts
+          let opts = (C.workflowStartOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                }
+          h <- C.start client wf.reference (WorkflowId uuid) opts
           result <- C.query h echoQuery C.defaultQueryOptions "hello"
           -- C.cancel client h
           result `shouldBe` Right "hello"
@@ -674,8 +705,10 @@ needsClient = do
         let conf = configure () testConf $ do
               baseConf
         withWorker conf $ do
-          let opts = C.workflowStartOptions taskQueue
-          wfH <- C.start client testRefs.workflowWaitConditionWorks opts
+          let opts = (C.workflowStartOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                }
+          wfH <- C.start client testRefs.workflowWaitConditionWorks "signalHandlerUnblock" opts
           C.signal wfH unblockWorkflowSignal C.defaultSignalOptions
           C.waitWorkflowResult wfH `shouldReturn` ()
 
@@ -685,8 +718,10 @@ needsClient = do
               baseConf
               
         withWorker conf $ do
-          let opts = C.workflowStartOptions taskQueue
-          C.execute client testRefs.simpleWait opts `shouldReturn` ()
+          let opts = (C.workflowStartOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                }
+          C.execute client testRefs.simpleWait "simpleWait" opts `shouldReturn` ()
     describe "Sleep" $ do
       specify "sleep" $ \TestEnv{..} -> do
         let workflow :: MyWorkflow Bool
@@ -699,8 +734,10 @@ needsClient = do
             conf = configure () wf $ do
               baseConf
         withWorker conf $ do
-          let opts = C.workflowStartOptions taskQueue
-          C.execute client wf.reference opts
+          let opts = (C.workflowStartOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                }
+          C.execute client wf.reference "sleep" opts
             `shouldReturn` True
 
 
@@ -718,8 +755,10 @@ needsClient = do
               baseConf
               
         withWorker conf $ do
-          let opts = C.workflowStartOptions taskQueue
-          C.execute client wf.reference opts
+          let opts = (C.workflowStartOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                }
+          C.execute client wf.reference "timer" opts
             `shouldReturn` True
         
       specify "timer and cancel immediately" $ \TestEnv{..} -> do
@@ -734,13 +773,14 @@ needsClient = do
               baseConf
         withWorker conf $ do
           let opts = (C.workflowStartOptions taskQueue)
-                { C.timeouts = C.TimeoutOptions
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
                     }
                 }
-          C.execute client wf.reference opts
+          C.execute client wf.reference "timerAndCancelImmediately" opts
             `shouldReturn` True
 
       specify "timer and cancel with delay" $ \TestEnv{..} -> do
@@ -757,13 +797,14 @@ needsClient = do
               
         withWorker conf $ do
           let opts = (C.workflowStartOptions taskQueue)
-                { C.timeouts = C.TimeoutOptions
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
                     }
                 }
-          C.execute client wf.reference opts
+          C.execute client wf.reference "timerAndCancelWithDelay" opts
             `shouldReturn` True
     describe "Patching" $ do
       specify "patch" $ \TestEnv{..} ->  do
@@ -776,13 +817,14 @@ needsClient = do
               baseConf
         withWorker conf $ do
           let opts = (C.workflowStartOptions taskQueue)
-                { C.timeouts = C.TimeoutOptions
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
                     }
                 }
-          C.execute client wf.reference opts
+          C.execute client wf.reference "supplyPatch" opts
             `shouldReturn` True
       specify "deprecated patch" $ \TestEnv{..} ->  do
         let workflow :: MyWorkflow Bool
@@ -795,13 +837,14 @@ needsClient = do
               
         withWorker conf $ do
           let opts = (C.workflowStartOptions taskQueue)
-                { C.timeouts = C.TimeoutOptions
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
                     , C.executionTimeout = Nothing
                     , C.taskTimeout = Nothing
                     }
                 }
-          C.execute client wf.reference opts
+          C.execute client wf.reference "deprecatePatch" opts
             `shouldReturn` True
   --   specify "default server options" pending
   --   describe "Search attributes" $ do
@@ -819,13 +862,14 @@ needsClient = do
             
       withWorker conf $ do
         let opts = (C.workflowStartOptions taskQueue)
-              { C.timeouts = C.TimeoutOptions
+              { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+              , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
                   }
               }
-        C.execute client wf.reference opts
+        C.execute client wf.reference "readWorkflowInfo" opts 
           `shouldReturn` "readWorkflowInfo"
 
   -- Note, needs the temporal operator to have mapped these attributes up-front:
@@ -848,14 +892,15 @@ needsClient = do
               , ("attr2", toSearchAttribute (4 :: Int64))
               ]
             opts = (C.workflowStartOptions taskQueue)
-              { C.timeouts = C.TimeoutOptions
+              { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+              , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
                   }
               , C.searchAttributes = initialAttrs
               }
-        C.execute client wf.reference opts
+        C.execute client wf.reference "attributesSetAtStart" opts
           `shouldReturn` initialAttrs
     specify "can upsert search attributes" $ \TestEnv{..} -> do
       let expectedAttrs = Map.fromList
@@ -873,13 +918,14 @@ needsClient = do
             
       withWorker conf $ do
         let opts = (C.workflowStartOptions taskQueue)
-              { C.timeouts = C.TimeoutOptions
+              { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+              , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
                   }
               }
-        C.execute client wf.reference opts
+        C.execute client wf.reference "searchAttributesUpsert" opts
           `shouldReturn` expectedAttrs
     
 
@@ -896,13 +942,14 @@ needsClient = do
             baseConf
       withWorker conf $ do
         let opts = (C.workflowStartOptions taskQueue)
-              { C.timeouts = C.TimeoutOptions
+              { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+              , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
                   }
               }
-        C.execute client testRefs.continueAsNewWorks opts 0
+        C.execute client testRefs.continueAsNewWorks "continueAsNewWorks" opts 0
           `shouldReturn` "woohoo"
 
   describe "Regression tests" $ do
@@ -932,13 +979,14 @@ needsClient = do
 
       withWorker conf $ do
         let opts = (C.workflowStartOptions taskQueue)
-              { C.timeouts = C.TimeoutOptions
+              { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+              , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Nothing
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
                   }
               }
-        C.execute client taskMainWorkflow.reference opts Foo
+        C.execute client taskMainWorkflow.reference "immediate-start-regression" opts Foo
           `shouldReturn` ()
 
       -- specify "to different workflow" pending
@@ -954,13 +1002,14 @@ needsClient = do
             
       withWorker conf $ do
         let opts = (C.workflowStartOptions taskQueue)
-              { C.timeouts = C.TimeoutOptions
+              { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+              , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
                   }
               }
-        C.execute client testRefs.retryableFailureTest opts
+        C.execute client testRefs.retryableFailureTest "use-for-retryable" opts
           -- `shouldThrow` (== WorkflowExecutionFailed)
 
     specify "ignored for non-retryable failures" $ \TestEnv{..} -> do
@@ -969,13 +1018,14 @@ needsClient = do
             
       withWorker conf $ do
         let opts = (C.workflowStartOptions taskQueue)
-              { C.timeouts = C.TimeoutOptions
+              { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+              , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
                   , C.executionTimeout = Nothing
                   , C.taskTimeout = Nothing
                   }
               }
-        C.execute client testRefs.nonRetryableFailureTest opts
+        C.execute client testRefs.nonRetryableFailureTest "ignore-non-retryable" opts
           `shouldThrow` (== WorkflowExecutionFailed)
 
   -- describe "WorkflowClient" $ do

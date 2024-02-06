@@ -171,6 +171,7 @@ import Temporal.Workflow
 import Temporal.Workflow.Definition
 import Temporal.Workflow.Internal.Monad
 import UnliftIO
+import Unsafe.Coerce
 
 type family ApplyRef (original :: Type) (f :: Type) where
   ApplyRef original (Workflow result) = KnownWorkflow (ArgsOf original) result
@@ -334,31 +335,38 @@ collectTemporalDefinitions = Rec.foldMapC @(Rec.ClassF (ToDefinitions actEnv) f)
     mkConf :: forall a. ToDefinitions actEnv (f @@ a) => Rec.Metadata a -> f @@ a -> Definitions actEnv
     mkConf _ = toDefinitions
 
-type family ActivityOptionsFieldType (f :: Type) :: Type where
-  ActivityOptionsFieldType (Activity env result) = StartActivityOptions
-  ActivityOptionsFieldType (_ -> b) = ActivityOptionsFieldType b
-  ActivityOptionsFieldType (Workflow a) = StartChildWorkflowOptions
+type family RefStartOptionsType (f :: Type) :: Type where
+  RefStartOptionsType (Activity env result) = StartActivityOptions
+  RefStartOptionsType (_ -> b) = RefStartOptionsType b
+  RefStartOptionsType (Workflow a) = StartChildWorkflowOptions
+  RefStartOptionsType (KnownWorkflow _ _) = StartChildWorkflowOptions
+  RefStartOptionsType (KnownActivity _ _) = StartActivityOptions
 
-class FieldToActivityOptionDefaults f where
-  activityOptionDefaults 
+class FieldToStartOptionDefaults f where
+  refStartOptionsDefaults 
     :: Proxy f 
     -> StartActivityOptions 
     -> StartChildWorkflowOptions
-    -> ActivityOptionsFieldType f
+    -> RefStartOptionsType f
 
-instance FieldToActivityOptionDefaults b => FieldToActivityOptionDefaults (a -> b) where
-  activityOptionDefaults _ act wf = activityOptionDefaults (Proxy @b) act wf
+instance FieldToStartOptionDefaults b => FieldToStartOptionDefaults (a -> b) where
+  refStartOptionsDefaults _ act wf = refStartOptionsDefaults (Proxy @b) act wf
 
-instance FieldToActivityOptionDefaults (Activity env result) where
-  activityOptionDefaults _ opts _ = opts
+instance FieldToStartOptionDefaults (Activity env result) where
+  refStartOptionsDefaults _ opts _ = opts
 
-instance FieldToActivityOptionDefaults (Workflow a) where
-  activityOptionDefaults _ _ opts = opts
+instance FieldToStartOptionDefaults (KnownActivity args res) where
+  refStartOptionsDefaults _ opts _ = opts
 
+instance FieldToStartOptionDefaults (Workflow a) where
+  refStartOptionsDefaults _ _ opts = opts
 
-data ActivityOptionDefaults :: Type -> Exp Type
+instance FieldToStartOptionDefaults (KnownWorkflow args res) where
+  refStartOptionsDefaults _ _ opts = opts
 
-type instance Eval (ActivityOptionDefaults f) = ActivityOptionsFieldType f
+data RefStartOptions :: Type -> Exp Type
+
+type instance Eval (RefStartOptions f) = RefStartOptionsType f
 
 -- | Define a record that provides the same default options for all activities in the a record.
 --
@@ -366,17 +374,17 @@ type instance Eval (ActivityOptionDefaults f) = ActivityOptionsFieldType f
 -- For example, you might want to provide a default timeout or non-retryable error type list for all activities.
 provideDefaultOptions 
   :: forall rec
-  .  (ApplicativeRec rec, ConstraintsRec rec, AllRec FieldToActivityOptionDefaults rec) 
+  .  (ApplicativeRec rec, ConstraintsRec rec, AllRec FieldToStartOptionDefaults rec) 
   => StartActivityOptions 
   -> StartChildWorkflowOptions
-  -> rec ActivityOptionDefaults
+  -> rec RefStartOptions
 provideDefaultOptions act wf = Rec.mapC 
-  @FieldToActivityOptionDefaults 
+  @FieldToStartOptionDefaults 
   mkDefaults 
   emptyBase
   where
-    mkDefaults :: forall a. FieldToActivityOptionDefaults a => Rec.Metadata a -> () -> ActivityOptionDefaults @@ a
-    mkDefaults meta _ = activityOptionDefaults (proxyFromMeta meta) act wf 
+    mkDefaults :: forall a. FieldToStartOptionDefaults a => Rec.Metadata a -> () -> RefStartOptions @@ a
+    mkDefaults meta _ = refStartOptionsDefaults (proxyFromMeta meta) act wf 
     proxyFromMeta :: forall a. Rec.Metadata a -> Proxy a
     proxyFromMeta = const Proxy
     emptyBase :: rec (ConstFn ())
@@ -388,10 +396,6 @@ type instance Eval (InWorkflowProxies ProxySync (KnownWorkflow args res)) = args
 type instance Eval (InWorkflowProxies ProxyAsync (KnownWorkflow args res)) = args :->: Workflow (ChildWorkflowHandle res)
 type instance Eval (InWorkflowProxies ProxySync (KnownActivity args res)) = args :->: Workflow res
 type instance Eval (InWorkflowProxies ProxyAsync (KnownActivity args res)) = args :->: Workflow (Task res)
-
-data RefStartOptions :: Type -> Exp Type
-type instance Eval (RefStartOptions (KnownWorkflow _ _)) = StartChildWorkflowOptions
-type instance Eval (RefStartOptions (KnownActivity _ _)) = StartActivityOptions
 
 class UseAsInWorkflowProxy synchronicity ref where
   useAsInWorkflowProxy 
@@ -414,21 +418,33 @@ instance UseAsInWorkflowProxy ProxyAsync (KnownWorkflow args res) where
 data ProxySync = ProxySync
 data ProxyAsync = ProxyAsync
 
+class (c @@ a ~ d @@ a) => Equate c d a where
+instance (c @@ a ~ d @@ a) => Equate c d a where
+
+coerceRec :: Rec.AllRec (Equate c d) rec => rec c -> rec d
+coerceRec = unsafeCoerce
+
+
 -- | Combine a record of references with a record of default options to give a record of
 -- functions that can be used to start activities and workflows. This is just a convenience
 -- function that makes it so that you don't have to call 'executeActivity' or 'executeChildWorkflow'
 -- directly as often.
---
--- 
--- inWorkflowProxies 
---   :: forall synchronicity rec
---   .  (ConstraintsRec rec, Rec.AllRecF (UseAsInWorkflowProxy synchronicity) Ref rec, ApplicativeRec rec)
---   => synchronicity
---   -> rec ActivityOptionDefaults 
---   -> rec Ref 
---   -> rec (InWorkflowProxies synchronicity)
--- inWorkflowProxies s = Rec.zipWithC @(UseAsInWorkflowProxy synchronicity) $ \meta opt ref -> 
---   useAsInWorkflowProxy s ref opt
+inWorkflowProxies 
+  :: forall synchronicity rec
+  .  (RequireCallStack, ConstraintsRec rec, Rec.AllRec (Rec.ClassF (UseAsInWorkflowProxy synchronicity) Ref) rec, ApplicativeRec rec)
+  => synchronicity
+  -> rec (RefStartOptions <=< Ref)
+  -> rec Ref 
+  -> rec (InWorkflowProxies synchronicity <=< Ref)
+inWorkflowProxies s = Rec.zipWithC @(Rec.ClassF (UseAsInWorkflowProxy synchronicity) Ref) convertToProxies
+  where
+    convertToProxies 
+      :: forall a. (UseAsInWorkflowProxy synchronicity (Ref @@ a)) 
+      => Rec.Metadata a 
+      -> (RefStartOptions <=< Ref) @@ a 
+      -> Ref @@ a 
+      -> (InWorkflowProxies synchronicity <=< Ref) @@ a
+    convertToProxies meta opt ref = useAsInWorkflowProxy s ref opt
 
 
 type Workers rec = rec (ConstFn Worker)

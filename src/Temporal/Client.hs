@@ -135,14 +135,15 @@ execute
   :: forall m wf. (MonadIO m, WorkflowRef wf)
   => WorkflowClient 
   -> wf
+  -> WorkflowId
   -> StartWorkflowOptions
   -> (WorkflowArgs wf :->: m (WorkflowResult wf))
-execute c wf opts = case workflowRef wf of
+execute c wf wfId opts = case workflowRef wf of
   k@(KnownWorkflow codec _) -> do
     let gather :: ([IO Payload] -> m (WorkflowResult wf)) -> (WorkflowArgs wf :->: m (WorkflowResult wf))
         gather = gatherArgs (Proxy @(WorkflowArgs wf)) codec Prelude.id
     gather $ \inputs -> liftIO $ do
-      h <- startFromPayloads c k opts =<< sequence inputs
+      h <- startFromPayloads c k wfId opts =<< sequence inputs
       waitWorkflowResult h
 
 -- | Given a 'WorkflowHandle', wait for the workflow to complete and return the result.
@@ -361,20 +362,25 @@ startFromPayloads
   :: MonadIO m
   => WorkflowClient
   -> KnownWorkflow args result
+  -- | A Workflow Id is a customizable, application-level identifier for a Workflow Execution that is unique to an Open Workflow Execution within a Namespace.
+  --
+  -- A Workflow Id is meant to be a business-process identifier such as customer identifier or order identifier.
+  --
+  -- A Workflow Id Reuse Policy can be used to manage whether a Workflow Id can be re-used. The Temporal Platform guarantees uniqueness of the Workflow Id within a Namespace based on the Workflow Id Reuse Policy.
+  --
+  -- A Workflow Execution can be uniquely identified across all Namespaces by its Namespace, Workflow Id, and Run Id.
+  -> WorkflowId
   -> StartWorkflowOptions
   -> [Payload]
   -> m (WorkflowHandle result)
-startFromPayloads c k@(KnownWorkflow codec _) opts payloads = do
-  wfH <- liftIO $ (Temporal.Client.Types.start c.clientInterceptors) (WorkflowType $ knownWorkflowName k) opts payloads $ \wfName opts' payloads' -> do
+startFromPayloads c k@(KnownWorkflow codec _) wfId opts payloads = do
+  wfH <- liftIO $ (Temporal.Client.Types.start c.clientInterceptors) (WorkflowType $ knownWorkflowName k) wfId opts payloads $ \wfName wfId' opts' payloads' -> do
     reqId <- UUID.nextRandom
     searchAttrs <- searchAttributesToProto opts'.searchAttributes
-    let wfId = case opts'.workflowId of
-          Nothing -> UUID.toText reqId
-          Just wfId -> rawWorkflowId wfId
-        tq = rawTaskQueue opts'.taskQueue
+    let tq = rawTaskQueue opts'.taskQueue
         req = defMessage
           & WF.namespace .~ (rawNamespace c.clientDefaultNamespace)
-          & WF.workflowId .~ wfId
+          & WF.workflowId .~ rawWorkflowId wfId'
           & WF.workflowType .~ 
             ( defMessage & Common.name .~ rawWorkflowType wfName
             )
@@ -418,7 +424,7 @@ startFromPayloads c k@(KnownWorkflow codec _) opts payloads = do
         { workflowHandleReadResult = pure
         , workflowHandleType = WorkflowType $ knownWorkflowName k
         , workflowHandleClient = c
-        , workflowHandleWorkflowId = WorkflowId wfId
+        , workflowHandleWorkflowId = wfId'
         , workflowHandleRunId = Just (RunId $ swer ^. WF.runId)
         }
   pure $ wfH 
@@ -437,14 +443,15 @@ start
   :: forall m wf. (MonadIO m, WorkflowRef wf)
   => WorkflowClient
   -> wf
+  -> WorkflowId
   -> StartWorkflowOptions
   -> (WorkflowArgs wf :->: m (WorkflowHandle (WorkflowResult wf)))
-start c wf opts = case workflowRef wf of 
+start c wf wfId opts = case workflowRef wf of 
   k@(KnownWorkflow codec _) -> do
     let gather :: ([IO Payload] -> m (WorkflowHandle (WorkflowResult wf))) -> (WorkflowArgs wf :->: m (WorkflowHandle (WorkflowResult wf)))
         gather = gatherArgs (Proxy @(WorkflowArgs wf)) codec Prelude.id
     gather $ \inputs -> liftIO $ do
-      startFromPayloads c k opts =<< sequence inputs
+      startFromPayloads c k wfId opts =<< sequence inputs
 
 
 -- | If there is a running Workflow Execution with the given Workflow Id, it will be Signaled. 
@@ -454,10 +461,11 @@ signalWithStart
   :: forall wf sigArgs m. (MonadIO m, WorkflowRef wf)
   => WorkflowClient 
   -> wf
+  -> WorkflowId
   -> StartWorkflowOptions 
   -> SignalRef sigArgs 
   -> (WorkflowArgs wf :->: (sigArgs :->: m (WorkflowHandle (WorkflowResult wf))))
-signalWithStart c wf opts (SignalRef n sigCodec) = case workflowRef wf of
+signalWithStart c wf (WorkflowId wfId) opts (SignalRef n sigCodec) = case workflowRef wf of
   k@(KnownWorkflow codec _) -> do
     let gatherWf :: ([IO Payload] -> (sigArgs :->: m (WorkflowHandle (WorkflowResult wf)))) -> (WorkflowArgs wf :->: sigArgs :->: m (WorkflowHandle (WorkflowResult wf)))
         gatherWf = gatherArgs (Proxy @(WorkflowArgs wf)) codec Prelude.id
@@ -479,10 +487,7 @@ signalWithStart c wf opts (SignalRef n sigCodec) = case workflowRef wf of
         reqId <- UUID.nextRandom
         searchAttrs <- searchAttributesToProto opts'.signalWithStartOptions.searchAttributes
 
-        let wfId = case opts'.signalWithStartOptions.workflowId of
-              Nothing -> UUID.toText reqId
-              Just wfId -> rawWorkflowId wfId
-            tq = rawTaskQueue opts'.signalWithStartOptions.taskQueue
+        let tq = rawTaskQueue opts'.signalWithStartOptions.taskQueue
             msg = defMessage
               & RR.namespace .~ (rawNamespace c.clientDefaultNamespace)
               & RR.workflowId .~ wfId

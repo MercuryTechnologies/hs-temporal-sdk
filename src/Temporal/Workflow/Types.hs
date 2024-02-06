@@ -130,9 +130,7 @@ parentClosePolicyToProto ParentClosePolicyRequestCancel = ChildWorkflow.PARENT_C
 data StartChildWorkflowOptions = StartChildWorkflowOptions 
   { cancellationType :: ChildWorkflowCancellationType
   , parentClosePolicy :: ParentClosePolicy
-  , executionTimeout :: Maybe Duration
-  , runTimeout :: Maybe Duration
-  , taskTimeout :: Maybe Duration
+  , timeoutOptions :: TimeoutOptions
   , retryPolicy :: Maybe RetryPolicy
   , cronSchedule :: Maybe Text
   , initialMemo :: Map Text Payload
@@ -147,9 +145,11 @@ defaultChildWorkflowOptions :: StartChildWorkflowOptions
 defaultChildWorkflowOptions = StartChildWorkflowOptions
   { cancellationType = ChildWorkflowCancellationAbandon
   , parentClosePolicy = ParentClosePolicyUnspecified
-  , executionTimeout = Nothing
-  , runTimeout = Nothing
-  , taskTimeout = Nothing
+  , timeoutOptions = TimeoutOptions
+    { executionTimeout = Nothing
+    , runTimeout = Nothing
+    , taskTimeout = Nothing
+    }
   , retryPolicy = Nothing
   , cronSchedule = Nothing
   , initialMemo = mempty

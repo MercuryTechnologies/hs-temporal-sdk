@@ -197,6 +197,7 @@ module Temporal.Workflow
   , WorkflowIdReusePolicy(..)
   , WorkflowType(..)
   , RequireCallStack
+  , TimeoutOptions(..)
   ) where
 import Control.Applicative
 import Control.Concurrent (forkIO)
@@ -525,9 +526,9 @@ startChildWorkflowFromPayloads k@(KnownWorkflow codec _) opts ps = do
               & Command.workflowType .~ knownWorkflowName k
               & Command.taskQueue .~ rawTaskQueue (fromMaybe info.taskQueue opts'.taskQueue)
               & Command.input .~ ps
-              & Command.maybe'workflowExecutionTimeout .~ fmap durationToProto opts'.executionTimeout
-              & Command.maybe'workflowRunTimeout .~ fmap durationToProto opts'.runTimeout
-              & Command.maybe'workflowTaskTimeout .~ fmap durationToProto opts'.taskTimeout
+              & Command.maybe'workflowExecutionTimeout .~ fmap durationToProto opts'.timeoutOptions.executionTimeout
+              & Command.maybe'workflowRunTimeout .~ fmap durationToProto opts'.timeoutOptions.runTimeout
+              & Command.maybe'workflowTaskTimeout .~ fmap durationToProto opts'.timeoutOptions.taskTimeout
               & Command.parentClosePolicy .~ parentClosePolicyToProto opts'.parentClosePolicy
               & Command.workflowIdReusePolicy .~ workflowIdReusePolicyToProto opts'.workflowIdReusePolicy
               & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts'.retryPolicy

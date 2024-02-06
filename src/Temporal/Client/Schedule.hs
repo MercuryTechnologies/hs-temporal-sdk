@@ -574,12 +574,15 @@ data ScheduleAction
 
 mkScheduleAction :: forall wf m. (MonadIO m, WorkflowRef wf) 
   => wf 
+  -> WorkflowId
+  -- ^ Unlike other uses of WorkflowId, this will be used as a prefix for the
+  -- actual workflow id, which will be unique.
   -> StartWorkflowOptions 
   -- ^ All fields of WorkflowStartOptions are valid except for the workflow id reuse policy and cron string.
   --
   -- The workflow id will generally have a timestamp appended for uniqueness.
   -> (WorkflowArgs wf :->: m ScheduleAction)
-mkScheduleAction wf opts = case workflowRef wf of
+mkScheduleAction wf (WorkflowId wfId) opts = case workflowRef wf of
   k@(KnownWorkflow codec wfName) -> do
     let gather :: ([IO Payload] -> m ScheduleAction) -> (WorkflowArgs wf :->: m ScheduleAction)
         gather = gatherArgs (Proxy @(WorkflowArgs wf)) codec Prelude.id
@@ -588,9 +591,7 @@ mkScheduleAction wf opts = case workflowRef wf of
       searchAttrs <- searchAttributesToProto opts.searchAttributes
       let tq = rawTaskQueue opts.taskQueue
           executionInfo = defMessage
-            & W.workflowId .~ case opts.workflowId of
-              Nothing -> wfName
-              Just (WorkflowId wId) -> wId
+            & W.workflowId .~ wfId
             & W.workflowType .~ (defMessage & C.name .~ wfName)
             & W.taskQueue .~ 
               ( defMessage
