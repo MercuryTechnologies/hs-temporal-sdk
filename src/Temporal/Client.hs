@@ -56,6 +56,21 @@ module Temporal.Client
 import Conduit
 import Control.Monad
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Accum
+import Control.Monad.Trans.Cont
+import Control.Monad.Trans.Except
+import Control.Monad.Trans.Identity
+import Control.Monad.Trans.Maybe
+import Control.Monad.Trans.Reader
+import Control.Monad.Trans.Select
+import qualified Control.Monad.Trans.RWS.CPS as CRWS
+import qualified Control.Monad.Trans.RWS.Lazy as LRWS
+import qualified Control.Monad.Trans.RWS.Strict as SRWS
+import qualified Control.Monad.Trans.State.Lazy as LS
+import qualified Control.Monad.Trans.State.Strict as SS
+import qualified Control.Monad.Trans.Writer.CPS as CW
+import qualified Control.Monad.Trans.Writer.Lazy as LW
+import qualified Control.Monad.Trans.Writer.Strict as SW
 import Data.Int
 import Data.Kind
 import Data.Proxy
@@ -123,6 +138,72 @@ workflowClient c ns int = do
     , clientInterceptors = int
     }
 
+class HasWorkflowClient m where
+  askWorkflowClient :: m WorkflowClient
+
+instance {-# OVERLAPS #-} Monad m => HasWorkflowClient (ReaderT WorkflowClient m) where
+  askWorkflowClient = ask
+
+instance (Monad m, HasWorkflowClient m, Monoid w) => HasWorkflowClient (AccumT w m) where
+  askWorkflowClient = lift askWorkflowClient
+
+instance (Monad m, HasWorkflowClient m) => HasWorkflowClient (ReaderT r m) where
+  askWorkflowClient = lift askWorkflowClient
+
+instance (Monad m, HasWorkflowClient m) => HasWorkflowClient (CRWS.RWST r w s m) where
+  askWorkflowClient = lift askWorkflowClient
+
+instance {-# OVERLAPS #-} (Monad m) => HasWorkflowClient (CRWS.RWST WorkflowClient w s m) where
+  askWorkflowClient = CRWS.ask 
+
+instance (Monad m, HasWorkflowClient m, Monoid w) => HasWorkflowClient (LRWS.RWST r w s m) where
+  askWorkflowClient = lift askWorkflowClient
+
+instance {-# OVERLAPS #-} (Monad m, Monoid w) => HasWorkflowClient (LRWS.RWST WorkflowClient w s m) where
+  askWorkflowClient = LRWS.ask 
+
+instance (Monad m, HasWorkflowClient m, Monoid w) => HasWorkflowClient (SRWS.RWST r w s m) where
+  askWorkflowClient = lift askWorkflowClient
+
+instance {-# OVERLAPS #-} (Monad m, Monoid w) => HasWorkflowClient (SRWS.RWST WorkflowClient w s m) where
+  askWorkflowClient = SRWS.ask 
+
+instance (Monad m, HasWorkflowClient m) => HasWorkflowClient (CW.WriterT w m) where
+  askWorkflowClient = lift askWorkflowClient
+
+instance (Monad m, HasWorkflowClient m, Monoid w) => HasWorkflowClient (LW.WriterT w m) where
+  askWorkflowClient = lift askWorkflowClient
+
+instance (Monad m, HasWorkflowClient m, Monoid w) => HasWorkflowClient (SW.WriterT w m) where
+  askWorkflowClient = lift askWorkflowClient
+
+instance (Monad m, HasWorkflowClient m) => HasWorkflowClient (LS.StateT s m) where
+  askWorkflowClient = lift askWorkflowClient
+
+instance (Monad m, HasWorkflowClient m) => HasWorkflowClient (SS.StateT s m) where
+  askWorkflowClient = lift askWorkflowClient
+
+instance (Monad m, HasWorkflowClient m) => HasWorkflowClient (ExceptT e m) where
+  askWorkflowClient = lift askWorkflowClient
+
+instance (Monad m, HasWorkflowClient m) => HasWorkflowClient (IdentityT m) where
+  askWorkflowClient = lift askWorkflowClient
+
+instance (Monad m, HasWorkflowClient m) => HasWorkflowClient (ContT r m) where
+  askWorkflowClient = lift askWorkflowClient
+
+instance (Monad m, HasWorkflowClient m) => HasWorkflowClient (MaybeT m) where
+  askWorkflowClient = lift askWorkflowClient
+
+instance (Monad m, HasWorkflowClient m) => HasWorkflowClient (SelectT r m) where
+  askWorkflowClient = lift askWorkflowClient
+
+instance (Monad m, HasWorkflowClient m) => HasWorkflowClient (ConduitT i o m) where
+  askWorkflowClient = lift askWorkflowClient
+
+instance HasWorkflowClient ((->) WorkflowClient) where
+  askWorkflowClient = id
+
 
 throwEither :: (MonadIO m, Exception e) => IO (Either e a) -> m a
 throwEither = either throwIO pure <=< liftIO
@@ -132,18 +213,18 @@ throwEither = either throwIO pure <=< liftIO
 -- This function will block until the workflow completes, and will return the result of the workflow
 -- or throw a 'WorkflowExecutionClosed' exception if the workflow was closed without returning a result.
 execute
-  :: forall m wf. (MonadIO m, WorkflowRef wf)
-  => WorkflowClient 
-  -> wf
+  :: forall m wf. (HasWorkflowClient m, MonadIO m, WorkflowRef wf)
+  => wf
   -> WorkflowId
   -> StartWorkflowOptions
   -> (WorkflowArgs wf :->: m (WorkflowResult wf))
-execute c wf wfId opts = case workflowRef wf of
+execute wf wfId opts = case workflowRef wf of
   k@(KnownWorkflow codec _) -> do
     let gather :: ([IO Payload] -> m (WorkflowResult wf)) -> (WorkflowArgs wf :->: m (WorkflowResult wf))
         gather = gatherArgs (Proxy @(WorkflowArgs wf)) codec Prelude.id
-    gather $ \inputs -> liftIO $ do
-      h <- startFromPayloads c k wfId opts =<< sequence inputs
+    gather $ \inputs -> do
+      c <- askWorkflowClient
+      h <- startFromPayloads k wfId opts =<< liftIO (sequence inputs)
       waitWorkflowResult h
 
 -- | Given a 'WorkflowHandle', wait for the workflow to complete and return the result.
@@ -152,7 +233,7 @@ execute c wf wfId opts = case workflowRef wf of
 -- or throw a 'WorkflowExecutionClosed' exception if the workflow was closed without returning a result.
 waitWorkflowResult :: (Typeable a, MonadIO m) => WorkflowHandle a -> m a
 waitWorkflowResult h@(WorkflowHandle readResult _ c wf r) = do
-  mev <- liftIO $ waitResult c wf r c.clientDefaultNamespace
+  mev <- runReaderT (waitResult wf r c.clientDefaultNamespace) c
   case mev of
     Nothing -> error "Unexpected empty history"
     Just ev -> case ev ^. History.maybe'attributes of
@@ -332,21 +413,22 @@ query h (QueryDefinition qn codec) opts = gather $ \inputs -> liftIO $ do
 -- Note that it is possible for a workflow to be closed or archived by the time you get a handle,
 -- so you should be prepared to handle 'WorkflowExecutionClosed' exceptions.
 getHandle
-  :: (MonadIO m)
-  => WorkflowClient
-  -> KnownWorkflow args a
+  :: (HasWorkflowClient m, MonadIO m)
+  => KnownWorkflow args a
   -> WorkflowId
   -> Maybe RunId
   -> m (WorkflowHandle a)
-getHandle c (KnownWorkflow {knownWorkflowCodec, knownWorkflowName}) wfId runId = pure $ WorkflowHandle 
-  { workflowHandleReadResult = \a -> do
-      result <- decode knownWorkflowCodec a
-      either (throwIO . ValueError) pure result
-  , workflowHandleClient = c
-  , workflowHandleWorkflowId = wfId
-  , workflowHandleRunId = runId
-  , workflowHandleType = WorkflowType knownWorkflowName
-  }
+getHandle (KnownWorkflow {knownWorkflowCodec, knownWorkflowName}) wfId runId = do
+  c <- askWorkflowClient
+  pure $ WorkflowHandle 
+    { workflowHandleReadResult = \a -> do
+        result <- decode knownWorkflowCodec a
+        either (throwIO . ValueError) pure result
+    , workflowHandleClient = c
+    , workflowHandleWorkflowId = wfId
+    , workflowHandleRunId = runId
+    , workflowHandleType = WorkflowType knownWorkflowName
+    }
 
 -- TODO
 -- list 
@@ -359,9 +441,8 @@ getHandle c (KnownWorkflow {knownWorkflowCodec, knownWorkflowName}) wfId runId =
 -- execution from another Workflow or from an external source, but no checking to make sure that the input
 -- types are correct is performed.
 startFromPayloads 
-  :: MonadIO m
-  => WorkflowClient
-  -> KnownWorkflow args result
+  :: (MonadIO m, HasWorkflowClient m)
+  => KnownWorkflow args result
   -- | A Workflow Id is a customizable, application-level identifier for a Workflow Execution that is unique to an Open Workflow Execution within a Namespace.
   --
   -- A Workflow Id is meant to be a business-process identifier such as customer identifier or order identifier.
@@ -373,7 +454,8 @@ startFromPayloads
   -> StartWorkflowOptions
   -> [Payload]
   -> m (WorkflowHandle result)
-startFromPayloads c k@(KnownWorkflow codec _) wfId opts payloads = do
+startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
+  c <- askWorkflowClient
   wfH <- liftIO $ (Temporal.Client.Types.start c.clientInterceptors) (WorkflowType $ knownWorkflowName k) wfId opts payloads $ \wfName wfId' opts' payloads' -> do
     reqId <- UUID.nextRandom
     searchAttrs <- searchAttributesToProto opts'.searchAttributes
@@ -440,32 +522,30 @@ startFromPayloads c k@(KnownWorkflow codec _) wfId opts payloads = do
 --
 -- This can be used to "fire-and-forget" a Workflow by discarding the handle.
 start
-  :: forall m wf. (MonadIO m, WorkflowRef wf)
-  => WorkflowClient
-  -> wf
+  :: forall m wf. (MonadIO m, HasWorkflowClient m, WorkflowRef wf)
+  => wf
   -> WorkflowId
   -> StartWorkflowOptions
   -> (WorkflowArgs wf :->: m (WorkflowHandle (WorkflowResult wf)))
-start c wf wfId opts = case workflowRef wf of 
+start wf wfId opts = case workflowRef wf of 
   k@(KnownWorkflow codec _) -> do
     let gather :: ([IO Payload] -> m (WorkflowHandle (WorkflowResult wf))) -> (WorkflowArgs wf :->: m (WorkflowHandle (WorkflowResult wf)))
         gather = gatherArgs (Proxy @(WorkflowArgs wf)) codec Prelude.id
-    gather $ \inputs -> liftIO $ do
-      startFromPayloads c k wfId opts =<< sequence inputs
+    gather $ \inputs -> do
+      startFromPayloads k wfId opts =<< liftIO (sequence inputs)
 
 
 -- | If there is a running Workflow Execution with the given Workflow Id, it will be Signaled. 
 --
 -- Otherwise, a new Workflow Execution is started and immediately send the Signal.
 signalWithStart 
-  :: forall wf sigArgs m. (MonadIO m, WorkflowRef wf)
-  => WorkflowClient 
-  -> wf
+  :: forall wf sigArgs m. (MonadIO m, HasWorkflowClient m, WorkflowRef wf)
+  => wf
   -> WorkflowId
   -> StartWorkflowOptions 
   -> SignalRef sigArgs 
   -> (WorkflowArgs wf :->: (sigArgs :->: m (WorkflowHandle (WorkflowResult wf))))
-signalWithStart c wf (WorkflowId wfId) opts (SignalRef n sigCodec) = case workflowRef wf of
+signalWithStart wf (WorkflowId wfId) opts (SignalRef n sigCodec) = case workflowRef wf of
   k@(KnownWorkflow codec _) -> do
     let gatherWf :: ([IO Payload] -> (sigArgs :->: m (WorkflowHandle (WorkflowResult wf)))) -> (WorkflowArgs wf :->: sigArgs :->: m (WorkflowHandle (WorkflowResult wf)))
         gatherWf = gatherArgs (Proxy @(WorkflowArgs wf)) codec Prelude.id
@@ -473,7 +553,7 @@ signalWithStart c wf (WorkflowId wfId) opts (SignalRef n sigCodec) = case workfl
         gatherSig :: ([IO Payload] -> m (WorkflowHandle (WorkflowResult wf))) -> (sigArgs :->: m (WorkflowHandle (WorkflowResult wf)))
         gatherSig = gatherArgs (Proxy @sigArgs) sigCodec Prelude.id
     
-    gatherWf $ \wfInputs -> gatherSig $ \sigInputs -> liftIO $ do
+    gatherWf $ \wfInputs -> gatherSig $ \sigInputs -> askWorkflowClient >>= \c -> liftIO $ do
       wfArgs <- sequence wfInputs
       sigArgs <- sequence sigInputs
       let interceptorOpts = SignalWithStartWorkflowInput
@@ -598,14 +678,13 @@ applyNewExecutionRunId attrs req alt = if attrs ^. History.newExecutionRunId == 
 -- subscribe to those events and process them as they are received. As an example, this is used to implement
 -- 'waitWorkflowResult'.
 streamEvents 
-  :: MonadIO m 
-  => WorkflowClient 
-  -> FollowOption
+  :: (MonadIO m, HasWorkflowClient m)
+  => FollowOption
   -> GetWorkflowExecutionHistoryRequest 
   -> ConduitT () HistoryEvent m ()
-streamEvents c followOpt baseReq = go baseReq
+streamEvents followOpt baseReq = askWorkflowClient >>= \c -> go c baseReq
   where
-    go req = do
+    go c req = do
       res <- liftIO $ getWorkflowExecutionHistory c.clientCore req
       case res of
         Left err -> throwIO err
@@ -613,7 +692,7 @@ streamEvents c followOpt baseReq = go baseReq
           yieldMany (res ^. RR.history . History.events)
           case decideLoop baseReq res of
             Nothing -> pure ()
-            Just req' -> go req'
+            Just req' -> go c req'
     decideLoop :: GetWorkflowExecutionHistoryRequest -> GetWorkflowExecutionHistoryResponse -> Maybe GetWorkflowExecutionHistoryRequest
     decideLoop req res = 
       if V.null (res ^. RR.history . History.vec'events)
@@ -645,12 +724,12 @@ streamEvents c followOpt baseReq = go baseReq
           else Just (req & RR.nextPageToken .~ (res ^. RR.nextPageToken))
 
 waitResult 
-  :: WorkflowClient
-  -> WorkflowId 
+  :: (MonadIO m, HasWorkflowClient m)
+  => WorkflowId 
   -> Maybe RunId 
   -> Namespace {- options incl namespace -}
-  -> IO (Maybe HistoryEvent)
-waitResult c wfId mrId (Namespace ns) = do
+  -> m (Maybe HistoryEvent)
+waitResult wfId mrId (Namespace ns) = do
   let startingReq :: GetWorkflowExecutionHistoryRequest
       startingReq = defMessage
         & RR.namespace .~ ns
@@ -665,7 +744,7 @@ waitResult c wfId mrId (Namespace ns) = do
         & RR.waitNewEvent .~ True
         & RR.historyEventFilterType .~ HISTORY_EVENT_FILTER_TYPE_CLOSE_EVENT
         & RR.skipArchival .~ True
-  connect (streamEvents c FollowRuns startingReq) lastC
+  connect (streamEvents FollowRuns startingReq) lastC
 
 
 
