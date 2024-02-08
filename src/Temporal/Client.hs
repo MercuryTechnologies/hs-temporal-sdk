@@ -22,6 +22,7 @@ module Temporal.Client
   -- * Workflow Client
     WorkflowClient
   , workflowClient
+  , HasWorkflowClient(..)
   -- * Running Workflows
   , StartWorkflowOptions(..)
   , TimeoutOptions(..)
