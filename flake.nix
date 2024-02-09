@@ -39,7 +39,7 @@
               cargoLock = {
                 lockFile = ./core/rust/Cargo.lock;
                 outputHashes = {
-                  "rustfsm-0.1.0" = "sha256-EVF+P+8zTNGsDOlBlttZme84buH+1rAHxez2qXVpXgI=";
+                  "rustfsm-0.1.0" = "sha256-L0rCBnCfhR3D5ku1ItCzIE9nOk9wXaMcxV2I11uhrRc=";
                 };
               };
 
