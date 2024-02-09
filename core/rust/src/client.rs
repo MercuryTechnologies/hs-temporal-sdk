@@ -191,7 +191,7 @@ pub fn connect_client(
   let runtime = runtime_ref.runtime.clone();
   runtime_ref.runtime.future_result_into_hs(hs_callback, async move {
     let retry_client_result = opts
-          .connect_no_namespace(runtime.core.metric_meter().as_deref(), headers)
+          .connect_no_namespace(runtime.core.as_ref().telemetry().get_metric_meter(), headers)
           .await;
         
     match retry_client_result {

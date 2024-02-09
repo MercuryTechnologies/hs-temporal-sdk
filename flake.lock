@@ -105,11 +105,11 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1694529238,
-        "narHash": "sha256-zsNZZGTGnMOf9YpHKJqMSsa0dXbfmxeoJ7xHlrt+xmY=",
+        "lastModified": 1705309234,
+        "narHash": "sha256-uNRRNRKmJyCRC/8y1RqBkqWBLM034y4qN7EprSdmgyA=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "ff7b65b44d01cf9ba6a71320833626af21126384",
+        "rev": "1ef2e671c3b0c19053962c07dbda38332dcebf26",
         "type": "github"
       },
       "original": {
@@ -584,11 +584,11 @@
     "temporal-sdk-core": {
       "flake": false,
       "locked": {
-        "lastModified": 1690221293,
-        "narHash": "sha256-EVF+P+8zTNGsDOlBlttZme84buH+1rAHxez2qXVpXgI=",
+        "lastModified": 1706895031,
+        "narHash": "sha256-L0rCBnCfhR3D5ku1ItCzIE9nOk9wXaMcxV2I11uhrRc=",
         "owner": "temporalio",
         "repo": "sdk-core",
-        "rev": "7f9755b77def19796a3db0a22d9b56919872678a",
+        "rev": "4f0b7f390bd0f53aa5329c49f92d049e62972e1f",
         "type": "github"
       },
       "original": {

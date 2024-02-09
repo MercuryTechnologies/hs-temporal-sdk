@@ -67,6 +67,6 @@ spec = do
                   }
               }
         c <- liftIO $ connectClient clientConfig 
-        qs <- replicateConcurrently 64 $ allocateU (startTaskQueues c workerConfigs) (liftIO . shutdownTaskQueues)
+        qs <- replicateConcurrently 100 $ allocateU (startTaskQueues c workerConfigs) (liftIO . shutdownTaskQueues)
         mapConcurrently_ (\(k, _) -> release k) qs
       True `shouldBe` True
