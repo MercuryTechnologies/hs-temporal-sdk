@@ -94,7 +94,7 @@ macro_rules! enter_sync {
 }
 
 #[repr(u8)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum WorkerErrorCode {
   SDKError = 1,
   InitWorkerFailed = 2,
@@ -125,6 +125,7 @@ impl CReprOf<WorkerErrorCode> for WorkerErrorCode {
   }
 }
 
+#[derive(Debug)]
 pub struct WorkerError {
   code: WorkerErrorCode,
   message: String,
@@ -197,11 +198,13 @@ pub extern "C" fn hs_temporal_new_worker(client: *mut client::ClientRef, config:
           unsafe { *result_slot = Box::into_raw(Box::new(worker_ref)) };
         },
         Err(worker_error) => {
+          eprintln!("Error: {:?}", worker_error);
           unsafe { *error_slot = CWorkerError::c_repr_of(worker_error).unwrap().into_raw_pointer_mut() };
         }
       }
     },
     Err(worker_error) => {
+      eprintln!("Error: {:?}", worker_error);
       unsafe { *error_slot = CWorkerError::c_repr_of(worker_error).unwrap().into_raw_pointer_mut() };
     }
   }

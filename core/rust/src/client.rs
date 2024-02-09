@@ -202,6 +202,7 @@ pub fn connect_client(
         })
       }
       Err(e) => {
+        eprintln!("Error: {:?}", e);
         let err_message = e.to_string().into_bytes();
         Err(
           CArray::c_repr_of(err_message).unwrap()
@@ -258,6 +259,7 @@ pub(crate) fn rpc_req<P: prost::Message + Default>(call: TemporalCall) -> Result
   Ok(req)
 }
 
+#[derive(Debug)]
 pub struct RPCError {
   pub code: u32,
   pub message: String,
@@ -299,10 +301,13 @@ where
 {
   match res {
       Ok(resp) => Ok(resp.get_ref().encode_to_vec()),
-      Err(err) => Err(CRPCError::c_repr_of(RPCError {
-        code: err.code() as u32,
-        message: err.message().to_owned(),
-        details: err.details().into(),
-      }).unwrap())
+      Err(err) => {
+        eprintln!("Error: {:?}", err);
+        Err(CRPCError::c_repr_of(RPCError {
+          code: err.code() as u32,
+          message: err.message().to_owned(),
+          details: err.details().into(),
+        }).unwrap())
+      }
   }
 }
