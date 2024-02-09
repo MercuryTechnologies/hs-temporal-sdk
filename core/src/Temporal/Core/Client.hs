@@ -116,8 +116,7 @@ clientConfig :: Client -> ClientConfig
 clientConfig = config
 
 withClient :: Client -> (Ptr CoreClient -> IO a) -> IO a
-withClient (Client cvar _) f = do
-  (CoreClient c) <- readMVar cvar
+withClient (Client cvar _) f = withMVar cvar $ \(CoreClient c) -> do
   withForeignPtr c f
 
 newtype CoreClient = CoreClient

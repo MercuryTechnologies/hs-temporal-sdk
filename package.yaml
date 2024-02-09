@@ -71,6 +71,7 @@ default-extensions:
 - TypeOperators
 
 ghc-options:
+- -g
 # For details on warnings: https://downloads.haskell.org/~ghc/master/users-guide/using-warnings.html
 # Enable all warnings with -Weverything, then disable the ones we don't care about
 # (Note: The vast majority of the Haskell community uses -Wall, which has less warnings then -Weverything.)
@@ -132,7 +133,7 @@ library:
 
 tests: 
   temporal-sdk-tests:
-    ghc-options: -threaded -rtsopts -with-rtsopts=-N
+    ghc-options: -g -threaded -rtsopts -with-rtsopts=-N
     build-tools:
       "hspec-discover:hspec-discover"
     dependencies:
@@ -153,9 +154,11 @@ tests:
       - containers
       - require-callstack
       - hs-opentelemetry-sdk
+      - resourcet
     main: Main.hs
     source-dirs: test
     other-modules:
       Spec,
+      ConcurrentAccessSpec,
       AsyncCompletionSpec,
-      IntegrationSpec,
+      IntegrationSpec

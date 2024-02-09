@@ -33,6 +33,7 @@ custom-setup
 
 library
     import:           warnings
+    ghc-options:      -g
     exposed-modules: 
       Temporal.Core.Client.WorkflowService,
       Temporal.Core.Client.TestService,

@@ -24,7 +24,7 @@ import System.IO.Unsafe
 --
 -- You almost always should use the 'globalRuntime' value, which is initialized
 -- once for the entire process.
-newtype Runtime = Runtime { runtime :: ForeignPtr Runtime }
+newtype Runtime = Runtime { runtime :: MVar (ForeignPtr Runtime) }
 
 type TryPutMVarFFI = FunPtr (Ptr CInt -> Ptr (MVar ()) -> IO ())
 foreign import ccall "&hs_try_putmvar" tryPutMVarPtr :: TryPutMVarFFI
@@ -38,11 +38,11 @@ globalRuntime = unsafePerformIO initializeRuntime
 
 -- | Initialize the Rust runtime and thread-pool.
 initializeRuntime :: IO Runtime
-initializeRuntime = Runtime <$> (newForeignPtr freeRuntime =<< initRuntime tryPutMVarPtr)
+initializeRuntime = Runtime <$> (newMVar =<< newForeignPtr freeRuntime =<< initRuntime tryPutMVarPtr)
 
 -- | Access the underlying 'Runtime' pointer for calling out to Rust.
 withRuntime :: Runtime -> (Ptr Runtime -> IO a) -> IO a
-withRuntime (Runtime r) = withForeignPtr r
+withRuntime (Runtime rvar) f = withMVar rvar $ \r -> withForeignPtr r f
 
 foreign import ccall "hs_temporal_runtime_fetch_logs" raw_fetchLogs :: Ptr Runtime -> IO (Ptr (CArray CCoreLog))
 foreign import ccall "hs_temporal_runtime_free_logs" raw_freeLogs :: Ptr (CArray CCoreLog) -> IO ()
