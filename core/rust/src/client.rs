@@ -4,7 +4,7 @@ use temporal_client::{
 };
 use tonic::{metadata::{MetadataKey, errors::InvalidMetadataValue}};
 use ffi_convert::*;
-use crate::runtime::{self, Capability, MVar, HsCallback, HaskellText};
+use crate::runtime::{self, Capability, MVar, HsCallback};
 use std::collections::HashMap;
 use std::sync::Arc;
 use parking_lot::RwLock;
@@ -179,7 +179,7 @@ impl RawPointerConverter<ClientRef> for ClientRef {
 pub fn connect_client(
   runtime_ref: &runtime::RuntimeRef,
   config: ClientConfig,
-  hs_callback: HsCallback<ClientRef, HaskellText>,
+  hs_callback: HsCallback<ClientRef, CArray<u8>>,
 ) -> () {
   let headers = if config.metadata.is_empty() {
       None
@@ -218,7 +218,7 @@ pub extern "C" fn hs_temporal_connect_client(
   config_json: *const libc::c_char,
   mvar: *mut MVar,
   cap: Capability,
-  error_slot: *mut*mut HaskellText,
+  error_slot: *mut*mut CArray<u8>,
   result_slot: *mut*mut ClientRef
 ) {
   let runtime_ref = unsafe { &*runtime_ref };

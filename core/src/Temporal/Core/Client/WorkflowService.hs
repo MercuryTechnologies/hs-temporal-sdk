@@ -56,27 +56,10 @@ module Temporal.Core.Client.WorkflowService
   , updateWorkflowExecution
   , updateWorkerBuildIdCompatibility
   ) where
-import Data.Word
-import Foreign.C.String
-import Foreign.C.Types
-import Foreign.Ptr
-import Foreign.Storable
-import GHC.TypeLits
 import Temporal.Core.Client
 import Temporal.Internal.FFI
 import Proto.Temporal.Api.Workflowservice.V1.RequestResponse
 import Proto.Temporal.Api.Workflowservice.V1.Service
-import Data.ProtoLens.Encoding
-import Data.ProtoLens.Service.Types
-
-{-
-withForeignPtr c $ \cPtr -> alloca $ \rpcPtr -> do
-  poke rpcPtr (RpcCall (methodId @svc @t) (encodeMessage req))
-  makeTokioAsyncCall 
-    (f cPtr)
-    (fromRust (Proxy :: Proxy _))
-    (fromRust (Proxy :: Proxy _))
--}
 
 -- TODO the way that the generated protobuf code is structured, it might be nicer to just have a single
 -- workflow service call that ensures the protobuf in question is the right one.

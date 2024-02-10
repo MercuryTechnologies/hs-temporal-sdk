@@ -8,7 +8,6 @@ import Test.Hspec
 import qualified Data.EvalRecord as Rec
 import Temporal.Bundle
 import Temporal.Bundle.TH
-import Temporal.Client
 import Temporal.Core.Client
 import Temporal.Payload
 import Temporal.Workflow

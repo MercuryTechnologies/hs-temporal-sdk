@@ -67,8 +67,8 @@ module Temporal.Worker
   , addInterceptors
   , WorkflowId(..)
   ) where
-import UnliftIO.Exception
 import UnliftIO
+import UnliftIO.Exception 
 import Control.Applicative
 
 import Control.Monad.Logger
@@ -416,13 +416,13 @@ waitWorker (Temporal.Worker.Worker{workerType, workerWorkflowLoop, workerActivit
 
 -- | Shut down a worker. This will initiate a graceful shutdown of the worker, waiting for all
 -- in-flight tasks to complete before finalizing the shutdown.
-shutdown :: MonadIO m => Temporal.Worker.Worker -> m ()
-shutdown worker@Temporal.Worker.Worker{workerCore} = liftIO $ do
-  Core.initiateShutdown workerCore
+shutdown :: (MonadUnliftIO m) => Temporal.Worker.Worker -> m ()
+shutdown worker@Temporal.Worker.Worker{workerCore} = mask $ \restore -> do
+  liftIO $ Core.initiateShutdown workerCore
 
-  waitWorker worker
+  restore $ waitWorker worker
 
-  err' <- Core.finalizeShutdown workerCore
+  err' <- liftIO $ Core.finalizeShutdown workerCore
   case err' of
     Left err -> throwIO err
     Right () -> pure ()

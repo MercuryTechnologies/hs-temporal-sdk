@@ -12,7 +12,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module IntegrationSpec where
 
-import Control.Applicative
 import Control.Exception
 import Control.Exception.Annotated
 import Control.Concurrent
@@ -20,10 +19,8 @@ import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Aeson (Value, FromJSON, ToJSON, encode, eitherDecode)
-import Data.ByteString (ByteString)
 import Data.Int
-import Data.ProtoLens
-import Data.Text (Text, pack)
+import Data.Text (Text)
 import Data.Time.Clock (UTCTime)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
@@ -32,7 +29,6 @@ import qualified Data.UUID.V4 as UUID
 import GHC.Generics
 import OpenTelemetry.Trace
 import RequireCallStack
-import System.IO
 import Test.Hspec
 import Temporal.Core.Client
 import qualified Temporal.Client as C
@@ -45,7 +41,6 @@ import Temporal.Exception (nonRetryableError)
 import Temporal.Payload
 import Temporal.Worker
 import Temporal.SearchAttributes
-import System.IO.Unsafe
 import System.Timeout (timeout)
 import Temporal.Duration
 import Temporal.Contrib.OpenTelemetry
@@ -77,7 +72,7 @@ temporalBundle [d|
     , nonRetryableFailureAct :: Activity () ()
     , retryableFailureTest :: W.Workflow ()
     , retryableFailureAct :: Activity () ()
-    } deriving (Generic)
+    } deriving stock (Generic)
   |]
 
 temporalBundle [d|

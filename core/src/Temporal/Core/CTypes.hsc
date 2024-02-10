@@ -1,0 +1,262 @@
+#include "temporal_bridge.h"
+
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+module Temporal.Core.CTypes where
+import Control.Exception
+import Control.Concurrent.MVar (MVar)
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Data.Vector as V
+import Data.Text (Text)
+import Data.Text.Foreign
+import Data.Word
+import Foreign.C.String
+import Foreign.C.Types
+import Foreign.ForeignPtr
+import Foreign.Ptr
+import Foreign.Storable
+
+type TryPutMVarFFI = FunPtr (Ptr CInt -> Ptr (MVar ()) -> IO ())
+foreign import ccall "&hs_try_putmvar" tryPutMVarPtr :: TryPutMVarFFI
+
+-- | A handle to the Rust Tokio runtime and thread-pool.
+--
+-- You almost always should use the 'globalRuntime' value, which is initialized
+-- once for the entire process.
+newtype Runtime = Runtime (Ptr Runtime)
+
+foreign import ccall "hs_temporal_init_runtime" initRuntime :: TryPutMVarFFI -> IO (Ptr Runtime)
+foreign import ccall "hs_temporal_free_runtime" freeRuntime :: Ptr Runtime -> IO ()
+
+data CoreLog = CoreLog
+  { target :: Text
+  , message :: Text
+  }
+
+data CCoreLog = CCoreLog
+  { target :: CString
+  , message :: CString
+  }
+
+peekCoreLog :: CCoreLog -> IO CoreLog
+peekCoreLog clog = do
+  target <- fromPtr0 $ castPtr clog.target
+  message <- fromPtr0 $ castPtr clog.message
+  pure CoreLog{..}
+
+foreign import ccall "hs_temporal_runtime_fetch_logs" raw_fetchLogs :: Ptr Runtime -> IO (Ptr (CArray CCoreLog))
+foreign import ccall "hs_temporal_runtime_free_logs" raw_freeLogs :: Ptr (CArray CCoreLog) -> IO ()
+
+instance Storable CCoreLog where
+  sizeOf _ = #{size CCoreLog}
+  alignment _ = #{alignment CCoreLog}
+  peek ptr = do
+    target <- #{peek CCoreLog, target} ptr
+    message <- #{peek CCoreLog, message} ptr
+    pure CCoreLog {..}
+  poke ptr CCoreLog {..} = do
+    #{poke CCoreLog, target} ptr target
+    #{poke CCoreLog, message} ptr message
+
+data CArray a = CArray
+  { dataPtr :: !(Ptr a)
+  , size :: !(#{type uintptr_t})
+  }
+  deriving (Show)
+
+cArrayToByteString :: CArray Word8 -> IO ByteString
+cArrayToByteString CArray{..} = BS.packCStringLen (castPtr dataPtr, fromIntegral size)
+
+cArrayToVector :: Storable a => (a -> IO b) -> CArray a -> IO (V.Vector b)
+cArrayToVector f CArray{..} = do
+  let len = fromIntegral size
+  V.generateM len $ \i -> do
+    x <- peekElemOff dataPtr i
+    f x
+
+cArrayToText :: CArray Word8 -> IO Text
+cArrayToText CArray{..} = do
+  let len = fromIntegral size
+  fromPtr dataPtr len
+
+instance Storable a => Storable (CArray a) where
+  sizeOf _ = #{size CArray_u8}
+  alignment _ = #{alignment CArray_u8}
+  peek ptr = do
+    dataPtr <- #{peek CArray_u8, data_ptr} ptr
+    size <- #{peek CArray_u8, size} ptr
+    pure CArray {..}
+  poke ptr CArray {..} = do
+    #{poke CArray_u8, data_ptr} ptr dataPtr
+    #{poke CArray_u8, size} ptr size
+
+foreign import ccall "&hs_temporal_drop_byte_array" rust_dropByteArray :: FinalizerPtr (CArray Word8)
+
+data RpcError = RpcError
+  { code :: Word32
+  , message :: Text
+  , details :: ByteString
+  }
+  deriving (Show)
+
+instance Exception RpcError
+
+data CRPCError = CRPCError
+  { code :: Word32
+  , message :: CString
+  , details :: CArray Word8
+  }
+
+instance Storable CRPCError where
+  sizeOf _ = #{size CRPCError}
+  alignment _ = #{alignment CRPCError}
+  peek ptr = do
+    code <- #{peek CRPCError, code} ptr
+    message <- #{peek CRPCError, message} ptr
+    details <- #{peek CRPCError, details} ptr
+    pure CRPCError {..}
+  poke ptr CRPCError {..} = do
+    #{poke CRPCError, code} ptr code
+    #{poke CRPCError, message} ptr message
+    #{poke CRPCError, details} ptr details
+
+foreign import ccall "&hs_temporal_drop_rpc_error" rust_drop_rpc_error :: FinalizerPtr CRPCError
+
+peekCRPCError :: CRPCError -> IO RpcError
+peekCRPCError CRPCError{..} = do
+  message <- fromPtr0 $ castPtr message
+  details <- cArrayToByteString details
+  pure RpcError{..}
+
+newtype CoreClient = CoreClient
+  { coreClientPtr :: ForeignPtr CoreClient
+  }
+
+-- TODO, this would be better as a pair of vectors instead of a linked list
+data HashMapEntries = HashMapEntries
+  { key :: CString
+  , keyLen :: CSize
+  , value :: CString
+  , valueLen :: CSize
+  , next :: Ptr HashMapEntries
+  }
+
+instance Storable HashMapEntries where
+  sizeOf _ = #{size HaskellHashMapEntries}
+  alignment _ = #{alignment HaskellHashMapEntries}
+  peek ptr = do
+    key <- #{peek HaskellHashMapEntries, key} ptr
+    keyLen <- #{peek HaskellHashMapEntries, key_len} ptr
+    value <- #{peek HaskellHashMapEntries, value} ptr
+    valueLen <- #{peek HaskellHashMapEntries, value_len} ptr
+    next <- #{peek HaskellHashMapEntries, next} ptr
+    pure HashMapEntries {..}
+  poke ptr HashMapEntries{..} = do
+    #{poke HaskellHashMapEntries, key} ptr key
+    #{poke HaskellHashMapEntries, key_len} ptr keyLen
+    #{poke HaskellHashMapEntries, value} ptr value
+    #{poke HaskellHashMapEntries, value_len} ptr valueLen
+    #{poke HaskellHashMapEntries, next} ptr next
+
+data CRpcCall = CRpcCall
+  { rpcCallReq :: Ptr (CArray Word8)
+  , rpcCallRetry :: Word8
+  , rpcCallMetadata :: Ptr HashMapEntries
+  , rpcCallTimeoutMillis :: Ptr Word64
+  }
+
+instance Storable CRpcCall where
+  sizeOf _ = #{size RpcCall}
+  alignment _ = #{alignment RpcCall}
+  peek ptr = do
+    rpcCallReq <- #{peek RpcCall, req} ptr
+    rpcCallRetry <- #{peek RpcCall, retry} ptr
+    rpcCallMetadata <- #{peek RpcCall, metadata} ptr
+    rpcCallTimeoutMillis <- #{peek RpcCall, timeout_millis} ptr
+    pure CRpcCall {..}
+  poke ptr CRpcCall {..} = do
+    #{poke RpcCall, req} ptr rpcCallReq
+    #{poke RpcCall, retry} ptr rpcCallRetry
+    #{poke RpcCall, metadata} ptr rpcCallMetadata
+    #{poke RpcCall, timeout_millis} ptr rpcCallTimeoutMillis
+
+
+data WorkerErrorCode 
+  = SDKError 
+  | InitWorkerFailed 
+  | InitReplayWorkerFailed 
+  | InvalidProto 
+  | ReplayWorkerClosed 
+  | PollShutdown 
+  | PollFailure 
+  | CompletionFailure 
+  | InvalidWorkerConfig
+  | UnknownError Word8
+  deriving (Show)
+
+instance Storable WorkerErrorCode where
+  sizeOf _ = #{size WorkerErrorCode}
+  alignment _ = #{alignment WorkerErrorCode}
+  peek ptr = do
+    code <- peek (castPtr ptr :: Ptr #{type WorkerErrorCode})
+    case code of
+      #{const SDKError} -> pure SDKError
+      #{const InitWorkerFailed} -> pure InitWorkerFailed
+      #{const InitReplayWorkerFailed} -> pure InitReplayWorkerFailed
+      #{const InvalidProto} -> pure InvalidProto
+      #{const ReplayWorkerClosed} -> pure ReplayWorkerClosed
+      #{const PollShutdownError} -> pure PollShutdown
+      #{const PollFailure} -> pure PollFailure
+      #{const CompletionFailure} -> pure CompletionFailure
+      #{const InvalidWorkerConfig} -> pure InvalidWorkerConfig
+      _ -> pure $ UnknownError code
+  poke ptr_ code = case code of
+    SDKError -> poke ptr #{const SDKError}
+    InitWorkerFailed -> poke ptr #{const InitWorkerFailed}
+    InitReplayWorkerFailed -> poke ptr #{const InitReplayWorkerFailed}
+    InvalidProto -> poke ptr #{const InvalidProto}
+    ReplayWorkerClosed -> poke ptr #{const ReplayWorkerClosed}
+    PollShutdown -> poke ptr #{const PollShutdownError}
+    PollFailure -> poke ptr #{const PollFailure}
+    CompletionFailure -> poke ptr #{const CompletionFailure}
+    InvalidWorkerConfig -> poke ptr #{const InvalidWorkerConfig}
+    (UnknownError code) -> poke ptr code
+    where
+      ptr = (castPtr ptr_ :: Ptr #{type WorkerErrorCode})
+
+data CWorkerError = CWorkerError
+  { code :: WorkerErrorCode
+  , message :: CString
+  }
+
+instance Storable CWorkerError where
+  sizeOf _ = #{size CWorkerError}
+  alignment _ = #{alignment CWorkerError}
+  peek ptr = do
+    code <- #{peek CWorkerError, code} ptr
+    message <- #{peek CWorkerError, message} ptr
+    pure CWorkerError {..}
+  poke ptr CWorkerError {..} = do
+    #{poke CWorkerError, code} ptr code
+    #{poke CWorkerError, message} ptr message
+
+data WorkerError = WorkerError
+  { code :: WorkerErrorCode
+  , message :: Text
+  } deriving (Show)
+
+instance Exception WorkerError
+
+peekWorkerError :: CWorkerError -> IO WorkerError
+peekWorkerError CWorkerError{..} = do
+  message <- fromPtr0 $ castPtr message
+  pure WorkerError{..}
+
+foreign import ccall "&hs_temporal_drop_worker_error" rust_dropWorkerError :: FinalizerPtr CWorkerError
+
+data CUnit = CUnit
+
+foreign import ccall "&hs_temporal_drop_unit" rust_dropUnit :: FinalizerPtr CUnit

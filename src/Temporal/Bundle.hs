@@ -484,14 +484,14 @@ startTaskQueues client conf = startWorkers conf >>= awaitWorkersStart
 -- | Stop each Temporal worker for each task queue specified in the MercuryTaskQueues record.
 --
 -- This function stops each worker concurrently, waits for them to complete shutdown (gracefully or not), and then returns.
-shutdownTaskQueues :: forall rec. (TraversableRec rec) => Workers rec -> IO ()
+shutdownTaskQueues :: forall m rec. (TraversableRec rec, MonadUnliftIO m) => Workers rec -> m ()
 shutdownTaskQueues workers =
   stopWorkers workers
     >>= awaitWorkersStop
   where
-    stopWorkers :: rec (ConstFn Worker) -> IO (rec (ConstFn (Async ())))
+    stopWorkers :: rec (ConstFn Worker) -> m (rec (ConstFn (Async ())))
     stopWorkers = Rec.traverse (\_ worker -> async (shutdown worker))
-    awaitWorkersStop :: rec (ConstFn (Async ())) -> IO ()
+    awaitWorkersStop :: rec (ConstFn (Async ())) -> m ()
     awaitWorkersStop = Rec.traverse_ (\_ workerShutdownThread -> UnliftIO.wait workerShutdownThread)
 
 

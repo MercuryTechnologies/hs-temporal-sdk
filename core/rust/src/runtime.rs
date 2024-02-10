@@ -17,9 +17,6 @@ pub(crate) struct Runtime {
   pub(crate) try_put_mvar: extern fn(capability: Capability, mvar: *mut MVar) -> (),
 }
 
-// Strings that we have sent to Haskell
-pub type HaskellText = CArray<u8>;
-
 fn init_runtime(telemetry_config: TelemetryOptions, try_put_mvar: extern fn(capability: Capability, mvar: *mut MVar) -> ()) -> Box<RuntimeRef> {
   let runtime = CoreRuntime::new(
     telemetry_config,
@@ -144,15 +141,6 @@ impl Runtime {
   }
 }
 
-#[no_mangle]
-pub extern fn hs_temporal_drop_cstring(str: *const HaskellText) {
-  unsafe {
-    drop(CArray::from_raw_pointer(str));
-  }
-}
-
-// Actually the same thing as the above, but we want to be explicit about the
-// type of what we're dropping for clarity.
 #[no_mangle]
 pub extern fn hs_temporal_drop_byte_array(str: *const CArray<u8>) {
   unsafe {

@@ -71,7 +71,7 @@ For more information on the saga pattern, see the following resources:
 - [The Saga Pattern in Distributed Systems](https://www.cs.cornell.edu/andru/cs711/2002fa/reading/sagas.pdf)
 -}
 newtype SagaT m a = SagaT { unSagaT :: StateT [m ()] m a }
-  deriving (Functor, Applicative, Monad, MonadIO)
+  deriving newtype (Functor, Applicative, Monad, MonadIO)
 
 runSaga :: (MonadCatch m, MonadLogger m) => (Catch.SomeException -> m ()) -> SagaT m a -> m a
 runSaga compensationExceptionHandler m = flip evalStateT [] $ do

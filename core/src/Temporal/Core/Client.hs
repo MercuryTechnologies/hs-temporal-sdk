@@ -14,6 +14,7 @@ module Temporal.Core.Client
   , connectClient
   , connectClient'
   , defaultClientConfig
+  , closeClient
   , CoreClient
   , ClientConfig(..)
   , ClientTlsConfig(..)
@@ -41,8 +42,8 @@ module Temporal.Core.Client
   ) where
 
 import Control.Concurrent
-import Control.Concurrent.MVar
 import Control.Exception
+import Control.Monad
 import Data.Aeson
 import Data.Aeson.TH
 import Data.ByteString (ByteString)
@@ -57,21 +58,20 @@ import Foreign.C.Types
 import Foreign.Marshal
 import Foreign.Ptr
 import Foreign.ForeignPtr
-import Foreign.Marshal
 import Foreign.Storable
 import Temporal.Runtime
 import Temporal.Internal.FFI
+import Temporal.Core.CTypes
 import qualified Data.ByteString          as BS
 import qualified Data.ByteString.Internal as BS
 import qualified Data.ByteString          as BL
 import qualified Data.Vector.Storable     as V
 import Data.ProtoLens.Encoding
-import Data.ProtoLens.Service.Types
 import System.Posix.Process
 import Network.BSD
 
-foreign import ccall "hs_temporal_connect_client" raw_connectClient :: Ptr Runtime -> CString -> TokioCall RustCStringLen CoreClient
-foreign import ccall "&hs_temporal_drop_client" raw_freeClient :: FunPtr (Ptr CoreClient -> IO ())
+foreign import ccall "hs_temporal_connect_client" raw_connectClient :: Ptr Runtime -> CString -> TokioCall (CArray Word8) CoreClient
+foreign import ccall "&hs_temporal_drop_client" raw_freeClient :: FinalizerPtr CoreClient
 
 data ClientConfig = ClientConfig
   { targetUrl :: Text
@@ -116,19 +116,7 @@ clientConfig :: Client -> ClientConfig
 clientConfig = config
 
 withClient :: Client -> (Ptr CoreClient -> IO a) -> IO a
-withClient (Client cvar _) f = withMVar cvar $ \(CoreClient c) -> do
-  withForeignPtr c f
-
-newtype CoreClient = CoreClient
-  { coreClientPtr :: ForeignPtr CoreClient
-  }
-
-instance ManagedRustValue CoreClient where
-  type RustRef CoreClient = Ptr CoreClient
-  type HaskellRep CoreClient = CoreClient
-  fromRust _ rustPtr = mask_ $ do
-    fp <- newForeignPtr raw_freeClient rustPtr
-    pure $ CoreClient fp
+withClient (Client cc _) f = withMVar cc $ \(CoreClient c) -> withForeignPtr c f
 
 newtype ByteVector = ByteVector { byteVector :: ByteString }
 
@@ -207,95 +195,42 @@ connectClient' rt conf = do
     withRuntime rt $ \rtPtr -> BS.useAsCString (BL.toStrict $ encode conf') $ \confPtr -> do
       let tryConnect = makeTokioAsyncCall 
             (raw_connectClient rtPtr confPtr)
-            (\cstrLen -> do
-              msg <- fromRust (Proxy :: Proxy RustCStringLen) cstrLen
-              pure msg
-            )
-            (\fp -> do
-              clientPtr <- newForeignPtr raw_freeClient fp
-              pure (CoreClient clientPtr)
-            )
+            (Just rust_dropByteArray)
+            (Just raw_freeClient)
           go attempt = do
             result <- tryConnect
             case result of
-              Left err -> case retryConfig conf of
-                Nothing -> putMVar clientPtrSlot (throw $ ClientConnectionError err)
-                Just retryConf -> do
-                  let delayMillis = fromIntegral (initialIntervalMillis retryConf) * multiplier retryConf ^ attempt
-                      delayMicros = delayMillis * 1000
-                  if (fmap fromIntegral (maxElapsedTimeMillis retryConf) < Just delayMillis) || (maxRetries retryConf <= attempt)
-                    then putMVar clientPtrSlot (throw $ ClientConnectionError err)
-                    else do
-                      threadDelay $ round delayMicros
-                      go (attempt + 1)
-              Right client -> putMVar clientPtrSlot client
+              Left errFP -> do
+                err <- withForeignPtr errFP $ \fp -> peek fp >>= cArrayToText
+                case retryConfig conf of
+                  Nothing -> putMVar clientPtrSlot (throw $ ClientConnectionError err)
+                  Just retryConf -> do
+                    let delayMillis = fromIntegral (initialIntervalMillis retryConf) * multiplier retryConf ^ attempt
+                        delayMicros = delayMillis * 1000
+                    if (fmap fromIntegral (maxElapsedTimeMillis retryConf) < Just delayMillis) || (maxRetries retryConf <= attempt)
+                      then putMVar clientPtrSlot (throw $ ClientConnectionError err)
+                      else do
+                        threadDelay $ round delayMicros
+                        go (attempt + 1)
+              Right client -> putMVar clientPtrSlot (CoreClient client)
       go 1
   pure $ Client clientPtrSlot conf'
 
 reconnectClient :: Client -> IO ()
-reconnectClient (Client clientPtrSlot conf) = do
-  _ <- tryTakeMVar clientPtrSlot
-  (Client newClientPtr _ ) <- connectClient conf `catch` (\c -> putMVar clientPtrSlot (throw (c :: ClientConnectionError)) >> throwIO c)
-  mask_ (takeMVar newClientPtr >>= putMVar clientPtrSlot)
+reconnectClient (Client clientPtrSlot conf) = mask $ \restore -> do
+  (CoreClient clientPtr) <- takeMVar clientPtrSlot
+  (Client newClientPtr _ ) <- restore (connectClient conf) `catch` (\c -> putMVar clientPtrSlot (throw (c :: ClientConnectionError)) >> throwIO c)
+  takeMVar newClientPtr >>= putMVar clientPtrSlot
 
-type PrimRpcCall = Ptr CoreClient -> Ptr CRpcCall -> TokioCall RpcError (CArray Word8)
+closeClient :: Client -> IO ()
+closeClient (Client clientPtrSlot _) = mask_ $ do
+  (CoreClient clientPtr) <- takeMVar clientPtrSlot
+  finalizeForeignPtr clientPtr
+  putMVar clientPtrSlot (error "Client has been closed")
 
--- TODO, this would be better as a pair of vectors instead of a linked list
-data HashMapEntries = HashMapEntries
-  { key :: CString
-  , keyLen :: CSize
-  , value :: CString
-  , valueLen :: CSize
-  , next :: Ptr HashMapEntries
-  }
 
-instance Storable HashMapEntries where
-  sizeOf _ = 
-    sizeOf (undefined :: CString) + 
-    sizeOf (undefined :: CSize) + 
-    sizeOf (undefined :: CString) + 
-    sizeOf (undefined :: CSize) + 
-    sizeOf (undefined :: Ptr HashMapEntries)
-  alignment _ = 8
-  peek ptr = do
-    key <- peekByteOff ptr 0
-    keyLen <- peekByteOff ptr (sizeOf (undefined :: CString))
-    value <- peekByteOff ptr (sizeOf (undefined :: CString) + sizeOf (undefined :: CSize))
-    valueLen <- peekByteOff ptr (sizeOf (undefined :: CString) + sizeOf (undefined :: CSize) + sizeOf (undefined :: CString))
-    next <- peekByteOff ptr (sizeOf (undefined :: CString) + sizeOf (undefined :: CSize) + sizeOf (undefined :: CString) + sizeOf (undefined :: CSize))
-    pure $ HashMapEntries key keyLen value valueLen next
-  poke ptr (HashMapEntries key keyLen value valueLen next) = do
-    pokeByteOff ptr 0 key
-    pokeByteOff ptr (sizeOf (undefined :: CString)) keyLen
-    pokeByteOff ptr (sizeOf (undefined :: CString) + sizeOf (undefined :: CSize)) value
-    pokeByteOff ptr (sizeOf (undefined :: CString) + sizeOf (undefined :: CSize) + sizeOf (undefined :: CString)) valueLen
-    pokeByteOff ptr (sizeOf (undefined :: CString) + sizeOf (undefined :: CSize) + sizeOf (undefined :: CString) + sizeOf (undefined :: CSize)) next
+type PrimRpcCall = Ptr CoreClient -> Ptr CRpcCall -> TokioCall CRPCError (CArray Word8)
 
-data CRpcCall = CRpcCall
-  { rpcCallReq :: Ptr (CArray Word8)
-  , rpcCallRetry :: Word8
-  , rpcCallMetadata :: Ptr HashMapEntries
-  , rpcCallTimeoutMillis :: Ptr Word64
-  }
-
-instance Storable CRpcCall where
-  sizeOf _ =
-    sizeOf (undefined :: Ptr (CArray Word8)) +
-    sizeOf (undefined :: Word8) +
-    sizeOf (undefined :: Ptr HashMapEntries) +
-    sizeOf (undefined :: Ptr Word64)
-  alignment _ = 8
-  peek ptr = do
-    rpcCallReq <- peekByteOff ptr 0
-    rpcCallRetry <- peekByteOff ptr (sizeOf (undefined :: Ptr (CArray Word8)))
-    rpcCallMetadata <- peekByteOff ptr (sizeOf (undefined :: Ptr (CArray Word8)) + sizeOf (undefined :: Word8))
-    rpcCallTimeoutMillis <- peekByteOff ptr (sizeOf (undefined :: Ptr (CArray Word8)) + sizeOf (undefined :: Word8) + sizeOf (undefined :: Ptr HashMapEntries))
-    pure $ CRpcCall rpcCallReq rpcCallRetry rpcCallMetadata rpcCallTimeoutMillis
-  poke ptr (CRpcCall rpcCallReq rpcCallRetry rpcCallMetadata rpcCallTimeoutMillis) = do
-    pokeByteOff ptr 0 rpcCallReq
-    pokeByteOff ptr (sizeOf (undefined :: Ptr (CArray Word8))) rpcCallRetry
-    pokeByteOff ptr (sizeOf (undefined :: Ptr (CArray Word8)) + sizeOf (undefined :: Word8)) rpcCallMetadata
-    pokeByteOff ptr (sizeOf (undefined :: Ptr (CArray Word8)) + sizeOf (undefined :: Word8) + sizeOf (undefined :: Ptr HashMapEntries)) rpcCallTimeoutMillis
 
 -- TODO how should we use mask here?
 call :: forall svc t. (HasMethodImpl svc t) => PrimRpcCall -> Client -> MethodInput svc t -> IO (Either RpcError (MethodOutput svc t))
@@ -314,13 +249,8 @@ call f c req = withClient c $ \cPtr -> do
         poke rpcCallPtr rpcCall
         result <- makeTokioAsyncCall
           (f cPtr rpcCallPtr)
-          (\rpcErr -> do
-            err <- peekCrpcError rpcErr
-            rust_drop_rpc_error rpcErr
-            pure err
-          )
-          (\rp -> do
-            fromRust (Proxy @(CArray Word8)) rp)
-        pure $ case result of
-          Left err -> Left err
-          Right r -> Right $ decodeMessageOrDie r
+          (Just rust_drop_rpc_error)
+          (Just rust_dropByteArray)
+        case result of
+          Left err -> Left <$> withForeignPtr err (peek >=> peekCRPCError)
+          Right r -> Right . decodeMessageOrDie <$> withForeignPtr r (peek >=> cArrayToByteString)
