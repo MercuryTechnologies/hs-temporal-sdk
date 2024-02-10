@@ -72,7 +72,7 @@ makeTokioAsyncCall call readErr readSuccess = uninterruptibleMask $ \restore -> 
   sp <- newStablePtrPrimMVar mvar
   errorSlot <- mallocForeignPtr
   resultSlot <- mallocForeignPtr 
-  withForeignPtr errorSlot $ \err -> withForeignPtr resultSlot $ \res -> do
+  withTokioResult errorSlot $ \err -> withTokioResult resultSlot $ \res -> do
     let peekEither = do
           e <- peekTokioResult err readErr
           case e of
