@@ -489,15 +489,15 @@ reevaluateDependentConditions cref = do
     seqMaps <- readTVar inst.workflowSequenceMaps
     let pendingConds = seqMaps.conditionsAwaitingSignal
         (reactivateConds, unactivatedConds) = HashMap.foldlWithKey'
-          (\(reactivateConds, unactivatedConds) k v@(ivar, varDependencies) -> 
+          (\(reactivateConds', unactivatedConds') k v@(ivar, varDependencies) -> 
             if cref.stateVarId `Set.member` varDependencies
             then
-              ( reactivateConds >> liftIO (putIVar ivar (Ok ()) inst.workflowInstanceContinuationEnv)
-              , unactivatedConds
+              ( reactivateConds' >> liftIO (putIVar ivar (Ok ()) inst.workflowInstanceContinuationEnv)
+              , unactivatedConds'
               )
             else
-              ( reactivateConds
-              , HashMap.insert k v unactivatedConds
+              ( reactivateConds'
+              , HashMap.insert k v unactivatedConds'
               )
           )
           (pure (), mempty)
@@ -628,17 +628,17 @@ data Task a = Task
   }
 
 instance Functor Task where
-  fmap f (Task wait cancel) = Task (fmap f wait) cancel
+  fmap f (Task wait' cancel') = Task (fmap f wait') cancel'
 
 instance Applicative Task where
   pure a = Task (pure a) (pure ())
-  Task wait cancel <*> Task wait' cancel' = Task (wait <*> wait') (cancel *> cancel')
+  Task waitL cancelL <*> Task waitR cancelR = Task (waitL <*> waitR) (cancelL *> cancelR)
 
 -- | Sometimes you want to alter the result of a task, but you 'Task' doesn't work as
 -- a monad due to the 'cancel' action. This function lets you alter the result of a task
 -- in the workflow monad.
 bindTask :: Task a -> (a -> Workflow b) -> Task b
-bindTask (Task wait cancel) f = Task (wait >>= f) cancel
+bindTask (Task wait' cancel') f = Task (wait' >>= f) cancel'
 
 
 -- | Handle representing an external Workflow Execution.

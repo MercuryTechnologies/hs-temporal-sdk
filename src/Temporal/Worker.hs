@@ -68,9 +68,7 @@ module Temporal.Worker
   , WorkflowId(..)
   ) where
 import UnliftIO
-import UnliftIO.Exception 
-import Control.Applicative
-
+import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.State
 import Data.HashMap.Strict (HashMap)
@@ -86,11 +84,13 @@ import Temporal.Workflow.Definition
 import qualified Temporal.Workflow.Worker as Workflow
 
 import Data.Text (Text)
+import qualified Data.Text as Text
 import Data.Word
 import qualified Data.HashMap.Strict as HashMap
 
 import Temporal.Interceptor
 import Temporal.Core.Worker (InactiveForReplay)
+import Temporal.Runtime
 
 newtype ConfigM actEnv a = ConfigM { unConfigM :: State (WorkerConfig actEnv) a }
   deriving newtype (Functor, Applicative, Monad)
@@ -384,13 +384,16 @@ startWorker client conf = do
       activityWorker = Activity.ActivityWorker{..}
       workerClient = client
   let workerType = Core.SReal
+  logs <- liftIO $ fetchLogs globalRuntime
+  forM_ logs $ \l -> do
+    $(logInfo) $ Text.pack $ show l
   workerWorkflowLoop <- async $ do
     $(logDebug) "Starting workflow worker loop"
     Workflow.execute workflowWorker
     $(logDebug) "Exiting workflow worker loop"
   workerActivityLoop <- async $ do 
     $(logDebug) "Starting activity worker loop"
-    liftIO $ Activity.execute activityWorker
+    Activity.execute activityWorker
     $(logDebug) "Exiting activity worker loop"
   pure Temporal.Worker.Worker{..}
 
@@ -399,7 +402,7 @@ startWorker client conf = do
 -- Any exceptions thrown by the workflow or activity loops will be rethrown.
 --
 -- This function is generally not needed, as 'shutdown' will wait for the worker to exit.
-waitWorker :: MonadIO m => Temporal.Worker.Worker -> m ()
+waitWorker :: (MonadIO m) => Temporal.Worker.Worker -> m ()
 waitWorker (Temporal.Worker.Worker{workerType, workerWorkflowLoop, workerActivityLoop}) = do
   case workerType of
     Core.SReal -> do
@@ -412,6 +415,9 @@ waitWorker (Temporal.Worker.Worker{workerType, workerWorkflowLoop, workerActivit
       link workerWorkflowLoop
       _ <- waitCatch workerWorkflowLoop
       pure ()
+  -- logs <- liftIO $ fetchLogs globalRuntime
+  -- forM_ logs $ \l -> do
+  --   $(logInfo) $ Text.pack $ show l
 
 
 -- | Shut down a worker. This will initiate a graceful shutdown of the worker, waiting for all
@@ -426,3 +432,7 @@ shutdown worker@Temporal.Worker.Worker{workerCore} = mask $ \restore -> do
   case err' of
     Left err -> throwIO err
     Right () -> pure ()
+
+  -- logs <- liftIO $ fetchLogs globalRuntime
+  -- forM_ logs $ \l -> do
+  --   $(logInfo) $ Text.pack $ show l

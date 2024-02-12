@@ -8,13 +8,10 @@ import Control.Exception.Annotated
 import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.Reader
-import Data.Annotation
 import Data.Bifunctor
 import qualified Data.HashMap.Strict as HashMap
 import Data.ProtoLens
 import qualified Data.Text as T
-import Data.Typeable
-import GHC.Stack
 import Lens.Family2
 import qualified Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask as AT
 import qualified Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields as AT
@@ -25,7 +22,6 @@ import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import Temporal.Activity.Definition
 import Temporal.Common
 import Temporal.Workflow.Types
-import qualified Temporal.Core.Client as Core
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
 import qualified Temporal.Exception as Err
@@ -34,8 +30,10 @@ import UnliftIO
 import Temporal.Duration (durationFromProto)
 import Data.HashMap.Strict (HashMap)
 import Data.Text (Text)
+import qualified Data.Text as Text
 import Temporal.Interceptor
 import Temporal.Activity.Types
+import Temporal.Runtime
 
 data ActivityWorker env = ActivityWorker
   { initialEnv :: env
@@ -49,34 +47,29 @@ data ActivityWorker env = ActivityWorker
   , activityErrorConverters :: [ApplicationFailureHandler]
   }
 
-instance MonadLogger (ActivityWorkerM env) where
-  monadLoggerLog loc src lvl msg = do
-    w <- ask
-    liftIO $ logger w loc src lvl (toLogStr msg)
-
-instance MonadLoggerIO (ActivityWorkerM env) where
-  askLoggerIO = do
-    w <- ask
-    pure $ logger w
-
-newtype ActivityWorkerM env a = ActivityWorkerM { unActivityWorkerM :: ReaderT (ActivityWorker env) IO a }
-  deriving
+newtype ActivityWorkerM env m a = ActivityWorkerM { unActivityWorkerM :: ReaderT (ActivityWorker env) m a }
+  deriving newtype
     ( Functor
     , Applicative
     , Monad
     , MonadIO
     , MonadReader (ActivityWorker env)
     , MonadUnliftIO
+    , MonadLogger
+    , MonadLoggerIO
     )
 
-runActivityWorker :: ActivityWorker env -> ActivityWorkerM env a -> IO a
+runActivityWorker :: (MonadUnliftIO m, MonadLogger m) => ActivityWorker env -> ActivityWorkerM env m a -> m a
 runActivityWorker w m = runReaderT (unActivityWorkerM m) w
 
-execute :: ActivityWorker actEnv -> IO ()
+execute :: (MonadUnliftIO m, MonadLogger m) => ActivityWorker actEnv -> m ()
 execute worker = runActivityWorker worker go
   where
     go = do
       eTask <- liftIO $ Core.pollActivityTask worker.workerCore
+      logs <- liftIO $ fetchLogs globalRuntime
+      forM_ logs $ \l -> do
+        $(logInfo) $ Text.pack $ show l
       case eTask of
         Left (Core.WorkerError Core.PollShutdown _) -> do
           pure ()
@@ -120,7 +113,7 @@ activityInfoFromProto tt msg = ActivityInfo
 completeAsync :: MonadIO m => m ()
 completeAsync = throwIO CompleteAsync
 
-applyActivityTask :: AT.ActivityTask -> ActivityWorkerM actEnv ()
+applyActivityTask :: (MonadUnliftIO m, MonadLogger m) => AT.ActivityTask -> ActivityWorkerM actEnv m ()
 applyActivityTask task = case task ^. AT.maybe'variant of
   Nothing -> throwIO $ RuntimeError "Activity task has no variant or an unknown variant"
   Just (AT.ActivityTask'Start msg) -> applyActivityTaskStart task tt msg
@@ -128,7 +121,7 @@ applyActivityTask task = case task ^. AT.maybe'variant of
   where
     tt = TaskToken $ task ^. AT.taskToken
 
-requireActivityNotRunning :: TaskToken -> ActivityWorkerM actEnv () -> ActivityWorkerM actEnv ()
+requireActivityNotRunning :: MonadUnliftIO m => TaskToken -> ActivityWorkerM actEnv m () -> ActivityWorkerM actEnv m ()
 requireActivityNotRunning tt m = do
   w <- ask
   running <- readTVarIO w.runningActivities
@@ -137,7 +130,7 @@ requireActivityNotRunning tt m = do
     Nothing -> m
 
 -- TODO, where should async exception masking happen?
-applyActivityTaskStart :: AT.ActivityTask -> TaskToken -> AT.Start -> ActivityWorkerM actEnv ()
+applyActivityTaskStart :: (MonadUnliftIO m, MonadLogger m) => AT.ActivityTask -> TaskToken -> AT.Start -> ActivityWorkerM actEnv m ()
 applyActivityTaskStart tsk tt msg = do
   w <- ask
   $logDebug $ "Starting activity: " <> T.pack (show tsk)
@@ -163,7 +156,7 @@ applyActivityTaskStart tsk tt msg = do
                 activityRun actEnv input' `finally` 
                 (takeMVar syncPoint *> atomically (modifyTVar' w.runningActivities (HashMap.delete tt)))
         completionMsg <- case join $ fmap (first (toException . ValueError)) ef of
-          Left err@(SomeException wrappedErr) -> do
+          Left err@(SomeException _wrappedErr) -> do
             $logDebug (T.pack (show err))
             let appFailure = mkApplicationFailure err w.activityErrorConverters
                 enrichedApplicationFailure = defMessage
@@ -205,7 +198,7 @@ applyActivityTaskStart tsk tt msg = do
       link runningActivity
       putMVar syncPoint ()
 
-applyActivityTaskCancel :: TaskToken -> AT.Cancel -> ActivityWorkerM actEnv ()
+applyActivityTaskCancel :: (MonadUnliftIO m, MonadLogger m) => TaskToken -> AT.Cancel -> ActivityWorkerM actEnv m ()
 applyActivityTaskCancel tt _msg = do
   w <- ask
   $logDebug $ "Cancelling activity: " <> T.pack (show tt)

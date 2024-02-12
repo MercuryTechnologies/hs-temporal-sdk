@@ -93,12 +93,12 @@ waitChildWorkflowResult wfHandle@(ChildWorkflowHandle{childWorkflowResultConvert
   case res ^. Activation.result . ChildWorkflow.maybe'status of
     Nothing -> ilift $ throwIO $ RuntimeError "Unrecognized child workflow result status"
     Just s -> case s of
-      ChildWorkflow.ChildWorkflowResult'Completed res -> do
-        eVal <- ilift $ liftIO $ UnliftIO.try $ childWorkflowResultConverter $ convertFromProtoPayload $ res ^. ChildWorkflow.result
+      ChildWorkflow.ChildWorkflowResult'Completed res' -> do
+        eVal <- ilift $ liftIO $ UnliftIO.try $ childWorkflowResultConverter $ convertFromProtoPayload $ res' ^. ChildWorkflow.result
         case eVal of
           Left err -> throw (err :: SomeException)
           Right ok -> pure ok
-      ChildWorkflow.ChildWorkflowResult'Failed res -> throw $ ChildWorkflowFailed $ res ^. ChildWorkflow.failure
+      ChildWorkflow.ChildWorkflowResult'Failed res' -> throw $ ChildWorkflowFailed $ res' ^. ChildWorkflow.failure
       ChildWorkflow.ChildWorkflowResult'Cancelled _ -> throw ChildWorkflowCancelled
 
 instance Cancel (ChildWorkflowHandle a) where

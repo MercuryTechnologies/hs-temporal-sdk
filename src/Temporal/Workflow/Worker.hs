@@ -30,6 +30,7 @@ import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_F
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import Temporal.Duration (durationFromProto)
 import Temporal.Core.Worker (InactiveForReplay)
+import Temporal.Runtime
 
 data WorkflowWorker = forall ty. WorkflowWorker
   { workerWorkflowFunctions :: HashMap Text WorkflowDefinition
@@ -78,6 +79,9 @@ execute worker = flip runReaderT worker $ do
   where
     go = do
       $(logDebug) "Polling for activation"
+      logs <- liftIO $ fetchLogs globalRuntime
+      forM_ logs $ \l -> do
+        $(logInfo) $ Text.pack $ show l
       eActivation <- pollWorkflowActivation
       case eActivation of
         -- TODO should we do anything else on shutdown?
