@@ -56,7 +56,6 @@ module Temporal.Client
 
 import Conduit
 import Control.Monad
-import Control.Monad.IO.Class
 import Control.Monad.Trans.Accum
 import Control.Monad.Trans.Cont
 import Control.Monad.Trans.Except
@@ -72,8 +71,6 @@ import qualified Control.Monad.Trans.State.Strict as SS
 import qualified Control.Monad.Trans.Writer.CPS as CW
 import qualified Control.Monad.Trans.Writer.Lazy as LW
 import qualified Control.Monad.Trans.Writer.Strict as SW
-import Data.Int
-import Data.Kind
 import Data.Proxy
 import Data.ProtoLens.Field
 import Data.ProtoLens.Message
@@ -81,7 +78,6 @@ import Data.Map (Map)
 import Data.Maybe
 import Data.Text (Text)
 import Data.Typeable
-import qualified Data.Text as Text
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
 import qualified Data.Vector as V
@@ -111,14 +107,10 @@ import qualified Proto.Temporal.Api.Query.V1.Message_Fields as Query
 import Proto.Temporal.Api.Enums.V1.Workflow (HistoryEventFilterType(..), WorkflowExecutionStatus(..))
 import UnliftIO
 import Unsafe.Coerce
-import Data.ProtoLens (Message(defMessage))
-import Temporal.Payload (convertToProtoPayload)
 import Temporal.Client.Types
-import Temporal.SearchAttributes
 import Temporal.SearchAttributes.Internal
-import Temporal.Workflow (WorkflowRef(..), QueryDefinition(..))
-import Temporal.Workflow.Signal (SignalRef(..))
-import Temporal.Duration (Duration, durationToProto)
+import Temporal.Workflow (QueryDefinition(..))
+import Temporal.Duration (durationToProto)
 ---------------------------------------------------------------------------------
 -- WorkflowClient stuff
 
@@ -224,7 +216,6 @@ execute wf wfId opts = case workflowRef wf of
     let gather :: ([IO Payload] -> m (WorkflowResult wf)) -> (WorkflowArgs wf :->: m (WorkflowResult wf))
         gather = gatherArgs (Proxy @(WorkflowArgs wf)) codec Prelude.id
     gather $ \inputs -> do
-      c <- askWorkflowClient
       h <- startFromPayloads k wfId opts =<< liftIO (sequence inputs)
       waitWorkflowResult h
 
@@ -251,11 +242,11 @@ waitWorkflowResult h@(WorkflowHandle readResult _ c wf r) = do
             else case payloads of
               (a:_) -> liftIO $ readResult a
               _ -> error "Missing result payload"
-        HistoryEvent'WorkflowExecutionFailedEventAttributes attrs -> throwIO WorkflowExecutionFailed
-        HistoryEvent'WorkflowExecutionTimedOutEventAttributes attrs -> throwIO WorkflowExecutionTimedOut
-        HistoryEvent'WorkflowExecutionCanceledEventAttributes attrs -> throwIO WorkflowExecutionCanceled
-        HistoryEvent'WorkflowExecutionTerminatedEventAttributes attrs -> throwIO WorkflowExecutionTerminated
-        HistoryEvent'WorkflowExecutionContinuedAsNewEventAttributes attrs -> throwIO WorkflowExecutionContinuedAsNew
+        HistoryEvent'WorkflowExecutionFailedEventAttributes _attrs -> throwIO WorkflowExecutionFailed
+        HistoryEvent'WorkflowExecutionTimedOutEventAttributes _attrs -> throwIO WorkflowExecutionTimedOut
+        HistoryEvent'WorkflowExecutionCanceledEventAttributes _attrs -> throwIO WorkflowExecutionCanceled
+        HistoryEvent'WorkflowExecutionTerminatedEventAttributes _attrs -> throwIO WorkflowExecutionTerminated
+        HistoryEvent'WorkflowExecutionContinuedAsNewEventAttributes _attrs -> throwIO WorkflowExecutionContinuedAsNew
         e -> error ("History event not supported " <> show e)
 
 data SignalOptions
@@ -295,7 +286,7 @@ signal :: forall m args a. MonadIO m
   -> SignalRef args 
   -> SignalOptions
   -> (args :->: m ())
-signal h@(WorkflowHandle _ _t c wf r) (SignalRef sName sCodec) opts = gather $ \inputs -> do
+signal (WorkflowHandle _ _t c wf r) (SignalRef sName sCodec) opts = gather $ \inputs -> do
   result <- liftIO $ do
     args <- traverse (fmap convertToProtoPayload) inputs
     signalWorkflowExecution c.clientCore $ defMessage
@@ -322,8 +313,9 @@ signal h@(WorkflowHandle _ _t c wf r) (SignalRef sName sCodec) opts = gather $ \
 
 
 data QueryOptions = QueryOptions
-  { queryId :: Text
-  , queryRejectCondition :: QueryRejectCondition
+  { -- queryId :: Text
+    -- , 
+    queryRejectCondition :: QueryRejectCondition
   , queryHeaders :: Map Text Payload
   }
 
@@ -546,7 +538,7 @@ signalWithStart
   -> StartWorkflowOptions 
   -> SignalRef sigArgs 
   -> (WorkflowArgs wf :->: (sigArgs :->: m (WorkflowHandle (WorkflowResult wf))))
-signalWithStart wf (WorkflowId wfId) opts (SignalRef n sigCodec) = case workflowRef wf of
+signalWithStart wf wfId opts (SignalRef n sigCodec) = case workflowRef wf of
   k@(KnownWorkflow codec _) -> do
     let gatherWf :: ([IO Payload] -> (sigArgs :->: m (WorkflowHandle (WorkflowResult wf)))) -> (WorkflowArgs wf :->: sigArgs :->: m (WorkflowHandle (WorkflowResult wf)))
         gatherWf = gatherArgs (Proxy @(WorkflowArgs wf)) codec Prelude.id
@@ -563,6 +555,7 @@ signalWithStart wf (WorkflowId wfId) opts (SignalRef n sigCodec) = case workflow
             , signalWithStartSignalArgs = sigArgs
             , signalWithStartArgs = wfArgs
             , signalWithStartOptions = opts
+            , signalWithStartWorkflowId = wfId
             }
       wfH <- Temporal.Client.Types.signalWithStart c.clientInterceptors interceptorOpts $ \opts' -> do
         reqId <- UUID.nextRandom
@@ -571,7 +564,7 @@ signalWithStart wf (WorkflowId wfId) opts (SignalRef n sigCodec) = case workflow
         let tq = rawTaskQueue opts'.signalWithStartOptions.taskQueue
             msg = defMessage
               & RR.namespace .~ (rawNamespace c.clientDefaultNamespace)
-              & RR.workflowId .~ wfId
+              & RR.workflowId .~ rawWorkflowId opts'.signalWithStartWorkflowId
               & RR.workflowType .~
                 ( defMessage & Common.name .~ rawWorkflowType opts'.signalWithStartWorkflowType
                 )
@@ -613,7 +606,7 @@ signalWithStart wf (WorkflowId wfId) opts (SignalRef n sigCodec) = case workflow
             { workflowHandleReadResult = pure
             , workflowHandleType = WorkflowType $ knownWorkflowName k
             , workflowHandleClient = c
-            , workflowHandleWorkflowId = WorkflowId wfId
+            , workflowHandleWorkflowId = opts'.signalWithStartWorkflowId
             , workflowHandleRunId = Just (RunId $ swer ^. WF.runId)
             }
       pure $ wfH 
@@ -689,9 +682,9 @@ streamEvents followOpt baseReq = askWorkflowClient >>= \c -> go c baseReq
       res <- liftIO $ getWorkflowExecutionHistory c.clientCore req
       case res of
         Left err -> throwIO err
-        Right res -> do
-          yieldMany (res ^. RR.history . History.events)
-          case decideLoop baseReq res of
+        Right x -> do
+          yieldMany (x ^. RR.history . History.events)
+          case decideLoop baseReq x of
             Nothing -> pure ()
             Just req' -> go c req'
     decideLoop :: GetWorkflowExecutionHistoryRequest -> GetWorkflowExecutionHistoryResponse -> Maybe GetWorkflowExecutionHistoryRequest

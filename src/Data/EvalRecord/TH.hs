@@ -42,7 +42,7 @@ module Data.EvalRecord.TH
 -- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 -- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import Language.Haskell.TH hiding (cxt)
-import Language.Haskell.TH.Syntax (VarBangType, Name(..), mkOccName, occString)
+import Language.Haskell.TH.Syntax (Name(..), mkOccName, occString)
 import Control.Monad (void)
 import Data.String
 import Data.Foldable (foldl')
@@ -50,7 +50,6 @@ import Data.List (partition, nub)
 import qualified Data.List.NonEmpty as NE
 import qualified Data.EvalRecord as Rec
 import GHC.Generics (Generic)
-import Control.Applicative
 import Data.List.Split
 import Data.Maybe
 import Fcf

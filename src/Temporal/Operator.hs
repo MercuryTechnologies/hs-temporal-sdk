@@ -17,7 +17,6 @@ import qualified Proto.Temporal.Api.Enums.V1.Common as Proto
 import qualified Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields as Proto
 import Lens.Family2
 import Data.ProtoLens (Message(defMessage))
-import UnliftIO
 
 data IndexedValueType 
   = Text 

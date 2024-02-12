@@ -108,7 +108,7 @@ instance Cancel (ChildWorkflowHandle a) where
     cancelChildWorkflowExecution h
   
 cancelChildWorkflowExecution :: RequireCallStack => ChildWorkflowHandle result -> Workflow ()
-cancelChildWorkflowExecution wfHandle@(ChildWorkflowHandle{childWorkflowSequence}) = ilift $ do
+cancelChildWorkflowExecution ChildWorkflowHandle{childWorkflowSequence} = ilift $ do
   updateCallStack
   -- I don't see a way to block on this? I guess Temporal wants us to rely on the orchestrator
   -- managing the cancellation. Compare with ResolveRequestCancelExternalWorkflow. I think

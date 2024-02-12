@@ -7,26 +7,19 @@ import qualified Control.Monad.Catch as Catch
 import System.Random.Stateful (StdGen, StatefulGen(..), RandomGenM(..), FrozenGen(..))
 import Temporal.Common
 import Data.Text (Text)
-import Temporal.Duration
 import Temporal.Exception
 import Temporal.Payload
 import Data.ProtoLens
 import Data.Map.Strict (Map)
 import Data.Time.Clock.System (SystemTime)
 import Data.Word (Word32)
-import Data.Hashable
 import Control.Concurrent.Async
-import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as Common
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
-import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
 import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands (WorkflowCommand)
-import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands as Command
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
-import Control.Concurrent.STM.TVar (TVar)
 import Control.Monad.Logger
-import Control.Concurrent (Chan)
 import Lens.Family2
 import qualified Temporal.Core.Worker as Core
 import GHC.TypeLits
@@ -35,15 +28,14 @@ import Data.Vector (Vector)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Kind
-import Debug.Trace
+-- import Debug.Trace
 import Control.Monad
 import Control.Monad.Reader
 import UnliftIO
 import RequireCallStack
 import Text.Printf
 import System.Random
-  ( StdGen
-  , genWord32R
+  ( genWord32R
   , genWord64R
   , genWord8
   , genWord16
@@ -546,7 +538,7 @@ instance MonadReadStateVar Query where
   readStateVar var = Query $ readIORef var.stateVarRef
 
 newtype InstanceM (a :: Type) = InstanceM { unInstanceM :: ReaderT WorkflowInstance IO a }
-  deriving (Functor, Applicative, Monad, MonadIO, MonadReader WorkflowInstance, MonadUnliftIO)
+  deriving newtype (Functor, Applicative, Monad, MonadIO, MonadReader WorkflowInstance, MonadUnliftIO)
 
 instance MonadLogger InstanceM where
   monadLoggerLog loc src lvl msg = do
@@ -611,7 +603,7 @@ data Sequences = Sequences
 
 -- Newtyped because the list is reversed
 newtype Reversed a = Reversed [a]
-  deriving (Functor, Show, Eq)
+  deriving newtype (Functor, Show, Eq)
 
 fromReversed :: Reversed a -> [a]
 fromReversed (Reversed xs) = reverse xs

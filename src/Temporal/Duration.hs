@@ -51,9 +51,9 @@ parseDuration t
 
 -- | Add two durations together. Durations are subject to integer overflow.
 addDurations :: Duration -> Duration -> Duration
-addDurations (Duration s1 ns1) (Duration s2 ns2) = Duration (s1 + s2 + fromIntegral s) $ fromIntegral ns
+addDurations (Duration s1 ns1) (Duration s2 ns2) = Duration (s1 + s2 + s) $ fromIntegral ns
     where
-      (s, ns) = (ns1 + ns2) `divMod` 1_000_000_000
+      (s :: Int64, ns :: Int64) = fromIntegral (ns1 + ns2) `divMod` 1_000_000_000
 
 -- | Convert a 'DiffTime' to a 'Duration'.
 --
@@ -127,13 +127,13 @@ weeks n = Duration (fromIntegral n * 60 * 60 * 24 * 7) 0
 
 -- | A 'Duration' representing the maximum possible length of time. (Approximately 132 years.)
 infinity :: Duration
-infinity = Duration (2 ^ 32) 0
+infinity = Duration ((2 :: Int64) ^ (32 :: Int64)) 0
 
 -- | Convert a protocol buffer duration to a 'Duration'.
 durationFromProto :: Duration.Duration -> Duration
 durationFromProto d = Duration
-  { durationSeconds = fromIntegral (d ^. Duration.seconds)
-  , durationNanoseconds = fromIntegral (d ^. Duration.nanos)
+  { durationSeconds = d ^. Duration.seconds
+  , durationNanoseconds = d ^. Duration.nanos
   }
 
 -- | Convert a 'Duration' to a protocol buffer duration.

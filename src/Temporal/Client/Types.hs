@@ -5,7 +5,6 @@ import Data.Text (Text)
 import Temporal.Payload
 import Temporal.SearchAttributes
 import Temporal.Duration
-import Temporal.Workflow.Definition
 import Temporal.Core.Client (Client)
 
 -- | Configuration parameters for starting a workflow execution.
@@ -142,12 +141,12 @@ data WorkflowExecutionStatus
   | ContinuedAsNew
   | TimedOut
   | UnknownStatus
-  deriving (Read, Show, Eq, Ord)
+  deriving stock (Read, Show, Eq, Ord)
 
 data QueryRejected
   = QueryRejected
     { status :: WorkflowExecutionStatus
-    } deriving (Read, Show, Eq, Ord)
+    } deriving stock (Read, Show, Eq, Ord)
 
 data SignalWithStartWorkflowInput = SignalWithStartWorkflowInput
   { signalWithStartWorkflowType :: WorkflowType

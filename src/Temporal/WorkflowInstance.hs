@@ -23,7 +23,7 @@ import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Functor.Identity
 import qualified Data.HashMap.Strict as HashMap
-import Data.List
+import Data.Foldable
 import Data.Proxy
 import Data.ProtoLens
 import Data.Set (Set)
@@ -31,7 +31,7 @@ import qualified Data.Set as Set
 import qualified Data.Text as Text
 import Data.Vector (Vector)
 import qualified Data.Vector as V
-import GHC.Stack (HasCallStack, emptyCallStack, callStack, prettyCallStack)
+import GHC.Stack (HasCallStack, emptyCallStack, prettyCallStack)
 import Lens.Family2
 import System.Random (mkStdGen)
 import Temporal.Common
@@ -68,16 +68,11 @@ import Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow
   )
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
-import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands
-  ( WorkflowCommand
-  )
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
-import qualified Proto.Temporal.Api.Failure.V1.Message as F
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import UnliftIO
 import Data.Time.Clock.System (SystemTime(..))
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Completion
-import Temporal.Payload (Payload)
 
 
 create :: (HasCallStack, MonadLoggerIO m)
@@ -373,13 +368,11 @@ applyJobs
   -> InstanceM (Either SomeException (f (SuspendableWorkflowExecution Payload)))
 applyJobs jobs fAwait = UnliftIO.try $ do
   $logDebug $ Text.pack ("Applying jobs: " <> show jobs)
-  inst <- ask
   let (patchNotifications, signalWorkflows, queryWorkflows, resolutions, otherJobs) = jobGroups
   patchNotifications
   queryWorkflows
   otherJobs
   activationResults <- applyResolutions resolutions
-  seqMaps <- atomically $ readTVar inst.workflowSequenceMaps
   let activations = activationResults
   pure $
     (\(Await wf) -> 
@@ -394,7 +387,7 @@ applyJobs jobs fAwait = UnliftIO.try $ do
           sigs -> do
             lift $ $logDebug "We get signal"
             lift (mapM_ injectWorkflowSignal sigs) *> wf []
-        nonEmptyActivations -> case signalWorkflows of
+        _ -> case signalWorkflows of
           [] -> wf activations
           sigs -> lift (mapM_ injectWorkflowSignal sigs) *> wf activations
         {- TODO: we need to run the signal workflows without messing up ContinuationEnv: runWorkflow signalWorkflows -}
@@ -553,7 +546,6 @@ runTopLevel m = do
     , Handler $ \WorkflowCancelRequested -> do
         pure $ WorkflowExitCancelled $ defMessage & Command.cancelWorkflowExecution .~ defMessage
     , Handler $ \(actFailure :: ActivityFailure) -> do
-        w <- ask
         let appFailure = actFailure.cause
             enrichedApplicationFailure = defMessage
               & F.message .~ actFailure.message

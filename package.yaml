@@ -67,8 +67,9 @@ default-extensions:
 - StandaloneDeriving
 - TypeApplications
 - TypeFamilies
-- UndecidableInstances
 - TypeOperators
+- UndecidableInstances
+- ViewPatterns
 
 ghc-options:
 - -g
@@ -98,6 +99,7 @@ ghc-options:
 - -fdefer-diagnostics
 - -fprint-explicit-kinds
 - -Wno-redundant-constraints
+# - -Werror
 library:
   source-dirs: src
   other-modules:

@@ -705,7 +705,7 @@ recompose bfs = \a -> map (\_ f -> f a) bfs
 -- | A wrapper for Eval Record-types, providing useful instances.
 newtype EvalRecord b (f :: Type -> Exp Type)
   = EvalRecord { evalRecord :: b f }
-  deriving (FunctorRec, ApplicativeRec)
+  deriving newtype (FunctorRec, ApplicativeRec)
 
 instance (WitnessFieldTypes b, FunctorRec b) => WitnessFieldTypes (EvalRecord b) where
   typeName _ = typeName (Proxy :: Proxy b)

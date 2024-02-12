@@ -15,6 +15,7 @@ module IntegrationSpec where
 import Control.Exception
 import Control.Exception.Annotated
 import Control.Concurrent
+import Control.Monad
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
@@ -103,8 +104,8 @@ mkWithWorker pn conf m = do
 
 makeClient :: PortNumber -> Interceptors -> IO (C.WorkflowClient, Client)
 makeClient pn Interceptors{..} = do
-  let clientConfig = configWithRetry pn
-  c <- connectClient clientConfig 
+  let conf = configWithRetry pn
+  c <- connectClient conf 
   (,) 
     <$> C.workflowClient c (W.Namespace "default") clientInterceptors
     <*> pure c
@@ -157,7 +158,7 @@ spec = do
               [ ("attr1", Temporal.Operator.Bool)
               , ("attr2", Temporal.Operator.Int)
               ]
-        addSearchAttributes coreClient (W.Namespace "default") (allTestAttributes `Map.difference` customAttributes)
+        _ <- addSearchAttributes coreClient (W.Namespace "default") (allTestAttributes `Map.difference` customAttributes)
 
         (conf, taskQueue) <- mkBaseConf interceptors
         go TestEnv
@@ -173,7 +174,7 @@ defaultCodec :: JSON
 defaultCodec = JSON
 
 data RegressionTask = Foo | Bar
-  deriving (Eq, Show, Generic)
+  deriving stock (Eq, Show, Generic)
 
 instance ToJSON RegressionTask
 instance FromJSON RegressionTask
@@ -239,8 +240,8 @@ testImpls = provideCallStack $ WorkflowTests
       h2 <- W.startActivity 
         testRefs.faultyActivity
         (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
-      W.wait (h1 :: W.Task Int)
-      W.wait (h2 :: W.Task Int)
+      _ <- W.wait @(W.Task Int) h1
+      W.wait @(W.Task Int) h2
   , workflowWaitConditionWorks = do
       st <- W.newStateVar False
       W.setSignalHandler unblockWorkflowSignal $ do
@@ -276,7 +277,7 @@ testImpls = provideCallStack $ WorkflowTests
   }
 
 testRefs :: Refs WorkflowTests
-testRefs = refs defaultCodec testImpls
+testRefs = refs defaultCodec
 
 testDefs :: Defs () WorkflowTests
 testDefs = defs defaultCodec testImpls
@@ -951,24 +952,22 @@ needsClient = do
     specify "immediate activity start works" $ \TestEnv{..} -> do
       let taskMainActivity :: ProvidedActivity () (RegressionTask -> Activity () ())
           taskMainActivity = provideCallStack $ provideActivity JSON "legacyTaskMainAct" $ \command -> do
-            app <- ask
             liftIO $ putStrLn "hi"
 
           taskMainWorkflow :: W.ProvidedWorkflow (RegressionTask -> W.Workflow ())
           taskMainWorkflow = provideCallStack $ W.provideWorkflow JSON "legacyTaskMain" $ \command -> do
             -- Info{..} <- info
-            x <- W.uuid4
             W.executeActivity
               taskMainActivity.reference
               ((W.defaultStartActivityOptions $ W.StartToClose infinity) { W.activityId = Just $ W.ActivityId "woejfwoefijweof"})
               command
 
-          defs = 
+          definitions = 
             ( activityDefinition taskMainActivity
             , workflowDefinition taskMainWorkflow
             , testConf
             )
-          conf = configure () defs $ do
+          conf = configure () definitions $ do
             baseConf
 
 

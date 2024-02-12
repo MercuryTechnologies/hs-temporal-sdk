@@ -23,7 +23,6 @@ import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Message
 import qualified Proto.Temporal.Api.Enums.V1.Workflow as Workflow
 import Temporal.Duration
 import Data.Kind
-import Data.Proxy
 import Temporal.Payload
 import qualified Data.Text as T
 import Data.Map (Map)
@@ -149,7 +148,7 @@ data RetryPolicy = RetryPolicy
   -- The default is an empty vector.
   -- Errors are matched against the @type@ field of the Application Failure.
   -- If one of those errors occurs, a retry does not occur.
-  } deriving (Show, Eq, Generic)
+  } deriving stock (Show, Eq, Generic)
 
 instance ToJSON RetryPolicy
 instance FromJSON RetryPolicy

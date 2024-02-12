@@ -53,9 +53,9 @@ workerConfigs = Rec.pureC @((~) (WorkerConfig ())) $ \meta -> configure () conf 
 spec :: Spec
 spec = do
   describe "Concurrent Worker initialization" $ do
-    fit "should work" $ do
+    it "should work" $ do
       runResourceT $ runStdoutLoggingT $ do
-        let clientConfig = defaultClientConfig 
+        let config = defaultClientConfig 
               { retryConfig = Just $ ClientRetryConfig
                   { initialIntervalMillis = 500
                   , randomizationFactor = 0.2
@@ -65,7 +65,7 @@ spec = do
                   , maxElapsedTimeMillis = Just 60000
                   }
               }
-        c <- liftIO $ connectClient clientConfig 
+        c <- liftIO $ connectClient config
         qs <- replicateConcurrently 100 $ allocateU (startTaskQueues c workerConfigs) (liftIO . shutdownTaskQueues)
         mapConcurrently_ (\(k, _) -> release k) qs
       True `shouldBe` True
