@@ -465,11 +465,12 @@ type WorkerConfigs env rec = rec (ConstFn (WorkerConfig env))
 --
 -- This function starts each worker concurrently, waits for them to initialize, and then returns
 -- a worker for each task queue.
-startTaskQueues :: forall rec m env. (TraversableRec rec, MonadLoggerIO m, MonadUnliftIO m) => Client -> WorkerConfigs env rec -> m (Workers rec)
+startTaskQueues :: forall rec m env. (TraversableRec rec, MonadUnliftIO m) => Client -> WorkerConfigs env rec -> m (Workers rec)
 startTaskQueues client conf = startWorkers conf >>= awaitWorkersStart
   where
     startWorkers :: rec (ConstFn (WorkerConfig env)) -> m (rec (ConstFn (Async Worker)))
-    startWorkers = Rec.traverse (\_ workerConfig -> async (startWorker client workerConfig))
+    startWorkers = Rec.traverse $ \_ workerConfig -> flip runLoggingT workerConfig.logger $ do
+      async (startWorker client workerConfig)
     awaitWorkersStart :: rec (ConstFn (Async Worker)) -> m (rec (ConstFn Worker))
     awaitWorkersStart = Rec.traverse (\_ workerStartupThread -> UnliftIO.wait workerStartupThread)
 

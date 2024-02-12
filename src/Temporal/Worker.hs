@@ -46,6 +46,7 @@ module Temporal.Worker
   , HasWorkflowDefinition(..)
   , HasActivityDefinition(..)
   , addErrorConverter
+  , setLogger
   , setNamespace
   , setTaskQueue
   , setBuildId
@@ -84,7 +85,6 @@ import Temporal.Workflow.Definition
 import qualified Temporal.Workflow.Worker as Workflow
 
 import Data.Text (Text)
-import qualified Data.Text as Text
 import Data.Word
 import qualified Data.HashMap.Strict as HashMap
 
@@ -113,6 +113,7 @@ configure actEnv defs = flip execState defaultConfig . unConfigM
       , deadlockTimeout = Just 1000000
       , interceptorConfig = mempty
       , applicationErrorConverters = standardApplicationFailureHandlers
+      , logger = \_ _ _ _ -> pure ()
       , ..
       }
 
@@ -312,6 +313,12 @@ setGracefulShutdownPeriodMillis n = modifyCore $ \conf -> conf
   { Core.gracefulShutdownPeriodMillis = n
   }
 
+-- | Set the logger for the worker. This is used to log messages from the worker.
+setLogger :: (Loc -> LogSource -> Control.Monad.Logger.LogLevel -> LogStr -> IO ()) -> ConfigM actEnv ()
+setLogger f = ConfigM $ modify' $ \conf -> conf
+  { logger = f
+  }
+
 ------------------------------------------------------------------------------------
 
 -- | A Worker is responsible for polling a Task Queue, dequeueing a Task, executing 
@@ -335,8 +342,8 @@ data Worker = forall ty. Worker
   , workerCore :: Core.Worker ty
   }
 
-startReplayWorker :: (MonadLoggerIO m, MonadUnliftIO m) => WorkerConfig actEnv -> m (Temporal.Worker.Worker, Core.HistoryPusher)
-startReplayWorker conf = do
+startReplayWorker :: (MonadUnliftIO m) => WorkerConfig actEnv -> m (Temporal.Worker.Worker, Core.HistoryPusher)
+startReplayWorker conf = flip runLoggingT conf.logger $ do
   $(logDebug) "Starting worker"
   (workerCore, replay) <- either throwIO pure =<< liftIO (Core.newReplayWorker conf.coreConfig)
   $(logDebug) "Instantiated core"
@@ -357,14 +364,13 @@ startReplayWorker conf = do
     $(logDebug) "Exiting workflow worker loop"
   pure (Temporal.Worker.Worker{..}, replay)
 
-startWorker :: (MonadLoggerIO m, MonadUnliftIO m) => Client -> WorkerConfig actEnv -> m Temporal.Worker.Worker
-startWorker client conf = do
+startWorker :: (MonadUnliftIO m) => Client -> WorkerConfig actEnv -> m Temporal.Worker.Worker
+startWorker client conf = flip runLoggingT conf.logger $ do
   $(logDebug) "Starting worker"
   workerCore <- either throwIO pure =<< liftIO (Core.newWorker client conf.coreConfig)
   $(logDebug) "Instantiated core"
   runningWorkflows <- newTVarIO mempty
   runningActivities <- newTVarIO mempty
-  workerLogFn <- askLoggerIO
   let errorConverters = mkAnnotatedHandlers conf.applicationErrorConverters
       workerWorkflowFunctions = conf.wfDefs
       workerTaskQueue = TaskQueue $ Core.taskQueue conf.coreConfig
@@ -376,7 +382,6 @@ startWorker client conf = do
 
       initialEnv = conf.actEnv
       definitions = conf.actDefs
-      logger = workerLogFn
       activityInboundInterceptors = conf.interceptorConfig.activityInboundInterceptors
       activityOutboundInterceptors = conf.interceptorConfig.activityOutboundInterceptors
       clientInterceptors = conf.interceptorConfig.clientInterceptors

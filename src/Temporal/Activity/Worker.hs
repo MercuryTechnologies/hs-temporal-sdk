@@ -30,14 +30,12 @@ import UnliftIO
 import Temporal.Duration (durationFromProto)
 import Data.HashMap.Strict (HashMap)
 import Data.Text (Text)
-import qualified Data.Text as Text
 import Temporal.Interceptor
 import Temporal.Activity.Types
 import Temporal.Runtime
 
 data ActivityWorker env = ActivityWorker
   { initialEnv :: env
-  , logger :: Loc -> LogSource -> Control.Monad.Logger.LogLevel -> LogStr -> IO ()
   , definitions :: HashMap Text (ActivityDefinition env)
   , runningActivities :: TVar (HashMap TaskToken (Async ()))
   , workerCore :: Core.Worker 'Core.Real

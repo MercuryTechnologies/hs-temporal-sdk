@@ -42,6 +42,7 @@ import Temporal.Exception (nonRetryableError)
 import Temporal.Payload
 import Temporal.Worker
 import Temporal.SearchAttributes
+import System.IO
 import System.Timeout (timeout)
 import Temporal.Duration
 import Temporal.Contrib.OpenTelemetry
@@ -100,7 +101,7 @@ mkWithWorker :: PortNumber -> WorkerConfig actEnv -> IO a -> IO a
 mkWithWorker pn conf m = do
   let clientConfig = configWithRetry pn
   c <- connectClient clientConfig
-  bracket (runStdoutLoggingT $ startWorker c conf) shutdown (const m)
+  bracket (startWorker c conf) shutdown (const m)
 
 makeClient :: PortNumber -> Interceptors -> IO (C.WorkflowClient, Client)
 makeClient pn Interceptors{..} = do
@@ -230,7 +231,6 @@ testImpls = provideCallStack $ WorkflowTests
       res <- askActivityInfo
       if res.attempt <= 2
         then do
-          liftIO $ putStrLn "failing"
           error "sad"
         else pure 1
   , faultyWorkflow = do
@@ -293,6 +293,7 @@ mkBaseConf interceptors = do
       setNamespace $ W.Namespace "default"
       setTaskQueue taskQueue
       addInterceptors interceptors
+      setLogger $ defaultOutput stdout
     , taskQueue
     )
 
@@ -952,7 +953,7 @@ needsClient = do
     specify "immediate activity start works" $ \TestEnv{..} -> do
       let taskMainActivity :: ProvidedActivity () (RegressionTask -> Activity () ())
           taskMainActivity = provideCallStack $ provideActivity JSON "legacyTaskMainAct" $ \command -> do
-            liftIO $ putStrLn "hi"
+            pure ()
 
           taskMainWorkflow :: W.ProvidedWorkflow (RegressionTask -> W.Workflow ())
           taskMainWorkflow = provideCallStack $ W.provideWorkflow JSON "legacyTaskMain" $ \command -> do

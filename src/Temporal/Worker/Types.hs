@@ -20,7 +20,7 @@ import Temporal.Workflow.Definition (WorkflowDefinition)
 import Temporal.Workflow.Worker (WorkflowWorker)
 import Temporal.Activity.Definition (ActivityDefinition)
 import Temporal.Activity.Worker (ActivityWorker)
-import Temporal.Exception (ApplicationFailureHandler, standardApplicationFailureHandlers)
+import Temporal.Exception (ApplicationFailureHandler)
 import Temporal.Interceptor
 import Temporal.Core.Worker (InactiveForReplay)
 
@@ -32,6 +32,7 @@ data WorkerConfig activityEnv = WorkerConfig
   , coreConfig :: Core.WorkerConfig
   , interceptorConfig :: Interceptors
   , applicationErrorConverters :: [ApplicationFailureHandler]
+  , logger :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
   }
 
 data Worker (ty :: Core.WorkerType) activityEnv = Worker

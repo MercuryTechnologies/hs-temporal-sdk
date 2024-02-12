@@ -214,7 +214,6 @@ handleActivation activation = do
               Just (WorkflowDefinition _ f) -> do
                 inst <- create
                   (\wf -> do
-                    putStrLn "Complete activation"
                     Core.completeWorkflowActivation workerCore wf
                   )
                   f
