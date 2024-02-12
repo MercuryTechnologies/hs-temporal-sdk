@@ -2,13 +2,15 @@
 
 {-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 module Temporal.Core.CTypes where
 import Control.Exception
 import Control.Concurrent.MVar (MVar)
-import Data.Aeson (Value, Object, camelTo2)
+import Data.Aeson
 import Data.Aeson.TH
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
@@ -34,11 +36,36 @@ newtype Runtime = Runtime (Ptr Runtime)
 foreign import ccall "hs_temporal_init_runtime" initRuntime :: TryPutMVarFFI -> IO (Ptr Runtime)
 foreign import ccall "hs_temporal_free_runtime" freeRuntime :: Ptr Runtime -> IO ()
 
+data LogLevel
+  = Trace
+  | Debug
+  | Info
+  | Warn
+  | Error
+  deriving (Show)
+
+instance ToJSON LogLevel where
+  toJSON = \case
+    Trace -> "TRACE"
+    Debug -> "DEBUG"
+    Info -> "INFO"
+    Warn -> "WARN"
+    Temporal.Core.CTypes.Error -> "ERROR"
+
+instance FromJSON LogLevel where
+  parseJSON = withText "LogLevel" $ \case
+    "TRACE" -> pure Trace
+    "DEBUG" -> pure Debug
+    "INFO" -> pure Info
+    "WARN" -> pure Warn
+    "ERROR" -> pure Temporal.Core.CTypes.Error
+    other -> fail $ "Invalid log level: " <> show other
+
 data CoreLog = CoreLog
   { target :: Text
   , message :: Text
   , timestamp :: Value
-  , level :: Text
+  , level :: LogLevel
   , fields :: Object
   , spanContexts :: [Text]
   } deriving (Show)

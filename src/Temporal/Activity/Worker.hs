@@ -37,7 +37,7 @@ import Temporal.Runtime
 
 data ActivityWorker env = ActivityWorker
   { initialEnv :: env
-  , logger :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
+  , logger :: Loc -> LogSource -> Control.Monad.Logger.LogLevel -> LogStr -> IO ()
   , definitions :: HashMap Text (ActivityDefinition env)
   , runningActivities :: TVar (HashMap TaskToken (Async ()))
   , workerCore :: Core.Worker 'Core.Real
@@ -68,8 +68,12 @@ execute worker = runActivityWorker worker go
     go = do
       eTask <- liftIO $ Core.pollActivityTask worker.workerCore
       logs <- liftIO $ fetchLogs globalRuntime
-      forM_ logs $ \l -> do
-        $(logInfo) $ Text.pack $ show l
+      forM_ logs $ \l -> case l.level of
+        Trace -> $(logDebug) l.message
+        Debug -> $(logDebug) l.message
+        Temporal.Runtime.Info -> $(logInfo) l.message
+        Warn -> $(logWarn) l.message
+        Error -> $(logError) l.message
       case eTask of
         Left (Core.WorkerError Core.PollShutdown _) -> do
           pure ()

@@ -8,6 +8,7 @@ module Temporal.Runtime
   , withRuntime
   , fetchLogs
   , CoreLog(..)
+  , LogLevel(..)
   ) where
 import Control.Concurrent
 import Control.Exception

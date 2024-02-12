@@ -385,8 +385,12 @@ startWorker client conf = do
       workerClient = client
   let workerType = Core.SReal
   logs <- liftIO $ fetchLogs globalRuntime
-  forM_ logs $ \l -> do
-    $(logInfo) $ Text.pack $ show l
+  forM_ logs $ \l -> case l.level of
+    Trace -> $(logDebug) l.message
+    Debug -> $(logDebug) l.message
+    Info -> $(logInfo) l.message
+    Warn -> $(logWarn) l.message
+    Error -> $(logError) l.message
   workerWorkflowLoop <- async $ do
     $(logDebug) "Starting workflow worker loop"
     Workflow.execute workflowWorker
