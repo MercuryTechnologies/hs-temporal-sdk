@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use ffi_convert::*;
 use temporal_sdk_core::{CoreRuntime};
 use temporal_sdk_core::telemetry::{construct_filter_string};
@@ -5,6 +6,8 @@ use temporal_sdk_core_api::telemetry::{CoreTelemetry, TelemetryOptions, Telemetr
 use std::sync::Arc;
 use std::os::raw::c_int;
 use std::future::Future;
+use std::time::SystemTime;
+use serde::Serialize;
 use tracing::Level;
 
 pub struct RuntimeRef {
@@ -148,41 +151,39 @@ pub extern fn hs_temporal_drop_byte_array(str: *const CArray<u8>) {
   }
 }
 
-pub struct CoreLog {
+#[derive(Serialize)]
+pub struct CoreLogDef {
   pub target: String,
   pub message: String,
-  // pub timestamp: String,
-  // pub level: Level
-  // pub fields: HashMap<String, serde_json::Value>
-  // pub span_contexts: Vec<String>
-}
-
-#[repr(C)]
-#[derive(CReprOf, AsRust, CDrop, RawPointerConverter)]
-#[target_type(CoreLog)]
-pub struct CCoreLog {
-  target: *const libc::c_char,
-  message: *const libc::c_char,
+  pub timestamp: SystemTime,
+  pub level: String,
+  pub fields: HashMap<String, serde_json::Value>,
+  pub span_contexts: Vec<String>
 }
 
 #[no_mangle]
 pub extern "C" fn hs_temporal_runtime_fetch_logs(
   runtime: *mut RuntimeRef,
-) -> *const CArray<CCoreLog> {
+) -> *const CArray<CArray<u8>> {
   let runtime = unsafe { &*runtime };
   let logs = runtime.runtime.core.telemetry().fetch_buffered_logs();
-  let hs_logs: Vec<CoreLog> = logs.iter().map(|log| {
-    CoreLog {
-      target: (&log.target).clone(),
-      message: (&log.message).clone(),
-    }
+  let hs_logs: Vec<Vec<u8>> = logs.iter().map(|log| {
+    let log = CoreLogDef {
+      target: log.target.clone(),
+      message: log.message.clone(),
+      timestamp: log.timestamp,
+      level: String::from(log.level.as_str()),
+      fields: log.fields.clone(),
+      span_contexts: log.span_contexts.clone()
+    };
+    serde_json::to_vec(&log).expect("Failed to serialize log line")
   }).collect();
   CArray::c_repr_of(hs_logs).unwrap().into_raw_pointer()
 }
 
 #[no_mangle]
 pub extern "C" fn hs_temporal_runtime_free_logs(
-  logs: *const CArray<CCoreLog>
+  logs: *const CArray<CArray<u8>>
 ) {
   unsafe {
     drop(CArray::from_raw_pointer(logs));

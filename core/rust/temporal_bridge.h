@@ -71,11 +71,6 @@ typedef struct CArray_u8 {
   uintptr_t size;
 } CArray_u8;
 
-typedef struct CCoreLog {
-  const char *target;
-  const char *message;
-} CCoreLog;
-
 /**
  * A utility type to represent arrays of the parametrized type.
  * Note that the parametrized type should have a C-compatible representation.
@@ -104,10 +99,10 @@ typedef struct CCoreLog {
  *
  * ```
  */
-typedef struct CArray_CCoreLog {
-  const struct CCoreLog *data_ptr;
+typedef struct CArray_CArray_u8 {
+  const struct CArray_u8 *data_ptr;
   uintptr_t size;
-} CArray_CCoreLog;
+} CArray_CArray_u8;
 
 typedef struct CRPCError {
   uint32_t code;
@@ -145,9 +140,9 @@ void hs_temporal_free_runtime(struct RuntimeRef *runtime);
 
 void hs_temporal_drop_byte_array(const struct CArray_u8 *str);
 
-const struct CArray_CCoreLog *hs_temporal_runtime_fetch_logs(struct RuntimeRef *runtime);
+const struct CArray_CArray_u8 *hs_temporal_runtime_fetch_logs(struct RuntimeRef *runtime);
 
-void hs_temporal_runtime_free_logs(const struct CArray_CCoreLog *logs);
+void hs_temporal_runtime_free_logs(const struct CArray_CArray_u8 *logs);
 
 void hs_temporal_connect_client(const struct RuntimeRef *runtime_ref,
                                 const char *config_json,

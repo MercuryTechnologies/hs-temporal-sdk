@@ -4,9 +4,12 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell #-}
 module Temporal.Core.CTypes where
 import Control.Exception
 import Control.Concurrent.MVar (MVar)
+import Data.Aeson (Value, Object, camelTo2)
+import Data.Aeson.TH
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
 import qualified Data.Vector as V
@@ -34,32 +37,16 @@ foreign import ccall "hs_temporal_free_runtime" freeRuntime :: Ptr Runtime -> IO
 data CoreLog = CoreLog
   { target :: Text
   , message :: Text
-  }
+  , timestamp :: Value
+  , level :: Text
+  , fields :: Object
+  , spanContexts :: [Text]
+  } deriving (Show)
 
-data CCoreLog = CCoreLog
-  { target :: CString
-  , message :: CString
-  }
+deriveJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''CoreLog
 
-peekCoreLog :: CCoreLog -> IO CoreLog
-peekCoreLog clog = do
-  target <- fromPtr0 $ castPtr clog.target
-  message <- fromPtr0 $ castPtr clog.message
-  pure CoreLog{..}
-
-foreign import ccall "hs_temporal_runtime_fetch_logs" raw_fetchLogs :: Ptr Runtime -> IO (Ptr (CArray CCoreLog))
-foreign import ccall "hs_temporal_runtime_free_logs" raw_freeLogs :: Ptr (CArray CCoreLog) -> IO ()
-
-instance Storable CCoreLog where
-  sizeOf _ = #{size CCoreLog}
-  alignment _ = #{alignment CCoreLog}
-  peek ptr = do
-    target <- #{peek CCoreLog, target} ptr
-    message <- #{peek CCoreLog, message} ptr
-    pure CCoreLog {..}
-  poke ptr CCoreLog {..} = do
-    #{poke CCoreLog, target} ptr target
-    #{poke CCoreLog, message} ptr message
+foreign import ccall "hs_temporal_runtime_fetch_logs" raw_fetchLogs :: Ptr Runtime -> IO (Ptr (CArray (CArray Word8)))
+foreign import ccall "hs_temporal_runtime_free_logs" raw_freeLogs :: Ptr (CArray (CArray Word8)) -> IO ()
 
 data CArray a = CArray
   { dataPtr :: !(Ptr a)

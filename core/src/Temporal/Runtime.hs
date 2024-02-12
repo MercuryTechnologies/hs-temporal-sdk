@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# LANGUAGE DuplicateRecordFields #-}
 module Temporal.Runtime
   ( Runtime
   , globalRuntime
@@ -9,6 +11,7 @@ module Temporal.Runtime
   ) where
 import Control.Concurrent
 import Control.Exception
+import Data.Aeson
 import qualified Data.Vector as V
 import Foreign.C.Types (CInt)
 import Foreign.C.String
@@ -43,4 +46,5 @@ fetchLogs :: Runtime -> IO (V.Vector CoreLog)
 fetchLogs r = withRuntime r $ \p -> do
   bracket (raw_fetchLogs p) raw_freeLogs $ \clogs -> do
     logs <- peek clogs
-    cArrayToVector peekCoreLog logs
+    vec <- cArrayToVector cArrayToByteString logs
+    V.mapM throwDecodeStrict vec
