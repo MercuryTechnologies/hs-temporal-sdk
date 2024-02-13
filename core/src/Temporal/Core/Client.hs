@@ -12,9 +12,9 @@ module Temporal.Core.Client
     Client
   , clientConfig
   , connectClient
-  , connectClient'
   , defaultClientConfig
   , closeClient
+  , clientRuntime
   , CoreClient
   , ClientConfig(..)
   , ClientTlsConfig(..)
@@ -109,14 +109,18 @@ data ClientRetryConfig = ClientRetryConfig
 -- when it is garbage collected.
 data Client = Client 
   { client :: MVar CoreClient 
+  , runtime :: Runtime
   , config :: ClientConfig
   }
 
 clientConfig :: Client -> ClientConfig
 clientConfig = config
 
+clientRuntime :: Client -> Runtime
+clientRuntime = runtime
+
 withClient :: Client -> (Ptr CoreClient -> IO a) -> IO a
-withClient (Client cc _) f = withMVar cc $ \(CoreClient c) -> withForeignPtr c f
+withClient (Client cc _ _) f = withMVar cc $ \(CoreClient c) -> withForeignPtr c f
 
 newtype ByteVector = ByteVector { byteVector :: ByteString }
 
@@ -171,19 +175,11 @@ defaultClientIdentity = do
   host <- getHostName
   pure (T.pack $ show pid <> "@" <> host)
 
--- | Connect to the Temporal server using the global runtime.
---
--- Throws 'ClientConnectionError' if the connection fails.
-connectClient :: ClientConfig -> IO Client
-connectClient = connectClient' globalRuntime
-
 -- | Connect to the Temporal server using a given runtime.
 --
--- Usually you should use 'connectClient' instead, which uses the global runtime.
---
 -- Throws 'ClientConnectionError' if the connection fails.
-connectClient' :: Runtime -> ClientConfig -> IO Client
-connectClient' rt conf = do
+connectClient :: Runtime -> ClientConfig -> IO Client
+connectClient rt conf = do
   conf' <- if identity conf == "" 
     then do
       ident <- defaultClientIdentity
@@ -214,16 +210,16 @@ connectClient' rt conf = do
                         go (attempt + 1)
               Right client -> putMVar clientPtrSlot (CoreClient client)
       go 1
-  pure $ Client clientPtrSlot conf'
+  pure $ Client clientPtrSlot rt conf'
 
 reconnectClient :: Client -> IO ()
-reconnectClient (Client clientPtrSlot conf) = mask $ \restore -> do
+reconnectClient (Client clientPtrSlot rt conf) = mask $ \restore -> do
   (CoreClient clientPtr) <- takeMVar clientPtrSlot
-  (Client newClientPtr _ ) <- restore (connectClient conf) `catch` (\c -> putMVar clientPtrSlot (throw (c :: ClientConnectionError)) >> throwIO c)
+  (Client newClientPtr _ _) <- restore (connectClient rt conf) `catch` (\c -> putMVar clientPtrSlot (throw (c :: ClientConnectionError)) >> throwIO c)
   takeMVar newClientPtr >>= putMVar clientPtrSlot
 
 closeClient :: Client -> IO ()
-closeClient (Client clientPtrSlot _) = mask_ $ do
+closeClient (Client clientPtrSlot _ _) = mask_ $ do
   (CoreClient clientPtr) <- takeMVar clientPtrSlot
   finalizeForeignPtr clientPtr
   putMVar clientPtrSlot (error "Client has been closed")

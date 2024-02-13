@@ -82,6 +82,7 @@ data Worker (ty :: WorkerType) = Worker
   { workerPtr :: ForeignPtr (Worker ty)
   , workerConfig :: WorkerConfig
   , workerClient :: InactiveForReplay ty Client
+  , workerRuntime :: Runtime
   }
 
 getWorkerClient :: Worker 'Real -> Client
@@ -167,19 +168,16 @@ newWorker c wc = withClient c $ \cPtr -> do
             then do
               wPtr <- peek wPtrPtr
               wPtrFP <- newForeignPtr raw_closeWorker wPtr
-              pure $ Right $ Worker wPtrFP wc c
+              pure $ Right $ Worker wPtrFP wc c (clientRuntime c)
             else Left <$> getWorkerError errPtr
 
 closeWorker :: Worker ty -> IO ()
-closeWorker (Worker w _ _) = finalizeForeignPtr w
+closeWorker (Worker w _ _ _) = finalizeForeignPtr w
 
 foreign import ccall "hs_temporal_new_replay_worker" raw_newReplayWorker :: Ptr Runtime -> Ptr (CArray Word8) -> Ptr (Ptr (Worker 'Replay)) -> Ptr (Ptr HistoryPusher) -> Ptr (Ptr CWorkerError) -> IO ()
 
-newReplayWorker :: WorkerConfig -> IO (Either WorkerError (Worker 'Replay, HistoryPusher))
-newReplayWorker = newReplayWorker' globalRuntime
-
-newReplayWorker' :: Runtime -> WorkerConfig -> IO (Either WorkerError (Worker 'Replay, HistoryPusher))
-newReplayWorker' r conf = withRuntime r $ \rPtr -> do
+newReplayWorker :: Runtime -> WorkerConfig -> IO (Either WorkerError (Worker 'Replay, HistoryPusher))
+newReplayWorker r conf = withRuntime r $ \rPtr -> do
   alloca $ \wPtrPtr -> do
     alloca $ \hpPtrPtr -> do
       withCArrayBS (BL.toStrict $ encode conf) $ \confPtr -> do
@@ -195,12 +193,12 @@ newReplayWorker' r conf = withRuntime r $ \rPtr -> do
               wPtr <- peek wPtrPtr
               hpPtr <- peek hpPtrPtr
               w <- newForeignPtr raw_closeWorker wPtr
-              pure $ Right (Worker w conf (error "Void"), HistoryPusher hpPtr)
+              pure $ Right (Worker w conf (error "Void") r, HistoryPusher hpPtr)
             else Left <$> getWorkerError errPtr
 
 foreign import ccall "hs_temporal_worker_poll_workflow_activation" raw_pollWorkflowActivation :: Ptr (Worker ty) -> TokioCall CWorkerError (CArray Word8)
 pollWorkflowActivation :: Worker ty -> IO (Either WorkerError WorkflowActivation)
-pollWorkflowActivation (Worker w _ _) = withForeignPtr w $ \wp -> do
+pollWorkflowActivation (Worker w _ _ _) = withForeignPtr w $ \wp -> do
   res <- makeTokioAsyncCall (raw_pollWorkflowActivation wp)
     (Just rust_dropWorkerError)
     (Just rust_dropByteArray)
@@ -210,7 +208,7 @@ pollWorkflowActivation (Worker w _ _) = withForeignPtr w $ \wp -> do
 
 foreign import ccall "hs_temporal_worker_poll_activity_task" raw_pollActivityTask :: Ptr (Worker ty) -> TokioCall CWorkerError (CArray Word8)
 pollActivityTask :: Worker ty -> IO (Either WorkerError ActivityTask)
-pollActivityTask (Worker w _ _) = withForeignPtr w $ \wp -> do
+pollActivityTask (Worker w _ _ _) = withForeignPtr w $ \wp -> do
   res <- makeTokioAsyncCall (raw_pollActivityTask wp)
     (Just rust_dropWorkerError)
     (Just rust_dropByteArray)
@@ -220,7 +218,7 @@ pollActivityTask (Worker w _ _) = withForeignPtr w $ \wp -> do
 
 foreign import ccall "hs_temporal_worker_complete_workflow_activation" raw_completeWorkflowActivation :: Ptr (Worker ty) -> Ptr (CArray Word8) -> TokioCall CWorkerError CUnit
 completeWorkflowActivation :: Worker ty -> WorkflowActivationCompletion -> IO (Either WorkerError ())
-completeWorkflowActivation (Worker w _ _) p = withForeignPtr w $ \wp -> do
+completeWorkflowActivation (Worker w _ _ _) p = withForeignPtr w $ \wp -> do
   withCArrayBS (encodeMessage p) $ \pPtr -> do
     res <- makeTokioAsyncCall (raw_completeWorkflowActivation wp pPtr)
       (Just rust_dropWorkerError)
@@ -231,7 +229,7 @@ completeWorkflowActivation (Worker w _ _) p = withForeignPtr w $ \wp -> do
 
 foreign import ccall "hs_temporal_worker_complete_activity_task" raw_completeActivityTask :: Ptr (Worker ty) -> Ptr (CArray Word8) -> TokioCall CWorkerError CUnit
 completeActivityTask :: Worker ty -> ActivityTaskCompletion -> IO (Either WorkerError ())
-completeActivityTask (Worker w _ _) p = withForeignPtr w $ \wp ->
+completeActivityTask (Worker w _ _ _) p = withForeignPtr w $ \wp ->
   withCArrayBS (encodeMessage p) $ \pPtr -> do
     res <- makeTokioAsyncCall (raw_completeActivityTask wp pPtr)
       (Just rust_dropWorkerError)
@@ -242,7 +240,7 @@ completeActivityTask (Worker w _ _) p = withForeignPtr w $ \wp ->
 
 foreign import ccall "hs_temporal_worker_record_activity_heartbeat" raw_recordActivityHeartbeat :: Ptr (Worker ty) -> Ptr (CArray Word8) -> Ptr (Ptr CWorkerError) -> Ptr (Ptr CUnit) -> IO ()
 recordActivityHeartbeat :: Worker ty -> ActivityHeartbeat -> IO (Either WorkerError ())
-recordActivityHeartbeat (Worker w _ _) p = withForeignPtr w $ \wp ->
+recordActivityHeartbeat (Worker w _ _ _) p = withForeignPtr w $ \wp ->
   withCArrayBS (encodeMessage p) $ \pPtr -> do
     alloca $ \errPtrPtr -> do
       alloca $ \resPtrPtr -> mask_ $ do
@@ -258,7 +256,7 @@ recordActivityHeartbeat (Worker w _ _) p = withForeignPtr w $ \wp ->
 
 foreign import ccall "hs_temporal_worker_request_workflow_eviction" raw_requestWorkflowEviction :: Ptr (Worker ty) -> Ptr (CArray Word8) -> IO ()
 requestWorkflowEviction :: Worker ty -> RunId -> IO ()
-requestWorkflowEviction (Worker w _ _) r = withForeignPtr w $ \wp ->
+requestWorkflowEviction (Worker w _ _ _) r = withForeignPtr w $ \wp ->
   withCArrayBS r $ \rPtr -> do
     raw_requestWorkflowEviction wp rPtr
 
@@ -266,7 +264,7 @@ foreign import ccall "hs_temporal_worker_initiate_shutdown" raw_initiateShutdown
 {- | Initiate shutdown.
 -}
 initiateShutdown :: Worker ty -> IO ()
-initiateShutdown (Worker w _ _) = withForeignPtr w raw_initiateShutdown
+initiateShutdown (Worker w _ _ _) = withForeignPtr w raw_initiateShutdown
 
 foreign import ccall "hs_temporal_worker_finalize_shutdown" raw_finalizeShutdown :: Ptr (Worker ty) -> TokioCall CWorkerError CUnit
 {- |
@@ -277,7 +275,7 @@ This should be called only after 'initiateShutdown' has resolved and/or both pol
 functions have returned `ShutDown` errors.
 -}
 finalizeShutdown :: Worker ty -> IO (Either WorkerError ())
-finalizeShutdown (Worker w _ _) = withForeignPtr w $ \wp -> do
+finalizeShutdown (Worker w _ _ _) = withForeignPtr w $ \wp -> do
   res <- makeTokioAsyncCall (raw_finalizeShutdown wp)
     (Just rust_dropWorkerError)
     (Just rust_dropUnit)

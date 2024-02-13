@@ -1,13 +1,15 @@
 use std::collections::HashMap;
 use ffi_convert::*;
 use temporal_sdk_core::{CoreRuntime};
-use temporal_sdk_core::telemetry::{construct_filter_string};
-use temporal_sdk_core_api::telemetry::{CoreTelemetry, TelemetryOptions, TelemetryOptionsBuilder, Logger};
+use temporal_sdk_core::telemetry::{build_otlp_metric_exporter, construct_filter_string, start_prometheus_metric_exporter};
+use temporal_sdk_core_api::telemetry::{CoreTelemetry, TelemetryOptions, TelemetryOptionsBuilder, Logger, OtelCollectorOptionsBuilder, PrometheusExporterOptionsBuilder};
 use std::sync::Arc;
 use std::os::raw::c_int;
 use std::future::Future;
-use std::time::SystemTime;
-use serde::Serialize;
+use std::net::{SocketAddr};
+use std::time::{Duration, SystemTime};
+use serde::{Deserialize, Serialize};
+use temporal_sdk_core_api::telemetry::metrics::{CoreMeter, NoOpCoreMeter};
 use tracing::Level;
 
 pub struct RuntimeRef {
@@ -20,35 +22,90 @@ pub(crate) struct Runtime {
   pub(crate) try_put_mvar: extern fn(capability: Capability, mvar: *mut MVar) -> (),
 }
 
-fn init_runtime(telemetry_config: TelemetryOptions, try_put_mvar: extern fn(capability: Capability, mvar: *mut MVar) -> ()) -> Box<RuntimeRef> {
-  let runtime = CoreRuntime::new(
+fn init_runtime(telemetry_config: TelemetryOptions, late_telemetry_options: HsTelemetryOptions, try_put_mvar: extern fn(capability: Capability, mvar: *mut MVar) -> ()) -> Box<RuntimeRef> {
+  let mut runtime = CoreRuntime::new(
     telemetry_config,
     tokio::runtime::Builder::new_multi_thread(),
-  );
+  ).unwrap();
+
+  let _guard = runtime.tokio_handle().enter();
+  let core_meter: Arc<dyn CoreMeter> = match late_telemetry_options {
+    HsTelemetryOptions::NoTelemetry => {
+      Arc::new(NoOpCoreMeter) as Arc<dyn CoreMeter>
+    },
+    HsTelemetryOptions::OtelTelemetryOptions { url, headers, metric_periodicity, global_tags } => {
+      Arc::new(build_otlp_metric_exporter(
+        OtelCollectorOptionsBuilder::default()
+            .url(url.parse().expect("Invalid URL"))
+            .metric_periodicity(metric_periodicity.unwrap_or_else(|| Duration::new(1, 0)))
+            .headers(headers)
+            .global_tags(global_tags)
+            .build()
+            .expect("Invalid OTEl configuration")
+      ).expect("Otel Metric exporter")) as Arc<dyn CoreMeter>
+    },
+    HsTelemetryOptions::PrometheusTelemetryOptions { socket_addr, global_tags, counters_total_suffix, unit_suffix } => {
+      let srv = start_prometheus_metric_exporter(
+        PrometheusExporterOptionsBuilder::default()
+            .socket_addr(socket_addr)
+            .unit_suffix(unit_suffix)
+            .global_tags(global_tags)
+            .counters_total_suffix(counters_total_suffix)
+            .build().expect("Invalid Prometheus configuration")
+      ).expect("Failed to start prometheus exporter");
+      srv.meter as Arc<dyn CoreMeter>
+    }
+  };
+  runtime.telemetry_mut().attach_late_init_metrics(core_meter);
 
   // TODO need to figure out how to handle errors here
   Box::new(
     RuntimeRef {
       runtime: Runtime {
-        core: Arc::new(runtime.unwrap()),
+        core: Arc::new(runtime),
         try_put_mvar
       },
     }
   )
 }
 
+#[derive(Serialize, Deserialize)]
+#[serde(tag = "tag")]
+pub enum HsTelemetryOptions {
+  OtelTelemetryOptions {
+    url: String,
+    headers: HashMap<String, String>,
+    metric_periodicity: Option<Duration>,
+    global_tags: HashMap<String, String>
+  },
+  PrometheusTelemetryOptions {
+    socket_addr: SocketAddr,
+    global_tags: HashMap<String, String>,
+    counters_total_suffix: bool,
+    unit_suffix: bool
+  },
+  NoTelemetry
+}
+
 #[no_mangle]
-pub extern "C" fn hs_temporal_init_runtime(try_put_mvar: extern fn(Capability, *mut MVar) -> ()) -> *mut RuntimeRef {
-  Box::into_raw(init_runtime(
-    TelemetryOptionsBuilder::default()
-      .logging(Logger::Forward {
-        filter: construct_filter_string(Level::TRACE, Level::ERROR),
-      })
-      .build()
-      .unwrap()
-    , try_put_mvar
-    )
-  )
+pub extern "C" fn hs_temporal_init_runtime(telemetry_opts: *const CArray<u8>, try_put_mvar: extern fn(Capability, *mut MVar) -> ()) -> *mut RuntimeRef {
+  let telemetry_opts = unsafe {
+    CArray::raw_borrow(telemetry_opts).unwrap().as_rust().unwrap().clone()
+  };
+  let telemetry_opts: HsTelemetryOptions = serde_json::from_slice(
+    telemetry_opts.as_slice()
+  ).expect("Failed to parse");
+
+  let early_options = TelemetryOptionsBuilder::default()
+          .logging(Logger::Forward {
+            filter: construct_filter_string(Level::INFO, Level::ERROR),
+          })
+          .attach_service_name(true)
+          // .metrics(core_meter)
+          .build()
+          .expect("Invalid TelemetryOptions");
+  let rt = init_runtime(early_options, telemetry_opts, try_put_mvar);
+  Box::into_raw(rt)
 }
 
 fn safe_drop_runtime(runtime: Box<RuntimeRef>) {

@@ -65,13 +65,13 @@ execute worker = runActivityWorker worker go
   where
     go = do
       eTask <- liftIO $ Core.pollActivityTask worker.workerCore
-      logs <- liftIO $ fetchLogs globalRuntime
-      forM_ logs $ \l -> case l.level of
-        Trace -> $(logDebug) l.message
-        Debug -> $(logDebug) l.message
-        Temporal.Runtime.Info -> $(logInfo) l.message
-        Warn -> $(logWarn) l.message
-        Error -> $(logError) l.message
+      -- logs <- liftIO $ fetchLogs globalRuntime
+      -- forM_ logs $ \l -> case l.level of
+      --   Trace -> $(logDebug) l.message
+      --   Debug -> $(logDebug) l.message
+      --   Temporal.Runtime.Info -> $(logInfo) l.message
+      --   Warn -> $(logWarn) l.message
+      --   Error -> $(logError) l.message
       case eTask of
         Left (Core.WorkerError Core.PollShutdown _) -> do
           pure ()

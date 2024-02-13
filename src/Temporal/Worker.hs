@@ -342,10 +342,10 @@ data Worker = forall ty. Worker
   , workerCore :: Core.Worker ty
   }
 
-startReplayWorker :: (MonadUnliftIO m) => WorkerConfig actEnv -> m (Temporal.Worker.Worker, Core.HistoryPusher)
-startReplayWorker conf = flip runLoggingT conf.logger $ do
+startReplayWorker :: (MonadUnliftIO m) => Runtime -> WorkerConfig actEnv -> m (Temporal.Worker.Worker, Core.HistoryPusher)
+startReplayWorker rt conf = flip runLoggingT conf.logger $ do
   $(logDebug) "Starting worker"
-  (workerCore, replay) <- either throwIO pure =<< liftIO (Core.newReplayWorker conf.coreConfig)
+  (workerCore, replay) <- either throwIO pure =<< liftIO (Core.newReplayWorker rt conf.coreConfig)
   $(logDebug) "Instantiated core"
   runningWorkflows <- newTVarIO mempty
   let workerWorkflowFunctions = conf.wfDefs
@@ -389,13 +389,13 @@ startWorker client conf = flip runLoggingT conf.logger $ do
       activityWorker = Activity.ActivityWorker{..}
       workerClient = client
   let workerType = Core.SReal
-  logs <- liftIO $ fetchLogs globalRuntime
-  forM_ logs $ \l -> case l.level of
-    Trace -> $(logDebug) l.message
-    Debug -> $(logDebug) l.message
-    Info -> $(logInfo) l.message
-    Warn -> $(logWarn) l.message
-    Error -> $(logError) l.message
+  -- logs <- liftIO $ fetchLogs globalRuntime
+  -- forM_ logs $ \l -> case l.level of
+  --   Trace -> $(logDebug) l.message
+  --   Debug -> $(logDebug) l.message
+  --   Info -> $(logInfo) l.message
+  --   Warn -> $(logWarn) l.message
+  --   Error -> $(logError) l.message
   workerWorkflowLoop <- async $ do
     $(logDebug) "Starting workflow worker loop"
     Workflow.execute workflowWorker

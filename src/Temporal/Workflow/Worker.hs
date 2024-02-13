@@ -79,13 +79,13 @@ execute worker = flip runReaderT worker $ do
   where
     go = do
       $(logDebug) "Polling for activation"
-      logs <- liftIO $ fetchLogs globalRuntime
-      forM_ logs $ \l -> case l.level of
-        Trace -> $(logDebug) l.message
-        Debug -> $(logDebug) l.message
-        Temporal.Runtime.Info -> $(logInfo) l.message
-        Warn -> $(logWarn) l.message
-        Error -> $(logError) l.message
+      -- logs <- liftIO $ fetchLogs globalRuntime
+      -- forM_ logs $ \l -> case l.level of
+      --   Trace -> $(logDebug) l.message
+      --   Debug -> $(logDebug) l.message
+      --   Temporal.Runtime.Info -> $(logInfo) l.message
+      --   Warn -> $(logWarn) l.message
+      --   Error -> $(logError) l.message
       eActivation <- pollWorkflowActivation
       case eActivation of
         -- TODO should we do anything else on shutdown?

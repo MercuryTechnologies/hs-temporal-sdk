@@ -49,6 +49,9 @@ import Temporal.Contrib.OpenTelemetry
 import Temporal.Interceptor
 import Temporal.EphemeralServer
 import Temporal.Operator (IndexedValueType(..), SearchAttributes(..), listSearchAttributes, addSearchAttributes)
+import Temporal.Runtime hiding (Periodicity(..))
+
+import Common
 
 unblockWorkflowSignal :: W.SignalRef '[]
 unblockWorkflowSignal = W.SignalRef "unblockWorkflow" JSON
@@ -100,13 +103,13 @@ configWithRetry pn = defaultClientConfig
 mkWithWorker :: PortNumber -> WorkerConfig actEnv -> IO a -> IO a
 mkWithWorker pn conf m = do
   let clientConfig = configWithRetry pn
-  c <- connectClient clientConfig
+  c <- connectClient globalRuntime clientConfig
   bracket (startWorker c conf) shutdown (const m)
 
 makeClient :: PortNumber -> Interceptors -> IO (C.WorkflowClient, Client)
 makeClient pn Interceptors{..} = do
   let conf = configWithRetry pn
-  c <- connectClient conf 
+  c <- connectClient globalRuntime conf 
   (,) 
     <$> C.workflowClient c (W.Namespace "default") clientInterceptors
     <*> pure c

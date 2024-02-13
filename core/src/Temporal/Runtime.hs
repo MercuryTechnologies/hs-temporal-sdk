@@ -2,7 +2,8 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 module Temporal.Runtime
   ( Runtime
-  , globalRuntime
+  , TelemetryOptions(..)
+  , Periodicity(..)
   , initializeRuntime
   , destroyRuntime
   , withRuntime
@@ -13,6 +14,7 @@ module Temporal.Runtime
 import Control.Concurrent
 import Control.Exception
 import Data.Aeson
+import qualified Data.ByteString.Lazy as BL
 import qualified Data.Vector as V
 import Foreign.C.Types (CInt)
 import Foreign.C.String
@@ -25,20 +27,23 @@ import Temporal.Core.CTypes
 import Temporal.Internal.FFI
 import System.IO.Unsafe
 
-globalRuntime :: Runtime
-globalRuntime = unsafePerformIO initializeRuntime
-{-# NOINLINE globalRuntime #-}
-
 -- | Initialize the Rust runtime and thread-pool.
-initializeRuntime :: IO Runtime
-initializeRuntime = Runtime <$> initRuntime tryPutMVarPtr
+initializeRuntime :: TelemetryOptions -> IO Runtime
+initializeRuntime opts = withCArrayBS (BL.toStrict $ encode opts) $ \optsP ->
+  mask_ $ do
+    rtP <- initRuntime optsP tryPutMVarPtr
+    Runtime <$> newForeignPtr freeRuntime rtP
 
+-- | Destroy the core runtime and all associated resources.
+--
+-- If a 'Runtime' value is garbage-collected without being explicitly
+-- destroyed, this function will be called automatically.
 destroyRuntime :: Runtime -> IO ()
-destroyRuntime (Runtime rvar) = freeRuntime rvar
+destroyRuntime (Runtime rvar) = finalizeForeignPtr rvar
 
 -- | Access the underlying 'Runtime' pointer for calling out to Rust.
 withRuntime :: Runtime -> (Ptr Runtime -> IO a) -> IO a
-withRuntime (Runtime rvar) f = f rvar
+withRuntime (Runtime rvar) f = withForeignPtr rvar f
 
 
 -- | The Rust runtime exports logs to the Haskell runtime. This function fetches

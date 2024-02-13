@@ -30,14 +30,6 @@ typedef struct RuntimeRef RuntimeRef;
 
 typedef struct WorkerRef WorkerRef;
 
-typedef struct Capability {
-  int cap_num;
-} Capability;
-
-typedef struct MVar {
-  uint8_t _data[0];
-} MVar;
-
 /**
  * A utility type to represent arrays of the parametrized type.
  * Note that the parametrized type should have a C-compatible representation.
@@ -70,6 +62,14 @@ typedef struct CArray_u8 {
   const uint8_t *data_ptr;
   uintptr_t size;
 } CArray_u8;
+
+typedef struct Capability {
+  int cap_num;
+} Capability;
+
+typedef struct MVar {
+  uint8_t _data[0];
+} MVar;
 
 /**
  * A utility type to represent arrays of the parametrized type.
@@ -134,7 +134,8 @@ typedef struct CUnit {
 
 } CUnit;
 
-struct RuntimeRef *hs_temporal_init_runtime(void (*try_put_mvar)(struct Capability, struct MVar*));
+struct RuntimeRef *hs_temporal_init_runtime(const struct CArray_u8 *telemetry_opts,
+                                            void (*try_put_mvar)(struct Capability, struct MVar*));
 
 void hs_temporal_free_runtime(struct RuntimeRef *runtime);
 

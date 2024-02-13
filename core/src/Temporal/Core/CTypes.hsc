@@ -14,6 +14,7 @@ import Data.Aeson
 import Data.Aeson.TH
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
+import Data.Map.Strict (Map)
 import qualified Data.Vector as V
 import Data.Text (Text)
 import Data.Text.Foreign
@@ -24,6 +25,40 @@ import Foreign.ForeignPtr
 import Foreign.Ptr
 import Foreign.Storable
 
+data CArray a = CArray
+  { dataPtr :: !(Ptr a)
+  , size :: !(#{type uintptr_t})
+  }
+  deriving (Show)
+
+cArrayToByteString :: CArray Word8 -> IO ByteString
+cArrayToByteString CArray{..} = BS.packCStringLen (castPtr dataPtr, fromIntegral size)
+
+cArrayToVector :: Storable a => (a -> IO b) -> CArray a -> IO (V.Vector b)
+cArrayToVector f CArray{..} = do
+  let len = fromIntegral size
+  V.generateM len $ \i -> do
+    x <- peekElemOff dataPtr i
+    f x
+
+cArrayToText :: CArray Word8 -> IO Text
+cArrayToText CArray{..} = do
+  let len = fromIntegral size
+  fromPtr dataPtr len
+
+instance Storable a => Storable (CArray a) where
+  sizeOf _ = #{size CArray_u8}
+  alignment _ = #{alignment CArray_u8}
+  peek ptr = do
+    dataPtr <- #{peek CArray_u8, data_ptr} ptr
+    size <- #{peek CArray_u8, size} ptr
+    pure CArray {..}
+  poke ptr CArray {..} = do
+    #{poke CArray_u8, data_ptr} ptr dataPtr
+    #{poke CArray_u8, size} ptr size
+
+foreign import ccall "&hs_temporal_drop_byte_array" rust_dropByteArray :: FinalizerPtr (CArray Word8)
+
 type TryPutMVarFFI = FunPtr (Ptr CInt -> Ptr (MVar ()) -> IO ())
 foreign import ccall "&hs_try_putmvar" tryPutMVarPtr :: TryPutMVarFFI
 
@@ -31,10 +66,39 @@ foreign import ccall "&hs_try_putmvar" tryPutMVarPtr :: TryPutMVarFFI
 --
 -- You almost always should use the 'globalRuntime' value, which is initialized
 -- once for the entire process.
-newtype Runtime = Runtime (Ptr Runtime)
+newtype Runtime = Runtime (ForeignPtr Runtime)
 
-foreign import ccall "hs_temporal_init_runtime" initRuntime :: TryPutMVarFFI -> IO (Ptr Runtime)
-foreign import ccall "hs_temporal_free_runtime" freeRuntime :: Ptr Runtime -> IO ()
+data Periodicity 
+  = Periodicity
+    { seconds :: Word64
+    , nanoseconds :: Word32
+    }
+
+instance ToJSON Periodicity where
+  toJSON Periodicity{..} = object
+    [ "secs" .= seconds
+    , "nanos" .= nanoseconds
+    ]
+
+data TelemetryOptions
+  = OtelTelemetryOptions
+    { url :: Text 
+    , headers :: Map Text Text
+    , metricPeriodicity :: Maybe Periodicity
+    , globalTags :: Map Text Text
+    }
+  | PrometheusTelemetryOptions
+    { socketAddr :: Text
+    , globalTags :: Map Text Text
+    , countersTotalSuffixx :: Bool
+    , unitSuffix :: Bool
+    }
+  | NoTelemetry
+
+deriveToJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''TelemetryOptions
+
+foreign import ccall "hs_temporal_init_runtime" initRuntime :: Ptr (CArray Word8) -> TryPutMVarFFI -> IO (Ptr Runtime)
+foreign import ccall "&hs_temporal_free_runtime" freeRuntime :: FinalizerPtr Runtime
 
 data LogLevel
   = Trace
@@ -74,40 +138,6 @@ deriveJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''CoreLog
 
 foreign import ccall "hs_temporal_runtime_fetch_logs" raw_fetchLogs :: Ptr Runtime -> IO (Ptr (CArray (CArray Word8)))
 foreign import ccall "hs_temporal_runtime_free_logs" raw_freeLogs :: Ptr (CArray (CArray Word8)) -> IO ()
-
-data CArray a = CArray
-  { dataPtr :: !(Ptr a)
-  , size :: !(#{type uintptr_t})
-  }
-  deriving (Show)
-
-cArrayToByteString :: CArray Word8 -> IO ByteString
-cArrayToByteString CArray{..} = BS.packCStringLen (castPtr dataPtr, fromIntegral size)
-
-cArrayToVector :: Storable a => (a -> IO b) -> CArray a -> IO (V.Vector b)
-cArrayToVector f CArray{..} = do
-  let len = fromIntegral size
-  V.generateM len $ \i -> do
-    x <- peekElemOff dataPtr i
-    f x
-
-cArrayToText :: CArray Word8 -> IO Text
-cArrayToText CArray{..} = do
-  let len = fromIntegral size
-  fromPtr dataPtr len
-
-instance Storable a => Storable (CArray a) where
-  sizeOf _ = #{size CArray_u8}
-  alignment _ = #{alignment CArray_u8}
-  peek ptr = do
-    dataPtr <- #{peek CArray_u8, data_ptr} ptr
-    size <- #{peek CArray_u8, size} ptr
-    pure CArray {..}
-  poke ptr CArray {..} = do
-    #{poke CArray_u8, data_ptr} ptr dataPtr
-    #{poke CArray_u8, size} ptr size
-
-foreign import ccall "&hs_temporal_drop_byte_array" rust_dropByteArray :: FinalizerPtr (CArray Word8)
 
 data RpcError = RpcError
   { code :: Word32

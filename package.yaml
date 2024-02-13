@@ -163,4 +163,5 @@ tests:
       Spec,
       ConcurrentAccessSpec,
       AsyncCompletionSpec,
-      IntegrationSpec
+      IntegrationSpec,
+      Common

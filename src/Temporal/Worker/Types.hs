@@ -23,6 +23,7 @@ import Temporal.Activity.Worker (ActivityWorker)
 import Temporal.Exception (ApplicationFailureHandler)
 import Temporal.Interceptor
 import Temporal.Core.Worker (InactiveForReplay)
+import Temporal.Runtime (Runtime)
 
 data WorkerConfig activityEnv = WorkerConfig
   { deadlockTimeout :: Maybe Int
