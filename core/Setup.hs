@@ -8,7 +8,8 @@ import Distribution.Simple.LocalBuildInfo
   ( InstallDirs(..),
     LocalBuildInfo (..),
     localPkgDescr,
-    absoluteInstallDirs
+    absoluteInstallDirs,
+    buildDir
   )
 import Distribution.Simple.Program.Find 
   ( defaultProgramSearchPath,
