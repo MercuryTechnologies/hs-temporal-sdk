@@ -208,6 +208,7 @@ handleActivation activation = do
                       fromMaybe 
                         (activation ^. Activation.timestamp) 
                         (startWorkflow ^. Activation.maybe'startTime)
+                  , continueAsNewSuggested = False
                   }
             case HashMap.lookup (startWorkflow ^. Activation.workflowType) worker.workerWorkflowFunctions of 
               Nothing -> pure Nothing

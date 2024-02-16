@@ -17,22 +17,23 @@ import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow as ChildWor
 data Info = Info
   { historyLength :: {-# UNPACK #-} !Word32
   , attempt :: {-# UNPACK #-} !Int
-  , continuedRunId :: Maybe RunId
-  , cronSchedule :: Maybe Text
-  , executionTimeout :: Maybe Duration
-  , headers :: Map Text Payload
-  , namespace :: Namespace
-  , parent :: Maybe ParentInfo
-  , rawMemo :: Map Text Payload
-  , retryPolicy :: Maybe RetryPolicy
-  , runId :: RunId
-  , runTimeout :: Maybe Duration
-  , searchAttributes :: Map Text SearchAttributeType
-  , startTime :: SystemTime
-  , taskQueue :: TaskQueue
-  , taskTimeout :: Duration
-  , workflowId :: WorkflowId
-  , workflowType :: WorkflowType
+  , continuedRunId :: !(Maybe RunId)
+  , cronSchedule :: !(Maybe Text)
+  , executionTimeout :: !(Maybe Duration)
+  , headers :: !(Map Text Payload)
+  , namespace :: !Namespace
+  , parent :: !(Maybe ParentInfo)
+  , rawMemo :: !(Map Text Payload)
+  , retryPolicy :: !(Maybe RetryPolicy)
+  , runId :: !RunId
+  , runTimeout :: !(Maybe Duration)
+  , searchAttributes :: !(Map Text SearchAttributeType)
+  , startTime :: !SystemTime
+  , taskQueue :: !TaskQueue
+  , taskTimeout :: !Duration
+  , workflowId :: !WorkflowId
+  , workflowType :: !WorkflowType
+  , continueAsNewSuggested :: !Bool
   }
 
 data StartActivityOptions = StartActivityOptions

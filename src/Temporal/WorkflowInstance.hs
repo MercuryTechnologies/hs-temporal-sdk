@@ -228,7 +228,10 @@ activate
 activate act suspension = do
   inst <- ask
   info <- atomicModifyIORef' inst.workflowInstanceInfo $ \info -> 
-    let info' = info { historyLength = act ^. Activation.historyLength }
+    let info' = info 
+          { historyLength = act ^. Activation.historyLength 
+          , continueAsNewSuggested = act ^. Activation.continueAsNewSuggested
+          }
     in (info', info')
   let completionBase = defMessage & Completion.runId .~ rawRunId info.runId
   writeIORef inst.workflowTime (act ^. Activation.timestamp . to timespecFromTimestamp)
