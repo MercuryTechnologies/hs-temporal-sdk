@@ -47,7 +47,5 @@ This monorepo contains the following packages:
 
 ## Pending work for v0.0.1.0
 
-- [ ] Prometheus, core logging support
 - [ ] Tested replay support
-- [ ] Ephemeral test environments
 - [ ] Tutorial Module(s)
