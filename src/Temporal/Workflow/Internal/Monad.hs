@@ -579,7 +579,7 @@ data WorkflowInstance = WorkflowInstance
   , workflowCancellationVar :: {-# UNPACK #-} !(IVar ())
   , workflowDeadlockTimeout :: Maybe Int
   -- These are how the instance gets its work done
-  , activationChannel :: Chan Core.WorkflowActivation
+  , activationChannel :: TQueue Core.WorkflowActivation
   , executionThread :: IORef (Async ())
   , inboundInterceptor :: WorkflowInboundInterceptor
   , outboundInterceptor :: WorkflowOutboundInterceptor

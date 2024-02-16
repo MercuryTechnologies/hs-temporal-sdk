@@ -49,6 +49,7 @@ dependencies:
 
 default-extensions:
 - BangPatterns
+- BlockArguments
 - DataKinds
 - DerivingStrategies
 - FlexibleContexts

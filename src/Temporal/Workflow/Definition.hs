@@ -21,7 +21,6 @@ module Temporal.Workflow.Definition
   , WorkflowDefinition(..) -- TODO, only export the type, not the constructor from this module
   , KnownWorkflow(..)
   , SignalRef(..)
-  , SignalDefinition(..)
   , WorkflowSignalDefinition(..)
   -- , StartChildWorkflow(..)
   , gatherStartChildWorkflowArgs

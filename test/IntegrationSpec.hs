@@ -991,7 +991,27 @@ needsClient = do
       -- specify "to same workflow keeps memo and search attributes" pending
       -- specify "to different workflow keeps memo and search attributes by default" pending
       -- specify "to different workflow can set memo and search attributes" pending
-  --   describe "signalWithStart" $ do
+    describe "signalWithStart" do
+      it "works" $ \TestEnv{..} -> do
+        let conf = configure () testConf baseConf
+        withWorker conf $ do
+          let opts = (C.workflowStartOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions
+                    { C.runTimeout = Just $ seconds 4
+                    , C.executionTimeout = Nothing
+                    , C.taskTimeout = Nothing
+                    }
+                }
+          useClient $ do
+            liftIO $ putStrLn "signalWithStart call"
+            wfH <- C.signalWithStart 
+              testRefs.workflowWaitConditionWorks 
+              "signalWithStart" 
+              opts
+              unblockWorkflowSignal 
+            lift $ C.waitWorkflowResult wfH `shouldReturn` ()
+
   --     specify "works as intended and returns correct runId" pending
   describe "RetryPolicy" $ do
     specify "is used for retryable failures" $ \TestEnv{..} -> do

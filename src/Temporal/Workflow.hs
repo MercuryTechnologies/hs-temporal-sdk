@@ -154,7 +154,6 @@ module Temporal.Workflow
   -- $signals
   , HasSignalRef(..)
   , SignalRef(..)
-  , SignalDefinition(..)
   , setSignalHandler
   , ValidSignalHandler
   , Condition
@@ -423,7 +422,7 @@ gatherActivityArgs c f = gatherArgs (Proxy @args) c id f
 -- Given the following Workflow definition:
 class WorkflowHandle h where
   -- | Signal a running Workflow.
-  signal :: RequireCallStack => h result -> SignalDefinition args -> (args :->: Workflow (Task ()))
+  signal :: (HasSignalRef ref, RequireCallStack) => h result -> ref -> (SignalArgs ref :->: Workflow (Task ()))
 
 instance WorkflowHandle ChildWorkflowHandle where
   signal h =
@@ -439,6 +438,7 @@ instance WorkflowHandle ExternalWorkflowHandle where
         -- TODO
         -- & Common.namespace .~ rawNamespace h.externalNamespace
 
+-- | A Workflow can send a Signal to another Workflow, in which case it's called an External Signal.
 signalWorkflow 
   :: forall result h ref
   .  (RequireCallStack, HasSignalRef ref)
