@@ -1061,9 +1061,11 @@ instance Control.DeepSeq.NFData ClusterMetadata where
                                (_ClusterMetadata'isConnectionEnabled x__) ()))))))
 {- | Fields :
      
-         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.namespace' @:: Lens' DeleteNamespaceRequest Data.Text.Text@ -}
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.namespace' @:: Lens' DeleteNamespaceRequest Data.Text.Text@
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.namespaceId' @:: Lens' DeleteNamespaceRequest Data.Text.Text@ -}
 data DeleteNamespaceRequest
   = DeleteNamespaceRequest'_constructor {_DeleteNamespaceRequest'namespace :: !Data.Text.Text,
+                                         _DeleteNamespaceRequest'namespaceId :: !Data.Text.Text,
                                          _DeleteNamespaceRequest'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show DeleteNamespaceRequest where
@@ -1079,6 +1081,13 @@ instance Data.ProtoLens.Field.HasField DeleteNamespaceRequest "namespace" Data.T
            _DeleteNamespaceRequest'namespace
            (\ x__ y__ -> x__ {_DeleteNamespaceRequest'namespace = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField DeleteNamespaceRequest "namespaceId" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _DeleteNamespaceRequest'namespaceId
+           (\ x__ y__ -> x__ {_DeleteNamespaceRequest'namespaceId = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message DeleteNamespaceRequest where
   messageName _
     = Data.Text.pack
@@ -1086,7 +1095,8 @@ instance Data.ProtoLens.Message DeleteNamespaceRequest where
   packedMessageDescriptor _
     = "\n\
       \\SYNDeleteNamespaceRequest\DC2\FS\n\
-      \\tnamespace\CAN\SOH \SOH(\tR\tnamespace"
+      \\tnamespace\CAN\SOH \SOH(\tR\tnamespace\DC2!\n\
+      \\fnamespace_id\CAN\STX \SOH(\tR\vnamespaceId"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -1099,9 +1109,19 @@ instance Data.ProtoLens.Message DeleteNamespaceRequest where
                  Data.ProtoLens.Optional
                  (Data.ProtoLens.Field.field @"namespace")) ::
               Data.ProtoLens.FieldDescriptor DeleteNamespaceRequest
+        namespaceId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "namespace_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"namespaceId")) ::
+              Data.ProtoLens.FieldDescriptor DeleteNamespaceRequest
       in
         Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, namespace__field_descriptor)]
+          [(Data.ProtoLens.Tag 1, namespace__field_descriptor),
+           (Data.ProtoLens.Tag 2, namespaceId__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _DeleteNamespaceRequest'_unknownFields
@@ -1109,6 +1129,7 @@ instance Data.ProtoLens.Message DeleteNamespaceRequest where
   defMessage
     = DeleteNamespaceRequest'_constructor
         {_DeleteNamespaceRequest'namespace = Data.ProtoLens.fieldDefault,
+         _DeleteNamespaceRequest'namespaceId = Data.ProtoLens.fieldDefault,
          _DeleteNamespaceRequest'_unknownFields = []}
   parseMessage
     = let
@@ -1141,6 +1162,14 @@ instance Data.ProtoLens.Message DeleteNamespaceRequest where
                                        "namespace"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"namespace") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "namespace_id"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"namespaceId") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -1168,15 +1197,34 @@ instance Data.ProtoLens.Message DeleteNamespaceRequest where
                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                          Data.Text.Encoding.encodeUtf8 _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+             ((Data.Monoid.<>)
+                (let
+                   _v
+                     = Lens.Family2.view (Data.ProtoLens.Field.field @"namespaceId") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                         ((Prelude..)
+                            (\ bs
+                               -> (Data.Monoid.<>)
+                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                            Data.Text.Encoding.encodeUtf8 _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
 instance Control.DeepSeq.NFData DeleteNamespaceRequest where
   rnf
     = \ x__
         -> Control.DeepSeq.deepseq
              (_DeleteNamespaceRequest'_unknownFields x__)
              (Control.DeepSeq.deepseq
-                (_DeleteNamespaceRequest'namespace x__) ())
+                (_DeleteNamespaceRequest'namespace x__)
+                (Control.DeepSeq.deepseq
+                   (_DeleteNamespaceRequest'namespaceId x__) ()))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.deletedNamespace' @:: Lens' DeleteNamespaceResponse Data.Text.Text@ -}
@@ -3029,9 +3077,10 @@ packedFileDescriptor
     \\ENQvalue\CAN\STX \SOH(\SO2'.temporal.api.enums.v1.IndexedValueTypeR\ENQvalue:\STX8\SOH\SUB@\n\
     \\DC2StorageSchemaEntry\DC2\DLE\n\
     \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-    \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH\"6\n\
+    \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH\"Y\n\
     \\SYNDeleteNamespaceRequest\DC2\FS\n\
-    \\tnamespace\CAN\SOH \SOH(\tR\tnamespace\"F\n\
+    \\tnamespace\CAN\SOH \SOH(\tR\tnamespace\DC2!\n\
+    \\fnamespace_id\CAN\STX \SOH(\tR\vnamespaceId\"F\n\
     \\ETBDeleteNamespaceResponse\DC2+\n\
     \\DC1deleted_namespace\CAN\SOH \SOH(\tR\DLEdeletedNamespace\"\149\SOH\n\
     \\USAddOrUpdateRemoteClusterRequest\DC2)\n\
@@ -3055,8 +3104,8 @@ packedFileDescriptor
     \\CANinitial_failover_version\CAN\EOT \SOH(\ETXR\SYNinitialFailoverVersion\DC2.\n\
     \\DC3history_shard_count\CAN\ENQ \SOH(\ENQR\DC1historyShardCount\DC22\n\
     \\NAKis_connection_enabled\CAN\ACK \SOH(\bR\DC3isConnectionEnabledB\190\SOH\n\
-    \\"io.temporal.api.operatorservice.v1B\DC4RequestResponseProtoP\SOHZ5go.temporal.io/api/operatorservice/v1;operatorservice\170\STX!Temporalio.Api.OperatorService.V1\234\STX$Temporalio::Api::OperatorService::V1J\146 \n\
-    \\ACK\DC2\EOT\SYN\NUL{\SOH\n\
+    \\"io.temporal.api.operatorservice.v1B\DC4RequestResponseProtoP\SOHZ5go.temporal.io/api/operatorservice/v1;operatorservice\170\STX!Temporalio.Api.OperatorService.V1\234\STX$Temporalio::Api::OperatorService::V1J\155!\n\
+    \\ACK\DC2\EOT\SYN\NUL}\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -3220,7 +3269,7 @@ packedFileDescriptor
     \\f\n\
     \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\ETXA)*\n\
     \\178\STX\n\
-    \\STX\EOT\ACK\DC2\EOTH\NULJ\SOH\SUB\165\STX (-- api-linter: core::0135::request-unknown-fields=disabled\n\
+    \\STX\EOT\ACK\DC2\EOTH\NULL\SOH\SUB\165\STX (-- api-linter: core::0135::request-unknown-fields=disabled\n\
     \     aip.dev/not-precedent: DeleteNamespace RPC doesn't follow Google API format. --)\n\
     \ (-- api-linter: core::0135::request-name-required=disabled\n\
     \     aip.dev/not-precedent: DeleteNamespace RPC doesn't follow Google API format. --)\n\
@@ -3228,202 +3277,212 @@ packedFileDescriptor
     \\n\
     \\n\
     \\ETX\EOT\ACK\SOH\DC2\ETXH\b\RS\n\
+    \]\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\ETXJ\EOT\EM\SUBP Only one of namespace or namespace_id must be specified to identify namespace.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETXJ\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXJ\v\DC4\n\
+    \\f\n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXJ\ETB\CAN\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\ETXI\EOT\EM\n\
+    \\EOT\EOT\ACK\STX\SOH\DC2\ETXK\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETXI\EOT\n\
+    \\ENQ\EOT\ACK\STX\SOH\ENQ\DC2\ETXK\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXI\v\DC4\n\
+    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXK\v\ETB\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXI\ETB\CAN\n\
+    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXK\SUB\ESC\n\
     \\n\
     \\n\
-    \\STX\EOT\a\DC2\EOTL\NULO\SOH\n\
+    \\STX\EOT\a\DC2\EOTN\NULQ\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\a\SOH\DC2\ETXL\b\US\n\
+    \\ETX\EOT\a\SOH\DC2\ETXN\b\US\n\
     \S\n\
-    \\EOT\EOT\a\STX\NUL\DC2\ETXN\EOT!\SUBF Temporary namespace name that is used during reclaim resources step.\n\
+    \\EOT\EOT\a\STX\NUL\DC2\ETXP\EOT!\SUBF Temporary namespace name that is used during reclaim resources step.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETXN\EOT\n\
+    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETXP\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETXN\v\FS\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETXP\v\FS\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETXN\US \n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETXP\US \n\
     \\n\
     \\n\
-    \\STX\EOT\b\DC2\EOTQ\NULV\SOH\n\
+    \\STX\EOT\b\DC2\EOTS\NULX\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\b\SOH\DC2\ETXQ\b'\n\
+    \\ETX\EOT\b\SOH\DC2\ETXS\b'\n\
     \F\n\
-    \\EOT\EOT\b\STX\NUL\DC2\ETXS\EOT \SUB9 Frontend Address is a cross cluster accessible address.\n\
+    \\EOT\EOT\b\STX\NUL\DC2\ETXU\EOT \SUB9 Frontend Address is a cross cluster accessible address.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\ETXS\EOT\n\
+    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\ETXU\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETXS\v\ESC\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETXU\v\ESC\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETXS\RS\US\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETXU\RS\US\n\
     \E\n\
-    \\EOT\EOT\b\STX\SOH\DC2\ETXU\EOT.\SUB8 Flag to enable / disable the cross cluster connection.\n\
+    \\EOT\EOT\b\STX\SOH\DC2\ETXW\EOT.\SUB8 Flag to enable / disable the cross cluster connection.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\ETXU\EOT\b\n\
+    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\ETXW\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETXU\t)\n\
+    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETXW\t)\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETXU,-\n\
+    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETXW,-\n\
     \\n\
     \\n\
-    \\STX\EOT\t\DC2\EOTX\NULY\SOH\n\
+    \\STX\EOT\t\DC2\EOTZ\NUL[\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\t\SOH\DC2\ETXX\b(\n\
+    \\ETX\EOT\t\SOH\DC2\ETXZ\b(\n\
     \\n\
     \\n\
     \\STX\EOT\n\
-    \\DC2\EOT[\NUL^\SOH\n\
+    \\DC2\EOT]\NUL`\SOH\n\
     \\n\
     \\n\
     \\ETX\EOT\n\
-    \\SOH\DC2\ETX[\b\"\n\
+    \\SOH\DC2\ETX]\b\"\n\
     \1\n\
     \\EOT\EOT\n\
-    \\STX\NUL\DC2\ETX]\EOT\FS\SUB$ Remote cluster name to be removed.\n\
+    \\STX\NUL\DC2\ETX_\EOT\FS\SUB$ Remote cluster name to be removed.\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ENQ\DC2\ETX]\EOT\n\
+    \\STX\NUL\ENQ\DC2\ETX_\EOT\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\SOH\DC2\ETX]\v\ETB\n\
+    \\STX\NUL\SOH\DC2\ETX_\v\ETB\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ETX\DC2\ETX]\SUB\ESC\n\
+    \\STX\NUL\ETX\DC2\ETX_\SUB\ESC\n\
     \\n\
     \\n\
-    \\STX\EOT\v\DC2\EOT`\NULa\SOH\n\
+    \\STX\EOT\v\DC2\EOTb\NULc\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\v\SOH\DC2\ETX`\b#\n\
+    \\ETX\EOT\v\SOH\DC2\ETXb\b#\n\
     \\n\
     \\n\
-    \\STX\EOT\f\DC2\EOTc\NULf\SOH\n\
+    \\STX\EOT\f\DC2\EOTe\NULh\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\f\SOH\DC2\ETXc\b\ESC\n\
+    \\ETX\EOT\f\SOH\DC2\ETXe\b\ESC\n\
     \\v\n\
-    \\EOT\EOT\f\STX\NUL\DC2\ETXd\EOT\CAN\n\
+    \\EOT\EOT\f\STX\NUL\DC2\ETXf\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\ETXd\EOT\t\n\
+    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\ETXf\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\NUL\SOH\DC2\ETXd\n\
+    \\ENQ\EOT\f\STX\NUL\SOH\DC2\ETXf\n\
     \\DC3\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\NUL\ETX\DC2\ETXd\SYN\ETB\n\
+    \\ENQ\EOT\f\STX\NUL\ETX\DC2\ETXf\SYN\ETB\n\
     \\v\n\
-    \\EOT\EOT\f\STX\SOH\DC2\ETXe\EOT\RS\n\
+    \\EOT\EOT\f\STX\SOH\DC2\ETXg\EOT\RS\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\SOH\ENQ\DC2\ETXe\EOT\t\n\
+    \\ENQ\EOT\f\STX\SOH\ENQ\DC2\ETXg\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\SOH\SOH\DC2\ETXe\n\
+    \\ENQ\EOT\f\STX\SOH\SOH\DC2\ETXg\n\
     \\EM\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\SOH\ETX\DC2\ETXe\FS\GS\n\
+    \\ENQ\EOT\f\STX\SOH\ETX\DC2\ETXg\FS\GS\n\
     \\n\
     \\n\
-    \\STX\EOT\r\DC2\EOTh\NULl\SOH\n\
+    \\STX\EOT\r\DC2\EOTj\NULn\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\r\SOH\DC2\ETXh\b\FS\n\
+    \\ETX\EOT\r\SOH\DC2\ETXj\b\FS\n\
     \.\n\
-    \\EOT\EOT\r\STX\NUL\DC2\ETXj\EOT*\SUB! List of all cluster information\n\
+    \\EOT\EOT\r\STX\NUL\DC2\ETXl\EOT*\SUB! List of all cluster information\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\EOT\DC2\ETXj\EOT\f\n\
+    \\ENQ\EOT\r\STX\NUL\EOT\DC2\ETXl\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\ACK\DC2\ETXj\r\FS\n\
+    \\ENQ\EOT\r\STX\NUL\ACK\DC2\ETXl\r\FS\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\SOH\DC2\ETXj\GS%\n\
+    \\ENQ\EOT\r\STX\NUL\SOH\DC2\ETXl\GS%\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\ETX\DC2\ETXj()\n\
+    \\ENQ\EOT\r\STX\NUL\ETX\DC2\ETXl()\n\
     \\v\n\
-    \\EOT\EOT\r\STX\SOH\DC2\ETXk\EOT\RS\n\
+    \\EOT\EOT\r\STX\SOH\DC2\ETXm\EOT\RS\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\SOH\ENQ\DC2\ETXk\EOT\t\n\
+    \\ENQ\EOT\r\STX\SOH\ENQ\DC2\ETXm\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\SOH\SOH\DC2\ETXk\n\
+    \\ENQ\EOT\r\STX\SOH\SOH\DC2\ETXm\n\
     \\EM\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\SOH\ETX\DC2\ETXk\FS\GS\n\
+    \\ENQ\EOT\r\STX\SOH\ETX\DC2\ETXm\FS\GS\n\
     \\n\
     \\n\
-    \\STX\EOT\SO\DC2\EOTn\NUL{\SOH\n\
+    \\STX\EOT\SO\DC2\EOTp\NUL}\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SO\SOH\DC2\ETXn\b\ETB\n\
+    \\ETX\EOT\SO\SOH\DC2\ETXp\b\ETB\n\
     \(\n\
-    \\EOT\EOT\SO\STX\NUL\DC2\ETXp\EOT\FS\SUB\ESC Name of the cluster name.\n\
+    \\EOT\EOT\SO\STX\NUL\DC2\ETXr\EOT\FS\SUB\ESC Name of the cluster name.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\NUL\ENQ\DC2\ETXp\EOT\n\
+    \\ENQ\EOT\SO\STX\NUL\ENQ\DC2\ETXr\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\ETXp\v\ETB\n\
+    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\ETXr\v\ETB\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\ETXp\SUB\ESC\n\
+    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\ETXr\SUB\ESC\n\
     \!\n\
-    \\EOT\EOT\SO\STX\SOH\DC2\ETXr\EOT\SUB\SUB\DC4 Id of the cluster.\n\
+    \\EOT\EOT\SO\STX\SOH\DC2\ETXt\EOT\SUB\SUB\DC4 Id of the cluster.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\SOH\ENQ\DC2\ETXr\EOT\n\
+    \\ENQ\EOT\SO\STX\SOH\ENQ\DC2\ETXt\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\ETXr\v\NAK\n\
+    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\ETXt\v\NAK\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\ETXr\CAN\EM\n\
+    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\ETXt\CAN\EM\n\
     \*\n\
-    \\EOT\EOT\SO\STX\STX\DC2\ETXt\EOT\ETB\SUB\GS Cluster accessible address.\n\
+    \\EOT\EOT\SO\STX\STX\DC2\ETXv\EOT\ETB\SUB\GS Cluster accessible address.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\STX\ENQ\DC2\ETXt\EOT\n\
+    \\ENQ\EOT\SO\STX\STX\ENQ\DC2\ETXv\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\STX\SOH\DC2\ETXt\v\DC2\n\
+    \\ENQ\EOT\SO\STX\STX\SOH\DC2\ETXv\v\DC2\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\STX\ETX\DC2\ETXt\NAK\SYN\n\
+    \\ENQ\EOT\SO\STX\STX\ETX\DC2\ETXv\NAK\SYN\n\
     \G\n\
-    \\EOT\EOT\SO\STX\ETX\DC2\ETXv\EOT'\SUB: A unique failover version across all connected clusters.\n\
+    \\EOT\EOT\SO\STX\ETX\DC2\ETXx\EOT'\SUB: A unique failover version across all connected clusters.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\ETX\ENQ\DC2\ETXv\EOT\t\n\
+    \\ENQ\EOT\SO\STX\ETX\ENQ\DC2\ETXx\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\ETX\SOH\DC2\ETXv\n\
+    \\ENQ\EOT\SO\STX\ETX\SOH\DC2\ETXx\n\
     \\"\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\ETX\ETX\DC2\ETXv%&\n\
+    \\ENQ\EOT\SO\STX\ETX\ETX\DC2\ETXx%&\n\
     \,\n\
-    \\EOT\EOT\SO\STX\EOT\DC2\ETXx\EOT\"\SUB\US History service shard number.\n\
+    \\EOT\EOT\SO\STX\EOT\DC2\ETXz\EOT\"\SUB\US History service shard number.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\EOT\ENQ\DC2\ETXx\EOT\t\n\
+    \\ENQ\EOT\SO\STX\EOT\ENQ\DC2\ETXz\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\EOT\SOH\DC2\ETXx\n\
+    \\ENQ\EOT\SO\STX\EOT\SOH\DC2\ETXz\n\
     \\GS\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\EOT\ETX\DC2\ETXx !\n\
+    \\ENQ\EOT\SO\STX\EOT\ETX\DC2\ETXz !\n\
     \<\n\
-    \\EOT\EOT\SO\STX\ENQ\DC2\ETXz\EOT#\SUB/ A flag to indicate if a connection is active.\n\
+    \\EOT\EOT\SO\STX\ENQ\DC2\ETX|\EOT#\SUB/ A flag to indicate if a connection is active.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\ENQ\ENQ\DC2\ETXz\EOT\b\n\
+    \\ENQ\EOT\SO\STX\ENQ\ENQ\DC2\ETX|\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\ENQ\SOH\DC2\ETXz\t\RS\n\
+    \\ENQ\EOT\SO\STX\ENQ\SOH\DC2\ETX|\t\RS\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\ENQ\ETX\DC2\ETXz!\"b\ACKproto3"
+    \\ENQ\EOT\SO\STX\ENQ\ETX\DC2\ETX|!\"b\ACKproto3"

@@ -39,6 +39,17 @@ langUsedFlags ::
    Data.ProtoLens.Field.HasField s "langUsedFlags" a) =>
   Lens.Family2.LensLike' f s a
 langUsedFlags = Data.ProtoLens.Field.field @"langUsedFlags"
+sdkName ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "sdkName" a) =>
+  Lens.Family2.LensLike' f s a
+sdkName = Data.ProtoLens.Field.field @"sdkName"
+sdkVersion ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "sdkVersion" a) =>
+  Lens.Family2.LensLike' f s a
+sdkVersion = Data.ProtoLens.Field.field @"sdkVersion"
 vec'coreUsedFlags ::
   forall f s a.
   (Prelude.Functor f,

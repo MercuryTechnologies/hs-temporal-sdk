@@ -425,6 +425,7 @@ applyJobs jobs fAwait = UnliftIO.try $ do
         Just (WorkflowActivationJob'StartWorkflow _startWorkflow) -> tup
         -- Handled in the worker.
         Just (WorkflowActivationJob'RemoveFromCache _removeFromCache) -> tup
+        Just (WorkflowActivationJob'DoUpdate _) -> error "DoUpdate not yet implemented"
         Nothing -> E.throw $ RuntimeError "Uncrecognized workflow activation job variant"
       )
       (pure (), [], pure (), [], pure ())

@@ -1760,7 +1760,7 @@ packedFileDescriptor
     \\bResponse\DC20\n\
     \\EOTmeta\CAN\SOH \SOH(\v2\FS.temporal.api.update.v1.MetaR\EOTmeta\DC29\n\
     \\aoutcome\CAN\STX \SOH(\v2\US.temporal.api.update.v1.OutcomeR\aoutcomeB\137\SOH\n\
-    \\EMio.temporal.api.update.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/update/v1;update\170\STX\CANTemporalio.Api.Update.V1\234\STX\ESCTemporalio::Api::Update::V1J\221\RS\n\
+    \\EMio.temporal.api.update.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/update/v1;update\170\STX\CANTemporalio.Api.Update.V1\234\STX\ESCTemporalio::Api::Update::V1J\220\RS\n\
     \\ACK\DC2\EOT\SYN\NULn\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
@@ -1835,8 +1835,8 @@ packedFileDescriptor
     \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX+@O\n\
     \\f\n\
     \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX+RS\n\
-    \o\n\
-    \\STX\EOT\SOH\DC2\EOT0\NUL3\SOH\SUBc The data needed by a client to refer to an previously invoked workflow\n\
+    \n\n\
+    \\STX\EOT\SOH\DC2\EOT0\NUL3\SOH\SUBb The data needed by a client to refer to a previously invoked workflow\n\
     \ execution update process.\n\
     \\n\
     \\n\

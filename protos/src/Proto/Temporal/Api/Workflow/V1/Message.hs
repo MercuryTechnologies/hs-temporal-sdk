@@ -34,7 +34,6 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Dependencies.Gogoproto.Gogo
 import qualified Proto.Google.Protobuf.Duration
 import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Temporal.Api.Common.V1.Message
@@ -270,10 +269,10 @@ instance Data.ProtoLens.Message NewWorkflowExecutionInfo where
       \\rworkflow_type\CAN\STX \SOH(\v2$.temporal.api.common.v1.WorkflowTypeR\fworkflowType\DC2C\n\
       \\n\
       \task_queue\CAN\ETX \SOH(\v2$.temporal.api.taskqueue.v1.TaskQueueR\ttaskQueue\DC26\n\
-      \\ENQinput\CAN\EOT \SOH(\v2 .temporal.api.common.v1.PayloadsR\ENQinput\DC2]\n\
-      \\SUBworkflow_execution_timeout\CAN\ENQ \SOH(\v2\EM.google.protobuf.DurationR\CANworkflowExecutionTimeoutB\EOT\152\223\US\SOH\DC2Q\n\
-      \\DC4workflow_run_timeout\CAN\ACK \SOH(\v2\EM.google.protobuf.DurationR\DC2workflowRunTimeoutB\EOT\152\223\US\SOH\DC2S\n\
-      \\NAKworkflow_task_timeout\CAN\a \SOH(\v2\EM.google.protobuf.DurationR\DC3workflowTaskTimeoutB\EOT\152\223\US\SOH\DC2e\n\
+      \\ENQinput\CAN\EOT \SOH(\v2 .temporal.api.common.v1.PayloadsR\ENQinput\DC2W\n\
+      \\SUBworkflow_execution_timeout\CAN\ENQ \SOH(\v2\EM.google.protobuf.DurationR\CANworkflowExecutionTimeout\DC2K\n\
+      \\DC4workflow_run_timeout\CAN\ACK \SOH(\v2\EM.google.protobuf.DurationR\DC2workflowRunTimeout\DC2M\n\
+      \\NAKworkflow_task_timeout\CAN\a \SOH(\v2\EM.google.protobuf.DurationR\DC3workflowTaskTimeout\DC2e\n\
       \\CANworkflow_id_reuse_policy\CAN\b \SOH(\SO2,.temporal.api.enums.v1.WorkflowIdReusePolicyR\NAKworkflowIdReusePolicy\DC2F\n\
       \\fretry_policy\CAN\t \SOH(\v2#.temporal.api.common.v1.RetryPolicyR\vretryPolicy\DC2#\n\
       \\rcron_schedule\CAN\n\
@@ -1018,14 +1017,14 @@ instance Data.ProtoLens.Message PendingActivityInfo where
       \activityId\DC2I\n\
       \\ractivity_type\CAN\STX \SOH(\v2$.temporal.api.common.v1.ActivityTypeR\factivityType\DC2A\n\
       \\ENQstate\CAN\ETX \SOH(\SO2+.temporal.api.enums.v1.PendingActivityStateR\ENQstate\DC2M\n\
-      \\DC1heartbeat_details\CAN\EOT \SOH(\v2 .temporal.api.common.v1.PayloadsR\DLEheartbeatDetails\DC2P\n\
-      \\DC3last_heartbeat_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\DC1lastHeartbeatTimeB\EOT\144\223\US\SOH\DC2L\n\
-      \\DC1last_started_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR\SIlastStartedTimeB\EOT\144\223\US\SOH\DC2\CAN\n\
+      \\DC1heartbeat_details\CAN\EOT \SOH(\v2 .temporal.api.common.v1.PayloadsR\DLEheartbeatDetails\DC2J\n\
+      \\DC3last_heartbeat_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\DC1lastHeartbeatTime\DC2F\n\
+      \\DC1last_started_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR\SIlastStartedTime\DC2\CAN\n\
       \\aattempt\CAN\a \SOH(\ENQR\aattempt\DC2)\n\
-      \\DLEmaximum_attempts\CAN\b \SOH(\ENQR\SImaximumAttempts\DC2G\n\
-      \\SOscheduled_time\CAN\t \SOH(\v2\SUB.google.protobuf.TimestampR\rscheduledTimeB\EOT\144\223\US\SOH\DC2I\n\
+      \\DLEmaximum_attempts\CAN\b \SOH(\ENQR\SImaximumAttempts\DC2A\n\
+      \\SOscheduled_time\CAN\t \SOH(\v2\SUB.google.protobuf.TimestampR\rscheduledTime\DC2C\n\
       \\SIexpiration_time\CAN\n\
-      \ \SOH(\v2\SUB.google.protobuf.TimestampR\SOexpirationTimeB\EOT\144\223\US\SOH\DC2C\n\
+      \ \SOH(\v2\SUB.google.protobuf.TimestampR\SOexpirationTime\DC2C\n\
       \\flast_failure\CAN\v \SOH(\v2 .temporal.api.failure.v1.FailureR\vlastFailure\DC20\n\
       \\DC4last_worker_identity\CAN\f \SOH(\tR\DC2lastWorkerIdentity"
   packedFileDescriptor _ = packedFileDescriptor
@@ -1933,10 +1932,10 @@ instance Data.ProtoLens.Message PendingWorkflowTaskInfo where
   packedMessageDescriptor _
     = "\n\
       \\ETBPendingWorkflowTaskInfo\DC2E\n\
-      \\ENQstate\CAN\SOH \SOH(\SO2/.temporal.api.enums.v1.PendingWorkflowTaskStateR\ENQstate\DC2G\n\
-      \\SOscheduled_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\rscheduledTimeB\EOT\144\223\US\SOH\DC2X\n\
-      \\ETBoriginal_scheduled_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\NAKoriginalScheduledTimeB\EOT\144\223\US\SOH\DC2C\n\
-      \\fstarted_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\vstartedTimeB\EOT\144\223\US\SOH\DC2\CAN\n\
+      \\ENQstate\CAN\SOH \SOH(\SO2/.temporal.api.enums.v1.PendingWorkflowTaskStateR\ENQstate\DC2A\n\
+      \\SOscheduled_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\rscheduledTime\DC2R\n\
+      \\ETBoriginal_scheduled_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\NAKoriginalScheduledTime\DC2=\n\
+      \\fstarted_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\vstartedTime\DC2\CAN\n\
       \\aattempt\CAN\ENQ \SOH(\ENQR\aattempt"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
@@ -2167,6 +2166,7 @@ instance Control.DeepSeq.NFData PendingWorkflowTaskInfo where
                             (_PendingWorkflowTaskInfo'attempt x__) ())))))
 {- | Fields :
      
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.buildId' @:: Lens' ResetPointInfo Data.Text.Text@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.binaryChecksum' @:: Lens' ResetPointInfo Data.Text.Text@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.runId' @:: Lens' ResetPointInfo Data.Text.Text@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.firstWorkflowTaskCompletedId' @:: Lens' ResetPointInfo Data.Int.Int64@
@@ -2176,7 +2176,8 @@ instance Control.DeepSeq.NFData PendingWorkflowTaskInfo where
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'expireTime' @:: Lens' ResetPointInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.resettable' @:: Lens' ResetPointInfo Prelude.Bool@ -}
 data ResetPointInfo
-  = ResetPointInfo'_constructor {_ResetPointInfo'binaryChecksum :: !Data.Text.Text,
+  = ResetPointInfo'_constructor {_ResetPointInfo'buildId :: !Data.Text.Text,
+                                 _ResetPointInfo'binaryChecksum :: !Data.Text.Text,
                                  _ResetPointInfo'runId :: !Data.Text.Text,
                                  _ResetPointInfo'firstWorkflowTaskCompletedId :: !Data.Int.Int64,
                                  _ResetPointInfo'createTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
@@ -2190,6 +2191,13 @@ instance Prelude.Show ResetPointInfo where
         '{'
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField ResetPointInfo "buildId" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResetPointInfo'buildId
+           (\ x__ y__ -> x__ {_ResetPointInfo'buildId = y__}))
+        Prelude.id
 instance Data.ProtoLens.Field.HasField ResetPointInfo "binaryChecksum" Data.Text.Text where
   fieldOf _
     = (Prelude..)
@@ -2252,20 +2260,29 @@ instance Data.ProtoLens.Message ResetPointInfo where
     = Data.Text.pack "temporal.api.workflow.v1.ResetPointInfo"
   packedMessageDescriptor _
     = "\n\
-      \\SOResetPointInfo\DC2'\n\
+      \\SOResetPointInfo\DC2\EM\n\
+      \\bbuild_id\CAN\a \SOH(\tR\abuildId\DC2'\n\
       \\SIbinary_checksum\CAN\SOH \SOH(\tR\SObinaryChecksum\DC2\NAK\n\
       \\ACKrun_id\CAN\STX \SOH(\tR\ENQrunId\DC2F\n\
-      \ first_workflow_task_completed_id\CAN\ETX \SOH(\ETXR\FSfirstWorkflowTaskCompletedId\DC2A\n\
+      \ first_workflow_task_completed_id\CAN\ETX \SOH(\ETXR\FSfirstWorkflowTaskCompletedId\DC2;\n\
       \\vcreate_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-      \createTimeB\EOT\144\223\US\SOH\DC2A\n\
+      \createTime\DC2;\n\
       \\vexpire_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-      \expireTimeB\EOT\144\223\US\SOH\DC2\RS\n\
+      \expireTime\DC2\RS\n\
       \\n\
       \resettable\CAN\ACK \SOH(\bR\n\
       \resettable"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
+        buildId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "build_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"buildId")) ::
+              Data.ProtoLens.FieldDescriptor ResetPointInfo
         binaryChecksum__field_descriptor
           = Data.ProtoLens.FieldDescriptor
               "binary_checksum"
@@ -2319,7 +2336,8 @@ instance Data.ProtoLens.Message ResetPointInfo where
               Data.ProtoLens.FieldDescriptor ResetPointInfo
       in
         Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, binaryChecksum__field_descriptor),
+          [(Data.ProtoLens.Tag 7, buildId__field_descriptor),
+           (Data.ProtoLens.Tag 1, binaryChecksum__field_descriptor),
            (Data.ProtoLens.Tag 2, runId__field_descriptor),
            (Data.ProtoLens.Tag 3, 
             firstWorkflowTaskCompletedId__field_descriptor),
@@ -2332,7 +2350,8 @@ instance Data.ProtoLens.Message ResetPointInfo where
         (\ x__ y__ -> x__ {_ResetPointInfo'_unknownFields = y__})
   defMessage
     = ResetPointInfo'_constructor
-        {_ResetPointInfo'binaryChecksum = Data.ProtoLens.fieldDefault,
+        {_ResetPointInfo'buildId = Data.ProtoLens.fieldDefault,
+         _ResetPointInfo'binaryChecksum = Data.ProtoLens.fieldDefault,
          _ResetPointInfo'runId = Data.ProtoLens.fieldDefault,
          _ResetPointInfo'firstWorkflowTaskCompletedId = Data.ProtoLens.fieldDefault,
          _ResetPointInfo'createTime = Prelude.Nothing,
@@ -2362,6 +2381,13 @@ instance Data.ProtoLens.Message ResetPointInfo where
                else
                    do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
                       case tag of
+                        58
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "build_id"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"buildId") y x)
                         10
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -2424,15 +2450,13 @@ instance Data.ProtoLens.Message ResetPointInfo where
     = \ _x
         -> (Data.Monoid.<>)
              (let
-                _v
-                  = Lens.Family2.view
-                      (Data.ProtoLens.Field.field @"binaryChecksum") _x
+                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"buildId") _x
               in
                 if (Prelude.==) _v Data.ProtoLens.fieldDefault then
                     Data.Monoid.mempty
                 else
                     (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 58)
                       ((Prelude..)
                          (\ bs
                             -> (Data.Monoid.<>)
@@ -2442,13 +2466,15 @@ instance Data.ProtoLens.Message ResetPointInfo where
                          Data.Text.Encoding.encodeUtf8 _v))
              ((Data.Monoid.<>)
                 (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"runId") _x
+                   _v
+                     = Lens.Family2.view
+                         (Data.ProtoLens.Field.field @"binaryChecksum") _x
                  in
                    if (Prelude.==) _v Data.ProtoLens.fieldDefault then
                        Data.Monoid.mempty
                    else
                        (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
                          ((Prelude..)
                             (\ bs
                                -> (Data.Monoid.<>)
@@ -2458,42 +2484,42 @@ instance Data.ProtoLens.Message ResetPointInfo where
                             Data.Text.Encoding.encodeUtf8 _v))
                 ((Data.Monoid.<>)
                    (let
-                      _v
-                        = Lens.Family2.view
-                            (Data.ProtoLens.Field.field @"firstWorkflowTaskCompletedId") _x
+                      _v = Lens.Family2.view (Data.ProtoLens.Field.field @"runId") _x
                     in
                       if (Prelude.==) _v Data.ProtoLens.fieldDefault then
                           Data.Monoid.mempty
                       else
                           (Data.Monoid.<>)
-                            (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
                             ((Prelude..)
-                               Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
+                               (\ bs
+                                  -> (Data.Monoid.<>)
+                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                               Data.Text.Encoding.encodeUtf8 _v))
                    ((Data.Monoid.<>)
-                      (case
-                           Lens.Family2.view
-                             (Data.ProtoLens.Field.field @"maybe'createTime") _x
-                       of
-                         Prelude.Nothing -> Data.Monoid.mempty
-                         (Prelude.Just _v)
-                           -> (Data.Monoid.<>)
-                                (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                                ((Prelude..)
-                                   (\ bs
-                                      -> (Data.Monoid.<>)
-                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                              (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                           (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                   Data.ProtoLens.encodeMessage _v))
+                      (let
+                         _v
+                           = Lens.Family2.view
+                               (Data.ProtoLens.Field.field @"firstWorkflowTaskCompletedId") _x
+                       in
+                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                             Data.Monoid.mempty
+                         else
+                             (Data.Monoid.<>)
+                               (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
+                               ((Prelude..)
+                                  Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
                       ((Data.Monoid.<>)
                          (case
                               Lens.Family2.view
-                                (Data.ProtoLens.Field.field @"maybe'expireTime") _x
+                                (Data.ProtoLens.Field.field @"maybe'createTime") _x
                           of
                             Prelude.Nothing -> Data.Monoid.mempty
                             (Prelude.Just _v)
                               -> (Data.Monoid.<>)
-                                   (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
+                                   (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
                                    ((Prelude..)
                                       (\ bs
                                          -> (Data.Monoid.<>)
@@ -2502,36 +2528,56 @@ instance Data.ProtoLens.Message ResetPointInfo where
                                               (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                                       Data.ProtoLens.encodeMessage _v))
                          ((Data.Monoid.<>)
-                            (let
-                               _v
-                                 = Lens.Family2.view (Data.ProtoLens.Field.field @"resettable") _x
-                             in
-                               if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                   Data.Monoid.mempty
-                               else
-                                   (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt 48)
-                                     ((Prelude..)
-                                        Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (\ b -> if b then 1 else 0) _v))
-                            (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                               (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))))
+                            (case
+                                 Lens.Family2.view
+                                   (Data.ProtoLens.Field.field @"maybe'expireTime") _x
+                             of
+                               Prelude.Nothing -> Data.Monoid.mempty
+                               (Prelude.Just _v)
+                                 -> (Data.Monoid.<>)
+                                      (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
+                                      ((Prelude..)
+                                         (\ bs
+                                            -> (Data.Monoid.<>)
+                                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                    (Prelude.fromIntegral
+                                                       (Data.ByteString.length bs)))
+                                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                         Data.ProtoLens.encodeMessage _v))
+                            ((Data.Monoid.<>)
+                               (let
+                                  _v
+                                    = Lens.Family2.view
+                                        (Data.ProtoLens.Field.field @"resettable") _x
+                                in
+                                  if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                      Data.Monoid.mempty
+                                  else
+                                      (Data.Monoid.<>)
+                                        (Data.ProtoLens.Encoding.Bytes.putVarInt 48)
+                                        ((Prelude..)
+                                           Data.ProtoLens.Encoding.Bytes.putVarInt
+                                           (\ b -> if b then 1 else 0) _v))
+                               (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                                  (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))))
 instance Control.DeepSeq.NFData ResetPointInfo where
   rnf
     = \ x__
         -> Control.DeepSeq.deepseq
              (_ResetPointInfo'_unknownFields x__)
              (Control.DeepSeq.deepseq
-                (_ResetPointInfo'binaryChecksum x__)
+                (_ResetPointInfo'buildId x__)
                 (Control.DeepSeq.deepseq
-                   (_ResetPointInfo'runId x__)
+                   (_ResetPointInfo'binaryChecksum x__)
                    (Control.DeepSeq.deepseq
-                      (_ResetPointInfo'firstWorkflowTaskCompletedId x__)
+                      (_ResetPointInfo'runId x__)
                       (Control.DeepSeq.deepseq
-                         (_ResetPointInfo'createTime x__)
+                         (_ResetPointInfo'firstWorkflowTaskCompletedId x__)
                          (Control.DeepSeq.deepseq
-                            (_ResetPointInfo'expireTime x__)
-                            (Control.DeepSeq.deepseq (_ResetPointInfo'resettable x__) ()))))))
+                            (_ResetPointInfo'createTime x__)
+                            (Control.DeepSeq.deepseq
+                               (_ResetPointInfo'expireTime x__)
+                               (Control.DeepSeq.deepseq (_ResetPointInfo'resettable x__) ())))))))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.points' @:: Lens' ResetPoints [ResetPointInfo]@
@@ -2758,10 +2804,10 @@ instance Data.ProtoLens.Message WorkflowExecutionConfig where
     = "\n\
       \\ETBWorkflowExecutionConfig\DC2C\n\
       \\n\
-      \task_queue\CAN\SOH \SOH(\v2$.temporal.api.taskqueue.v1.TaskQueueR\ttaskQueue\DC2]\n\
-      \\SUBworkflow_execution_timeout\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\CANworkflowExecutionTimeoutB\EOT\152\223\US\SOH\DC2Q\n\
-      \\DC4workflow_run_timeout\CAN\ETX \SOH(\v2\EM.google.protobuf.DurationR\DC2workflowRunTimeoutB\EOT\152\223\US\SOH\DC2b\n\
-      \\GSdefault_workflow_task_timeout\CAN\EOT \SOH(\v2\EM.google.protobuf.DurationR\SUBdefaultWorkflowTaskTimeoutB\EOT\152\223\US\SOH"
+      \task_queue\CAN\SOH \SOH(\v2$.temporal.api.taskqueue.v1.TaskQueueR\ttaskQueue\DC2W\n\
+      \\SUBworkflow_execution_timeout\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\CANworkflowExecutionTimeout\DC2K\n\
+      \\DC4workflow_run_timeout\CAN\ETX \SOH(\v2\EM.google.protobuf.DurationR\DC2workflowRunTimeout\DC2\\\n\
+      \\GSdefault_workflow_task_timeout\CAN\EOT \SOH(\v2\EM.google.protobuf.DurationR\SUBdefaultWorkflowTaskTimeout"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -3212,16 +3258,16 @@ instance Data.ProtoLens.Message WorkflowExecutionInfo where
     = "\n\
       \\NAKWorkflowExecutionInfo\DC2G\n\
       \\texecution\CAN\SOH \SOH(\v2).temporal.api.common.v1.WorkflowExecutionR\texecution\DC28\n\
-      \\EOTtype\CAN\STX \SOH(\v2$.temporal.api.common.v1.WorkflowTypeR\EOTtype\DC2?\n\
+      \\EOTtype\CAN\STX \SOH(\v2$.temporal.api.common.v1.WorkflowTypeR\EOTtype\DC29\n\
       \\n\
-      \start_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTimeB\EOT\144\223\US\SOH\DC2?\n\
+      \start_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTime\DC29\n\
       \\n\
-      \close_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\tcloseTimeB\EOT\144\223\US\SOH\DC2F\n\
+      \close_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\tcloseTime\DC2F\n\
       \\ACKstatus\CAN\ENQ \SOH(\SO2..temporal.api.enums.v1.WorkflowExecutionStatusR\ACKstatus\DC2%\n\
       \\SOhistory_length\CAN\ACK \SOH(\ETXR\rhistoryLength\DC2.\n\
       \\DC3parent_namespace_id\CAN\a \SOH(\tR\DC1parentNamespaceId\DC2T\n\
-      \\DLEparent_execution\CAN\b \SOH(\v2).temporal.api.common.v1.WorkflowExecutionR\SIparentExecution\DC2G\n\
-      \\SOexecution_time\CAN\t \SOH(\v2\SUB.google.protobuf.TimestampR\rexecutionTimeB\EOT\144\223\US\SOH\DC20\n\
+      \\DLEparent_execution\CAN\b \SOH(\v2).temporal.api.common.v1.WorkflowExecutionR\SIparentExecution\DC2A\n\
+      \\SOexecution_time\CAN\t \SOH(\v2\SUB.google.protobuf.TimestampR\rexecutionTime\DC20\n\
       \\EOTmemo\CAN\n\
       \ \SOH(\v2\FS.temporal.api.common.v1.MemoR\EOTmemo\DC2U\n\
       \\DC1search_attributes\CAN\v \SOH(\v2(.temporal.api.common.v1.SearchAttributesR\DLEsearchAttributes\DC2Q\n\
@@ -3916,19 +3962,19 @@ instance Control.DeepSeq.NFData WorkflowExecutionInfo where
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \&temporal/api/workflow/v1/message.proto\DC2\CANtemporal.api.workflow.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\USgoogle/protobuf/timestamp.proto\SUB!dependencies/gogoproto/gogo.proto\SUB$temporal/api/enums/v1/workflow.proto\SUB$temporal/api/common/v1/message.proto\SUB%temporal/api/failure/v1/message.proto\SUB'temporal/api/taskqueue/v1/message.proto\"\173\b\n\
+    \&temporal/api/workflow/v1/message.proto\DC2\CANtemporal.api.workflow.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\USgoogle/protobuf/timestamp.proto\SUB$temporal/api/enums/v1/workflow.proto\SUB$temporal/api/common/v1/message.proto\SUB%temporal/api/failure/v1/message.proto\SUB'temporal/api/taskqueue/v1/message.proto\"\155\b\n\
     \\NAKWorkflowExecutionInfo\DC2G\n\
     \\texecution\CAN\SOH \SOH(\v2).temporal.api.common.v1.WorkflowExecutionR\texecution\DC28\n\
-    \\EOTtype\CAN\STX \SOH(\v2$.temporal.api.common.v1.WorkflowTypeR\EOTtype\DC2?\n\
+    \\EOTtype\CAN\STX \SOH(\v2$.temporal.api.common.v1.WorkflowTypeR\EOTtype\DC29\n\
     \\n\
-    \start_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTimeB\EOT\144\223\US\SOH\DC2?\n\
+    \start_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTime\DC29\n\
     \\n\
-    \close_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\tcloseTimeB\EOT\144\223\US\SOH\DC2F\n\
+    \close_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\tcloseTime\DC2F\n\
     \\ACKstatus\CAN\ENQ \SOH(\SO2..temporal.api.enums.v1.WorkflowExecutionStatusR\ACKstatus\DC2%\n\
     \\SOhistory_length\CAN\ACK \SOH(\ETXR\rhistoryLength\DC2.\n\
     \\DC3parent_namespace_id\CAN\a \SOH(\tR\DC1parentNamespaceId\DC2T\n\
-    \\DLEparent_execution\CAN\b \SOH(\v2).temporal.api.common.v1.WorkflowExecutionR\SIparentExecution\DC2G\n\
-    \\SOexecution_time\CAN\t \SOH(\v2\SUB.google.protobuf.TimestampR\rexecutionTimeB\EOT\144\223\US\SOH\DC20\n\
+    \\DLEparent_execution\CAN\b \SOH(\v2).temporal.api.common.v1.WorkflowExecutionR\SIparentExecution\DC2A\n\
+    \\SOexecution_time\CAN\t \SOH(\v2\SUB.google.protobuf.TimestampR\rexecutionTime\DC20\n\
     \\EOTmemo\CAN\n\
     \ \SOH(\v2\FS.temporal.api.common.v1.MemoR\EOTmemo\DC2U\n\
     \\DC1search_attributes\CAN\v \SOH(\v2(.temporal.api.common.v1.SearchAttributesR\DLEsearchAttributes\DC2Q\n\
@@ -3937,26 +3983,26 @@ packedFileDescriptor
     \task_queue\CAN\r \SOH(\tR\ttaskQueue\DC24\n\
     \\SYNstate_transition_count\CAN\SO \SOH(\ETXR\DC4stateTransitionCount\DC2,\n\
     \\DC2history_size_bytes\CAN\SI \SOH(\ETXR\DLEhistorySizeBytes\DC2r\n\
-    \ most_recent_worker_version_stamp\CAN\DLE \SOH(\v2*.temporal.api.common.v1.WorkerVersionStampR\FSmostRecentWorkerVersionStamp\"\244\STX\n\
+    \ most_recent_worker_version_stamp\CAN\DLE \SOH(\v2*.temporal.api.common.v1.WorkerVersionStampR\FSmostRecentWorkerVersionStamp\"\226\STX\n\
     \\ETBWorkflowExecutionConfig\DC2C\n\
     \\n\
-    \task_queue\CAN\SOH \SOH(\v2$.temporal.api.taskqueue.v1.TaskQueueR\ttaskQueue\DC2]\n\
-    \\SUBworkflow_execution_timeout\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\CANworkflowExecutionTimeoutB\EOT\152\223\US\SOH\DC2Q\n\
-    \\DC4workflow_run_timeout\CAN\ETX \SOH(\v2\EM.google.protobuf.DurationR\DC2workflowRunTimeoutB\EOT\152\223\US\SOH\DC2b\n\
-    \\GSdefault_workflow_task_timeout\CAN\EOT \SOH(\v2\EM.google.protobuf.DurationR\SUBdefaultWorkflowTaskTimeoutB\EOT\152\223\US\SOH\"\131\ACK\n\
+    \task_queue\CAN\SOH \SOH(\v2$.temporal.api.taskqueue.v1.TaskQueueR\ttaskQueue\DC2W\n\
+    \\SUBworkflow_execution_timeout\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\CANworkflowExecutionTimeout\DC2K\n\
+    \\DC4workflow_run_timeout\CAN\ETX \SOH(\v2\EM.google.protobuf.DurationR\DC2workflowRunTimeout\DC2\\\n\
+    \\GSdefault_workflow_task_timeout\CAN\EOT \SOH(\v2\EM.google.protobuf.DurationR\SUBdefaultWorkflowTaskTimeout\"\235\ENQ\n\
     \\DC3PendingActivityInfo\DC2\US\n\
     \\vactivity_id\CAN\SOH \SOH(\tR\n\
     \activityId\DC2I\n\
     \\ractivity_type\CAN\STX \SOH(\v2$.temporal.api.common.v1.ActivityTypeR\factivityType\DC2A\n\
     \\ENQstate\CAN\ETX \SOH(\SO2+.temporal.api.enums.v1.PendingActivityStateR\ENQstate\DC2M\n\
-    \\DC1heartbeat_details\CAN\EOT \SOH(\v2 .temporal.api.common.v1.PayloadsR\DLEheartbeatDetails\DC2P\n\
-    \\DC3last_heartbeat_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\DC1lastHeartbeatTimeB\EOT\144\223\US\SOH\DC2L\n\
-    \\DC1last_started_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR\SIlastStartedTimeB\EOT\144\223\US\SOH\DC2\CAN\n\
+    \\DC1heartbeat_details\CAN\EOT \SOH(\v2 .temporal.api.common.v1.PayloadsR\DLEheartbeatDetails\DC2J\n\
+    \\DC3last_heartbeat_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\DC1lastHeartbeatTime\DC2F\n\
+    \\DC1last_started_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR\SIlastStartedTime\DC2\CAN\n\
     \\aattempt\CAN\a \SOH(\ENQR\aattempt\DC2)\n\
-    \\DLEmaximum_attempts\CAN\b \SOH(\ENQR\SImaximumAttempts\DC2G\n\
-    \\SOscheduled_time\CAN\t \SOH(\v2\SUB.google.protobuf.TimestampR\rscheduledTimeB\EOT\144\223\US\SOH\DC2I\n\
+    \\DLEmaximum_attempts\CAN\b \SOH(\ENQR\SImaximumAttempts\DC2A\n\
+    \\SOscheduled_time\CAN\t \SOH(\v2\SUB.google.protobuf.TimestampR\rscheduledTime\DC2C\n\
     \\SIexpiration_time\CAN\n\
-    \ \SOH(\v2\SUB.google.protobuf.TimestampR\SOexpirationTimeB\EOT\144\223\US\SOH\DC2C\n\
+    \ \SOH(\v2\SUB.google.protobuf.TimestampR\SOexpirationTime\DC2C\n\
     \\flast_failure\CAN\v \SOH(\v2 .temporal.api.failure.v1.FailureR\vlastFailure\DC20\n\
     \\DC4last_worker_identity\CAN\f \SOH(\tR\DC2lastWorkerIdentity\"\254\SOH\n\
     \\EMPendingChildExecutionInfo\DC2\US\n\
@@ -3965,36 +4011,37 @@ packedFileDescriptor
     \\ACKrun_id\CAN\STX \SOH(\tR\ENQrunId\DC2,\n\
     \\DC2workflow_type_name\CAN\ETX \SOH(\tR\DLEworkflowTypeName\DC2!\n\
     \\finitiated_id\CAN\EOT \SOH(\ETXR\vinitiatedId\DC2X\n\
-    \\DC3parent_close_policy\CAN\ENQ \SOH(\SO2(.temporal.api.enums.v1.ParentClosePolicyR\DC1parentClosePolicy\"\226\STX\n\
+    \\DC3parent_close_policy\CAN\ENQ \SOH(\SO2(.temporal.api.enums.v1.ParentClosePolicyR\DC1parentClosePolicy\"\208\STX\n\
     \\ETBPendingWorkflowTaskInfo\DC2E\n\
-    \\ENQstate\CAN\SOH \SOH(\SO2/.temporal.api.enums.v1.PendingWorkflowTaskStateR\ENQstate\DC2G\n\
-    \\SOscheduled_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\rscheduledTimeB\EOT\144\223\US\SOH\DC2X\n\
-    \\ETBoriginal_scheduled_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\NAKoriginalScheduledTimeB\EOT\144\223\US\SOH\DC2C\n\
-    \\fstarted_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\vstartedTimeB\EOT\144\223\US\SOH\DC2\CAN\n\
+    \\ENQstate\CAN\SOH \SOH(\SO2/.temporal.api.enums.v1.PendingWorkflowTaskStateR\ENQstate\DC2A\n\
+    \\SOscheduled_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\rscheduledTime\DC2R\n\
+    \\ETBoriginal_scheduled_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\NAKoriginalScheduledTime\DC2=\n\
+    \\fstarted_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\vstartedTime\DC2\CAN\n\
     \\aattempt\CAN\ENQ \SOH(\ENQR\aattempt\"O\n\
     \\vResetPoints\DC2@\n\
-    \\ACKpoints\CAN\SOH \ETX(\v2(.temporal.api.workflow.v1.ResetPointInfoR\ACKpoints\"\190\STX\n\
-    \\SOResetPointInfo\DC2'\n\
+    \\ACKpoints\CAN\SOH \ETX(\v2(.temporal.api.workflow.v1.ResetPointInfoR\ACKpoints\"\205\STX\n\
+    \\SOResetPointInfo\DC2\EM\n\
+    \\bbuild_id\CAN\a \SOH(\tR\abuildId\DC2'\n\
     \\SIbinary_checksum\CAN\SOH \SOH(\tR\SObinaryChecksum\DC2\NAK\n\
     \\ACKrun_id\CAN\STX \SOH(\tR\ENQrunId\DC2F\n\
-    \ first_workflow_task_completed_id\CAN\ETX \SOH(\ETXR\FSfirstWorkflowTaskCompletedId\DC2A\n\
+    \ first_workflow_task_completed_id\CAN\ETX \SOH(\ETXR\FSfirstWorkflowTaskCompletedId\DC2;\n\
     \\vcreate_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-    \createTimeB\EOT\144\223\US\SOH\DC2A\n\
+    \createTime\DC2;\n\
     \\vexpire_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-    \expireTimeB\EOT\144\223\US\SOH\DC2\RS\n\
+    \expireTime\DC2\RS\n\
     \\n\
     \resettable\CAN\ACK \SOH(\bR\n\
-    \resettable\"\159\a\n\
+    \resettable\"\141\a\n\
     \\CANNewWorkflowExecutionInfo\DC2\US\n\
     \\vworkflow_id\CAN\SOH \SOH(\tR\n\
     \workflowId\DC2I\n\
     \\rworkflow_type\CAN\STX \SOH(\v2$.temporal.api.common.v1.WorkflowTypeR\fworkflowType\DC2C\n\
     \\n\
     \task_queue\CAN\ETX \SOH(\v2$.temporal.api.taskqueue.v1.TaskQueueR\ttaskQueue\DC26\n\
-    \\ENQinput\CAN\EOT \SOH(\v2 .temporal.api.common.v1.PayloadsR\ENQinput\DC2]\n\
-    \\SUBworkflow_execution_timeout\CAN\ENQ \SOH(\v2\EM.google.protobuf.DurationR\CANworkflowExecutionTimeoutB\EOT\152\223\US\SOH\DC2Q\n\
-    \\DC4workflow_run_timeout\CAN\ACK \SOH(\v2\EM.google.protobuf.DurationR\DC2workflowRunTimeoutB\EOT\152\223\US\SOH\DC2S\n\
-    \\NAKworkflow_task_timeout\CAN\a \SOH(\v2\EM.google.protobuf.DurationR\DC3workflowTaskTimeoutB\EOT\152\223\US\SOH\DC2e\n\
+    \\ENQinput\CAN\EOT \SOH(\v2 .temporal.api.common.v1.PayloadsR\ENQinput\DC2W\n\
+    \\SUBworkflow_execution_timeout\CAN\ENQ \SOH(\v2\EM.google.protobuf.DurationR\CANworkflowExecutionTimeout\DC2K\n\
+    \\DC4workflow_run_timeout\CAN\ACK \SOH(\v2\EM.google.protobuf.DurationR\DC2workflowRunTimeout\DC2M\n\
+    \\NAKworkflow_task_timeout\CAN\a \SOH(\v2\EM.google.protobuf.DurationR\DC3workflowTaskTimeout\DC2e\n\
     \\CANworkflow_id_reuse_policy\CAN\b \SOH(\SO2,.temporal.api.enums.v1.WorkflowIdReusePolicyR\NAKworkflowIdReusePolicy\DC2F\n\
     \\fretry_policy\CAN\t \SOH(\v2#.temporal.api.common.v1.RetryPolicyR\vretryPolicy\DC2#\n\
     \\rcron_schedule\CAN\n\
@@ -4002,8 +4049,8 @@ packedFileDescriptor
     \\EOTmemo\CAN\v \SOH(\v2\FS.temporal.api.common.v1.MemoR\EOTmemo\DC2U\n\
     \\DC1search_attributes\CAN\f \SOH(\v2(.temporal.api.common.v1.SearchAttributesR\DLEsearchAttributes\DC26\n\
     \\ACKheader\CAN\r \SOH(\v2\RS.temporal.api.common.v1.HeaderR\ACKheaderB\147\SOH\n\
-    \\ESCio.temporal.api.workflow.v1B\fMessageProtoP\SOHZ'go.temporal.io/api/workflow/v1;workflow\170\STX\SUBTemporalio.Api.Workflow.V1\234\STX\GSTemporalio::Api::Workflow::V1J\166\&8\n\
-    \\a\DC2\ENQ\SYN\NUL\150\SOH\SOH\n\
+    \\ESCio.temporal.api.workflow.v1B\fMessageProtoP\SOHZ'go.temporal.io/api/workflow/v1;workflow\170\STX\SUBTemporalio.Api.Workflow.V1\234\STX\GSTemporalio::Api::Workflow::V1J\140\&6\n\
+    \\a\DC2\ENQ\SYN\NUL\152\SOH\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -4059,682 +4106,619 @@ packedFileDescriptor
     \\t\n\
     \\STX\ETX\SOH\DC2\ETX\"\NUL)\n\
     \\t\n\
-    \\STX\ETX\STX\DC2\ETX$\NUL+\n\
+    \\STX\ETX\STX\DC2\ETX$\NUL.\n\
     \\t\n\
-    \\STX\ETX\ETX\DC2\ETX&\NUL.\n\
+    \\STX\ETX\ETX\DC2\ETX%\NUL.\n\
     \\t\n\
-    \\STX\ETX\EOT\DC2\ETX'\NUL.\n\
+    \\STX\ETX\EOT\DC2\ETX&\NUL/\n\
     \\t\n\
-    \\STX\ETX\ENQ\DC2\ETX(\NUL/\n\
-    \\t\n\
-    \\STX\ETX\ACK\DC2\ETX)\NUL1\n\
+    \\STX\ETX\ENQ\DC2\ETX'\NUL1\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT+\NUL=\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT)\NUL;\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX+\b\GS\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX)\b\GS\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX,\EOT;\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX*\EOT;\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX,\EOT,\n\
+    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX*\EOT,\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX,-6\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX*-6\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX,9:\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX*9:\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX-\EOT1\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX+\EOT1\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX-\EOT'\n\
+    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX+\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX-(,\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX+(,\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX-/0\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX+/0\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX.\EOTJ\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX,\EOT-\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX.\EOT\GS\n\
+    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX,\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX.\RS(\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX,\RS(\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX.+,\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\b\DC2\ETX.-I\n\
-    \\SI\n\
-    \\b\EOT\NUL\STX\STX\b\242\251\ETX\DC2\ETX..H\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX,+,\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\ETX\DC2\ETX/\EOTJ\n\
+    \\EOT\EOT\NUL\STX\ETX\DC2\ETX-\EOT-\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ACK\DC2\ETX/\EOT\GS\n\
+    \\ENQ\EOT\NUL\STX\ETX\ACK\DC2\ETX-\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX/\RS(\n\
+    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX-\RS(\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX/+,\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\b\DC2\ETX/-I\n\
-    \\SI\n\
-    \\b\EOT\NUL\STX\ETX\b\242\251\ETX\DC2\ETX/.H\n\
+    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX-+,\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\EOT\DC2\ETX0\EOT=\n\
+    \\EOT\EOT\NUL\STX\EOT\DC2\ETX.\EOT=\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ACK\DC2\ETX0\EOT1\n\
+    \\ENQ\EOT\NUL\STX\EOT\ACK\DC2\ETX.\EOT1\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETX028\n\
+    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETX.28\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETX0;<\n\
+    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETX.;<\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\ENQ\DC2\ETX1\EOT\GS\n\
+    \\EOT\EOT\NUL\STX\ENQ\DC2\ETX/\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\ENQ\DC2\ETX1\EOT\t\n\
+    \\ENQ\EOT\NUL\STX\ENQ\ENQ\DC2\ETX/\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\SOH\DC2\ETX1\n\
+    \\ENQ\EOT\NUL\STX\ENQ\SOH\DC2\ETX/\n\
     \\CAN\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\ETX\DC2\ETX1\ESC\FS\n\
+    \\ENQ\EOT\NUL\STX\ENQ\ETX\DC2\ETX/\ESC\FS\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\ACK\DC2\ETX2\EOT#\n\
+    \\EOT\EOT\NUL\STX\ACK\DC2\ETX0\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\ENQ\DC2\ETX2\EOT\n\
+    \\ENQ\EOT\NUL\STX\ACK\ENQ\DC2\ETX0\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\SOH\DC2\ETX2\v\RS\n\
+    \\ENQ\EOT\NUL\STX\ACK\SOH\DC2\ETX0\v\RS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\ETX\DC2\ETX2!\"\n\
+    \\ENQ\EOT\NUL\STX\ACK\ETX\DC2\ETX0!\"\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\a\DC2\ETX3\EOTB\n\
+    \\EOT\EOT\NUL\STX\a\DC2\ETX1\EOTB\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\a\ACK\DC2\ETX3\EOT,\n\
+    \\ENQ\EOT\NUL\STX\a\ACK\DC2\ETX1\EOT,\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\a\SOH\DC2\ETX3-=\n\
+    \\ENQ\EOT\NUL\STX\a\SOH\DC2\ETX1-=\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\a\ETX\DC2\ETX3@A\n\
+    \\ENQ\EOT\NUL\STX\a\ETX\DC2\ETX1@A\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\b\DC2\ETX4\EOTN\n\
+    \\EOT\EOT\NUL\STX\b\DC2\ETX2\EOT1\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\b\ACK\DC2\ETX4\EOT\GS\n\
+    \\ENQ\EOT\NUL\STX\b\ACK\DC2\ETX2\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\b\SOH\DC2\ETX4\RS,\n\
+    \\ENQ\EOT\NUL\STX\b\SOH\DC2\ETX2\RS,\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\b\ETX\DC2\ETX4/0\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\b\b\DC2\ETX41M\n\
-    \\SI\n\
-    \\b\EOT\NUL\STX\b\b\242\251\ETX\DC2\ETX42L\n\
+    \\ENQ\EOT\NUL\STX\b\ETX\DC2\ETX2/0\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\t\DC2\ETX5\EOT*\n\
+    \\EOT\EOT\NUL\STX\t\DC2\ETX3\EOT*\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\t\ACK\DC2\ETX5\EOT\US\n\
+    \\ENQ\EOT\NUL\STX\t\ACK\DC2\ETX3\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\t\SOH\DC2\ETX5 $\n\
+    \\ENQ\EOT\NUL\STX\t\SOH\DC2\ETX3 $\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\t\ETX\DC2\ETX5')\n\
+    \\ENQ\EOT\NUL\STX\t\ETX\DC2\ETX3')\n\
     \\v\n\
     \\EOT\EOT\NUL\STX\n\
-    \\DC2\ETX6\EOTC\n\
+    \\DC2\ETX4\EOTC\n\
     \\f\n\
     \\ENQ\EOT\NUL\STX\n\
-    \\ACK\DC2\ETX6\EOT+\n\
+    \\ACK\DC2\ETX4\EOT+\n\
     \\f\n\
     \\ENQ\EOT\NUL\STX\n\
-    \\SOH\DC2\ETX6,=\n\
+    \\SOH\DC2\ETX4,=\n\
     \\f\n\
     \\ENQ\EOT\NUL\STX\n\
-    \\ETX\DC2\ETX6@B\n\
+    \\ETX\DC2\ETX4@B\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\v\DC2\ETX7\EOT'\n\
+    \\EOT\EOT\NUL\STX\v\DC2\ETX5\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\v\ACK\DC2\ETX7\EOT\SI\n\
+    \\ENQ\EOT\NUL\STX\v\ACK\DC2\ETX5\EOT\SI\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\v\SOH\DC2\ETX7\DLE!\n\
+    \\ENQ\EOT\NUL\STX\v\SOH\DC2\ETX5\DLE!\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\v\ETX\DC2\ETX7$&\n\
+    \\ENQ\EOT\NUL\STX\v\ETX\DC2\ETX5$&\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\f\DC2\ETX8\EOT\ESC\n\
+    \\EOT\EOT\NUL\STX\f\DC2\ETX6\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\f\ENQ\DC2\ETX8\EOT\n\
+    \\ENQ\EOT\NUL\STX\f\ENQ\DC2\ETX6\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\f\SOH\DC2\ETX8\v\NAK\n\
+    \\ENQ\EOT\NUL\STX\f\SOH\DC2\ETX6\v\NAK\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\f\ETX\DC2\ETX8\CAN\SUB\n\
+    \\ENQ\EOT\NUL\STX\f\ETX\DC2\ETX6\CAN\SUB\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\r\DC2\ETX9\EOT&\n\
+    \\EOT\EOT\NUL\STX\r\DC2\ETX7\EOT&\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\r\ENQ\DC2\ETX9\EOT\t\n\
+    \\ENQ\EOT\NUL\STX\r\ENQ\DC2\ETX7\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\r\SOH\DC2\ETX9\n\
+    \\ENQ\EOT\NUL\STX\r\SOH\DC2\ETX7\n\
     \ \n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\r\ETX\DC2\ETX9#%\n\
+    \\ENQ\EOT\NUL\STX\r\ETX\DC2\ETX7#%\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\SO\DC2\ETX:\EOT\"\n\
+    \\EOT\EOT\NUL\STX\SO\DC2\ETX8\EOT\"\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SO\ENQ\DC2\ETX:\EOT\t\n\
+    \\ENQ\EOT\NUL\STX\SO\ENQ\DC2\ETX8\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SO\SOH\DC2\ETX:\n\
+    \\ENQ\EOT\NUL\STX\SO\SOH\DC2\ETX8\n\
     \\FS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SO\ETX\DC2\ETX:\US!\n\
+    \\ENQ\EOT\NUL\STX\SO\ETX\DC2\ETX8\US!\n\
     \g\n\
-    \\EOT\EOT\NUL\STX\SI\DC2\ETX<\EOTT\SUBZ If set, the most recent worker version stamp that appeared in a workflow task completion\n\
+    \\EOT\EOT\NUL\STX\SI\DC2\ETX:\EOTT\SUBZ If set, the most recent worker version stamp that appeared in a workflow task completion\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SI\ACK\DC2\ETX<\EOT-\n\
+    \\ENQ\EOT\NUL\STX\SI\ACK\DC2\ETX:\EOT-\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SI\SOH\DC2\ETX<.N\n\
+    \\ENQ\EOT\NUL\STX\SI\SOH\DC2\ETX:.N\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SI\ETX\DC2\ETX<QS\n\
+    \\ENQ\EOT\NUL\STX\SI\ETX\DC2\ETX:QS\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT?\NULD\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT=\NULB\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX?\b\US\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX=\b\US\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX@\EOT7\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX>\EOT7\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX@\EOT'\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX>\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX@(2\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX>(2\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX@56\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX>56\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETXA\EOT]\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX?\EOT<\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETXA\EOT\FS\n\
+    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX?\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETXA\GS7\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX?\GS7\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETXA:;\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\b\DC2\ETXA<\\\n\
-    \\SI\n\
-    \\b\EOT\SOH\STX\SOH\b\243\251\ETX\DC2\ETXA=[\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX?:;\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETXB\EOTW\n\
+    \\EOT\EOT\SOH\STX\STX\DC2\ETX@\EOT6\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETXB\EOT\FS\n\
+    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX@\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETXB\GS1\n\
+    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX@\GS1\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETXB45\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\b\DC2\ETXB6V\n\
-    \\SI\n\
-    \\b\EOT\SOH\STX\STX\b\243\251\ETX\DC2\ETXB7U\n\
+    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX@45\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\ETX\DC2\ETXC\EOT`\n\
+    \\EOT\EOT\SOH\STX\ETX\DC2\ETXA\EOT?\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ACK\DC2\ETXC\EOT\FS\n\
+    \\ENQ\EOT\SOH\STX\ETX\ACK\DC2\ETXA\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETXC\GS:\n\
+    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETXA\GS:\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETXC=>\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\b\DC2\ETXC?_\n\
-    \\SI\n\
-    \\b\EOT\SOH\STX\ETX\b\243\251\ETX\DC2\ETXC@^\n\
+    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETXA=>\n\
     \\n\
     \\n\
-    \\STX\EOT\STX\DC2\EOTF\NULS\SOH\n\
+    \\STX\EOT\STX\DC2\EOTD\NULQ\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETXF\b\ESC\n\
+    \\ETX\EOT\STX\SOH\DC2\ETXD\b\ESC\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETXG\EOT\ESC\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETXE\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETXG\EOT\n\
+    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETXE\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXG\v\SYN\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXE\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXG\EM\SUB\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXE\EM\SUB\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETXH\EOT:\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETXF\EOT:\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETXH\EOT'\n\
+    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETXF\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETXH(5\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETXF(5\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETXH89\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETXF89\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\STX\DC2\ETXI\EOT9\n\
+    \\EOT\EOT\STX\STX\STX\DC2\ETXG\EOT9\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ACK\DC2\ETXI\EOT.\n\
+    \\ENQ\EOT\STX\STX\STX\ACK\DC2\ETXG\EOT.\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETXI/4\n\
+    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETXG/4\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETXI78\n\
+    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETXG78\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\ETX\DC2\ETXJ\EOT:\n\
+    \\EOT\EOT\STX\STX\ETX\DC2\ETXH\EOT:\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ACK\DC2\ETXJ\EOT#\n\
+    \\ENQ\EOT\STX\STX\ETX\ACK\DC2\ETXH\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETXJ$5\n\
+    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETXH$5\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETXJ89\n\
+    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETXH89\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\EOT\DC2\ETXK\EOTS\n\
+    \\EOT\EOT\STX\STX\EOT\DC2\ETXI\EOT6\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ACK\DC2\ETXK\EOT\GS\n\
+    \\ENQ\EOT\STX\STX\EOT\ACK\DC2\ETXI\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\SOH\DC2\ETXK\RS1\n\
+    \\ENQ\EOT\STX\STX\EOT\SOH\DC2\ETXI\RS1\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ETX\DC2\ETXK45\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\b\DC2\ETXK6R\n\
-    \\SI\n\
-    \\b\EOT\STX\STX\EOT\b\242\251\ETX\DC2\ETXK7Q\n\
+    \\ENQ\EOT\STX\STX\EOT\ETX\DC2\ETXI45\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\ENQ\DC2\ETXL\EOTQ\n\
+    \\EOT\EOT\STX\STX\ENQ\DC2\ETXJ\EOT4\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ENQ\ACK\DC2\ETXL\EOT\GS\n\
+    \\ENQ\EOT\STX\STX\ENQ\ACK\DC2\ETXJ\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ENQ\SOH\DC2\ETXL\RS/\n\
+    \\ENQ\EOT\STX\STX\ENQ\SOH\DC2\ETXJ\RS/\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ENQ\ETX\DC2\ETXL23\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ENQ\b\DC2\ETXL4P\n\
-    \\SI\n\
-    \\b\EOT\STX\STX\ENQ\b\242\251\ETX\DC2\ETXL5O\n\
+    \\ENQ\EOT\STX\STX\ENQ\ETX\DC2\ETXJ23\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\ACK\DC2\ETXM\EOT\SYN\n\
+    \\EOT\EOT\STX\STX\ACK\DC2\ETXK\EOT\SYN\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ACK\ENQ\DC2\ETXM\EOT\t\n\
+    \\ENQ\EOT\STX\STX\ACK\ENQ\DC2\ETXK\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ACK\SOH\DC2\ETXM\n\
+    \\ENQ\EOT\STX\STX\ACK\SOH\DC2\ETXK\n\
     \\DC1\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ACK\ETX\DC2\ETXM\DC4\NAK\n\
+    \\ENQ\EOT\STX\STX\ACK\ETX\DC2\ETXK\DC4\NAK\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\a\DC2\ETXN\EOT\US\n\
+    \\EOT\EOT\STX\STX\a\DC2\ETXL\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\a\ENQ\DC2\ETXN\EOT\t\n\
+    \\ENQ\EOT\STX\STX\a\ENQ\DC2\ETXL\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\a\SOH\DC2\ETXN\n\
+    \\ENQ\EOT\STX\STX\a\SOH\DC2\ETXL\n\
     \\SUB\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\a\ETX\DC2\ETXN\GS\RS\n\
+    \\ENQ\EOT\STX\STX\a\ETX\DC2\ETXL\GS\RS\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\b\DC2\ETXO\EOTN\n\
+    \\EOT\EOT\STX\STX\b\DC2\ETXM\EOT1\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\b\ACK\DC2\ETXO\EOT\GS\n\
+    \\ENQ\EOT\STX\STX\b\ACK\DC2\ETXM\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\b\SOH\DC2\ETXO\RS,\n\
+    \\ENQ\EOT\STX\STX\b\SOH\DC2\ETXM\RS,\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\b\ETX\DC2\ETXO/0\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\b\b\DC2\ETXO1M\n\
-    \\SI\n\
-    \\b\EOT\STX\STX\b\b\242\251\ETX\DC2\ETXO2L\n\
+    \\ENQ\EOT\STX\STX\b\ETX\DC2\ETXM/0\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\t\DC2\ETXP\EOTP\n\
+    \\EOT\EOT\STX\STX\t\DC2\ETXN\EOT3\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\t\ACK\DC2\ETXP\EOT\GS\n\
+    \\ENQ\EOT\STX\STX\t\ACK\DC2\ETXN\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\t\SOH\DC2\ETXP\RS-\n\
+    \\ENQ\EOT\STX\STX\t\SOH\DC2\ETXN\RS-\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\t\ETX\DC2\ETXP02\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\t\b\DC2\ETXP3O\n\
-    \\SI\n\
-    \\b\EOT\STX\STX\t\b\242\251\ETX\DC2\ETXP4N\n\
+    \\ENQ\EOT\STX\STX\t\ETX\DC2\ETXN02\n\
     \\v\n\
     \\EOT\EOT\STX\STX\n\
-    \\DC2\ETXQ\EOT6\n\
+    \\DC2\ETXO\EOT6\n\
     \\f\n\
     \\ENQ\EOT\STX\STX\n\
-    \\ACK\DC2\ETXQ\EOT#\n\
+    \\ACK\DC2\ETXO\EOT#\n\
     \\f\n\
     \\ENQ\EOT\STX\STX\n\
-    \\SOH\DC2\ETXQ$0\n\
+    \\SOH\DC2\ETXO$0\n\
     \\f\n\
     \\ENQ\EOT\STX\STX\n\
-    \\ETX\DC2\ETXQ35\n\
+    \\ETX\DC2\ETXO35\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\v\DC2\ETXR\EOT%\n\
+    \\EOT\EOT\STX\STX\v\DC2\ETXP\EOT%\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\v\ENQ\DC2\ETXR\EOT\n\
+    \\ENQ\EOT\STX\STX\v\ENQ\DC2\ETXP\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\v\SOH\DC2\ETXR\v\US\n\
+    \\ENQ\EOT\STX\STX\v\SOH\DC2\ETXP\v\US\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\v\ETX\DC2\ETXR\"$\n\
+    \\ENQ\EOT\STX\STX\v\ETX\DC2\ETXP\"$\n\
     \\n\
     \\n\
-    \\STX\EOT\ETX\DC2\EOTU\NUL\\\SOH\n\
+    \\STX\EOT\ETX\DC2\EOTS\NULZ\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETXU\b!\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETXS\b!\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETXV\EOT\ESC\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETXT\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETXV\EOT\n\
+    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETXT\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETXV\v\SYN\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETXT\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETXV\EM\SUB\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETXT\EM\SUB\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\SOH\DC2\ETXW\EOT\SYN\n\
+    \\EOT\EOT\ETX\STX\SOH\DC2\ETXU\EOT\SYN\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETXW\EOT\n\
+    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETXU\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETXW\v\DC1\n\
+    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETXU\v\DC1\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETXW\DC4\NAK\n\
+    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETXU\DC4\NAK\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\STX\DC2\ETXX\EOT\"\n\
+    \\EOT\EOT\ETX\STX\STX\DC2\ETXV\EOT\"\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\ENQ\DC2\ETXX\EOT\n\
+    \\ENQ\EOT\ETX\STX\STX\ENQ\DC2\ETXV\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\SOH\DC2\ETXX\v\GS\n\
+    \\ENQ\EOT\ETX\STX\STX\SOH\DC2\ETXV\v\GS\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\ETX\DC2\ETXX !\n\
+    \\ENQ\EOT\ETX\STX\STX\ETX\DC2\ETXV !\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\ETX\DC2\ETXY\EOT\ESC\n\
+    \\EOT\EOT\ETX\STX\ETX\DC2\ETXW\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\ETX\ENQ\DC2\ETXY\EOT\t\n\
+    \\ENQ\EOT\ETX\STX\ETX\ENQ\DC2\ETXW\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\ETX\SOH\DC2\ETXY\n\
+    \\ENQ\EOT\ETX\STX\ETX\SOH\DC2\ETXW\n\
     \\SYN\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\ETX\ETX\DC2\ETXY\EM\SUB\n\
+    \\ENQ\EOT\ETX\STX\ETX\ETX\DC2\ETXW\EM\SUB\n\
     \6\n\
-    \\EOT\EOT\ETX\STX\EOT\DC2\ETX[\EOTD\SUB) Default: PARENT_CLOSE_POLICY_TERMINATE.\n\
+    \\EOT\EOT\ETX\STX\EOT\DC2\ETXY\EOTD\SUB) Default: PARENT_CLOSE_POLICY_TERMINATE.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\EOT\ACK\DC2\ETX[\EOT+\n\
+    \\ENQ\EOT\ETX\STX\EOT\ACK\DC2\ETXY\EOT+\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\EOT\SOH\DC2\ETX[,?\n\
+    \\ENQ\EOT\ETX\STX\EOT\SOH\DC2\ETXY,?\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\EOT\ETX\DC2\ETX[BC\n\
+    \\ENQ\EOT\ETX\STX\EOT\ETX\DC2\ETXYBC\n\
     \\n\
     \\n\
-    \\STX\EOT\EOT\DC2\EOT^\NULh\SOH\n\
+    \\STX\EOT\EOT\DC2\EOT\\\NULf\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETX^\b\US\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETX\\\b\US\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETX_\EOT=\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETX]\EOT=\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETX_\EOT2\n\
+    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETX]\EOT2\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX_38\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX]38\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX_;<\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX];<\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\SOH\DC2\ETX`\EOTN\n\
+    \\EOT\EOT\EOT\STX\SOH\DC2\ETX^\EOT1\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ACK\DC2\ETX`\EOT\GS\n\
+    \\ENQ\EOT\EOT\STX\SOH\ACK\DC2\ETX^\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETX`\RS,\n\
+    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETX^\RS,\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETX`/0\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\b\DC2\ETX`1M\n\
-    \\SI\n\
-    \\b\EOT\EOT\STX\SOH\b\242\251\ETX\DC2\ETX`2L\n\
+    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETX^/0\n\
     \\150\ETX\n\
-    \\EOT\EOT\EOT\STX\STX\DC2\ETXe\EOTW\SUB\136\ETX original_scheduled_time is the scheduled time of the first workflow task during workflow task heartbeat.\n\
+    \\EOT\EOT\EOT\STX\STX\DC2\ETXc\EOT:\SUB\136\ETX original_scheduled_time is the scheduled time of the first workflow task during workflow task heartbeat.\n\
     \ Heartbeat workflow task is done by RespondWorkflowTaskComplete with ForceCreateNewWorkflowTask == true and no command\n\
     \ In this case, OriginalScheduledTime won't change. Then when current time - original_scheduled_time exceeds\n\
     \ some threshold, the workflow task will be forced timeout.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\ACK\DC2\ETXe\EOT\GS\n\
+    \\ENQ\EOT\EOT\STX\STX\ACK\DC2\ETXc\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\SOH\DC2\ETXe\RS5\n\
+    \\ENQ\EOT\EOT\STX\STX\SOH\DC2\ETXc\RS5\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\ETX\DC2\ETXe89\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\b\DC2\ETXe:V\n\
-    \\SI\n\
-    \\b\EOT\EOT\STX\STX\b\242\251\ETX\DC2\ETXe;U\n\
+    \\ENQ\EOT\EOT\STX\STX\ETX\DC2\ETXc89\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\ETX\DC2\ETXf\EOTL\n\
+    \\EOT\EOT\EOT\STX\ETX\DC2\ETXd\EOT/\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\ETX\ACK\DC2\ETXf\EOT\GS\n\
+    \\ENQ\EOT\EOT\STX\ETX\ACK\DC2\ETXd\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\ETX\SOH\DC2\ETXf\RS*\n\
+    \\ENQ\EOT\EOT\STX\ETX\SOH\DC2\ETXd\RS*\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\ETX\ETX\DC2\ETXf-.\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\ETX\b\DC2\ETXf/K\n\
-    \\SI\n\
-    \\b\EOT\EOT\STX\ETX\b\242\251\ETX\DC2\ETXf0J\n\
+    \\ENQ\EOT\EOT\STX\ETX\ETX\DC2\ETXd-.\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\EOT\DC2\ETXg\EOT\SYN\n\
+    \\EOT\EOT\EOT\STX\EOT\DC2\ETXe\EOT\SYN\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\EOT\ENQ\DC2\ETXg\EOT\t\n\
+    \\ENQ\EOT\EOT\STX\EOT\ENQ\DC2\ETXe\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\EOT\SOH\DC2\ETXg\n\
+    \\ENQ\EOT\EOT\STX\EOT\SOH\DC2\ETXe\n\
     \\DC1\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\EOT\ETX\DC2\ETXg\DC4\NAK\n\
+    \\ENQ\EOT\EOT\STX\EOT\ETX\DC2\ETXe\DC4\NAK\n\
     \\n\
     \\n\
-    \\STX\EOT\ENQ\DC2\EOTj\NULl\SOH\n\
+    \\STX\EOT\ENQ\DC2\EOTh\NULj\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETXj\b\DC3\n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETXh\b\DC3\n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXk\EOT'\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXi\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\EOT\DC2\ETXk\EOT\f\n\
+    \\ENQ\EOT\ENQ\STX\NUL\EOT\DC2\ETXi\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETXk\r\ESC\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETXi\r\ESC\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXk\FS\"\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXi\FS\"\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXk%&\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXi%&\n\
+    \\153\STX\n\
+    \\STX\EOT\ACK\DC2\EOTo\NUL\DEL\SOH\SUB\140\STX ResetPointInfo records the workflow event id that is the first one processed by a given\n\
+    \ build id or binary checksum. A new reset point will be created if either build id or binary\n\
+    \ checksum changes (although in general only one or the other will be used at a time).\n\
     \\n\
     \\n\
-    \\STX\EOT\ACK\DC2\EOTn\NUL}\SOH\n\
     \\n\
-    \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETXn\b\SYN\n\
-    \u\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\ETXq\EOT\US\SUBh A worker binary version identifier, will be deprecated and superseded by a newer concept of\n\
-    \ build_id.\n\
+    \\ETX\EOT\ACK\SOH\DC2\ETXo\b\SYN\n\
+    \\US\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\ETXq\EOT\CAN\SUB\DC2 Worker build id.\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETXq\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXq\v\SUB\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXq\v\DC3\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXq\GS\RS\n\
-    \]\n\
-    \\EOT\EOT\ACK\STX\SOH\DC2\ETXs\EOT\SYN\SUBP The first run ID in the execution chain that was touched by this worker build.\n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXq\SYN\ETB\n\
+    \?\n\
+    \\EOT\EOT\ACK\STX\SOH\DC2\ETXs\EOT\US\SUB2 A worker binary version identifier (deprecated).\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\ACK\STX\SOH\ENQ\DC2\ETXs\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXs\v\DC1\n\
+    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXs\v\SUB\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXs\DC4\NAK\n\
-    \`\n\
-    \\EOT\EOT\ACK\STX\STX\DC2\ETXu\EOT/\SUBS Event ID of the first WorkflowTaskCompleted event processed by this worker build.\n\
+    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXs\GS\RS\n\
+    \]\n\
+    \\EOT\EOT\ACK\STX\STX\DC2\ETXu\EOT\SYN\SUBP The first run ID in the execution chain that was touched by this worker build.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\ENQ\DC2\ETXu\EOT\t\n\
+    \\ENQ\EOT\ACK\STX\STX\ENQ\DC2\ETXu\EOT\n\
+    \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\ETXu\n\
+    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\ETXu\v\DC1\n\
+    \\f\n\
+    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\ETXu\DC4\NAK\n\
+    \`\n\
+    \\EOT\EOT\ACK\STX\ETX\DC2\ETXw\EOT/\SUBS Event ID of the first WorkflowTaskCompleted event processed by this worker build.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\ACK\STX\ETX\ENQ\DC2\ETXw\EOT\t\n\
+    \\f\n\
+    \\ENQ\EOT\ACK\STX\ETX\SOH\DC2\ETXw\n\
     \*\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\ETXu-.\n\
+    \\ENQ\EOT\ACK\STX\ETX\ETX\DC2\ETXw-.\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\ETX\DC2\ETXv\EOTK\n\
+    \\EOT\EOT\ACK\STX\EOT\DC2\ETXx\EOT.\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ETX\ACK\DC2\ETXv\EOT\GS\n\
+    \\ENQ\EOT\ACK\STX\EOT\ACK\DC2\ETXx\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ETX\SOH\DC2\ETXv\RS)\n\
+    \\ENQ\EOT\ACK\STX\EOT\SOH\DC2\ETXx\RS)\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ETX\ETX\DC2\ETXv,-\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\ETX\b\DC2\ETXv.J\n\
-    \\SI\n\
-    \\b\EOT\ACK\STX\ETX\b\242\251\ETX\DC2\ETXv/I\n\
+    \\ENQ\EOT\ACK\STX\EOT\ETX\DC2\ETXx,-\n\
     \\191\SOH\n\
-    \\EOT\EOT\ACK\STX\EOT\DC2\ETXz\EOTK\SUB\177\SOH (-- api-linter: core::0214::resource-expiry=disabled\n\
+    \\EOT\EOT\ACK\STX\ENQ\DC2\ETX|\EOT.\SUB\177\SOH (-- api-linter: core::0214::resource-expiry=disabled\n\
     \     aip.dev/not-precedent: TTL is not defined for ResetPointInfo. --)\n\
     \ The time that the run is deleted due to retention.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\EOT\ACK\DC2\ETXz\EOT\GS\n\
+    \\ENQ\EOT\ACK\STX\ENQ\ACK\DC2\ETX|\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\EOT\SOH\DC2\ETXz\RS)\n\
+    \\ENQ\EOT\ACK\STX\ENQ\SOH\DC2\ETX|\RS)\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\EOT\ETX\DC2\ETXz,-\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\EOT\b\DC2\ETXz.J\n\
-    \\SI\n\
-    \\b\EOT\ACK\STX\EOT\b\242\251\ETX\DC2\ETXz/I\n\
+    \\ENQ\EOT\ACK\STX\ENQ\ETX\DC2\ETX|,-\n\
     \X\n\
-    \\EOT\EOT\ACK\STX\ENQ\DC2\ETX|\EOT\CAN\SUBK false if the reset point has pending childWFs/reqCancels/signalExternals.\n\
+    \\EOT\EOT\ACK\STX\ACK\DC2\ETX~\EOT\CAN\SUBK false if the reset point has pending childWFs/reqCancels/signalExternals.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ENQ\ENQ\DC2\ETX|\EOT\b\n\
+    \\ENQ\EOT\ACK\STX\ACK\ENQ\DC2\ETX~\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ENQ\SOH\DC2\ETX|\t\DC3\n\
+    \\ENQ\EOT\ACK\STX\ACK\SOH\DC2\ETX~\t\DC3\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ENQ\ETX\DC2\ETX|\SYN\ETB\n\
+    \\ENQ\EOT\ACK\STX\ACK\ETX\DC2\ETX~\SYN\ETB\n\
     \\153\SOH\n\
-    \\STX\EOT\a\DC2\ACK\129\SOH\NUL\150\SOH\SOH\SUB\138\SOH NewWorkflowExecutionInfo is a shared message that encapsulates all the\n\
+    \\STX\EOT\a\DC2\ACK\131\SOH\NUL\152\SOH\SOH\SUB\138\SOH NewWorkflowExecutionInfo is a shared message that encapsulates all the\n\
     \ required arguments to starting a workflow in different contexts.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\a\SOH\DC2\EOT\129\SOH\b \n\
+    \\ETX\EOT\a\SOH\DC2\EOT\131\SOH\b \n\
     \\f\n\
-    \\EOT\EOT\a\STX\NUL\DC2\EOT\130\SOH\EOT\ESC\n\
+    \\EOT\EOT\a\STX\NUL\DC2\EOT\132\SOH\EOT\ESC\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\EOT\130\SOH\EOT\n\
+    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\EOT\132\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\EOT\130\SOH\v\SYN\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\EOT\132\SOH\v\SYN\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\EOT\130\SOH\EM\SUB\n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\EOT\132\SOH\EM\SUB\n\
     \\f\n\
-    \\EOT\EOT\a\STX\SOH\DC2\EOT\131\SOH\EOT:\n\
+    \\EOT\EOT\a\STX\SOH\DC2\EOT\133\SOH\EOT:\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\SOH\ACK\DC2\EOT\131\SOH\EOT'\n\
+    \\ENQ\EOT\a\STX\SOH\ACK\DC2\EOT\133\SOH\EOT'\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\SOH\SOH\DC2\EOT\131\SOH(5\n\
+    \\ENQ\EOT\a\STX\SOH\SOH\DC2\EOT\133\SOH(5\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\SOH\ETX\DC2\EOT\131\SOH89\n\
+    \\ENQ\EOT\a\STX\SOH\ETX\DC2\EOT\133\SOH89\n\
     \\f\n\
-    \\EOT\EOT\a\STX\STX\DC2\EOT\132\SOH\EOT7\n\
+    \\EOT\EOT\a\STX\STX\DC2\EOT\134\SOH\EOT7\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\STX\ACK\DC2\EOT\132\SOH\EOT'\n\
+    \\ENQ\EOT\a\STX\STX\ACK\DC2\EOT\134\SOH\EOT'\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\STX\SOH\DC2\EOT\132\SOH(2\n\
+    \\ENQ\EOT\a\STX\STX\SOH\DC2\EOT\134\SOH(2\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\STX\ETX\DC2\EOT\132\SOH56\n\
+    \\ENQ\EOT\a\STX\STX\ETX\DC2\EOT\134\SOH56\n\
     \5\n\
-    \\EOT\EOT\a\STX\ETX\DC2\EOT\134\SOH\EOT.\SUB' Serialized arguments to the workflow.\n\
+    \\EOT\EOT\a\STX\ETX\DC2\EOT\136\SOH\EOT.\SUB' Serialized arguments to the workflow.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\ETX\ACK\DC2\EOT\134\SOH\EOT#\n\
+    \\ENQ\EOT\a\STX\ETX\ACK\DC2\EOT\136\SOH\EOT#\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\ETX\SOH\DC2\EOT\134\SOH$)\n\
+    \\ENQ\EOT\a\STX\ETX\SOH\DC2\EOT\136\SOH$)\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\ETX\ETX\DC2\EOT\134\SOH,-\n\
+    \\ENQ\EOT\a\STX\ETX\ETX\DC2\EOT\136\SOH,-\n\
     \W\n\
-    \\EOT\EOT\a\STX\EOT\DC2\EOT\136\SOH\EOT]\SUBI Total workflow execution timeout including retries and continue as new.\n\
+    \\EOT\EOT\a\STX\EOT\DC2\EOT\138\SOH\EOT<\SUBI Total workflow execution timeout including retries and continue as new.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\EOT\ACK\DC2\EOT\136\SOH\EOT\FS\n\
+    \\ENQ\EOT\a\STX\EOT\ACK\DC2\EOT\138\SOH\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\EOT\SOH\DC2\EOT\136\SOH\GS7\n\
+    \\ENQ\EOT\a\STX\EOT\SOH\DC2\EOT\138\SOH\GS7\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\EOT\ETX\DC2\EOT\136\SOH:;\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\EOT\b\DC2\EOT\136\SOH<\\\n\
-    \\DLE\n\
-    \\b\EOT\a\STX\EOT\b\243\251\ETX\DC2\EOT\136\SOH=[\n\
+    \\ENQ\EOT\a\STX\EOT\ETX\DC2\EOT\138\SOH:;\n\
     \1\n\
-    \\EOT\EOT\a\STX\ENQ\DC2\EOT\138\SOH\EOTW\SUB# Timeout of a single workflow run.\n\
+    \\EOT\EOT\a\STX\ENQ\DC2\EOT\140\SOH\EOT6\SUB# Timeout of a single workflow run.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\ENQ\ACK\DC2\EOT\138\SOH\EOT\FS\n\
+    \\ENQ\EOT\a\STX\ENQ\ACK\DC2\EOT\140\SOH\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\ENQ\SOH\DC2\EOT\138\SOH\GS1\n\
+    \\ENQ\EOT\a\STX\ENQ\SOH\DC2\EOT\140\SOH\GS1\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\ENQ\ETX\DC2\EOT\138\SOH45\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\ENQ\b\DC2\EOT\138\SOH6V\n\
-    \\DLE\n\
-    \\b\EOT\a\STX\ENQ\b\243\251\ETX\DC2\EOT\138\SOH7U\n\
+    \\ENQ\EOT\a\STX\ENQ\ETX\DC2\EOT\140\SOH45\n\
     \2\n\
-    \\EOT\EOT\a\STX\ACK\DC2\EOT\140\SOH\EOTX\SUB$ Timeout of a single workflow task.\n\
+    \\EOT\EOT\a\STX\ACK\DC2\EOT\142\SOH\EOT7\SUB$ Timeout of a single workflow task.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\ACK\ACK\DC2\EOT\140\SOH\EOT\FS\n\
+    \\ENQ\EOT\a\STX\ACK\ACK\DC2\EOT\142\SOH\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\ACK\SOH\DC2\EOT\140\SOH\GS2\n\
+    \\ENQ\EOT\a\STX\ACK\SOH\DC2\EOT\142\SOH\GS2\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\ACK\ETX\DC2\EOT\140\SOH56\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\ACK\b\DC2\EOT\140\SOH7W\n\
-    \\DLE\n\
-    \\b\EOT\a\STX\ACK\b\243\251\ETX\DC2\EOT\140\SOH8V\n\
+    \\ENQ\EOT\a\STX\ACK\ETX\DC2\EOT\142\SOH56\n\
     \B\n\
-    \\EOT\EOT\a\STX\a\DC2\EOT\142\SOH\EOTM\SUB4 Default: WORKFLOW_ID_REUSE_POLICY_ALLOW_DUPLICATE.\n\
+    \\EOT\EOT\a\STX\a\DC2\EOT\144\SOH\EOTM\SUB4 Default: WORKFLOW_ID_REUSE_POLICY_ALLOW_DUPLICATE.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\a\ACK\DC2\EOT\142\SOH\EOT/\n\
+    \\ENQ\EOT\a\STX\a\ACK\DC2\EOT\144\SOH\EOT/\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\a\SOH\DC2\EOT\142\SOH0H\n\
+    \\ENQ\EOT\a\STX\a\SOH\DC2\EOT\144\SOH0H\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\a\ETX\DC2\EOT\142\SOHKL\n\
+    \\ENQ\EOT\a\STX\a\ETX\DC2\EOT\144\SOHKL\n\
     \b\n\
-    \\EOT\EOT\a\STX\b\DC2\EOT\144\SOH\EOT8\SUBT The retry policy for the workflow. Will never exceed `workflow_execution_timeout`.\n\
+    \\EOT\EOT\a\STX\b\DC2\EOT\146\SOH\EOT8\SUBT The retry policy for the workflow. Will never exceed `workflow_execution_timeout`.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\b\ACK\DC2\EOT\144\SOH\EOT&\n\
+    \\ENQ\EOT\a\STX\b\ACK\DC2\EOT\146\SOH\EOT&\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\b\SOH\DC2\EOT\144\SOH'3\n\
+    \\ENQ\EOT\a\STX\b\SOH\DC2\EOT\146\SOH'3\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\b\ETX\DC2\EOT\144\SOH67\n\
+    \\ENQ\EOT\a\STX\b\ETX\DC2\EOT\146\SOH67\n\
     \V\n\
-    \\EOT\EOT\a\STX\t\DC2\EOT\146\SOH\EOT\RS\SUBH See https://docs.temporal.io/docs/content/what-is-a-temporal-cron-job/\n\
+    \\EOT\EOT\a\STX\t\DC2\EOT\148\SOH\EOT\RS\SUBH See https://docs.temporal.io/docs/content/what-is-a-temporal-cron-job/\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\t\ENQ\DC2\EOT\146\SOH\EOT\n\
+    \\ENQ\EOT\a\STX\t\ENQ\DC2\EOT\148\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\t\SOH\DC2\EOT\146\SOH\v\CAN\n\
+    \\ENQ\EOT\a\STX\t\SOH\DC2\EOT\148\SOH\v\CAN\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\t\ETX\DC2\EOT\146\SOH\ESC\GS\n\
+    \\ENQ\EOT\a\STX\t\ETX\DC2\EOT\148\SOH\ESC\GS\n\
     \\f\n\
     \\EOT\EOT\a\STX\n\
-    \\DC2\EOT\147\SOH\EOT*\n\
+    \\DC2\EOT\149\SOH\EOT*\n\
     \\r\n\
     \\ENQ\EOT\a\STX\n\
-    \\ACK\DC2\EOT\147\SOH\EOT\US\n\
+    \\ACK\DC2\EOT\149\SOH\EOT\US\n\
     \\r\n\
     \\ENQ\EOT\a\STX\n\
-    \\SOH\DC2\EOT\147\SOH $\n\
+    \\SOH\DC2\EOT\149\SOH $\n\
     \\r\n\
     \\ENQ\EOT\a\STX\n\
-    \\ETX\DC2\EOT\147\SOH')\n\
+    \\ETX\DC2\EOT\149\SOH')\n\
     \\f\n\
-    \\EOT\EOT\a\STX\v\DC2\EOT\148\SOH\EOTC\n\
+    \\EOT\EOT\a\STX\v\DC2\EOT\150\SOH\EOTC\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\v\ACK\DC2\EOT\148\SOH\EOT+\n\
+    \\ENQ\EOT\a\STX\v\ACK\DC2\EOT\150\SOH\EOT+\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\v\SOH\DC2\EOT\148\SOH,=\n\
+    \\ENQ\EOT\a\STX\v\SOH\DC2\EOT\150\SOH,=\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\v\ETX\DC2\EOT\148\SOH@B\n\
+    \\ENQ\EOT\a\STX\v\ETX\DC2\EOT\150\SOH@B\n\
     \\f\n\
-    \\EOT\EOT\a\STX\f\DC2\EOT\149\SOH\EOT.\n\
+    \\EOT\EOT\a\STX\f\DC2\EOT\151\SOH\EOT.\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\f\ACK\DC2\EOT\149\SOH\EOT!\n\
+    \\ENQ\EOT\a\STX\f\ACK\DC2\EOT\151\SOH\EOT!\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\f\SOH\DC2\EOT\149\SOH\"(\n\
+    \\ENQ\EOT\a\STX\f\SOH\DC2\EOT\151\SOH\"(\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\f\ETX\DC2\EOT\149\SOH+-b\ACKproto3"
+    \\ENQ\EOT\a\STX\f\ETX\DC2\EOT\151\SOH+-b\ACKproto3"

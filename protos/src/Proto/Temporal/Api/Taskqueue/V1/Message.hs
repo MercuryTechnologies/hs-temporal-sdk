@@ -34,7 +34,6 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Dependencies.Gogoproto.Gogo
 import qualified Proto.Google.Protobuf.Duration
 import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Google.Protobuf.Wrappers
@@ -432,8 +431,8 @@ instance Data.ProtoLens.Message PollerInfo where
   packedMessageDescriptor _
     = "\n\
       \\n\
-      \PollerInfo\DC2J\n\
-      \\DLElast_access_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\SOlastAccessTimeB\EOT\144\223\US\SOH\DC2\SUB\n\
+      \PollerInfo\DC2D\n\
+      \\DLElast_access_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\SOlastAccessTime\DC2\SUB\n\
       \\bidentity\CAN\STX \SOH(\tR\bidentity\DC2&\n\
       \\SIrate_per_second\CAN\ETX \SOH(\SOHR\rratePerSecond\DC2q\n\
       \\ESCworker_version_capabilities\CAN\EOT \SOH(\v21.temporal.api.common.v1.WorkerVersionCapabilitiesR\EMworkerVersionCapabilities"
@@ -693,8 +692,8 @@ instance Data.ProtoLens.Message StickyExecutionAttributes where
   packedMessageDescriptor _
     = "\n\
       \\EMStickyExecutionAttributes\DC2P\n\
-      \\DC1worker_task_queue\CAN\SOH \SOH(\v2$.temporal.api.taskqueue.v1.TaskQueueR\SIworkerTaskQueue\DC2Z\n\
-      \\EMschedule_to_start_timeout\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\SYNscheduleToStartTimeoutB\EOT\152\223\US\SOH"
+      \\DC1worker_task_queue\CAN\SOH \SOH(\v2$.temporal.api.taskqueue.v1.TaskQueueR\SIworkerTaskQueue\DC2T\n\
+      \\EMschedule_to_start_timeout\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\SYNscheduleToStartTimeout"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -1985,7 +1984,7 @@ instance Control.DeepSeq.NFData TaskQueueStatus where
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \'temporal/api/taskqueue/v1/message.proto\DC2\EMtemporal.api.taskqueue.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\USgoogle/protobuf/timestamp.proto\SUB\RSgoogle/protobuf/wrappers.proto\SUB!dependencies/gogoproto/gogo.proto\SUB&temporal/api/enums/v1/task_queue.proto\SUB$temporal/api/common/v1/message.proto\"z\n\
+    \'temporal/api/taskqueue/v1/message.proto\DC2\EMtemporal.api.taskqueue.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\USgoogle/protobuf/timestamp.proto\SUB\RSgoogle/protobuf/wrappers.proto\SUB&temporal/api/enums/v1/task_queue.proto\SUB$temporal/api/common/v1/message.proto\"z\n\
     \\tTaskQueue\DC2\DC2\n\
     \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC28\n\
     \\EOTkind\CAN\STX \SOH(\SO2$.temporal.api.enums.v1.TaskQueueKindR\EOTkind\DC2\US\n\
@@ -2005,16 +2004,16 @@ packedFileDescriptor
     \\ACKend_id\CAN\STX \SOH(\ETXR\ENQendId\"V\n\
     \\SUBTaskQueuePartitionMetadata\DC2\DLE\n\
     \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2&\n\
-    \\SIowner_host_name\CAN\STX \SOH(\tR\rownerHostName\"\143\STX\n\
+    \\SIowner_host_name\CAN\STX \SOH(\tR\rownerHostName\"\137\STX\n\
     \\n\
-    \PollerInfo\DC2J\n\
-    \\DLElast_access_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\SOlastAccessTimeB\EOT\144\223\US\SOH\DC2\SUB\n\
+    \PollerInfo\DC2D\n\
+    \\DLElast_access_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\SOlastAccessTime\DC2\SUB\n\
     \\bidentity\CAN\STX \SOH(\tR\bidentity\DC2&\n\
     \\SIrate_per_second\CAN\ETX \SOH(\SOHR\rratePerSecond\DC2q\n\
-    \\ESCworker_version_capabilities\CAN\EOT \SOH(\v21.temporal.api.common.v1.WorkerVersionCapabilitiesR\EMworkerVersionCapabilities\"\201\SOH\n\
+    \\ESCworker_version_capabilities\CAN\EOT \SOH(\v21.temporal.api.common.v1.WorkerVersionCapabilitiesR\EMworkerVersionCapabilities\"\195\SOH\n\
     \\EMStickyExecutionAttributes\DC2P\n\
-    \\DC1worker_task_queue\CAN\SOH \SOH(\v2$.temporal.api.taskqueue.v1.TaskQueueR\SIworkerTaskQueue\DC2Z\n\
-    \\EMschedule_to_start_timeout\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\SYNscheduleToStartTimeoutB\EOT\152\223\US\SOH\"3\n\
+    \\DC1worker_task_queue\CAN\SOH \SOH(\v2$.temporal.api.taskqueue.v1.TaskQueueR\SIworkerTaskQueue\DC2T\n\
+    \\EMschedule_to_start_timeout\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\SYNscheduleToStartTimeout\"3\n\
     \\DC4CompatibleVersionSet\DC2\ESC\n\
     \\tbuild_ids\CAN\SOH \ETX(\tR\bbuildIds\"\131\SOH\n\
     \\NAKTaskQueueReachability\DC2\GS\n\
@@ -2024,8 +2023,8 @@ packedFileDescriptor
     \\DC3BuildIdReachability\DC2\EM\n\
     \\bbuild_id\CAN\SOH \SOH(\tR\abuildId\DC2h\n\
     \\ETBtask_queue_reachability\CAN\STX \ETX(\v20.temporal.api.taskqueue.v1.TaskQueueReachabilityR\NAKtaskQueueReachabilityB\152\SOH\n\
-    \\FSio.temporal.api.taskqueue.v1B\fMessageProtoP\SOHZ)go.temporal.io/api/taskqueue/v1;taskqueue\170\STX\ESCTemporalio.Api.TaskQueue.V1\234\STX\RSTemporalio::Api::TaskQueue::V1J\225!\n\
-    \\ACK\DC2\EOT\SYN\NULr\SOH\n\
+    \\FSio.temporal.api.taskqueue.v1B\fMessageProtoP\SOHZ)go.temporal.io/api/taskqueue/v1;taskqueue\170\STX\ESCTemporalio.Api.TaskQueue.V1\234\STX\RSTemporalio::Api::TaskQueue::V1J\152!\n\
+    \\ACK\DC2\EOT\SYN\NULp\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -2083,303 +2082,293 @@ packedFileDescriptor
     \\t\n\
     \\STX\ETX\STX\DC2\ETX#\NUL(\n\
     \\t\n\
-    \\STX\ETX\ETX\DC2\ETX%\NUL+\n\
+    \\STX\ETX\ETX\DC2\ETX%\NUL0\n\
     \\t\n\
-    \\STX\ETX\EOT\DC2\ETX'\NUL0\n\
-    \\t\n\
-    \\STX\ETX\ENQ\DC2\ETX(\NUL.\n\
+    \\STX\ETX\EOT\DC2\ETX&\NUL.\n\
     \E\n\
-    \\STX\EOT\NUL\DC2\EOT+\NUL2\SOH\SUB9 See https://docs.temporal.io/docs/concepts/task-queues/\n\
+    \\STX\EOT\NUL\DC2\EOT)\NUL0\SOH\SUB9 See https://docs.temporal.io/docs/concepts/task-queues/\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX+\b\DC1\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX)\b\DC1\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX,\EOT\DC4\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX*\EOT\DC4\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX,\EOT\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX*\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX,\v\SI\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX*\v\SI\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX,\DC2\DC3\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX*\DC2\DC3\n\
     \/\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX.\EOT1\SUB\" Default: TASK_QUEUE_KIND_NORMAL.\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX,\EOT1\SUB\" Default: TASK_QUEUE_KIND_NORMAL.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX.\EOT'\n\
+    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX,\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX.(,\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX,(,\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX./0\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX,/0\n\
     \\149\SOH\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX1\EOT\ESC\SUB\135\SOH Iff kind == TASK_QUEUE_KIND_STICKY, then this field contains the name of\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX/\EOT\ESC\SUB\135\SOH Iff kind == TASK_QUEUE_KIND_STICKY, then this field contains the name of\n\
     \ the normal task queue that the sticky worker is running on.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX1\EOT\n\
+    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX/\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX1\v\SYN\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX/\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX1\EM\SUB\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX/\EM\SUB\n\
     \2\n\
-    \\STX\EOT\SOH\DC2\EOT5\NUL8\SOH\SUB& Only applies to activity task queues\n\
+    \\STX\EOT\SOH\DC2\EOT3\NUL6\SOH\SUB& Only applies to activity task queues\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX5\b\EM\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX3\b\EM\n\
     \B\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX7\EOT9\SUB5 Allows throttling dispatch of tasks from this queue\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX5\EOT9\SUB5 Allows throttling dispatch of tasks from this queue\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX7\EOT\US\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX5\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX7 4\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX5 4\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX778\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX578\n\
     \\n\
     \\n\
-    \\STX\EOT\STX\DC2\EOT:\NUL@\SOH\n\
+    \\STX\EOT\STX\DC2\EOT8\NUL>\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX:\b\ETB\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX8\b\ETB\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX;\EOT!\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX9\EOT!\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX;\EOT\t\n\
+    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX9\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX;\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX9\n\
     \\FS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX;\US \n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX9\US \n\
     \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX<\EOT\EM\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX:\EOT\EM\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX<\EOT\t\n\
+    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX:\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX<\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX:\n\
     \\DC4\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX<\ETB\CAN\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX:\ETB\CAN\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\STX\DC2\ETX=\EOT\CAN\n\
+    \\EOT\EOT\STX\STX\STX\DC2\ETX;\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETX=\EOT\t\n\
+    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETX;\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX=\n\
+    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX;\n\
     \\DC3\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX=\SYN\ETB\n\
+    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX;\SYN\ETB\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\ETX\DC2\ETX>\EOT\US\n\
+    \\EOT\EOT\STX\STX\ETX\DC2\ETX<\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ENQ\DC2\ETX>\EOT\n\
+    \\ENQ\EOT\STX\STX\ETX\ENQ\DC2\ETX<\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETX>\v\SUB\n\
+    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETX<\v\SUB\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETX>\GS\RS\n\
+    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETX<\GS\RS\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\EOT\DC2\ETX?\EOT\"\n\
+    \\EOT\EOT\STX\STX\EOT\DC2\ETX=\EOT\"\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ACK\DC2\ETX?\EOT\SI\n\
+    \\ENQ\EOT\STX\STX\EOT\ACK\DC2\ETX=\EOT\SI\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\SOH\DC2\ETX?\DLE\GS\n\
+    \\ENQ\EOT\STX\STX\EOT\SOH\DC2\ETX=\DLE\GS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ETX\DC2\ETX? !\n\
+    \\ENQ\EOT\STX\STX\EOT\ETX\DC2\ETX= !\n\
     \\n\
     \\n\
-    \\STX\EOT\ETX\DC2\EOTB\NULE\SOH\n\
+    \\STX\EOT\ETX\DC2\EOT@\NULC\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETXB\b\DC3\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX@\b\DC3\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETXC\EOT\ETB\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETXA\EOT\ETB\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETXC\EOT\t\n\
+    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETXA\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETXC\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETXA\n\
     \\DC2\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETXC\NAK\SYN\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETXA\NAK\SYN\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\SOH\DC2\ETXD\EOT\NAK\n\
+    \\EOT\EOT\ETX\STX\SOH\DC2\ETXB\EOT\NAK\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETXD\EOT\t\n\
+    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETXB\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETXD\n\
+    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETXB\n\
     \\DLE\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETXD\DC3\DC4\n\
+    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETXB\DC3\DC4\n\
     \\n\
     \\n\
-    \\STX\EOT\EOT\DC2\EOTG\NULJ\SOH\n\
+    \\STX\EOT\EOT\DC2\EOTE\NULH\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETXG\b\"\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETXE\b\"\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETXH\EOT\DC3\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETXF\EOT\DC3\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETXH\EOT\n\
+    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETXF\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXH\v\SO\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXF\v\SO\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXH\DC1\DC2\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXF\DC1\DC2\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\SOH\DC2\ETXI\EOT\US\n\
+    \\EOT\EOT\EOT\STX\SOH\DC2\ETXG\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ENQ\DC2\ETXI\EOT\n\
+    \\ENQ\EOT\EOT\STX\SOH\ENQ\DC2\ETXG\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETXI\v\SUB\n\
+    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETXG\v\SUB\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETXI\GS\RS\n\
+    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETXG\GS\RS\n\
     \\n\
     \\n\
-    \\STX\EOT\ENQ\DC2\EOTL\NULS\SOH\n\
+    \\STX\EOT\ENQ\DC2\EOTJ\NULQ\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETXL\b\DC2\n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETXJ\b\DC2\n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXM\EOTP\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXK\EOT3\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETXM\EOT\GS\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETXK\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXM\RS.\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXK\RS.\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXM12\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\b\DC2\ETXM3O\n\
-    \\SI\n\
-    \\b\EOT\ENQ\STX\NUL\b\242\251\ETX\DC2\ETXM4N\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXK12\n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\SOH\DC2\ETXN\EOT\CAN\n\
+    \\EOT\EOT\ENQ\STX\SOH\DC2\ETXL\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ENQ\DC2\ETXN\EOT\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ENQ\DC2\ETXL\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETXN\v\DC3\n\
+    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETXL\v\DC3\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETXN\SYN\ETB\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETXL\SYN\ETB\n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\STX\DC2\ETXO\EOT\US\n\
+    \\EOT\EOT\ENQ\STX\STX\DC2\ETXM\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\ENQ\DC2\ETXO\EOT\n\
+    \\ENQ\EOT\ENQ\STX\STX\ENQ\DC2\ETXM\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\ETXO\v\SUB\n\
+    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\ETXM\v\SUB\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\ETXO\GS\RS\n\
+    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\ETXM\GS\RS\n\
     \z\n\
-    \\EOT\EOT\ENQ\STX\ETX\DC2\ETXR\EOTU\SUBm If a worker has opted into the worker versioning feature while polling, its capabilities will\n\
+    \\EOT\EOT\ENQ\STX\ETX\DC2\ETXP\EOTU\SUBm If a worker has opted into the worker versioning feature while polling, its capabilities will\n\
     \ appear here.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\ACK\DC2\ETXR\EOT4\n\
+    \\ENQ\EOT\ENQ\STX\ETX\ACK\DC2\ETXP\EOT4\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\SOH\DC2\ETXR5P\n\
+    \\ENQ\EOT\ENQ\STX\ETX\SOH\DC2\ETXP5P\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\ETX\DC2\ETXRST\n\
+    \\ENQ\EOT\ENQ\STX\ETX\ETX\DC2\ETXPST\n\
     \\n\
     \\n\
-    \\STX\EOT\ACK\DC2\EOTU\NULZ\SOH\n\
+    \\STX\EOT\ACK\DC2\EOTS\NULX\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETXU\b!\n\
+    \\ETX\EOT\ACK\SOH\DC2\ETXS\b!\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\ETXV\EOT$\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\ETXT\EOT$\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ACK\DC2\ETXV\EOT\r\n\
+    \\ENQ\EOT\ACK\STX\NUL\ACK\DC2\ETXT\EOT\r\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXV\SO\US\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXT\SO\US\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXV\"#\n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXT\"#\n\
     \\131\SOH\n\
-    \\EOT\EOT\ACK\STX\SOH\DC2\ETXY\EOT\\\SUBv (-- api-linter: core::0140::prepositions=disabled\n\
+    \\EOT\EOT\ACK\STX\SOH\DC2\ETXW\EOT;\SUBv (-- api-linter: core::0140::prepositions=disabled\n\
     \     aip.dev/not-precedent: \"to\" is used to indicate interval. --)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ACK\DC2\ETXY\EOT\FS\n\
+    \\ENQ\EOT\ACK\STX\SOH\ACK\DC2\ETXW\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXY\GS6\n\
+    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXW\GS6\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXY9:\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\b\DC2\ETXY;[\n\
-    \\SI\n\
-    \\b\EOT\ACK\STX\SOH\b\243\251\ETX\DC2\ETXY<Z\n\
+    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXW9:\n\
     \\210\SOH\n\
-    \\STX\EOT\a\DC2\EOT^\NULa\SOH\SUB\197\SOH Used by the worker versioning APIs, represents an unordered set of one or more versions which are\n\
+    \\STX\EOT\a\DC2\EOT\\\NUL_\SOH\SUB\197\SOH Used by the worker versioning APIs, represents an unordered set of one or more versions which are\n\
     \ considered to be compatible with each other. Currently the versions are always worker build IDs.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\a\SOH\DC2\ETX^\b\FS\n\
+    \\ETX\EOT\a\SOH\DC2\ETX\\\b\FS\n\
     \z\n\
-    \\EOT\EOT\a\STX\NUL\DC2\ETX`\EOT\"\SUBm All the compatible versions, unordered, except for the last element, which is considered the set \"default\".\n\
+    \\EOT\EOT\a\STX\NUL\DC2\ETX^\EOT\"\SUBm All the compatible versions, unordered, except for the last element, which is considered the set \"default\".\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\EOT\DC2\ETX`\EOT\f\n\
+    \\ENQ\EOT\a\STX\NUL\EOT\DC2\ETX^\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETX`\r\DC3\n\
+    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETX^\r\DC3\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETX`\DC4\GS\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETX^\DC4\GS\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETX` !\n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETX^ !\n\
     \H\n\
-    \\STX\EOT\b\DC2\EOTd\NULj\SOH\SUB< Reachability of tasks for a worker on a single task queue.\n\
+    \\STX\EOT\b\DC2\EOTb\NULh\SOH\SUB< Reachability of tasks for a worker on a single task queue.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\b\SOH\DC2\ETXd\b\GS\n\
+    \\ETX\EOT\b\SOH\DC2\ETXb\b\GS\n\
     \\v\n\
-    \\EOT\EOT\b\STX\NUL\DC2\ETXe\EOT\SUB\n\
+    \\EOT\EOT\b\STX\NUL\DC2\ETXc\EOT\SUB\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\ETXe\EOT\n\
+    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\ETXc\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETXe\v\NAK\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETXc\v\NAK\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETXe\CAN\EM\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETXc\CAN\EM\n\
     \\232\SOH\n\
-    \\EOT\EOT\b\STX\SOH\DC2\ETXi\EOTE\SUB\218\SOH Task reachability for a worker in a single task queue.\n\
+    \\EOT\EOT\b\STX\SOH\DC2\ETXg\EOTE\SUB\218\SOH Task reachability for a worker in a single task queue.\n\
     \ See the TaskReachability docstring for information about each enum variant.\n\
     \ If reachability is empty, this worker is considered unreachable in this task queue.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\EOT\DC2\ETXi\EOT\f\n\
+    \\ENQ\EOT\b\STX\SOH\EOT\DC2\ETXg\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\ACK\DC2\ETXi\r3\n\
+    \\ENQ\EOT\b\STX\SOH\ACK\DC2\ETXg\r3\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETXi4@\n\
+    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETXg4@\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETXiCD\n\
+    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETXgCD\n\
     \Y\n\
-    \\STX\EOT\t\DC2\EOTm\NULr\SOH\SUBM Reachability of tasks for a worker by build id, in one or more task queues.\n\
+    \\STX\EOT\t\DC2\EOTk\NULp\SOH\SUBM Reachability of tasks for a worker by build id, in one or more task queues.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\t\SOH\DC2\ETXm\b\ESC\n\
+    \\ETX\EOT\t\SOH\DC2\ETXk\b\ESC\n\
     \2\n\
-    \\EOT\EOT\t\STX\NUL\DC2\ETXo\EOT\CAN\SUB% A build id or empty if unversioned.\n\
+    \\EOT\EOT\t\STX\NUL\DC2\ETXm\EOT\CAN\SUB% A build id or empty if unversioned.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\NUL\ENQ\DC2\ETXo\EOT\n\
+    \\ENQ\EOT\t\STX\NUL\ENQ\DC2\ETXm\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\NUL\SOH\DC2\ETXo\v\DC3\n\
+    \\ENQ\EOT\t\STX\NUL\SOH\DC2\ETXm\v\DC3\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\NUL\ETX\DC2\ETXo\SYN\ETB\n\
+    \\ENQ\EOT\t\STX\NUL\ETX\DC2\ETXm\SYN\ETB\n\
     \+\n\
-    \\EOT\EOT\t\STX\SOH\DC2\ETXq\EOT?\SUB\RS Reachability per task queue.\n\
+    \\EOT\EOT\t\STX\SOH\DC2\ETXo\EOT?\SUB\RS Reachability per task queue.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\SOH\EOT\DC2\ETXq\EOT\f\n\
+    \\ENQ\EOT\t\STX\SOH\EOT\DC2\ETXo\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\SOH\ACK\DC2\ETXq\r\"\n\
+    \\ENQ\EOT\t\STX\SOH\ACK\DC2\ETXo\r\"\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\SOH\SOH\DC2\ETXq#:\n\
+    \\ENQ\EOT\t\STX\SOH\SOH\DC2\ETXo#:\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\SOH\ETX\DC2\ETXq=>b\ACKproto3"
+    \\ENQ\EOT\t\STX\SOH\ETX\DC2\ETXo=>b\ACKproto3"

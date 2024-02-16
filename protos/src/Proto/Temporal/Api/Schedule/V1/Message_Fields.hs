@@ -27,7 +27,6 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Dependencies.Gogoproto.Gogo
 import qualified Proto.Google.Protobuf.Duration
 import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Temporal.Api.Common.V1.Message
@@ -56,6 +55,18 @@ backfillRequest ::
    Data.ProtoLens.Field.HasField s "backfillRequest" a) =>
   Lens.Family2.LensLike' f s a
 backfillRequest = Data.ProtoLens.Field.field @"backfillRequest"
+bufferDropped ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "bufferDropped" a) =>
+  Lens.Family2.LensLike' f s a
+bufferDropped = Data.ProtoLens.Field.field @"bufferDropped"
+bufferSize ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "bufferSize" a) =>
+  Lens.Family2.LensLike' f s a
+bufferSize = Data.ProtoLens.Field.field @"bufferSize"
 calendar ::
   forall f s a.
   (Prelude.Functor f,

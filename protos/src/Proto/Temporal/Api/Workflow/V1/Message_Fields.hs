@@ -27,7 +27,6 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Dependencies.Gogoproto.Gogo
 import qualified Proto.Google.Protobuf.Duration
 import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Temporal.Api.Common.V1.Message
@@ -63,6 +62,11 @@ binaryChecksum ::
    Data.ProtoLens.Field.HasField s "binaryChecksum" a) =>
   Lens.Family2.LensLike' f s a
 binaryChecksum = Data.ProtoLens.Field.field @"binaryChecksum"
+buildId ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "buildId" a) =>
+  Lens.Family2.LensLike' f s a
+buildId = Data.ProtoLens.Field.field @"buildId"
 closeTime ::
   forall f s a.
   (Prelude.Functor f,

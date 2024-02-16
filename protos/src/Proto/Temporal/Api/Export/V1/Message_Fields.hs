@@ -1,9 +1,9 @@
-{- This file was auto-generated from temporal/api/filter/v1/message.proto by the proto-lens-protoc program. -}
+{- This file was auto-generated from temporal/api/export/v1/message.proto by the proto-lens-protoc program. -}
 {-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
 {-# OPTIONS_GHC -Wno-unused-imports#-}
 {-# OPTIONS_GHC -Wno-duplicate-exports#-}
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Api.Filter.V1.Message_Fields where
+module Proto.Temporal.Api.Export.V1.Message_Fields where
 import qualified Data.ProtoLens.Runtime.Prelude as Prelude
 import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
 import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
@@ -27,51 +27,26 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Google.Protobuf.Timestamp
-import qualified Proto.Temporal.Api.Enums.V1.Workflow
-earliestTime ::
+import qualified Proto.Temporal.Api.History.V1.Message
+history ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "history" a) =>
+  Lens.Family2.LensLike' f s a
+history = Data.ProtoLens.Field.field @"history"
+items ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "items" a) =>
+  Lens.Family2.LensLike' f s a
+items = Data.ProtoLens.Field.field @"items"
+maybe'history ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "earliestTime" a) =>
+   Data.ProtoLens.Field.HasField s "maybe'history" a) =>
   Lens.Family2.LensLike' f s a
-earliestTime = Data.ProtoLens.Field.field @"earliestTime"
-latestTime ::
+maybe'history = Data.ProtoLens.Field.field @"maybe'history"
+vec'items ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "latestTime" a) =>
+   Data.ProtoLens.Field.HasField s "vec'items" a) =>
   Lens.Family2.LensLike' f s a
-latestTime = Data.ProtoLens.Field.field @"latestTime"
-maybe'earliestTime ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'earliestTime" a) =>
-  Lens.Family2.LensLike' f s a
-maybe'earliestTime
-  = Data.ProtoLens.Field.field @"maybe'earliestTime"
-maybe'latestTime ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'latestTime" a) =>
-  Lens.Family2.LensLike' f s a
-maybe'latestTime = Data.ProtoLens.Field.field @"maybe'latestTime"
-name ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "name" a) =>
-  Lens.Family2.LensLike' f s a
-name = Data.ProtoLens.Field.field @"name"
-runId ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "runId" a) =>
-  Lens.Family2.LensLike' f s a
-runId = Data.ProtoLens.Field.field @"runId"
-status ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "status" a) =>
-  Lens.Family2.LensLike' f s a
-status = Data.ProtoLens.Field.field @"status"
-workflowId ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "workflowId" a) =>
-  Lens.Family2.LensLike' f s a
-workflowId = Data.ProtoLens.Field.field @"workflowId"
+vec'items = Data.ProtoLens.Field.field @"vec'items"

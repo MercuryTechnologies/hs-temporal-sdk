@@ -37,7 +37,6 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Dependencies.Gogoproto.Gogo
 import qualified Proto.Google.Protobuf.Duration
 import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Temporal.Api.Common.V1.Message
@@ -102,10 +101,10 @@ instance Data.ProtoLens.Message BackfillRequest where
     = Data.Text.pack "temporal.api.schedule.v1.BackfillRequest"
   packedMessageDescriptor _
     = "\n\
-      \\SIBackfillRequest\DC2?\n\
+      \\SIBackfillRequest\DC29\n\
       \\n\
-      \start_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTimeB\EOT\144\223\US\SOH\DC2;\n\
-      \\bend_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\aendTimeB\EOT\144\223\US\SOH\DC2S\n\
+      \start_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTime\DC25\n\
+      \\bend_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\aendTime\DC2S\n\
       \\SOoverlap_policy\CAN\ETX \SOH(\SO2,.temporal.api.enums.v1.ScheduleOverlapPolicyR\roverlapPolicy"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
@@ -751,9 +750,9 @@ instance Data.ProtoLens.Message IntervalSpec where
     = Data.Text.pack "temporal.api.schedule.v1.IntervalSpec"
   packedMessageDescriptor _
     = "\n\
-      \\fIntervalSpec\DC2;\n\
-      \\binterval\CAN\SOH \SOH(\v2\EM.google.protobuf.DurationR\bintervalB\EOT\152\223\US\SOH\DC25\n\
-      \\ENQphase\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\ENQphaseB\EOT\152\223\US\SOH"
+      \\fIntervalSpec\DC25\n\
+      \\binterval\CAN\SOH \SOH(\v2\EM.google.protobuf.DurationR\binterval\DC2/\n\
+      \\ENQphase\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\ENQphase"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -1547,10 +1546,10 @@ instance Data.ProtoLens.Message ScheduleActionResult where
     = Data.Text.pack "temporal.api.schedule.v1.ScheduleActionResult"
   packedMessageDescriptor _
     = "\n\
-      \\DC4ScheduleActionResult\DC2E\n\
-      \\rschedule_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\fscheduleTimeB\EOT\144\223\US\SOH\DC2A\n\
+      \\DC4ScheduleActionResult\DC2?\n\
+      \\rschedule_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\fscheduleTime\DC2;\n\
       \\vactual_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-      \actualTimeB\EOT\144\223\US\SOH\DC2]\n\
+      \actualTime\DC2]\n\
       \\NAKstart_workflow_result\CAN\v \SOH(\v2).temporal.api.common.v1.WorkflowExecutionR\DC3startWorkflowResult"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
@@ -1720,6 +1719,8 @@ instance Control.DeepSeq.NFData ScheduleActionResult where
          * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.actionCount' @:: Lens' ScheduleInfo Data.Int.Int64@
          * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.missedCatchupWindow' @:: Lens' ScheduleInfo Data.Int.Int64@
          * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.overlapSkipped' @:: Lens' ScheduleInfo Data.Int.Int64@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.bufferDropped' @:: Lens' ScheduleInfo Data.Int.Int64@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.bufferSize' @:: Lens' ScheduleInfo Data.Int.Int64@
          * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.runningWorkflows' @:: Lens' ScheduleInfo [Proto.Temporal.Api.Common.V1.Message.WorkflowExecution]@
          * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.vec'runningWorkflows' @:: Lens' ScheduleInfo (Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.WorkflowExecution)@
          * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.recentActions' @:: Lens' ScheduleInfo [ScheduleActionResult]@
@@ -1735,6 +1736,8 @@ data ScheduleInfo
   = ScheduleInfo'_constructor {_ScheduleInfo'actionCount :: !Data.Int.Int64,
                                _ScheduleInfo'missedCatchupWindow :: !Data.Int.Int64,
                                _ScheduleInfo'overlapSkipped :: !Data.Int.Int64,
+                               _ScheduleInfo'bufferDropped :: !Data.Int.Int64,
+                               _ScheduleInfo'bufferSize :: !Data.Int.Int64,
                                _ScheduleInfo'runningWorkflows :: !(Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.WorkflowExecution),
                                _ScheduleInfo'recentActions :: !(Data.Vector.Vector ScheduleActionResult),
                                _ScheduleInfo'futureActionTimes :: !(Data.Vector.Vector Proto.Google.Protobuf.Timestamp.Timestamp),
@@ -1769,6 +1772,20 @@ instance Data.ProtoLens.Field.HasField ScheduleInfo "overlapSkipped" Data.Int.In
         (Lens.Family2.Unchecked.lens
            _ScheduleInfo'overlapSkipped
            (\ x__ y__ -> x__ {_ScheduleInfo'overlapSkipped = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleInfo "bufferDropped" Data.Int.Int64 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleInfo'bufferDropped
+           (\ x__ y__ -> x__ {_ScheduleInfo'bufferDropped = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ScheduleInfo "bufferSize" Data.Int.Int64 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ScheduleInfo'bufferSize
+           (\ x__ y__ -> x__ {_ScheduleInfo'bufferSize = y__}))
         Prelude.id
 instance Data.ProtoLens.Field.HasField ScheduleInfo "runningWorkflows" [Proto.Temporal.Api.Common.V1.Message.WorkflowExecution] where
   fieldOf _
@@ -1861,14 +1878,18 @@ instance Data.ProtoLens.Message ScheduleInfo where
       \\fScheduleInfo\DC2!\n\
       \\faction_count\CAN\SOH \SOH(\ETXR\vactionCount\DC22\n\
       \\NAKmissed_catchup_window\CAN\STX \SOH(\ETXR\DC3missedCatchupWindow\DC2'\n\
-      \\SIoverlap_skipped\CAN\ETX \SOH(\ETXR\SOoverlapSkipped\DC2V\n\
+      \\SIoverlap_skipped\CAN\ETX \SOH(\ETXR\SOoverlapSkipped\DC2%\n\
+      \\SObuffer_dropped\CAN\n\
+      \ \SOH(\ETXR\rbufferDropped\DC2\US\n\
+      \\vbuffer_size\CAN\v \SOH(\ETXR\n\
+      \bufferSize\DC2V\n\
       \\DC1running_workflows\CAN\t \ETX(\v2).temporal.api.common.v1.WorkflowExecutionR\DLErunningWorkflows\DC2U\n\
-      \\SOrecent_actions\CAN\EOT \ETX(\v2..temporal.api.schedule.v1.ScheduleActionResultR\rrecentActions\DC2P\n\
-      \\DC3future_action_times\CAN\ENQ \ETX(\v2\SUB.google.protobuf.TimestampR\DC1futureActionTimesB\EOT\144\223\US\SOH\DC2A\n\
+      \\SOrecent_actions\CAN\EOT \ETX(\v2..temporal.api.schedule.v1.ScheduleActionResultR\rrecentActions\DC2J\n\
+      \\DC3future_action_times\CAN\ENQ \ETX(\v2\SUB.google.protobuf.TimestampR\DC1futureActionTimes\DC2;\n\
       \\vcreate_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-      \createTimeB\EOT\144\223\US\SOH\DC2A\n\
+      \createTime\DC2;\n\
       \\vupdate_time\CAN\a \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-      \updateTimeB\EOT\144\223\US\SOH\DC28\n\
+      \updateTime\DC28\n\
       \\SYNinvalid_schedule_error\CAN\b \SOH(\tR\DC4invalidScheduleErrorB\STX\CAN\SOH"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
@@ -1899,6 +1920,24 @@ instance Data.ProtoLens.Message ScheduleInfo where
               (Data.ProtoLens.PlainField
                  Data.ProtoLens.Optional
                  (Data.ProtoLens.Field.field @"overlapSkipped")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleInfo
+        bufferDropped__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "buffer_dropped"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.Int64Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int64)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"bufferDropped")) ::
+              Data.ProtoLens.FieldDescriptor ScheduleInfo
+        bufferSize__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "buffer_size"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.Int64Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int64)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"bufferSize")) ::
               Data.ProtoLens.FieldDescriptor ScheduleInfo
         runningWorkflows__field_descriptor
           = Data.ProtoLens.FieldDescriptor
@@ -1957,6 +1996,8 @@ instance Data.ProtoLens.Message ScheduleInfo where
           [(Data.ProtoLens.Tag 1, actionCount__field_descriptor),
            (Data.ProtoLens.Tag 2, missedCatchupWindow__field_descriptor),
            (Data.ProtoLens.Tag 3, overlapSkipped__field_descriptor),
+           (Data.ProtoLens.Tag 10, bufferDropped__field_descriptor),
+           (Data.ProtoLens.Tag 11, bufferSize__field_descriptor),
            (Data.ProtoLens.Tag 9, runningWorkflows__field_descriptor),
            (Data.ProtoLens.Tag 4, recentActions__field_descriptor),
            (Data.ProtoLens.Tag 5, futureActionTimes__field_descriptor),
@@ -1972,6 +2013,8 @@ instance Data.ProtoLens.Message ScheduleInfo where
         {_ScheduleInfo'actionCount = Data.ProtoLens.fieldDefault,
          _ScheduleInfo'missedCatchupWindow = Data.ProtoLens.fieldDefault,
          _ScheduleInfo'overlapSkipped = Data.ProtoLens.fieldDefault,
+         _ScheduleInfo'bufferDropped = Data.ProtoLens.fieldDefault,
+         _ScheduleInfo'bufferSize = Data.ProtoLens.fieldDefault,
          _ScheduleInfo'runningWorkflows = Data.Vector.Generic.empty,
          _ScheduleInfo'recentActions = Data.Vector.Generic.empty,
          _ScheduleInfo'futureActionTimes = Data.Vector.Generic.empty,
@@ -2056,6 +2099,27 @@ instance Data.ProtoLens.Message ScheduleInfo where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"overlapSkipped") y x)
+                                  mutable'futureActionTimes mutable'recentActions
+                                  mutable'runningWorkflows
+                        80
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "buffer_dropped"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"bufferDropped") y x)
+                                  mutable'futureActionTimes mutable'recentActions
+                                  mutable'runningWorkflows
+                        88
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "buffer_size"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"bufferSize") y x)
                                   mutable'futureActionTimes mutable'recentActions
                                   mutable'runningWorkflows
                         74
@@ -2183,39 +2247,36 @@ instance Data.ProtoLens.Message ScheduleInfo where
                             ((Prelude..)
                                Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
                    ((Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                         (\ _v
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt 74)
-                                 ((Prelude..)
-                                    (\ bs
-                                       -> (Data.Monoid.<>)
-                                            (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                               (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                            (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                    Data.ProtoLens.encodeMessage _v))
-                         (Lens.Family2.view
-                            (Data.ProtoLens.Field.field @"vec'runningWorkflows") _x))
+                      (let
+                         _v
+                           = Lens.Family2.view
+                               (Data.ProtoLens.Field.field @"bufferDropped") _x
+                       in
+                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                             Data.Monoid.mempty
+                         else
+                             (Data.Monoid.<>)
+                               (Data.ProtoLens.Encoding.Bytes.putVarInt 80)
+                               ((Prelude..)
+                                  Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
                       ((Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                            (\ _v
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                                    ((Prelude..)
-                                       (\ bs
-                                          -> (Data.Monoid.<>)
-                                               (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                  (Prelude.fromIntegral
-                                                     (Data.ByteString.length bs)))
-                                               (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                       Data.ProtoLens.encodeMessage _v))
-                            (Lens.Family2.view
-                               (Data.ProtoLens.Field.field @"vec'recentActions") _x))
+                         (let
+                            _v
+                              = Lens.Family2.view (Data.ProtoLens.Field.field @"bufferSize") _x
+                          in
+                            if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                Data.Monoid.mempty
+                            else
+                                (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 88)
+                                  ((Prelude..)
+                                     Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral
+                                     _v))
                          ((Data.Monoid.<>)
                             (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
                                (\ _v
                                   -> (Data.Monoid.<>)
-                                       (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
+                                       (Data.ProtoLens.Encoding.Bytes.putVarInt 74)
                                        ((Prelude..)
                                           (\ bs
                                              -> (Data.Monoid.<>)
@@ -2225,64 +2286,98 @@ instance Data.ProtoLens.Message ScheduleInfo where
                                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                                           Data.ProtoLens.encodeMessage _v))
                                (Lens.Family2.view
-                                  (Data.ProtoLens.Field.field @"vec'futureActionTimes") _x))
+                                  (Data.ProtoLens.Field.field @"vec'runningWorkflows") _x))
                             ((Data.Monoid.<>)
-                               (case
-                                    Lens.Family2.view
-                                      (Data.ProtoLens.Field.field @"maybe'createTime") _x
-                                of
-                                  Prelude.Nothing -> Data.Monoid.mempty
-                                  (Prelude.Just _v)
-                                    -> (Data.Monoid.<>)
-                                         (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
-                                         ((Prelude..)
-                                            (\ bs
-                                               -> (Data.Monoid.<>)
-                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                       (Prelude.fromIntegral
-                                                          (Data.ByteString.length bs)))
-                                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                            Data.ProtoLens.encodeMessage _v))
+                               (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                                  (\ _v
+                                     -> (Data.Monoid.<>)
+                                          (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
+                                          ((Prelude..)
+                                             (\ bs
+                                                -> (Data.Monoid.<>)
+                                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                        (Prelude.fromIntegral
+                                                           (Data.ByteString.length bs)))
+                                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                             Data.ProtoLens.encodeMessage _v))
+                                  (Lens.Family2.view
+                                     (Data.ProtoLens.Field.field @"vec'recentActions") _x))
                                ((Data.Monoid.<>)
-                                  (case
-                                       Lens.Family2.view
-                                         (Data.ProtoLens.Field.field @"maybe'updateTime") _x
-                                   of
-                                     Prelude.Nothing -> Data.Monoid.mempty
-                                     (Prelude.Just _v)
-                                       -> (Data.Monoid.<>)
-                                            (Data.ProtoLens.Encoding.Bytes.putVarInt 58)
-                                            ((Prelude..)
-                                               (\ bs
-                                                  -> (Data.Monoid.<>)
-                                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                          (Prelude.fromIntegral
-                                                             (Data.ByteString.length bs)))
-                                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                               Data.ProtoLens.encodeMessage _v))
+                                  (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                                     (\ _v
+                                        -> (Data.Monoid.<>)
+                                             (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
+                                             ((Prelude..)
+                                                (\ bs
+                                                   -> (Data.Monoid.<>)
+                                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                           (Prelude.fromIntegral
+                                                              (Data.ByteString.length bs)))
+                                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                                Data.ProtoLens.encodeMessage _v))
+                                     (Lens.Family2.view
+                                        (Data.ProtoLens.Field.field @"vec'futureActionTimes") _x))
                                   ((Data.Monoid.<>)
-                                     (let
-                                        _v
-                                          = Lens.Family2.view
-                                              (Data.ProtoLens.Field.field @"invalidScheduleError")
-                                              _x
-                                      in
-                                        if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                            Data.Monoid.mempty
-                                        else
-                                            (Data.Monoid.<>)
-                                              (Data.ProtoLens.Encoding.Bytes.putVarInt 66)
-                                              ((Prelude..)
-                                                 (\ bs
-                                                    -> (Data.Monoid.<>)
-                                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                            (Prelude.fromIntegral
-                                                               (Data.ByteString.length bs)))
-                                                         (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                            bs))
-                                                 Data.Text.Encoding.encodeUtf8 _v))
-                                     (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                                        (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))))))
+                                     (case
+                                          Lens.Family2.view
+                                            (Data.ProtoLens.Field.field @"maybe'createTime") _x
+                                      of
+                                        Prelude.Nothing -> Data.Monoid.mempty
+                                        (Prelude.Just _v)
+                                          -> (Data.Monoid.<>)
+                                               (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
+                                               ((Prelude..)
+                                                  (\ bs
+                                                     -> (Data.Monoid.<>)
+                                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                             (Prelude.fromIntegral
+                                                                (Data.ByteString.length bs)))
+                                                          (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                             bs))
+                                                  Data.ProtoLens.encodeMessage _v))
+                                     ((Data.Monoid.<>)
+                                        (case
+                                             Lens.Family2.view
+                                               (Data.ProtoLens.Field.field @"maybe'updateTime") _x
+                                         of
+                                           Prelude.Nothing -> Data.Monoid.mempty
+                                           (Prelude.Just _v)
+                                             -> (Data.Monoid.<>)
+                                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 58)
+                                                  ((Prelude..)
+                                                     (\ bs
+                                                        -> (Data.Monoid.<>)
+                                                             (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                (Prelude.fromIntegral
+                                                                   (Data.ByteString.length bs)))
+                                                             (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                bs))
+                                                     Data.ProtoLens.encodeMessage _v))
+                                        ((Data.Monoid.<>)
+                                           (let
+                                              _v
+                                                = Lens.Family2.view
+                                                    (Data.ProtoLens.Field.field
+                                                       @"invalidScheduleError")
+                                                    _x
+                                            in
+                                              if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                                  Data.Monoid.mempty
+                                              else
+                                                  (Data.Monoid.<>)
+                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt 66)
+                                                    ((Prelude..)
+                                                       (\ bs
+                                                          -> (Data.Monoid.<>)
+                                                               (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                  (Prelude.fromIntegral
+                                                                     (Data.ByteString.length bs)))
+                                                               (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                  bs))
+                                                       Data.Text.Encoding.encodeUtf8 _v))
+                                           (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                                              (Lens.Family2.view
+                                                 Data.ProtoLens.unknownFields _x))))))))))))
 instance Control.DeepSeq.NFData ScheduleInfo where
   rnf
     = \ x__
@@ -2295,17 +2390,21 @@ instance Control.DeepSeq.NFData ScheduleInfo where
                    (Control.DeepSeq.deepseq
                       (_ScheduleInfo'overlapSkipped x__)
                       (Control.DeepSeq.deepseq
-                         (_ScheduleInfo'runningWorkflows x__)
+                         (_ScheduleInfo'bufferDropped x__)
                          (Control.DeepSeq.deepseq
-                            (_ScheduleInfo'recentActions x__)
+                            (_ScheduleInfo'bufferSize x__)
                             (Control.DeepSeq.deepseq
-                               (_ScheduleInfo'futureActionTimes x__)
+                               (_ScheduleInfo'runningWorkflows x__)
                                (Control.DeepSeq.deepseq
-                                  (_ScheduleInfo'createTime x__)
+                                  (_ScheduleInfo'recentActions x__)
                                   (Control.DeepSeq.deepseq
-                                     (_ScheduleInfo'updateTime x__)
+                                     (_ScheduleInfo'futureActionTimes x__)
                                      (Control.DeepSeq.deepseq
-                                        (_ScheduleInfo'invalidScheduleError x__) ())))))))))
+                                        (_ScheduleInfo'createTime x__)
+                                        (Control.DeepSeq.deepseq
+                                           (_ScheduleInfo'updateTime x__)
+                                           (Control.DeepSeq.deepseq
+                                              (_ScheduleInfo'invalidScheduleError x__) ())))))))))))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.scheduleId' @:: Lens' ScheduleListEntry Data.Text.Text@
@@ -2694,8 +2793,8 @@ instance Data.ProtoLens.Message ScheduleListInfo where
       \\rworkflow_type\CAN\STX \SOH(\v2$.temporal.api.common.v1.WorkflowTypeR\fworkflowType\DC2\DC4\n\
       \\ENQnotes\CAN\ETX \SOH(\tR\ENQnotes\DC2\SYN\n\
       \\ACKpaused\CAN\EOT \SOH(\bR\ACKpaused\DC2U\n\
-      \\SOrecent_actions\CAN\ENQ \ETX(\v2..temporal.api.schedule.v1.ScheduleActionResultR\rrecentActions\DC2P\n\
-      \\DC3future_action_times\CAN\ACK \ETX(\v2\SUB.google.protobuf.TimestampR\DC1futureActionTimesB\EOT\144\223\US\SOH"
+      \\SOrecent_actions\CAN\ENQ \ETX(\v2..temporal.api.schedule.v1.ScheduleActionResultR\rrecentActions\DC2J\n\
+      \\DC3future_action_times\CAN\ACK \ETX(\v2\SUB.google.protobuf.TimestampR\DC1futureActionTimes"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -3332,8 +3431,8 @@ instance Data.ProtoLens.Message SchedulePolicies where
   packedMessageDescriptor _
     = "\n\
       \\DLESchedulePolicies\DC2S\n\
-      \\SOoverlap_policy\CAN\SOH \SOH(\SO2,.temporal.api.enums.v1.ScheduleOverlapPolicyR\roverlapPolicy\DC2F\n\
-      \\SOcatchup_window\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\rcatchupWindowB\EOT\152\223\US\SOH\DC2(\n\
+      \\SOoverlap_policy\CAN\SOH \SOH(\SO2,.temporal.api.enums.v1.ScheduleOverlapPolicyR\roverlapPolicy\DC2@\n\
+      \\SOcatchup_window\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\rcatchupWindow\DC2(\n\
       \\DLEpause_on_failure\CAN\ETX \SOH(\bR\SOpauseOnFailure"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
@@ -3704,11 +3803,11 @@ instance Data.ProtoLens.Message ScheduleSpec where
       \\bcalendar\CAN\SOH \ETX(\v2&.temporal.api.schedule.v1.CalendarSpecR\bcalendar\DC2B\n\
       \\binterval\CAN\STX \ETX(\v2&.temporal.api.schedule.v1.IntervalSpecR\binterval\DC2U\n\
       \\DLEexclude_calendar\CAN\ETX \ETX(\v2&.temporal.api.schedule.v1.CalendarSpecR\SIexcludeCalendarB\STX\CAN\SOH\DC2p\n\
-      \\ESCexclude_structured_calendar\CAN\t \ETX(\v20.temporal.api.schedule.v1.StructuredCalendarSpecR\EMexcludeStructuredCalendar\DC2?\n\
+      \\ESCexclude_structured_calendar\CAN\t \ETX(\v20.temporal.api.schedule.v1.StructuredCalendarSpecR\EMexcludeStructuredCalendar\DC29\n\
       \\n\
-      \start_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTimeB\EOT\144\223\US\SOH\DC2;\n\
-      \\bend_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\aendTimeB\EOT\144\223\US\SOH\DC27\n\
-      \\ACKjitter\CAN\ACK \SOH(\v2\EM.google.protobuf.DurationR\ACKjitterB\EOT\152\223\US\SOH\DC2#\n\
+      \start_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTime\DC25\n\
+      \\bend_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\aendTime\DC21\n\
+      \\ACKjitter\CAN\ACK \SOH(\v2\EM.google.protobuf.DurationR\ACKjitter\DC2#\n\
       \\rtimezone_name\CAN\n\
       \ \SOH(\tR\ftimezoneName\DC2#\n\
       \\rtimezone_data\CAN\v \SOH(\fR\ftimezoneData"
@@ -5249,7 +5348,7 @@ instance Control.DeepSeq.NFData TriggerImmediatelyRequest where
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \&temporal/api/schedule/v1/message.proto\DC2\CANtemporal.api.schedule.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\USgoogle/protobuf/timestamp.proto\SUB!dependencies/gogoproto/gogo.proto\SUB$temporal/api/common/v1/message.proto\SUB$temporal/api/enums/v1/schedule.proto\SUB&temporal/api/workflow/v1/message.proto\"\216\SOH\n\
+    \&temporal/api/schedule/v1/message.proto\DC2\CANtemporal.api.schedule.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\USgoogle/protobuf/timestamp.proto\SUB$temporal/api/common/v1/message.proto\SUB$temporal/api/enums/v1/schedule.proto\SUB&temporal/api/workflow/v1/message.proto\"\216\SOH\n\
     \\fCalendarSpec\DC2\SYN\n\
     \\ACKsecond\CAN\SOH \SOH(\tR\ACKsecond\DC2\SYN\n\
     \\ACKminute\CAN\STX \SOH(\tR\ACKminute\DC2\DC2\n\
@@ -5273,10 +5372,10 @@ packedFileDescriptor
     \\ENQmonth\CAN\ENQ \ETX(\v2\US.temporal.api.schedule.v1.RangeR\ENQmonth\DC23\n\
     \\EOTyear\CAN\ACK \ETX(\v2\US.temporal.api.schedule.v1.RangeR\EOTyear\DC2?\n\
     \\vday_of_week\CAN\a \ETX(\v2\US.temporal.api.schedule.v1.RangeR\tdayOfWeek\DC2\CAN\n\
-    \\acomment\CAN\b \SOH(\tR\acomment\"\130\SOH\n\
-    \\fIntervalSpec\DC2;\n\
-    \\binterval\CAN\SOH \SOH(\v2\EM.google.protobuf.DurationR\bintervalB\EOT\152\223\US\SOH\DC25\n\
-    \\ENQphase\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\ENQphaseB\EOT\152\223\US\SOH\"\228\ENQ\n\
+    \\acomment\CAN\b \SOH(\tR\acomment\"v\n\
+    \\fIntervalSpec\DC25\n\
+    \\binterval\CAN\SOH \SOH(\v2\EM.google.protobuf.DurationR\binterval\DC2/\n\
+    \\ENQphase\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\ENQphase\"\210\ENQ\n\
     \\fScheduleSpec\DC2a\n\
     \\DC3structured_calendar\CAN\a \ETX(\v20.temporal.api.schedule.v1.StructuredCalendarSpecR\DC2structuredCalendar\DC2\US\n\
     \\vcron_string\CAN\b \ETX(\tR\n\
@@ -5284,25 +5383,25 @@ packedFileDescriptor
     \\bcalendar\CAN\SOH \ETX(\v2&.temporal.api.schedule.v1.CalendarSpecR\bcalendar\DC2B\n\
     \\binterval\CAN\STX \ETX(\v2&.temporal.api.schedule.v1.IntervalSpecR\binterval\DC2U\n\
     \\DLEexclude_calendar\CAN\ETX \ETX(\v2&.temporal.api.schedule.v1.CalendarSpecR\SIexcludeCalendarB\STX\CAN\SOH\DC2p\n\
-    \\ESCexclude_structured_calendar\CAN\t \ETX(\v20.temporal.api.schedule.v1.StructuredCalendarSpecR\EMexcludeStructuredCalendar\DC2?\n\
+    \\ESCexclude_structured_calendar\CAN\t \ETX(\v20.temporal.api.schedule.v1.StructuredCalendarSpecR\EMexcludeStructuredCalendar\DC29\n\
     \\n\
-    \start_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTimeB\EOT\144\223\US\SOH\DC2;\n\
-    \\bend_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\aendTimeB\EOT\144\223\US\SOH\DC27\n\
-    \\ACKjitter\CAN\ACK \SOH(\v2\EM.google.protobuf.DurationR\ACKjitterB\EOT\152\223\US\SOH\DC2#\n\
+    \start_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTime\DC25\n\
+    \\bend_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\aendTime\DC21\n\
+    \\ACKjitter\CAN\ACK \SOH(\v2\EM.google.protobuf.DurationR\ACKjitter\DC2#\n\
     \\rtimezone_name\CAN\n\
     \ \SOH(\tR\ftimezoneName\DC2#\n\
-    \\rtimezone_data\CAN\v \SOH(\fR\ftimezoneData\"\217\SOH\n\
+    \\rtimezone_data\CAN\v \SOH(\fR\ftimezoneData\"\211\SOH\n\
     \\DLESchedulePolicies\DC2S\n\
-    \\SOoverlap_policy\CAN\SOH \SOH(\SO2,.temporal.api.enums.v1.ScheduleOverlapPolicyR\roverlapPolicy\DC2F\n\
-    \\SOcatchup_window\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\rcatchupWindowB\EOT\152\223\US\SOH\DC2(\n\
+    \\SOoverlap_policy\CAN\SOH \SOH(\SO2,.temporal.api.enums.v1.ScheduleOverlapPolicyR\roverlapPolicy\DC2@\n\
+    \\SOcatchup_window\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\rcatchupWindow\DC2(\n\
     \\DLEpause_on_failure\CAN\ETX \SOH(\bR\SOpauseOnFailure\"w\n\
     \\SOScheduleAction\DC2[\n\
     \\SOstart_workflow\CAN\SOH \SOH(\v22.temporal.api.workflow.v1.NewWorkflowExecutionInfoH\NULR\rstartWorkflowB\b\n\
-    \\ACKaction\"\255\SOH\n\
-    \\DC4ScheduleActionResult\DC2E\n\
-    \\rschedule_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\fscheduleTimeB\EOT\144\223\US\SOH\DC2A\n\
+    \\ACKaction\"\243\SOH\n\
+    \\DC4ScheduleActionResult\DC2?\n\
+    \\rschedule_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\fscheduleTime\DC2;\n\
     \\vactual_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-    \actualTimeB\EOT\144\223\US\SOH\DC2]\n\
+    \actualTime\DC2]\n\
     \\NAKstart_workflow_result\CAN\v \SOH(\v2).temporal.api.common.v1.WorkflowExecutionR\DC3startWorkflowResult\"\147\SOH\n\
     \\rScheduleState\DC2\DC4\n\
     \\ENQnotes\CAN\SOH \SOH(\tR\ENQnotes\DC2\SYN\n\
@@ -5310,49 +5409,53 @@ packedFileDescriptor
     \\SIlimited_actions\CAN\ETX \SOH(\bR\SOlimitedActions\DC2+\n\
     \\DC1remaining_actions\CAN\EOT \SOH(\ETXR\DLEremainingActions\"p\n\
     \\EMTriggerImmediatelyRequest\DC2S\n\
-    \\SOoverlap_policy\CAN\SOH \SOH(\SO2,.temporal.api.enums.v1.ScheduleOverlapPolicyR\roverlapPolicy\"\228\SOH\n\
-    \\SIBackfillRequest\DC2?\n\
+    \\SOoverlap_policy\CAN\SOH \SOH(\SO2,.temporal.api.enums.v1.ScheduleOverlapPolicyR\roverlapPolicy\"\216\SOH\n\
+    \\SIBackfillRequest\DC29\n\
     \\n\
-    \start_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTimeB\EOT\144\223\US\SOH\DC2;\n\
-    \\bend_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\aendTimeB\EOT\144\223\US\SOH\DC2S\n\
+    \start_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTime\DC25\n\
+    \\bend_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\aendTime\DC2S\n\
     \\SOoverlap_policy\CAN\ETX \SOH(\SO2,.temporal.api.enums.v1.ScheduleOverlapPolicyR\roverlapPolicy\"\251\SOH\n\
     \\rSchedulePatch\DC2d\n\
     \\DC3trigger_immediately\CAN\SOH \SOH(\v23.temporal.api.schedule.v1.TriggerImmediatelyRequestR\DC2triggerImmediately\DC2T\n\
     \\DLEbackfill_request\CAN\STX \ETX(\v2).temporal.api.schedule.v1.BackfillRequestR\SIbackfillRequest\DC2\DC4\n\
     \\ENQpause\CAN\ETX \SOH(\tR\ENQpause\DC2\CAN\n\
-    \\aunpause\CAN\EOT \SOH(\tR\aunpause\"\207\EOT\n\
+    \\aunpause\CAN\EOT \SOH(\tR\aunpause\"\133\ENQ\n\
     \\fScheduleInfo\DC2!\n\
     \\faction_count\CAN\SOH \SOH(\ETXR\vactionCount\DC22\n\
     \\NAKmissed_catchup_window\CAN\STX \SOH(\ETXR\DC3missedCatchupWindow\DC2'\n\
-    \\SIoverlap_skipped\CAN\ETX \SOH(\ETXR\SOoverlapSkipped\DC2V\n\
+    \\SIoverlap_skipped\CAN\ETX \SOH(\ETXR\SOoverlapSkipped\DC2%\n\
+    \\SObuffer_dropped\CAN\n\
+    \ \SOH(\ETXR\rbufferDropped\DC2\US\n\
+    \\vbuffer_size\CAN\v \SOH(\ETXR\n\
+    \bufferSize\DC2V\n\
     \\DC1running_workflows\CAN\t \ETX(\v2).temporal.api.common.v1.WorkflowExecutionR\DLErunningWorkflows\DC2U\n\
-    \\SOrecent_actions\CAN\EOT \ETX(\v2..temporal.api.schedule.v1.ScheduleActionResultR\rrecentActions\DC2P\n\
-    \\DC3future_action_times\CAN\ENQ \ETX(\v2\SUB.google.protobuf.TimestampR\DC1futureActionTimesB\EOT\144\223\US\SOH\DC2A\n\
+    \\SOrecent_actions\CAN\EOT \ETX(\v2..temporal.api.schedule.v1.ScheduleActionResultR\rrecentActions\DC2J\n\
+    \\DC3future_action_times\CAN\ENQ \ETX(\v2\SUB.google.protobuf.TimestampR\DC1futureActionTimes\DC2;\n\
     \\vcreate_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-    \createTimeB\EOT\144\223\US\SOH\DC2A\n\
+    \createTime\DC2;\n\
     \\vupdate_time\CAN\a \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-    \updateTimeB\EOT\144\223\US\SOH\DC28\n\
+    \updateTime\DC28\n\
     \\SYNinvalid_schedule_error\CAN\b \SOH(\tR\DC4invalidScheduleErrorB\STX\CAN\SOH\"\143\STX\n\
     \\bSchedule\DC2:\n\
     \\EOTspec\CAN\SOH \SOH(\v2&.temporal.api.schedule.v1.ScheduleSpecR\EOTspec\DC2@\n\
     \\ACKaction\CAN\STX \SOH(\v2(.temporal.api.schedule.v1.ScheduleActionR\ACKaction\DC2F\n\
     \\bpolicies\CAN\ETX \SOH(\v2*.temporal.api.schedule.v1.SchedulePoliciesR\bpolicies\DC2=\n\
-    \\ENQstate\CAN\EOT \SOH(\v2'.temporal.api.schedule.v1.ScheduleStateR\ENQstate\"\240\STX\n\
+    \\ENQstate\CAN\EOT \SOH(\v2'.temporal.api.schedule.v1.ScheduleStateR\ENQstate\"\234\STX\n\
     \\DLEScheduleListInfo\DC2:\n\
     \\EOTspec\CAN\SOH \SOH(\v2&.temporal.api.schedule.v1.ScheduleSpecR\EOTspec\DC2I\n\
     \\rworkflow_type\CAN\STX \SOH(\v2$.temporal.api.common.v1.WorkflowTypeR\fworkflowType\DC2\DC4\n\
     \\ENQnotes\CAN\ETX \SOH(\tR\ENQnotes\DC2\SYN\n\
     \\ACKpaused\CAN\EOT \SOH(\bR\ACKpaused\DC2U\n\
-    \\SOrecent_actions\CAN\ENQ \ETX(\v2..temporal.api.schedule.v1.ScheduleActionResultR\rrecentActions\DC2P\n\
-    \\DC3future_action_times\CAN\ACK \ETX(\v2\SUB.google.protobuf.TimestampR\DC1futureActionTimesB\EOT\144\223\US\SOH\"\253\SOH\n\
+    \\SOrecent_actions\CAN\ENQ \ETX(\v2..temporal.api.schedule.v1.ScheduleActionResultR\rrecentActions\DC2J\n\
+    \\DC3future_action_times\CAN\ACK \ETX(\v2\SUB.google.protobuf.TimestampR\DC1futureActionTimes\"\253\SOH\n\
     \\DC1ScheduleListEntry\DC2\US\n\
     \\vschedule_id\CAN\SOH \SOH(\tR\n\
     \scheduleId\DC20\n\
     \\EOTmemo\CAN\STX \SOH(\v2\FS.temporal.api.common.v1.MemoR\EOTmemo\DC2U\n\
     \\DC1search_attributes\CAN\ETX \SOH(\v2(.temporal.api.common.v1.SearchAttributesR\DLEsearchAttributes\DC2>\n\
     \\EOTinfo\CAN\EOT \SOH(\v2*.temporal.api.schedule.v1.ScheduleListInfoR\EOTinfoB\147\SOH\n\
-    \\ESCio.temporal.api.schedule.v1B\fMessageProtoP\SOHZ'go.temporal.io/api/schedule/v1;schedule\170\STX\SUBTemporalio.Api.Schedule.V1\234\STX\GSTemporalio::Api::Schedule::V1J\138\138\SOH\n\
-    \\a\DC2\ENQ\ESC\NUL\250\STX\SOH\n\
+    \\ESCio.temporal.api.schedule.v1B\fMessageProtoP\SOHZ'go.temporal.io/api/schedule/v1;schedule\170\STX\SUBTemporalio.Api.Schedule.V1\234\STX\GSTemporalio::Api::Schedule::V1J\154\142\SOH\n\
+    \\a\DC2\ENQ\ESC\NUL\138\ETX\SOH\n\
     \\134\v\n\
     \\SOH\f\DC2\ETX\ESC\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -5412,15 +5515,13 @@ packedFileDescriptor
     \\t\n\
     \\STX\ETX\SOH\DC2\ETX'\NUL)\n\
     \\t\n\
-    \\STX\ETX\STX\DC2\ETX)\NUL+\n\
+    \\STX\ETX\STX\DC2\ETX)\NUL.\n\
     \\t\n\
-    \\STX\ETX\ETX\DC2\ETX+\NUL.\n\
+    \\STX\ETX\ETX\DC2\ETX*\NUL.\n\
     \\t\n\
-    \\STX\ETX\EOT\DC2\ETX,\NUL.\n\
-    \\t\n\
-    \\STX\ETX\ENQ\DC2\ETX-\NUL0\n\
+    \\STX\ETX\EOT\DC2\ETX+\NUL0\n\
     \\231\a\n\
-    \\STX\EOT\NUL\DC2\EOTA\NULT\SOH\SUB\218\a CalendarSpec describes an event specification relative to the calendar,\n\
+    \\STX\EOT\NUL\DC2\EOT?\NULR\SOH\SUB\218\a CalendarSpec describes an event specification relative to the calendar,\n\
     \ similar to a traditional cron specification, but with labeled fields. Each\n\
     \ field can be one of:\n\
     \   *: matches always\n\
@@ -5441,130 +5542,130 @@ packedFileDescriptor
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETXA\b\DC4\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX?\b\DC4\n\
     \6\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETXC\EOT\SYN\SUB) Expression to match seconds. Default: 0\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETXA\EOT\SYN\SUB) Expression to match seconds. Default: 0\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETXC\EOT\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETXA\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETXC\v\DC1\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETXA\v\DC1\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETXC\DC4\NAK\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETXA\DC4\NAK\n\
     \6\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETXE\EOT\SYN\SUB) Expression to match minutes. Default: 0\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETXC\EOT\SYN\SUB) Expression to match minutes. Default: 0\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETXE\EOT\n\
+    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETXC\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETXE\v\DC1\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETXC\v\DC1\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETXE\DC4\NAK\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETXC\DC4\NAK\n\
     \4\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETXG\EOT\DC4\SUB' Expression to match hours. Default: 0\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETXE\EOT\DC4\SUB' Expression to match hours. Default: 0\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETXG\EOT\n\
+    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETXE\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETXG\v\SI\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETXE\v\SI\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETXG\DC2\DC3\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETXE\DC2\DC3\n\
     \\171\SOH\n\
-    \\EOT\EOT\NUL\STX\ETX\DC2\ETXK\EOT\FS\SUB\157\SOH Expression to match days of the month. Default: *\n\
+    \\EOT\EOT\NUL\STX\ETX\DC2\ETXI\EOT\FS\SUB\157\SOH Expression to match days of the month. Default: *\n\
     \ (-- api-linter: core::0140::prepositions=disabled\n\
     \     aip.dev/not-precedent: standard name of field --)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ENQ\DC2\ETXK\EOT\n\
+    \\ENQ\EOT\NUL\STX\ETX\ENQ\DC2\ETXI\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETXK\v\ETB\n\
+    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETXI\v\ETB\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETXK\SUB\ESC\n\
+    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETXI\SUB\ESC\n\
     \5\n\
-    \\EOT\EOT\NUL\STX\EOT\DC2\ETXM\EOT\NAK\SUB( Expression to match months. Default: *\n\
+    \\EOT\EOT\NUL\STX\EOT\DC2\ETXK\EOT\NAK\SUB( Expression to match months. Default: *\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ENQ\DC2\ETXM\EOT\n\
+    \\ENQ\EOT\NUL\STX\EOT\ENQ\DC2\ETXK\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETXM\v\DLE\n\
+    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETXK\v\DLE\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETXM\DC3\DC4\n\
+    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETXK\DC3\DC4\n\
     \4\n\
-    \\EOT\EOT\NUL\STX\ENQ\DC2\ETXO\EOT\DC4\SUB' Expression to match years. Default: *\n\
+    \\EOT\EOT\NUL\STX\ENQ\DC2\ETXM\EOT\DC4\SUB' Expression to match years. Default: *\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\ENQ\DC2\ETXO\EOT\n\
+    \\ENQ\EOT\NUL\STX\ENQ\ENQ\DC2\ETXM\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\SOH\DC2\ETXO\v\SI\n\
+    \\ENQ\EOT\NUL\STX\ENQ\SOH\DC2\ETXM\v\SI\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\ETX\DC2\ETXO\DC2\DC3\n\
+    \\ENQ\EOT\NUL\STX\ENQ\ETX\DC2\ETXM\DC2\DC3\n\
     \?\n\
-    \\EOT\EOT\NUL\STX\ACK\DC2\ETXQ\EOT\ESC\SUB2 Expression to match days of the week. Default: *\n\
+    \\EOT\EOT\NUL\STX\ACK\DC2\ETXO\EOT\ESC\SUB2 Expression to match days of the week. Default: *\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\ENQ\DC2\ETXQ\EOT\n\
+    \\ENQ\EOT\NUL\STX\ACK\ENQ\DC2\ETXO\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\SOH\DC2\ETXQ\v\SYN\n\
+    \\ENQ\EOT\NUL\STX\ACK\SOH\DC2\ETXO\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\ETX\DC2\ETXQ\EM\SUB\n\
+    \\ENQ\EOT\NUL\STX\ACK\ETX\DC2\ETXO\EM\SUB\n\
     \G\n\
-    \\EOT\EOT\NUL\STX\a\DC2\ETXS\EOT\ETB\SUB: Free-form comment describing the intention of this spec.\n\
+    \\EOT\EOT\NUL\STX\a\DC2\ETXQ\EOT\ETB\SUB: Free-form comment describing the intention of this spec.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\a\ENQ\DC2\ETXS\EOT\n\
+    \\ENQ\EOT\NUL\STX\a\ENQ\DC2\ETXQ\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\a\SOH\DC2\ETXS\v\DC2\n\
+    \\ENQ\EOT\NUL\STX\a\SOH\DC2\ETXQ\v\DC2\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\a\ETX\DC2\ETXS\NAK\SYN\n\
+    \\ENQ\EOT\NUL\STX\a\ETX\DC2\ETXQ\NAK\SYN\n\
     \\185\STX\n\
-    \\STX\EOT\SOH\DC2\EOTZ\NULa\SOH\SUB\172\STX Range represents a set of integer values, used to match fields of a calendar\n\
+    \\STX\EOT\SOH\DC2\EOTX\NUL_\SOH\SUB\172\STX Range represents a set of integer values, used to match fields of a calendar\n\
     \ time in StructuredCalendarSpec. If end < start, then end is interpreted as\n\
     \ equal to start. This means you can use a Range with start set to a value, and\n\
     \ end and step unset (defaulting to 0) to represent a single value.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETXZ\b\r\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETXX\b\r\n\
     \*\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\\\EOT\DC4\SUB\GS Start of range (inclusive).\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETXZ\EOT\DC4\SUB\GS Start of range (inclusive).\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX\\\EOT\t\n\
+    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETXZ\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\\\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETXZ\n\
     \\SI\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\\\DC2\DC3\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETXZ\DC2\DC3\n\
     \(\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX^\EOT\DC2\SUB\ESC End of range (inclusive).\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\\\EOT\DC2\SUB\ESC End of range (inclusive).\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ENQ\DC2\ETX^\EOT\t\n\
+    \\ENQ\EOT\SOH\STX\SOH\ENQ\DC2\ETX\\\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX^\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\\\n\
     \\r\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX^\DLE\DC1\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\\\DLE\DC1\n\
     \*\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETX`\EOT\DC3\SUB\GS Step (optional, default 1).\n\
+    \\EOT\EOT\SOH\STX\STX\DC2\ETX^\EOT\DC3\SUB\GS Step (optional, default 1).\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ENQ\DC2\ETX`\EOT\t\n\
+    \\ENQ\EOT\SOH\STX\STX\ENQ\DC2\ETX^\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX`\n\
+    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX^\n\
     \\SO\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX`\DC1\DC2\n\
+    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX^\DC1\DC2\n\
     \\136\EOT\n\
-    \\STX\EOT\STX\DC2\EOTl\NUL\DEL\SOH\SUB\251\ETX StructuredCalendarSpec describes an event specification relative to the\n\
+    \\STX\EOT\STX\DC2\EOTj\NUL}\SOH\SUB\251\ETX StructuredCalendarSpec describes an event specification relative to the\n\
     \ calendar, in a form that's easy to work with programmatically. Each field can\n\
     \ be one or more ranges.\n\
     \ A timestamp matches if at least one range of each field matches the\n\
@@ -5576,98 +5677,98 @@ packedFileDescriptor
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETXl\b\RS\n\
+    \\ETX\EOT\STX\SOH\DC2\ETXj\b\RS\n\
     \#\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETXn\EOT\RS\SUB\SYN Match seconds (0-59)\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETXl\EOT\RS\SUB\SYN Match seconds (0-59)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\EOT\DC2\ETXn\EOT\f\n\
+    \\ENQ\EOT\STX\STX\NUL\EOT\DC2\ETXl\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETXn\r\DC2\n\
+    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETXl\r\DC2\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXn\DC3\EM\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXl\DC3\EM\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXn\FS\GS\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXl\FS\GS\n\
     \#\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETXp\EOT\RS\SUB\SYN Match minutes (0-59)\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETXn\EOT\RS\SUB\SYN Match minutes (0-59)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\EOT\DC2\ETXp\EOT\f\n\
+    \\ENQ\EOT\STX\STX\SOH\EOT\DC2\ETXn\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETXp\r\DC2\n\
+    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETXn\r\DC2\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETXp\DC3\EM\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETXn\DC3\EM\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETXp\FS\GS\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETXn\FS\GS\n\
     \!\n\
-    \\EOT\EOT\STX\STX\STX\DC2\ETXr\EOT\FS\SUB\DC4 Match hours (0-23)\n\
+    \\EOT\EOT\STX\STX\STX\DC2\ETXp\EOT\FS\SUB\DC4 Match hours (0-23)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\EOT\DC2\ETXr\EOT\f\n\
+    \\ENQ\EOT\STX\STX\STX\EOT\DC2\ETXp\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ACK\DC2\ETXr\r\DC2\n\
+    \\ENQ\EOT\STX\STX\STX\ACK\DC2\ETXp\r\DC2\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETXr\DC3\ETB\n\
+    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETXp\DC3\ETB\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETXr\SUB\ESC\n\
+    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETXp\SUB\ESC\n\
     \\152\SOH\n\
-    \\EOT\EOT\STX\STX\ETX\DC2\ETXv\EOT$\SUB\138\SOH Match days of the month (1-31)\n\
+    \\EOT\EOT\STX\STX\ETX\DC2\ETXt\EOT$\SUB\138\SOH Match days of the month (1-31)\n\
     \ (-- api-linter: core::0140::prepositions=disabled\n\
     \     aip.dev/not-precedent: standard name of field --)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\EOT\DC2\ETXv\EOT\f\n\
+    \\ENQ\EOT\STX\STX\ETX\EOT\DC2\ETXt\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ACK\DC2\ETXv\r\DC2\n\
+    \\ENQ\EOT\STX\STX\ETX\ACK\DC2\ETXt\r\DC2\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETXv\DC3\US\n\
+    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETXt\DC3\US\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETXv\"#\n\
+    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETXt\"#\n\
     \\"\n\
-    \\EOT\EOT\STX\STX\EOT\DC2\ETXx\EOT\GS\SUB\NAK Match months (1-12)\n\
+    \\EOT\EOT\STX\STX\EOT\DC2\ETXv\EOT\GS\SUB\NAK Match months (1-12)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\EOT\DC2\ETXx\EOT\f\n\
+    \\ENQ\EOT\STX\STX\EOT\EOT\DC2\ETXv\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ACK\DC2\ETXx\r\DC2\n\
+    \\ENQ\EOT\STX\STX\EOT\ACK\DC2\ETXv\r\DC2\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\SOH\DC2\ETXx\DC3\CAN\n\
+    \\ENQ\EOT\STX\STX\EOT\SOH\DC2\ETXv\DC3\CAN\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ETX\DC2\ETXx\ESC\FS\n\
+    \\ENQ\EOT\STX\STX\EOT\ETX\DC2\ETXv\ESC\FS\n\
     \\ESC\n\
-    \\EOT\EOT\STX\STX\ENQ\DC2\ETXz\EOT\FS\SUB\SO Match years.\n\
+    \\EOT\EOT\STX\STX\ENQ\DC2\ETXx\EOT\FS\SUB\SO Match years.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ENQ\EOT\DC2\ETXz\EOT\f\n\
+    \\ENQ\EOT\STX\STX\ENQ\EOT\DC2\ETXx\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ENQ\ACK\DC2\ETXz\r\DC2\n\
+    \\ENQ\EOT\STX\STX\ENQ\ACK\DC2\ETXx\r\DC2\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ENQ\SOH\DC2\ETXz\DC3\ETB\n\
+    \\ENQ\EOT\STX\STX\ENQ\SOH\DC2\ETXx\DC3\ETB\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ENQ\ETX\DC2\ETXz\SUB\ESC\n\
+    \\ENQ\EOT\STX\STX\ENQ\ETX\DC2\ETXx\SUB\ESC\n\
     \9\n\
-    \\EOT\EOT\STX\STX\ACK\DC2\ETX|\EOT#\SUB, Match days of the week (0-6; 0 is Sunday).\n\
+    \\EOT\EOT\STX\STX\ACK\DC2\ETXz\EOT#\SUB, Match days of the week (0-6; 0 is Sunday).\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ACK\EOT\DC2\ETX|\EOT\f\n\
+    \\ENQ\EOT\STX\STX\ACK\EOT\DC2\ETXz\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ACK\ACK\DC2\ETX|\r\DC2\n\
+    \\ENQ\EOT\STX\STX\ACK\ACK\DC2\ETXz\r\DC2\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ACK\SOH\DC2\ETX|\DC3\RS\n\
+    \\ENQ\EOT\STX\STX\ACK\SOH\DC2\ETXz\DC3\RS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ACK\ETX\DC2\ETX|!\"\n\
+    \\ENQ\EOT\STX\STX\ACK\ETX\DC2\ETXz!\"\n\
     \G\n\
-    \\EOT\EOT\STX\STX\a\DC2\ETX~\EOT\ETB\SUB: Free-form comment describing the intention of this spec.\n\
+    \\EOT\EOT\STX\STX\a\DC2\ETX|\EOT\ETB\SUB: Free-form comment describing the intention of this spec.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\a\ENQ\DC2\ETX~\EOT\n\
+    \\ENQ\EOT\STX\STX\a\ENQ\DC2\ETX|\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\a\SOH\DC2\ETX~\v\DC2\n\
+    \\ENQ\EOT\STX\STX\a\SOH\DC2\ETX|\v\DC2\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\a\ETX\DC2\ETX~\NAK\SYN\n\
+    \\ENQ\EOT\STX\STX\a\ETX\DC2\ETX|\NAK\SYN\n\
     \\150\ENQ\n\
-    \\STX\EOT\ETX\DC2\ACK\140\SOH\NUL\143\SOH\SOH\SUB\135\ENQ IntervalSpec matches times that can be expressed as:\n\
+    \\STX\EOT\ETX\DC2\ACK\138\SOH\NUL\141\SOH\SOH\SUB\135\ENQ IntervalSpec matches times that can be expressed as:\n\
     \ epoch + n * interval + phase\n\
     \ where n is an integer.\n\
     \ phase defaults to zero if missing. interval is required.\n\
@@ -5680,33 +5781,25 @@ packedFileDescriptor
     \ days, 5 hours, and 23 minutes would match 2022-02-20T05:23:00Z instead.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\ETX\SOH\DC2\EOT\140\SOH\b\DC4\n\
+    \\ETX\EOT\ETX\SOH\DC2\EOT\138\SOH\b\DC4\n\
     \\f\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\EOT\141\SOH\EOTK\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\EOT\139\SOH\EOT*\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\NUL\ACK\DC2\EOT\141\SOH\EOT\FS\n\
+    \\ENQ\EOT\ETX\STX\NUL\ACK\DC2\EOT\139\SOH\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\EOT\141\SOH\GS%\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\EOT\139\SOH\GS%\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\EOT\141\SOH()\n\
-    \\r\n\
-    \\ENQ\EOT\ETX\STX\NUL\b\DC2\EOT\141\SOH*J\n\
-    \\DLE\n\
-    \\b\EOT\ETX\STX\NUL\b\243\251\ETX\DC2\EOT\141\SOH+I\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\EOT\139\SOH()\n\
     \\f\n\
-    \\EOT\EOT\ETX\STX\SOH\DC2\EOT\142\SOH\EOTH\n\
+    \\EOT\EOT\ETX\STX\SOH\DC2\EOT\140\SOH\EOT'\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\SOH\ACK\DC2\EOT\142\SOH\EOT\FS\n\
+    \\ENQ\EOT\ETX\STX\SOH\ACK\DC2\EOT\140\SOH\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\EOT\142\SOH\GS\"\n\
+    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\EOT\140\SOH\GS\"\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\EOT\142\SOH%&\n\
-    \\r\n\
-    \\ENQ\EOT\ETX\STX\SOH\b\DC2\EOT\142\SOH'G\n\
-    \\DLE\n\
-    \\b\EOT\ETX\STX\SOH\b\243\251\ETX\DC2\EOT\142\SOH(F\n\
-    \\170\a\n\
-    \\STX\EOT\EOT\DC2\ACK\160\SOH\NUL\224\SOH\SOH\SUB\155\a ScheduleSpec is a complete description of a set of absolute timestamps\n\
+    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\EOT\140\SOH%&\n\
+    \\179\b\n\
+    \\STX\EOT\EOT\DC2\ACK\161\SOH\NUL\225\SOH\SOH\SUB\164\b ScheduleSpec is a complete description of a set of absolute timestamps\n\
     \ (possibly infinite) that an action should occur at. The meaning of a\n\
     \ ScheduleSpec depends only on its contents and never changes, except that the\n\
     \ definition of a time zone can change over time (most commonly, when daylight\n\
@@ -5722,21 +5815,24 @@ packedFileDescriptor
     \ structured_calendar (and maybe interval and timezone_name), so if you\n\
     \ Describe a schedule, you'll see only structured_calendar, interval, etc.\n\
     \\n\
+    \ If a spec has no matching times after the current time, then the schedule\n\
+    \ will be subject to automatic deletion (after several days).\n\
+    \\n\
     \\v\n\
-    \\ETX\EOT\EOT\SOH\DC2\EOT\160\SOH\b\DC4\n\
+    \\ETX\EOT\EOT\SOH\DC2\EOT\161\SOH\b\DC4\n\
     \7\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\EOT\162\SOH\EOT<\SUB) Calendar-based specifications of times.\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\EOT\163\SOH\EOT<\SUB) Calendar-based specifications of times.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\NUL\EOT\DC2\EOT\162\SOH\EOT\f\n\
+    \\ENQ\EOT\EOT\STX\NUL\EOT\DC2\EOT\163\SOH\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\EOT\162\SOH\r#\n\
+    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\EOT\163\SOH\r#\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\EOT\162\SOH$7\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\EOT\163\SOH$7\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\EOT\162\SOH:;\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\EOT\163\SOH:;\n\
     \\168\t\n\
-    \\EOT\EOT\EOT\STX\SOH\DC2\EOT\183\SOH\EOT$\SUB\153\t cron_string holds a traditional cron specification as a string. It\n\
+    \\EOT\EOT\EOT\STX\SOH\DC2\EOT\184\SOH\EOT$\SUB\153\t cron_string holds a traditional cron specification as a string. It\n\
     \ accepts 5, 6, or 7 fields, separated by spaces, and interprets them the\n\
     \ same way as CalendarSpec.\n\
     \ 5 fields:         minute, hour, day_of_month, month, day_of_week\n\
@@ -5758,104 +5854,92 @@ packedFileDescriptor
     \ with a unit suffix s, m, h, or d.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\SOH\EOT\DC2\EOT\183\SOH\EOT\f\n\
+    \\ENQ\EOT\EOT\STX\SOH\EOT\DC2\EOT\184\SOH\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\SOH\ENQ\DC2\EOT\183\SOH\r\DC3\n\
+    \\ENQ\EOT\EOT\STX\SOH\ENQ\DC2\EOT\184\SOH\r\DC3\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\EOT\183\SOH\DC4\US\n\
+    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\EOT\184\SOH\DC4\US\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\EOT\183\SOH\"#\n\
+    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\EOT\184\SOH\"#\n\
     \7\n\
-    \\EOT\EOT\EOT\STX\STX\DC2\EOT\185\SOH\EOT'\SUB) Calendar-based specifications of times.\n\
+    \\EOT\EOT\EOT\STX\STX\DC2\EOT\186\SOH\EOT'\SUB) Calendar-based specifications of times.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\STX\EOT\DC2\EOT\185\SOH\EOT\f\n\
+    \\ENQ\EOT\EOT\STX\STX\EOT\DC2\EOT\186\SOH\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\STX\ACK\DC2\EOT\185\SOH\r\EM\n\
+    \\ENQ\EOT\EOT\STX\STX\ACK\DC2\EOT\186\SOH\r\EM\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\STX\SOH\DC2\EOT\185\SOH\SUB\"\n\
+    \\ENQ\EOT\EOT\STX\STX\SOH\DC2\EOT\186\SOH\SUB\"\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\STX\ETX\DC2\EOT\185\SOH%&\n\
+    \\ENQ\EOT\EOT\STX\STX\ETX\DC2\EOT\186\SOH%&\n\
     \7\n\
-    \\EOT\EOT\EOT\STX\ETX\DC2\EOT\187\SOH\EOT'\SUB) Interval-based specifications of times.\n\
+    \\EOT\EOT\EOT\STX\ETX\DC2\EOT\188\SOH\EOT'\SUB) Interval-based specifications of times.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\ETX\EOT\DC2\EOT\187\SOH\EOT\f\n\
+    \\ENQ\EOT\EOT\STX\ETX\EOT\DC2\EOT\188\SOH\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\ETX\ACK\DC2\EOT\187\SOH\r\EM\n\
+    \\ENQ\EOT\EOT\STX\ETX\ACK\DC2\EOT\188\SOH\r\EM\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\ETX\SOH\DC2\EOT\187\SOH\SUB\"\n\
+    \\ENQ\EOT\EOT\STX\ETX\SOH\DC2\EOT\188\SOH\SUB\"\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\ETX\ETX\DC2\EOT\187\SOH%&\n\
+    \\ENQ\EOT\EOT\STX\ETX\ETX\DC2\EOT\188\SOH%&\n\
     \l\n\
-    \\EOT\EOT\EOT\STX\EOT\DC2\EOT\189\SOH\EOTC\SUB; Any timestamps matching any of exclude_* will be skipped.\n\
+    \\EOT\EOT\EOT\STX\EOT\DC2\EOT\190\SOH\EOTC\SUB; Any timestamps matching any of exclude_* will be skipped.\n\
     \\"! use exclude_structured_calendar\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\EOT\EOT\DC2\EOT\189\SOH\EOT\f\n\
+    \\ENQ\EOT\EOT\STX\EOT\EOT\DC2\EOT\190\SOH\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\EOT\ACK\DC2\EOT\189\SOH\r\EM\n\
+    \\ENQ\EOT\EOT\STX\EOT\ACK\DC2\EOT\190\SOH\r\EM\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\EOT\SOH\DC2\EOT\189\SOH\SUB*\n\
+    \\ENQ\EOT\EOT\STX\EOT\SOH\DC2\EOT\190\SOH\SUB*\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\EOT\ETX\DC2\EOT\189\SOH-.\n\
+    \\ENQ\EOT\EOT\STX\EOT\ETX\DC2\EOT\190\SOH-.\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\EOT\b\DC2\EOT\189\SOH/B\n\
+    \\ENQ\EOT\EOT\STX\EOT\b\DC2\EOT\190\SOH/B\n\
     \\SO\n\
-    \\ACK\EOT\EOT\STX\EOT\b\ETX\DC2\EOT\189\SOH0A\n\
+    \\ACK\EOT\EOT\STX\EOT\b\ETX\DC2\EOT\190\SOH0A\n\
     \\f\n\
-    \\EOT\EOT\EOT\STX\ENQ\DC2\EOT\190\SOH\EOTD\n\
+    \\EOT\EOT\EOT\STX\ENQ\DC2\EOT\191\SOH\EOTD\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\ENQ\EOT\DC2\EOT\190\SOH\EOT\f\n\
+    \\ENQ\EOT\EOT\STX\ENQ\EOT\DC2\EOT\191\SOH\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\ENQ\ACK\DC2\EOT\190\SOH\r#\n\
+    \\ENQ\EOT\EOT\STX\ENQ\ACK\DC2\EOT\191\SOH\r#\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\ENQ\SOH\DC2\EOT\190\SOH$?\n\
+    \\ENQ\EOT\EOT\STX\ENQ\SOH\DC2\EOT\191\SOH$?\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\ENQ\ETX\DC2\EOT\190\SOHBC\n\
+    \\ENQ\EOT\EOT\STX\ENQ\ETX\DC2\EOT\191\SOHBC\n\
     \\153\SOH\n\
-    \\EOT\EOT\EOT\STX\ACK\DC2\EOT\193\SOH\EOTJ\SUB\138\SOH If start_time is set, any timestamps before start_time will be skipped.\n\
+    \\EOT\EOT\EOT\STX\ACK\DC2\EOT\194\SOH\EOT-\SUB\138\SOH If start_time is set, any timestamps before start_time will be skipped.\n\
     \ (Together, start_time and end_time make an inclusive interval.)\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\ACK\ACK\DC2\EOT\193\SOH\EOT\GS\n\
+    \\ENQ\EOT\EOT\STX\ACK\ACK\DC2\EOT\194\SOH\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\ACK\SOH\DC2\EOT\193\SOH\RS(\n\
+    \\ENQ\EOT\EOT\STX\ACK\SOH\DC2\EOT\194\SOH\RS(\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\ACK\ETX\DC2\EOT\193\SOH+,\n\
-    \\r\n\
-    \\ENQ\EOT\EOT\STX\ACK\b\DC2\EOT\193\SOH-I\n\
-    \\DLE\n\
-    \\b\EOT\EOT\STX\ACK\b\242\251\ETX\DC2\EOT\193\SOH.H\n\
+    \\ENQ\EOT\EOT\STX\ACK\ETX\DC2\EOT\194\SOH+,\n\
     \R\n\
-    \\EOT\EOT\EOT\STX\a\DC2\EOT\195\SOH\EOTH\SUBD If end_time is set, any timestamps after end_time will be skipped.\n\
+    \\EOT\EOT\EOT\STX\a\DC2\EOT\196\SOH\EOT+\SUBD If end_time is set, any timestamps after end_time will be skipped.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\a\ACK\DC2\EOT\195\SOH\EOT\GS\n\
+    \\ENQ\EOT\EOT\STX\a\ACK\DC2\EOT\196\SOH\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\a\SOH\DC2\EOT\195\SOH\RS&\n\
+    \\ENQ\EOT\EOT\STX\a\SOH\DC2\EOT\196\SOH\RS&\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\a\ETX\DC2\EOT\195\SOH)*\n\
-    \\r\n\
-    \\ENQ\EOT\EOT\STX\a\b\DC2\EOT\195\SOH+G\n\
-    \\DLE\n\
-    \\b\EOT\EOT\STX\a\b\242\251\ETX\DC2\EOT\195\SOH,F\n\
+    \\ENQ\EOT\EOT\STX\a\ETX\DC2\EOT\196\SOH)*\n\
     \q\n\
-    \\EOT\EOT\EOT\STX\b\DC2\EOT\198\SOH\EOTI\SUBc All timestamps will be incremented by a random value from 0 to this\n\
+    \\EOT\EOT\EOT\STX\b\DC2\EOT\199\SOH\EOT(\SUBc All timestamps will be incremented by a random value from 0 to this\n\
     \ amount of jitter. Default: 0\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\b\ACK\DC2\EOT\198\SOH\EOT\FS\n\
+    \\ENQ\EOT\EOT\STX\b\ACK\DC2\EOT\199\SOH\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\b\SOH\DC2\EOT\198\SOH\GS#\n\
+    \\ENQ\EOT\EOT\STX\b\SOH\DC2\EOT\199\SOH\GS#\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\b\ETX\DC2\EOT\198\SOH&'\n\
-    \\r\n\
-    \\ENQ\EOT\EOT\STX\b\b\DC2\EOT\198\SOH(H\n\
-    \\DLE\n\
-    \\b\EOT\EOT\STX\b\b\243\251\ETX\DC2\EOT\198\SOH)G\n\
+    \\ENQ\EOT\EOT\STX\b\ETX\DC2\EOT\199\SOH&'\n\
     \\187\t\n\
-    \\EOT\EOT\EOT\STX\t\DC2\EOT\222\SOH\EOT\RS\SUB\172\t Time zone to interpret all calendar-based specs in.\n\
+    \\EOT\EOT\EOT\STX\t\DC2\EOT\223\SOH\EOT\RS\SUB\172\t Time zone to interpret all calendar-based specs in.\n\
     \\n\
     \ If unset, defaults to UTC. We recommend using UTC for your application if\n\
     \ at all possible, to avoid various surprising properties of time zones.\n\
@@ -5879,546 +5963,541 @@ packedFileDescriptor
     \ Also note that no actions are taken on leap-seconds (e.g. 23:59:60 UTC).\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\t\ENQ\DC2\EOT\222\SOH\EOT\n\
+    \\ENQ\EOT\EOT\STX\t\ENQ\DC2\EOT\223\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\t\SOH\DC2\EOT\222\SOH\v\CAN\n\
+    \\ENQ\EOT\EOT\STX\t\SOH\DC2\EOT\223\SOH\v\CAN\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\t\ETX\DC2\EOT\222\SOH\ESC\GS\n\
+    \\ENQ\EOT\EOT\STX\t\ETX\DC2\EOT\223\SOH\ESC\GS\n\
     \\f\n\
     \\EOT\EOT\EOT\STX\n\
-    \\DC2\EOT\223\SOH\EOT\GS\n\
+    \\DC2\EOT\224\SOH\EOT\GS\n\
     \\r\n\
     \\ENQ\EOT\EOT\STX\n\
-    \\ENQ\DC2\EOT\223\SOH\EOT\t\n\
+    \\ENQ\DC2\EOT\224\SOH\EOT\t\n\
     \\r\n\
     \\ENQ\EOT\EOT\STX\n\
-    \\SOH\DC2\EOT\223\SOH\n\
+    \\SOH\DC2\EOT\224\SOH\n\
     \\ETB\n\
     \\r\n\
     \\ENQ\EOT\EOT\STX\n\
-    \\ETX\DC2\EOT\223\SOH\SUB\FS\n\
+    \\ETX\DC2\EOT\224\SOH\SUB\FS\n\
     \\f\n\
-    \\STX\EOT\ENQ\DC2\ACK\226\SOH\NUL\244\SOH\SOH\n\
+    \\STX\EOT\ENQ\DC2\ACK\227\SOH\NUL\245\SOH\SOH\n\
     \\v\n\
-    \\ETX\EOT\ENQ\SOH\DC2\EOT\226\SOH\b\CAN\n\
+    \\ETX\EOT\ENQ\SOH\DC2\EOT\227\SOH\b\CAN\n\
     \\222\SOH\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\EOT\231\SOH\EOTC\SUB\207\SOH Policy for overlaps.\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\EOT\232\SOH\EOTC\SUB\207\SOH Policy for overlaps.\n\
     \ Note that this can be changed after a schedule has taken some actions,\n\
     \ and some changes might produce unintuitive results. In general, the later\n\
     \ policy overrides the earlier policy.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\EOT\231\SOH\EOT/\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\EOT\232\SOH\EOT/\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\EOT\231\SOH0>\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\EOT\232\SOH0>\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\EOT\231\SOHAB\n\
-    \\174\STX\n\
-    \\EOT\EOT\ENQ\STX\SOH\DC2\EOT\238\SOH\EOTQ\SUB\159\STX Policy for catchups:\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\EOT\232\SOHAB\n\
+    \\172\STX\n\
+    \\EOT\EOT\ENQ\STX\SOH\DC2\EOT\239\SOH\EOT0\SUB\157\STX Policy for catchups:\n\
     \ If the Temporal server misses an action due to one or more components\n\
     \ being down, and comes back up, the action will be run if the scheduled\n\
     \ time is within this window from the current time.\n\
-    \ This value defaults to 60 seconds, and can't be less than 10 seconds.\n\
+    \ This value defaults to one year, and can't be less than 10 seconds.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ACK\DC2\EOT\238\SOH\EOT\FS\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ACK\DC2\EOT\239\SOH\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\EOT\238\SOH\GS+\n\
+    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\EOT\239\SOH\GS+\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\EOT\238\SOH./\n\
-    \\r\n\
-    \\ENQ\EOT\ENQ\STX\SOH\b\DC2\EOT\238\SOH0P\n\
-    \\DLE\n\
-    \\b\EOT\ENQ\STX\SOH\b\243\251\ETX\DC2\EOT\238\SOH1O\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\EOT\239\SOH./\n\
     \\180\SOH\n\
-    \\EOT\EOT\ENQ\STX\STX\DC2\EOT\243\SOH\EOT\RS\SUB\165\SOH If true, and a workflow run fails or times out, turn on \"paused\".\n\
+    \\EOT\EOT\ENQ\STX\STX\DC2\EOT\244\SOH\EOT\RS\SUB\165\SOH If true, and a workflow run fails or times out, turn on \"paused\".\n\
     \ This applies after retry policies: the full chain of retries must fail to\n\
     \ trigger a pause here.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\STX\ENQ\DC2\EOT\243\SOH\EOT\b\n\
+    \\ENQ\EOT\ENQ\STX\STX\ENQ\DC2\EOT\244\SOH\EOT\b\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\EOT\243\SOH\t\EM\n\
+    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\EOT\244\SOH\t\EM\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\EOT\243\SOH\FS\GS\n\
+    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\EOT\244\SOH\FS\GS\n\
     \\f\n\
-    \\STX\EOT\ACK\DC2\ACK\246\SOH\NUL\255\SOH\SOH\n\
+    \\STX\EOT\ACK\DC2\ACK\247\SOH\NUL\128\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\ACK\SOH\DC2\EOT\246\SOH\b\SYN\n\
+    \\ETX\EOT\ACK\SOH\DC2\EOT\247\SOH\b\SYN\n\
     \\SO\n\
-    \\EOT\EOT\ACK\b\NUL\DC2\ACK\247\SOH\EOT\254\SOH\ENQ\n\
+    \\EOT\EOT\ACK\b\NUL\DC2\ACK\248\SOH\EOT\255\SOH\ENQ\n\
     \\r\n\
-    \\ENQ\EOT\ACK\b\NUL\SOH\DC2\EOT\247\SOH\n\
+    \\ENQ\EOT\ACK\b\NUL\SOH\DC2\EOT\248\SOH\n\
     \\DLE\n\
     \\241\SOH\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\EOT\253\SOH\bM\SUB\226\SOH All fields of NewWorkflowExecutionInfo are valid except for:\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\EOT\254\SOH\bM\SUB\226\SOH All fields of NewWorkflowExecutionInfo are valid except for:\n\
     \ - workflow_id_reuse_policy\n\
     \ - cron_schedule\n\
     \ The workflow id of the started workflow may not match this exactly,\n\
     \ it may have a timestamp appended for uniqueness.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\NUL\ACK\DC2\EOT\253\SOH\b9\n\
+    \\ENQ\EOT\ACK\STX\NUL\ACK\DC2\EOT\254\SOH\b9\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\EOT\253\SOH:H\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\EOT\254\SOH:H\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\EOT\253\SOHKL\n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\EOT\254\SOHKL\n\
     \\f\n\
-    \\STX\EOT\a\DC2\ACK\129\STX\NUL\138\STX\SOH\n\
+    \\STX\EOT\a\DC2\ACK\130\STX\NUL\139\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\a\SOH\DC2\EOT\129\STX\b\FS\n\
+    \\ETX\EOT\a\SOH\DC2\EOT\130\STX\b\FS\n\
     \]\n\
-    \\EOT\EOT\a\STX\NUL\DC2\EOT\131\STX\EOTM\SUBO Time that the action was taken (according to the schedule, including jitter).\n\
+    \\EOT\EOT\a\STX\NUL\DC2\EOT\132\STX\EOT0\SUBO Time that the action was taken (according to the schedule, including jitter).\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\NUL\ACK\DC2\EOT\131\STX\EOT\GS\n\
+    \\ENQ\EOT\a\STX\NUL\ACK\DC2\EOT\132\STX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\EOT\131\STX\RS+\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\EOT\132\STX\RS+\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\EOT\131\STX./\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\NUL\b\DC2\EOT\131\STX0L\n\
-    \\DLE\n\
-    \\b\EOT\a\STX\NUL\b\242\251\ETX\DC2\EOT\131\STX1K\n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\EOT\132\STX./\n\
     \;\n\
-    \\EOT\EOT\a\STX\SOH\DC2\EOT\134\STX\EOTK\SUB- Time that the action was taken (real time).\n\
+    \\EOT\EOT\a\STX\SOH\DC2\EOT\135\STX\EOT.\SUB- Time that the action was taken (real time).\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\SOH\ACK\DC2\EOT\134\STX\EOT\GS\n\
+    \\ENQ\EOT\a\STX\SOH\ACK\DC2\EOT\135\STX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\SOH\SOH\DC2\EOT\134\STX\RS)\n\
+    \\ENQ\EOT\a\STX\SOH\SOH\DC2\EOT\135\STX\RS)\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\SOH\ETX\DC2\EOT\134\STX,-\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\SOH\b\DC2\EOT\134\STX.J\n\
-    \\DLE\n\
-    \\b\EOT\a\STX\SOH\b\242\251\ETX\DC2\EOT\134\STX/I\n\
+    \\ENQ\EOT\a\STX\SOH\ETX\DC2\EOT\135\STX,-\n\
     \-\n\
-    \\EOT\EOT\a\STX\STX\DC2\EOT\137\STX\EOTH\SUB\US If action was start_workflow:\n\
+    \\EOT\EOT\a\STX\STX\DC2\EOT\138\STX\EOTH\SUB\US If action was start_workflow:\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\STX\ACK\DC2\EOT\137\STX\EOT,\n\
+    \\ENQ\EOT\a\STX\STX\ACK\DC2\EOT\138\STX\EOT,\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\STX\SOH\DC2\EOT\137\STX-B\n\
+    \\ENQ\EOT\a\STX\STX\SOH\DC2\EOT\138\STX-B\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\STX\ETX\DC2\EOT\137\STXEG\n\
+    \\ENQ\EOT\a\STX\STX\ETX\DC2\EOT\138\STXEG\n\
     \\f\n\
-    \\STX\EOT\b\DC2\ACK\140\STX\NUL\156\STX\SOH\n\
+    \\STX\EOT\b\DC2\ACK\141\STX\NUL\159\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\b\SOH\DC2\EOT\140\STX\b\NAK\n\
+    \\ETX\EOT\b\SOH\DC2\EOT\141\STX\b\NAK\n\
     \\211\SOH\n\
-    \\EOT\EOT\b\STX\NUL\DC2\EOT\144\STX\EOT\NAK\SUB\196\SOH Informative human-readable message with contextual notes, e.g. the reason\n\
+    \\EOT\EOT\b\STX\NUL\DC2\EOT\145\STX\EOT\NAK\SUB\196\SOH Informative human-readable message with contextual notes, e.g. the reason\n\
     \ a schedule is paused. The system may overwrite this message on certain\n\
     \ conditions, e.g. when pause-on-failure happens.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\EOT\144\STX\EOT\n\
+    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\EOT\145\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\EOT\144\STX\v\DLE\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\EOT\145\STX\v\DLE\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\EOT\144\STX\DC3\DC4\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\EOT\145\STX\DC3\DC4\n\
     \L\n\
-    \\EOT\EOT\b\STX\SOH\DC2\EOT\147\STX\EOT\DC4\SUB> If true, do not take any actions based on the schedule spec.\n\
+    \\EOT\EOT\b\STX\SOH\DC2\EOT\148\STX\EOT\DC4\SUB> If true, do not take any actions based on the schedule spec.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\EOT\147\STX\EOT\b\n\
+    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\EOT\148\STX\EOT\b\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\SOH\SOH\DC2\EOT\147\STX\t\SI\n\
+    \\ENQ\EOT\b\STX\SOH\SOH\DC2\EOT\148\STX\t\SI\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\SOH\ETX\DC2\EOT\147\STX\DC2\DC3\n\
-    \\207\STX\n\
-    \\EOT\EOT\b\STX\STX\DC2\EOT\154\STX\EOT\GS\SUB\192\STX If limited_actions is true, decrement remaining_actions after each\n\
+    \\ENQ\EOT\b\STX\SOH\ETX\DC2\EOT\148\STX\DC2\DC3\n\
+    \\204\ETX\n\
+    \\EOT\EOT\b\STX\STX\DC2\EOT\157\STX\EOT\GS\SUB\189\ETX If limited_actions is true, decrement remaining_actions after each\n\
     \ action, and do not take any more scheduled actions if remaining_actions\n\
     \ is zero. Actions may still be taken by explicit request (i.e. trigger\n\
     \ immediately or backfill). Skipped actions (due to overlap policy) do not\n\
     \ count against remaining actions.\n\
+    \ If a schedule has no more remaining actions, then the schedule will be\n\
+    \ subject to automatic deletion (after several days).\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\STX\ENQ\DC2\EOT\154\STX\EOT\b\n\
+    \\ENQ\EOT\b\STX\STX\ENQ\DC2\EOT\157\STX\EOT\b\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\STX\SOH\DC2\EOT\154\STX\t\CAN\n\
+    \\ENQ\EOT\b\STX\STX\SOH\DC2\EOT\157\STX\t\CAN\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\STX\ETX\DC2\EOT\154\STX\ESC\FS\n\
+    \\ENQ\EOT\b\STX\STX\ETX\DC2\EOT\157\STX\ESC\FS\n\
     \\f\n\
-    \\EOT\EOT\b\STX\ETX\DC2\EOT\155\STX\EOT \n\
+    \\EOT\EOT\b\STX\ETX\DC2\EOT\158\STX\EOT \n\
     \\r\n\
-    \\ENQ\EOT\b\STX\ETX\ENQ\DC2\EOT\155\STX\EOT\t\n\
+    \\ENQ\EOT\b\STX\ETX\ENQ\DC2\EOT\158\STX\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\ETX\SOH\DC2\EOT\155\STX\n\
+    \\ENQ\EOT\b\STX\ETX\SOH\DC2\EOT\158\STX\n\
     \\ESC\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\ETX\ETX\DC2\EOT\155\STX\RS\US\n\
+    \\ENQ\EOT\b\STX\ETX\ETX\DC2\EOT\158\STX\RS\US\n\
     \\f\n\
-    \\STX\EOT\t\DC2\ACK\158\STX\NUL\161\STX\SOH\n\
+    \\STX\EOT\t\DC2\ACK\161\STX\NUL\164\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\t\SOH\DC2\EOT\158\STX\b!\n\
-    \=\n\
-    \\EOT\EOT\t\STX\NUL\DC2\EOT\160\STX\EOTC\SUB/ Override overlap policy for this one request.\n\
+    \\ETX\EOT\t\SOH\DC2\EOT\161\STX\b!\n\
+    \E\n\
+    \\EOT\EOT\t\STX\NUL\DC2\EOT\163\STX\EOTC\SUB7 If set, override overlap policy for this one request.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\NUL\ACK\DC2\EOT\160\STX\EOT/\n\
+    \\ENQ\EOT\t\STX\NUL\ACK\DC2\EOT\163\STX\EOT/\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\NUL\SOH\DC2\EOT\160\STX0>\n\
+    \\ENQ\EOT\t\STX\NUL\SOH\DC2\EOT\163\STX0>\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\NUL\ETX\DC2\EOT\160\STXAB\n\
+    \\ENQ\EOT\t\STX\NUL\ETX\DC2\EOT\163\STXAB\n\
     \\f\n\
     \\STX\EOT\n\
-    \\DC2\ACK\163\STX\NUL\169\STX\SOH\n\
+    \\DC2\ACK\166\STX\NUL\177\STX\SOH\n\
     \\v\n\
     \\ETX\EOT\n\
-    \\SOH\DC2\EOT\163\STX\b\ETB\n\
-    \3\n\
+    \\SOH\DC2\EOT\166\STX\b\ETB\n\
+    \\148\ETX\n\
     \\EOT\EOT\n\
-    \\STX\NUL\DC2\EOT\165\STX\EOTJ\SUB% Time range to evaluate schedule in.\n\
+    \\STX\NUL\DC2\EOT\173\STX\EOT-\SUB\133\ETX Time range to evaluate schedule in. Currently, this time range is\n\
+    \ exclusive on start_time and inclusive on end_time. (This is admittedly\n\
+    \ counterintuitive and it may change in the future, so to be safe, use a\n\
+    \ start time strictly before a scheduled time.) Also note that an action\n\
+    \ nominally scheduled in the interval but with jitter that pushes it after\n\
+    \ end_time will not be included.\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ACK\DC2\EOT\165\STX\EOT\GS\n\
+    \\STX\NUL\ACK\DC2\EOT\173\STX\EOT\GS\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\SOH\DC2\EOT\165\STX\RS(\n\
+    \\STX\NUL\SOH\DC2\EOT\173\STX\RS(\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ETX\DC2\EOT\165\STX+,\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\NUL\b\DC2\EOT\165\STX-I\n\
-    \\DLE\n\
-    \\b\EOT\n\
-    \\STX\NUL\b\242\251\ETX\DC2\EOT\165\STX.H\n\
+    \\STX\NUL\ETX\DC2\EOT\173\STX+,\n\
     \\f\n\
     \\EOT\EOT\n\
-    \\STX\SOH\DC2\EOT\166\STX\EOTH\n\
+    \\STX\SOH\DC2\EOT\174\STX\EOT+\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\SOH\ACK\DC2\EOT\166\STX\EOT\GS\n\
+    \\STX\SOH\ACK\DC2\EOT\174\STX\EOT\GS\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\SOH\SOH\DC2\EOT\166\STX\RS&\n\
+    \\STX\SOH\SOH\DC2\EOT\174\STX\RS&\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\SOH\ETX\DC2\EOT\166\STX)*\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\SOH\b\DC2\EOT\166\STX+G\n\
-    \\DLE\n\
-    \\b\EOT\n\
-    \\STX\SOH\b\242\251\ETX\DC2\EOT\166\STX,F\n\
-    \9\n\
+    \\STX\SOH\ETX\DC2\EOT\174\STX)*\n\
+    \A\n\
     \\EOT\EOT\n\
-    \\STX\STX\DC2\EOT\168\STX\EOTC\SUB+ Override overlap policy for this request.\n\
+    \\STX\STX\DC2\EOT\176\STX\EOTC\SUB3 If set, override overlap policy for this request.\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\STX\ACK\DC2\EOT\168\STX\EOT/\n\
+    \\STX\STX\ACK\DC2\EOT\176\STX\EOT/\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\STX\SOH\DC2\EOT\168\STX0>\n\
+    \\STX\STX\SOH\DC2\EOT\176\STX0>\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\STX\ETX\DC2\EOT\168\STXAB\n\
+    \\STX\STX\ETX\DC2\EOT\176\STXAB\n\
     \\f\n\
-    \\STX\EOT\v\DC2\ACK\171\STX\NUL\184\STX\SOH\n\
+    \\STX\EOT\v\DC2\ACK\179\STX\NUL\192\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\v\SOH\DC2\EOT\171\STX\b\NAK\n\
+    \\ETX\EOT\v\SOH\DC2\EOT\179\STX\b\NAK\n\
     \7\n\
-    \\EOT\EOT\v\STX\NUL\DC2\EOT\173\STX\EOT6\SUB) If set, trigger one action immediately.\n\
+    \\EOT\EOT\v\STX\NUL\DC2\EOT\181\STX\EOT6\SUB) If set, trigger one action immediately.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\NUL\ACK\DC2\EOT\173\STX\EOT\GS\n\
+    \\ENQ\EOT\v\STX\NUL\ACK\DC2\EOT\181\STX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\NUL\SOH\DC2\EOT\173\STX\RS1\n\
+    \\ENQ\EOT\v\STX\NUL\SOH\DC2\EOT\181\STX\RS1\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\NUL\ETX\DC2\EOT\173\STX45\n\
+    \\ENQ\EOT\v\STX\NUL\ETX\DC2\EOT\181\STX45\n\
     \\203\SOH\n\
-    \\EOT\EOT\v\STX\SOH\DC2\EOT\178\STX\EOT2\SUB\188\SOH If set, runs though the specified time period(s) and takes actions as if that time\n\
+    \\EOT\EOT\v\STX\SOH\DC2\EOT\186\STX\EOT2\SUB\188\SOH If set, runs though the specified time period(s) and takes actions as if that time\n\
     \ passed by right now, all at once. The overlap policy can be overridden for the\n\
     \ scope of the backfill.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\EOT\DC2\EOT\178\STX\EOT\f\n\
+    \\ENQ\EOT\v\STX\SOH\EOT\DC2\EOT\186\STX\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\ACK\DC2\EOT\178\STX\r\FS\n\
+    \\ENQ\EOT\v\STX\SOH\ACK\DC2\EOT\186\STX\r\FS\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\SOH\DC2\EOT\178\STX\GS-\n\
+    \\ENQ\EOT\v\STX\SOH\SOH\DC2\EOT\186\STX\GS-\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\ETX\DC2\EOT\178\STX01\n\
+    \\ENQ\EOT\v\STX\SOH\ETX\DC2\EOT\186\STX01\n\
     \\130\SOH\n\
-    \\EOT\EOT\v\STX\STX\DC2\EOT\182\STX\EOT\NAK\SUBt If set, change the state to paused or unpaused (respectively) and set the\n\
+    \\EOT\EOT\v\STX\STX\DC2\EOT\190\STX\EOT\NAK\SUBt If set, change the state to paused or unpaused (respectively) and set the\n\
     \ notes field to the value of the string.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\STX\ENQ\DC2\EOT\182\STX\EOT\n\
+    \\ENQ\EOT\v\STX\STX\ENQ\DC2\EOT\190\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\STX\SOH\DC2\EOT\182\STX\v\DLE\n\
+    \\ENQ\EOT\v\STX\STX\SOH\DC2\EOT\190\STX\v\DLE\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\STX\ETX\DC2\EOT\182\STX\DC3\DC4\n\
+    \\ENQ\EOT\v\STX\STX\ETX\DC2\EOT\190\STX\DC3\DC4\n\
     \\f\n\
-    \\EOT\EOT\v\STX\ETX\DC2\EOT\183\STX\EOT\ETB\n\
+    \\EOT\EOT\v\STX\ETX\DC2\EOT\191\STX\EOT\ETB\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\ETX\ENQ\DC2\EOT\183\STX\EOT\n\
+    \\ENQ\EOT\v\STX\ETX\ENQ\DC2\EOT\191\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\ETX\SOH\DC2\EOT\183\STX\v\DC2\n\
+    \\ENQ\EOT\v\STX\ETX\SOH\DC2\EOT\191\STX\v\DC2\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\ETX\ETX\DC2\EOT\183\STX\NAK\SYN\n\
+    \\ENQ\EOT\v\STX\ETX\ETX\DC2\EOT\191\STX\NAK\SYN\n\
     \\f\n\
-    \\STX\EOT\f\DC2\ACK\186\STX\NUL\214\STX\SOH\n\
+    \\STX\EOT\f\DC2\ACK\194\STX\NUL\230\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\f\SOH\DC2\EOT\186\STX\b\DC4\n\
+    \\ETX\EOT\f\SOH\DC2\EOT\194\STX\b\DC4\n\
     \/\n\
-    \\EOT\EOT\f\STX\NUL\DC2\EOT\188\STX\EOT\ESC\SUB! Number of actions taken so far.\n\
+    \\EOT\EOT\f\STX\NUL\DC2\EOT\196\STX\EOT\ESC\SUB! Number of actions taken so far.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\EOT\188\STX\EOT\t\n\
+    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\EOT\196\STX\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\SOH\DC2\EOT\188\STX\n\
+    \\ENQ\EOT\f\STX\NUL\SOH\DC2\EOT\196\STX\n\
     \\SYN\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\ETX\DC2\EOT\188\STX\EM\SUB\n\
+    \\ENQ\EOT\f\STX\NUL\ETX\DC2\EOT\196\STX\EM\SUB\n\
     \a\n\
-    \\EOT\EOT\f\STX\SOH\DC2\EOT\191\STX\EOT$\SUBS Number of times a scheduled action was skipped due to missing the catchup window.\n\
+    \\EOT\EOT\f\STX\SOH\DC2\EOT\199\STX\EOT$\SUBS Number of times a scheduled action was skipped due to missing the catchup window.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SOH\ENQ\DC2\EOT\191\STX\EOT\t\n\
+    \\ENQ\EOT\f\STX\SOH\ENQ\DC2\EOT\199\STX\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SOH\SOH\DC2\EOT\191\STX\n\
+    \\ENQ\EOT\f\STX\SOH\SOH\DC2\EOT\199\STX\n\
     \\US\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SOH\ETX\DC2\EOT\191\STX\"#\n\
+    \\ENQ\EOT\f\STX\SOH\ETX\DC2\EOT\199\STX\"#\n\
     \9\n\
-    \\EOT\EOT\f\STX\STX\DC2\EOT\194\STX\EOT\RS\SUB+ Number of skipped actions due to overlap.\n\
+    \\EOT\EOT\f\STX\STX\DC2\EOT\202\STX\EOT\RS\SUB+ Number of skipped actions due to overlap.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\STX\ENQ\DC2\EOT\194\STX\EOT\t\n\
+    \\ENQ\EOT\f\STX\STX\ENQ\DC2\EOT\202\STX\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\STX\SOH\DC2\EOT\194\STX\n\
+    \\ENQ\EOT\f\STX\STX\SOH\DC2\EOT\202\STX\n\
     \\EM\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\STX\ETX\DC2\EOT\194\STX\FS\GS\n\
+    \\ENQ\EOT\f\STX\STX\ETX\DC2\EOT\202\STX\FS\GS\n\
+    \>\n\
+    \\EOT\EOT\f\STX\ETX\DC2\EOT\205\STX\EOT\RS\SUB0 Number of dropped actions due to buffer limit.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\ETX\ENQ\DC2\EOT\205\STX\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\ETX\SOH\DC2\EOT\205\STX\n\
+    \\CAN\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\ETX\ETX\DC2\EOT\205\STX\ESC\GS\n\
+    \\214\SOH\n\
+    \\EOT\EOT\f\STX\EOT\DC2\EOT\210\STX\EOT\ESC\SUB\199\SOH Number of actions in the buffer. The buffer holds the actions that cannot\n\
+    \ be immediately triggered (due to the overlap policy). These actions can be a result of\n\
+    \ the normal schedule or a backfill.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\EOT\ENQ\DC2\EOT\210\STX\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\EOT\SOH\DC2\EOT\210\STX\n\
+    \\NAK\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\EOT\ETX\DC2\EOT\210\STX\CAN\SUB\n\
     \\228\STX\n\
-    \\EOT\EOT\f\STX\ETX\DC2\EOT\201\STX\EOTL\SUB\213\STX Currently-running workflows started by this schedule. (There might be\n\
+    \\EOT\EOT\f\STX\ENQ\DC2\EOT\217\STX\EOTL\SUB\213\STX Currently-running workflows started by this schedule. (There might be\n\
     \ more than one if the overlap policy allows overlaps.)\n\
     \ Note that the run_ids in here are the original execution run ids as\n\
     \ started by the schedule. If the workflows retried, did continue-as-new,\n\
     \ or were reset, they might still be running but with a different run_id.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ETX\EOT\DC2\EOT\201\STX\EOT\f\n\
+    \\ENQ\EOT\f\STX\ENQ\EOT\DC2\EOT\217\STX\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ETX\ACK\DC2\EOT\201\STX\r5\n\
+    \\ENQ\EOT\f\STX\ENQ\ACK\DC2\EOT\217\STX\r5\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ETX\SOH\DC2\EOT\201\STX6G\n\
+    \\ENQ\EOT\f\STX\ENQ\SOH\DC2\EOT\217\STX6G\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ETX\ETX\DC2\EOT\201\STXJK\n\
+    \\ENQ\EOT\f\STX\ENQ\ETX\DC2\EOT\217\STXJK\n\
     \P\n\
-    \\EOT\EOT\f\STX\EOT\DC2\EOT\204\STX\EOT5\SUBB Most recent ten actual action times (including manual triggers).\n\
+    \\EOT\EOT\f\STX\ACK\DC2\EOT\220\STX\EOT5\SUBB Most recent ten actual action times (including manual triggers).\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\EOT\EOT\DC2\EOT\204\STX\EOT\f\n\
+    \\ENQ\EOT\f\STX\ACK\EOT\DC2\EOT\220\STX\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\EOT\ACK\DC2\EOT\204\STX\r!\n\
+    \\ENQ\EOT\f\STX\ACK\ACK\DC2\EOT\220\STX\r!\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\EOT\SOH\DC2\EOT\204\STX\"0\n\
+    \\ENQ\EOT\f\STX\ACK\SOH\DC2\EOT\220\STX\"0\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\EOT\ETX\DC2\EOT\204\STX34\n\
+    \\ENQ\EOT\f\STX\ACK\ETX\DC2\EOT\220\STX34\n\
     \0\n\
-    \\EOT\EOT\f\STX\ENQ\DC2\EOT\207\STX\EOT\\\SUB\" Next ten scheduled action times.\n\
+    \\EOT\EOT\f\STX\a\DC2\EOT\223\STX\EOT?\SUB\" Next ten scheduled action times.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ENQ\EOT\DC2\EOT\207\STX\EOT\f\n\
+    \\ENQ\EOT\f\STX\a\EOT\DC2\EOT\223\STX\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ENQ\ACK\DC2\EOT\207\STX\r&\n\
+    \\ENQ\EOT\f\STX\a\ACK\DC2\EOT\223\STX\r&\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ENQ\SOH\DC2\EOT\207\STX':\n\
+    \\ENQ\EOT\f\STX\a\SOH\DC2\EOT\223\STX':\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ENQ\ETX\DC2\EOT\207\STX=>\n\
-    \\r\n\
-    \\ENQ\EOT\f\STX\ENQ\b\DC2\EOT\207\STX?[\n\
-    \\DLE\n\
-    \\b\EOT\f\STX\ENQ\b\242\251\ETX\DC2\EOT\207\STX@Z\n\
+    \\ENQ\EOT\f\STX\a\ETX\DC2\EOT\223\STX=>\n\
     \@\n\
-    \\EOT\EOT\f\STX\ACK\DC2\EOT\210\STX\EOTK\SUB2 Timestamps of schedule creation and last update.\n\
+    \\EOT\EOT\f\STX\b\DC2\EOT\226\STX\EOT.\SUB2 Timestamps of schedule creation and last update.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ACK\ACK\DC2\EOT\210\STX\EOT\GS\n\
+    \\ENQ\EOT\f\STX\b\ACK\DC2\EOT\226\STX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ACK\SOH\DC2\EOT\210\STX\RS)\n\
+    \\ENQ\EOT\f\STX\b\SOH\DC2\EOT\226\STX\RS)\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ACK\ETX\DC2\EOT\210\STX,-\n\
-    \\r\n\
-    \\ENQ\EOT\f\STX\ACK\b\DC2\EOT\210\STX.J\n\
-    \\DLE\n\
-    \\b\EOT\f\STX\ACK\b\242\251\ETX\DC2\EOT\210\STX/I\n\
+    \\ENQ\EOT\f\STX\b\ETX\DC2\EOT\226\STX,-\n\
     \\f\n\
-    \\EOT\EOT\f\STX\a\DC2\EOT\211\STX\EOTK\n\
+    \\EOT\EOT\f\STX\t\DC2\EOT\227\STX\EOT.\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\a\ACK\DC2\EOT\211\STX\EOT\GS\n\
+    \\ENQ\EOT\f\STX\t\ACK\DC2\EOT\227\STX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\a\SOH\DC2\EOT\211\STX\RS)\n\
+    \\ENQ\EOT\f\STX\t\SOH\DC2\EOT\227\STX\RS)\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\a\ETX\DC2\EOT\211\STX,-\n\
-    \\r\n\
-    \\ENQ\EOT\f\STX\a\b\DC2\EOT\211\STX.J\n\
-    \\DLE\n\
-    \\b\EOT\f\STX\a\b\242\251\ETX\DC2\EOT\211\STX/I\n\
+    \\ENQ\EOT\f\STX\t\ETX\DC2\EOT\227\STX,-\n\
     \\f\n\
-    \\EOT\EOT\f\STX\b\DC2\EOT\213\STX\EOT:\n\
+    \\EOT\EOT\f\STX\n\
+    \\DC2\EOT\229\STX\EOT:\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\b\ENQ\DC2\EOT\213\STX\EOT\n\
+    \\ENQ\EOT\f\STX\n\
+    \\ENQ\DC2\EOT\229\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\b\SOH\DC2\EOT\213\STX\v!\n\
+    \\ENQ\EOT\f\STX\n\
+    \\SOH\DC2\EOT\229\STX\v!\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\b\ETX\DC2\EOT\213\STX$%\n\
+    \\ENQ\EOT\f\STX\n\
+    \\ETX\DC2\EOT\229\STX$%\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\b\b\DC2\EOT\213\STX&9\n\
+    \\ENQ\EOT\f\STX\n\
+    \\b\DC2\EOT\229\STX&9\n\
     \\SO\n\
-    \\ACK\EOT\f\STX\b\b\ETX\DC2\EOT\213\STX'8\n\
+    \\ACK\EOT\f\STX\n\
+    \\b\ETX\DC2\EOT\229\STX'8\n\
     \\f\n\
-    \\STX\EOT\r\DC2\ACK\216\STX\NUL\221\STX\SOH\n\
+    \\STX\EOT\r\DC2\ACK\232\STX\NUL\237\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\r\SOH\DC2\EOT\216\STX\b\DLE\n\
+    \\ETX\EOT\r\SOH\DC2\EOT\232\STX\b\DLE\n\
     \\f\n\
-    \\EOT\EOT\r\STX\NUL\DC2\EOT\217\STX\EOT\SUB\n\
+    \\EOT\EOT\r\STX\NUL\DC2\EOT\233\STX\EOT\SUB\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\NUL\ACK\DC2\EOT\217\STX\EOT\DLE\n\
+    \\ENQ\EOT\r\STX\NUL\ACK\DC2\EOT\233\STX\EOT\DLE\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\NUL\SOH\DC2\EOT\217\STX\DC1\NAK\n\
+    \\ENQ\EOT\r\STX\NUL\SOH\DC2\EOT\233\STX\DC1\NAK\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\NUL\ETX\DC2\EOT\217\STX\CAN\EM\n\
+    \\ENQ\EOT\r\STX\NUL\ETX\DC2\EOT\233\STX\CAN\EM\n\
     \\f\n\
-    \\EOT\EOT\r\STX\SOH\DC2\EOT\218\STX\EOT\RS\n\
+    \\EOT\EOT\r\STX\SOH\DC2\EOT\234\STX\EOT\RS\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SOH\ACK\DC2\EOT\218\STX\EOT\DC2\n\
+    \\ENQ\EOT\r\STX\SOH\ACK\DC2\EOT\234\STX\EOT\DC2\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SOH\SOH\DC2\EOT\218\STX\DC3\EM\n\
+    \\ENQ\EOT\r\STX\SOH\SOH\DC2\EOT\234\STX\DC3\EM\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SOH\ETX\DC2\EOT\218\STX\FS\GS\n\
+    \\ENQ\EOT\r\STX\SOH\ETX\DC2\EOT\234\STX\FS\GS\n\
     \\f\n\
-    \\EOT\EOT\r\STX\STX\DC2\EOT\219\STX\EOT\"\n\
+    \\EOT\EOT\r\STX\STX\DC2\EOT\235\STX\EOT\"\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\STX\ACK\DC2\EOT\219\STX\EOT\DC4\n\
+    \\ENQ\EOT\r\STX\STX\ACK\DC2\EOT\235\STX\EOT\DC4\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\STX\SOH\DC2\EOT\219\STX\NAK\GS\n\
+    \\ENQ\EOT\r\STX\STX\SOH\DC2\EOT\235\STX\NAK\GS\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\STX\ETX\DC2\EOT\219\STX !\n\
+    \\ENQ\EOT\r\STX\STX\ETX\DC2\EOT\235\STX !\n\
     \\f\n\
-    \\EOT\EOT\r\STX\ETX\DC2\EOT\220\STX\EOT\FS\n\
+    \\EOT\EOT\r\STX\ETX\DC2\EOT\236\STX\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ETX\ACK\DC2\EOT\220\STX\EOT\DC1\n\
+    \\ENQ\EOT\r\STX\ETX\ACK\DC2\EOT\236\STX\EOT\DC1\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ETX\SOH\DC2\EOT\220\STX\DC2\ETB\n\
+    \\ENQ\EOT\r\STX\ETX\SOH\DC2\EOT\236\STX\DC2\ETB\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ETX\ETX\DC2\EOT\220\STX\SUB\ESC\n\
+    \\ENQ\EOT\r\STX\ETX\ETX\DC2\EOT\236\STX\SUB\ESC\n\
     \\130\SOH\n\
-    \\STX\EOT\SO\DC2\ACK\225\STX\NUL\242\STX\SOH\SUBt ScheduleListInfo is an abbreviated set of values from Schedule and ScheduleInfo\n\
+    \\STX\EOT\SO\DC2\ACK\241\STX\NUL\130\ETX\SOH\SUBt ScheduleListInfo is an abbreviated set of values from Schedule and ScheduleInfo\n\
     \ that's returned in ListSchedules.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\SO\SOH\DC2\EOT\225\STX\b\CAN\n\
+    \\ETX\EOT\SO\SOH\DC2\EOT\241\STX\b\CAN\n\
     \Y\n\
-    \\EOT\EOT\SO\STX\NUL\DC2\EOT\228\STX\EOT\SUB\SUBK From spec:\n\
+    \\EOT\EOT\SO\STX\NUL\DC2\EOT\244\STX\EOT\SUB\SUBK From spec:\n\
     \ Some fields are dropped from this copy of spec: timezone_data\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\ACK\DC2\EOT\228\STX\EOT\DLE\n\
+    \\ENQ\EOT\SO\STX\NUL\ACK\DC2\EOT\244\STX\EOT\DLE\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\EOT\228\STX\DC1\NAK\n\
+    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\EOT\244\STX\DC1\NAK\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\EOT\228\STX\CAN\EM\n\
+    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\EOT\244\STX\CAN\EM\n\
     \\177\SOH\n\
-    \\EOT\EOT\SO\STX\SOH\DC2\EOT\233\STX\EOT:\SUB\162\SOH From action:\n\
+    \\EOT\EOT\SO\STX\SOH\DC2\EOT\249\STX\EOT:\SUB\162\SOH From action:\n\
     \ Action is a oneof field, but we need to encode this in JSON and oneof fields don't work\n\
     \ well with JSON. If action is start_workflow, this is set:\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\SOH\ACK\DC2\EOT\233\STX\EOT'\n\
+    \\ENQ\EOT\SO\STX\SOH\ACK\DC2\EOT\249\STX\EOT'\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\EOT\233\STX(5\n\
+    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\EOT\249\STX(5\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\EOT\233\STX89\n\
+    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\EOT\249\STX89\n\
     \\ESC\n\
-    \\EOT\EOT\SO\STX\STX\DC2\EOT\236\STX\EOT\NAK\SUB\r From state:\n\
+    \\EOT\EOT\SO\STX\STX\DC2\EOT\252\STX\EOT\NAK\SUB\r From state:\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\STX\ENQ\DC2\EOT\236\STX\EOT\n\
+    \\ENQ\EOT\SO\STX\STX\ENQ\DC2\EOT\252\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\STX\SOH\DC2\EOT\236\STX\v\DLE\n\
+    \\ENQ\EOT\SO\STX\STX\SOH\DC2\EOT\252\STX\v\DLE\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\STX\ETX\DC2\EOT\236\STX\DC3\DC4\n\
+    \\ENQ\EOT\SO\STX\STX\ETX\DC2\EOT\252\STX\DC3\DC4\n\
     \\f\n\
-    \\EOT\EOT\SO\STX\ETX\DC2\EOT\237\STX\EOT\DC4\n\
+    \\EOT\EOT\SO\STX\ETX\DC2\EOT\253\STX\EOT\DC4\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\ETX\ENQ\DC2\EOT\237\STX\EOT\b\n\
+    \\ENQ\EOT\SO\STX\ETX\ENQ\DC2\EOT\253\STX\EOT\b\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\ETX\SOH\DC2\EOT\237\STX\t\SI\n\
+    \\ENQ\EOT\SO\STX\ETX\SOH\DC2\EOT\253\STX\t\SI\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\ETX\ETX\DC2\EOT\237\STX\DC2\DC3\n\
+    \\ENQ\EOT\SO\STX\ETX\ETX\DC2\EOT\253\STX\DC2\DC3\n\
     \0\n\
-    \\EOT\EOT\SO\STX\EOT\DC2\EOT\240\STX\EOT5\SUB\" From info (maybe fewer entries):\n\
+    \\EOT\EOT\SO\STX\EOT\DC2\EOT\128\ETX\EOT5\SUB\" From info (maybe fewer entries):\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\EOT\EOT\DC2\EOT\240\STX\EOT\f\n\
+    \\ENQ\EOT\SO\STX\EOT\EOT\DC2\EOT\128\ETX\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\EOT\ACK\DC2\EOT\240\STX\r!\n\
+    \\ENQ\EOT\SO\STX\EOT\ACK\DC2\EOT\128\ETX\r!\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\EOT\SOH\DC2\EOT\240\STX\"0\n\
+    \\ENQ\EOT\SO\STX\EOT\SOH\DC2\EOT\128\ETX\"0\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\EOT\ETX\DC2\EOT\240\STX34\n\
+    \\ENQ\EOT\SO\STX\EOT\ETX\DC2\EOT\128\ETX34\n\
     \\f\n\
-    \\EOT\EOT\SO\STX\ENQ\DC2\EOT\241\STX\EOT\\\n\
+    \\EOT\EOT\SO\STX\ENQ\DC2\EOT\129\ETX\EOT?\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\ENQ\EOT\DC2\EOT\241\STX\EOT\f\n\
+    \\ENQ\EOT\SO\STX\ENQ\EOT\DC2\EOT\129\ETX\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\ENQ\ACK\DC2\EOT\241\STX\r&\n\
+    \\ENQ\EOT\SO\STX\ENQ\ACK\DC2\EOT\129\ETX\r&\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\ENQ\SOH\DC2\EOT\241\STX':\n\
+    \\ENQ\EOT\SO\STX\ENQ\SOH\DC2\EOT\129\ETX':\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\ENQ\ETX\DC2\EOT\241\STX=>\n\
-    \\r\n\
-    \\ENQ\EOT\SO\STX\ENQ\b\DC2\EOT\241\STX?[\n\
-    \\DLE\n\
-    \\b\EOT\SO\STX\ENQ\b\242\251\ETX\DC2\EOT\241\STX@Z\n\
+    \\ENQ\EOT\SO\STX\ENQ\ETX\DC2\EOT\129\ETX=>\n\
     \?\n\
-    \\STX\EOT\SI\DC2\ACK\245\STX\NUL\250\STX\SOH\SUB1 ScheduleListEntry is returned by ListSchedules.\n\
+    \\STX\EOT\SI\DC2\ACK\133\ETX\NUL\138\ETX\SOH\SUB1 ScheduleListEntry is returned by ListSchedules.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\SI\SOH\DC2\EOT\245\STX\b\EM\n\
+    \\ETX\EOT\SI\SOH\DC2\EOT\133\ETX\b\EM\n\
     \\f\n\
-    \\EOT\EOT\SI\STX\NUL\DC2\EOT\246\STX\EOT\ESC\n\
+    \\EOT\EOT\SI\STX\NUL\DC2\EOT\134\ETX\EOT\ESC\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\EOT\246\STX\EOT\n\
+    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\EOT\134\ETX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\EOT\246\STX\v\SYN\n\
+    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\EOT\134\ETX\v\SYN\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\EOT\246\STX\EM\SUB\n\
+    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\EOT\134\ETX\EM\SUB\n\
     \\f\n\
-    \\EOT\EOT\SI\STX\SOH\DC2\EOT\247\STX\EOT)\n\
+    \\EOT\EOT\SI\STX\SOH\DC2\EOT\135\ETX\EOT)\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\SOH\ACK\DC2\EOT\247\STX\EOT\US\n\
+    \\ENQ\EOT\SI\STX\SOH\ACK\DC2\EOT\135\ETX\EOT\US\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\SOH\SOH\DC2\EOT\247\STX $\n\
+    \\ENQ\EOT\SI\STX\SOH\SOH\DC2\EOT\135\ETX $\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\SOH\ETX\DC2\EOT\247\STX'(\n\
+    \\ENQ\EOT\SI\STX\SOH\ETX\DC2\EOT\135\ETX'(\n\
     \\f\n\
-    \\EOT\EOT\SI\STX\STX\DC2\EOT\248\STX\EOTB\n\
+    \\EOT\EOT\SI\STX\STX\DC2\EOT\136\ETX\EOTB\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\STX\ACK\DC2\EOT\248\STX\EOT+\n\
+    \\ENQ\EOT\SI\STX\STX\ACK\DC2\EOT\136\ETX\EOT+\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\STX\SOH\DC2\EOT\248\STX,=\n\
+    \\ENQ\EOT\SI\STX\STX\SOH\DC2\EOT\136\ETX,=\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\STX\ETX\DC2\EOT\248\STX@A\n\
+    \\ENQ\EOT\SI\STX\STX\ETX\DC2\EOT\136\ETX@A\n\
     \\f\n\
-    \\EOT\EOT\SI\STX\ETX\DC2\EOT\249\STX\EOT\RS\n\
+    \\EOT\EOT\SI\STX\ETX\DC2\EOT\137\ETX\EOT\RS\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\ETX\ACK\DC2\EOT\249\STX\EOT\DC4\n\
+    \\ENQ\EOT\SI\STX\ETX\ACK\DC2\EOT\137\ETX\EOT\DC4\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\ETX\SOH\DC2\EOT\249\STX\NAK\EM\n\
+    \\ENQ\EOT\SI\STX\ETX\SOH\DC2\EOT\137\ETX\NAK\EM\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\ETX\ETX\DC2\EOT\249\STX\FS\GSb\ACKproto3"
+    \\ENQ\EOT\SI\STX\ETX\ETX\DC2\EOT\137\ETX\FS\GSb\ACKproto3"
