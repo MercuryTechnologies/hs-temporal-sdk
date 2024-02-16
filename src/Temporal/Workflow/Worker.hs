@@ -139,7 +139,7 @@ handleActivation activation = do
           let withoutStart = filter (\job -> not $ isJust (job ^. Activation.maybe'startWorkflow)) (activation ^. Activation.jobs)
           case withoutStart of
             [] -> pure ()
-            otherJobs -> writeChan inst.activationChannel (activation & Activation.jobs .~ otherJobs)
+            otherJobs -> atomically $ writeTQueue inst.activationChannel (activation & Activation.jobs .~ otherJobs)
     else do
       $(logDebug) "Workflow does not need to run."
       let completionMessage = defMessage 

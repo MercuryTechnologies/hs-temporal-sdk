@@ -71,11 +71,14 @@ listSearchAttributes c (Namespace n) = do
 
 addSearchAttributes :: MonadIO m => Client -> Namespace -> Map Text IndexedValueType -> m (Either RpcError ())
 addSearchAttributes c (Namespace n) newAttrs = do
-  res <- liftIO $ Core.addSearchAttributes c 
-    ( defMessage 
-      & Proto.namespace .~ n
-      & Proto.searchAttributes .~ converted
-    )
-  pure $ fmap (\_ -> ()) res
+  if null newAttrs
+    then pure $ Right ()
+    else do
+      res <- liftIO $ Core.addSearchAttributes c 
+        ( defMessage 
+          & Proto.namespace .~ n
+          & Proto.searchAttributes .~ converted
+        )
+      pure $ fmap (\_ -> ()) res
   where
     converted = fmap searchAttributeTypeToProto newAttrs
