@@ -31,7 +31,6 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Dependencies.Gogoproto.Gogo
 import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Temporal.Api.Enums.V1.Common
 {- | Fields :
@@ -240,8 +239,8 @@ instance Data.ProtoLens.Message ReleaseInfo where
   packedMessageDescriptor _
     = "\n\
       \\vReleaseInfo\DC2\CAN\n\
-      \\aversion\CAN\SOH \SOH(\tR\aversion\DC2C\n\
-      \\frelease_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\vreleaseTimeB\EOT\144\223\US\SOH\DC2\DC4\n\
+      \\aversion\CAN\SOH \SOH(\tR\aversion\DC2=\n\
+      \\frelease_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\vreleaseTime\DC2\DC4\n\
       \\ENQnotes\CAN\ETX \SOH(\tR\ENQnotes"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
@@ -497,8 +496,8 @@ instance Data.ProtoLens.Message VersionInfo where
       \\acurrent\CAN\SOH \SOH(\v2$.temporal.api.version.v1.ReleaseInfoR\acurrent\DC2F\n\
       \\vrecommended\CAN\STX \SOH(\v2$.temporal.api.version.v1.ReleaseInfoR\vrecommended\DC2\"\n\
       \\finstructions\CAN\ETX \SOH(\tR\finstructions\DC26\n\
-      \\ACKalerts\CAN\EOT \ETX(\v2\RS.temporal.api.version.v1.AlertR\ACKalerts\DC2J\n\
-      \\DLElast_update_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\SOlastUpdateTimeB\EOT\144\223\US\SOH"
+      \\ACKalerts\CAN\EOT \ETX(\v2\RS.temporal.api.version.v1.AlertR\ACKalerts\DC2D\n\
+      \\DLElast_update_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\SOlastUpdateTime"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -750,22 +749,22 @@ instance Control.DeepSeq.NFData VersionInfo where
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \%temporal/api/version/v1/message.proto\DC2\ETBtemporal.api.version.v1\SUB\USgoogle/protobuf/timestamp.proto\SUB!dependencies/gogoproto/gogo.proto\SUB\"temporal/api/enums/v1/common.proto\"\130\SOH\n\
+    \%temporal/api/version/v1/message.proto\DC2\ETBtemporal.api.version.v1\SUB\USgoogle/protobuf/timestamp.proto\SUB\"temporal/api/enums/v1/common.proto\"|\n\
     \\vReleaseInfo\DC2\CAN\n\
-    \\aversion\CAN\SOH \SOH(\tR\aversion\DC2C\n\
-    \\frelease_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\vreleaseTimeB\EOT\144\223\US\SOH\DC2\DC4\n\
+    \\aversion\CAN\SOH \SOH(\tR\aversion\DC2=\n\
+    \\frelease_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\vreleaseTime\DC2\DC4\n\
     \\ENQnotes\CAN\ETX \SOH(\tR\ENQnotes\"^\n\
     \\ENQAlert\DC2\CAN\n\
     \\amessage\CAN\SOH \SOH(\tR\amessage\DC2;\n\
-    \\bseverity\CAN\STX \SOH(\SO2\US.temporal.api.enums.v1.SeverityR\bseverity\"\189\STX\n\
+    \\bseverity\CAN\STX \SOH(\SO2\US.temporal.api.enums.v1.SeverityR\bseverity\"\183\STX\n\
     \\vVersionInfo\DC2>\n\
     \\acurrent\CAN\SOH \SOH(\v2$.temporal.api.version.v1.ReleaseInfoR\acurrent\DC2F\n\
     \\vrecommended\CAN\STX \SOH(\v2$.temporal.api.version.v1.ReleaseInfoR\vrecommended\DC2\"\n\
     \\finstructions\CAN\ETX \SOH(\tR\finstructions\DC26\n\
-    \\ACKalerts\CAN\EOT \ETX(\v2\RS.temporal.api.version.v1.AlertR\ACKalerts\DC2J\n\
-    \\DLElast_update_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\SOlastUpdateTimeB\EOT\144\223\US\SOHB\142\SOH\n\
-    \\SUBio.temporal.api.version.v1B\fMessageProtoP\SOHZ%go.temporal.io/api/version/v1;version\170\STX\EMTemporalio.Api.Version.V1\234\STX\FSTemporalio::Api::Version::V1J\208\DC1\n\
-    \\ACK\DC2\EOT\SYN\NUL9\SOH\n\
+    \\ACKalerts\CAN\EOT \ETX(\v2\RS.temporal.api.version.v1.AlertR\ACKalerts\DC2D\n\
+    \\DLElast_update_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\SOlastUpdateTimeB\142\SOH\n\
+    \\SUBio.temporal.api.version.v1B\fMessageProtoP\SOHZ%go.temporal.io/api/version/v1;version\170\STX\EMTemporalio.Api.Version.V1\234\STX\FSTemporalio::Api::Version::V1J\135\DC1\n\
+    \\ACK\DC2\EOT\SYN\NUL8\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -819,118 +818,108 @@ packedFileDescriptor
     \\t\n\
     \\STX\ETX\NUL\DC2\ETX!\NUL)\n\
     \\t\n\
-    \\STX\ETX\SOH\DC2\ETX\"\NUL+\n\
-    \\t\n\
-    \\STX\ETX\STX\DC2\ETX#\NUL,\n\
+    \\STX\ETX\SOH\DC2\ETX\"\NUL,\n\
     \R\n\
-    \\STX\EOT\NUL\DC2\EOT&\NUL*\SOH\SUBF ReleaseInfo contains information about specific version of temporal.\n\
+    \\STX\EOT\NUL\DC2\EOT%\NUL)\SOH\SUBF ReleaseInfo contains information about specific version of temporal.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX&\b\DC3\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX%\b\DC3\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX'\EOT\ETB\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX&\EOT\ETB\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX'\EOT\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX&\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX'\v\DC2\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX&\v\DC2\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX'\NAK\SYN\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX&\NAK\SYN\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX(\EOTL\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX'\EOT/\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX(\EOT\GS\n\
+    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX'\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX(\RS*\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX'\RS*\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX(-.\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\b\DC2\ETX(/K\n\
-    \\SI\n\
-    \\b\EOT\NUL\STX\SOH\b\242\251\ETX\DC2\ETX(0J\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX'-.\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX)\EOT\NAK\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX(\EOT\NAK\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX)\EOT\n\
+    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX(\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX)\v\DLE\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX(\v\DLE\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX)\DC3\DC4\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX(\DC3\DC4\n\
     \7\n\
-    \\STX\EOT\SOH\DC2\EOT-\NUL0\SOH\SUB+ Alert contains notification and severity.\n\
+    \\STX\EOT\SOH\DC2\EOT,\NUL/\SOH\SUB+ Alert contains notification and severity.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX-\b\r\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX,\b\r\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX.\EOT\ETB\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX-\EOT\ETB\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX.\EOT\n\
+    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX-\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX.\v\DC2\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX-\v\DC2\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX.\NAK\SYN\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX-\NAK\SYN\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX/\EOT0\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX.\EOT0\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX/\EOT\"\n\
+    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX.\EOT\"\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX/#+\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX.#+\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX/./\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX../\n\
     \\133\SOH\n\
-    \\STX\EOT\STX\DC2\EOT3\NUL9\SOH\SUBy VersionInfo contains details about current and recommended release versions as well as alerts and upgrade instructions.\n\
+    \\STX\EOT\STX\DC2\EOT2\NUL8\SOH\SUBy VersionInfo contains details about current and recommended release versions as well as alerts and upgrade instructions.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX3\b\DC3\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX2\b\DC3\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX4\EOT\FS\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX3\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX4\EOT\SI\n\
+    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX3\EOT\SI\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX4\DLE\ETB\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX3\DLE\ETB\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX4\SUB\ESC\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX3\SUB\ESC\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX5\EOT \n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX4\EOT \n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETX5\EOT\SI\n\
+    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETX4\EOT\SI\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX5\DLE\ESC\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX4\DLE\ESC\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX5\RS\US\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX4\RS\US\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\STX\DC2\ETX6\EOT\FS\n\
+    \\EOT\EOT\STX\STX\STX\DC2\ETX5\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETX6\EOT\n\
+    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETX5\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX6\v\ETB\n\
+    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX5\v\ETB\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX6\SUB\ESC\n\
+    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX5\SUB\ESC\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\ETX\DC2\ETX7\EOT\RS\n\
+    \\EOT\EOT\STX\STX\ETX\DC2\ETX6\EOT\RS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\EOT\DC2\ETX7\EOT\f\n\
+    \\ENQ\EOT\STX\STX\ETX\EOT\DC2\ETX6\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ACK\DC2\ETX7\r\DC2\n\
+    \\ENQ\EOT\STX\STX\ETX\ACK\DC2\ETX6\r\DC2\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETX7\DC3\EM\n\
+    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETX6\DC3\EM\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETX7\FS\GS\n\
+    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETX6\FS\GS\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\EOT\DC2\ETX8\EOTP\n\
+    \\EOT\EOT\STX\STX\EOT\DC2\ETX7\EOT3\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ACK\DC2\ETX8\EOT\GS\n\
+    \\ENQ\EOT\STX\STX\EOT\ACK\DC2\ETX7\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\SOH\DC2\ETX8\RS.\n\
+    \\ENQ\EOT\STX\STX\EOT\SOH\DC2\ETX7\RS.\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ETX\DC2\ETX812\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\b\DC2\ETX83O\n\
-    \\SI\n\
-    \\b\EOT\STX\STX\EOT\b\242\251\ETX\DC2\ETX84Nb\ACKproto3"
+    \\ENQ\EOT\STX\STX\EOT\ETX\DC2\ETX712b\ACKproto3"

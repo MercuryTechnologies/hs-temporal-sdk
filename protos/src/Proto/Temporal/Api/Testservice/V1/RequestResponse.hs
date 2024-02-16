@@ -34,7 +34,6 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Dependencies.Gogoproto.Gogo
 import qualified Proto.Google.Protobuf.Duration
 import qualified Proto.Google.Protobuf.Timestamp
 {- | Fields :
@@ -71,8 +70,8 @@ instance Data.ProtoLens.Message GetCurrentTimeResponse where
         "temporal.api.testservice.v1.GetCurrentTimeResponse"
   packedMessageDescriptor _
     = "\n\
-      \\SYNGetCurrentTimeResponse\DC24\n\
-      \\EOTtime\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\EOTtimeB\EOT\144\223\US\SOH"
+      \\SYNGetCurrentTimeResponse\DC2.\n\
+      \\EOTtime\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\EOTtime"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -327,8 +326,8 @@ instance Data.ProtoLens.Message SleepRequest where
     = Data.Text.pack "temporal.api.testservice.v1.SleepRequest"
   packedMessageDescriptor _
     = "\n\
-      \\fSleepRequest\DC2;\n\
-      \\bduration\CAN\SOH \SOH(\v2\EM.google.protobuf.DurationR\bdurationB\EOT\152\223\US\SOH"
+      \\fSleepRequest\DC25\n\
+      \\bduration\CAN\SOH \SOH(\v2\EM.google.protobuf.DurationR\bduration"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -512,8 +511,8 @@ instance Data.ProtoLens.Message SleepUntilRequest where
     = Data.Text.pack "temporal.api.testservice.v1.SleepUntilRequest"
   packedMessageDescriptor _
     = "\n\
-      \\DC1SleepUntilRequest\DC2>\n\
-      \\ttimestamp\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\ttimestampB\EOT\144\223\US\SOH"
+      \\DC1SleepUntilRequest\DC28\n\
+      \\ttimestamp\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\ttimestamp"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -743,20 +742,20 @@ instance Control.DeepSeq.NFData UnlockTimeSkippingResponse where
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \2temporal/api/testservice/v1/request_response.proto\DC2\ESCtemporal.api.testservice.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\USgoogle/protobuf/timestamp.proto\SUB!dependencies/gogoproto/gogo.proto\"\EM\n\
+    \2temporal/api/testservice/v1/request_response.proto\DC2\ESCtemporal.api.testservice.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\USgoogle/protobuf/timestamp.proto\"\EM\n\
     \\ETBLockTimeSkippingRequest\"\SUB\n\
     \\CANLockTimeSkippingResponse\"\ESC\n\
     \\EMUnlockTimeSkippingRequest\"\FS\n\
-    \\SUBUnlockTimeSkippingResponse\"S\n\
-    \\DC1SleepUntilRequest\DC2>\n\
-    \\ttimestamp\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\ttimestampB\EOT\144\223\US\SOH\"K\n\
-    \\fSleepRequest\DC2;\n\
-    \\bduration\CAN\SOH \SOH(\v2\EM.google.protobuf.DurationR\bdurationB\EOT\152\223\US\SOH\"\SI\n\
-    \\rSleepResponse\"N\n\
-    \\SYNGetCurrentTimeResponse\DC24\n\
-    \\EOTtime\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\EOTtimeB\EOT\144\223\US\SOHB\170\SOH\n\
-    \\RSio.temporal.api.testservice.v1B\DC4RequestResponseProtoP\SOHZ-go.temporal.io/api/testservice/v1;testservice\170\STX\GSTemporalio.Api.TestService.V1\234\STX Temporalio::Api::TestService::V1J\231\r\n\
-    \\ACK\DC2\EOT\SYN\NUL>\SOH\n\
+    \\SUBUnlockTimeSkippingResponse\"M\n\
+    \\DC1SleepUntilRequest\DC28\n\
+    \\ttimestamp\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\ttimestamp\"E\n\
+    \\fSleepRequest\DC25\n\
+    \\bduration\CAN\SOH \SOH(\v2\EM.google.protobuf.DurationR\bduration\"\SI\n\
+    \\rSleepResponse\"H\n\
+    \\SYNGetCurrentTimeResponse\DC2.\n\
+    \\EOTtime\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\EOTtimeB\170\SOH\n\
+    \\RSio.temporal.api.testservice.v1B\DC4RequestResponseProtoP\SOHZ-go.temporal.io/api/testservice/v1;testservice\170\STX\GSTemporalio.Api.TestService.V1\234\STX Temporalio::Api::TestService::V1J\255\f\n\
+    \\ACK\DC2\EOT\SYN\NUL=\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -811,89 +810,75 @@ packedFileDescriptor
     \\STX\ETX\NUL\DC2\ETX!\NUL(\n\
     \\t\n\
     \\STX\ETX\SOH\DC2\ETX\"\NUL)\n\
-    \\t\n\
-    \\STX\ETX\STX\DC2\ETX#\NUL+\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT%\NUL&\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT$\NUL%\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX%\b\US\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX$\b\US\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT(\NUL)\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT'\NUL(\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX(\b \n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX'\b \n\
     \\n\
     \\n\
-    \\STX\EOT\STX\DC2\EOT+\NUL,\SOH\n\
+    \\STX\EOT\STX\DC2\EOT*\NUL+\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX+\b!\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX*\b!\n\
     \\n\
     \\n\
-    \\STX\EOT\ETX\DC2\EOT.\NUL/\SOH\n\
+    \\STX\EOT\ETX\DC2\EOT-\NUL.\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX.\b\"\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX-\b\"\n\
     \\n\
     \\n\
-    \\STX\EOT\EOT\DC2\EOT1\NUL3\SOH\n\
+    \\STX\EOT\EOT\DC2\EOT0\NUL2\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETX1\b\EM\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETX0\b\EM\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETX2\EOTI\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETX1\EOT,\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETX2\EOT\GS\n\
+    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETX1\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX2\RS'\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX1\RS'\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX2*+\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\b\DC2\ETX2,H\n\
-    \\SI\n\
-    \\b\EOT\EOT\STX\NUL\b\242\251\ETX\DC2\ETX2-G\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX1*+\n\
     \\n\
     \\n\
-    \\STX\EOT\ENQ\DC2\EOT5\NUL7\SOH\n\
+    \\STX\EOT\ENQ\DC2\EOT4\NUL6\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETX5\b\DC4\n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETX4\b\DC4\n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX6\EOTK\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX5\EOT*\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETX6\EOT\FS\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETX5\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX6\GS%\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX5\GS%\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX6()\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\b\DC2\ETX6*J\n\
-    \\SI\n\
-    \\b\EOT\ENQ\STX\NUL\b\243\251\ETX\DC2\ETX6+I\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX5()\n\
     \\n\
     \\n\
-    \\STX\EOT\ACK\DC2\EOT9\NUL:\SOH\n\
+    \\STX\EOT\ACK\DC2\EOT8\NUL9\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETX9\b\NAK\n\
+    \\ETX\EOT\ACK\SOH\DC2\ETX8\b\NAK\n\
     \\n\
     \\n\
-    \\STX\EOT\a\DC2\EOT<\NUL>\SOH\n\
+    \\STX\EOT\a\DC2\EOT;\NUL=\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\a\SOH\DC2\ETX<\b\RS\n\
+    \\ETX\EOT\a\SOH\DC2\ETX;\b\RS\n\
     \\v\n\
-    \\EOT\EOT\a\STX\NUL\DC2\ETX=\EOTD\n\
+    \\EOT\EOT\a\STX\NUL\DC2\ETX<\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ACK\DC2\ETX=\EOT\GS\n\
+    \\ENQ\EOT\a\STX\NUL\ACK\DC2\ETX<\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETX=\RS\"\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETX<\RS\"\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETX=%&\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\NUL\b\DC2\ETX='C\n\
-    \\SI\n\
-    \\b\EOT\a\STX\NUL\b\242\251\ETX\DC2\ETX=(Bb\ACKproto3"
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETX<%&b\ACKproto3"

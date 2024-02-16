@@ -27,7 +27,6 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Dependencies.Gogoproto.Gogo
 import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Temporal.Api.Common.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.BatchOperation
@@ -88,12 +87,23 @@ maybe'input ::
    Data.ProtoLens.Field.HasField s "maybe'input" a) =>
   Lens.Family2.LensLike' f s a
 maybe'input = Data.ProtoLens.Field.field @"maybe'input"
+maybe'options ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'options" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'options = Data.ProtoLens.Field.field @"maybe'options"
 maybe'startTime ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "maybe'startTime" a) =>
   Lens.Family2.LensLike' f s a
 maybe'startTime = Data.ProtoLens.Field.field @"maybe'startTime"
+options ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "options" a) =>
+  Lens.Family2.LensLike' f s a
+options = Data.ProtoLens.Field.field @"options"
 resetReapplyType ::
   forall f s a.
   (Prelude.Functor f,

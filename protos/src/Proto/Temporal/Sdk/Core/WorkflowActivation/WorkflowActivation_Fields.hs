@@ -32,6 +32,7 @@ import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Temporal.Api.Common.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.Workflow
 import qualified Proto.Temporal.Api.Failure.V1.Message
+import qualified Proto.Temporal.Api.Update.V1.Message
 import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow
 import qualified Proto.Temporal.Sdk.Core.Common.Common
@@ -53,6 +54,13 @@ availableInternalFlags ::
   Lens.Family2.LensLike' f s a
 availableInternalFlags
   = Data.ProtoLens.Field.field @"availableInternalFlags"
+buildIdForCurrentTask ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "buildIdForCurrentTask" a) =>
+  Lens.Family2.LensLike' f s a
+buildIdForCurrentTask
+  = Data.ProtoLens.Field.field @"buildIdForCurrentTask"
 cancelWorkflow ::
   forall f s a.
   (Prelude.Functor f,
@@ -115,6 +123,12 @@ details ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "details" a) =>
   Lens.Family2.LensLike' f s a
 details = Data.ProtoLens.Field.field @"details"
+doUpdate ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "doUpdate" a) =>
+  Lens.Family2.LensLike' f s a
+doUpdate = Data.ProtoLens.Field.field @"doUpdate"
 failed ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "failed" a) =>
@@ -155,6 +169,11 @@ historySizeBytes ::
    Data.ProtoLens.Field.HasField s "historySizeBytes" a) =>
   Lens.Family2.LensLike' f s a
 historySizeBytes = Data.ProtoLens.Field.field @"historySizeBytes"
+id ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "id" a) =>
+  Lens.Family2.LensLike' f s a
+id = Data.ProtoLens.Field.field @"id"
 identity ::
   forall f s a.
   (Prelude.Functor f,
@@ -217,6 +236,12 @@ maybe'cronScheduleToScheduleInterval ::
 maybe'cronScheduleToScheduleInterval
   = Data.ProtoLens.Field.field
       @"maybe'cronScheduleToScheduleInterval"
+maybe'doUpdate ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'doUpdate" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'doUpdate = Data.ProtoLens.Field.field @"maybe'doUpdate"
 maybe'failed ::
   forall f s a.
   (Prelude.Functor f,
@@ -248,6 +273,12 @@ maybe'memo ::
    Data.ProtoLens.Field.HasField s "maybe'memo" a) =>
   Lens.Family2.LensLike' f s a
 maybe'memo = Data.ProtoLens.Field.field @"maybe'memo"
+maybe'meta ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'meta" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'meta = Data.ProtoLens.Field.field @"maybe'meta"
 maybe'notifyHasPatch ::
   forall f s a.
   (Prelude.Functor f,
@@ -428,6 +459,16 @@ message ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "message" a) =>
   Lens.Family2.LensLike' f s a
 message = Data.ProtoLens.Field.field @"message"
+meta ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "meta" a) =>
+  Lens.Family2.LensLike' f s a
+meta = Data.ProtoLens.Field.field @"meta"
+name ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "name" a) =>
+  Lens.Family2.LensLike' f s a
+name = Data.ProtoLens.Field.field @"name"
 notifyHasPatch ::
   forall f s a.
   (Prelude.Functor f,
@@ -446,6 +487,13 @@ patchId ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "patchId" a) =>
   Lens.Family2.LensLike' f s a
 patchId = Data.ProtoLens.Field.field @"patchId"
+protocolInstanceId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "protocolInstanceId" a) =>
+  Lens.Family2.LensLike' f s a
+protocolInstanceId
+  = Data.ProtoLens.Field.field @"protocolInstanceId"
 queryId ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "queryId" a) =>
@@ -531,6 +579,12 @@ runId ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "runId" a) =>
   Lens.Family2.LensLike' f s a
 runId = Data.ProtoLens.Field.field @"runId"
+runValidator ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "runValidator" a) =>
+  Lens.Family2.LensLike' f s a
+runValidator = Data.ProtoLens.Field.field @"runValidator"
 searchAttributes ::
   forall f s a.
   (Prelude.Functor f,

@@ -32,7 +32,6 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Dependencies.Gogoproto.Gogo
 import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Temporal.Api.Enums.V1.Namespace
 {- | Fields :
@@ -196,8 +195,8 @@ instance Data.ProtoLens.Message FailoverStatus where
     = Data.Text.pack "temporal.api.replication.v1.FailoverStatus"
   packedMessageDescriptor _
     = "\n\
-      \\SOFailoverStatus\DC2E\n\
-      \\rfailover_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\ffailoverTimeB\EOT\144\223\US\SOH\DC2)\n\
+      \\SOFailoverStatus\DC2?\n\
+      \\rfailover_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\ffailoverTime\DC2)\n\
       \\DLEfailover_version\CAN\STX \SOH(\ETXR\SIfailoverVersion"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
@@ -563,18 +562,18 @@ instance Control.DeepSeq.NFData NamespaceReplicationConfig where
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \)temporal/api/replication/v1/message.proto\DC2\ESCtemporal.api.replication.v1\SUB\USgoogle/protobuf/timestamp.proto\SUB!dependencies/gogoproto/gogo.proto\SUB%temporal/api/enums/v1/namespace.proto\"=\n\
+    \)temporal/api/replication/v1/message.proto\DC2\ESCtemporal.api.replication.v1\SUB\USgoogle/protobuf/timestamp.proto\SUB%temporal/api/enums/v1/namespace.proto\"=\n\
     \\CANClusterReplicationConfig\DC2!\n\
     \\fcluster_name\CAN\SOH \SOH(\tR\vclusterName\"\222\SOH\n\
     \\SUBNamespaceReplicationConfig\DC2.\n\
     \\DC3active_cluster_name\CAN\SOH \SOH(\tR\DC1activeClusterName\DC2Q\n\
     \\bclusters\CAN\STX \ETX(\v25.temporal.api.replication.v1.ClusterReplicationConfigR\bclusters\DC2=\n\
-    \\ENQstate\CAN\ETX \SOH(\SO2'.temporal.api.enums.v1.ReplicationStateR\ENQstate\"\130\SOH\n\
-    \\SOFailoverStatus\DC2E\n\
-    \\rfailover_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\ffailoverTimeB\EOT\144\223\US\SOH\DC2)\n\
+    \\ENQstate\CAN\ETX \SOH(\SO2'.temporal.api.enums.v1.ReplicationStateR\ENQstate\"|\n\
+    \\SOFailoverStatus\DC2?\n\
+    \\rfailover_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\ffailoverTime\DC2)\n\
     \\DLEfailover_version\CAN\STX \SOH(\ETXR\SIfailoverVersionB\162\SOH\n\
-    \\RSio.temporal.api.replication.v1B\fMessageProtoP\SOHZ-go.temporal.io/api/replication/v1;replication\170\STX\GSTemporalio.Api.Replication.V1\234\STX Temporalio::Api::Replication::V1J\234\SO\n\
-    \\ACK\DC2\EOT\SYN\NUL6\SOH\n\
+    \\RSio.temporal.api.replication.v1B\fMessageProtoP\SOHZ-go.temporal.io/api/replication/v1;replication\170\STX\GSTemporalio.Api.Replication.V1\234\STX Temporalio::Api::Replication::V1J\192\SO\n\
+    \\ACK\DC2\EOT\SYN\NUL4\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -628,82 +627,76 @@ packedFileDescriptor
     \\t\n\
     \\STX\ETX\NUL\DC2\ETX!\NUL)\n\
     \\t\n\
-    \\STX\ETX\SOH\DC2\ETX#\NUL+\n\
-    \\t\n\
-    \\STX\ETX\STX\DC2\ETX%\NUL/\n\
+    \\STX\ETX\SOH\DC2\ETX#\NUL/\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT'\NUL)\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT%\NUL'\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX'\b \n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX%\b \n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX(\EOT\FS\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX&\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX(\EOT\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX&\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX(\v\ETB\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX&\v\ETB\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX(\SUB\ESC\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX&\SUB\ESC\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT+\NUL/\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT)\NUL-\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX+\b\"\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX)\b\"\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX,\EOT#\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX*\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX,\EOT\n\
+    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX*\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX,\v\RS\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX*\v\RS\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX,!\"\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX*!\"\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX-\EOT3\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX+\EOT3\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\EOT\DC2\ETX-\EOT\f\n\
+    \\ENQ\EOT\SOH\STX\SOH\EOT\DC2\ETX+\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX-\r%\n\
+    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX+\r%\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX-&.\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX+&.\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX-12\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX+12\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETX.\EOT5\n\
+    \\EOT\EOT\SOH\STX\STX\DC2\ETX,\EOT5\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX.\EOT*\n\
+    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX,\EOT*\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX.+0\n\
+    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX,+0\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX.34\n\
+    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX,34\n\
     \G\n\
-    \\STX\EOT\STX\DC2\EOT2\NUL6\SOH\SUB; Represents a historical replication status of a Namespace\n\
+    \\STX\EOT\STX\DC2\EOT0\NUL4\SOH\SUB; Represents a historical replication status of a Namespace\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX2\b\SYN\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX0\b\SYN\n\
     \T\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX4\EOTM\SUBG Timestamp when the Cluster switched to the following failover_version\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX2\EOT0\SUBG Timestamp when the Cluster switched to the following failover_version\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX4\EOT\GS\n\
+    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX2\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX4\RS+\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX2\RS+\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX4./\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\b\DC2\ETX40L\n\
-    \\SI\n\
-    \\b\EOT\STX\STX\NUL\b\242\251\ETX\DC2\ETX41K\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX2./\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX5\EOT\US\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX3\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX5\EOT\t\n\
+    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX3\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX5\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX3\n\
     \\SUB\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX5\GS\RSb\ACKproto3"
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX3\GS\RSb\ACKproto3"

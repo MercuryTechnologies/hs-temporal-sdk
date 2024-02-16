@@ -28,12 +28,19 @@ import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Gener
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
 import qualified Proto.Google.Protobuf.Duration
+import qualified Proto.Google.Protobuf.Empty
 import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Temporal.Api.Common.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.Workflow
 import qualified Proto.Temporal.Api.Failure.V1.Message
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow
 import qualified Proto.Temporal.Sdk.Core.Common.Common
+accepted ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "accepted" a) =>
+  Lens.Family2.LensLike' f s a
+accepted = Data.ProtoLens.Field.field @"accepted"
 activityId ::
   forall f s a.
   (Prelude.Functor f,
@@ -114,6 +121,12 @@ completeWorkflowExecution ::
   Lens.Family2.LensLike' f s a
 completeWorkflowExecution
   = Data.ProtoLens.Field.field @"completeWorkflowExecution"
+completed ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "completed" a) =>
+  Lens.Family2.LensLike' f s a
+completed = Data.ProtoLens.Field.field @"completed"
 continueAsNewWorkflowExecution ::
   forall f s a.
   (Prelude.Functor f,
@@ -185,6 +198,12 @@ localRetryThreshold ::
   Lens.Family2.LensLike' f s a
 localRetryThreshold
   = Data.ProtoLens.Field.field @"localRetryThreshold"
+maybe'accepted ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'accepted" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'accepted = Data.ProtoLens.Field.field @"maybe'accepted"
 maybe'cancelChildWorkflowExecution ::
   forall f s a.
   (Prelude.Functor f,
@@ -226,6 +245,12 @@ maybe'completeWorkflowExecution ::
   Lens.Family2.LensLike' f s a
 maybe'completeWorkflowExecution
   = Data.ProtoLens.Field.field @"maybe'completeWorkflowExecution"
+maybe'completed ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'completed" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'completed = Data.ProtoLens.Field.field @"maybe'completed"
 maybe'continueAsNewWorkflowExecution ::
   forall f s a.
   (Prelude.Functor f,
@@ -281,6 +306,12 @@ maybe'originalScheduleTime ::
   Lens.Family2.LensLike' f s a
 maybe'originalScheduleTime
   = Data.ProtoLens.Field.field @"maybe'originalScheduleTime"
+maybe'rejected ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'rejected" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'rejected = Data.ProtoLens.Field.field @"maybe'rejected"
 maybe'requestCancelActivity ::
   forall f s a.
   (Prelude.Functor f,
@@ -410,6 +441,13 @@ maybe'target ::
    Data.ProtoLens.Field.HasField s "maybe'target" a) =>
   Lens.Family2.LensLike' f s a
 maybe'target = Data.ProtoLens.Field.field @"maybe'target"
+maybe'updateResponse ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'updateResponse" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'updateResponse
+  = Data.ProtoLens.Field.field @"maybe'updateResponse"
 maybe'upsertWorkflowSearchAttributes ::
   forall f s a.
   (Prelude.Functor f,
@@ -501,11 +539,24 @@ patchId ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "patchId" a) =>
   Lens.Family2.LensLike' f s a
 patchId = Data.ProtoLens.Field.field @"patchId"
+protocolInstanceId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "protocolInstanceId" a) =>
+  Lens.Family2.LensLike' f s a
+protocolInstanceId
+  = Data.ProtoLens.Field.field @"protocolInstanceId"
 queryId ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "queryId" a) =>
   Lens.Family2.LensLike' f s a
 queryId = Data.ProtoLens.Field.field @"queryId"
+rejected ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "rejected" a) =>
+  Lens.Family2.LensLike' f s a
+rejected = Data.ProtoLens.Field.field @"rejected"
 requestCancelActivity ::
   forall f s a.
   (Prelude.Functor f,
@@ -647,6 +698,12 @@ taskQueue ::
    Data.ProtoLens.Field.HasField s "taskQueue" a) =>
   Lens.Family2.LensLike' f s a
 taskQueue = Data.ProtoLens.Field.field @"taskQueue"
+updateResponse ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "updateResponse" a) =>
+  Lens.Family2.LensLike' f s a
+updateResponse = Data.ProtoLens.Field.field @"updateResponse"
 upsertWorkflowSearchAttributes ::
   forall f s a.
   (Prelude.Functor f,

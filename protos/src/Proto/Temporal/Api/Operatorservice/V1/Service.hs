@@ -31,6 +31,7 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
+import qualified Proto.Google.Api.Annotations
 import qualified Proto.Temporal.Api.Operatorservice.V1.RequestResponse
 data OperatorService = OperatorService {}
 instance Data.ProtoLens.Service.Types.Service OperatorService where
@@ -47,8 +48,8 @@ instance Data.ProtoLens.Service.Types.Service OperatorService where
     = "\n\
       \\SIOperatorService\DC2\146\SOH\n\
       \\DC3AddSearchAttributes\DC2;.temporal.api.operatorservice.v1.AddSearchAttributesRequest\SUB<.temporal.api.operatorservice.v1.AddSearchAttributesResponse\"\NUL\DC2\155\SOH\n\
-      \\SYNRemoveSearchAttributes\DC2>.temporal.api.operatorservice.v1.RemoveSearchAttributesRequest\SUB?.temporal.api.operatorservice.v1.RemoveSearchAttributesResponse\"\NUL\DC2\149\SOH\n\
-      \\DC4ListSearchAttributes\DC2<.temporal.api.operatorservice.v1.ListSearchAttributesRequest\SUB=.temporal.api.operatorservice.v1.ListSearchAttributesResponse\"\NUL\DC2\134\SOH\n\
+      \\SYNRemoveSearchAttributes\DC2>.temporal.api.operatorservice.v1.RemoveSearchAttributesRequest\SUB?.temporal.api.operatorservice.v1.RemoveSearchAttributesResponse\"\NUL\DC2\205\SOH\n\
+      \\DC4ListSearchAttributes\DC2<.temporal.api.operatorservice.v1.ListSearchAttributesRequest\SUB=.temporal.api.operatorservice.v1.ListSearchAttributesResponse\"8\130\211\228\147\STX2\DC20/api/v1/namespaces/{namespace}/search-attributes\DC2\134\SOH\n\
       \\SIDeleteNamespace\DC27.temporal.api.operatorservice.v1.DeleteNamespaceRequest\SUB8.temporal.api.operatorservice.v1.DeleteNamespaceResponse\"\NUL\DC2\161\SOH\n\
       \\CANAddOrUpdateRemoteCluster\DC2@.temporal.api.operatorservice.v1.AddOrUpdateRemoteClusterRequest\SUBA.temporal.api.operatorservice.v1.AddOrUpdateRemoteClusterResponse\"\NUL\DC2\146\SOH\n\
       \\DC3RemoveRemoteCluster\DC2;.temporal.api.operatorservice.v1.RemoveRemoteClusterRequest\SUB<.temporal.api.operatorservice.v1.RemoveRemoteClusterResponse\"\NUL\DC2}\n\

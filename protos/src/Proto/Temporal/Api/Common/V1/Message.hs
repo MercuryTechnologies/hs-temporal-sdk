@@ -6,10 +6,12 @@
 module Proto.Temporal.Api.Common.V1.Message (
         ActivityType(), DataBlob(), Header(), Header'FieldsEntry(), Memo(),
         Memo'FieldsEntry(), MeteringMetadata(), Payload(),
-        Payload'MetadataEntry(), Payloads(), RetryPolicy(),
-        SearchAttributes(), SearchAttributes'IndexedFieldsEntry(),
-        WorkerVersionCapabilities(), WorkerVersionStamp(),
-        WorkflowExecution(), WorkflowType()
+        Payload'MetadataEntry(), Payloads(), ResetOptions(),
+        ResetOptions'Target(..), _ResetOptions'FirstWorkflowTask,
+        _ResetOptions'LastWorkflowTask, _ResetOptions'WorkflowTaskId,
+        _ResetOptions'BuildId, RetryPolicy(), SearchAttributes(),
+        SearchAttributes'IndexedFieldsEntry(), WorkerVersionCapabilities(),
+        WorkerVersionStamp(), WorkflowExecution(), WorkflowType()
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -36,9 +38,10 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Dependencies.Gogoproto.Gogo
 import qualified Proto.Google.Protobuf.Duration
+import qualified Proto.Google.Protobuf.Empty
 import qualified Proto.Temporal.Api.Enums.V1.Common
+import qualified Proto.Temporal.Api.Enums.V1.Reset
 {- | Fields :
      
          * 'Proto.Temporal.Api.Common.V1.Message_Fields.name' @:: Lens' ActivityType Data.Text.Text@ -}
@@ -1485,6 +1488,461 @@ instance Control.DeepSeq.NFData Payloads where
              (Control.DeepSeq.deepseq (_Payloads'payloads x__) ())
 {- | Fields :
      
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.resetReapplyType' @:: Lens' ResetOptions Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyType@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.currentRunOnly' @:: Lens' ResetOptions Prelude.Bool@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'target' @:: Lens' ResetOptions (Prelude.Maybe ResetOptions'Target)@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'firstWorkflowTask' @:: Lens' ResetOptions (Prelude.Maybe Proto.Google.Protobuf.Empty.Empty)@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.firstWorkflowTask' @:: Lens' ResetOptions Proto.Google.Protobuf.Empty.Empty@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'lastWorkflowTask' @:: Lens' ResetOptions (Prelude.Maybe Proto.Google.Protobuf.Empty.Empty)@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.lastWorkflowTask' @:: Lens' ResetOptions Proto.Google.Protobuf.Empty.Empty@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'workflowTaskId' @:: Lens' ResetOptions (Prelude.Maybe Data.Int.Int64)@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.workflowTaskId' @:: Lens' ResetOptions Data.Int.Int64@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'buildId' @:: Lens' ResetOptions (Prelude.Maybe Data.Text.Text)@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.buildId' @:: Lens' ResetOptions Data.Text.Text@ -}
+data ResetOptions
+  = ResetOptions'_constructor {_ResetOptions'resetReapplyType :: !Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyType,
+                               _ResetOptions'currentRunOnly :: !Prelude.Bool,
+                               _ResetOptions'target :: !(Prelude.Maybe ResetOptions'Target),
+                               _ResetOptions'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show ResetOptions where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+data ResetOptions'Target
+  = ResetOptions'FirstWorkflowTask !Proto.Google.Protobuf.Empty.Empty |
+    ResetOptions'LastWorkflowTask !Proto.Google.Protobuf.Empty.Empty |
+    ResetOptions'WorkflowTaskId !Data.Int.Int64 |
+    ResetOptions'BuildId !Data.Text.Text
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.Field.HasField ResetOptions "resetReapplyType" Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyType where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResetOptions'resetReapplyType
+           (\ x__ y__ -> x__ {_ResetOptions'resetReapplyType = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ResetOptions "currentRunOnly" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResetOptions'currentRunOnly
+           (\ x__ y__ -> x__ {_ResetOptions'currentRunOnly = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ResetOptions "maybe'target" (Prelude.Maybe ResetOptions'Target) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResetOptions'target
+           (\ x__ y__ -> x__ {_ResetOptions'target = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ResetOptions "maybe'firstWorkflowTask" (Prelude.Maybe Proto.Google.Protobuf.Empty.Empty) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResetOptions'target
+           (\ x__ y__ -> x__ {_ResetOptions'target = y__}))
+        (Lens.Family2.Unchecked.lens
+           (\ x__
+              -> case x__ of
+                   (Prelude.Just (ResetOptions'FirstWorkflowTask x__val))
+                     -> Prelude.Just x__val
+                   _otherwise -> Prelude.Nothing)
+           (\ _ y__ -> Prelude.fmap ResetOptions'FirstWorkflowTask y__))
+instance Data.ProtoLens.Field.HasField ResetOptions "firstWorkflowTask" Proto.Google.Protobuf.Empty.Empty where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResetOptions'target
+           (\ x__ y__ -> x__ {_ResetOptions'target = y__}))
+        ((Prelude..)
+           (Lens.Family2.Unchecked.lens
+              (\ x__
+                 -> case x__ of
+                      (Prelude.Just (ResetOptions'FirstWorkflowTask x__val))
+                        -> Prelude.Just x__val
+                      _otherwise -> Prelude.Nothing)
+              (\ _ y__ -> Prelude.fmap ResetOptions'FirstWorkflowTask y__))
+           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
+instance Data.ProtoLens.Field.HasField ResetOptions "maybe'lastWorkflowTask" (Prelude.Maybe Proto.Google.Protobuf.Empty.Empty) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResetOptions'target
+           (\ x__ y__ -> x__ {_ResetOptions'target = y__}))
+        (Lens.Family2.Unchecked.lens
+           (\ x__
+              -> case x__ of
+                   (Prelude.Just (ResetOptions'LastWorkflowTask x__val))
+                     -> Prelude.Just x__val
+                   _otherwise -> Prelude.Nothing)
+           (\ _ y__ -> Prelude.fmap ResetOptions'LastWorkflowTask y__))
+instance Data.ProtoLens.Field.HasField ResetOptions "lastWorkflowTask" Proto.Google.Protobuf.Empty.Empty where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResetOptions'target
+           (\ x__ y__ -> x__ {_ResetOptions'target = y__}))
+        ((Prelude..)
+           (Lens.Family2.Unchecked.lens
+              (\ x__
+                 -> case x__ of
+                      (Prelude.Just (ResetOptions'LastWorkflowTask x__val))
+                        -> Prelude.Just x__val
+                      _otherwise -> Prelude.Nothing)
+              (\ _ y__ -> Prelude.fmap ResetOptions'LastWorkflowTask y__))
+           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
+instance Data.ProtoLens.Field.HasField ResetOptions "maybe'workflowTaskId" (Prelude.Maybe Data.Int.Int64) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResetOptions'target
+           (\ x__ y__ -> x__ {_ResetOptions'target = y__}))
+        (Lens.Family2.Unchecked.lens
+           (\ x__
+              -> case x__ of
+                   (Prelude.Just (ResetOptions'WorkflowTaskId x__val))
+                     -> Prelude.Just x__val
+                   _otherwise -> Prelude.Nothing)
+           (\ _ y__ -> Prelude.fmap ResetOptions'WorkflowTaskId y__))
+instance Data.ProtoLens.Field.HasField ResetOptions "workflowTaskId" Data.Int.Int64 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResetOptions'target
+           (\ x__ y__ -> x__ {_ResetOptions'target = y__}))
+        ((Prelude..)
+           (Lens.Family2.Unchecked.lens
+              (\ x__
+                 -> case x__ of
+                      (Prelude.Just (ResetOptions'WorkflowTaskId x__val))
+                        -> Prelude.Just x__val
+                      _otherwise -> Prelude.Nothing)
+              (\ _ y__ -> Prelude.fmap ResetOptions'WorkflowTaskId y__))
+           (Data.ProtoLens.maybeLens Data.ProtoLens.fieldDefault))
+instance Data.ProtoLens.Field.HasField ResetOptions "maybe'buildId" (Prelude.Maybe Data.Text.Text) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResetOptions'target
+           (\ x__ y__ -> x__ {_ResetOptions'target = y__}))
+        (Lens.Family2.Unchecked.lens
+           (\ x__
+              -> case x__ of
+                   (Prelude.Just (ResetOptions'BuildId x__val)) -> Prelude.Just x__val
+                   _otherwise -> Prelude.Nothing)
+           (\ _ y__ -> Prelude.fmap ResetOptions'BuildId y__))
+instance Data.ProtoLens.Field.HasField ResetOptions "buildId" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResetOptions'target
+           (\ x__ y__ -> x__ {_ResetOptions'target = y__}))
+        ((Prelude..)
+           (Lens.Family2.Unchecked.lens
+              (\ x__
+                 -> case x__ of
+                      (Prelude.Just (ResetOptions'BuildId x__val)) -> Prelude.Just x__val
+                      _otherwise -> Prelude.Nothing)
+              (\ _ y__ -> Prelude.fmap ResetOptions'BuildId y__))
+           (Data.ProtoLens.maybeLens Data.ProtoLens.fieldDefault))
+instance Data.ProtoLens.Message ResetOptions where
+  messageName _
+    = Data.Text.pack "temporal.api.common.v1.ResetOptions"
+  packedMessageDescriptor _
+    = "\n\
+      \\fResetOptions\DC2H\n\
+      \\DC3first_workflow_task\CAN\SOH \SOH(\v2\SYN.google.protobuf.EmptyH\NULR\DC1firstWorkflowTask\DC2F\n\
+      \\DC2last_workflow_task\CAN\STX \SOH(\v2\SYN.google.protobuf.EmptyH\NULR\DLElastWorkflowTask\DC2*\n\
+      \\DLEworkflow_task_id\CAN\ETX \SOH(\ETXH\NULR\SOworkflowTaskId\DC2\ESC\n\
+      \\bbuild_id\CAN\EOT \SOH(\tH\NULR\abuildId\DC2U\n\
+      \\DC2reset_reapply_type\CAN\n\
+      \ \SOH(\SO2'.temporal.api.enums.v1.ResetReapplyTypeR\DLEresetReapplyType\DC2(\n\
+      \\DLEcurrent_run_only\CAN\v \SOH(\bR\SOcurrentRunOnlyB\b\n\
+      \\ACKtarget"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        resetReapplyType__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "reset_reapply_type"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyType)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"resetReapplyType")) ::
+              Data.ProtoLens.FieldDescriptor ResetOptions
+        currentRunOnly__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "current_run_only"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"currentRunOnly")) ::
+              Data.ProtoLens.FieldDescriptor ResetOptions
+        firstWorkflowTask__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "first_workflow_task"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Empty.Empty)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'firstWorkflowTask")) ::
+              Data.ProtoLens.FieldDescriptor ResetOptions
+        lastWorkflowTask__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "last_workflow_task"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Empty.Empty)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'lastWorkflowTask")) ::
+              Data.ProtoLens.FieldDescriptor ResetOptions
+        workflowTaskId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "workflow_task_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.Int64Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int64)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'workflowTaskId")) ::
+              Data.ProtoLens.FieldDescriptor ResetOptions
+        buildId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "build_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'buildId")) ::
+              Data.ProtoLens.FieldDescriptor ResetOptions
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 10, resetReapplyType__field_descriptor),
+           (Data.ProtoLens.Tag 11, currentRunOnly__field_descriptor),
+           (Data.ProtoLens.Tag 1, firstWorkflowTask__field_descriptor),
+           (Data.ProtoLens.Tag 2, lastWorkflowTask__field_descriptor),
+           (Data.ProtoLens.Tag 3, workflowTaskId__field_descriptor),
+           (Data.ProtoLens.Tag 4, buildId__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _ResetOptions'_unknownFields
+        (\ x__ y__ -> x__ {_ResetOptions'_unknownFields = y__})
+  defMessage
+    = ResetOptions'_constructor
+        {_ResetOptions'resetReapplyType = Data.ProtoLens.fieldDefault,
+         _ResetOptions'currentRunOnly = Data.ProtoLens.fieldDefault,
+         _ResetOptions'target = Prelude.Nothing,
+         _ResetOptions'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          ResetOptions -> Data.ProtoLens.Encoding.Bytes.Parser ResetOptions
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        80
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.toEnum
+                                          (Prelude.fmap
+                                             Prelude.fromIntegral
+                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
+                                       "reset_reapply_type"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"resetReapplyType") y x)
+                        88
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "current_run_only"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"currentRunOnly") y x)
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "first_workflow_task"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"firstWorkflowTask") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "last_workflow_task"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"lastWorkflowTask") y x)
+                        24
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "workflow_task_id"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"workflowTaskId") y x)
+                        34
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "build_id"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"buildId") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "ResetOptions"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view
+                      (Data.ProtoLens.Field.field @"resetReapplyType") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 80)
+                      ((Prelude..)
+                         ((Prelude..)
+                            Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
+                         Prelude.fromEnum _v))
+             ((Data.Monoid.<>)
+                (let
+                   _v
+                     = Lens.Family2.view
+                         (Data.ProtoLens.Field.field @"currentRunOnly") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 88)
+                         ((Prelude..)
+                            Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
+                            _v))
+                ((Data.Monoid.<>)
+                   (case
+                        Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'target") _x
+                    of
+                      Prelude.Nothing -> Data.Monoid.mempty
+                      (Prelude.Just (ResetOptions'FirstWorkflowTask v))
+                        -> (Data.Monoid.<>)
+                             (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                             ((Prelude..)
+                                (\ bs
+                                   -> (Data.Monoid.<>)
+                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                Data.ProtoLens.encodeMessage v)
+                      (Prelude.Just (ResetOptions'LastWorkflowTask v))
+                        -> (Data.Monoid.<>)
+                             (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                             ((Prelude..)
+                                (\ bs
+                                   -> (Data.Monoid.<>)
+                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                Data.ProtoLens.encodeMessage v)
+                      (Prelude.Just (ResetOptions'WorkflowTaskId v))
+                        -> (Data.Monoid.<>)
+                             (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
+                             ((Prelude..)
+                                Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral v)
+                      (Prelude.Just (ResetOptions'BuildId v))
+                        -> (Data.Monoid.<>)
+                             (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
+                             ((Prelude..)
+                                (\ bs
+                                   -> (Data.Monoid.<>)
+                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                Data.Text.Encoding.encodeUtf8 v))
+                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
+instance Control.DeepSeq.NFData ResetOptions where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_ResetOptions'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_ResetOptions'resetReapplyType x__)
+                (Control.DeepSeq.deepseq
+                   (_ResetOptions'currentRunOnly x__)
+                   (Control.DeepSeq.deepseq (_ResetOptions'target x__) ())))
+instance Control.DeepSeq.NFData ResetOptions'Target where
+  rnf (ResetOptions'FirstWorkflowTask x__) = Control.DeepSeq.rnf x__
+  rnf (ResetOptions'LastWorkflowTask x__) = Control.DeepSeq.rnf x__
+  rnf (ResetOptions'WorkflowTaskId x__) = Control.DeepSeq.rnf x__
+  rnf (ResetOptions'BuildId x__) = Control.DeepSeq.rnf x__
+_ResetOptions'FirstWorkflowTask ::
+  Data.ProtoLens.Prism.Prism' ResetOptions'Target Proto.Google.Protobuf.Empty.Empty
+_ResetOptions'FirstWorkflowTask
+  = Data.ProtoLens.Prism.prism'
+      ResetOptions'FirstWorkflowTask
+      (\ p__
+         -> case p__ of
+              (ResetOptions'FirstWorkflowTask p__val) -> Prelude.Just p__val
+              _otherwise -> Prelude.Nothing)
+_ResetOptions'LastWorkflowTask ::
+  Data.ProtoLens.Prism.Prism' ResetOptions'Target Proto.Google.Protobuf.Empty.Empty
+_ResetOptions'LastWorkflowTask
+  = Data.ProtoLens.Prism.prism'
+      ResetOptions'LastWorkflowTask
+      (\ p__
+         -> case p__ of
+              (ResetOptions'LastWorkflowTask p__val) -> Prelude.Just p__val
+              _otherwise -> Prelude.Nothing)
+_ResetOptions'WorkflowTaskId ::
+  Data.ProtoLens.Prism.Prism' ResetOptions'Target Data.Int.Int64
+_ResetOptions'WorkflowTaskId
+  = Data.ProtoLens.Prism.prism'
+      ResetOptions'WorkflowTaskId
+      (\ p__
+         -> case p__ of
+              (ResetOptions'WorkflowTaskId p__val) -> Prelude.Just p__val
+              _otherwise -> Prelude.Nothing)
+_ResetOptions'BuildId ::
+  Data.ProtoLens.Prism.Prism' ResetOptions'Target Data.Text.Text
+_ResetOptions'BuildId
+  = Data.ProtoLens.Prism.prism'
+      ResetOptions'BuildId
+      (\ p__
+         -> case p__ of
+              (ResetOptions'BuildId p__val) -> Prelude.Just p__val
+              _otherwise -> Prelude.Nothing)
+{- | Fields :
+     
          * 'Proto.Temporal.Api.Common.V1.Message_Fields.initialInterval' @:: Lens' RetryPolicy Proto.Google.Protobuf.Duration.Duration@
          * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'initialInterval' @:: Lens' RetryPolicy (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
          * 'Proto.Temporal.Api.Common.V1.Message_Fields.backoffCoefficient' @:: Lens' RetryPolicy Prelude.Double@
@@ -1569,10 +2027,10 @@ instance Data.ProtoLens.Message RetryPolicy where
   messageName _ = Data.Text.pack "temporal.api.common.v1.RetryPolicy"
   packedMessageDescriptor _
     = "\n\
-      \\vRetryPolicy\DC2J\n\
-      \\DLEinitial_interval\CAN\SOH \SOH(\v2\EM.google.protobuf.DurationR\SIinitialIntervalB\EOT\152\223\US\SOH\DC2/\n\
-      \\DC3backoff_coefficient\CAN\STX \SOH(\SOHR\DC2backoffCoefficient\DC2J\n\
-      \\DLEmaximum_interval\CAN\ETX \SOH(\v2\EM.google.protobuf.DurationR\SImaximumIntervalB\EOT\152\223\US\SOH\DC2)\n\
+      \\vRetryPolicy\DC2D\n\
+      \\DLEinitial_interval\CAN\SOH \SOH(\v2\EM.google.protobuf.DurationR\SIinitialInterval\DC2/\n\
+      \\DC3backoff_coefficient\CAN\STX \SOH(\SOHR\DC2backoffCoefficient\DC2D\n\
+      \\DLEmaximum_interval\CAN\ETX \SOH(\v2\EM.google.protobuf.DurationR\SImaximumInterval\DC2)\n\
       \\DLEmaximum_attempts\CAN\EOT \SOH(\ENQR\SImaximumAttempts\DC29\n\
       \\EMnon_retryable_error_types\CAN\ENQ \ETX(\tR\SYNnonRetryableErrorTypes"
   packedFileDescriptor _ = packedFileDescriptor
@@ -2780,7 +3238,7 @@ instance Control.DeepSeq.NFData WorkflowType where
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \$temporal/api/common/v1/message.proto\DC2\SYNtemporal.api.common.v1\SUB\RSgoogle/protobuf/duration.proto\SUB!dependencies/gogoproto/gogo.proto\SUB\"temporal/api/enums/v1/common.proto\"h\n\
+    \$temporal/api/common/v1/message.proto\DC2\SYNtemporal.api.common.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\ESCgoogle/protobuf/empty.proto\SUB\"temporal/api/enums/v1/common.proto\SUB!temporal/api/enums/v1/reset.proto\"h\n\
     \\bDataBlob\DC2H\n\
     \\rencoding_type\CAN\SOH \SOH(\SO2#.temporal.api.enums.v1.EncodingTypeR\fencodingType\DC2\DC2\n\
     \\EOTdata\CAN\STX \SOH(\fR\EOTdata\"G\n\
@@ -2814,11 +3272,11 @@ packedFileDescriptor
     \\fWorkflowType\DC2\DC2\n\
     \\EOTname\CAN\SOH \SOH(\tR\EOTname\"\"\n\
     \\fActivityType\DC2\DC2\n\
-    \\EOTname\CAN\SOH \SOH(\tR\EOTname\"\188\STX\n\
-    \\vRetryPolicy\DC2J\n\
-    \\DLEinitial_interval\CAN\SOH \SOH(\v2\EM.google.protobuf.DurationR\SIinitialIntervalB\EOT\152\223\US\SOH\DC2/\n\
-    \\DC3backoff_coefficient\CAN\STX \SOH(\SOHR\DC2backoffCoefficient\DC2J\n\
-    \\DLEmaximum_interval\CAN\ETX \SOH(\v2\EM.google.protobuf.DurationR\SImaximumIntervalB\EOT\152\223\US\SOH\DC2)\n\
+    \\EOTname\CAN\SOH \SOH(\tR\EOTname\"\176\STX\n\
+    \\vRetryPolicy\DC2D\n\
+    \\DLEinitial_interval\CAN\SOH \SOH(\v2\EM.google.protobuf.DurationR\SIinitialInterval\DC2/\n\
+    \\DC3backoff_coefficient\CAN\STX \SOH(\SOHR\DC2backoffCoefficient\DC2D\n\
+    \\DLEmaximum_interval\CAN\ETX \SOH(\v2\EM.google.protobuf.DurationR\SImaximumInterval\DC2)\n\
     \\DLEmaximum_attempts\CAN\EOT \SOH(\ENQR\SImaximumAttempts\DC29\n\
     \\EMnon_retryable_error_types\CAN\ENQ \ETX(\tR\SYNnonRetryableErrorTypes\"n\n\
     \\DLEMeteringMetadata\DC2Z\n\
@@ -2829,9 +3287,18 @@ packedFileDescriptor
     \\SOuse_versioning\CAN\ETX \SOH(\bR\ruseVersioning\"]\n\
     \\EMWorkerVersionCapabilities\DC2\EM\n\
     \\bbuild_id\CAN\SOH \SOH(\tR\abuildId\DC2%\n\
-    \\SOuse_versioning\CAN\STX \SOH(\bR\ruseVersioningB\137\SOH\n\
-    \\EMio.temporal.api.common.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/common/v1;common\170\STX\CANTemporalio.Api.Common.V1\234\STX\ESCTemporalio::Api::Common::V1J\161\&2\n\
-    \\a\DC2\ENQ\SYN\NUL\150\SOH\SOH\n\
+    \\SOuse_versioning\CAN\STX \SOH(\bR\ruseVersioning\"\244\STX\n\
+    \\fResetOptions\DC2H\n\
+    \\DC3first_workflow_task\CAN\SOH \SOH(\v2\SYN.google.protobuf.EmptyH\NULR\DC1firstWorkflowTask\DC2F\n\
+    \\DC2last_workflow_task\CAN\STX \SOH(\v2\SYN.google.protobuf.EmptyH\NULR\DLElastWorkflowTask\DC2*\n\
+    \\DLEworkflow_task_id\CAN\ETX \SOH(\ETXH\NULR\SOworkflowTaskId\DC2\ESC\n\
+    \\bbuild_id\CAN\EOT \SOH(\tH\NULR\abuildId\DC2U\n\
+    \\DC2reset_reapply_type\CAN\n\
+    \ \SOH(\SO2'.temporal.api.enums.v1.ResetReapplyTypeR\DLEresetReapplyType\DC2(\n\
+    \\DLEcurrent_run_only\CAN\v \SOH(\bR\SOcurrentRunOnlyB\b\n\
+    \\ACKtargetB\137\SOH\n\
+    \\EMio.temporal.api.common.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/common/v1;common\170\STX\CANTemporalio.Api.Common.V1\234\STX\ESCTemporalio::Api::Common::V1J\216<\n\
+    \\a\DC2\ENQ\SYN\NUL\179\SOH\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -2885,9 +3352,11 @@ packedFileDescriptor
     \\t\n\
     \\STX\ETX\NUL\DC2\ETX!\NUL(\n\
     \\t\n\
-    \\STX\ETX\SOH\DC2\ETX#\NUL+\n\
+    \\STX\ETX\SOH\DC2\ETX\"\NUL%\n\
     \\t\n\
-    \\STX\ETX\STX\DC2\ETX%\NUL,\n\
+    \\STX\ETX\STX\DC2\ETX$\NUL,\n\
+    \\t\n\
+    \\STX\ETX\ETX\DC2\ETX%\NUL+\n\
     \\n\
     \\n\
     \\STX\EOT\NUL\DC2\EOT'\NUL*\SOH\n\
@@ -3061,7 +3530,7 @@ packedFileDescriptor
     \\n\
     \\ETX\EOT\t\SOH\DC2\ETX_\b\DC3\n\
     \n\n\
-    \\EOT\EOT\t\STX\NUL\DC2\ETXa\EOTS\SUBa Interval of the first retry. If retryBackoffCoefficient is 1.0 then it is used for all retries.\n\
+    \\EOT\EOT\t\STX\NUL\DC2\ETXa\EOT2\SUBa Interval of the first retry. If retryBackoffCoefficient is 1.0 then it is used for all retries.\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\t\STX\NUL\ACK\DC2\ETXa\EOT\FS\n\
@@ -3069,10 +3538,6 @@ packedFileDescriptor
     \\ENQ\EOT\t\STX\NUL\SOH\DC2\ETXa\GS-\n\
     \\f\n\
     \\ENQ\EOT\t\STX\NUL\ETX\DC2\ETXa01\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\NUL\b\DC2\ETXa2R\n\
-    \\SI\n\
-    \\b\EOT\t\STX\NUL\b\243\251\ETX\DC2\ETXa3Q\n\
     \\169\SOH\n\
     \\EOT\EOT\t\STX\SOH\DC2\ETXe\EOT#\SUB\155\SOH Coefficient used to calculate the next retry interval.\n\
     \ The next retry interval is previous interval multiplied by the coefficient.\n\
@@ -3086,7 +3551,7 @@ packedFileDescriptor
     \\f\n\
     \\ENQ\EOT\t\STX\SOH\ETX\DC2\ETXe!\"\n\
     \\178\SOH\n\
-    \\EOT\EOT\t\STX\STX\DC2\ETXh\EOTS\SUB\164\SOH Maximum interval between retries. Exponential backoff leads to interval increase.\n\
+    \\EOT\EOT\t\STX\STX\DC2\ETXh\EOT2\SUB\164\SOH Maximum interval between retries. Exponential backoff leads to interval increase.\n\
     \ This value is the cap of the increase. Default is 100x of the initial interval.\n\
     \\n\
     \\f\n\
@@ -3095,10 +3560,6 @@ packedFileDescriptor
     \\ENQ\EOT\t\STX\STX\SOH\DC2\ETXh\GS-\n\
     \\f\n\
     \\ENQ\EOT\t\STX\STX\ETX\DC2\ETXh01\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\STX\b\DC2\ETXh2R\n\
-    \\SI\n\
-    \\b\EOT\t\STX\STX\b\243\251\ETX\DC2\ETXh3Q\n\
     \\159\SOH\n\
     \\EOT\EOT\t\STX\ETX\DC2\ETXk\EOT\US\SUB\145\SOH Maximum number of attempts. When exceeded the retries stop even if not expired yet.\n\
     \ 1 disables retries. 0 means unlimited (up to the timeouts)\n\
@@ -3213,4 +3674,77 @@ packedFileDescriptor
     \\r\n\
     \\ENQ\EOT\f\STX\SOH\SOH\DC2\EOT\147\SOH\t\ETB\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SOH\ETX\DC2\EOT\147\SOH\SUB\ESCb\ACKproto3"
+    \\ENQ\EOT\f\STX\SOH\ETX\DC2\EOT\147\SOH\SUB\ESC\n\
+    \\141\SOH\n\
+    \\STX\EOT\r\DC2\ACK\154\SOH\NUL\179\SOH\SOH\SUB\DEL Describes where and how to reset a workflow, used for batch reset currently\n\
+    \ and may be used for single-workflow reset later.\n\
+    \\n\
+    \\v\n\
+    \\ETX\EOT\r\SOH\DC2\EOT\154\SOH\b\DC4\n\
+    \2\n\
+    \\EOT\EOT\r\b\NUL\DC2\ACK\156\SOH\EOT\171\SOH\ENQ\SUB\" Which workflow task to reset to.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\r\b\NUL\SOH\DC2\EOT\156\SOH\n\
+    \\DLE\n\
+    \M\n\
+    \\EOT\EOT\r\STX\NUL\DC2\EOT\158\SOH\b6\SUB? Resets to the first workflow task completed or started event.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\NUL\ACK\DC2\EOT\158\SOH\b\GS\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\NUL\SOH\DC2\EOT\158\SOH\RS1\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\NUL\ETX\DC2\EOT\158\SOH45\n\
+    \L\n\
+    \\EOT\EOT\r\STX\SOH\DC2\EOT\160\SOH\b5\SUB> Resets to the last workflow task completed or started event.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\SOH\ACK\DC2\EOT\160\SOH\b\GS\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\SOH\SOH\DC2\EOT\160\SOH\RS0\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\SOH\ETX\DC2\EOT\160\SOH34\n\
+    \\241\SOH\n\
+    \\EOT\EOT\r\STX\STX\DC2\EOT\164\SOH\b#\SUB\226\SOH The id of a specific `WORKFLOW_TASK_COMPLETED`,`WORKFLOW_TASK_TIMED_OUT`, `WORKFLOW_TASK_FAILED`, or\n\
+    \ `WORKFLOW_TASK_STARTED` event to reset to.\n\
+    \ Note that this option doesn't make sense when used as part of a batch request.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\STX\ENQ\DC2\EOT\164\SOH\b\r\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\STX\SOH\DC2\EOT\164\SOH\SO\RS\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\STX\ETX\DC2\EOT\164\SOH!\"\n\
+    \\171\STX\n\
+    \\EOT\EOT\r\STX\ETX\DC2\EOT\170\SOH\b\FS\SUB\156\STX Resets to the first workflow task processed by this build id.\n\
+    \ If the workflow was not processed by the build id, or the workflow task can't be\n\
+    \ determined, no reset will be performed.\n\
+    \ Note that by default, this reset is allowed to be to a prior run in a chain of\n\
+    \ continue-as-new.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\ETX\ENQ\DC2\EOT\170\SOH\b\SO\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\ETX\SOH\DC2\EOT\170\SOH\SI\ETB\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\ETX\ETX\DC2\EOT\170\SOH\SUB\ESC\n\
+    \.\n\
+    \\EOT\EOT\r\STX\EOT\DC2\EOT\174\SOH\EOTC\SUB  History event reapply options.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\EOT\ACK\DC2\EOT\174\SOH\EOT*\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\EOT\SOH\DC2\EOT\174\SOH+=\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\EOT\ETX\DC2\EOT\174\SOH@B\n\
+    \\138\SOH\n\
+    \\EOT\EOT\r\STX\ENQ\DC2\EOT\178\SOH\EOT\US\SUB| If true, limit the reset to only within the current run. (Applies to build_id targets and\n\
+    \ possibly others in the future.)\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\ENQ\ENQ\DC2\EOT\178\SOH\EOT\b\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\ENQ\SOH\DC2\EOT\178\SOH\t\EM\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\ENQ\ETX\DC2\EOT\178\SOH\FS\RSb\ACKproto3"
