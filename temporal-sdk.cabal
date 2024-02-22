@@ -18,7 +18,6 @@ library
       Temporal.Bundle
       Temporal.Bundle.TH
       Temporal.Client
-      Temporal.Client.Batch
       Temporal.Client.Schedule
       Temporal.Contrib.OpenTelemetry
       Temporal.Duration
