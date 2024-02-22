@@ -22,50 +22,12 @@ import Foreign.C.Types
 import Foreign.Marshal.Alloc
 import qualified Foreign.Marshal.Utils as Marshal
 import Foreign.Ptr
+import Foreign.ForeignPtr
 import Foreign.StablePtr
 import Foreign.Storable
 import GHC.Conc (newStablePtrPrimMVar, PrimMVar)
 import Data.Kind (Type)
-
-class ManagedRustValue r where
-  type RustRef r :: Type
-  type HaskellRep r :: Type
-  fromRust :: proxy r -> RustRef r -> IO (HaskellRep r)
-
--- | See CUnit in the rust side. I'm not sure about the semantics of an empty
--- struct in Rust/C, so we'll just call a drop function on it to be safe.
-instance ManagedRustValue () where
-  type RustRef () = Ptr ()
-  type HaskellRep () = ()
-  fromRust _ = rust_dropUnit
-
-foreign import ccall "hs_temporal_drop_unit" rust_dropUnit :: Ptr () -> IO ()
-
-data RustCStringLen = RustCStringLen
-  { rustCStringLenBytes :: CString
-  , rustCStringLenLen :: CSize
-  }
-
-instance Storable RustCStringLen where
-  sizeOf = const (sizeOf (undefined :: CString) + sizeOf (undefined :: CSize))
-  alignment = const 8
-  peek ptr = RustCStringLen <$> peekByteOff ptr 0 <*> peekByteOff ptr (sizeOf (undefined :: CString))
-  poke ptr (RustCStringLen bytes len) = do
-    pokeByteOff ptr 0 bytes
-    pokeByteOff ptr (sizeOf (undefined :: CString)) len
-
-data CArray a = CArray
-  { cArrayPtr :: Ptr a
-  , cArrayLen :: CSize
-  }
-
-instance Storable a => Storable (CArray a) where
-  sizeOf = const (sizeOf (undefined :: Ptr a) + sizeOf (undefined :: CSize))
-  alignment = const 8
-  peek ptr = CArray <$> peekByteOff ptr 0 <*> peekByteOff ptr (sizeOf (undefined :: CString))
-  poke ptr (CArray bytes len) = do
-    pokeByteOff ptr 0 bytes
-    pokeByteOff ptr (sizeOf (undefined :: CString)) len
+import Temporal.Core.CTypes
 
 withCArray :: Storable a => Vector.Vector a -> (Ptr (CArray a) -> IO b) -> IO b
 withCArray v f = Vector.unsafeWith v $ \vPtr ->
@@ -79,94 +41,54 @@ withCArrayText :: Text -> (Ptr (CArray Word8) -> IO b) -> IO b
 withCArrayText txt f = Text.withCStringLen txt $ \(bytes, len) ->
   Marshal.with (CArray (castPtr bytes) (fromIntegral len)) f
 
-
-instance ManagedRustValue (CArray Word8) where
-  type RustRef (CArray Word8) = Ptr (CArray Word8)
-  type HaskellRep (CArray Word8) = ByteString
-  fromRust _ rustPtr = mask_ $ do
-    (CArray bytes len) <- peek rustPtr
-    bs <- ByteString.packCStringLen (castPtr bytes, fromIntegral len)
-    rust_drop_byte_array rustPtr
-    pure bs
-
-foreign import ccall "hs_temporal_drop_byte_array" rust_drop_byte_array :: Ptr (CArray Word8) -> IO ()
-foreign import ccall "hs_temporal_drop_cstring" rust_drop_cstring :: Ptr RustCStringLen -> IO ()
-instance ManagedRustValue RustCStringLen where
-  type RustRef RustCStringLen = Ptr RustCStringLen
-  type HaskellRep RustCStringLen = Text
-  fromRust _ rustPtr = mask_ $ do
-    (RustCStringLen bytes len) <- peek rustPtr
-    txt <- Text.peekCStringLen (bytes, fromIntegral len)
-    rust_drop_cstring rustPtr
-    pure txt
-
-newtype TokioResult a = TokioResult (Ptr (RustRef a))
-
-withTokioResult :: (RustRef a ~ Ptr a) => (TokioResult a -> IO b) -> IO b
-withTokioResult f = alloca $ \ptr -> do
+withTokioResult :: TokioResult a -> (Ptr (Ptr a) -> IO b) -> IO b
+withTokioResult fp f = withForeignPtr fp $ \ptr -> do
   poke ptr nullPtr
-  f (TokioResult ptr)
+  f ptr
 
-peekTokioResult :: (ManagedRustValue a, RustRef a ~ Ptr a) => TokioResult a -> (RustRef a -> IO b) -> IO (Maybe b)
-peekTokioResult (TokioResult ptr) f = do
-  inner <- peek ptr
+peekTokioResult :: TokioSlot a -> Maybe (FinalizerPtr a) -> IO (Maybe (ForeignPtr a))
+peekTokioResult slot mfp = do
+  inner <- peek slot
   if (inner == nullPtr)
     then return Nothing
-    else Just <$> f inner
+    else Just <$> case mfp of
+      Nothing -> newForeignPtr_ inner
+      Just fp -> newForeignPtr fp inner
 
-type TokioCall e a = StablePtr PrimMVar -> Int -> TokioResult e -> TokioResult a -> IO ()
+type TokioCall e a = StablePtr PrimMVar -> Int -> TokioSlot e -> TokioSlot a -> IO ()
+type TokioSlot a = Ptr (Ptr a)
+type TokioResult a = ForeignPtr (Ptr a)
 
 -- | Dropping can't be done automatically if the result is returned without async exceptions
 -- intervening, because we don't want to drop things like `Client` while they're still in use.
 -- So we should return ForeignPtrs for things that need to stay alive, and then we can drop when we're done.
-makeTokioAsyncCall :: (ManagedRustValue e, RustRef e ~ Ptr e, ManagedRustValue a, RustRef a ~ Ptr a) 
-  => TokioCall e a 
-  -> (RustRef e -> IO f)
-  -> (RustRef a -> IO b)
-  -> IO (Either f b)
-makeTokioAsyncCall call readErr readSuccess = mask_ $ do
+makeTokioAsyncCall 
+  :: TokioCall err res
+  -> (Maybe (FinalizerPtr err))
+  -> (Maybe (FinalizerPtr res))
+  -> IO (Either (ForeignPtr err) (ForeignPtr res))
+makeTokioAsyncCall call readErr readSuccess = uninterruptibleMask $ \restore -> do
   mvar <- newEmptyMVar
   sp <- newStablePtrPrimMVar mvar
-  withTokioResult $ \errorSlot -> withTokioResult $ \resultSlot -> do
+  errorSlot <- mallocForeignPtr
+  resultSlot <- mallocForeignPtr 
+  withTokioResult errorSlot $ \err -> withTokioResult resultSlot $ \res -> do
     let peekEither = do
-          e <- peekTokioResult errorSlot readErr
+          e <- peekTokioResult err readErr
           case e of
             Nothing -> do
-              r <- peekTokioResult resultSlot readSuccess
+              r <- peekTokioResult res readSuccess
               case r of
                 Nothing -> error "Both error and result are null"
                 Just r -> return (Right r)
             Just e -> return (Left e)
 
     (cap, _) <- threadCapability =<< myThreadId
-    call sp cap errorSlot resultSlot
-    () <- takeMVar mvar `onException`
-      forkIO (takeMVar mvar >> void peekEither)
+    call sp cap err res
+    let handleCleanup = forkIO $ do
+          takeMVar mvar
+          -- We still need to get the result out of the slot and into a ForeignPtr so that we can drop it
+          void peekEither
+    () <- restore (takeMVar mvar) `onException` handleCleanup
     peekEither
 
-data RpcError = RpcError
-  { code :: Word32
-  , message :: Text
-  , details :: ByteString
-  }
-  deriving (Show)
-
-instance Exception RpcError
-
--- nb: Alignment for C repr structs is not packed, so the alignment is based on the largest field size.
-peekCrpcError :: Ptr RpcError -> IO RpcError 
-peekCrpcError ptr = do
-  code <- peekByteOff ptr 0
-  message <- Text.pack <$> (peekByteOff ptr 8 >>= peekCString)
-  details <- peekByteOff ptr 16 >>= \(CArray ptr len) -> ByteString.packCStringLen (ptr, fromIntegral len)
-  pure RpcError{..}
-
-foreign import ccall "hs_temporal_drop_rpc_error" rust_drop_rpc_error :: Ptr RpcError -> IO ()
-
-instance ManagedRustValue RpcError where
-  type RustRef RpcError = Ptr RpcError
-  type HaskellRep RpcError = RpcError
-  fromRust _ ptr = mask_ $ do
-    err <- peekCrpcError ptr
-    rust_drop_rpc_error ptr
-    pure err

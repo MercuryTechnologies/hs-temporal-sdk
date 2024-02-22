@@ -14,7 +14,7 @@ extra-doc-files:    CHANGELOG.md
 extra-source-files:
   rust/Cargo.toml,
   rust/Cargo.lock,
-  rust/src/*.rs
+  rust/src/*.rs,
 
 common warnings
     ghc-options: -Wall
@@ -33,6 +33,10 @@ custom-setup
 
 library
     import:           warnings
+    includes:
+      rust/temporal_bridge.h
+    include-dirs:     rust
+
     ghc-options:      -g
     exposed-modules: 
       Temporal.Core.Client.WorkflowService,
@@ -41,10 +45,10 @@ library
       Temporal.Core.Client,
       Temporal.Core.EphemeralServer,
       Temporal.Core.Worker,
-      Temporal.Runtime,
-      Temporal.Internal.JobPool
+      Temporal.Runtime
     other-modules:
       Temporal.Internal.FFI,
+      Temporal.Core.CTypes,
     build-depends:
       base >= 4.14 && < 5, 
       proto-lens, 
@@ -66,7 +70,7 @@ library
     hs-source-dirs:   src
     default-language: Haskell2010
     if(os(darwin))
-      frameworks: Security, CoreFoundation
+      frameworks: Security, CoreFoundation, SystemConfiguration
 
 -- test-suite temporal-sdk-core-test
 --     import:           warnings

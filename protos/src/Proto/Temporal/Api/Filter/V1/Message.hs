@@ -32,7 +32,6 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Dependencies.Gogoproto.Gogo
 import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Temporal.Api.Enums.V1.Workflow
 {- | Fields :
@@ -85,10 +84,10 @@ instance Data.ProtoLens.Message StartTimeFilter where
     = Data.Text.pack "temporal.api.filter.v1.StartTimeFilter"
   packedMessageDescriptor _
     = "\n\
-      \\SIStartTimeFilter\DC2E\n\
-      \\rearliest_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\fearliestTimeB\EOT\144\223\US\SOH\DC2A\n\
+      \\SIStartTimeFilter\DC2?\n\
+      \\rearliest_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\fearliestTime\DC2;\n\
       \\vlatest_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-      \latestTimeB\EOT\144\223\US\SOH"
+      \latestTime"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -603,21 +602,21 @@ instance Control.DeepSeq.NFData WorkflowTypeFilter where
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \$temporal/api/filter/v1/message.proto\DC2\SYNtemporal.api.filter.v1\SUB\USgoogle/protobuf/timestamp.proto\SUB!dependencies/gogoproto/gogo.proto\SUB$temporal/api/enums/v1/workflow.proto\"Q\n\
+    \$temporal/api/filter/v1/message.proto\DC2\SYNtemporal.api.filter.v1\SUB\USgoogle/protobuf/timestamp.proto\SUB$temporal/api/enums/v1/workflow.proto\"Q\n\
     \\ETBWorkflowExecutionFilter\DC2\US\n\
     \\vworkflow_id\CAN\SOH \SOH(\tR\n\
     \workflowId\DC2\NAK\n\
     \\ACKrun_id\CAN\STX \SOH(\tR\ENQrunId\"(\n\
     \\DC2WorkflowTypeFilter\DC2\DC2\n\
-    \\EOTname\CAN\SOH \SOH(\tR\EOTname\"\155\SOH\n\
-    \\SIStartTimeFilter\DC2E\n\
-    \\rearliest_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\fearliestTimeB\EOT\144\223\US\SOH\DC2A\n\
+    \\EOTname\CAN\SOH \SOH(\tR\EOTname\"\143\SOH\n\
+    \\SIStartTimeFilter\DC2?\n\
+    \\rearliest_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\fearliestTime\DC2;\n\
     \\vlatest_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-    \latestTimeB\EOT\144\223\US\SOH\"V\n\
+    \latestTime\"V\n\
     \\fStatusFilter\DC2F\n\
     \\ACKstatus\CAN\SOH \SOH(\SO2..temporal.api.enums.v1.WorkflowExecutionStatusR\ACKstatusB\137\SOH\n\
-    \\EMio.temporal.api.filter.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/filter/v1;filter\170\STX\CANTemporalio.Api.Filter.V1\234\STX\ESCTemporalio::Api::Filter::V1J\141\SO\n\
-    \\ACK\DC2\EOT\SYN\NUL7\SOH\n\
+    \\EMio.temporal.api.filter.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/filter/v1;filter\170\STX\CANTemporalio.Api.Filter.V1\234\STX\ESCTemporalio::Api::Filter::V1J\196\r\n\
+    \\ACK\DC2\EOT\SYN\NUL5\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -671,89 +670,79 @@ packedFileDescriptor
     \\t\n\
     \\STX\ETX\NUL\DC2\ETX!\NUL)\n\
     \\t\n\
-    \\STX\ETX\SOH\DC2\ETX#\NUL+\n\
-    \\t\n\
-    \\STX\ETX\STX\DC2\ETX%\NUL.\n\
+    \\STX\ETX\SOH\DC2\ETX#\NUL.\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT'\NUL*\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT%\NUL(\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX'\b\US\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX%\b\US\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX(\EOT\ESC\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX&\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX(\EOT\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX&\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX(\v\SYN\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX&\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX(\EM\SUB\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX&\EM\SUB\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX)\EOT\SYN\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX'\EOT\SYN\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX)\EOT\n\
+    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX'\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX)\v\DC1\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX'\v\DC1\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX)\DC4\NAK\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX'\DC4\NAK\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT,\NUL.\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT*\NUL,\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX,\b\SUB\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX*\b\SUB\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX-\EOT\DC4\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX+\EOT\DC4\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX-\EOT\n\
+    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX+\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX-\v\SI\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX+\v\SI\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX-\DC2\DC3\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX+\DC2\DC3\n\
     \\n\
     \\n\
-    \\STX\EOT\STX\DC2\EOT0\NUL3\SOH\n\
+    \\STX\EOT\STX\DC2\EOT.\NUL1\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX0\b\ETB\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX.\b\ETB\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX1\EOTM\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX/\EOT0\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX1\EOT\GS\n\
+    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX/\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX1\RS+\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX/\RS+\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX1./\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\b\DC2\ETX10L\n\
-    \\SI\n\
-    \\b\EOT\STX\STX\NUL\b\242\251\ETX\DC2\ETX11K\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX/./\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX2\EOTK\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX0\EOT.\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETX2\EOT\GS\n\
+    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETX0\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX2\RS)\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX0\RS)\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX2,-\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\b\DC2\ETX2.J\n\
-    \\SI\n\
-    \\b\EOT\STX\STX\SOH\b\242\251\ETX\DC2\ETX2/I\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX0,-\n\
     \\n\
     \\n\
-    \\STX\EOT\ETX\DC2\EOT5\NUL7\SOH\n\
+    \\STX\EOT\ETX\DC2\EOT3\NUL5\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX5\b\DC4\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX3\b\DC4\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETX6\EOT=\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETX4\EOT=\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ACK\DC2\ETX6\EOT1\n\
+    \\ENQ\EOT\ETX\STX\NUL\ACK\DC2\ETX4\EOT1\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX628\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX428\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX6;<b\ACKproto3"
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX4;<b\ACKproto3"

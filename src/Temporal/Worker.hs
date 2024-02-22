@@ -46,6 +46,7 @@ module Temporal.Worker
   , HasWorkflowDefinition(..)
   , HasActivityDefinition(..)
   , addErrorConverter
+  , setLogger
   , setNamespace
   , setTaskQueue
   , setBuildId
@@ -67,10 +68,8 @@ module Temporal.Worker
   , addInterceptors
   , WorkflowId(..)
   ) where
-import UnliftIO.Exception
 import UnliftIO
-import Control.Applicative
-
+import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.State
 import Data.HashMap.Strict (HashMap)
@@ -91,6 +90,7 @@ import qualified Data.HashMap.Strict as HashMap
 
 import Temporal.Interceptor
 import Temporal.Core.Worker (InactiveForReplay)
+import Temporal.Runtime
 
 newtype ConfigM actEnv a = ConfigM { unConfigM :: State (WorkerConfig actEnv) a }
   deriving newtype (Functor, Applicative, Monad)
@@ -113,6 +113,7 @@ configure actEnv defs = flip execState defaultConfig . unConfigM
       , deadlockTimeout = Just 1000000
       , interceptorConfig = mempty
       , applicationErrorConverters = standardApplicationFailureHandlers
+      , logger = \_ _ _ _ -> pure ()
       , ..
       }
 
@@ -312,6 +313,12 @@ setGracefulShutdownPeriodMillis n = modifyCore $ \conf -> conf
   { Core.gracefulShutdownPeriodMillis = n
   }
 
+-- | Set the logger for the worker. This is used to log messages from the worker.
+setLogger :: (Loc -> LogSource -> Control.Monad.Logger.LogLevel -> LogStr -> IO ()) -> ConfigM actEnv ()
+setLogger f = ConfigM $ modify' $ \conf -> conf
+  { logger = f
+  }
+
 ------------------------------------------------------------------------------------
 
 -- | A Worker is responsible for polling a Task Queue, dequeueing a Task, executing 
@@ -335,10 +342,10 @@ data Worker = forall ty. Worker
   , workerCore :: Core.Worker ty
   }
 
-startReplayWorker :: (MonadLoggerIO m, MonadUnliftIO m) => WorkerConfig actEnv -> m (Temporal.Worker.Worker, Core.HistoryPusher)
-startReplayWorker conf = do
+startReplayWorker :: (MonadUnliftIO m) => Runtime -> WorkerConfig actEnv -> m (Temporal.Worker.Worker, Core.HistoryPusher)
+startReplayWorker rt conf = flip runLoggingT conf.logger $ do
   $(logDebug) "Starting worker"
-  (workerCore, replay) <- either throwIO pure =<< liftIO (Core.newReplayWorker conf.coreConfig)
+  (workerCore, replay) <- either throwIO pure =<< liftIO (Core.newReplayWorker rt conf.coreConfig)
   $(logDebug) "Instantiated core"
   runningWorkflows <- newTVarIO mempty
   let workerWorkflowFunctions = conf.wfDefs
@@ -357,14 +364,13 @@ startReplayWorker conf = do
     $(logDebug) "Exiting workflow worker loop"
   pure (Temporal.Worker.Worker{..}, replay)
 
-startWorker :: (MonadLoggerIO m, MonadUnliftIO m) => Client -> WorkerConfig actEnv -> m Temporal.Worker.Worker
-startWorker client conf = do
+startWorker :: (MonadUnliftIO m) => Client -> WorkerConfig actEnv -> m Temporal.Worker.Worker
+startWorker client conf = flip runLoggingT conf.logger $ do
   $(logDebug) "Starting worker"
   workerCore <- either throwIO pure =<< liftIO (Core.newWorker client conf.coreConfig)
   $(logDebug) "Instantiated core"
   runningWorkflows <- newTVarIO mempty
   runningActivities <- newTVarIO mempty
-  workerLogFn <- askLoggerIO
   let errorConverters = mkAnnotatedHandlers conf.applicationErrorConverters
       workerWorkflowFunctions = conf.wfDefs
       workerTaskQueue = TaskQueue $ Core.taskQueue conf.coreConfig
@@ -376,7 +382,6 @@ startWorker client conf = do
 
       initialEnv = conf.actEnv
       definitions = conf.actDefs
-      logger = workerLogFn
       activityInboundInterceptors = conf.interceptorConfig.activityInboundInterceptors
       activityOutboundInterceptors = conf.interceptorConfig.activityOutboundInterceptors
       clientInterceptors = conf.interceptorConfig.clientInterceptors
@@ -384,13 +389,20 @@ startWorker client conf = do
       activityWorker = Activity.ActivityWorker{..}
       workerClient = client
   let workerType = Core.SReal
+  -- logs <- liftIO $ fetchLogs globalRuntime
+  -- forM_ logs $ \l -> case l.level of
+  --   Trace -> $(logDebug) l.message
+  --   Debug -> $(logDebug) l.message
+  --   Info -> $(logInfo) l.message
+  --   Warn -> $(logWarn) l.message
+  --   Error -> $(logError) l.message
   workerWorkflowLoop <- async $ do
     $(logDebug) "Starting workflow worker loop"
     Workflow.execute workflowWorker
     $(logDebug) "Exiting workflow worker loop"
   workerActivityLoop <- async $ do 
     $(logDebug) "Starting activity worker loop"
-    liftIO $ Activity.execute activityWorker
+    Activity.execute activityWorker
     $(logDebug) "Exiting activity worker loop"
   pure Temporal.Worker.Worker{..}
 
@@ -399,7 +411,7 @@ startWorker client conf = do
 -- Any exceptions thrown by the workflow or activity loops will be rethrown.
 --
 -- This function is generally not needed, as 'shutdown' will wait for the worker to exit.
-waitWorker :: MonadIO m => Temporal.Worker.Worker -> m ()
+waitWorker :: (MonadIO m) => Temporal.Worker.Worker -> m ()
 waitWorker (Temporal.Worker.Worker{workerType, workerWorkflowLoop, workerActivityLoop}) = do
   case workerType of
     Core.SReal -> do
@@ -412,17 +424,24 @@ waitWorker (Temporal.Worker.Worker{workerType, workerWorkflowLoop, workerActivit
       link workerWorkflowLoop
       _ <- waitCatch workerWorkflowLoop
       pure ()
+  -- logs <- liftIO $ fetchLogs globalRuntime
+  -- forM_ logs $ \l -> do
+  --   $(logInfo) $ Text.pack $ show l
 
 
 -- | Shut down a worker. This will initiate a graceful shutdown of the worker, waiting for all
 -- in-flight tasks to complete before finalizing the shutdown.
-shutdown :: MonadIO m => Temporal.Worker.Worker -> m ()
-shutdown worker@Temporal.Worker.Worker{workerCore} = liftIO $ do
-  Core.initiateShutdown workerCore
+shutdown :: (MonadUnliftIO m) => Temporal.Worker.Worker -> m ()
+shutdown worker@Temporal.Worker.Worker{workerCore} = mask $ \restore -> do
+  liftIO $ Core.initiateShutdown workerCore
 
-  waitWorker worker
+  restore $ waitWorker worker
 
-  err' <- Core.finalizeShutdown workerCore
+  err' <- liftIO $ Core.finalizeShutdown workerCore
   case err' of
     Left err -> throwIO err
     Right () -> pure ()
+
+  -- logs <- liftIO $ fetchLogs globalRuntime
+  -- forM_ logs $ \l -> do
+  --   $(logInfo) $ Text.pack $ show l

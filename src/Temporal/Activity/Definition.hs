@@ -1,3 +1,4 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 module Temporal.Activity.Definition where
 import Control.Applicative
 import Control.Monad.Catch
@@ -8,6 +9,7 @@ import Control.Monad.Reader
 import Data.Kind
 import Data.Text (Text)
 import Data.Vector (Vector)
+import GHC.TypeLits
 import Temporal.Payload
 import Temporal.Core.Client (Client)
 import Temporal.Core.Worker (Worker, getWorkerClient, WorkerType(Real))
@@ -43,9 +45,7 @@ instance HasActivityDefinition (ProvidedActivity env f) where
   activityDefinition (ProvidedActivity def _) = def
 
 data KnownActivity (args :: [Type]) (result :: Type) = forall codec. 
-  ( Codec codec result
-  , GatherArgs codec args
-  , Typeable result
+  ( FunctionSupportsCodec codec args result
   ) => KnownActivity
         { knownActivityCodec :: codec
         , knownActivityName :: Text
@@ -62,6 +62,42 @@ data ActivityEnv env = ActivityEnv
   , activityClientInterceptors :: ClientInterceptors
   , activityEnv :: env
   }
+
+class ActivityRef (f :: Type) where
+  type ActivityArgs f :: [Type]
+  type ActivityResult f :: Type
+  activityRef :: f -> KnownActivity (ActivityArgs f) (ActivityResult f)
+
+instance VarArgs args => ActivityRef (KnownActivity args result) where
+  type ActivityArgs (KnownActivity args result) = args
+  type ActivityResult (KnownActivity args result) = result
+  activityRef = id
+
+instance ActivityRef (ProvidedActivity env f) where
+  type ActivityArgs (ProvidedActivity env f) = ArgsOf f
+  type ActivityResult (ProvidedActivity env f) = ResultOf (Activity env) f
+  activityRef act = act.reference
+
+
+type DirectActivityReferenceMsg =
+  'Text "You can't run an 'Activity' directly in a 'Workflow' like this."
+    ':$$: 'Text "A 'Workflow' must be deterministic, and 'Activity' values execute arbitrary IO."
+    ':$$: 'Text "You will want to use a reference to a registered activity like 'KnownActivity' or 'RefFromFunction' to invoke the activity here."
+    ':$$: 'Text "Then, you'll be able to call 'startActivity' or 'executeActivity' on it. So, instead of writing:"
+    ':$$: 'Text "    > executeActivity myActivity ..."
+    ':$$: 'Text "write:"
+    ':$$: 'Text "    > executeActivity myActivityRef ..."
+
+instance {-# OVERLAPPABLE #-} (f ~ (ArgsOf f :->: Activity env (ResultOf (Activity env) f)), TypeError DirectActivityReferenceMsg) => ActivityRef (a -> f) where
+  type ActivityArgs (a -> f) = '[]
+  type ActivityResult (a -> f) = ()
+  activityRef _ = error "Should never be called"
+
+instance TypeError DirectActivityReferenceMsg => ActivityRef (Activity env a) where
+  type ActivityArgs (Activity env a) = '[]
+  type ActivityResult (Activity env a) = a
+  activityRef _ = error "Should never be called"
+
 
 -- | 
 -- = What is an Activity?

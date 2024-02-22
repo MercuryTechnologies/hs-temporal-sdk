@@ -8,13 +8,15 @@ import Test.Hspec
 import qualified Data.EvalRecord as Rec
 import Temporal.Bundle
 import Temporal.Bundle.TH
-import Temporal.Client
 import Temporal.Core.Client
 import Temporal.Payload
+import Temporal.Runtime hiding (Periodicity(..))
 import Temporal.Workflow
 import Temporal.Worker
 import UnliftIO
 import UnliftIO.Resource
+
+import Common
 
 temporalBundle [d|
   data OodlesOfQueues = OodlesOfQueues
@@ -34,7 +36,7 @@ temporalBundle [d|
     , queue14 :: TaskQueue
     , queue15 :: TaskQueue
     , queue16 :: TaskQueue
-    }
+    } deriving (Eq, Show)
   
   data Functions = Functions
     { something :: Workflow ()
@@ -54,9 +56,9 @@ workerConfigs = Rec.pureC @((~) (WorkerConfig ())) $ \meta -> configure () conf 
 spec :: Spec
 spec = do
   describe "Concurrent Worker initialization" $ do
-    fit "should work" $ do
+    it "should work" $ do
       runResourceT $ runStdoutLoggingT $ do
-        let clientConfig = defaultClientConfig 
+        let config = defaultClientConfig 
               { retryConfig = Just $ ClientRetryConfig
                   { initialIntervalMillis = 500
                   , randomizationFactor = 0.2
@@ -66,7 +68,7 @@ spec = do
                   , maxElapsedTimeMillis = Just 60000
                   }
               }
-        c <- liftIO $ connectClient clientConfig 
+        c <- liftIO $ connectClient globalRuntime config
         qs <- replicateConcurrently 100 $ allocateU (startTaskQueues c workerConfigs) (liftIO . shutdownTaskQueues)
         mapConcurrently_ (\(k, _) -> release k) qs
       True `shouldBe` True

@@ -93,12 +93,12 @@ waitChildWorkflowResult wfHandle@(ChildWorkflowHandle{childWorkflowResultConvert
   case res ^. Activation.result . ChildWorkflow.maybe'status of
     Nothing -> ilift $ throwIO $ RuntimeError "Unrecognized child workflow result status"
     Just s -> case s of
-      ChildWorkflow.ChildWorkflowResult'Completed res -> do
-        eVal <- ilift $ liftIO $ UnliftIO.try $ childWorkflowResultConverter $ convertFromProtoPayload $ res ^. ChildWorkflow.result
+      ChildWorkflow.ChildWorkflowResult'Completed res' -> do
+        eVal <- ilift $ liftIO $ UnliftIO.try $ childWorkflowResultConverter $ convertFromProtoPayload $ res' ^. ChildWorkflow.result
         case eVal of
           Left err -> throw (err :: SomeException)
           Right ok -> pure ok
-      ChildWorkflow.ChildWorkflowResult'Failed res -> throw $ ChildWorkflowFailed $ res ^. ChildWorkflow.failure
+      ChildWorkflow.ChildWorkflowResult'Failed res' -> throw $ ChildWorkflowFailed $ res' ^. ChildWorkflow.failure
       ChildWorkflow.ChildWorkflowResult'Cancelled _ -> throw ChildWorkflowCancelled
 
 instance Cancel (ChildWorkflowHandle a) where
@@ -108,7 +108,7 @@ instance Cancel (ChildWorkflowHandle a) where
     cancelChildWorkflowExecution h
   
 cancelChildWorkflowExecution :: RequireCallStack => ChildWorkflowHandle result -> Workflow ()
-cancelChildWorkflowExecution wfHandle@(ChildWorkflowHandle{childWorkflowSequence}) = ilift $ do
+cancelChildWorkflowExecution ChildWorkflowHandle{childWorkflowSequence} = ilift $ do
   updateCallStack
   -- I don't see a way to block on this? I guess Temporal wants us to rely on the orchestrator
   -- managing the cancellation. Compare with ResolveRequestCancelExternalWorkflow. I think

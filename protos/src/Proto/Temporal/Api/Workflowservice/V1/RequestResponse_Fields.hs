@@ -27,7 +27,6 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Dependencies.Gogoproto.Gogo
 import qualified Proto.Google.Protobuf.Duration
 import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Temporal.Api.Batch.V1.Message
@@ -40,6 +39,7 @@ import qualified Proto.Temporal.Api.Enums.V1.Namespace
 import qualified Proto.Temporal.Api.Enums.V1.Query
 import qualified Proto.Temporal.Api.Enums.V1.Reset
 import qualified Proto.Temporal.Api.Enums.V1.TaskQueue
+import qualified Proto.Temporal.Api.Enums.V1.Update
 import qualified Proto.Temporal.Api.Enums.V1.Workflow
 import qualified Proto.Temporal.Api.Failure.V1.Message
 import qualified Proto.Temporal.Api.Filter.V1.Message
@@ -243,6 +243,13 @@ count ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "count" a) =>
   Lens.Family2.LensLike' f s a
 count = Data.ProtoLens.Field.field @"count"
+countGroupByExecutionStatus ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "countGroupByExecutionStatus" a) =>
+  Lens.Family2.LensLike' f s a
+countGroupByExecutionStatus
+  = Data.ProtoLens.Field.field @"countGroupByExecutionStatus"
 cronSchedule ::
   forall f s a.
   (Prelude.Functor f,
@@ -390,6 +397,17 @@ forceCreateNewWorkflowTask ::
   Lens.Family2.LensLike' f s a
 forceCreateNewWorkflowTask
   = Data.ProtoLens.Field.field @"forceCreateNewWorkflowTask"
+groupValues ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "groupValues" a) =>
+  Lens.Family2.LensLike' f s a
+groupValues = Data.ProtoLens.Field.field @"groupValues"
+groups ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "groups" a) =>
+  Lens.Family2.LensLike' f s a
+groups = Data.ProtoLens.Field.field @"groups"
 header ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "header" a) =>
@@ -527,6 +545,13 @@ makeSetDefault ::
    Data.ProtoLens.Field.HasField s "makeSetDefault" a) =>
   Lens.Family2.LensLike' f s a
 makeSetDefault = Data.ProtoLens.Field.field @"makeSetDefault"
+maxOperationsPerSecond ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maxOperationsPerSecond" a) =>
+  Lens.Family2.LensLike' f s a
+maxOperationsPerSecond
+  = Data.ProtoLens.Field.field @"maxOperationsPerSecond"
 maxSets ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "maxSets" a) =>
@@ -1454,6 +1479,11 @@ skipGenerateWorkflowTask ::
   Lens.Family2.LensLike' f s a
 skipGenerateWorkflowTask
   = Data.ProtoLens.Field.field @"skipGenerateWorkflowTask"
+stage ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "stage" a) =>
+  Lens.Family2.LensLike' f s a
+stage = Data.ProtoLens.Field.field @"stage"
 startTime ::
   forall f s a.
   (Prelude.Functor f,
@@ -1650,6 +1680,18 @@ vec'failures ::
    Data.ProtoLens.Field.HasField s "vec'failures" a) =>
   Lens.Family2.LensLike' f s a
 vec'failures = Data.ProtoLens.Field.field @"vec'failures"
+vec'groupValues ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'groupValues" a) =>
+  Lens.Family2.LensLike' f s a
+vec'groupValues = Data.ProtoLens.Field.field @"vec'groupValues"
+vec'groups ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'groups" a) =>
+  Lens.Family2.LensLike' f s a
+vec'groups = Data.ProtoLens.Field.field @"vec'groups"
 vec'majorVersionSets ::
   forall f s a.
   (Prelude.Functor f,
@@ -1732,12 +1774,6 @@ versionInfo ::
    Data.ProtoLens.Field.HasField s "versionInfo" a) =>
   Lens.Family2.LensLike' f s a
 versionInfo = Data.ProtoLens.Field.field @"versionInfo"
-versionSetId ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "versionSetId" a) =>
-  Lens.Family2.LensLike' f s a
-versionSetId = Data.ProtoLens.Field.field @"versionSetId"
 visibilityArchivalState ::
   forall f s a.
   (Prelude.Functor f,

@@ -125,5 +125,5 @@ instance Semigroup ScheduleClientInterceptors where
 
 instance Monoid ScheduleClientInterceptors where
   mempty = ScheduleClientInterceptors
-    { scheduleWorkflowAction = \opts input -> return opts
+    { scheduleWorkflowAction = \opts _ -> return opts
     }

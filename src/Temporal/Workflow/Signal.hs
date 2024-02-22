@@ -3,17 +3,17 @@ module Temporal.Workflow.Signal where
 import Data.Kind
 import Temporal.Payload
 import Data.Text (Text)
-import Data.Proxy
-import Data.Vector (Vector)
 
-data SignalRef (args :: [Type]) = forall codec. (ApplyPayloads codec args, GatherArgs codec args) => 
-  SignalRef
+data KnownSignal (args :: [Type]) = forall codec. (ApplyPayloads codec args, GatherArgs codec args) => 
+  KnownSignal
     { signalName :: Text
     , signalCodec :: codec
     }
 
-data SignalDefinition (args :: [Type]) =
-  SignalDefinition 
-    { signalRef :: SignalRef args
-    , signalApply :: forall res. Proxy res -> (args :->: res) -> Vector Payload -> IO res
-    }
+class SignalRef sig where
+  type SignalArgs sig :: [Type]
+  signalRef :: sig -> KnownSignal (SignalArgs sig)
+
+instance SignalRef (KnownSignal args) where
+  type SignalArgs (KnownSignal args) = args
+  signalRef = id

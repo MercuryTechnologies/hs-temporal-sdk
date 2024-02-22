@@ -9,22 +9,15 @@ module Temporal.Workflow.Eval where
 
 import Control.Monad.Logger
 import Control.Monad.Reader
-import Data.ProtoLens
 import Data.Text (Text)
 import qualified Data.Text as Text
 import GHC.Stack
-import Lens.Family2
 import Temporal.Common
 import Temporal.Coroutine
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
-import Temporal.Payload
 import UnliftIO
 import Unsafe.Coerce
-import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
-import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands
-  ( WorkflowCommand
-  )
 import Text.Printf
 import RequireCallStack
 

@@ -166,6 +166,7 @@ data ResourceExhaustedCause
     RESOURCE_EXHAUSTED_CAUSE_SYSTEM_OVERLOADED |
     RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_LIMIT |
     RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW |
+    RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT |
     ResourceExhaustedCause'Unrecognized !ResourceExhaustedCause'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum ResourceExhaustedCause where
@@ -179,6 +180,7 @@ instance Data.ProtoLens.MessageEnum ResourceExhaustedCause where
   maybeToEnum 4
     = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_LIMIT
   maybeToEnum 5 = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW
+  maybeToEnum 6 = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT
   maybeToEnum k
     = Prelude.Just
         (ResourceExhaustedCause'Unrecognized
@@ -196,6 +198,8 @@ instance Data.ProtoLens.MessageEnum ResourceExhaustedCause where
     = "RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_LIMIT"
   showEnum RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW
     = "RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW"
+  showEnum RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT
+    = "RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT"
   showEnum
     (ResourceExhaustedCause'Unrecognized (ResourceExhaustedCause'UnrecognizedValue k))
     = Prelude.show k
@@ -212,11 +216,13 @@ instance Data.ProtoLens.MessageEnum ResourceExhaustedCause where
     = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_LIMIT
     | (Prelude.==) k "RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW"
     = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW
+    | (Prelude.==) k "RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT"
+    = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT
     | Prelude.otherwise
     = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
 instance Prelude.Bounded ResourceExhaustedCause where
   minBound = RESOURCE_EXHAUSTED_CAUSE_UNSPECIFIED
-  maxBound = RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW
+  maxBound = RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT
 instance Prelude.Enum ResourceExhaustedCause where
   toEnum k__
     = Prelude.maybe
@@ -231,12 +237,13 @@ instance Prelude.Enum ResourceExhaustedCause where
   fromEnum RESOURCE_EXHAUSTED_CAUSE_SYSTEM_OVERLOADED = 3
   fromEnum RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_LIMIT = 4
   fromEnum RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW = 5
+  fromEnum RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT = 6
   fromEnum
     (ResourceExhaustedCause'Unrecognized (ResourceExhaustedCause'UnrecognizedValue k))
     = Prelude.fromIntegral k
-  succ RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW
+  succ RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT
     = Prelude.error
-        "ResourceExhaustedCause.succ: bad argument RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW. This value would be out of bounds."
+        "ResourceExhaustedCause.succ: bad argument RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT. This value would be out of bounds."
   succ RESOURCE_EXHAUSTED_CAUSE_UNSPECIFIED
     = RESOURCE_EXHAUSTED_CAUSE_RPS_LIMIT
   succ RESOURCE_EXHAUSTED_CAUSE_RPS_LIMIT
@@ -247,6 +254,8 @@ instance Prelude.Enum ResourceExhaustedCause where
     = RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_LIMIT
   succ RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_LIMIT
     = RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW
+  succ RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW
+    = RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT
   succ (ResourceExhaustedCause'Unrecognized _)
     = Prelude.error
         "ResourceExhaustedCause.succ: bad argument: unrecognized value"
@@ -263,6 +272,8 @@ instance Prelude.Enum ResourceExhaustedCause where
     = RESOURCE_EXHAUSTED_CAUSE_SYSTEM_OVERLOADED
   pred RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW
     = RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_LIMIT
+  pred RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT
+    = RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW
   pred (ResourceExhaustedCause'Unrecognized _)
     = Prelude.error
         "ResourceExhaustedCause.pred: bad argument: unrecognized value"

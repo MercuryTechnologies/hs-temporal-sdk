@@ -120,10 +120,10 @@ module Temporal.Bundle
   -- * Turning implementations into references and definitions
     refs
   , Refs
-  , Ref(..)
+  , Ref
   , defs
   , Defs
-  , Def(..)
+  , Def
   , collectTemporalDefinitions
   , Impl
   , inWorkflowProxies
@@ -147,9 +147,9 @@ module Temporal.Bundle
   -- * Constraints
   , CanUseAsRefs
   , CanUseAsDefs
-  , RefFromFunction(..)
+  , RefFromFunction
   , RefFromFunction'(..)
-  , DefFromFunction(..)
+  , DefFromFunction
   , DefFromFunction'(..)
   , WorkflowRef(..)
   , ActivityRef(..)
@@ -159,26 +159,18 @@ module Temporal.Bundle
   ) where
 
 import Data.EvalRecord 
-  ( FunctorRec, ApplicativeRec, TraversableRec, ConstraintsRec, AllRec
+  ( ApplicativeRec, TraversableRec, ConstraintsRec, AllRec
   )
 import qualified Data.EvalRecord as Rec
 import Fcf
 
-import Control.Monad.Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
-import Data.Functor.Const
-import Data.Functor.Identity
-import qualified Data.HashMap.Strict as HashMap
 import Data.Kind
 import Data.Proxy
 import qualified Data.Text as Text
-import GHC.Generics
 import GHC.TypeLits
 import RequireCallStack
-import Data.String (IsString)
-import Data.Typeable
-import Data.Kind
 import Temporal.Workflow.Types
 import Temporal.Payload
 import Temporal.Activity
@@ -193,7 +185,7 @@ import Unsafe.Coerce
 
 type family ApplyRef (original :: Type) (f :: Type) where
   ApplyRef original (Workflow result) = KnownWorkflow (ArgsOf original) result
-  ApplyRef original (Activity env result) = KnownActivity (ArgsOf original) result
+  ApplyRef original (Activity _ result) = KnownActivity (ArgsOf original) result
   ApplyRef original (_ -> b) = ApplyRef original b
   ApplyRef _ a = TypeError ('Text "Expected a Workflow or Activity, but got " ':<>: 'ShowType a)
 
@@ -206,8 +198,8 @@ data Ref :: Type -> Exp Type
 type instance Eval (Ref f) = ApplyRef f f
 
 type family ApplyDef (f :: Type) where
-  ApplyDef (Workflow result) = WorkflowDefinition
-  ApplyDef (Activity env result) = ActivityDefinition env
+  ApplyDef (Workflow _) = WorkflowDefinition
+  ApplyDef (Activity env _) = ActivityDefinition env
   ApplyDef (_ -> b) = ApplyDef b
   ApplyDef a = TypeError ('Text "Expected a Workflow or Activity, but got " ':<>: 'ShowType a)
 
@@ -216,7 +208,7 @@ data Def :: Type -> Type -> Exp Type
 type instance Eval (Def _ f) = ApplyDef f
 
 type family InnerActivityResult (f :: Type) where
-  InnerActivityResult (Activity env result) = result
+  InnerActivityResult (Activity _ result) = result
   InnerActivityResult (_ -> b) = InnerActivityResult b
   InnerActivityResult a = TypeError ('Text "Expected an Activity, but got " ':<>: 'ShowType a)
 
@@ -297,10 +289,10 @@ type CanUseAsRefs f codec =
 --
 -- The fields in the records produced by this function can be used to invoke the workflows and activities
 -- via the Temporal client or within Temporal workflows.
-refs :: forall r f codec.
+refs :: forall r codec.
   ( CanUseAsRefs r codec
-  ) => codec -> r f -> Refs r 
-refs codec wfrec = result
+  ) => codec -> Refs r 
+refs codec = result
   where
     ns :: String
     ns = Rec.typeName (Proxy @r)
@@ -354,7 +346,7 @@ collectTemporalDefinitions = Rec.foldMapC @(Rec.ClassF (ToDefinitions actEnv) f)
     mkConf _ = toDefinitions
 
 type family RefStartOptionsType (f :: Type) :: Type where
-  RefStartOptionsType (Activity env result) = StartActivityOptions
+  RefStartOptionsType (Activity _ _) = StartActivityOptions
   RefStartOptionsType (_ -> b) = RefStartOptionsType b
   RefStartOptionsType (Workflow _) = StartChildWorkflowOptions
   RefStartOptionsType (KnownWorkflow _ _) = StartChildWorkflowOptions
@@ -423,9 +415,9 @@ class UseAsInWorkflowProxy synchronicity ref where
     -> RefStartOptions @@ ref 
     -> InWorkflowProxies synchronicity @@ ref
 
-instance UseAsInWorkflowProxy ProxySync (KnownActivity args res) where
+instance VarArgs args => UseAsInWorkflowProxy ProxySync (KnownActivity args res) where
   useAsInWorkflowProxy _ = executeActivity 
-instance UseAsInWorkflowProxy ProxyAsync (KnownActivity args res) where
+instance VarArgs args => UseAsInWorkflowProxy ProxyAsync (KnownActivity args res) where
   useAsInWorkflowProxy _ = startActivity 
 
 instance UseAsInWorkflowProxy ProxySync (KnownWorkflow args res) where
@@ -473,26 +465,27 @@ type WorkerConfigs env rec = rec (ConstFn (WorkerConfig env))
 --
 -- This function starts each worker concurrently, waits for them to initialize, and then returns
 -- a worker for each task queue.
-startTaskQueues :: forall rec m env. (TraversableRec rec, MonadLoggerIO m, MonadUnliftIO m) => Client -> WorkerConfigs env rec -> m (Workers rec)
+startTaskQueues :: forall rec m env. (TraversableRec rec, MonadUnliftIO m) => Client -> WorkerConfigs env rec -> m (Workers rec)
 startTaskQueues client conf = startWorkers conf >>= awaitWorkersStart
   where
     startWorkers :: rec (ConstFn (WorkerConfig env)) -> m (rec (ConstFn (Async Worker)))
-    startWorkers = Rec.traverse (\_ workerConfig -> async (startWorker client workerConfig))
+    startWorkers = Rec.traverse $ \_ workerConfig -> flip runLoggingT workerConfig.logger $ do
+      async (startWorker client workerConfig)
     awaitWorkersStart :: rec (ConstFn (Async Worker)) -> m (rec (ConstFn Worker))
     awaitWorkersStart = Rec.traverse (\_ workerStartupThread -> UnliftIO.wait workerStartupThread)
 
 -- | Stop each Temporal worker for each task queue specified in the MercuryTaskQueues record.
 --
 -- This function stops each worker concurrently, waits for them to complete shutdown (gracefully or not), and then returns.
-shutdownTaskQueues :: forall rec. (TraversableRec rec) => Workers rec -> IO ()
+shutdownTaskQueues :: forall m rec. (TraversableRec rec, MonadUnliftIO m) => Workers rec -> m ()
 shutdownTaskQueues workers =
   stopWorkers workers
     >>= awaitWorkersStop
   where
-    stopWorkers :: rec (ConstFn Worker) -> IO (rec (ConstFn (Async ())))
-    stopWorkers = Rec.traverse (\_ worker -> async (shutdown worker))
-    awaitWorkersStop :: rec (ConstFn (Async ())) -> IO ()
-    awaitWorkersStop = Rec.traverse_ (\_ workerShutdownThread -> UnliftIO.wait workerShutdownThread)
+    stopWorkers :: rec (ConstFn Worker) -> m (rec (ConstFn (Async ())))
+    stopWorkers = Rec.traverse $ \_ worker -> async (shutdown worker)
+    awaitWorkersStop :: rec (ConstFn (Async ())) -> m ()
+    awaitWorkersStop = Rec.traverse_ $ \_ workerShutdownThread -> UnliftIO.wait workerShutdownThread
 
 
 -- data ProxyActivity :: k -> Exp k

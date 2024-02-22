@@ -179,7 +179,6 @@ module Temporal.Client.Schedule
   ) where
 
 import Control.Monad
-import Control.Monad.IO.Class (MonadIO)
 import Data.Conduit
 import Data.Bifunctor
 import Data.ByteString (ByteString)
@@ -187,7 +186,6 @@ import Data.Int (Int32, Int64)
 import Data.Map.Strict (Map)
 import Data.Maybe (fromMaybe)
 import Data.ProtoLens
-import Data.Proxy (Proxy(..))
 import Data.Vector (Vector)
 import qualified Data.Vector as V
 import Data.Text (Text)
@@ -199,7 +197,7 @@ import Temporal.Exception
 import qualified Temporal.Core.Client.WorkflowService as Core
 import Temporal.SearchAttributes
 import Temporal.SearchAttributes.Internal
-import Temporal.Client (StartWorkflowOptions(..), TimeoutOptions(..))
+-- import Temporal.Client (StartWorkflowOptions(..), TimeoutOptions(..))
 import Temporal.Client
 import Temporal.Workflow
 import Lens.Family2
@@ -210,14 +208,12 @@ import qualified Proto.Temporal.Api.Schedule.V1.Message as S
 import qualified Proto.Temporal.Api.Schedule.V1.Message_Fields as S
 import qualified Proto.Temporal.Api.Workflow.V1.Message as W
 import qualified Proto.Temporal.Api.Workflow.V1.Message_Fields as W
-import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse as WF
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as WF
 import qualified Proto.Temporal.Api.Taskqueue.V1.Message_Fields as TQ
 import Proto.Temporal.Api.Enums.V1.TaskQueue (TaskQueueKind(..))
 
 import Data.Time.Clock.System (SystemTime)
 import UnliftIO
-import Temporal.Common (timespecFromTimestamp, Namespace (rawNamespace), ScheduleId (rawScheduleId))
 
 throwEither :: (MonadIO m, Exception e) => m (Either e a) -> m a
 throwEither m = do
@@ -342,10 +338,13 @@ scheduleListEntryFromProto p = do
   searchAttributes <- throwEither $ do
     res <- searchAttributesFromProto searchAttrs
     pure $ first ValueError res
-  let info = fmap scheduleListInfoFromProto (p ^. S.maybe'info)
-      scheduleId = ScheduleId (p ^. S.scheduleId)
-      memo = convertFromProtoMemo (p ^. S.memo)
-  pure $ ScheduleListEntry{..}
+      
+  pure $ ScheduleListEntry
+    { info = fmap scheduleListInfoFromProto (p ^. S.maybe'info)
+    , scheduleId = ScheduleId (p ^. S.scheduleId)
+    , memo = convertFromProtoMemo (p ^. S.memo)
+    , ..
+    }
 
 -- | List all schedules in a namespace.
 listSchedules 
@@ -570,7 +569,7 @@ scheduleStateFromProto p = ScheduleState
 data ScheduleAction
   = StartWorkflow W.NewWorkflowExecutionInfo
   | ScheduleActionUnrecognized
-  deriving (Eq, Show)
+  deriving stock (Eq, Show)
 
 mkScheduleAction :: forall wf m. (MonadIO m, WorkflowRef wf) 
   => wf 
@@ -582,31 +581,26 @@ mkScheduleAction :: forall wf m. (MonadIO m, WorkflowRef wf)
   --
   -- The workflow id will generally have a timestamp appended for uniqueness.
   -> (WorkflowArgs wf :->: m ScheduleAction)
-mkScheduleAction wf (WorkflowId wfId) opts = case workflowRef wf of
-  k@(KnownWorkflow codec wfName) -> do
-    let gather :: ([IO Payload] -> m ScheduleAction) -> (WorkflowArgs wf :->: m ScheduleAction)
-        gather = gatherArgs (Proxy @(WorkflowArgs wf)) codec Prelude.id
-    gather $ \inputs -> liftIO $ do
-      is <- sequence inputs
-      searchAttrs <- searchAttributesToProto opts.searchAttributes
-      let tq = rawTaskQueue opts.taskQueue
-          executionInfo = defMessage
-            & W.workflowId .~ wfId
-            & W.workflowType .~ (defMessage & C.name .~ wfName)
-            & W.taskQueue .~ 
-              ( defMessage
-                & C.name .~ tq
-                & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
-              )
-            & W.input .~ (defMessage & C.payloads .~ (convertToProtoPayload <$> is))
-            & W.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts.timeouts.executionTimeout)
-            & W.maybe'workflowRunTimeout .~ (durationToProto <$> opts.timeouts.runTimeout)
-            & W.maybe'workflowTaskTimeout .~ (durationToProto <$> opts.timeouts.taskTimeout)
-            & W.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retry)
-            & W.memo .~ convertToProtoMemo opts.memo
-            & W.searchAttributes .~ (defMessage & C.indexedFields .~ searchAttrs)
-            & W.header .~ (defMessage & C.fields .~ fmap convertToProtoPayload opts.headers)
-      pure $ StartWorkflow executionInfo
+mkScheduleAction (workflowRef -> KnownWorkflow codec wfName) (WorkflowId wfId) opts = withArgs @(WorkflowArgs wf) @ScheduleAction @m codec $ \inputs -> liftIO $ do
+  searchAttrs <- searchAttributesToProto opts.searchAttributes
+  let tq = rawTaskQueue opts.taskQueue
+      executionInfo = defMessage
+        & W.workflowId .~ wfId
+        & W.workflowType .~ (defMessage & C.name .~ wfName)
+        & W.taskQueue .~ 
+          ( defMessage
+            & C.name .~ tq
+            & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
+          )
+        & W.input .~ (defMessage & C.vec'payloads .~ fmap convertToProtoPayload inputs)
+        & W.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts.timeouts.executionTimeout)
+        & W.maybe'workflowRunTimeout .~ (durationToProto <$> opts.timeouts.runTimeout)
+        & W.maybe'workflowTaskTimeout .~ (durationToProto <$> opts.timeouts.taskTimeout)
+        & W.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retry)
+        & W.memo .~ convertToProtoMemo opts.memo
+        & W.searchAttributes .~ (defMessage & C.indexedFields .~ searchAttrs)
+        & W.header .~ (defMessage & C.fields .~ fmap convertToProtoPayload opts.headers)
+  pure $ StartWorkflow executionInfo
 
 
 scheduleActionToProto :: ScheduleAction -> S.ScheduleAction
@@ -681,10 +675,10 @@ triggerImmediatelyRequestToProto :: TriggerImmediatelyRequest -> S.TriggerImmedi
 triggerImmediatelyRequestToProto p = defMessage
   & S.overlapPolicy .~ overlapPolicyToProto p.overlapPolicy
 
-triggerImmediatelyRequestFromProto :: S.TriggerImmediatelyRequest -> TriggerImmediatelyRequest
-triggerImmediatelyRequestFromProto p = TriggerImmediatelyRequest
-  { overlapPolicy = overlapPolicyFromProto (p ^. S.overlapPolicy)
-  }
+-- triggerImmediatelyRequestFromProto :: S.TriggerImmediatelyRequest -> TriggerImmediatelyRequest
+-- triggerImmediatelyRequestFromProto p = TriggerImmediatelyRequest
+--   { overlapPolicy = overlapPolicyFromProto (p ^. S.overlapPolicy)
+--   }
 
 data BackfillRequest = BackfillRequest
   { startTime :: !SystemTime
@@ -701,12 +695,12 @@ backfillRequestToProto p = defMessage
   & S.endTime .~ timespecToTimestamp p.endTime
   & S.overlapPolicy .~ overlapPolicyToProto p.overlapPolicy
 
-backfillRequestFromProto :: S.BackfillRequest -> BackfillRequest
-backfillRequestFromProto p = BackfillRequest
-  { startTime = timespecFromTimestamp (p ^. S.startTime)
-  , endTime = timespecFromTimestamp (p ^. S.endTime)
-  , overlapPolicy = overlapPolicyFromProto (p ^. S.overlapPolicy)
-  }
+-- backfillRequestFromProto :: S.BackfillRequest -> BackfillRequest
+-- backfillRequestFromProto p = BackfillRequest
+--   { startTime = timespecFromTimestamp (p ^. S.startTime)
+--   , endTime = timespecFromTimestamp (p ^. S.endTime)
+--   , overlapPolicy = overlapPolicyFromProto (p ^. S.overlapPolicy)
+--   }
 
 data SchedulePatch = SchedulePatch
   { triggerImmediately :: !(Maybe TriggerImmediatelyRequest)

@@ -7,26 +7,19 @@ import qualified Control.Monad.Catch as Catch
 import System.Random.Stateful (StdGen, StatefulGen(..), RandomGenM(..), FrozenGen(..))
 import Temporal.Common
 import Data.Text (Text)
-import Temporal.Duration
 import Temporal.Exception
 import Temporal.Payload
 import Data.ProtoLens
 import Data.Map.Strict (Map)
 import Data.Time.Clock.System (SystemTime)
 import Data.Word (Word32)
-import Data.Hashable
 import Control.Concurrent.Async
-import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as Common
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
-import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
 import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands (WorkflowCommand)
-import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands as Command
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
-import Control.Concurrent.STM.TVar (TVar)
 import Control.Monad.Logger
-import Control.Concurrent (Chan)
 import Lens.Family2
 import qualified Temporal.Core.Worker as Core
 import GHC.TypeLits
@@ -35,15 +28,14 @@ import Data.Vector (Vector)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Kind
-import Debug.Trace
+-- import Debug.Trace
 import Control.Monad
 import Control.Monad.Reader
 import UnliftIO
 import RequireCallStack
 import Text.Printf
 import System.Random
-  ( StdGen
-  , genWord32R
+  ( genWord32R
   , genWord64R
   , genWord8
   , genWord16
@@ -497,15 +489,15 @@ reevaluateDependentConditions cref = do
     seqMaps <- readTVar inst.workflowSequenceMaps
     let pendingConds = seqMaps.conditionsAwaitingSignal
         (reactivateConds, unactivatedConds) = HashMap.foldlWithKey'
-          (\(reactivateConds, unactivatedConds) k v@(ivar, varDependencies) -> 
+          (\(reactivateConds', unactivatedConds') k v@(ivar, varDependencies) -> 
             if cref.stateVarId `Set.member` varDependencies
             then
-              ( reactivateConds >> liftIO (putIVar ivar (Ok ()) inst.workflowInstanceContinuationEnv)
-              , unactivatedConds
+              ( reactivateConds' >> liftIO (putIVar ivar (Ok ()) inst.workflowInstanceContinuationEnv)
+              , unactivatedConds'
               )
             else
-              ( reactivateConds
-              , HashMap.insert k v unactivatedConds
+              ( reactivateConds'
+              , HashMap.insert k v unactivatedConds'
               )
           )
           (pure (), mempty)
@@ -539,6 +531,8 @@ instance MonadWriteStateVar Workflow where
     reevaluateDependentConditions var
     pure $ Done res
 
+-- | The Query monad is a very constrained version of the Workflow monad. It can
+-- only read state variables and return values. It is used to define query handlers.
 newtype Query a = Query (InstanceM a)
   deriving newtype (Functor, Applicative, Monad)
 
@@ -546,7 +540,7 @@ instance MonadReadStateVar Query where
   readStateVar var = Query $ readIORef var.stateVarRef
 
 newtype InstanceM (a :: Type) = InstanceM { unInstanceM :: ReaderT WorkflowInstance IO a }
-  deriving (Functor, Applicative, Monad, MonadIO, MonadReader WorkflowInstance, MonadUnliftIO)
+  deriving newtype (Functor, Applicative, Monad, MonadIO, MonadReader WorkflowInstance, MonadUnliftIO)
 
 instance MonadLogger InstanceM where
   monadLoggerLog loc src lvl msg = do
@@ -587,7 +581,7 @@ data WorkflowInstance = WorkflowInstance
   , workflowCancellationVar :: {-# UNPACK #-} !(IVar ())
   , workflowDeadlockTimeout :: Maybe Int
   -- These are how the instance gets its work done
-  , activationChannel :: Chan Core.WorkflowActivation
+  , activationChannel :: TQueue Core.WorkflowActivation
   , executionThread :: IORef (Async ())
   , inboundInterceptor :: WorkflowInboundInterceptor
   , outboundInterceptor :: WorkflowOutboundInterceptor
@@ -611,7 +605,7 @@ data Sequences = Sequences
 
 -- Newtyped because the list is reversed
 newtype Reversed a = Reversed [a]
-  deriving (Functor, Show, Eq)
+  deriving newtype (Functor, Show, Eq)
 
 fromReversed :: Reversed a -> [a]
 fromReversed (Reversed xs) = reverse xs
@@ -636,17 +630,17 @@ data Task a = Task
   }
 
 instance Functor Task where
-  fmap f (Task wait cancel) = Task (fmap f wait) cancel
+  fmap f (Task wait' cancel') = Task (fmap f wait') cancel'
 
 instance Applicative Task where
   pure a = Task (pure a) (pure ())
-  Task wait cancel <*> Task wait' cancel' = Task (wait <*> wait') (cancel *> cancel')
+  Task waitL cancelL <*> Task waitR cancelR = Task (waitL <*> waitR) (cancelL *> cancelR)
 
 -- | Sometimes you want to alter the result of a task, but you 'Task' doesn't work as
 -- a monad due to the 'cancel' action. This function lets you alter the result of a task
 -- in the workflow monad.
 bindTask :: Task a -> (a -> Workflow b) -> Task b
-bindTask (Task wait cancel) f = Task (wait >>= f) cancel
+bindTask (Task wait' cancel') f = Task (wait' >>= f) cancel'
 
 
 -- | Handle representing an external Workflow Execution.

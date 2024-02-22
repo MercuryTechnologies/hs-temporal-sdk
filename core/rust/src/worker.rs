@@ -185,7 +185,7 @@ pub extern "C" fn hs_temporal_drop_worker(worker: *mut WorkerRef) -> () {
 pub extern "C" fn hs_temporal_new_worker(client: *mut client::ClientRef, config: *const CArray<u8>, result_slot: *mut*mut WorkerRef, error_slot: *mut*mut CWorkerError) -> () {
   let client_ref = unsafe { client.as_ref() }.expect("client is null");
   let config_json = unsafe { CArray::raw_borrow(config).unwrap() };
-  let config = serde_json::from_slice(&config_json.as_rust().unwrap()).map_err(|err| WorkerError {
+  let config = serde_json::from_slice(&config_json.as_rust().unwrap().clone()).map_err(|err| WorkerError {
     code: WorkerErrorCode::InvalidWorkerConfig,
     message: format!("{}", err),
   });

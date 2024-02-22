@@ -97,9 +97,6 @@ main = do
   hSetBuffering stdout NoBuffering
   forkIO $ do
     threadDelay 1000000
-    logs <- fetchLogs globalRuntime
-    forM_ logs $ \log -> do
-      putStrLn $ show (coreLogLevel log) <> ": " <> show (coreLogMessage log)
   -- _ephemeral <- startDevServer rt (defaultTemporalDevServerConfig { exe = ExistingPath "/opt/homebrew/bin/temporal" })
   
   putStrLn "Initializing Temporal runtime"

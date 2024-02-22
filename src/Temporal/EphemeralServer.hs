@@ -8,9 +8,7 @@ module Temporal.EphemeralServer
   ( launchTestServer
   , launchDevServer
   , withDevServer
-  , withDevServer'
   , withTestServer
-  , withTestServer'
   , getFreePort
   , openFreePort
   , EphemeralServerError(..)
@@ -39,19 +37,13 @@ data EphemeralServerError = EphemeralServerError ByteString
 
 instance E.Exception EphemeralServerError
 
-withDevServer :: MonadUnliftIO m => TemporalDevServerConfig -> (EphemeralServer -> m a) -> m a
-withDevServer = withDevServer' globalRuntime
-
-withDevServer' :: MonadUnliftIO m => Runtime -> TemporalDevServerConfig -> (EphemeralServer -> m a) -> m a
-withDevServer' rt conf = bracket 
+withDevServer :: MonadUnliftIO m => Runtime -> TemporalDevServerConfig -> (EphemeralServer -> m a) -> m a
+withDevServer rt conf = bracket 
   (liftIO (startDevServer rt conf) >>= either (throwIO . EphemeralServerError) pure) 
   (\e -> liftIO (shutdownEphemeralServer e) >>= either (throwIO . EphemeralServerError) pure)
 
-withTestServer :: MonadUnliftIO m => TestServerConfig -> (EphemeralServer -> m a) -> m a
-withTestServer = withTestServer' globalRuntime
-
-withTestServer' :: MonadUnliftIO m => Runtime -> TestServerConfig -> (EphemeralServer -> m a) -> m a
-withTestServer' rt conf = bracket 
+withTestServer :: MonadUnliftIO m => Runtime -> TestServerConfig -> (EphemeralServer -> m a) -> m a
+withTestServer rt conf = bracket 
   (liftIO (startTestServer rt conf) >>= either (throwIO . EphemeralServerError) pure) 
   (\e -> liftIO (shutdownEphemeralServer e) >>= either (throwIO . EphemeralServerError) pure)
 
@@ -84,10 +76,10 @@ getFreePort = do
   N.close socket
   pure port
 
-launchTestServer :: [String] -> IO (Either EphemeralServerError (N.PortNumber, EphemeralServer))
-launchTestServer extraArgs = do
+launchTestServer :: Runtime -> [String] -> IO (Either EphemeralServerError (N.PortNumber, EphemeralServer))
+launchTestServer rt extraArgs = do
   freePort <- getFreePort
-  bimap EphemeralServerError (\srv -> (freePort, srv)) <$> startTestServer globalRuntime (hackyConfig freePort)
+  bimap EphemeralServerError (\srv -> (freePort, srv)) <$> startTestServer rt (hackyConfig freePort)
   where
     hackyConfig port = TestServerConfig 
       { exe = CachedDownload (Default $ SDKDefault "community-haskell" "0.1.0.0") Nothing 
@@ -95,5 +87,5 @@ launchTestServer extraArgs = do
       , extraArgs
       }
 
-launchDevServer :: TemporalDevServerConfig -> IO (Either EphemeralServerError EphemeralServer)
-launchDevServer conf = first EphemeralServerError <$> startDevServer globalRuntime conf
+launchDevServer :: Runtime -> TemporalDevServerConfig -> IO (Either EphemeralServerError EphemeralServer)
+launchDevServer rt conf = first EphemeralServerError <$> startDevServer rt conf

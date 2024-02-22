@@ -2,10 +2,10 @@ module Temporal.Client.Types where
 import Temporal.Common
 import Data.Map.Strict (Map)
 import Data.Text (Text)
+import Data.Vector (Vector)
 import Temporal.Payload
 import Temporal.SearchAttributes
 import Temporal.Duration
-import Temporal.Workflow.Definition
 import Temporal.Core.Client (Client)
 
 -- | Configuration parameters for starting a workflow execution.
@@ -130,7 +130,7 @@ data QueryWorkflowInput = QueryWorkflowInput
   , queryWorkflowHeaders :: Map Text Payload
   , queryWorkflowType :: Text
   , queryWorkflowRunId :: Maybe RunId
-  , queryWorkflowArgs :: [Payload]
+  , queryWorkflowArgs :: Vector Payload
   }
 
 data WorkflowExecutionStatus
@@ -142,24 +142,24 @@ data WorkflowExecutionStatus
   | ContinuedAsNew
   | TimedOut
   | UnknownStatus
-  deriving (Read, Show, Eq, Ord)
+  deriving stock (Read, Show, Eq, Ord)
 
 data QueryRejected
   = QueryRejected
     { status :: WorkflowExecutionStatus
-    } deriving (Read, Show, Eq, Ord)
+    } deriving stock (Read, Show, Eq, Ord)
 
 data SignalWithStartWorkflowInput = SignalWithStartWorkflowInput
   { signalWithStartWorkflowType :: WorkflowType
   , signalWithStartWorkflowId :: WorkflowId
-  , signalWithStartArgs :: [Payload]
+  , signalWithStartArgs :: Vector Payload
   , signalWithStartSignalName :: Text
-  , signalWithStartSignalArgs :: [Payload]
+  , signalWithStartSignalArgs :: Vector Payload
   , signalWithStartOptions :: StartWorkflowOptions
   }
 
 data ClientInterceptors = ClientInterceptors
-  { start :: WorkflowType -> WorkflowId -> StartWorkflowOptions -> [Payload] -> (WorkflowType -> WorkflowId -> StartWorkflowOptions -> [Payload] -> IO (WorkflowHandle Payload)) -> IO (WorkflowHandle Payload)
+  { start :: WorkflowType -> WorkflowId -> StartWorkflowOptions -> Vector Payload -> (WorkflowType -> WorkflowId -> StartWorkflowOptions -> Vector Payload -> IO (WorkflowHandle Payload)) -> IO (WorkflowHandle Payload)
   , queryWorkflow :: QueryWorkflowInput -> (QueryWorkflowInput -> IO (Either QueryRejected Payload)) -> IO (Either QueryRejected Payload)
   , signalWithStart :: SignalWithStartWorkflowInput -> (SignalWithStartWorkflowInput -> IO (WorkflowHandle Payload)) -> IO (WorkflowHandle Payload)
   -- TODO

@@ -1,10 +1,15 @@
+use std::collections::HashMap;
 use ffi_convert::*;
 use temporal_sdk_core::{CoreRuntime};
-use temporal_sdk_core::telemetry::{construct_filter_string};
-use temporal_sdk_core_api::telemetry::{CoreTelemetry, TelemetryOptions, TelemetryOptionsBuilder, Logger};
+use temporal_sdk_core::telemetry::{build_otlp_metric_exporter, construct_filter_string, start_prometheus_metric_exporter};
+use temporal_sdk_core_api::telemetry::{CoreTelemetry, TelemetryOptions, TelemetryOptionsBuilder, Logger, OtelCollectorOptionsBuilder, PrometheusExporterOptionsBuilder};
 use std::sync::Arc;
 use std::os::raw::c_int;
 use std::future::Future;
+use std::net::{SocketAddr};
+use std::time::{Duration, SystemTime};
+use serde::{Deserialize, Serialize};
+use temporal_sdk_core_api::telemetry::metrics::{CoreMeter, NoOpCoreMeter};
 use tracing::Level;
 
 pub struct RuntimeRef {
@@ -17,38 +22,90 @@ pub(crate) struct Runtime {
   pub(crate) try_put_mvar: extern fn(capability: Capability, mvar: *mut MVar) -> (),
 }
 
-// Strings that we have sent to Haskell
-pub type HaskellText = CArray<u8>;
-
-fn init_runtime(telemetry_config: TelemetryOptions, try_put_mvar: extern fn(capability: Capability, mvar: *mut MVar) -> ()) -> Box<RuntimeRef> {
-  let runtime = CoreRuntime::new(
+fn init_runtime(telemetry_config: TelemetryOptions, late_telemetry_options: HsTelemetryOptions, try_put_mvar: extern fn(capability: Capability, mvar: *mut MVar) -> ()) -> Box<RuntimeRef> {
+  let mut runtime = CoreRuntime::new(
     telemetry_config,
     tokio::runtime::Builder::new_multi_thread(),
-  );
+  ).unwrap();
+
+  let _guard = runtime.tokio_handle().enter();
+  let core_meter: Arc<dyn CoreMeter> = match late_telemetry_options {
+    HsTelemetryOptions::NoTelemetry => {
+      Arc::new(NoOpCoreMeter) as Arc<dyn CoreMeter>
+    },
+    HsTelemetryOptions::OtelTelemetryOptions { url, headers, metric_periodicity, global_tags } => {
+      Arc::new(build_otlp_metric_exporter(
+        OtelCollectorOptionsBuilder::default()
+            .url(url.parse().expect("Invalid URL"))
+            .metric_periodicity(metric_periodicity.unwrap_or_else(|| Duration::new(1, 0)))
+            .headers(headers)
+            .global_tags(global_tags)
+            .build()
+            .expect("Invalid OTEl configuration")
+      ).expect("Otel Metric exporter")) as Arc<dyn CoreMeter>
+    },
+    HsTelemetryOptions::PrometheusTelemetryOptions { socket_addr, global_tags, counters_total_suffix, unit_suffix } => {
+      let srv = start_prometheus_metric_exporter(
+        PrometheusExporterOptionsBuilder::default()
+            .socket_addr(socket_addr)
+            .unit_suffix(unit_suffix)
+            .global_tags(global_tags)
+            .counters_total_suffix(counters_total_suffix)
+            .build().expect("Invalid Prometheus configuration")
+      ).expect("Failed to start prometheus exporter");
+      srv.meter as Arc<dyn CoreMeter>
+    }
+  };
+  runtime.telemetry_mut().attach_late_init_metrics(core_meter);
 
   // TODO need to figure out how to handle errors here
   Box::new(
     RuntimeRef {
       runtime: Runtime {
-        core: Arc::new(runtime.unwrap()),
+        core: Arc::new(runtime),
         try_put_mvar
       },
     }
   )
 }
 
+#[derive(Serialize, Deserialize)]
+#[serde(tag = "tag")]
+pub enum HsTelemetryOptions {
+  OtelTelemetryOptions {
+    url: String,
+    headers: HashMap<String, String>,
+    metric_periodicity: Option<Duration>,
+    global_tags: HashMap<String, String>
+  },
+  PrometheusTelemetryOptions {
+    socket_addr: SocketAddr,
+    global_tags: HashMap<String, String>,
+    counters_total_suffix: bool,
+    unit_suffix: bool
+  },
+  NoTelemetry
+}
+
 #[no_mangle]
-pub extern "C" fn hs_temporal_init_runtime(try_put_mvar: extern fn(Capability, *mut MVar) -> ()) -> *mut RuntimeRef {
-  Box::into_raw(init_runtime(
-    TelemetryOptionsBuilder::default()
-      .logging(Logger::Forward {
-        filter: construct_filter_string(Level::TRACE, Level::ERROR),
-      })
-      .build()
-      .unwrap()
-    , try_put_mvar
-    )
-  )
+pub extern "C" fn hs_temporal_init_runtime(telemetry_opts: *const CArray<u8>, try_put_mvar: extern fn(Capability, *mut MVar) -> ()) -> *mut RuntimeRef {
+  let telemetry_opts = unsafe {
+    CArray::raw_borrow(telemetry_opts).unwrap().as_rust().unwrap().clone()
+  };
+  let telemetry_opts: HsTelemetryOptions = serde_json::from_slice(
+    telemetry_opts.as_slice()
+  ).expect("Failed to parse");
+
+  let early_options = TelemetryOptionsBuilder::default()
+          .logging(Logger::Forward {
+            filter: construct_filter_string(Level::INFO, Level::ERROR),
+          })
+          .attach_service_name(true)
+          // .metrics(core_meter)
+          .build()
+          .expect("Invalid TelemetryOptions");
+  let rt = init_runtime(early_options, telemetry_opts, try_put_mvar);
+  Box::into_raw(rt)
 }
 
 fn safe_drop_runtime(runtime: Box<RuntimeRef>) {
@@ -145,56 +202,45 @@ impl Runtime {
 }
 
 #[no_mangle]
-pub extern fn hs_temporal_drop_cstring(str: *const HaskellText) {
-  unsafe {
-    drop(CArray::from_raw_pointer(str));
-  }
-}
-
-// Actually the same thing as the above, but we want to be explicit about the
-// type of what we're dropping for clarity.
-#[no_mangle]
 pub extern fn hs_temporal_drop_byte_array(str: *const CArray<u8>) {
   unsafe {
     drop(CArray::from_raw_pointer(str));
   }
 }
 
-pub struct CoreLog {
+#[derive(Serialize)]
+pub struct CoreLogDef {
   pub target: String,
   pub message: String,
-  // pub timestamp: String,
-  // pub level: Level
-  // pub fields: HashMap<String, serde_json::Value>
-  // pub span_contexts: Vec<String>
-}
-
-#[repr(C)]
-#[derive(CReprOf, AsRust, CDrop, RawPointerConverter)]
-#[target_type(CoreLog)]
-pub struct CCoreLog {
-  target: *const libc::c_char,
-  message: *const libc::c_char,
+  pub timestamp: SystemTime,
+  pub level: String,
+  pub fields: HashMap<String, serde_json::Value>,
+  pub span_contexts: Vec<String>
 }
 
 #[no_mangle]
 pub extern "C" fn hs_temporal_runtime_fetch_logs(
   runtime: *mut RuntimeRef,
-) -> *const CArray<CCoreLog> {
+) -> *const CArray<CArray<u8>> {
   let runtime = unsafe { &*runtime };
   let logs = runtime.runtime.core.telemetry().fetch_buffered_logs();
-  let hs_logs: Vec<CoreLog> = logs.iter().map(|log| {
-    CoreLog {
-      target: (&log.target).clone(),
-      message: (&log.message).clone(),
-    }
+  let hs_logs: Vec<Vec<u8>> = logs.iter().map(|log| {
+    let log = CoreLogDef {
+      target: log.target.clone(),
+      message: log.message.clone(),
+      timestamp: log.timestamp,
+      level: String::from(log.level.as_str()),
+      fields: log.fields.clone(),
+      span_contexts: log.span_contexts.clone()
+    };
+    serde_json::to_vec(&log).expect("Failed to serialize log line")
   }).collect();
   CArray::c_repr_of(hs_logs).unwrap().into_raw_pointer()
 }
 
 #[no_mangle]
 pub extern "C" fn hs_temporal_runtime_free_logs(
-  logs: *const CArray<CCoreLog>
+  logs: *const CArray<CArray<u8>>
 ) {
   unsafe {
     drop(CArray::from_raw_pointer(logs));

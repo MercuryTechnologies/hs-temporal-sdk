@@ -12,18 +12,16 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module IntegrationSpec where
 
-import Control.Applicative
 import Control.Exception
 import Control.Exception.Annotated
 import Control.Concurrent
+import Control.Monad
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Aeson (Value, FromJSON, ToJSON, encode, eitherDecode)
-import Data.ByteString (ByteString)
 import Data.Int
-import Data.ProtoLens
-import Data.Text (Text, pack)
+import Data.Text (Text)
 import Data.Time.Clock (UTCTime)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
@@ -32,7 +30,6 @@ import qualified Data.UUID.V4 as UUID
 import GHC.Generics
 import OpenTelemetry.Trace
 import RequireCallStack
-import System.IO
 import Test.Hspec
 import Temporal.Core.Client
 import qualified Temporal.Client as C
@@ -45,16 +42,19 @@ import Temporal.Exception (nonRetryableError)
 import Temporal.Payload
 import Temporal.Worker
 import Temporal.SearchAttributes
-import System.IO.Unsafe
+import System.IO
 import System.Timeout (timeout)
 import Temporal.Duration
 import Temporal.Contrib.OpenTelemetry
 import Temporal.Interceptor
 import Temporal.EphemeralServer
 import Temporal.Operator (IndexedValueType(..), SearchAttributes(..), listSearchAttributes, addSearchAttributes)
+import Temporal.Runtime hiding (Periodicity(..))
 
-unblockWorkflowSignal :: W.SignalRef '[]
-unblockWorkflowSignal = W.SignalRef "unblockWorkflow" JSON
+import Common
+
+unblockWorkflowSignal :: W.KnownSignal '[]
+unblockWorkflowSignal = W.KnownSignal "unblockWorkflow" JSON
 
 temporalBundle [d|
   data WorkflowTests = WorkflowTests
@@ -77,7 +77,7 @@ temporalBundle [d|
     , nonRetryableFailureAct :: Activity () ()
     , retryableFailureTest :: W.Workflow ()
     , retryableFailureAct :: Activity () ()
-    } deriving (Generic)
+    } deriving stock (Generic)
   |]
 
 temporalBundle [d|
@@ -103,13 +103,13 @@ configWithRetry pn = defaultClientConfig
 mkWithWorker :: PortNumber -> WorkerConfig actEnv -> IO a -> IO a
 mkWithWorker pn conf m = do
   let clientConfig = configWithRetry pn
-  c <- connectClient clientConfig
-  bracket (runStdoutLoggingT $ startWorker c conf) shutdown (const m)
+  c <- connectClient globalRuntime clientConfig
+  bracket (startWorker c conf) shutdown (const m)
 
 makeClient :: PortNumber -> Interceptors -> IO (C.WorkflowClient, Client)
 makeClient pn Interceptors{..} = do
-  let clientConfig = configWithRetry pn
-  c <- connectClient clientConfig 
+  let conf = configWithRetry pn
+  c <- connectClient globalRuntime conf 
   (,) 
     <$> C.workflowClient c (W.Namespace "default") clientInterceptors
     <*> pure c
@@ -162,7 +162,7 @@ spec = do
               [ ("attr1", Temporal.Operator.Bool)
               , ("attr2", Temporal.Operator.Int)
               ]
-        addSearchAttributes coreClient (W.Namespace "default") (allTestAttributes `Map.difference` customAttributes)
+        _ <- addSearchAttributes coreClient (W.Namespace "default") (allTestAttributes `Map.difference` customAttributes)
 
         (conf, taskQueue) <- mkBaseConf interceptors
         go TestEnv
@@ -178,13 +178,13 @@ defaultCodec :: JSON
 defaultCodec = JSON
 
 data RegressionTask = Foo | Bar
-  deriving (Eq, Show, Generic)
+  deriving stock (Eq, Show, Generic)
 
 instance ToJSON RegressionTask
 instance FromJSON RegressionTask
 
-signalUnblockWorkflow :: W.SignalRef '[]
-signalUnblockWorkflow = W.SignalRef "unblockWorkflow" defaultCodec
+signalUnblockWorkflow :: W.KnownSignal '[]
+signalUnblockWorkflow = W.KnownSignal "unblockWorkflow" defaultCodec
 
 testImpls :: Impl WorkflowTests
 testImpls = provideCallStack $ WorkflowTests
@@ -234,7 +234,6 @@ testImpls = provideCallStack $ WorkflowTests
       res <- askActivityInfo
       if res.attempt <= 2
         then do
-          liftIO $ putStrLn "failing"
           error "sad"
         else pure 1
   , faultyWorkflow = do
@@ -244,8 +243,8 @@ testImpls = provideCallStack $ WorkflowTests
       h2 <- W.startActivity 
         testRefs.faultyActivity
         (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
-      W.wait (h1 :: W.Task Int)
-      W.wait (h2 :: W.Task Int)
+      _ <- W.wait @(W.Task Int) h1
+      W.wait @(W.Task Int) h2
   , workflowWaitConditionWorks = do
       st <- W.newStateVar False
       W.setSignalHandler unblockWorkflowSignal $ do
@@ -281,7 +280,7 @@ testImpls = provideCallStack $ WorkflowTests
   }
 
 testRefs :: Refs WorkflowTests
-testRefs = refs defaultCodec testImpls
+testRefs = refs defaultCodec
 
 testDefs :: Defs () WorkflowTests
 testDefs = defs defaultCodec testImpls
@@ -297,6 +296,7 @@ mkBaseConf interceptors = do
       setNamespace $ W.Namespace "default"
       setTaskQueue taskQueue
       addInterceptors interceptors
+      setLogger $ defaultOutput stdout
     , taskQueue
     )
 
@@ -659,8 +659,8 @@ needsClient = do
         tp <- getGlobalTracerProvider
         let testTracer = makeTracer tp "testTracer" tracerOptions
 
-        let echoQuery :: W.QueryDefinition '[Text] Text
-            echoQuery = W.QueryDefinition "testQuery" defaultCodec
+        let echoQuery :: W.KnownQuery '[Text] Text
+            echoQuery = W.KnownQuery "testQuery" defaultCodec
             workflow :: MyWorkflow ()
             workflow = do
               W.setQueryHandler echoQuery $ \msg -> pure msg
@@ -682,8 +682,8 @@ needsClient = do
 
       specify "query not found" $ \TestEnv{..} -> do
         uuid <- uuidText
-        let echoQuery :: W.QueryDefinition '[Text] Text
-            echoQuery = W.QueryDefinition "testQuery" defaultCodec
+        let echoQuery :: W.KnownQuery '[Text] Text
+            echoQuery = W.KnownQuery "testQuery" defaultCodec
             workflow :: MyWorkflow ()
             workflow = do
               W.setQueryHandler echoQuery $ \msg -> pure msg
@@ -956,24 +956,22 @@ needsClient = do
     specify "immediate activity start works" $ \TestEnv{..} -> do
       let taskMainActivity :: ProvidedActivity () (RegressionTask -> Activity () ())
           taskMainActivity = provideCallStack $ provideActivity JSON "legacyTaskMainAct" $ \command -> do
-            app <- ask
-            liftIO $ putStrLn "hi"
+            pure ()
 
           taskMainWorkflow :: W.ProvidedWorkflow (RegressionTask -> W.Workflow ())
           taskMainWorkflow = provideCallStack $ W.provideWorkflow JSON "legacyTaskMain" $ \command -> do
             -- Info{..} <- info
-            x <- W.uuid4
             W.executeActivity
               taskMainActivity.reference
               ((W.defaultStartActivityOptions $ W.StartToClose infinity) { W.activityId = Just $ W.ActivityId "woejfwoefijweof"})
               command
 
-          defs = 
+          definitions = 
             ( activityDefinition taskMainActivity
             , workflowDefinition taskMainWorkflow
             , testConf
             )
-          conf = configure () defs $ do
+          conf = configure () definitions $ do
             baseConf
 
 
@@ -993,7 +991,27 @@ needsClient = do
       -- specify "to same workflow keeps memo and search attributes" pending
       -- specify "to different workflow keeps memo and search attributes by default" pending
       -- specify "to different workflow can set memo and search attributes" pending
-  --   describe "signalWithStart" $ do
+    describe "signalWithStart" do
+      it "works" $ \TestEnv{..} -> do
+        let conf = configure () testConf baseConf
+        withWorker conf $ do
+          let opts = (C.workflowStartOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions
+                    { C.runTimeout = Just $ seconds 4
+                    , C.executionTimeout = Nothing
+                    , C.taskTimeout = Nothing
+                    }
+                }
+          useClient $ do
+            liftIO $ putStrLn "signalWithStart call"
+            wfH <- C.signalWithStart 
+              testRefs.workflowWaitConditionWorks 
+              "signalWithStart" 
+              opts
+              unblockWorkflowSignal 
+            lift $ C.waitWorkflowResult wfH `shouldReturn` ()
+
   --     specify "works as intended and returns correct runId" pending
   describe "RetryPolicy" $ do
     specify "is used for retryable failures" $ \TestEnv{..} -> do

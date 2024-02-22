@@ -6,12 +6,12 @@ set -x
 stack exec -- protoc \
   --plugin=protoc-gen-haskell=`which proto-lens-protoc` \
   --haskell_out=$PWD/protos/src \
-  --proto_path=$PWD/sdk-core/protos/local \
-  --proto_path=$PWD/sdk-core/protos/api_upstream \
-  --proto_path=$PWD/sdk-core/protos/grpc \
-  --proto_path=$PWD/sdk-core/protos/testsrv_upstream \
-  $PWD/sdk-core/protos/local/**/*.proto \
-  $PWD/sdk-core/protos/api_upstream/**/*.proto \
-  $PWD/sdk-core/protos/grpc/**/*.proto \
-  $PWD/sdk-core/protos/testsrv_upstream/temporal/**/*.proto
+  --proto_path=$PWD/sdk-core/sdk-core-protos/protos/local \
+  --proto_path=$PWD/sdk-core/sdk-core-protos/protos/api_upstream \
+  --proto_path=$PWD/sdk-core/sdk-core-protos/protos/grpc \
+  --proto_path=$PWD/sdk-core/sdk-core-protos/protos/testsrv_upstream \
+  $PWD/sdk-core/sdk-core-protos/protos/local/**/*.proto \
+  $PWD/sdk-core/sdk-core-protos/protos/api_upstream/temporal/**/*.proto \
+  $PWD/sdk-core/sdk-core-protos/protos/grpc/**/*.proto \
+  $PWD/sdk-core/sdk-core-protos/protos/testsrv_upstream/**/*.proto
 

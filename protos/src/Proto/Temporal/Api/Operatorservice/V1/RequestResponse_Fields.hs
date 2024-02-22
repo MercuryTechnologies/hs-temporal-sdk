@@ -107,6 +107,12 @@ namespace ::
    Data.ProtoLens.Field.HasField s "namespace" a) =>
   Lens.Family2.LensLike' f s a
 namespace = Data.ProtoLens.Field.field @"namespace"
+namespaceId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "namespaceId" a) =>
+  Lens.Family2.LensLike' f s a
+namespaceId = Data.ProtoLens.Field.field @"namespaceId"
 nextPageToken ::
   forall f s a.
   (Prelude.Functor f,

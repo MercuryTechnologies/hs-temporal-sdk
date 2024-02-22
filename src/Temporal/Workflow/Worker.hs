@@ -30,6 +30,7 @@ import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_F
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import Temporal.Duration (durationFromProto)
 import Temporal.Core.Worker (InactiveForReplay)
+import Temporal.Runtime
 
 data WorkflowWorker = forall ty. WorkflowWorker
   { workerWorkflowFunctions :: HashMap Text WorkflowDefinition
@@ -78,6 +79,13 @@ execute worker = flip runReaderT worker $ do
   where
     go = do
       $(logDebug) "Polling for activation"
+      -- logs <- liftIO $ fetchLogs globalRuntime
+      -- forM_ logs $ \l -> case l.level of
+      --   Trace -> $(logDebug) l.message
+      --   Debug -> $(logDebug) l.message
+      --   Temporal.Runtime.Info -> $(logInfo) l.message
+      --   Warn -> $(logWarn) l.message
+      --   Error -> $(logError) l.message
       eActivation <- pollWorkflowActivation
       case eActivation of
         -- TODO should we do anything else on shutdown?
@@ -131,7 +139,7 @@ handleActivation activation = do
           let withoutStart = filter (\job -> not $ isJust (job ^. Activation.maybe'startWorkflow)) (activation ^. Activation.jobs)
           case withoutStart of
             [] -> pure ()
-            otherJobs -> writeChan inst.activationChannel (activation & Activation.jobs .~ otherJobs)
+            otherJobs -> atomically $ writeTQueue inst.activationChannel (activation & Activation.jobs .~ otherJobs)
     else do
       $(logDebug) "Workflow does not need to run."
       let completionMessage = defMessage 
@@ -178,7 +186,7 @@ handleActivation activation = do
                     , parentRunId = RunId $ parent ^. CommonProto.runId
                     , parentWorkflowId = WorkflowId $ parent ^. CommonProto.workflowId
                     }
-                workflowInfo = Info
+                workflowInfo = Temporal.WorkflowInstance.Info
                   { historyLength = activation ^. Activation.historyLength
                   , attempt = fromIntegral $ startWorkflow ^. Activation.attempt
                   , taskQueue = worker.workerTaskQueue
@@ -200,13 +208,13 @@ handleActivation activation = do
                       fromMaybe 
                         (activation ^. Activation.timestamp) 
                         (startWorkflow ^. Activation.maybe'startTime)
+                  , continueAsNewSuggested = False
                   }
             case HashMap.lookup (startWorkflow ^. Activation.workflowType) worker.workerWorkflowFunctions of 
               Nothing -> pure Nothing
               Just (WorkflowDefinition _ f) -> do
                 inst <- create
                   (\wf -> do
-                    putStrLn "Complete activation"
                     Core.completeWorkflowActivation workerCore wf
                   )
                   f

@@ -36,10 +36,14 @@ import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
          * 'Proto.Temporal.Api.Sdk.V1.TaskCompleteMetadata_Fields.coreUsedFlags' @:: Lens' WorkflowTaskCompletedMetadata [Data.Word.Word32]@
          * 'Proto.Temporal.Api.Sdk.V1.TaskCompleteMetadata_Fields.vec'coreUsedFlags' @:: Lens' WorkflowTaskCompletedMetadata (Data.Vector.Unboxed.Vector Data.Word.Word32)@
          * 'Proto.Temporal.Api.Sdk.V1.TaskCompleteMetadata_Fields.langUsedFlags' @:: Lens' WorkflowTaskCompletedMetadata [Data.Word.Word32]@
-         * 'Proto.Temporal.Api.Sdk.V1.TaskCompleteMetadata_Fields.vec'langUsedFlags' @:: Lens' WorkflowTaskCompletedMetadata (Data.Vector.Unboxed.Vector Data.Word.Word32)@ -}
+         * 'Proto.Temporal.Api.Sdk.V1.TaskCompleteMetadata_Fields.vec'langUsedFlags' @:: Lens' WorkflowTaskCompletedMetadata (Data.Vector.Unboxed.Vector Data.Word.Word32)@
+         * 'Proto.Temporal.Api.Sdk.V1.TaskCompleteMetadata_Fields.sdkName' @:: Lens' WorkflowTaskCompletedMetadata Data.Text.Text@
+         * 'Proto.Temporal.Api.Sdk.V1.TaskCompleteMetadata_Fields.sdkVersion' @:: Lens' WorkflowTaskCompletedMetadata Data.Text.Text@ -}
 data WorkflowTaskCompletedMetadata
   = WorkflowTaskCompletedMetadata'_constructor {_WorkflowTaskCompletedMetadata'coreUsedFlags :: !(Data.Vector.Unboxed.Vector Data.Word.Word32),
                                                 _WorkflowTaskCompletedMetadata'langUsedFlags :: !(Data.Vector.Unboxed.Vector Data.Word.Word32),
+                                                _WorkflowTaskCompletedMetadata'sdkName :: !Data.Text.Text,
+                                                _WorkflowTaskCompletedMetadata'sdkVersion :: !Data.Text.Text,
                                                 _WorkflowTaskCompletedMetadata'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show WorkflowTaskCompletedMetadata where
@@ -84,6 +88,21 @@ instance Data.ProtoLens.Field.HasField WorkflowTaskCompletedMetadata "vec'langUs
            (\ x__ y__
               -> x__ {_WorkflowTaskCompletedMetadata'langUsedFlags = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField WorkflowTaskCompletedMetadata "sdkName" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowTaskCompletedMetadata'sdkName
+           (\ x__ y__ -> x__ {_WorkflowTaskCompletedMetadata'sdkName = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField WorkflowTaskCompletedMetadata "sdkVersion" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowTaskCompletedMetadata'sdkVersion
+           (\ x__ y__
+              -> x__ {_WorkflowTaskCompletedMetadata'sdkVersion = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message WorkflowTaskCompletedMetadata where
   messageName _
     = Data.Text.pack
@@ -92,7 +111,10 @@ instance Data.ProtoLens.Message WorkflowTaskCompletedMetadata where
     = "\n\
       \\GSWorkflowTaskCompletedMetadata\DC2&\n\
       \\SIcore_used_flags\CAN\SOH \ETX(\rR\rcoreUsedFlags\DC2&\n\
-      \\SIlang_used_flags\CAN\STX \ETX(\rR\rlangUsedFlags"
+      \\SIlang_used_flags\CAN\STX \ETX(\rR\rlangUsedFlags\DC2\EM\n\
+      \\bsdk_name\CAN\ETX \SOH(\tR\asdkName\DC2\US\n\
+      \\vsdk_version\CAN\EOT \SOH(\tR\n\
+      \sdkVersion"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -114,10 +136,29 @@ instance Data.ProtoLens.Message WorkflowTaskCompletedMetadata where
                  Data.ProtoLens.Packed
                  (Data.ProtoLens.Field.field @"langUsedFlags")) ::
               Data.ProtoLens.FieldDescriptor WorkflowTaskCompletedMetadata
+        sdkName__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "sdk_name"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"sdkName")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowTaskCompletedMetadata
+        sdkVersion__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "sdk_version"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"sdkVersion")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowTaskCompletedMetadata
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, coreUsedFlags__field_descriptor),
-           (Data.ProtoLens.Tag 2, langUsedFlags__field_descriptor)]
+           (Data.ProtoLens.Tag 2, langUsedFlags__field_descriptor),
+           (Data.ProtoLens.Tag 3, sdkName__field_descriptor),
+           (Data.ProtoLens.Tag 4, sdkVersion__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _WorkflowTaskCompletedMetadata'_unknownFields
@@ -127,6 +168,8 @@ instance Data.ProtoLens.Message WorkflowTaskCompletedMetadata where
     = WorkflowTaskCompletedMetadata'_constructor
         {_WorkflowTaskCompletedMetadata'coreUsedFlags = Data.Vector.Generic.empty,
          _WorkflowTaskCompletedMetadata'langUsedFlags = Data.Vector.Generic.empty,
+         _WorkflowTaskCompletedMetadata'sdkName = Data.ProtoLens.fieldDefault,
+         _WorkflowTaskCompletedMetadata'sdkVersion = Data.ProtoLens.fieldDefault,
          _WorkflowTaskCompletedMetadata'_unknownFields = []}
   parseMessage
     = let
@@ -228,6 +271,24 @@ instance Data.ProtoLens.Message WorkflowTaskCompletedMetadata where
                                             in ploop)
                                              mutable'langUsedFlags)
                                 loop x mutable'coreUsedFlags y
+                        26
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "sdk_name"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"sdkName") y x)
+                                  mutable'coreUsedFlags mutable'langUsedFlags
+                        34
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "sdk_version"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"sdkVersion") y x)
+                                  mutable'coreUsedFlags mutable'langUsedFlags
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -287,8 +348,41 @@ instance Data.ProtoLens.Message WorkflowTaskCompletedMetadata where
                                   ((Prelude..)
                                      Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
                                   p))))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+                ((Data.Monoid.<>)
+                   (let
+                      _v = Lens.Family2.view (Data.ProtoLens.Field.field @"sdkName") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                            ((Prelude..)
+                               (\ bs
+                                  -> (Data.Monoid.<>)
+                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                               Data.Text.Encoding.encodeUtf8 _v))
+                   ((Data.Monoid.<>)
+                      (let
+                         _v
+                           = Lens.Family2.view (Data.ProtoLens.Field.field @"sdkVersion") _x
+                       in
+                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                             Data.Monoid.mempty
+                         else
+                             (Data.Monoid.<>)
+                               (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
+                               ((Prelude..)
+                                  (\ bs
+                                     -> (Data.Monoid.<>)
+                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                             (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                          (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                  Data.Text.Encoding.encodeUtf8 _v))
+                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
 instance Control.DeepSeq.NFData WorkflowTaskCompletedMetadata where
   rnf
     = \ x__
@@ -297,16 +391,23 @@ instance Control.DeepSeq.NFData WorkflowTaskCompletedMetadata where
              (Control.DeepSeq.deepseq
                 (_WorkflowTaskCompletedMetadata'coreUsedFlags x__)
                 (Control.DeepSeq.deepseq
-                   (_WorkflowTaskCompletedMetadata'langUsedFlags x__) ()))
+                   (_WorkflowTaskCompletedMetadata'langUsedFlags x__)
+                   (Control.DeepSeq.deepseq
+                      (_WorkflowTaskCompletedMetadata'sdkName x__)
+                      (Control.DeepSeq.deepseq
+                         (_WorkflowTaskCompletedMetadata'sdkVersion x__) ()))))
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \0temporal/api/sdk/v1/task_complete_metadata.proto\DC2\DC3temporal.api.sdk.v1\"o\n\
+    \0temporal/api/sdk/v1/task_complete_metadata.proto\DC2\DC3temporal.api.sdk.v1\"\171\SOH\n\
     \\GSWorkflowTaskCompletedMetadata\DC2&\n\
     \\SIcore_used_flags\CAN\SOH \ETX(\rR\rcoreUsedFlags\DC2&\n\
-    \\SIlang_used_flags\CAN\STX \ETX(\rR\rlangUsedFlagsB\135\SOH\n\
-    \\SYNio.temporal.api.sdk.v1B\EMTaskCompleteMetadataProtoP\SOHZ\GSgo.temporal.io/api/sdk/v1;sdk\170\STX\NAKTemporalio.Api.Sdk.V1\234\STX\CANTemporalio::Api::Sdk::V1J\172\SYN\n\
-    \\ACK\DC2\EOT\SYN\NUL>\SOH\n\
+    \\SIlang_used_flags\CAN\STX \ETX(\rR\rlangUsedFlags\DC2\EM\n\
+    \\bsdk_name\CAN\ETX \SOH(\tR\asdkName\DC2\US\n\
+    \\vsdk_version\CAN\EOT \SOH(\tR\n\
+    \sdkVersionB\135\SOH\n\
+    \\SYNio.temporal.api.sdk.v1B\EMTaskCompleteMetadataProtoP\SOHZ\GSgo.temporal.io/api/sdk/v1;sdk\170\STX\NAKTemporalio.Api.Sdk.V1\234\STX\CANTemporalio::Api::Sdk::V1J\164\FS\n\
+    \\ACK\DC2\EOT\SYN\NULK\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -359,7 +460,7 @@ packedFileDescriptor
     \\STX\b%\DC2\ETX\US\NUL2\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT!\NUL>\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT!\NULK\SOH\n\
     \\n\
     \\n\
     \\ETX\EOT\NUL\SOH\DC2\ETX!\b%\n\
@@ -409,4 +510,29 @@ packedFileDescriptor
     \\f\n\
     \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX=\DC2!\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX=$%b\ACKproto3"
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX=$%\n\
+    \\137\ETX\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETXE\STX\SYN\SUB\251\STX Name of the SDK that processed the task. This is usually something like \"temporal-go\" and is\n\
+    \ usually the same as client-name gRPC header. This should only be set if its value changed\n\
+    \ since the last time recorded on the workflow (or be set on the first task).\n\
+    \\n\
+    \ (-- api-linter: core::0122::name-suffix=disabled\n\
+    \     aip.dev/not-precedent: We're ok with a name suffix here. --)\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETXE\STX\b\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETXE\t\DC1\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETXE\DC4\NAK\n\
+    \\149\STX\n\
+    \\EOT\EOT\NUL\STX\ETX\DC2\ETXJ\STX\EM\SUB\135\STX Version of the SDK that processed the task. This is usually something like \"1.20.0\" and is\n\
+    \ usually the same as client-version gRPC header. This should only be set if its value changed\n\
+    \ since the last time recorded on the workflow (or be set on the first task).\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\ETX\ENQ\DC2\ETXJ\STX\b\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETXJ\t\DC4\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETXJ\ETB\CANb\ACKproto3"

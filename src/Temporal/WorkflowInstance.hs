@@ -23,7 +23,7 @@ import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Functor.Identity
 import qualified Data.HashMap.Strict as HashMap
-import Data.List
+import Data.Foldable
 import Data.Proxy
 import Data.ProtoLens
 import Data.Set (Set)
@@ -31,7 +31,7 @@ import qualified Data.Set as Set
 import qualified Data.Text as Text
 import Data.Vector (Vector)
 import qualified Data.Vector as V
-import GHC.Stack (HasCallStack, emptyCallStack, callStack, prettyCallStack)
+import GHC.Stack (HasCallStack, emptyCallStack, prettyCallStack)
 import Lens.Family2
 import System.Random (mkStdGen)
 import Temporal.Common
@@ -68,16 +68,11 @@ import Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow
   )
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
-import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands
-  ( WorkflowCommand
-  )
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
-import qualified Proto.Temporal.Api.Failure.V1.Message as F
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import UnliftIO
 import Data.Time.Clock.System (SystemTime(..))
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Completion
-import Temporal.Payload (Payload)
 
 
 create :: (HasCallStack, MonadLoggerIO m)
@@ -115,7 +110,7 @@ create workflowCompleteActivation workflowFn workflowDeadlockTimeout errorConver
   workflowInstanceInfo <- newIORef info
   workflowInstanceContinuationEnv <- ContinuationEnv <$> newIORef JobNil
   workflowCancellationVar <- newIVar
-  activationChannel <- newChan
+  activationChannel <- newTQueueIO
   executionThread <- newIORef (error "Workflow thread not yet started")
   -- The execution thread is funny because it needs access to the instance, but the instance
   -- needs access to the execution thread. It's a bit of a circular dependency, but
@@ -155,9 +150,20 @@ runWorkflowToCompletion wf = runTopLevel $ do
         -- that we are stuck. Once we get unstuck (e.g. something is in the activation channel)
         -- then we can resume the workflow.
         --
-        -- AFAICT it should be a 1:1 relationship between flushing and receiving an activation.
-        flushCommands
-        activation <- readChan inst.activationChannel
+        -- There are a few cases like singalWithStart where a workflow will reach a blocking
+        -- state, but we aren't actually ready to flush the commands yet. So, we read
+        -- from the activation channel and resume the workflow until the channel is emptied.
+        --
+        -- Once we're blocked in that way, then we should flush the commands and wait for
+        -- the next activation(s?).
+        activation <- join $ atomically $ do
+          mActivition <- tryReadTQueue inst.activationChannel
+          case mActivition of
+            Nothing -> do
+              pure $ do
+                flushCommands
+                atomically $ readTQueue inst.activationChannel
+            Just act -> pure $ pure act
         fmap runIdentity $ activate activation $ Identity suspension
   supplyM completeStep wf
 
@@ -171,7 +177,7 @@ runWorkflowToCompletion wf = runTopLevel $ do
 handleQueriesAfterCompletion :: InstanceM ()
 handleQueriesAfterCompletion = forever $ do
   w <- ask
-  activation <- readChan =<< asks activationChannel
+  activation <- atomically . readTQueue =<< asks activationChannel
   completion <- UnliftIO.try $ activate activation Proxy
 
   case completion of
@@ -222,7 +228,10 @@ activate
 activate act suspension = do
   inst <- ask
   info <- atomicModifyIORef' inst.workflowInstanceInfo $ \info -> 
-    let info' = info { historyLength = act ^. Activation.historyLength }
+    let info' = info 
+          { historyLength = act ^. Activation.historyLength 
+          , continueAsNewSuggested = act ^. Activation.continueAsNewSuggested
+          }
     in (info', info')
   let completionBase = defMessage & Completion.runId .~ rawRunId info.runId
   writeIORef inst.workflowTime (act ^. Activation.timestamp . to timespecFromTimestamp)
@@ -373,13 +382,11 @@ applyJobs
   -> InstanceM (Either SomeException (f (SuspendableWorkflowExecution Payload)))
 applyJobs jobs fAwait = UnliftIO.try $ do
   $logDebug $ Text.pack ("Applying jobs: " <> show jobs)
-  inst <- ask
   let (patchNotifications, signalWorkflows, queryWorkflows, resolutions, otherJobs) = jobGroups
   patchNotifications
   queryWorkflows
   otherJobs
   activationResults <- applyResolutions resolutions
-  seqMaps <- atomically $ readTVar inst.workflowSequenceMaps
   let activations = activationResults
   pure $
     (\(Await wf) -> 
@@ -394,7 +401,7 @@ applyJobs jobs fAwait = UnliftIO.try $ do
           sigs -> do
             lift $ $logDebug "We get signal"
             lift (mapM_ injectWorkflowSignal sigs) *> wf []
-        nonEmptyActivations -> case signalWorkflows of
+        _ -> case signalWorkflows of
           [] -> wf activations
           sigs -> lift (mapM_ injectWorkflowSignal sigs) *> wf activations
         {- TODO: we need to run the signal workflows without messing up ContinuationEnv: runWorkflow signalWorkflows -}
@@ -421,6 +428,7 @@ applyJobs jobs fAwait = UnliftIO.try $ do
         Just (WorkflowActivationJob'StartWorkflow _startWorkflow) -> tup
         -- Handled in the worker.
         Just (WorkflowActivationJob'RemoveFromCache _removeFromCache) -> tup
+        Just (WorkflowActivationJob'DoUpdate _) -> error "DoUpdate not yet implemented"
         Nothing -> E.throw $ RuntimeError "Uncrecognized workflow activation job variant"
       )
       (pure (), [], pure (), [], pure ())
@@ -553,7 +561,6 @@ runTopLevel m = do
     , Handler $ \WorkflowCancelRequested -> do
         pure $ WorkflowExitCancelled $ defMessage & Command.cancelWorkflowExecution .~ defMessage
     , Handler $ \(actFailure :: ActivityFailure) -> do
-        w <- ask
         let appFailure = actFailure.cause
             enrichedApplicationFailure = defMessage
               & F.message .~ actFailure.message

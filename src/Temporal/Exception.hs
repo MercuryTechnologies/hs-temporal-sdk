@@ -169,7 +169,7 @@ mkAnnotatedHandlers xs =
     [ ApplicationFailureHandler $ \e -> hndlr e
     , ApplicationFailureHandler $ \(AnnotatedException anns e) -> let base = (hndlr e) in base
       { stack = if base.stack == "" 
-        then case callStackInAnnotations anns of
+        then case tryAnnotations anns of
           (cs : _, _) -> pack $ prettyCallStack cs
           (_, _) -> base.stack
         else base.stack

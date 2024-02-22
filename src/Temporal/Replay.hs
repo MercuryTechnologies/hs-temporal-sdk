@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE GADTs #-}
@@ -32,14 +33,12 @@ import Data.ProtoLens
 import Data.Vector (Vector)
 import qualified Data.Text as T
 import Data.List (intersperse)
-import Data.List.Split (wordsBy)
+-- import Data.List.Split (wordsBy)
 import qualified Data.Text.Encoding as T
-import Data.Map.Strict (Map)
 import qualified Data.ByteString.Lazy as BS
 import Proto.Temporal.Api.History.V1.Message
 import Proto.Temporal.Api.History.V1.Message_Fields
 
-import Data.Aeson.Types (Result(..), parse)
 import Data.ProtoLens.Json
 import Temporal.Common (WorkflowId(..))
 import Temporal.Core.Worker (newReplayWorker, HistoryPusher, pushHistory, closeHistory)
@@ -48,18 +47,18 @@ instance FromJSON History where
   parseJSON = do
     let opts = defaultFromJsonMessageOptions
           { fromJsonMessageEnumModifier = \_msg enumInfo str -> 
-            let result = toScreamingSnake $ fromHumps (T.unpack (enumName enumInfo) <> str)
-            in result
+            toScreamingSnake (fromHumps (T.unpack (enumName enumInfo) <> str))
           }
     withObject "History" $ \o -> parseJsonMessage opts o
 
 -- | An opaque type that represents a parsed identifier.
 newtype Identifier a = Identifier { unIdentifier :: [a] }
-    deriving (Monad, Functor, Applicative, Show, Foldable, Traversable, Eq)
+  deriving newtype (Monad, Functor, Applicative, Show, Eq)
+  deriving stock (Foldable, Traversable)
 
-wordCase :: String -> String
-wordCase "" = ""
-wordCase (x:xs) = toUpper x : map toLower xs
+-- wordCase :: String -> String
+-- wordCase "" = ""
+-- wordCase (x:xs) = toUpper x : map toLower xs
 
 -- | Convert from "humped" casing (@camelCase@ or @PascalCase@)
 fromHumps :: String -> Identifier String
@@ -67,7 +66,7 @@ fromHumps = Identifier . go
     where
         go "" = [""]
         go (x:[]) = [x:[]]
-        go xxs@(x:xs)
+        go xxs@(x:_)
           | isUpper x =
               let lhs = takeWhile isUpper xxs
                   rhs = dropWhile isUpper xxs
@@ -79,43 +78,43 @@ fromHumps = Identifier . go
                     cur = take curLen lhs
                     rec = go rhs
                     nxt = drop curLen lhs ++ concat (take 1 rec)
-                    rem = drop 1 rec
+                    remaining = drop 1 rec
                     curL = if null cur then [] else [cur]
                     nxtL = if null nxt then [] else [nxt]
-                in curL ++ nxtL ++ rem
+                in curL ++ nxtL ++ remaining
 
           | otherwise =
               let cur = takeWhile (not . isUpper) xxs
-                  rem = dropWhile (not . isUpper) xxs
+                  remaining = dropWhile (not . isUpper) xxs
               in
-              if null rem then
+              if null remaining then
                 [cur]
               else
-                cur:go rem
+                cur:go remaining
 
-fromWords :: String -> Identifier String
-fromWords = Identifier . words
+-- fromWords :: String -> Identifier String
+-- fromWords = Identifier . words
 
--- | Convert from @kebab-cased-identifiers@
-fromKebab :: String -> Identifier String
-fromKebab = Identifier . wordsBy (== '-')
+-- -- | Convert from @kebab-cased-identifiers@
+-- fromKebab :: String -> Identifier String
+-- fromKebab = Identifier . wordsBy (== '-')
 
--- | Convert from @snake_cased@ (either flavor)
-fromSnake :: String -> Identifier String
-fromSnake = Identifier . wordsBy (== '_')
+-- -- | Convert from @snake_cased@ (either flavor)
+-- fromSnake :: String -> Identifier String
+-- fromSnake = Identifier . wordsBy (== '_')
 
--- | Convert from anything, including mixed casing.
-fromAny :: String -> Identifier String
-fromAny str = fromHumps str >>= fromKebab >>= fromSnake >>= fromWords
+-- -- | Convert from anything, including mixed casing.
+-- fromAny :: String -> Identifier String
+-- fromAny str = fromHumps str >>= fromKebab >>= fromSnake >>= fromWords
 
--- | To @PascalCase@
-toPascal :: Identifier String -> String
-toPascal = concat . map wordCase . unIdentifier
+-- -- | To @PascalCase@
+-- toPascal :: Identifier String -> String
+-- toPascal = concat . map wordCase . unIdentifier
 
--- | To @camelCase@
-toCamel :: Identifier String -> String
-toCamel (Identifier []) = ""
-toCamel (Identifier (x:xs)) = concat $ map toLower x:map wordCase xs
+-- -- | To @camelCase@
+-- toCamel :: Identifier String -> String
+-- toCamel (Identifier []) = ""
+-- toCamel (Identifier (x:xs)) = concat $ map toLower x:map wordCase xs
 
 -- | To @snake_Case@
 toSnake :: Identifier String -> String
@@ -125,21 +124,21 @@ toSnake = concat . intersperse "_" . unIdentifier
 toScreamingSnake :: Identifier String -> String
 toScreamingSnake = map toUpper . toSnake
 
--- | To @word Case@
-toWords :: Identifier String -> String
-toWords = unwords . unIdentifier
+-- -- | To @word Case@
+-- toWords :: Identifier String -> String
+-- toWords = unwords . unIdentifier
 
--- | Directly convert to @PascalCase@ through 'fromAny'
-pascal :: String -> String
-pascal = toPascal . fromAny
+-- -- | Directly convert to @PascalCase@ through 'fromAny'
+-- pascal :: String -> String
+-- pascal = toPascal . fromAny
 
--- | Directly convert to @camelCase@ through 'fromAny'
-camel :: String -> String
-camel = toCamel . fromAny
+-- -- | Directly convert to @camelCase@ through 'fromAny'
+-- camel :: String -> String
+-- camel = toCamel . fromAny
 
--- | Directly convert to @snake_Case@ through 'fromAny'
-snake :: String -> String
-snake = toSnake . fromAny
+-- -- | Directly convert to @snake_Case@ through 'fromAny'
+-- snake :: String -> String
+-- snake = toSnake . fromAny
 
 readHistoryFromJSONFile :: MonadIO m => FilePath -> m (Either String (Vector HistoryEvent))
 readHistoryFromJSONFile fp = liftIO $ do

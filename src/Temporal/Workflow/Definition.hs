@@ -21,13 +21,11 @@ module Temporal.Workflow.Definition
   , WorkflowDefinition(..) -- TODO, only export the type, not the constructor from this module
   , KnownWorkflow(..)
   , SignalRef(..)
-  , SignalDefinition(..)
   , WorkflowSignalDefinition(..)
   -- , StartChildWorkflow(..)
-  , gatherStartChildWorkflowArgs
   , provideWorkflow
   , ProvidedWorkflow(..)
-  , GatherArgs(..)
+  , GatherArgs
   , WorkflowRef(..)
   ) where
 
@@ -36,10 +34,8 @@ import Data.Kind
 import Data.Text (Text)
 import Data.Typeable
 import Data.Vector (Vector)
-import Temporal.Common
 import Temporal.Payload
 import Temporal.Workflow.Internal.Monad
-import Temporal.Workflow.Query
 import Temporal.Workflow.Signal
 import RequireCallStack
 
@@ -78,12 +74,12 @@ data KnownWorkflow (args :: [Type]) (result :: Type) = forall codec.
         , knownWorkflowName :: Text
         }
 
-gatherStartChildWorkflowArgs 
-  :: forall args result codec. GatherArgs codec args
-  => codec 
-  -> ([IO Payload] -> Workflow (ChildWorkflowHandle result)) 
-  -> (args :->: Workflow (ChildWorkflowHandle result))
-gatherStartChildWorkflowArgs c f = gatherArgs (Proxy @args) c id f
+-- gatherStartChildWorkflowArgs 
+--   :: forall args result codec. GatherArgs codec args
+--   => codec 
+--   -> ([IO Payload] -> Workflow (ChildWorkflowHandle result)) 
+--   -> (args :->: Workflow (ChildWorkflowHandle result))
+-- gatherStartChildWorkflowArgs c f = gatherArgs (Proxy @args) c id f
 
 data ProvidedWorkflow f = ProvidedWorkflow
   { definition :: WorkflowDefinition
@@ -94,7 +90,7 @@ instance HasWorkflowDefinition (ProvidedWorkflow f) where
   workflowDefinition :: ProvidedWorkflow f -> WorkflowDefinition
   workflowDefinition = definition
 
-instance WorkflowRef (ProvidedWorkflow f) where
+instance VarArgs (ArgsOf f) => WorkflowRef (ProvidedWorkflow f) where
   type WorkflowArgs (ProvidedWorkflow f) = ArgsOf f
   type WorkflowResult (ProvidedWorkflow f) = ResultOf Workflow f
   workflowRef :: ProvidedWorkflow f -> KnownWorkflow (WorkflowArgs (ProvidedWorkflow f)) (WorkflowResult (ProvidedWorkflow f))

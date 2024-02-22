@@ -18,6 +18,7 @@ library
       Temporal.Bundle
       Temporal.Bundle.TH
       Temporal.Client
+      Temporal.Client.Batch
       Temporal.Client.Schedule
       Temporal.Contrib.OpenTelemetry
       Temporal.Duration
@@ -60,6 +61,7 @@ library
       src
   default-extensions:
       BangPatterns
+      BlockArguments
       DataKinds
       DerivingStrategies
       FlexibleContexts
@@ -78,9 +80,10 @@ library
       StandaloneDeriving
       TypeApplications
       TypeFamilies
-      UndecidableInstances
       TypeOperators
-  ghc-options: -g -Weverything -Wno-missing-exported-signatures -Wno-missing-export-lists -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -Wno-unused-packages -Wno-operator-whitespace -fdiagnostics-color=always -Wno-missing-kind-signatures -Wno-implicit-lift -Wno-implicit-prelude -fwarn-tabs +RTS -A128m -n2m -RTS -fdefer-diagnostics -fprint-explicit-kinds -Wno-redundant-constraints
+      UndecidableInstances
+      ViewPatterns
+  ghc-options: -g -Weverything -Wno-missing-exported-signatures -Wno-missing-export-lists -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -Wno-unused-packages -Wno-operator-whitespace -fdiagnostics-color=always -Wno-missing-kind-signatures -Wno-implicit-lift -Wno-implicit-prelude -fwarn-tabs +RTS -A128m -n2m -RTS -fdefer-diagnostics -Wno-redundant-constraints
   build-depends:
       aeson
     , annotated-exception
@@ -131,11 +134,12 @@ test-suite temporal-sdk-tests
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
-      Spec, ConcurrentAccessSpec, AsyncCompletionSpec, IntegrationSpec
+      Spec, ConcurrentAccessSpec, AsyncCompletionSpec, IntegrationSpec, Common
   hs-source-dirs:
       test
   default-extensions:
       BangPatterns
+      BlockArguments
       DataKinds
       DerivingStrategies
       FlexibleContexts
@@ -154,9 +158,10 @@ test-suite temporal-sdk-tests
       StandaloneDeriving
       TypeApplications
       TypeFamilies
-      UndecidableInstances
       TypeOperators
-  ghc-options: -g -Weverything -Wno-missing-exported-signatures -Wno-missing-export-lists -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -Wno-unused-packages -Wno-operator-whitespace -fdiagnostics-color=always -Wno-missing-kind-signatures -Wno-implicit-lift -Wno-implicit-prelude -fwarn-tabs +RTS -A128m -n2m -RTS -fdefer-diagnostics -fprint-explicit-kinds -Wno-redundant-constraints -g -threaded -rtsopts -with-rtsopts=-N
+      UndecidableInstances
+      ViewPatterns
+  ghc-options: -g -Weverything -Wno-missing-exported-signatures -Wno-missing-export-lists -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -Wno-unused-packages -Wno-operator-whitespace -fdiagnostics-color=always -Wno-missing-kind-signatures -Wno-implicit-lift -Wno-implicit-prelude -fwarn-tabs +RTS -A128m -n2m -RTS -fdefer-diagnostics -Wno-redundant-constraints -g -threaded -rtsopts -with-rtsopts=-N
   build-tool-depends:
       hspec-discover:hspec-discover
   build-depends:
