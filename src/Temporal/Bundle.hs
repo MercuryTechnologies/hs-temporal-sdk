@@ -415,9 +415,9 @@ class UseAsInWorkflowProxy synchronicity ref where
     -> RefStartOptions @@ ref 
     -> InWorkflowProxies synchronicity @@ ref
 
-instance UseAsInWorkflowProxy ProxySync (KnownActivity args res) where
+instance VarArgs args => UseAsInWorkflowProxy ProxySync (KnownActivity args res) where
   useAsInWorkflowProxy _ = executeActivity 
-instance UseAsInWorkflowProxy ProxyAsync (KnownActivity args res) where
+instance VarArgs args => UseAsInWorkflowProxy ProxyAsync (KnownActivity args res) where
   useAsInWorkflowProxy _ = startActivity 
 
 instance UseAsInWorkflowProxy ProxySync (KnownWorkflow args res) where

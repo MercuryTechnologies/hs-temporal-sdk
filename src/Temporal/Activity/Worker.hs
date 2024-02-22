@@ -32,7 +32,6 @@ import Data.HashMap.Strict (HashMap)
 import Data.Text (Text)
 import Temporal.Interceptor
 import Temporal.Activity.Types
-import Temporal.Runtime
 
 data ActivityWorker env = ActivityWorker
   { initialEnv :: env

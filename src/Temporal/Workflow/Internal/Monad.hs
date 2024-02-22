@@ -531,6 +531,8 @@ instance MonadWriteStateVar Workflow where
     reevaluateDependentConditions var
     pure $ Done res
 
+-- | The Query monad is a very constrained version of the Workflow monad. It can
+-- only read state variables and return values. It is used to define query handlers.
 newtype Query a = Query (InstanceM a)
   deriving newtype (Functor, Applicative, Monad)
 

@@ -36,7 +36,7 @@ temporalBundle [d|
     , queue14 :: TaskQueue
     , queue15 :: TaskQueue
     , queue16 :: TaskQueue
-    }
+    } deriving (Eq, Show)
   
   data Functions = Functions
     { something :: Workflow ()

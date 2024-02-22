@@ -42,16 +42,24 @@ module Temporal.Payload
   , addPayloadProcessor
   , PayloadProcessor
   , ApplyPayloads
-  , GatherArgs(..)
   , ArgsOf
-  , GatherArgsOf
   , ResultOf
   , EncodeResultOf
-  , FunctionSupportsCodec
-  , FunctionSupportsCodec'
   , (:->:)
   , convertToProtoPayload
   , convertFromProtoPayload
+  -- * Vararg manipulation
+  , VarArgs(..)
+  , hoistResult
+  , foldMapArgs
+  , foldMArgs
+  , foldMArgs_
+  , withArgs
+  , AllArgs
+  , GatherArgs
+  , GatherArgsOf
+  , FunctionSupportsCodec
+  , FunctionSupportsCodec'
   ) where
 
 import Codec.Compression.Zlib.Internal hiding (Format(..))
@@ -61,15 +69,20 @@ import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as C
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BL
+import Control.Monad
+import Control.Monad.IO.Class
 import Data.Text.Encoding (encodeUtf8)
 import Data.Kind
 import Data.ProtoLens (defMessage, Message(..))
 import Data.Proxy
 import Data.Map.Strict (Map)
 import qualified Data.Vector as V
+import qualified Data.Vector.Generic as VG
+import qualified Data.Vector.Fusion.Bundle as B
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import Data.Typeable
+import Fcf hiding (Null)
 import GHC.TypeLits
 import Lens.Family2
 import qualified Proto.Temporal.Api.Common.V1.Message as Proto (Payload)
@@ -256,9 +269,78 @@ type family (:->:) (args :: [Type]) (result :: Type) where
 
 infixr 0 :->: 
 
+-- | Applies a constraint to all types in a type-level list.
+type AllArgs (c :: Type -> Constraint) (args :: [Type]) = (Constraints <=< Fcf.Map (Pure1 c)) @@ args
+
+class VarArgs (args :: [Type]) where
+  sequenceArgs :: Monad m => Proxy (m result) -> m (args :->: m result) -> args :->: m result
+
+  mapResult :: (result -> result') -> (args :->: result) -> (args :->: result')
+
+  foldlArgs :: forall c b. (AllArgs c args) => Proxy c -> (forall a. c a => b -> a -> b) -> b -> (args :->: b)
+
+-- Instance for the base case where there are no arguments left
+instance VarArgs '[] where
+  sequenceArgs :: Monad m => Proxy (m result) -> m (m result) -> m result
+  sequenceArgs _ = join
+  {-# INLINE sequenceArgs #-}
+
+  mapResult :: (result -> result') -> result -> result'
+  mapResult f = f
+  {-# INLINE mapResult #-}
+
+  foldlArgs _ _ !x = x
+  {-# INLINE foldlArgs #-}
+
+-- Instance for the recursive case where there's at least one argument
+instance (VarArgs args) => VarArgs (arg ': args) where
+  sequenceArgs :: forall result (m :: Type -> Type). Monad m => Proxy (m result) -> m ((arg ': args) :->: m result) -> (arg -> (args :->: m result))
+  sequenceArgs p action arg = sequenceArgs @args p $ do
+    f <- action
+    return (f arg)
+  {-# INLINE sequenceArgs #-}
+
+  mapResult :: forall result result'. (result -> result') -> (arg -> (args :->: result)) -> (arg -> (args :->: result'))
+  mapResult f g arg = mapResult @args @result f (g arg)
+  {-# INLINE mapResult #-}
+
+  foldlArgs p f !acc = \arg -> foldlArgs @args p f (f acc arg)
+  {-# INLINE foldlArgs #-}
+
+hoistResult :: forall args result m n. VarArgs args => (forall x. m x -> n x) -> (args :->: m result) -> (args :->: n result)
+hoistResult = mapResult @args @(m result)
+{-# INLINE hoistResult #-}
+
+foldMapArgs :: forall args c m. (VarArgs args, AllArgs c args, Monoid m) => (forall a. c a => a -> m) -> args :->: m
+foldMapArgs f = foldlArgs @args @c @(m) Proxy (\acc a -> acc `mappend` f a) mempty
+{-# INLINE foldMapArgs #-}
+
+foldMArgs :: forall args c b m. (VarArgs args, AllArgs c args, Monad m) => (forall a. c a => b -> a -> m b) -> b -> args :->: m b
+foldMArgs f x = foldlArgs @args @c @(m b) Proxy (\acc y -> acc >>= \(!x') -> f x' y) (pure x)
+{-# INLINE foldMArgs #-}
+
+foldMArgs_ :: forall args c b m. (VarArgs args, AllArgs c args, Monad m) => (forall a. c a => b -> a -> m b) -> b -> args :->: m ()
+foldMArgs_ f x = mapResult @args @(m b) @(m ()) void (foldMArgs @args @c @b @m f x)
+{-# INLINE foldMArgs_ #-}
+
+gatherArgs :: forall args codec. (VarArgs args, AllArgs (Codec codec) args) => codec -> args :->: IO (V.Vector Payload) 
+gatherArgs codec = mapResult @args @(IO (B.Bundle V.Vector Payload)) @(IO (V.Vector Payload)) (fmap VG.unstream) (foldMArgs @args @(Codec codec) go B.empty)
+  where
+    go :: forall a. Codec codec a => B.Bundle V.Vector Payload -> a -> IO (B.Bundle V.Vector Payload)
+    go acc arg = B.snoc acc <$> encode codec arg
+{-# INLINE gatherArgs #-}
+
+withArgs :: forall args result m codec. (VarArgs args, AllArgs (Codec codec) args, MonadIO m) => codec -> (V.Vector Payload -> m result) -> args :->: m result
+withArgs codec f = mapResult @args @(IO (V.Vector Payload)) @(m result) go (gatherArgs @args @codec codec)
+  where
+    go :: IO (V.Vector Payload) -> m result
+    go argsM = do
+      args <- liftIO argsM
+      f args
+
 data Payload = Payload
   { payloadData :: ByteString
-  , payloadMetadata :: Map Text ByteString
+  , payloadMetadata :: Data.Map.Strict.Map Text ByteString
   } deriving stock (Eq, Show)
 
 
@@ -313,33 +395,38 @@ instance (Codec codec ty, ApplyPayloads codec tys) => ApplyPayloads codec (ty ':
         Right arg -> applyPayloads codec (Proxy @tys) resP (f arg) rest
         Left err -> pure $ Left err
 
--- | Given a list of function argument types and a codec, produce a function that takes a list of
+-- Given a list of function argument types and a codec, produce a function that takes a list of
 -- 'Payload's and does something useful with them. This is used to support outbound invocations of
 -- child workflows, activities, queries, and signals.
-class GatherArgs codec (args :: [Type]) where
-  gatherArgs 
-    :: Proxy args 
-    -> codec 
-    -> ([IO Payload] -> [IO Payload]) 
-    -> ([IO Payload] -> result)
-    -> (args :->: result)
+-- class GatherArgs codec (args :: [Type]) where
+--   gatherArgs 
+--     :: Proxy args 
+--     -> codec 
+--     -> ([IO Payload] -> [IO Payload]) 
+--     -> ([IO Payload] -> result)
+--     -> (args :->: result)
 
-instance (Codec codec arg, GatherArgs codec args) => GatherArgs codec (arg ': args) where
-  gatherArgs _ c accum f = \arg ->
-    gatherArgs 
-      (Proxy @args) 
-      c 
-      (accum . (encode c arg :))
-      f
+-- instance (Codec codec arg, GatherArgs codec args) => GatherArgs codec (arg ': args) where
+--   gatherArgs _ c accum f = \arg ->
+--     gatherArgs 
+--       (Proxy @args) 
+--       c 
+--       (accum . (encode c arg :))
+--       f
 
-instance GatherArgs codec '[] where
-  gatherArgs _ _ accum f = f $ accum []
+-- instance GatherArgs codec '[] where
+--   gatherArgs _ _ accum f = f $ accum []
 
-class (GatherArgs codec (ArgsOf f)) => GatherArgsOf codec f
-instance (GatherArgs codec (ArgsOf f)) => GatherArgsOf codec f
+-- class (GatherArgs codec (ArgsOf f)) => GatherArgsOf codec f
+-- instance (GatherArgs codec (ArgsOf f)) => GatherArgsOf codec f
 
-class (GatherArgs codec args, Codec codec result, Typeable result, ApplyPayloads codec args) => FunctionSupportsCodec codec args result
-instance (GatherArgs codec args, Codec codec result, Typeable result, ApplyPayloads codec args) => FunctionSupportsCodec codec args result
+-- class (GatherArgs codec args, Codec codec result, Typeable result, ApplyPayloads codec args) => FunctionSupportsCodec codec args result
+-- instance (GatherArgs codec args, Codec codec result, Typeable result, ApplyPayloads codec args) => FunctionSupportsCodec codec args result
 
-class (FunctionSupportsCodec codec (ArgsOf f) (ResultOf m f), f ~ (ArgsOf f :->: m (ResultOf m f))) => FunctionSupportsCodec' (m :: Type -> Type) codec f
-instance (FunctionSupportsCodec codec (ArgsOf f) (ResultOf m f), f ~ (ArgsOf f :->: m (ResultOf m f))) => FunctionSupportsCodec' m codec f
+-- class (FunctionSupportsCodec codec (ArgsOf f) (ResultOf m f), f ~ (ArgsOf f :->: m (ResultOf m f))) => FunctionSupportsCodec' (m :: Type -> Type) codec f
+-- instance (FunctionSupportsCodec codec (ArgsOf f) (ResultOf m f), f ~ (ArgsOf f :->: m (ResultOf m f))) => FunctionSupportsCodec' m codec f
+
+type GatherArgs codec args = (VarArgs args, AllArgs (Codec codec) args)
+type GatherArgsOf codec f = GatherArgs codec (ArgsOf f)
+type FunctionSupportsCodec codec args result = (GatherArgs codec args, Codec codec result, Typeable result, ApplyPayloads codec args)
+type FunctionSupportsCodec' m codec f = (FunctionSupportsCodec codec (ArgsOf f) (ResultOf m f), f ~ (ArgsOf f :->: m (ResultOf m f)))

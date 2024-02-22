@@ -186,7 +186,6 @@ import Data.Int (Int32, Int64)
 import Data.Map.Strict (Map)
 import Data.Maybe (fromMaybe)
 import Data.ProtoLens
-import Data.Proxy (Proxy(..))
 import Data.Vector (Vector)
 import qualified Data.Vector as V
 import Data.Text (Text)
@@ -582,30 +581,26 @@ mkScheduleAction :: forall wf m. (MonadIO m, WorkflowRef wf)
   --
   -- The workflow id will generally have a timestamp appended for uniqueness.
   -> (WorkflowArgs wf :->: m ScheduleAction)
-mkScheduleAction (workflowRef -> KnownWorkflow codec wfName) (WorkflowId wfId) opts = do
-  let gather :: ([IO Payload] -> m ScheduleAction) -> (WorkflowArgs wf :->: m ScheduleAction)
-      gather = gatherArgs (Proxy @(WorkflowArgs wf)) codec Prelude.id
-  gather $ \inputs -> liftIO $ do
-    is <- sequence inputs
-    searchAttrs <- searchAttributesToProto opts.searchAttributes
-    let tq = rawTaskQueue opts.taskQueue
-        executionInfo = defMessage
-          & W.workflowId .~ wfId
-          & W.workflowType .~ (defMessage & C.name .~ wfName)
-          & W.taskQueue .~ 
-            ( defMessage
-              & C.name .~ tq
-              & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
-            )
-          & W.input .~ (defMessage & C.payloads .~ (convertToProtoPayload <$> is))
-          & W.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts.timeouts.executionTimeout)
-          & W.maybe'workflowRunTimeout .~ (durationToProto <$> opts.timeouts.runTimeout)
-          & W.maybe'workflowTaskTimeout .~ (durationToProto <$> opts.timeouts.taskTimeout)
-          & W.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retry)
-          & W.memo .~ convertToProtoMemo opts.memo
-          & W.searchAttributes .~ (defMessage & C.indexedFields .~ searchAttrs)
-          & W.header .~ (defMessage & C.fields .~ fmap convertToProtoPayload opts.headers)
-    pure $ StartWorkflow executionInfo
+mkScheduleAction (workflowRef -> KnownWorkflow codec wfName) (WorkflowId wfId) opts = withArgs @(WorkflowArgs wf) @ScheduleAction @m codec $ \inputs -> liftIO $ do
+  searchAttrs <- searchAttributesToProto opts.searchAttributes
+  let tq = rawTaskQueue opts.taskQueue
+      executionInfo = defMessage
+        & W.workflowId .~ wfId
+        & W.workflowType .~ (defMessage & C.name .~ wfName)
+        & W.taskQueue .~ 
+          ( defMessage
+            & C.name .~ tq
+            & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
+          )
+        & W.input .~ (defMessage & C.vec'payloads .~ fmap convertToProtoPayload inputs)
+        & W.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts.timeouts.executionTimeout)
+        & W.maybe'workflowRunTimeout .~ (durationToProto <$> opts.timeouts.runTimeout)
+        & W.maybe'workflowTaskTimeout .~ (durationToProto <$> opts.timeouts.taskTimeout)
+        & W.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retry)
+        & W.memo .~ convertToProtoMemo opts.memo
+        & W.searchAttributes .~ (defMessage & C.indexedFields .~ searchAttrs)
+        & W.header .~ (defMessage & C.fields .~ fmap convertToProtoPayload opts.headers)
+  pure $ StartWorkflow executionInfo
 
 
 scheduleActionToProto :: ScheduleAction -> S.ScheduleAction

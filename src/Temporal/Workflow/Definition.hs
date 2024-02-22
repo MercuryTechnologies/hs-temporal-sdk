@@ -23,10 +23,9 @@ module Temporal.Workflow.Definition
   , SignalRef(..)
   , WorkflowSignalDefinition(..)
   -- , StartChildWorkflow(..)
-  , gatherStartChildWorkflowArgs
   , provideWorkflow
   , ProvidedWorkflow(..)
-  , GatherArgs(..)
+  , GatherArgs
   , WorkflowRef(..)
   ) where
 
@@ -75,12 +74,12 @@ data KnownWorkflow (args :: [Type]) (result :: Type) = forall codec.
         , knownWorkflowName :: Text
         }
 
-gatherStartChildWorkflowArgs 
-  :: forall args result codec. GatherArgs codec args
-  => codec 
-  -> ([IO Payload] -> Workflow (ChildWorkflowHandle result)) 
-  -> (args :->: Workflow (ChildWorkflowHandle result))
-gatherStartChildWorkflowArgs c f = gatherArgs (Proxy @args) c id f
+-- gatherStartChildWorkflowArgs 
+--   :: forall args result codec. GatherArgs codec args
+--   => codec 
+--   -> ([IO Payload] -> Workflow (ChildWorkflowHandle result)) 
+--   -> (args :->: Workflow (ChildWorkflowHandle result))
+-- gatherStartChildWorkflowArgs c f = gatherArgs (Proxy @args) c id f
 
 data ProvidedWorkflow f = ProvidedWorkflow
   { definition :: WorkflowDefinition
@@ -91,7 +90,7 @@ instance HasWorkflowDefinition (ProvidedWorkflow f) where
   workflowDefinition :: ProvidedWorkflow f -> WorkflowDefinition
   workflowDefinition = definition
 
-instance WorkflowRef (ProvidedWorkflow f) where
+instance VarArgs (ArgsOf f) => WorkflowRef (ProvidedWorkflow f) where
   type WorkflowArgs (ProvidedWorkflow f) = ArgsOf f
   type WorkflowResult (ProvidedWorkflow f) = ResultOf Workflow f
   workflowRef :: ProvidedWorkflow f -> KnownWorkflow (WorkflowArgs (ProvidedWorkflow f)) (WorkflowResult (ProvidedWorkflow f))

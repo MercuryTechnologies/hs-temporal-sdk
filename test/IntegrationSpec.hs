@@ -53,8 +53,8 @@ import Temporal.Runtime hiding (Periodicity(..))
 
 import Common
 
-unblockWorkflowSignal :: W.SignalRef '[]
-unblockWorkflowSignal = W.SignalRef "unblockWorkflow" JSON
+unblockWorkflowSignal :: W.KnownSignal '[]
+unblockWorkflowSignal = W.KnownSignal "unblockWorkflow" JSON
 
 temporalBundle [d|
   data WorkflowTests = WorkflowTests
@@ -183,8 +183,8 @@ data RegressionTask = Foo | Bar
 instance ToJSON RegressionTask
 instance FromJSON RegressionTask
 
-signalUnblockWorkflow :: W.SignalRef '[]
-signalUnblockWorkflow = W.SignalRef "unblockWorkflow" defaultCodec
+signalUnblockWorkflow :: W.KnownSignal '[]
+signalUnblockWorkflow = W.KnownSignal "unblockWorkflow" defaultCodec
 
 testImpls :: Impl WorkflowTests
 testImpls = provideCallStack $ WorkflowTests
@@ -659,8 +659,8 @@ needsClient = do
         tp <- getGlobalTracerProvider
         let testTracer = makeTracer tp "testTracer" tracerOptions
 
-        let echoQuery :: W.QueryDefinition '[Text] Text
-            echoQuery = W.QueryDefinition "testQuery" defaultCodec
+        let echoQuery :: W.KnownQuery '[Text] Text
+            echoQuery = W.KnownQuery "testQuery" defaultCodec
             workflow :: MyWorkflow ()
             workflow = do
               W.setQueryHandler echoQuery $ \msg -> pure msg
@@ -682,8 +682,8 @@ needsClient = do
 
       specify "query not found" $ \TestEnv{..} -> do
         uuid <- uuidText
-        let echoQuery :: W.QueryDefinition '[Text] Text
-            echoQuery = W.QueryDefinition "testQuery" defaultCodec
+        let echoQuery :: W.KnownQuery '[Text] Text
+            echoQuery = W.KnownQuery "testQuery" defaultCodec
             workflow :: MyWorkflow ()
             workflow = do
               W.setQueryHandler echoQuery $ \msg -> pure msg
