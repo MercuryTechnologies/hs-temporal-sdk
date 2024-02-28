@@ -153,6 +153,7 @@ module Data.EvalRecord
   , Dict(..)
     -- ** Utility functions
   , dicts
+  , requiringDict
   , mapC
   , foldMapC
   , traverseC
@@ -169,6 +170,7 @@ import qualified Data.List.NonEmpty as NE
 import Data.Kind
 import Data.Proxy
 import Data.Typeable
+import GHC.TypeLits
 import Prelude hiding
   ( zipWith
   , zipWith3
@@ -265,6 +267,7 @@ data Metadata a where
 -- help due to injectivity. This class provides that help by providing a function that provides
 -- a witness of the type of a for each field of the record.
 class WitnessFieldTypes (rec :: (Type -> Exp Type) -> Type) where
+  type FieldMetadata rec :: [(Symbol, Type)]
   typeName :: Proxy rec -> String
   default typeName :: Typeable rec => Proxy rec -> String
   typeName p = concat [tyConModule tc, ".", tyConName tc]
@@ -281,7 +284,7 @@ class WitnessFieldTypes (rec :: (Type -> Exp Type) -> Type) where
 -- 'map' 'id' = 'id'
 -- 'map' f . 'map' g = 'map' (f . g)
 -- @
-class WitnessFieldTypes rec => FunctorRec (rec :: (Type -> Exp Type) -> Type) where
+class FunctorRec (rec :: (Type -> Exp Type) -> Type) where
   map :: (forall a. Metadata a -> f @@ a -> g @@ a) -> rec f -> rec g
 
 -- | Record-types that can be traversed from left to right. Instances should

@@ -341,7 +341,7 @@ withArgs codec f = mapResult @args @(IO (V.Vector Payload)) @(m result) go (gath
 data Payload = Payload
   { payloadData :: ByteString
   , payloadMetadata :: Data.Map.Strict.Map Text ByteString
-  } deriving stock (Eq, Show)
+  } deriving stock (Show, Eq, Ord)
 
 
 base64DecodeFromText :: MonadFail m => T.Text -> m ByteString

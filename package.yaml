@@ -23,6 +23,7 @@ dependencies:
 - vector
 - async
 - unliftio
+- lens
 - lens-family
 - scientific
 - uuid
@@ -45,6 +46,7 @@ dependencies:
 - zlib
 - network
 - split
+- these
 - first-class-families
 
 default-extensions:

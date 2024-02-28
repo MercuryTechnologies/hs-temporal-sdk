@@ -128,6 +128,7 @@ module Temporal.Bundle
   , Impl
   , inWorkflowProxies
   , InWorkflowProxies
+  , InWorkflowProxyOptions
   , RefStartOptions
   , UseAsInWorkflowProxy(..)
   , provideDefaultOptions
@@ -281,6 +282,7 @@ type Defs env f = f (Def env)
 
 type CanUseAsRefs f codec = 
   ( ConstraintsRec f
+  , Rec.WitnessFieldTypes f
   , AllRec (RefFromFunction codec) f
   , ApplicativeRec f
   )
@@ -312,6 +314,7 @@ refs codec = result
 -- and the activities have an environment of type @env@.
 type CanUseAsDefs f codec env = 
   ( ConstraintsRec f
+  , Rec.WitnessFieldTypes f
   , AllRec (DefFromFunction codec env) f
   , ApplicativeRec f
   )
@@ -434,6 +437,7 @@ instance (c @@ a ~ d @@ a) => Equate c d a where
 coerceRec :: Rec.AllRec (Equate c d) rec => rec c -> rec d
 coerceRec = unsafeCoerce
 
+type InWorkflowProxyOptions = RefStartOptions <=< Ref
 
 -- | Combine a record of references with a record of default options to give a record of
 -- functions that can be used to start activities and workflows. This is just a convenience
@@ -451,7 +455,7 @@ inWorkflowProxies s = Rec.zipWithC @(Rec.ClassF (UseAsInWorkflowProxy synchronic
     convertToProxies 
       :: forall a. (UseAsInWorkflowProxy synchronicity (Ref @@ a)) 
       => Rec.Metadata a 
-      -> (RefStartOptions <=< Ref) @@ a 
+      -> InWorkflowProxyOptions @@ a 
       -> Ref @@ a 
       -> (InWorkflowProxies synchronicity <=< Ref) @@ a
     convertToProxies _ opt ref = useAsInWorkflowProxy s ref opt

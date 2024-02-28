@@ -3,6 +3,7 @@ module Temporal.Workflow.Types where
 
 import Data.Map.Strict (Map)
 import Data.Text (Text)
+import Data.These
 import Data.Word (Word32)
 import Data.Time.Clock.System (SystemTime)
 import Temporal.Common
@@ -43,7 +44,7 @@ data StartActivityOptions = StartActivityOptions
   -- An Activity Id can be used to complete the Activity asynchronously.
     activityId :: Maybe ActivityId
   , taskQueue :: Maybe TaskQueue
-  , timeout :: TimeoutType
+  , timeout :: These StartToClose ScheduleToClose
   -- | A Schedule-To-Start Timeout is the maximum amount of time that is allowed from when an Activity Task is scheduled (that is, placed in a Task Queue) to when a Worker starts (that is, picks up from the Task Queue) that Activity Task. In other words, it's a limit for how long an Activity Task can be enqueued.
   , scheduleToStartTimeout :: Maybe Duration
   -- | A Heartbeat Timeout is the maximum time between Activity Heartbeats. If this timeout is reached, the Activity Task fails and a retry occurs if a Retry Policy dictates it.
@@ -58,7 +59,7 @@ data StartActivityOptions = StartActivityOptions
   , disableEagerExecution :: Bool
   }
 
-defaultStartActivityOptions :: TimeoutType -> StartActivityOptions
+defaultStartActivityOptions :: These StartToClose ScheduleToClose -> StartActivityOptions
 defaultStartActivityOptions t = StartActivityOptions
   { activityId = Nothing
   , taskQueue = Nothing

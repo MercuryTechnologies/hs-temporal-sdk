@@ -2,6 +2,7 @@
   AllowAmbiguousTypes,
   ConstraintKinds,
   DataKinds,
+  DeriveGeneric,
   DuplicateRecordFields,
   OverloadedLabels,
   ScopedTypeVariables,
@@ -189,6 +190,7 @@ import Data.ProtoLens
 import Data.Vector (Vector)
 import qualified Data.Vector as V
 import Data.Text (Text)
+import GHC.Generics
 import Temporal.Duration
 import Temporal.Common
 import Temporal.Payload
@@ -251,7 +253,7 @@ data CreateScheduleRequest = CreateScheduleRequest
   -- ^ A unique identifier for this create request for idempotence. Typically UUIDv4.
   , searchAttributes :: !(Map Text SearchAttributeType)
   -- ^ Search attributes attached to the schedule itself.
-  }
+  } deriving stock (Show, Eq, Ord, Generic)
 
 -- | Creates a new schedule.
 createSchedule 
@@ -292,12 +294,12 @@ deleteSchedule c sId = do
 
 data ListSchedulesOptions = ListSchedulesOptions
   { maximumPageSize :: Int32 
-  }
+  } deriving stock (Show, Eq, Ord, Generic)
 
 data WorkflowExecution = WorkflowExecution
   { workflowId :: !WorkflowId
   , runId :: !RunId
-  }
+  } deriving stock (Show, Eq, Ord, Generic)
 
 workflowExecutionFromProto :: C.WorkflowExecution -> WorkflowExecution
 workflowExecutionFromProto p = WorkflowExecution
@@ -312,14 +314,14 @@ data ScheduleListInfo = ScheduleListInfo
   , paused :: !Bool
   , recentActions :: ![ScheduleActionResult]
   , futureActionTimes :: ![SystemTime]
-  }
+  } deriving stock (Show, Eq, Ord, Generic)
 
 data ScheduleListEntry = ScheduleListEntry
   { scheduleId :: !ScheduleId
   , memo :: !(Map Text Payload)
   , searchAttributes :: !(Map Text SearchAttributeType)
   , info :: !(Maybe ScheduleListInfo)
-  }
+  } deriving stock (Show, Eq, Ord, Generic)
 
 scheduleListInfoFromProto :: S.ScheduleListInfo -> ScheduleListInfo
 scheduleListInfoFromProto p = ScheduleListInfo
@@ -372,7 +374,7 @@ data ListScheduleMatchingTimesOptions = ListScheduleMatchingTimesOptions
   { scheduleId :: !ScheduleId
   , startTime :: !SystemTime
   , endTime :: !SystemTime
-  }
+  } deriving stock (Show, Eq, Ord, Generic)
 
 -- | Lists matching times within a range.
 listScheduleMatchingTimes
@@ -395,7 +397,7 @@ data ScheduleActionResult = ScheduleActionResult
   { scheduleTime :: !SystemTime
   , actualTime :: !SystemTime
   , startWorkflowResult :: !WorkflowExecution
-  }
+  } deriving stock (Show, Eq, Ord, Generic)
 
 scheduleActionResultFromProto :: S.ScheduleActionResult -> ScheduleActionResult
 scheduleActionResultFromProto p = ScheduleActionResult
@@ -427,7 +429,7 @@ data ScheduleInfo = ScheduleInfo
   -- ^ Timestamp of last update.
   , invalidScheduleError :: !Text
   -- ^ deprecated
-  }
+  } deriving stock (Show, Eq, Generic)
 
 scheduleInfoFromProto :: S.ScheduleInfo -> ScheduleInfo
 scheduleInfoFromProto p = ScheduleInfo
@@ -448,7 +450,7 @@ data Schedule = Schedule
   , action :: !ScheduleAction
   , policies :: !SchedulePolicies
   , state :: !ScheduleState
-  }
+  } deriving stock (Show, Eq, Ord, Generic)
 
 scheduleToProto :: Schedule -> S.Schedule
 scheduleToProto p = defMessage
@@ -473,7 +475,7 @@ data SchedulePolicies = SchedulePolicies
   -- ^ If true, and a workflow run fails or times out, turn on "paused".
   -- This applies after retry policies: the full chain of retries must fail to
   -- trigger a pause here.
-  }
+  } deriving stock (Show, Eq, Ord, Generic)
 
 schedulePoliciesToProto :: SchedulePolicies -> S.SchedulePolicies
 schedulePoliciesToProto p = defMessage
@@ -512,6 +514,7 @@ data OverlapPolicy
   -- Note that with this policy, last completion result and last failure will not be
   -- available since workflows are not sequential.
   | OverlapPolicyUnrecognized
+  deriving stock (Show, Eq, Ord, Generic)
 
 overlapPolicyToProto :: OverlapPolicy -> S.ScheduleOverlapPolicy
 overlapPolicyToProto p = case p of
@@ -549,7 +552,7 @@ data ScheduleState = ScheduleState
   -- immediately or backfill). Skipped actions (due to overlap policy) do not
   -- count against remaining actions.
   , remainingActions :: !Int64
-  }
+  } deriving stock (Show, Eq, Ord, Generic)
 
 scheduleStateToProto :: ScheduleState -> S.ScheduleState
 scheduleStateToProto p = defMessage
@@ -569,7 +572,7 @@ scheduleStateFromProto p = ScheduleState
 data ScheduleAction
   = StartWorkflow W.NewWorkflowExecutionInfo
   | ScheduleActionUnrecognized
-  deriving stock (Eq, Show)
+  deriving stock (Eq, Ord, Show)
 
 mkScheduleAction :: forall wf m. (MonadIO m, WorkflowRef wf) 
   => wf 
@@ -641,7 +644,7 @@ data DescribeScheduleResponse = DescribeScheduleResponse
   -- ^ This value can be passed back to UpdateSchedule to ensure that the
   -- schedule was not modified between a Describe and an Update, which could
   -- lead to lost updates and other confusion.
-  }
+  } deriving stock (Show, Eq, Generic)
 
 -- | Returns the schedule description and current state of an existing schedule.
 describeSchedule 
@@ -669,7 +672,7 @@ describeSchedule c (ScheduleId s) = liftIO $ do
 
 data TriggerImmediatelyRequest = TriggerImmediatelyRequest
   { overlapPolicy :: !OverlapPolicy
-  }
+  } deriving stock (Show, Eq, Ord, Generic)
 
 triggerImmediatelyRequestToProto :: TriggerImmediatelyRequest -> S.TriggerImmediatelyRequest
 triggerImmediatelyRequestToProto p = defMessage
@@ -687,7 +690,7 @@ data BackfillRequest = BackfillRequest
   -- ^ End of time range to evaluate schedule in.
   , overlapPolicy :: !OverlapPolicy
   -- ^ Override overlap policy for this request.
-  }
+  } deriving stock (Show, Eq, Ord, Generic)
 
 backfillRequestToProto :: BackfillRequest -> S.BackfillRequest
 backfillRequestToProto p = defMessage
@@ -702,6 +705,9 @@ backfillRequestToProto p = defMessage
 --   , overlapPolicy = overlapPolicyFromProto (p ^. S.overlapPolicy)
 --   }
 
+data PauseState = Unpause !Text | Pause !Text
+  deriving stock (Show, Eq, Ord, Generic)
+
 data SchedulePatch = SchedulePatch
   { triggerImmediately :: !(Maybe TriggerImmediatelyRequest)
   -- ^ If set, trigger one action immediately.
@@ -709,21 +715,20 @@ data SchedulePatch = SchedulePatch
   -- ^ If set, runs though the specified time period(s) and takes actions as if that time
   -- passed by right now, all at once. The overlap policy can be overridden for the
   -- scope of the backfill.
-  , pause :: !Text
-  -- ^ If set, change the state to paused and set the
-  -- notes field to the value of the string.
-  , unpause :: !Text
-  -- ^ If set, change the state to unpaused and set the
+  , pauseState :: !(Maybe PauseState)
+  -- ^ If set, change the state and set the
   -- notes field to the value of the string.
   , requestId :: !Text
-  }
+  } deriving stock (Show, Eq, Ord, Generic)
 
 schedulePatchToProto :: SchedulePatch -> S.SchedulePatch
 schedulePatchToProto p = defMessage
   & S.maybe'triggerImmediately .~ fmap triggerImmediatelyRequestToProto p.triggerImmediately
   & S.backfillRequest .~ fmap backfillRequestToProto p.backfillRequest
-  & S.pause .~ p.pause
-  & S.unpause .~ p.unpause
+  & case p.pauseState of
+    Nothing -> id
+    Just (Unpause s) -> S.unpause .~ s
+    Just (Pause s) -> S.pause .~ s
 
 -- | Makes a specific change to a schedule or triggers an immediate action.
 patchSchedule 
@@ -756,7 +761,7 @@ data UpdateScheduleRequest = UpdateScheduleRequest
   -- If missing, the schedule will be updated unconditionally.
   , requestId :: !Text
   -- ^ A unique identifier for this update request for idempotence. Typically UUIDv4.
-  }
+  } deriving stock (Show, Eq, Generic)
 
 updateSchedule 
   :: MonadIO m
@@ -881,7 +886,7 @@ data ScheduleSpec = ScheduleSpec
   -- the form of a TZif file from the time zone database. If present, this
   -- will be used instead of loading anything from the environment. You are
   -- then responsible for updating timezone_data when the definition changes.
-  }
+  } deriving stock (Eq, Ord, Show, Generic)
 
 scheduleSpecToProto :: ScheduleSpec -> S.ScheduleSpec
 scheduleSpecToProto p = defMessage
@@ -927,7 +932,7 @@ data Range = Range
   -- ^ End of range (inclusive).
   , step :: !Int32
   -- ^ Step (optional, default 1).
-  }
+  } deriving stock (Eq, Ord, Show, Generic)
 
 rangeToProto :: Range -> S.Range
 rangeToProto p = defMessage
@@ -967,7 +972,7 @@ data StructuredCalendarSpec = StructuredCalendarSpec
   -- ^ Match days of the week (0-6; 0 is Sunday).
   , comment :: Text
   -- ^ Free-form comment describing the intention of this spec.
-  }
+  } deriving stock (Eq, Ord, Show, Generic)
 
 structuredCalendarSpec :: StructuredCalendarSpec
 structuredCalendarSpec = StructuredCalendarSpec
@@ -1021,7 +1026,7 @@ data CalendarSpec = CalendarSpec
   -- ^ Expression to match days of the week. Default: *
   , comment :: !Text
   -- ^ Free-form comment describing the intention of this spec.
-  }
+  } deriving stock (Eq, Ord, Show, Generic)
 
 calendarSpec :: CalendarSpec
 calendarSpec = CalendarSpec
@@ -1075,7 +1080,7 @@ calendarSpecFromProto p = CalendarSpec
 data IntervalSpec = IntervalSpec
   { interval :: !Duration
   , phase :: !(Maybe Duration)
-  }
+  } deriving stock (Eq, Show, Ord, Generic)
 
 intervalSpecToProto :: IntervalSpec -> S.IntervalSpec
 intervalSpecToProto p = defMessage

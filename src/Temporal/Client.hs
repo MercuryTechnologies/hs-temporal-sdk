@@ -198,7 +198,6 @@ instance (Monad m, HasWorkflowClient m) => HasWorkflowClient (ConduitT i o m) wh
 instance HasWorkflowClient ((->) WorkflowClient) where
   askWorkflowClient = id
 
-
 throwEither :: (MonadIO m, Exception e) => IO (Either e a) -> m a
 throwEither = either throwIO pure <=< liftIO
 

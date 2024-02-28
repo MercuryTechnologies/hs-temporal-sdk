@@ -88,7 +88,9 @@ classic = DeclareRecordConfig
 mkEvalRecord :: DecsQ -> DecsQ
 mkEvalRecord = mkEvalRecordWith classic
 
--- | Generate a higher-kinded data declaration using a custom config
+-- | Generate a higher-kinded data declaration using a custom config.
+--
+-- Note that sum types are not currently supported.
 mkEvalRecordWith :: DeclareRecordConfig -> DecsQ -> DecsQ
 mkEvalRecordWith DeclareRecordConfig{..} decsQ = do
   decs <- decsQ
@@ -175,19 +177,20 @@ mkEvalRecordWith DeclareRecordConfig{..} decsQ = do
           allConstr = case typeChunks of
             [ps] -> mkConstraints ps
             pss -> mkConstraints $ map mkConstraints pss
-
+          fieldNamesAndTypesAsTupleList = foldr 
+            (\(n, _, t) fs -> PromotedConsT `AppT` (PromotedTupleT 2 `AppT` LitT (StrTyLit $ nameBase n) `AppT` t) `AppT` fs)
+            PromotedNilT 
+            fields
+            --strTyLit 
 
       -- let datC = pure coveredType
       decs <- [d|
         instance Rec.WitnessFieldTypes $(pure coveredType) where
+          type FieldMetadata $(pure coveredType) = $(pure fieldNamesAndTypesAsTupleList)
           typeProxies = $(fieldNamesE)
           getAccessors = $(accessorsE)
           nestedFieldNames = $(nestedFieldNamesE)
-        -- instance FieldNamesB $(pure coveredType) where
-        --   bfieldNames = $(fieldNamesE)
-        --   bnestedFieldNames = $(nestedFieldNamesE)
-        -- instance Label $(pure coveredType) where
-        --   fieldNames = bfieldNames
+
         instance Rec.FunctorRec $(pure coveredType) where
           map f $(conP nDataCon $ map varP xs)
             = $(reconE $ mapMembers 

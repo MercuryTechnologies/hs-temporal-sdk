@@ -99,7 +99,9 @@ module Temporal.Workflow
   , ProvidedWorkflow(..)
   , provideWorkflow
   , Task
-  , TimeoutType(..)
+  , StartToClose(..)
+  , ScheduleToClose(..)
+  , These(..)
   -- * Workflow monad operations
   -- $workflowBasics
 
@@ -225,6 +227,7 @@ import Data.Kind
 import Data.UUID (UUID)
 import qualified Data.UUID as UUID
 import Data.UUID.Types.Internal ( buildFromBytes )
+import Data.These (These(..))
 import Data.Vector (Vector)
 import GHC.Stack
 import qualified Data.Vector as V
@@ -343,9 +346,9 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift 
           & Command.maybe'scheduleToStartTimeout .~ fmap durationToProto activityInput.options.scheduleToStartTimeout
           & Command.maybe'heartbeatTimeout .~ fmap durationToProto activityInput.options.heartbeatTimeout
           & \msg -> case activityInput.options.timeout of
-            StartToClose t -> msg & Command.startToCloseTimeout .~ durationToProto t
-            ScheduleToClose t -> msg & Command.scheduleToCloseTimeout .~ durationToProto t
-            StartToCloseAndScheduleToClose stc stc' -> msg 
+            This (StartToClose t) -> msg & Command.startToCloseTimeout .~ durationToProto t
+            That (ScheduleToClose t) -> msg & Command.scheduleToCloseTimeout .~ durationToProto t
+            These (StartToClose stc) (ScheduleToClose stc') -> msg 
               & Command.startToCloseTimeout .~ durationToProto stc
               & Command.scheduleToCloseTimeout .~ durationToProto stc'
           & Command.doNotEagerlyExecute .~ activityInput.options.disableEagerExecution

@@ -217,7 +217,7 @@ testImpls = provideCallStack $ WorkflowTests
       $logDebug "starting activity"
       h <- W.startActivity 
         testRefs.basicActivity
-        (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
+        (W.defaultStartActivityOptions $ W.This $ W.StartToClose $ seconds 3)
       $logDebug "waiting for activity"
       W.wait (h :: W.Task Int)
   , basicActivity = pure 1
@@ -228,7 +228,7 @@ testImpls = provideCallStack $ WorkflowTests
   , runHeartbeat = do
       h <- W.startActivity 
         testRefs.heartbeatWorks
-        (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
+        (W.defaultStartActivityOptions $ W.This $ W.StartToClose $ seconds 3)
       W.wait (h :: W.Task Int) 
   , faultyActivity = do
       res <- askActivityInfo
@@ -239,10 +239,10 @@ testImpls = provideCallStack $ WorkflowTests
   , faultyWorkflow = do
       h1 <- W.startActivity 
         testRefs.faultyActivity
-        (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
+        (W.defaultStartActivityOptions $ W.This $ W.StartToClose $ seconds 1)
       h2 <- W.startActivity 
         testRefs.faultyActivity
-        (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
+        (W.defaultStartActivityOptions $ W.This $ W.StartToClose $ seconds 1)
       _ <- W.wait @(W.Task Int) h1
       W.wait @(W.Task Int) h2
   , workflowWaitConditionWorks = do
@@ -259,14 +259,14 @@ testImpls = provideCallStack $ WorkflowTests
   , nonRetryableFailureTest = do
       h <- W.startActivity 
         testRefs.nonRetryableFailureAct
-        (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
+        (W.defaultStartActivityOptions $ W.This $ W.StartToClose $ seconds 1)
       W.wait (h :: W.Task ())
   , nonRetryableFailureAct = checkpoint nonRetryableError $ do
       error "sad"
   , retryableFailureTest = do
       h <- W.startActivity 
         testRefs.retryableFailureAct
-        (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
+        (W.defaultStartActivityOptions $ W.This $ W.StartToClose $ seconds 1)
           -- { retryPolicy = Just $ defaultRetryPolicy 
           --   { nonRetryableErrorTypes = [ "ErrorCall" ]
           --   }
@@ -399,7 +399,7 @@ needsClient = do
             testFn = do
               h1 <- W.startActivity 
                 testActivityAct.reference
-                (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
+                (W.defaultStartActivityOptions $ W.This $ W.StartToClose $ seconds 1)
               W.cancel (h1 :: W.Task Int)
               W.wait h1 `Catch.catch` \(_ :: ActivityCancelled) -> pure 1
 
@@ -431,7 +431,7 @@ needsClient = do
             testFn = do
               h1 <- W.startActivity 
                 testActivityAct.reference
-                (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
+                (W.defaultStartActivityOptions $ W.This $ W.StartToClose $ seconds 1)
               W.sleep $ nanoseconds 1
               W.cancel (h1 :: W.Task Int)
               W.wait h1 `Catch.catch` \(_ :: ActivityCancelled) -> pure 1
@@ -963,7 +963,7 @@ needsClient = do
             -- Info{..} <- info
             W.executeActivity
               taskMainActivity.reference
-              ((W.defaultStartActivityOptions $ W.StartToClose infinity) { W.activityId = Just $ W.ActivityId "woejfwoefijweof"})
+              ((W.defaultStartActivityOptions $ W.This $ W.StartToClose infinity) { W.activityId = Just $ W.ActivityId "woejfwoefijweof"})
               command
 
           definitions = 

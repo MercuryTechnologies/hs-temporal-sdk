@@ -130,3 +130,6 @@ activityWorkflowClient = do
   c <- askActivityClient
   i <- askActivityInfo
   workflowClient c i.workflowNamespace mempty
+
+instance HasWorkflowClient (Activity env) where
+  askWorkflowClient = activityWorkflowClient

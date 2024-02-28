@@ -82,7 +82,7 @@ library
       TypeOperators
       UndecidableInstances
       ViewPatterns
-  ghc-options: -g -Weverything -Wno-missing-exported-signatures -Wno-missing-export-lists -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -Wno-unused-packages -Wno-operator-whitespace -fdiagnostics-color=always -Wno-missing-kind-signatures -Wno-implicit-lift -Wno-implicit-prelude -fwarn-tabs +RTS -A128m -n2m -RTS -fdefer-diagnostics -Wno-redundant-constraints
+  ghc-options: -g -Weverything -Wno-missing-exported-signatures -Wno-missing-export-lists -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -Wno-unused-packages -Wno-operator-whitespace -fdiagnostics-color=always -Wno-missing-kind-signatures -Wno-implicit-lift -Wno-implicit-prelude -fwarn-tabs +RTS -A128m -n2m -RTS -fdefer-diagnostics -fprint-explicit-kinds -Wno-redundant-constraints
   build-depends:
       aeson
     , annotated-exception
@@ -98,6 +98,7 @@ library
     , hashable
     , hs-opentelemetry-api
     , hs-opentelemetry-propagator-w3c
+    , lens
     , lens-family
     , monad-logger
     , mtl
@@ -114,6 +115,7 @@ library
     , temporal-api-protos
     , temporal-sdk-core
     , text
+    , these
     , time
     , transformers
     , unliftio
@@ -160,7 +162,7 @@ test-suite temporal-sdk-tests
       TypeOperators
       UndecidableInstances
       ViewPatterns
-  ghc-options: -g -Weverything -Wno-missing-exported-signatures -Wno-missing-export-lists -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -Wno-unused-packages -Wno-operator-whitespace -fdiagnostics-color=always -Wno-missing-kind-signatures -Wno-implicit-lift -Wno-implicit-prelude -fwarn-tabs +RTS -A128m -n2m -RTS -fdefer-diagnostics -Wno-redundant-constraints -g -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -g -Weverything -Wno-missing-exported-signatures -Wno-missing-export-lists -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -Wno-unused-packages -Wno-operator-whitespace -fdiagnostics-color=always -Wno-missing-kind-signatures -Wno-implicit-lift -Wno-implicit-prelude -fwarn-tabs +RTS -A128m -n2m -RTS -fdefer-diagnostics -fprint-explicit-kinds -Wno-redundant-constraints -g -threaded -rtsopts -with-rtsopts=-N
   build-tool-depends:
       hspec-discover:hspec-discover
   build-depends:
@@ -180,6 +182,7 @@ test-suite temporal-sdk-tests
     , hs-opentelemetry-propagator-w3c
     , hs-opentelemetry-sdk
     , hspec
+    , lens
     , lens-family
     , monad-logger
     , mtl
@@ -198,6 +201,7 @@ test-suite temporal-sdk-tests
     , temporal-sdk
     , temporal-sdk-core
     , text
+    , these
     , time
     , transformers
     , unliftio
