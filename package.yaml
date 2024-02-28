@@ -23,7 +23,6 @@ dependencies:
 - vector
 - async
 - unliftio
-- lens
 - lens-family
 - scientific
 - uuid

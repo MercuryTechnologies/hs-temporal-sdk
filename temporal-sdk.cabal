@@ -98,7 +98,6 @@ library
     , hashable
     , hs-opentelemetry-api
     , hs-opentelemetry-propagator-w3c
-    , lens
     , lens-family
     , monad-logger
     , mtl
@@ -182,7 +181,6 @@ test-suite temporal-sdk-tests
     , hs-opentelemetry-propagator-w3c
     , hs-opentelemetry-sdk
     , hspec
-    , lens
     , lens-family
     , monad-logger
     , mtl
