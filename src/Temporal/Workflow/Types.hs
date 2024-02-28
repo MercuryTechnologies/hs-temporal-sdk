@@ -59,11 +59,32 @@ data StartActivityOptions = StartActivityOptions
   , disableEagerExecution :: Bool
   }
 
-defaultStartActivityOptions :: These StartToClose ScheduleToClose -> StartActivityOptions
+class StartActivityTimeoutOption a where
+  toStartActivityTimeoutOption :: a -> These StartToClose ScheduleToClose
+
+instance StartActivityTimeoutOption (These StartToClose ScheduleToClose) where
+  toStartActivityTimeoutOption = id
+
+instance StartActivityTimeoutOption StartToClose where
+  toStartActivityTimeoutOption = This
+
+instance StartActivityTimeoutOption ScheduleToClose where
+  toStartActivityTimeoutOption = That
+
+instance StartActivityTimeoutOption (StartToClose, ScheduleToClose) where
+  toStartActivityTimeoutOption (s, sc) = These s sc
+
+instance StartActivityTimeoutOption (ScheduleToClose, StartToClose) where
+  toStartActivityTimeoutOption (sc, s) = These s sc
+
+instance StartActivityTimeoutOption (Either StartToClose ScheduleToClose) where
+  toStartActivityTimeoutOption = either This That
+
+defaultStartActivityOptions :: StartActivityTimeoutOption timeout => timeout -> StartActivityOptions
 defaultStartActivityOptions t = StartActivityOptions
   { activityId = Nothing
   , taskQueue = Nothing
-  , timeout = t
+  , timeout = toStartActivityTimeoutOption t
   , scheduleToStartTimeout = Nothing
   , heartbeatTimeout = Nothing
   , retryPolicy = Nothing

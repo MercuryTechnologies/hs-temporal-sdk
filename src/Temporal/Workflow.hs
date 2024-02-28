@@ -111,6 +111,7 @@ module Temporal.Workflow
   , KnownActivity(..)
   , StartActivityOptions(..) -- TODO fields conflict
   , ActivityCancellationType(..)
+  , StartActivityTimeoutOption(..)
   , defaultStartActivityOptions
   , startActivity
   , executeActivity
