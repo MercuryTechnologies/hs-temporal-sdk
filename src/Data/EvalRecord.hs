@@ -163,6 +163,12 @@ module Data.EvalRecord
   , zipWith4C
   , pureC
   , Data.EvalRecord.mempty
+    -- * Partial record mapping
+  , MapMatches
+  , ValueOnMatch
+  , ApplyOnMatch
+  , mapMatching
+  , applyPred
     -- * Reexports
   , module Fcf
   ) where
@@ -170,7 +176,6 @@ import qualified Data.List.NonEmpty as NE
 import Data.Kind
 import Data.Proxy
 import Data.Typeable
-import GHC.TypeLits
 import Prelude hiding
   ( zipWith
   , zipWith3
@@ -267,7 +272,6 @@ data Metadata a where
 -- help due to injectivity. This class provides that help by providing a function that provides
 -- a witness of the type of a for each field of the record.
 class WitnessFieldTypes (rec :: (Type -> Exp Type) -> Type) where
-  type FieldMetadata rec :: [(Symbol, Type)]
   typeName :: Proxy rec -> String
   default typeName :: Typeable rec => Proxy rec -> String
   typeName p = concat [tyConModule tc, ".", tyConName tc]
@@ -741,3 +745,45 @@ instance (ConstraintsRec b, ApplicativeRec b, AllRecF Semigroup f b) => Semigrou
 instance (ConstraintsRec b, ApplicativeRec b, AllRecF Semigroup f b, AllRecF Monoid f b) => Monoid (EvalRecord b f) where
   mempty  = Data.EvalRecord.mempty
   mappend = (<>)
+
+data MapMatches pred f :: Type -> Exp Type
+
+type instance Eval (MapMatches pred f a) = ValueOnMatch (pred @@ a) (f @@ a) a
+
+type family ValueOnMatch cond b a where
+  ValueOnMatch 'True b _ = b
+  ValueOnMatch 'False _ a = a
+
+class ApplyOnMatch (cond :: Bool) where
+  applyOnMatch :: Proxy cond -> (a -> b) -> a -> ValueOnMatch cond b a
+
+instance ApplyOnMatch 'True where
+  applyOnMatch _ f x = f x
+
+instance ApplyOnMatch 'False where
+  applyOnMatch _ _ x = x
+
+mapMatching 
+  :: forall (pred :: Type -> Exp Bool) (f :: Type -> Exp Type) (g :: Type -> Exp Type) rec
+  .  (FunctorRec rec, ConstraintsRec rec, AllRecF ApplyOnMatch (pred <=< f) rec)
+  => Proxy (pred :: Type -> Exp Bool) 
+  -> (forall a. Metadata a -> f @@ a -> (g <=< f) @@ a)
+  -> rec f 
+  -> rec (MapMatches pred g <=< f)
+mapMatching p f record = Data.EvalRecord.mapC @(ClassF ApplyOnMatch (pred <=< f))
+  applyIfRelevant
+  record
+  where
+    applyIfRelevant :: forall a. ApplyOnMatch ((pred <=< f) @@ a) => Metadata a -> f @@ a -> (MapMatches pred g <=< f) @@ a
+    applyIfRelevant meta x = 
+      let 
+        predAppProxy :: Proxy (pred @@ (f @@ a))
+        predAppProxy = applyPred p x
+
+        mapFn :: f @@ a -> (g <=< f) @@ a
+        mapFn = f meta
+      in 
+        applyOnMatch predAppProxy mapFn x
+
+applyPred :: Proxy pred -> a -> Proxy (pred @@ a)
+applyPred _ _ = Proxy

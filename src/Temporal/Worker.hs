@@ -47,6 +47,7 @@ module Temporal.Worker
   , HasActivityDefinition(..)
   , addErrorConverter
   , setLogger
+  , setTracerProvider
   , setNamespace
   , setTaskQueue
   , setBuildId
@@ -69,11 +70,13 @@ module Temporal.Worker
   , WorkflowId(..)
   ) where
 import UnliftIO
-import Control.Monad
 import Control.Monad.Logger
+import Control.Monad.Reader
 import Control.Monad.State
 import Data.HashMap.Strict (HashMap)
-
+import OpenTelemetry.Trace.Core hiding (inSpan)
+import qualified OpenTelemetry.Trace.Core as OT
+import OpenTelemetry.Trace.Monad
 import Temporal.Common
 import Temporal.Core.Client
 import qualified Temporal.Core.Worker as Core
@@ -83,14 +86,14 @@ import qualified Temporal.Activity.Worker as Activity
 import Temporal.Worker.Types
 import Temporal.Workflow.Definition
 import qualified Temporal.Workflow.Worker as Workflow
-
 import Data.Text (Text)
 import Data.Word
 import qualified Data.HashMap.Strict as HashMap
-
 import Temporal.Interceptor
 import Temporal.Core.Worker (InactiveForReplay)
 import Temporal.Runtime
+import RequireCallStack
+import System.IO.Unsafe
 
 newtype ConfigM actEnv a = ConfigM { unConfigM :: State (WorkerConfig actEnv) a }
   deriving newtype (Functor, Applicative, Monad)
@@ -104,6 +107,11 @@ instance Monoid a => Monoid (ConfigM actEnv a) where
 ------------------------------------------------------------------------------------
 -- Configuration
 
+-- TODO, it would be nice to expose an inert Tracer Provider in hs-opentelemetry-api
+inertTracerProvider :: TracerProvider
+inertTracerProvider = unsafePerformIO $ createTracerProvider [] emptyTracerProviderOptions
+{-# NOINLINE inertTracerProvider #-}
+
 -- | Turn a configuration block into the final configuration.
 configure :: ToDefinitions actEnv defs => actEnv -> defs -> ConfigM actEnv () -> WorkerConfig actEnv
 configure actEnv defs = flip execState defaultConfig . unConfigM
@@ -114,6 +122,7 @@ configure actEnv defs = flip execState defaultConfig . unConfigM
       , interceptorConfig = mempty
       , applicationErrorConverters = standardApplicationFailureHandlers
       , logger = \_ _ _ _ -> pure ()
+      , tracerProvider = inertTracerProvider
       , ..
       }
 
@@ -319,6 +328,12 @@ setLogger f = ConfigM $ modify' $ \conf -> conf
   { logger = f
   }
 
+-- | Set the tracer provider for the worker. This is used to trace the worker's internal activity.
+setTracerProvider :: TracerProvider -> ConfigM actEnv ()
+setTracerProvider tp = ConfigM $ modify' $ \conf -> conf
+  { tracerProvider = tp
+  }
+
 ------------------------------------------------------------------------------------
 
 -- | A Worker is responsible for polling a Task Queue, dequeueing a Task, executing 
@@ -340,10 +355,11 @@ data Worker = forall ty. Worker
   , workerWorkflowLoop :: Async ()
   , workerActivityLoop :: InactiveForReplay ty (Async ())
   , workerCore :: Core.Worker ty
+  , workerTracer :: Tracer
   }
 
 startReplayWorker :: (MonadUnliftIO m) => Runtime -> WorkerConfig actEnv -> m (Temporal.Worker.Worker, Core.HistoryPusher)
-startReplayWorker rt conf = flip runLoggingT conf.logger $ do
+startReplayWorker rt conf = provideCallStack $ runWorkerContext conf $ do
   $(logDebug) "Starting worker"
   (workerCore, replay) <- either throwIO pure =<< liftIO (Core.newReplayWorker rt conf.coreConfig)
   $(logDebug) "Instantiated core"
@@ -357,18 +373,33 @@ startReplayWorker rt conf = flip runLoggingT conf.logger $ do
       workerErrorConverters = conf.applicationErrorConverters
       workflowWorker = Workflow.WorkflowWorker{..}
       workerActivityLoop = error "Cannot use activity worker in replay worker"
-  let workerType = Core.SReplay
+      workerType = Core.SReplay
+      workerTracer = makeTracer conf.tracerProvider (InstrumentationLibrary "hs-temporal-sdk" "0.0.1.0") tracerOptions
   workerWorkflowLoop <- async $ do
     $(logDebug) "Starting workflow worker loop"
     Workflow.execute workflowWorker
     $(logDebug) "Exiting workflow worker loop"
   pure (Temporal.Worker.Worker{..}, replay)
 
+traced :: WorkerConfig env -> ReaderT Tracer m a -> m a
+traced conf m = runReaderT m $ makeTracer 
+  conf.tracerProvider 
+  (InstrumentationLibrary "hs-temporal-sdk" "0.0.1.0") 
+  tracerOptions
+
+runWorkerContext :: WorkerConfig conf -> WorkerContextM m a -> m a
+runWorkerContext conf (WorkerContextM m) = flip runLoggingT conf.logger $ traced conf m
+
+newtype WorkerContextM m a = WorkerContextM (ReaderT Tracer (LoggingT m) a)
+  deriving newtype (Functor, Applicative, Monad, MonadIO, MonadUnliftIO, MonadLogger, MonadLoggerIO)
+
+instance Monad m => MonadTracer (WorkerContextM m) where
+  getTracer = WorkerContextM ask
+
 startWorker :: (MonadUnliftIO m) => Client -> WorkerConfig actEnv -> m Temporal.Worker.Worker
-startWorker client conf = flip runLoggingT conf.logger $ do
-  $(logDebug) "Starting worker"
-  workerCore <- either throwIO pure =<< liftIO (Core.newWorker client conf.coreConfig)
-  $(logDebug) "Instantiated core"
+startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "startWorker" defaultSpanArguments $ do
+  workerCore <- inSpan "Core.newWorker" defaultSpanArguments 
+    (either throwIO pure =<< liftIO (Core.newWorker client conf.coreConfig))
   runningWorkflows <- newTVarIO mempty
   runningActivities <- newTVarIO mempty
   let errorConverters = mkAnnotatedHandlers conf.applicationErrorConverters
@@ -379,7 +410,6 @@ startWorker client conf = flip runLoggingT conf.logger $ do
       workerDeadlockTimeout = conf.deadlockTimeout
       workerErrorConverters = errorConverters
       workflowWorker = Workflow.WorkflowWorker{..}
-
       initialEnv = conf.actEnv
       definitions = conf.actDefs
       activityInboundInterceptors = conf.interceptorConfig.activityInboundInterceptors
@@ -388,6 +418,7 @@ startWorker client conf = flip runLoggingT conf.logger $ do
       activityErrorConverters = errorConverters
       activityWorker = Activity.ActivityWorker{..}
       workerClient = client
+      workerTracer = makeTracer conf.tracerProvider (InstrumentationLibrary "hs-temporal-sdk" "0.0.1.0") tracerOptions
   let workerType = Core.SReal
   -- logs <- liftIO $ fetchLogs globalRuntime
   -- forM_ logs $ \l -> case l.level of
@@ -432,12 +463,12 @@ waitWorker (Temporal.Worker.Worker{workerType, workerWorkflowLoop, workerActivit
 -- | Shut down a worker. This will initiate a graceful shutdown of the worker, waiting for all
 -- in-flight tasks to complete before finalizing the shutdown.
 shutdown :: (MonadUnliftIO m) => Temporal.Worker.Worker -> m ()
-shutdown worker@Temporal.Worker.Worker{workerCore} = mask $ \restore -> do
-  liftIO $ Core.initiateShutdown workerCore
+shutdown worker@Temporal.Worker.Worker{workerCore, workerTracer} = OT.inSpan workerTracer "shutdown" defaultSpanArguments $ mask $ \restore -> do
+  OT.inSpan workerTracer "initiateShutdown" defaultSpanArguments $ liftIO $ Core.initiateShutdown workerCore
 
-  restore $ waitWorker worker
+  OT.inSpan workerTracer "waitWorker" defaultSpanArguments $ restore $ waitWorker worker
 
-  err' <- liftIO $ Core.finalizeShutdown workerCore
+  err' <- OT.inSpan workerTracer "finalizeShutdown" defaultSpanArguments $ liftIO $ Core.finalizeShutdown workerCore
   case err' of
     Left err -> throwIO err
     Right () -> pure ()

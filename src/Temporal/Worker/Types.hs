@@ -12,6 +12,7 @@ import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.HashMap.Strict (HashMap)
 import Data.Text (Text)
+import OpenTelemetry.Trace.Core
 import Temporal.Common
 import qualified Temporal.Core.Worker as Core
 import UnliftIO hiding (race)
@@ -23,7 +24,6 @@ import Temporal.Activity.Worker (ActivityWorker)
 import Temporal.Exception (ApplicationFailureHandler)
 import Temporal.Interceptor
 import Temporal.Core.Worker (InactiveForReplay)
-import Temporal.Runtime (Runtime)
 
 data WorkerConfig activityEnv = WorkerConfig
   { deadlockTimeout :: Maybe Int
@@ -33,6 +33,9 @@ data WorkerConfig activityEnv = WorkerConfig
   , coreConfig :: Core.WorkerConfig
   , interceptorConfig :: Interceptors
   , applicationErrorConverters :: [ApplicationFailureHandler]
+  -- | This TracerProvider should only need to be supplied if you want to observe
+  -- Worker-internal traces for debugging purposes.
+  , tracerProvider :: TracerProvider
   , logger :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
   }
 

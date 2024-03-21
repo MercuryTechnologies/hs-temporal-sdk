@@ -177,16 +177,16 @@ mkEvalRecordWith DeclareRecordConfig{..} decsQ = do
           allConstr = case typeChunks of
             [ps] -> mkConstraints ps
             pss -> mkConstraints $ map mkConstraints pss
-          fieldNamesAndTypesAsTupleList = foldr 
-            (\(n, _, t) fs -> PromotedConsT `AppT` (PromotedTupleT 2 `AppT` LitT (StrTyLit $ nameBase n) `AppT` t) `AppT` fs)
-            PromotedNilT 
-            fields
-            --strTyLit 
+          -- fieldNamesAndTypesAsTupleList = foldr 
+          --   (\(n, _, t) fs -> PromotedConsT `AppT` (PromotedTupleT 2 `AppT` LitT (StrTyLit $ nameBase n) `AppT` t) `AppT` fs)
+          --   PromotedNilT 
+          --   fields
+          --   --strTyLit 
 
       -- let datC = pure coveredType
       decs <- [d|
         instance Rec.WitnessFieldTypes $(pure coveredType) where
-          type FieldMetadata $(pure coveredType) = $(pure fieldNamesAndTypesAsTupleList)
+          -- type FieldMetadata $(pure coveredType) = $(pure fieldNamesAndTypesAsTupleList)
           typeProxies = $(fieldNamesE)
           getAccessors = $(accessorsE)
           nestedFieldNames = $(nestedFieldNamesE)
@@ -258,7 +258,6 @@ mkEvalRecordWith DeclareRecordConfig{..} decsQ = do
         |]
       -- strip deriving Generic
       let classes' = map (\(DerivClause strat cs) -> fmap (DerivClause strat) $ partition (== ConT ''Generic) cs) classes
-
 
       specifyStockStrategy <- isExtEnabled DerivingStrategies
       -- Redefine instances of the bare type with the original strategy

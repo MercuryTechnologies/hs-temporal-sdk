@@ -191,6 +191,7 @@ import Data.Vector (Vector)
 import qualified Data.Vector as V
 import Data.Text (Text)
 import GHC.Generics
+import GHC.Records
 import Temporal.Duration
 import Temporal.Common
 import Temporal.Payload
@@ -227,18 +228,19 @@ throwEither m = do
 ---------------------------------------------------------------------------------
 -- ScheduleClient
 
-mkScheduleClient :: Client -> Namespace -> Text -> ScheduleClient
-mkScheduleClient c ns i = ScheduleClient
+mkScheduleClient :: Client -> Namespace -> ScheduleClient
+mkScheduleClient c ns = ScheduleClient
   { scheduleClient = c
   , scheduleClientNamespace = ns
-  , scheduleClientIdentity = i
   }
 
 data ScheduleClient = ScheduleClient 
   { scheduleClient :: Client
   , scheduleClientNamespace :: Namespace
-  , scheduleClientIdentity :: Text
   }
+
+instance HasField "identity" ScheduleClient Text where
+  getField c = (clientConfig c.scheduleClient).identity
 
 data CreateScheduleRequest = CreateScheduleRequest
   { scheduleId :: !ScheduleId
@@ -269,6 +271,7 @@ createSchedule s opts = liftIO $ do
       & WF.namespace .~ rawNamespace s.scheduleClientNamespace
       & WF.scheduleId .~ rawScheduleId opts.scheduleId
       & WF.schedule .~ scheduleToProto opts.schedule
+      & WF.identity .~ s.identity
       & WF.maybe'initialPatch .~ fmap schedulePatchToProto opts.initialPatch
       & WF.memo .~ convertToProtoMemo opts.memo
       & WF.requestId .~ opts.requestId
@@ -287,7 +290,7 @@ deleteSchedule c sId = do
     c.scheduleClient 
     (defMessage 
       & WF.namespace .~ rawNamespace c.scheduleClientNamespace
-      & WF.identity .~ c.scheduleClientIdentity
+      & WF.identity .~ c.identity
       & WF.scheduleId .~ rawScheduleId sId
     )
   pure ()
@@ -580,7 +583,7 @@ mkScheduleAction :: forall wf m. (MonadIO m, WorkflowRef wf)
   -- ^ Unlike other uses of WorkflowId, this will be used as a prefix for the
   -- actual workflow id, which will be unique.
   -> StartWorkflowOptions 
-  -- ^ All fields of WorkflowStartOptions are valid except for the workflow id reuse policy and cron string.
+  -- ^ All fields of 'StartWorkflowOptions' are valid except for the workflow id reuse policy and cron string.
   --
   -- The workflow id will generally have a timestamp appended for uniqueness.
   -> (WorkflowArgs wf :->: m ScheduleAction)
@@ -744,7 +747,7 @@ patchSchedule c (ScheduleId s) p = liftIO $ do
       & WF.namespace .~ rawNamespace c.scheduleClientNamespace
       & WF.scheduleId .~ s
       & WF.patch .~ schedulePatchToProto p
-      & WF.identity .~ c.scheduleClientIdentity
+      & WF.identity .~ c.identity
       -- TODO
       & WF.requestId .~ p.requestId
     )
@@ -777,7 +780,7 @@ updateSchedule c (ScheduleId s) u = liftIO $ do
       & WF.scheduleId .~ s
       & WF.schedule .~ scheduleToProto u.schedule
       & WF.conflictToken .~ fromMaybe "" u.conflictToken
-      & WF.identity .~ c.scheduleClientIdentity
+      & WF.identity .~ c.identity
       & WF.requestId .~ u.requestId
     )
   pure ()

@@ -43,7 +43,7 @@ data StartWorkflowOptions = StartWorkflowOptions
   --
   -- >
   -- > Temporal.Client.start scheduledWorkflow
-  -- >   (Temporal.Client.workflowStartOptions "my-workflow" "my-task-queue") { cronSchedule = Just "* * * * *" } -- start every minute
+  -- >   (Temporal.Client.startWorkflowOptions "my-workflow" "my-task-queue") { cronSchedule = Just "* * * * *" } -- start every minute
   -- >
   --
   -- Note that Temporal offers more advanced scheduling support via 'Temporal.Client.Schedule', so
@@ -72,14 +72,14 @@ data StartWorkflowOptions = StartWorkflowOptions
   , workflowStartDelay :: Maybe Duration
   }
 
--- | Smart constructor for 'WorkflowStartOptions'.
+-- | Smart constructor for 'StartWorkflowOptions'.
 --
 -- At a minimum, a 'Workflow' execution requires a 'WorkflowId' and a 'TaskQueue'.
 --
 -- It is recommend to specify 'WorkflowId' in most cases, as it is used to uniquely identify a 'Workflow' execution,
 -- but if one is not specified then a random UUID will be generated.
-workflowStartOptions :: TaskQueue -> StartWorkflowOptions
-workflowStartOptions tq = StartWorkflowOptions
+startWorkflowOptions :: TaskQueue -> StartWorkflowOptions
+startWorkflowOptions tq = StartWorkflowOptions
   { taskQueue = tq
   , followRuns = True
   , workflowIdReusePolicy = Nothing

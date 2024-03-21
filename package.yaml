@@ -99,7 +99,7 @@ ghc-options:
 - -fwarn-tabs
 - +RTS -A128m -n2m -RTS
 - -fdefer-diagnostics
-- -fprint-explicit-kinds
+# - -fprint-explicit-kinds
 - -Wno-redundant-constraints
 # - -Werror
 library:

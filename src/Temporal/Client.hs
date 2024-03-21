@@ -26,7 +26,7 @@ module Temporal.Client
   -- * Running Workflows
   , StartWorkflowOptions(..)
   , TimeoutOptions(..)
-  , workflowStartOptions
+  , startWorkflowOptions
   , Temporal.Client.start
   , startFromPayloads
   , WorkflowHandle

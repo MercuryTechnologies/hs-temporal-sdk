@@ -307,7 +307,7 @@ needsClient = do
       let conf = configure () testConf $ do
             baseConf
       withWorker conf $ do
-        let opts = (C.workflowStartOptions taskQueue)
+        let opts = (C.startWorkflowOptions taskQueue)
               { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
               , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
@@ -322,7 +322,7 @@ needsClient = do
         let conf = configure () testConf $ do
               baseConf
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue )
+          let opts = (C.startWorkflowOptions taskQueue )
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
           useClient (C.execute testRefs.raceBlockOnLeftSideWorks "blockLeftWorks" opts)
@@ -332,7 +332,7 @@ needsClient = do
         let conf = configure () testConf $ do
               baseConf
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
           useClient (C.execute testRefs.raceBlockOnBothSidesWorks "blockBothWorks" opts)
@@ -342,7 +342,7 @@ needsClient = do
         let conf = configure () testConf $ do
               baseConf
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
           useClient (C.execute testRefs.raceThrowsRhsErrorWhenLhsBlocked "eitherSideThrows" opts)
@@ -352,7 +352,7 @@ needsClient = do
         let conf = configure () testConf $ do
               baseConf
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
           useClient (C.execute testRefs.raceIgnoresRhsErrorOnLhsSuccess "lhsError" opts)
@@ -363,7 +363,7 @@ needsClient = do
               baseConf
               
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
           useClient (C.execute testRefs.basicActivityWf "basicActivity" opts)
@@ -372,7 +372,7 @@ needsClient = do
         let conf = configure () testConf $ do
               baseConf
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
           useClient (C.execute testRefs.runHeartbeat "heartbeatWorks" opts)
@@ -381,7 +381,7 @@ needsClient = do
         let conf = configure () testConf $ do
               baseConf
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
           useClient (C.execute testRefs.faultyWorkflow "faultyWorkflow" opts)
@@ -407,7 +407,7 @@ needsClient = do
             conf = configure () (wf, testActivityAct) $ do
               baseConf
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
@@ -440,7 +440,7 @@ needsClient = do
             conf = configure () (wf, testActivityAct) $ do
               baseConf
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
@@ -463,7 +463,7 @@ needsClient = do
               baseConf
               
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
           useClient (C.execute wf.reference "argOrderingIsCorrect" opts 1 "two" False)
@@ -478,7 +478,7 @@ needsClient = do
       --         addWorkflow wf
       --   withWorker conf $ do
       --     wfId <- uuidText
-      --     let opts = C.workflowStartOptions
+      --     let opts = C.startWorkflowOptions
       --           (W.WorkflowId wfId)
       --           taskQueue
       --     C.execute wf.reference opts "hello there."
@@ -500,7 +500,7 @@ needsClient = do
   --             baseConf
   --       withWorker conf $ do
   --         wfId <- uuidText
-  --         let opts = C.workflowStartOptions
+  --         let opts = C.startWorkflowOptions
   --               (W.WorkflowId wfId)
   --               taskQueue
   --         -- pending
@@ -532,7 +532,7 @@ needsClient = do
             conf = configure () wf $ do
               baseConf
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
           (t1, t2, t3) <- useClient (C.execute wf.reference "deterministicTime" opts)
@@ -568,7 +568,7 @@ needsClient = do
               baseConf
               
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 5
@@ -593,7 +593,7 @@ needsClient = do
               baseConf
               
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
           useClient (C.execute parentWf.reference (W.WorkflowId parentId) opts)
@@ -618,7 +618,7 @@ needsClient = do
               baseConf
               
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
           useClient (C.execute parentWf.reference (W.WorkflowId parentId) opts)
@@ -642,7 +642,7 @@ needsClient = do
             conf = configure () (childWf, parentWf) $ do
               baseConf
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
           useClient (C.execute parentWf.reference (W.WorkflowId parentId) opts)
@@ -671,7 +671,7 @@ needsClient = do
               
         inSpan testTracer "Query.works" defaultSpanArguments $ do
           withWorker conf $ do
-            let opts = (C.workflowStartOptions taskQueue)
+            let opts = (C.startWorkflowOptions taskQueue)
                   { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                   }
             h <- useClient (C.start wf.reference "queryWorks" opts)
@@ -692,7 +692,7 @@ needsClient = do
             conf = configure () wf $ do
               baseConf
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
           h <- useClient (C.start wf.reference (WorkflowId uuid) opts)
@@ -705,7 +705,7 @@ needsClient = do
         let conf = configure () testConf $ do
               baseConf
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
           wfH <- useClient (C.start testRefs.workflowWaitConditionWorks "signalHandlerUnblock" opts)
@@ -718,7 +718,7 @@ needsClient = do
               baseConf
               
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
           useClient (C.execute testRefs.simpleWait "simpleWait" opts) `shouldReturn` ()
@@ -734,7 +734,7 @@ needsClient = do
             conf = configure () wf $ do
               baseConf
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
           useClient (C.execute wf.reference "sleep" opts)
@@ -755,7 +755,7 @@ needsClient = do
               baseConf
               
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
           useClient (C.execute wf.reference "timer" opts)
@@ -772,7 +772,7 @@ needsClient = do
             conf = configure () wf $ do
               baseConf
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
@@ -796,7 +796,7 @@ needsClient = do
               baseConf
               
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
@@ -816,7 +816,7 @@ needsClient = do
             conf = configure () wf $ do
               baseConf
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
@@ -836,7 +836,7 @@ needsClient = do
               baseConf
               
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
@@ -861,7 +861,7 @@ needsClient = do
             baseConf
             
       withWorker conf $ do
-        let opts = (C.workflowStartOptions taskQueue)
+        let opts = (C.startWorkflowOptions taskQueue)
               { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
               , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
@@ -891,7 +891,7 @@ needsClient = do
               [ ("attr1", toSearchAttribute True)
               , ("attr2", toSearchAttribute (4 :: Int64))
               ]
-            opts = (C.workflowStartOptions taskQueue)
+            opts = (C.startWorkflowOptions taskQueue)
               { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
               , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
@@ -917,7 +917,7 @@ needsClient = do
             baseConf
             
       withWorker conf $ do
-        let opts = (C.workflowStartOptions taskQueue)
+        let opts = (C.startWorkflowOptions taskQueue)
               { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
               , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
@@ -941,7 +941,7 @@ needsClient = do
       let conf = configure () testConf $ do
             baseConf
       withWorker conf $ do
-        let opts = (C.workflowStartOptions taskQueue)
+        let opts = (C.startWorkflowOptions taskQueue)
               { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
               , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
@@ -976,7 +976,7 @@ needsClient = do
 
 
       withWorker conf $ do
-        let opts = (C.workflowStartOptions taskQueue)
+        let opts = (C.startWorkflowOptions taskQueue)
               { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
               , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Nothing
@@ -995,7 +995,7 @@ needsClient = do
       it "works" $ \TestEnv{..} -> do
         let conf = configure () testConf baseConf
         withWorker conf $ do
-          let opts = (C.workflowStartOptions taskQueue)
+          let opts = (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 , C.timeouts = C.TimeoutOptions
                     { C.runTimeout = Just $ seconds 4
@@ -1019,7 +1019,7 @@ needsClient = do
             baseConf
             
       withWorker conf $ do
-        let opts = (C.workflowStartOptions taskQueue)
+        let opts = (C.startWorkflowOptions taskQueue)
               { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
               , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4
@@ -1035,7 +1035,7 @@ needsClient = do
             baseConf
             
       withWorker conf $ do
-        let opts = (C.workflowStartOptions taskQueue)
+        let opts = (C.startWorkflowOptions taskQueue)
               { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
               , C.timeouts = C.TimeoutOptions
                   { C.runTimeout = Just $ seconds 4

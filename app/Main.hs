@@ -142,7 +142,7 @@ runClient c taskname id' = do
   resp <- C.start 
     workflowClient
     helloWf.reference
-    (C.workflowStartOptions (WorkflowId $ T.pack id') queue)
+    (C.startWorkflowOptions (WorkflowId $ T.pack id') queue)
     "Ian"
   C.awaitWorkflowResult resp >>= print
   pure ()

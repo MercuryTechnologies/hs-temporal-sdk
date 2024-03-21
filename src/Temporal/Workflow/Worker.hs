@@ -21,6 +21,9 @@ import Temporal.WorkflowInstance
 import Temporal.SearchAttributes.Internal
 import UnliftIO
 import Lens.Family2
+import OpenTelemetry.Context.ThreadLocal
+import OpenTelemetry.Trace.Core hiding (inSpan, inSpan')
+import OpenTelemetry.Trace.Monad
 import Data.ProtoLens
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Message
 import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as CommonProto
@@ -28,9 +31,9 @@ import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
+import RequireCallStack
 import Temporal.Duration (durationFromProto)
 import Temporal.Core.Worker (InactiveForReplay)
-import Temporal.Runtime
 
 data WorkflowWorker = forall ty. WorkflowWorker
   { workerWorkflowFunctions :: HashMap Text WorkflowDefinition
@@ -63,7 +66,15 @@ upsertWorkflowInstance r inst = do
         writeTVar worker.runningWorkflows workflows
         pure existingInstance
 
-
+-- | Execute an action repeatedly as long as it returns True.
+whileM_ :: (Monad m) => m Bool -> m ()
+whileM_ p = go
+  where 
+    go = do
+      x <- p
+      if x
+      then go
+      else pure ()
 
 -- | Execute this worker until poller shutdown or failure. If there is a failure, this may
 -- need to be called a second time after shutdown initiated to ensure workflow activations
@@ -71,14 +82,12 @@ upsertWorkflowInstance r inst = do
 --
 -- The Async handle only completes successfully on poller shutdown.
 
-execute :: (MonadLoggerIO m, MonadUnliftIO m) => WorkflowWorker -> m ()
+execute :: (MonadLoggerIO m, MonadUnliftIO m, MonadTracer m, RequireCallStack) => WorkflowWorker -> m ()
 execute worker = flip runReaderT worker $ do
-  $(logInfo) "Starting workflow worker"
-  go
-
+  $(logDebug) "Starting workflow worker"
+  whileM_ go
   where
-    go = do
-      $(logDebug) "Polling for activation"
+    go = inSpan' "Workflow activation step" defaultSpanArguments $ \s -> do
       -- logs <- liftIO $ fetchLogs globalRuntime
       -- forM_ logs $ \l -> case l.level of
       --   Trace -> $(logDebug) l.message
@@ -93,24 +102,30 @@ execute worker = flip runReaderT worker $ do
           $(logDebug) "Poller shutting down"
           runningWorkflows <- readTVarIO worker.runningWorkflows
           mapM_ (cancel <=< readIORef . executionThread) runningWorkflows
+          pure False
         (Left err) -> do
           $(logError) $ Text.pack $ show err
-          go
+          recordException s mempty Nothing err
+          pure True
         (Right activation) -> do
           $(logDebug) $ Text.pack ("Got activation " <> show activation) 
           -- We want to handle activations as fast as possible, so we don't want to block
-          -- on dispatching jobs.
-          _ <- async $ handleActivation activation
-          go
+          -- on dispatching jobs. We link the activator thread to the run-loop so that any
+          -- unhandled exceptions in that logic aren't ignored.
+          activationCtxt <- getContext
+          activator <- async $ do
+            _ <- attachContext activationCtxt
+            handleActivation activation
+          link activator
+          pure True
       
 
-handleActivation :: forall m. (MonadLoggerIO m) => Core.WorkflowActivation -> ReaderT WorkflowWorker m ()
-handleActivation activation = do
+handleActivation :: forall m. (MonadUnliftIO m, MonadLoggerIO m, MonadTracer m) => Core.WorkflowActivation -> ReaderT WorkflowWorker m ()
+handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments { attributes = HashMap.fromList [("temporal.activation.run_id", toAttribute $ activation ^. Activation.runId)]}) $ \s -> do
   $(logDebug) ("Handling activation: RunId " <> Text.pack (show (activation ^. Activation.runId)))
   forM_ (activation ^. Activation.jobs) $ \job -> do
     $(logDebug) ("Job: " <> Text.pack (show job))
   WorkflowWorker{workerCore} <- ask
-
   {-
   Run jobs
   -}
@@ -119,6 +134,7 @@ handleActivation activation = do
       mInst <- createOrFetchWorkflowInstance
       case mInst of
         Nothing -> do
+          setStatus s (Error "No workflow definition found")
           $logInfo "No workflow definition found"
           let failureProto = defMessage
                 & Completion.failure .~ 
@@ -167,13 +183,17 @@ handleActivation activation = do
       (activation ^. Activation.vec'jobs)
 
     createOrFetchWorkflowInstance :: ReaderT WorkflowWorker m (Maybe WorkflowInstance)
-    createOrFetchWorkflowInstance = do
+    createOrFetchWorkflowInstance = inSpan' "createOrFetchWorkflowInstance" (defaultSpanArguments { attributes = HashMap.fromList [("temporal.activation.run_id", toAttribute $ activation ^. Activation.runId)] }) $ \s -> do
       worker@WorkflowWorker{workerCore} <- ask
       runningWorkflows_ <- atomically $ readTVar worker.runningWorkflows
       case HashMap.lookup (RunId $ activation ^. Activation.runId) runningWorkflows_ of
-        Just inst -> pure $ Just inst
+        Just inst -> do
+          addAttribute s "temporal.workflow.worker.instance_state" ("existing" :: Text)
+          pure $ Just inst
         Nothing -> do
+          addAttribute s "temporal.workflow.worker.instance_state" ("new" :: Text)
           vExistingInstance <- forM activationStartWorkflowJobs $ \(_job, startWorkflow) -> do
+            addAttribute s "temporal.workflow.type" (startWorkflow ^. Activation.workflowType)
             searchAttrs <- liftIO $ do
               decodedAttrs <- startWorkflow ^. Activation.searchAttributes . Message.indexedFields . to searchAttributesFromProto
               either (throwIO . ValueError) pure decodedAttrs
@@ -232,15 +252,24 @@ handleActivation activation = do
     removeEvictedWorkflowInstances = forM_ (activation ^. Activation.vec'jobs) $ \job -> do
       case job ^. Activation.maybe'variant of
         Just (WorkflowActivationJob'RemoveFromCache removeFromCache) -> do
-          worker <- ask
-          let runId_ = RunId $ activation ^. CommonProto.runId
-          join $ atomically $ do
-            currentWorkflows <- readTVar worker.runningWorkflows
-            writeTVar worker.runningWorkflows $ HashMap.delete runId_ currentWorkflows
-            case HashMap.lookup runId_ currentWorkflows of
-              Nothing -> pure $ $(logDebug) $ Text.pack ("Eviction request on an unknown workflow with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
-              Just wf -> do
-                pure $ do
-                  cancel =<< readIORef wf.executionThread
-                  $(logDebug) $ Text.pack ("Evicting workflow instance with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
+          let spanAttrs = HashMap.fromList 
+                [ ("temporal.workflow.worker.instance_state", toAttribute ("evicted" :: Text))
+                , ("temporal.activation.run_id", toAttribute $ activation ^. CommonProto.runId)
+                ]
+          inSpan' "removeEvictedWorkflowInstance" (defaultSpanArguments { attributes = spanAttrs }) $ \s -> do
+            worker <- ask
+            let runId_ = RunId $ activation ^. CommonProto.runId
+            join $ atomically $ do
+              currentWorkflows <- readTVar worker.runningWorkflows
+              writeTVar worker.runningWorkflows $ HashMap.delete runId_ currentWorkflows
+              case HashMap.lookup runId_ currentWorkflows of
+                Nothing -> do
+                  let msg = Text.pack ("Eviction request on an unknown workflow with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
+                  pure $ do
+                    setStatus s $ Error msg
+                    $(logDebug) msg
+                Just wf -> do
+                  pure $ do
+                    cancel =<< readIORef wf.executionThread
+                    $(logDebug) $ Text.pack ("Evicting workflow instance with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
         _ -> pure ()
