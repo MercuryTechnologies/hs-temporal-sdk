@@ -2,6 +2,9 @@ module Temporal.Codec.Server
   ( codecServerMiddleware
   , CodecServerConfig(..)
   , CorsResourcePolicy(..)
+  , ErrorResponse(..)
+  , AuthorizationHeaderValue
+  , Payload(..)
   , temporalCloudCorsPolicy
   ) where
 
@@ -37,8 +40,8 @@ data ErrorResponse = ErrorResponse
   }
 
 data CodecServerConfig = CodecServerConfig
-  { codecServerDecoder :: {-# UNPACK #-} !(Namespace -> Maybe AuthorizationHeaderValue -> Payload -> ExceptT ErrorResponse IO Payload)
-  , codecServerEncoder :: {-# UNPACK #-} !(Namespace -> Maybe AuthorizationHeaderValue -> Payload -> ExceptT ErrorResponse IO Payload)
+  { codecServerDecoder :: !(Namespace -> Maybe AuthorizationHeaderValue -> Payload -> ExceptT ErrorResponse IO Payload)
+  , codecServerEncoder :: !(Namespace -> Maybe AuthorizationHeaderValue -> Payload -> ExceptT ErrorResponse IO Payload)
   , endpointBase :: [Text] -- ^ Path segments
   , corsPolicy :: CorsResourcePolicy
   }
