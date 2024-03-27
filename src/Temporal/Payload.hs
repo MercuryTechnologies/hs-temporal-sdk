@@ -40,7 +40,7 @@ module Temporal.Payload
   , Around(..)
   , mkPayloadProcessor
   , addPayloadProcessor
-  , PayloadProcessor
+  , PayloadProcessor(..)
   , ApplyPayloads
   , ArgsOf
   , ResultOf
@@ -55,14 +55,19 @@ module Temporal.Payload
   , foldMArgs
   , foldMArgs_
   , withArgs
+  , UnencodedPayload
+  , processorEncodePayloads
+  , processorDecodePayloads
   , AllArgs
   , GatherArgs
   , GatherArgsOf
   , FunctionSupportsCodec
   , FunctionSupportsCodec'
+  , ValueError(..)
   ) where
 
 import Codec.Compression.Zlib.Internal hiding (Format(..))
+import Control.Exception (Exception, throwIO)
 import Data.Aeson hiding (encode, decode)
 import qualified Data.Aeson as Aeson
 import Data.ByteString (ByteString)
@@ -92,6 +97,12 @@ import qualified Data.Text as T
 import qualified Data.Text.Encoding as Text
 import qualified Data.Text as Text
 import Data.ByteString.Base64 (encodeBase64, decodeBase64)
+
+-- | Used to denote that a payload either failed to encode or decode
+data ValueError
+  = ValueError String
+  deriving stock (Show)
+instance Exception ValueError
 
 {- * Parameter serialization 
 
@@ -323,26 +334,35 @@ foldMArgs_ :: forall args c b m. (VarArgs args, AllArgs c args, Monad m) => (for
 foldMArgs_ f x = mapResult @args @(m b) @(m ()) void (foldMArgs @args @c @b @m f x)
 {-# INLINE foldMArgs_ #-}
 
-gatherArgs :: forall args codec. (VarArgs args, AllArgs (Codec codec) args) => codec -> args :->: IO (V.Vector Payload) 
-gatherArgs codec = mapResult @args @(IO (B.Bundle V.Vector Payload)) @(IO (V.Vector Payload)) (fmap VG.unstream) (foldMArgs @args @(Codec codec) go B.empty)
+type UnencodedPayload = IO Payload
+
+-- | This is the final step in the process of encoding payloads. 
+--
+-- It takes a list of suspended payload encodings and runs them through the payload processor.
+-- This allows us to 
+processorEncodePayloads :: (MonadIO m, Traversable f) => PayloadProcessor -> f Payload -> m (f Payload)
+processorEncodePayloads processor = liftIO . mapM (payloadProcessorEncode processor)
+{-# INLINE processorEncodePayloads #-}
+
+processorDecodePayloads :: (MonadIO m, Traversable f) => PayloadProcessor -> f Payload -> m (f Payload)
+processorDecodePayloads processor = liftIO . mapM (\payload -> payloadProcessorDecode processor payload >>= either (throwIO . ValueError) pure)
+{-# INLINE processorDecodePayloads #-}
+
+gatherArgs :: forall args codec. (VarArgs args, AllArgs (Codec codec) args) => codec -> args :->: V.Vector UnencodedPayload
+gatherArgs codec = mapResult @args @(B.Bundle V.Vector UnencodedPayload) @(V.Vector UnencodedPayload) VG.unstream (foldlArgs @args @(Codec codec) Proxy go B.empty)
   where
-    go :: forall a. Codec codec a => B.Bundle V.Vector Payload -> a -> IO (B.Bundle V.Vector Payload)
-    go acc arg = B.snoc acc <$> encode codec arg
+    go :: forall a. Codec codec a => B.Bundle V.Vector UnencodedPayload -> a -> B.Bundle V.Vector UnencodedPayload
+    go acc arg = B.snoc acc (encode codec arg)
 {-# INLINE gatherArgs #-}
 
-withArgs :: forall args result m codec. (VarArgs args, AllArgs (Codec codec) args, MonadIO m) => codec -> (V.Vector Payload -> m result) -> args :->: m result
-withArgs codec f = mapResult @args @(IO (V.Vector Payload)) @(m result) go (gatherArgs @args @codec codec)
-  where
-    go :: IO (V.Vector Payload) -> m result
-    go argsM = do
-      args <- liftIO argsM
-      f args
+withArgs :: forall args result codec. (VarArgs args, AllArgs (Codec codec) args) => codec -> (V.Vector UnencodedPayload -> result) -> args :->: result
+withArgs codec f = mapResult @args @(V.Vector UnencodedPayload) @result f (gatherArgs @args @codec codec)
+{-# INLINE withArgs #-}
 
 data Payload = Payload
   { payloadData :: ByteString
   , payloadMetadata :: Data.Map.Strict.Map Text ByteString
   } deriving stock (Show, Eq, Ord)
-
 
 base64DecodeFromText :: MonadFail m => T.Text -> m ByteString
 base64DecodeFromText txt = case decodeBase64 $ Text.encodeUtf8 txt of

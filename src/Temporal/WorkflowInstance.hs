@@ -37,9 +37,11 @@ import System.Random (mkStdGen)
 import Temporal.Common
 import Temporal.Coroutine
 import qualified Temporal.Core.Worker as Core
+import Temporal.Duration
 import Temporal.Exception
 import qualified Temporal.Exception as Err
 import Temporal.Payload
+import Temporal.SearchAttributes.Internal
 import Temporal.Workflow.Eval (ActivationResult(..), SuspendableWorkflowExecution, runWorkflow, injectWorkflowSignal)
 import Temporal.Workflow.Types
 import Temporal.Workflow.Internal.Instance
@@ -68,6 +70,7 @@ import Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow
   )
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
+import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands as Command
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import UnliftIO
@@ -82,10 +85,11 @@ create :: (HasCallStack, MonadLoggerIO m)
   -> [ApplicationFailureHandler]
   -> WorkflowInboundInterceptor
   -> WorkflowOutboundInterceptor
+  -> PayloadProcessor
   -> Info 
   -> StartWorkflow
   -> m WorkflowInstance
-create workflowCompleteActivation workflowFn workflowDeadlockTimeout errorConverters inboundInterceptor outboundInterceptor info start = do
+create workflowCompleteActivation workflowFn workflowDeadlockTimeout errorConverters inboundInterceptor outboundInterceptor payloadProcessor info start = do
   $logDebug "Instantiating workflow instance"
   workflowInstanceLogger <- askLoggerIO
   workflowRandomnessSeed <- WorkflowGenM <$> newIORef (mkStdGen 0)
@@ -120,16 +124,12 @@ create workflowCompleteActivation workflowFn workflowDeadlockTimeout errorConver
   workerThread <- liftIO $ async $ runInstanceM inst $ do
     $logDebug "Start workflow execution thread"
     exec <- setUpWorkflowExecution start
-    res <- liftIO $ inboundInterceptor.executeWorkflow exec $ \exec' -> runInstanceM inst $ do
+    res <- liftIO $ inboundInterceptor.executeWorkflow exec $ \exec' -> runInstanceM inst $ runTopLevel $ do
       $logDebug "Executing workflow"
-      wf <- applyStartWorkflow exec' workflowFn 
+      wf <- applyStartWorkflow exec' workflowFn
       runWorkflowToCompletion wf
     $logDebug "Workflow execution completed"
-    case res of
-      WorkflowExitSuccess result -> finishWorkflow result
-      WorkflowExitContinuedAsNew cmd -> addCommand cmd
-      WorkflowExitCancelled cmd -> addCommand cmd
-      WorkflowExitFailed _ cmd -> addCommand cmd
+    addCommand =<< convertExitVariantToCommand res
     flushCommands
     $logDebug "Handling leftover queries"
     handleQueriesAfterCompletion
@@ -140,8 +140,8 @@ create workflowCompleteActivation workflowFn workflowDeadlockTimeout errorConver
   writeIORef executionThread workerThread
   pure inst
 
-runWorkflowToCompletion :: HasCallStack => SuspendableWorkflowExecution Payload -> InstanceM (WorkflowExitVariant Payload)
-runWorkflowToCompletion wf = runTopLevel $ do
+runWorkflowToCompletion :: HasCallStack => SuspendableWorkflowExecution Payload -> InstanceM Payload
+runWorkflowToCompletion wf = do
   inst <- ask
   let completeStep :: Await [ActivationResult] (SuspendableWorkflowExecution Payload) -> InstanceM (SuspendableWorkflowExecution Payload)
       completeStep suspension = do
@@ -282,16 +282,14 @@ applyStartWorkflow :: ExecuteWorkflowInput -> (Vector Payload -> IO (Either Stri
 applyStartWorkflow execInput workflowFn = do
   inst <- ask
   let executeWorkflowBase input = runInstanceM inst $ do
-        -- case inst.workflowInstanceDefinition of
-        --   (WorkflowDefinition _ (ValidWorkflowFunction fmt innerF applyArgs)) -> do
-            eAct <- liftIO $ workflowFn input.executeWorkflowInputArgs
-            case eAct of
-              Left msg -> do
-                $(logError) $ Text.pack ("Failed to decode workflow arguments: " <> msg)
-                throwIO (ValueError msg)
-              Right act -> do
-                $(logDebug) "Calling runWorkflow"
-                pure (runWorkflow act)
+        eAct <- liftIO (workflowFn =<< processorDecodePayloads inst.payloadProcessor input.executeWorkflowInputArgs)
+        case eAct of
+          Left msg -> do
+            $(logError) $ Text.pack ("Failed to decode workflow arguments: " <> msg)
+            throwIO (ValueError msg)
+          Right act -> do
+            $(logDebug) "Calling runWorkflow"
+            pure (runWorkflow act)
 
   liftIO $ executeWorkflowBase execInput
 
@@ -306,11 +304,14 @@ applyQueryWorkflow queryWorkflow = do
   inst <- ask
   handles <- readIORef inst.workflowQueryHandlers
   $logDebug $ Text.pack ("Applying query: " <> show (queryWorkflow ^. Activation.queryType))
+  let processor = inst.payloadProcessor
+  args <- processorDecodePayloads processor (fmap convertFromProtoPayload (queryWorkflow ^. Command.vec'arguments))
+  hdrs <- processorDecodePayloads processor (fmap convertFromProtoPayload (queryWorkflow ^. Activation.headers))
   let baseInput = HandleQueryInput
         { handleQueryId = queryWorkflow ^. Activation.queryId
         , handleQueryInputType = queryWorkflow ^. Activation.queryType
-        , handleQueryInputArgs = fmap convertFromProtoPayload (queryWorkflow ^. Command.vec'arguments)
-        , handleQueryInputHeaders = fmap convertFromProtoPayload (queryWorkflow ^. Activation.headers)
+        , handleQueryInputArgs = args
+        , handleQueryInputHeaders = hdrs
         }
   res <- liftIO $ inst.inboundInterceptor.handleQuery baseInput $ \input -> do
     let handlerOrDefault = 
@@ -323,38 +324,43 @@ applyQueryWorkflow queryWorkflow = do
         (QueryId input.handleQueryId)
         input.handleQueryInputArgs
         input.handleQueryInputHeaders
-  let cmd = defMessage & Command.respondToQuery .~ case res of
-        Left err -> 
-          defMessage 
-            & Command.failed .~ 
-              ( defMessage
-                & F.message .~ Text.pack (show err)
-              )
-        Right ok ->
-          defMessage 
-            & Command.queryId .~ baseInput.handleQueryId
-            & Command.succeeded .~
-              ( defMessage
-                & Command.response .~ convertToProtoPayload ok
-              )
-  addCommand cmd
+  cmd <- case res of
+    Left err -> 
+      -- TODO, more useful error message
+      pure $ defMessage 
+        & Command.failed .~ 
+          ( defMessage
+            & F.message .~ Text.pack (show err)
+          )
+    Right ok -> do
+      res' <- liftIO $ payloadProcessorEncode processor ok
+      pure $ defMessage 
+        & Command.queryId .~ baseInput.handleQueryId
+        & Command.succeeded .~
+          ( defMessage
+            & Command.response .~ convertToProtoPayload res'
+          )
+  addCommand $ defMessage & Command.respondToQuery .~ cmd
 
 applySignalWorkflow :: SignalWorkflow -> Workflow ()
-applySignalWorkflow signalWorkflow = do
-  handlers <- Workflow $ \_ -> do
+applySignalWorkflow signalWorkflow = join $ do
+  Workflow $ \_ -> do
     inst <- ask
-    Done <$> readIORef inst.workflowSignalHandlers
-  let handlerOrDefault = 
-        HashMap.lookup (Just (signalWorkflow ^. Activation.signalName)) handlers <|>
-        HashMap.lookup Nothing handlers
-  case handlerOrDefault of
-    Nothing -> do
-      $(logWarn) $ Text.pack ("No signal handler found for signal: " <> show (signalWorkflow ^. Activation.signalName))
-      pure ()
-    Just handler -> do
-      let args = fmap convertFromProtoPayload (signalWorkflow ^. Command.vec'input)
-      $(logDebug) $ Text.pack ("Applying signal handler for signal: " <> show (signalWorkflow ^. Activation.signalName))
-      handler args
+    handlers <- readIORef inst.workflowSignalHandlers
+    let handlerOrDefault = 
+          HashMap.lookup (Just (signalWorkflow ^. Activation.signalName)) handlers <|>
+          HashMap.lookup Nothing handlers
+    case handlerOrDefault of
+      Nothing -> pure $ Done $ do
+        $(logWarn) $ Text.pack ("No signal handler found for signal: " <> show (signalWorkflow ^. Activation.signalName))
+        pure ()
+      Just handler -> do
+        eInputs <- UnliftIO.try $ processorDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (signalWorkflow ^. Command.vec'input))
+        case eInputs of
+          Left err -> pure $ Throw err
+          Right args -> pure $ Done $ do
+            $(logDebug) $ Text.pack ("Applying signal handler for signal: " <> show (signalWorkflow ^. Activation.signalName))
+            handler args
 
 applyNotifyHasPatch :: NotifyHasPatch -> InstanceM ()
 applyNotifyHasPatch notifyHasPatch = do
@@ -550,56 +556,90 @@ applyResolutions rs = do
     writeTVar inst.workflowSequenceMaps updatedSequenceMaps
     pure newCompletions
 
+convertExitVariantToCommand :: WorkflowExitVariant Payload -> InstanceM Command.WorkflowCommand
+convertExitVariantToCommand variant = do
+  inst <- ask
+  let processor = inst.payloadProcessor
+  case variant of
+    WorkflowExitSuccess result -> do
+      result' <- liftIO $ payloadProcessorEncode processor result
+      pure $ defMessage &
+        Command.completeWorkflowExecution .~ (defMessage & Command.result .~ convertToProtoPayload result')
+
+    WorkflowExitContinuedAsNew (ContinueAsNewException {..}) -> do
+      i <- readIORef inst.workflowInstanceInfo
+      searchAttrs <- liftIO $ searchAttributesToProto
+          (if continueAsNewOptions.searchAttributes == mempty
+            then i.searchAttributes
+            else continueAsNewOptions.searchAttributes)
+      args <- processorEncodePayloads processor continueAsNewArguments
+      hdrs <- processorEncodePayloads processor continueAsNewOptions.headers
+      memo <- processorEncodePayloads processor continueAsNewOptions.memo
+      pure $ defMessage 
+        & Command.continueAsNewWorkflowExecution .~
+          ( defMessage
+              & Command.workflowType .~ rawWorkflowType continueAsNewWorkflowType
+              & Command.taskQueue .~ (maybe "" rawTaskQueue continueAsNewOptions.taskQueue)
+              & Command.vec'arguments .~ fmap convertToProtoPayload args
+              & Command.maybe'retryPolicy .~ (retryPolicyToProto <$> continueAsNewOptions.retryPolicy)
+              & Command.searchAttributes .~ searchAttrs
+              & Command.headers .~ fmap convertToProtoPayload hdrs
+              & Command.memo .~ fmap convertToProtoPayload memo
+              & Command.maybe'workflowTaskTimeout .~ (durationToProto <$> continueAsNewOptions.taskTimeout)
+              & Command.maybe'workflowRunTimeout .~ (durationToProto <$> continueAsNewOptions.runTimeout)
+          ) 
+    WorkflowExitCancelled WorkflowCancelRequested -> do
+      pure $ defMessage & Command.cancelWorkflowExecution .~ defMessage
+    WorkflowExitFailed e | Just (actFailure :: ActivityFailure) <- fromException e -> do
+      let appFailure = actFailure.cause
+          enrichedApplicationFailure = defMessage
+            & F.message .~ actFailure.message
+            & F.source .~ "hs-temporal-sdk"
+            & F.activityFailureInfo .~ actFailure.original
+            & F.stackTrace .~ actFailure.stack
+            & F.cause .~ 
+              ( defMessage
+                & F.message .~ appFailure.message
+                & F.source .~ "hs-temporal-sdk"
+                & F.stackTrace .~ appFailure.stack
+                & F.applicationFailureInfo .~ 
+                  ( defMessage
+                    & F.type' .~ Err.type' appFailure
+                    & F.nonRetryable .~ Err.nonRetryable appFailure
+                  )
+              )
+      pure $ defMessage 
+        & Command.failWorkflowExecution .~ 
+          ( defMessage 
+            & Command.failure .~ enrichedApplicationFailure
+          )
+    WorkflowExitFailed e -> do
+      w <- ask
+      let appFailure = mkApplicationFailure e w.errorConverters
+          enrichedApplicationFailure = defMessage
+            & F.message .~ appFailure.message
+            & F.source .~ "hs-temporal-sdk"
+            & F.stackTrace .~ appFailure.stack
+            & F.applicationFailureInfo .~ 
+              ( defMessage
+                & F.type' .~ Err.type' appFailure
+                & F.nonRetryable .~ Err.nonRetryable appFailure
+              )
+      pure $ defMessage 
+        & Command.failWorkflowExecution .~ 
+          ( defMessage 
+            & Command.failure .~ enrichedApplicationFailure
+          )
+
 -- Note: this is intended to exclusively handle top-level workflow execution.
 --
 -- Don't use elsewhere.
-runTopLevel :: InstanceM a -> InstanceM (WorkflowExitVariant a)
+runTopLevel :: InstanceM Payload -> InstanceM (WorkflowExitVariant Payload)
 runTopLevel m = do
   (WorkflowExitSuccess <$> m) `catches`
-    [ Handler $ \(ContinueAsNewException msg) -> do
-        pure $ WorkflowExitContinuedAsNew $ defMessage & Command.continueAsNewWorkflowExecution .~ msg
+    [ Handler $ \e@(ContinueAsNewException {}) -> pure $ WorkflowExitContinuedAsNew e
     , Handler $ \WorkflowCancelRequested -> do
-        pure $ WorkflowExitCancelled $ defMessage & Command.cancelWorkflowExecution .~ defMessage
-    , Handler $ \(actFailure :: ActivityFailure) -> do
-        let appFailure = actFailure.cause
-            enrichedApplicationFailure = defMessage
-              & F.message .~ actFailure.message
-              & F.source .~ "hs-temporal-sdk"
-              & F.activityFailureInfo .~ actFailure.original
-              & F.stackTrace .~ actFailure.stack
-              & F.cause .~ 
-                ( defMessage
-                  & F.message .~ appFailure.message
-                  & F.source .~ "hs-temporal-sdk"
-                  & F.stackTrace .~ appFailure.stack
-                  & F.applicationFailureInfo .~ 
-                    ( defMessage
-                      & F.type' .~ Err.type' appFailure
-                      & F.nonRetryable .~ Err.nonRetryable appFailure
-                    )
-                )
-        pure $ WorkflowExitFailed (toException actFailure) $
-          defMessage 
-            & Command.failWorkflowExecution .~ 
-              ( defMessage 
-                & Command.failure .~ enrichedApplicationFailure
-              )
-    , Handler $ \e -> do
-        w <- ask
-        let appFailure = mkApplicationFailure e w.errorConverters
-            enrichedApplicationFailure = defMessage
-              & F.message .~ appFailure.message
-              & F.source .~ "hs-temporal-sdk"
-              & F.stackTrace .~ appFailure.stack
-              & F.applicationFailureInfo .~ 
-                ( defMessage
-                  & F.type' .~ Err.type' appFailure
-                  & F.nonRetryable .~ Err.nonRetryable appFailure
-                )
-        pure $ WorkflowExitFailed e $
-          defMessage 
-            & Command.failWorkflowExecution .~ 
-              ( defMessage 
-                & Command.failure .~ enrichedApplicationFailure
-              )
+        pure $ WorkflowExitCancelled WorkflowCancelRequested
+    , Handler $ \(e :: SomeException) -> do
+        pure $ WorkflowExitFailed e
     ]

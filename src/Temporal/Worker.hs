@@ -67,6 +67,7 @@ module Temporal.Worker
   , setMaxTaskQueueActivitiesPerSecond
   , setGracefulShutdownPeriodMillis
   , addInterceptors
+  , setPayloadProcessor
   , WorkflowId(..)
   ) where
 import UnliftIO
@@ -83,6 +84,7 @@ import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
 import Temporal.Activity.Definition
 import qualified Temporal.Activity.Worker as Activity
+import Temporal.Payload (PayloadProcessor(..))
 import Temporal.Worker.Types
 import Temporal.Workflow.Definition
 import qualified Temporal.Workflow.Worker as Workflow
@@ -123,12 +125,13 @@ configure actEnv defs = flip execState defaultConfig . unConfigM
       , applicationErrorConverters = standardApplicationFailureHandlers
       , logger = \_ _ _ _ -> pure ()
       , tracerProvider = inertTracerProvider
+      , payloadProcessor = PayloadProcessor pure (pure . Right)
       , ..
       }
 
 data Definitions env = Definitions
-  { workflowDefinitions :: HashMap Text WorkflowDefinition
-  , activityDefinitions :: HashMap Text (ActivityDefinition env)
+  { workflowDefinitions :: {-# UNPACK #-} !(HashMap Text WorkflowDefinition)
+  , activityDefinitions :: {-# UNPACK #-} !(HashMap Text (ActivityDefinition env))
   }
 
 instance Semigroup (Definitions env) where
@@ -334,6 +337,11 @@ setTracerProvider tp = ConfigM $ modify' $ \conf -> conf
   { tracerProvider = tp
   }
 
+setPayloadProcessor :: PayloadProcessor -> ConfigM actEnv ()
+setPayloadProcessor p = ConfigM $ modify' $ \conf -> conf
+  { payloadProcessor = p
+  }
+
 ------------------------------------------------------------------------------------
 
 -- | A Worker is responsible for polling a Task Queue, dequeueing a Task, executing 
@@ -371,6 +379,7 @@ startReplayWorker rt conf = provideCallStack $ runWorkerContext conf $ do
       workerDeadlockTimeout = conf.deadlockTimeout
       workerClient = error "Cannot use workflow client in replay worker"
       workerErrorConverters = conf.applicationErrorConverters
+      processor = conf.payloadProcessor
       workflowWorker = Workflow.WorkflowWorker{..}
       workerActivityLoop = error "Cannot use activity worker in replay worker"
       workerType = Core.SReplay
@@ -409,6 +418,7 @@ startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "sta
       workerOutboundInterceptors = conf.interceptorConfig.workflowOutboundInterceptors
       workerDeadlockTimeout = conf.deadlockTimeout
       workerErrorConverters = errorConverters
+      processor = conf.payloadProcessor
       workflowWorker = Workflow.WorkflowWorker{..}
       initialEnv = conf.actEnv
       definitions = conf.actDefs
@@ -416,6 +426,7 @@ startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "sta
       activityOutboundInterceptors = conf.interceptorConfig.activityOutboundInterceptors
       clientInterceptors = conf.interceptorConfig.clientInterceptors
       activityErrorConverters = errorConverters
+      payloadProcessor = conf.payloadProcessor
       activityWorker = Activity.ActivityWorker{..}
       workerClient = client
       workerTracer = makeTracer conf.tracerProvider (InstrumentationLibrary "hs-temporal-sdk" "0.0.1.0") tracerOptions

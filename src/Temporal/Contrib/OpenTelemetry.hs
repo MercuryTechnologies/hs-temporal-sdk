@@ -176,7 +176,8 @@ makeOpenTelemetryInterceptor = do
           inSpan'' tracer ("RunWorkflow:" <> input.executeWorkflowInputType) spanArgs $ \span -> do
             execution <- next input
             case execution of
-              WorkflowExitFailed e _ -> do
+              WorkflowExitFailed e -> do
+                -- TODO use our enrichment handlers here
                 setStatus span (Error $ T.pack $ show e)
                 recordException span mempty Nothing e
               _ -> pure ()

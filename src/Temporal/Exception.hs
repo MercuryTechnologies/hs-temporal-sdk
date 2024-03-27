@@ -8,18 +8,15 @@ import Data.Annotation
 import Data.Int
 import Data.Text
 import Data.Typeable
+import Data.Vector (Vector)
 import GHC.Stack
 import qualified Proto.Temporal.Api.Failure.V1.Message as Proto
 import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands (ContinueAsNewWorkflowExecution)
 import Proto.Temporal.Api.Failure.V1.Message
 import Temporal.Common
 import Temporal.Payload
+import Temporal.Workflow.Types
 
--- | Used to denote that a payload either failed to encode or decode
-data ValueError
-  = ValueError String
-  deriving stock (Show)
-instance Exception ValueError
 
 ---------------------------------------------------------------------
 -- SDK failures
@@ -113,7 +110,11 @@ instance Exception SignalExternalWorkflowFailed
 
 -- This does not need to be in the exception hierarchy,
 -- since we don't want to catch it in the workflow code.
-data ContinueAsNewException = ContinueAsNewException ContinueAsNewWorkflowExecution
+data ContinueAsNewException = ContinueAsNewException
+  { continueAsNewWorkflowType :: WorkflowType
+  , continueAsNewArguments :: Vector Payload
+  , continueAsNewOptions :: ContinueAsNewOptions
+  }
   deriving stock (Show)
 
 instance Exception ContinueAsNewException

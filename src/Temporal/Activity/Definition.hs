@@ -57,9 +57,10 @@ data ActivityDefinition env = ActivityDefinition
   }
 
 data ActivityEnv env = ActivityEnv
-  { activityWorker :: Worker 'Real
-  , activityInfo :: ActivityInfo
-  , activityClientInterceptors :: ClientInterceptors
+  { activityWorker :: {-# UNPACK #-} !(Worker 'Real)
+  , activityInfo :: {-# UNPACK #-} !ActivityInfo
+  , activityClientInterceptors :: {-# UNPACK #-} !ClientInterceptors
+  , activityPayloadProcessor :: {-# UNPACK #-} !PayloadProcessor
   , activityEnv :: env
   }
 

@@ -78,12 +78,6 @@ ilift m = Workflow $ \_ -> Done <$> m
 askInstance :: Workflow WorkflowInstance
 askInstance = Workflow $ \_ -> asks Done
 
-finishWorkflow :: Payload -> InstanceM ()
-finishWorkflow result = do
-  let completeMessage = defMessage &
-        Command.completeWorkflowExecution .~ (defMessage & Command.result .~ convertToProtoPayload result)
-  addCommand completeMessage
-
 addCommand :: WorkflowCommand -> InstanceM ()
 addCommand command = do
   inst <- ask
@@ -581,12 +575,13 @@ data WorkflowInstance = WorkflowInstance
   , workflowCancellationVar :: {-# UNPACK #-} !(IVar ())
   , workflowDeadlockTimeout :: Maybe Int
   -- These are how the instance gets its work done
-  , activationChannel :: TQueue Core.WorkflowActivation
-  , executionThread :: IORef (Async ())
-  , inboundInterceptor :: WorkflowInboundInterceptor
-  , outboundInterceptor :: WorkflowOutboundInterceptor
+  , activationChannel :: {-# UNPACK #-} !(TQueue Core.WorkflowActivation)
+  , executionThread :: {-# UNPACK #-} !(IORef (Async ()))
+  , inboundInterceptor :: {-# UNPACK #-} !WorkflowInboundInterceptor
+  , outboundInterceptor :: {-# UNPACK #-} !WorkflowOutboundInterceptor
   -- Improves error reporting
   , errorConverters :: [ApplicationFailureHandler]
+  , payloadProcessor :: {-# UNPACK #-} !PayloadProcessor
   }
 
 data SomeChildWorkflowHandle = forall result. SomeChildWorkflowHandle (ChildWorkflowHandle result)
@@ -684,9 +679,9 @@ data ExecuteWorkflowInput = ExecuteWorkflowInput
   }
 
 data WorkflowExitVariant a
-  = WorkflowExitContinuedAsNew WorkflowCommand
-  | WorkflowExitCancelled WorkflowCommand
-  | WorkflowExitFailed SomeException WorkflowCommand
+  = WorkflowExitContinuedAsNew ContinueAsNewException
+  | WorkflowExitCancelled WorkflowCancelRequested
+  | WorkflowExitFailed SomeException
   | WorkflowExitSuccess a
 
 data HandleQueryInput = HandleQueryInput

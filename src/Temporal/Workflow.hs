@@ -224,7 +224,6 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Time.Clock (UTCTime)
 import Data.Time.Clock.System (SystemTime(..), systemToUTCTime)
-import Data.Kind
 import Data.UUID (UUID)
 import qualified Data.UUID as UUID
 import Data.UUID.Types.Internal ( buildFromBytes )
@@ -290,7 +289,10 @@ withWorkflowArgs c f =
     @(WorkflowInternal (Result result)) 
     @(Workflow result) 
     safely 
-    (withArgs @args @(Result result) c (unsafely . f))
+    $ withArgs @args @(WorkflowInternal (Result result)) c
+    $ \args -> do
+      args' <- liftIO $ sequence args 
+      unsafely $ f args'
   where
     unsafely :: Workflow a -> WorkflowInternal (Result a)
     unsafely = coerce
@@ -333,15 +335,16 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift 
       seqMaps { activities = HashMap.insert s resultSlot (activities seqMaps) }
 
     i <- readIORef inst.workflowInstanceInfo
-    
+    hdrs <- processorEncodePayloads inst.payloadProcessor activityInput.options.headers
+    args <- processorEncodePayloads inst.payloadProcessor activityInput.args
     let actId = maybe (Text.pack $ show actSeq) rawActivityId (activityInput.options.activityId)
         scheduleActivity = defMessage
           & Command.seq .~ actSeq
           & Command.activityId .~ actId
           & Command.activityType .~ activityInput.activityType
           & Command.taskQueue .~ rawTaskQueue (fromMaybe i.taskQueue activityInput.options.taskQueue)
-          & Command.headers .~ fmap convertToProtoPayload activityInput.options.headers
-          & Command.vec'arguments .~ fmap convertToProtoPayload activityInput.args
+          & Command.headers .~ fmap convertToProtoPayload hdrs 
+          & Command.vec'arguments .~ fmap convertToProtoPayload args
           & Command.maybe'retryPolicy .~ fmap retryPolicyToProto activityInput.options.retryPolicy
           & Command.cancellationType .~ activityCancellationTypeToProto activityInput.options.cancellationType
           & Command.maybe'scheduleToStartTimeout .~ fmap durationToProto activityInput.options.scheduleToStartTimeout
@@ -362,7 +365,11 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift 
         $(logInfo) ("Activity result: " <> Text.pack (show res))
         Workflow $ \_ -> case res ^. Activation.result . ActivityResult.maybe'status of
           Nothing -> error "Activity result missing status"
-          Just (ActivityResult.ActivityResolution'Completed success) -> pure $ Done (success ^. ActivityResult.result . to convertFromProtoPayload)
+          Just (ActivityResult.ActivityResolution'Completed success) -> do
+            res <- liftIO $ payloadProcessorDecode inst.payloadProcessor $ convertFromProtoPayload (success ^. ActivityResult.result) 
+            pure $ case res of
+              Left err -> Throw $ toException $ ValueError err
+              Right val -> Done val
           Just (ActivityResult.ActivityResolution'Failed failure_) -> let failure = failure_ ^. ActivityResult.failure in pure $ Throw $ toException $ ActivityFailure
             { message = failure  ^. Failure.message
             , activityType = ActivityType $ activityInput.activityType
@@ -395,8 +402,7 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift 
     ( rawTask `bindTask` (\payload -> Workflow $ \_ -> do
         result <- liftIO $ decode codec payload
         case result of
-          -- TODO handle properly
-          Left err -> error $ "Failed to decode activity result: " <> show err
+          Left err -> pure $ Throw $ toException $ ValueError err
           Right val -> pure $ Done val
         )
     )
@@ -454,13 +460,14 @@ signalWorkflow _ f (signalRef -> KnownSignal signalName signalCodec) = withWorkf
     resVar <- newIVar
     inst <- ask
     s <- nextExternalSignalSequence
+    args <- processorEncodePayloads inst.payloadProcessor ps
     let cmd = defMessage
           & Command.signalExternalWorkflowExecution .~
             ( f 
               ( defMessage
                 & Command.seq .~ rawSequence s
                 & Command.signalName .~ signalName 
-                & Command.vec'args .~ fmap convertToProtoPayload ps
+                & Command.vec'args .~ fmap convertToProtoPayload args
               -- TODO
               -- & Command.headers .~ _
               )
@@ -503,9 +510,13 @@ startChildWorkflowFromPayloads (workflowRef -> k@(KnownWorkflow codec _)) opts p
     sendChildWorkflowCommand typedPayloads wfId = do
       inst <- ask
       -- TODO these need to pass through the interceptor
-      let convertedPayloads = fmap convertToProtoPayload typedPayloads
       runInIO <- askRunInIO      
       wfHandle <- liftIO $ inst.outboundInterceptor.startChildWorkflowExecution (knownWorkflowName k) opts $ \wfName opts' -> runInIO $ do
+        args <- processorEncodePayloads inst.payloadProcessor typedPayloads
+        let convertedPayloads = fmap convertToProtoPayload args
+        hdrs <- processorEncodePayloads inst.payloadProcessor opts'.headers
+        memo <- processorEncodePayloads inst.payloadProcessor opts'.initialMemo
+
         s@(Sequence wfSeq) <- nextChildWorkflowSequence
         startSlot <- newIVar
         resultSlot <- newIVar
@@ -526,8 +537,8 @@ startChildWorkflowFromPayloads (workflowRef -> k@(KnownWorkflow codec _)) opts p
               & Command.workflowIdReusePolicy .~ workflowIdReusePolicyToProto opts'.workflowIdReusePolicy
               & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts'.retryPolicy
               & Command.cronSchedule .~ fromMaybe "" opts'.cronSchedule
-              & Command.headers .~ fmap convertToProtoPayload opts'.headers
-              & Command.memo .~ fmap convertToProtoPayload opts'.initialMemo
+              & Command.headers .~ fmap convertToProtoPayload hdrs
+              & Command.memo .~ fmap convertToProtoPayload memo
               & Command.searchAttributes .~ searchAttrs
               & Command.cancellationType .~ childWorkflowCancellationTypeToProto opts'.cancellationType
 
@@ -550,7 +561,7 @@ startChildWorkflowFromPayloads (workflowRef -> k@(KnownWorkflow codec _)) opts p
         pure wfHandle
       pure $ wfHandle 
         { childWorkflowResultConverter = \r -> do
-            decodingResult <- decode codec r
+            decodingResult <- decode codec =<< either (throwIO . ValueError) pure =<< payloadProcessorDecode inst.payloadProcessor r
             case decodingResult of
               Left err -> throwIO $ ValueError err
               Right val -> pure val
@@ -1048,21 +1059,11 @@ continueAsNew (workflowRef -> k@(KnownWorkflow codec _)) opts = withWorkflowArgs
   Workflow $ \_ -> do
     inst <- ask
     res <- liftIO $ (Temporal.Workflow.Internal.Monad.continueAsNew inst.outboundInterceptor) (knownWorkflowName k) opts $ \wfName (opts' :: ContinueAsNewOptions) -> do
-      searchAttrs <- searchAttributesToProto
-          (if opts'.searchAttributes == mempty
-            then i.searchAttributes
-            else opts'.searchAttributes)
-      let protoArgs = fmap convertToProtoPayload args
-      throwIO $ ContinueAsNewException $ defMessage
-        & Command.workflowType .~ wfName
-        & Command.taskQueue .~ (maybe "" rawTaskQueue opts'.taskQueue)
-        & Command.vec'arguments .~ protoArgs
-        & Command.maybe'retryPolicy .~ (retryPolicyToProto <$> opts'.retryPolicy)
-        & Command.searchAttributes .~ searchAttrs
-        & Command.headers .~ fmap convertToProtoPayload opts'.headers
-        & Command.memo .~ fmap convertToProtoPayload opts'.memo
-        & Command.maybe'workflowTaskTimeout .~ (durationToProto <$> opts'.taskTimeout)
-        & Command.maybe'workflowRunTimeout .~ (durationToProto <$> opts'.runTimeout)
+      -- searchAttrs <- searchAttributesToProto
+      --     (if opts'.searchAttributes == mempty
+      --       then i.searchAttributes
+      --       else opts'.searchAttributes)
+      throwIO $ ContinueAsNewException (WorkflowType wfName) args opts'
     pure $ Done res
 
 -- | Returns a client-side handle that can be used to signal and cancel an existing Workflow execution. It takes a Workflow ID and optional run ID.

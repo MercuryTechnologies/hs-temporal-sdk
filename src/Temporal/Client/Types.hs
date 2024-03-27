@@ -97,11 +97,29 @@ startWorkflowOptions tq = StartWorkflowOptions
   , workflowStartDelay = Nothing
   }
 
-data WorkflowClient = WorkflowClient 
-  { clientCore :: Client
-  , clientDefaultNamespace :: Namespace
-  , clientInterceptors :: ClientInterceptors
+data WorkflowClientConfig = WorkflowClientConfig
+  { namespace :: !Namespace
+  -- ^ Default namespace for all workflows started by this client.
+  , interceptors :: !ClientInterceptors
+  -- ^ Interceptors to be used by the client.
+  , payloadProcessor :: !PayloadProcessor
+  -- ^ The payload processor to be used by the client.
+  --
+  -- This can be used to apply encryption and compression to payloads.
+  }
+  -- TODO
   -- , clientHeaders :: Map Text Payload
+
+mkWorkflowClientConfig :: Namespace -> WorkflowClientConfig
+mkWorkflowClientConfig ns = WorkflowClientConfig
+  { namespace = ns
+  , interceptors = mempty
+  , payloadProcessor = PayloadProcessor pure (pure . Right)
+  }
+
+data WorkflowClient = WorkflowClient 
+  { clientCore :: {-# UNPACK #-} !Client
+  , clientConfig :: {-# UNPACK #-} !WorkflowClientConfig
   }
 
 data WorkflowHandle a = WorkflowHandle

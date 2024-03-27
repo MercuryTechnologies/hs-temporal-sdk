@@ -191,7 +191,7 @@ data ContinueAsNewOptions = ContinueAsNewOptions
   , memo :: Map Text Payload
   , searchAttributes :: Map Text SearchAttributeType
   , headers :: Map Text Payload
-  }
+  } deriving (Show)
 
 defaultContinueAsNewOptions :: ContinueAsNewOptions
 defaultContinueAsNewOptions = ContinueAsNewOptions

@@ -23,6 +23,7 @@ import Temporal.Activity.Definition (ActivityDefinition)
 import Temporal.Activity.Worker (ActivityWorker)
 import Temporal.Exception (ApplicationFailureHandler)
 import Temporal.Interceptor
+import Temporal.Payload
 import Temporal.Core.Worker (InactiveForReplay)
 
 data WorkerConfig activityEnv = WorkerConfig
@@ -37,6 +38,7 @@ data WorkerConfig activityEnv = WorkerConfig
   -- Worker-internal traces for debugging purposes.
   , tracerProvider :: TracerProvider
   , logger :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
+  , payloadProcessor :: PayloadProcessor
   }
 
 data Worker (ty :: Core.WorkerType) activityEnv = Worker

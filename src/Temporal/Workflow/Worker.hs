@@ -36,15 +36,16 @@ import Temporal.Duration (durationFromProto)
 import Temporal.Core.Worker (InactiveForReplay)
 
 data WorkflowWorker = forall ty. WorkflowWorker
-  { workerWorkflowFunctions :: HashMap Text WorkflowDefinition
-  , runningWorkflows :: TVar (HashMap RunId WorkflowInstance)
+  { workerWorkflowFunctions :: {-# UNPACK #-} !(HashMap Text WorkflowDefinition)
+  , runningWorkflows :: {-# UNPACK #-} !(TVar (HashMap RunId WorkflowInstance))
   , workerClient :: InactiveForReplay ty C.Client
   , workerCore :: Core.Worker ty
-  , workerInboundInterceptors :: WorkflowInboundInterceptor
-  , workerOutboundInterceptors :: WorkflowOutboundInterceptor
+  , workerInboundInterceptors :: {-# UNPACK #-} !WorkflowInboundInterceptor
+  , workerOutboundInterceptors :: {-# UNPACK #-} !WorkflowOutboundInterceptor
   , workerDeadlockTimeout :: Maybe Int
   , workerTaskQueue :: TaskQueue
   , workerErrorConverters :: [ApplicationFailureHandler]
+  , processor :: {-# UNPACK #-} !PayloadProcessor
   }
 
 pollWorkflowActivation :: (MonadLoggerIO m) => ReaderT WorkflowWorker m (Either Core.WorkerError Core.WorkflowActivation)
@@ -197,6 +198,8 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
             searchAttrs <- liftIO $ do
               decodedAttrs <- startWorkflow ^. Activation.searchAttributes . Message.indexedFields . to searchAttributesFromProto
               either (throwIO . ValueError) pure decodedAttrs
+            hdrs <- processorDecodePayloads worker.processor (startWorkflow ^. Activation.headers . to (fmap convertFromProtoPayload))
+            memo <- processorDecodePayloads worker.processor (startWorkflow ^. Activation.memo . Message.fields . to (fmap convertFromProtoPayload))
             let runId_ = RunId $ activation ^. CommonProto.runId
                 parentProto = startWorkflow ^. Activation.maybe'parentWorkflowInfo
                 parentInfo = case parentProto of
@@ -218,8 +221,8 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                   , executionTimeout = fmap durationFromProto $ startWorkflow ^. Activation.maybe'workflowExecutionTimeout
                   , namespace = Namespace $ Core.namespace $ Core.getWorkerConfig workerCore
                   , parent = parentInfo
-                  , headers = startWorkflow ^. Activation.headers . to (fmap convertFromProtoPayload)
-                  , rawMemo = startWorkflow ^. Activation.memo . Message.fields . to (fmap convertFromProtoPayload)
+                  , headers = hdrs
+                  , rawMemo = memo
                   , searchAttributes = searchAttrs
                   , retryPolicy = retryPolicyFromProto <$> startWorkflow ^. Activation.maybe'retryPolicy
                   , runId = RunId $ activation ^. CommonProto.runId
@@ -242,6 +245,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                   worker.workerErrorConverters
                   worker.workerInboundInterceptors
                   worker.workerOutboundInterceptors
+                  worker.processor
                   workflowInfo 
                   startWorkflow
                 liftIO $ addStackTraceHandler inst

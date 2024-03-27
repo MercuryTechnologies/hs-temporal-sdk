@@ -587,8 +587,9 @@ mkScheduleAction :: forall wf m. (MonadIO m, WorkflowRef wf)
   --
   -- The workflow id will generally have a timestamp appended for uniqueness.
   -> (WorkflowArgs wf :->: m ScheduleAction)
-mkScheduleAction (workflowRef -> KnownWorkflow codec wfName) (WorkflowId wfId) opts = withArgs @(WorkflowArgs wf) @ScheduleAction @m codec $ \inputs -> liftIO $ do
+mkScheduleAction (workflowRef -> KnownWorkflow codec wfName) (WorkflowId wfId) opts = withArgs @(WorkflowArgs wf) @(m ScheduleAction) codec $ \inputs -> liftIO $ do
   searchAttrs <- searchAttributesToProto opts.searchAttributes
+  inputs' <- sequence inputs
   let tq = rawTaskQueue opts.taskQueue
       executionInfo = defMessage
         & W.workflowId .~ wfId
@@ -598,7 +599,7 @@ mkScheduleAction (workflowRef -> KnownWorkflow codec wfName) (WorkflowId wfId) o
             & C.name .~ tq
             & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
           )
-        & W.input .~ (defMessage & C.vec'payloads .~ fmap convertToProtoPayload inputs)
+        & W.input .~ (defMessage & C.vec'payloads .~ fmap convertToProtoPayload inputs')
         & W.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts.timeouts.executionTimeout)
         & W.maybe'workflowRunTimeout .~ (durationToProto <$> opts.timeouts.runTimeout)
         & W.maybe'workflowTaskTimeout .~ (durationToProto <$> opts.timeouts.taskTimeout)

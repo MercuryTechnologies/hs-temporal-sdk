@@ -35,13 +35,14 @@ import Temporal.Activity.Types
 
 data ActivityWorker env = ActivityWorker
   { initialEnv :: env
-  , definitions :: HashMap Text (ActivityDefinition env)
-  , runningActivities :: TVar (HashMap TaskToken (Async ()))
-  , workerCore :: Core.Worker 'Core.Real
-  , activityInboundInterceptors :: ActivityInboundInterceptor
-  , activityOutboundInterceptors :: ActivityOutboundInterceptor
-  , clientInterceptors :: ClientInterceptors
-  , activityErrorConverters :: [ApplicationFailureHandler]
+  , definitions :: {-# UNPACK #-} !(HashMap Text (ActivityDefinition env))
+  , runningActivities :: {-# UNPACK #-} !(TVar (HashMap TaskToken (Async ())))
+  , workerCore :: {-# UNPACK #-} !(Core.Worker 'Core.Real)
+  , activityInboundInterceptors :: {-# UNPACK #-} !ActivityInboundInterceptor
+  , activityOutboundInterceptors :: {-# UNPACK #-} !ActivityOutboundInterceptor
+  , clientInterceptors :: {-# UNPACK #-} !ClientInterceptors
+  , activityErrorConverters :: {-# UNPACK #-} ![ApplicationFailureHandler]
+  , payloadProcessor :: {-# UNPACK #-} !PayloadProcessor
   }
 
 newtype ActivityWorkerM env m a = ActivityWorkerM { unActivityWorkerM :: ReaderT (ActivityWorker env) m a }
@@ -64,13 +65,6 @@ execute worker = runActivityWorker worker go
   where
     go = do
       eTask <- liftIO $ Core.pollActivityTask worker.workerCore
-      -- logs <- liftIO $ fetchLogs globalRuntime
-      -- forM_ logs $ \l -> case l.level of
-      --   Trace -> $(logDebug) l.message
-      --   Debug -> $(logDebug) l.message
-      --   Temporal.Runtime.Info -> $(logInfo) l.message
-      --   Warn -> $(logWarn) l.message
-      --   Error -> $(logError) l.message
       case eTask of
         Left (Core.WorkerError Core.PollShutdown _) -> do
           pure ()
@@ -81,27 +75,31 @@ execute worker = runActivityWorker worker go
           applyActivityTask task
           go
 
-activityInfoFromProto :: TaskToken -> AT.Start -> ActivityInfo
-activityInfoFromProto tt msg = ActivityInfo
-  { workflowNamespace = Namespace $ msg ^. AT.workflowNamespace
-  , workflowType = WorkflowType $ msg ^. AT.workflowType
-  , workflowId = WorkflowId $ msg ^. AT.workflowExecution . P.workflowId
-  , runId = RunId $ msg ^. AT.workflowExecution . P.runId
-  , activityId = ActivityId $ msg ^. AT.activityId
-  , activityType = msg ^. AT.activityType
-  , headerFields = fmap convertFromProtoPayload (msg ^. AT.headerFields)
-  , heartbeatDetails = fmap convertFromProtoPayload (msg ^. AT.vec'heartbeatDetails)
-  , scheduledTime = msg ^. AT.scheduledTime . to timespecFromTimestamp
-  , currentAttemptScheduledTime = msg ^. AT.currentAttemptScheduledTime . to timespecFromTimestamp
-  , startedTime = msg ^. AT.startedTime . to timespecFromTimestamp
-  , attempt = msg ^. AT.attempt
-  , scheduleToCloseTimeout = fmap durationFromProto (msg ^. AT.maybe'scheduleToCloseTimeout)
-  , startToCloseTimeout = fmap durationFromProto (msg ^. AT.maybe'startToCloseTimeout)
-  , heartbeatTimeout = fmap durationFromProto (msg ^. AT.maybe'heartbeatTimeout)
-  , retryPolicy = fmap retryPolicyFromProto (msg ^. AT.maybe'retryPolicy)
-  , isLocal = msg ^. AT.isLocal
-  , taskToken = tt
-  }
+activityInfoFromProto :: MonadIO m => TaskToken -> AT.Start -> ActivityWorkerM actEnv m ActivityInfo
+activityInfoFromProto tt msg = do
+  w <- ask
+  hdrs <- processorDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload (msg ^. AT.headerFields))
+  heartbeats <- processorDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload (msg ^. AT.vec'heartbeatDetails))
+  pure $ ActivityInfo
+    { workflowNamespace = Namespace $ msg ^. AT.workflowNamespace
+    , workflowType = WorkflowType $ msg ^. AT.workflowType
+    , workflowId = WorkflowId $ msg ^. AT.workflowExecution . P.workflowId
+    , runId = RunId $ msg ^. AT.workflowExecution . P.runId
+    , activityId = ActivityId $ msg ^. AT.activityId
+    , activityType = msg ^. AT.activityType
+    , headerFields = hdrs
+    , heartbeatDetails = heartbeats
+    , scheduledTime = msg ^. AT.scheduledTime . to timespecFromTimestamp
+    , currentAttemptScheduledTime = msg ^. AT.currentAttemptScheduledTime . to timespecFromTimestamp
+    , startedTime = msg ^. AT.startedTime . to timespecFromTimestamp
+    , attempt = msg ^. AT.attempt
+    , scheduleToCloseTimeout = fmap durationFromProto (msg ^. AT.maybe'scheduleToCloseTimeout)
+    , startToCloseTimeout = fmap durationFromProto (msg ^. AT.maybe'startToCloseTimeout)
+    , heartbeatTimeout = fmap durationFromProto (msg ^. AT.maybe'heartbeatTimeout)
+    , retryPolicy = fmap retryPolicyFromProto (msg ^. AT.maybe'retryPolicy)
+    , isLocal = msg ^. AT.isLocal
+    , taskToken = tt
+    }
 
 -- | Signal to the Temporal worker that the activity will be completed asynchronously (out of band).
 --
@@ -136,11 +134,12 @@ applyActivityTaskStart tsk tt msg = do
   w <- ask
   $logDebug $ "Starting activity: " <> T.pack (show tsk)
   requireActivityNotRunning tt $ do
-    let info = activityInfoFromProto tt msg
-        env = w.initialEnv
-        actEnv = ActivityEnv w.workerCore info w.clientInterceptors env
+    info <- activityInfoFromProto tt msg
+    args <- processorDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload (msg ^. AT.vec'input)) 
+    let env = w.initialEnv
+        actEnv = ActivityEnv w.workerCore info w.clientInterceptors w.payloadProcessor env
         input = ExecuteActivityInput
-          (fmap convertFromProtoPayload (msg ^. AT.vec'input))
+          args
           info.headerFields
           info
     -- We mask here to ensure that the activity is definitely registered
@@ -178,11 +177,12 @@ applyActivityTaskStart tsk tt msg = do
                 ( defMessage & AR.failure .~ enrichedApplicationFailure )
           Right ok -> do
             $logDebug "Got activity result"
+            ok' <- liftIO $ payloadProcessorEncode w.payloadProcessor ok
             pure $ defMessage
               & C.taskToken .~ rawTaskToken tt
               & C.result .~ 
                 ( defMessage & AR.completed .~
-                  ( defMessage & AR.result .~ convertToProtoPayload ok )
+                  ( defMessage & AR.result .~ convertToProtoPayload ok' )
                 )
         $logDebug ("Activity completion message: " <> T.pack (show completionMsg))
         completionResult <- liftIO $ Core.completeActivityTask w.workerCore completionMsg

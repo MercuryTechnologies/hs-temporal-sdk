@@ -20,6 +20,7 @@ import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Aeson (Value, FromJSON, ToJSON, encode, eitherDecode)
+import qualified Data.ByteString as BS
 import Data.Int
 import Data.Text (Text)
 import Data.Time.Clock (UTCTime)
@@ -104,14 +105,30 @@ mkWithWorker :: PortNumber -> WorkerConfig actEnv -> IO a -> IO a
 mkWithWorker pn conf m = do
   let clientConfig = configWithRetry pn
   c <- connectClient globalRuntime clientConfig
-  bracket (startWorker c conf) shutdown (const m)
+  bracket (startWorker c (conf { payloadProcessor = sillyEncryptionPayloadProcessor })) shutdown (const m)
+
+-- Increment the bytestring words by 1 on encode, and decrement by 1 on decode
+--
+-- This is used to test that the payload processor is working correctly
+sillyEncryptionPayloadProcessor :: PayloadProcessor
+sillyEncryptionPayloadProcessor = PayloadProcessor incr decr
+  where
+    incr (Payload data_ meta) = pure $ Payload (BS.map (+1) data_) meta
+    decr (Payload data_ meta) = pure $ Right $ Payload (BS.map (\x -> x - 1) data_) meta
+
 
 makeClient :: PortNumber -> Interceptors -> IO (C.WorkflowClient, Client)
 makeClient pn Interceptors{..} = do
   let conf = configWithRetry pn
   c <- connectClient globalRuntime conf 
   (,) 
-    <$> C.workflowClient c (W.Namespace "default") clientInterceptors
+    <$> C.workflowClient 
+          c 
+          (C.WorkflowClientConfig 
+            { namespace = "default"
+            , interceptors = clientInterceptors 
+            , payloadProcessor = sillyEncryptionPayloadProcessor
+            })
     <*> pure c
 
 uuidText :: IO Text

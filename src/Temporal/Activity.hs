@@ -51,6 +51,7 @@ module Temporal.Activity
   ) where
 
 import Control.Monad
+import Control.Monad.Reader.Class
 import Control.Monad.IO.Class
 import Data.ProtoLens
 import Data.Proxy
@@ -61,10 +62,11 @@ import Temporal.Exception
 import Temporal.Activity.Definition
 import Temporal.Activity.Worker
 import Temporal.Common
-import Temporal.Core.Worker (recordActivityHeartbeat)
+import Temporal.Core.Worker (getWorkerClient, recordActivityHeartbeat)
 import Temporal.Payload
 import Temporal.Activity.Types
 import Temporal.Workflow.Types
+import Temporal.Worker.Types (Worker(..))
 
 import qualified Proto.Temporal.Sdk.Core.CoreInterface_Fields as Proto
 
@@ -126,10 +128,13 @@ heartbeat baseDetails = do
 -- with another Workflow, like using 'query' or 'signal'. This function
 -- provides a 'WorkflowClient' that can be used to accomplish that.
 activityWorkflowClient :: Activity env WorkflowClient
-activityWorkflowClient = do
-  c <- askActivityClient
-  i <- askActivityInfo
-  workflowClient c i.workflowNamespace mempty
+activityWorkflowClient = Activity $ do
+  e <- ask
+  workflowClient (getWorkerClient e.activityWorker) $ WorkflowClientConfig
+    { namespace = e.activityInfo.workflowNamespace 
+    , interceptors = e.activityClientInterceptors
+    , payloadProcessor = e.activityPayloadProcessor
+    }
 
 instance HasWorkflowClient (Activity env) where
   askWorkflowClient = activityWorkflowClient
