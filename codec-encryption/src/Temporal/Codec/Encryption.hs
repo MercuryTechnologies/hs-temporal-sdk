@@ -54,7 +54,7 @@ encrypt c initIV msg = convert initIV <> ctrCombine c initIV msg
 decrypt :: (BlockCipher c) => c -> ByteString -> Either String ByteString
 decrypt c msgWithIv = case makeIV ivBytes of
   Nothing -> Left "Invalid IV supplied for message"
-  Just reconstructedIV -> Right $ encrypt c reconstructedIV encryptedMsg
+  Just reconstructedIV -> Right $ ctrCombine c reconstructedIV encryptedMsg
   where 
     (ivBytes, encryptedMsg) = BS.splitAt aes256IVLength msgWithIv
     aes256IVLength = blockSize c
