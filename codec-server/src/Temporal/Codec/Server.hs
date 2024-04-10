@@ -94,20 +94,26 @@ codecServerMiddleware CodecServerConfig{..} =
 
     runEncode req respond = do
       let authHeader = lookup hAuthorization $ requestHeaders req
-      res <- runExceptT $ do
-        ns <- requireNamespaceHeader req
-        body <- streamingDecode req
-        traverse (codecServerEncoder ns authHeader) $ payloads body
-      respond $ case res of
-        Left err -> errorResponse err
-        Right ok -> responseLBS status200 respHeaders $ Data.Aeson.encode $ Body ok
+      if requestMethod req /= methodPost
+      then respond $ responseLBS status200 [] "{}"
+      else do
+        res <- runExceptT $ do
+          ns <- requireNamespaceHeader req
+          body <- streamingDecode req
+          traverse (codecServerEncoder ns authHeader) $ payloads body
+        respond $ case res of
+          Left err -> errorResponse err
+          Right ok -> responseLBS status200 respHeaders $ Data.Aeson.encode $ Body ok
 
     runDecode req respond = do
       let authHeader = lookup hAuthorization $ requestHeaders req
-      res <- runExceptT $ do
-        ns <- requireNamespaceHeader req
-        body <- streamingDecode req
-        traverse (codecServerDecoder ns authHeader) $ payloads body
-      respond $ case res of
-        Left err -> errorResponse err
-        Right ok -> responseLBS status200 respHeaders $ Data.Aeson.encode $ Body ok
+      if requestMethod req /= methodPost
+      then respond $ responseLBS status200 [] "{}"
+      else do
+        res <- runExceptT $ do
+          ns <- requireNamespaceHeader req
+          body <- streamingDecode req
+          traverse (codecServerDecoder ns authHeader) $ payloads body
+        respond $ case res of
+          Left err -> errorResponse err
+          Right ok -> responseLBS status200 respHeaders $ Data.Aeson.encode $ Body ok

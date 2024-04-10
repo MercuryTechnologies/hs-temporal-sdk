@@ -1,79 +1,72 @@
-module Temporal.Codec.Encryption where
+module Temporal.Codec.Encryption 
+  ( Key
+  , keyFromBytes
+  , Cipher
+  , keyToBase64
+  , keyFromBase64
+  , genSecretKey
+  , initCipher
+  , Encrypted
+  , mkEncryptionCodec
+  ) where
 
 import Crypto.Cipher.AES (AES256)
-import Crypto.Cipher.Types (BlockCipher(..), Cipher(..), IV, makeIV, ivAdd)
+import qualified Crypto.Cipher.AESGCMSIV as AESGCMSIV
+import Crypto.Cipher.Types (AuthTag(..), KeySizeSpecifier(KeySizeFixed), cipherInit, cipherKeySize)
 import Crypto.Error (CryptoFailable(..))
+import Control.Error
+import Control.Exception (displayException)
 import Control.Monad.IO.Class
 import qualified Crypto.Random.Types as CRT
 
 import Data.ByteArray (ScrubbedBytes, convert)
 import Data.ByteArray.Encoding
 import Data.ByteString (ByteString)
-import qualified Data.ByteString as BS
-import Data.IORef
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.ProtoLens.Encoding (encodeMessage, decodeMessage)
-import Data.Proxy
 import Temporal.Payload
 
--- TODO
--- encryptionInterceptor :: Interceptors
--- encryptionInterceptor = fowefowe
+-- An unencoded AES-256 encryption key
+newtype Key where
+  Key :: ScrubbedBytes -> Key
+  deriving (Eq, Ord, Show)
 
-data Key c where
-  Key :: (BlockCipher c) => ScrubbedBytes -> Key c
+newtype Cipher where
+  Cipher :: AES256 -> Temporal.Codec.Encryption.Cipher
 
-keyToBase64 :: Key c -> ByteString
+keyFromBytes :: ScrubbedBytes -> Key
+keyFromBytes = Key
+
+keyToBase64 :: Key -> ByteString
 keyToBase64 (Key bytes) = convertToBase Base64 bytes
 
-keyFromBase64 :: BlockCipher c => ByteString -> Either String (Key c)
+keyFromBase64 :: ByteString -> Either String Key
 keyFromBase64 bs64 = case convertFromBase Base64 bs64 of
-  Left err -> Left err
+  Left e -> Left e
   Right bs -> Right $ Key (bs :: ScrubbedBytes)
 
 -- | Generates a string of bytes (key) of a specific length for a given block cipher
-genSecretKey :: forall m c. (CRT.MonadRandom m, BlockCipher c) => Proxy c -> Int -> m (Key c)
-genSecretKey _ = fmap Key . CRT.getRandomBytes
+genSecretKey :: forall m. (CRT.MonadRandom m) => m Key
+genSecretKey = fmap Key $ CRT.getRandomBytes $ case cipherKeySize (undefined :: AES256) of
+  KeySizeFixed n -> n
+  _ -> error "AES256 key size should fixed"
 
--- | Generate a random initialization vector for a given block cipher
-genRandomIV :: forall m c. (CRT.MonadRandom m, BlockCipher c) => Proxy c -> m (Maybe (IV c))
-genRandomIV _ = do
-  bytes :: ByteString <- CRT.getRandomBytes $ blockSize (undefined :: c)
-  return $ makeIV bytes
-
--- | Initialize a block cipher
-initCipher :: (BlockCipher c) => Key c -> Either String c
+-- | Initialize an AES256 cipher
+initCipher :: Key -> Either String Cipher
 initCipher (Key k) = case cipherInit k of
   CryptoFailed e -> Left $ show e
-  CryptoPassed a -> Right a
-
-encrypt :: (BlockCipher c) => c -> IV c -> ByteString -> ByteString
-encrypt c initIV msg = convert initIV <> ctrCombine c initIV msg
-
-decrypt :: (BlockCipher c) => c -> ByteString -> Either String ByteString
-decrypt c msgWithIv = case makeIV ivBytes of
-  Nothing -> Left "Invalid IV supplied for message"
-  Just reconstructedIV -> Right $ ctrCombine c reconstructedIV encryptedMsg
-  where 
-    (ivBytes, encryptedMsg) = BS.splitAt aes256IVLength msgWithIv
-    aes256IVLength = blockSize c
+  CryptoPassed a -> Right $ Cipher a
 
 data Encrypted = Encrypted
-  { encryptionKeys :: Map ByteString AES256
-  , ivRef :: IORef (IV AES256)
+  { encryptionKeys :: Map ByteString Cipher
   , defaultKeyName :: ByteString
-  , defaultKey :: AES256
+  , defaultKey :: Cipher
   -- TODO, fetchKey operation to support a KMS (key management system)
   }
 
-mkEncryptionCodec :: MonadIO m => (ByteString, AES256) -> Map ByteString AES256 -> m (Either String Encrypted)
+mkEncryptionCodec :: MonadIO m => (ByteString, Cipher) -> Map ByteString Cipher -> m (Either String Encrypted)
 mkEncryptionCodec (defaultKeyName, defaultKey) otherKeys = liftIO $ do
-  mRandomIV <- genRandomIV (Proxy @AES256)
-  case mRandomIV of
-    Nothing -> pure $ Left "Unable to generate IV for AES256 codec"
-    Just randomIV -> do
-      ivRef <- newIORef randomIV
       pure $ Right $ Encrypted
         { encryptionKeys = Map.insert defaultKeyName defaultKey otherKeys
         , ..
@@ -82,19 +75,30 @@ mkEncryptionCodec (defaultKeyName, defaultKey) otherKeys = liftIO $ do
 instance Codec Encrypted Payload where
   encoding _ _ = "binary/encrypted"
   encode Encrypted{..} x = do
-    iv <- atomicModifyIORef' ivRef (\iv -> let next = ivAdd iv 1 in (next, iv))
-    pure $ Payload 
-      (encrypt defaultKey iv $ encodeMessage $ convertToProtoPayload x) 
-      (Map.fromList [("encryption-key-id", defaultKeyName), ("encoding", "binary/encrypted")])
-  decode Encrypted{..} payload = 
-    if payload.payloadMetadata Map.!? "encoding" /= (Just "binary/encrypted")
-    then pure $ Right payload
-    else 
+    n <- AESGCMSIV.generateNonce
+    let (Cipher k) = defaultKey
+        (authTag, encrypted) = AESGCMSIV.encrypt k n (mempty :: ByteString) $ encodeMessage $ convertToProtoPayload x
+    pure $ Payload encrypted
+      (Map.fromList 
+        [ ("encryption-key-id", defaultKeyName)
+        , ("encoding", "binary/encrypted")
+        , ("cipher", "AESGCMSIV")
+        , ("nonce", convert n)
+        , ("auth-tag", convert authTag)
+        ])
+  decode Encrypted{..} payload = case (,) <$> payload.payloadMetadata Map.!? "encoding" <*> payload.payloadMetadata Map.!? "cipher" of
+    Just ("binary/encrypted", "AESGCMSIV") -> do
       if payload.payloadData == ""
       then pure $ Left "Payload data is missing"
-      else
-        case payload.payloadMetadata Map.!? "encryption-key-id" of
-          Nothing -> pure $ Left "Unable to decrypt Payload without encryption key id'"
-          Just keyName -> case encryptionKeys Map.!? keyName of
-            Nothing -> pure $ Left ("Could not find encryption key: " <> show keyName)
-            Just k -> pure $ fmap convertFromProtoPayload (decrypt k payload.payloadData >>= decodeMessage)
+      else runExceptT $ do
+        keyName <- tryJust "Unable to decrypt Payload without encryption key id'" $ payload.payloadMetadata Map.!? "encryption-key-id"
+        (Cipher k) <- tryJust ("Could not find encryption key: " <> show keyName) $ encryptionKeys Map.!? keyName
+        rawNonce <- tryJust "Unable to decrypt Payload without nonce" $ payload.payloadMetadata Map.!? "nonce"
+        n <- case AESGCMSIV.nonce rawNonce of
+          CryptoPassed n -> pure n
+          CryptoFailed e -> throwE $ displayException e
+        authTag <- tryJust "Unable to decrypt Payload without auth tag" $ payload.payloadMetadata Map.!? "auth-tag"
+        decrypted <- tryJust "Unable to decrypt Payload" $ AESGCMSIV.decrypt k n (mempty :: ByteString) payload.payloadData (AuthTag $ convert authTag)
+        p <- tryRight $ decodeMessage decrypted
+        pure $! convertFromProtoPayload p
+    _ -> pure $ Right payload

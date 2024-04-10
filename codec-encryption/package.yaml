@@ -8,6 +8,7 @@ version: "0.0.1.0"
 
 dependencies:
 - base
+- errors
 - temporal-sdk
 - bytestring
 - containers
@@ -66,3 +67,12 @@ ghc-options:
 library:
   source-dirs: src
   other-modules: []
+
+tests:
+  encryption-tests:
+    ghc-options: -g -threaded -rtsopts -with-rtsopts=-N
+    dependencies:
+      - temporal-codec-encryption
+      - hedgehog
+    main: Main.hs
+    source-dirs: test
