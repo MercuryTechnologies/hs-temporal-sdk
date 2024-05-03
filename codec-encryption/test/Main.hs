@@ -1,6 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Main where
 
+import Control.Monad (when)
 import Data.ByteArray (convert)
 import Data.ByteString (ByteString)
 import Data.Either (isLeft)
@@ -15,7 +16,7 @@ import qualified Hedgehog.Range as Range
 import Temporal.Payload
 
 genByteString :: MonadGen m => m ByteString
-genByteString = Gen.bytes (Range.linear 1 1024)
+genByteString = Gen.bytes (Range.linear 0 1024)
 
 genText :: MonadGen m => m Text
 genText = T.pack <$> Gen.string (Range.linear 0 100) Gen.alphaNum
@@ -43,7 +44,8 @@ prop_roundtripEncryption = property $ do
   encoded <- evalIO $ encode codec somePayload
 
   -- Ensure the encrypted payload is not the plaintext
-  encoded /== somePayload
+  when (somePayload.payloadData /= "") $ do
+    encoded /== somePayload
 
   -- Attempt to decrypt the encrypted payload
   (Right decoded) <- evalIO $ decode codec encoded
@@ -55,7 +57,7 @@ prop_failedDecryptionWithTamperedCiphertext :: Property
 prop_failedDecryptionWithTamperedCiphertext = property $ do
   k <- forAll genKey
   cipher <- evalEither $ initCipher k
-  somePayload <- forAll genPayload
+  somePayload <- forAll $ Gen.filter (\p -> p.payloadData /= "") genPayload
   codec <- evalEitherM $ mkEncryptionCodec ("test", cipher) mempty
   encoded <- evalIO $ encode codec somePayload
 

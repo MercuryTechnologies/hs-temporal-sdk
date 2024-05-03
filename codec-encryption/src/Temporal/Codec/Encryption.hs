@@ -75,17 +75,20 @@ mkEncryptionCodec (defaultKeyName, defaultKey) otherKeys = liftIO $ do
 instance Codec Encrypted Payload where
   encoding _ _ = "binary/encrypted"
   encode Encrypted{..} x = do
-    n <- AESGCMSIV.generateNonce
-    let (Cipher k) = defaultKey
-        (authTag, encrypted) = AESGCMSIV.encrypt k n (mempty :: ByteString) $ encodeMessage $ convertToProtoPayload x
-    pure $ Payload encrypted
-      (Map.fromList 
-        [ ("encryption-key-id", defaultKeyName)
-        , ("encoding", "binary/encrypted")
-        , ("cipher", "AESGCMSIV")
-        , ("nonce", convert n)
-        , ("auth-tag", convert authTag)
-        ])
+    if x.payloadData == ""
+    then pure x
+    else do
+      n <- AESGCMSIV.generateNonce
+      let (Cipher k) = defaultKey
+          (authTag, encrypted) = AESGCMSIV.encrypt k n (mempty :: ByteString) $ encodeMessage $ convertToProtoPayload x
+      pure $ Payload encrypted
+        (Map.fromList 
+          [ ("encryption-key-id", defaultKeyName)
+          , ("encoding", "binary/encrypted")
+          , ("cipher", "AESGCMSIV")
+          , ("nonce", convert n)
+          , ("auth-tag", convert authTag)
+          ])
   decode Encrypted{..} payload = case (,) <$> payload.payloadMetadata Map.!? "encoding" <*> payload.payloadMetadata Map.!? "cipher" of
     Just ("binary/encrypted", "AESGCMSIV") -> do
       if payload.payloadData == ""
