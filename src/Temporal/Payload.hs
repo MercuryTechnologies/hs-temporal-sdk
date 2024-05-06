@@ -101,7 +101,7 @@ import Data.ByteString.Base64 (encodeBase64, decodeBase64)
 -- | Used to denote that a payload either failed to encode or decode
 data ValueError
   = ValueError String
-  deriving stock (Show)
+  deriving stock (Eq, Show)
 instance Exception ValueError
 
 {- * Parameter serialization 

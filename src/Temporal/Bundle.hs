@@ -165,6 +165,7 @@ import Data.EvalRecord
 import qualified Data.EvalRecord as Rec
 import Fcf
 
+import Control.Monad.Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Kind
@@ -469,7 +470,7 @@ type WorkerConfigs env rec = rec (ConstFn (WorkerConfig env))
 --
 -- This function starts each worker concurrently, waits for them to initialize, and then returns
 -- a worker for each task queue.
-startTaskQueues :: forall rec m env. (TraversableRec rec, MonadUnliftIO m) => Client -> WorkerConfigs env rec -> m (Workers rec)
+startTaskQueues :: forall rec m env. (TraversableRec rec, MonadUnliftIO m, MonadCatch m) => Client -> WorkerConfigs env rec -> m (Workers rec)
 startTaskQueues client conf = startWorkers conf >>= awaitWorkersStart
   where
     startWorkers :: rec (ConstFn (WorkerConfig env)) -> m (rec (ConstFn (Async Worker)))

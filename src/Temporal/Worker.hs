@@ -71,6 +71,7 @@ module Temporal.Worker
   , WorkflowId(..)
   ) where
 import UnliftIO
+import Control.Monad.Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Control.Monad.State
@@ -366,7 +367,7 @@ data Worker = forall ty. Worker
   , workerTracer :: Tracer
   }
 
-startReplayWorker :: (MonadUnliftIO m) => Runtime -> WorkerConfig actEnv -> m (Temporal.Worker.Worker, Core.HistoryPusher)
+startReplayWorker :: (MonadUnliftIO m, MonadCatch m) => Runtime -> WorkerConfig actEnv -> m (Temporal.Worker.Worker, Core.HistoryPusher)
 startReplayWorker rt conf = provideCallStack $ runWorkerContext conf $ do
   $(logDebug) "Starting worker"
   (workerCore, replay) <- either throwIO pure =<< liftIO (Core.newReplayWorker rt conf.coreConfig)
@@ -388,6 +389,7 @@ startReplayWorker rt conf = provideCallStack $ runWorkerContext conf $ do
     $(logDebug) "Starting workflow worker loop"
     Workflow.execute workflowWorker
     $(logDebug) "Exiting workflow worker loop"
+  link workerWorkflowLoop
   pure (Temporal.Worker.Worker{..}, replay)
 
 traced :: WorkerConfig env -> ReaderT Tracer m a -> m a
@@ -400,12 +402,12 @@ runWorkerContext :: WorkerConfig conf -> WorkerContextM m a -> m a
 runWorkerContext conf (WorkerContextM m) = flip runLoggingT conf.logger $ traced conf m
 
 newtype WorkerContextM m a = WorkerContextM (ReaderT Tracer (LoggingT m) a)
-  deriving newtype (Functor, Applicative, Monad, MonadIO, MonadUnliftIO, MonadLogger, MonadLoggerIO)
+  deriving newtype (Functor, Applicative, Monad, MonadIO, MonadUnliftIO, MonadLogger, MonadLoggerIO, MonadCatch, MonadThrow)
 
 instance Monad m => MonadTracer (WorkerContextM m) where
   getTracer = WorkerContextM ask
 
-startWorker :: (MonadUnliftIO m) => Client -> WorkerConfig actEnv -> m Temporal.Worker.Worker
+startWorker :: (MonadUnliftIO m, MonadCatch m) => Client -> WorkerConfig actEnv -> m Temporal.Worker.Worker
 startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "startWorker" defaultSpanArguments $ do
   workerCore <- inSpan "Core.newWorker" defaultSpanArguments 
     (either throwIO pure =<< liftIO (Core.newWorker client conf.coreConfig))
@@ -446,6 +448,8 @@ startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "sta
     $(logDebug) "Starting activity worker loop"
     Activity.execute activityWorker
     $(logDebug) "Exiting activity worker loop"
+  link workerWorkflowLoop
+  link workerActivityLoop
   pure Temporal.Worker.Worker{..}
 
 -- | Wait for a worker to exit. This waits for both the workflow and activity loops to complete.
@@ -457,13 +461,10 @@ waitWorker :: (MonadIO m) => Temporal.Worker.Worker -> m ()
 waitWorker (Temporal.Worker.Worker{workerType, workerWorkflowLoop, workerActivityLoop}) = do
   case workerType of
     Core.SReal -> do
-      link workerWorkflowLoop
-      link workerActivityLoop
       _ <- wait workerWorkflowLoop
       _ <- wait workerActivityLoop
       pure ()
     Core.SReplay -> do
-      link workerWorkflowLoop
       _ <- waitCatch workerWorkflowLoop
       pure ()
   -- logs <- liftIO $ fetchLogs globalRuntime
@@ -474,7 +475,7 @@ waitWorker (Temporal.Worker.Worker{workerType, workerWorkflowLoop, workerActivit
 -- | Shut down a worker. This will initiate a graceful shutdown of the worker, waiting for all
 -- in-flight tasks to complete before finalizing the shutdown.
 shutdown :: (MonadUnliftIO m) => Temporal.Worker.Worker -> m ()
-shutdown worker@Temporal.Worker.Worker{workerCore, workerTracer} = OT.inSpan workerTracer "shutdown" defaultSpanArguments $ mask $ \restore -> do
+shutdown worker@Temporal.Worker.Worker{workerCore, workerTracer} = OT.inSpan workerTracer "shutdown" defaultSpanArguments $ UnliftIO.mask $ \restore -> do
   OT.inSpan workerTracer "initiateShutdown" defaultSpanArguments $ liftIO $ Core.initiateShutdown workerCore
 
   OT.inSpan workerTracer "waitWorker" defaultSpanArguments $ restore $ waitWorker worker

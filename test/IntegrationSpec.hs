@@ -500,16 +500,44 @@ needsClient = do
       --           taskQueue
       --     C.execute wf.reference opts "hello there."
       --       `shouldReturn` "general kenobi"
-  --     specify "args that parse incorrectly should fail a Workflow appropriately" $ \TestEnv{..} -> do
-  --       pending
-  --     specify "args that parse incorrectly should fail an Activity appropriately" $ \TestEnv{..} -> do
-  --       pending
-  --     specify "Workflow return values that parse incorrectly should throw a ValueException for Client" $ \TestEnv{..} -> do
-  --       pending
-  --     specify "ChildWorkflow return values that parse incorrectly should throw a ValueException in a Workflow" $ \TestEnv{..} -> do
-  --       pending
-  --     specify "Activity return values that parse incorrectly should throw a ValueException in a Workflow" $ \TestEnv{..} -> do
-  --       pending
+      specify "args that parse incorrectly should fail a Workflow appropriately" $ \TestEnv{..} -> do
+        let testFn :: Int -> W.Workflow Bool
+            testFn _ = pure True
+            wf = W.provideWorkflow defaultCodec "test" testFn
+            badWfRef = W.KnownWorkflow @'[String] @Int defaultCodec "test"
+            conf = configure () wf $ do
+              baseConf
+            opts = (C.startWorkflowOptions taskQueue)
+              { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+              }
+        withWorker conf $ do
+          useClient (C.execute badWfRef "incorrectWorkflowArg" opts "ruhroh")
+            `shouldThrow` (WorkflowExecutionFailed ==)
+      specify "memo values that parse incorrectly should fail a Workflow appropriately" $ \TestEnv{..} -> do
+        pending
+      specify "header values that parse incorrectly should fail a Workflow appropriately" $ \TestEnv{..} -> do
+        pending
+      specify "search attribute values that parse incorrectly should fail a Workflow appropriately" $ \TestEnv{..} -> do
+        pending
+      specify "args that parse incorrectly should fail an Activity appropriately" $ \TestEnv{..} -> do
+        pending
+      specify "Workflow return values that parse incorrectly should throw a ValueException for Client" $ \TestEnv{..} -> do
+        let testFn :: Int -> W.Workflow Bool
+            testFn _ = pure True
+            wf = W.provideWorkflow defaultCodec "test" testFn
+            badWfRef = W.KnownWorkflow @'[Int] @String defaultCodec "test"
+            conf = configure () wf $ do
+              baseConf
+            opts = (C.startWorkflowOptions taskQueue)
+              { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+              }
+        withWorker conf $ do
+          useClient (C.execute badWfRef "incorrectWorkflowArg" opts 0)
+            `shouldThrow` (ValueError "Error in $: expected String, but encountered Boolean" ==)
+      specify "ChildWorkflow return values that parse incorrectly should throw a ValueException in a Workflow" $ \TestEnv{..} -> do
+        pending
+      specify "Activity return values that parse incorrectly should throw a ValueException in a Workflow" $ \TestEnv{..} -> do
+        pending
 
   --   describe "not found" $ do
   --     xit "should result in a task retry" $ \TestEnv{..} -> do

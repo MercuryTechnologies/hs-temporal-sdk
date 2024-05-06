@@ -69,13 +69,13 @@ import Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow
   ( StartChildWorkflowExecutionFailedCause(..)
   )
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
+import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Completion
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands as Command
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import UnliftIO
 import Data.Time.Clock.System (SystemTime(..))
-import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Completion
 
 
 create :: (HasCallStack, MonadLoggerIO m)

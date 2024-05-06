@@ -234,7 +234,8 @@ waitWorkflowResult h@(WorkflowHandle readResult _ c wf r) = do
             else case payloads of
               (a:_) -> liftIO $ readResult a
               _ -> error "Missing result payload"
-        HistoryEvent'WorkflowExecutionFailedEventAttributes _attrs -> throwIO WorkflowExecutionFailed
+        HistoryEvent'WorkflowExecutionFailedEventAttributes attrs ->
+          throwIO $ WorkflowExecutionFailed attrs
         HistoryEvent'WorkflowExecutionTimedOutEventAttributes _attrs -> throwIO WorkflowExecutionTimedOut
         HistoryEvent'WorkflowExecutionCanceledEventAttributes _attrs -> throwIO WorkflowExecutionCanceled
         HistoryEvent'WorkflowExecutionTerminatedEventAttributes _attrs -> throwIO WorkflowExecutionTerminated

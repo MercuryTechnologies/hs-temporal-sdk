@@ -12,6 +12,7 @@ import Data.Vector (Vector)
 import GHC.Stack
 import qualified Proto.Temporal.Api.Failure.V1.Message as Proto
 import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands (ContinueAsNewWorkflowExecution)
+import Proto.Temporal.Api.History.V1.Message
 import Proto.Temporal.Api.Failure.V1.Message
 import Temporal.Common
 import Temporal.Payload
@@ -35,6 +36,70 @@ workerExceptionFromException :: Exception e => SomeException -> Maybe e
 workerExceptionFromException x = do
   SomeWorkerException a <- fromException x
   cast a
+
+-- type SomeFailure = Failure (Maybe FailureInfo)
+
+-- data Failure = Failure
+--   { message :: Text
+--   , source :: Text
+--   , stackTrace :: Text
+--   , encodedAttributes :: Maybe Payload
+--   , cause :: Maybe Failure
+--   , failureInfo :: Maybe FailureInfo
+--   }
+
+-- data FailureInfo
+--   = ApplicationFailureInfo ApplicationFailure
+--   | TimeoutFailureInfo TimeoutFailure
+--   | CanceledFailureInfo CanceledFailure
+--   | TerminatedFailureInfo TerminatedFailure
+--   | ServerFailureInfo ServerFailure
+--   | ResetWorkflowFailureInfo ResetWorkflowFailure
+--   | ActivityFailureInfo ActivityFailure
+--   | ChildWorkflowExecutionFailureInfo ChildWorkflowExecutionFailure
+
+-- data ApplicationFailureInfo = ApplicationFailureInfo
+--   { type' :: Text
+--   , nonRetryable :: Bool
+--   , details :: Vector Payload
+--   }
+
+-- data TimeoutFailureInfo = TimeoutFailureInfo
+--   { timeoutType :: TimeoutTime
+--   , lastHeartbeatDetails :: Vector Payload
+--   }
+
+-- data CanceledFailureInfo = CanceledFailureInfo
+--   { details :: Vector Payload
+--   }
+
+-- data ResetWorkflowFailureInfo = ResetWorkflowFailureInfo
+--   { lastHeartbeatDetails :: Vector Payload
+--   }
+
+-- data TerminatedFailure = TerminatedFailure
+
+-- data ServerFailure = ServerFailure
+--   { nonRetryable :: Bool
+--   }
+
+-- data ActivityFailure = ActivityFailure
+--   { scheduledEventId :: Int64
+--   , startedEventId :: Int64
+--   , identity :: Text
+--   , activityType :: ActivityType
+--   , activityId :: ActivityId
+--   , retryState :: RetryState
+--   }
+
+-- data ChildWorkflowExecutionFailure = ChildWorkflowExecutionFailure
+--   { namespace :: Text
+--   , workflowExecution :: WorkflowExecution
+--   , workflowType :: WorkflowType
+--   , initiatedEventId :: Int64
+--   , startedEventId :: Int64
+--   , retryState :: RetryState
+--   }
 
 -- | Errors that are an issue with the worker itself, not the workflow
 --
@@ -259,9 +324,8 @@ instance Exception CompleteAsync where
   toException = activityExceptionToException
   fromException = activityExceptionFromException
 
-
 data WorkflowExecutionClosed 
-  = WorkflowExecutionFailed
+  = WorkflowExecutionFailed WorkflowExecutionFailedEventAttributes
   | WorkflowExecutionTimedOut
   | WorkflowExecutionCanceled
   | WorkflowExecutionTerminated
@@ -269,3 +333,11 @@ data WorkflowExecutionClosed
   deriving stock (Show, Eq)
 
 instance Exception WorkflowExecutionClosed
+
+data WorkflowExecutionFailedAttributes = WorkflowExecutionFailedAttributes
+  { failure :: Maybe Failure
+  , retryState :: RetryState
+  , workflowTaskCompletedEventId :: Int64
+  , newExecutionRunId :: Maybe RunId
+  }
+  deriving stock (Show, Eq)
