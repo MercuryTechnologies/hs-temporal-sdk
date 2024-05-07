@@ -25,6 +25,9 @@ module Temporal.Worker
   , startWorker
   , waitWorker
   , shutdown
+  , linkWorker
+  , pollWorkerSTM
+  , waitWorkerSTM
   -- * Configuration
   , WorkerConfig(..)
   , Definitions(..)
@@ -71,11 +74,15 @@ module Temporal.Worker
   , WorkflowId(..)
   ) where
 import UnliftIO
+import Control.Concurrent
+import Control.Monad
 import Control.Monad.Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Control.Monad.State
 import Data.HashMap.Strict (HashMap)
+import Data.Either (lefts)
+import Data.Foldable
 import OpenTelemetry.Trace.Core hiding (inSpan)
 import qualified OpenTelemetry.Trace.Core as OT
 import OpenTelemetry.Trace.Monad
@@ -90,9 +97,11 @@ import Temporal.Worker.Types
 import Temporal.Workflow.Definition
 import qualified Temporal.Workflow.Worker as Workflow
 import Data.Text (Text)
+import qualified Data.Text as T
 import Data.Word
 import qualified Data.HashMap.Strict as HashMap
 import Temporal.Interceptor
+import Temporal.Common.Async
 import Temporal.Core.Worker (InactiveForReplay)
 import Temporal.Runtime
 import RequireCallStack
@@ -385,11 +394,10 @@ startReplayWorker rt conf = provideCallStack $ runWorkerContext conf $ do
       workerActivityLoop = error "Cannot use activity worker in replay worker"
       workerType = Core.SReplay
       workerTracer = makeTracer conf.tracerProvider (InstrumentationLibrary "hs-temporal-sdk" "0.0.1.0") tracerOptions
-  workerWorkflowLoop <- async $ do
+  workerWorkflowLoop <- asyncLabelled (T.unpack $ T.concat [ "temporal/worker/workflow/", Core.namespace conf.coreConfig, "/", Core.taskQueue conf.coreConfig ]) $ do
     $(logDebug) "Starting workflow worker loop"
-    Workflow.execute workflowWorker
-    $(logDebug) "Exiting workflow worker loop"
-  link workerWorkflowLoop
+    Workflow.execute workflowWorker 
+      `UnliftIO.finally` $(logDebug) "Exiting workflow worker loop"
   pure (Temporal.Worker.Worker{..}, replay)
 
 traced :: WorkerConfig env -> ReaderT Tracer m a -> m a
@@ -440,16 +448,14 @@ startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "sta
   --   Info -> $(logInfo) l.message
   --   Warn -> $(logWarn) l.message
   --   Error -> $(logError) l.message
-  workerWorkflowLoop <- async $ do
+  workerWorkflowLoop <- asyncLabelled (T.unpack $ T.concat [ "temporal/worker/workflow/", Core.namespace conf.coreConfig, "/", Core.taskQueue conf.coreConfig ]) $ do
     $(logDebug) "Starting workflow worker loop"
     Workflow.execute workflowWorker
-    $(logDebug) "Exiting workflow worker loop"
-  workerActivityLoop <- async $ do 
+      `UnliftIO.finally` $(logDebug) "Exiting workflow worker loop"
+  workerActivityLoop <- asyncLabelled (T.unpack $ T.concat [ "temporal/worker/activity/", Core.namespace conf.coreConfig, "/", Core.taskQueue conf.coreConfig ]) $ do 
     $(logDebug) "Starting activity worker loop"
     Activity.execute activityWorker
-    $(logDebug) "Exiting activity worker loop"
-  link workerWorkflowLoop
-  link workerActivityLoop
+      `UnliftIO.finally` $(logDebug) "Exiting activity worker loop"
   pure Temporal.Worker.Worker{..}
 
 -- | Wait for a worker to exit. This waits for both the workflow and activity loops to complete.
@@ -461,16 +467,65 @@ waitWorker :: (MonadIO m) => Temporal.Worker.Worker -> m ()
 waitWorker (Temporal.Worker.Worker{workerType, workerWorkflowLoop, workerActivityLoop}) = do
   case workerType of
     Core.SReal -> do
-      _ <- wait workerWorkflowLoop
-      _ <- wait workerActivityLoop
-      pure ()
+      wfRes <- waitCatch workerWorkflowLoop
+      actRes <- waitCatch workerActivityLoop
+      for_ (lefts [wfRes, actRes]) throwIO
     Core.SReplay -> do
-      _ <- waitCatch workerWorkflowLoop
+      _ <- wait workerWorkflowLoop
       pure ()
   -- logs <- liftIO $ fetchLogs globalRuntime
   -- forM_ logs $ \l -> do
   --   $(logInfo) $ Text.pack $ show l
 
+
+-- | Link a worker to the current thread. This will cause uncaught worker exceptions to be rethrown in the current thread.
+--
+-- If the worker has both workflow and activity definitions registered, this will link both the workflow and activity loops.
+-- If one of the loops fails, the worker will initiate graceful shutdown (but not block) before rethrowing the exception.
+linkWorker :: Temporal.Worker.Worker -> IO ()
+linkWorker Temporal.Worker.Worker{workerCore, workerType, workerWorkflowLoop, workerActivityLoop} = do
+  tid <- myThreadId
+  void $ forkIOLabelled (T.unpack $ T.concat [ "temporal/worker/link/", Core.namespace c, "/", Core.taskQueue c ]) $ do
+    let errorClause :: SomeException -> IO ()
+        errorClause e = do
+          Core.initiateShutdown workerCore
+          Control.Concurrent.throwTo tid e
+    case workerType of
+      Core.SReal ->  do
+        eeRes <- race (waitCatch workerWorkflowLoop) (waitCatch workerActivityLoop)
+        case eeRes of
+          Left (Left e) -> errorClause e
+          Right (Left e) -> errorClause e
+          _ -> pure ()
+      Core.SReplay -> do
+        eRes <- waitCatch workerWorkflowLoop
+        case eRes of
+          Left e -> errorClause e
+          _ -> pure ()
+  where
+    c = Core.getWorkerConfig workerCore
+
+
+pollWorkerSTM :: Temporal.Worker.Worker -> STM (Maybe (Either SomeException ()))
+pollWorkerSTM Temporal.Worker.Worker{workerType, workerWorkflowLoop, workerActivityLoop} = do
+  case workerType of
+    Core.SReal -> do
+      wfRes <- pollSTM workerWorkflowLoop
+      actRes <- pollSTM workerActivityLoop
+      pure $ case (wfRes, actRes) of
+        (Just (Left e), _) -> Just (Left e)
+        (_, Just (Left e)) -> Just (Left e)
+        (Just (Right ()), Just (Right ())) -> Just (Right ())
+        _ -> Nothing
+    Core.SReplay -> pollSTM workerWorkflowLoop
+
+waitWorkerSTM :: Temporal.Worker.Worker -> STM ()
+waitWorkerSTM Temporal.Worker.Worker{workerType, workerWorkflowLoop, workerActivityLoop} = do
+  case workerType of
+    Core.SReal -> do
+      waitSTM workerWorkflowLoop
+      waitSTM workerActivityLoop
+    Core.SReplay -> waitSTM workerWorkflowLoop
 
 -- | Shut down a worker. This will initiate a graceful shutdown of the worker, waiting for all
 -- in-flight tasks to complete before finalizing the shutdown.

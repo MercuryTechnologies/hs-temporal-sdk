@@ -39,6 +39,7 @@ library
       Temporal.Client.Namespace
       Temporal.Client.Workflow
       Temporal.Common
+      Temporal.Common.Async
       Temporal.Common.TimeoutType
       Temporal.Coroutine
       Temporal.Workflow.Definition

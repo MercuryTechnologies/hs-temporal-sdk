@@ -135,6 +135,8 @@ module Temporal.Bundle
   , FieldToStartOptionDefaults(..)
   , RefStartOptionsType
   -- * Worker management
+  , withTaskQueues
+  , linkTaskQueues
   , startTaskQueues
   , shutdownTaskQueues
   , WorkerConfigs
@@ -173,6 +175,7 @@ import Data.Proxy
 import qualified Data.Text as Text
 import GHC.TypeLits
 import RequireCallStack
+import Temporal.Common.Async
 import Temporal.Workflow.Types
 import Temporal.Payload
 import Temporal.Activity
@@ -475,7 +478,7 @@ startTaskQueues client conf = startWorkers conf >>= awaitWorkersStart
   where
     startWorkers :: rec (ConstFn (WorkerConfig env)) -> m (rec (ConstFn (Async Worker)))
     startWorkers = Rec.traverse $ \_ workerConfig -> flip runLoggingT workerConfig.logger $ do
-      async (startWorker client workerConfig)
+      asyncLabelled "temporal/startTaskQueues" (startWorker client workerConfig)
     awaitWorkersStart :: rec (ConstFn (Async Worker)) -> m (rec (ConstFn Worker))
     awaitWorkersStart = Rec.traverse (\_ workerStartupThread -> UnliftIO.wait workerStartupThread)
 
@@ -488,6 +491,12 @@ shutdownTaskQueues workers =
     >>= awaitWorkersStop
   where
     stopWorkers :: rec (ConstFn Worker) -> m (rec (ConstFn (Async ())))
-    stopWorkers = Rec.traverse $ \_ worker -> async (shutdown worker)
+    stopWorkers = Rec.traverse $ \_ worker -> asyncLabelled "temporal/shutdownTaskQueues" (shutdown worker)
     awaitWorkersStop :: rec (ConstFn (Async ())) -> m ()
     awaitWorkersStop = Rec.traverse_ $ \_ workerShutdownThread -> UnliftIO.wait workerShutdownThread
+
+linkTaskQueues :: forall m rec. (TraversableRec rec, MonadUnliftIO m) => Workers rec -> m ()
+linkTaskQueues workers = Rec.traverse_ (\_ -> liftIO . linkWorker) workers
+
+withTaskQueues :: forall m rec a. (TraversableRec rec, MonadUnliftIO m, MonadCatch m) => Client -> WorkerConfigs a rec -> (Workers rec -> m ()) -> m ()
+withTaskQueues client conf f = UnliftIO.bracket (startTaskQueues client conf) shutdownTaskQueues $ \ws -> linkTaskQueues ws >> f ws

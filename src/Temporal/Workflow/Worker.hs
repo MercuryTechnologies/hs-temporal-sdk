@@ -13,6 +13,7 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Vector as V
 import Temporal.Common
+import Temporal.Common.Async
 import qualified Temporal.Core.Client as C
 import qualified Temporal.Core.Worker as Core
 import qualified Temporal.Exception as Err
@@ -87,10 +88,11 @@ whileM_ p = go
 -- The Async handle only completes successfully on poller shutdown.
 
 execute :: (MonadLoggerIO m, MonadUnliftIO m, MonadCatch m, MonadTracer m, RequireCallStack) => WorkflowWorker -> m ()
-execute worker = flip runReaderT worker $ do
+execute worker@WorkflowWorker{workerCore} = flip runReaderT worker $ do
   $(logDebug) "Starting workflow worker"
   whileM_ go
   where
+    c = Core.getWorkerConfig workerCore
     go = inSpan' "Workflow activation step" defaultSpanArguments $ \s -> do
       -- logs <- liftIO $ fetchLogs globalRuntime
       -- forM_ logs $ \l -> case l.level of
@@ -117,7 +119,7 @@ execute worker = flip runReaderT worker $ do
           -- on dispatching jobs. We link the activator thread to the run-loop so that any
           -- unhandled exceptions in that logic aren't ignored.
           activationCtxt <- getContext
-          activator <- async $ do
+          activator <- asyncLabelled (Text.unpack $ Text.concat ["temporal/worker/workflow/activate", Core.namespace c, "/", Core.taskQueue c]) $ do
             _ <- attachContext activationCtxt
             handleActivation activation
           link activator
@@ -171,6 +173,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
     createOrFetchWorkflowInstance = inSpan' "createOrFetchWorkflowInstance" (defaultSpanArguments { attributes = HashMap.fromList [("temporal.activation.run_id", toAttribute $ activation ^. Activation.runId)] }) $ \s -> do
       worker@WorkflowWorker{workerCore} <- ask
       runningWorkflows_ <- atomically $ readTVar worker.runningWorkflows
+      let c = Core.getWorkerConfig workerCore
       case HashMap.lookup (RunId $ activation ^. Activation.runId) runningWorkflows_ of
         Just inst -> do
           addAttribute s "temporal.workflow.worker.instance_state" ("existing" :: Text)

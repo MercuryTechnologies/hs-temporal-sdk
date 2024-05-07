@@ -30,6 +30,7 @@ import UnliftIO
 import Temporal.Duration (durationFromProto)
 import Data.HashMap.Strict (HashMap)
 import Data.Text (Text)
+import Temporal.Common.Async
 import Temporal.Interceptor
 import Temporal.Activity.Types
 
@@ -147,7 +148,8 @@ applyActivityTaskStart tsk tt msg = do
     -- it later if the orchestrator requests it.
     mask_ $ do
       syncPoint <- newEmptyMVar
-      runningActivity <- async $ do
+      let c = Core.getWorkerConfig w.workerCore
+      runningActivity <- asyncLabelled (T.unpack $ T.concat ["temporal/worker/activity/start/", Core.namespace c, "/", Core.taskQueue c]) $ do
         (ef :: Either SomeException (Either String Payload)) <- liftIO $ UnliftIO.trySyncOrAsync $ do
           w.activityInboundInterceptors.executeActivity input $ \input' -> do
             case HashMap.lookup info.activityType w.definitions of

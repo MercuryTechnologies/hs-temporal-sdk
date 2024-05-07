@@ -363,7 +363,9 @@ needsClient = do
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
           useClient (C.execute testRefs.raceThrowsRhsErrorWhenLhsBlocked "eitherSideThrows" opts)
-            `shouldThrow` (== WorkflowExecutionFailed)
+            `shouldThrow` \case 
+              (WorkflowExecutionFailed _) -> True
+              _ -> False
 
       specify "treats error as ok if LHS returns immediately" $ \TestEnv{..} -> do
         let conf = configure () testConf $ do
@@ -512,7 +514,9 @@ needsClient = do
               }
         withWorker conf $ do
           useClient (C.execute badWfRef "incorrectWorkflowArg" opts "ruhroh")
-            `shouldThrow` (WorkflowExecutionFailed ==)
+            `shouldThrow` \case
+              (WorkflowExecutionFailed _) -> True
+              _ -> False
       specify "memo values that parse incorrectly should fail a Workflow appropriately" $ \TestEnv{..} -> do
         pending
       specify "header values that parse incorrectly should fail a Workflow appropriately" $ \TestEnv{..} -> do
@@ -642,7 +646,9 @@ needsClient = do
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 }
           useClient (C.execute parentWf.reference (W.WorkflowId parentId) opts)
-            `shouldThrow` (== WorkflowExecutionFailed)
+            `shouldThrow` \case
+              (WorkflowExecutionFailed _) -> True
+              _ -> False
 
   -- --     specify "termination" $ \_ -> pending
   -- --     specify "timeout" $ \_ -> pending
@@ -1089,7 +1095,10 @@ needsClient = do
                   }
               }
         useClient (C.execute testRefs.nonRetryableFailureTest "ignore-non-retryable" opts)
-          `shouldThrow` (== WorkflowExecutionFailed)
+          `shouldThrow` \case
+            (WorkflowExecutionFailed _) -> True
+            _ -> False
+
   -- describe "Exception conversion" $ do
   --   xspecify "AnnotatedException and SomeException values don't appear in ApplicationFailure" $ do
   --     Ann.throw (SomeException )
