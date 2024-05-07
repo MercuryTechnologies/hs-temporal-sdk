@@ -498,5 +498,5 @@ shutdownTaskQueues workers =
 linkTaskQueues :: forall m rec. (TraversableRec rec, MonadUnliftIO m) => Workers rec -> m ()
 linkTaskQueues workers = Rec.traverse_ (\_ -> liftIO . linkWorker) workers
 
-withTaskQueues :: forall m rec a. (TraversableRec rec, MonadUnliftIO m, MonadCatch m) => Client -> WorkerConfigs a rec -> (Workers rec -> m ()) -> m ()
+withTaskQueues :: forall m rec a. (TraversableRec rec, MonadUnliftIO m, MonadCatch m) => Client -> WorkerConfigs a rec -> (Workers rec -> m a) -> m a
 withTaskQueues client conf f = UnliftIO.bracket (startTaskQueues client conf) shutdownTaskQueues $ \ws -> linkTaskQueues ws >> f ws
