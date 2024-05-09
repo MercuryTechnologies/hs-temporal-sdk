@@ -15,6 +15,7 @@ extra-source-files:
   rust/Cargo.toml,
   rust/Cargo.lock,
   rust/src/*.rs,
+  rust/temporal_bridge.h
 
 common warnings
     ghc-options: -Wall
@@ -33,9 +34,9 @@ custom-setup
 
 library
     import:           warnings
-    includes:
-      rust/temporal_bridge.h
     include-dirs:     rust
+    install-includes:
+      temporal_bridge.h
 
     ghc-options:      -g
     exposed-modules: 
