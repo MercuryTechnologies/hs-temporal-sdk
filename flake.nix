@@ -178,6 +178,8 @@
               # config,
               ...
             }: {
+              # There should be a way to get this from the flake in the future.
+              # devenv.root = "/Users/ian/Code/mercury/hs-temporal-sdk";
               packages = with pkgs;
                 [
                   (protogen ghcVersion)
