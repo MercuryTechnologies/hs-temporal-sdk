@@ -1,26 +1,28 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE OverloadedStrings #-}
-module Temporal.Core.Client 
-  ( 
+
+module Temporal.Core.Client (
   -- * Connecting to the server
-    Client
-  , clientConfig
-  , connectClient
-  , defaultClientConfig
-  , closeClient
-  , clientRuntime
-  , CoreClient
-  , ClientConfig(..)
-  , ClientTlsConfig(..)
-  , ByteVector(..)
-  , ClientRetryConfig(..)
+  Client,
+  clientConfig,
+  connectClient,
+  defaultClientConfig,
+  closeClient,
+  clientRuntime,
+  CoreClient,
+  ClientConfig (..),
+  ClientTlsConfig (..),
+  ByteVector (..),
+  ClientRetryConfig (..),
+
   -- * Making calls to the server
+
   --
   -- Generally you should not need to use 'call' directly, but instead should
   -- use the supplied functions in 'Temporal.Core.Client.WorkflowService' and
@@ -28,18 +30,19 @@ module Temporal.Core.Client
   --
   -- For higher-level access, see the@@temporal-sdk@ package for a more
   -- idiomatic Haskell API.
-  , call
-  , RpcCall(..)
-  , RpcError(..)
-  , ClientConnectionError(..)
+  call,
+  RpcCall (..),
+  RpcError (..),
+  ClientConnectionError (..),
+
   -- * Primitive access
-  , CRpcCall
-  , TokioCall
-  , TokioResult
-  , PrimRpcCall
+  CRpcCall,
+  TokioCall,
+  TokioResult,
+  PrimRpcCall,
   -- | Use the underlying Rust client pointer
-  , withClient
-  ) where
+  withClient,
+) where
 
 import Control.Concurrent
 import Control.Exception
@@ -47,31 +50,35 @@ import Control.Monad
 import Data.Aeson
 import Data.Aeson.TH
 import Data.ByteString (ByteString)
+import qualified Data.ByteString as BL
+import qualified Data.ByteString as BS
+import qualified Data.ByteString.Internal as BS
 import Data.HashMap.Strict (HashMap)
+import Data.ProtoLens.Encoding
 import Data.ProtoLens.Service.Types
 import Data.Proxy
 import Data.Text (Text)
 import qualified Data.Text as T
+import qualified Data.Vector.Storable as V
 import Data.Word
 import Foreign.C.String
 import Foreign.C.Types
+import Foreign.ForeignPtr
 import Foreign.Marshal
 import Foreign.Ptr
-import Foreign.ForeignPtr
 import Foreign.Storable
-import Temporal.Runtime
-import Temporal.Internal.FFI
-import Temporal.Core.CTypes
-import qualified Data.ByteString          as BS
-import qualified Data.ByteString.Internal as BS
-import qualified Data.ByteString          as BL
-import qualified Data.Vector.Storable     as V
-import Data.ProtoLens.Encoding
-import System.Posix.Process
 import Network.BSD
+import System.Posix.Process
+import Temporal.Core.CTypes
+import Temporal.Internal.FFI
+import Temporal.Runtime
+
 
 foreign import ccall "hs_temporal_connect_client" raw_connectClient :: Ptr Runtime -> CString -> TokioCall (CArray Word8) CoreClient
+
+
 foreign import ccall "&hs_temporal_drop_client" raw_freeClient :: FinalizerPtr CoreClient
+
 
 data ClientConfig = ClientConfig
   { targetUrl :: Text
@@ -83,12 +90,15 @@ data ClientConfig = ClientConfig
   , retryConfig :: Maybe ClientRetryConfig
   }
 
+
 data ClientTlsConfig = ClientTlsConfig
   { serverRootCaCert :: Maybe ByteVector
   , domain :: Maybe Text
   , clientCert :: Maybe ByteVector
   , clientPrivateKey :: Maybe ByteVector
   }
+
+
 data ClientRetryConfig = ClientRetryConfig
   { initialIntervalMillis :: Word64
   , randomizationFactor :: Double
@@ -98,53 +108,68 @@ data ClientRetryConfig = ClientRetryConfig
   , maxRetries :: Word64
   }
 
--- | A client connection to the Temporal server.
---
--- The client is thread-safe and can be shared across threads.
---
--- Clients are expensive to create, so you should generally create one per
--- process and share it across your application..
---
--- The client doesn't have an explicit close method, but will be cleaned up
--- when it is garbage collected.
-data Client = Client 
-  { client :: MVar CoreClient 
+
+{- | A client connection to the Temporal server.
+
+The client is thread-safe and can be shared across threads.
+
+Clients are expensive to create, so you should generally create one per
+process and share it across your application..
+
+The client doesn't have an explicit close method, but will be cleaned up
+when it is garbage collected.
+-}
+data Client = Client
+  { client :: MVar CoreClient
   , runtime :: Runtime
   , config :: ClientConfig
   }
 
+
 clientConfig :: Client -> ClientConfig
 clientConfig = config
+
 
 clientRuntime :: Client -> Runtime
 clientRuntime = runtime
 
+
 withClient :: Client -> (Ptr CoreClient -> IO a) -> IO a
 withClient (Client cc _ _) f = withMVar cc $ \(CoreClient c) -> withForeignPtr c f
 
-newtype ByteVector = ByteVector { byteVector :: ByteString }
+
+newtype ByteVector = ByteVector {byteVector :: ByteString}
+
 
 byteStringToVector :: BS.ByteString -> V.Vector Word8
-byteStringToVector bs = vec 
+byteStringToVector bs = vec
   where
     vec = V.unsafeFromForeignPtr (castForeignPtr fptr) off len
     (fptr, off, len) = BS.toForeignPtr bs
 
+
 vectorToByteString :: V.Vector Word8 -> BS.ByteString
-vectorToByteString vec = BS.fromForeignPtr (castForeignPtr fptr) off len 
+vectorToByteString vec = BS.fromForeignPtr (castForeignPtr fptr) off len
   where
     (fptr, off, len) = V.unsafeToForeignPtr vec
 
+
 instance ToJSON ByteVector where
   toJSON = toJSON . byteStringToVector . byteVector
+
+
 instance FromJSON ByteVector where
   parseJSON = fmap ByteVector . fmap vectorToByteString . parseJSON
 
+
 deriveJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''ClientTlsConfig
+
 
 deriveJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''ClientRetryConfig
 
+
 deriveJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''ClientConfig
+
 
 data RpcCall a = RpcCall
   { req :: a
@@ -153,21 +178,26 @@ data RpcCall a = RpcCall
   , timeoutMillis :: Maybe Word64
   }
 
+
 data ClientConnectionError = ClientConnectionError Text
   deriving (Show)
 
+
 instance Exception ClientConnectionError
 
+
 defaultClientConfig :: ClientConfig
-defaultClientConfig = ClientConfig
-  { targetUrl = "http://localhost:7233"
-  , clientName = "temporal-haskell"
-  , clientVersion = "0.0.1"
-  , metadata = mempty
-  , identity = ""
-  , tlsConfig = Nothing
-  , retryConfig = Nothing
-  }
+defaultClientConfig =
+  ClientConfig
+    { targetUrl = "http://localhost:7233"
+    , clientName = "temporal-haskell"
+    , clientVersion = "0.0.1"
+    , metadata = mempty
+    , identity = ""
+    , tlsConfig = Nothing
+    , retryConfig = Nothing
+    }
+
 
 defaultClientIdentity :: IO Text
 defaultClientIdentity = do
@@ -175,24 +205,28 @@ defaultClientIdentity = do
   host <- getHostName
   pure (T.pack $ show pid <> "@" <> host)
 
--- | Connect to the Temporal server using a given runtime.
---
--- Throws 'ClientConnectionError' if the connection fails.
+
+{- | Connect to the Temporal server using a given runtime.
+
+Throws 'ClientConnectionError' if the connection fails.
+-}
 connectClient :: Runtime -> ClientConfig -> IO Client
 connectClient rt conf = do
-  conf' <- if identity conf == "" 
-    then do
-      ident <- defaultClientIdentity
-      pure $ conf { identity = ident }
-    else pure conf
+  conf' <-
+    if identity conf == ""
+      then do
+        ident <- defaultClientIdentity
+        pure $ conf {identity = ident}
+      else pure conf
 
   clientPtrSlot <- newEmptyMVar
   forkIO $ do
     withRuntime rt $ \rtPtr -> BS.useAsCString (BL.toStrict $ encode conf') $ \confPtr -> do
-      let tryConnect = makeTokioAsyncCall 
-            (raw_connectClient rtPtr confPtr)
-            (Just rust_dropByteArray)
-            (Just raw_freeClient)
+      let tryConnect =
+            makeTokioAsyncCall
+              (raw_connectClient rtPtr confPtr)
+              (Just rust_dropByteArray)
+              (Just raw_freeClient)
           go attempt = do
             result <- tryConnect
             case result of
@@ -212,11 +246,13 @@ connectClient rt conf = do
       go 1
   pure $ Client clientPtrSlot rt conf'
 
+
 reconnectClient :: Client -> IO ()
 reconnectClient (Client clientPtrSlot rt conf) = mask $ \restore -> do
   (CoreClient clientPtr) <- takeMVar clientPtrSlot
   (Client newClientPtr _ _) <- restore (connectClient rt conf) `catch` (\c -> putMVar clientPtrSlot (throw (c :: ClientConnectionError)) >> throwIO c)
   takeMVar newClientPtr >>= putMVar clientPtrSlot
+
 
 closeClient :: Client -> IO ()
 closeClient (Client clientPtrSlot _ _) = mask_ $ do
@@ -235,18 +271,20 @@ call f c req = withClient c $ \cPtr -> do
   BS.useAsCStringLen msgBytes $ \(msgPtr, msgLen) -> do
     alloca $ \cArrayPtr -> do
       poke cArrayPtr (CArray msgPtr (fromIntegral msgLen))
-      let rpcCall = CRpcCall
-            { rpcCallReq = castPtr cArrayPtr
-            , rpcCallRetry = if False then 0 else 1
-            , rpcCallMetadata = nullPtr
-            , rpcCallTimeoutMillis = nullPtr
-            }
+      let rpcCall =
+            CRpcCall
+              { rpcCallReq = castPtr cArrayPtr
+              , rpcCallRetry = if False then 0 else 1
+              , rpcCallMetadata = nullPtr
+              , rpcCallTimeoutMillis = nullPtr
+              }
       alloca $ \rpcCallPtr -> do
         poke rpcCallPtr rpcCall
-        result <- makeTokioAsyncCall
-          (f cPtr rpcCallPtr)
-          (Just rust_drop_rpc_error)
-          (Just rust_dropByteArray)
+        result <-
+          makeTokioAsyncCall
+            (f cPtr rpcCallPtr)
+            (Just rust_drop_rpc_error)
+            (Just rust_dropByteArray)
         case result of
           Left err -> Left <$> withForeignPtr err (peek >=> peekCRPCError)
           Right r -> Right . decodeMessageOrDie <$> withForeignPtr r (peek >=> cArrayToByteString)

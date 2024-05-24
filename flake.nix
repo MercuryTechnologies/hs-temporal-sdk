@@ -3,7 +3,6 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-    # devenv.url = "git+file:///Users/ian/Code/devenv";
     devenv.url = "github:cachix/devenv/v1.0.5";
     temporal-sdk-core = {
       url = "github:temporalio/sdk-core";
@@ -49,6 +48,36 @@
       "ghc98"
       "ghc910"
     ];
+
+    ignoreGeneratedCode = attrs:
+      attrs
+      // {
+        excludes = [
+          "protos/"
+          "dist-newstyle/"
+        ];
+      };
+
+    pre-commit-hooks = {
+      alejandra.enable = true;
+      shellcheck.enable = true;
+      # clippy.enable = true;
+      fourmolu = ignoreGeneratedCode {
+        enable = true;
+      };
+      hlint = ignoreGeneratedCode {
+        enable = true;
+      };
+      deadnix.enable = true;
+      hpack.enable = true;
+      end-of-file-fixer.enable = true;
+      shfmt.enable = true;
+      check-shebang-scripts-are-executable.enable = true;
+      check-symlinks.enable = true;
+      check-merge-conflicts.enable = true;
+      # Not smart enough to find the location of the Cargo.toml
+      cargo-check.enable = false;
+    };
   in
     flake-utils.lib.eachSystem supportedSystems (system: let
       overlays = [
@@ -70,7 +99,7 @@
             inherit
               pkgs
               # ghc-source-gen-src
-              
+
               temporal-bridge
               ;
           });
@@ -147,17 +176,7 @@
               # pkgs,
               # config,
               ...
-            }: let
-              ignoreGeneratedCode = attrs:
-                attrs
-                // {
-                  excludes = [
-                    "protos/"
-                    "dist-newstyle/"
-                  ];
-                };
-            in {
-              # This is your devenv configuration
+            }: {
               packages = with pkgs;
                 [
                   (protogen ghcVersion)
@@ -175,7 +194,7 @@
                   [
                     # We want to use temporal-sdk-core from the flake
                     # when possible.
-                    # hpkgs.temporal-sdk-core
+                    hpkgs.temporal-sdk-core
                     hpkgs.proto-lens-protoc
                   ]
                   ++ lib.attrVals (attrNames (localDevPackageDepsAsAttrSet myHaskellPackages)) hpkgs);
@@ -183,26 +202,7 @@
               languages.rust.enable = true;
               services.temporal.enable = true;
 
-              pre-commit.hooks = {
-                alejandra.enable = true;
-                shellcheck.enable = true;
-                # clippy.enable = true;
-                fourmolu = ignoreGeneratedCode {
-                  enable = true;
-                };
-                hlint = ignoreGeneratedCode {
-                  enable = true;
-                };
-                deadnix.enable = true;
-                hpack.enable = true;
-                end-of-file-fixer.enable = true;
-                shfmt.enable = true;
-                check-shebang-scripts-are-executable.enable = true;
-                check-symlinks.enable = true;
-                check-merge-conflicts.enable = true;
-                # Not smart enough to find the location of the Cargo.toml
-                cargo-check.enable = false;
-              };
+              pre-commit.hooks = pre-commit-hooks;
             })
           ];
         };
@@ -214,10 +214,6 @@
       packages =
         {
           devenv-up = self.devShells.${system}.default.config.procfileScript;
-          default = pkgs.buildEnv {
-            name = "temporal-sdk-all-packages";
-            paths = pluckLocalPackages extendedPackageSetByGHCVersions.ghc96;
-          };
           temporal-bridge = temporal-bridge;
         }
         // pluckLocalPackages extendedPackageSetByGHCVersions.ghc96
@@ -227,6 +223,12 @@
         ghc96 = mkShellForGHC "ghc96";
         ghc98 = mkShellForGHC "ghc98";
         ghc910 = mkShellForGHC "ghc910";
+      };
+      checks = {
+        pre-commit-check = devenv.inputs.pre-commit-hooks.lib.${system}.run {
+          src = ./.;
+          hooks = pre-commit-hooks;
+        };
       };
     });
 

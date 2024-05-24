@@ -994,4 +994,3 @@ pub extern "C" fn hs_remove_search_attributes(client: *mut ClientRef, c_call: *c
     }
   });
 }
-

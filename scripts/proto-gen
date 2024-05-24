@@ -4,7 +4,7 @@ shopt -s globstar
 
 set -x
 stack exec -- protoc \
-  --plugin=protoc-gen-haskell=`which proto-lens-protoc` \
+  --plugin=protoc-gen-haskell=$(which proto-lens-protoc) \
   --haskell_out=$PWD/protos/src \
   --proto_path=$PWD/sdk-core/sdk-core-protos/protos/local \
   --proto_path=$PWD/sdk-core/sdk-core-protos/protos/api_upstream \
@@ -14,4 +14,3 @@ stack exec -- protoc \
   $PWD/sdk-core/sdk-core-protos/protos/api_upstream/temporal/**/*.proto \
   $PWD/sdk-core/sdk-core-protos/protos/grpc/**/*.proto \
   $PWD/sdk-core/sdk-core-protos/protos/testsrv_upstream/**/*.proto
-

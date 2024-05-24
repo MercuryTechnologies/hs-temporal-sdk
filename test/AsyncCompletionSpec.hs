@@ -2,6 +2,7 @@ module AsyncCompletionSpec where
 
 import Test.Hspec
 
+
 spec :: Spec
 spec = do
   specify "Activity can complete asynchronously" pending
