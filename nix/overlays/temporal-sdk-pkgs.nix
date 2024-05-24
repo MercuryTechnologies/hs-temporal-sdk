@@ -10,7 +10,9 @@
 
   inherit
     (pkgs)
+    darwin
     lib
+    stdenv
     ;
 in {
   temporal-sdk-core = overrideCabal (old: {
@@ -22,11 +24,11 @@ in {
     extraLibraries = [
       temporal-bridge
     ];
-    libraryFrameworkDepends = with pkgs.darwin.apple_sdk.frameworks; [
+    libraryFrameworkDepends = lib.optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [
       CoreFoundation
       Security
       SystemConfiguration
-    ];
+    ]);
   }) (enableCabalFlag "external_lib" (final.callCabal2nix "temporal-sdk-core" ../../core {}));
   temporal-sdk = final.callCabal2nix "temporal-sdk" ../.. {};
   temporal-sdk-codec-server = final.callCabal2nix "temporal-sdk-codec-server" ../../codec-server {};

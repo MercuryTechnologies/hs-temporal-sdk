@@ -112,7 +112,7 @@ pub fn convert_hashmap(
     let value = unsafe { 
       from_utf8_unchecked(std::slice::from_raw_parts(hashmap_val.value, hashmap_val.value_len))
     };
-    map.insert(key.clone().to_string(), value.clone().to_string());
+    map.insert(key.to_string(), value.to_string());
     hashmap_ptr = unsafe { (*hashmap).next };
   }
 

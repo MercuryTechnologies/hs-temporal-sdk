@@ -1,0 +1,7 @@
+builds:
+  exclude: []
+  include:
+  - '*.x86_64-linux.*'
+  - defaultPackage.x86_64-linux
+  # Unable to build because devenv is impure
+  # - devShell.x86_64-linux

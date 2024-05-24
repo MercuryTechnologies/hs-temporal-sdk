@@ -32,6 +32,7 @@
     inherit
       (builtins)
       attrNames
+      attrValues
       listToAttrs
       map
       ;
@@ -105,7 +106,7 @@
         devenv-up = self.devShells.${system}.default.config.procfileScript;
         default = pkgs.buildEnv {
           name = "temporal-sdk-all-packages";
-          paths = localDevPackages myHaskellPackages;
+          paths = attrValues localDevPackages;
         };
         temporal-bridge = temporal-bridge;
         temporal-sdk = myHaskellPackages.temporal-sdk;
@@ -134,9 +135,16 @@
               };
           in {
             # This is your devenv configuration
-            packages = [
-              protogen
-            ];
+            packages = with pkgs;
+              [
+                protogen
+                ghciwatch
+              ]
+              ++ lib.optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [
+                Security
+                CoreFoundation
+                SystemConfiguration
+              ]);
 
             languages.haskell = {
               enable = true;
@@ -169,7 +177,8 @@
               check-shebang-scripts-are-executable.enable = true;
               check-symlinks.enable = true;
               check-merge-conflicts.enable = true;
-              cargo-check.enable = true;
+              # Not smart enough to find the location of the Cargo.toml
+              cargo-check.enable = false;
             };
           })
         ];

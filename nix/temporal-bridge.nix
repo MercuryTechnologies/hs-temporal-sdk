@@ -20,6 +20,7 @@
         CoreFoundation
         SystemConfiguration
       ]);
+
     cargoLock = {
       lockFile = ../core/rust/Cargo.lock;
       outputHashes = {
