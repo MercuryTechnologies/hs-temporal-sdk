@@ -17,3 +17,6 @@ result
 .DS_Store
 core/rust/build.rs
 core/rust/lib*
+.devenv
+.idea/
+.pre-commit-config.yaml
