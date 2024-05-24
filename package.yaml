@@ -154,6 +154,7 @@ tests:
       - temporal-sdk
       - temporal-sdk-core
       - bytestring
+      - directory
       - hspec
       - text
       - uuid

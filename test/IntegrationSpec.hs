@@ -28,12 +28,14 @@ import Data.Int
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
+import qualified Data.Text as Text
 import Data.Time.Clock (UTCTime)
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
 import GHC.Generics
 import OpenTelemetry.Trace
 import RequireCallStack
+import System.Directory
 import System.IO
 import System.Timeout (timeout)
 import Temporal.Activity
@@ -98,14 +100,15 @@ temporalBundle
 configWithRetry :: PortNumber -> ClientConfig
 configWithRetry pn =
   defaultClientConfig
-    { retryConfig =
+    { targetUrl = "http://localhost:" <> Text.pack (show pn)
+    , retryConfig =
         Just $
           ClientRetryConfig
             { initialIntervalMillis = 500
             , randomizationFactor = 0.2
             , multiplier = 1.5
             , maxIntervalMillis = 10000
-            , maxRetries = 5
+            , maxRetries = 15
             , maxElapsedTimeMillis = Just 60000
             }
             -- , targetUrl = pack ("http://localhost:" <> show pn)
@@ -190,8 +193,17 @@ spec = do
     setup :: (TestEnv -> IO ()) -> IO ()
     setup go = do
       fp <- getFreePort
-      -- withDevServer (defaultTemporalDevServerConfig { port = Just $ fromIntegral fp }) $ \_ -> do
-      do
+      mTemporalPath <- findExecutable "temporal"
+      conf <- case mTemporalPath of
+        Nothing -> error "Could not find the 'temporal' executable in PATH"
+        Just temporalPath -> do
+          let serverConfig =
+                defaultTemporalDevServerConfig
+                  { port = Just $ fromIntegral fp
+                  , exe = ExistingPath temporalPath
+                  }
+          pure serverConfig
+      withDevServer globalRuntime conf $ \_ -> do
         interceptors <- makeOpenTelemetryInterceptor
         (client, coreClient) <- makeClient fp interceptors
 
@@ -240,7 +252,7 @@ testImpls =
     WorkflowTests
       { shouldRunWorkflowTest = $(logDebug) "oh hi!"
       , raceBlockOnLeftSideWorks = do
-          let lhs :: RequireCallStack => W.Workflow Bool
+          let lhs, rhs :: RequireCallStack => W.Workflow Bool
               lhs = do
                 $(logDebug) "sleepy lad"
                 W.sleep (seconds 10)
@@ -251,11 +263,12 @@ testImpls =
           $(logDebug) "done"
           pure res
       , raceBlockOnBothSidesWorks = do
-          let lhs = W.sleep (seconds 5000) >> pure False
+          let lhs, rhs :: RequireCallStack => W.Workflow Bool
+              lhs = W.sleep (seconds 5000) >> pure False
               rhs = W.sleep (seconds 1) >> pure True
           lhs `W.race` rhs
       , raceThrowsRhsErrorWhenLhsBlocked = do
-          let lhs :: RequireCallStack => W.Workflow Bool
+          let lhs, rhs :: RequireCallStack => W.Workflow Bool
               lhs = W.sleep (seconds 5000) >> pure False
               rhs = error "foo"
           lhs `W.race` rhs
