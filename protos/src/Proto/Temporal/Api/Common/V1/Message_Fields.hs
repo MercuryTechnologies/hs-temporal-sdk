@@ -43,12 +43,6 @@ buildId ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "buildId" a) =>
   Lens.Family2.LensLike' f s a
 buildId = Data.ProtoLens.Field.field @"buildId"
-bundleId ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "bundleId" a) =>
-  Lens.Family2.LensLike' f s a
-bundleId = Data.ProtoLens.Field.field @"bundleId"
 currentRunOnly ::
   forall f s a.
   (Prelude.Functor f,
@@ -77,6 +71,11 @@ firstWorkflowTask ::
    Data.ProtoLens.Field.HasField s "firstWorkflowTask" a) =>
   Lens.Family2.LensLike' f s a
 firstWorkflowTask = Data.ProtoLens.Field.field @"firstWorkflowTask"
+header ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "header" a) =>
+  Lens.Family2.LensLike' f s a
+header = Data.ProtoLens.Field.field @"header"
 indexedFields ::
   forall f s a.
   (Prelude.Functor f,
@@ -146,6 +145,12 @@ maybe'maximumInterval ::
   Lens.Family2.LensLike' f s a
 maybe'maximumInterval
   = Data.ProtoLens.Field.field @"maybe'maximumInterval"
+maybe'nexus ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'nexus" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'nexus = Data.ProtoLens.Field.field @"maybe'nexus"
 maybe'target ::
   forall f s a.
   (Prelude.Functor f,
@@ -158,6 +163,12 @@ maybe'value ::
    Data.ProtoLens.Field.HasField s "maybe'value" a) =>
   Lens.Family2.LensLike' f s a
 maybe'value = Data.ProtoLens.Field.field @"maybe'value"
+maybe'variant ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'variant" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'variant = Data.ProtoLens.Field.field @"maybe'variant"
 maybe'workflowTaskId ::
   forall f s a.
   (Prelude.Functor f,
@@ -176,6 +187,11 @@ name ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "name" a) =>
   Lens.Family2.LensLike' f s a
 name = Data.ProtoLens.Field.field @"name"
+nexus ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "nexus" a) =>
+  Lens.Family2.LensLike' f s a
+nexus = Data.ProtoLens.Field.field @"nexus"
 nonRetryableErrorTypes ::
   forall f s a.
   (Prelude.Functor f,
@@ -197,6 +213,13 @@ payloads ::
    Data.ProtoLens.Field.HasField s "payloads" a) =>
   Lens.Family2.LensLike' f s a
 payloads = Data.ProtoLens.Field.field @"payloads"
+resetReapplyExcludeTypes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "resetReapplyExcludeTypes" a) =>
+  Lens.Family2.LensLike' f s a
+resetReapplyExcludeTypes
+  = Data.ProtoLens.Field.field @"resetReapplyExcludeTypes"
 resetReapplyType ::
   forall f s a.
   (Prelude.Functor f,
@@ -208,6 +231,11 @@ runId ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "runId" a) =>
   Lens.Family2.LensLike' f s a
 runId = Data.ProtoLens.Field.field @"runId"
+url ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "url" a) =>
+  Lens.Family2.LensLike' f s a
+url = Data.ProtoLens.Field.field @"url"
 useVersioning ::
   forall f s a.
   (Prelude.Functor f,
@@ -232,6 +260,13 @@ vec'payloads ::
    Data.ProtoLens.Field.HasField s "vec'payloads" a) =>
   Lens.Family2.LensLike' f s a
 vec'payloads = Data.ProtoLens.Field.field @"vec'payloads"
+vec'resetReapplyExcludeTypes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'resetReapplyExcludeTypes" a) =>
+  Lens.Family2.LensLike' f s a
+vec'resetReapplyExcludeTypes
+  = Data.ProtoLens.Field.field @"vec'resetReapplyExcludeTypes"
 workflowId ::
   forall f s a.
   (Prelude.Functor f,

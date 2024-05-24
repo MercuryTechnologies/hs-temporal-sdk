@@ -174,7 +174,6 @@ data ChildWorkflowCancellationType
     ChildWorkflowCancellationType'Unrecognized !ChildWorkflowCancellationType'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum ChildWorkflowCancellationType where
-  enumName _ = Data.Text.pack "ChildWorkflowCancellationType"
   maybeToEnum 0 = Prelude.Just ABANDON
   maybeToEnum 1 = Prelude.Just TRY_CANCEL
   maybeToEnum 2 = Prelude.Just WAIT_CANCELLATION_COMPLETED
@@ -668,7 +667,6 @@ data ParentClosePolicy
     ParentClosePolicy'Unrecognized !ParentClosePolicy'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum ParentClosePolicy where
-  enumName _ = Data.Text.pack "ParentClosePolicy"
   maybeToEnum 0 = Prelude.Just PARENT_CLOSE_POLICY_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just PARENT_CLOSE_POLICY_TERMINATE
   maybeToEnum 2 = Prelude.Just PARENT_CLOSE_POLICY_ABANDON
@@ -756,8 +754,6 @@ data StartChildWorkflowExecutionFailedCause
     StartChildWorkflowExecutionFailedCause'Unrecognized !StartChildWorkflowExecutionFailedCause'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum StartChildWorkflowExecutionFailedCause where
-  enumName _
-    = Data.Text.pack "StartChildWorkflowExecutionFailedCause"
   maybeToEnum 0
     = Prelude.Just
         START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED

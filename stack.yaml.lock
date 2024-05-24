@@ -5,23 +5,19 @@
 
 packages:
 - completed:
-    commit: b0ad0a51ccc1d2ea45cc1c6e8ef753c54efe30a4
-    git: git@github.com:sheaf/if-instance.git
-    name: if-instance
+    hackage: if-instance-0.5.1.0@sha256:fc16583409a2d1749428a2f4b9e3163e04ce4f7c7b2b311f8ffaa220f7b17a28,3036
     pantry-tree:
-      sha256: 3a7a07a2ef7559cf943f6f87ac4ce2bc3767509c101710612657de0db038df4b
-      size: 725
-    version: 0.4.0.0
+      sha256: 0b04caf041e99ad46528b87928a6d1c87d8ded032a605795544feabd348ca7b4
+      size: 579
   original:
-    commit: b0ad0a51ccc1d2ea45cc1c6e8ef753c54efe30a4
-    git: git@github.com:sheaf/if-instance.git
+    hackage: if-instance-0.5.1.0
 - completed:
-    hackage: ghc-tcplugin-api-0.10.0.0@sha256:e48b4849cf41f1a14c4550600a7f049451c413c317e937c85fe9fea61239382b,4641
+    hackage: ghc-tcplugin-api-0.11.0.0@sha256:3f753db5becff0c7336a1f9a413f2f62ba358a36cd853df133fb9e82fb089628,4641
     pantry-tree:
-      sha256: 6eb15b77c7e82aad03d48efdb417b7e3a65edc9722d195c116c56a42d676e6ac
+      sha256: 805ec3669298e1fe27e3d1ba557d6675a354d22cd837a6260fb43e0b5b4601eb
       size: 498
   original:
-    hackage: ghc-tcplugin-api-0.10.0.0
+    hackage: ghc-tcplugin-api-0.11.0.0
 - completed:
     hackage: annotated-exception-0.2.0.3@sha256:3b648717c060cf808435738d85e94e78b144eb8267c281c8cc87edb99a18393e,1785
     pantry-tree:
@@ -58,70 +54,26 @@ packages:
   original:
     hackage: crypton-0.33
 - completed:
-    commit: 191f384b5329f0231844ae8405695fcdc29eab44
-    git: git@github.com:iand675/proto-lens.git
-    name: proto-lens
+    hackage: proto-lens-protoc-0.8.0.1@sha256:1a3cad568151d028079281db17ed9c07ebfad7db24d51b184357ef3abcc9a361,2235
     pantry-tree:
-      sha256: d8259b577c0ee18a1ae8ff0da84951d472ca7d272a57a0d76237046dc2e4804a
-      size: 1720
-    subdir: proto-lens
-    version: 0.7.1.3
+      sha256: 0acbfe4af2f9a01396ad075dc5fac36b2488effd8f7c10042502d739218d6a2b
+      size: 1218
   original:
-    commit: 191f384b5329f0231844ae8405695fcdc29eab44
-    git: git@github.com:iand675/proto-lens.git
-    subdir: proto-lens
+    hackage: proto-lens-protoc-0.8.0.1
 - completed:
-    commit: 191f384b5329f0231844ae8405695fcdc29eab44
-    git: git@github.com:iand675/proto-lens.git
-    name: proto-lens-protoc
+    hackage: proto-lens-protobuf-types-0.7.2.0@sha256:78f9d686aca30f1b569145b6c0d7a20f8398b5f5de601ec1c3d07ac644ea1e66,3814
     pantry-tree:
-      sha256: 57853a9f4dedc08dd42ca7144edea2597a766780e5f6ab4fd194e38198dd3dc3
-      size: 1271
-    subdir: proto-lens-protoc
-    version: 0.7.1.1
+      sha256: dff5f67b3a437cf18a2901942be472364f7a64b8cac071f1467b227b3cc878ff
+      size: 1333
   original:
-    commit: 191f384b5329f0231844ae8405695fcdc29eab44
-    git: git@github.com:iand675/proto-lens.git
-    subdir: proto-lens-protoc
+    hackage: proto-lens-protobuf-types-0.7.2.0
 - completed:
-    commit: 191f384b5329f0231844ae8405695fcdc29eab44
-    git: git@github.com:iand675/proto-lens.git
-    name: proto-lens-protobuf-types
+    hackage: proto-lens-setup-0.4.0.8@sha256:dd5622c949c17b72abe72a3f8e52638318e0e9ce157092ff3ae9de0c57b4f036,3128
     pantry-tree:
-      sha256: 90212d646dd426ab8be6a2b10c448b859abec3e4a966efb49f7c31a665072d2e
-      size: 1013530
-    subdir: proto-lens-protobuf-types
-    version: 0.8.0.0
+      sha256: caee4bb645f2ac52cb60ce6770631c085915fb84f99a2939d4995bb630cf48f1
+      size: 235
   original:
-    commit: 191f384b5329f0231844ae8405695fcdc29eab44
-    git: git@github.com:iand675/proto-lens.git
-    subdir: proto-lens-protobuf-types
-- completed:
-    commit: 191f384b5329f0231844ae8405695fcdc29eab44
-    git: git@github.com:iand675/proto-lens.git
-    name: proto-lens-runtime
-    pantry-tree:
-      sha256: 64ff7cb58d8a042da417cec8f3891f3267554eeeda949ce7678f14ec5cf08c39
-      size: 221
-    subdir: proto-lens-runtime
-    version: 0.7.0.4
-  original:
-    commit: 191f384b5329f0231844ae8405695fcdc29eab44
-    git: git@github.com:iand675/proto-lens.git
-    subdir: proto-lens-runtime
-- completed:
-    commit: 191f384b5329f0231844ae8405695fcdc29eab44
-    git: git@github.com:iand675/proto-lens.git
-    name: proto-lens-json
-    pantry-tree:
-      sha256: e301e072ea4b3cc2f84766f12d32f7693d37ea1e8b878bd5015b9a4a9dc0da41
-      size: 329
-    subdir: proto-lens-json
-    version: 0.0.1.0
-  original:
-    commit: 191f384b5329f0231844ae8405695fcdc29eab44
-    git: git@github.com:iand675/proto-lens.git
-    subdir: proto-lens-json
+    hackage: proto-lens-setup-0.4.0.8
 - completed:
     commit: e07f598b6ec1e36ad2f6e597bd0bd6342c166093
     git: git@github.com:iand675/hs-opentelemetry.git
@@ -201,19 +153,15 @@ packages:
     git: git@github.com:iand675/hs-opentelemetry.git
     subdir: propagators/w3c
 - completed:
-    commit: 7a6aac047b706508e85ba2054b5bedbecfd7eb7a
-    git: git@github.com:circuithub/ghc-source-gen.git
-    name: ghc-source-gen
+    hackage: ghc-source-gen-0.4.5.0@sha256:9b944e727b3a7292ef47307aea89a9a4226c2327c01d174df497ae0455f573c0,4236
     pantry-tree:
-      sha256: 4ba36ca22269ea5c9f56921182785817c23a4f4bc3811a39edd584f6876d4555
-      size: 3952
-    version: 0.4.3.0
+      sha256: 8ef8556b6a97c27cd23e929bddea5f183b081833e87281b1ef0a2665c523930e
+      size: 3250
   original:
-    commit: 7a6aac047b706508e85ba2054b5bedbecfd7eb7a
-    git: git@github.com:circuithub/ghc-source-gen.git
+    hackage: ghc-source-gen-0.4.5.0
 snapshots:
 - completed:
-    sha256: 56ef9e03804cb4827866e762dc9752eeb392adda8f4811690da110dd9a165b9e
-    size: 714105
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/22/8.yaml
-  original: lts-22.8
+    sha256: 4be1ca5d31689b524a7f0f17a439bbe9136465213edc498e9a395899a670f2aa
+    size: 718486
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/22/22.yaml
+  original: lts-22.22

@@ -4,9 +4,10 @@
 {-# OPTIONS_GHC -Wno-duplicate-exports#-}
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
 module Proto.Temporal.Api.Enums.V1.Reset (
-        ResetReapplyType(..), ResetReapplyType(),
-        ResetReapplyType'UnrecognizedValue, ResetType(..), ResetType(),
-        ResetType'UnrecognizedValue
+        ResetReapplyExcludeType(..), ResetReapplyExcludeType(),
+        ResetReapplyExcludeType'UnrecognizedValue, ResetReapplyType(..),
+        ResetReapplyType(), ResetReapplyType'UnrecognizedValue,
+        ResetType(..), ResetType(), ResetType'UnrecognizedValue
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -33,6 +34,87 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
+newtype ResetReapplyExcludeType'UnrecognizedValue
+  = ResetReapplyExcludeType'UnrecognizedValue Data.Int.Int32
+  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+data ResetReapplyExcludeType
+  = RESET_REAPPLY_EXCLUDE_TYPE_UNSPECIFIED |
+    RESET_REAPPLY_EXCLUDE_TYPE_SIGNAL |
+    RESET_REAPPLY_EXCLUDE_TYPE_UPDATE |
+    ResetReapplyExcludeType'Unrecognized !ResetReapplyExcludeType'UnrecognizedValue
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.MessageEnum ResetReapplyExcludeType where
+  maybeToEnum 0 = Prelude.Just RESET_REAPPLY_EXCLUDE_TYPE_UNSPECIFIED
+  maybeToEnum 1 = Prelude.Just RESET_REAPPLY_EXCLUDE_TYPE_SIGNAL
+  maybeToEnum 2 = Prelude.Just RESET_REAPPLY_EXCLUDE_TYPE_UPDATE
+  maybeToEnum k
+    = Prelude.Just
+        (ResetReapplyExcludeType'Unrecognized
+           (ResetReapplyExcludeType'UnrecognizedValue
+              (Prelude.fromIntegral k)))
+  showEnum RESET_REAPPLY_EXCLUDE_TYPE_UNSPECIFIED
+    = "RESET_REAPPLY_EXCLUDE_TYPE_UNSPECIFIED"
+  showEnum RESET_REAPPLY_EXCLUDE_TYPE_SIGNAL
+    = "RESET_REAPPLY_EXCLUDE_TYPE_SIGNAL"
+  showEnum RESET_REAPPLY_EXCLUDE_TYPE_UPDATE
+    = "RESET_REAPPLY_EXCLUDE_TYPE_UPDATE"
+  showEnum
+    (ResetReapplyExcludeType'Unrecognized (ResetReapplyExcludeType'UnrecognizedValue k))
+    = Prelude.show k
+  readEnum k
+    | (Prelude.==) k "RESET_REAPPLY_EXCLUDE_TYPE_UNSPECIFIED"
+    = Prelude.Just RESET_REAPPLY_EXCLUDE_TYPE_UNSPECIFIED
+    | (Prelude.==) k "RESET_REAPPLY_EXCLUDE_TYPE_SIGNAL"
+    = Prelude.Just RESET_REAPPLY_EXCLUDE_TYPE_SIGNAL
+    | (Prelude.==) k "RESET_REAPPLY_EXCLUDE_TYPE_UPDATE"
+    = Prelude.Just RESET_REAPPLY_EXCLUDE_TYPE_UPDATE
+    | Prelude.otherwise
+    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
+instance Prelude.Bounded ResetReapplyExcludeType where
+  minBound = RESET_REAPPLY_EXCLUDE_TYPE_UNSPECIFIED
+  maxBound = RESET_REAPPLY_EXCLUDE_TYPE_UPDATE
+instance Prelude.Enum ResetReapplyExcludeType where
+  toEnum k__
+    = Prelude.maybe
+        (Prelude.error
+           ((Prelude.++)
+              "toEnum: unknown value for enum ResetReapplyExcludeType: "
+              (Prelude.show k__)))
+        Prelude.id (Data.ProtoLens.maybeToEnum k__)
+  fromEnum RESET_REAPPLY_EXCLUDE_TYPE_UNSPECIFIED = 0
+  fromEnum RESET_REAPPLY_EXCLUDE_TYPE_SIGNAL = 1
+  fromEnum RESET_REAPPLY_EXCLUDE_TYPE_UPDATE = 2
+  fromEnum
+    (ResetReapplyExcludeType'Unrecognized (ResetReapplyExcludeType'UnrecognizedValue k))
+    = Prelude.fromIntegral k
+  succ RESET_REAPPLY_EXCLUDE_TYPE_UPDATE
+    = Prelude.error
+        "ResetReapplyExcludeType.succ: bad argument RESET_REAPPLY_EXCLUDE_TYPE_UPDATE. This value would be out of bounds."
+  succ RESET_REAPPLY_EXCLUDE_TYPE_UNSPECIFIED
+    = RESET_REAPPLY_EXCLUDE_TYPE_SIGNAL
+  succ RESET_REAPPLY_EXCLUDE_TYPE_SIGNAL
+    = RESET_REAPPLY_EXCLUDE_TYPE_UPDATE
+  succ (ResetReapplyExcludeType'Unrecognized _)
+    = Prelude.error
+        "ResetReapplyExcludeType.succ: bad argument: unrecognized value"
+  pred RESET_REAPPLY_EXCLUDE_TYPE_UNSPECIFIED
+    = Prelude.error
+        "ResetReapplyExcludeType.pred: bad argument RESET_REAPPLY_EXCLUDE_TYPE_UNSPECIFIED. This value would be out of bounds."
+  pred RESET_REAPPLY_EXCLUDE_TYPE_SIGNAL
+    = RESET_REAPPLY_EXCLUDE_TYPE_UNSPECIFIED
+  pred RESET_REAPPLY_EXCLUDE_TYPE_UPDATE
+    = RESET_REAPPLY_EXCLUDE_TYPE_SIGNAL
+  pred (ResetReapplyExcludeType'Unrecognized _)
+    = Prelude.error
+        "ResetReapplyExcludeType.pred: bad argument: unrecognized value"
+  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
+  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
+  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
+  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
+instance Data.ProtoLens.FieldDefault ResetReapplyExcludeType where
+  fieldDefault = RESET_REAPPLY_EXCLUDE_TYPE_UNSPECIFIED
+instance Control.DeepSeq.NFData ResetReapplyExcludeType where
+  rnf x__ = Prelude.seq x__ ()
 newtype ResetReapplyType'UnrecognizedValue
   = ResetReapplyType'UnrecognizedValue Data.Int.Int32
   deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
@@ -40,13 +122,14 @@ data ResetReapplyType
   = RESET_REAPPLY_TYPE_UNSPECIFIED |
     RESET_REAPPLY_TYPE_SIGNAL |
     RESET_REAPPLY_TYPE_NONE |
+    RESET_REAPPLY_TYPE_ALL_ELIGIBLE |
     ResetReapplyType'Unrecognized !ResetReapplyType'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum ResetReapplyType where
-  enumName _ = Data.Text.pack "ResetReapplyType"
   maybeToEnum 0 = Prelude.Just RESET_REAPPLY_TYPE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just RESET_REAPPLY_TYPE_SIGNAL
   maybeToEnum 2 = Prelude.Just RESET_REAPPLY_TYPE_NONE
+  maybeToEnum 3 = Prelude.Just RESET_REAPPLY_TYPE_ALL_ELIGIBLE
   maybeToEnum k
     = Prelude.Just
         (ResetReapplyType'Unrecognized
@@ -55,6 +138,8 @@ instance Data.ProtoLens.MessageEnum ResetReapplyType where
     = "RESET_REAPPLY_TYPE_UNSPECIFIED"
   showEnum RESET_REAPPLY_TYPE_SIGNAL = "RESET_REAPPLY_TYPE_SIGNAL"
   showEnum RESET_REAPPLY_TYPE_NONE = "RESET_REAPPLY_TYPE_NONE"
+  showEnum RESET_REAPPLY_TYPE_ALL_ELIGIBLE
+    = "RESET_REAPPLY_TYPE_ALL_ELIGIBLE"
   showEnum
     (ResetReapplyType'Unrecognized (ResetReapplyType'UnrecognizedValue k))
     = Prelude.show k
@@ -65,11 +150,13 @@ instance Data.ProtoLens.MessageEnum ResetReapplyType where
     = Prelude.Just RESET_REAPPLY_TYPE_SIGNAL
     | (Prelude.==) k "RESET_REAPPLY_TYPE_NONE"
     = Prelude.Just RESET_REAPPLY_TYPE_NONE
+    | (Prelude.==) k "RESET_REAPPLY_TYPE_ALL_ELIGIBLE"
+    = Prelude.Just RESET_REAPPLY_TYPE_ALL_ELIGIBLE
     | Prelude.otherwise
     = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
 instance Prelude.Bounded ResetReapplyType where
   minBound = RESET_REAPPLY_TYPE_UNSPECIFIED
-  maxBound = RESET_REAPPLY_TYPE_NONE
+  maxBound = RESET_REAPPLY_TYPE_ALL_ELIGIBLE
 instance Prelude.Enum ResetReapplyType where
   toEnum k__
     = Prelude.maybe
@@ -81,14 +168,16 @@ instance Prelude.Enum ResetReapplyType where
   fromEnum RESET_REAPPLY_TYPE_UNSPECIFIED = 0
   fromEnum RESET_REAPPLY_TYPE_SIGNAL = 1
   fromEnum RESET_REAPPLY_TYPE_NONE = 2
+  fromEnum RESET_REAPPLY_TYPE_ALL_ELIGIBLE = 3
   fromEnum
     (ResetReapplyType'Unrecognized (ResetReapplyType'UnrecognizedValue k))
     = Prelude.fromIntegral k
-  succ RESET_REAPPLY_TYPE_NONE
+  succ RESET_REAPPLY_TYPE_ALL_ELIGIBLE
     = Prelude.error
-        "ResetReapplyType.succ: bad argument RESET_REAPPLY_TYPE_NONE. This value would be out of bounds."
+        "ResetReapplyType.succ: bad argument RESET_REAPPLY_TYPE_ALL_ELIGIBLE. This value would be out of bounds."
   succ RESET_REAPPLY_TYPE_UNSPECIFIED = RESET_REAPPLY_TYPE_SIGNAL
   succ RESET_REAPPLY_TYPE_SIGNAL = RESET_REAPPLY_TYPE_NONE
+  succ RESET_REAPPLY_TYPE_NONE = RESET_REAPPLY_TYPE_ALL_ELIGIBLE
   succ (ResetReapplyType'Unrecognized _)
     = Prelude.error
         "ResetReapplyType.succ: bad argument: unrecognized value"
@@ -97,6 +186,7 @@ instance Prelude.Enum ResetReapplyType where
         "ResetReapplyType.pred: bad argument RESET_REAPPLY_TYPE_UNSPECIFIED. This value would be out of bounds."
   pred RESET_REAPPLY_TYPE_SIGNAL = RESET_REAPPLY_TYPE_UNSPECIFIED
   pred RESET_REAPPLY_TYPE_NONE = RESET_REAPPLY_TYPE_SIGNAL
+  pred RESET_REAPPLY_TYPE_ALL_ELIGIBLE = RESET_REAPPLY_TYPE_NONE
   pred (ResetReapplyType'Unrecognized _)
     = Prelude.error
         "ResetReapplyType.pred: bad argument: unrecognized value"
@@ -118,7 +208,6 @@ data ResetType
     ResetType'Unrecognized !ResetType'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum ResetType where
-  enumName _ = Data.Text.pack "ResetType"
   maybeToEnum 0 = Prelude.Just RESET_TYPE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just RESET_TYPE_FIRST_WORKFLOW_TASK
   maybeToEnum 2 = Prelude.Just RESET_TYPE_LAST_WORKFLOW_TASK

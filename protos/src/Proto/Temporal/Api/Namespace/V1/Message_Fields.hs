@@ -30,6 +30,12 @@ import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
 import qualified Proto.Google.Protobuf.Duration
 import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Temporal.Api.Enums.V1.Namespace
+asyncUpdate ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "asyncUpdate" a) =>
+  Lens.Family2.LensLike' f s a
+asyncUpdate = Data.ProtoLens.Field.field @"asyncUpdate"
 badBinaries ::
   forall f s a.
   (Prelude.Functor f,
@@ -42,6 +48,12 @@ binaries ::
    Data.ProtoLens.Field.HasField s "binaries" a) =>
   Lens.Family2.LensLike' f s a
 binaries = Data.ProtoLens.Field.field @"binaries"
+capabilities ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "capabilities" a) =>
+  Lens.Family2.LensLike' f s a
+capabilities = Data.ProtoLens.Field.field @"capabilities"
 createTime ::
   forall f s a.
   (Prelude.Functor f,
@@ -66,6 +78,13 @@ description ::
    Data.ProtoLens.Field.HasField s "description" a) =>
   Lens.Family2.LensLike' f s a
 description = Data.ProtoLens.Field.field @"description"
+eagerWorkflowStart ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "eagerWorkflowStart" a) =>
+  Lens.Family2.LensLike' f s a
+eagerWorkflowStart
+  = Data.ProtoLens.Field.field @"eagerWorkflowStart"
 historyArchivalState ::
   forall f s a.
   (Prelude.Functor f,
@@ -102,6 +121,13 @@ maybe'badBinaries ::
    Data.ProtoLens.Field.HasField s "maybe'badBinaries" a) =>
   Lens.Family2.LensLike' f s a
 maybe'badBinaries = Data.ProtoLens.Field.field @"maybe'badBinaries"
+maybe'capabilities ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'capabilities" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'capabilities
+  = Data.ProtoLens.Field.field @"maybe'capabilities"
 maybe'createTime ::
   forall f s a.
   (Prelude.Functor f,
@@ -154,6 +180,12 @@ supportsSchedules ::
    Data.ProtoLens.Field.HasField s "supportsSchedules" a) =>
   Lens.Family2.LensLike' f s a
 supportsSchedules = Data.ProtoLens.Field.field @"supportsSchedules"
+syncUpdate ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "syncUpdate" a) =>
+  Lens.Family2.LensLike' f s a
+syncUpdate = Data.ProtoLens.Field.field @"syncUpdate"
 value ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "value" a) =>

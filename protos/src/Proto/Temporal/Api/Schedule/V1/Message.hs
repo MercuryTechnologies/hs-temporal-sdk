@@ -3384,11 +3384,13 @@ instance Control.DeepSeq.NFData SchedulePatch where
          * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.overlapPolicy' @:: Lens' SchedulePolicies Proto.Temporal.Api.Enums.V1.Schedule.ScheduleOverlapPolicy@
          * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.catchupWindow' @:: Lens' SchedulePolicies Proto.Google.Protobuf.Duration.Duration@
          * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.maybe'catchupWindow' @:: Lens' SchedulePolicies (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
-         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.pauseOnFailure' @:: Lens' SchedulePolicies Prelude.Bool@ -}
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.pauseOnFailure' @:: Lens' SchedulePolicies Prelude.Bool@
+         * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.keepOriginalWorkflowId' @:: Lens' SchedulePolicies Prelude.Bool@ -}
 data SchedulePolicies
   = SchedulePolicies'_constructor {_SchedulePolicies'overlapPolicy :: !Proto.Temporal.Api.Enums.V1.Schedule.ScheduleOverlapPolicy,
                                    _SchedulePolicies'catchupWindow :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
                                    _SchedulePolicies'pauseOnFailure :: !Prelude.Bool,
+                                   _SchedulePolicies'keepOriginalWorkflowId :: !Prelude.Bool,
                                    _SchedulePolicies'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show SchedulePolicies where
@@ -3425,6 +3427,14 @@ instance Data.ProtoLens.Field.HasField SchedulePolicies "pauseOnFailure" Prelude
            _SchedulePolicies'pauseOnFailure
            (\ x__ y__ -> x__ {_SchedulePolicies'pauseOnFailure = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField SchedulePolicies "keepOriginalWorkflowId" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _SchedulePolicies'keepOriginalWorkflowId
+           (\ x__ y__
+              -> x__ {_SchedulePolicies'keepOriginalWorkflowId = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message SchedulePolicies where
   messageName _
     = Data.Text.pack "temporal.api.schedule.v1.SchedulePolicies"
@@ -3433,7 +3443,8 @@ instance Data.ProtoLens.Message SchedulePolicies where
       \\DLESchedulePolicies\DC2S\n\
       \\SOoverlap_policy\CAN\SOH \SOH(\SO2,.temporal.api.enums.v1.ScheduleOverlapPolicyR\roverlapPolicy\DC2@\n\
       \\SOcatchup_window\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\rcatchupWindow\DC2(\n\
-      \\DLEpause_on_failure\CAN\ETX \SOH(\bR\SOpauseOnFailure"
+      \\DLEpause_on_failure\CAN\ETX \SOH(\bR\SOpauseOnFailure\DC29\n\
+      \\EMkeep_original_workflow_id\CAN\EOT \SOH(\bR\SYNkeepOriginalWorkflowId"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -3463,11 +3474,21 @@ instance Data.ProtoLens.Message SchedulePolicies where
                  Data.ProtoLens.Optional
                  (Data.ProtoLens.Field.field @"pauseOnFailure")) ::
               Data.ProtoLens.FieldDescriptor SchedulePolicies
+        keepOriginalWorkflowId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "keep_original_workflow_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"keepOriginalWorkflowId")) ::
+              Data.ProtoLens.FieldDescriptor SchedulePolicies
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, overlapPolicy__field_descriptor),
            (Data.ProtoLens.Tag 2, catchupWindow__field_descriptor),
-           (Data.ProtoLens.Tag 3, pauseOnFailure__field_descriptor)]
+           (Data.ProtoLens.Tag 3, pauseOnFailure__field_descriptor),
+           (Data.ProtoLens.Tag 4, keepOriginalWorkflowId__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _SchedulePolicies'_unknownFields
@@ -3477,6 +3498,7 @@ instance Data.ProtoLens.Message SchedulePolicies where
         {_SchedulePolicies'overlapPolicy = Data.ProtoLens.fieldDefault,
          _SchedulePolicies'catchupWindow = Prelude.Nothing,
          _SchedulePolicies'pauseOnFailure = Data.ProtoLens.fieldDefault,
+         _SchedulePolicies'keepOriginalWorkflowId = Data.ProtoLens.fieldDefault,
          _SchedulePolicies'_unknownFields = []}
   parseMessage
     = let
@@ -3528,6 +3550,14 @@ instance Data.ProtoLens.Message SchedulePolicies where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"pauseOnFailure") y x)
+                        32
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "keep_original_workflow_id"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"keepOriginalWorkflowId") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -3584,8 +3614,22 @@ instance Data.ProtoLens.Message SchedulePolicies where
                             ((Prelude..)
                                Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
                                _v))
-                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
+                   ((Data.Monoid.<>)
+                      (let
+                         _v
+                           = Lens.Family2.view
+                               (Data.ProtoLens.Field.field @"keepOriginalWorkflowId") _x
+                       in
+                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                             Data.Monoid.mempty
+                         else
+                             (Data.Monoid.<>)
+                               (Data.ProtoLens.Encoding.Bytes.putVarInt 32)
+                               ((Prelude..)
+                                  Data.ProtoLens.Encoding.Bytes.putVarInt
+                                  (\ b -> if b then 1 else 0) _v))
+                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
 instance Control.DeepSeq.NFData SchedulePolicies where
   rnf
     = \ x__
@@ -3596,7 +3640,9 @@ instance Control.DeepSeq.NFData SchedulePolicies where
                 (Control.DeepSeq.deepseq
                    (_SchedulePolicies'catchupWindow x__)
                    (Control.DeepSeq.deepseq
-                      (_SchedulePolicies'pauseOnFailure x__) ())))
+                      (_SchedulePolicies'pauseOnFailure x__)
+                      (Control.DeepSeq.deepseq
+                         (_SchedulePolicies'keepOriginalWorkflowId x__) ()))))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Schedule.V1.Message_Fields.structuredCalendar' @:: Lens' ScheduleSpec [StructuredCalendarSpec]@
@@ -5390,11 +5436,12 @@ packedFileDescriptor
     \\ACKjitter\CAN\ACK \SOH(\v2\EM.google.protobuf.DurationR\ACKjitter\DC2#\n\
     \\rtimezone_name\CAN\n\
     \ \SOH(\tR\ftimezoneName\DC2#\n\
-    \\rtimezone_data\CAN\v \SOH(\fR\ftimezoneData\"\211\SOH\n\
+    \\rtimezone_data\CAN\v \SOH(\fR\ftimezoneData\"\142\STX\n\
     \\DLESchedulePolicies\DC2S\n\
     \\SOoverlap_policy\CAN\SOH \SOH(\SO2,.temporal.api.enums.v1.ScheduleOverlapPolicyR\roverlapPolicy\DC2@\n\
     \\SOcatchup_window\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\rcatchupWindow\DC2(\n\
-    \\DLEpause_on_failure\CAN\ETX \SOH(\bR\SOpauseOnFailure\"w\n\
+    \\DLEpause_on_failure\CAN\ETX \SOH(\bR\SOpauseOnFailure\DC29\n\
+    \\EMkeep_original_workflow_id\CAN\EOT \SOH(\bR\SYNkeepOriginalWorkflowId\"w\n\
     \\SOScheduleAction\DC2[\n\
     \\SOstart_workflow\CAN\SOH \SOH(\v22.temporal.api.workflow.v1.NewWorkflowExecutionInfoH\NULR\rstartWorkflowB\b\n\
     \\ACKaction\"\243\SOH\n\
@@ -5454,8 +5501,8 @@ packedFileDescriptor
     \\EOTmemo\CAN\STX \SOH(\v2\FS.temporal.api.common.v1.MemoR\EOTmemo\DC2U\n\
     \\DC1search_attributes\CAN\ETX \SOH(\v2(.temporal.api.common.v1.SearchAttributesR\DLEsearchAttributes\DC2>\n\
     \\EOTinfo\CAN\EOT \SOH(\v2*.temporal.api.schedule.v1.ScheduleListInfoR\EOTinfoB\147\SOH\n\
-    \\ESCio.temporal.api.schedule.v1B\fMessageProtoP\SOHZ'go.temporal.io/api/schedule/v1;schedule\170\STX\SUBTemporalio.Api.Schedule.V1\234\STX\GSTemporalio::Api::Schedule::V1J\154\142\SOH\n\
-    \\a\DC2\ENQ\ESC\NUL\138\ETX\SOH\n\
+    \\ESCio.temporal.api.schedule.v1B\fMessageProtoP\SOHZ'go.temporal.io/api/schedule/v1;schedule\170\STX\SUBTemporalio.Api.Schedule.V1\234\STX\GSTemporalio::Api::Schedule::V1J\200\143\SOH\n\
+    \\a\DC2\ENQ\ESC\NUL\142\ETX\SOH\n\
     \\134\v\n\
     \\SOH\f\DC2\ETX\ESC\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -5983,7 +6030,7 @@ packedFileDescriptor
     \\ENQ\EOT\EOT\STX\n\
     \\ETX\DC2\EOT\224\SOH\SUB\FS\n\
     \\f\n\
-    \\STX\EOT\ENQ\DC2\ACK\227\SOH\NUL\245\SOH\SOH\n\
+    \\STX\EOT\ENQ\DC2\ACK\227\SOH\NUL\249\SOH\SOH\n\
     \\v\n\
     \\ETX\EOT\ENQ\SOH\DC2\EOT\227\SOH\b\CAN\n\
     \\222\SOH\n\
@@ -6022,86 +6069,96 @@ packedFileDescriptor
     \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\EOT\244\SOH\t\EM\n\
     \\r\n\
     \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\EOT\244\SOH\FS\GS\n\
-    \\f\n\
-    \\STX\EOT\ACK\DC2\ACK\247\SOH\NUL\128\STX\SOH\n\
-    \\v\n\
-    \\ETX\EOT\ACK\SOH\DC2\EOT\247\SOH\b\SYN\n\
-    \\SO\n\
-    \\EOT\EOT\ACK\b\NUL\DC2\ACK\248\SOH\EOT\255\SOH\ENQ\n\
+    \\DEL\n\
+    \\EOT\EOT\ENQ\STX\ETX\DC2\EOT\248\SOH\EOT'\SUBq If true, and the action would start a workflow, a timestamp will not be\n\
+    \ appended to the scheduled workflow id.\n\
+    \\n\
     \\r\n\
-    \\ENQ\EOT\ACK\b\NUL\SOH\DC2\EOT\248\SOH\n\
+    \\ENQ\EOT\ENQ\STX\ETX\ENQ\DC2\EOT\248\SOH\EOT\b\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\ETX\SOH\DC2\EOT\248\SOH\t\"\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\ETX\ETX\DC2\EOT\248\SOH%&\n\
+    \\f\n\
+    \\STX\EOT\ACK\DC2\ACK\251\SOH\NUL\132\STX\SOH\n\
+    \\v\n\
+    \\ETX\EOT\ACK\SOH\DC2\EOT\251\SOH\b\SYN\n\
+    \\SO\n\
+    \\EOT\EOT\ACK\b\NUL\DC2\ACK\252\SOH\EOT\131\STX\ENQ\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\b\NUL\SOH\DC2\EOT\252\SOH\n\
     \\DLE\n\
     \\241\SOH\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\EOT\254\SOH\bM\SUB\226\SOH All fields of NewWorkflowExecutionInfo are valid except for:\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\EOT\130\STX\bM\SUB\226\SOH All fields of NewWorkflowExecutionInfo are valid except for:\n\
     \ - workflow_id_reuse_policy\n\
     \ - cron_schedule\n\
     \ The workflow id of the started workflow may not match this exactly,\n\
     \ it may have a timestamp appended for uniqueness.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\NUL\ACK\DC2\EOT\254\SOH\b9\n\
+    \\ENQ\EOT\ACK\STX\NUL\ACK\DC2\EOT\130\STX\b9\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\EOT\254\SOH:H\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\EOT\130\STX:H\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\EOT\254\SOHKL\n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\EOT\130\STXKL\n\
     \\f\n\
-    \\STX\EOT\a\DC2\ACK\130\STX\NUL\139\STX\SOH\n\
+    \\STX\EOT\a\DC2\ACK\134\STX\NUL\143\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\a\SOH\DC2\EOT\130\STX\b\FS\n\
+    \\ETX\EOT\a\SOH\DC2\EOT\134\STX\b\FS\n\
     \]\n\
-    \\EOT\EOT\a\STX\NUL\DC2\EOT\132\STX\EOT0\SUBO Time that the action was taken (according to the schedule, including jitter).\n\
+    \\EOT\EOT\a\STX\NUL\DC2\EOT\136\STX\EOT0\SUBO Time that the action was taken (according to the schedule, including jitter).\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\NUL\ACK\DC2\EOT\132\STX\EOT\GS\n\
+    \\ENQ\EOT\a\STX\NUL\ACK\DC2\EOT\136\STX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\EOT\132\STX\RS+\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\EOT\136\STX\RS+\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\EOT\132\STX./\n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\EOT\136\STX./\n\
     \;\n\
-    \\EOT\EOT\a\STX\SOH\DC2\EOT\135\STX\EOT.\SUB- Time that the action was taken (real time).\n\
+    \\EOT\EOT\a\STX\SOH\DC2\EOT\139\STX\EOT.\SUB- Time that the action was taken (real time).\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\SOH\ACK\DC2\EOT\135\STX\EOT\GS\n\
+    \\ENQ\EOT\a\STX\SOH\ACK\DC2\EOT\139\STX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\SOH\SOH\DC2\EOT\135\STX\RS)\n\
+    \\ENQ\EOT\a\STX\SOH\SOH\DC2\EOT\139\STX\RS)\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\SOH\ETX\DC2\EOT\135\STX,-\n\
+    \\ENQ\EOT\a\STX\SOH\ETX\DC2\EOT\139\STX,-\n\
     \-\n\
-    \\EOT\EOT\a\STX\STX\DC2\EOT\138\STX\EOTH\SUB\US If action was start_workflow:\n\
+    \\EOT\EOT\a\STX\STX\DC2\EOT\142\STX\EOTH\SUB\US If action was start_workflow:\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\STX\ACK\DC2\EOT\138\STX\EOT,\n\
+    \\ENQ\EOT\a\STX\STX\ACK\DC2\EOT\142\STX\EOT,\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\STX\SOH\DC2\EOT\138\STX-B\n\
+    \\ENQ\EOT\a\STX\STX\SOH\DC2\EOT\142\STX-B\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\STX\ETX\DC2\EOT\138\STXEG\n\
+    \\ENQ\EOT\a\STX\STX\ETX\DC2\EOT\142\STXEG\n\
     \\f\n\
-    \\STX\EOT\b\DC2\ACK\141\STX\NUL\159\STX\SOH\n\
+    \\STX\EOT\b\DC2\ACK\145\STX\NUL\163\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\b\SOH\DC2\EOT\141\STX\b\NAK\n\
+    \\ETX\EOT\b\SOH\DC2\EOT\145\STX\b\NAK\n\
     \\211\SOH\n\
-    \\EOT\EOT\b\STX\NUL\DC2\EOT\145\STX\EOT\NAK\SUB\196\SOH Informative human-readable message with contextual notes, e.g. the reason\n\
+    \\EOT\EOT\b\STX\NUL\DC2\EOT\149\STX\EOT\NAK\SUB\196\SOH Informative human-readable message with contextual notes, e.g. the reason\n\
     \ a schedule is paused. The system may overwrite this message on certain\n\
     \ conditions, e.g. when pause-on-failure happens.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\EOT\145\STX\EOT\n\
+    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\EOT\149\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\EOT\145\STX\v\DLE\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\EOT\149\STX\v\DLE\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\EOT\145\STX\DC3\DC4\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\EOT\149\STX\DC3\DC4\n\
     \L\n\
-    \\EOT\EOT\b\STX\SOH\DC2\EOT\148\STX\EOT\DC4\SUB> If true, do not take any actions based on the schedule spec.\n\
+    \\EOT\EOT\b\STX\SOH\DC2\EOT\152\STX\EOT\DC4\SUB> If true, do not take any actions based on the schedule spec.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\EOT\148\STX\EOT\b\n\
+    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\EOT\152\STX\EOT\b\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\SOH\SOH\DC2\EOT\148\STX\t\SI\n\
+    \\ENQ\EOT\b\STX\SOH\SOH\DC2\EOT\152\STX\t\SI\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\SOH\ETX\DC2\EOT\148\STX\DC2\DC3\n\
+    \\ENQ\EOT\b\STX\SOH\ETX\DC2\EOT\152\STX\DC2\DC3\n\
     \\204\ETX\n\
-    \\EOT\EOT\b\STX\STX\DC2\EOT\157\STX\EOT\GS\SUB\189\ETX If limited_actions is true, decrement remaining_actions after each\n\
+    \\EOT\EOT\b\STX\STX\DC2\EOT\161\STX\EOT\GS\SUB\189\ETX If limited_actions is true, decrement remaining_actions after each\n\
     \ action, and do not take any more scheduled actions if remaining_actions\n\
     \ is zero. Actions may still be taken by explicit request (i.e. trigger\n\
     \ immediately or backfill). Skipped actions (due to overlap policy) do not\n\
@@ -6110,42 +6167,42 @@ packedFileDescriptor
     \ subject to automatic deletion (after several days).\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\STX\ENQ\DC2\EOT\157\STX\EOT\b\n\
+    \\ENQ\EOT\b\STX\STX\ENQ\DC2\EOT\161\STX\EOT\b\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\STX\SOH\DC2\EOT\157\STX\t\CAN\n\
+    \\ENQ\EOT\b\STX\STX\SOH\DC2\EOT\161\STX\t\CAN\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\STX\ETX\DC2\EOT\157\STX\ESC\FS\n\
+    \\ENQ\EOT\b\STX\STX\ETX\DC2\EOT\161\STX\ESC\FS\n\
     \\f\n\
-    \\EOT\EOT\b\STX\ETX\DC2\EOT\158\STX\EOT \n\
+    \\EOT\EOT\b\STX\ETX\DC2\EOT\162\STX\EOT \n\
     \\r\n\
-    \\ENQ\EOT\b\STX\ETX\ENQ\DC2\EOT\158\STX\EOT\t\n\
+    \\ENQ\EOT\b\STX\ETX\ENQ\DC2\EOT\162\STX\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\ETX\SOH\DC2\EOT\158\STX\n\
+    \\ENQ\EOT\b\STX\ETX\SOH\DC2\EOT\162\STX\n\
     \\ESC\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\ETX\ETX\DC2\EOT\158\STX\RS\US\n\
+    \\ENQ\EOT\b\STX\ETX\ETX\DC2\EOT\162\STX\RS\US\n\
     \\f\n\
-    \\STX\EOT\t\DC2\ACK\161\STX\NUL\164\STX\SOH\n\
+    \\STX\EOT\t\DC2\ACK\165\STX\NUL\168\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\t\SOH\DC2\EOT\161\STX\b!\n\
+    \\ETX\EOT\t\SOH\DC2\EOT\165\STX\b!\n\
     \E\n\
-    \\EOT\EOT\t\STX\NUL\DC2\EOT\163\STX\EOTC\SUB7 If set, override overlap policy for this one request.\n\
+    \\EOT\EOT\t\STX\NUL\DC2\EOT\167\STX\EOTC\SUB7 If set, override overlap policy for this one request.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\NUL\ACK\DC2\EOT\163\STX\EOT/\n\
+    \\ENQ\EOT\t\STX\NUL\ACK\DC2\EOT\167\STX\EOT/\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\NUL\SOH\DC2\EOT\163\STX0>\n\
+    \\ENQ\EOT\t\STX\NUL\SOH\DC2\EOT\167\STX0>\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\NUL\ETX\DC2\EOT\163\STXAB\n\
+    \\ENQ\EOT\t\STX\NUL\ETX\DC2\EOT\167\STXAB\n\
     \\f\n\
     \\STX\EOT\n\
-    \\DC2\ACK\166\STX\NUL\177\STX\SOH\n\
+    \\DC2\ACK\170\STX\NUL\181\STX\SOH\n\
     \\v\n\
     \\ETX\EOT\n\
-    \\SOH\DC2\EOT\166\STX\b\ETB\n\
+    \\SOH\DC2\EOT\170\STX\b\ETB\n\
     \\148\ETX\n\
     \\EOT\EOT\n\
-    \\STX\NUL\DC2\EOT\173\STX\EOT-\SUB\133\ETX Time range to evaluate schedule in. Currently, this time range is\n\
+    \\STX\NUL\DC2\EOT\177\STX\EOT-\SUB\133\ETX Time range to evaluate schedule in. Currently, this time range is\n\
     \ exclusive on start_time and inclusive on end_time. (This is admittedly\n\
     \ counterintuitive and it may change in the future, so to be safe, use a\n\
     \ start time strictly before a scheduled time.) Also note that an action\n\
@@ -6154,350 +6211,350 @@ packedFileDescriptor
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ACK\DC2\EOT\173\STX\EOT\GS\n\
+    \\STX\NUL\ACK\DC2\EOT\177\STX\EOT\GS\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\SOH\DC2\EOT\173\STX\RS(\n\
+    \\STX\NUL\SOH\DC2\EOT\177\STX\RS(\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ETX\DC2\EOT\173\STX+,\n\
+    \\STX\NUL\ETX\DC2\EOT\177\STX+,\n\
     \\f\n\
     \\EOT\EOT\n\
-    \\STX\SOH\DC2\EOT\174\STX\EOT+\n\
+    \\STX\SOH\DC2\EOT\178\STX\EOT+\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\SOH\ACK\DC2\EOT\174\STX\EOT\GS\n\
+    \\STX\SOH\ACK\DC2\EOT\178\STX\EOT\GS\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\SOH\SOH\DC2\EOT\174\STX\RS&\n\
+    \\STX\SOH\SOH\DC2\EOT\178\STX\RS&\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\SOH\ETX\DC2\EOT\174\STX)*\n\
+    \\STX\SOH\ETX\DC2\EOT\178\STX)*\n\
     \A\n\
     \\EOT\EOT\n\
-    \\STX\STX\DC2\EOT\176\STX\EOTC\SUB3 If set, override overlap policy for this request.\n\
+    \\STX\STX\DC2\EOT\180\STX\EOTC\SUB3 If set, override overlap policy for this request.\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\STX\ACK\DC2\EOT\176\STX\EOT/\n\
+    \\STX\STX\ACK\DC2\EOT\180\STX\EOT/\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\STX\SOH\DC2\EOT\176\STX0>\n\
+    \\STX\STX\SOH\DC2\EOT\180\STX0>\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\STX\ETX\DC2\EOT\176\STXAB\n\
+    \\STX\STX\ETX\DC2\EOT\180\STXAB\n\
     \\f\n\
-    \\STX\EOT\v\DC2\ACK\179\STX\NUL\192\STX\SOH\n\
+    \\STX\EOT\v\DC2\ACK\183\STX\NUL\196\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\v\SOH\DC2\EOT\179\STX\b\NAK\n\
+    \\ETX\EOT\v\SOH\DC2\EOT\183\STX\b\NAK\n\
     \7\n\
-    \\EOT\EOT\v\STX\NUL\DC2\EOT\181\STX\EOT6\SUB) If set, trigger one action immediately.\n\
+    \\EOT\EOT\v\STX\NUL\DC2\EOT\185\STX\EOT6\SUB) If set, trigger one action immediately.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\NUL\ACK\DC2\EOT\181\STX\EOT\GS\n\
+    \\ENQ\EOT\v\STX\NUL\ACK\DC2\EOT\185\STX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\NUL\SOH\DC2\EOT\181\STX\RS1\n\
+    \\ENQ\EOT\v\STX\NUL\SOH\DC2\EOT\185\STX\RS1\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\NUL\ETX\DC2\EOT\181\STX45\n\
+    \\ENQ\EOT\v\STX\NUL\ETX\DC2\EOT\185\STX45\n\
     \\203\SOH\n\
-    \\EOT\EOT\v\STX\SOH\DC2\EOT\186\STX\EOT2\SUB\188\SOH If set, runs though the specified time period(s) and takes actions as if that time\n\
+    \\EOT\EOT\v\STX\SOH\DC2\EOT\190\STX\EOT2\SUB\188\SOH If set, runs though the specified time period(s) and takes actions as if that time\n\
     \ passed by right now, all at once. The overlap policy can be overridden for the\n\
     \ scope of the backfill.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\EOT\DC2\EOT\186\STX\EOT\f\n\
+    \\ENQ\EOT\v\STX\SOH\EOT\DC2\EOT\190\STX\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\ACK\DC2\EOT\186\STX\r\FS\n\
+    \\ENQ\EOT\v\STX\SOH\ACK\DC2\EOT\190\STX\r\FS\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\SOH\DC2\EOT\186\STX\GS-\n\
+    \\ENQ\EOT\v\STX\SOH\SOH\DC2\EOT\190\STX\GS-\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\ETX\DC2\EOT\186\STX01\n\
+    \\ENQ\EOT\v\STX\SOH\ETX\DC2\EOT\190\STX01\n\
     \\130\SOH\n\
-    \\EOT\EOT\v\STX\STX\DC2\EOT\190\STX\EOT\NAK\SUBt If set, change the state to paused or unpaused (respectively) and set the\n\
+    \\EOT\EOT\v\STX\STX\DC2\EOT\194\STX\EOT\NAK\SUBt If set, change the state to paused or unpaused (respectively) and set the\n\
     \ notes field to the value of the string.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\STX\ENQ\DC2\EOT\190\STX\EOT\n\
+    \\ENQ\EOT\v\STX\STX\ENQ\DC2\EOT\194\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\STX\SOH\DC2\EOT\190\STX\v\DLE\n\
+    \\ENQ\EOT\v\STX\STX\SOH\DC2\EOT\194\STX\v\DLE\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\STX\ETX\DC2\EOT\190\STX\DC3\DC4\n\
+    \\ENQ\EOT\v\STX\STX\ETX\DC2\EOT\194\STX\DC3\DC4\n\
     \\f\n\
-    \\EOT\EOT\v\STX\ETX\DC2\EOT\191\STX\EOT\ETB\n\
+    \\EOT\EOT\v\STX\ETX\DC2\EOT\195\STX\EOT\ETB\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\ETX\ENQ\DC2\EOT\191\STX\EOT\n\
+    \\ENQ\EOT\v\STX\ETX\ENQ\DC2\EOT\195\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\ETX\SOH\DC2\EOT\191\STX\v\DC2\n\
+    \\ENQ\EOT\v\STX\ETX\SOH\DC2\EOT\195\STX\v\DC2\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\ETX\ETX\DC2\EOT\191\STX\NAK\SYN\n\
+    \\ENQ\EOT\v\STX\ETX\ETX\DC2\EOT\195\STX\NAK\SYN\n\
     \\f\n\
-    \\STX\EOT\f\DC2\ACK\194\STX\NUL\230\STX\SOH\n\
+    \\STX\EOT\f\DC2\ACK\198\STX\NUL\234\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\f\SOH\DC2\EOT\194\STX\b\DC4\n\
+    \\ETX\EOT\f\SOH\DC2\EOT\198\STX\b\DC4\n\
     \/\n\
-    \\EOT\EOT\f\STX\NUL\DC2\EOT\196\STX\EOT\ESC\SUB! Number of actions taken so far.\n\
+    \\EOT\EOT\f\STX\NUL\DC2\EOT\200\STX\EOT\ESC\SUB! Number of actions taken so far.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\EOT\196\STX\EOT\t\n\
+    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\EOT\200\STX\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\SOH\DC2\EOT\196\STX\n\
+    \\ENQ\EOT\f\STX\NUL\SOH\DC2\EOT\200\STX\n\
     \\SYN\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\ETX\DC2\EOT\196\STX\EM\SUB\n\
+    \\ENQ\EOT\f\STX\NUL\ETX\DC2\EOT\200\STX\EM\SUB\n\
     \a\n\
-    \\EOT\EOT\f\STX\SOH\DC2\EOT\199\STX\EOT$\SUBS Number of times a scheduled action was skipped due to missing the catchup window.\n\
+    \\EOT\EOT\f\STX\SOH\DC2\EOT\203\STX\EOT$\SUBS Number of times a scheduled action was skipped due to missing the catchup window.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SOH\ENQ\DC2\EOT\199\STX\EOT\t\n\
+    \\ENQ\EOT\f\STX\SOH\ENQ\DC2\EOT\203\STX\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SOH\SOH\DC2\EOT\199\STX\n\
+    \\ENQ\EOT\f\STX\SOH\SOH\DC2\EOT\203\STX\n\
     \\US\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SOH\ETX\DC2\EOT\199\STX\"#\n\
+    \\ENQ\EOT\f\STX\SOH\ETX\DC2\EOT\203\STX\"#\n\
     \9\n\
-    \\EOT\EOT\f\STX\STX\DC2\EOT\202\STX\EOT\RS\SUB+ Number of skipped actions due to overlap.\n\
+    \\EOT\EOT\f\STX\STX\DC2\EOT\206\STX\EOT\RS\SUB+ Number of skipped actions due to overlap.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\STX\ENQ\DC2\EOT\202\STX\EOT\t\n\
+    \\ENQ\EOT\f\STX\STX\ENQ\DC2\EOT\206\STX\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\STX\SOH\DC2\EOT\202\STX\n\
+    \\ENQ\EOT\f\STX\STX\SOH\DC2\EOT\206\STX\n\
     \\EM\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\STX\ETX\DC2\EOT\202\STX\FS\GS\n\
+    \\ENQ\EOT\f\STX\STX\ETX\DC2\EOT\206\STX\FS\GS\n\
     \>\n\
-    \\EOT\EOT\f\STX\ETX\DC2\EOT\205\STX\EOT\RS\SUB0 Number of dropped actions due to buffer limit.\n\
+    \\EOT\EOT\f\STX\ETX\DC2\EOT\209\STX\EOT\RS\SUB0 Number of dropped actions due to buffer limit.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ETX\ENQ\DC2\EOT\205\STX\EOT\t\n\
+    \\ENQ\EOT\f\STX\ETX\ENQ\DC2\EOT\209\STX\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ETX\SOH\DC2\EOT\205\STX\n\
+    \\ENQ\EOT\f\STX\ETX\SOH\DC2\EOT\209\STX\n\
     \\CAN\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ETX\ETX\DC2\EOT\205\STX\ESC\GS\n\
+    \\ENQ\EOT\f\STX\ETX\ETX\DC2\EOT\209\STX\ESC\GS\n\
     \\214\SOH\n\
-    \\EOT\EOT\f\STX\EOT\DC2\EOT\210\STX\EOT\ESC\SUB\199\SOH Number of actions in the buffer. The buffer holds the actions that cannot\n\
+    \\EOT\EOT\f\STX\EOT\DC2\EOT\214\STX\EOT\ESC\SUB\199\SOH Number of actions in the buffer. The buffer holds the actions that cannot\n\
     \ be immediately triggered (due to the overlap policy). These actions can be a result of\n\
     \ the normal schedule or a backfill.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\EOT\ENQ\DC2\EOT\210\STX\EOT\t\n\
+    \\ENQ\EOT\f\STX\EOT\ENQ\DC2\EOT\214\STX\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\EOT\SOH\DC2\EOT\210\STX\n\
+    \\ENQ\EOT\f\STX\EOT\SOH\DC2\EOT\214\STX\n\
     \\NAK\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\EOT\ETX\DC2\EOT\210\STX\CAN\SUB\n\
+    \\ENQ\EOT\f\STX\EOT\ETX\DC2\EOT\214\STX\CAN\SUB\n\
     \\228\STX\n\
-    \\EOT\EOT\f\STX\ENQ\DC2\EOT\217\STX\EOTL\SUB\213\STX Currently-running workflows started by this schedule. (There might be\n\
+    \\EOT\EOT\f\STX\ENQ\DC2\EOT\221\STX\EOTL\SUB\213\STX Currently-running workflows started by this schedule. (There might be\n\
     \ more than one if the overlap policy allows overlaps.)\n\
     \ Note that the run_ids in here are the original execution run ids as\n\
     \ started by the schedule. If the workflows retried, did continue-as-new,\n\
     \ or were reset, they might still be running but with a different run_id.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ENQ\EOT\DC2\EOT\217\STX\EOT\f\n\
+    \\ENQ\EOT\f\STX\ENQ\EOT\DC2\EOT\221\STX\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ENQ\ACK\DC2\EOT\217\STX\r5\n\
+    \\ENQ\EOT\f\STX\ENQ\ACK\DC2\EOT\221\STX\r5\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ENQ\SOH\DC2\EOT\217\STX6G\n\
+    \\ENQ\EOT\f\STX\ENQ\SOH\DC2\EOT\221\STX6G\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ENQ\ETX\DC2\EOT\217\STXJK\n\
+    \\ENQ\EOT\f\STX\ENQ\ETX\DC2\EOT\221\STXJK\n\
     \P\n\
-    \\EOT\EOT\f\STX\ACK\DC2\EOT\220\STX\EOT5\SUBB Most recent ten actual action times (including manual triggers).\n\
+    \\EOT\EOT\f\STX\ACK\DC2\EOT\224\STX\EOT5\SUBB Most recent ten actual action times (including manual triggers).\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ACK\EOT\DC2\EOT\220\STX\EOT\f\n\
+    \\ENQ\EOT\f\STX\ACK\EOT\DC2\EOT\224\STX\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ACK\ACK\DC2\EOT\220\STX\r!\n\
+    \\ENQ\EOT\f\STX\ACK\ACK\DC2\EOT\224\STX\r!\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ACK\SOH\DC2\EOT\220\STX\"0\n\
+    \\ENQ\EOT\f\STX\ACK\SOH\DC2\EOT\224\STX\"0\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ACK\ETX\DC2\EOT\220\STX34\n\
+    \\ENQ\EOT\f\STX\ACK\ETX\DC2\EOT\224\STX34\n\
     \0\n\
-    \\EOT\EOT\f\STX\a\DC2\EOT\223\STX\EOT?\SUB\" Next ten scheduled action times.\n\
+    \\EOT\EOT\f\STX\a\DC2\EOT\227\STX\EOT?\SUB\" Next ten scheduled action times.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\a\EOT\DC2\EOT\223\STX\EOT\f\n\
+    \\ENQ\EOT\f\STX\a\EOT\DC2\EOT\227\STX\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\a\ACK\DC2\EOT\223\STX\r&\n\
+    \\ENQ\EOT\f\STX\a\ACK\DC2\EOT\227\STX\r&\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\a\SOH\DC2\EOT\223\STX':\n\
+    \\ENQ\EOT\f\STX\a\SOH\DC2\EOT\227\STX':\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\a\ETX\DC2\EOT\223\STX=>\n\
+    \\ENQ\EOT\f\STX\a\ETX\DC2\EOT\227\STX=>\n\
     \@\n\
-    \\EOT\EOT\f\STX\b\DC2\EOT\226\STX\EOT.\SUB2 Timestamps of schedule creation and last update.\n\
+    \\EOT\EOT\f\STX\b\DC2\EOT\230\STX\EOT.\SUB2 Timestamps of schedule creation and last update.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\b\ACK\DC2\EOT\226\STX\EOT\GS\n\
+    \\ENQ\EOT\f\STX\b\ACK\DC2\EOT\230\STX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\b\SOH\DC2\EOT\226\STX\RS)\n\
+    \\ENQ\EOT\f\STX\b\SOH\DC2\EOT\230\STX\RS)\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\b\ETX\DC2\EOT\226\STX,-\n\
+    \\ENQ\EOT\f\STX\b\ETX\DC2\EOT\230\STX,-\n\
     \\f\n\
-    \\EOT\EOT\f\STX\t\DC2\EOT\227\STX\EOT.\n\
+    \\EOT\EOT\f\STX\t\DC2\EOT\231\STX\EOT.\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\t\ACK\DC2\EOT\227\STX\EOT\GS\n\
+    \\ENQ\EOT\f\STX\t\ACK\DC2\EOT\231\STX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\t\SOH\DC2\EOT\227\STX\RS)\n\
+    \\ENQ\EOT\f\STX\t\SOH\DC2\EOT\231\STX\RS)\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\t\ETX\DC2\EOT\227\STX,-\n\
+    \\ENQ\EOT\f\STX\t\ETX\DC2\EOT\231\STX,-\n\
     \\f\n\
     \\EOT\EOT\f\STX\n\
-    \\DC2\EOT\229\STX\EOT:\n\
+    \\DC2\EOT\233\STX\EOT:\n\
     \\r\n\
     \\ENQ\EOT\f\STX\n\
-    \\ENQ\DC2\EOT\229\STX\EOT\n\
+    \\ENQ\DC2\EOT\233\STX\EOT\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\f\STX\n\
-    \\SOH\DC2\EOT\229\STX\v!\n\
+    \\SOH\DC2\EOT\233\STX\v!\n\
     \\r\n\
     \\ENQ\EOT\f\STX\n\
-    \\ETX\DC2\EOT\229\STX$%\n\
+    \\ETX\DC2\EOT\233\STX$%\n\
     \\r\n\
     \\ENQ\EOT\f\STX\n\
-    \\b\DC2\EOT\229\STX&9\n\
+    \\b\DC2\EOT\233\STX&9\n\
     \\SO\n\
     \\ACK\EOT\f\STX\n\
-    \\b\ETX\DC2\EOT\229\STX'8\n\
+    \\b\ETX\DC2\EOT\233\STX'8\n\
     \\f\n\
-    \\STX\EOT\r\DC2\ACK\232\STX\NUL\237\STX\SOH\n\
+    \\STX\EOT\r\DC2\ACK\236\STX\NUL\241\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\r\SOH\DC2\EOT\232\STX\b\DLE\n\
+    \\ETX\EOT\r\SOH\DC2\EOT\236\STX\b\DLE\n\
     \\f\n\
-    \\EOT\EOT\r\STX\NUL\DC2\EOT\233\STX\EOT\SUB\n\
+    \\EOT\EOT\r\STX\NUL\DC2\EOT\237\STX\EOT\SUB\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\NUL\ACK\DC2\EOT\233\STX\EOT\DLE\n\
+    \\ENQ\EOT\r\STX\NUL\ACK\DC2\EOT\237\STX\EOT\DLE\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\NUL\SOH\DC2\EOT\233\STX\DC1\NAK\n\
+    \\ENQ\EOT\r\STX\NUL\SOH\DC2\EOT\237\STX\DC1\NAK\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\NUL\ETX\DC2\EOT\233\STX\CAN\EM\n\
+    \\ENQ\EOT\r\STX\NUL\ETX\DC2\EOT\237\STX\CAN\EM\n\
     \\f\n\
-    \\EOT\EOT\r\STX\SOH\DC2\EOT\234\STX\EOT\RS\n\
+    \\EOT\EOT\r\STX\SOH\DC2\EOT\238\STX\EOT\RS\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SOH\ACK\DC2\EOT\234\STX\EOT\DC2\n\
+    \\ENQ\EOT\r\STX\SOH\ACK\DC2\EOT\238\STX\EOT\DC2\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SOH\SOH\DC2\EOT\234\STX\DC3\EM\n\
+    \\ENQ\EOT\r\STX\SOH\SOH\DC2\EOT\238\STX\DC3\EM\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SOH\ETX\DC2\EOT\234\STX\FS\GS\n\
+    \\ENQ\EOT\r\STX\SOH\ETX\DC2\EOT\238\STX\FS\GS\n\
     \\f\n\
-    \\EOT\EOT\r\STX\STX\DC2\EOT\235\STX\EOT\"\n\
+    \\EOT\EOT\r\STX\STX\DC2\EOT\239\STX\EOT\"\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\STX\ACK\DC2\EOT\235\STX\EOT\DC4\n\
+    \\ENQ\EOT\r\STX\STX\ACK\DC2\EOT\239\STX\EOT\DC4\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\STX\SOH\DC2\EOT\235\STX\NAK\GS\n\
+    \\ENQ\EOT\r\STX\STX\SOH\DC2\EOT\239\STX\NAK\GS\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\STX\ETX\DC2\EOT\235\STX !\n\
+    \\ENQ\EOT\r\STX\STX\ETX\DC2\EOT\239\STX !\n\
     \\f\n\
-    \\EOT\EOT\r\STX\ETX\DC2\EOT\236\STX\EOT\FS\n\
+    \\EOT\EOT\r\STX\ETX\DC2\EOT\240\STX\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ETX\ACK\DC2\EOT\236\STX\EOT\DC1\n\
+    \\ENQ\EOT\r\STX\ETX\ACK\DC2\EOT\240\STX\EOT\DC1\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ETX\SOH\DC2\EOT\236\STX\DC2\ETB\n\
+    \\ENQ\EOT\r\STX\ETX\SOH\DC2\EOT\240\STX\DC2\ETB\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ETX\ETX\DC2\EOT\236\STX\SUB\ESC\n\
+    \\ENQ\EOT\r\STX\ETX\ETX\DC2\EOT\240\STX\SUB\ESC\n\
     \\130\SOH\n\
-    \\STX\EOT\SO\DC2\ACK\241\STX\NUL\130\ETX\SOH\SUBt ScheduleListInfo is an abbreviated set of values from Schedule and ScheduleInfo\n\
+    \\STX\EOT\SO\DC2\ACK\245\STX\NUL\134\ETX\SOH\SUBt ScheduleListInfo is an abbreviated set of values from Schedule and ScheduleInfo\n\
     \ that's returned in ListSchedules.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\SO\SOH\DC2\EOT\241\STX\b\CAN\n\
+    \\ETX\EOT\SO\SOH\DC2\EOT\245\STX\b\CAN\n\
     \Y\n\
-    \\EOT\EOT\SO\STX\NUL\DC2\EOT\244\STX\EOT\SUB\SUBK From spec:\n\
+    \\EOT\EOT\SO\STX\NUL\DC2\EOT\248\STX\EOT\SUB\SUBK From spec:\n\
     \ Some fields are dropped from this copy of spec: timezone_data\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\ACK\DC2\EOT\244\STX\EOT\DLE\n\
+    \\ENQ\EOT\SO\STX\NUL\ACK\DC2\EOT\248\STX\EOT\DLE\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\EOT\244\STX\DC1\NAK\n\
+    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\EOT\248\STX\DC1\NAK\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\EOT\244\STX\CAN\EM\n\
+    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\EOT\248\STX\CAN\EM\n\
     \\177\SOH\n\
-    \\EOT\EOT\SO\STX\SOH\DC2\EOT\249\STX\EOT:\SUB\162\SOH From action:\n\
+    \\EOT\EOT\SO\STX\SOH\DC2\EOT\253\STX\EOT:\SUB\162\SOH From action:\n\
     \ Action is a oneof field, but we need to encode this in JSON and oneof fields don't work\n\
     \ well with JSON. If action is start_workflow, this is set:\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\SOH\ACK\DC2\EOT\249\STX\EOT'\n\
+    \\ENQ\EOT\SO\STX\SOH\ACK\DC2\EOT\253\STX\EOT'\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\EOT\249\STX(5\n\
+    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\EOT\253\STX(5\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\EOT\249\STX89\n\
+    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\EOT\253\STX89\n\
     \\ESC\n\
-    \\EOT\EOT\SO\STX\STX\DC2\EOT\252\STX\EOT\NAK\SUB\r From state:\n\
+    \\EOT\EOT\SO\STX\STX\DC2\EOT\128\ETX\EOT\NAK\SUB\r From state:\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\STX\ENQ\DC2\EOT\252\STX\EOT\n\
+    \\ENQ\EOT\SO\STX\STX\ENQ\DC2\EOT\128\ETX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\STX\SOH\DC2\EOT\252\STX\v\DLE\n\
+    \\ENQ\EOT\SO\STX\STX\SOH\DC2\EOT\128\ETX\v\DLE\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\STX\ETX\DC2\EOT\252\STX\DC3\DC4\n\
+    \\ENQ\EOT\SO\STX\STX\ETX\DC2\EOT\128\ETX\DC3\DC4\n\
     \\f\n\
-    \\EOT\EOT\SO\STX\ETX\DC2\EOT\253\STX\EOT\DC4\n\
+    \\EOT\EOT\SO\STX\ETX\DC2\EOT\129\ETX\EOT\DC4\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\ETX\ENQ\DC2\EOT\253\STX\EOT\b\n\
+    \\ENQ\EOT\SO\STX\ETX\ENQ\DC2\EOT\129\ETX\EOT\b\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\ETX\SOH\DC2\EOT\253\STX\t\SI\n\
+    \\ENQ\EOT\SO\STX\ETX\SOH\DC2\EOT\129\ETX\t\SI\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\ETX\ETX\DC2\EOT\253\STX\DC2\DC3\n\
+    \\ENQ\EOT\SO\STX\ETX\ETX\DC2\EOT\129\ETX\DC2\DC3\n\
     \0\n\
-    \\EOT\EOT\SO\STX\EOT\DC2\EOT\128\ETX\EOT5\SUB\" From info (maybe fewer entries):\n\
+    \\EOT\EOT\SO\STX\EOT\DC2\EOT\132\ETX\EOT5\SUB\" From info (maybe fewer entries):\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\EOT\EOT\DC2\EOT\128\ETX\EOT\f\n\
+    \\ENQ\EOT\SO\STX\EOT\EOT\DC2\EOT\132\ETX\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\EOT\ACK\DC2\EOT\128\ETX\r!\n\
+    \\ENQ\EOT\SO\STX\EOT\ACK\DC2\EOT\132\ETX\r!\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\EOT\SOH\DC2\EOT\128\ETX\"0\n\
+    \\ENQ\EOT\SO\STX\EOT\SOH\DC2\EOT\132\ETX\"0\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\EOT\ETX\DC2\EOT\128\ETX34\n\
+    \\ENQ\EOT\SO\STX\EOT\ETX\DC2\EOT\132\ETX34\n\
     \\f\n\
-    \\EOT\EOT\SO\STX\ENQ\DC2\EOT\129\ETX\EOT?\n\
+    \\EOT\EOT\SO\STX\ENQ\DC2\EOT\133\ETX\EOT?\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\ENQ\EOT\DC2\EOT\129\ETX\EOT\f\n\
+    \\ENQ\EOT\SO\STX\ENQ\EOT\DC2\EOT\133\ETX\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\ENQ\ACK\DC2\EOT\129\ETX\r&\n\
+    \\ENQ\EOT\SO\STX\ENQ\ACK\DC2\EOT\133\ETX\r&\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\ENQ\SOH\DC2\EOT\129\ETX':\n\
+    \\ENQ\EOT\SO\STX\ENQ\SOH\DC2\EOT\133\ETX':\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\ENQ\ETX\DC2\EOT\129\ETX=>\n\
+    \\ENQ\EOT\SO\STX\ENQ\ETX\DC2\EOT\133\ETX=>\n\
     \?\n\
-    \\STX\EOT\SI\DC2\ACK\133\ETX\NUL\138\ETX\SOH\SUB1 ScheduleListEntry is returned by ListSchedules.\n\
+    \\STX\EOT\SI\DC2\ACK\137\ETX\NUL\142\ETX\SOH\SUB1 ScheduleListEntry is returned by ListSchedules.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\SI\SOH\DC2\EOT\133\ETX\b\EM\n\
+    \\ETX\EOT\SI\SOH\DC2\EOT\137\ETX\b\EM\n\
     \\f\n\
-    \\EOT\EOT\SI\STX\NUL\DC2\EOT\134\ETX\EOT\ESC\n\
+    \\EOT\EOT\SI\STX\NUL\DC2\EOT\138\ETX\EOT\ESC\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\EOT\134\ETX\EOT\n\
+    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\EOT\138\ETX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\EOT\134\ETX\v\SYN\n\
+    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\EOT\138\ETX\v\SYN\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\EOT\134\ETX\EM\SUB\n\
+    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\EOT\138\ETX\EM\SUB\n\
     \\f\n\
-    \\EOT\EOT\SI\STX\SOH\DC2\EOT\135\ETX\EOT)\n\
+    \\EOT\EOT\SI\STX\SOH\DC2\EOT\139\ETX\EOT)\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\SOH\ACK\DC2\EOT\135\ETX\EOT\US\n\
+    \\ENQ\EOT\SI\STX\SOH\ACK\DC2\EOT\139\ETX\EOT\US\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\SOH\SOH\DC2\EOT\135\ETX $\n\
+    \\ENQ\EOT\SI\STX\SOH\SOH\DC2\EOT\139\ETX $\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\SOH\ETX\DC2\EOT\135\ETX'(\n\
+    \\ENQ\EOT\SI\STX\SOH\ETX\DC2\EOT\139\ETX'(\n\
     \\f\n\
-    \\EOT\EOT\SI\STX\STX\DC2\EOT\136\ETX\EOTB\n\
+    \\EOT\EOT\SI\STX\STX\DC2\EOT\140\ETX\EOTB\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\STX\ACK\DC2\EOT\136\ETX\EOT+\n\
+    \\ENQ\EOT\SI\STX\STX\ACK\DC2\EOT\140\ETX\EOT+\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\STX\SOH\DC2\EOT\136\ETX,=\n\
+    \\ENQ\EOT\SI\STX\STX\SOH\DC2\EOT\140\ETX,=\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\STX\ETX\DC2\EOT\136\ETX@A\n\
+    \\ENQ\EOT\SI\STX\STX\ETX\DC2\EOT\140\ETX@A\n\
     \\f\n\
-    \\EOT\EOT\SI\STX\ETX\DC2\EOT\137\ETX\EOT\RS\n\
+    \\EOT\EOT\SI\STX\ETX\DC2\EOT\141\ETX\EOT\RS\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\ETX\ACK\DC2\EOT\137\ETX\EOT\DC4\n\
+    \\ENQ\EOT\SI\STX\ETX\ACK\DC2\EOT\141\ETX\EOT\DC4\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\ETX\SOH\DC2\EOT\137\ETX\NAK\EM\n\
+    \\ENQ\EOT\SI\STX\ETX\SOH\DC2\EOT\141\ETX\NAK\EM\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\ETX\ETX\DC2\EOT\137\ETX\FS\GSb\ACKproto3"
+    \\ENQ\EOT\SI\STX\ETX\ETX\DC2\EOT\141\ETX\FS\GSb\ACKproto3"

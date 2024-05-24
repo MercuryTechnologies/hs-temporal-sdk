@@ -165,6 +165,13 @@ jitter ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "jitter" a) =>
   Lens.Family2.LensLike' f s a
 jitter = Data.ProtoLens.Field.field @"jitter"
+keepOriginalWorkflowId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "keepOriginalWorkflowId" a) =>
+  Lens.Family2.LensLike' f s a
+keepOriginalWorkflowId
+  = Data.ProtoLens.Field.field @"keepOriginalWorkflowId"
 limitedActions ::
   forall f s a.
   (Prelude.Functor f,

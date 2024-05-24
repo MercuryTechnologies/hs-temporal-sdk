@@ -9,6 +9,8 @@ module Proto.Temporal.Api.Enums.V1.FailedCause (
         CancelExternalWorkflowExecutionFailedCause'UnrecognizedValue,
         ResourceExhaustedCause(..), ResourceExhaustedCause(),
         ResourceExhaustedCause'UnrecognizedValue,
+        ResourceExhaustedScope(..), ResourceExhaustedScope(),
+        ResourceExhaustedScope'UnrecognizedValue,
         SignalExternalWorkflowExecutionFailedCause(..),
         SignalExternalWorkflowExecutionFailedCause(),
         SignalExternalWorkflowExecutionFailedCause'UnrecognizedValue,
@@ -53,8 +55,6 @@ data CancelExternalWorkflowExecutionFailedCause
     CancelExternalWorkflowExecutionFailedCause'Unrecognized !CancelExternalWorkflowExecutionFailedCause'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum CancelExternalWorkflowExecutionFailedCause where
-  enumName _
-    = Data.Text.pack "CancelExternalWorkflowExecutionFailedCause"
   maybeToEnum 0
     = Prelude.Just
         CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
@@ -170,7 +170,6 @@ data ResourceExhaustedCause
     ResourceExhaustedCause'Unrecognized !ResourceExhaustedCause'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum ResourceExhaustedCause where
-  enumName _ = Data.Text.pack "ResourceExhaustedCause"
   maybeToEnum 0 = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_RPS_LIMIT
   maybeToEnum 2
@@ -285,6 +284,87 @@ instance Data.ProtoLens.FieldDefault ResourceExhaustedCause where
   fieldDefault = RESOURCE_EXHAUSTED_CAUSE_UNSPECIFIED
 instance Control.DeepSeq.NFData ResourceExhaustedCause where
   rnf x__ = Prelude.seq x__ ()
+newtype ResourceExhaustedScope'UnrecognizedValue
+  = ResourceExhaustedScope'UnrecognizedValue Data.Int.Int32
+  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+data ResourceExhaustedScope
+  = RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED |
+    RESOURCE_EXHAUSTED_SCOPE_NAMESPACE |
+    RESOURCE_EXHAUSTED_SCOPE_SYSTEM |
+    ResourceExhaustedScope'Unrecognized !ResourceExhaustedScope'UnrecognizedValue
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.MessageEnum ResourceExhaustedScope where
+  maybeToEnum 0 = Prelude.Just RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED
+  maybeToEnum 1 = Prelude.Just RESOURCE_EXHAUSTED_SCOPE_NAMESPACE
+  maybeToEnum 2 = Prelude.Just RESOURCE_EXHAUSTED_SCOPE_SYSTEM
+  maybeToEnum k
+    = Prelude.Just
+        (ResourceExhaustedScope'Unrecognized
+           (ResourceExhaustedScope'UnrecognizedValue
+              (Prelude.fromIntegral k)))
+  showEnum RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED
+    = "RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED"
+  showEnum RESOURCE_EXHAUSTED_SCOPE_NAMESPACE
+    = "RESOURCE_EXHAUSTED_SCOPE_NAMESPACE"
+  showEnum RESOURCE_EXHAUSTED_SCOPE_SYSTEM
+    = "RESOURCE_EXHAUSTED_SCOPE_SYSTEM"
+  showEnum
+    (ResourceExhaustedScope'Unrecognized (ResourceExhaustedScope'UnrecognizedValue k))
+    = Prelude.show k
+  readEnum k
+    | (Prelude.==) k "RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED"
+    = Prelude.Just RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED
+    | (Prelude.==) k "RESOURCE_EXHAUSTED_SCOPE_NAMESPACE"
+    = Prelude.Just RESOURCE_EXHAUSTED_SCOPE_NAMESPACE
+    | (Prelude.==) k "RESOURCE_EXHAUSTED_SCOPE_SYSTEM"
+    = Prelude.Just RESOURCE_EXHAUSTED_SCOPE_SYSTEM
+    | Prelude.otherwise
+    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
+instance Prelude.Bounded ResourceExhaustedScope where
+  minBound = RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED
+  maxBound = RESOURCE_EXHAUSTED_SCOPE_SYSTEM
+instance Prelude.Enum ResourceExhaustedScope where
+  toEnum k__
+    = Prelude.maybe
+        (Prelude.error
+           ((Prelude.++)
+              "toEnum: unknown value for enum ResourceExhaustedScope: "
+              (Prelude.show k__)))
+        Prelude.id (Data.ProtoLens.maybeToEnum k__)
+  fromEnum RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED = 0
+  fromEnum RESOURCE_EXHAUSTED_SCOPE_NAMESPACE = 1
+  fromEnum RESOURCE_EXHAUSTED_SCOPE_SYSTEM = 2
+  fromEnum
+    (ResourceExhaustedScope'Unrecognized (ResourceExhaustedScope'UnrecognizedValue k))
+    = Prelude.fromIntegral k
+  succ RESOURCE_EXHAUSTED_SCOPE_SYSTEM
+    = Prelude.error
+        "ResourceExhaustedScope.succ: bad argument RESOURCE_EXHAUSTED_SCOPE_SYSTEM. This value would be out of bounds."
+  succ RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED
+    = RESOURCE_EXHAUSTED_SCOPE_NAMESPACE
+  succ RESOURCE_EXHAUSTED_SCOPE_NAMESPACE
+    = RESOURCE_EXHAUSTED_SCOPE_SYSTEM
+  succ (ResourceExhaustedScope'Unrecognized _)
+    = Prelude.error
+        "ResourceExhaustedScope.succ: bad argument: unrecognized value"
+  pred RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED
+    = Prelude.error
+        "ResourceExhaustedScope.pred: bad argument RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED. This value would be out of bounds."
+  pred RESOURCE_EXHAUSTED_SCOPE_NAMESPACE
+    = RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED
+  pred RESOURCE_EXHAUSTED_SCOPE_SYSTEM
+    = RESOURCE_EXHAUSTED_SCOPE_NAMESPACE
+  pred (ResourceExhaustedScope'Unrecognized _)
+    = Prelude.error
+        "ResourceExhaustedScope.pred: bad argument: unrecognized value"
+  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
+  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
+  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
+  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
+instance Data.ProtoLens.FieldDefault ResourceExhaustedScope where
+  fieldDefault = RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED
+instance Control.DeepSeq.NFData ResourceExhaustedScope where
+  rnf x__ = Prelude.seq x__ ()
 newtype SignalExternalWorkflowExecutionFailedCause'UnrecognizedValue
   = SignalExternalWorkflowExecutionFailedCause'UnrecognizedValue Data.Int.Int32
   deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
@@ -296,8 +376,6 @@ data SignalExternalWorkflowExecutionFailedCause
     SignalExternalWorkflowExecutionFailedCause'Unrecognized !SignalExternalWorkflowExecutionFailedCause'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum SignalExternalWorkflowExecutionFailedCause where
-  enumName _
-    = Data.Text.pack "SignalExternalWorkflowExecutionFailedCause"
   maybeToEnum 0
     = Prelude.Just
         SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
@@ -429,8 +507,6 @@ data StartChildWorkflowExecutionFailedCause
     StartChildWorkflowExecutionFailedCause'Unrecognized !StartChildWorkflowExecutionFailedCause'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum StartChildWorkflowExecutionFailedCause where
-  enumName _
-    = Data.Text.pack "StartChildWorkflowExecutionFailedCause"
   maybeToEnum 0
     = Prelude.Just
         START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
@@ -564,10 +640,13 @@ data WorkflowTaskFailedCause
     WORKFLOW_TASK_FAILED_CAUSE_PENDING_REQUEST_CANCEL_LIMIT_EXCEEDED |
     WORKFLOW_TASK_FAILED_CAUSE_BAD_UPDATE_WORKFLOW_EXECUTION_MESSAGE |
     WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE |
+    WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES |
+    WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED |
+    WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES |
+    WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED |
     WorkflowTaskFailedCause'Unrecognized !WorkflowTaskFailedCause'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum WorkflowTaskFailedCause where
-  enumName _ = Data.Text.pack "WorkflowTaskFailedCause"
   maybeToEnum 0 = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_UNSPECIFIED
   maybeToEnum 1
     = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_COMMAND
@@ -650,6 +729,17 @@ instance Data.ProtoLens.MessageEnum WorkflowTaskFailedCause where
         WORKFLOW_TASK_FAILED_CAUSE_BAD_UPDATE_WORKFLOW_EXECUTION_MESSAGE
   maybeToEnum 31
     = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE
+  maybeToEnum 32
+    = Prelude.Just
+        WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES
+  maybeToEnum 33
+    = Prelude.Just
+        WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED
+  maybeToEnum 34
+    = Prelude.Just
+        WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES
+  maybeToEnum 35
+    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
   maybeToEnum k
     = Prelude.Just
         (WorkflowTaskFailedCause'Unrecognized
@@ -733,6 +823,17 @@ instance Data.ProtoLens.MessageEnum WorkflowTaskFailedCause where
     = "WORKFLOW_TASK_FAILED_CAUSE_BAD_UPDATE_WORKFLOW_EXECUTION_MESSAGE"
   showEnum WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE
     = "WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE"
+  showEnum
+    WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES
+    = "WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES"
+  showEnum
+    WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED
+    = "WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED"
+  showEnum
+    WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES
+    = "WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES"
+  showEnum WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
+    = "WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED"
   showEnum
     (WorkflowTaskFailedCause'Unrecognized (WorkflowTaskFailedCause'UnrecognizedValue k))
     = Prelude.show k
@@ -855,11 +956,28 @@ instance Data.ProtoLens.MessageEnum WorkflowTaskFailedCause where
         WORKFLOW_TASK_FAILED_CAUSE_BAD_UPDATE_WORKFLOW_EXECUTION_MESSAGE
     | (Prelude.==) k "WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE"
     = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE
+    | (Prelude.==)
+        k
+        "WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES"
+    = Prelude.Just
+        WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES
+    | (Prelude.==)
+        k
+        "WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED"
+    = Prelude.Just
+        WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED
+    | (Prelude.==)
+        k
+        "WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES"
+    = Prelude.Just
+        WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES
+    | (Prelude.==) k "WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED"
+    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
     | Prelude.otherwise
     = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
 instance Prelude.Bounded WorkflowTaskFailedCause where
   minBound = WORKFLOW_TASK_FAILED_CAUSE_UNSPECIFIED
-  maxBound = WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE
+  maxBound = WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
 instance Prelude.Enum WorkflowTaskFailedCause where
   toEnum k__
     = Prelude.maybe
@@ -933,11 +1051,21 @@ instance Prelude.Enum WorkflowTaskFailedCause where
     = 30
   fromEnum WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE = 31
   fromEnum
+    WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES
+    = 32
+  fromEnum
+    WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED
+    = 33
+  fromEnum
+    WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES
+    = 34
+  fromEnum WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED = 35
+  fromEnum
     (WorkflowTaskFailedCause'Unrecognized (WorkflowTaskFailedCause'UnrecognizedValue k))
     = Prelude.fromIntegral k
-  succ WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE
+  succ WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
     = Prelude.error
-        "WorkflowTaskFailedCause.succ: bad argument WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE. This value would be out of bounds."
+        "WorkflowTaskFailedCause.succ: bad argument WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED. This value would be out of bounds."
   succ WORKFLOW_TASK_FAILED_CAUSE_UNSPECIFIED
     = WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_COMMAND
   succ WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_COMMAND
@@ -1011,6 +1139,17 @@ instance Prelude.Enum WorkflowTaskFailedCause where
   succ
     WORKFLOW_TASK_FAILED_CAUSE_BAD_UPDATE_WORKFLOW_EXECUTION_MESSAGE
     = WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE
+  succ WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE
+    = WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES
+  succ
+    WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES
+    = WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED
+  succ
+    WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED
+    = WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES
+  succ
+    WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES
+    = WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
   succ (WorkflowTaskFailedCause'Unrecognized _)
     = Prelude.error
         "WorkflowTaskFailedCause.succ: bad argument: unrecognized value"
@@ -1090,6 +1229,17 @@ instance Prelude.Enum WorkflowTaskFailedCause where
     = WORKFLOW_TASK_FAILED_CAUSE_PENDING_REQUEST_CANCEL_LIMIT_EXCEEDED
   pred WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE
     = WORKFLOW_TASK_FAILED_CAUSE_BAD_UPDATE_WORKFLOW_EXECUTION_MESSAGE
+  pred
+    WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES
+    = WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE
+  pred
+    WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED
+    = WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES
+  pred
+    WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES
+    = WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED
+  pred WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
+    = WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES
   pred (WorkflowTaskFailedCause'Unrecognized _)
     = Prelude.error
         "WorkflowTaskFailedCause.pred: bad argument: unrecognized value"

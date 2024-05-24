@@ -31,6 +31,7 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
+import qualified Proto.Google.Api.Annotations
 import qualified Proto.Temporal.Api.Operatorservice.V1.RequestResponse
 data OperatorService = OperatorService {}
 instance Data.ProtoLens.Service.Types.Service OperatorService where
@@ -38,11 +39,16 @@ instance Data.ProtoLens.Service.Types.Service OperatorService where
   type ServicePackage OperatorService = "temporal.api.operatorservice.v1"
   type ServiceMethods OperatorService = '["addOrUpdateRemoteCluster",
                                           "addSearchAttributes",
+                                          "createNexusEndpoint",
                                           "deleteNamespace",
+                                          "deleteNexusEndpoint",
+                                          "getNexusEndpoint",
                                           "listClusters",
+                                          "listNexusEndpoints",
                                           "listSearchAttributes",
                                           "removeRemoteCluster",
-                                          "removeSearchAttributes"]
+                                          "removeSearchAttributes",
+                                          "updateNexusEndpoint"]
   packedServiceDescriptor _
     = "\n\
       \\SIOperatorService\DC2\146\SOH\n\
@@ -52,7 +58,12 @@ instance Data.ProtoLens.Service.Types.Service OperatorService where
       \\SIDeleteNamespace\DC27.temporal.api.operatorservice.v1.DeleteNamespaceRequest\SUB8.temporal.api.operatorservice.v1.DeleteNamespaceResponse\"\NUL\DC2\161\SOH\n\
       \\CANAddOrUpdateRemoteCluster\DC2@.temporal.api.operatorservice.v1.AddOrUpdateRemoteClusterRequest\SUBA.temporal.api.operatorservice.v1.AddOrUpdateRemoteClusterResponse\"\NUL\DC2\146\SOH\n\
       \\DC3RemoveRemoteCluster\DC2;.temporal.api.operatorservice.v1.RemoveRemoteClusterRequest\SUB<.temporal.api.operatorservice.v1.RemoveRemoteClusterResponse\"\NUL\DC2}\n\
-      \\fListClusters\DC24.temporal.api.operatorservice.v1.ListClustersRequest\SUB5.temporal.api.operatorservice.v1.ListClustersResponse\"\NUL"
+      \\fListClusters\DC24.temporal.api.operatorservice.v1.ListClustersRequest\SUB5.temporal.api.operatorservice.v1.ListClustersResponse\"\NUL\DC2\173\SOH\n\
+      \\DLEGetNexusEndpoint\DC28.temporal.api.operatorservice.v1.GetNexusEndpointRequest\SUB9.temporal.api.operatorservice.v1.GetNexusEndpointResponse\"$\130\211\228\147\STX\RS\DC2\FS/api/v1/nexus/endpoints/{id}\DC2\180\SOH\n\
+      \\DC3CreateNexusEndpoint\DC2;.temporal.api.operatorservice.v1.CreateNexusEndpointRequest\SUB<.temporal.api.operatorservice.v1.CreateNexusEndpointResponse\"\"\130\211\228\147\STX\FS\"\ETB/api/v1/nexus/endpoints:\SOH*\DC2\192\SOH\n\
+      \\DC3UpdateNexusEndpoint\DC2;.temporal.api.operatorservice.v1.UpdateNexusEndpointRequest\SUB<.temporal.api.operatorservice.v1.UpdateNexusEndpointResponse\".\130\211\228\147\STX(\"#/api/v1/nexus/endpoints/{id}/update:\SOH*\DC2\182\SOH\n\
+      \\DC3DeleteNexusEndpoint\DC2;.temporal.api.operatorservice.v1.DeleteNexusEndpointRequest\SUB<.temporal.api.operatorservice.v1.DeleteNexusEndpointResponse\"$\130\211\228\147\STX\RS*\FS/api/v1/nexus/endpoints/{id}\DC2\174\SOH\n\
+      \\DC2ListNexusEndpoints\DC2:.temporal.api.operatorservice.v1.ListNexusEndpointsRequest\SUB;.temporal.api.operatorservice.v1.ListNexusEndpointsResponse\"\US\130\211\228\147\STX\EM\DC2\ETB/api/v1/nexus/endpoints"
 instance Data.ProtoLens.Service.Types.HasMethodImpl OperatorService "addSearchAttributes" where
   type MethodName OperatorService "addSearchAttributes" = "AddSearchAttributes"
   type MethodInput OperatorService "addSearchAttributes" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.AddSearchAttributesRequest
@@ -88,3 +99,28 @@ instance Data.ProtoLens.Service.Types.HasMethodImpl OperatorService "listCluster
   type MethodInput OperatorService "listClusters" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.ListClustersRequest
   type MethodOutput OperatorService "listClusters" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.ListClustersResponse
   type MethodStreamingType OperatorService "listClusters" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl OperatorService "getNexusEndpoint" where
+  type MethodName OperatorService "getNexusEndpoint" = "GetNexusEndpoint"
+  type MethodInput OperatorService "getNexusEndpoint" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.GetNexusEndpointRequest
+  type MethodOutput OperatorService "getNexusEndpoint" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.GetNexusEndpointResponse
+  type MethodStreamingType OperatorService "getNexusEndpoint" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl OperatorService "createNexusEndpoint" where
+  type MethodName OperatorService "createNexusEndpoint" = "CreateNexusEndpoint"
+  type MethodInput OperatorService "createNexusEndpoint" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.CreateNexusEndpointRequest
+  type MethodOutput OperatorService "createNexusEndpoint" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.CreateNexusEndpointResponse
+  type MethodStreamingType OperatorService "createNexusEndpoint" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl OperatorService "updateNexusEndpoint" where
+  type MethodName OperatorService "updateNexusEndpoint" = "UpdateNexusEndpoint"
+  type MethodInput OperatorService "updateNexusEndpoint" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.UpdateNexusEndpointRequest
+  type MethodOutput OperatorService "updateNexusEndpoint" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.UpdateNexusEndpointResponse
+  type MethodStreamingType OperatorService "updateNexusEndpoint" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl OperatorService "deleteNexusEndpoint" where
+  type MethodName OperatorService "deleteNexusEndpoint" = "DeleteNexusEndpoint"
+  type MethodInput OperatorService "deleteNexusEndpoint" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.DeleteNexusEndpointRequest
+  type MethodOutput OperatorService "deleteNexusEndpoint" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.DeleteNexusEndpointResponse
+  type MethodStreamingType OperatorService "deleteNexusEndpoint" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl OperatorService "listNexusEndpoints" where
+  type MethodName OperatorService "listNexusEndpoints" = "ListNexusEndpoints"
+  type MethodInput OperatorService "listNexusEndpoints" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.ListNexusEndpointsRequest
+  type MethodOutput OperatorService "listNexusEndpoints" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.ListNexusEndpointsResponse
+  type MethodStreamingType OperatorService "listNexusEndpoints" = 'Data.ProtoLens.Service.Types.NonStreaming

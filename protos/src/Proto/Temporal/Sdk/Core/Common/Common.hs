@@ -255,7 +255,6 @@ data VersioningIntent
     VersioningIntent'Unrecognized !VersioningIntent'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum VersioningIntent where
-  enumName _ = Data.Text.pack "VersioningIntent"
   maybeToEnum 0 = Prelude.Just UNSPECIFIED
   maybeToEnum 1 = Prelude.Just COMPATIBLE
   maybeToEnum 2 = Prelude.Just DEFAULT

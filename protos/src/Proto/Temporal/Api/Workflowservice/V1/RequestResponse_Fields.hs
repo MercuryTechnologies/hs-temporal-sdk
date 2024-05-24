@@ -45,6 +45,7 @@ import qualified Proto.Temporal.Api.Failure.V1.Message
 import qualified Proto.Temporal.Api.Filter.V1.Message
 import qualified Proto.Temporal.Api.History.V1.Message
 import qualified Proto.Temporal.Api.Namespace.V1.Message
+import qualified Proto.Temporal.Api.Nexus.V1.Message
 import qualified Proto.Temporal.Api.Protocol.V1.Message
 import qualified Proto.Temporal.Api.Query.V1.Message
 import qualified Proto.Temporal.Api.Replication.V1.Message
@@ -92,6 +93,13 @@ activityType ::
    Data.ProtoLens.Field.HasField s "activityType" a) =>
   Lens.Family2.LensLike' f s a
 activityType = Data.ProtoLens.Field.field @"activityType"
+addCompatibleRedirectRule ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "addCompatibleRedirectRule" a) =>
+  Lens.Family2.LensLike' f s a
+addCompatibleRedirectRule
+  = Data.ProtoLens.Field.field @"addCompatibleRedirectRule"
 addNewBuildIdInNewDefaultSet ::
   forall f s a.
   (Prelude.Functor f,
@@ -106,12 +114,23 @@ addNewCompatibleBuildId ::
   Lens.Family2.LensLike' f s a
 addNewCompatibleBuildId
   = Data.ProtoLens.Field.field @"addNewCompatibleBuildId"
+apiMode ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "apiMode" a) =>
+  Lens.Family2.LensLike' f s a
+apiMode = Data.ProtoLens.Field.field @"apiMode"
 archived ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "archived" a) =>
   Lens.Family2.LensLike' f s a
 archived = Data.ProtoLens.Field.field @"archived"
+assignmentRules ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "assignmentRules" a) =>
+  Lens.Family2.LensLike' f s a
+assignmentRules = Data.ProtoLens.Field.field @"assignmentRules"
 attempt ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "attempt" a) =>
@@ -149,6 +168,12 @@ buildIds ::
    Data.ProtoLens.Field.HasField s "buildIds" a) =>
   Lens.Family2.LensLike' f s a
 buildIds = Data.ProtoLens.Field.field @"buildIds"
+callbacks ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "callbacks" a) =>
+  Lens.Family2.LensLike' f s a
+callbacks = Data.ProtoLens.Field.field @"callbacks"
 cancelRequested ::
   forall f s a.
   (Prelude.Functor f,
@@ -203,6 +228,19 @@ commands ::
    Data.ProtoLens.Field.HasField s "commands" a) =>
   Lens.Family2.LensLike' f s a
 commands = Data.ProtoLens.Field.field @"commands"
+commitBuildId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "commitBuildId" a) =>
+  Lens.Family2.LensLike' f s a
+commitBuildId = Data.ProtoLens.Field.field @"commitBuildId"
+compatibleRedirectRules ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "compatibleRedirectRules" a) =>
+  Lens.Family2.LensLike' f s a
+compatibleRedirectRules
+  = Data.ProtoLens.Field.field @"compatibleRedirectRules"
 completeOperationCount ::
   forall f s a.
   (Prelude.Functor f,
@@ -216,6 +254,13 @@ completedType ::
    Data.ProtoLens.Field.HasField s "completedType" a) =>
   Lens.Family2.LensLike' f s a
 completedType = Data.ProtoLens.Field.field @"completedType"
+completionCallbacks ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "completionCallbacks" a) =>
+  Lens.Family2.LensLike' f s a
+completionCallbacks
+  = Data.ProtoLens.Field.field @"completionCallbacks"
 config ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "config" a) =>
@@ -268,12 +313,26 @@ data' ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "data'" a) =>
   Lens.Family2.LensLike' f s a
 data' = Data.ProtoLens.Field.field @"data'"
+deleteAssignmentRule ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "deleteAssignmentRule" a) =>
+  Lens.Family2.LensLike' f s a
+deleteAssignmentRule
+  = Data.ProtoLens.Field.field @"deleteAssignmentRule"
 deleteBadBinary ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "deleteBadBinary" a) =>
   Lens.Family2.LensLike' f s a
 deleteBadBinary = Data.ProtoLens.Field.field @"deleteBadBinary"
+deleteCompatibleRedirectRule ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "deleteCompatibleRedirectRule" a) =>
+  Lens.Family2.LensLike' f s a
+deleteCompatibleRedirectRule
+  = Data.ProtoLens.Field.field @"deleteCompatibleRedirectRule"
 deletionOperation ::
   forall f s a.
   (Prelude.Functor f,
@@ -316,6 +375,11 @@ endTime ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "endTime" a) =>
   Lens.Family2.LensLike' f s a
 endTime = Data.ProtoLens.Field.field @"endTime"
+error ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "error" a) =>
+  Lens.Family2.LensLike' f s a
+error = Data.ProtoLens.Field.field @"error"
 errorMessage ::
   forall f s a.
   (Prelude.Functor f,
@@ -390,6 +454,11 @@ firstExecutionRunId ::
   Lens.Family2.LensLike' f s a
 firstExecutionRunId
   = Data.ProtoLens.Field.field @"firstExecutionRunId"
+force ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "force" a) =>
+  Lens.Family2.LensLike' f s a
+force = Data.ProtoLens.Field.field @"force"
 forceCreateNewWorkflowTask ::
   forall f s a.
   (Prelude.Functor f,
@@ -491,6 +560,13 @@ input ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "input" a) =>
   Lens.Family2.LensLike' f s a
 input = Data.ProtoLens.Field.field @"input"
+insertAssignmentRule ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "insertAssignmentRule" a) =>
+  Lens.Family2.LensLike' f s a
+insertAssignmentRule
+  = Data.ProtoLens.Field.field @"insertAssignmentRule"
 internalErrorDifferentiation ::
   forall f s a.
   (Prelude.Functor f,
@@ -570,6 +646,13 @@ maybe'activityType ::
   Lens.Family2.LensLike' f s a
 maybe'activityType
   = Data.ProtoLens.Field.field @"maybe'activityType"
+maybe'addCompatibleRedirectRule ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'addCompatibleRedirectRule" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'addCompatibleRedirectRule
+  = Data.ProtoLens.Field.field @"maybe'addCompatibleRedirectRule"
 maybe'addNewBuildIdInNewDefaultSet ::
   forall f s a.
   (Prelude.Functor f,
@@ -604,6 +687,13 @@ maybe'closeTime ::
    Data.ProtoLens.Field.HasField s "maybe'closeTime" a) =>
   Lens.Family2.LensLike' f s a
 maybe'closeTime = Data.ProtoLens.Field.field @"maybe'closeTime"
+maybe'commitBuildId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'commitBuildId" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'commitBuildId
+  = Data.ProtoLens.Field.field @"maybe'commitBuildId"
 maybe'config ::
   forall f s a.
   (Prelude.Functor f,
@@ -624,6 +714,20 @@ maybe'currentAttemptScheduledTime ::
   Lens.Family2.LensLike' f s a
 maybe'currentAttemptScheduledTime
   = Data.ProtoLens.Field.field @"maybe'currentAttemptScheduledTime"
+maybe'deleteAssignmentRule ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'deleteAssignmentRule" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'deleteAssignmentRule
+  = Data.ProtoLens.Field.field @"maybe'deleteAssignmentRule"
+maybe'deleteCompatibleRedirectRule ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'deleteCompatibleRedirectRule" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'deleteCompatibleRedirectRule
+  = Data.ProtoLens.Field.field @"maybe'deleteCompatibleRedirectRule"
 maybe'deletionOperation ::
   forall f s a.
   (Prelude.Functor f,
@@ -650,6 +754,12 @@ maybe'endTime ::
    Data.ProtoLens.Field.HasField s "maybe'endTime" a) =>
   Lens.Family2.LensLike' f s a
 maybe'endTime = Data.ProtoLens.Field.field @"maybe'endTime"
+maybe'error ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'error" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'error = Data.ProtoLens.Field.field @"maybe'error"
 maybe'execution ::
   forall f s a.
   (Prelude.Functor f,
@@ -727,6 +837,13 @@ maybe'input ::
    Data.ProtoLens.Field.HasField s "maybe'input" a) =>
   Lens.Family2.LensLike' f s a
 maybe'input = Data.ProtoLens.Field.field @"maybe'input"
+maybe'insertAssignmentRule ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'insertAssignmentRule" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'insertAssignmentRule
+  = Data.ProtoLens.Field.field @"maybe'insertAssignmentRule"
 maybe'lastCompletionResult ::
   forall f s a.
   (Prelude.Functor f,
@@ -832,6 +949,20 @@ maybe'queryResult ::
    Data.ProtoLens.Field.HasField s "maybe'queryResult" a) =>
   Lens.Family2.LensLike' f s a
 maybe'queryResult = Data.ProtoLens.Field.field @"maybe'queryResult"
+maybe'replaceAssignmentRule ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'replaceAssignmentRule" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'replaceAssignmentRule
+  = Data.ProtoLens.Field.field @"maybe'replaceAssignmentRule"
+maybe'replaceCompatibleRedirectRule ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'replaceCompatibleRedirectRule" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'replaceCompatibleRedirectRule
+  = Data.ProtoLens.Field.field @"maybe'replaceCompatibleRedirectRule"
 maybe'replicationConfig ::
   forall f s a.
   (Prelude.Functor f,
@@ -852,6 +983,12 @@ maybe'resetOperation ::
   Lens.Family2.LensLike' f s a
 maybe'resetOperation
   = Data.ProtoLens.Field.field @"maybe'resetOperation"
+maybe'response ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'response" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'response = Data.ProtoLens.Field.field @"maybe'response"
 maybe'result ::
   forall f s a.
   (Prelude.Functor f,
@@ -864,6 +1001,12 @@ maybe'retryPolicy ::
    Data.ProtoLens.Field.HasField s "maybe'retryPolicy" a) =>
   Lens.Family2.LensLike' f s a
 maybe'retryPolicy = Data.ProtoLens.Field.field @"maybe'retryPolicy"
+maybe'rule ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'rule" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'rule = Data.ProtoLens.Field.field @"maybe'rule"
 maybe'schedule ::
   forall f s a.
   (Prelude.Functor f,
@@ -930,6 +1073,13 @@ maybe'startToCloseTimeout ::
   Lens.Family2.LensLike' f s a
 maybe'startToCloseTimeout
   = Data.ProtoLens.Field.field @"maybe'startToCloseTimeout"
+maybe'startWorkflow ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'startWorkflow" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'startWorkflow
+  = Data.ProtoLens.Field.field @"maybe'startWorkflow"
 maybe'startedTime ::
   forall f s a.
   (Prelude.Functor f,
@@ -995,6 +1145,13 @@ maybe'updateRef ::
    Data.ProtoLens.Field.HasField s "maybe'updateRef" a) =>
   Lens.Family2.LensLike' f s a
 maybe'updateRef = Data.ProtoLens.Field.field @"maybe'updateRef"
+maybe'updateWorkflow ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'updateWorkflow" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'updateWorkflow
+  = Data.ProtoLens.Field.field @"maybe'updateWorkflow"
 maybe'value ::
   forall f s a.
   (Prelude.Functor f,
@@ -1007,6 +1164,12 @@ maybe'versionInfo ::
    Data.ProtoLens.Field.HasField s "maybe'versionInfo" a) =>
   Lens.Family2.LensLike' f s a
 maybe'versionInfo = Data.ProtoLens.Field.field @"maybe'versionInfo"
+maybe'versions ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'versions" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'versions = Data.ProtoLens.Field.field @"maybe'versions"
 maybe'waitPolicy ::
   forall f s a.
   (Prelude.Functor f,
@@ -1176,6 +1339,12 @@ operationType ::
    Data.ProtoLens.Field.HasField s "operationType" a) =>
   Lens.Family2.LensLike' f s a
 operationType = Data.ProtoLens.Field.field @"operationType"
+operations ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "operations" a) =>
+  Lens.Family2.LensLike' f s a
+operations = Data.ProtoLens.Field.field @"operations"
 outcome ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "outcome" a) =>
@@ -1210,6 +1379,13 @@ pendingChildren ::
    Data.ProtoLens.Field.HasField s "pendingChildren" a) =>
   Lens.Family2.LensLike' f s a
 pendingChildren = Data.ProtoLens.Field.field @"pendingChildren"
+pendingNexusOperations ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "pendingNexusOperations" a) =>
+  Lens.Family2.LensLike' f s a
+pendingNexusOperations
+  = Data.ProtoLens.Field.field @"pendingNexusOperations"
 pendingWorkflowTask ::
   forall f s a.
   (Prelude.Functor f,
@@ -1313,12 +1489,39 @@ reason ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "reason" a) =>
   Lens.Family2.LensLike' f s a
 reason = Data.ProtoLens.Field.field @"reason"
+replaceAssignmentRule ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "replaceAssignmentRule" a) =>
+  Lens.Family2.LensLike' f s a
+replaceAssignmentRule
+  = Data.ProtoLens.Field.field @"replaceAssignmentRule"
+replaceCompatibleRedirectRule ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "replaceCompatibleRedirectRule" a) =>
+  Lens.Family2.LensLike' f s a
+replaceCompatibleRedirectRule
+  = Data.ProtoLens.Field.field @"replaceCompatibleRedirectRule"
 replicationConfig ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "replicationConfig" a) =>
   Lens.Family2.LensLike' f s a
 replicationConfig = Data.ProtoLens.Field.field @"replicationConfig"
+reportPollers ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "reportPollers" a) =>
+  Lens.Family2.LensLike' f s a
+reportPollers = Data.ProtoLens.Field.field @"reportPollers"
+reportTaskReachability ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "reportTaskReachability" a) =>
+  Lens.Family2.LensLike' f s a
+reportTaskReachability
+  = Data.ProtoLens.Field.field @"reportTaskReachability"
 request ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "request" a) =>
@@ -1350,12 +1553,31 @@ resetOperation ::
    Data.ProtoLens.Field.HasField s "resetOperation" a) =>
   Lens.Family2.LensLike' f s a
 resetOperation = Data.ProtoLens.Field.field @"resetOperation"
+resetReapplyExcludeTypes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "resetReapplyExcludeTypes" a) =>
+  Lens.Family2.LensLike' f s a
+resetReapplyExcludeTypes
+  = Data.ProtoLens.Field.field @"resetReapplyExcludeTypes"
 resetReapplyType ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "resetReapplyType" a) =>
   Lens.Family2.LensLike' f s a
 resetReapplyType = Data.ProtoLens.Field.field @"resetReapplyType"
+response ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "response" a) =>
+  Lens.Family2.LensLike' f s a
+response = Data.ProtoLens.Field.field @"response"
+responses ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "responses" a) =>
+  Lens.Family2.LensLike' f s a
+responses = Data.ProtoLens.Field.field @"responses"
 result ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "result" a) =>
@@ -1374,6 +1596,17 @@ returnNewWorkflowTask ::
   Lens.Family2.LensLike' f s a
 returnNewWorkflowTask
   = Data.ProtoLens.Field.field @"returnNewWorkflowTask"
+rule ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "rule" a) =>
+  Lens.Family2.LensLike' f s a
+rule = Data.ProtoLens.Field.field @"rule"
+ruleIndex ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "ruleIndex" a) =>
+  Lens.Family2.LensLike' f s a
+ruleIndex = Data.ProtoLens.Field.field @"ruleIndex"
 runId ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "runId" a) =>
@@ -1479,6 +1712,12 @@ skipGenerateWorkflowTask ::
   Lens.Family2.LensLike' f s a
 skipGenerateWorkflowTask
   = Data.ProtoLens.Field.field @"skipGenerateWorkflowTask"
+sourceBuildId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "sourceBuildId" a) =>
+  Lens.Family2.LensLike' f s a
+sourceBuildId = Data.ProtoLens.Field.field @"sourceBuildId"
 stage ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "stage" a) =>
@@ -1503,6 +1742,17 @@ startToCloseTimeout ::
   Lens.Family2.LensLike' f s a
 startToCloseTimeout
   = Data.ProtoLens.Field.field @"startToCloseTimeout"
+startWorkflow ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "startWorkflow" a) =>
+  Lens.Family2.LensLike' f s a
+startWorkflow = Data.ProtoLens.Field.field @"startWorkflow"
+started ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "started" a) =>
+  Lens.Family2.LensLike' f s a
+started = Data.ProtoLens.Field.field @"started"
 startedEventId ::
   forall f s a.
   (Prelude.Functor f,
@@ -1544,6 +1794,12 @@ supportsSchedules ::
    Data.ProtoLens.Field.HasField s "supportsSchedules" a) =>
   Lens.Family2.LensLike' f s a
 supportsSchedules = Data.ProtoLens.Field.field @"supportsSchedules"
+targetBuildId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "targetBuildId" a) =>
+  Lens.Family2.LensLike' f s a
+targetBuildId = Data.ProtoLens.Field.field @"targetBuildId"
 taskQueue ::
   forall f s a.
   (Prelude.Functor f,
@@ -1568,6 +1824,12 @@ taskQueueType ::
    Data.ProtoLens.Field.HasField s "taskQueueType" a) =>
   Lens.Family2.LensLike' f s a
 taskQueueType = Data.ProtoLens.Field.field @"taskQueueType"
+taskQueueTypes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "taskQueueTypes" a) =>
+  Lens.Family2.LensLike' f s a
+taskQueueTypes = Data.ProtoLens.Field.field @"taskQueueTypes"
 taskQueues ::
   forall f s a.
   (Prelude.Functor f,
@@ -1612,6 +1874,12 @@ updateRef ::
    Data.ProtoLens.Field.HasField s "updateRef" a) =>
   Lens.Family2.LensLike' f s a
 updateRef = Data.ProtoLens.Field.field @"updateRef"
+updateWorkflow ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "updateWorkflow" a) =>
+  Lens.Family2.LensLike' f s a
+updateWorkflow = Data.ProtoLens.Field.field @"updateWorkflow"
 upsertMemo ::
   forall f s a.
   (Prelude.Functor f,
@@ -1636,6 +1904,13 @@ vec'activityTasks ::
    Data.ProtoLens.Field.HasField s "vec'activityTasks" a) =>
   Lens.Family2.LensLike' f s a
 vec'activityTasks = Data.ProtoLens.Field.field @"vec'activityTasks"
+vec'assignmentRules ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'assignmentRules" a) =>
+  Lens.Family2.LensLike' f s a
+vec'assignmentRules
+  = Data.ProtoLens.Field.field @"vec'assignmentRules"
 vec'buildIdReachability ::
   forall f s a.
   (Prelude.Functor f,
@@ -1649,6 +1924,12 @@ vec'buildIds ::
    Data.ProtoLens.Field.HasField s "vec'buildIds" a) =>
   Lens.Family2.LensLike' f s a
 vec'buildIds = Data.ProtoLens.Field.field @"vec'buildIds"
+vec'callbacks ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'callbacks" a) =>
+  Lens.Family2.LensLike' f s a
+vec'callbacks = Data.ProtoLens.Field.field @"vec'callbacks"
 vec'clusters ::
   forall f s a.
   (Prelude.Functor f,
@@ -1661,6 +1942,20 @@ vec'commands ::
    Data.ProtoLens.Field.HasField s "vec'commands" a) =>
   Lens.Family2.LensLike' f s a
 vec'commands = Data.ProtoLens.Field.field @"vec'commands"
+vec'compatibleRedirectRules ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'compatibleRedirectRules" a) =>
+  Lens.Family2.LensLike' f s a
+vec'compatibleRedirectRules
+  = Data.ProtoLens.Field.field @"vec'compatibleRedirectRules"
+vec'completionCallbacks ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'completionCallbacks" a) =>
+  Lens.Family2.LensLike' f s a
+vec'completionCallbacks
+  = Data.ProtoLens.Field.field @"vec'completionCallbacks"
 vec'executions ::
   forall f s a.
   (Prelude.Functor f,
@@ -1717,6 +2012,12 @@ vec'operationInfo ::
    Data.ProtoLens.Field.HasField s "vec'operationInfo" a) =>
   Lens.Family2.LensLike' f s a
 vec'operationInfo = Data.ProtoLens.Field.field @"vec'operationInfo"
+vec'operations ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'operations" a) =>
+  Lens.Family2.LensLike' f s a
+vec'operations = Data.ProtoLens.Field.field @"vec'operations"
 vec'pendingActivities ::
   forall f s a.
   (Prelude.Functor f,
@@ -1731,6 +2032,13 @@ vec'pendingChildren ::
   Lens.Family2.LensLike' f s a
 vec'pendingChildren
   = Data.ProtoLens.Field.field @"vec'pendingChildren"
+vec'pendingNexusOperations ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'pendingNexusOperations" a) =>
+  Lens.Family2.LensLike' f s a
+vec'pendingNexusOperations
+  = Data.ProtoLens.Field.field @"vec'pendingNexusOperations"
 vec'pollers ::
   forall f s a.
   (Prelude.Functor f,
@@ -1743,6 +2051,19 @@ vec'rawHistory ::
    Data.ProtoLens.Field.HasField s "vec'rawHistory" a) =>
   Lens.Family2.LensLike' f s a
 vec'rawHistory = Data.ProtoLens.Field.field @"vec'rawHistory"
+vec'resetReapplyExcludeTypes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'resetReapplyExcludeTypes" a) =>
+  Lens.Family2.LensLike' f s a
+vec'resetReapplyExcludeTypes
+  = Data.ProtoLens.Field.field @"vec'resetReapplyExcludeTypes"
+vec'responses ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'responses" a) =>
+  Lens.Family2.LensLike' f s a
+vec'responses = Data.ProtoLens.Field.field @"vec'responses"
 vec'schedules ::
   forall f s a.
   (Prelude.Functor f,
@@ -1755,6 +2076,13 @@ vec'startTime ::
    Data.ProtoLens.Field.HasField s "vec'startTime" a) =>
   Lens.Family2.LensLike' f s a
 vec'startTime = Data.ProtoLens.Field.field @"vec'startTime"
+vec'taskQueueTypes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'taskQueueTypes" a) =>
+  Lens.Family2.LensLike' f s a
+vec'taskQueueTypes
+  = Data.ProtoLens.Field.field @"vec'taskQueueTypes"
 vec'taskQueues ::
   forall f s a.
   (Prelude.Functor f,
@@ -1774,6 +2102,18 @@ versionInfo ::
    Data.ProtoLens.Field.HasField s "versionInfo" a) =>
   Lens.Family2.LensLike' f s a
 versionInfo = Data.ProtoLens.Field.field @"versionInfo"
+versions ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "versions" a) =>
+  Lens.Family2.LensLike' f s a
+versions = Data.ProtoLens.Field.field @"versions"
+versionsInfo ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "versionsInfo" a) =>
+  Lens.Family2.LensLike' f s a
+versionsInfo = Data.ProtoLens.Field.field @"versionsInfo"
 visibilityArchivalState ::
   forall f s a.
   (Prelude.Functor f,
@@ -1872,6 +2212,13 @@ workflowId ::
    Data.ProtoLens.Field.HasField s "workflowId" a) =>
   Lens.Family2.LensLike' f s a
 workflowId = Data.ProtoLens.Field.field @"workflowId"
+workflowIdConflictPolicy ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "workflowIdConflictPolicy" a) =>
+  Lens.Family2.LensLike' f s a
+workflowIdConflictPolicy
+  = Data.ProtoLens.Field.field @"workflowIdConflictPolicy"
 workflowIdReusePolicy ::
   forall f s a.
   (Prelude.Functor f,

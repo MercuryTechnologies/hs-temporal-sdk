@@ -38,6 +38,12 @@ ackLevel ::
    Data.ProtoLens.Field.HasField s "ackLevel" a) =>
   Lens.Family2.LensLike' f s a
 ackLevel = Data.ProtoLens.Field.field @"ackLevel"
+allActive ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "allActive" a) =>
+  Lens.Family2.LensLike' f s a
+allActive = Data.ProtoLens.Field.field @"allActive"
 backlogCountHint ::
   forall f s a.
   (Prelude.Functor f,
@@ -55,6 +61,12 @@ buildIds ::
    Data.ProtoLens.Field.HasField s "buildIds" a) =>
   Lens.Family2.LensLike' f s a
 buildIds = Data.ProtoLens.Field.field @"buildIds"
+createTime ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "createTime" a) =>
+  Lens.Family2.LensLike' f s a
+createTime = Data.ProtoLens.Field.field @"createTime"
 endId ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "endId" a) =>
@@ -88,6 +100,12 @@ maxTasksPerSecond ::
    Data.ProtoLens.Field.HasField s "maxTasksPerSecond" a) =>
   Lens.Family2.LensLike' f s a
 maxTasksPerSecond = Data.ProtoLens.Field.field @"maxTasksPerSecond"
+maybe'createTime ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'createTime" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'createTime = Data.ProtoLens.Field.field @"maybe'createTime"
 maybe'lastAccessTime ::
   forall f s a.
   (Prelude.Functor f,
@@ -102,6 +120,25 @@ maybe'maxTasksPerSecond ::
   Lens.Family2.LensLike' f s a
 maybe'maxTasksPerSecond
   = Data.ProtoLens.Field.field @"maybe'maxTasksPerSecond"
+maybe'percentageRamp ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'percentageRamp" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'percentageRamp
+  = Data.ProtoLens.Field.field @"maybe'percentageRamp"
+maybe'ramp ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'ramp" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'ramp = Data.ProtoLens.Field.field @"maybe'ramp"
+maybe'rule ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'rule" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'rule = Data.ProtoLens.Field.field @"maybe'rule"
 maybe'scheduleToStartTimeout ::
   forall f s a.
   (Prelude.Functor f,
@@ -115,6 +152,12 @@ maybe'taskIdBlock ::
    Data.ProtoLens.Field.HasField s "maybe'taskIdBlock" a) =>
   Lens.Family2.LensLike' f s a
 maybe'taskIdBlock = Data.ProtoLens.Field.field @"maybe'taskIdBlock"
+maybe'value ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'value" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'value = Data.ProtoLens.Field.field @"maybe'value"
 maybe'workerTaskQueue ::
   forall f s a.
   (Prelude.Functor f,
@@ -146,6 +189,23 @@ ownerHostName ::
    Data.ProtoLens.Field.HasField s "ownerHostName" a) =>
   Lens.Family2.LensLike' f s a
 ownerHostName = Data.ProtoLens.Field.field @"ownerHostName"
+percentageRamp ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "percentageRamp" a) =>
+  Lens.Family2.LensLike' f s a
+percentageRamp = Data.ProtoLens.Field.field @"percentageRamp"
+pollers ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "pollers" a) =>
+  Lens.Family2.LensLike' f s a
+pollers = Data.ProtoLens.Field.field @"pollers"
+rampPercentage ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "rampPercentage" a) =>
+  Lens.Family2.LensLike' f s a
+rampPercentage = Data.ProtoLens.Field.field @"rampPercentage"
 ratePerSecond ::
   forall f s a.
   (Prelude.Functor f,
@@ -164,6 +224,11 @@ readLevel ::
    Data.ProtoLens.Field.HasField s "readLevel" a) =>
   Lens.Family2.LensLike' f s a
 readLevel = Data.ProtoLens.Field.field @"readLevel"
+rule ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "rule" a) =>
+  Lens.Family2.LensLike' f s a
+rule = Data.ProtoLens.Field.field @"rule"
 scheduleToStartTimeout ::
   forall f s a.
   (Prelude.Functor f,
@@ -171,11 +236,23 @@ scheduleToStartTimeout ::
   Lens.Family2.LensLike' f s a
 scheduleToStartTimeout
   = Data.ProtoLens.Field.field @"scheduleToStartTimeout"
+sourceBuildId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "sourceBuildId" a) =>
+  Lens.Family2.LensLike' f s a
+sourceBuildId = Data.ProtoLens.Field.field @"sourceBuildId"
 startId ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "startId" a) =>
   Lens.Family2.LensLike' f s a
 startId = Data.ProtoLens.Field.field @"startId"
+targetBuildId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "targetBuildId" a) =>
+  Lens.Family2.LensLike' f s a
+targetBuildId = Data.ProtoLens.Field.field @"targetBuildId"
 taskIdBlock ::
   forall f s a.
   (Prelude.Functor f,
@@ -195,12 +272,41 @@ taskQueueReachability ::
   Lens.Family2.LensLike' f s a
 taskQueueReachability
   = Data.ProtoLens.Field.field @"taskQueueReachability"
+taskReachability ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "taskReachability" a) =>
+  Lens.Family2.LensLike' f s a
+taskReachability = Data.ProtoLens.Field.field @"taskReachability"
+typesInfo ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "typesInfo" a) =>
+  Lens.Family2.LensLike' f s a
+typesInfo = Data.ProtoLens.Field.field @"typesInfo"
+unversioned ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "unversioned" a) =>
+  Lens.Family2.LensLike' f s a
+unversioned = Data.ProtoLens.Field.field @"unversioned"
+value ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "value" a) =>
+  Lens.Family2.LensLike' f s a
+value = Data.ProtoLens.Field.field @"value"
 vec'buildIds ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "vec'buildIds" a) =>
   Lens.Family2.LensLike' f s a
 vec'buildIds = Data.ProtoLens.Field.field @"vec'buildIds"
+vec'pollers ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'pollers" a) =>
+  Lens.Family2.LensLike' f s a
+vec'pollers = Data.ProtoLens.Field.field @"vec'pollers"
 vec'reachability ::
   forall f s a.
   (Prelude.Functor f,

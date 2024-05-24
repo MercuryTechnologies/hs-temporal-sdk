@@ -24,7 +24,7 @@
     nixpkgs,
     devenv,
     flake-utils,
-    ghc-source-gen-src,
+    # ghc-source-gen-src,
     # , proto-lens-src
     temporal-sdk-core,
     ...
@@ -52,7 +52,8 @@
       myHaskellPackages = pkgs.haskellPackages.extend (import ./nix/overlays/temporal-sdk-pkgs.nix {
         inherit
           pkgs
-          ghc-source-gen-src
+          # ghc-source-gen-src
+          
           temporal-bridge
           ;
       });
@@ -122,7 +123,16 @@
             # pkgs,
             # config,
             ...
-          }: {
+          }: let
+            ignoreGeneratedCode = attrs:
+              attrs
+              // {
+                excludes = [
+                  "protos/"
+                  "dist-newstyle/"
+                ];
+              };
+          in {
             # This is your devenv configuration
             packages = [
               protogen
@@ -146,13 +156,11 @@
               alejandra.enable = true;
               shellcheck.enable = true;
               # clippy.enable = true;
-              fourmolu = {
+              fourmolu = ignoreGeneratedCode {
                 enable = true;
-                excludes = ["protos"];
               };
-              hlint = {
+              hlint = ignoreGeneratedCode {
                 enable = true;
-                excludes = ["protos"];
               };
               deadnix.enable = true;
               hpack.enable = true;

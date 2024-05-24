@@ -12,6 +12,8 @@ module Proto.Temporal.Api.Failure.V1.Message (
         _Failure'ServerFailureInfo, _Failure'ResetWorkflowFailureInfo,
         _Failure'ActivityFailureInfo,
         _Failure'ChildWorkflowExecutionFailureInfo,
+        _Failure'NexusOperationExecutionFailureInfo,
+        MultiOperationExecutionAborted(), NexusOperationFailureInfo(),
         ResetWorkflowFailureInfo(), ServerFailureInfo(),
         TerminatedFailureInfo(), TimeoutFailureInfo()
     ) where
@@ -40,6 +42,7 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
+import qualified Proto.Google.Protobuf.Duration
 import qualified Proto.Temporal.Api.Common.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.Workflow
 {- | Fields :
@@ -406,11 +409,14 @@ instance Control.DeepSeq.NFData ActivityFailureInfo where
          * 'Proto.Temporal.Api.Failure.V1.Message_Fields.type'' @:: Lens' ApplicationFailureInfo Data.Text.Text@
          * 'Proto.Temporal.Api.Failure.V1.Message_Fields.nonRetryable' @:: Lens' ApplicationFailureInfo Prelude.Bool@
          * 'Proto.Temporal.Api.Failure.V1.Message_Fields.details' @:: Lens' ApplicationFailureInfo Proto.Temporal.Api.Common.V1.Message.Payloads@
-         * 'Proto.Temporal.Api.Failure.V1.Message_Fields.maybe'details' @:: Lens' ApplicationFailureInfo (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payloads)@ -}
+         * 'Proto.Temporal.Api.Failure.V1.Message_Fields.maybe'details' @:: Lens' ApplicationFailureInfo (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payloads)@
+         * 'Proto.Temporal.Api.Failure.V1.Message_Fields.nextRetryDelay' @:: Lens' ApplicationFailureInfo Proto.Google.Protobuf.Duration.Duration@
+         * 'Proto.Temporal.Api.Failure.V1.Message_Fields.maybe'nextRetryDelay' @:: Lens' ApplicationFailureInfo (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@ -}
 data ApplicationFailureInfo
   = ApplicationFailureInfo'_constructor {_ApplicationFailureInfo'type' :: !Data.Text.Text,
                                          _ApplicationFailureInfo'nonRetryable :: !Prelude.Bool,
                                          _ApplicationFailureInfo'details :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payloads),
+                                         _ApplicationFailureInfo'nextRetryDelay :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
                                          _ApplicationFailureInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show ApplicationFailureInfo where
@@ -447,6 +453,20 @@ instance Data.ProtoLens.Field.HasField ApplicationFailureInfo "maybe'details" (P
            _ApplicationFailureInfo'details
            (\ x__ y__ -> x__ {_ApplicationFailureInfo'details = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField ApplicationFailureInfo "nextRetryDelay" Proto.Google.Protobuf.Duration.Duration where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ApplicationFailureInfo'nextRetryDelay
+           (\ x__ y__ -> x__ {_ApplicationFailureInfo'nextRetryDelay = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField ApplicationFailureInfo "maybe'nextRetryDelay" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ApplicationFailureInfo'nextRetryDelay
+           (\ x__ y__ -> x__ {_ApplicationFailureInfo'nextRetryDelay = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message ApplicationFailureInfo where
   messageName _
     = Data.Text.pack "temporal.api.failure.v1.ApplicationFailureInfo"
@@ -455,7 +475,8 @@ instance Data.ProtoLens.Message ApplicationFailureInfo where
       \\SYNApplicationFailureInfo\DC2\DC2\n\
       \\EOTtype\CAN\SOH \SOH(\tR\EOTtype\DC2#\n\
       \\rnon_retryable\CAN\STX \SOH(\bR\fnonRetryable\DC2:\n\
-      \\adetails\CAN\ETX \SOH(\v2 .temporal.api.common.v1.PayloadsR\adetails"
+      \\adetails\CAN\ETX \SOH(\v2 .temporal.api.common.v1.PayloadsR\adetails\DC2C\n\
+      \\DLEnext_retry_delay\CAN\EOT \SOH(\v2\EM.google.protobuf.DurationR\SOnextRetryDelay"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -484,11 +505,20 @@ instance Data.ProtoLens.Message ApplicationFailureInfo where
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'details")) ::
               Data.ProtoLens.FieldDescriptor ApplicationFailureInfo
+        nextRetryDelay__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "next_retry_delay"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'nextRetryDelay")) ::
+              Data.ProtoLens.FieldDescriptor ApplicationFailureInfo
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, type'__field_descriptor),
            (Data.ProtoLens.Tag 2, nonRetryable__field_descriptor),
-           (Data.ProtoLens.Tag 3, details__field_descriptor)]
+           (Data.ProtoLens.Tag 3, details__field_descriptor),
+           (Data.ProtoLens.Tag 4, nextRetryDelay__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _ApplicationFailureInfo'_unknownFields
@@ -498,6 +528,7 @@ instance Data.ProtoLens.Message ApplicationFailureInfo where
         {_ApplicationFailureInfo'type' = Data.ProtoLens.fieldDefault,
          _ApplicationFailureInfo'nonRetryable = Data.ProtoLens.fieldDefault,
          _ApplicationFailureInfo'details = Prelude.Nothing,
+         _ApplicationFailureInfo'nextRetryDelay = Prelude.Nothing,
          _ApplicationFailureInfo'_unknownFields = []}
   parseMessage
     = let
@@ -544,6 +575,15 @@ instance Data.ProtoLens.Message ApplicationFailureInfo where
                                              (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
                                        "details"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"details") y x)
+                        34
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "next_retry_delay"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"nextRetryDelay") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -599,8 +639,24 @@ instance Data.ProtoLens.Message ApplicationFailureInfo where
                                            (Prelude.fromIntegral (Data.ByteString.length bs)))
                                         (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                                 Data.ProtoLens.encodeMessage _v))
-                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
+                   ((Data.Monoid.<>)
+                      (case
+                           Lens.Family2.view
+                             (Data.ProtoLens.Field.field @"maybe'nextRetryDelay") _x
+                       of
+                         Prelude.Nothing -> Data.Monoid.mempty
+                         (Prelude.Just _v)
+                           -> (Data.Monoid.<>)
+                                (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
+                                ((Prelude..)
+                                   (\ bs
+                                      -> (Data.Monoid.<>)
+                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                              (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                           (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                   Data.ProtoLens.encodeMessage _v))
+                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
 instance Control.DeepSeq.NFData ApplicationFailureInfo where
   rnf
     = \ x__
@@ -611,7 +667,9 @@ instance Control.DeepSeq.NFData ApplicationFailureInfo where
                 (Control.DeepSeq.deepseq
                    (_ApplicationFailureInfo'nonRetryable x__)
                    (Control.DeepSeq.deepseq
-                      (_ApplicationFailureInfo'details x__) ())))
+                      (_ApplicationFailureInfo'details x__)
+                      (Control.DeepSeq.deepseq
+                         (_ApplicationFailureInfo'nextRetryDelay x__) ()))))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Failure.V1.Message_Fields.details' @:: Lens' CanceledFailureInfo Proto.Temporal.Api.Common.V1.Message.Payloads@
@@ -1139,7 +1197,9 @@ instance Control.DeepSeq.NFData ChildWorkflowExecutionFailureInfo where
          * 'Proto.Temporal.Api.Failure.V1.Message_Fields.maybe'activityFailureInfo' @:: Lens' Failure (Prelude.Maybe ActivityFailureInfo)@
          * 'Proto.Temporal.Api.Failure.V1.Message_Fields.activityFailureInfo' @:: Lens' Failure ActivityFailureInfo@
          * 'Proto.Temporal.Api.Failure.V1.Message_Fields.maybe'childWorkflowExecutionFailureInfo' @:: Lens' Failure (Prelude.Maybe ChildWorkflowExecutionFailureInfo)@
-         * 'Proto.Temporal.Api.Failure.V1.Message_Fields.childWorkflowExecutionFailureInfo' @:: Lens' Failure ChildWorkflowExecutionFailureInfo@ -}
+         * 'Proto.Temporal.Api.Failure.V1.Message_Fields.childWorkflowExecutionFailureInfo' @:: Lens' Failure ChildWorkflowExecutionFailureInfo@
+         * 'Proto.Temporal.Api.Failure.V1.Message_Fields.maybe'nexusOperationExecutionFailureInfo' @:: Lens' Failure (Prelude.Maybe NexusOperationFailureInfo)@
+         * 'Proto.Temporal.Api.Failure.V1.Message_Fields.nexusOperationExecutionFailureInfo' @:: Lens' Failure NexusOperationFailureInfo@ -}
 data Failure
   = Failure'_constructor {_Failure'message :: !Data.Text.Text,
                           _Failure'source :: !Data.Text.Text,
@@ -1163,7 +1223,8 @@ data Failure'FailureInfo
     Failure'ServerFailureInfo !ServerFailureInfo |
     Failure'ResetWorkflowFailureInfo !ResetWorkflowFailureInfo |
     Failure'ActivityFailureInfo !ActivityFailureInfo |
-    Failure'ChildWorkflowExecutionFailureInfo !ChildWorkflowExecutionFailureInfo
+    Failure'ChildWorkflowExecutionFailureInfo !ChildWorkflowExecutionFailureInfo |
+    Failure'NexusOperationExecutionFailureInfo !NexusOperationFailureInfo
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.Field.HasField Failure "message" Data.Text.Text where
   fieldOf _
@@ -1442,6 +1503,36 @@ instance Data.ProtoLens.Field.HasField Failure "childWorkflowExecutionFailureInf
               (\ _ y__
                  -> Prelude.fmap Failure'ChildWorkflowExecutionFailureInfo y__))
            (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
+instance Data.ProtoLens.Field.HasField Failure "maybe'nexusOperationExecutionFailureInfo" (Prelude.Maybe NexusOperationFailureInfo) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Failure'failureInfo
+           (\ x__ y__ -> x__ {_Failure'failureInfo = y__}))
+        (Lens.Family2.Unchecked.lens
+           (\ x__
+              -> case x__ of
+                   (Prelude.Just (Failure'NexusOperationExecutionFailureInfo x__val))
+                     -> Prelude.Just x__val
+                   _otherwise -> Prelude.Nothing)
+           (\ _ y__
+              -> Prelude.fmap Failure'NexusOperationExecutionFailureInfo y__))
+instance Data.ProtoLens.Field.HasField Failure "nexusOperationExecutionFailureInfo" NexusOperationFailureInfo where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Failure'failureInfo
+           (\ x__ y__ -> x__ {_Failure'failureInfo = y__}))
+        ((Prelude..)
+           (Lens.Family2.Unchecked.lens
+              (\ x__
+                 -> case x__ of
+                      (Prelude.Just (Failure'NexusOperationExecutionFailureInfo x__val))
+                        -> Prelude.Just x__val
+                      _otherwise -> Prelude.Nothing)
+              (\ _ y__
+                 -> Prelude.fmap Failure'NexusOperationExecutionFailureInfo y__))
+           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
 instance Data.ProtoLens.Message Failure where
   messageName _ = Data.Text.pack "temporal.api.failure.v1.Failure"
   packedMessageDescriptor _
@@ -1461,7 +1552,8 @@ instance Data.ProtoLens.Message Failure where
       \\ESCreset_workflow_failure_info\CAN\n\
       \ \SOH(\v21.temporal.api.failure.v1.ResetWorkflowFailureInfoH\NULR\CANresetWorkflowFailureInfo\DC2b\n\
       \\NAKactivity_failure_info\CAN\v \SOH(\v2,.temporal.api.failure.v1.ActivityFailureInfoH\NULR\DC3activityFailureInfo\DC2\142\SOH\n\
-      \%child_workflow_execution_failure_info\CAN\f \SOH(\v2:.temporal.api.failure.v1.ChildWorkflowExecutionFailureInfoH\NULR!childWorkflowExecutionFailureInfoB\SO\n\
+      \%child_workflow_execution_failure_info\CAN\f \SOH(\v2:.temporal.api.failure.v1.ChildWorkflowExecutionFailureInfoH\NULR!childWorkflowExecutionFailureInfo\DC2\136\SOH\n\
+      \&nexus_operation_execution_failure_info\CAN\r \SOH(\v22.temporal.api.failure.v1.NexusOperationFailureInfoH\NULR\"nexusOperationExecutionFailureInfoB\SO\n\
       \\ffailure_info"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
@@ -1572,6 +1664,15 @@ instance Data.ProtoLens.Message Failure where
                  (Data.ProtoLens.Field.field
                     @"maybe'childWorkflowExecutionFailureInfo")) ::
               Data.ProtoLens.FieldDescriptor Failure
+        nexusOperationExecutionFailureInfo__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "nexus_operation_execution_failure_info"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor NexusOperationFailureInfo)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field
+                    @"maybe'nexusOperationExecutionFailureInfo")) ::
+              Data.ProtoLens.FieldDescriptor Failure
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, message__field_descriptor),
@@ -1588,7 +1689,9 @@ instance Data.ProtoLens.Message Failure where
             resetWorkflowFailureInfo__field_descriptor),
            (Data.ProtoLens.Tag 11, activityFailureInfo__field_descriptor),
            (Data.ProtoLens.Tag 12, 
-            childWorkflowExecutionFailureInfo__field_descriptor)]
+            childWorkflowExecutionFailureInfo__field_descriptor),
+           (Data.ProtoLens.Tag 13, 
+            nexusOperationExecutionFailureInfo__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _Failure'_unknownFields
@@ -1734,6 +1837,17 @@ instance Data.ProtoLens.Message Failure where
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field
                                         @"childWorkflowExecutionFailureInfo")
+                                     y x)
+                        106
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "nexus_operation_execution_failure_info"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field
+                                        @"nexusOperationExecutionFailureInfo")
                                      y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
@@ -1919,6 +2033,17 @@ instance Data.ProtoLens.Message Failure where
                                                     (Prelude.fromIntegral
                                                        (Data.ByteString.length bs)))
                                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                         Data.ProtoLens.encodeMessage v)
+                               (Prelude.Just (Failure'NexusOperationExecutionFailureInfo v))
+                                 -> (Data.Monoid.<>)
+                                      (Data.ProtoLens.Encoding.Bytes.putVarInt 106)
+                                      ((Prelude..)
+                                         (\ bs
+                                            -> (Data.Monoid.<>)
+                                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                    (Prelude.fromIntegral
+                                                       (Data.ByteString.length bs)))
+                                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                                          Data.ProtoLens.encodeMessage v))
                             (Data.ProtoLens.Encoding.Wire.buildFieldSet
                                (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))))
@@ -1948,6 +2073,8 @@ instance Control.DeepSeq.NFData Failure'FailureInfo where
     = Control.DeepSeq.rnf x__
   rnf (Failure'ActivityFailureInfo x__) = Control.DeepSeq.rnf x__
   rnf (Failure'ChildWorkflowExecutionFailureInfo x__)
+    = Control.DeepSeq.rnf x__
+  rnf (Failure'NexusOperationExecutionFailureInfo x__)
     = Control.DeepSeq.rnf x__
 _Failure'ApplicationFailureInfo ::
   Data.ProtoLens.Prism.Prism' Failure'FailureInfo ApplicationFailureInfo
@@ -2022,6 +2149,390 @@ _Failure'ChildWorkflowExecutionFailureInfo
               (Failure'ChildWorkflowExecutionFailureInfo p__val)
                 -> Prelude.Just p__val
               _otherwise -> Prelude.Nothing)
+_Failure'NexusOperationExecutionFailureInfo ::
+  Data.ProtoLens.Prism.Prism' Failure'FailureInfo NexusOperationFailureInfo
+_Failure'NexusOperationExecutionFailureInfo
+  = Data.ProtoLens.Prism.prism'
+      Failure'NexusOperationExecutionFailureInfo
+      (\ p__
+         -> case p__ of
+              (Failure'NexusOperationExecutionFailureInfo p__val)
+                -> Prelude.Just p__val
+              _otherwise -> Prelude.Nothing)
+{- | Fields :
+      -}
+data MultiOperationExecutionAborted
+  = MultiOperationExecutionAborted'_constructor {_MultiOperationExecutionAborted'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show MultiOperationExecutionAborted where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Message MultiOperationExecutionAborted where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.failure.v1.MultiOperationExecutionAborted"
+  packedMessageDescriptor _
+    = "\n\
+      \\RSMultiOperationExecutionAborted"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag = let in Data.Map.fromList []
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _MultiOperationExecutionAborted'_unknownFields
+        (\ x__ y__
+           -> x__ {_MultiOperationExecutionAborted'_unknownFields = y__})
+  defMessage
+    = MultiOperationExecutionAborted'_constructor
+        {_MultiOperationExecutionAborted'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          MultiOperationExecutionAborted
+          -> Data.ProtoLens.Encoding.Bytes.Parser MultiOperationExecutionAborted
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage)
+          "MultiOperationExecutionAborted"
+  buildMessage
+    = \ _x
+        -> Data.ProtoLens.Encoding.Wire.buildFieldSet
+             (Lens.Family2.view Data.ProtoLens.unknownFields _x)
+instance Control.DeepSeq.NFData MultiOperationExecutionAborted where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_MultiOperationExecutionAborted'_unknownFields x__) ()
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Failure.V1.Message_Fields.scheduledEventId' @:: Lens' NexusOperationFailureInfo Data.Int.Int64@
+         * 'Proto.Temporal.Api.Failure.V1.Message_Fields.endpoint' @:: Lens' NexusOperationFailureInfo Data.Text.Text@
+         * 'Proto.Temporal.Api.Failure.V1.Message_Fields.service' @:: Lens' NexusOperationFailureInfo Data.Text.Text@
+         * 'Proto.Temporal.Api.Failure.V1.Message_Fields.operation' @:: Lens' NexusOperationFailureInfo Data.Text.Text@
+         * 'Proto.Temporal.Api.Failure.V1.Message_Fields.operationId' @:: Lens' NexusOperationFailureInfo Data.Text.Text@ -}
+data NexusOperationFailureInfo
+  = NexusOperationFailureInfo'_constructor {_NexusOperationFailureInfo'scheduledEventId :: !Data.Int.Int64,
+                                            _NexusOperationFailureInfo'endpoint :: !Data.Text.Text,
+                                            _NexusOperationFailureInfo'service :: !Data.Text.Text,
+                                            _NexusOperationFailureInfo'operation :: !Data.Text.Text,
+                                            _NexusOperationFailureInfo'operationId :: !Data.Text.Text,
+                                            _NexusOperationFailureInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show NexusOperationFailureInfo where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField NexusOperationFailureInfo "scheduledEventId" Data.Int.Int64 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _NexusOperationFailureInfo'scheduledEventId
+           (\ x__ y__
+              -> x__ {_NexusOperationFailureInfo'scheduledEventId = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField NexusOperationFailureInfo "endpoint" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _NexusOperationFailureInfo'endpoint
+           (\ x__ y__ -> x__ {_NexusOperationFailureInfo'endpoint = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField NexusOperationFailureInfo "service" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _NexusOperationFailureInfo'service
+           (\ x__ y__ -> x__ {_NexusOperationFailureInfo'service = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField NexusOperationFailureInfo "operation" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _NexusOperationFailureInfo'operation
+           (\ x__ y__ -> x__ {_NexusOperationFailureInfo'operation = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField NexusOperationFailureInfo "operationId" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _NexusOperationFailureInfo'operationId
+           (\ x__ y__ -> x__ {_NexusOperationFailureInfo'operationId = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message NexusOperationFailureInfo where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.failure.v1.NexusOperationFailureInfo"
+  packedMessageDescriptor _
+    = "\n\
+      \\EMNexusOperationFailureInfo\DC2,\n\
+      \\DC2scheduled_event_id\CAN\SOH \SOH(\ETXR\DLEscheduledEventId\DC2\SUB\n\
+      \\bendpoint\CAN\STX \SOH(\tR\bendpoint\DC2\CAN\n\
+      \\aservice\CAN\ETX \SOH(\tR\aservice\DC2\FS\n\
+      \\toperation\CAN\EOT \SOH(\tR\toperation\DC2!\n\
+      \\foperation_id\CAN\ENQ \SOH(\tR\voperationId"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        scheduledEventId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "scheduled_event_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.Int64Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int64)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"scheduledEventId")) ::
+              Data.ProtoLens.FieldDescriptor NexusOperationFailureInfo
+        endpoint__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "endpoint"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"endpoint")) ::
+              Data.ProtoLens.FieldDescriptor NexusOperationFailureInfo
+        service__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "service"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"service")) ::
+              Data.ProtoLens.FieldDescriptor NexusOperationFailureInfo
+        operation__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "operation"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"operation")) ::
+              Data.ProtoLens.FieldDescriptor NexusOperationFailureInfo
+        operationId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "operation_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"operationId")) ::
+              Data.ProtoLens.FieldDescriptor NexusOperationFailureInfo
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, scheduledEventId__field_descriptor),
+           (Data.ProtoLens.Tag 2, endpoint__field_descriptor),
+           (Data.ProtoLens.Tag 3, service__field_descriptor),
+           (Data.ProtoLens.Tag 4, operation__field_descriptor),
+           (Data.ProtoLens.Tag 5, operationId__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _NexusOperationFailureInfo'_unknownFields
+        (\ x__ y__
+           -> x__ {_NexusOperationFailureInfo'_unknownFields = y__})
+  defMessage
+    = NexusOperationFailureInfo'_constructor
+        {_NexusOperationFailureInfo'scheduledEventId = Data.ProtoLens.fieldDefault,
+         _NexusOperationFailureInfo'endpoint = Data.ProtoLens.fieldDefault,
+         _NexusOperationFailureInfo'service = Data.ProtoLens.fieldDefault,
+         _NexusOperationFailureInfo'operation = Data.ProtoLens.fieldDefault,
+         _NexusOperationFailureInfo'operationId = Data.ProtoLens.fieldDefault,
+         _NexusOperationFailureInfo'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          NexusOperationFailureInfo
+          -> Data.ProtoLens.Encoding.Bytes.Parser NexusOperationFailureInfo
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "scheduled_event_id"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"scheduledEventId") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "endpoint"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"endpoint") y x)
+                        26
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "service"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"service") y x)
+                        34
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "operation"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"operation") y x)
+                        42
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "operation_id"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"operationId") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "NexusOperationFailureInfo"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view
+                      (Data.ProtoLens.Field.field @"scheduledEventId") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
+                      ((Prelude..)
+                         Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
+             ((Data.Monoid.<>)
+                (let
+                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"endpoint") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                         ((Prelude..)
+                            (\ bs
+                               -> (Data.Monoid.<>)
+                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                            Data.Text.Encoding.encodeUtf8 _v))
+                ((Data.Monoid.<>)
+                   (let
+                      _v = Lens.Family2.view (Data.ProtoLens.Field.field @"service") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                            ((Prelude..)
+                               (\ bs
+                                  -> (Data.Monoid.<>)
+                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                               Data.Text.Encoding.encodeUtf8 _v))
+                   ((Data.Monoid.<>)
+                      (let
+                         _v = Lens.Family2.view (Data.ProtoLens.Field.field @"operation") _x
+                       in
+                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                             Data.Monoid.mempty
+                         else
+                             (Data.Monoid.<>)
+                               (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
+                               ((Prelude..)
+                                  (\ bs
+                                     -> (Data.Monoid.<>)
+                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                             (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                          (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                  Data.Text.Encoding.encodeUtf8 _v))
+                      ((Data.Monoid.<>)
+                         (let
+                            _v
+                              = Lens.Family2.view (Data.ProtoLens.Field.field @"operationId") _x
+                          in
+                            if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                Data.Monoid.mempty
+                            else
+                                (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
+                                  ((Prelude..)
+                                     (\ bs
+                                        -> (Data.Monoid.<>)
+                                             (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                             (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                     Data.Text.Encoding.encodeUtf8 _v))
+                         (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                            (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))
+instance Control.DeepSeq.NFData NexusOperationFailureInfo where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_NexusOperationFailureInfo'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_NexusOperationFailureInfo'scheduledEventId x__)
+                (Control.DeepSeq.deepseq
+                   (_NexusOperationFailureInfo'endpoint x__)
+                   (Control.DeepSeq.deepseq
+                      (_NexusOperationFailureInfo'service x__)
+                      (Control.DeepSeq.deepseq
+                         (_NexusOperationFailureInfo'operation x__)
+                         (Control.DeepSeq.deepseq
+                            (_NexusOperationFailureInfo'operationId x__) ())))))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Failure.V1.Message_Fields.lastHeartbeatDetails' @:: Lens' ResetWorkflowFailureInfo Proto.Temporal.Api.Common.V1.Message.Payloads@
@@ -2504,11 +3015,12 @@ instance Control.DeepSeq.NFData TimeoutFailureInfo where
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \%temporal/api/failure/v1/message.proto\DC2\ETBtemporal.api.failure.v1\SUB$temporal/api/common/v1/message.proto\SUB$temporal/api/enums/v1/workflow.proto\"\141\SOH\n\
+    \%temporal/api/failure/v1/message.proto\DC2\ETBtemporal.api.failure.v1\SUB$temporal/api/common/v1/message.proto\SUB$temporal/api/enums/v1/workflow.proto\SUB\RSgoogle/protobuf/duration.proto\"\210\SOH\n\
     \\SYNApplicationFailureInfo\DC2\DC2\n\
     \\EOTtype\CAN\SOH \SOH(\tR\EOTtype\DC2#\n\
     \\rnon_retryable\CAN\STX \SOH(\bR\fnonRetryable\DC2:\n\
-    \\adetails\CAN\ETX \SOH(\v2 .temporal.api.common.v1.PayloadsR\adetails\"\179\SOH\n\
+    \\adetails\CAN\ETX \SOH(\v2 .temporal.api.common.v1.PayloadsR\adetails\DC2C\n\
+    \\DLEnext_retry_delay\CAN\EOT \SOH(\v2\EM.google.protobuf.DurationR\SOnextRetryDelay\"\179\SOH\n\
     \\DC2TimeoutFailureInfo\DC2E\n\
     \\ftimeout_type\CAN\SOH \SOH(\SO2\".temporal.api.enums.v1.TimeoutTypeR\vtimeoutType\DC2V\n\
     \\SYNlast_heartbeat_details\CAN\STX \SOH(\v2 .temporal.api.common.v1.PayloadsR\DC4lastHeartbeatDetails\"Q\n\
@@ -2535,7 +3047,13 @@ packedFileDescriptor
     \\DC2initiated_event_id\CAN\EOT \SOH(\ETXR\DLEinitiatedEventId\DC2(\n\
     \\DLEstarted_event_id\CAN\ENQ \SOH(\ETXR\SOstartedEventId\DC2B\n\
     \\vretry_state\CAN\ACK \SOH(\SO2!.temporal.api.enums.v1.RetryStateR\n\
-    \retryState\"\215\b\n\
+    \retryState\"\192\SOH\n\
+    \\EMNexusOperationFailureInfo\DC2,\n\
+    \\DC2scheduled_event_id\CAN\SOH \SOH(\ETXR\DLEscheduledEventId\DC2\SUB\n\
+    \\bendpoint\CAN\STX \SOH(\tR\bendpoint\DC2\CAN\n\
+    \\aservice\CAN\ETX \SOH(\tR\aservice\DC2\FS\n\
+    \\toperation\CAN\EOT \SOH(\tR\toperation\DC2!\n\
+    \\foperation_id\CAN\ENQ \SOH(\tR\voperationId\"\226\t\n\
     \\aFailure\DC2\CAN\n\
     \\amessage\CAN\SOH \SOH(\tR\amessage\DC2\SYN\n\
     \\ACKsource\CAN\STX \SOH(\tR\ACKsource\DC2\US\n\
@@ -2551,10 +3069,12 @@ packedFileDescriptor
     \\ESCreset_workflow_failure_info\CAN\n\
     \ \SOH(\v21.temporal.api.failure.v1.ResetWorkflowFailureInfoH\NULR\CANresetWorkflowFailureInfo\DC2b\n\
     \\NAKactivity_failure_info\CAN\v \SOH(\v2,.temporal.api.failure.v1.ActivityFailureInfoH\NULR\DC3activityFailureInfo\DC2\142\SOH\n\
-    \%child_workflow_execution_failure_info\CAN\f \SOH(\v2:.temporal.api.failure.v1.ChildWorkflowExecutionFailureInfoH\NULR!childWorkflowExecutionFailureInfoB\SO\n\
-    \\ffailure_infoB\142\SOH\n\
-    \\SUBio.temporal.api.failure.v1B\fMessageProtoP\SOHZ%go.temporal.io/api/failure/v1;failure\170\STX\EMTemporalio.Api.Failure.V1\234\STX\FSTemporalio::Api::Failure::V1J\178#\n\
-    \\ACK\DC2\EOT\SYN\NULq\SOH\n\
+    \%child_workflow_execution_failure_info\CAN\f \SOH(\v2:.temporal.api.failure.v1.ChildWorkflowExecutionFailureInfoH\NULR!childWorkflowExecutionFailureInfo\DC2\136\SOH\n\
+    \&nexus_operation_execution_failure_info\CAN\r \SOH(\v22.temporal.api.failure.v1.NexusOperationFailureInfoH\NULR\"nexusOperationExecutionFailureInfoB\SO\n\
+    \\ffailure_info\" \n\
+    \\RSMultiOperationExecutionAbortedB\142\SOH\n\
+    \\SUBio.temporal.api.failure.v1B\fMessageProtoP\SOHZ%go.temporal.io/api/failure/v1;failure\170\STX\EMTemporalio.Api.Failure.V1\234\STX\FSTemporalio::Api::Failure::V1J\245*\n\
+    \\a\DC2\ENQ\SYN\NUL\138\SOH)\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -2609,259 +3129,330 @@ packedFileDescriptor
     \\STX\ETX\NUL\DC2\ETX!\NUL.\n\
     \\t\n\
     \\STX\ETX\SOH\DC2\ETX\"\NUL.\n\
+    \\t\n\
+    \\STX\ETX\STX\DC2\ETX$\NUL(\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT$\NUL(\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT&\NUL1\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX$\b\RS\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX&\b\RS\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX%\EOT\DC4\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX'\EOT\DC4\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX%\EOT\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX'\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX%\v\SI\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX'\v\SI\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX%\DC2\DC3\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX'\DC2\DC3\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX&\EOT\ESC\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX(\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX&\EOT\b\n\
+    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX(\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX&\t\SYN\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX(\t\SYN\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX&\EM\SUB\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX(\EM\SUB\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX'\EOT0\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX)\EOT0\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX'\EOT#\n\
+    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX)\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX'$+\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX)$+\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX'./\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX)./\n\
+    \\201\STX\n\
+    \\EOT\EOT\NUL\STX\ETX\DC2\ETX0\EOT2\SUB\187\STX next_retry_delay can be used by the client to override the activity\n\
+    \ retry interval calculated by the retry policy. Retry attempts will\n\
+    \ still be subject to the maximum retries limit and total time limit\n\
+    \ defined by the policy.\n\
+    \ ATTENTION: this value will be ignored if set for failures produced by\n\
+    \ the workflow.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\ETX\ACK\DC2\ETX0\EOT\FS\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX0\GS-\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX001\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT*\NUL-\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT3\NUL6\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX*\b\SUB\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX3\b\SUB\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX+\EOT7\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX4\EOT7\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX+\EOT%\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX4\EOT%\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX+&2\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX4&2\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX+56\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX456\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX,\EOT?\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX5\EOT?\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX,\EOT#\n\
+    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX5\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX,$:\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX5$:\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX,=>\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX5=>\n\
     \\n\
     \\n\
-    \\STX\EOT\STX\DC2\EOT/\NUL1\SOH\n\
+    \\STX\EOT\STX\DC2\EOT8\NUL:\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX/\b\ESC\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX8\b\ESC\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX0\EOT0\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX9\EOT0\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX0\EOT#\n\
+    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX9\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX0$+\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX9$+\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX0./\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX9./\n\
     \\n\
     \\n\
-    \\STX\EOT\ETX\DC2\EOT3\NUL4\SOH\n\
+    \\STX\EOT\ETX\DC2\EOT<\NUL=\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX3\b\GS\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX<\b\GS\n\
     \\n\
     \\n\
-    \\STX\EOT\EOT\DC2\EOT6\NUL8\SOH\n\
+    \\STX\EOT\EOT\DC2\EOT?\NULA\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETX6\b\EM\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETX?\b\EM\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETX7\EOT\ESC\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETX@\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETX7\EOT\b\n\
+    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETX@\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX7\t\SYN\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX@\t\SYN\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX7\EM\SUB\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX@\EM\SUB\n\
     \\n\
     \\n\
-    \\STX\EOT\ENQ\DC2\EOT:\NUL<\SOH\n\
+    \\STX\EOT\ENQ\DC2\EOTC\NULE\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETX:\b \n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETXC\b \n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX;\EOT?\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXD\EOT?\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETX;\EOT#\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETXD\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX;$:\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXD$:\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX;=>\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXD=>\n\
     \\n\
     \\n\
-    \\STX\EOT\ACK\DC2\EOT>\NULE\SOH\n\
+    \\STX\EOT\ACK\DC2\EOTG\NULN\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETX>\b\ESC\n\
+    \\ETX\EOT\ACK\SOH\DC2\ETXG\b\ESC\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\ETX?\EOT!\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\ETXH\EOT!\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETX?\EOT\t\n\
+    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETXH\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETX?\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXH\n\
     \\FS\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETX?\US \n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXH\US \n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\SOH\DC2\ETX@\EOT\US\n\
+    \\EOT\EOT\ACK\STX\SOH\DC2\ETXI\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ENQ\DC2\ETX@\EOT\t\n\
+    \\ENQ\EOT\ACK\STX\SOH\ENQ\DC2\ETXI\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETX@\n\
+    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXI\n\
     \\SUB\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETX@\GS\RS\n\
+    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXI\GS\RS\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\STX\DC2\ETXA\EOT\CAN\n\
+    \\EOT\EOT\ACK\STX\STX\DC2\ETXJ\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\ENQ\DC2\ETXA\EOT\n\
+    \\ENQ\EOT\ACK\STX\STX\ENQ\DC2\ETXJ\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\ETXA\v\DC3\n\
+    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\ETXJ\v\DC3\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\ETXA\SYN\ETB\n\
+    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\ETXJ\SYN\ETB\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\ETX\DC2\ETXB\EOT:\n\
+    \\EOT\EOT\ACK\STX\ETX\DC2\ETXK\EOT:\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ETX\ACK\DC2\ETXB\EOT'\n\
+    \\ENQ\EOT\ACK\STX\ETX\ACK\DC2\ETXK\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ETX\SOH\DC2\ETXB(5\n\
+    \\ENQ\EOT\ACK\STX\ETX\SOH\DC2\ETXK(5\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ETX\ETX\DC2\ETXB89\n\
+    \\ENQ\EOT\ACK\STX\ETX\ETX\DC2\ETXK89\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\EOT\DC2\ETXC\EOT\ESC\n\
+    \\EOT\EOT\ACK\STX\EOT\DC2\ETXL\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\EOT\ENQ\DC2\ETXC\EOT\n\
+    \\ENQ\EOT\ACK\STX\EOT\ENQ\DC2\ETXL\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\EOT\SOH\DC2\ETXC\v\SYN\n\
+    \\ENQ\EOT\ACK\STX\EOT\SOH\DC2\ETXL\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\EOT\ETX\DC2\ETXC\EM\SUB\n\
+    \\ENQ\EOT\ACK\STX\EOT\ETX\DC2\ETXL\EM\SUB\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\ENQ\DC2\ETXD\EOT5\n\
+    \\EOT\EOT\ACK\STX\ENQ\DC2\ETXM\EOT5\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ENQ\ACK\DC2\ETXD\EOT$\n\
+    \\ENQ\EOT\ACK\STX\ENQ\ACK\DC2\ETXM\EOT$\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ENQ\SOH\DC2\ETXD%0\n\
+    \\ENQ\EOT\ACK\STX\ENQ\SOH\DC2\ETXM%0\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ENQ\ETX\DC2\ETXD34\n\
+    \\ENQ\EOT\ACK\STX\ENQ\ETX\DC2\ETXM34\n\
     \\n\
     \\n\
-    \\STX\EOT\a\DC2\EOTG\NULN\SOH\n\
+    \\STX\EOT\a\DC2\EOTP\NULW\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\a\SOH\DC2\ETXG\b)\n\
+    \\ETX\EOT\a\SOH\DC2\ETXP\b)\n\
     \\v\n\
-    \\EOT\EOT\a\STX\NUL\DC2\ETXH\EOT\EM\n\
+    \\EOT\EOT\a\STX\NUL\DC2\ETXQ\EOT\EM\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETXH\EOT\n\
+    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETXQ\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETXH\v\DC4\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETXQ\v\DC4\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETXH\ETB\CAN\n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETXQ\ETB\CAN\n\
     \\v\n\
-    \\EOT\EOT\a\STX\SOH\DC2\ETXI\EOTD\n\
+    \\EOT\EOT\a\STX\SOH\DC2\ETXR\EOTD\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\ACK\DC2\ETXI\EOT,\n\
+    \\ENQ\EOT\a\STX\SOH\ACK\DC2\ETXR\EOT,\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\SOH\DC2\ETXI-?\n\
+    \\ENQ\EOT\a\STX\SOH\SOH\DC2\ETXR-?\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\ETX\DC2\ETXIBC\n\
+    \\ENQ\EOT\a\STX\SOH\ETX\DC2\ETXRBC\n\
     \\v\n\
-    \\EOT\EOT\a\STX\STX\DC2\ETXJ\EOT:\n\
+    \\EOT\EOT\a\STX\STX\DC2\ETXS\EOT:\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\STX\ACK\DC2\ETXJ\EOT'\n\
+    \\ENQ\EOT\a\STX\STX\ACK\DC2\ETXS\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\STX\SOH\DC2\ETXJ(5\n\
+    \\ENQ\EOT\a\STX\STX\SOH\DC2\ETXS(5\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\STX\ETX\DC2\ETXJ89\n\
+    \\ENQ\EOT\a\STX\STX\ETX\DC2\ETXS89\n\
     \\v\n\
-    \\EOT\EOT\a\STX\ETX\DC2\ETXK\EOT!\n\
+    \\EOT\EOT\a\STX\ETX\DC2\ETXT\EOT!\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\ETX\ENQ\DC2\ETXK\EOT\t\n\
+    \\ENQ\EOT\a\STX\ETX\ENQ\DC2\ETXT\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\ETX\SOH\DC2\ETXK\n\
+    \\ENQ\EOT\a\STX\ETX\SOH\DC2\ETXT\n\
     \\FS\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\ETX\ETX\DC2\ETXK\US \n\
+    \\ENQ\EOT\a\STX\ETX\ETX\DC2\ETXT\US \n\
     \\v\n\
-    \\EOT\EOT\a\STX\EOT\DC2\ETXL\EOT\US\n\
+    \\EOT\EOT\a\STX\EOT\DC2\ETXU\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\EOT\ENQ\DC2\ETXL\EOT\t\n\
+    \\ENQ\EOT\a\STX\EOT\ENQ\DC2\ETXU\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\EOT\SOH\DC2\ETXL\n\
+    \\ENQ\EOT\a\STX\EOT\SOH\DC2\ETXU\n\
     \\SUB\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\EOT\ETX\DC2\ETXL\GS\RS\n\
+    \\ENQ\EOT\a\STX\EOT\ETX\DC2\ETXU\GS\RS\n\
     \\v\n\
-    \\EOT\EOT\a\STX\ENQ\DC2\ETXM\EOT5\n\
+    \\EOT\EOT\a\STX\ENQ\DC2\ETXV\EOT5\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\ENQ\ACK\DC2\ETXM\EOT$\n\
+    \\ENQ\EOT\a\STX\ENQ\ACK\DC2\ETXV\EOT$\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\ENQ\SOH\DC2\ETXM%0\n\
+    \\ENQ\EOT\a\STX\ENQ\SOH\DC2\ETXV%0\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\ENQ\ETX\DC2\ETXM34\n\
+    \\ENQ\EOT\a\STX\ENQ\ETX\DC2\ETXV34\n\
     \\n\
     \\n\
-    \\STX\EOT\b\DC2\EOTP\NULq\SOH\n\
+    \\STX\EOT\b\DC2\EOTY\NULd\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\b\SOH\DC2\ETXP\b\SI\n\
+    \\ETX\EOT\b\SOH\DC2\ETXY\b!\n\
+    \4\n\
+    \\EOT\EOT\b\STX\NUL\DC2\ETX[\EOT!\SUB' The NexusOperationScheduled event ID.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\ETX[\EOT\t\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETX[\n\
+    \\FS\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETX[\US \n\
+    \\GS\n\
+    \\EOT\EOT\b\STX\SOH\DC2\ETX]\EOT\CAN\SUB\DLE Endpoint name.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\ETX]\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETX]\v\DC3\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETX]\SYN\ETB\n\
+    \\FS\n\
+    \\EOT\EOT\b\STX\STX\DC2\ETX_\EOT\ETB\SUB\SI Service name.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\STX\ENQ\DC2\ETX_\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\STX\SOH\DC2\ETX_\v\DC2\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\STX\ETX\DC2\ETX_\NAK\SYN\n\
+    \\RS\n\
+    \\EOT\EOT\b\STX\ETX\DC2\ETXa\EOT\EM\SUB\DC1 Operation name.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\ETX\ENQ\DC2\ETXa\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\ETX\SOH\DC2\ETXa\v\DC4\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\ETX\ETX\DC2\ETXa\ETB\CAN\n\
+    \T\n\
+    \\EOT\EOT\b\STX\EOT\DC2\ETXc\EOT\FS\SUBG Operation ID - may be empty if the operation completed synchronously.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\EOT\ENQ\DC2\ETXc\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\EOT\SOH\DC2\ETXc\v\ETB\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\EOT\ETX\DC2\ETXc\SUB\ESC\n\
     \\v\n\
-    \\EOT\EOT\b\STX\NUL\DC2\ETXQ\EOT\ETB\n\
+    \\STX\EOT\t\DC2\ENQf\NUL\136\SOH\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\t\SOH\DC2\ETXf\b\SI\n\
+    \\v\n\
+    \\EOT\EOT\t\STX\NUL\DC2\ETXg\EOT\ETB\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\ETXQ\EOT\n\
+    \\ENQ\EOT\t\STX\NUL\ENQ\DC2\ETXg\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETXQ\v\DC2\n\
+    \\ENQ\EOT\t\STX\NUL\SOH\DC2\ETXg\v\DC2\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETXQ\NAK\SYN\n\
+    \\ENQ\EOT\t\STX\NUL\ETX\DC2\ETXg\NAK\SYN\n\
     \\165\SOH\n\
-    \\EOT\EOT\b\STX\SOH\DC2\ETXT\EOT\SYN\SUB\151\SOH The source this Failure originated in, e.g. TypeScriptSDK / JavaSDK\n\
+    \\EOT\EOT\t\STX\SOH\DC2\ETXj\EOT\SYN\SUB\151\SOH The source this Failure originated in, e.g. TypeScriptSDK / JavaSDK\n\
     \ In some SDKs this is used to rehydrate the stack trace into an exception object.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\ETXT\EOT\n\
+    \\ENQ\EOT\t\STX\SOH\ENQ\DC2\ETXj\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETXT\v\DC1\n\
+    \\ENQ\EOT\t\STX\SOH\SOH\DC2\ETXj\v\DC1\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETXT\DC4\NAK\n\
+    \\ENQ\EOT\t\STX\SOH\ETX\DC2\ETXj\DC4\NAK\n\
     \\v\n\
-    \\EOT\EOT\b\STX\STX\DC2\ETXU\EOT\ESC\n\
+    \\EOT\EOT\t\STX\STX\DC2\ETXk\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\STX\ENQ\DC2\ETXU\EOT\n\
+    \\ENQ\EOT\t\STX\STX\ENQ\DC2\ETXk\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\STX\SOH\DC2\ETXU\v\SYN\n\
+    \\ENQ\EOT\t\STX\STX\SOH\DC2\ETXk\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\STX\ETX\DC2\ETXU\EM\SUB\n\
+    \\ENQ\EOT\t\STX\STX\ETX\DC2\ETXk\EM\SUB\n\
     \\252\a\n\
-    \\EOT\EOT\b\STX\ETX\DC2\ETXe\EOT;\SUB\238\a Alternative way to supply `message` and `stack_trace` and possibly other attributes, used for encryption of\n\
+    \\EOT\EOT\t\STX\ETX\DC2\ETX{\EOT;\SUB\238\a Alternative way to supply `message` and `stack_trace` and possibly other attributes, used for encryption of\n\
     \ errors originating in user code which might contain sensitive information.\n\
     \ The `encoded_attributes` Payload could represent any serializable object, e.g. JSON object or a `Failure` proto\n\
     \ message.\n\
@@ -2878,89 +3469,104 @@ packedFileDescriptor
     \ (-- api-linter: core::0203::optional=disabled --)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\ETX\ACK\DC2\ETXe\EOT\"\n\
+    \\ENQ\EOT\t\STX\ETX\ACK\DC2\ETX{\EOT\"\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\ETX\SOH\DC2\ETXe#5\n\
+    \\ENQ\EOT\t\STX\ETX\SOH\DC2\ETX{#5\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\ETX\ETX\DC2\ETXe8:\n\
+    \\ENQ\EOT\t\STX\ETX\ETX\DC2\ETX{8:\n\
     \\v\n\
-    \\EOT\EOT\b\STX\EOT\DC2\ETXf\EOT\SYN\n\
+    \\EOT\EOT\t\STX\EOT\DC2\ETX|\EOT\SYN\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\EOT\ACK\DC2\ETXf\EOT\v\n\
+    \\ENQ\EOT\t\STX\EOT\ACK\DC2\ETX|\EOT\v\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\EOT\SOH\DC2\ETXf\f\DC1\n\
+    \\ENQ\EOT\t\STX\EOT\SOH\DC2\ETX|\f\DC1\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\EOT\ETX\DC2\ETXf\DC4\NAK\n\
+    \\ENQ\EOT\t\STX\EOT\ETX\DC2\ETX|\DC4\NAK\n\
+    \\r\n\
+    \\EOT\EOT\t\b\NUL\DC2\ENQ}\EOT\135\SOH\ENQ\n\
     \\f\n\
-    \\EOT\EOT\b\b\NUL\DC2\EOTg\EOTp\ENQ\n\
-    \\f\n\
-    \\ENQ\EOT\b\b\NUL\SOH\DC2\ETXg\n\
+    \\ENQ\EOT\t\b\NUL\SOH\DC2\ETX}\n\
     \\SYN\n\
     \\v\n\
-    \\EOT\EOT\b\STX\ENQ\DC2\ETXh\b<\n\
+    \\EOT\EOT\t\STX\ENQ\DC2\ETX~\b<\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\ENQ\ACK\DC2\ETXh\b\RS\n\
+    \\ENQ\EOT\t\STX\ENQ\ACK\DC2\ETX~\b\RS\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\ENQ\SOH\DC2\ETXh\US7\n\
+    \\ENQ\EOT\t\STX\ENQ\SOH\DC2\ETX~\US7\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\ENQ\ETX\DC2\ETXh:;\n\
+    \\ENQ\EOT\t\STX\ENQ\ETX\DC2\ETX~:;\n\
     \\v\n\
-    \\EOT\EOT\b\STX\ACK\DC2\ETXi\b4\n\
+    \\EOT\EOT\t\STX\ACK\DC2\ETX\DEL\b4\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\ACK\ACK\DC2\ETXi\b\SUB\n\
+    \\ENQ\EOT\t\STX\ACK\ACK\DC2\ETX\DEL\b\SUB\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\ACK\SOH\DC2\ETXi\ESC/\n\
+    \\ENQ\EOT\t\STX\ACK\SOH\DC2\ETX\DEL\ESC/\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\ACK\ETX\DC2\ETXi23\n\
+    \\ENQ\EOT\t\STX\ACK\ETX\DC2\ETX\DEL23\n\
+    \\f\n\
+    \\EOT\EOT\t\STX\a\DC2\EOT\128\SOH\b6\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\a\ACK\DC2\EOT\128\SOH\b\ESC\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\a\SOH\DC2\EOT\128\SOH\FS1\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\a\ETX\DC2\EOT\128\SOH45\n\
+    \\f\n\
+    \\EOT\EOT\t\STX\b\DC2\EOT\129\SOH\b:\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\b\ACK\DC2\EOT\129\SOH\b\GS\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\b\SOH\DC2\EOT\129\SOH\RS5\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\b\ETX\DC2\EOT\129\SOH89\n\
+    \\f\n\
+    \\EOT\EOT\t\STX\t\DC2\EOT\130\SOH\b2\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\t\ACK\DC2\EOT\130\SOH\b\EM\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\t\SOH\DC2\EOT\130\SOH\SUB-\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\t\ETX\DC2\EOT\130\SOH01\n\
+    \\f\n\
+    \\EOT\EOT\t\STX\n\
+    \\DC2\EOT\131\SOH\bB\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\n\
+    \\ACK\DC2\EOT\131\SOH\b \n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\n\
+    \\SOH\DC2\EOT\131\SOH!<\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\n\
+    \\ETX\DC2\EOT\131\SOH?A\n\
+    \\f\n\
+    \\EOT\EOT\t\STX\v\DC2\EOT\132\SOH\b7\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\v\ACK\DC2\EOT\132\SOH\b\ESC\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\v\SOH\DC2\EOT\132\SOH\FS1\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\v\ETX\DC2\EOT\132\SOH46\n\
+    \\f\n\
+    \\EOT\EOT\t\STX\f\DC2\EOT\133\SOH\bU\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\f\ACK\DC2\EOT\133\SOH\b)\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\f\SOH\DC2\EOT\133\SOH*O\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\f\ETX\DC2\EOT\133\SOHRT\n\
+    \\f\n\
+    \\EOT\EOT\t\STX\r\DC2\EOT\134\SOH\bN\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\r\ACK\DC2\EOT\134\SOH\b!\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\r\SOH\DC2\EOT\134\SOH\"H\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\r\ETX\DC2\EOT\134\SOHKM\n\
+    \\n\
+    \\n\
+    \\STX\EOT\n\
+    \\DC2\EOT\138\SOH\NUL)\n\
     \\v\n\
-    \\EOT\EOT\b\STX\a\DC2\ETXj\b6\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\a\ACK\DC2\ETXj\b\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\a\SOH\DC2\ETXj\FS1\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\a\ETX\DC2\ETXj45\n\
-    \\v\n\
-    \\EOT\EOT\b\STX\b\DC2\ETXk\b:\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\b\ACK\DC2\ETXk\b\GS\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\b\SOH\DC2\ETXk\RS5\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\b\ETX\DC2\ETXk89\n\
-    \\v\n\
-    \\EOT\EOT\b\STX\t\DC2\ETXl\b2\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\t\ACK\DC2\ETXl\b\EM\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\t\SOH\DC2\ETXl\SUB-\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\t\ETX\DC2\ETXl01\n\
-    \\v\n\
-    \\EOT\EOT\b\STX\n\
-    \\DC2\ETXm\bB\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\n\
-    \\ACK\DC2\ETXm\b \n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\n\
-    \\SOH\DC2\ETXm!<\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\n\
-    \\ETX\DC2\ETXm?A\n\
-    \\v\n\
-    \\EOT\EOT\b\STX\v\DC2\ETXn\b7\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\v\ACK\DC2\ETXn\b\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\v\SOH\DC2\ETXn\FS1\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\v\ETX\DC2\ETXn46\n\
-    \\v\n\
-    \\EOT\EOT\b\STX\f\DC2\ETXo\bU\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\f\ACK\DC2\ETXo\b)\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\f\SOH\DC2\ETXo*O\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\f\ETX\DC2\ETXoRTb\ACKproto3"
+    \\ETX\EOT\n\
+    \\SOH\DC2\EOT\138\SOH\b&b\ACKproto3"

@@ -27,6 +27,7 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
+import qualified Proto.Google.Protobuf.Any
 import qualified Proto.Temporal.Api.Common.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.FailedCause
 import qualified Proto.Temporal.Api.Enums.V1.Namespace
@@ -66,6 +67,11 @@ clientVersion ::
    Data.ProtoLens.Field.HasField s "clientVersion" a) =>
   Lens.Family2.LensLike' f s a
 clientVersion = Data.ProtoLens.Field.field @"clientVersion"
+code ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "code" a) =>
+  Lens.Family2.LensLike' f s a
+code = Data.ProtoLens.Field.field @"code"
 currentCluster ::
   forall f s a.
   (Prelude.Functor f,
@@ -78,6 +84,11 @@ defaultBuildId ::
    Data.ProtoLens.Field.HasField s "defaultBuildId" a) =>
   Lens.Family2.LensLike' f s a
 defaultBuildId = Data.ProtoLens.Field.field @"defaultBuildId"
+details ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "details" a) =>
+  Lens.Family2.LensLike' f s a
+details = Data.ProtoLens.Field.field @"details"
 maybe'workflowExecution ::
   forall f s a.
   (Prelude.Functor f,
@@ -85,6 +96,11 @@ maybe'workflowExecution ::
   Lens.Family2.LensLike' f s a
 maybe'workflowExecution
   = Data.ProtoLens.Field.field @"maybe'workflowExecution"
+message ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "message" a) =>
+  Lens.Family2.LensLike' f s a
+message = Data.ProtoLens.Field.field @"message"
 namespace ::
   forall f s a.
   (Prelude.Functor f,
@@ -101,6 +117,11 @@ runId ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "runId" a) =>
   Lens.Family2.LensLike' f s a
 runId = Data.ProtoLens.Field.field @"runId"
+scope ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "scope" a) =>
+  Lens.Family2.LensLike' f s a
+scope = Data.ProtoLens.Field.field @"scope"
 serverVersion ::
   forall f s a.
   (Prelude.Functor f,
@@ -118,6 +139,12 @@ state ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "state" a) =>
   Lens.Family2.LensLike' f s a
 state = Data.ProtoLens.Field.field @"state"
+statuses ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "statuses" a) =>
+  Lens.Family2.LensLike' f s a
+statuses = Data.ProtoLens.Field.field @"statuses"
 supportedVersions ::
   forall f s a.
   (Prelude.Functor f,
@@ -130,6 +157,18 @@ vec'allowedStates ::
    Data.ProtoLens.Field.HasField s "vec'allowedStates" a) =>
   Lens.Family2.LensLike' f s a
 vec'allowedStates = Data.ProtoLens.Field.field @"vec'allowedStates"
+vec'details ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'details" a) =>
+  Lens.Family2.LensLike' f s a
+vec'details = Data.ProtoLens.Field.field @"vec'details"
+vec'statuses ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'statuses" a) =>
+  Lens.Family2.LensLike' f s a
+vec'statuses = Data.ProtoLens.Field.field @"vec'statuses"
 workflowError ::
   forall f s a.
   (Prelude.Functor f,

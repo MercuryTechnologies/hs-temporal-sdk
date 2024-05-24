@@ -49,7 +49,6 @@ data ActivityCancelReason
     ActivityCancelReason'Unrecognized !ActivityCancelReason'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum ActivityCancelReason where
-  enumName _ = Data.Text.pack "ActivityCancelReason"
   maybeToEnum 0 = Prelude.Just NOT_FOUND
   maybeToEnum 1 = Prelude.Just CANCELLED
   maybeToEnum 2 = Prelude.Just TIMED_OUT
@@ -806,9 +805,6 @@ instance Data.ProtoLens.Message Start where
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                  Data.ProtoLens.FieldTypeDescriptor Start'HeaderFieldsEntry)
               (Data.ProtoLens.MapField
-                 Data.ProtoLens.MapStringKey
-                 (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                    Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
                  (Data.ProtoLens.Field.field @"key")
                  (Data.ProtoLens.Field.field @"value")
                  (Data.ProtoLens.Field.field @"headerFields")) ::

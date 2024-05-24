@@ -9,7 +9,7 @@ version: "0.0.1.0"
 dependencies:
 - base
 - temporal-sdk
-- if-instance
+- if-instance >= 0.5
 - containers
 
 default-extensions:

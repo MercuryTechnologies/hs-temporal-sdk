@@ -274,7 +274,6 @@ data HealthCheckResponse'ServingStatus
     HealthCheckResponse'ServingStatus'Unrecognized !HealthCheckResponse'ServingStatus'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum HealthCheckResponse'ServingStatus where
-  enumName _ = Data.Text.pack "ServingStatus"
   maybeToEnum 0 = Prelude.Just HealthCheckResponse'UNKNOWN
   maybeToEnum 1 = Prelude.Just HealthCheckResponse'SERVING
   maybeToEnum 2 = Prelude.Just HealthCheckResponse'NOT_SERVING

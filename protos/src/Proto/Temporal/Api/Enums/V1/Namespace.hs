@@ -45,7 +45,6 @@ data ArchivalState
     ArchivalState'Unrecognized !ArchivalState'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum ArchivalState where
-  enumName _ = Data.Text.pack "ArchivalState"
   maybeToEnum 0 = Prelude.Just ARCHIVAL_STATE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just ARCHIVAL_STATE_DISABLED
   maybeToEnum 2 = Prelude.Just ARCHIVAL_STATE_ENABLED
@@ -120,7 +119,6 @@ data NamespaceState
     NamespaceState'Unrecognized !NamespaceState'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum NamespaceState where
-  enumName _ = Data.Text.pack "NamespaceState"
   maybeToEnum 0 = Prelude.Just NAMESPACE_STATE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just NAMESPACE_STATE_REGISTERED
   maybeToEnum 2 = Prelude.Just NAMESPACE_STATE_DEPRECATED
@@ -202,7 +200,6 @@ data ReplicationState
     ReplicationState'Unrecognized !ReplicationState'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum ReplicationState where
-  enumName _ = Data.Text.pack "ReplicationState"
   maybeToEnum 0 = Prelude.Just REPLICATION_STATE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just REPLICATION_STATE_NORMAL
   maybeToEnum 2 = Prelude.Just REPLICATION_STATE_HANDOVER

@@ -4,6 +4,8 @@
 {-# OPTIONS_GHC -Wno-duplicate-exports#-}
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
 module Proto.Temporal.Api.Enums.V1.Update (
+        UpdateAdmittedEventOrigin(..), UpdateAdmittedEventOrigin(),
+        UpdateAdmittedEventOrigin'UnrecognizedValue,
         UpdateWorkflowExecutionLifecycleStage(..),
         UpdateWorkflowExecutionLifecycleStage(),
         UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
@@ -33,6 +35,77 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
+newtype UpdateAdmittedEventOrigin'UnrecognizedValue
+  = UpdateAdmittedEventOrigin'UnrecognizedValue Data.Int.Int32
+  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+data UpdateAdmittedEventOrigin
+  = UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED |
+    UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY |
+    UpdateAdmittedEventOrigin'Unrecognized !UpdateAdmittedEventOrigin'UnrecognizedValue
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.MessageEnum UpdateAdmittedEventOrigin where
+  maybeToEnum 0
+    = Prelude.Just UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED
+  maybeToEnum 1 = Prelude.Just UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY
+  maybeToEnum k
+    = Prelude.Just
+        (UpdateAdmittedEventOrigin'Unrecognized
+           (UpdateAdmittedEventOrigin'UnrecognizedValue
+              (Prelude.fromIntegral k)))
+  showEnum UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED
+    = "UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED"
+  showEnum UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY
+    = "UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY"
+  showEnum
+    (UpdateAdmittedEventOrigin'Unrecognized (UpdateAdmittedEventOrigin'UnrecognizedValue k))
+    = Prelude.show k
+  readEnum k
+    | (Prelude.==) k "UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED"
+    = Prelude.Just UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED
+    | (Prelude.==) k "UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY"
+    = Prelude.Just UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY
+    | Prelude.otherwise
+    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
+instance Prelude.Bounded UpdateAdmittedEventOrigin where
+  minBound = UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED
+  maxBound = UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY
+instance Prelude.Enum UpdateAdmittedEventOrigin where
+  toEnum k__
+    = Prelude.maybe
+        (Prelude.error
+           ((Prelude.++)
+              "toEnum: unknown value for enum UpdateAdmittedEventOrigin: "
+              (Prelude.show k__)))
+        Prelude.id (Data.ProtoLens.maybeToEnum k__)
+  fromEnum UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED = 0
+  fromEnum UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY = 1
+  fromEnum
+    (UpdateAdmittedEventOrigin'Unrecognized (UpdateAdmittedEventOrigin'UnrecognizedValue k))
+    = Prelude.fromIntegral k
+  succ UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY
+    = Prelude.error
+        "UpdateAdmittedEventOrigin.succ: bad argument UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY. This value would be out of bounds."
+  succ UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED
+    = UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY
+  succ (UpdateAdmittedEventOrigin'Unrecognized _)
+    = Prelude.error
+        "UpdateAdmittedEventOrigin.succ: bad argument: unrecognized value"
+  pred UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED
+    = Prelude.error
+        "UpdateAdmittedEventOrigin.pred: bad argument UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED. This value would be out of bounds."
+  pred UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY
+    = UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED
+  pred (UpdateAdmittedEventOrigin'Unrecognized _)
+    = Prelude.error
+        "UpdateAdmittedEventOrigin.pred: bad argument: unrecognized value"
+  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
+  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
+  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
+  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
+instance Data.ProtoLens.FieldDefault UpdateAdmittedEventOrigin where
+  fieldDefault = UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED
+instance Control.DeepSeq.NFData UpdateAdmittedEventOrigin where
+  rnf x__ = Prelude.seq x__ ()
 newtype UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
   = UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue Data.Int.Int32
   deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
@@ -44,7 +117,6 @@ data UpdateWorkflowExecutionLifecycleStage
     UpdateWorkflowExecutionLifecycleStage'Unrecognized !UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum UpdateWorkflowExecutionLifecycleStage where
-  enumName _ = Data.Text.pack "UpdateWorkflowExecutionLifecycleStage"
   maybeToEnum 0
     = Prelude.Just
         UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED

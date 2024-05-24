@@ -4,10 +4,16 @@
 {-# OPTIONS_GHC -Wno-duplicate-exports#-}
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
 module Proto.Temporal.Api.Taskqueue.V1.Message (
-        BuildIdReachability(), CompatibleVersionSet(), PollerInfo(),
-        StickyExecutionAttributes(), TaskIdBlock(), TaskQueue(),
-        TaskQueueMetadata(), TaskQueuePartitionMetadata(),
-        TaskQueueReachability(), TaskQueueStatus()
+        BuildIdAssignmentRule(), BuildIdAssignmentRule'Ramp(..),
+        _BuildIdAssignmentRule'PercentageRamp, BuildIdReachability(),
+        CompatibleBuildIdRedirectRule(), CompatibleVersionSet(),
+        PollerInfo(), RampByPercentage(), StickyExecutionAttributes(),
+        TaskIdBlock(), TaskQueue(), TaskQueueMetadata(),
+        TaskQueuePartitionMetadata(), TaskQueueReachability(),
+        TaskQueueStatus(), TaskQueueTypeInfo(), TaskQueueVersionInfo(),
+        TaskQueueVersionInfo'TypesInfoEntry(), TaskQueueVersionSelection(),
+        TimestampedBuildIdAssignmentRule(),
+        TimestampedCompatibleBuildIdRedirectRule()
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -39,6 +45,217 @@ import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Google.Protobuf.Wrappers
 import qualified Proto.Temporal.Api.Common.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.TaskQueue
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.targetBuildId' @:: Lens' BuildIdAssignmentRule Data.Text.Text@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'ramp' @:: Lens' BuildIdAssignmentRule (Prelude.Maybe BuildIdAssignmentRule'Ramp)@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'percentageRamp' @:: Lens' BuildIdAssignmentRule (Prelude.Maybe RampByPercentage)@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.percentageRamp' @:: Lens' BuildIdAssignmentRule RampByPercentage@ -}
+data BuildIdAssignmentRule
+  = BuildIdAssignmentRule'_constructor {_BuildIdAssignmentRule'targetBuildId :: !Data.Text.Text,
+                                        _BuildIdAssignmentRule'ramp :: !(Prelude.Maybe BuildIdAssignmentRule'Ramp),
+                                        _BuildIdAssignmentRule'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show BuildIdAssignmentRule where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+data BuildIdAssignmentRule'Ramp
+  = BuildIdAssignmentRule'PercentageRamp !RampByPercentage
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.Field.HasField BuildIdAssignmentRule "targetBuildId" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _BuildIdAssignmentRule'targetBuildId
+           (\ x__ y__ -> x__ {_BuildIdAssignmentRule'targetBuildId = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField BuildIdAssignmentRule "maybe'ramp" (Prelude.Maybe BuildIdAssignmentRule'Ramp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _BuildIdAssignmentRule'ramp
+           (\ x__ y__ -> x__ {_BuildIdAssignmentRule'ramp = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField BuildIdAssignmentRule "maybe'percentageRamp" (Prelude.Maybe RampByPercentage) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _BuildIdAssignmentRule'ramp
+           (\ x__ y__ -> x__ {_BuildIdAssignmentRule'ramp = y__}))
+        (Lens.Family2.Unchecked.lens
+           (\ x__
+              -> case x__ of
+                   (Prelude.Just (BuildIdAssignmentRule'PercentageRamp x__val))
+                     -> Prelude.Just x__val
+                   _otherwise -> Prelude.Nothing)
+           (\ _ y__ -> Prelude.fmap BuildIdAssignmentRule'PercentageRamp y__))
+instance Data.ProtoLens.Field.HasField BuildIdAssignmentRule "percentageRamp" RampByPercentage where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _BuildIdAssignmentRule'ramp
+           (\ x__ y__ -> x__ {_BuildIdAssignmentRule'ramp = y__}))
+        ((Prelude..)
+           (Lens.Family2.Unchecked.lens
+              (\ x__
+                 -> case x__ of
+                      (Prelude.Just (BuildIdAssignmentRule'PercentageRamp x__val))
+                        -> Prelude.Just x__val
+                      _otherwise -> Prelude.Nothing)
+              (\ _ y__ -> Prelude.fmap BuildIdAssignmentRule'PercentageRamp y__))
+           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
+instance Data.ProtoLens.Message BuildIdAssignmentRule where
+  messageName _
+    = Data.Text.pack "temporal.api.taskqueue.v1.BuildIdAssignmentRule"
+  packedMessageDescriptor _
+    = "\n\
+      \\NAKBuildIdAssignmentRule\DC2&\n\
+      \\SItarget_build_id\CAN\SOH \SOH(\tR\rtargetBuildId\DC2V\n\
+      \\SIpercentage_ramp\CAN\ETX \SOH(\v2+.temporal.api.taskqueue.v1.RampByPercentageH\NULR\SOpercentageRampB\ACK\n\
+      \\EOTramp"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        targetBuildId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "target_build_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"targetBuildId")) ::
+              Data.ProtoLens.FieldDescriptor BuildIdAssignmentRule
+        percentageRamp__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "percentage_ramp"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor RampByPercentage)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'percentageRamp")) ::
+              Data.ProtoLens.FieldDescriptor BuildIdAssignmentRule
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, targetBuildId__field_descriptor),
+           (Data.ProtoLens.Tag 3, percentageRamp__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _BuildIdAssignmentRule'_unknownFields
+        (\ x__ y__ -> x__ {_BuildIdAssignmentRule'_unknownFields = y__})
+  defMessage
+    = BuildIdAssignmentRule'_constructor
+        {_BuildIdAssignmentRule'targetBuildId = Data.ProtoLens.fieldDefault,
+         _BuildIdAssignmentRule'ramp = Prelude.Nothing,
+         _BuildIdAssignmentRule'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          BuildIdAssignmentRule
+          -> Data.ProtoLens.Encoding.Bytes.Parser BuildIdAssignmentRule
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "target_build_id"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"targetBuildId") y x)
+                        26
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "percentage_ramp"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"percentageRamp") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "BuildIdAssignmentRule"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view
+                      (Data.ProtoLens.Field.field @"targetBuildId") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'ramp") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just (BuildIdAssignmentRule'PercentageRamp v))
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData BuildIdAssignmentRule where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_BuildIdAssignmentRule'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_BuildIdAssignmentRule'targetBuildId x__)
+                (Control.DeepSeq.deepseq (_BuildIdAssignmentRule'ramp x__) ()))
+instance Control.DeepSeq.NFData BuildIdAssignmentRule'Ramp where
+  rnf (BuildIdAssignmentRule'PercentageRamp x__)
+    = Control.DeepSeq.rnf x__
+_BuildIdAssignmentRule'PercentageRamp ::
+  Data.ProtoLens.Prism.Prism' BuildIdAssignmentRule'Ramp RampByPercentage
+_BuildIdAssignmentRule'PercentageRamp
+  = Data.ProtoLens.Prism.prism'
+      BuildIdAssignmentRule'PercentageRamp
+      (\ p__
+         -> case p__ of
+              (BuildIdAssignmentRule'PercentageRamp p__val)
+                -> Prelude.Just p__val)
 {- | Fields :
      
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.buildId' @:: Lens' BuildIdReachability Data.Text.Text@
@@ -227,6 +444,180 @@ instance Control.DeepSeq.NFData BuildIdReachability where
                 (_BuildIdReachability'buildId x__)
                 (Control.DeepSeq.deepseq
                    (_BuildIdReachability'taskQueueReachability x__) ()))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.sourceBuildId' @:: Lens' CompatibleBuildIdRedirectRule Data.Text.Text@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.targetBuildId' @:: Lens' CompatibleBuildIdRedirectRule Data.Text.Text@ -}
+data CompatibleBuildIdRedirectRule
+  = CompatibleBuildIdRedirectRule'_constructor {_CompatibleBuildIdRedirectRule'sourceBuildId :: !Data.Text.Text,
+                                                _CompatibleBuildIdRedirectRule'targetBuildId :: !Data.Text.Text,
+                                                _CompatibleBuildIdRedirectRule'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show CompatibleBuildIdRedirectRule where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField CompatibleBuildIdRedirectRule "sourceBuildId" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _CompatibleBuildIdRedirectRule'sourceBuildId
+           (\ x__ y__
+              -> x__ {_CompatibleBuildIdRedirectRule'sourceBuildId = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField CompatibleBuildIdRedirectRule "targetBuildId" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _CompatibleBuildIdRedirectRule'targetBuildId
+           (\ x__ y__
+              -> x__ {_CompatibleBuildIdRedirectRule'targetBuildId = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message CompatibleBuildIdRedirectRule where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.taskqueue.v1.CompatibleBuildIdRedirectRule"
+  packedMessageDescriptor _
+    = "\n\
+      \\GSCompatibleBuildIdRedirectRule\DC2&\n\
+      \\SIsource_build_id\CAN\SOH \SOH(\tR\rsourceBuildId\DC2&\n\
+      \\SItarget_build_id\CAN\STX \SOH(\tR\rtargetBuildId"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        sourceBuildId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "source_build_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"sourceBuildId")) ::
+              Data.ProtoLens.FieldDescriptor CompatibleBuildIdRedirectRule
+        targetBuildId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "target_build_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"targetBuildId")) ::
+              Data.ProtoLens.FieldDescriptor CompatibleBuildIdRedirectRule
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, sourceBuildId__field_descriptor),
+           (Data.ProtoLens.Tag 2, targetBuildId__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _CompatibleBuildIdRedirectRule'_unknownFields
+        (\ x__ y__
+           -> x__ {_CompatibleBuildIdRedirectRule'_unknownFields = y__})
+  defMessage
+    = CompatibleBuildIdRedirectRule'_constructor
+        {_CompatibleBuildIdRedirectRule'sourceBuildId = Data.ProtoLens.fieldDefault,
+         _CompatibleBuildIdRedirectRule'targetBuildId = Data.ProtoLens.fieldDefault,
+         _CompatibleBuildIdRedirectRule'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          CompatibleBuildIdRedirectRule
+          -> Data.ProtoLens.Encoding.Bytes.Parser CompatibleBuildIdRedirectRule
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "source_build_id"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"sourceBuildId") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "target_build_id"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"targetBuildId") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "CompatibleBuildIdRedirectRule"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view
+                      (Data.ProtoLens.Field.field @"sourceBuildId") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             ((Data.Monoid.<>)
+                (let
+                   _v
+                     = Lens.Family2.view
+                         (Data.ProtoLens.Field.field @"targetBuildId") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                         ((Prelude..)
+                            (\ bs
+                               -> (Data.Monoid.<>)
+                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                            Data.Text.Encoding.encodeUtf8 _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData CompatibleBuildIdRedirectRule where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_CompatibleBuildIdRedirectRule'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_CompatibleBuildIdRedirectRule'sourceBuildId x__)
+                (Control.DeepSeq.deepseq
+                   (_CompatibleBuildIdRedirectRule'targetBuildId x__) ()))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.buildIds' @:: Lens' CompatibleVersionSet [Data.Text.Text]@
@@ -636,6 +1027,121 @@ instance Control.DeepSeq.NFData PollerInfo where
                       (_PollerInfo'ratePerSecond x__)
                       (Control.DeepSeq.deepseq
                          (_PollerInfo'workerVersionCapabilities x__) ()))))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.rampPercentage' @:: Lens' RampByPercentage Prelude.Float@ -}
+data RampByPercentage
+  = RampByPercentage'_constructor {_RampByPercentage'rampPercentage :: !Prelude.Float,
+                                   _RampByPercentage'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show RampByPercentage where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField RampByPercentage "rampPercentage" Prelude.Float where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _RampByPercentage'rampPercentage
+           (\ x__ y__ -> x__ {_RampByPercentage'rampPercentage = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message RampByPercentage where
+  messageName _
+    = Data.Text.pack "temporal.api.taskqueue.v1.RampByPercentage"
+  packedMessageDescriptor _
+    = "\n\
+      \\DLERampByPercentage\DC2'\n\
+      \\SIramp_percentage\CAN\SOH \SOH(\STXR\SOrampPercentage"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        rampPercentage__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "ramp_percentage"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.FloatField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Float)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"rampPercentage")) ::
+              Data.ProtoLens.FieldDescriptor RampByPercentage
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, rampPercentage__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _RampByPercentage'_unknownFields
+        (\ x__ y__ -> x__ {_RampByPercentage'_unknownFields = y__})
+  defMessage
+    = RampByPercentage'_constructor
+        {_RampByPercentage'rampPercentage = Data.ProtoLens.fieldDefault,
+         _RampByPercentage'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          RampByPercentage
+          -> Data.ProtoLens.Encoding.Bytes.Parser RampByPercentage
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        13
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Data.ProtoLens.Encoding.Bytes.wordToFloat
+                                          Data.ProtoLens.Encoding.Bytes.getFixed32)
+                                       "ramp_percentage"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"rampPercentage") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "RampByPercentage"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view
+                      (Data.ProtoLens.Field.field @"rampPercentage") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 13)
+                      ((Prelude..)
+                         Data.ProtoLens.Encoding.Bytes.putFixed32
+                         Data.ProtoLens.Encoding.Bytes.floatToWord _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData RampByPercentage where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_RampByPercentage'_unknownFields x__)
+             (Control.DeepSeq.deepseq (_RampByPercentage'rampPercentage x__) ())
 {- | Fields :
      
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.workerTaskQueue' @:: Lens' StickyExecutionAttributes TaskQueue@
@@ -1981,6 +2487,1085 @@ instance Control.DeepSeq.NFData TaskQueueStatus where
                       (Control.DeepSeq.deepseq
                          (_TaskQueueStatus'ratePerSecond x__)
                          (Control.DeepSeq.deepseq (_TaskQueueStatus'taskIdBlock x__) ())))))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.pollers' @:: Lens' TaskQueueTypeInfo [PollerInfo]@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.vec'pollers' @:: Lens' TaskQueueTypeInfo (Data.Vector.Vector PollerInfo)@ -}
+data TaskQueueTypeInfo
+  = TaskQueueTypeInfo'_constructor {_TaskQueueTypeInfo'pollers :: !(Data.Vector.Vector PollerInfo),
+                                    _TaskQueueTypeInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show TaskQueueTypeInfo where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField TaskQueueTypeInfo "pollers" [PollerInfo] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueTypeInfo'pollers
+           (\ x__ y__ -> x__ {_TaskQueueTypeInfo'pollers = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField TaskQueueTypeInfo "vec'pollers" (Data.Vector.Vector PollerInfo) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueTypeInfo'pollers
+           (\ x__ y__ -> x__ {_TaskQueueTypeInfo'pollers = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message TaskQueueTypeInfo where
+  messageName _
+    = Data.Text.pack "temporal.api.taskqueue.v1.TaskQueueTypeInfo"
+  packedMessageDescriptor _
+    = "\n\
+      \\DC1TaskQueueTypeInfo\DC2?\n\
+      \\apollers\CAN\SOH \ETX(\v2%.temporal.api.taskqueue.v1.PollerInfoR\apollers"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        pollers__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "pollers"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor PollerInfo)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked (Data.ProtoLens.Field.field @"pollers")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueTypeInfo
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, pollers__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _TaskQueueTypeInfo'_unknownFields
+        (\ x__ y__ -> x__ {_TaskQueueTypeInfo'_unknownFields = y__})
+  defMessage
+    = TaskQueueTypeInfo'_constructor
+        {_TaskQueueTypeInfo'pollers = Data.Vector.Generic.empty,
+         _TaskQueueTypeInfo'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          TaskQueueTypeInfo
+          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld PollerInfo
+             -> Data.ProtoLens.Encoding.Bytes.Parser TaskQueueTypeInfo
+        loop x mutable'pollers
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do frozen'pollers <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                          (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                             mutable'pollers)
+                      (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
+                           (Lens.Family2.set
+                              (Data.ProtoLens.Field.field @"vec'pollers") frozen'pollers x))
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "pollers"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append mutable'pollers y)
+                                loop x v
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+                                  mutable'pollers
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do mutable'pollers <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                   Data.ProtoLens.Encoding.Growing.new
+              loop Data.ProtoLens.defMessage mutable'pollers)
+          "TaskQueueTypeInfo"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                (\ _v
+                   -> (Data.Monoid.<>)
+                        (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                        ((Prelude..)
+                           (\ bs
+                              -> (Data.Monoid.<>)
+                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                           Data.ProtoLens.encodeMessage _v))
+                (Lens.Family2.view (Data.ProtoLens.Field.field @"vec'pollers") _x))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData TaskQueueTypeInfo where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_TaskQueueTypeInfo'_unknownFields x__)
+             (Control.DeepSeq.deepseq (_TaskQueueTypeInfo'pollers x__) ())
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.typesInfo' @:: Lens' TaskQueueVersionInfo (Data.Map.Map Data.Int.Int32 TaskQueueTypeInfo)@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.taskReachability' @:: Lens' TaskQueueVersionInfo Proto.Temporal.Api.Enums.V1.TaskQueue.BuildIdTaskReachability@ -}
+data TaskQueueVersionInfo
+  = TaskQueueVersionInfo'_constructor {_TaskQueueVersionInfo'typesInfo :: !(Data.Map.Map Data.Int.Int32 TaskQueueTypeInfo),
+                                       _TaskQueueVersionInfo'taskReachability :: !Proto.Temporal.Api.Enums.V1.TaskQueue.BuildIdTaskReachability,
+                                       _TaskQueueVersionInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show TaskQueueVersionInfo where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField TaskQueueVersionInfo "typesInfo" (Data.Map.Map Data.Int.Int32 TaskQueueTypeInfo) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueVersionInfo'typesInfo
+           (\ x__ y__ -> x__ {_TaskQueueVersionInfo'typesInfo = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField TaskQueueVersionInfo "taskReachability" Proto.Temporal.Api.Enums.V1.TaskQueue.BuildIdTaskReachability where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueVersionInfo'taskReachability
+           (\ x__ y__ -> x__ {_TaskQueueVersionInfo'taskReachability = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message TaskQueueVersionInfo where
+  messageName _
+    = Data.Text.pack "temporal.api.taskqueue.v1.TaskQueueVersionInfo"
+  packedMessageDescriptor _
+    = "\n\
+      \\DC4TaskQueueVersionInfo\DC2]\n\
+      \\n\
+      \types_info\CAN\SOH \ETX(\v2>.temporal.api.taskqueue.v1.TaskQueueVersionInfo.TypesInfoEntryR\ttypesInfo\DC2[\n\
+      \\DC1task_reachability\CAN\STX \SOH(\SO2..temporal.api.enums.v1.BuildIdTaskReachabilityR\DLEtaskReachability\SUBj\n\
+      \\SOTypesInfoEntry\DC2\DLE\n\
+      \\ETXkey\CAN\SOH \SOH(\ENQR\ETXkey\DC2B\n\
+      \\ENQvalue\CAN\STX \SOH(\v2,.temporal.api.taskqueue.v1.TaskQueueTypeInfoR\ENQvalue:\STX8\SOH"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        typesInfo__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "types_info"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor TaskQueueVersionInfo'TypesInfoEntry)
+              (Data.ProtoLens.MapField
+                 (Data.ProtoLens.Field.field @"key")
+                 (Data.ProtoLens.Field.field @"value")
+                 (Data.ProtoLens.Field.field @"typesInfo")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueVersionInfo
+        taskReachability__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "task_reachability"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.TaskQueue.BuildIdTaskReachability)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"taskReachability")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueVersionInfo
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, typesInfo__field_descriptor),
+           (Data.ProtoLens.Tag 2, taskReachability__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _TaskQueueVersionInfo'_unknownFields
+        (\ x__ y__ -> x__ {_TaskQueueVersionInfo'_unknownFields = y__})
+  defMessage
+    = TaskQueueVersionInfo'_constructor
+        {_TaskQueueVersionInfo'typesInfo = Data.Map.empty,
+         _TaskQueueVersionInfo'taskReachability = Data.ProtoLens.fieldDefault,
+         _TaskQueueVersionInfo'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          TaskQueueVersionInfo
+          -> Data.ProtoLens.Encoding.Bytes.Parser TaskQueueVersionInfo
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do !(entry :: TaskQueueVersionInfo'TypesInfoEntry) <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                                                                     (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                                                         Data.ProtoLens.Encoding.Bytes.isolate
+                                                                                           (Prelude.fromIntegral
+                                                                                              len)
+                                                                                           Data.ProtoLens.parseMessage)
+                                                                                     "types_info"
+                                (let
+                                   key = Lens.Family2.view (Data.ProtoLens.Field.field @"key") entry
+                                   value
+                                     = Lens.Family2.view (Data.ProtoLens.Field.field @"value") entry
+                                 in
+                                   loop
+                                     (Lens.Family2.over
+                                        (Data.ProtoLens.Field.field @"typesInfo")
+                                        (\ !t -> Data.Map.insert key value t) x))
+                        16
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.toEnum
+                                          (Prelude.fmap
+                                             Prelude.fromIntegral
+                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
+                                       "task_reachability"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"taskReachability") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "TaskQueueVersionInfo"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (Data.Monoid.mconcat
+                (Prelude.map
+                   (\ _v
+                      -> (Data.Monoid.<>)
+                           (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                           ((Prelude..)
+                              (\ bs
+                                 -> (Data.Monoid.<>)
+                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                              Data.ProtoLens.encodeMessage
+                              (Lens.Family2.set
+                                 (Data.ProtoLens.Field.field @"key") (Prelude.fst _v)
+                                 (Lens.Family2.set
+                                    (Data.ProtoLens.Field.field @"value") (Prelude.snd _v)
+                                    (Data.ProtoLens.defMessage ::
+                                       TaskQueueVersionInfo'TypesInfoEntry)))))
+                   (Data.Map.toList
+                      (Lens.Family2.view (Data.ProtoLens.Field.field @"typesInfo") _x))))
+             ((Data.Monoid.<>)
+                (let
+                   _v
+                     = Lens.Family2.view
+                         (Data.ProtoLens.Field.field @"taskReachability") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
+                         ((Prelude..)
+                            ((Prelude..)
+                               Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
+                            Prelude.fromEnum _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData TaskQueueVersionInfo where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_TaskQueueVersionInfo'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_TaskQueueVersionInfo'typesInfo x__)
+                (Control.DeepSeq.deepseq
+                   (_TaskQueueVersionInfo'taskReachability x__) ()))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.key' @:: Lens' TaskQueueVersionInfo'TypesInfoEntry Data.Int.Int32@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.value' @:: Lens' TaskQueueVersionInfo'TypesInfoEntry TaskQueueTypeInfo@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'value' @:: Lens' TaskQueueVersionInfo'TypesInfoEntry (Prelude.Maybe TaskQueueTypeInfo)@ -}
+data TaskQueueVersionInfo'TypesInfoEntry
+  = TaskQueueVersionInfo'TypesInfoEntry'_constructor {_TaskQueueVersionInfo'TypesInfoEntry'key :: !Data.Int.Int32,
+                                                      _TaskQueueVersionInfo'TypesInfoEntry'value :: !(Prelude.Maybe TaskQueueTypeInfo),
+                                                      _TaskQueueVersionInfo'TypesInfoEntry'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show TaskQueueVersionInfo'TypesInfoEntry where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField TaskQueueVersionInfo'TypesInfoEntry "key" Data.Int.Int32 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueVersionInfo'TypesInfoEntry'key
+           (\ x__ y__
+              -> x__ {_TaskQueueVersionInfo'TypesInfoEntry'key = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField TaskQueueVersionInfo'TypesInfoEntry "value" TaskQueueTypeInfo where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueVersionInfo'TypesInfoEntry'value
+           (\ x__ y__
+              -> x__ {_TaskQueueVersionInfo'TypesInfoEntry'value = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField TaskQueueVersionInfo'TypesInfoEntry "maybe'value" (Prelude.Maybe TaskQueueTypeInfo) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueVersionInfo'TypesInfoEntry'value
+           (\ x__ y__
+              -> x__ {_TaskQueueVersionInfo'TypesInfoEntry'value = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message TaskQueueVersionInfo'TypesInfoEntry where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.taskqueue.v1.TaskQueueVersionInfo.TypesInfoEntry"
+  packedMessageDescriptor _
+    = "\n\
+      \\SOTypesInfoEntry\DC2\DLE\n\
+      \\ETXkey\CAN\SOH \SOH(\ENQR\ETXkey\DC2B\n\
+      \\ENQvalue\CAN\STX \SOH(\v2,.temporal.api.taskqueue.v1.TaskQueueTypeInfoR\ENQvalue:\STX8\SOH"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        key__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "key"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.Int32Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int32)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"key")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueVersionInfo'TypesInfoEntry
+        value__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "value"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor TaskQueueTypeInfo)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'value")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueVersionInfo'TypesInfoEntry
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, key__field_descriptor),
+           (Data.ProtoLens.Tag 2, value__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _TaskQueueVersionInfo'TypesInfoEntry'_unknownFields
+        (\ x__ y__
+           -> x__ {_TaskQueueVersionInfo'TypesInfoEntry'_unknownFields = y__})
+  defMessage
+    = TaskQueueVersionInfo'TypesInfoEntry'_constructor
+        {_TaskQueueVersionInfo'TypesInfoEntry'key = Data.ProtoLens.fieldDefault,
+         _TaskQueueVersionInfo'TypesInfoEntry'value = Prelude.Nothing,
+         _TaskQueueVersionInfo'TypesInfoEntry'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          TaskQueueVersionInfo'TypesInfoEntry
+          -> Data.ProtoLens.Encoding.Bytes.Parser TaskQueueVersionInfo'TypesInfoEntry
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "key"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"key") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "value"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"value") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "TypesInfoEntry"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"key") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
+                      ((Prelude..)
+                         Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'value") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just _v)
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData TaskQueueVersionInfo'TypesInfoEntry where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_TaskQueueVersionInfo'TypesInfoEntry'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_TaskQueueVersionInfo'TypesInfoEntry'key x__)
+                (Control.DeepSeq.deepseq
+                   (_TaskQueueVersionInfo'TypesInfoEntry'value x__) ()))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.buildIds' @:: Lens' TaskQueueVersionSelection [Data.Text.Text]@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.vec'buildIds' @:: Lens' TaskQueueVersionSelection (Data.Vector.Vector Data.Text.Text)@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.unversioned' @:: Lens' TaskQueueVersionSelection Prelude.Bool@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.allActive' @:: Lens' TaskQueueVersionSelection Prelude.Bool@ -}
+data TaskQueueVersionSelection
+  = TaskQueueVersionSelection'_constructor {_TaskQueueVersionSelection'buildIds :: !(Data.Vector.Vector Data.Text.Text),
+                                            _TaskQueueVersionSelection'unversioned :: !Prelude.Bool,
+                                            _TaskQueueVersionSelection'allActive :: !Prelude.Bool,
+                                            _TaskQueueVersionSelection'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show TaskQueueVersionSelection where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField TaskQueueVersionSelection "buildIds" [Data.Text.Text] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueVersionSelection'buildIds
+           (\ x__ y__ -> x__ {_TaskQueueVersionSelection'buildIds = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField TaskQueueVersionSelection "vec'buildIds" (Data.Vector.Vector Data.Text.Text) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueVersionSelection'buildIds
+           (\ x__ y__ -> x__ {_TaskQueueVersionSelection'buildIds = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField TaskQueueVersionSelection "unversioned" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueVersionSelection'unversioned
+           (\ x__ y__ -> x__ {_TaskQueueVersionSelection'unversioned = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField TaskQueueVersionSelection "allActive" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueVersionSelection'allActive
+           (\ x__ y__ -> x__ {_TaskQueueVersionSelection'allActive = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message TaskQueueVersionSelection where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.taskqueue.v1.TaskQueueVersionSelection"
+  packedMessageDescriptor _
+    = "\n\
+      \\EMTaskQueueVersionSelection\DC2\ESC\n\
+      \\tbuild_ids\CAN\SOH \ETX(\tR\bbuildIds\DC2 \n\
+      \\vunversioned\CAN\STX \SOH(\bR\vunversioned\DC2\GS\n\
+      \\n\
+      \all_active\CAN\ETX \SOH(\bR\tallActive"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        buildIds__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "build_ids"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked
+                 (Data.ProtoLens.Field.field @"buildIds")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueVersionSelection
+        unversioned__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "unversioned"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"unversioned")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueVersionSelection
+        allActive__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "all_active"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"allActive")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueVersionSelection
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, buildIds__field_descriptor),
+           (Data.ProtoLens.Tag 2, unversioned__field_descriptor),
+           (Data.ProtoLens.Tag 3, allActive__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _TaskQueueVersionSelection'_unknownFields
+        (\ x__ y__
+           -> x__ {_TaskQueueVersionSelection'_unknownFields = y__})
+  defMessage
+    = TaskQueueVersionSelection'_constructor
+        {_TaskQueueVersionSelection'buildIds = Data.Vector.Generic.empty,
+         _TaskQueueVersionSelection'unversioned = Data.ProtoLens.fieldDefault,
+         _TaskQueueVersionSelection'allActive = Data.ProtoLens.fieldDefault,
+         _TaskQueueVersionSelection'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          TaskQueueVersionSelection
+          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Data.Text.Text
+             -> Data.ProtoLens.Encoding.Bytes.Parser TaskQueueVersionSelection
+        loop x mutable'buildIds
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do frozen'buildIds <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                           (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                              mutable'buildIds)
+                      (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
+                           (Lens.Family2.set
+                              (Data.ProtoLens.Field.field @"vec'buildIds") frozen'buildIds x))
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.getText
+                                              (Prelude.fromIntegral len))
+                                        "build_ids"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append mutable'buildIds y)
+                                loop x v
+                        16
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "unversioned"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"unversioned") y x)
+                                  mutable'buildIds
+                        24
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "all_active"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"allActive") y x)
+                                  mutable'buildIds
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+                                  mutable'buildIds
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do mutable'buildIds <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                    Data.ProtoLens.Encoding.Growing.new
+              loop Data.ProtoLens.defMessage mutable'buildIds)
+          "TaskQueueVersionSelection"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                (\ _v
+                   -> (Data.Monoid.<>)
+                        (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                        ((Prelude..)
+                           (\ bs
+                              -> (Data.Monoid.<>)
+                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                           Data.Text.Encoding.encodeUtf8 _v))
+                (Lens.Family2.view
+                   (Data.ProtoLens.Field.field @"vec'buildIds") _x))
+             ((Data.Monoid.<>)
+                (let
+                   _v
+                     = Lens.Family2.view (Data.ProtoLens.Field.field @"unversioned") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
+                         ((Prelude..)
+                            Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
+                            _v))
+                ((Data.Monoid.<>)
+                   (let
+                      _v = Lens.Family2.view (Data.ProtoLens.Field.field @"allActive") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
+                            ((Prelude..)
+                               Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
+                               _v))
+                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
+instance Control.DeepSeq.NFData TaskQueueVersionSelection where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_TaskQueueVersionSelection'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_TaskQueueVersionSelection'buildIds x__)
+                (Control.DeepSeq.deepseq
+                   (_TaskQueueVersionSelection'unversioned x__)
+                   (Control.DeepSeq.deepseq
+                      (_TaskQueueVersionSelection'allActive x__) ())))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.rule' @:: Lens' TimestampedBuildIdAssignmentRule BuildIdAssignmentRule@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'rule' @:: Lens' TimestampedBuildIdAssignmentRule (Prelude.Maybe BuildIdAssignmentRule)@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.createTime' @:: Lens' TimestampedBuildIdAssignmentRule Proto.Google.Protobuf.Timestamp.Timestamp@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'createTime' @:: Lens' TimestampedBuildIdAssignmentRule (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@ -}
+data TimestampedBuildIdAssignmentRule
+  = TimestampedBuildIdAssignmentRule'_constructor {_TimestampedBuildIdAssignmentRule'rule :: !(Prelude.Maybe BuildIdAssignmentRule),
+                                                   _TimestampedBuildIdAssignmentRule'createTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                                                   _TimestampedBuildIdAssignmentRule'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show TimestampedBuildIdAssignmentRule where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField TimestampedBuildIdAssignmentRule "rule" BuildIdAssignmentRule where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TimestampedBuildIdAssignmentRule'rule
+           (\ x__ y__ -> x__ {_TimestampedBuildIdAssignmentRule'rule = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField TimestampedBuildIdAssignmentRule "maybe'rule" (Prelude.Maybe BuildIdAssignmentRule) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TimestampedBuildIdAssignmentRule'rule
+           (\ x__ y__ -> x__ {_TimestampedBuildIdAssignmentRule'rule = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField TimestampedBuildIdAssignmentRule "createTime" Proto.Google.Protobuf.Timestamp.Timestamp where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TimestampedBuildIdAssignmentRule'createTime
+           (\ x__ y__
+              -> x__ {_TimestampedBuildIdAssignmentRule'createTime = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField TimestampedBuildIdAssignmentRule "maybe'createTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TimestampedBuildIdAssignmentRule'createTime
+           (\ x__ y__
+              -> x__ {_TimestampedBuildIdAssignmentRule'createTime = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message TimestampedBuildIdAssignmentRule where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.taskqueue.v1.TimestampedBuildIdAssignmentRule"
+  packedMessageDescriptor _
+    = "\n\
+      \ TimestampedBuildIdAssignmentRule\DC2D\n\
+      \\EOTrule\CAN\SOH \SOH(\v20.temporal.api.taskqueue.v1.BuildIdAssignmentRuleR\EOTrule\DC2;\n\
+      \\vcreate_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
+      \createTime"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        rule__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "rule"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor BuildIdAssignmentRule)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'rule")) ::
+              Data.ProtoLens.FieldDescriptor TimestampedBuildIdAssignmentRule
+        createTime__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "create_time"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'createTime")) ::
+              Data.ProtoLens.FieldDescriptor TimestampedBuildIdAssignmentRule
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, rule__field_descriptor),
+           (Data.ProtoLens.Tag 2, createTime__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _TimestampedBuildIdAssignmentRule'_unknownFields
+        (\ x__ y__
+           -> x__ {_TimestampedBuildIdAssignmentRule'_unknownFields = y__})
+  defMessage
+    = TimestampedBuildIdAssignmentRule'_constructor
+        {_TimestampedBuildIdAssignmentRule'rule = Prelude.Nothing,
+         _TimestampedBuildIdAssignmentRule'createTime = Prelude.Nothing,
+         _TimestampedBuildIdAssignmentRule'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          TimestampedBuildIdAssignmentRule
+          -> Data.ProtoLens.Encoding.Bytes.Parser TimestampedBuildIdAssignmentRule
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "rule"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"rule") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "create_time"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"createTime") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage)
+          "TimestampedBuildIdAssignmentRule"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'rule") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view
+                       (Data.ProtoLens.Field.field @"maybe'createTime") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just _v)
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData TimestampedBuildIdAssignmentRule where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_TimestampedBuildIdAssignmentRule'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_TimestampedBuildIdAssignmentRule'rule x__)
+                (Control.DeepSeq.deepseq
+                   (_TimestampedBuildIdAssignmentRule'createTime x__) ()))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.rule' @:: Lens' TimestampedCompatibleBuildIdRedirectRule CompatibleBuildIdRedirectRule@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'rule' @:: Lens' TimestampedCompatibleBuildIdRedirectRule (Prelude.Maybe CompatibleBuildIdRedirectRule)@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.createTime' @:: Lens' TimestampedCompatibleBuildIdRedirectRule Proto.Google.Protobuf.Timestamp.Timestamp@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'createTime' @:: Lens' TimestampedCompatibleBuildIdRedirectRule (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@ -}
+data TimestampedCompatibleBuildIdRedirectRule
+  = TimestampedCompatibleBuildIdRedirectRule'_constructor {_TimestampedCompatibleBuildIdRedirectRule'rule :: !(Prelude.Maybe CompatibleBuildIdRedirectRule),
+                                                           _TimestampedCompatibleBuildIdRedirectRule'createTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                                                           _TimestampedCompatibleBuildIdRedirectRule'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show TimestampedCompatibleBuildIdRedirectRule where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField TimestampedCompatibleBuildIdRedirectRule "rule" CompatibleBuildIdRedirectRule where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TimestampedCompatibleBuildIdRedirectRule'rule
+           (\ x__ y__
+              -> x__ {_TimestampedCompatibleBuildIdRedirectRule'rule = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField TimestampedCompatibleBuildIdRedirectRule "maybe'rule" (Prelude.Maybe CompatibleBuildIdRedirectRule) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TimestampedCompatibleBuildIdRedirectRule'rule
+           (\ x__ y__
+              -> x__ {_TimestampedCompatibleBuildIdRedirectRule'rule = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField TimestampedCompatibleBuildIdRedirectRule "createTime" Proto.Google.Protobuf.Timestamp.Timestamp where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TimestampedCompatibleBuildIdRedirectRule'createTime
+           (\ x__ y__
+              -> x__
+                   {_TimestampedCompatibleBuildIdRedirectRule'createTime = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField TimestampedCompatibleBuildIdRedirectRule "maybe'createTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TimestampedCompatibleBuildIdRedirectRule'createTime
+           (\ x__ y__
+              -> x__
+                   {_TimestampedCompatibleBuildIdRedirectRule'createTime = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message TimestampedCompatibleBuildIdRedirectRule where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.taskqueue.v1.TimestampedCompatibleBuildIdRedirectRule"
+  packedMessageDescriptor _
+    = "\n\
+      \(TimestampedCompatibleBuildIdRedirectRule\DC2L\n\
+      \\EOTrule\CAN\SOH \SOH(\v28.temporal.api.taskqueue.v1.CompatibleBuildIdRedirectRuleR\EOTrule\DC2;\n\
+      \\vcreate_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
+      \createTime"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        rule__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "rule"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor CompatibleBuildIdRedirectRule)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'rule")) ::
+              Data.ProtoLens.FieldDescriptor TimestampedCompatibleBuildIdRedirectRule
+        createTime__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "create_time"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'createTime")) ::
+              Data.ProtoLens.FieldDescriptor TimestampedCompatibleBuildIdRedirectRule
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, rule__field_descriptor),
+           (Data.ProtoLens.Tag 2, createTime__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _TimestampedCompatibleBuildIdRedirectRule'_unknownFields
+        (\ x__ y__
+           -> x__
+                {_TimestampedCompatibleBuildIdRedirectRule'_unknownFields = y__})
+  defMessage
+    = TimestampedCompatibleBuildIdRedirectRule'_constructor
+        {_TimestampedCompatibleBuildIdRedirectRule'rule = Prelude.Nothing,
+         _TimestampedCompatibleBuildIdRedirectRule'createTime = Prelude.Nothing,
+         _TimestampedCompatibleBuildIdRedirectRule'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          TimestampedCompatibleBuildIdRedirectRule
+          -> Data.ProtoLens.Encoding.Bytes.Parser TimestampedCompatibleBuildIdRedirectRule
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "rule"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"rule") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "create_time"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"createTime") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage)
+          "TimestampedCompatibleBuildIdRedirectRule"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'rule") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view
+                       (Data.ProtoLens.Field.field @"maybe'createTime") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just _v)
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData TimestampedCompatibleBuildIdRedirectRule where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_TimestampedCompatibleBuildIdRedirectRule'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_TimestampedCompatibleBuildIdRedirectRule'rule x__)
+                (Control.DeepSeq.deepseq
+                   (_TimestampedCompatibleBuildIdRedirectRule'createTime x__) ()))
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
@@ -1991,7 +3576,21 @@ packedFileDescriptor
     \\vnormal_name\CAN\ETX \SOH(\tR\n\
     \normalName\"b\n\
     \\DC1TaskQueueMetadata\DC2M\n\
-    \\DC4max_tasks_per_second\CAN\SOH \SOH(\v2\FS.google.protobuf.DoubleValueR\DC1maxTasksPerSecond\"\239\SOH\n\
+    \\DC4max_tasks_per_second\CAN\SOH \SOH(\v2\FS.google.protobuf.DoubleValueR\DC1maxTasksPerSecond\"y\n\
+    \\EMTaskQueueVersionSelection\DC2\ESC\n\
+    \\tbuild_ids\CAN\SOH \ETX(\tR\bbuildIds\DC2 \n\
+    \\vunversioned\CAN\STX \SOH(\bR\vunversioned\DC2\GS\n\
+    \\n\
+    \all_active\CAN\ETX \SOH(\bR\tallActive\"\190\STX\n\
+    \\DC4TaskQueueVersionInfo\DC2]\n\
+    \\n\
+    \types_info\CAN\SOH \ETX(\v2>.temporal.api.taskqueue.v1.TaskQueueVersionInfo.TypesInfoEntryR\ttypesInfo\DC2[\n\
+    \\DC1task_reachability\CAN\STX \SOH(\SO2..temporal.api.enums.v1.BuildIdTaskReachabilityR\DLEtaskReachability\SUBj\n\
+    \\SOTypesInfoEntry\DC2\DLE\n\
+    \\ETXkey\CAN\SOH \SOH(\ENQR\ETXkey\DC2B\n\
+    \\ENQvalue\CAN\STX \SOH(\v2,.temporal.api.taskqueue.v1.TaskQueueTypeInfoR\ENQvalue:\STX8\SOH\"T\n\
+    \\DC1TaskQueueTypeInfo\DC2?\n\
+    \\apollers\CAN\SOH \ETX(\v2%.temporal.api.taskqueue.v1.PollerInfoR\apollers\"\239\SOH\n\
     \\SITaskQueueStatus\DC2,\n\
     \\DC2backlog_count_hint\CAN\SOH \SOH(\ETXR\DLEbacklogCountHint\DC2\GS\n\
     \\n\
@@ -2022,9 +3621,26 @@ packedFileDescriptor
     \\freachability\CAN\STX \ETX(\SO2'.temporal.api.enums.v1.TaskReachabilityR\freachability\"\154\SOH\n\
     \\DC3BuildIdReachability\DC2\EM\n\
     \\bbuild_id\CAN\SOH \SOH(\tR\abuildId\DC2h\n\
-    \\ETBtask_queue_reachability\CAN\STX \ETX(\v20.temporal.api.taskqueue.v1.TaskQueueReachabilityR\NAKtaskQueueReachabilityB\152\SOH\n\
-    \\FSio.temporal.api.taskqueue.v1B\fMessageProtoP\SOHZ)go.temporal.io/api/taskqueue/v1;taskqueue\170\STX\ESCTemporalio.Api.TaskQueue.V1\234\STX\RSTemporalio::Api::TaskQueue::V1J\152!\n\
-    \\ACK\DC2\EOT\SYN\NULp\SOH\n\
+    \\ETBtask_queue_reachability\CAN\STX \ETX(\v20.temporal.api.taskqueue.v1.TaskQueueReachabilityR\NAKtaskQueueReachability\";\n\
+    \\DLERampByPercentage\DC2'\n\
+    \\SIramp_percentage\CAN\SOH \SOH(\STXR\SOrampPercentage\"\159\SOH\n\
+    \\NAKBuildIdAssignmentRule\DC2&\n\
+    \\SItarget_build_id\CAN\SOH \SOH(\tR\rtargetBuildId\DC2V\n\
+    \\SIpercentage_ramp\CAN\ETX \SOH(\v2+.temporal.api.taskqueue.v1.RampByPercentageH\NULR\SOpercentageRampB\ACK\n\
+    \\EOTramp\"o\n\
+    \\GSCompatibleBuildIdRedirectRule\DC2&\n\
+    \\SIsource_build_id\CAN\SOH \SOH(\tR\rsourceBuildId\DC2&\n\
+    \\SItarget_build_id\CAN\STX \SOH(\tR\rtargetBuildId\"\165\SOH\n\
+    \ TimestampedBuildIdAssignmentRule\DC2D\n\
+    \\EOTrule\CAN\SOH \SOH(\v20.temporal.api.taskqueue.v1.BuildIdAssignmentRuleR\EOTrule\DC2;\n\
+    \\vcreate_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
+    \createTime\"\181\SOH\n\
+    \(TimestampedCompatibleBuildIdRedirectRule\DC2L\n\
+    \\EOTrule\CAN\SOH \SOH(\v28.temporal.api.taskqueue.v1.CompatibleBuildIdRedirectRuleR\EOTrule\DC2;\n\
+    \\vcreate_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
+    \createTimeB\152\SOH\n\
+    \\FSio.temporal.api.taskqueue.v1B\fMessageProtoP\SOHZ)go.temporal.io/api/taskqueue/v1;taskqueue\170\STX\ESCTemporalio.Api.TaskQueue.V1\234\STX\RSTemporalio::Api::TaskQueue::V1J\237H\n\
+    \\a\DC2\ENQ\SYN\NUL\228\SOH\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -2135,240 +3751,489 @@ packedFileDescriptor
     \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX5 4\n\
     \\f\n\
     \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX578\n\
+    \G\n\
+    \\STX\EOT\STX\DC2\EOT9\NULA\SOH\SUB; Used for specifying versions the caller is interested in.\n\
     \\n\
     \\n\
-    \\STX\EOT\STX\DC2\EOT8\NUL>\SOH\n\
+    \\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX9\b!\n\
+    \*\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX;\EOT\"\SUB\GS Include specific Build IDs.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\NUL\EOT\DC2\ETX;\EOT\f\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX;\r\DC3\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX;\DC4\GS\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX; !\n\
+    \-\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX=\EOT\EM\SUB  Include the unversioned queue.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX=\EOT\b\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX=\t\DC4\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX=\ETB\CAN\n\
+    \v\n\
+    \\EOT\EOT\STX\STX\STX\DC2\ETX@\EOT\CAN\SUBi Include all active versions. A version is considered active if it has had new\n\
+    \ tasks or polls recently.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETX@\EOT\b\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX@\t\DC3\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX@\SYN\ETB\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX8\b\ETB\n\
+    \\STX\EOT\ETX\DC2\EOTC\NULG\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETXC\b\FS\n\
+    \y\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETXE\EOT1\SUBl Task Queue info per Task Type. Key is the numerical value of the temporal.api.enums.v1.TaskQueueType enum.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\NUL\ACK\DC2\ETXE\EOT!\n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETXE\",\n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETXE/0\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX9\EOT!\n\
+    \\EOT\EOT\ETX\STX\SOH\DC2\ETXF\EOTH\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX9\EOT\t\n\
+    \\ENQ\EOT\ETX\STX\SOH\ACK\DC2\ETXF\EOT1\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX9\n\
+    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETXF2C\n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETXFFG\n\
+    \\n\
+    \\n\
+    \\STX\EOT\EOT\DC2\EOTI\NULL\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETXI\b\EM\n\
+    \\DEL\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETXK\EOT$\SUBr Unversioned workers (with `useVersioning=false`) are reported in unversioned result even if they set a Build ID.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\EOT\STX\NUL\EOT\DC2\ETXK\EOT\f\n\
+    \\f\n\
+    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETXK\r\ETB\n\
+    \\f\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXK\CAN\US\n\
+    \\f\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXK\"#\n\
+    \y\n\
+    \\STX\EOT\ENQ\DC2\EOTO\NULU\SOH\SUBm Deprecated. Use `InternalTaskQueueStatus`. This is kept until `DescribeTaskQueue` supports legacy behavior.\n\
+    \\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETXO\b\ETB\n\
+    \\v\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXP\EOT!\n\
+    \\f\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETXP\EOT\t\n\
+    \\f\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXP\n\
     \\FS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX9\US \n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXP\US \n\
     \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX:\EOT\EM\n\
+    \\EOT\EOT\ENQ\STX\SOH\DC2\ETXQ\EOT\EM\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX:\EOT\t\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ENQ\DC2\ETXQ\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX:\n\
+    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETXQ\n\
     \\DC4\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX:\ETB\CAN\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETXQ\ETB\CAN\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\STX\DC2\ETX;\EOT\CAN\n\
+    \\EOT\EOT\ENQ\STX\STX\DC2\ETXR\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETX;\EOT\t\n\
+    \\ENQ\EOT\ENQ\STX\STX\ENQ\DC2\ETXR\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX;\n\
+    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\ETXR\n\
     \\DC3\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX;\SYN\ETB\n\
+    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\ETXR\SYN\ETB\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\ETX\DC2\ETX<\EOT\US\n\
+    \\EOT\EOT\ENQ\STX\ETX\DC2\ETXS\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ENQ\DC2\ETX<\EOT\n\
+    \\ENQ\EOT\ENQ\STX\ETX\ENQ\DC2\ETXS\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETX<\v\SUB\n\
+    \\ENQ\EOT\ENQ\STX\ETX\SOH\DC2\ETXS\v\SUB\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETX<\GS\RS\n\
+    \\ENQ\EOT\ENQ\STX\ETX\ETX\DC2\ETXS\GS\RS\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\EOT\DC2\ETX=\EOT\"\n\
+    \\EOT\EOT\ENQ\STX\EOT\DC2\ETXT\EOT\"\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ACK\DC2\ETX=\EOT\SI\n\
+    \\ENQ\EOT\ENQ\STX\EOT\ACK\DC2\ETXT\EOT\SI\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\SOH\DC2\ETX=\DLE\GS\n\
+    \\ENQ\EOT\ENQ\STX\EOT\SOH\DC2\ETXT\DLE\GS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ETX\DC2\ETX= !\n\
+    \\ENQ\EOT\ENQ\STX\EOT\ETX\DC2\ETXT !\n\
     \\n\
     \\n\
-    \\STX\EOT\ETX\DC2\EOT@\NULC\SOH\n\
+    \\STX\EOT\ACK\DC2\EOTW\NULZ\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX@\b\DC3\n\
+    \\ETX\EOT\ACK\SOH\DC2\ETXW\b\DC3\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETXA\EOT\ETB\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\ETXX\EOT\ETB\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETXA\EOT\t\n\
+    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETXX\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETXA\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXX\n\
     \\DC2\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETXA\NAK\SYN\n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXX\NAK\SYN\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\SOH\DC2\ETXB\EOT\NAK\n\
+    \\EOT\EOT\ACK\STX\SOH\DC2\ETXY\EOT\NAK\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETXB\EOT\t\n\
+    \\ENQ\EOT\ACK\STX\SOH\ENQ\DC2\ETXY\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETXB\n\
+    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXY\n\
     \\DLE\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETXB\DC3\DC4\n\
+    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXY\DC3\DC4\n\
     \\n\
     \\n\
-    \\STX\EOT\EOT\DC2\EOTE\NULH\SOH\n\
+    \\STX\EOT\a\DC2\EOT\\\NUL_\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETXE\b\"\n\
+    \\ETX\EOT\a\SOH\DC2\ETX\\\b\"\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETXF\EOT\DC3\n\
+    \\EOT\EOT\a\STX\NUL\DC2\ETX]\EOT\DC3\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETXF\EOT\n\
+    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETX]\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXF\v\SO\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETX]\v\SO\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXF\DC1\DC2\n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETX]\DC1\DC2\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\SOH\DC2\ETXG\EOT\US\n\
+    \\EOT\EOT\a\STX\SOH\DC2\ETX^\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ENQ\DC2\ETXG\EOT\n\
+    \\ENQ\EOT\a\STX\SOH\ENQ\DC2\ETX^\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETXG\v\SUB\n\
+    \\ENQ\EOT\a\STX\SOH\SOH\DC2\ETX^\v\SUB\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETXG\GS\RS\n\
+    \\ENQ\EOT\a\STX\SOH\ETX\DC2\ETX^\GS\RS\n\
     \\n\
     \\n\
-    \\STX\EOT\ENQ\DC2\EOTJ\NULQ\SOH\n\
+    \\STX\EOT\b\DC2\EOTa\NULh\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETXJ\b\DC2\n\
+    \\ETX\EOT\b\SOH\DC2\ETXa\b\DC2\n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXK\EOT3\n\
+    \\EOT\EOT\b\STX\NUL\DC2\ETXb\EOT3\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETXK\EOT\GS\n\
+    \\ENQ\EOT\b\STX\NUL\ACK\DC2\ETXb\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXK\RS.\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETXb\RS.\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXK12\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETXb12\n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\SOH\DC2\ETXL\EOT\CAN\n\
+    \\EOT\EOT\b\STX\SOH\DC2\ETXc\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ENQ\DC2\ETXL\EOT\n\
+    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\ETXc\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETXL\v\DC3\n\
+    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETXc\v\DC3\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETXL\SYN\ETB\n\
+    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETXc\SYN\ETB\n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\STX\DC2\ETXM\EOT\US\n\
+    \\EOT\EOT\b\STX\STX\DC2\ETXd\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\ENQ\DC2\ETXM\EOT\n\
+    \\ENQ\EOT\b\STX\STX\ENQ\DC2\ETXd\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\ETXM\v\SUB\n\
+    \\ENQ\EOT\b\STX\STX\SOH\DC2\ETXd\v\SUB\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\ETXM\GS\RS\n\
+    \\ENQ\EOT\b\STX\STX\ETX\DC2\ETXd\GS\RS\n\
     \z\n\
-    \\EOT\EOT\ENQ\STX\ETX\DC2\ETXP\EOTU\SUBm If a worker has opted into the worker versioning feature while polling, its capabilities will\n\
+    \\EOT\EOT\b\STX\ETX\DC2\ETXg\EOTU\SUBm If a worker has opted into the worker versioning feature while polling, its capabilities will\n\
     \ appear here.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\ACK\DC2\ETXP\EOT4\n\
+    \\ENQ\EOT\b\STX\ETX\ACK\DC2\ETXg\EOT4\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\SOH\DC2\ETXP5P\n\
+    \\ENQ\EOT\b\STX\ETX\SOH\DC2\ETXg5P\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\ETX\DC2\ETXPST\n\
+    \\ENQ\EOT\b\STX\ETX\ETX\DC2\ETXgST\n\
     \\n\
     \\n\
-    \\STX\EOT\ACK\DC2\EOTS\NULX\SOH\n\
+    \\STX\EOT\t\DC2\EOTj\NULo\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETXS\b!\n\
+    \\ETX\EOT\t\SOH\DC2\ETXj\b!\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\ETXT\EOT$\n\
+    \\EOT\EOT\t\STX\NUL\DC2\ETXk\EOT$\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ACK\DC2\ETXT\EOT\r\n\
+    \\ENQ\EOT\t\STX\NUL\ACK\DC2\ETXk\EOT\r\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXT\SO\US\n\
+    \\ENQ\EOT\t\STX\NUL\SOH\DC2\ETXk\SO\US\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXT\"#\n\
+    \\ENQ\EOT\t\STX\NUL\ETX\DC2\ETXk\"#\n\
     \\131\SOH\n\
-    \\EOT\EOT\ACK\STX\SOH\DC2\ETXW\EOT;\SUBv (-- api-linter: core::0140::prepositions=disabled\n\
+    \\EOT\EOT\t\STX\SOH\DC2\ETXn\EOT;\SUBv (-- api-linter: core::0140::prepositions=disabled\n\
     \     aip.dev/not-precedent: \"to\" is used to indicate interval. --)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ACK\DC2\ETXW\EOT\FS\n\
+    \\ENQ\EOT\t\STX\SOH\ACK\DC2\ETXn\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXW\GS6\n\
+    \\ENQ\EOT\t\STX\SOH\SOH\DC2\ETXn\GS6\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXW9:\n\
+    \\ENQ\EOT\t\STX\SOH\ETX\DC2\ETXn9:\n\
     \\210\SOH\n\
-    \\STX\EOT\a\DC2\EOT\\\NUL_\SOH\SUB\197\SOH Used by the worker versioning APIs, represents an unordered set of one or more versions which are\n\
+    \\STX\EOT\n\
+    \\DC2\EOTs\NULv\SOH\SUB\197\SOH Used by the worker versioning APIs, represents an unordered set of one or more versions which are\n\
     \ considered to be compatible with each other. Currently the versions are always worker build IDs.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\a\SOH\DC2\ETX\\\b\FS\n\
+    \\ETX\EOT\n\
+    \\SOH\DC2\ETXs\b\FS\n\
     \z\n\
-    \\EOT\EOT\a\STX\NUL\DC2\ETX^\EOT\"\SUBm All the compatible versions, unordered, except for the last element, which is considered the set \"default\".\n\
+    \\EOT\EOT\n\
+    \\STX\NUL\DC2\ETXu\EOT\"\SUBm All the compatible versions, unordered, except for the last element, which is considered the set \"default\".\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\EOT\DC2\ETX^\EOT\f\n\
+    \\ENQ\EOT\n\
+    \\STX\NUL\EOT\DC2\ETXu\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETX^\r\DC3\n\
+    \\ENQ\EOT\n\
+    \\STX\NUL\ENQ\DC2\ETXu\r\DC3\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETX^\DC4\GS\n\
+    \\ENQ\EOT\n\
+    \\STX\NUL\SOH\DC2\ETXu\DC4\GS\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETX^ !\n\
+    \\ENQ\EOT\n\
+    \\STX\NUL\ETX\DC2\ETXu !\n\
     \H\n\
-    \\STX\EOT\b\DC2\EOTb\NULh\SOH\SUB< Reachability of tasks for a worker on a single task queue.\n\
+    \\STX\EOT\v\DC2\EOTy\NUL\DEL\SOH\SUB< Reachability of tasks for a worker on a single task queue.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\b\SOH\DC2\ETXb\b\GS\n\
+    \\ETX\EOT\v\SOH\DC2\ETXy\b\GS\n\
     \\v\n\
-    \\EOT\EOT\b\STX\NUL\DC2\ETXc\EOT\SUB\n\
+    \\EOT\EOT\v\STX\NUL\DC2\ETXz\EOT\SUB\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\ETXc\EOT\n\
+    \\ENQ\EOT\v\STX\NUL\ENQ\DC2\ETXz\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETXc\v\NAK\n\
+    \\ENQ\EOT\v\STX\NUL\SOH\DC2\ETXz\v\NAK\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETXc\CAN\EM\n\
+    \\ENQ\EOT\v\STX\NUL\ETX\DC2\ETXz\CAN\EM\n\
     \\232\SOH\n\
-    \\EOT\EOT\b\STX\SOH\DC2\ETXg\EOTE\SUB\218\SOH Task reachability for a worker in a single task queue.\n\
+    \\EOT\EOT\v\STX\SOH\DC2\ETX~\EOTE\SUB\218\SOH Task reachability for a worker in a single task queue.\n\
     \ See the TaskReachability docstring for information about each enum variant.\n\
     \ If reachability is empty, this worker is considered unreachable in this task queue.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\EOT\DC2\ETXg\EOT\f\n\
+    \\ENQ\EOT\v\STX\SOH\EOT\DC2\ETX~\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\ACK\DC2\ETXg\r3\n\
+    \\ENQ\EOT\v\STX\SOH\ACK\DC2\ETX~\r3\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETXg4@\n\
+    \\ENQ\EOT\v\STX\SOH\SOH\DC2\ETX~4@\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETXgCD\n\
-    \Y\n\
-    \\STX\EOT\t\DC2\EOTk\NULp\SOH\SUBM Reachability of tasks for a worker by build id, in one or more task queues.\n\
+    \\ENQ\EOT\v\STX\SOH\ETX\DC2\ETX~CD\n\
+    \[\n\
+    \\STX\EOT\f\DC2\ACK\130\SOH\NUL\135\SOH\SOH\SUBM Reachability of tasks for a worker by build id, in one or more task queues.\n\
     \\n\
+    \\v\n\
+    \\ETX\EOT\f\SOH\DC2\EOT\130\SOH\b\ESC\n\
+    \3\n\
+    \\EOT\EOT\f\STX\NUL\DC2\EOT\132\SOH\EOT\CAN\SUB% A build id or empty if unversioned.\n\
     \\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\EOT\132\SOH\EOT\n\
     \\n\
-    \\ETX\EOT\t\SOH\DC2\ETXk\b\ESC\n\
-    \2\n\
-    \\EOT\EOT\t\STX\NUL\DC2\ETXm\EOT\CAN\SUB% A build id or empty if unversioned.\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\NUL\SOH\DC2\EOT\132\SOH\v\DC3\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\NUL\ETX\DC2\EOT\132\SOH\SYN\ETB\n\
+    \,\n\
+    \\EOT\EOT\f\STX\SOH\DC2\EOT\134\SOH\EOT?\SUB\RS Reachability per task queue.\n\
     \\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\SOH\EOT\DC2\EOT\134\SOH\EOT\f\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\SOH\ACK\DC2\EOT\134\SOH\r\"\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\SOH\SOH\DC2\EOT\134\SOH#:\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\SOH\ETX\DC2\EOT\134\SOH=>\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\NUL\ENQ\DC2\ETXm\EOT\n\
+    \\STX\EOT\r\DC2\ACK\137\SOH\NUL\140\SOH\SOH\n\
+    \\v\n\
+    \\ETX\EOT\r\SOH\DC2\EOT\137\SOH\b\CAN\n\
+    \,\n\
+    \\EOT\EOT\r\STX\NUL\DC2\EOT\139\SOH\EOT\RS\SUB\RS Acceptable range is [0,100).\n\
     \\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\NUL\SOH\DC2\ETXm\v\DC3\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\NUL\ETX\DC2\ETXm\SYN\ETB\n\
-    \+\n\
-    \\EOT\EOT\t\STX\SOH\DC2\ETXo\EOT?\SUB\RS Reachability per task queue.\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\NUL\ENQ\DC2\EOT\139\SOH\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\NUL\SOH\DC2\EOT\139\SOH\n\
+    \\EM\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\NUL\ETX\DC2\EOT\139\SOH\FS\GS\n\
+    \\216\SI\n\
+    \\STX\EOT\SO\DC2\ACK\179\SOH\NUL\192\SOH\SOH\SUB\201\SI These rules assign a Build ID to Unassigned Workflow Executions and\n\
+    \ Activities.\n\
     \\n\
+    \ Specifically, assignment rules are applied to the following Executions or\n\
+    \ Activities when they are scheduled in a Task Queue:\n\
+    \    - Generally, any new Workflow Execution, except:\n\
+    \      - When A Child Workflow or a Continue-As-New Execution inherits the\n\
+    \        Build ID from its parent/previous execution by setting the\n\
+    \        `inherit_build_id` flag.\n\
+    \      - Workflow Executions started Eagerly are assigned to the Build ID of\n\
+    \        the Starter.\n\
+    \    - An Activity that is scheduled on a Task Queue different from the one\n\
+    \      their Workflow runs on, unless the `use_workflow_build_id` flag is set.\n\
+    \\n\
+    \ In absence of (applicable) redirect rules (`CompatibleBuildIdRedirectRule`s)\n\
+    \ the task will be dispatched to Workers of the Build ID determined by the\n\
+    \ assignment rules. Otherwise, the final Build ID will be determined by the\n\
+    \ redirect rules.\n\
+    \\n\
+    \ When using Worker Versioning, in the steady state, for a given Task Queue,\n\
+    \ there should typically be exactly one assignment rule to send all Unassigned\n\
+    \ tasks to the latest Build ID. Existence of at least one such \"unconditional\"\n\
+    \ rule at all times is enforce by the system, unless the `force` flag is used\n\
+    \ by the user when replacing/deleting these rules (for exceptional cases).\n\
+    \\n\
+    \ During a deployment, one or more additional rules can be added to assign a\n\
+    \ subset of the tasks to a new Build ID based on a \"ramp percentage\".\n\
+    \\n\
+    \ When there are multiple assignment rules for a Task Queue, the rules are\n\
+    \ evaluated in order, starting from index 0. The first applicable rule will be\n\
+    \ applied and the rest will be ignored.\n\
+    \\n\
+    \ In the event that no assignment rule is applicable on a task (or the Task\n\
+    \ Queue is simply not versioned), the tasks will be sent to unversioned\n\
+    \ workers, if available. Otherwise, they remain Unassigned, and will be\n\
+    \ retried for assignment, or dispatch to unversioned workers, at a later time\n\
+    \ depending on the availability of workers.\n\
+    \\n\
+    \\v\n\
+    \\ETX\EOT\SO\SOH\DC2\EOT\179\SOH\b\GS\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\SOH\EOT\DC2\ETXo\EOT\f\n\
+    \\EOT\EOT\SO\STX\NUL\DC2\EOT\180\SOH\EOT\US\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\NUL\ENQ\DC2\EOT\180\SOH\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\EOT\180\SOH\v\SUB\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\EOT\180\SOH\GS\RS\n\
+    \\240\SOH\n\
+    \\EOT\EOT\SO\b\NUL\DC2\ACK\186\SOH\EOT\191\SOH\ENQ\SUB\223\SOH If a ramp is provided, this rule will be applied only to a sample of\n\
+    \ tasks according to the provided percentage.\n\
+    \ This option can be used only on \"terminal\" Build IDs (the ones not used\n\
+    \ as source in any redirect rules).\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SO\b\NUL\SOH\DC2\EOT\186\SOH\n\
+    \\SO\n\
+    \\167\SOH\n\
+    \\EOT\EOT\SO\STX\SOH\DC2\EOT\190\SOH\b-\SUB\152\SOH This ramp is useful for gradual Blue/Green deployments (and similar)\n\
+    \ where you want to send a certain portion of the traffic to the target\n\
+    \ Build ID.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\SOH\ACK\DC2\EOT\190\SOH\b\CAN\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\EOT\190\SOH\EM(\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\EOT\190\SOH+,\n\
+    \\198\a\n\
+    \\STX\EOT\SI\DC2\ACK\215\SOH\NUL\218\SOH\SOH\SUB\183\a These rules apply to tasks assigned to a particular Build ID\n\
+    \ (`source_build_id`) to redirect them to another *compatible* Build ID\n\
+    \ (`target_build_id`).\n\
+    \\n\
+    \ It is user's responsibility to ensure that the target Build ID is compatible\n\
+    \ with the source Build ID (e.g. by using the Patching API).\n\
+    \\n\
+    \ Most deployments are not expected to need these rules, however following\n\
+    \ situations can greatly benefit from redirects:\n\
+    \  - Need to move long-running Workflow Executions from an old Build ID to a\n\
+    \    newer one.\n\
+    \  - Need to hotfix some broken or stuck Workflow Executions.\n\
+    \\n\
+    \ In steady state, redirect rules are beneficial when dealing with old\n\
+    \ Executions ran on now-decommissioned Build IDs:\n\
+    \  - To redirecting the Workflow Queries to the current (compatible) Build ID.\n\
+    \  - To be able to Reset an old Execution so it can run on the current\n\
+    \    (compatible) Build ID.\n\
+    \\n\
+    \ Redirect rules can be chained, but only the last rule in the chain can have\n\
+    \ a ramp.\n\
+    \\n\
+    \\v\n\
+    \\ETX\EOT\SI\SOH\DC2\EOT\215\SOH\b%\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\SOH\ACK\DC2\ETXo\r\"\n\
+    \\EOT\EOT\SI\STX\NUL\DC2\EOT\216\SOH\EOT\US\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\EOT\216\SOH\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\EOT\216\SOH\v\SUB\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\EOT\216\SOH\GS\RS\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\SOH\SOH\DC2\ETXo#:\n\
+    \\EOT\EOT\SI\STX\SOH\DC2\EOT\217\SOH\EOT\US\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\SOH\ENQ\DC2\EOT\217\SOH\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\SOH\SOH\DC2\EOT\217\SOH\v\SUB\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\SOH\ETX\DC2\EOT\217\SOH\GS\RS\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\SOH\ETX\DC2\ETXo=>b\ACKproto3"
+    \\STX\EOT\DLE\DC2\ACK\220\SOH\NUL\223\SOH\SOH\n\
+    \\v\n\
+    \\ETX\EOT\DLE\SOH\DC2\EOT\220\SOH\b(\n\
+    \\f\n\
+    \\EOT\EOT\DLE\STX\NUL\DC2\EOT\221\SOH\EOT#\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\NUL\ACK\DC2\EOT\221\SOH\EOT\EM\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\NUL\SOH\DC2\EOT\221\SOH\SUB\RS\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\NUL\ETX\DC2\EOT\221\SOH!\"\n\
+    \\f\n\
+    \\EOT\EOT\DLE\STX\SOH\DC2\EOT\222\SOH\EOT.\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\SOH\ACK\DC2\EOT\222\SOH\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\SOH\SOH\DC2\EOT\222\SOH\RS)\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\SOH\ETX\DC2\EOT\222\SOH,-\n\
+    \\f\n\
+    \\STX\EOT\DC1\DC2\ACK\225\SOH\NUL\228\SOH\SOH\n\
+    \\v\n\
+    \\ETX\EOT\DC1\SOH\DC2\EOT\225\SOH\b0\n\
+    \\f\n\
+    \\EOT\EOT\DC1\STX\NUL\DC2\EOT\226\SOH\EOT+\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\NUL\ACK\DC2\EOT\226\SOH\EOT!\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\NUL\SOH\DC2\EOT\226\SOH\"&\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\NUL\ETX\DC2\EOT\226\SOH)*\n\
+    \\f\n\
+    \\EOT\EOT\DC1\STX\SOH\DC2\EOT\227\SOH\EOT.\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\SOH\ACK\DC2\EOT\227\SOH\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\SOH\SOH\DC2\EOT\227\SOH\RS)\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\SOH\ETX\DC2\EOT\227\SOH,-b\ACKproto3"

@@ -99,7 +99,6 @@ data ActivityCancellationType
     ActivityCancellationType'Unrecognized !ActivityCancellationType'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum ActivityCancellationType where
-  enumName _ = Data.Text.pack "ActivityCancellationType"
   maybeToEnum 0 = Prelude.Just TRY_CANCEL
   maybeToEnum 1 = Prelude.Just WAIT_CANCELLATION_COMPLETED
   maybeToEnum 2 = Prelude.Just ABANDON
@@ -911,9 +910,6 @@ instance Data.ProtoLens.Message ContinueAsNewWorkflowExecution where
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                  Data.ProtoLens.FieldTypeDescriptor ContinueAsNewWorkflowExecution'MemoEntry)
               (Data.ProtoLens.MapField
-                 Data.ProtoLens.MapStringKey
-                 (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                    Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
                  (Data.ProtoLens.Field.field @"key")
                  (Data.ProtoLens.Field.field @"value")
                  (Data.ProtoLens.Field.field @"memo")) ::
@@ -924,9 +920,6 @@ instance Data.ProtoLens.Message ContinueAsNewWorkflowExecution where
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                  Data.ProtoLens.FieldTypeDescriptor ContinueAsNewWorkflowExecution'HeadersEntry)
               (Data.ProtoLens.MapField
-                 Data.ProtoLens.MapStringKey
-                 (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                    Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
                  (Data.ProtoLens.Field.field @"key")
                  (Data.ProtoLens.Field.field @"value")
                  (Data.ProtoLens.Field.field @"headers")) ::
@@ -937,9 +930,6 @@ instance Data.ProtoLens.Message ContinueAsNewWorkflowExecution where
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                  Data.ProtoLens.FieldTypeDescriptor ContinueAsNewWorkflowExecution'SearchAttributesEntry)
               (Data.ProtoLens.MapField
-                 Data.ProtoLens.MapStringKey
-                 (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                    Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
                  (Data.ProtoLens.Field.field @"key")
                  (Data.ProtoLens.Field.field @"value")
                  (Data.ProtoLens.Field.field @"searchAttributes")) ::
@@ -3300,9 +3290,6 @@ instance Data.ProtoLens.Message ScheduleActivity where
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                  Data.ProtoLens.FieldTypeDescriptor ScheduleActivity'HeadersEntry)
               (Data.ProtoLens.MapField
-                 Data.ProtoLens.MapStringKey
-                 (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                    Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
                  (Data.ProtoLens.Field.field @"key")
                  (Data.ProtoLens.Field.field @"value")
                  (Data.ProtoLens.Field.field @"headers")) ::
@@ -4337,9 +4324,6 @@ instance Data.ProtoLens.Message ScheduleLocalActivity where
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                  Data.ProtoLens.FieldTypeDescriptor ScheduleLocalActivity'HeadersEntry)
               (Data.ProtoLens.MapField
-                 Data.ProtoLens.MapStringKey
-                 (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                    Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
                  (Data.ProtoLens.Field.field @"key")
                  (Data.ProtoLens.Field.field @"value")
                  (Data.ProtoLens.Field.field @"headers")) ::
@@ -5401,9 +5385,6 @@ instance Data.ProtoLens.Message SignalExternalWorkflowExecution where
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                  Data.ProtoLens.FieldTypeDescriptor SignalExternalWorkflowExecution'HeadersEntry)
               (Data.ProtoLens.MapField
-                 Data.ProtoLens.MapStringKey
-                 (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                    Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
                  (Data.ProtoLens.Field.field @"key")
                  (Data.ProtoLens.Field.field @"value")
                  (Data.ProtoLens.Field.field @"headers")) ::
@@ -6245,9 +6226,6 @@ instance Data.ProtoLens.Message StartChildWorkflowExecution where
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                  Data.ProtoLens.FieldTypeDescriptor StartChildWorkflowExecution'HeadersEntry)
               (Data.ProtoLens.MapField
-                 Data.ProtoLens.MapStringKey
-                 (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                    Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
                  (Data.ProtoLens.Field.field @"key")
                  (Data.ProtoLens.Field.field @"value")
                  (Data.ProtoLens.Field.field @"headers")) ::
@@ -6258,9 +6236,6 @@ instance Data.ProtoLens.Message StartChildWorkflowExecution where
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                  Data.ProtoLens.FieldTypeDescriptor StartChildWorkflowExecution'MemoEntry)
               (Data.ProtoLens.MapField
-                 Data.ProtoLens.MapStringKey
-                 (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                    Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
                  (Data.ProtoLens.Field.field @"key")
                  (Data.ProtoLens.Field.field @"value")
                  (Data.ProtoLens.Field.field @"memo")) ::
@@ -6271,9 +6246,6 @@ instance Data.ProtoLens.Message StartChildWorkflowExecution where
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                  Data.ProtoLens.FieldTypeDescriptor StartChildWorkflowExecution'SearchAttributesEntry)
               (Data.ProtoLens.MapField
-                 Data.ProtoLens.MapStringKey
-                 (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                    Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
                  (Data.ProtoLens.Field.field @"key")
                  (Data.ProtoLens.Field.field @"value")
                  (Data.ProtoLens.Field.field @"searchAttributes")) ::
@@ -8076,9 +8048,6 @@ instance Data.ProtoLens.Message UpsertWorkflowSearchAttributes where
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                  Data.ProtoLens.FieldTypeDescriptor UpsertWorkflowSearchAttributes'SearchAttributesEntry)
               (Data.ProtoLens.MapField
-                 Data.ProtoLens.MapStringKey
-                 (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                    Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
                  (Data.ProtoLens.Field.field @"key")
                  (Data.ProtoLens.Field.field @"value")
                  (Data.ProtoLens.Field.field @"searchAttributes")) ::

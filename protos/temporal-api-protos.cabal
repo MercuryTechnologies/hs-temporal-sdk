@@ -73,6 +73,8 @@ library
     Proto.Temporal.Api.Enums.V1.CommandType
     Proto.Temporal.Api.Namespace.V1.Message_Fields
     Proto.Temporal.Api.Namespace.V1.Message
+    Proto.Temporal.Api.Nexus.V1.Message_Fields
+    Proto.Temporal.Api.Nexus.V1.Message
     Proto.Temporal.Api.Protocol.V1.Message_Fields
     Proto.Temporal.Api.Protocol.V1.Message
     Proto.Temporal.Api.Common.V1.Message_Fields
@@ -99,3 +101,8 @@ library
     Proto.Temporal.Api.Query.V1.Message
     Proto.Temporal.Api.Errordetails.V1.Message_Fields
     Proto.Temporal.Api.Errordetails.V1.Message
+  other-modules:
+    Proto.Google.Api.Annotations
+    Proto.Google.Api.Annotations_Fields
+    Proto.Google.Api.Http
+    Proto.Google.Api.Http_Fields

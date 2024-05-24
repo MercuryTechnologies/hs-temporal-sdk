@@ -27,6 +27,7 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
+import qualified Proto.Google.Protobuf.Duration
 import qualified Proto.Temporal.Api.Common.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.Workflow
 activityFailureInfo ::
@@ -85,6 +86,12 @@ encodedAttributes ::
    Data.ProtoLens.Field.HasField s "encodedAttributes" a) =>
   Lens.Family2.LensLike' f s a
 encodedAttributes = Data.ProtoLens.Field.field @"encodedAttributes"
+endpoint ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "endpoint" a) =>
+  Lens.Family2.LensLike' f s a
+endpoint = Data.ProtoLens.Field.field @"endpoint"
 identity ::
   forall f s a.
   (Prelude.Functor f,
@@ -172,6 +179,21 @@ maybe'lastHeartbeatDetails ::
   Lens.Family2.LensLike' f s a
 maybe'lastHeartbeatDetails
   = Data.ProtoLens.Field.field @"maybe'lastHeartbeatDetails"
+maybe'nextRetryDelay ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'nextRetryDelay" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'nextRetryDelay
+  = Data.ProtoLens.Field.field @"maybe'nextRetryDelay"
+maybe'nexusOperationExecutionFailureInfo ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'nexusOperationExecutionFailureInfo" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'nexusOperationExecutionFailureInfo
+  = Data.ProtoLens.Field.field
+      @"maybe'nexusOperationExecutionFailureInfo"
 maybe'resetWorkflowFailureInfo ::
   forall f s a.
   (Prelude.Functor f,
@@ -225,12 +247,37 @@ namespace ::
    Data.ProtoLens.Field.HasField s "namespace" a) =>
   Lens.Family2.LensLike' f s a
 namespace = Data.ProtoLens.Field.field @"namespace"
+nextRetryDelay ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "nextRetryDelay" a) =>
+  Lens.Family2.LensLike' f s a
+nextRetryDelay = Data.ProtoLens.Field.field @"nextRetryDelay"
+nexusOperationExecutionFailureInfo ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "nexusOperationExecutionFailureInfo" a) =>
+  Lens.Family2.LensLike' f s a
+nexusOperationExecutionFailureInfo
+  = Data.ProtoLens.Field.field @"nexusOperationExecutionFailureInfo"
 nonRetryable ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "nonRetryable" a) =>
   Lens.Family2.LensLike' f s a
 nonRetryable = Data.ProtoLens.Field.field @"nonRetryable"
+operation ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "operation" a) =>
+  Lens.Family2.LensLike' f s a
+operation = Data.ProtoLens.Field.field @"operation"
+operationId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "operationId" a) =>
+  Lens.Family2.LensLike' f s a
+operationId = Data.ProtoLens.Field.field @"operationId"
 resetWorkflowFailureInfo ::
   forall f s a.
   (Prelude.Functor f,
@@ -256,6 +303,11 @@ serverFailureInfo ::
    Data.ProtoLens.Field.HasField s "serverFailureInfo" a) =>
   Lens.Family2.LensLike' f s a
 serverFailureInfo = Data.ProtoLens.Field.field @"serverFailureInfo"
+service ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "service" a) =>
+  Lens.Family2.LensLike' f s a
+service = Data.ProtoLens.Field.field @"service"
 source ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "source" a) =>

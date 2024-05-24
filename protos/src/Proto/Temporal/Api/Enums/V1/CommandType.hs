@@ -51,10 +51,11 @@ data CommandType
     COMMAND_TYPE_UPSERT_WORKFLOW_SEARCH_ATTRIBUTES |
     COMMAND_TYPE_PROTOCOL_MESSAGE |
     COMMAND_TYPE_MODIFY_WORKFLOW_PROPERTIES |
+    COMMAND_TYPE_SCHEDULE_NEXUS_OPERATION |
+    COMMAND_TYPE_REQUEST_CANCEL_NEXUS_OPERATION |
     CommandType'Unrecognized !CommandType'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum CommandType where
-  enumName _ = Data.Text.pack "CommandType"
   maybeToEnum 0 = Prelude.Just COMMAND_TYPE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just COMMAND_TYPE_SCHEDULE_ACTIVITY_TASK
   maybeToEnum 2
@@ -80,6 +81,9 @@ instance Data.ProtoLens.MessageEnum CommandType where
   maybeToEnum 14 = Prelude.Just COMMAND_TYPE_PROTOCOL_MESSAGE
   maybeToEnum 16
     = Prelude.Just COMMAND_TYPE_MODIFY_WORKFLOW_PROPERTIES
+  maybeToEnum 17 = Prelude.Just COMMAND_TYPE_SCHEDULE_NEXUS_OPERATION
+  maybeToEnum 18
+    = Prelude.Just COMMAND_TYPE_REQUEST_CANCEL_NEXUS_OPERATION
   maybeToEnum k
     = Prelude.Just
         (CommandType'Unrecognized
@@ -112,6 +116,10 @@ instance Data.ProtoLens.MessageEnum CommandType where
     = "COMMAND_TYPE_PROTOCOL_MESSAGE"
   showEnum COMMAND_TYPE_MODIFY_WORKFLOW_PROPERTIES
     = "COMMAND_TYPE_MODIFY_WORKFLOW_PROPERTIES"
+  showEnum COMMAND_TYPE_SCHEDULE_NEXUS_OPERATION
+    = "COMMAND_TYPE_SCHEDULE_NEXUS_OPERATION"
+  showEnum COMMAND_TYPE_REQUEST_CANCEL_NEXUS_OPERATION
+    = "COMMAND_TYPE_REQUEST_CANCEL_NEXUS_OPERATION"
   showEnum
     (CommandType'Unrecognized (CommandType'UnrecognizedValue k))
     = Prelude.show k
@@ -150,11 +158,15 @@ instance Data.ProtoLens.MessageEnum CommandType where
     = Prelude.Just COMMAND_TYPE_PROTOCOL_MESSAGE
     | (Prelude.==) k "COMMAND_TYPE_MODIFY_WORKFLOW_PROPERTIES"
     = Prelude.Just COMMAND_TYPE_MODIFY_WORKFLOW_PROPERTIES
+    | (Prelude.==) k "COMMAND_TYPE_SCHEDULE_NEXUS_OPERATION"
+    = Prelude.Just COMMAND_TYPE_SCHEDULE_NEXUS_OPERATION
+    | (Prelude.==) k "COMMAND_TYPE_REQUEST_CANCEL_NEXUS_OPERATION"
+    = Prelude.Just COMMAND_TYPE_REQUEST_CANCEL_NEXUS_OPERATION
     | Prelude.otherwise
     = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
 instance Prelude.Bounded CommandType where
   minBound = COMMAND_TYPE_UNSPECIFIED
-  maxBound = COMMAND_TYPE_MODIFY_WORKFLOW_PROPERTIES
+  maxBound = COMMAND_TYPE_REQUEST_CANCEL_NEXUS_OPERATION
 instance Prelude.Enum CommandType where
   toEnum k__
     = Prelude.maybe
@@ -179,12 +191,14 @@ instance Prelude.Enum CommandType where
   fromEnum COMMAND_TYPE_UPSERT_WORKFLOW_SEARCH_ATTRIBUTES = 13
   fromEnum COMMAND_TYPE_PROTOCOL_MESSAGE = 14
   fromEnum COMMAND_TYPE_MODIFY_WORKFLOW_PROPERTIES = 16
+  fromEnum COMMAND_TYPE_SCHEDULE_NEXUS_OPERATION = 17
+  fromEnum COMMAND_TYPE_REQUEST_CANCEL_NEXUS_OPERATION = 18
   fromEnum
     (CommandType'Unrecognized (CommandType'UnrecognizedValue k))
     = Prelude.fromIntegral k
-  succ COMMAND_TYPE_MODIFY_WORKFLOW_PROPERTIES
+  succ COMMAND_TYPE_REQUEST_CANCEL_NEXUS_OPERATION
     = Prelude.error
-        "CommandType.succ: bad argument COMMAND_TYPE_MODIFY_WORKFLOW_PROPERTIES. This value would be out of bounds."
+        "CommandType.succ: bad argument COMMAND_TYPE_REQUEST_CANCEL_NEXUS_OPERATION. This value would be out of bounds."
   succ COMMAND_TYPE_UNSPECIFIED = COMMAND_TYPE_SCHEDULE_ACTIVITY_TASK
   succ COMMAND_TYPE_SCHEDULE_ACTIVITY_TASK
     = COMMAND_TYPE_REQUEST_CANCEL_ACTIVITY_TASK
@@ -214,6 +228,10 @@ instance Prelude.Enum CommandType where
     = COMMAND_TYPE_PROTOCOL_MESSAGE
   succ COMMAND_TYPE_PROTOCOL_MESSAGE
     = COMMAND_TYPE_MODIFY_WORKFLOW_PROPERTIES
+  succ COMMAND_TYPE_MODIFY_WORKFLOW_PROPERTIES
+    = COMMAND_TYPE_SCHEDULE_NEXUS_OPERATION
+  succ COMMAND_TYPE_SCHEDULE_NEXUS_OPERATION
+    = COMMAND_TYPE_REQUEST_CANCEL_NEXUS_OPERATION
   succ (CommandType'Unrecognized _)
     = Prelude.error
         "CommandType.succ: bad argument: unrecognized value"
@@ -249,6 +267,10 @@ instance Prelude.Enum CommandType where
     = COMMAND_TYPE_UPSERT_WORKFLOW_SEARCH_ATTRIBUTES
   pred COMMAND_TYPE_MODIFY_WORKFLOW_PROPERTIES
     = COMMAND_TYPE_PROTOCOL_MESSAGE
+  pred COMMAND_TYPE_SCHEDULE_NEXUS_OPERATION
+    = COMMAND_TYPE_MODIFY_WORKFLOW_PROPERTIES
+  pred COMMAND_TYPE_REQUEST_CANCEL_NEXUS_OPERATION
+    = COMMAND_TYPE_SCHEDULE_NEXUS_OPERATION
   pred (CommandType'Unrecognized _)
     = Prelude.error
         "CommandType.pred: bad argument: unrecognized value"

@@ -1,9 +1,9 @@
-{- This file was auto-generated from temporal/api/workflowservice/v1/service.proto by the proto-lens-protoc program. -}
+{- This file was auto-generated from google/api/annotations.proto by the proto-lens-protoc program. -}
 {-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
 {-# OPTIONS_GHC -Wno-unused-imports#-}
 {-# OPTIONS_GHC -Wno-duplicate-exports#-}
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Api.Workflowservice.V1.Service_Fields where
+module Proto.Google.Api.Annotations_Fields where
 import qualified Data.ProtoLens.Runtime.Prelude as Prelude
 import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
 import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
@@ -27,5 +27,5 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Google.Api.Annotations
-import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse
+import qualified Proto.Google.Api.Http
+import qualified Proto.Google.Protobuf.Descriptor

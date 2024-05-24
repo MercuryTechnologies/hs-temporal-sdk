@@ -27,7 +27,9 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
+import qualified Proto.Google.Protobuf.Duration
 import qualified Proto.Temporal.Api.Enums.V1.Common
+import qualified Proto.Temporal.Api.Nexus.V1.Message
 address ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "address" a) =>
@@ -70,18 +72,48 @@ enableRemoteClusterConnection ::
   Lens.Family2.LensLike' f s a
 enableRemoteClusterConnection
   = Data.ProtoLens.Field.field @"enableRemoteClusterConnection"
+endpoint ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "endpoint" a) =>
+  Lens.Family2.LensLike' f s a
+endpoint = Data.ProtoLens.Field.field @"endpoint"
+endpoints ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "endpoints" a) =>
+  Lens.Family2.LensLike' f s a
+endpoints = Data.ProtoLens.Field.field @"endpoints"
 frontendAddress ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "frontendAddress" a) =>
   Lens.Family2.LensLike' f s a
 frontendAddress = Data.ProtoLens.Field.field @"frontendAddress"
+frontendHttpAddress ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "frontendHttpAddress" a) =>
+  Lens.Family2.LensLike' f s a
+frontendHttpAddress
+  = Data.ProtoLens.Field.field @"frontendHttpAddress"
 historyShardCount ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "historyShardCount" a) =>
   Lens.Family2.LensLike' f s a
 historyShardCount = Data.ProtoLens.Field.field @"historyShardCount"
+httpAddress ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "httpAddress" a) =>
+  Lens.Family2.LensLike' f s a
+httpAddress = Data.ProtoLens.Field.field @"httpAddress"
+id ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "id" a) =>
+  Lens.Family2.LensLike' f s a
+id = Data.ProtoLens.Field.field @"id"
 initialFailoverVersion ::
   forall f s a.
   (Prelude.Functor f,
@@ -101,12 +133,43 @@ key ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "key" a) =>
   Lens.Family2.LensLike' f s a
 key = Data.ProtoLens.Field.field @"key"
+maybe'endpoint ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'endpoint" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'endpoint = Data.ProtoLens.Field.field @"maybe'endpoint"
+maybe'namespaceDeleteDelay ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'namespaceDeleteDelay" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'namespaceDeleteDelay
+  = Data.ProtoLens.Field.field @"maybe'namespaceDeleteDelay"
+maybe'spec ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'spec" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'spec = Data.ProtoLens.Field.field @"maybe'spec"
+name ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "name" a) =>
+  Lens.Family2.LensLike' f s a
+name = Data.ProtoLens.Field.field @"name"
 namespace ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "namespace" a) =>
   Lens.Family2.LensLike' f s a
 namespace = Data.ProtoLens.Field.field @"namespace"
+namespaceDeleteDelay ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "namespaceDeleteDelay" a) =>
+  Lens.Family2.LensLike' f s a
+namespaceDeleteDelay
+  = Data.ProtoLens.Field.field @"namespaceDeleteDelay"
 namespaceId ::
   forall f s a.
   (Prelude.Functor f,
@@ -131,6 +194,11 @@ searchAttributes ::
    Data.ProtoLens.Field.HasField s "searchAttributes" a) =>
   Lens.Family2.LensLike' f s a
 searchAttributes = Data.ProtoLens.Field.field @"searchAttributes"
+spec ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "spec" a) =>
+  Lens.Family2.LensLike' f s a
+spec = Data.ProtoLens.Field.field @"spec"
 storageSchema ::
   forall f s a.
   (Prelude.Functor f,
@@ -154,6 +222,12 @@ vec'clusters ::
    Data.ProtoLens.Field.HasField s "vec'clusters" a) =>
   Lens.Family2.LensLike' f s a
 vec'clusters = Data.ProtoLens.Field.field @"vec'clusters"
+vec'endpoints ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'endpoints" a) =>
+  Lens.Family2.LensLike' f s a
+vec'endpoints = Data.ProtoLens.Field.field @"vec'endpoints"
 vec'searchAttributes ::
   forall f s a.
   (Prelude.Functor f,
@@ -161,3 +235,8 @@ vec'searchAttributes ::
   Lens.Family2.LensLike' f s a
 vec'searchAttributes
   = Data.ProtoLens.Field.field @"vec'searchAttributes"
+version ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "version" a) =>
+  Lens.Family2.LensLike' f s a
+version = Data.ProtoLens.Field.field @"version"

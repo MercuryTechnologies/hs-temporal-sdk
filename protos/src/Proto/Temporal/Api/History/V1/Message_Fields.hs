@@ -32,6 +32,7 @@ import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Temporal.Api.Common.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.EventType
 import qualified Proto.Temporal.Api.Enums.V1.FailedCause
+import qualified Proto.Temporal.Api.Enums.V1.Update
 import qualified Proto.Temporal.Api.Enums.V1.Workflow
 import qualified Proto.Temporal.Api.Failure.V1.Message
 import qualified Proto.Temporal.Api.Sdk.V1.TaskCompleteMetadata
@@ -160,6 +161,13 @@ binaryChecksum ::
    Data.ProtoLens.Field.HasField s "binaryChecksum" a) =>
   Lens.Family2.LensLike' f s a
 binaryChecksum = Data.ProtoLens.Field.field @"binaryChecksum"
+buildIdRedirectCounter ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "buildIdRedirectCounter" a) =>
+  Lens.Family2.LensLike' f s a
+buildIdRedirectCounter
+  = Data.ProtoLens.Field.field @"buildIdRedirectCounter"
 cause ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "cause" a) =>
@@ -219,6 +227,13 @@ childWorkflowOnly ::
    Data.ProtoLens.Field.HasField s "childWorkflowOnly" a) =>
   Lens.Family2.LensLike' f s a
 childWorkflowOnly = Data.ProtoLens.Field.field @"childWorkflowOnly"
+completionCallbacks ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "completionCallbacks" a) =>
+  Lens.Family2.LensLike' f s a
+completionCallbacks
+  = Data.ProtoLens.Field.field @"completionCallbacks"
 continuedExecutionRunId ::
   forall f s a.
   (Prelude.Functor f,
@@ -248,6 +263,12 @@ details ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "details" a) =>
   Lens.Family2.LensLike' f s a
 details = Data.ProtoLens.Field.field @"details"
+endpoint ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "endpoint" a) =>
+  Lens.Family2.LensLike' f s a
+endpoint = Data.ProtoLens.Field.field @"endpoint"
 eventId ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "eventId" a) =>
@@ -348,6 +369,18 @@ identity ::
    Data.ProtoLens.Field.HasField s "identity" a) =>
   Lens.Family2.LensLike' f s a
 identity = Data.ProtoLens.Field.field @"identity"
+inheritBuildId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "inheritBuildId" a) =>
+  Lens.Family2.LensLike' f s a
+inheritBuildId = Data.ProtoLens.Field.field @"inheritBuildId"
+inheritedBuildId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "inheritedBuildId" a) =>
+  Lens.Family2.LensLike' f s a
+inheritedBuildId = Data.ProtoLens.Field.field @"inheritedBuildId"
 initiatedEventId ::
   forall f s a.
   (Prelude.Functor f,
@@ -683,6 +716,62 @@ maybe'newWorkflowTaskTimeout ::
   Lens.Family2.LensLike' f s a
 maybe'newWorkflowTaskTimeout
   = Data.ProtoLens.Field.field @"maybe'newWorkflowTaskTimeout"
+maybe'nexusOperationCancelRequestedEventAttributes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'nexusOperationCancelRequestedEventAttributes" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'nexusOperationCancelRequestedEventAttributes
+  = Data.ProtoLens.Field.field
+      @"maybe'nexusOperationCancelRequestedEventAttributes"
+maybe'nexusOperationCanceledEventAttributes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'nexusOperationCanceledEventAttributes" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'nexusOperationCanceledEventAttributes
+  = Data.ProtoLens.Field.field
+      @"maybe'nexusOperationCanceledEventAttributes"
+maybe'nexusOperationCompletedEventAttributes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'nexusOperationCompletedEventAttributes" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'nexusOperationCompletedEventAttributes
+  = Data.ProtoLens.Field.field
+      @"maybe'nexusOperationCompletedEventAttributes"
+maybe'nexusOperationFailedEventAttributes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'nexusOperationFailedEventAttributes" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'nexusOperationFailedEventAttributes
+  = Data.ProtoLens.Field.field
+      @"maybe'nexusOperationFailedEventAttributes"
+maybe'nexusOperationScheduledEventAttributes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'nexusOperationScheduledEventAttributes" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'nexusOperationScheduledEventAttributes
+  = Data.ProtoLens.Field.field
+      @"maybe'nexusOperationScheduledEventAttributes"
+maybe'nexusOperationStartedEventAttributes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'nexusOperationStartedEventAttributes" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'nexusOperationStartedEventAttributes
+  = Data.ProtoLens.Field.field
+      @"maybe'nexusOperationStartedEventAttributes"
+maybe'nexusOperationTimedOutEventAttributes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'nexusOperationTimedOutEventAttributes" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'nexusOperationTimedOutEventAttributes
+  = Data.ProtoLens.Field.field
+      @"maybe'nexusOperationTimedOutEventAttributes"
 maybe'outcome ::
   forall f s a.
   (Prelude.Functor f,
@@ -710,6 +799,12 @@ maybe'rejectedRequest ::
   Lens.Family2.LensLike' f s a
 maybe'rejectedRequest
   = Data.ProtoLens.Field.field @"maybe'rejectedRequest"
+maybe'request ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'request" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'request = Data.ProtoLens.Field.field @"maybe'request"
 maybe'requestCancelExternalWorkflowExecutionFailedEventAttributes ::
   forall f s a.
   (Prelude.Functor f,
@@ -738,6 +833,13 @@ maybe'retryPolicy ::
    Data.ProtoLens.Field.HasField s "maybe'retryPolicy" a) =>
   Lens.Family2.LensLike' f s a
 maybe'retryPolicy = Data.ProtoLens.Field.field @"maybe'retryPolicy"
+maybe'rootWorkflowExecution ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'rootWorkflowExecution" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'rootWorkflowExecution
+  = Data.ProtoLens.Field.field @"maybe'rootWorkflowExecution"
 maybe'scheduleToCloseTimeout ::
   forall f s a.
   (Prelude.Functor f,
@@ -975,6 +1077,14 @@ maybe'workflowExecutionUpdateAcceptedEventAttributes ::
 maybe'workflowExecutionUpdateAcceptedEventAttributes
   = Data.ProtoLens.Field.field
       @"maybe'workflowExecutionUpdateAcceptedEventAttributes"
+maybe'workflowExecutionUpdateAdmittedEventAttributes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'workflowExecutionUpdateAdmittedEventAttributes" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'workflowExecutionUpdateAdmittedEventAttributes
+  = Data.ProtoLens.Field.field
+      @"maybe'workflowExecutionUpdateAdmittedEventAttributes"
 maybe'workflowExecutionUpdateCompletedEventAttributes ::
   forall f s a.
   (Prelude.Functor f,
@@ -1141,6 +1251,84 @@ newWorkflowTaskTimeout ::
   Lens.Family2.LensLike' f s a
 newWorkflowTaskTimeout
   = Data.ProtoLens.Field.field @"newWorkflowTaskTimeout"
+nexusHeader ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "nexusHeader" a) =>
+  Lens.Family2.LensLike' f s a
+nexusHeader = Data.ProtoLens.Field.field @"nexusHeader"
+nexusOperationCancelRequestedEventAttributes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "nexusOperationCancelRequestedEventAttributes" a) =>
+  Lens.Family2.LensLike' f s a
+nexusOperationCancelRequestedEventAttributes
+  = Data.ProtoLens.Field.field
+      @"nexusOperationCancelRequestedEventAttributes"
+nexusOperationCanceledEventAttributes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "nexusOperationCanceledEventAttributes" a) =>
+  Lens.Family2.LensLike' f s a
+nexusOperationCanceledEventAttributes
+  = Data.ProtoLens.Field.field
+      @"nexusOperationCanceledEventAttributes"
+nexusOperationCompletedEventAttributes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "nexusOperationCompletedEventAttributes" a) =>
+  Lens.Family2.LensLike' f s a
+nexusOperationCompletedEventAttributes
+  = Data.ProtoLens.Field.field
+      @"nexusOperationCompletedEventAttributes"
+nexusOperationFailedEventAttributes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "nexusOperationFailedEventAttributes" a) =>
+  Lens.Family2.LensLike' f s a
+nexusOperationFailedEventAttributes
+  = Data.ProtoLens.Field.field @"nexusOperationFailedEventAttributes"
+nexusOperationScheduledEventAttributes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "nexusOperationScheduledEventAttributes" a) =>
+  Lens.Family2.LensLike' f s a
+nexusOperationScheduledEventAttributes
+  = Data.ProtoLens.Field.field
+      @"nexusOperationScheduledEventAttributes"
+nexusOperationStartedEventAttributes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "nexusOperationStartedEventAttributes" a) =>
+  Lens.Family2.LensLike' f s a
+nexusOperationStartedEventAttributes
+  = Data.ProtoLens.Field.field
+      @"nexusOperationStartedEventAttributes"
+nexusOperationTimedOutEventAttributes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "nexusOperationTimedOutEventAttributes" a) =>
+  Lens.Family2.LensLike' f s a
+nexusOperationTimedOutEventAttributes
+  = Data.ProtoLens.Field.field
+      @"nexusOperationTimedOutEventAttributes"
+operation ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "operation" a) =>
+  Lens.Family2.LensLike' f s a
+operation = Data.ProtoLens.Field.field @"operation"
+operationId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "operationId" a) =>
+  Lens.Family2.LensLike' f s a
+operationId = Data.ProtoLens.Field.field @"operationId"
+origin ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "origin" a) =>
+  Lens.Family2.LensLike' f s a
+origin = Data.ProtoLens.Field.field @"origin"
 originalExecutionRunId ::
   forall f s a.
   (Prelude.Functor f,
@@ -1233,6 +1421,11 @@ rejectedRequestSequencingEventId ::
   Lens.Family2.LensLike' f s a
 rejectedRequestSequencingEventId
   = Data.ProtoLens.Field.field @"rejectedRequestSequencingEventId"
+request ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "request" a) =>
+  Lens.Family2.LensLike' f s a
+request = Data.ProtoLens.Field.field @"request"
 requestCancelExternalWorkflowExecutionFailedEventAttributes ::
   forall f s a.
   (Prelude.Functor f,
@@ -1272,6 +1465,13 @@ retryState ::
    Data.ProtoLens.Field.HasField s "retryState" a) =>
   Lens.Family2.LensLike' f s a
 retryState = Data.ProtoLens.Field.field @"retryState"
+rootWorkflowExecution ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "rootWorkflowExecution" a) =>
+  Lens.Family2.LensLike' f s a
+rootWorkflowExecution
+  = Data.ProtoLens.Field.field @"rootWorkflowExecution"
 scheduleToCloseTimeout ::
   forall f s a.
   (Prelude.Functor f,
@@ -1304,6 +1504,11 @@ searchAttributes ::
    Data.ProtoLens.Field.HasField s "searchAttributes" a) =>
   Lens.Family2.LensLike' f s a
 searchAttributes = Data.ProtoLens.Field.field @"searchAttributes"
+service ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "service" a) =>
+  Lens.Family2.LensLike' f s a
+service = Data.ProtoLens.Field.field @"service"
 signalExternalWorkflowExecutionFailedEventAttributes ::
   forall f s a.
   (Prelude.Functor f,
@@ -1440,18 +1645,25 @@ upsertedMemo ::
    Data.ProtoLens.Field.HasField s "upsertedMemo" a) =>
   Lens.Family2.LensLike' f s a
 upsertedMemo = Data.ProtoLens.Field.field @"upsertedMemo"
-useCompatibleVersion ::
+useWorkflowBuildId ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "useCompatibleVersion" a) =>
+   Data.ProtoLens.Field.HasField s "useWorkflowBuildId" a) =>
   Lens.Family2.LensLike' f s a
-useCompatibleVersion
-  = Data.ProtoLens.Field.field @"useCompatibleVersion"
+useWorkflowBuildId
+  = Data.ProtoLens.Field.field @"useWorkflowBuildId"
 value ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "value" a) =>
   Lens.Family2.LensLike' f s a
 value = Data.ProtoLens.Field.field @"value"
+vec'completionCallbacks ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'completionCallbacks" a) =>
+  Lens.Family2.LensLike' f s a
+vec'completionCallbacks
+  = Data.ProtoLens.Field.field @"vec'completionCallbacks"
 vec'events ::
   forall f s a.
   (Prelude.Functor f,
@@ -1575,6 +1787,14 @@ workflowExecutionUpdateAcceptedEventAttributes ::
 workflowExecutionUpdateAcceptedEventAttributes
   = Data.ProtoLens.Field.field
       @"workflowExecutionUpdateAcceptedEventAttributes"
+workflowExecutionUpdateAdmittedEventAttributes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "workflowExecutionUpdateAdmittedEventAttributes" a) =>
+  Lens.Family2.LensLike' f s a
+workflowExecutionUpdateAdmittedEventAttributes
+  = Data.ProtoLens.Field.field
+      @"workflowExecutionUpdateAdmittedEventAttributes"
 workflowExecutionUpdateCompletedEventAttributes ::
   forall f s a.
   (Prelude.Functor f,

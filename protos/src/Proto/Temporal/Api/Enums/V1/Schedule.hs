@@ -46,7 +46,6 @@ data ScheduleOverlapPolicy
     ScheduleOverlapPolicy'Unrecognized !ScheduleOverlapPolicy'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum ScheduleOverlapPolicy where
-  enumName _ = Data.Text.pack "ScheduleOverlapPolicy"
   maybeToEnum 0 = Prelude.Just SCHEDULE_OVERLAP_POLICY_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just SCHEDULE_OVERLAP_POLICY_SKIP
   maybeToEnum 2 = Prelude.Just SCHEDULE_OVERLAP_POLICY_BUFFER_ONE

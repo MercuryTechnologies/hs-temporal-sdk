@@ -17,7 +17,7 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: lts-22.8
+resolver: lts-22.22
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -45,9 +45,8 @@ packages:
 #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a
 #
 extra-deps:
-- git: git@github.com:sheaf/if-instance.git
-  commit: b0ad0a51ccc1d2ea45cc1c6e8ef753c54efe30a4
-- ghc-tcplugin-api-0.10.0.0
+- if-instance-0.5.1.0
+- ghc-tcplugin-api-0.11.0.0
 - annotated-exception-0.2.0.3
 - require-callstack-0.1.0.0
 
@@ -56,14 +55,18 @@ extra-deps:
 - thread-utils-finalizers-0.1.1.0
 - crypton-0.33
 
-- git: git@github.com:iand675/proto-lens.git
-  commit: 191f384b5329f0231844ae8405695fcdc29eab44
-  subdirs:
-  - proto-lens
-  - proto-lens-protoc
-  - proto-lens-protobuf-types
-  - proto-lens-runtime
-  - proto-lens-json
+
+- proto-lens-protoc-0.8.0.1
+- proto-lens-protobuf-types-0.7.2.0
+- proto-lens-setup-0.4.0.8
+# - git: git@github.com:iand675/proto-lens.git
+#   commit: 191f384b5329f0231844ae8405695fcdc29eab44
+#   subdirs:
+  # - proto-lens
+#   - proto-lens-protoc
+#   - proto-lens-protobuf-types
+#   - proto-lens-runtime
+#   - proto-lens-json
 - git: git@github.com:iand675/hs-opentelemetry.git
   commit: e07f598b6ec1e36ad2f6e597bd0bd6342c166093
   subdirs:
@@ -73,9 +76,8 @@ extra-deps:
   - exporters/otlp
   - propagators/b3
   - propagators/w3c
-- git: git@github.com:circuithub/ghc-source-gen.git
-  commit: 7a6aac047b706508e85ba2054b5bedbecfd7eb7a
 
+- ghc-source-gen-0.4.5.0
 # Override default flag values for local packages and extra-deps
 # flags: {}
 
@@ -83,14 +85,14 @@ extra-deps:
 # extra-package-dbs: []
 
 # Control whether we use the GHC we find on the path
-# system-ghc: true
+system-ghc: true
 #
 # Require a specific version of Stack, using version ranges
 # require-stack-version: -any # Default
 # require-stack-version: ">=2.9"
 #
 # Override the architecture used by Stack, especially useful on Windows
-arch: aarch64 # i386
+# arch: aarch64 # i386
 #
 # Extra directories used by Stack for building
 # extra-include-dirs: [/path/to/dir]
@@ -98,6 +100,6 @@ arch: aarch64 # i386
 #
 # Allow a newer minor version of GHC than the snapshot specifies
 # compiler-check: newer-minor
-# nix:
-#   enable: true
+nix:
+  enable: false
 #   packages: [zlib]

@@ -44,7 +44,6 @@ data BatchOperationState
     BatchOperationState'Unrecognized !BatchOperationState'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum BatchOperationState where
-  enumName _ = Data.Text.pack "BatchOperationState"
   maybeToEnum 0 = Prelude.Just BATCH_OPERATION_STATE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just BATCH_OPERATION_STATE_RUNNING
   maybeToEnum 2 = Prelude.Just BATCH_OPERATION_STATE_COMPLETED
@@ -136,7 +135,6 @@ data BatchOperationType
     BatchOperationType'Unrecognized !BatchOperationType'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum BatchOperationType where
-  enumName _ = Data.Text.pack "BatchOperationType"
   maybeToEnum 0 = Prelude.Just BATCH_OPERATION_TYPE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just BATCH_OPERATION_TYPE_TERMINATE
   maybeToEnum 2 = Prelude.Just BATCH_OPERATION_TYPE_CANCEL

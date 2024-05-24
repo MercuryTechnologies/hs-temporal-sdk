@@ -8,14 +8,19 @@ module Proto.Temporal.Api.Operatorservice.V1.RequestResponse (
         AddOrUpdateRemoteClusterResponse(), AddSearchAttributesRequest(),
         AddSearchAttributesRequest'SearchAttributesEntry(),
         AddSearchAttributesResponse(), ClusterMetadata(),
+        CreateNexusEndpointRequest(), CreateNexusEndpointResponse(),
         DeleteNamespaceRequest(), DeleteNamespaceResponse(),
+        DeleteNexusEndpointRequest(), DeleteNexusEndpointResponse(),
+        GetNexusEndpointRequest(), GetNexusEndpointResponse(),
         ListClustersRequest(), ListClustersResponse(),
+        ListNexusEndpointsRequest(), ListNexusEndpointsResponse(),
         ListSearchAttributesRequest(), ListSearchAttributesResponse(),
         ListSearchAttributesResponse'CustomAttributesEntry(),
         ListSearchAttributesResponse'StorageSchemaEntry(),
         ListSearchAttributesResponse'SystemAttributesEntry(),
         RemoveRemoteClusterRequest(), RemoveRemoteClusterResponse(),
-        RemoveSearchAttributesRequest(), RemoveSearchAttributesResponse()
+        RemoveSearchAttributesRequest(), RemoveSearchAttributesResponse(),
+        UpdateNexusEndpointRequest(), UpdateNexusEndpointResponse()
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -42,14 +47,18 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
+import qualified Proto.Google.Protobuf.Duration
 import qualified Proto.Temporal.Api.Enums.V1.Common
+import qualified Proto.Temporal.Api.Nexus.V1.Message
 {- | Fields :
      
          * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.frontendAddress' @:: Lens' AddOrUpdateRemoteClusterRequest Data.Text.Text@
-         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.enableRemoteClusterConnection' @:: Lens' AddOrUpdateRemoteClusterRequest Prelude.Bool@ -}
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.enableRemoteClusterConnection' @:: Lens' AddOrUpdateRemoteClusterRequest Prelude.Bool@
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.frontendHttpAddress' @:: Lens' AddOrUpdateRemoteClusterRequest Data.Text.Text@ -}
 data AddOrUpdateRemoteClusterRequest
   = AddOrUpdateRemoteClusterRequest'_constructor {_AddOrUpdateRemoteClusterRequest'frontendAddress :: !Data.Text.Text,
                                                   _AddOrUpdateRemoteClusterRequest'enableRemoteClusterConnection :: !Prelude.Bool,
+                                                  _AddOrUpdateRemoteClusterRequest'frontendHttpAddress :: !Data.Text.Text,
                                                   _AddOrUpdateRemoteClusterRequest'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show AddOrUpdateRemoteClusterRequest where
@@ -75,6 +84,15 @@ instance Data.ProtoLens.Field.HasField AddOrUpdateRemoteClusterRequest "enableRe
               -> x__
                    {_AddOrUpdateRemoteClusterRequest'enableRemoteClusterConnection = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField AddOrUpdateRemoteClusterRequest "frontendHttpAddress" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _AddOrUpdateRemoteClusterRequest'frontendHttpAddress
+           (\ x__ y__
+              -> x__
+                   {_AddOrUpdateRemoteClusterRequest'frontendHttpAddress = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message AddOrUpdateRemoteClusterRequest where
   messageName _
     = Data.Text.pack
@@ -83,7 +101,8 @@ instance Data.ProtoLens.Message AddOrUpdateRemoteClusterRequest where
     = "\n\
       \\USAddOrUpdateRemoteClusterRequest\DC2)\n\
       \\DLEfrontend_address\CAN\SOH \SOH(\tR\SIfrontendAddress\DC2G\n\
-      \ enable_remote_cluster_connection\CAN\STX \SOH(\bR\GSenableRemoteClusterConnection"
+      \ enable_remote_cluster_connection\CAN\STX \SOH(\bR\GSenableRemoteClusterConnection\DC22\n\
+      \\NAKfrontend_http_address\CAN\ETX \SOH(\tR\DC3frontendHttpAddress"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -105,11 +124,21 @@ instance Data.ProtoLens.Message AddOrUpdateRemoteClusterRequest where
                  Data.ProtoLens.Optional
                  (Data.ProtoLens.Field.field @"enableRemoteClusterConnection")) ::
               Data.ProtoLens.FieldDescriptor AddOrUpdateRemoteClusterRequest
+        frontendHttpAddress__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "frontend_http_address"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"frontendHttpAddress")) ::
+              Data.ProtoLens.FieldDescriptor AddOrUpdateRemoteClusterRequest
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, frontendAddress__field_descriptor),
            (Data.ProtoLens.Tag 2, 
-            enableRemoteClusterConnection__field_descriptor)]
+            enableRemoteClusterConnection__field_descriptor),
+           (Data.ProtoLens.Tag 3, frontendHttpAddress__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _AddOrUpdateRemoteClusterRequest'_unknownFields
@@ -119,6 +148,7 @@ instance Data.ProtoLens.Message AddOrUpdateRemoteClusterRequest where
     = AddOrUpdateRemoteClusterRequest'_constructor
         {_AddOrUpdateRemoteClusterRequest'frontendAddress = Data.ProtoLens.fieldDefault,
          _AddOrUpdateRemoteClusterRequest'enableRemoteClusterConnection = Data.ProtoLens.fieldDefault,
+         _AddOrUpdateRemoteClusterRequest'frontendHttpAddress = Data.ProtoLens.fieldDefault,
          _AddOrUpdateRemoteClusterRequest'_unknownFields = []}
   parseMessage
     = let
@@ -161,6 +191,15 @@ instance Data.ProtoLens.Message AddOrUpdateRemoteClusterRequest where
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"enableRemoteClusterConnection") y
                                      x)
+                        26
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "frontend_http_address"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"frontendHttpAddress") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -205,8 +244,26 @@ instance Data.ProtoLens.Message AddOrUpdateRemoteClusterRequest where
                          ((Prelude..)
                             Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
                             _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+                ((Data.Monoid.<>)
+                   (let
+                      _v
+                        = Lens.Family2.view
+                            (Data.ProtoLens.Field.field @"frontendHttpAddress") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                            ((Prelude..)
+                               (\ bs
+                                  -> (Data.Monoid.<>)
+                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                               Data.Text.Encoding.encodeUtf8 _v))
+                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
 instance Control.DeepSeq.NFData AddOrUpdateRemoteClusterRequest where
   rnf
     = \ x__
@@ -217,7 +274,8 @@ instance Control.DeepSeq.NFData AddOrUpdateRemoteClusterRequest where
                 (Control.DeepSeq.deepseq
                    (_AddOrUpdateRemoteClusterRequest'enableRemoteClusterConnection
                       x__)
-                   ()))
+                   (Control.DeepSeq.deepseq
+                      (_AddOrUpdateRemoteClusterRequest'frontendHttpAddress x__) ())))
 {- | Fields :
       -}
 data AddOrUpdateRemoteClusterResponse
@@ -339,9 +397,6 @@ instance Data.ProtoLens.Message AddSearchAttributesRequest where
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                  Data.ProtoLens.FieldTypeDescriptor AddSearchAttributesRequest'SearchAttributesEntry)
               (Data.ProtoLens.MapField
-                 Data.ProtoLens.MapStringKey
-                 (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                    Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Common.IndexedValueType)
                  (Data.ProtoLens.Field.field @"key")
                  (Data.ProtoLens.Field.field @"value")
                  (Data.ProtoLens.Field.field @"searchAttributes")) ::
@@ -717,6 +772,7 @@ instance Control.DeepSeq.NFData AddSearchAttributesResponse where
          * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.clusterName' @:: Lens' ClusterMetadata Data.Text.Text@
          * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.clusterId' @:: Lens' ClusterMetadata Data.Text.Text@
          * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.address' @:: Lens' ClusterMetadata Data.Text.Text@
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.httpAddress' @:: Lens' ClusterMetadata Data.Text.Text@
          * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.initialFailoverVersion' @:: Lens' ClusterMetadata Data.Int.Int64@
          * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.historyShardCount' @:: Lens' ClusterMetadata Data.Int.Int32@
          * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.isConnectionEnabled' @:: Lens' ClusterMetadata Prelude.Bool@ -}
@@ -724,6 +780,7 @@ data ClusterMetadata
   = ClusterMetadata'_constructor {_ClusterMetadata'clusterName :: !Data.Text.Text,
                                   _ClusterMetadata'clusterId :: !Data.Text.Text,
                                   _ClusterMetadata'address :: !Data.Text.Text,
+                                  _ClusterMetadata'httpAddress :: !Data.Text.Text,
                                   _ClusterMetadata'initialFailoverVersion :: !Data.Int.Int64,
                                   _ClusterMetadata'historyShardCount :: !Data.Int.Int32,
                                   _ClusterMetadata'isConnectionEnabled :: !Prelude.Bool,
@@ -756,6 +813,13 @@ instance Data.ProtoLens.Field.HasField ClusterMetadata "address" Data.Text.Text 
            _ClusterMetadata'address
            (\ x__ y__ -> x__ {_ClusterMetadata'address = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField ClusterMetadata "httpAddress" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ClusterMetadata'httpAddress
+           (\ x__ y__ -> x__ {_ClusterMetadata'httpAddress = y__}))
+        Prelude.id
 instance Data.ProtoLens.Field.HasField ClusterMetadata "initialFailoverVersion" Data.Int.Int64 where
   fieldOf _
     = (Prelude..)
@@ -786,7 +850,8 @@ instance Data.ProtoLens.Message ClusterMetadata where
       \\fcluster_name\CAN\SOH \SOH(\tR\vclusterName\DC2\GS\n\
       \\n\
       \cluster_id\CAN\STX \SOH(\tR\tclusterId\DC2\CAN\n\
-      \\aaddress\CAN\ETX \SOH(\tR\aaddress\DC28\n\
+      \\aaddress\CAN\ETX \SOH(\tR\aaddress\DC2!\n\
+      \\fhttp_address\CAN\a \SOH(\tR\vhttpAddress\DC28\n\
       \\CANinitial_failover_version\CAN\EOT \SOH(\ETXR\SYNinitialFailoverVersion\DC2.\n\
       \\DC3history_shard_count\CAN\ENQ \SOH(\ENQR\DC1historyShardCount\DC22\n\
       \\NAKis_connection_enabled\CAN\ACK \SOH(\bR\DC3isConnectionEnabled"
@@ -818,6 +883,15 @@ instance Data.ProtoLens.Message ClusterMetadata where
                  Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
               (Data.ProtoLens.PlainField
                  Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"address")) ::
+              Data.ProtoLens.FieldDescriptor ClusterMetadata
+        httpAddress__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "http_address"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"httpAddress")) ::
               Data.ProtoLens.FieldDescriptor ClusterMetadata
         initialFailoverVersion__field_descriptor
           = Data.ProtoLens.FieldDescriptor
@@ -851,6 +925,7 @@ instance Data.ProtoLens.Message ClusterMetadata where
           [(Data.ProtoLens.Tag 1, clusterName__field_descriptor),
            (Data.ProtoLens.Tag 2, clusterId__field_descriptor),
            (Data.ProtoLens.Tag 3, address__field_descriptor),
+           (Data.ProtoLens.Tag 7, httpAddress__field_descriptor),
            (Data.ProtoLens.Tag 4, initialFailoverVersion__field_descriptor),
            (Data.ProtoLens.Tag 5, historyShardCount__field_descriptor),
            (Data.ProtoLens.Tag 6, isConnectionEnabled__field_descriptor)]
@@ -863,6 +938,7 @@ instance Data.ProtoLens.Message ClusterMetadata where
         {_ClusterMetadata'clusterName = Data.ProtoLens.fieldDefault,
          _ClusterMetadata'clusterId = Data.ProtoLens.fieldDefault,
          _ClusterMetadata'address = Data.ProtoLens.fieldDefault,
+         _ClusterMetadata'httpAddress = Data.ProtoLens.fieldDefault,
          _ClusterMetadata'initialFailoverVersion = Data.ProtoLens.fieldDefault,
          _ClusterMetadata'historyShardCount = Data.ProtoLens.fieldDefault,
          _ClusterMetadata'isConnectionEnabled = Data.ProtoLens.fieldDefault,
@@ -913,6 +989,14 @@ instance Data.ProtoLens.Message ClusterMetadata where
                                              (Prelude.fromIntegral len))
                                        "address"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"address") y x)
+                        58
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "http_address"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"httpAddress") y x)
                         32
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (Prelude.fmap
@@ -1002,27 +1086,31 @@ instance Data.ProtoLens.Message ClusterMetadata where
                    ((Data.Monoid.<>)
                       (let
                          _v
-                           = Lens.Family2.view
-                               (Data.ProtoLens.Field.field @"initialFailoverVersion") _x
+                           = Lens.Family2.view (Data.ProtoLens.Field.field @"httpAddress") _x
                        in
                          if (Prelude.==) _v Data.ProtoLens.fieldDefault then
                              Data.Monoid.mempty
                          else
                              (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt 32)
+                               (Data.ProtoLens.Encoding.Bytes.putVarInt 58)
                                ((Prelude..)
-                                  Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
+                                  (\ bs
+                                     -> (Data.Monoid.<>)
+                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                             (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                          (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                  Data.Text.Encoding.encodeUtf8 _v))
                       ((Data.Monoid.<>)
                          (let
                             _v
                               = Lens.Family2.view
-                                  (Data.ProtoLens.Field.field @"historyShardCount") _x
+                                  (Data.ProtoLens.Field.field @"initialFailoverVersion") _x
                           in
                             if (Prelude.==) _v Data.ProtoLens.fieldDefault then
                                 Data.Monoid.mempty
                             else
                                 (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 40)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 32)
                                   ((Prelude..)
                                      Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral
                                      _v))
@@ -1030,18 +1118,32 @@ instance Data.ProtoLens.Message ClusterMetadata where
                             (let
                                _v
                                  = Lens.Family2.view
-                                     (Data.ProtoLens.Field.field @"isConnectionEnabled") _x
+                                     (Data.ProtoLens.Field.field @"historyShardCount") _x
                              in
                                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
                                    Data.Monoid.mempty
                                else
                                    (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt 48)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt 40)
                                      ((Prelude..)
-                                        Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (\ b -> if b then 1 else 0) _v))
-                            (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                               (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))))
+                                        Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral
+                                        _v))
+                            ((Data.Monoid.<>)
+                               (let
+                                  _v
+                                    = Lens.Family2.view
+                                        (Data.ProtoLens.Field.field @"isConnectionEnabled") _x
+                                in
+                                  if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                      Data.Monoid.mempty
+                                  else
+                                      (Data.Monoid.<>)
+                                        (Data.ProtoLens.Encoding.Bytes.putVarInt 48)
+                                        ((Prelude..)
+                                           Data.ProtoLens.Encoding.Bytes.putVarInt
+                                           (\ b -> if b then 1 else 0) _v))
+                               (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                                  (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))))
 instance Control.DeepSeq.NFData ClusterMetadata where
   rnf
     = \ x__
@@ -1054,18 +1156,270 @@ instance Control.DeepSeq.NFData ClusterMetadata where
                    (Control.DeepSeq.deepseq
                       (_ClusterMetadata'address x__)
                       (Control.DeepSeq.deepseq
-                         (_ClusterMetadata'initialFailoverVersion x__)
+                         (_ClusterMetadata'httpAddress x__)
                          (Control.DeepSeq.deepseq
-                            (_ClusterMetadata'historyShardCount x__)
+                            (_ClusterMetadata'initialFailoverVersion x__)
                             (Control.DeepSeq.deepseq
-                               (_ClusterMetadata'isConnectionEnabled x__) ()))))))
+                               (_ClusterMetadata'historyShardCount x__)
+                               (Control.DeepSeq.deepseq
+                                  (_ClusterMetadata'isConnectionEnabled x__) ())))))))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.spec' @:: Lens' CreateNexusEndpointRequest Proto.Temporal.Api.Nexus.V1.Message.EndpointSpec@
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.maybe'spec' @:: Lens' CreateNexusEndpointRequest (Prelude.Maybe Proto.Temporal.Api.Nexus.V1.Message.EndpointSpec)@ -}
+data CreateNexusEndpointRequest
+  = CreateNexusEndpointRequest'_constructor {_CreateNexusEndpointRequest'spec :: !(Prelude.Maybe Proto.Temporal.Api.Nexus.V1.Message.EndpointSpec),
+                                             _CreateNexusEndpointRequest'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show CreateNexusEndpointRequest where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField CreateNexusEndpointRequest "spec" Proto.Temporal.Api.Nexus.V1.Message.EndpointSpec where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _CreateNexusEndpointRequest'spec
+           (\ x__ y__ -> x__ {_CreateNexusEndpointRequest'spec = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField CreateNexusEndpointRequest "maybe'spec" (Prelude.Maybe Proto.Temporal.Api.Nexus.V1.Message.EndpointSpec) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _CreateNexusEndpointRequest'spec
+           (\ x__ y__ -> x__ {_CreateNexusEndpointRequest'spec = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message CreateNexusEndpointRequest where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.operatorservice.v1.CreateNexusEndpointRequest"
+  packedMessageDescriptor _
+    = "\n\
+      \\SUBCreateNexusEndpointRequest\DC27\n\
+      \\EOTspec\CAN\SOH \SOH(\v2#.temporal.api.nexus.v1.EndpointSpecR\EOTspec"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        spec__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "spec"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Nexus.V1.Message.EndpointSpec)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'spec")) ::
+              Data.ProtoLens.FieldDescriptor CreateNexusEndpointRequest
+      in
+        Data.Map.fromList [(Data.ProtoLens.Tag 1, spec__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _CreateNexusEndpointRequest'_unknownFields
+        (\ x__ y__
+           -> x__ {_CreateNexusEndpointRequest'_unknownFields = y__})
+  defMessage
+    = CreateNexusEndpointRequest'_constructor
+        {_CreateNexusEndpointRequest'spec = Prelude.Nothing,
+         _CreateNexusEndpointRequest'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          CreateNexusEndpointRequest
+          -> Data.ProtoLens.Encoding.Bytes.Parser CreateNexusEndpointRequest
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "spec"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"spec") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "CreateNexusEndpointRequest"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'spec") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData CreateNexusEndpointRequest where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_CreateNexusEndpointRequest'_unknownFields x__)
+             (Control.DeepSeq.deepseq (_CreateNexusEndpointRequest'spec x__) ())
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.endpoint' @:: Lens' CreateNexusEndpointResponse Proto.Temporal.Api.Nexus.V1.Message.Endpoint@
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.maybe'endpoint' @:: Lens' CreateNexusEndpointResponse (Prelude.Maybe Proto.Temporal.Api.Nexus.V1.Message.Endpoint)@ -}
+data CreateNexusEndpointResponse
+  = CreateNexusEndpointResponse'_constructor {_CreateNexusEndpointResponse'endpoint :: !(Prelude.Maybe Proto.Temporal.Api.Nexus.V1.Message.Endpoint),
+                                              _CreateNexusEndpointResponse'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show CreateNexusEndpointResponse where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField CreateNexusEndpointResponse "endpoint" Proto.Temporal.Api.Nexus.V1.Message.Endpoint where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _CreateNexusEndpointResponse'endpoint
+           (\ x__ y__ -> x__ {_CreateNexusEndpointResponse'endpoint = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField CreateNexusEndpointResponse "maybe'endpoint" (Prelude.Maybe Proto.Temporal.Api.Nexus.V1.Message.Endpoint) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _CreateNexusEndpointResponse'endpoint
+           (\ x__ y__ -> x__ {_CreateNexusEndpointResponse'endpoint = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message CreateNexusEndpointResponse where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.operatorservice.v1.CreateNexusEndpointResponse"
+  packedMessageDescriptor _
+    = "\n\
+      \\ESCCreateNexusEndpointResponse\DC2;\n\
+      \\bendpoint\CAN\SOH \SOH(\v2\US.temporal.api.nexus.v1.EndpointR\bendpoint"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        endpoint__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "endpoint"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Nexus.V1.Message.Endpoint)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'endpoint")) ::
+              Data.ProtoLens.FieldDescriptor CreateNexusEndpointResponse
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, endpoint__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _CreateNexusEndpointResponse'_unknownFields
+        (\ x__ y__
+           -> x__ {_CreateNexusEndpointResponse'_unknownFields = y__})
+  defMessage
+    = CreateNexusEndpointResponse'_constructor
+        {_CreateNexusEndpointResponse'endpoint = Prelude.Nothing,
+         _CreateNexusEndpointResponse'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          CreateNexusEndpointResponse
+          -> Data.ProtoLens.Encoding.Bytes.Parser CreateNexusEndpointResponse
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "endpoint"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"endpoint") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "CreateNexusEndpointResponse"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'endpoint") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData CreateNexusEndpointResponse where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_CreateNexusEndpointResponse'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_CreateNexusEndpointResponse'endpoint x__) ())
 {- | Fields :
      
          * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.namespace' @:: Lens' DeleteNamespaceRequest Data.Text.Text@
-         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.namespaceId' @:: Lens' DeleteNamespaceRequest Data.Text.Text@ -}
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.namespaceId' @:: Lens' DeleteNamespaceRequest Data.Text.Text@
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.namespaceDeleteDelay' @:: Lens' DeleteNamespaceRequest Proto.Google.Protobuf.Duration.Duration@
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.maybe'namespaceDeleteDelay' @:: Lens' DeleteNamespaceRequest (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@ -}
 data DeleteNamespaceRequest
   = DeleteNamespaceRequest'_constructor {_DeleteNamespaceRequest'namespace :: !Data.Text.Text,
                                          _DeleteNamespaceRequest'namespaceId :: !Data.Text.Text,
+                                         _DeleteNamespaceRequest'namespaceDeleteDelay :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
                                          _DeleteNamespaceRequest'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show DeleteNamespaceRequest where
@@ -1088,6 +1442,22 @@ instance Data.ProtoLens.Field.HasField DeleteNamespaceRequest "namespaceId" Data
            _DeleteNamespaceRequest'namespaceId
            (\ x__ y__ -> x__ {_DeleteNamespaceRequest'namespaceId = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField DeleteNamespaceRequest "namespaceDeleteDelay" Proto.Google.Protobuf.Duration.Duration where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _DeleteNamespaceRequest'namespaceDeleteDelay
+           (\ x__ y__
+              -> x__ {_DeleteNamespaceRequest'namespaceDeleteDelay = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField DeleteNamespaceRequest "maybe'namespaceDeleteDelay" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _DeleteNamespaceRequest'namespaceDeleteDelay
+           (\ x__ y__
+              -> x__ {_DeleteNamespaceRequest'namespaceDeleteDelay = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message DeleteNamespaceRequest where
   messageName _
     = Data.Text.pack
@@ -1096,7 +1466,8 @@ instance Data.ProtoLens.Message DeleteNamespaceRequest where
     = "\n\
       \\SYNDeleteNamespaceRequest\DC2\FS\n\
       \\tnamespace\CAN\SOH \SOH(\tR\tnamespace\DC2!\n\
-      \\fnamespace_id\CAN\STX \SOH(\tR\vnamespaceId"
+      \\fnamespace_id\CAN\STX \SOH(\tR\vnamespaceId\DC2O\n\
+      \\SYNnamespace_delete_delay\CAN\ETX \SOH(\v2\EM.google.protobuf.DurationR\DC4namespaceDeleteDelay"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -1118,10 +1489,19 @@ instance Data.ProtoLens.Message DeleteNamespaceRequest where
                  Data.ProtoLens.Optional
                  (Data.ProtoLens.Field.field @"namespaceId")) ::
               Data.ProtoLens.FieldDescriptor DeleteNamespaceRequest
+        namespaceDeleteDelay__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "namespace_delete_delay"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'namespaceDeleteDelay")) ::
+              Data.ProtoLens.FieldDescriptor DeleteNamespaceRequest
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, namespace__field_descriptor),
-           (Data.ProtoLens.Tag 2, namespaceId__field_descriptor)]
+           (Data.ProtoLens.Tag 2, namespaceId__field_descriptor),
+           (Data.ProtoLens.Tag 3, namespaceDeleteDelay__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _DeleteNamespaceRequest'_unknownFields
@@ -1130,6 +1510,7 @@ instance Data.ProtoLens.Message DeleteNamespaceRequest where
     = DeleteNamespaceRequest'_constructor
         {_DeleteNamespaceRequest'namespace = Data.ProtoLens.fieldDefault,
          _DeleteNamespaceRequest'namespaceId = Data.ProtoLens.fieldDefault,
+         _DeleteNamespaceRequest'namespaceDeleteDelay = Prelude.Nothing,
          _DeleteNamespaceRequest'_unknownFields = []}
   parseMessage
     = let
@@ -1170,6 +1551,15 @@ instance Data.ProtoLens.Message DeleteNamespaceRequest where
                                        "namespace_id"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"namespaceId") y x)
+                        26
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "namespace_delete_delay"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"namespaceDeleteDelay") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -1214,8 +1604,24 @@ instance Data.ProtoLens.Message DeleteNamespaceRequest where
                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                             Data.Text.Encoding.encodeUtf8 _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+                ((Data.Monoid.<>)
+                   (case
+                        Lens.Family2.view
+                          (Data.ProtoLens.Field.field @"maybe'namespaceDeleteDelay") _x
+                    of
+                      Prelude.Nothing -> Data.Monoid.mempty
+                      (Prelude.Just _v)
+                        -> (Data.Monoid.<>)
+                             (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                             ((Prelude..)
+                                (\ bs
+                                   -> (Data.Monoid.<>)
+                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                Data.ProtoLens.encodeMessage _v))
+                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
 instance Control.DeepSeq.NFData DeleteNamespaceRequest where
   rnf
     = \ x__
@@ -1224,7 +1630,9 @@ instance Control.DeepSeq.NFData DeleteNamespaceRequest where
              (Control.DeepSeq.deepseq
                 (_DeleteNamespaceRequest'namespace x__)
                 (Control.DeepSeq.deepseq
-                   (_DeleteNamespaceRequest'namespaceId x__) ()))
+                   (_DeleteNamespaceRequest'namespaceId x__)
+                   (Control.DeepSeq.deepseq
+                      (_DeleteNamespaceRequest'namespaceDeleteDelay x__) ())))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.deletedNamespace' @:: Lens' DeleteNamespaceResponse Data.Text.Text@ -}
@@ -1347,6 +1755,467 @@ instance Control.DeepSeq.NFData DeleteNamespaceResponse where
              (_DeleteNamespaceResponse'_unknownFields x__)
              (Control.DeepSeq.deepseq
                 (_DeleteNamespaceResponse'deletedNamespace x__) ())
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.id' @:: Lens' DeleteNexusEndpointRequest Data.Text.Text@
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.version' @:: Lens' DeleteNexusEndpointRequest Data.Int.Int64@ -}
+data DeleteNexusEndpointRequest
+  = DeleteNexusEndpointRequest'_constructor {_DeleteNexusEndpointRequest'id :: !Data.Text.Text,
+                                             _DeleteNexusEndpointRequest'version :: !Data.Int.Int64,
+                                             _DeleteNexusEndpointRequest'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show DeleteNexusEndpointRequest where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField DeleteNexusEndpointRequest "id" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _DeleteNexusEndpointRequest'id
+           (\ x__ y__ -> x__ {_DeleteNexusEndpointRequest'id = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField DeleteNexusEndpointRequest "version" Data.Int.Int64 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _DeleteNexusEndpointRequest'version
+           (\ x__ y__ -> x__ {_DeleteNexusEndpointRequest'version = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message DeleteNexusEndpointRequest where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.operatorservice.v1.DeleteNexusEndpointRequest"
+  packedMessageDescriptor _
+    = "\n\
+      \\SUBDeleteNexusEndpointRequest\DC2\SO\n\
+      \\STXid\CAN\SOH \SOH(\tR\STXid\DC2\CAN\n\
+      \\aversion\CAN\STX \SOH(\ETXR\aversion"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        id__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"id")) ::
+              Data.ProtoLens.FieldDescriptor DeleteNexusEndpointRequest
+        version__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "version"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.Int64Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int64)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"version")) ::
+              Data.ProtoLens.FieldDescriptor DeleteNexusEndpointRequest
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, id__field_descriptor),
+           (Data.ProtoLens.Tag 2, version__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _DeleteNexusEndpointRequest'_unknownFields
+        (\ x__ y__
+           -> x__ {_DeleteNexusEndpointRequest'_unknownFields = y__})
+  defMessage
+    = DeleteNexusEndpointRequest'_constructor
+        {_DeleteNexusEndpointRequest'id = Data.ProtoLens.fieldDefault,
+         _DeleteNexusEndpointRequest'version = Data.ProtoLens.fieldDefault,
+         _DeleteNexusEndpointRequest'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          DeleteNexusEndpointRequest
+          -> Data.ProtoLens.Encoding.Bytes.Parser DeleteNexusEndpointRequest
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "id"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"id") y x)
+                        16
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "version"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"version") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "DeleteNexusEndpointRequest"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"id") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             ((Data.Monoid.<>)
+                (let
+                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"version") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
+                         ((Prelude..)
+                            Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData DeleteNexusEndpointRequest where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_DeleteNexusEndpointRequest'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_DeleteNexusEndpointRequest'id x__)
+                (Control.DeepSeq.deepseq
+                   (_DeleteNexusEndpointRequest'version x__) ()))
+{- | Fields :
+      -}
+data DeleteNexusEndpointResponse
+  = DeleteNexusEndpointResponse'_constructor {_DeleteNexusEndpointResponse'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show DeleteNexusEndpointResponse where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Message DeleteNexusEndpointResponse where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.operatorservice.v1.DeleteNexusEndpointResponse"
+  packedMessageDescriptor _
+    = "\n\
+      \\ESCDeleteNexusEndpointResponse"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag = let in Data.Map.fromList []
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _DeleteNexusEndpointResponse'_unknownFields
+        (\ x__ y__
+           -> x__ {_DeleteNexusEndpointResponse'_unknownFields = y__})
+  defMessage
+    = DeleteNexusEndpointResponse'_constructor
+        {_DeleteNexusEndpointResponse'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          DeleteNexusEndpointResponse
+          -> Data.ProtoLens.Encoding.Bytes.Parser DeleteNexusEndpointResponse
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "DeleteNexusEndpointResponse"
+  buildMessage
+    = \ _x
+        -> Data.ProtoLens.Encoding.Wire.buildFieldSet
+             (Lens.Family2.view Data.ProtoLens.unknownFields _x)
+instance Control.DeepSeq.NFData DeleteNexusEndpointResponse where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_DeleteNexusEndpointResponse'_unknownFields x__) ()
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.id' @:: Lens' GetNexusEndpointRequest Data.Text.Text@ -}
+data GetNexusEndpointRequest
+  = GetNexusEndpointRequest'_constructor {_GetNexusEndpointRequest'id :: !Data.Text.Text,
+                                          _GetNexusEndpointRequest'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show GetNexusEndpointRequest where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField GetNexusEndpointRequest "id" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _GetNexusEndpointRequest'id
+           (\ x__ y__ -> x__ {_GetNexusEndpointRequest'id = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message GetNexusEndpointRequest where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.operatorservice.v1.GetNexusEndpointRequest"
+  packedMessageDescriptor _
+    = "\n\
+      \\ETBGetNexusEndpointRequest\DC2\SO\n\
+      \\STXid\CAN\SOH \SOH(\tR\STXid"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        id__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"id")) ::
+              Data.ProtoLens.FieldDescriptor GetNexusEndpointRequest
+      in Data.Map.fromList [(Data.ProtoLens.Tag 1, id__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _GetNexusEndpointRequest'_unknownFields
+        (\ x__ y__ -> x__ {_GetNexusEndpointRequest'_unknownFields = y__})
+  defMessage
+    = GetNexusEndpointRequest'_constructor
+        {_GetNexusEndpointRequest'id = Data.ProtoLens.fieldDefault,
+         _GetNexusEndpointRequest'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          GetNexusEndpointRequest
+          -> Data.ProtoLens.Encoding.Bytes.Parser GetNexusEndpointRequest
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "id"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"id") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "GetNexusEndpointRequest"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"id") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData GetNexusEndpointRequest where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_GetNexusEndpointRequest'_unknownFields x__)
+             (Control.DeepSeq.deepseq (_GetNexusEndpointRequest'id x__) ())
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.endpoint' @:: Lens' GetNexusEndpointResponse Proto.Temporal.Api.Nexus.V1.Message.Endpoint@
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.maybe'endpoint' @:: Lens' GetNexusEndpointResponse (Prelude.Maybe Proto.Temporal.Api.Nexus.V1.Message.Endpoint)@ -}
+data GetNexusEndpointResponse
+  = GetNexusEndpointResponse'_constructor {_GetNexusEndpointResponse'endpoint :: !(Prelude.Maybe Proto.Temporal.Api.Nexus.V1.Message.Endpoint),
+                                           _GetNexusEndpointResponse'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show GetNexusEndpointResponse where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField GetNexusEndpointResponse "endpoint" Proto.Temporal.Api.Nexus.V1.Message.Endpoint where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _GetNexusEndpointResponse'endpoint
+           (\ x__ y__ -> x__ {_GetNexusEndpointResponse'endpoint = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField GetNexusEndpointResponse "maybe'endpoint" (Prelude.Maybe Proto.Temporal.Api.Nexus.V1.Message.Endpoint) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _GetNexusEndpointResponse'endpoint
+           (\ x__ y__ -> x__ {_GetNexusEndpointResponse'endpoint = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message GetNexusEndpointResponse where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.operatorservice.v1.GetNexusEndpointResponse"
+  packedMessageDescriptor _
+    = "\n\
+      \\CANGetNexusEndpointResponse\DC2;\n\
+      \\bendpoint\CAN\SOH \SOH(\v2\US.temporal.api.nexus.v1.EndpointR\bendpoint"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        endpoint__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "endpoint"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Nexus.V1.Message.Endpoint)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'endpoint")) ::
+              Data.ProtoLens.FieldDescriptor GetNexusEndpointResponse
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, endpoint__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _GetNexusEndpointResponse'_unknownFields
+        (\ x__ y__ -> x__ {_GetNexusEndpointResponse'_unknownFields = y__})
+  defMessage
+    = GetNexusEndpointResponse'_constructor
+        {_GetNexusEndpointResponse'endpoint = Prelude.Nothing,
+         _GetNexusEndpointResponse'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          GetNexusEndpointResponse
+          -> Data.ProtoLens.Encoding.Bytes.Parser GetNexusEndpointResponse
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "endpoint"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"endpoint") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "GetNexusEndpointResponse"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'endpoint") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData GetNexusEndpointResponse where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_GetNexusEndpointResponse'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_GetNexusEndpointResponse'endpoint x__) ())
 {- | Fields :
      
          * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.pageSize' @:: Lens' ListClustersRequest Data.Int.Int32@
@@ -1698,6 +2567,403 @@ instance Control.DeepSeq.NFData ListClustersResponse where
                    (_ListClustersResponse'nextPageToken x__) ()))
 {- | Fields :
      
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.pageSize' @:: Lens' ListNexusEndpointsRequest Data.Int.Int32@
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.nextPageToken' @:: Lens' ListNexusEndpointsRequest Data.ByteString.ByteString@
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.name' @:: Lens' ListNexusEndpointsRequest Data.Text.Text@ -}
+data ListNexusEndpointsRequest
+  = ListNexusEndpointsRequest'_constructor {_ListNexusEndpointsRequest'pageSize :: !Data.Int.Int32,
+                                            _ListNexusEndpointsRequest'nextPageToken :: !Data.ByteString.ByteString,
+                                            _ListNexusEndpointsRequest'name :: !Data.Text.Text,
+                                            _ListNexusEndpointsRequest'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show ListNexusEndpointsRequest where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField ListNexusEndpointsRequest "pageSize" Data.Int.Int32 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ListNexusEndpointsRequest'pageSize
+           (\ x__ y__ -> x__ {_ListNexusEndpointsRequest'pageSize = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ListNexusEndpointsRequest "nextPageToken" Data.ByteString.ByteString where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ListNexusEndpointsRequest'nextPageToken
+           (\ x__ y__
+              -> x__ {_ListNexusEndpointsRequest'nextPageToken = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ListNexusEndpointsRequest "name" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ListNexusEndpointsRequest'name
+           (\ x__ y__ -> x__ {_ListNexusEndpointsRequest'name = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message ListNexusEndpointsRequest where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.operatorservice.v1.ListNexusEndpointsRequest"
+  packedMessageDescriptor _
+    = "\n\
+      \\EMListNexusEndpointsRequest\DC2\ESC\n\
+      \\tpage_size\CAN\SOH \SOH(\ENQR\bpageSize\DC2&\n\
+      \\SInext_page_token\CAN\STX \SOH(\fR\rnextPageToken\DC2\DC2\n\
+      \\EOTname\CAN\ETX \SOH(\tR\EOTname"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        pageSize__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "page_size"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.Int32Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int32)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"pageSize")) ::
+              Data.ProtoLens.FieldDescriptor ListNexusEndpointsRequest
+        nextPageToken__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "next_page_token"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BytesField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.ByteString.ByteString)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"nextPageToken")) ::
+              Data.ProtoLens.FieldDescriptor ListNexusEndpointsRequest
+        name__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "name"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"name")) ::
+              Data.ProtoLens.FieldDescriptor ListNexusEndpointsRequest
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, pageSize__field_descriptor),
+           (Data.ProtoLens.Tag 2, nextPageToken__field_descriptor),
+           (Data.ProtoLens.Tag 3, name__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _ListNexusEndpointsRequest'_unknownFields
+        (\ x__ y__
+           -> x__ {_ListNexusEndpointsRequest'_unknownFields = y__})
+  defMessage
+    = ListNexusEndpointsRequest'_constructor
+        {_ListNexusEndpointsRequest'pageSize = Data.ProtoLens.fieldDefault,
+         _ListNexusEndpointsRequest'nextPageToken = Data.ProtoLens.fieldDefault,
+         _ListNexusEndpointsRequest'name = Data.ProtoLens.fieldDefault,
+         _ListNexusEndpointsRequest'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          ListNexusEndpointsRequest
+          -> Data.ProtoLens.Encoding.Bytes.Parser ListNexusEndpointsRequest
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "page_size"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"pageSize") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getBytes
+                                             (Prelude.fromIntegral len))
+                                       "next_page_token"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"nextPageToken") y x)
+                        26
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "name"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"name") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "ListNexusEndpointsRequest"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"pageSize") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
+                      ((Prelude..)
+                         Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
+             ((Data.Monoid.<>)
+                (let
+                   _v
+                     = Lens.Family2.view
+                         (Data.ProtoLens.Field.field @"nextPageToken") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                         ((\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                            _v))
+                ((Data.Monoid.<>)
+                   (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"name") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                            ((Prelude..)
+                               (\ bs
+                                  -> (Data.Monoid.<>)
+                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                               Data.Text.Encoding.encodeUtf8 _v))
+                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
+instance Control.DeepSeq.NFData ListNexusEndpointsRequest where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_ListNexusEndpointsRequest'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_ListNexusEndpointsRequest'pageSize x__)
+                (Control.DeepSeq.deepseq
+                   (_ListNexusEndpointsRequest'nextPageToken x__)
+                   (Control.DeepSeq.deepseq
+                      (_ListNexusEndpointsRequest'name x__) ())))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.nextPageToken' @:: Lens' ListNexusEndpointsResponse Data.ByteString.ByteString@
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.endpoints' @:: Lens' ListNexusEndpointsResponse [Proto.Temporal.Api.Nexus.V1.Message.Endpoint]@
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.vec'endpoints' @:: Lens' ListNexusEndpointsResponse (Data.Vector.Vector Proto.Temporal.Api.Nexus.V1.Message.Endpoint)@ -}
+data ListNexusEndpointsResponse
+  = ListNexusEndpointsResponse'_constructor {_ListNexusEndpointsResponse'nextPageToken :: !Data.ByteString.ByteString,
+                                             _ListNexusEndpointsResponse'endpoints :: !(Data.Vector.Vector Proto.Temporal.Api.Nexus.V1.Message.Endpoint),
+                                             _ListNexusEndpointsResponse'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show ListNexusEndpointsResponse where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField ListNexusEndpointsResponse "nextPageToken" Data.ByteString.ByteString where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ListNexusEndpointsResponse'nextPageToken
+           (\ x__ y__
+              -> x__ {_ListNexusEndpointsResponse'nextPageToken = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ListNexusEndpointsResponse "endpoints" [Proto.Temporal.Api.Nexus.V1.Message.Endpoint] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ListNexusEndpointsResponse'endpoints
+           (\ x__ y__ -> x__ {_ListNexusEndpointsResponse'endpoints = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField ListNexusEndpointsResponse "vec'endpoints" (Data.Vector.Vector Proto.Temporal.Api.Nexus.V1.Message.Endpoint) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ListNexusEndpointsResponse'endpoints
+           (\ x__ y__ -> x__ {_ListNexusEndpointsResponse'endpoints = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message ListNexusEndpointsResponse where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.operatorservice.v1.ListNexusEndpointsResponse"
+  packedMessageDescriptor _
+    = "\n\
+      \\SUBListNexusEndpointsResponse\DC2&\n\
+      \\SInext_page_token\CAN\SOH \SOH(\fR\rnextPageToken\DC2=\n\
+      \\tendpoints\CAN\STX \ETX(\v2\US.temporal.api.nexus.v1.EndpointR\tendpoints"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        nextPageToken__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "next_page_token"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BytesField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.ByteString.ByteString)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"nextPageToken")) ::
+              Data.ProtoLens.FieldDescriptor ListNexusEndpointsResponse
+        endpoints__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "endpoints"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Nexus.V1.Message.Endpoint)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked
+                 (Data.ProtoLens.Field.field @"endpoints")) ::
+              Data.ProtoLens.FieldDescriptor ListNexusEndpointsResponse
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, nextPageToken__field_descriptor),
+           (Data.ProtoLens.Tag 2, endpoints__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _ListNexusEndpointsResponse'_unknownFields
+        (\ x__ y__
+           -> x__ {_ListNexusEndpointsResponse'_unknownFields = y__})
+  defMessage
+    = ListNexusEndpointsResponse'_constructor
+        {_ListNexusEndpointsResponse'nextPageToken = Data.ProtoLens.fieldDefault,
+         _ListNexusEndpointsResponse'endpoints = Data.Vector.Generic.empty,
+         _ListNexusEndpointsResponse'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          ListNexusEndpointsResponse
+          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Proto.Temporal.Api.Nexus.V1.Message.Endpoint
+             -> Data.ProtoLens.Encoding.Bytes.Parser ListNexusEndpointsResponse
+        loop x mutable'endpoints
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do frozen'endpoints <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                            (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                               mutable'endpoints)
+                      (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
+                           (Lens.Family2.set
+                              (Data.ProtoLens.Field.field @"vec'endpoints") frozen'endpoints x))
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getBytes
+                                             (Prelude.fromIntegral len))
+                                       "next_page_token"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"nextPageToken") y x)
+                                  mutable'endpoints
+                        18
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "endpoints"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append mutable'endpoints y)
+                                loop x v
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+                                  mutable'endpoints
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do mutable'endpoints <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                     Data.ProtoLens.Encoding.Growing.new
+              loop Data.ProtoLens.defMessage mutable'endpoints)
+          "ListNexusEndpointsResponse"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view
+                      (Data.ProtoLens.Field.field @"nextPageToken") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((\ bs
+                          -> (Data.Monoid.<>)
+                               (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                  (Prelude.fromIntegral (Data.ByteString.length bs)))
+                               (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         _v))
+             ((Data.Monoid.<>)
+                (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                   (\ _v
+                      -> (Data.Monoid.<>)
+                           (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                           ((Prelude..)
+                              (\ bs
+                                 -> (Data.Monoid.<>)
+                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                              Data.ProtoLens.encodeMessage _v))
+                   (Lens.Family2.view
+                      (Data.ProtoLens.Field.field @"vec'endpoints") _x))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData ListNexusEndpointsResponse where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_ListNexusEndpointsResponse'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_ListNexusEndpointsResponse'nextPageToken x__)
+                (Control.DeepSeq.deepseq
+                   (_ListNexusEndpointsResponse'endpoints x__) ()))
+{- | Fields :
+     
          * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.namespace' @:: Lens' ListSearchAttributesRequest Data.Text.Text@ -}
 data ListSearchAttributesRequest
   = ListSearchAttributesRequest'_constructor {_ListSearchAttributesRequest'namespace :: !Data.Text.Text,
@@ -1884,9 +3150,6 @@ instance Data.ProtoLens.Message ListSearchAttributesResponse where
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                  Data.ProtoLens.FieldTypeDescriptor ListSearchAttributesResponse'CustomAttributesEntry)
               (Data.ProtoLens.MapField
-                 Data.ProtoLens.MapStringKey
-                 (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                    Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Common.IndexedValueType)
                  (Data.ProtoLens.Field.field @"key")
                  (Data.ProtoLens.Field.field @"value")
                  (Data.ProtoLens.Field.field @"customAttributes")) ::
@@ -1897,9 +3160,6 @@ instance Data.ProtoLens.Message ListSearchAttributesResponse where
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                  Data.ProtoLens.FieldTypeDescriptor ListSearchAttributesResponse'SystemAttributesEntry)
               (Data.ProtoLens.MapField
-                 Data.ProtoLens.MapStringKey
-                 (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                    Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Common.IndexedValueType)
                  (Data.ProtoLens.Field.field @"key")
                  (Data.ProtoLens.Field.field @"value")
                  (Data.ProtoLens.Field.field @"systemAttributes")) ::
@@ -1910,9 +3170,6 @@ instance Data.ProtoLens.Message ListSearchAttributesResponse where
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                  Data.ProtoLens.FieldTypeDescriptor ListSearchAttributesResponse'StorageSchemaEntry)
               (Data.ProtoLens.MapField
-                 Data.ProtoLens.MapStringKey
-                 (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                    Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
                  (Data.ProtoLens.Field.field @"key")
                  (Data.ProtoLens.Field.field @"value")
                  (Data.ProtoLens.Field.field @"storageSchema")) ::
@@ -3048,10 +4305,343 @@ instance Control.DeepSeq.NFData RemoveSearchAttributesResponse where
     = \ x__
         -> Control.DeepSeq.deepseq
              (_RemoveSearchAttributesResponse'_unknownFields x__) ()
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.id' @:: Lens' UpdateNexusEndpointRequest Data.Text.Text@
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.version' @:: Lens' UpdateNexusEndpointRequest Data.Int.Int64@
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.spec' @:: Lens' UpdateNexusEndpointRequest Proto.Temporal.Api.Nexus.V1.Message.EndpointSpec@
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.maybe'spec' @:: Lens' UpdateNexusEndpointRequest (Prelude.Maybe Proto.Temporal.Api.Nexus.V1.Message.EndpointSpec)@ -}
+data UpdateNexusEndpointRequest
+  = UpdateNexusEndpointRequest'_constructor {_UpdateNexusEndpointRequest'id :: !Data.Text.Text,
+                                             _UpdateNexusEndpointRequest'version :: !Data.Int.Int64,
+                                             _UpdateNexusEndpointRequest'spec :: !(Prelude.Maybe Proto.Temporal.Api.Nexus.V1.Message.EndpointSpec),
+                                             _UpdateNexusEndpointRequest'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show UpdateNexusEndpointRequest where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField UpdateNexusEndpointRequest "id" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _UpdateNexusEndpointRequest'id
+           (\ x__ y__ -> x__ {_UpdateNexusEndpointRequest'id = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField UpdateNexusEndpointRequest "version" Data.Int.Int64 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _UpdateNexusEndpointRequest'version
+           (\ x__ y__ -> x__ {_UpdateNexusEndpointRequest'version = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField UpdateNexusEndpointRequest "spec" Proto.Temporal.Api.Nexus.V1.Message.EndpointSpec where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _UpdateNexusEndpointRequest'spec
+           (\ x__ y__ -> x__ {_UpdateNexusEndpointRequest'spec = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField UpdateNexusEndpointRequest "maybe'spec" (Prelude.Maybe Proto.Temporal.Api.Nexus.V1.Message.EndpointSpec) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _UpdateNexusEndpointRequest'spec
+           (\ x__ y__ -> x__ {_UpdateNexusEndpointRequest'spec = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message UpdateNexusEndpointRequest where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.operatorservice.v1.UpdateNexusEndpointRequest"
+  packedMessageDescriptor _
+    = "\n\
+      \\SUBUpdateNexusEndpointRequest\DC2\SO\n\
+      \\STXid\CAN\SOH \SOH(\tR\STXid\DC2\CAN\n\
+      \\aversion\CAN\STX \SOH(\ETXR\aversion\DC27\n\
+      \\EOTspec\CAN\ETX \SOH(\v2#.temporal.api.nexus.v1.EndpointSpecR\EOTspec"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        id__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"id")) ::
+              Data.ProtoLens.FieldDescriptor UpdateNexusEndpointRequest
+        version__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "version"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.Int64Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int64)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"version")) ::
+              Data.ProtoLens.FieldDescriptor UpdateNexusEndpointRequest
+        spec__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "spec"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Nexus.V1.Message.EndpointSpec)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'spec")) ::
+              Data.ProtoLens.FieldDescriptor UpdateNexusEndpointRequest
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, id__field_descriptor),
+           (Data.ProtoLens.Tag 2, version__field_descriptor),
+           (Data.ProtoLens.Tag 3, spec__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _UpdateNexusEndpointRequest'_unknownFields
+        (\ x__ y__
+           -> x__ {_UpdateNexusEndpointRequest'_unknownFields = y__})
+  defMessage
+    = UpdateNexusEndpointRequest'_constructor
+        {_UpdateNexusEndpointRequest'id = Data.ProtoLens.fieldDefault,
+         _UpdateNexusEndpointRequest'version = Data.ProtoLens.fieldDefault,
+         _UpdateNexusEndpointRequest'spec = Prelude.Nothing,
+         _UpdateNexusEndpointRequest'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          UpdateNexusEndpointRequest
+          -> Data.ProtoLens.Encoding.Bytes.Parser UpdateNexusEndpointRequest
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "id"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"id") y x)
+                        16
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "version"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"version") y x)
+                        26
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "spec"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"spec") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "UpdateNexusEndpointRequest"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"id") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             ((Data.Monoid.<>)
+                (let
+                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"version") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
+                         ((Prelude..)
+                            Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
+                ((Data.Monoid.<>)
+                   (case
+                        Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'spec") _x
+                    of
+                      Prelude.Nothing -> Data.Monoid.mempty
+                      (Prelude.Just _v)
+                        -> (Data.Monoid.<>)
+                             (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                             ((Prelude..)
+                                (\ bs
+                                   -> (Data.Monoid.<>)
+                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                Data.ProtoLens.encodeMessage _v))
+                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
+instance Control.DeepSeq.NFData UpdateNexusEndpointRequest where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_UpdateNexusEndpointRequest'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_UpdateNexusEndpointRequest'id x__)
+                (Control.DeepSeq.deepseq
+                   (_UpdateNexusEndpointRequest'version x__)
+                   (Control.DeepSeq.deepseq
+                      (_UpdateNexusEndpointRequest'spec x__) ())))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.endpoint' @:: Lens' UpdateNexusEndpointResponse Proto.Temporal.Api.Nexus.V1.Message.Endpoint@
+         * 'Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields.maybe'endpoint' @:: Lens' UpdateNexusEndpointResponse (Prelude.Maybe Proto.Temporal.Api.Nexus.V1.Message.Endpoint)@ -}
+data UpdateNexusEndpointResponse
+  = UpdateNexusEndpointResponse'_constructor {_UpdateNexusEndpointResponse'endpoint :: !(Prelude.Maybe Proto.Temporal.Api.Nexus.V1.Message.Endpoint),
+                                              _UpdateNexusEndpointResponse'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show UpdateNexusEndpointResponse where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField UpdateNexusEndpointResponse "endpoint" Proto.Temporal.Api.Nexus.V1.Message.Endpoint where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _UpdateNexusEndpointResponse'endpoint
+           (\ x__ y__ -> x__ {_UpdateNexusEndpointResponse'endpoint = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField UpdateNexusEndpointResponse "maybe'endpoint" (Prelude.Maybe Proto.Temporal.Api.Nexus.V1.Message.Endpoint) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _UpdateNexusEndpointResponse'endpoint
+           (\ x__ y__ -> x__ {_UpdateNexusEndpointResponse'endpoint = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message UpdateNexusEndpointResponse where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.operatorservice.v1.UpdateNexusEndpointResponse"
+  packedMessageDescriptor _
+    = "\n\
+      \\ESCUpdateNexusEndpointResponse\DC2;\n\
+      \\bendpoint\CAN\SOH \SOH(\v2\US.temporal.api.nexus.v1.EndpointR\bendpoint"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        endpoint__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "endpoint"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Nexus.V1.Message.Endpoint)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'endpoint")) ::
+              Data.ProtoLens.FieldDescriptor UpdateNexusEndpointResponse
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, endpoint__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _UpdateNexusEndpointResponse'_unknownFields
+        (\ x__ y__
+           -> x__ {_UpdateNexusEndpointResponse'_unknownFields = y__})
+  defMessage
+    = UpdateNexusEndpointResponse'_constructor
+        {_UpdateNexusEndpointResponse'endpoint = Prelude.Nothing,
+         _UpdateNexusEndpointResponse'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          UpdateNexusEndpointResponse
+          -> Data.ProtoLens.Encoding.Bytes.Parser UpdateNexusEndpointResponse
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "endpoint"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"endpoint") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "UpdateNexusEndpointResponse"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'endpoint") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData UpdateNexusEndpointResponse where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_UpdateNexusEndpointResponse'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_UpdateNexusEndpointResponse'endpoint x__) ())
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \6temporal/api/operatorservice/v1/request_response.proto\DC2\UStemporal.api.operatorservice.v1\SUB\"temporal/api/enums/v1/common.proto\"\168\STX\n\
+    \6temporal/api/operatorservice/v1/request_response.proto\DC2\UStemporal.api.operatorservice.v1\SUB\"temporal/api/enums/v1/common.proto\SUB#temporal/api/nexus/v1/message.proto\SUB\RSgoogle/protobuf/duration.proto\"\168\STX\n\
     \\SUBAddSearchAttributesRequest\DC2~\n\
     \\DC1search_attributes\CAN\SOH \ETX(\v2Q.temporal.api.operatorservice.v1.AddSearchAttributesRequest.SearchAttributesEntryR\DLEsearchAttributes\DC2\FS\n\
     \\tnamespace\CAN\STX \SOH(\tR\tnamespace\SUBl\n\
@@ -3077,15 +4667,17 @@ packedFileDescriptor
     \\ENQvalue\CAN\STX \SOH(\SO2'.temporal.api.enums.v1.IndexedValueTypeR\ENQvalue:\STX8\SOH\SUB@\n\
     \\DC2StorageSchemaEntry\DC2\DLE\n\
     \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-    \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH\"Y\n\
+    \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH\"\170\SOH\n\
     \\SYNDeleteNamespaceRequest\DC2\FS\n\
     \\tnamespace\CAN\SOH \SOH(\tR\tnamespace\DC2!\n\
-    \\fnamespace_id\CAN\STX \SOH(\tR\vnamespaceId\"F\n\
+    \\fnamespace_id\CAN\STX \SOH(\tR\vnamespaceId\DC2O\n\
+    \\SYNnamespace_delete_delay\CAN\ETX \SOH(\v2\EM.google.protobuf.DurationR\DC4namespaceDeleteDelay\"F\n\
     \\ETBDeleteNamespaceResponse\DC2+\n\
-    \\DC1deleted_namespace\CAN\SOH \SOH(\tR\DLEdeletedNamespace\"\149\SOH\n\
+    \\DC1deleted_namespace\CAN\SOH \SOH(\tR\DLEdeletedNamespace\"\201\SOH\n\
     \\USAddOrUpdateRemoteClusterRequest\DC2)\n\
     \\DLEfrontend_address\CAN\SOH \SOH(\tR\SIfrontendAddress\DC2G\n\
-    \ enable_remote_cluster_connection\CAN\STX \SOH(\bR\GSenableRemoteClusterConnection\"\"\n\
+    \ enable_remote_cluster_connection\CAN\STX \SOH(\bR\GSenableRemoteClusterConnection\DC22\n\
+    \\NAKfrontend_http_address\CAN\ETX \SOH(\tR\DC3frontendHttpAddress\"\"\n\
     \ AddOrUpdateRemoteClusterResponse\"?\n\
     \\SUBRemoveRemoteClusterRequest\DC2!\n\
     \\fcluster_name\CAN\SOH \SOH(\tR\vclusterName\"\GS\n\
@@ -3095,17 +4687,43 @@ packedFileDescriptor
     \\SInext_page_token\CAN\STX \SOH(\fR\rnextPageToken\"\140\SOH\n\
     \\DC4ListClustersResponse\DC2L\n\
     \\bclusters\CAN\SOH \ETX(\v20.temporal.api.operatorservice.v1.ClusterMetadataR\bclusters\DC2&\n\
-    \\SInext_page_token\CAN\EOT \SOH(\fR\rnextPageToken\"\139\STX\n\
+    \\SInext_page_token\CAN\EOT \SOH(\fR\rnextPageToken\"\174\STX\n\
     \\SIClusterMetadata\DC2!\n\
     \\fcluster_name\CAN\SOH \SOH(\tR\vclusterName\DC2\GS\n\
     \\n\
     \cluster_id\CAN\STX \SOH(\tR\tclusterId\DC2\CAN\n\
-    \\aaddress\CAN\ETX \SOH(\tR\aaddress\DC28\n\
+    \\aaddress\CAN\ETX \SOH(\tR\aaddress\DC2!\n\
+    \\fhttp_address\CAN\a \SOH(\tR\vhttpAddress\DC28\n\
     \\CANinitial_failover_version\CAN\EOT \SOH(\ETXR\SYNinitialFailoverVersion\DC2.\n\
     \\DC3history_shard_count\CAN\ENQ \SOH(\ENQR\DC1historyShardCount\DC22\n\
-    \\NAKis_connection_enabled\CAN\ACK \SOH(\bR\DC3isConnectionEnabledB\190\SOH\n\
-    \\"io.temporal.api.operatorservice.v1B\DC4RequestResponseProtoP\SOHZ5go.temporal.io/api/operatorservice/v1;operatorservice\170\STX!Temporalio.Api.OperatorService.V1\234\STX$Temporalio::Api::OperatorService::V1J\155!\n\
-    \\ACK\DC2\EOT\SYN\NUL}\SOH\n\
+    \\NAKis_connection_enabled\CAN\ACK \SOH(\bR\DC3isConnectionEnabled\")\n\
+    \\ETBGetNexusEndpointRequest\DC2\SO\n\
+    \\STXid\CAN\SOH \SOH(\tR\STXid\"W\n\
+    \\CANGetNexusEndpointResponse\DC2;\n\
+    \\bendpoint\CAN\SOH \SOH(\v2\US.temporal.api.nexus.v1.EndpointR\bendpoint\"U\n\
+    \\SUBCreateNexusEndpointRequest\DC27\n\
+    \\EOTspec\CAN\SOH \SOH(\v2#.temporal.api.nexus.v1.EndpointSpecR\EOTspec\"Z\n\
+    \\ESCCreateNexusEndpointResponse\DC2;\n\
+    \\bendpoint\CAN\SOH \SOH(\v2\US.temporal.api.nexus.v1.EndpointR\bendpoint\"\DEL\n\
+    \\SUBUpdateNexusEndpointRequest\DC2\SO\n\
+    \\STXid\CAN\SOH \SOH(\tR\STXid\DC2\CAN\n\
+    \\aversion\CAN\STX \SOH(\ETXR\aversion\DC27\n\
+    \\EOTspec\CAN\ETX \SOH(\v2#.temporal.api.nexus.v1.EndpointSpecR\EOTspec\"Z\n\
+    \\ESCUpdateNexusEndpointResponse\DC2;\n\
+    \\bendpoint\CAN\SOH \SOH(\v2\US.temporal.api.nexus.v1.EndpointR\bendpoint\"F\n\
+    \\SUBDeleteNexusEndpointRequest\DC2\SO\n\
+    \\STXid\CAN\SOH \SOH(\tR\STXid\DC2\CAN\n\
+    \\aversion\CAN\STX \SOH(\ETXR\aversion\"\GS\n\
+    \\ESCDeleteNexusEndpointResponse\"t\n\
+    \\EMListNexusEndpointsRequest\DC2\ESC\n\
+    \\tpage_size\CAN\SOH \SOH(\ENQR\bpageSize\DC2&\n\
+    \\SInext_page_token\CAN\STX \SOH(\fR\rnextPageToken\DC2\DC2\n\
+    \\EOTname\CAN\ETX \SOH(\tR\EOTname\"\131\SOH\n\
+    \\SUBListNexusEndpointsResponse\DC2&\n\
+    \\SInext_page_token\CAN\SOH \SOH(\fR\rnextPageToken\DC2=\n\
+    \\tendpoints\CAN\STX \ETX(\v2\US.temporal.api.nexus.v1.EndpointR\tendpointsB\190\SOH\n\
+    \\"io.temporal.api.operatorservice.v1B\DC4RequestResponseProtoP\SOHZ5go.temporal.io/api/operatorservice/v1;operatorservice\170\STX!Temporalio.Api.OperatorService.V1\234\STX$Temporalio::Api::OperatorService::V1J\202\&4\n\
+    \\a\DC2\ENQ\SYN\NUL\192\SOH\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -3158,331 +4776,548 @@ packedFileDescriptor
     \\STX\b%\DC2\ETX\US\NUL>\n\
     \\t\n\
     \\STX\ETX\NUL\DC2\ETX!\NUL,\n\
+    \\t\n\
+    \\STX\ETX\SOH\DC2\ETX\"\NUL-\n\
+    \\t\n\
+    \\STX\ETX\STX\DC2\ETX#\NUL(\n\
     \&\n\
-    \\STX\EOT\NUL\DC2\EOT%\NUL)\SOH2\SUB (-- Search Attribute --)\n\
+    \\STX\EOT\NUL\DC2\EOT'\NUL+\SOH2\SUB (-- Search Attribute --)\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX%\b\"\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX'\b\"\n\
     \N\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX'\EOTN\SUBA Mapping between search attribute name and its IndexedValueType.\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX)\EOTN\SUBA Mapping between search attribute name and its IndexedValueType.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX'\EOT7\n\
+    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX)\EOT7\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX'8I\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX)8I\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX'LM\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX)LM\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX(\EOT\EM\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX*\EOT\EM\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX(\EOT\n\
+    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX*\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX(\v\DC4\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX*\v\DC4\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX(\ETB\CAN\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX*\ETB\CAN\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT+\NUL,\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT-\NUL.\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX+\b#\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX-\b#\n\
     \\n\
     \\n\
-    \\STX\EOT\STX\DC2\EOT.\NUL2\SOH\n\
+    \\STX\EOT\STX\DC2\EOT0\NUL4\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX.\b%\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX0\b%\n\
     \0\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX0\EOT*\SUB# Search attribute names to delete.\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX2\EOT*\SUB# Search attribute names to delete.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\EOT\DC2\ETX0\EOT\f\n\
+    \\ENQ\EOT\STX\STX\NUL\EOT\DC2\ETX2\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX0\r\DC3\n\
+    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX2\r\DC3\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX0\DC4%\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX2\DC4%\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX0()\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX2()\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX1\EOT\EM\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX3\EOT\EM\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX1\EOT\n\
+    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX3\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX1\v\DC4\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX3\v\DC4\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX1\ETB\CAN\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX3\ETB\CAN\n\
     \\n\
     \\n\
-    \\STX\EOT\ETX\DC2\EOT4\NUL5\SOH\n\
+    \\STX\EOT\ETX\DC2\EOT6\NUL7\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX4\b&\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX6\b&\n\
     \\n\
     \\n\
-    \\STX\EOT\EOT\DC2\EOT7\NUL9\SOH\n\
+    \\STX\EOT\EOT\DC2\EOT9\NUL;\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETX7\b#\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETX9\b#\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETX8\EOT\EM\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETX:\EOT\EM\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETX8\EOT\n\
+    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETX:\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX8\v\DC4\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX:\v\DC4\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX8\ETB\CAN\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX:\ETB\CAN\n\
     \\n\
     \\n\
-    \\STX\EOT\ENQ\DC2\EOT;\NULB\SOH\n\
+    \\STX\EOT\ENQ\DC2\EOT=\NULD\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETX;\b$\n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETX=\b$\n\
     \f\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX=\EOTN\SUBY Mapping between custom (user-registered) search attribute name to its IndexedValueType.\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX?\EOTN\SUBY Mapping between custom (user-registered) search attribute name to its IndexedValueType.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETX=\EOT7\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETX?\EOT7\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX=8I\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX?8I\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX=LM\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX?LM\n\
     \a\n\
-    \\EOT\EOT\ENQ\STX\SOH\DC2\ETX?\EOTN\SUBT Mapping between system (predefined) search attribute name to its IndexedValueType.\n\
+    \\EOT\EOT\ENQ\STX\SOH\DC2\ETXA\EOTN\SUBT Mapping between system (predefined) search attribute name to its IndexedValueType.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ACK\DC2\ETX?\EOT7\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ACK\DC2\ETXA\EOT7\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETX?8I\n\
+    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETXA8I\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETX?LM\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETXALM\n\
     \U\n\
-    \\EOT\EOT\ENQ\STX\STX\DC2\ETXA\EOT+\SUBH Mapping from the attribute name to the visibility storage native type.\n\
+    \\EOT\EOT\ENQ\STX\STX\DC2\ETXC\EOT+\SUBH Mapping from the attribute name to the visibility storage native type.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\ACK\DC2\ETXA\EOT\ETB\n\
+    \\ENQ\EOT\ENQ\STX\STX\ACK\DC2\ETXC\EOT\ETB\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\ETXA\CAN&\n\
+    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\ETXC\CAN&\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\ETXA)*\n\
-    \\178\STX\n\
-    \\STX\EOT\ACK\DC2\EOTH\NULL\SOH\SUB\165\STX (-- api-linter: core::0135::request-unknown-fields=disabled\n\
-    \     aip.dev/not-precedent: DeleteNamespace RPC doesn't follow Google API format. --)\n\
-    \ (-- api-linter: core::0135::request-name-required=disabled\n\
-    \     aip.dev/not-precedent: DeleteNamespace RPC doesn't follow Google API format. --)\n\
+    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\ETXC)*\n\
     \\n\
     \\n\
+    \\STX\EOT\ACK\DC2\EOTF\NULM\SOH\n\
     \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETXH\b\RS\n\
+    \\n\
+    \\ETX\EOT\ACK\SOH\DC2\ETXF\b\RS\n\
     \]\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\ETXJ\EOT\EM\SUBP Only one of namespace or namespace_id must be specified to identify namespace.\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\ETXH\EOT\EM\SUBP Only one of namespace or namespace_id must be specified to identify namespace.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETXJ\EOT\n\
+    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETXH\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXJ\v\DC4\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXH\v\DC4\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXJ\ETB\CAN\n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXH\ETB\CAN\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\SOH\DC2\ETXK\EOT\FS\n\
+    \\EOT\EOT\ACK\STX\SOH\DC2\ETXI\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ENQ\DC2\ETXK\EOT\n\
+    \\ENQ\EOT\ACK\STX\SOH\ENQ\DC2\ETXI\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXK\v\ETB\n\
+    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXI\v\ETB\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXK\SUB\ESC\n\
+    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXI\SUB\ESC\n\
+    \\194\SOH\n\
+    \\EOT\EOT\ACK\STX\STX\DC2\ETXL\EOT8\SUB\180\SOH If provided, the deletion of namespace info will be delayed for the given duration (0 means no delay).\n\
+    \ If not provided, the default delay configured in the cluster will be used.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\ACK\STX\STX\ACK\DC2\ETXL\EOT\FS\n\
+    \\f\n\
+    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\ETXL\GS3\n\
+    \\f\n\
+    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\ETXL67\n\
     \\n\
     \\n\
-    \\STX\EOT\a\DC2\EOTN\NULQ\SOH\n\
+    \\STX\EOT\a\DC2\EOTO\NULR\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\a\SOH\DC2\ETXN\b\US\n\
+    \\ETX\EOT\a\SOH\DC2\ETXO\b\US\n\
     \S\n\
-    \\EOT\EOT\a\STX\NUL\DC2\ETXP\EOT!\SUBF Temporary namespace name that is used during reclaim resources step.\n\
+    \\EOT\EOT\a\STX\NUL\DC2\ETXQ\EOT!\SUBF Temporary namespace name that is used during reclaim resources step.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETXP\EOT\n\
+    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETXQ\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETXP\v\FS\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETXQ\v\FS\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETXP\US \n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETXQ\US \n\
     \\n\
     \\n\
-    \\STX\EOT\b\DC2\EOTS\NULX\SOH\n\
+    \\STX\EOT\b\DC2\EOTT\NUL\\\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\b\SOH\DC2\ETXS\b'\n\
-    \F\n\
-    \\EOT\EOT\b\STX\NUL\DC2\ETXU\EOT \SUB9 Frontend Address is a cross cluster accessible address.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\ETXU\EOT\n\
+    \\ETX\EOT\b\SOH\DC2\ETXT\b'\n\
+    \o\n\
+    \\EOT\EOT\b\STX\NUL\DC2\ETXV\EOT \SUBb Frontend Address is a cross cluster accessible address for gRPC traffic. This field is required.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETXU\v\ESC\n\
+    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\ETXV\EOT\n\
+    \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETXU\RS\US\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETXV\v\ESC\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETXV\RS\US\n\
     \E\n\
-    \\EOT\EOT\b\STX\SOH\DC2\ETXW\EOT.\SUB8 Flag to enable / disable the cross cluster connection.\n\
+    \\EOT\EOT\b\STX\SOH\DC2\ETXX\EOT.\SUB8 Flag to enable / disable the cross cluster connection.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\ETXW\EOT\b\n\
+    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\ETXX\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETXW\t)\n\
+    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETXX\t)\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETXW,-\n\
+    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETXX,-\n\
+    \\189\SOH\n\
+    \\EOT\EOT\b\STX\STX\DC2\ETX[\EOT%\SUB\175\SOH Frontend HTTP Address is a cross cluster accessible address for HTTP traffic. This field is optional. If not provided\n\
+    \  on update, the existing HTTP address will be removed.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\STX\ENQ\DC2\ETX[\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\STX\SOH\DC2\ETX[\v \n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\STX\ETX\DC2\ETX[#$\n\
     \\n\
     \\n\
-    \\STX\EOT\t\DC2\EOTZ\NUL[\SOH\n\
+    \\STX\EOT\t\DC2\EOT^\NUL_\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\t\SOH\DC2\ETXZ\b(\n\
+    \\ETX\EOT\t\SOH\DC2\ETX^\b(\n\
     \\n\
     \\n\
     \\STX\EOT\n\
-    \\DC2\EOT]\NUL`\SOH\n\
+    \\DC2\EOTa\NULd\SOH\n\
     \\n\
     \\n\
     \\ETX\EOT\n\
-    \\SOH\DC2\ETX]\b\"\n\
+    \\SOH\DC2\ETXa\b\"\n\
     \1\n\
     \\EOT\EOT\n\
-    \\STX\NUL\DC2\ETX_\EOT\FS\SUB$ Remote cluster name to be removed.\n\
+    \\STX\NUL\DC2\ETXc\EOT\FS\SUB$ Remote cluster name to be removed.\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ENQ\DC2\ETX_\EOT\n\
+    \\STX\NUL\ENQ\DC2\ETXc\EOT\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\SOH\DC2\ETX_\v\ETB\n\
+    \\STX\NUL\SOH\DC2\ETXc\v\ETB\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ETX\DC2\ETX_\SUB\ESC\n\
+    \\STX\NUL\ETX\DC2\ETXc\SUB\ESC\n\
     \\n\
     \\n\
-    \\STX\EOT\v\DC2\EOTb\NULc\SOH\n\
+    \\STX\EOT\v\DC2\EOTf\NULg\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\v\SOH\DC2\ETXb\b#\n\
+    \\ETX\EOT\v\SOH\DC2\ETXf\b#\n\
     \\n\
     \\n\
-    \\STX\EOT\f\DC2\EOTe\NULh\SOH\n\
+    \\STX\EOT\f\DC2\EOTi\NULl\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\f\SOH\DC2\ETXe\b\ESC\n\
+    \\ETX\EOT\f\SOH\DC2\ETXi\b\ESC\n\
     \\v\n\
-    \\EOT\EOT\f\STX\NUL\DC2\ETXf\EOT\CAN\n\
+    \\EOT\EOT\f\STX\NUL\DC2\ETXj\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\ETXf\EOT\t\n\
+    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\ETXj\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\NUL\SOH\DC2\ETXf\n\
+    \\ENQ\EOT\f\STX\NUL\SOH\DC2\ETXj\n\
     \\DC3\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\NUL\ETX\DC2\ETXf\SYN\ETB\n\
+    \\ENQ\EOT\f\STX\NUL\ETX\DC2\ETXj\SYN\ETB\n\
     \\v\n\
-    \\EOT\EOT\f\STX\SOH\DC2\ETXg\EOT\RS\n\
+    \\EOT\EOT\f\STX\SOH\DC2\ETXk\EOT\RS\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\SOH\ENQ\DC2\ETXg\EOT\t\n\
+    \\ENQ\EOT\f\STX\SOH\ENQ\DC2\ETXk\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\SOH\SOH\DC2\ETXg\n\
+    \\ENQ\EOT\f\STX\SOH\SOH\DC2\ETXk\n\
     \\EM\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\SOH\ETX\DC2\ETXg\FS\GS\n\
+    \\ENQ\EOT\f\STX\SOH\ETX\DC2\ETXk\FS\GS\n\
     \\n\
     \\n\
-    \\STX\EOT\r\DC2\EOTj\NULn\SOH\n\
+    \\STX\EOT\r\DC2\EOTn\NULr\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\r\SOH\DC2\ETXj\b\FS\n\
+    \\ETX\EOT\r\SOH\DC2\ETXn\b\FS\n\
     \.\n\
-    \\EOT\EOT\r\STX\NUL\DC2\ETXl\EOT*\SUB! List of all cluster information\n\
+    \\EOT\EOT\r\STX\NUL\DC2\ETXp\EOT*\SUB! List of all cluster information\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\EOT\DC2\ETXl\EOT\f\n\
+    \\ENQ\EOT\r\STX\NUL\EOT\DC2\ETXp\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\ACK\DC2\ETXl\r\FS\n\
+    \\ENQ\EOT\r\STX\NUL\ACK\DC2\ETXp\r\FS\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\SOH\DC2\ETXl\GS%\n\
+    \\ENQ\EOT\r\STX\NUL\SOH\DC2\ETXp\GS%\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\ETX\DC2\ETXl()\n\
+    \\ENQ\EOT\r\STX\NUL\ETX\DC2\ETXp()\n\
     \\v\n\
-    \\EOT\EOT\r\STX\SOH\DC2\ETXm\EOT\RS\n\
+    \\EOT\EOT\r\STX\SOH\DC2\ETXq\EOT\RS\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\SOH\ENQ\DC2\ETXm\EOT\t\n\
+    \\ENQ\EOT\r\STX\SOH\ENQ\DC2\ETXq\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\SOH\SOH\DC2\ETXm\n\
+    \\ENQ\EOT\r\STX\SOH\SOH\DC2\ETXq\n\
     \\EM\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\SOH\ETX\DC2\ETXm\FS\GS\n\
+    \\ENQ\EOT\r\STX\SOH\ETX\DC2\ETXq\FS\GS\n\
+    \\v\n\
+    \\STX\EOT\SO\DC2\ENQt\NUL\131\SOH\SOH\n\
     \\n\
     \\n\
-    \\STX\EOT\SO\DC2\EOTp\NUL}\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\SO\SOH\DC2\ETXp\b\ETB\n\
+    \\ETX\EOT\SO\SOH\DC2\ETXt\b\ETB\n\
     \(\n\
-    \\EOT\EOT\SO\STX\NUL\DC2\ETXr\EOT\FS\SUB\ESC Name of the cluster name.\n\
+    \\EOT\EOT\SO\STX\NUL\DC2\ETXv\EOT\FS\SUB\ESC Name of the cluster name.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\NUL\ENQ\DC2\ETXr\EOT\n\
+    \\ENQ\EOT\SO\STX\NUL\ENQ\DC2\ETXv\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\ETXr\v\ETB\n\
+    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\ETXv\v\ETB\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\ETXr\SUB\ESC\n\
+    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\ETXv\SUB\ESC\n\
     \!\n\
-    \\EOT\EOT\SO\STX\SOH\DC2\ETXt\EOT\SUB\SUB\DC4 Id of the cluster.\n\
+    \\EOT\EOT\SO\STX\SOH\DC2\ETXx\EOT\SUB\SUB\DC4 Id of the cluster.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\SOH\ENQ\DC2\ETXt\EOT\n\
+    \\ENQ\EOT\SO\STX\SOH\ENQ\DC2\ETXx\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\ETXt\v\NAK\n\
+    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\ETXx\v\NAK\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\ETXt\CAN\EM\n\
-    \*\n\
-    \\EOT\EOT\SO\STX\STX\DC2\ETXv\EOT\ETB\SUB\GS Cluster accessible address.\n\
+    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\ETXx\CAN\EM\n\
+    \\FS\n\
+    \\EOT\EOT\SO\STX\STX\DC2\ETXz\EOT\ETB\SUB\SI gRPC address.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\STX\ENQ\DC2\ETXv\EOT\n\
+    \\ENQ\EOT\SO\STX\STX\ENQ\DC2\ETXz\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\STX\SOH\DC2\ETXv\v\DC2\n\
+    \\ENQ\EOT\SO\STX\STX\SOH\DC2\ETXz\v\DC2\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\STX\ETX\DC2\ETXv\NAK\SYN\n\
+    \\ENQ\EOT\SO\STX\STX\ETX\DC2\ETXz\NAK\SYN\n\
+    \+\n\
+    \\EOT\EOT\SO\STX\ETX\DC2\ETX|\EOT\FS\SUB\RS HTTP address, if one exists.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\SO\STX\ETX\ENQ\DC2\ETX|\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\SO\STX\ETX\SOH\DC2\ETX|\v\ETB\n\
+    \\f\n\
+    \\ENQ\EOT\SO\STX\ETX\ETX\DC2\ETX|\SUB\ESC\n\
     \G\n\
-    \\EOT\EOT\SO\STX\ETX\DC2\ETXx\EOT'\SUB: A unique failover version across all connected clusters.\n\
+    \\EOT\EOT\SO\STX\EOT\DC2\ETX~\EOT'\SUB: A unique failover version across all connected clusters.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\ETX\ENQ\DC2\ETXx\EOT\t\n\
+    \\ENQ\EOT\SO\STX\EOT\ENQ\DC2\ETX~\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\ETX\SOH\DC2\ETXx\n\
+    \\ENQ\EOT\SO\STX\EOT\SOH\DC2\ETX~\n\
     \\"\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\ETX\ETX\DC2\ETXx%&\n\
-    \,\n\
-    \\EOT\EOT\SO\STX\EOT\DC2\ETXz\EOT\"\SUB\US History service shard number.\n\
+    \\ENQ\EOT\SO\STX\EOT\ETX\DC2\ETX~%&\n\
+    \-\n\
+    \\EOT\EOT\SO\STX\ENQ\DC2\EOT\128\SOH\EOT\"\SUB\US History service shard number.\n\
     \\n\
-    \\f\n\
-    \\ENQ\EOT\SO\STX\EOT\ENQ\DC2\ETXz\EOT\t\n\
-    \\f\n\
-    \\ENQ\EOT\SO\STX\EOT\SOH\DC2\ETXz\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\ENQ\ENQ\DC2\EOT\128\SOH\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\ENQ\SOH\DC2\EOT\128\SOH\n\
     \\GS\n\
-    \\f\n\
-    \\ENQ\EOT\SO\STX\EOT\ETX\DC2\ETXz !\n\
-    \<\n\
-    \\EOT\EOT\SO\STX\ENQ\DC2\ETX|\EOT#\SUB/ A flag to indicate if a connection is active.\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\ENQ\ETX\DC2\EOT\128\SOH !\n\
+    \=\n\
+    \\EOT\EOT\SO\STX\ACK\DC2\EOT\130\SOH\EOT#\SUB/ A flag to indicate if a connection is active.\n\
     \\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\ACK\ENQ\DC2\EOT\130\SOH\EOT\b\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\ACK\SOH\DC2\EOT\130\SOH\t\RS\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\ACK\ETX\DC2\EOT\130\SOH!\"\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\ENQ\ENQ\DC2\ETX|\EOT\b\n\
+    \\STX\EOT\SI\DC2\ACK\133\SOH\NUL\136\SOH\SOH\n\
+    \\v\n\
+    \\ETX\EOT\SI\SOH\DC2\EOT\133\SOH\b\US\n\
+    \4\n\
+    \\EOT\EOT\SI\STX\NUL\DC2\EOT\135\SOH\EOT\DC2\SUB& Server-generated unique endpoint ID.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\EOT\135\SOH\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\EOT\135\SOH\v\r\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\EOT\135\SOH\DLE\DC1\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\ENQ\SOH\DC2\ETX|\t\RS\n\
+    \\STX\EOT\DLE\DC2\ACK\138\SOH\NUL\140\SOH\SOH\n\
+    \\v\n\
+    \\ETX\EOT\DLE\SOH\DC2\EOT\138\SOH\b \n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\ENQ\ETX\DC2\ETX|!\"b\ACKproto3"
+    \\EOT\EOT\DLE\STX\NUL\DC2\EOT\139\SOH\EOT0\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\NUL\ACK\DC2\EOT\139\SOH\EOT\"\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\NUL\SOH\DC2\EOT\139\SOH#+\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\NUL\ETX\DC2\EOT\139\SOH./\n\
+    \\f\n\
+    \\STX\EOT\DC1\DC2\ACK\142\SOH\NUL\145\SOH\SOH\n\
+    \\v\n\
+    \\ETX\EOT\DC1\SOH\DC2\EOT\142\SOH\b\"\n\
+    \.\n\
+    \\EOT\EOT\DC1\STX\NUL\DC2\EOT\144\SOH\EOT0\SUB  Endpoint definition to create.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\NUL\ACK\DC2\EOT\144\SOH\EOT&\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\NUL\SOH\DC2\EOT\144\SOH'+\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\NUL\ETX\DC2\EOT\144\SOH./\n\
+    \\f\n\
+    \\STX\EOT\DC2\DC2\ACK\147\SOH\NUL\150\SOH\SOH\n\
+    \\v\n\
+    \\ETX\EOT\DC2\SOH\DC2\EOT\147\SOH\b#\n\
+    \]\n\
+    \\EOT\EOT\DC2\STX\NUL\DC2\EOT\149\SOH\EOT0\SUBO Data post acceptance. Can be used to issue additional updates to this record.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DC2\STX\NUL\ACK\DC2\EOT\149\SOH\EOT\"\n\
+    \\r\n\
+    \\ENQ\EOT\DC2\STX\NUL\SOH\DC2\EOT\149\SOH#+\n\
+    \\r\n\
+    \\ENQ\EOT\DC2\STX\NUL\ETX\DC2\EOT\149\SOH./\n\
+    \\f\n\
+    \\STX\EOT\DC3\DC2\ACK\152\SOH\NUL\159\SOH\SOH\n\
+    \\v\n\
+    \\ETX\EOT\DC3\SOH\DC2\EOT\152\SOH\b\"\n\
+    \4\n\
+    \\EOT\EOT\DC3\STX\NUL\DC2\EOT\154\SOH\EOT\DC2\SUB& Server-generated unique endpoint ID.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DC3\STX\NUL\ENQ\DC2\EOT\154\SOH\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DC3\STX\NUL\SOH\DC2\EOT\154\SOH\v\r\n\
+    \\r\n\
+    \\ENQ\EOT\DC3\STX\NUL\ETX\DC2\EOT\154\SOH\DLE\DC1\n\
+    \K\n\
+    \\EOT\EOT\DC3\STX\SOH\DC2\EOT\156\SOH\EOT\SYN\SUB= Data version for this endpoint. Must match current version.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DC3\STX\SOH\ENQ\DC2\EOT\156\SOH\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\DC3\STX\SOH\SOH\DC2\EOT\156\SOH\n\
+    \\DC1\n\
+    \\r\n\
+    \\ENQ\EOT\DC3\STX\SOH\ETX\DC2\EOT\156\SOH\DC4\NAK\n\
+    \\f\n\
+    \\EOT\EOT\DC3\STX\STX\DC2\EOT\158\SOH\EOT0\n\
+    \\r\n\
+    \\ENQ\EOT\DC3\STX\STX\ACK\DC2\EOT\158\SOH\EOT&\n\
+    \\r\n\
+    \\ENQ\EOT\DC3\STX\STX\SOH\DC2\EOT\158\SOH'+\n\
+    \\r\n\
+    \\ENQ\EOT\DC3\STX\STX\ETX\DC2\EOT\158\SOH./\n\
+    \\f\n\
+    \\STX\EOT\DC4\DC2\ACK\161\SOH\NUL\164\SOH\SOH\n\
+    \\v\n\
+    \\ETX\EOT\DC4\SOH\DC2\EOT\161\SOH\b#\n\
+    \]\n\
+    \\EOT\EOT\DC4\STX\NUL\DC2\EOT\163\SOH\EOT0\SUBO Data post acceptance. Can be used to issue additional updates to this record.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DC4\STX\NUL\ACK\DC2\EOT\163\SOH\EOT\"\n\
+    \\r\n\
+    \\ENQ\EOT\DC4\STX\NUL\SOH\DC2\EOT\163\SOH#+\n\
+    \\r\n\
+    \\ENQ\EOT\DC4\STX\NUL\ETX\DC2\EOT\163\SOH./\n\
+    \\f\n\
+    \\STX\EOT\NAK\DC2\ACK\166\SOH\NUL\171\SOH\SOH\n\
+    \\v\n\
+    \\ETX\EOT\NAK\SOH\DC2\EOT\166\SOH\b\"\n\
+    \4\n\
+    \\EOT\EOT\NAK\STX\NUL\DC2\EOT\168\SOH\EOT\DC2\SUB& Server-generated unique endpoint ID.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\NAK\STX\NUL\ENQ\DC2\EOT\168\SOH\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\NAK\STX\NUL\SOH\DC2\EOT\168\SOH\v\r\n\
+    \\r\n\
+    \\ENQ\EOT\NAK\STX\NUL\ETX\DC2\EOT\168\SOH\DLE\DC1\n\
+    \K\n\
+    \\EOT\EOT\NAK\STX\SOH\DC2\EOT\170\SOH\EOT\SYN\SUB= Data version for this endpoint. Must match current version.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\NAK\STX\SOH\ENQ\DC2\EOT\170\SOH\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\NAK\STX\SOH\SOH\DC2\EOT\170\SOH\n\
+    \\DC1\n\
+    \\r\n\
+    \\ENQ\EOT\NAK\STX\SOH\ETX\DC2\EOT\170\SOH\DC4\NAK\n\
+    \\f\n\
+    \\STX\EOT\SYN\DC2\ACK\173\SOH\NUL\174\SOH\SOH\n\
+    \\v\n\
+    \\ETX\EOT\SYN\SOH\DC2\EOT\173\SOH\b#\n\
+    \\f\n\
+    \\STX\EOT\ETB\DC2\ACK\176\SOH\NUL\186\SOH\SOH\n\
+    \\v\n\
+    \\ETX\EOT\ETB\SOH\DC2\EOT\176\SOH\b!\n\
+    \\f\n\
+    \\EOT\EOT\ETB\STX\NUL\DC2\EOT\177\SOH\EOT\CAN\n\
+    \\r\n\
+    \\ENQ\EOT\ETB\STX\NUL\ENQ\DC2\EOT\177\SOH\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\ETB\STX\NUL\SOH\DC2\EOT\177\SOH\n\
+    \\DC3\n\
+    \\r\n\
+    \\ENQ\EOT\ETB\STX\NUL\ETX\DC2\EOT\177\SOH\SYN\ETB\n\
+    \\159\STX\n\
+    \\EOT\EOT\ETB\STX\SOH\DC2\EOT\181\SOH\EOT\RS\SUB\144\STX To get the next page, pass in `ListNexusEndpointsResponse.next_page_token` from the previous page's\n\
+    \ response, the token will be empty if there's no other page.\n\
+    \ Note: the last page may be empty if the total number of endpoints registered is a multiple of the page size.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ETB\STX\SOH\ENQ\DC2\EOT\181\SOH\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\ETB\STX\SOH\SOH\DC2\EOT\181\SOH\n\
+    \\EM\n\
+    \\r\n\
+    \\ENQ\EOT\ETB\STX\SOH\ETX\DC2\EOT\181\SOH\FS\GS\n\
+    \\244\SOH\n\
+    \\EOT\EOT\ETB\STX\STX\DC2\EOT\185\SOH\EOT\DC4\SUB\229\SOH Name of the incoming endpoint to filter on - optional. Specifying this will result in zero or one results.\n\
+    \ (-- api-linter: core::203::field-behavior-required=disabled\n\
+    \     aip.dev/not-precedent: Not following linter rules. --)\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ETB\STX\STX\ENQ\DC2\EOT\185\SOH\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ETB\STX\STX\SOH\DC2\EOT\185\SOH\v\SI\n\
+    \\r\n\
+    \\ENQ\EOT\ETB\STX\STX\ETX\DC2\EOT\185\SOH\DC2\DC3\n\
+    \\f\n\
+    \\STX\EOT\CAN\DC2\ACK\188\SOH\NUL\192\SOH\SOH\n\
+    \\v\n\
+    \\ETX\EOT\CAN\SOH\DC2\EOT\188\SOH\b\"\n\
+    \0\n\
+    \\EOT\EOT\CAN\STX\NUL\DC2\EOT\190\SOH\EOT\RS\SUB\" Token for getting the next page.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\CAN\STX\NUL\ENQ\DC2\EOT\190\SOH\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\CAN\STX\NUL\SOH\DC2\EOT\190\SOH\n\
+    \\EM\n\
+    \\r\n\
+    \\ENQ\EOT\CAN\STX\NUL\ETX\DC2\EOT\190\SOH\FS\GS\n\
+    \\f\n\
+    \\EOT\EOT\CAN\STX\SOH\DC2\EOT\191\SOH\EOT:\n\
+    \\r\n\
+    \\ENQ\EOT\CAN\STX\SOH\EOT\DC2\EOT\191\SOH\EOT\f\n\
+    \\r\n\
+    \\ENQ\EOT\CAN\STX\SOH\ACK\DC2\EOT\191\SOH\r+\n\
+    \\r\n\
+    \\ENQ\EOT\CAN\STX\SOH\SOH\DC2\EOT\191\SOH,5\n\
+    \\r\n\
+    \\ENQ\EOT\CAN\STX\SOH\ETX\DC2\EOT\191\SOH89b\ACKproto3"

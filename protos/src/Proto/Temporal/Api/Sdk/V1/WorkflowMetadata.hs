@@ -718,7 +718,7 @@ packedFileDescriptor
     \\GSWorkflowInteractionDefinition\DC2\DC2\n\
     \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC2 \n\
     \\vdescription\CAN\STX \SOH(\tR\vdescriptionB\131\SOH\n\
-    \\SYNio.temporal.api.sdk.v1B\NAKWorkflowMetadataProtoP\SOHZ\GSgo.temporal.io/api/sdk/v1;sdk\170\STX\NAKTemporalio.Api.Sdk.V1\234\STX\CANTemporalio::Api::Sdk::V1J\251\SYN\n\
+    \\SYNio.temporal.api.sdk.v1B\NAKWorkflowMetadataProtoP\SOHZ\GSgo.temporal.io/api/sdk/v1;sdk\170\STX\NAKTemporalio.Api.Sdk.V1\234\STX\CANTemporalio::Api::Sdk::V1J\249\SYN\n\
     \\ACK\DC2\EOT\SYN\NULA\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
@@ -770,8 +770,8 @@ packedFileDescriptor
     \\SOH\b\DC2\ETX\US\NUL2\n\
     \\t\n\
     \\STX\b%\DC2\ETX\US\NUL2\n\
-    \e\n\
-    \\STX\EOT\NUL\DC2\EOT\"\NUL%\SOH\SUBY The name of the query to retrieve this information is `__temporal_getWorkflowMetadata`.\n\
+    \c\n\
+    \\STX\EOT\NUL\DC2\EOT\"\NUL%\SOH\SUBW The name of the query to retrieve this information is `__temporal_workflow_metadata`.\n\
     \\n\
     \\n\
     \\n\

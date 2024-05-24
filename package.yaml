@@ -7,11 +7,15 @@ license-file: LICENSE
 license: BSD-3-Clause
 build-type: Simple
 
+flags:
+  replay-json:
+    manual: true
+    default: false
+
 dependencies:
 - base
 - proto-lens
 - proto-lens-protobuf-types
-- proto-lens-json
 - temporal-api-protos
 - temporal-sdk-core
 - bytestring
@@ -135,8 +139,12 @@ library:
     other-modules: Paths_temporal_sdk
   - condition: true
     exposed-modules: Paths_temporal_sdk
+  - condition: flag(replay-json)
+    exposed-modules: Temporal.Replay
+    dependencies:
+    - proto-lens-json
 
-tests: 
+tests:
   temporal-sdk-tests:
     ghc-options: -g -threaded -rtsopts -with-rtsopts=-N
     build-tools:

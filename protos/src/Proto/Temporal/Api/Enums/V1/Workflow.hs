@@ -17,6 +17,8 @@ module Proto.Temporal.Api.Enums.V1.Workflow (
         TimeoutType(), TimeoutType'UnrecognizedValue,
         WorkflowExecutionStatus(..), WorkflowExecutionStatus(),
         WorkflowExecutionStatus'UnrecognizedValue,
+        WorkflowIdConflictPolicy(..), WorkflowIdConflictPolicy(),
+        WorkflowIdConflictPolicy'UnrecognizedValue,
         WorkflowIdReusePolicy(..), WorkflowIdReusePolicy(),
         WorkflowIdReusePolicy'UnrecognizedValue
     ) where
@@ -56,7 +58,6 @@ data ContinueAsNewInitiator
     ContinueAsNewInitiator'Unrecognized !ContinueAsNewInitiator'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum ContinueAsNewInitiator where
-  enumName _ = Data.Text.pack "ContinueAsNewInitiator"
   maybeToEnum 0 = Prelude.Just CONTINUE_AS_NEW_INITIATOR_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just CONTINUE_AS_NEW_INITIATOR_WORKFLOW
   maybeToEnum 2 = Prelude.Just CONTINUE_AS_NEW_INITIATOR_RETRY
@@ -149,7 +150,6 @@ data HistoryEventFilterType
     HistoryEventFilterType'Unrecognized !HistoryEventFilterType'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum HistoryEventFilterType where
-  enumName _ = Data.Text.pack "HistoryEventFilterType"
   maybeToEnum 0 = Prelude.Just HISTORY_EVENT_FILTER_TYPE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just HISTORY_EVENT_FILTER_TYPE_ALL_EVENT
   maybeToEnum 2 = Prelude.Just HISTORY_EVENT_FILTER_TYPE_CLOSE_EVENT
@@ -232,7 +232,6 @@ data ParentClosePolicy
     ParentClosePolicy'Unrecognized !ParentClosePolicy'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum ParentClosePolicy where
-  enumName _ = Data.Text.pack "ParentClosePolicy"
   maybeToEnum 0 = Prelude.Just PARENT_CLOSE_POLICY_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just PARENT_CLOSE_POLICY_TERMINATE
   maybeToEnum 2 = Prelude.Just PARENT_CLOSE_POLICY_ABANDON
@@ -322,7 +321,6 @@ data PendingActivityState
     PendingActivityState'Unrecognized !PendingActivityState'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum PendingActivityState where
-  enumName _ = Data.Text.pack "PendingActivityState"
   maybeToEnum 0 = Prelude.Just PENDING_ACTIVITY_STATE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just PENDING_ACTIVITY_STATE_SCHEDULED
   maybeToEnum 2 = Prelude.Just PENDING_ACTIVITY_STATE_STARTED
@@ -414,7 +412,6 @@ data PendingWorkflowTaskState
     PendingWorkflowTaskState'Unrecognized !PendingWorkflowTaskState'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum PendingWorkflowTaskState where
-  enumName _ = Data.Text.pack "PendingWorkflowTaskState"
   maybeToEnum 0
     = Prelude.Just PENDING_WORKFLOW_TASK_STATE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just PENDING_WORKFLOW_TASK_STATE_SCHEDULED
@@ -502,7 +499,6 @@ data RetryState
     RetryState'Unrecognized !RetryState'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum RetryState where
-  enumName _ = Data.Text.pack "RetryState"
   maybeToEnum 0 = Prelude.Just RETRY_STATE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just RETRY_STATE_IN_PROGRESS
   maybeToEnum 2 = Prelude.Just RETRY_STATE_NON_RETRYABLE_FAILURE
@@ -619,7 +615,6 @@ data TimeoutType
     TimeoutType'Unrecognized !TimeoutType'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum TimeoutType where
-  enumName _ = Data.Text.pack "TimeoutType"
   maybeToEnum 0 = Prelude.Just TIMEOUT_TYPE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just TIMEOUT_TYPE_START_TO_CLOSE
   maybeToEnum 2 = Prelude.Just TIMEOUT_TYPE_SCHEDULE_TO_START
@@ -716,7 +711,6 @@ data WorkflowExecutionStatus
     WorkflowExecutionStatus'Unrecognized !WorkflowExecutionStatus'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum WorkflowExecutionStatus where
-  enumName _ = Data.Text.pack "WorkflowExecutionStatus"
   maybeToEnum 0 = Prelude.Just WORKFLOW_EXECUTION_STATUS_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just WORKFLOW_EXECUTION_STATUS_RUNNING
   maybeToEnum 2 = Prelude.Just WORKFLOW_EXECUTION_STATUS_COMPLETED
@@ -839,6 +833,101 @@ instance Data.ProtoLens.FieldDefault WorkflowExecutionStatus where
   fieldDefault = WORKFLOW_EXECUTION_STATUS_UNSPECIFIED
 instance Control.DeepSeq.NFData WorkflowExecutionStatus where
   rnf x__ = Prelude.seq x__ ()
+newtype WorkflowIdConflictPolicy'UnrecognizedValue
+  = WorkflowIdConflictPolicy'UnrecognizedValue Data.Int.Int32
+  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+data WorkflowIdConflictPolicy
+  = WORKFLOW_ID_CONFLICT_POLICY_UNSPECIFIED |
+    WORKFLOW_ID_CONFLICT_POLICY_FAIL |
+    WORKFLOW_ID_CONFLICT_POLICY_USE_EXISTING |
+    WORKFLOW_ID_CONFLICT_POLICY_TERMINATE_EXISTING |
+    WorkflowIdConflictPolicy'Unrecognized !WorkflowIdConflictPolicy'UnrecognizedValue
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.MessageEnum WorkflowIdConflictPolicy where
+  maybeToEnum 0
+    = Prelude.Just WORKFLOW_ID_CONFLICT_POLICY_UNSPECIFIED
+  maybeToEnum 1 = Prelude.Just WORKFLOW_ID_CONFLICT_POLICY_FAIL
+  maybeToEnum 2
+    = Prelude.Just WORKFLOW_ID_CONFLICT_POLICY_USE_EXISTING
+  maybeToEnum 3
+    = Prelude.Just WORKFLOW_ID_CONFLICT_POLICY_TERMINATE_EXISTING
+  maybeToEnum k
+    = Prelude.Just
+        (WorkflowIdConflictPolicy'Unrecognized
+           (WorkflowIdConflictPolicy'UnrecognizedValue
+              (Prelude.fromIntegral k)))
+  showEnum WORKFLOW_ID_CONFLICT_POLICY_UNSPECIFIED
+    = "WORKFLOW_ID_CONFLICT_POLICY_UNSPECIFIED"
+  showEnum WORKFLOW_ID_CONFLICT_POLICY_FAIL
+    = "WORKFLOW_ID_CONFLICT_POLICY_FAIL"
+  showEnum WORKFLOW_ID_CONFLICT_POLICY_USE_EXISTING
+    = "WORKFLOW_ID_CONFLICT_POLICY_USE_EXISTING"
+  showEnum WORKFLOW_ID_CONFLICT_POLICY_TERMINATE_EXISTING
+    = "WORKFLOW_ID_CONFLICT_POLICY_TERMINATE_EXISTING"
+  showEnum
+    (WorkflowIdConflictPolicy'Unrecognized (WorkflowIdConflictPolicy'UnrecognizedValue k))
+    = Prelude.show k
+  readEnum k
+    | (Prelude.==) k "WORKFLOW_ID_CONFLICT_POLICY_UNSPECIFIED"
+    = Prelude.Just WORKFLOW_ID_CONFLICT_POLICY_UNSPECIFIED
+    | (Prelude.==) k "WORKFLOW_ID_CONFLICT_POLICY_FAIL"
+    = Prelude.Just WORKFLOW_ID_CONFLICT_POLICY_FAIL
+    | (Prelude.==) k "WORKFLOW_ID_CONFLICT_POLICY_USE_EXISTING"
+    = Prelude.Just WORKFLOW_ID_CONFLICT_POLICY_USE_EXISTING
+    | (Prelude.==) k "WORKFLOW_ID_CONFLICT_POLICY_TERMINATE_EXISTING"
+    = Prelude.Just WORKFLOW_ID_CONFLICT_POLICY_TERMINATE_EXISTING
+    | Prelude.otherwise
+    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
+instance Prelude.Bounded WorkflowIdConflictPolicy where
+  minBound = WORKFLOW_ID_CONFLICT_POLICY_UNSPECIFIED
+  maxBound = WORKFLOW_ID_CONFLICT_POLICY_TERMINATE_EXISTING
+instance Prelude.Enum WorkflowIdConflictPolicy where
+  toEnum k__
+    = Prelude.maybe
+        (Prelude.error
+           ((Prelude.++)
+              "toEnum: unknown value for enum WorkflowIdConflictPolicy: "
+              (Prelude.show k__)))
+        Prelude.id (Data.ProtoLens.maybeToEnum k__)
+  fromEnum WORKFLOW_ID_CONFLICT_POLICY_UNSPECIFIED = 0
+  fromEnum WORKFLOW_ID_CONFLICT_POLICY_FAIL = 1
+  fromEnum WORKFLOW_ID_CONFLICT_POLICY_USE_EXISTING = 2
+  fromEnum WORKFLOW_ID_CONFLICT_POLICY_TERMINATE_EXISTING = 3
+  fromEnum
+    (WorkflowIdConflictPolicy'Unrecognized (WorkflowIdConflictPolicy'UnrecognizedValue k))
+    = Prelude.fromIntegral k
+  succ WORKFLOW_ID_CONFLICT_POLICY_TERMINATE_EXISTING
+    = Prelude.error
+        "WorkflowIdConflictPolicy.succ: bad argument WORKFLOW_ID_CONFLICT_POLICY_TERMINATE_EXISTING. This value would be out of bounds."
+  succ WORKFLOW_ID_CONFLICT_POLICY_UNSPECIFIED
+    = WORKFLOW_ID_CONFLICT_POLICY_FAIL
+  succ WORKFLOW_ID_CONFLICT_POLICY_FAIL
+    = WORKFLOW_ID_CONFLICT_POLICY_USE_EXISTING
+  succ WORKFLOW_ID_CONFLICT_POLICY_USE_EXISTING
+    = WORKFLOW_ID_CONFLICT_POLICY_TERMINATE_EXISTING
+  succ (WorkflowIdConflictPolicy'Unrecognized _)
+    = Prelude.error
+        "WorkflowIdConflictPolicy.succ: bad argument: unrecognized value"
+  pred WORKFLOW_ID_CONFLICT_POLICY_UNSPECIFIED
+    = Prelude.error
+        "WorkflowIdConflictPolicy.pred: bad argument WORKFLOW_ID_CONFLICT_POLICY_UNSPECIFIED. This value would be out of bounds."
+  pred WORKFLOW_ID_CONFLICT_POLICY_FAIL
+    = WORKFLOW_ID_CONFLICT_POLICY_UNSPECIFIED
+  pred WORKFLOW_ID_CONFLICT_POLICY_USE_EXISTING
+    = WORKFLOW_ID_CONFLICT_POLICY_FAIL
+  pred WORKFLOW_ID_CONFLICT_POLICY_TERMINATE_EXISTING
+    = WORKFLOW_ID_CONFLICT_POLICY_USE_EXISTING
+  pred (WorkflowIdConflictPolicy'Unrecognized _)
+    = Prelude.error
+        "WorkflowIdConflictPolicy.pred: bad argument: unrecognized value"
+  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
+  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
+  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
+  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
+instance Data.ProtoLens.FieldDefault WorkflowIdConflictPolicy where
+  fieldDefault = WORKFLOW_ID_CONFLICT_POLICY_UNSPECIFIED
+instance Control.DeepSeq.NFData WorkflowIdConflictPolicy where
+  rnf x__ = Prelude.seq x__ ()
 newtype WorkflowIdReusePolicy'UnrecognizedValue
   = WorkflowIdReusePolicy'UnrecognizedValue Data.Int.Int32
   deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
@@ -851,7 +940,6 @@ data WorkflowIdReusePolicy
     WorkflowIdReusePolicy'Unrecognized !WorkflowIdReusePolicy'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum WorkflowIdReusePolicy where
-  enumName _ = Data.Text.pack "WorkflowIdReusePolicy"
   maybeToEnum 0 = Prelude.Just WORKFLOW_ID_REUSE_POLICY_UNSPECIFIED
   maybeToEnum 1
     = Prelude.Just WORKFLOW_ID_REUSE_POLICY_ALLOW_DUPLICATE
