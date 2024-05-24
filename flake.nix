@@ -32,7 +32,6 @@
     inherit
       (builtins)
       attrNames
-      attrValues
       listToAttrs
       map
       ;
@@ -44,20 +43,40 @@
       "aarch64-linux"
       "aarch64-darwin"
     ];
+
+    supportedGHCVersions = [
+      "ghc96"
+      "ghc98"
+      "ghc910"
+    ];
   in
     flake-utils.lib.eachSystem supportedSystems (system: let
       overlays = [
       ];
       pkgs = import nixpkgs {inherit system overlays;};
       temporal-bridge = (import ./nix/temporal-bridge.nix {inherit pkgs temporal-sdk-core;}).temporal-bridge;
-      myHaskellPackages = pkgs.haskellPackages.extend (import ./nix/overlays/temporal-sdk-pkgs.nix {
-        inherit
-          pkgs
-          # ghc-source-gen-src
-          
-          temporal-bridge
-          ;
-      });
+      # myHaskellPackages = pkgs.haskellPackages.extend (import ./nix/overlays/temporal-sdk-pkgs.nix {
+      #   inherit
+      #     pkgs
+      #     # ghc-source-gen-src
+
+      #     temporal-bridge
+      #     ;
+      # });
+      extendedPackageSetByGHCVersions = listToAttrs (
+        map (ghcVersion: {
+          name = ghcVersion;
+          value = pkgs.haskell.packages.${ghcVersion}.extend (import ./nix/overlays/temporal-sdk-pkgs.nix {
+            inherit
+              pkgs
+              # ghc-source-gen-src
+              
+              temporal-bridge
+              ;
+          });
+        })
+        supportedGHCVersions
+      );
       pluckLocalPackages = hpkgs: {
         inherit
           (hpkgs)
@@ -69,130 +88,148 @@
           temporal-api-protos
           ;
       };
-      localDevPackages = pluckLocalPackages myHaskellPackages;
-      localDevPackageDeps = lib.concatMapAttrs (_: v:
-        listToAttrs (
-          map (p: {
-            name = p.pname;
-            value = p;
-          })
-          v.getBuildInputs.haskellBuildInputs
-        ))
-      localDevPackages;
-      localDevPackageDepsAsAttrSet =
-        lib.filterAttrs (k: _: !builtins.hasAttr k localDevPackages)
-        localDevPackageDeps;
+      localPackageMatrix = listToAttrs (
+        lib.concatMap (
+          ghcVersion: let
+            myLocalPackages = pluckLocalPackages extendedPackageSetByGHCVersions.${ghcVersion};
+          in
+            map (localPackage: {
+              name = "${localPackage}-${ghcVersion}";
+              value = myLocalPackages.${localPackage};
+            })
+            (attrNames myLocalPackages)
+        )
+        supportedGHCVersions
+      );
+      localDevPackageDeps = hsPackageSet:
+        lib.concatMapAttrs (_: v:
+          listToAttrs (
+            map (p: {
+              name = p.pname;
+              value = p;
+            })
+            v.getBuildInputs.haskellBuildInputs
+          ))
+        (pluckLocalPackages hsPackageSet);
+      localDevPackageDepsAsAttrSet = hsPackageSet:
+        lib.filterAttrs (k: _: !builtins.hasAttr k (pluckLocalPackages hsPackageSet))
+        (localDevPackageDeps hsPackageSet);
 
-      protogen = pkgs.writeShellScriptBin "protogen" ''
-        shopt -s globstar
-        ${pkgs.protobuf}/bin/protoc \
-          --plugin=protoc-gen-haskell=${myHaskellPackages.proto-lens-protoc}/bin/proto-lens-protoc \
-          --haskell_out=./protos/src \
-          --proto_path=${temporal-sdk-core}/sdk-core-protos/protos/local \
-          --proto_path=${temporal-sdk-core}/sdk-core-protos/protos/api_upstream \
-          --proto_path=${temporal-sdk-core}/sdk-core-protos/protos/grpc \
-          --proto_path=${temporal-sdk-core}/sdk-core-protos/protos/testsrv_upstream \
-          ${temporal-sdk-core}/sdk-core-protos/protos/local/**/*.proto \
-          ${temporal-sdk-core}/sdk-core-protos/protos/api_upstream/**/*.proto \
-          ${temporal-sdk-core}/sdk-core-protos/protos/grpc/**/*.proto \
-          ${temporal-sdk-core}/sdk-core-protos/protos/testsrv_upstream/temporal/**/*.proto
-      '';
-    in {
-      debug = {
-        inherit myHaskellPackages localDevPackages localDevPackageDeps localDevPackageDepsAsAttrSet;
-      };
+      protogen = ghcVersion: let
+        inherit
+          (extendedPackageSetByGHCVersions.${ghcVersion})
+          proto-lens-protoc
+          temporal-sdk-core
+          ;
+      in
+        pkgs.writeShellScriptBin "protogen" ''
+          shopt -s globstar
+          ${pkgs.protobuf}/bin/protoc \
+            --plugin=protoc-gen-haskell=${proto-lens-protoc}/bin/proto-lens-protoc \
+            --haskell_out=./protos/src \
+            --proto_path=${temporal-sdk-core}/sdk-core-protos/protos/local \
+            --proto_path=${temporal-sdk-core}/sdk-core-protos/protos/api_upstream \
+            --proto_path=${temporal-sdk-core}/sdk-core-protos/protos/grpc \
+            --proto_path=${temporal-sdk-core}/sdk-core-protos/protos/testsrv_upstream \
+            ${temporal-sdk-core}/sdk-core-protos/protos/local/**/*.proto \
+            ${temporal-sdk-core}/sdk-core-protos/protos/api_upstream/**/*.proto \
+            ${temporal-sdk-core}/sdk-core-protos/protos/grpc/**/*.proto \
+            ${temporal-sdk-core}/sdk-core-protos/protos/testsrv_upstream/temporal/**/*.proto
+        '';
 
-      packages = {
-        devenv-up = self.devShells.${system}.default.config.procfileScript;
-        default = pkgs.buildEnv {
-          name = "temporal-sdk-all-packages";
-          paths = attrValues localDevPackages;
-        };
-        temporal-bridge = temporal-bridge;
-        temporal-sdk = myHaskellPackages.temporal-sdk;
-        temporal-sdk-core = myHaskellPackages.temporal-sdk-core;
-        temporal-sdk-codec-server = myHaskellPackages.temporal-sdk-codec-server;
-        temporal-codec-encryption = myHaskellPackages.temporal-codec-encryption;
-        temporal-sdk-optimal-codec = myHaskellPackages.temporal-sdk-optimal-codec;
-        temporal-api-protos = myHaskellPackages.temporal-api-protos;
-      };
-      devShells.default = devenv.lib.mkShell {
-        inherit inputs pkgs;
-        # packages = [myHaskellPackages.temporal-sdk];
-        modules = [
-          ({
-            # pkgs,
-            # config,
-            ...
-          }: let
-            ignoreGeneratedCode = attrs:
-              attrs
-              // {
-                excludes = [
-                  "protos/"
-                  "dist-newstyle/"
-                ];
-              };
-          in {
-            # This is your devenv configuration
-            packages = with pkgs;
-              [
-                protogen
-                ghciwatch
-              ]
-              ++ lib.optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [
-                Security
-                CoreFoundation
-                SystemConfiguration
-              ]);
-
-            languages.haskell = {
-              enable = true;
-              package = myHaskellPackages.ghc.withHoogle (hpkgs:
+      mkShellForGHC = ghcVersion: let
+        myHaskellPackages = extendedPackageSetByGHCVersions.${ghcVersion};
+      in
+        devenv.lib.mkShell {
+          inherit inputs pkgs;
+          modules = [
+            ({
+              # pkgs,
+              # config,
+              ...
+            }: let
+              ignoreGeneratedCode = attrs:
+                attrs
+                // {
+                  excludes = [
+                    "protos/"
+                    "dist-newstyle/"
+                  ];
+                };
+            in {
+              # This is your devenv configuration
+              packages = with pkgs;
                 [
-                  # We want to use temporal-sdk-core from the flake
-                  # when possible.
-                  # hpkgs.temporal-sdk-core
-                  hpkgs.proto-lens-protoc
+                  (protogen ghcVersion)
+                  ghciwatch
                 ]
-                ++ lib.attrVals (attrNames localDevPackageDepsAsAttrSet) hpkgs);
-            };
-            languages.rust.enable = true;
-            services.temporal.enable = true;
+                ++ lib.optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [
+                  Security
+                  CoreFoundation
+                  SystemConfiguration
+                ]);
 
-            pre-commit.hooks = {
-              alejandra.enable = true;
-              shellcheck.enable = true;
-              # clippy.enable = true;
-              fourmolu = ignoreGeneratedCode {
+              languages.haskell = {
                 enable = true;
+                package = myHaskellPackages.ghc.withHoogle (hpkgs:
+                  [
+                    # We want to use temporal-sdk-core from the flake
+                    # when possible.
+                    # hpkgs.temporal-sdk-core
+                    hpkgs.proto-lens-protoc
+                  ]
+                  ++ lib.attrVals (attrNames (localDevPackageDepsAsAttrSet myHaskellPackages)) hpkgs);
               };
-              hlint = ignoreGeneratedCode {
-                enable = true;
+              languages.rust.enable = true;
+              services.temporal.enable = true;
+
+              pre-commit.hooks = {
+                alejandra.enable = true;
+                shellcheck.enable = true;
+                # clippy.enable = true;
+                fourmolu = ignoreGeneratedCode {
+                  enable = true;
+                };
+                hlint = ignoreGeneratedCode {
+                  enable = true;
+                };
+                deadnix.enable = true;
+                hpack.enable = true;
+                end-of-file-fixer.enable = true;
+                shfmt.enable = true;
+                check-shebang-scripts-are-executable.enable = true;
+                check-symlinks.enable = true;
+                check-merge-conflicts.enable = true;
+                # Not smart enough to find the location of the Cargo.toml
+                cargo-check.enable = false;
               };
-              deadnix.enable = true;
-              hpack.enable = true;
-              end-of-file-fixer.enable = true;
-              shfmt.enable = true;
-              check-shebang-scripts-are-executable.enable = true;
-              check-symlinks.enable = true;
-              check-merge-conflicts.enable = true;
-              # Not smart enough to find the location of the Cargo.toml
-              cargo-check.enable = false;
-            };
-          })
-        ];
+            })
+          ];
+        };
+    in {
+      # debug = {
+      #   inherit pkgs myHaskellPackages localDevPackages localDevPackageDeps localDevPackageDepsAsAttrSet;
+      # };
+
+      packages =
+        {
+          devenv-up = self.devShells.${system}.default.config.procfileScript;
+          default = pkgs.buildEnv {
+            name = "temporal-sdk-all-packages";
+            paths = pluckLocalPackages extendedPackageSetByGHCVersions.ghc96;
+          };
+          temporal-bridge = temporal-bridge;
+        }
+        // pluckLocalPackages extendedPackageSetByGHCVersions.ghc96
+        // localPackageMatrix;
+      devShells = rec {
+        default = ghc96;
+        ghc96 = mkShellForGHC "ghc96";
+        ghc98 = mkShellForGHC "ghc98";
+        ghc910 = mkShellForGHC "ghc910";
       };
     });
-  # flake // rec {
-  #   packages = {
-  #     # inherit (pkgs) temporal_bridge;
-  #     # Built by `nix build .`
-  #     # default = flake.packages.temporal-sdk;
-  #   };
 
-  #   devShells = let
-  #     in flake.devShells // {
   #       # Used to generate the protobufs. We just need GHC stuff out of the path, or it seems to confuse proto-lens-protoc
   #       # Example: nix develop .\#devShells.aarch64-darwin.generator -i --command protogen
   #       generator = pkgs.mkShell {
@@ -200,8 +237,6 @@
   #           protogen
   #         ];
   #       };
-  #     };
-  # });
 
   # --- Flake Local Nix Configuration ----------------------------
   nixConfig = {
