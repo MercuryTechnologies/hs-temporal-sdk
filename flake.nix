@@ -46,7 +46,8 @@
     supportedGHCVersions = [
       "ghc96"
       "ghc98"
-      "ghc910"
+      # Currently not working.
+      # "ghc910"
     ];
 
     ignoreGeneratedCode = attrs:
@@ -99,7 +100,7 @@
             inherit
               pkgs
               # ghc-source-gen-src
-
+              
               temporal-bridge
               ;
           });
@@ -222,7 +223,7 @@
         default = ghc96;
         ghc96 = mkShellForGHC "ghc96";
         ghc98 = mkShellForGHC "ghc98";
-        ghc910 = mkShellForGHC "ghc910";
+        # ghc910 = mkShellForGHC "ghc910";
       };
       checks = {
         pre-commit-check = devenv.inputs.pre-commit-hooks.lib.${system}.run {

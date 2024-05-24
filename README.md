@@ -12,9 +12,11 @@
 
 [Temporal](https://temporal.io) is a durable execution system that transparently makes your code durable, fault-tolerant, and simple.
 
-"Temporal Haskell SDK" is the framework for authoring workflows and activities using the Haskell programming language with the GHC compiler.
+This project provides an unofficial Haskell SDK along with supporting packages for authoring workflows and activities.
 
-This SDK requires Temporal Server >= 1.20
+> [!WARNING]
+> This project is still under heavy development. It is in production use at [Mercury](https://mercury.com), but we currently make no stability guarantees for
+> external users of the project.
 
 For documentation and samples, see:
 
@@ -24,28 +26,46 @@ For documentation and samples, see:
 
 This monorepo contains the following packages:
 
-| Subfolder | Package |
-|-----------|---------|
-| [`core/`](core/)                                  | `temporal-sdk-core`                                            |
-| [`codec-encryption/`](codec-encryption/)          | `temporal-codec-encryption`                                    |
-| [`codec-server`](codec-server/)                   | `temporal-sdk-codec-server`                                    |
-| [`optimal-codec/`](optimal-codec/)                | `temporal-sdk-optimal-codec`                                   |
-| [`protos/`](protos/)                              | `temporal-api-protos`                                          |
-| [`./`](./)                                        | `temporal-sdk`                                                 |
+| Subfolder | Package | Description |
+|-----------|---------|-------------|
+| [`./`](./)                                        | `temporal-sdk`               | The developer-facing core package. Use this to author and execute Temporal Workflows and Activities. |
+| [`core/`](core/)                                  | `temporal-sdk-core`          | Core FFI bindings that interface with the rust core library. |
+| [`codec-encryption/`](codec-encryption/)          | `temporal-codec-encryption`  | A simple implementation of at-rest encryption for payloads. |
+| [`codec-server`](codec-server/)                   | `temporal-sdk-codec-server`  | A WAI middleware to transform payloads for use with the Temporal Web UI.
+| [`optimal-codec/`](optimal-codec/)                | `temporal-sdk-optimal-codec` | Given a set of preferred codecs for Activity and Workflow inputs and outputs, choose the optimal codec for each value. |
+| [`protos/`](protos/)                              | `temporal-api-protos`        | Raw protocol buffer modules for exotic use cases. |
 
-## Notes
+## Development Environment
 
-- The Cabal package is configured to automatically build the Rust dependency while developing the library. You must have `cargo` installed in order for this to work.
+This project uses [Nix](https://nixos.org/guides/nix-package-manager.html) to manage the development environment and dependencies. Nix ensures a reproducible and consistent build environment across different systems.
 
-## Handy Development Commands
+> [!NOTE]
+> Stack support is for convenience, but not guaranteed by CI to compile consistently.
 
-- `nix build .` builds the Haskell program.
-- `nix build .#hs_temporal_bridge` builds the Rust library.
-- `nix develop` enters the development Shell for the Haskell program.
-  - `stack` supports a GHC 9.2.x build environment
-  - `cabal` supports a GHC 9.6.x build environment
+It is recommended to set up [direnv](https://direnv.net/) and [nix-direnv](https://github.com/nix-community/nix-direnv) to automatically load the Nix environment when you enter the project directory. After installing `direnv`, run the following command in the project root to bootstrap the development environment.
 
-## Pending work for v0.0.1.0
+```bash
+direnv allow
+```
 
-- [ ] Tested replay support
-- [ ] Tutorial Module(s)
+### Useful Development Commands
+
+`nix develop --impure` enters the development shell for the Haskell program if you aren't
+using `direnv`. This shell includes the necessary tools and dependencies for development, such as GHC, Cabal, and the Rust toolchain.
+
+Inside the development shell, you can use cabal commands as usual. Cabal is the official build tool for this project.
+
+- `nix build .\#{packageName}-{ghcVersion}` builds the given package for a given GHC version.
+- `nix build .\#temporal-bridge` builds the Rust library (temporal-bridge) that provides bindings to the Temporal Core library.
+- `devenv up` starts a local Temporal server for development and testing purposes.
+
+The flake.nix file defines different shells for each supported GHC version (`ghc96`, `ghc98`). You can enter the shell for a specific GHC version with the following command:
+
+```bash
+nix develop .\#{ghcVersion} --impure
+```
+
+Replace {ghcVersion} with the desired GHC version (e.g., `ghc96`, `ghc98`).
+
+> [!NOTE]
+> The first time you run nix develop or nix build, Nix will download and build all the necessary dependencies, which may take some time. Subsequent runs will be faster as Nix will reuse the cached dependencies.
