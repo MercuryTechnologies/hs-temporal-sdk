@@ -1,7 +1,10 @@
 builds:
-  exclude: []
+  exclude:
+  - 'packages.*.default'
+  - 'packages.*.devenv-up'
+  # Unable to build because devenv is impure
+  - 'devShells.*.*'
   include:
   - '*.x86_64-linux.*'
-  - defaultPackage.x86_64-linux
-  # Unable to build because devenv is impure
-  # - devShell.x86_64-linux
+  - 'packages.aarch64-darwin.*'
+  - 'packages.aarch64-linux.*'
