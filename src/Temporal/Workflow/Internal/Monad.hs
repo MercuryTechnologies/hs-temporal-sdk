@@ -1,5 +1,3 @@
-{-# HLINT ignore "Use newtype instead of data" #-}
-{-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
 module Temporal.Workflow.Internal.Monad where
@@ -15,7 +13,6 @@ import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import Data.Kind
 import Data.Map.Strict (Map)
-import Data.ProtoLens
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Text (Text)
@@ -24,10 +21,8 @@ import Data.Vector (Vector)
 import Data.Word (Word32)
 import GHC.Stack
 import GHC.TypeLits
-import Lens.Family2
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
 import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands (WorkflowCommand)
-import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
 import RequireCallStack
 import System.Random (
   genShortByteString,
@@ -162,7 +157,7 @@ blockedBlocked
 blockedBlocked _ _ (Return i) ivar2 acont =
   return (Blocked ivar2 (acont :>>= getIVarApply i))
 blockedBlocked _ _ (g :<$> Return i) ivar2 acont =
-  return (Blocked ivar2 (acont :>>= \a -> (\f -> g f a) <$> getIVar i))
+  return (Blocked ivar2 (acont :>>= \a -> (`g` a) <$> getIVar i))
 blockedBlocked env ivar1 fcont ivar2 acont = do
   i <- newIVar
   addJob env (toWf fcont) i ivar1
@@ -319,7 +314,7 @@ applyWorkflowGen f (WorkflowGenM ref) = Workflow $ \_ -> do
 
 
 newWorkflowGenM :: StdGen -> Workflow WorkflowGenM
-newWorkflowGenM g = Workflow $ \_ -> (Done . WorkflowGenM) <$> newIORef g
+newWorkflowGenM g = Workflow $ \_ -> Done . WorkflowGenM <$> newIORef g
 {-# INLINE newWorkflowGenM #-}
 
 
@@ -769,7 +764,7 @@ data ChildWorkflowHandle result = ChildWorkflowHandle
 
 
 instance Functor ChildWorkflowHandle where
-  fmap f h = h {childWorkflowResultConverter = \r -> f <$> childWorkflowResultConverter h r}
+  fmap f h = h {childWorkflowResultConverter = fmap f . childWorkflowResultConverter h}
 
 
 {- | This is only intended for use by interceptors. Normal workflow code should be able to use
@@ -778,7 +773,7 @@ the 'fmap' instance for simple transformations or else provide an appropriate co
 interceptorConvertChildWorkflowHandle :: ChildWorkflowHandle a -> (a -> IO b) -> ChildWorkflowHandle b
 interceptorConvertChildWorkflowHandle h f =
   h
-    { childWorkflowResultConverter = \r -> childWorkflowResultConverter h r >>= f
+    { childWorkflowResultConverter = childWorkflowResultConverter h >=> f
     }
 
 

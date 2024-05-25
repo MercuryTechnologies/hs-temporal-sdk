@@ -1,5 +1,4 @@
 {-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE InstanceSigs #-}
 
 module Temporal.Exception where
 
@@ -14,7 +13,6 @@ import GHC.Stack
 import Proto.Temporal.Api.Failure.V1.Message
 import qualified Proto.Temporal.Api.Failure.V1.Message as Proto
 import Proto.Temporal.Api.History.V1.Message
-import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands (ContinueAsNewWorkflowExecution)
 import Temporal.Common
 import Temporal.Payload
 import Temporal.Workflow.Types
@@ -265,11 +263,9 @@ data ApplicationFailureHandler where
 
 
 mkApplicationFailure :: SomeException -> [ApplicationFailureHandler] -> ApplicationFailure
-mkApplicationFailure e handlers = Prelude.foldr tryHandler (ApplicationFailure "" "" False [] "") handlers
+mkApplicationFailure e = Prelude.foldr tryHandler (ApplicationFailure "" "" False [] "")
   where
-    tryHandler (ApplicationFailureHandler hndlr) acc = case fromException e of
-      Just e' -> hndlr e'
-      Nothing -> acc
+    tryHandler (ApplicationFailureHandler hndlr) acc = maybe acc hndlr $ fromException e
 
 
 mkAnnotatedHandlers :: HasCallStack => [ApplicationFailureHandler] -> [ApplicationFailureHandler]
@@ -277,7 +273,7 @@ mkAnnotatedHandlers xs =
   xs >>= \(ApplicationFailureHandler hndlr) ->
     [ ApplicationFailureHandler $ \e -> hndlr e
     , ApplicationFailureHandler $ \(AnnotatedException anns e) ->
-        let base = (hndlr e)
+        let base = hndlr e
         in base
             { stack =
                 if base.stack == ""
@@ -296,7 +292,7 @@ mkAnnotatedHandlers xs =
 
 standardApplicationFailureHandlers :: [ApplicationFailureHandler]
 standardApplicationFailureHandlers =
-  [ ApplicationFailureHandler $ \(h@ApplicationFailure {}) -> h
+  [ ApplicationFailureHandler $ \h@ApplicationFailure {} -> h
   , ApplicationFailureHandler $ \(ErrorCallWithLocation msg loc) ->
       ApplicationFailure
         { type' = "ErrorCallWithLocation"

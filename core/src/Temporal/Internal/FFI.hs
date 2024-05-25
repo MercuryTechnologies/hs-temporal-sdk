@@ -1,9 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE TypeOperators #-}
 
 module Temporal.Internal.FFI where
 
@@ -56,7 +54,7 @@ withTokioResult fp f = withForeignPtr fp $ \ptr -> do
 peekTokioResult :: TokioSlot a -> Maybe (FinalizerPtr a) -> IO (Maybe (ForeignPtr a))
 peekTokioResult slot mfp = do
   inner <- peek slot
-  if (inner == nullPtr)
+  if inner == nullPtr
     then return Nothing
     else
       Just <$> case mfp of
@@ -79,8 +77,8 @@ So we should return ForeignPtrs for things that need to stay alive, and then we 
 -}
 makeTokioAsyncCall
   :: TokioCall err res
-  -> (Maybe (FinalizerPtr err))
-  -> (Maybe (FinalizerPtr res))
+  -> Maybe (FinalizerPtr err)
+  -> Maybe (FinalizerPtr res)
   -> IO (Either (ForeignPtr err) (ForeignPtr res))
 makeTokioAsyncCall call readErr readSuccess = uninterruptibleMask $ \restore -> do
   mvar <- newEmptyMVar

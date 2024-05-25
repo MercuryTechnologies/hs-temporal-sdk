@@ -28,7 +28,6 @@ import Lens.Family2
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Core
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
 import Temporal.Common
-import qualified Temporal.Core.Worker as Core
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
 import UnliftIO

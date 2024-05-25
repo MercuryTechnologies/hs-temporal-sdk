@@ -176,7 +176,7 @@ makeOpenTelemetryInterceptor = do
                                     ( \retryPolicy ->
                                         maybe
                                           id
-                                          (\maxInterval -> (("temporal.retry_policy.maximum_interval_ms", toAttribute $ durationToMilliseconds $ maxInterval) :))
+                                          (\maxInterval -> (("temporal.retry_policy.maximum_interval_ms", toAttribute $ durationToMilliseconds maxInterval) :))
                                           retryPolicy.maximumInterval
                                           [ ("temporal.retry_policy.initial_interval_ms", toAttribute $ durationToMilliseconds $ retryPolicy.initialInterval)
                                           , ("temporal.retry_policy.backoff_coefficient", toAttribute $ retryPolicy.backoffCoefficient)

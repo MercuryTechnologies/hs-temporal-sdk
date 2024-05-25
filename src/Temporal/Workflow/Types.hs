@@ -216,7 +216,7 @@ data ContinueAsNewOptions = ContinueAsNewOptions
   , searchAttributes :: Map Text SearchAttributeType
   , headers :: Map Text Payload
   }
-  deriving (Show)
+  deriving stock (Show)
 
 
 defaultContinueAsNewOptions :: ContinueAsNewOptions

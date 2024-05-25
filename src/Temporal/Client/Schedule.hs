@@ -1,3 +1,4 @@
+{-# HLINT ignore "Use ?~" #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
@@ -5,16 +6,12 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GADTs #-}
-{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -210,7 +207,6 @@ import Temporal.Common
 import Temporal.Core.Client
 import qualified Temporal.Core.Client.WorkflowService as Core
 import Temporal.Duration
-import Temporal.Exception
 import Temporal.Payload
 import Temporal.SearchAttributes
 import Temporal.SearchAttributes.Internal
@@ -1009,9 +1005,7 @@ scheduleSpecToProto p =
     & S.maybe'endTime .~ fmap timespecToTimestamp p.endTime
     & S.maybe'jitter .~ fmap durationToProto p.jitter
     & S.timezoneName .~ p.timezoneName
-    & S.timezoneData .~ case p.timezoneData of
-      Just tz -> tz
-      Nothing -> ""
+    & S.timezoneData .~ fromMaybe "" p.timezoneData
 
 
 scheduleSpecFromProto :: S.ScheduleSpec -> ScheduleSpec

@@ -222,7 +222,7 @@ runWorkflow wf = provideCallStack $ do
           $logDebug =<< withRunId "No new activation results"
           return JobNil
         _ -> do
-          ($logDebug =<< withRunId (Text.pack $ printf "%d complete" (length comps)))
+          $logDebug =<< withRunId (Text.pack $ printf "%d complete" (length comps))
           let
             getComplete (ActivationResult a IVar {ivarRef = cr}) = do
               r <- readIORef cr
@@ -246,7 +246,7 @@ runWorkflow wf = provideCallStack $ do
     waitActivationResults env = do
       lift ($logDebug =<< withRunId "waitActivationResults")
       newActivations <- do
-        activations <- lift $ atomically $ readTVar pendingActivations
+        activations <- lift $ readTVarIO pendingActivations
         if null activations
           then await
           else do

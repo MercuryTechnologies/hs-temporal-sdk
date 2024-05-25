@@ -1,5 +1,4 @@
 {-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE OverloadedRecordDot #-}
 
 module Temporal.Runtime (
   Runtime,
@@ -49,7 +48,7 @@ destroyRuntime (Runtime rvar) = finalizeForeignPtr rvar
 
 -- | Access the underlying 'Runtime' pointer for calling out to Rust.
 withRuntime :: Runtime -> (Ptr Runtime -> IO a) -> IO a
-withRuntime (Runtime rvar) f = withForeignPtr rvar f
+withRuntime (Runtime rvar) = withForeignPtr rvar
 
 
 {- | The Rust runtime exports logs to the Haskell runtime. This function fetches

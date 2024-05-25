@@ -93,7 +93,7 @@ instance Cancel (ExternalWorkflowHandle a) where
 
 instance Wait (ChildWorkflowHandle a) where
   type WaitResult (ChildWorkflowHandle a) = Workflow a
-  wait h = waitChildWorkflowResult h
+  wait = waitChildWorkflowResult
 
 
 waitChildWorkflowStart :: RequireCallStack => ChildWorkflowHandle result -> Workflow ()

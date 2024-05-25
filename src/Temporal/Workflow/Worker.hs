@@ -83,9 +83,7 @@ whileM_ p = go
   where
     go = do
       x <- p
-      if x
-        then go
-        else pure ()
+      when x go
 
 
 {- | Execute this worker until poller shutdown or failure. If there is a failure, this may
@@ -134,7 +132,7 @@ execute worker@WorkflowWorker {workerCore} = flip runReaderT worker $ do
 
 
 handleActivation :: forall m. (MonadUnliftIO m, MonadLoggerIO m, MonadCatch m, MonadTracer m) => Core.WorkflowActivation -> ReaderT WorkflowWorker m ()
-handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {attributes = HashMap.fromList [("temporal.activation.run_id", toAttribute $ activation ^. Activation.runId)]}) $ \s -> do
+handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {attributes = HashMap.fromList [("temporal.activation.run_id", toAttribute $ activation ^. Activation.runId)]}) $ \_s -> do
   $(logDebug) ("Handling activation: RunId " <> Text.pack (show (activation ^. Activation.runId)))
   forM_ (activation ^. Activation.jobs) $ \job -> do
     $(logDebug) ("Job: " <> Text.pack (show job))
@@ -146,7 +144,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
     then do
       mInst <- createOrFetchWorkflowInstance
       forM_ mInst $ \inst -> do
-        let withoutStart = filter (\job -> not $ isJust (job ^. Activation.maybe'startWorkflow)) (activation ^. Activation.jobs)
+        let withoutStart = filter (\job -> isNothing (job ^. Activation.maybe'startWorkflow)) (activation ^. Activation.jobs)
         case withoutStart of
           [] -> pure ()
           otherJobs -> atomically $ writeTQueue inst.activationChannel (activation & Activation.jobs .~ otherJobs)
@@ -181,7 +179,6 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
     createOrFetchWorkflowInstance = inSpan' "createOrFetchWorkflowInstance" (defaultSpanArguments {attributes = HashMap.fromList [("temporal.activation.run_id", toAttribute $ activation ^. Activation.runId)]}) $ \s -> do
       worker@WorkflowWorker {workerCore} <- ask
       runningWorkflows_ <- atomically $ readTVar worker.runningWorkflows
-      let c = Core.getWorkerConfig workerCore
       case HashMap.lookup (RunId $ activation ^. Activation.runId) runningWorkflows_ of
         Just inst -> do
           addAttribute s "temporal.workflow.worker.instance_state" ("existing" :: Text)

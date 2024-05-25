@@ -8,6 +8,7 @@ tasks.
 -}
 module Temporal.Operator where
 
+import Control.Monad
 import Control.Monad.IO.Class
 import Data.Map.Strict (Map)
 import Data.ProtoLens (Message (defMessage))
@@ -90,6 +91,6 @@ addSearchAttributes c (Namespace n) newAttrs = do
                 & Proto.namespace .~ n
                 & Proto.searchAttributes .~ converted
             )
-      pure $ fmap (\_ -> ()) res
+      pure $ void res
   where
     converted = fmap searchAttributeTypeToProto newAttrs

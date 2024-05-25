@@ -54,8 +54,9 @@
       attrs
       // {
         excludes = [
-          "protos/"
-          "dist-newstyle/"
+          "^protos/"
+          "^dist-newstyle/"
+          "^src/Data/EvalRecord/TH.hs"
         ];
       };
 
@@ -71,7 +72,9 @@
       };
       deadnix.enable = true;
       hpack.enable = true;
-      end-of-file-fixer.enable = true;
+      end-of-file-fixer = ignoreGeneratedCode {
+        enable = true;
+      };
       shfmt.enable = true;
       check-shebang-scripts-are-executable.enable = true;
       check-symlinks.enable = true;

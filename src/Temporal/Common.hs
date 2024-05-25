@@ -309,11 +309,11 @@ class FunctionHoist (args :: [Type]) where
 
 
 instance FunctionHoist '[] where
-  hoistFn trans _ _ f = trans f
+  hoistFn trans _ _ = trans
 
 
 instance FunctionHoist args => FunctionHoist (a ': args) where
-  hoistFn trans _ res f = \arg -> hoistFn trans (Proxy @args) res (f arg)
+  hoistFn trans _ res f = hoistFn trans (Proxy @args) res . f
 
 
 -- | A specalized version of 'hoist' that allows you to change the end result functor of a given function.
@@ -323,7 +323,7 @@ hoist
   => (forall x. m x -> n x)
   -> f
   -> (ArgsOf f :->: n (ResultOf m f))
-hoist trans f = hoistFn trans (Proxy @(ArgsOf f)) (Proxy @(ResultOf m f)) f
+hoist trans = hoistFn trans (Proxy @(ArgsOf f)) (Proxy @(ResultOf m f))
 
 
 nonEmptyString :: Text -> Maybe Text

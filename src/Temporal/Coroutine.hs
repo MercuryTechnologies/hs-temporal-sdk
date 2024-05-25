@@ -50,7 +50,7 @@ instance (Functor s, MonadFail m) => MonadFail (Coroutine s m) where
 
 
 instance Functor s => MonadTrans (Coroutine s) where
-  lift = Coroutine . liftM Right
+  lift = Coroutine . fmap Right
 
 
 instance (Functor s, MonadIO m) => MonadIO (Coroutine s m) where
@@ -100,7 +100,7 @@ coroutineHoist
   -> Coroutine f n a
 coroutineHoist f routine =
   Coroutine
-    { resume = liftM go $ f $ resume routine
+    { resume = fmap go $ f $ resume routine
     }
   where
     go (Right r) = Right r

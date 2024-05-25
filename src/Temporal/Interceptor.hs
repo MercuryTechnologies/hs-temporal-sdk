@@ -79,7 +79,7 @@ data ActivityInboundInterceptor = ActivityInboundInterceptor
 instance Semigroup ActivityInboundInterceptor where
   l <> r =
     ActivityInboundInterceptor
-      { executeActivity = \input next -> (executeActivity l) input $ \input' -> (executeActivity r) input' next
+      { executeActivity = \input next -> executeActivity l input $ \input' -> executeActivity r input' next
       }
 
 

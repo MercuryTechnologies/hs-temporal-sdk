@@ -9,8 +9,8 @@ import Temporal.SearchAttributes
 
 
 searchAttributesToProto :: Map.Map Text SearchAttributeType -> IO (Map.Map Text Message.Payload)
-searchAttributesToProto searchAttrs = traverse (fmap convertToProtoPayload . encode JSON) searchAttrs
+searchAttributesToProto = traverse (fmap convertToProtoPayload . encode JSON)
 
 
 searchAttributesFromProto :: Map.Map Text Message.Payload -> IO (Either String (Map.Map Text SearchAttributeType))
-searchAttributesFromProto fs = runExceptT $ traverse (ExceptT . decode JSON . convertFromProtoPayload) $ fs
+searchAttributesFromProto = runExceptT . traverse (ExceptT . decode JSON . convertFromProtoPayload)

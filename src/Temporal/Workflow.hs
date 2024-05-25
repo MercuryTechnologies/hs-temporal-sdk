@@ -1,9 +1,7 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE PolyKinds #-}
@@ -11,7 +9,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -226,7 +223,6 @@ import Control.Concurrent (forkIO)
 import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.Reader
-import Control.Monad.State
 import qualified Data.ByteString.Short as SBS
 import Data.Coerce
 import qualified Data.HashMap.Strict as HashMap
@@ -258,7 +254,7 @@ import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands as Co
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
 import RequireCallStack
 import System.Random.Stateful
-import Temporal.Activity.Definition (Activity, ActivityRef (..), KnownActivity (..), ProvidedActivity (..))
+import Temporal.Activity.Definition (ActivityRef (..), KnownActivity (..))
 import Temporal.Common
 import Temporal.Common.TimeoutType
 import Temporal.Duration (Duration, durationToProto, seconds)
@@ -508,15 +504,14 @@ signalWorkflow _ f (signalRef -> KnownSignal signalName signalCodec) = withWorkf
     let cmd =
           defMessage
             & Command.signalExternalWorkflowExecution
-              .~ ( f
-                    ( defMessage
-                        & Command.seq .~ rawSequence s
-                        & Command.signalName .~ signalName
-                        & Command.vec'args .~ fmap convertToProtoPayload args
-                        -- TODO
-                        -- & Command.headers .~ _
-                    )
-                 )
+              .~ f
+                ( defMessage
+                    & Command.seq .~ rawSequence s
+                    & Command.signalName .~ signalName
+                    & Command.vec'args .~ fmap convertToProtoPayload args
+                    -- TODO
+                    -- & Command.headers .~ _
+                )
     addCommand cmd
     atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
       seqMaps {externalSignals = HashMap.insert s resVar seqMaps.externalSignals}
@@ -547,15 +542,14 @@ startChildWorkflowFromPayloads
   -> Workflow (ChildWorkflowHandle (WorkflowResult wf))
 startChildWorkflowFromPayloads (workflowRef -> k@(KnownWorkflow codec _)) opts ps = do
   wfId <- case opts.workflowId of
-    Nothing -> (WorkflowId . UUID.toText) <$> uuid4
+    Nothing -> WorkflowId . UUID.toText <$> uuid4
     Just wfId -> pure wfId
   ilift $ go ps wfId
   where
     go :: Vector Payload -> WorkflowId -> InstanceM (ChildWorkflowHandle (WorkflowResult wf))
     go typedPayloads wfId = do
       updateCallStack
-      wfHandle <- sendChildWorkflowCommand typedPayloads wfId
-      pure wfHandle
+      sendChildWorkflowCommand typedPayloads wfId
     sendChildWorkflowCommand typedPayloads wfId = do
       inst <- ask
       -- TODO these need to pass through the interceptor
@@ -814,16 +808,12 @@ info = askInstance >>= (\m -> Workflow $ \_ -> Done <$> m) . readIORef . workflo
 
 -- | Current workflow's raw memo values.
 getMemoValues :: Workflow (Map Text Payload)
-getMemoValues = do
-  details <- info
-  pure details.rawMemo
+getMemoValues = (.rawMemo) <$> info
 
 
 -- | Lookup a memo value by key.
 lookupMemoValue :: Text -> Workflow (Maybe Payload)
-lookupMemoValue k = do
-  memoMap <- getMemoValues
-  pure $ Map.lookup k memoMap
+lookupMemoValue k = Map.lookup k <$> getMemoValues
 
 
 {- | Updates this Workflow's Search Attributes by merging the provided searchAttributes with the existing Search Attributes
@@ -857,7 +847,7 @@ Equivalent to `getCurrentTime` from the `time` package.
 now :: Workflow UTCTime
 now = Workflow $ \_ ->
   Done <$> do
-    wft <- workflowTime <$> ask
+    wft <- asks workflowTime
     t <- readIORef wft
     pure $! systemToUTCTime t
 
@@ -874,7 +864,8 @@ You may need to patch if:
 -}
 
 
-applyPatch :: RequireCallStack
+applyPatch
+  :: RequireCallStack
   => PatchId
   -> Bool
   -- ^ whether the patch is deprecated
@@ -1067,11 +1058,11 @@ setSignalHandler (signalRef -> KnownSignal n codec) f = ilift $ do
     HashMap.insert (Just n) handle' handlers
   where
     handle' :: Vector Payload -> Workflow ()
-    handle' = \vec -> do
+    handle' vec = do
       eWorkflow <- Workflow $ \_env ->
         liftIO $
-          fmap Done $
-            applyPayloads
+          Done
+            <$> applyPayloads
               codec
               (Proxy @(ArgsOf f))
               (Proxy @(Workflow ()))
@@ -1089,7 +1080,7 @@ The value is relative to epoch time.
 time :: RequireCallStack => Workflow SystemTime
 time = ilift $ do
   updateCallStack
-  wft <- workflowTime <$> ask
+  wft <- asks workflowTime
   readIORef wft
 
 
@@ -1197,7 +1188,6 @@ continueAsNew
   -> ContinueAsNewOptions
   -> (WorkflowArgs wf :->: Workflow (WorkflowResult wf))
 continueAsNew (workflowRef -> k@(KnownWorkflow codec _)) opts = withWorkflowArgs @(WorkflowArgs wf) @(WorkflowResult wf) codec $ \args -> do
-  i <- info
   Workflow $ \_ -> do
     inst <- ask
     res <- liftIO $ (Temporal.Workflow.Internal.Monad.continueAsNew inst.outboundInterceptor) (knownWorkflowName k) opts $ \wfName (opts' :: ContinueAsNewOptions) -> do
@@ -1237,7 +1227,7 @@ waitCondition c@(Condition m) = do
   (conditionSatisfied, touchedVars) <- ilift $ do
     sRef <- newIORef mempty
     sat <- runReaderT m sRef
-    (,) <$> pure sat <*> readIORef sRef
+    (,) sat <$> readIORef sRef
   if conditionSatisfied
     then pure ()
     else go touchedVars
@@ -1281,7 +1271,7 @@ biselect
   => Workflow (Either a b)
   -> Workflow (Either a c)
   -> Workflow (Either a (b, c))
-biselect wfA wfB = biselectOpt id id Left Right wfA wfB
+biselect = biselectOpt id id Left Right
 
 
 {-# INLINE biselectOpt #-}
@@ -1356,7 +1346,7 @@ race
   => Workflow a
   -> Workflow b
   -> Workflow (Either a b)
-race x y = biselectOpt discrimX discrimY id right x y
+race = biselectOpt discrimX discrimY id right
   where
     discrimX :: a -> Either (Either a b) ()
     discrimX a = Left (Left a)

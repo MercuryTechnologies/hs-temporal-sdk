@@ -68,7 +68,7 @@ data Composite (codecs :: [Type]) where
   CompositeCons :: codec -> Composite codecs -> Composite (codec ': codecs)
 
 
-instance TypeError (('ShowType a) ':<>: 'Text " is not supported by any of the provided codecs") => Codec (Composite '[]) a where
+instance TypeError ('ShowType a ':<>: 'Text " is not supported by any of the provided codecs") => Codec (Composite '[]) a where
   messageType = error "unreachable"
   encoding = error "unreachable"
   encode = error "unreachable"

@@ -71,7 +71,6 @@ import Temporal.Common
 import Temporal.Core.Worker (getWorkerClient, recordActivityHeartbeat)
 import Temporal.Exception
 import Temporal.Payload
-import Temporal.Worker.Types (Worker (..))
 import Temporal.Workflow.Types
 
 
@@ -110,7 +109,7 @@ provideActivity codec name f =
                   (Proxy @(Activity env (ResultOf (Activity env) f)))
                   f
                   input.activityArgs
-              traverse (\act -> runActivity actEnv act >>= encode codec) eAct
+              traverse (runActivity actEnv >=> encode codec) eAct
           }
     , reference =
         KnownActivity
