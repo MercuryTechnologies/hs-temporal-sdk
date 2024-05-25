@@ -4,6 +4,7 @@
 }: final: _prev: let
   inherit
     (pkgs.haskell.lib.compose)
+    addTestToolDepend
     enableCabalFlag
     overrideCabal
     ;
@@ -30,7 +31,7 @@ in {
       SystemConfiguration
     ]);
   }) (enableCabalFlag "external_lib" (final.callCabal2nix "temporal-sdk-core" ../../core {}));
-  temporal-sdk = final.callCabal2nix "temporal-sdk" ../.. {};
+  temporal-sdk = addTestToolDepend pkgs.temporal-cli (final.callCabal2nix "temporal-sdk" ../.. {});
   temporal-sdk-codec-server = final.callCabal2nix "temporal-sdk-codec-server" ../../codec-server {};
   temporal-codec-encryption = final.callCabal2nix "temporal-codec-encryption" ../../codec-encryption {};
   temporal-sdk-optimal-codec = final.callCabal2nix "temporal-sdk-optimal-codec" ../../optimal-codec {};
