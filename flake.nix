@@ -246,7 +246,6 @@
           temporal-bridge = temporal-bridge-and-friends.cargoNix.rootCrate.build;
           # temporal-bridge-better-2 = temporal-bridge-and-friends.cargoNix2.rootCrate.build;
         }
-        // pluckLocalPackages extendedPackageSetByGHCVersions.ghc96
         // localPackageMatrix;
 
       devShells = rec {
