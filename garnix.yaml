@@ -1,10 +1,14 @@
 builds:
-  exclude:
-  - 'packages.*.default'
-  - 'packages.*.devenv-up'
-  # Unable to build because devenv is impure
-  - 'devShells.*.*'
-  include:
-  - '*.x86_64-linux.*'
-  - 'packages.aarch64-darwin.*'
-  - 'packages.aarch64-linux.*'
+  - include:
+    - 'checks.x86_64-linux.*'
+    - 'packages.x86_64-linux.*-ghc*'
+    - 'packages.*.temporal-bridge'
+    exclude:
+    - 'packages.*.default'
+    - 'packages.*.devenv-up'
+    # Unable to build because devenv is impure
+    - 'devShells.*.*'
+  - include:
+    - 'packages.aarch64-darwin.*-ghc*'
+    - 'packages.aarch64-linux.*-ghc*'
+    branch: main
