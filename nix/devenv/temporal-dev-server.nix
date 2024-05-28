@@ -1,0 +1,3 @@
+{...}: {
+  services.temporal.enable = true;
+}

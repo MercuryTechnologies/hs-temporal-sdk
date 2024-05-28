@@ -10,6 +10,7 @@
 {-# HLINT ignore "Avoid lambda using `infix`" #-}
 {-# HLINT ignore "Avoid lambda" #-}
 {-# HLINT ignore "Use const" #-}
+{-# HLINT ignore "Redundant bracket" #-}
 
 -----------------------------------------------------------------------------
 
