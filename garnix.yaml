@@ -1,7 +1,7 @@
 builds:
   - include:
     - 'checks.x86_64-linux.*'
-    - 'packages.x86_64-linux.*-ghc*'
+    - 'packages.x86_64-linux.*'
     - 'packages.*.temporal-bridge'
     exclude:
     - 'packages.*.default'
@@ -9,6 +9,6 @@ builds:
     # Unable to build because devenv is impure
     - 'devShells.*.*'
   - include:
-    - 'packages.aarch64-darwin.*-ghc*'
-    - 'packages.aarch64-linux.*-ghc*'
+    - 'packages.aarch64-darwin.*'
+    - 'packages.aarch64-linux.*'
     branch: main
