@@ -11,4 +11,5 @@ builds:
   - include:
     - 'packages.aarch64-darwin.*'
     - 'packages.aarch64-linux.*'
+    exclude: []
     branch: main

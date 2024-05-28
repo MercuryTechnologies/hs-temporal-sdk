@@ -163,8 +163,8 @@ mkEvalRecordWith DeclareRecordConfig{..} decsQ = do
           vanillaType = foldl' appT (conT dataName) (varT . varName <$> tvbs)
 
       -- bare/covered types
-      bareType <- [t| $vanillaType Pure |]
-      coveredType <- [t| $vanillaType |]
+      bareType <- [t| $(vanillaType) Pure |]
+      coveredType <- [t| $(vanillaType) |]
 
       -- max arity = 62
       let typeChunks = chunksOf 62

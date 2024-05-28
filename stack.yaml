@@ -30,8 +30,8 @@ resolver: lts-22.22
 #   - wai
 packages:
 - protos
-- .
 - core
+- sdk
 - optimal-codec
 - codec-server
 - codec-encryption
