@@ -7,5 +7,5 @@ _self: super: let
     temporal-bridge = rustCore.temporal-bridge;
   };
 in {
-  haskellPackages = super.haskellPackages // sdkPackages;
+  haskellPackages = super.haskellPackages.extend sdkPackages;
 }
