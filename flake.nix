@@ -42,7 +42,7 @@
           [
             "^protos/"
             "^dist-newstyle/"
-            "^src/Data/EvalRecord/TH.hs"
+            "^src/Data/EvalRecord/TH\\.hs"
           ]
           ++ attrs.excludes or [];
       };
@@ -52,8 +52,20 @@
       // {
         excludes =
           [
-            "^core/rust/Cargo.nix"
-            "^core/rust/crate-hashes.json"
+            "^core/rust/Cargo\\.nix"
+            "^core/rust/crate-hashes\\.json"
+          ]
+          ++ attrs.excludes or [];
+      };
+
+    ignoreConflictingFormatting = attrs:
+      attrs
+      // {
+        excludes =
+          [
+            "^src/Temporal/Client/Namespace\\.hs"
+            "^src/Temporal/Client/Workflow\\.hs"
+            "^test/Spec\\.hs"
           ]
           ++ attrs.excludes or [];
       };
@@ -64,9 +76,9 @@
       };
       shellcheck.enable = true;
       # clippy.enable = true;
-      fourmolu = ignoreGeneratedCode {
+      fourmolu = ignoreConflictingFormatting (ignoreGeneratedCode {
         enable = true;
-      };
+      });
       hlint = ignoreGeneratedCode {
         enable = true;
       };

@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
-
 module Temporal.Client.HealthService where
 
 import Proto.Health.V1.Health
