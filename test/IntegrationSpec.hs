@@ -17,7 +17,6 @@ import Common
 import Control.Concurrent
 import Control.Exception
 import Control.Exception.Annotated
-import Control.Monad
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
@@ -37,7 +36,6 @@ import OpenTelemetry.Trace
 import RequireCallStack
 import System.Directory
 import System.IO
-import System.Timeout (timeout)
 import Temporal.Activity
 import Temporal.Bundle
 import Temporal.Bundle.TH
@@ -50,7 +48,6 @@ import Temporal.Exception
 import Temporal.Interceptor
 import Temporal.Operator (IndexedValueType (..), SearchAttributes (..), addSearchAttributes, listSearchAttributes)
 import Temporal.Payload
-import Temporal.Runtime hiding (Periodicity (..))
 import Temporal.SearchAttributes
 import Temporal.Worker
 import qualified Temporal.Workflow as W
@@ -192,7 +189,8 @@ spec = do
   where
     setup :: (TestEnv -> IO ()) -> IO ()
     setup go = do
-      fp <- getFreePort
+      -- fp <- getFreePort
+      let fp = 7233
       mTemporalPath <- findExecutable "temporal"
       conf <- case mTemporalPath of
         Nothing -> error "Could not find the 'temporal' executable in PATH"
