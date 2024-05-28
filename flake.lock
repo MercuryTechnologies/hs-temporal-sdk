@@ -170,23 +170,6 @@
         "type": "github"
       }
     },
-    "ghc-source-gen-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1684228610,
-        "narHash": "sha256-DZu3XAOYLKcSpOYhjpb6IuXMvRHtGohTkL0nsCb/dT0=",
-        "owner": "circuithub",
-        "repo": "ghc-source-gen",
-        "rev": "7a6aac047b706508e85ba2054b5bedbecfd7eb7a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "circuithub",
-        "repo": "ghc-source-gen",
-        "rev": "7a6aac047b706508e85ba2054b5bedbecfd7eb7a",
-        "type": "github"
-      }
-    },
     "gitignore": {
       "inputs": {
         "nixpkgs": [
@@ -435,31 +418,11 @@
         "type": "github"
       }
     },
-    "proto-lens-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1695734749,
-        "narHash": "sha256-e2lSKUsitYl5RoMfn5cIkAMSMrJ64xsuXB0vWZka76Y=",
-        "owner": "iand675",
-        "repo": "proto-lens",
-        "rev": "191f384b5329f0231844ae8405695fcdc29eab44",
-        "type": "github"
-      },
-      "original": {
-        "owner": "iand675",
-        "repo": "proto-lens",
-        "rev": "191f384b5329f0231844ae8405695fcdc29eab44",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "devenv": "devenv",
         "flake-utils": "flake-utils_3",
-        "ghc-source-gen-src": "ghc-source-gen-src",
-        "nixpkgs": "nixpkgs_3",
-        "proto-lens-src": "proto-lens-src",
-        "temporal-sdk-core": "temporal-sdk-core"
+        "nixpkgs": "nixpkgs_3"
       }
     },
     "systems": {
@@ -504,22 +467,6 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
-        "type": "github"
-      }
-    },
-    "temporal-sdk-core": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1716335191,
-        "narHash": "sha256-XuGv6oucI1QblWLrcL9tjvVuCrGXVrQ40KGQYyia6TY=",
-        "owner": "temporalio",
-        "repo": "sdk-core",
-        "rev": "30fb70287fe60cfb8545eb5facbccebe744870ca",
-        "type": "github"
-      },
-      "original": {
-        "owner": "temporalio",
-        "repo": "sdk-core",
         "type": "github"
       }
     }

@@ -4,18 +4,6 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     devenv.url = "github:cachix/devenv/v1.0.5";
-    temporal-sdk-core = {
-      url = "github:temporalio/sdk-core";
-      flake = false;
-    };
-    ghc-source-gen-src = {
-      url = "github:circuithub/ghc-source-gen/7a6aac047b706508e85ba2054b5bedbecfd7eb7a";
-      flake = false;
-    };
-    proto-lens-src = {
-      url = "github:iand675/proto-lens/191f384b5329f0231844ae8405695fcdc29eab44";
-      flake = false;
-    };
   };
 
   outputs = inputs @ {
@@ -23,9 +11,6 @@
     nixpkgs,
     devenv,
     flake-utils,
-    # ghc-source-gen-src,
-    # , proto-lens-src
-    temporal-sdk-core,
     ...
   }: let
     inherit
@@ -53,15 +38,30 @@
     ignoreGeneratedCode = attrs:
       attrs
       // {
-        excludes = [
-          "^protos/"
-          "^dist-newstyle/"
-          "^src/Data/EvalRecord/TH.hs"
-        ];
+        excludes =
+          [
+            "^protos/"
+            "^dist-newstyle/"
+            "^src/Data/EvalRecord/TH.hs"
+          ]
+          ++ attrs.excludes or [];
+      };
+
+    ignoreCrate2Nix = attrs:
+      attrs
+      // {
+        excludes =
+          [
+            "^core/rust/Cargo.nix"
+            "^core/rust/crate-hashes.json"
+          ]
+          ++ attrs.excludes or [];
       };
 
     pre-commit-hooks = {
-      alejandra.enable = true;
+      alejandra = ignoreCrate2Nix {
+        enable = true;
+      };
       shellcheck.enable = true;
       # clippy.enable = true;
       fourmolu = ignoreGeneratedCode {
@@ -70,11 +70,13 @@
       hlint = ignoreGeneratedCode {
         enable = true;
       };
-      deadnix.enable = true;
-      hpack.enable = true;
-      end-of-file-fixer = ignoreGeneratedCode {
+      deadnix = ignoreCrate2Nix {
         enable = true;
       };
+      hpack.enable = true;
+      end-of-file-fixer = ignoreCrate2Nix (ignoreGeneratedCode {
+        enable = true;
+      });
       shfmt.enable = true;
       check-shebang-scripts-are-executable.enable = true;
       check-symlinks.enable = true;
@@ -87,23 +89,18 @@
       overlays = [
       ];
       pkgs = import nixpkgs {inherit system overlays;};
-      temporal-bridge = (import ./nix/temporal-bridge.nix {inherit pkgs temporal-sdk-core;}).temporal-bridge;
-      # myHaskellPackages = pkgs.haskellPackages.extend (import ./nix/overlays/temporal-sdk-pkgs.nix {
-      #   inherit
-      #     pkgs
-      #     # ghc-source-gen-src
-
-      #     temporal-bridge
-      #     ;
-      # });
+      temporal-bridge-and-friends = import ./nix/temporal-bridge.nix {
+        inherit
+          pkgs
+          ;
+      };
+      temporal-bridge = temporal-bridge-and-friends.temporal-bridge;
       extendedPackageSetByGHCVersions = listToAttrs (
         map (ghcVersion: {
           name = ghcVersion;
           value = pkgs.haskell.packages.${ghcVersion}.extend (import ./nix/overlays/temporal-sdk-pkgs.nix {
             inherit
               pkgs
-              # ghc-source-gen-src
-              
               temporal-bridge
               ;
           });
@@ -152,8 +149,8 @@
         inherit
           (extendedPackageSetByGHCVersions.${ghcVersion})
           proto-lens-protoc
-          temporal-sdk-core
           ;
+        temporal-sdk-core = temporal-bridge-and-friends.temporal-sdk-core-src;
       in
         pkgs.writeShellScriptBin "protogen" ''
           shopt -s globstar
@@ -193,14 +190,13 @@
                   CoreFoundation
                   SystemConfiguration
                 ]);
+              env.LIBRARY_PATH = "${temporal-bridge.lib}/lib";
+              env.TEMPORAL_BRIDGE_LIB_DIR = "${temporal-bridge.lib}/lib";
 
               languages.haskell = {
                 enable = true;
                 package = myHaskellPackages.ghc.withHoogle (hpkgs:
                   [
-                    # We want to use temporal-sdk-core from the flake
-                    # when possible.
-                    hpkgs.temporal-sdk-core
                     hpkgs.proto-lens-protoc
                   ]
                   ++ lib.attrVals (attrNames (localDevPackageDepsAsAttrSet myHaskellPackages)) hpkgs);
@@ -210,17 +206,35 @@
 
               pre-commit.hooks = pre-commit-hooks;
             })
+            ({...}: {
+              pre-commit.hooks = {
+                crate2nix = {
+                  enable = true;
+                  name = "crate2nix";
+                  files = "Cargo\\.(toml|lock)$";
+                  language = "system";
+                  pass_filenames = true;
+                  entry = ''
+                    cd $(dirname $1)
+                    ${pkgs.crate2nix}/bin/crate2nix generate
+                  '';
+                };
+              };
+            })
           ];
         };
     in {
-      # debug = {
-      #   inherit pkgs myHaskellPackages localDevPackages localDevPackageDeps localDevPackageDepsAsAttrSet;
-      # };
+      debug = {
+        # inherit pkgs localDevPackages localDevPackageDeps localDevPackageDepsAsAttrSet;
+        inherit (temporal-bridge-and-friends) cargoNix temporal-bridge;
+      };
 
       packages =
         {
           devenv-up = self.devShells.${system}.default.config.procfileScript;
-          temporal-bridge = temporal-bridge;
+          # temporal-bridge = temporal-bridge;
+          temporal-bridge = temporal-bridge-and-friends.cargoNix.rootCrate.build;
+          # temporal-bridge-better-2 = temporal-bridge-and-friends.cargoNix2.rootCrate.build;
         }
         // pluckLocalPackages extendedPackageSetByGHCVersions.ghc96
         // localPackageMatrix;

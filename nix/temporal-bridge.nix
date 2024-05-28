@@ -1,48 +1,46 @@
-{
-  pkgs,
-  temporal-sdk-core,
-}: {
-  temporal-bridge = pkgs.rustPlatform.buildRustPackage {
-    name = "temporal_bridge";
-    src = ../core/rust;
-    PROTOC = "${pkgs.protobuf}/bin/protoc";
-    PROTOC_INCLUDE = "${pkgs.protobuf}/include";
-
-    buildInputs = with pkgs;
-      [
-        protobuf
-        pkg-config
-        openssl
-        protobuf
-      ]
-      ++ lib.optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [
-        Security
-        CoreFoundation
-        SystemConfiguration
-      ]);
-
-    cargoLock = {
-      lockFile = ../core/rust/Cargo.lock;
-      outputHashes = {
-        "rustfsm-0.1.0" = "sha256-L0rCBnCfhR3D5ku1ItCzIE9nOk9wXaMcxV2I11uhrRc=";
-      };
+{pkgs}: let
+  customBuildRustCrateForPkgs = pkgs:
+    pkgs.buildRustCrate.override {
+      defaultCrateOverrides =
+        pkgs.defaultCrateOverrides
+        // {
+          prost = _attrs: {
+            PROTOC = "${pkgs.protobuf}/bin/protoc";
+            PROTOC_INCLUDE = "${pkgs.protobuf}/include";
+          };
+          prost-wkt-types = _attrs: {
+            PROTOC = "${pkgs.protobuf}/bin/protoc";
+            PROTOC_INCLUDE = "${pkgs.protobuf}/include";
+          };
+          temporal-sdk-core-protos = _attrs: {
+            PROTOC = "${pkgs.protobuf}/bin/protoc";
+            PROTOC_INCLUDE = "${pkgs.protobuf}/include";
+          };
+          temporal_bridge = attrs: {
+            buildInputs = pkgs.lib.optionals pkgs.stdenv.isDarwin (with pkgs.darwin.apple_sdk.frameworks; [
+              Security
+              CoreFoundation
+              SystemConfiguration
+            ]);
+            postInstall = ''
+              ${attrs.postInstall or ""}
+              ${pkgs.lib.optionalString pkgs.stdenv.isDarwin ''
+                for library in $lib/lib/*.so $lib/lib/*.dylib; do #*/
+                  echo "Trying to fix library paths for $library"
+                  if [ -f "$library" ] && [ ! -L "$library" ]; then
+                    install_name_tool -id "$library" "$library"
+                  fi
+                done
+              ''}
+            '';
+          };
+        };
     };
-
-    doCheck = false;
-    # wow, this is ugly
-    preBuild = ''
-      mkdir -p ../cargo-vendor-dir
-      ln -s ${temporal-sdk-core}/protos ../cargo-vendor-dir/protos
-    '';
-
-    postInstall = ''
-      ${pkgs.lib.optionalString pkgs.stdenv.isDarwin ''
-        install_name_tool -id $out/lib/libtemporal_bridge.dylib $out/lib/libtemporal_bridge.dylib
-      ''}
-    '';
-    # ${pkgs.lib.optionalString pkgs.stdenv.isLinux ''
-    #   patchelf --set-rpath $out/lib $out/lib/libtemporal_bridge.so
-    #   patchelf --set-soname libtemporal_bridge.so $out/lib/libtemporal_bridge.so
-    # ''}
+  cargoNix = pkgs.callPackage ../core/rust/Cargo.nix {
+    buildRustCrateForPkgs = customBuildRustCrateForPkgs;
   };
+in {
+  inherit cargoNix;
+  temporal-bridge = cargoNix.rootCrate.build;
+  temporal-sdk-core-src = cargoNix.internal.crates.temporal-sdk-core.src;
 }

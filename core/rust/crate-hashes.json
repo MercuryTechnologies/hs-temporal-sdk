@@ -1,0 +1,9 @@
+{
+  "git+https://github.com/temporalio/sdk-core?branch=master#rustfsm@0.1.0": "05xdl5dxg22xqlfa6pbh9wx6fkr0ng825dabwv1iv1czf03c4jig",
+  "git+https://github.com/temporalio/sdk-core?branch=master#rustfsm_procmacro@0.1.0": "05xdl5dxg22xqlfa6pbh9wx6fkr0ng825dabwv1iv1czf03c4jig",
+  "git+https://github.com/temporalio/sdk-core?branch=master#rustfsm_trait@0.1.0": "05xdl5dxg22xqlfa6pbh9wx6fkr0ng825dabwv1iv1czf03c4jig",
+  "git+https://github.com/temporalio/sdk-core?branch=master#temporal-client@0.1.0": "05xdl5dxg22xqlfa6pbh9wx6fkr0ng825dabwv1iv1czf03c4jig",
+  "git+https://github.com/temporalio/sdk-core?branch=master#temporal-sdk-core-api@0.1.0": "05xdl5dxg22xqlfa6pbh9wx6fkr0ng825dabwv1iv1czf03c4jig",
+  "git+https://github.com/temporalio/sdk-core?branch=master#temporal-sdk-core-protos@0.1.0": "05xdl5dxg22xqlfa6pbh9wx6fkr0ng825dabwv1iv1czf03c4jig",
+  "git+https://github.com/temporalio/sdk-core?branch=master#temporal-sdk-core@0.1.0": "05xdl5dxg22xqlfa6pbh9wx6fkr0ng825dabwv1iv1czf03c4jig"
+}

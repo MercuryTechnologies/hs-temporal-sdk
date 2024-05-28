@@ -1,3 +1,4 @@
+import Control.Monad
 import Data.Char (toLower)
 import Data.Functor (($>))
 import Data.Maybe (fromMaybe)
@@ -41,7 +42,8 @@ main = defaultMainWithHooks hooks
             pure emptyHookedBuildInfo
         , confHook = \a flags -> do
             lbi <- confHook simpleUserHooks a flags >>= rsAddLibraryInfo flags
-            copyTemporalBridge lbi (buildDir lbi)
+            unless (cabalFlag externalLibFlag flags) $ do
+              copyTemporalBridge lbi (buildDir lbi)
             pure lbi
         , postClean = \_ flags _ _ ->
             rsClean (fromFlag $ cleanVerbosity flags)
@@ -151,8 +153,9 @@ copyLib fl libPref shared = do
 copyTemporalBridge :: LocalBuildInfo -> FilePath -> IO ()
 copyTemporalBridge lbi fp = do
   copyLib config fp True
-  copyLib config fp False
   where
+    -- copyLib config fp False
+
     config = configFlags lbi
 
 
