@@ -86,9 +86,7 @@
     };
   in
     flake-utils.lib.eachSystem supportedSystems (system: let
-      overlays = [
-      ];
-      pkgs = import nixpkgs {inherit system overlays;};
+      pkgs = import nixpkgs {inherit system;};
       temporal-bridge-and-friends = import ./nix/temporal-bridge.nix {
         inherit
           pkgs
@@ -238,12 +236,14 @@
         }
         // pluckLocalPackages extendedPackageSetByGHCVersions.ghc96
         // localPackageMatrix;
+
       devShells = rec {
         default = ghc96;
         ghc96 = mkShellForGHC "ghc96";
         ghc98 = mkShellForGHC "ghc98";
         # ghc910 = mkShellForGHC "ghc910";
       };
+
       checks = {
         pre-commit-check = devenv.inputs.pre-commit-hooks.lib.${system}.run {
           src = ./.;

@@ -47,7 +47,8 @@ main = defaultMainWithHooks hooks
             pure lbi
         , postClean = \_ flags _ _ ->
             rsClean (fromFlag $ cleanVerbosity flags)
-        , postCopy = installTemporalBridge
+        , postCopy =
+            installTemporalBridge
         }
 
 
@@ -143,19 +144,13 @@ copyLib fl libPref shared = do
           _ -> "so"
         else "a"
     getLibraryPath =
-      if external
-        then do
-          bridgeLibDir <- getEnv "TEMPORAL_BRIDGE_LIB_DIR"
-          pure (bridgeLibDir ++ "/libtemporal_bridge." ++ ext)
-        else pure ("rust/target/release/libtemporal_bridge." ++ ext)
+      pure ("rust/target/release/libtemporal_bridge." ++ ext)
 
 
 copyTemporalBridge :: LocalBuildInfo -> FilePath -> IO ()
 copyTemporalBridge lbi fp = do
-  copyLib config fp True
+  copyLib config fp False
   where
-    -- copyLib config fp False
-
     config = configFlags lbi
 
 
@@ -170,8 +165,9 @@ installTemporalBridge _ flags pkg_descr lbi = do
         $ flags
     config = configFlags lbi
 
-  copyLib config libPref True
-  copyLib config libPref False
+  unless (cabalFlag externalLibFlag $ configFlags lbi) $ do
+    copyLib config libPref True
+    copyLib config libPref False
 
 
 getCabalFlag :: String -> ConfigFlags -> Bool

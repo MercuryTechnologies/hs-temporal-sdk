@@ -16,14 +16,9 @@
     stdenv
     ;
 in {
-  temporal-sdk-core = overrideCabal (old: {
-    postUnpack = ''
-      ${old.postUnpack or ""}
-      echo "Setting temporal bridge lib dir to ${temporal-bridge}/lib"
-      export TEMPORAL_BRIDGE_LIB_DIR=${temporal-bridge}/lib
-    '';
+  temporal-sdk-core = overrideCabal (_attrs: {
     extraLibraries = [
-      temporal-bridge
+      temporal-bridge.lib
     ];
     libraryFrameworkDepends = lib.optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [
       CoreFoundation
