@@ -202,7 +202,8 @@ spec = do
                   }
           pure serverConfig
       withDevServer globalRuntime conf $ \_ -> do
-        interceptors <- makeOpenTelemetryInterceptor
+        -- interceptors <- makeOpenTelemetryInterceptor
+        let interceptors = mempty
         (client, coreClient) <- makeClient fp interceptors
 
         SearchAttributes {customAttributes} <- either throwIO pure =<< listSearchAttributes coreClient (W.Namespace "default")
