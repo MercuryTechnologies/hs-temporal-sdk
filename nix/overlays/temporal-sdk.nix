@@ -1,11 +1,10 @@
-_self: super: let
+pkgs: let
   rustCore = import ../temporal-bridge.nix {
-    pkgs = super;
+    inherit pkgs;
   };
-  sdkPackages = import ../temporal-sdk-packages.nix {
-    pkgs = super;
+  sdkPackages = import ../temporal-sdk-pkgs.nix {
+    inherit pkgs;
     temporal-bridge = rustCore.temporal-bridge;
   };
-in {
-  haskellPackages = super.haskellPackages.extend sdkPackages;
-}
+in
+  sdkPackages

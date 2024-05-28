@@ -34,6 +34,9 @@
               ''}
             '';
           };
+          ring = attrs: {
+            CARGO_MANIFEST_LINKS = attrs.links;
+          };
         };
     };
   cargoNix = pkgs.callPackage ../core/rust/Cargo.nix {
