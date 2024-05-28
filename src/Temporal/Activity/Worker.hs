@@ -33,7 +33,6 @@ import Temporal.Exception
 import qualified Temporal.Exception as Err
 import Temporal.Interceptor
 import Temporal.Payload
-import Temporal.Workflow.Types
 import UnliftIO
 
 
@@ -171,7 +170,7 @@ applyActivityTaskStart tsk tt msg = do
               Just ActivityDefinition {..} ->
                 activityRun actEnv input'
                   `finally` (takeMVar syncPoint *> atomically (modifyTVar' w.runningActivities (HashMap.delete tt)))
-        completionMsg <- case join $ fmap (first (toException . ValueError)) ef of
+        completionMsg <- case ef >>= first (toException . ValueError) of
           Left err@(SomeException _wrappedErr) -> do
             $logDebug (T.pack (show err))
             let appFailure = mkApplicationFailure err w.activityErrorConverters

@@ -156,6 +156,7 @@ tests:
       - bytestring
       - directory
       - hspec
+      - hspec-api
       - text
       - uuid
       - monad-logger

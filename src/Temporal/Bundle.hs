@@ -1,18 +1,11 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DefaultSignatures #-}
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -165,6 +158,7 @@ module Temporal.Bundle (
   ApplyRef,
 ) where
 
+import Control.Monad
 import Control.Monad.Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
@@ -255,7 +249,7 @@ instance
 
 
 instance RefFromFunction' codec b original => RefFromFunction' codec (a -> b) original where
-  refFromFunction _ codec name f = refFromFunction (Proxy @b) codec name f
+  refFromFunction _ = refFromFunction (Proxy @b)
 
 
 class RefFromFunction' codec f f => RefFromFunction codec f
@@ -308,12 +302,12 @@ instance
               (Proxy @(Activity env (ResultOf (Activity env) original)))
               f
               input.activityArgs
-          traverse (\act -> runActivity actEnv act >>= encode codec) eAct
+          traverse (runActivity actEnv >=> encode codec) eAct
       )
 
 
 instance DefFromFunction' codec env b original => DefFromFunction' codec env (a -> b) original where
-  defFromFunction _ codec name f = defFromFunction @codec @env (Proxy @b) codec name f
+  defFromFunction _ = defFromFunction @codec @env (Proxy @b)
 
 
 -- | A bare record type that supplies the actual implementation of workflows and activities.
@@ -356,7 +350,7 @@ refs codec = result
     defLabels = Rec.pure (\meta -> concat [ns, ".", Rec.name meta])
 
     convertToKnownWorkflow :: forall wf. RefFromFunction codec wf => Rec.Metadata wf -> String -> Ref @@ wf
-    convertToKnownWorkflow = \_ n -> refFromFunction (Proxy @wf) codec n (Proxy @wf)
+    convertToKnownWorkflow _ n = refFromFunction (Proxy @wf) codec n (Proxy @wf)
 
     result :: r Ref
     result = Rec.mapC @(RefFromFunction codec) convertToKnownWorkflow defLabels
@@ -395,7 +389,7 @@ defs codec wfrec = result
     labeledFields = Rec.zipWith (\_ label f -> (label, f)) defLabels wfrec
 
     convertToWorkflowDefinition :: forall wf. (DefFromFunction codec env wf) => Rec.Metadata wf -> (String, wf) -> Def env @@ wf
-    convertToWorkflowDefinition = (\_ (n, f) -> provideCallStack $ defFromFunction @codec @env (pure f) codec n f)
+    convertToWorkflowDefinition _ (n, f) = provideCallStack $ defFromFunction @codec @env (pure f) codec n f
 
     result :: f (Def env)
     result = Rec.mapC @(DefFromFunction codec env) convertToWorkflowDefinition labeledFields
@@ -426,7 +420,7 @@ class FieldToStartOptionDefaults f where
 
 
 instance FieldToStartOptionDefaults b => FieldToStartOptionDefaults (a -> b) where
-  refStartOptionsDefaults _ act wf = refStartOptionsDefaults (Proxy @b) act wf
+  refStartOptionsDefaults _ = refStartOptionsDefaults (Proxy @b)
 
 
 instance FieldToStartOptionDefaults (Activity env result) where
@@ -473,7 +467,7 @@ provideDefaultOptions act wf =
     proxyFromMeta :: forall a. Rec.Metadata a -> Proxy a
     proxyFromMeta = const Proxy
     emptyBase :: rec (ConstFn ())
-    emptyBase = Rec.pure $ \_ -> ()
+    emptyBase = Rec.pure $ const ()
 
 
 data InWorkflowProxies :: Type -> Type -> Exp Type
@@ -596,7 +590,7 @@ shutdownTaskQueues workers =
 
 
 linkTaskQueues :: forall m rec. (TraversableRec rec, MonadUnliftIO m) => Workers rec -> m ()
-linkTaskQueues workers = Rec.traverse_ (\_ -> liftIO . linkWorker) workers
+linkTaskQueues = Rec.traverse_ (\_ -> liftIO . linkWorker)
 
 
 withTaskQueues :: forall rec m env a. (TraversableRec rec, MonadUnliftIO m, MonadCatch m) => Client -> WorkerConfigs env rec -> (Workers rec -> m a) -> m a

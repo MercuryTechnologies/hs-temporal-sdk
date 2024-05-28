@@ -4,13 +4,11 @@
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE ImpredicativeTypes #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE PolyKinds #-}
-{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -368,7 +366,7 @@ instance (VarArgs args) => VarArgs (arg ': args) where
   {-# INLINE mapResult #-}
 
 
-  foldlArgs p f !acc = \arg -> foldlArgs @args p f (f acc arg)
+  foldlArgs p f !acc arg = foldlArgs @args p f (f acc arg)
   {-# INLINE foldlArgs #-}
 
 
@@ -378,7 +376,7 @@ hoistResult = mapResult @args @(m result)
 
 
 foldMapArgs :: forall args c m. (VarArgs args, AllArgs c args, Monoid m) => (forall a. c a => a -> m) -> args :->: m
-foldMapArgs f = foldlArgs @args @c @(m) Proxy (\acc a -> acc `mappend` f a) mempty
+foldMapArgs f = foldlArgs @args @c @m Proxy (\acc a -> acc `mappend` f a) mempty
 {-# INLINE foldMapArgs #-}
 
 
@@ -406,7 +404,7 @@ processorEncodePayloads processor = liftIO . mapM (payloadProcessorEncode proces
 
 
 processorDecodePayloads :: (MonadIO m, Traversable f) => PayloadProcessor -> f Payload -> m (f Payload)
-processorDecodePayloads processor = liftIO . mapM (\payload -> payloadProcessorDecode processor payload >>= either (throwIO . ValueError) pure)
+processorDecodePayloads processor = liftIO . mapM (payloadProcessorDecode processor >=> either (throwIO . ValueError) pure)
 {-# INLINE processorDecodePayloads #-}
 
 
@@ -453,8 +451,8 @@ instance ToJSON Payload where
           []
   toEncoding Payload {..} =
     pairs $
-      (if payloadData == "" then mempty else ("data" .= encodeBase64 payloadData))
-        <> (if Map.null payloadMetadata then mempty else ("metadata" .= fmap encodeBase64 payloadMetadata))
+      (if payloadData == "" then mempty else "data" .= encodeBase64 payloadData)
+        <> (if Map.null payloadMetadata then mempty else "metadata" .= fmap encodeBase64 payloadMetadata)
 
 
 convertFromProtoPayload :: Proto.Payload -> Payload

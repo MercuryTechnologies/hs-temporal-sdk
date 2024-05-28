@@ -5,6 +5,11 @@
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RoleAnnotations #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Avoid lambda using `infix`" #-}
+{-# HLINT ignore "Avoid lambda" #-}
+{-# HLINT ignore "Use const" #-}
 
 -----------------------------------------------------------------------------
 
@@ -187,6 +192,7 @@ module Data.EvalRecord (
   module Fcf,
 ) where
 
+import Data.Bifunctor (first)
 import Data.Kind
 import qualified Data.List.NonEmpty as NE
 import Data.Proxy
@@ -217,7 +223,7 @@ runSt s (St f) =
 
 instance Functor (St s) where
   fmap f (St g) =
-    St $ (\(a, s') -> (f a, s')) . g
+    St $ first f . g
   {-# INLINE fmap #-}
 
 
@@ -243,7 +249,7 @@ instance Monad (St s) where
   St action >>= f =
     St $ \s ->
       let
-        (a, s') = action s
+        (a, !s') = action s
         St go = f a
       in
         go s'
@@ -260,7 +266,7 @@ execWr =
 
 tell :: Monoid w => w -> Wr w ()
 tell w =
-  St (\s -> ((), seq s s `mappend` w))
+  St (\s -> ((), s `mappend` w))
 
 
 {- | A first-class-families version of 'Data.Functor.Product.Product'.
@@ -504,7 +510,7 @@ instance Show (Dict c a) where
   that uses the packed instance dictionary instead.
 -}
 requiringDict :: (c a => r) -> (Dict c a -> r)
-requiringDict r = \Dict -> r
+requiringDict r Dict = r
 
 
 {- | Instances of this class provide means to talk about constraints,
@@ -625,7 +631,7 @@ zipWithC
 zipWithC f bf bg =
   mapC @c go (bf `prod` bg)
   where
-    go :: forall a. c a => Metadata a -> (Tuple2 f g) @@ a -> h @@ a
+    go :: forall a. c a => Metadata a -> Tuple2 f g @@ a -> h @@ a
     go p (fa, ga) = f p fa ga
 
 
@@ -711,7 +717,7 @@ dicts = dicts'
     addedDicts =
       addDicts @b @c @(Pure1 Proxy) $
         proxyRec
-    proxyRec = Data.EvalRecord.pure @b @(Pure1 Proxy) (\_ -> Proxy)
+    proxyRec = Data.EvalRecord.pure @b @(Pure1 Proxy) (const Proxy)
 
 
 {- | Like 'pure' but a constraint is allowed to be required on
@@ -804,7 +810,7 @@ decompose f = dropPureBind (distribute f)
 
 -- | Recompose a decomposed function.
 recompose :: FunctorRec rec => rec (Pure1 ((->) a)) -> a -> rec Pure
-recompose bfs = \a -> map (\_ f -> f a) bfs
+recompose bfs a = map (\_ f -> f a) bfs
 {-# INLINE recompose #-}
 
 
@@ -868,7 +874,7 @@ class ApplyOnMatch (cond :: Bool) where
 
 
 instance ApplyOnMatch 'True where
-  applyOnMatch _ f x = f x
+  applyOnMatch _ f = f
 
 
 instance ApplyOnMatch 'False where
@@ -882,10 +888,9 @@ mapMatching
   -> (forall a. Metadata a -> f @@ a -> (g <=< f) @@ a)
   -> rec f
   -> rec (MapMatches pred g <=< f)
-mapMatching p f record =
+mapMatching p f =
   Data.EvalRecord.mapC @(ClassF ApplyOnMatch (pred <=< f))
     applyIfRelevant
-    record
   where
     applyIfRelevant :: forall a. ApplyOnMatch ((pred <=< f) @@ a) => Metadata a -> f @@ a -> (MapMatches pred g <=< f) @@ a
     applyIfRelevant meta x =

@@ -15,6 +15,7 @@
 {-# LANGUAGE TypeFamilyDependencies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
 {- |
 Module: Temporal.Client.Schedule
@@ -424,8 +425,8 @@ listScheduleMatchingTimes c opts = do
           ( defMessage
               & WF.namespace .~ rawNamespace c.scheduleClientNamespace
               & WF.scheduleId .~ rawScheduleId opts.scheduleId
-              & WF.startTime .~ timespecToTimestamp (opts.startTime)
-              & WF.endTime .~ timespecToTimestamp (opts.endTime)
+              & WF.startTime .~ timespecToTimestamp opts.startTime
+              & WF.endTime .~ timespecToTimestamp opts.endTime
           )
   pure $ fmap timespecFromTimestamp (resp ^. WF.vec'startTime)
 

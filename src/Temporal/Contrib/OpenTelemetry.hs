@@ -138,12 +138,12 @@ makeOpenTelemetryInterceptor = do
                             HashMap.fromList $
                               concat
                                 [
-                                  [ ("temporal.workflow_id", toAttribute $ rawWorkflowId $ input.executeWorkflowInputInfo.workflowId)
-                                  , ("temporal.run_id", toAttribute $ rawRunId $ input.executeWorkflowInputInfo.runId)
-                                  , ("temporal.workflow_type", toAttribute $ input.executeWorkflowInputType)
-                                  , ("temporal.attempt", toAttribute $ input.executeWorkflowInputInfo.attempt)
-                                  , ("temporal.namespace", toAttribute $ rawNamespace $ input.executeWorkflowInputInfo.namespace)
-                                  , ("temporal.task_queue", toAttribute $ rawTaskQueue $ input.executeWorkflowInputInfo.taskQueue)
+                                  [ ("temporal.workflow_id", toAttribute $ rawWorkflowId input.executeWorkflowInputInfo.workflowId)
+                                  , ("temporal.run_id", toAttribute $ rawRunId input.executeWorkflowInputInfo.runId)
+                                  , ("temporal.workflow_type", toAttribute input.executeWorkflowInputType)
+                                  , ("temporal.attempt", toAttribute input.executeWorkflowInputInfo.attempt)
+                                  , ("temporal.namespace", toAttribute $ rawNamespace input.executeWorkflowInputInfo.namespace)
+                                  , ("temporal.task_queue", toAttribute $ rawTaskQueue input.executeWorkflowInputInfo.taskQueue)
                                   ]
                                 , maybe
                                     []
@@ -165,9 +165,9 @@ makeOpenTelemetryInterceptor = do
                                 , maybe
                                     []
                                     ( \parentInfo ->
-                                        [ ("temporal.parent.namespace", toAttribute $ rawNamespace $ parentInfo.parentNamespace)
-                                        , ("temporal.parent.run_id", toAttribute $ rawRunId $ parentInfo.parentRunId)
-                                        , ("temporal.parent.workflow_id", toAttribute $ rawWorkflowId $ parentInfo.parentWorkflowId)
+                                        [ ("temporal.parent.namespace", toAttribute $ rawNamespace parentInfo.parentNamespace)
+                                        , ("temporal.parent.run_id", toAttribute $ rawRunId parentInfo.parentRunId)
+                                        , ("temporal.parent.workflow_id", toAttribute $ rawWorkflowId parentInfo.parentWorkflowId)
                                         ]
                                     )
                                     input.executeWorkflowInputInfo.parent
@@ -178,8 +178,8 @@ makeOpenTelemetryInterceptor = do
                                           id
                                           (\maxInterval -> (("temporal.retry_policy.maximum_interval_ms", toAttribute $ durationToMilliseconds maxInterval) :))
                                           retryPolicy.maximumInterval
-                                          [ ("temporal.retry_policy.initial_interval_ms", toAttribute $ durationToMilliseconds $ retryPolicy.initialInterval)
-                                          , ("temporal.retry_policy.backoff_coefficient", toAttribute $ retryPolicy.backoffCoefficient)
+                                          [ ("temporal.retry_policy.initial_interval_ms", toAttribute $ durationToMilliseconds retryPolicy.initialInterval)
+                                          , ("temporal.retry_policy.backoff_coefficient", toAttribute retryPolicy.backoffCoefficient)
                                           , ("temporal.retry_policy.maximum_attempts", toAttribute $ fromIntegral @Int32 @Int $ retryPolicy.maximumAttempts)
                                           ]
                                     )
@@ -305,7 +305,7 @@ makeOpenTelemetryInterceptor = do
                         }
                 inSpan'' tracer ("SignalWithStartWorkflow:" <> rawWorkflowType (signalWithStartWorkflowType input)) spanArgs $ \_ -> do
                   ctxt <- getContext
-                  hdrs <- inject headersPropagator ctxt $ input.signalWithStartOptions.headers
+                  hdrs <- inject headersPropagator ctxt input.signalWithStartOptions.headers
                   next (input {signalWithStartOptions = (signalWithStartOptions input) {Temporal.Client.Types.headers = hdrs}})
             }
       , -- Not really anything to do here since new cron jobs should be in their own context

@@ -2,7 +2,7 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE RecordWildCards #-}
-module Data.EvalRecord.TH 
+module Data.EvalRecord.TH
   ( mkEvalRecord
   , mkEvalRecordWith
   , DeclareRecordConfig(..)
@@ -123,7 +123,7 @@ mkEvalRecordWith DeclareRecordConfig{..} decsQ = do
           strLit str = [| fromString $(litE $ StringL str)|]
           fieldNamesE = reconE $ mapMembers
             (\(name,_,_) -> conE 'Rec.Metadata `appE` strLit (nameBase name))
-            (\_ -> [|Rec.typeProxies|])
+            (const [|Rec.typeProxies|])
             fields
           nestedFieldNamesE = reconE $ mapMembers
             (\(name,_,_) -> [|pure $(strLit $ nameBase name)|])
@@ -163,8 +163,8 @@ mkEvalRecordWith DeclareRecordConfig{..} decsQ = do
           vanillaType = foldl' appT (conT dataName) (varT . varName <$> tvbs)
 
       -- bare/covered types
-      bareType <- [t| $(vanillaType) Pure |]
-      coveredType <- [t| $(vanillaType) |]
+      bareType <- [t| $vanillaType Pure |]
+      coveredType <- [t| $vanillaType |]
 
       -- max arity = 62
       let typeChunks = chunksOf 62
@@ -177,11 +177,11 @@ mkEvalRecordWith DeclareRecordConfig{..} decsQ = do
           allConstr = case typeChunks of
             [ps] -> mkConstraints ps
             pss -> mkConstraints $ map mkConstraints pss
-          -- fieldNamesAndTypesAsTupleList = foldr 
+          -- fieldNamesAndTypesAsTupleList = foldr
           --   (\(n, _, t) fs -> PromotedConsT `AppT` (PromotedTupleT 2 `AppT` LitT (StrTyLit $ nameBase n) `AppT` t) `AppT` fs)
-          --   PromotedNilT 
+          --   PromotedNilT
           --   fields
-          --   --strTyLit 
+          --   --strTyLit
 
       -- let datC = pure coveredType
       decs <- [d|
@@ -193,7 +193,7 @@ mkEvalRecordWith DeclareRecordConfig{..} decsQ = do
 
         instance Rec.FunctorRec $(pure coveredType) where
           map f $(conP nDataCon $ map varP xs)
-            = $(reconE $ mapMembers 
+            = $(reconE $ mapMembers
                   (\tup@(n, _, _) -> [|f ($(varE n) Rec.typeProxies) $(varE $ mkVarName "x" tup)|] )
                   (\tup -> appE [|Rec.map f|] (varE $ mkVarName "x" tup))
                   fields
@@ -212,31 +212,31 @@ mkEvalRecordWith DeclareRecordConfig{..} decsQ = do
           traverse f $(conP nDataCon $ map varP xs) = $(fst $ foldl'
               (\(l, op) r -> (infixE (Just l) (varE op) (Just r), '(<*>)))
               (conE nDataCon, '(<$>))
-              (mapMembers 
-                (\tup@(n, _, _) -> [|f ($(varE n) Rec.typeProxies) $(varE $ mkVarName "x" tup)|]) 
-                (\tup -> [|Rec.traverse f $(varE $ mkVarName "x" tup)|]) 
+              (mapMembers
+                (\tup@(n, _, _) -> [|f ($(varE n) Rec.typeProxies) $(varE $ mkVarName "x" tup)|])
+                (\tup -> [|Rec.traverse f $(varE $ mkVarName "x" tup)|])
                 fields
               )
             )
           {-# INLINE Rec.traverse #-}
           traverse_ f $(conP nDataCon $ map varP xs) = $(
-              case 
-                mapMembers 
-                  (\tup@(n, _, _) -> [|f ($(varE n) Rec.typeProxies) $(varE $ mkVarName "x" tup)|]) 
-                  (\tup -> [|Rec.traverse_ f $(varE $ mkVarName "x" tup)|]) 
+              case
+                mapMembers
+                  (\tup@(n, _, _) -> [|f ($(varE n) Rec.typeProxies) $(varE $ mkVarName "x" tup)|])
+                  (\tup -> [|Rec.traverse_ f $(varE $ mkVarName "x" tup)|])
                   fields
                 of
                   [] -> varE 'pure `appE` conE '()
-                  exprs -> varE 'void `appE` 
+                  exprs -> varE 'void `appE`
                     foldr1
-                      (\l r -> (infixE (Just l) (varE '(*>)) (Just r)))
+                      (\l r -> infixE (Just l) (varE '(*>)) (Just r))
                       exprs
-              
+
             )
           {-# INLINE Rec.traverse_ #-}
 
         instance Rec.ConstraintsRec $(pure coveredType) where
-          type AllRec $(varT nConstr) $(pure coveredType) = $(allConstr)
+          type AllRec $(varT nConstr) $(pure coveredType) = $allConstr
           addDicts $(conP nDataCon $ map varP xs)
             = $(reconE $ mapMembers
                 (\x -> [|(Rec.Dict, $x)|])
@@ -257,18 +257,18 @@ mkEvalRecordWith DeclareRecordConfig{..} decsQ = do
             (conE nDataCon) (zip3 otherBarbieMask xs ys))
         |]
       -- strip deriving Generic
-      let classes' = map (\(DerivClause strat cs) -> fmap (DerivClause strat) $ partition (== ConT ''Generic) cs) classes
+      let classes' = map (\(DerivClause strat cs) -> DerivClause strat <$> partition (== ConT ''Generic) cs) classes
 
       specifyStockStrategy <- isExtEnabled DerivingStrategies
       -- Redefine instances of the bare type with the original strategy
       bareDrvs <- traverse (\(strat, cls) -> do
         param <- newName "f"
-        standaloneDerivWithStrategyD 
-          strat 
-          (sequence 
+        standaloneDerivWithStrategyD
+          strat
+          (sequence
             [ conT ''Rec.AllRecF `appT` cls `appT` varT param `appT` pure coveredType
-            ]) 
-          [t|$(cls) ($(pure coveredType) $(varT param)) |])
+            ])
+          [t|$cls ($(pure coveredType) $(varT param)) |])
         [ (strat, pure t) | (_, DerivClause strat preds) <- classes', t <- preds ]
 
       return $ DataD [] dataName

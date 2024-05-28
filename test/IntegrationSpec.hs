@@ -117,8 +117,8 @@ configWithRetry pn =
 
 mkWithWorker :: PortNumber -> WorkerConfig actEnv -> IO a -> IO a
 mkWithWorker pn conf m = do
-  let clientConfig = configWithRetry pn
-  c <- connectClient globalRuntime clientConfig
+  let clientConfig_ = configWithRetry pn
+  c <- connectClient globalRuntime clientConfig_
   bracket (startWorker c (conf {payloadProcessor = sillyEncryptionPayloadProcessor})) shutdown (const m)
 
 
@@ -170,7 +170,7 @@ data TemporalWorkflowJobPayload = TemporalWorkflowJobPayload
   , workflowIdReusePolicy :: Maybe W.WorkflowIdReusePolicy
   , workflowSearchAttributes :: Map Text SearchAttributeType
   }
-  deriving (Eq, Show, Generic)
+  deriving stock (Eq, Show, Generic)
 
 
 instance ToJSON TemporalWorkflowJobPayload
@@ -615,7 +615,7 @@ needsClient = do
             `shouldThrow` (ValueError "Error in $: expected String, but encountered Boolean" ==)
       specify "ChildWorkflow return values that parse incorrectly should throw a ValueException in a Workflow" $ \TestEnv {..} -> do
         pending
-      specify "Activity return values that parse incorrectly should throw a ValueException in a Workflow" $ \TestEnv {..} -> do
+      specify "Activity return values that parse incorrectly should throw a ValueException in a Workflow" $ \TestEnv {} -> do
         pending
 
     --   describe "not found" $ do

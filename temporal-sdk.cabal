@@ -190,6 +190,7 @@ test-suite temporal-sdk-tests
     , hs-opentelemetry-propagator-w3c
     , hs-opentelemetry-sdk
     , hspec
+    , hspec-api
     , lens-family
     , monad-logger
     , mtl

@@ -335,7 +335,7 @@ applyQueryWorkflow queryWorkflow = do
           }
   res <- liftIO $ inst.inboundInterceptor.handleQuery baseInput $ \input -> do
     let handlerOrDefault =
-          HashMap.lookup (Just (input.handleQueryInputType)) handles
+          HashMap.lookup (Just input.handleQueryInputType) handles
             <|> HashMap.lookup Nothing handles
     case handlerOrDefault of
       Nothing -> do
@@ -499,7 +499,7 @@ applyResolutions rs = do
                 Just status -> case status of
                   ResolveChildWorkflowExecutionStart'Succeeded succeeded ->
                     ( ActivationResult (Ok ()) existing.startHandle
-                        : ActivationResult (Ok $ (succeeded ^. Activation.runId . to RunId)) existing.firstExecutionRunId
+                        : ActivationResult (Ok (succeeded ^. Activation.runId . to RunId)) existing.firstExecutionRunId
                         : completions
                     , sequenceMaps'
                     )
@@ -613,7 +613,7 @@ convertExitVariantToCommand variant = do
           & Command.continueAsNewWorkflowExecution
             .~ ( defMessage
                   & Command.workflowType .~ rawWorkflowType continueAsNewWorkflowType
-                  & Command.taskQueue .~ (maybe "" rawTaskQueue continueAsNewOptions.taskQueue)
+                  & Command.taskQueue .~ maybe "" rawTaskQueue continueAsNewOptions.taskQueue
                   & Command.vec'arguments .~ fmap convertToProtoPayload args
                   & Command.maybe'retryPolicy .~ (retryPolicyToProto <$> continueAsNewOptions.retryPolicy)
                   & Command.searchAttributes .~ searchAttrs

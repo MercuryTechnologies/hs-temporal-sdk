@@ -1,14 +1,9 @@
-{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GADTs #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeApplications #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 {- | Temporal.Replay supports replaying a workflow from its event history. Use for troubleshooting and backwards compatibility unit tests.
@@ -71,7 +66,7 @@ fromHumps :: String -> Identifier String
 fromHumps = Identifier . go
   where
     go "" = [""]
-    go (x : []) = [x : []]
+    go [x] = [[x]]
     go xxs@(x : _)
       | isUpper x =
           let lhs = takeWhile isUpper xxs
@@ -121,7 +116,7 @@ fromHumps = Identifier . go
 
 -- | To @snake_Case@
 toSnake :: Identifier String -> String
-toSnake = concat . intersperse "_" . unIdentifier
+toSnake = intercalate "_" . unIdentifier
 
 
 -- | To @SCREAMING_SNAKE_CASE@
@@ -148,7 +143,7 @@ toScreamingSnake = map toUpper . toSnake
 readHistoryFromJSONFile :: MonadIO m => FilePath -> m (Either String (Vector HistoryEvent))
 readHistoryFromJSONFile fp = liftIO $ do
   bs <- BS.readFile fp
-  pure $ fmap (\msg -> (msg :: History) ^. vec'events) $ eitherDecode bs
+  pure $ (\msg -> (msg :: History) ^. vec'events) <$> eitherDecode bs
 
 
 feedWorkflowHistoryFromJSONFile :: MonadIO m => WorkflowId -> FilePath -> HistoryPusher -> m ()
