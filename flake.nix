@@ -87,6 +87,10 @@
         #   hooks = pre-commit-hooks;
         # };
       };
+
+      overlays = {
+        default = import ./nix/overlays/temporal-sdk.nix;
+      };
     });
 
   # --- Flake Local Nix Configuration ----------------------------
