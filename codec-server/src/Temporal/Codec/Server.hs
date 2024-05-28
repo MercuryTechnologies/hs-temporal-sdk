@@ -63,7 +63,7 @@ namespaceHeader = "x-namespace"
 
 
 streamingDecode :: Request -> ExceptT ErrorResponse IO Body
-streamingDecode req = ExceptT ((first (ErrorResponse status500) . eitherDecode') <$> consumeRequestBodyLazy req)
+streamingDecode req = ExceptT (first (ErrorResponse status500) . eitherDecode' <$> consumeRequestBodyLazy req)
 
 
 respHeaders :: ResponseHeaders

@@ -56,13 +56,11 @@ import qualified Data.ByteString.Internal as BS
 import Data.HashMap.Strict (HashMap)
 import Data.ProtoLens.Encoding
 import Data.ProtoLens.Service.Types
-import Data.Proxy
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Vector.Storable as V
 import Data.Word
 import Foreign.C.String
-import Foreign.C.Types
 import Foreign.ForeignPtr
 import Foreign.Marshal
 import Foreign.Ptr
@@ -159,7 +157,7 @@ instance ToJSON ByteVector where
 
 
 instance FromJSON ByteVector where
-  parseJSON = fmap ByteVector . fmap vectorToByteString . parseJSON
+  parseJSON = fmap (ByteVector . vectorToByteString) . parseJSON
 
 
 deriveJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''ClientTlsConfig
@@ -220,7 +218,7 @@ connectClient rt conf = do
       else pure conf
 
   clientPtrSlot <- newEmptyMVar
-  forkIO $ do
+  _ <- forkIO $ do
     withRuntime rt $ \rtPtr -> BS.useAsCString (BL.toStrict $ encode conf') $ \confPtr -> do
       let tryConnect =
             makeTokioAsyncCall
@@ -231,7 +229,7 @@ connectClient rt conf = do
             result <- tryConnect
             case result of
               Left errFP -> do
-                err <- withForeignPtr errFP $ \fp -> peek fp >>= cArrayToText
+                err <- withForeignPtr errFP $ peek >=> cArrayToText
                 case retryConfig conf of
                   Nothing -> putMVar clientPtrSlot (throw $ ClientConnectionError err)
                   Just retryConf -> do
@@ -242,7 +240,7 @@ connectClient rt conf = do
                       else do
                         threadDelay $ round delayMicros
                         go (attempt + 1)
-              Right client -> putMVar clientPtrSlot (CoreClient client)
+              Right client_ -> putMVar clientPtrSlot (CoreClient client_)
       go 1
   pure $ Client clientPtrSlot rt conf'
 
@@ -266,8 +264,8 @@ type PrimRpcCall = Ptr CoreClient -> Ptr CRpcCall -> TokioCall CRPCError (CArray
 
 -- TODO how should we use mask here?
 call :: forall svc t. (HasMethodImpl svc t) => PrimRpcCall -> Client -> MethodInput svc t -> IO (Either RpcError (MethodOutput svc t))
-call f c req = withClient c $ \cPtr -> do
-  let msgBytes = encodeMessage req
+call f c req_ = withClient c $ \cPtr -> do
+  let msgBytes = encodeMessage req_
   BS.useAsCStringLen msgBytes $ \(msgPtr, msgLen) -> do
     alloca $ \cArrayPtr -> do
       poke cArrayPtr (CArray msgPtr (fromIntegral msgLen))

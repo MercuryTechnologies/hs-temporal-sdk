@@ -61,7 +61,6 @@ module Temporal.Core.Client.WorkflowService (
 import Proto.Temporal.Api.Workflowservice.V1.RequestResponse
 import Proto.Temporal.Api.Workflowservice.V1.Service
 import Temporal.Core.Client
-import Temporal.Internal.FFI
 
 
 -- TODO the way that the generated protobuf code is structured, it might be nicer to just have a single
