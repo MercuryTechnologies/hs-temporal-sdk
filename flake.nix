@@ -4,10 +4,18 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     devenv.url = "github:cachix/devenv/v1.0.5";
+    # Hack to avoid needing to use impure when loading the devenv root.
+    #
+    # See .envrc for how we substitute this with the actual path.
+    devenv-root = {
+      url = "file+file:///dev/null";
+      flake = false;
+    };
   };
 
   outputs = inputs @ {
     self,
+    devenv-root,
     nixpkgs,
     devenv,
     flake-utils,
@@ -20,8 +28,8 @@
       ;
   in
     {
-      overlays = {
-        default = import ./nix/overlays/temporal-sdk.nix;
+      lib = {
+        haskellOverlay = import ./nix/overlays/temporal-sdk.nix;
       };
     }
     // flake-utils.lib.eachSystem supportedSystems (system: let
@@ -48,6 +56,10 @@
           inherit inputs pkgs;
           modules = [
             ({...}: {
+              devenv.root = let
+                devenvRootFileContent = builtins.readFile devenv-root.outPath;
+              in
+                pkgs.lib.mkIf (devenvRootFileContent != "") devenvRootFileContent;
               # There should be a way to get this from the flake in the future.
               # devenv.root = "/Users/ian/Code/mercury/hs-temporal-sdk";
               packages = with pkgs; [
