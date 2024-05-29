@@ -19,7 +19,12 @@
       supportedSystems
       ;
   in
-    flake-utils.lib.eachSystem supportedSystems (system: let
+    {
+      overlays = {
+        default = import ./nix/overlays/temporal-sdk.nix;
+      };
+    }
+    // flake-utils.lib.eachSystem supportedSystems (system: let
       pkgs = import nixpkgs {inherit system;};
       temporalBridgeAndFriends = import ./nix/temporal-bridge.nix {
         inherit
