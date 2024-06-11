@@ -1,13 +1,16 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 
 module Temporal.Workflow.Types where
 
+import Data.Data (Data)
 import Data.Map.Strict (Map)
 import Data.Text (Text)
-import Data.These
 import Data.Time.Clock.System (SystemTime)
 import Data.Vector (Vector)
 import Data.Word (Word32)
+import Language.Haskell.TH.Syntax (Lift)
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow as ChildWorkflow
 import Temporal.Activity.Types
 import Temporal.Common
@@ -38,6 +41,14 @@ data Info = Info
   , workflowType :: !WorkflowType
   , continueAsNewSuggested :: !Bool
   }
+  deriving stock (Show)
+
+
+data ActivityTimeoutPolicy
+  = StartToCloseTimeout !StartToClose
+  | ScheduleToCloseTimeout !ScheduleToClose
+  | StartToCloseAndScheduleToCloseTimeout !StartToClose !ScheduleToClose
+  deriving stock (Eq, Show, Data, Lift)
 
 
 data StartActivityOptions = StartActivityOptions
@@ -46,7 +57,7 @@ data StartActivityOptions = StartActivityOptions
   --
   -- An Activity Id can be used to complete the Activity asynchronously.
   , taskQueue :: Maybe TaskQueue
-  , timeout :: These StartToClose ScheduleToClose
+  , timeout :: ActivityTimeoutPolicy
   , scheduleToStartTimeout :: Maybe Duration
   -- ^ A Schedule-To-Start Timeout is the maximum amount of time that is allowed from when an Activity Task is scheduled (that is, placed in a Task Queue) to when a Worker starts (that is, picks up from the Task Queue) that Activity Task. In other words, it's a limit for how long an Activity Task can be enqueued.
   , heartbeatTimeout :: Maybe Duration
@@ -60,34 +71,35 @@ data StartActivityOptions = StartActivityOptions
   , disableEagerExecution :: Bool
   -- ^ If true, will disable eager activity execution. Eager activity execution is an optimization on some servers that sends activities back to the same worker as the calling workflow if they can run there. This setting is experimental and may be removed in a future release.
   }
+  deriving stock (Show, Lift)
 
 
 class StartActivityTimeoutOption a where
-  toStartActivityTimeoutOption :: a -> These StartToClose ScheduleToClose
+  toStartActivityTimeoutOption :: a -> ActivityTimeoutPolicy
 
 
-instance StartActivityTimeoutOption (These StartToClose ScheduleToClose) where
+instance StartActivityTimeoutOption ActivityTimeoutPolicy where
   toStartActivityTimeoutOption = id
 
 
 instance StartActivityTimeoutOption StartToClose where
-  toStartActivityTimeoutOption = This
+  toStartActivityTimeoutOption = StartToCloseTimeout
 
 
 instance StartActivityTimeoutOption ScheduleToClose where
-  toStartActivityTimeoutOption = That
+  toStartActivityTimeoutOption = ScheduleToCloseTimeout
 
 
 instance StartActivityTimeoutOption (StartToClose, ScheduleToClose) where
-  toStartActivityTimeoutOption (s, sc) = These s sc
+  toStartActivityTimeoutOption (s, sc) = StartToCloseAndScheduleToCloseTimeout s sc
 
 
 instance StartActivityTimeoutOption (ScheduleToClose, StartToClose) where
-  toStartActivityTimeoutOption (sc, s) = These s sc
+  toStartActivityTimeoutOption (sc, s) = StartToCloseAndScheduleToCloseTimeout s sc
 
 
 instance StartActivityTimeoutOption (Either StartToClose ScheduleToClose) where
-  toStartActivityTimeoutOption = either This That
+  toStartActivityTimeoutOption = either StartToCloseTimeout ScheduleToCloseTimeout
 
 
 defaultStartActivityOptions :: StartActivityTimeoutOption timeout => timeout -> StartActivityOptions
@@ -121,6 +133,7 @@ data ActivityCancellationType
   | -- | Do not request cancellation of the activity and immediately report cancellation to the
     -- workflow
     ActivityCancellationAbandon
+  deriving stock (Show, Eq, Lift, Data)
 
 
 data ExecuteActivityInput = ExecuteActivityInput
@@ -128,6 +141,7 @@ data ExecuteActivityInput = ExecuteActivityInput
   , activityHeaders :: Map Text Payload
   , activityInfo :: ActivityInfo
   }
+  deriving stock (Show)
 
 
 -- | Controls at which point to report back when a child workflow is cancelled.
@@ -140,6 +154,7 @@ data ChildWorkflowCancellationType
     ChildWorkflowCancellationWaitCancellationCompleted
   | -- | Request cancellation of the child and wait for confirmation that the request was received.
     ChildWorkflowCancellationWaitCancellationRequested
+  deriving stock (Show, Eq, Ord, Lift, Data)
 
 
 childWorkflowCancellationTypeToProto :: ChildWorkflowCancellationType -> ChildWorkflow.ChildWorkflowCancellationType
@@ -161,6 +176,7 @@ data ParentClosePolicy
     ParentClosePolicyAbandon
   | -- | Request cancellation on the child workflow.
     ParentClosePolicyRequestCancel
+  deriving stock (Eq, Ord, Show, Lift, Data)
 
 
 parentClosePolicyToProto :: ParentClosePolicy -> ChildWorkflow.ParentClosePolicy
@@ -183,6 +199,7 @@ data StartChildWorkflowOptions = StartChildWorkflowOptions
   , workflowId :: Maybe WorkflowId
   , taskQueue :: Maybe TaskQueue
   }
+  deriving stock (Show, Lift)
 
 
 defaultChildWorkflowOptions :: StartChildWorkflowOptions
@@ -216,7 +233,7 @@ data ContinueAsNewOptions = ContinueAsNewOptions
   , searchAttributes :: Map Text SearchAttributeType
   , headers :: Map Text Payload
   }
-  deriving stock (Show)
+  deriving stock (Eq, Show, Lift)
 
 
 defaultContinueAsNewOptions :: ContinueAsNewOptions

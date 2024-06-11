@@ -1,4 +1,6 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TypeFamilies #-}
 
@@ -6,6 +8,7 @@ module Temporal.Common where
 
 import Data.Aeson (FromJSON, ToJSON)
 import Data.ByteString (ByteString)
+import Data.Data (Data)
 import Data.Hashable (Hashable)
 import Data.Int (Int32)
 import Data.Kind
@@ -20,6 +23,8 @@ import Data.Typeable
 import Data.Vector (Vector)
 import Data.Word (Word32)
 import GHC.Generics (Generic)
+import Instances.TH.Lift
+import Language.Haskell.TH.Syntax (Lift)
 import Lens.Family2
 import qualified Proto.Google.Protobuf.Timestamp as Timestamp
 import qualified Proto.Google.Protobuf.Timestamp_Fields as Timestamp
@@ -32,16 +37,19 @@ import Temporal.Payload
 
 -- | This is generally the name of the function itself
 newtype WorkflowType = WorkflowType {rawWorkflowType :: Text}
+  deriving stock (Lift)
   deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 
 -- | A Workflow Id is a customizable, application-level identifier for a Workflow Execution that is unique to an Open Workflow Execution within a Namespace.
 newtype WorkflowId = WorkflowId {rawWorkflowId :: Text}
+  deriving stock (Lift)
   deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 
 -- | A Namespace is a unit of isolation within the Temporal Platform
 newtype Namespace = Namespace {rawNamespace :: Text}
+  deriving stock (Lift)
   deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 
@@ -54,10 +62,12 @@ Temporal guarantees that only one Workflow Execution with a given Workflow Id ca
 A Run Id uniquely identifies a Workflow Execution even if it shares a Workflow Id with other Workflow Executions.
 -}
 newtype RunId = RunId {rawRunId :: Text}
+  deriving stock (Lift)
   deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 
 newtype PatchId = PatchId {rawPatchId :: Text}
+  deriving stock (Lift)
   deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 
@@ -73,35 +83,43 @@ created under the same name. There is no limit to the number of Task Queues a Te
 can maintain.
 -}
 newtype TaskQueue = TaskQueue {rawTaskQueue :: Text}
+  deriving stock (Lift)
   deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 
 newtype ActivityType = ActivityType {rawActivityType :: Text}
+  deriving stock (Lift)
   deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 
 -- | A unique identifier for an Activity Execution.
 newtype ActivityId = ActivityId {rawActivityId :: Text}
+  deriving stock (Lift)
   deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 
 newtype ScheduleId = ScheduleId {rawScheduleId :: Text}
+  deriving stock (Lift)
   deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 
 newtype SignalId = SignalId {rawSignalId :: Text}
+  deriving stock (Lift)
   deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 
 newtype TimerId = TimerId {rawTimerId :: Text}
+  deriving stock (Lift)
   deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 
 newtype CancellationId = CancellationId {rawCancellationId :: Text}
+  deriving stock (Lift)
   deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 
 newtype QueryId = QueryId {rawQueryId :: Text}
+  deriving stock (Lift)
   deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 
@@ -172,7 +190,7 @@ data RetryPolicy = RetryPolicy
   -- Errors are matched against the @type@ field of the Application Failure.
   -- If one of those errors occurs, a retry does not occur.
   }
-  deriving stock (Show, Eq, Generic)
+  deriving stock (Show, Eq, Generic, Lift, Data)
 
 
 instance ToJSON RetryPolicy
@@ -258,7 +276,7 @@ data WorkflowIdReusePolicy
     -- it should be terminated and a new Workflow Execution with the same Workflow Id should be started.
     -- This policy allows for only one Workflow Execution with a specific Workflow Id to be running at any given time.
     WorkflowIdReusePolicyTerminateIfRunning
-  deriving stock (Eq, Ord, Read, Show, Enum, Bounded, Generic)
+  deriving stock (Eq, Ord, Read, Show, Enum, Bounded, Generic, Lift, Data)
 
 
 instance ToJSON WorkflowIdReusePolicy
@@ -297,6 +315,7 @@ data ParentInfo = ParentInfo
   , parentRunId :: RunId
   , parentWorkflowId :: WorkflowId
   }
+  deriving stock (Show, Eq, Generic)
 
 
 newtype Sequence = Sequence {rawSequence :: Word32}
@@ -354,3 +373,4 @@ data TimeoutOptions = TimeoutOptions
   --
   -- The default value is 10 seconds. This timeout is primarily available to recognize whether a Worker has gone down so that the Workflow Execution can be recovered on a different Worker. The main reason for increasing the default value would be to accommodate a Workflow Execution that has a very long Workflow Execution History that could take longer than 10 seconds for the Worker to load.
   }
+  deriving stock (Show, Eq, Lift, Data)

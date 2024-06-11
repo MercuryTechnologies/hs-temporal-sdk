@@ -2,6 +2,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
@@ -93,6 +94,7 @@ import qualified Data.Vector.Fusion.Bundle as B
 import qualified Data.Vector.Generic as VG
 import Fcf hiding (Null)
 import GHC.TypeLits
+import Language.Haskell.TH.Syntax (Lift)
 import Lens.Family2
 import qualified Proto.Temporal.Api.Common.V1.Message as Proto (Payload)
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Proto (data', metadata)
@@ -425,7 +427,7 @@ data Payload = Payload
   { payloadData :: ByteString
   , payloadMetadata :: Data.Map.Strict.Map Text ByteString
   }
-  deriving stock (Show, Eq, Ord)
+  deriving stock (Show, Eq, Ord, Lift)
 
 
 base64DecodeFromText :: MonadFail m => T.Text -> m ByteString

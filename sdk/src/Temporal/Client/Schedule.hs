@@ -668,7 +668,7 @@ mkScheduleAction (workflowRef -> KnownWorkflow codec wfName) (WorkflowId wfId) o
           & W.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts.timeouts.executionTimeout)
           & W.maybe'workflowRunTimeout .~ (durationToProto <$> opts.timeouts.runTimeout)
           & W.maybe'workflowTaskTimeout .~ (durationToProto <$> opts.timeouts.taskTimeout)
-          & W.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retry)
+          & W.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retryPolicy)
           & W.memo .~ convertToProtoMemo opts.memo
           & W.searchAttributes .~ (defMessage & C.indexedFields .~ searchAttrs)
           & W.header .~ (defMessage & C.fields .~ fmap convertToProtoPayload opts.headers)

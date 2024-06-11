@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE NumericUnderscores #-}
 
 {- |
@@ -27,6 +28,7 @@ import Data.Int (Int32, Int64)
 import Data.ProtoLens (defMessage)
 import qualified Data.Text as T
 import Data.Time.Clock
+import Language.Haskell.TH.Syntax (Lift)
 import Lens.Family2 ((&), (.~), (^.))
 import qualified Proto.Google.Protobuf.Duration as Duration
 import qualified Proto.Google.Protobuf.Duration_Fields as Duration
@@ -38,7 +40,7 @@ data Duration = Duration
   { durationSeconds :: {-# UNPACK #-} !Int64
   , durationNanoseconds :: {-# UNPACK #-} !Int32
   }
-  deriving stock (Eq, Ord, Show, Data)
+  deriving stock (Eq, Ord, Show, Data, Lift)
 
 
 -- | 	Generated output always contains 0, 3, 6, or 9 fractional digits, depending on required precision, followed by the suffix "s". Accepted are any fractional digits (also none) as long as they fit into nano-seconds precision and the suffix "s" is required.

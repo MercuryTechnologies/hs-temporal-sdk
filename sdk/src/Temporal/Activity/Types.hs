@@ -37,3 +37,4 @@ data ActivityInfo = ActivityInfo
   , isLocal :: Bool
   , taskToken :: TaskToken
   }
+  deriving stock (Show, Eq)

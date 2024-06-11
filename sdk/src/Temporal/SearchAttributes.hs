@@ -1,5 +1,9 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 {- |
 Module: Temporal.SearchAttributes
@@ -131,13 +135,17 @@ A Temporal Cluster has a set of default Search Attributes already available. Def
 module Temporal.SearchAttributes where
 
 import qualified Data.Aeson as A
+import Data.Data
 import Data.Int
 import Data.Scientific (floatingOrInteger)
 import Data.Text (Text)
-import Data.Time.Clock (UTCTime)
+import Data.Time
+import Data.Time.Clock
 import Data.Vector (Vector)
 import Data.Word
 import GHC.TypeLits
+import Instances.TH.Lift ()
+import Language.Haskell.TH.Syntax (Lift (..))
 
 
 class ToSearchAttribute a where
@@ -227,7 +235,21 @@ data SearchAttributeType
     -- - As a Text it would be matched by ProductId = 2dd8, which could cause unwanted matches.
     KeywordOrText Text
   | KeywordList (Vector Text)
-  deriving stock (Show, Eq, Ord)
+  deriving stock (Show, Eq, Ord, Lift, Data)
+
+#if MIN_VERSION_time(1,14,0)
+#else
+deriving stock instance Lift UTCTime
+instance Lift DiffTime where
+  lift t = let t' = toRational t in [| fromRational t' |]
+  liftTyped t = let t' = toRational t in [|| (fromRational t' :: DiffTime) ||]
+instance Lift NominalDiffTime where
+  lift t = let t' = toRational t in [| fromRational t' |]
+  liftTyped t = let t' = toRational t in [|| (fromRational t' :: NominalDiffTime) ||]
+instance Lift Day where
+  lift t = let t' = toModifiedJulianDay t in [| ModifiedJulianDay t' |]
+  liftTyped t = let t' = toModifiedJulianDay t in [|| ModifiedJulianDay t' ||]
+#endif
 
 
 instance A.ToJSON SearchAttributeType where

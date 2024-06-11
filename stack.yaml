@@ -47,18 +47,18 @@ packages:
 extra-deps:
 - if-instance-0.5.1.0
 - ghc-tcplugin-api-0.11.0.0
-- annotated-exception-0.2.0.3
-- require-callstack-0.1.0.0
-
+- annotated-exception-0.2.0.5
+- require-callstack-0.2.0.0
+- validation-selective-0.2.0.0
 # Used for OTel contrib
 - thread-utils-context-0.3.0.4
 - thread-utils-finalizers-0.1.1.0
 - crypton-0.33
 
-
 - proto-lens-protoc-0.8.0.1
 - proto-lens-protobuf-types-0.7.2.0
 - proto-lens-setup-0.4.0.8
+
 # - git: git@github.com:iand675/proto-lens.git
 #   commit: 191f384b5329f0231844ae8405695fcdc29eab44
 #   subdirs:

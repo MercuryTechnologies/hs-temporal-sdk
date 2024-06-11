@@ -117,6 +117,7 @@ library
     , temporal-api-protos
     , temporal-sdk-core
     , text
+    , th-lift-instances
     , these
     , time
     , transformers
@@ -208,6 +209,7 @@ test-suite temporal-sdk-tests
     , temporal-sdk
     , temporal-sdk-core
     , text
+    , th-lift-instances
     , these
     , time
     , transformers

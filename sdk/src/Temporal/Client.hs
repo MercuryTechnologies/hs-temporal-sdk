@@ -529,7 +529,7 @@ startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
             & WF.workflowIdReusePolicy
               .~ workflowIdReusePolicyToProto
                 (fromMaybe WorkflowIdReusePolicyAllowDuplicateFailedOnly opts'.workflowIdReusePolicy)
-            & WF.maybe'retryPolicy .~ (retryPolicyToProto <$> opts'.retry)
+            & WF.maybe'retryPolicy .~ (retryPolicyToProto <$> opts'.retryPolicy)
             & WF.cronSchedule .~ fromMaybe "" opts'.cronSchedule
             & WF.memo .~ convertToProtoMemo opts'.memo
             & WF.searchAttributes .~ (defMessage & Common.indexedFields .~ searchAttrs)
@@ -665,7 +665,7 @@ signalWithStart (workflowRef -> k@(KnownWorkflow codec _)) wfId opts (signalRef 
                 & RR.signalInput .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload signalArgs')
                 -- Deprecated, no need to set
                 -- & RR.control .~ _
-                & RR.maybe'retryPolicy .~ (retryPolicyToProto <$> opts'.signalWithStartOptions.retry)
+                & RR.maybe'retryPolicy .~ (retryPolicyToProto <$> opts'.signalWithStartOptions.retryPolicy)
                 & RR.cronSchedule .~ fromMaybe "" opts'.signalWithStartOptions.cronSchedule
                 & RR.memo .~ convertToProtoMemo memo'
                 & RR.header .~ headerToProto (fmap convertToProtoPayload hdrs)

@@ -19,19 +19,26 @@ packages:
   original:
     hackage: ghc-tcplugin-api-0.11.0.0
 - completed:
-    hackage: annotated-exception-0.2.0.3@sha256:3b648717c060cf808435738d85e94e78b144eb8267c281c8cc87edb99a18393e,1785
+    hackage: annotated-exception-0.2.0.5@sha256:d8d343f556e67ac38c8b5c8b9a1d551dd8005f6d28fe9c2accd606c5f9070e24,1785
     pantry-tree:
-      sha256: 4412649314f4bebda75c31bc2f6bcb56701af2eea04218e678709b440179055e
+      sha256: 7e8f91d0899402a6ede549e6a47b169fdc9bb9877f4fe52471c2f43ef05eb167
       size: 776
   original:
-    hackage: annotated-exception-0.2.0.3
+    hackage: annotated-exception-0.2.0.5
 - completed:
-    hackage: require-callstack-0.1.0.0@sha256:4286e01386aa92186474259f16f9250861bb8123fd1171bdbce754215c3dc3f9,1263
+    hackage: require-callstack-0.2.0.0@sha256:49c2cf84a07fa6499c5ac180cc08f711420c78843fd0f783001200390b4f9010,1147
     pantry-tree:
-      sha256: 2721dcb1a5b0a996da2723da8a63f844903091fba4039b58ae7402023a2a88e7
-      size: 405
+      sha256: fde38305489adf953a5d6ee0a4f1ce84b88c53d47035c3ccf2c02dc45c49f5c4
+      size: 332
   original:
-    hackage: require-callstack-0.1.0.0
+    hackage: require-callstack-0.2.0.0
+- completed:
+    hackage: validation-selective-0.2.0.0@sha256:cc847f1a110e3b1bd437a5356f115881b61cafcb11781b570b180efd88bf0907,3917
+    pantry-tree:
+      sha256: f6d871d6200ec0cf4903072028e17f0d0c7d9a71bedca11ace9d4c33a5387dd4
+      size: 697
+  original:
+    hackage: validation-selective-0.2.0.0
 - completed:
     hackage: thread-utils-context-0.3.0.4@sha256:e763da1c6cab3b6d378fb670ca74aa9bf03c9b61b6fcf7628c56363fb0e3e71e,1671
     pantry-tree:

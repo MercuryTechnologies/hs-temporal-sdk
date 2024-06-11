@@ -177,8 +177,10 @@ import GHC.TypeLits
 import RequireCallStack
 import Temporal.Activity
 import Temporal.Activity.Definition
+import Temporal.Client (StartWorkflowOptions, WorkflowHandle)
 import Temporal.Common.Async
 import Temporal.Core.Client
+import Temporal.Core.Worker (WorkerError (WorkerError))
 import Temporal.Payload
 import Temporal.Worker
 import Temporal.Workflow
@@ -404,9 +406,6 @@ collectTemporalDefinitions = Rec.foldMapC @(Rec.ClassF (ToDefinitions actEnv) f)
 
 
 type family RefStartOptionsType (f :: Type) :: Type where
-  RefStartOptionsType (Activity _ _) = StartActivityOptions
-  RefStartOptionsType (_ -> b) = RefStartOptionsType b
-  RefStartOptionsType (Workflow _) = StartChildWorkflowOptions
   RefStartOptionsType (KnownWorkflow _ _) = StartChildWorkflowOptions
   RefStartOptionsType (KnownActivity _ _) = StartActivityOptions
 
@@ -419,20 +418,8 @@ class FieldToStartOptionDefaults f where
     -> RefStartOptionsType f
 
 
-instance FieldToStartOptionDefaults b => FieldToStartOptionDefaults (a -> b) where
-  refStartOptionsDefaults _ = refStartOptionsDefaults (Proxy @b)
-
-
-instance FieldToStartOptionDefaults (Activity env result) where
-  refStartOptionsDefaults _ opts _ = opts
-
-
 instance FieldToStartOptionDefaults (KnownActivity args res) where
   refStartOptionsDefaults _ opts _ = opts
-
-
-instance FieldToStartOptionDefaults (Workflow a) where
-  refStartOptionsDefaults _ _ opts = opts
 
 
 instance FieldToStartOptionDefaults (KnownWorkflow args res) where
@@ -553,6 +540,28 @@ inWorkflowProxies s = Rec.zipWithC @(Rec.ClassF (UseAsInWorkflowProxy synchronic
     convertToProxies _ opt ref = useAsInWorkflowProxy s ref opt
 
 
+-- type family OptionsFor m ref where
+--   OptionsFor Workflow (KnownWorkflow args res) = StartChildWorkflowOptions
+--   OptionsFor Workflow (KnownActivity args res) = StartActivityOptions
+--   OptionsFor (t (m :: Type -> Type)) ref = OptionsFor m ref
+--   OptionsFor m (KnownWorkflow args res) = StartWorkflowOptions
+--   OptionsFor m (KnownActivity args res) = TypeError ('Text "Activities can only be invoked within the Workflow monad.")
+
+-- type family ResultType ref where
+--   ResultType (KnownWorkflow args res) = res
+--   ResultType (KnownActivity args res) = res
+
+-- type family HandleFor m ref where
+--   HandleFor Workflow (KnownWorkflow args res) = ChildWorkflowHandle res
+--   HandleFor Workflow (KnownActivity args res) = Task res
+--   HandleFor (t (m :: Type -> Type)) ref = HandleFor m ref
+--   HandleFor m (KnownWorkflow args res) = Temporal.Client.WorkflowHandle res
+--   HandleFor m (KnownActivity args res) = TypeError ('Text "Activities can only be invoked within the Workflow monad.")
+
+-- type family SynchronicityResult synchronicity m ref where
+--   SynchronicityResult ProxySync m ref = ResultType ref
+--   SynchronicityResult ProxyAsync m ref = HandleFor m ref
+
 type Workers rec = rec (ConstFn Worker)
 
 
@@ -578,15 +587,15 @@ startTaskQueues client conf = startWorkers conf >>= awaitWorkersStart
 
 This function stops each worker concurrently, waits for them to complete shutdown (gracefully or not), and then returns.
 -}
-shutdownTaskQueues :: forall m rec. (TraversableRec rec, MonadUnliftIO m) => Workers rec -> m ()
+shutdownTaskQueues :: forall m rec. (TraversableRec rec, MonadUnliftIO m) => Workers rec -> m (rec (ConstFn (Either SomeException ())))
 shutdownTaskQueues workers =
   stopWorkers workers
     >>= awaitWorkersStop
   where
     stopWorkers :: rec (ConstFn Worker) -> m (rec (ConstFn (Async ())))
     stopWorkers = Rec.traverse $ \_ worker -> asyncLabelled "temporal/shutdownTaskQueues" (shutdown worker)
-    awaitWorkersStop :: rec (ConstFn (Async ())) -> m ()
-    awaitWorkersStop = Rec.traverse_ $ \_ workerShutdownThread -> UnliftIO.wait workerShutdownThread
+    awaitWorkersStop :: rec (ConstFn (Async ())) -> m (rec (ConstFn (Either SomeException ())))
+    awaitWorkersStop = Rec.traverse $ \_ workerShutdownThread -> UnliftIO.waitCatch workerShutdownThread
 
 
 linkTaskQueues :: forall m rec. (TraversableRec rec, MonadUnliftIO m) => Workers rec -> m ()

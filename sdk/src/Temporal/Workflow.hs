@@ -91,7 +91,7 @@ Workflow Function Executions are completely oblivious to the Worker Process in t
 -}
 module Temporal.Workflow (
   Workflow,
-  WorkflowDefinition,
+  WorkflowDefinition (..),
   KnownWorkflow (..),
   ProvidedWorkflow (..),
   provideWorkflow,
@@ -109,6 +109,7 @@ module Temporal.Workflow (
   KnownActivity (..),
   StartActivityOptions (..), -- TODO fields conflict
   ActivityCancellationType (..),
+  ActivityTimeoutPolicy (..),
   StartActivityTimeoutOption (..),
   defaultStartActivityOptions,
   startActivity,
@@ -368,9 +369,9 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift 
             & Command.maybe'heartbeatTimeout .~ fmap durationToProto activityInput.options.heartbeatTimeout
             & \msg ->
               case activityInput.options.timeout of
-                This (StartToClose t) -> msg & Command.startToCloseTimeout .~ durationToProto t
-                That (ScheduleToClose t) -> msg & Command.scheduleToCloseTimeout .~ durationToProto t
-                These (StartToClose stc) (ScheduleToClose stc') ->
+                StartToCloseTimeout (StartToClose t) -> msg & Command.startToCloseTimeout .~ durationToProto t
+                ScheduleToCloseTimeout (ScheduleToClose t) -> msg & Command.scheduleToCloseTimeout .~ durationToProto t
+                StartToCloseAndScheduleToCloseTimeout (StartToClose stc) (ScheduleToClose stc') ->
                   msg
                     & Command.startToCloseTimeout .~ durationToProto stc
                     & Command.scheduleToCloseTimeout .~ durationToProto stc'

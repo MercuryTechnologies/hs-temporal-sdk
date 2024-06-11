@@ -46,7 +46,7 @@ module Temporal.Activity (
   provideActivity,
   ProvidedActivity (..),
   KnownActivity (..),
-  ActivityDefinition,
+  ActivityDefinition (..),
   ValidActivityFunction,
 
   -- * Asynchronous Completion
