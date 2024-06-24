@@ -127,6 +127,7 @@ module Temporal.Bundle (
   provideDefaultOptions,
   FieldToStartOptionDefaults (..),
   RefStartOptionsType,
+  EquateRefStartOptionsType,
 
   -- * Worker management
   withTaskQueues,
@@ -525,7 +526,7 @@ coerceRec :: Rec.AllRec (Equate c d) rec => rec c -> rec d
 coerceRec = unsafeCoerce
 
 
-type InWorkflowProxyOptions = RefStartOptions <=< Ref
+type InWorkflowProxyOptions = RefStartOptions
 
 
 {- | Combine a record of references with a record of default options to give a record of
