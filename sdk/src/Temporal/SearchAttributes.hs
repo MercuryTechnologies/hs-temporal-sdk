@@ -2,8 +2,12 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveLift #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
+
+{-# HLINT ignore "Unused LANGUAGE pragma" #-}
 
 {- |
 Module: Temporal.SearchAttributes

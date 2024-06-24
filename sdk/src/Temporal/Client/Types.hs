@@ -1,8 +1,11 @@
+{-# LANGUAGE DeriveLift #-}
+
 module Temporal.Client.Types where
 
 import Data.Map.Strict (Map)
 import Data.Text (Text)
 import Data.Vector (Vector)
+import Language.Haskell.TH.Syntax (Lift)
 import Temporal.Common
 import Temporal.Core.Client (Client)
 import Temporal.Duration
@@ -73,6 +76,7 @@ data StartWorkflowOptions = StartWorkflowOptions
   -- back to the same worker as the calling workflow if they can run there.
   , workflowStartDelay :: Maybe Duration
   }
+  deriving stock (Show, Eq, Lift)
 
 
 {- | Smart constructor for 'StartWorkflowOptions'.

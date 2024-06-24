@@ -19,6 +19,7 @@ dependencies:
 - temporal-api-protos
 - temporal-sdk-core
 - bytestring
+- discover-instances
 - mtl
 - transformers
 - text
@@ -52,6 +53,7 @@ dependencies:
 - split
 - these
 - first-class-families
+- validation-selective
 
 default-extensions:
 - BangPatterns
