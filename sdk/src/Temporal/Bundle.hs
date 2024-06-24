@@ -127,7 +127,6 @@ module Temporal.Bundle (
   provideDefaultOptions,
   FieldToStartOptionDefaults (..),
   RefStartOptionsType,
-  EquateRefStartOptionsType,
 
   -- * Worker management
   withTaskQueues,
@@ -183,6 +182,7 @@ import Temporal.Core.Client
 import Temporal.Payload
 import Temporal.Worker
 import Temporal.Workflow
+import Temporal.Workflow.Definition
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
 import UnliftIO
@@ -192,8 +192,6 @@ import Unsafe.Coerce
 type family ApplyRef (original :: Type) (f :: Type) where
   ApplyRef original (Workflow result) = KnownWorkflow (ArgsOf original) result
   ApplyRef original (Activity _ result) = KnownActivity (ArgsOf original) result
-  ApplyRef (KnownWorkflow args result) (KnownWorkflow args result) = KnownWorkflow args result
-  ApplyRef (KnownActivity args result) (KnownActivity args result) = KnownActivity args result
   ApplyRef original (_ -> b) = ApplyRef original b
   ApplyRef _ a = TypeError ('Text "Expected a Workflow or Activity, but got " ':<>: 'ShowType a)
 
@@ -406,9 +404,11 @@ collectTemporalDefinitions = Rec.foldMapC @(Rec.ClassF (ToDefinitions actEnv) f)
 
 
 type family RefStartOptionsType (f :: Type) :: Type where
+  RefStartOptionsType (Activity _ _) = StartActivityOptions
+  RefStartOptionsType (_ -> b) = RefStartOptionsType b
+  RefStartOptionsType (Workflow _) = StartChildWorkflowOptions
   RefStartOptionsType (KnownWorkflow _ _) = StartChildWorkflowOptions
   RefStartOptionsType (KnownActivity _ _) = StartActivityOptions
-  RefStartOptionsType other = RefStartOptionsType (Ref @@ other)
 
 
 class FieldToStartOptionDefaults f where
@@ -419,8 +419,20 @@ class FieldToStartOptionDefaults f where
     -> RefStartOptionsType f
 
 
+instance FieldToStartOptionDefaults b => FieldToStartOptionDefaults (a -> b) where
+  refStartOptionsDefaults _ = refStartOptionsDefaults (Proxy @b)
+
+
+instance FieldToStartOptionDefaults (Activity env result) where
+  refStartOptionsDefaults _ opts _ = opts
+
+
 instance FieldToStartOptionDefaults (KnownActivity args res) where
   refStartOptionsDefaults _ opts _ = opts
+
+
+instance FieldToStartOptionDefaults (Workflow a) where
+  refStartOptionsDefaults _ _ opts = opts
 
 
 instance FieldToStartOptionDefaults (KnownWorkflow args res) where
@@ -461,28 +473,16 @@ provideDefaultOptions act wf =
 data InWorkflowProxies :: Type -> Type -> Exp Type
 
 
-type instance Eval (InWorkflowProxies sync t) = InWorkflowProxyType sync t
+type instance Eval (InWorkflowProxies ProxySync (KnownWorkflow args res)) = args :->: Workflow res
 
 
-type family InWorkflowProxyType synchronicity ref :: Type where
-  InWorkflowProxyType ProxySync (KnownWorkflow args res) = args :->: Workflow res
-  InWorkflowProxyType ProxyAsync (KnownWorkflow args res) = args :->: Workflow (ChildWorkflowHandle res)
-  InWorkflowProxyType ProxySync (KnownActivity args res) = args :->: Workflow res
-  InWorkflowProxyType ProxyAsync (KnownActivity args res) = args :->: Workflow (Task res)
+type instance Eval (InWorkflowProxies ProxyAsync (KnownWorkflow args res)) = args :->: Workflow (ChildWorkflowHandle res)
 
 
-class
-  ( RefStartOptionsType f ~ RefStartOptionsType (Ref @@ f)
-  , InWorkflowProxyType synchronicity (Ref @@ f) ~ InWorkflowProxyType synchronicity f
-  ) =>
-  EquateRefStartOptionsType synchronicity f
+type instance Eval (InWorkflowProxies ProxySync (KnownActivity args res)) = args :->: Workflow res
 
 
-instance
-  ( RefStartOptionsType f ~ RefStartOptionsType (Ref @@ f)
-  , InWorkflowProxyType synchronicity (Ref @@ f) ~ InWorkflowProxyType synchronicity f
-  )
-  => EquateRefStartOptionsType synchronicity f
+type instance Eval (InWorkflowProxies ProxyAsync (KnownActivity args res)) = args :->: Workflow (Task res)
 
 
 class UseAsInWorkflowProxy synchronicity ref where
@@ -526,7 +526,7 @@ coerceRec :: Rec.AllRec (Equate c d) rec => rec c -> rec d
 coerceRec = unsafeCoerce
 
 
-type InWorkflowProxyOptions = RefStartOptions
+type InWorkflowProxyOptions = RefStartOptions <=< Ref
 
 
 {- | Combine a record of references with a record of default options to give a record of
@@ -536,51 +536,22 @@ directly as often.
 -}
 inWorkflowProxies
   :: forall synchronicity rec
-   . ( RequireCallStack
-     , ApplicativeRec rec
-     , ConstraintsRec rec
-     , Rec.AllRec (Rec.ClassF (UseAsInWorkflowProxy synchronicity) Ref Rec.& EquateRefStartOptionsType synchronicity) rec
-     )
+   . (RequireCallStack, ConstraintsRec rec, Rec.AllRec (Rec.ClassF (UseAsInWorkflowProxy synchronicity) Ref) rec, ApplicativeRec rec)
   => synchronicity
-  -> rec RefStartOptions
+  -> rec (RefStartOptions <=< Ref)
   -> rec Ref
-  -> rec (InWorkflowProxies synchronicity)
-inWorkflowProxies s =
-  Rec.zipWithC
-    @(Rec.ClassF (UseAsInWorkflowProxy synchronicity) Ref Rec.& EquateRefStartOptionsType synchronicity)
-    convertToProxies
+  -> rec (InWorkflowProxies synchronicity <=< Ref)
+inWorkflowProxies s = Rec.zipWithC @(Rec.ClassF (UseAsInWorkflowProxy synchronicity) Ref) convertToProxies
   where
     convertToProxies
       :: forall a
-       . (UseAsInWorkflowProxy synchronicity (Ref @@ a), EquateRefStartOptionsType synchronicity a)
+       . (UseAsInWorkflowProxy synchronicity (Ref @@ a))
       => Rec.Metadata a
       -> InWorkflowProxyOptions @@ a
       -> Ref @@ a
-      -> InWorkflowProxies synchronicity @@ (Ref @@ a)
+      -> (InWorkflowProxies synchronicity <=< Ref) @@ a
     convertToProxies _ opt ref = useAsInWorkflowProxy s ref opt
 
-
--- type family OptionsFor m ref where
---   OptionsFor Workflow (KnownWorkflow args res) = StartChildWorkflowOptions
---   OptionsFor Workflow (KnownActivity args res) = StartActivityOptions
---   OptionsFor (t (m :: Type -> Type)) ref = OptionsFor m ref
---   OptionsFor m (KnownWorkflow args res) = StartWorkflowOptions
---   OptionsFor m (KnownActivity args res) = TypeError ('Text "Activities can only be invoked within the Workflow monad.")
-
--- type family ResultType ref where
---   ResultType (KnownWorkflow args res) = res
---   ResultType (KnownActivity args res) = res
-
--- type family HandleFor m ref where
---   HandleFor Workflow (KnownWorkflow args res) = ChildWorkflowHandle res
---   HandleFor Workflow (KnownActivity args res) = Task res
---   HandleFor (t (m :: Type -> Type)) ref = HandleFor m ref
---   HandleFor m (KnownWorkflow args res) = Temporal.Client.WorkflowHandle res
---   HandleFor m (KnownActivity args res) = TypeError ('Text "Activities can only be invoked within the Workflow monad.")
-
--- type family SynchronicityResult synchronicity m ref where
---   SynchronicityResult ProxySync m ref = ResultType ref
---   SynchronicityResult ProxyAsync m ref = HandleFor m ref
 
 type Workers rec = rec (ConstFn Worker)
 
