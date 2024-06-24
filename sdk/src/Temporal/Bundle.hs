@@ -177,14 +177,11 @@ import GHC.TypeLits
 import RequireCallStack
 import Temporal.Activity
 import Temporal.Activity.Definition
-import Temporal.Client (StartWorkflowOptions, WorkflowHandle)
 import Temporal.Common.Async
 import Temporal.Core.Client
-import Temporal.Core.Worker (WorkerError (WorkerError))
 import Temporal.Payload
 import Temporal.Worker
 import Temporal.Workflow
-import Temporal.Workflow.Definition
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
 import UnliftIO
@@ -194,6 +191,8 @@ import Unsafe.Coerce
 type family ApplyRef (original :: Type) (f :: Type) where
   ApplyRef original (Workflow result) = KnownWorkflow (ArgsOf original) result
   ApplyRef original (Activity _ result) = KnownActivity (ArgsOf original) result
+  ApplyRef (KnownWorkflow args result) (KnownWorkflow args result) = KnownWorkflow args result
+  ApplyRef (KnownActivity args result) (KnownActivity args result) = KnownActivity args result
   ApplyRef original (_ -> b) = ApplyRef original b
   ApplyRef _ a = TypeError ('Text "Expected a Workflow or Activity, but got " ':<>: 'ShowType a)
 
@@ -408,6 +407,7 @@ collectTemporalDefinitions = Rec.foldMapC @(Rec.ClassF (ToDefinitions actEnv) f)
 type family RefStartOptionsType (f :: Type) :: Type where
   RefStartOptionsType (KnownWorkflow _ _) = StartChildWorkflowOptions
   RefStartOptionsType (KnownActivity _ _) = StartActivityOptions
+  RefStartOptionsType other = RefStartOptionsType (Ref @@ other)
 
 
 class FieldToStartOptionDefaults f where
@@ -460,16 +460,28 @@ provideDefaultOptions act wf =
 data InWorkflowProxies :: Type -> Type -> Exp Type
 
 
-type instance Eval (InWorkflowProxies ProxySync (KnownWorkflow args res)) = args :->: Workflow res
+type instance Eval (InWorkflowProxies sync t) = InWorkflowProxyType sync t
 
 
-type instance Eval (InWorkflowProxies ProxyAsync (KnownWorkflow args res)) = args :->: Workflow (ChildWorkflowHandle res)
+type family InWorkflowProxyType synchronicity ref :: Type where
+  InWorkflowProxyType ProxySync (KnownWorkflow args res) = args :->: Workflow res
+  InWorkflowProxyType ProxyAsync (KnownWorkflow args res) = args :->: Workflow (ChildWorkflowHandle res)
+  InWorkflowProxyType ProxySync (KnownActivity args res) = args :->: Workflow res
+  InWorkflowProxyType ProxyAsync (KnownActivity args res) = args :->: Workflow (Task res)
 
 
-type instance Eval (InWorkflowProxies ProxySync (KnownActivity args res)) = args :->: Workflow res
+class
+  ( RefStartOptionsType f ~ RefStartOptionsType (Ref @@ f)
+  , InWorkflowProxyType synchronicity (Ref @@ f) ~ InWorkflowProxyType synchronicity f
+  ) =>
+  EquateRefStartOptionsType synchronicity f
 
 
-type instance Eval (InWorkflowProxies ProxyAsync (KnownActivity args res)) = args :->: Workflow (Task res)
+instance
+  ( RefStartOptionsType f ~ RefStartOptionsType (Ref @@ f)
+  , InWorkflowProxyType synchronicity (Ref @@ f) ~ InWorkflowProxyType synchronicity f
+  )
+  => EquateRefStartOptionsType synchronicity f
 
 
 class UseAsInWorkflowProxy synchronicity ref where
@@ -523,20 +535,27 @@ directly as often.
 -}
 inWorkflowProxies
   :: forall synchronicity rec
-   . (RequireCallStack, ConstraintsRec rec, Rec.AllRec (Rec.ClassF (UseAsInWorkflowProxy synchronicity) Ref) rec, ApplicativeRec rec)
+   . ( RequireCallStack
+     , ApplicativeRec rec
+     , ConstraintsRec rec
+     , Rec.AllRec (Rec.ClassF (UseAsInWorkflowProxy synchronicity) Ref Rec.& EquateRefStartOptionsType synchronicity) rec
+     )
   => synchronicity
-  -> rec (RefStartOptions <=< Ref)
+  -> rec RefStartOptions
   -> rec Ref
-  -> rec (InWorkflowProxies synchronicity <=< Ref)
-inWorkflowProxies s = Rec.zipWithC @(Rec.ClassF (UseAsInWorkflowProxy synchronicity) Ref) convertToProxies
+  -> rec (InWorkflowProxies synchronicity)
+inWorkflowProxies s =
+  Rec.zipWithC
+    @(Rec.ClassF (UseAsInWorkflowProxy synchronicity) Ref Rec.& EquateRefStartOptionsType synchronicity)
+    convertToProxies
   where
     convertToProxies
       :: forall a
-       . (UseAsInWorkflowProxy synchronicity (Ref @@ a))
+       . (UseAsInWorkflowProxy synchronicity (Ref @@ a), EquateRefStartOptionsType synchronicity a)
       => Rec.Metadata a
       -> InWorkflowProxyOptions @@ a
       -> Ref @@ a
-      -> (InWorkflowProxies synchronicity <=< Ref) @@ a
+      -> InWorkflowProxies synchronicity @@ (Ref @@ a)
     convertToProxies _ opt ref = useAsInWorkflowProxy s ref opt
 
 
