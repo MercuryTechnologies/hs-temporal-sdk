@@ -47,20 +47,31 @@ execute n = do
 
   if
     | isActivity -> error "Activities cannot be invoked here. They must be invoked from within a Workflow."
-    | isWorkflow ->
-        [|
-          Temporal.Client.execute
-            ( let refProxy :: Proxy $(pure nconT)
-                  refProxy = Proxy
+    | isWorkflow -> do
+        hasDefaultTaskQueue <- not . null <$> TH.qReifyInstances ''WorkflowRootTaskQueue [nconT]
+        let baseExecution =
+              [|
+                Temporal.Client.execute
+                  ( let refProxy :: Proxy $(pure nconT)
+                        refProxy = Proxy
 
-                  ref :: ProvidedWorkflow (FnType $(pure nconT))
-                  ref = workflowRef refProxy
+                        ref :: ProvidedWorkflow (FnType $(pure nconT))
+                        ref = workflowRef refProxy
 
-                  kwf :: KnownWorkflow $argsAsPromotedList $(pure $ extractWorkflowResultType res)
-                  kwf = reference ref
-              in kwf
-            )
-          |]
+                        kwf :: KnownWorkflow $argsAsPromotedList $(pure $ extractWorkflowResultType res)
+                        kwf = reference ref
+                    in kwf
+                  )
+                |]
+        if hasDefaultTaskQueue
+          then
+            [|
+              \wfId ->
+                $(baseExecution)
+                  wfId
+                  (workflowClientStartOptions (Proxy :: Proxy $(pure nconT)) $ startWorkflowOptions $ workflowRootTaskQueue (Proxy :: Proxy $(pure nconT)))
+              |]
+          else [|\wfId -> $(baseExecution) wfId . workflowClientStartOptions (Proxy :: Proxy $(pure nconT)) . startWorkflowOptions|]
     | otherwise -> error "Not a known Workflow"
 
 
@@ -77,18 +88,29 @@ start n = do
 
   if
     | isActivity -> error "Activities cannot be invoked here. They must be invoked from within a Workflow."
-    | isWorkflow ->
-        [|
-          Temporal.Client.start
-            ( let refProxy :: Proxy $(pure nconT)
-                  refProxy = Proxy
+    | isWorkflow -> do
+        hasDefaultTaskQueue <- not . null <$> TH.qReifyInstances ''WorkflowRootTaskQueue [nconT]
+        let baseExecution =
+              [|
+                Temporal.Client.start
+                  ( let refProxy :: Proxy $(pure nconT)
+                        refProxy = Proxy
 
-                  ref :: ProvidedWorkflow (FnType $(pure nconT))
-                  ref = workflowRef refProxy
+                        ref :: ProvidedWorkflow (FnType $(pure nconT))
+                        ref = workflowRef refProxy
 
-                  kwf :: KnownWorkflow $argsAsPromotedList $(pure $ extractWorkflowResultType res)
-                  kwf = reference ref
-              in kwf
-            )
-          |]
+                        kwf :: KnownWorkflow $argsAsPromotedList $(pure $ extractWorkflowResultType res)
+                        kwf = reference ref
+                    in kwf
+                  )
+                |]
+        if hasDefaultTaskQueue
+          then
+            [|
+              \wfId ->
+                $(baseExecution)
+                  wfId
+                  (workflowClientStartOptions (Proxy :: Proxy $(pure nconT)) $ startWorkflowOptions $ workflowRootTaskQueue (Proxy :: Proxy $(pure nconT)))
+              |]
+          else [|\wfId -> $(baseExecution) wfId . workflowClientStartOptions (Proxy :: Proxy $(pure nconT)) . startWorkflowOptions|]
     | otherwise -> error "Not a known Workflow"

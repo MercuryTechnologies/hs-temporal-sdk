@@ -16,6 +16,8 @@ module Temporal.TH.Annotations (
   overrideName,
   ActivityTimeoutPolicy (..),
   activityTimeout,
+  ScheduleToStartTimeout (..),
+  HeartbeatTimeout (..),
 
   -- * Finding and validating annotations
   findAllAnnotations,
@@ -66,10 +68,10 @@ data TaskQueuePreference
     -- when not manually overridden by the caller.
     --
     -- This is still _overridable_ by the caller when starting the workflow or activity.
-    AlwaysUse Text
+    AlwaysUse TaskQueue
   | -- | Use this task queue if no other task queue is specified when starting the workflow
     -- using the client.
-    Root Text
+    Root TaskQueue
   deriving stock (Show, Eq, Data, Lift)
 
 
@@ -119,6 +121,14 @@ Applies to: Activities
 -}
 activityTimeout :: forall timeout. StartActivityTimeoutOption timeout => timeout -> ActivityTimeoutPolicy
 activityTimeout = toStartActivityTimeoutOption
+
+
+newtype HeartbeatTimeout = HeartbeatTimeout Duration
+  deriving stock (Show, Eq, Data, Lift)
+
+
+newtype ScheduleToStartTimeout = ScheduleToStartTimeout Duration
+  deriving stock (Show, Eq, Data, Lift)
 
 
 -- TODO
@@ -189,8 +199,8 @@ data AllAnnotations = AllAnnotations
   , searchAttributesAnns :: [(Text, SearchAttributeType)]
   , timeoutsAnns :: [TimeoutOptions]
   , activityCancellationTypeAnns :: [ActivityCancellationType]
-  , scheduleToStartTimeoutAnns :: [Duration]
-  , heartbeatTimeoutAnns :: [Duration]
+  , scheduleToStartTimeoutAnns :: [ScheduleToStartTimeout]
+  , heartbeatTimeoutAnns :: [HeartbeatTimeout]
   , childWorkflowCancellationTypeAnns :: [ChildWorkflowCancellationType]
   , parentClosePolicyAnns :: [ParentClosePolicy]
   }
@@ -232,7 +242,7 @@ formatValidationResults txt = Prelude.unlines . fmap go . toList
 data WorkflowAnnotations = WorkflowAnnotations
   { wfNameOverride :: Maybe Text
   , wfAliases :: [Text]
-  , wfTaskQueue :: Maybe TaskQueuePreference
+  , wfTaskQueue :: TaskQueuePreference
   , wfRetryPolicy :: Maybe RetryPolicy
   , wfWorkflowIdReusePolicy :: Maybe WorkflowIdReusePolicy
   , wfSearchAttributes :: [(Text, SearchAttributeType)]
@@ -257,13 +267,13 @@ ensureActivityOnlyOptionUnpopulated txt _ = failure $ OnlyForActivities txt
 validateWorkflowAnnotations :: AllAnnotations -> Validation (NonEmpty ValidationResult) WorkflowAnnotations
 validateWorkflowAnnotations AllAnnotations {..} = do
   ensureActivityOnlyOptionUnpopulated "activityTimeout" activityTimeoutAnns
-    *> ensureActivityOnlyOptionUnpopulated "heartbeatTimeout" taskQueueAnns
+    *> ensureActivityOnlyOptionUnpopulated "heartbeatTimeout" heartbeatTimeoutAnns
     *> ensureActivityOnlyOptionUnpopulated "activityCancellationType" activityCancellationTypeAnns
     *> ensureActivityOnlyOptionUnpopulated "scheduleToStartTimeout" scheduleToStartTimeoutAnns
     *> ( WorkflowAnnotations
           <$> atMostOne "nameOverride" (coerce nameOverrideAnns)
           <*> pure aliasesAnns
-          <*> atMostOne "taskQueue" taskQueueAnns
+          <*> (fromMaybe NoPreference <$> atMostOne "taskQueue" taskQueueAnns)
           <*> atMostOne "retryPolicy" retryPolicyAnns
           <*> atMostOne "workflowIdReusePolicy" workflowIdReusePolicyAnns
           <*> pure searchAttributesAnns
@@ -277,10 +287,9 @@ workflowAnnotationsToStartWorkflowOptionsModifier :: WorkflowAnnotations -> Star
 workflowAnnotationsToStartWorkflowOptionsModifier WorkflowAnnotations {..} opts =
   opts
     { taskQueue = case wfTaskQueue of
-        Just (AlwaysUse tq) -> TaskQueue tq
-        Just (Root tq) -> TaskQueue tq
-        Just NoPreference -> Temporal.Client.taskQueue opts
-        Nothing -> Temporal.Client.taskQueue opts
+        AlwaysUse tq -> tq
+        Root tq -> tq
+        NoPreference -> Temporal.Client.taskQueue opts
     , retryPolicy = wfRetryPolicy <|> opts.retryPolicy
     , workflowIdReusePolicy = wfWorkflowIdReusePolicy <|> opts.workflowIdReusePolicy
     , searchAttributes = Map.fromList wfSearchAttributes <> opts.searchAttributes
@@ -292,10 +301,9 @@ workflowAnnotationsToStartChildWorkflowOptionsModifier :: WorkflowAnnotations ->
 workflowAnnotationsToStartChildWorkflowOptionsModifier WorkflowAnnotations {..} opts =
   opts
     { taskQueue = case wfTaskQueue of
-        Just (AlwaysUse tq) -> Just $ TaskQueue tq
-        Just (Root _) -> opts.taskQueue
-        Just NoPreference -> opts.taskQueue
-        Nothing -> opts.taskQueue
+        AlwaysUse tq -> Just tq
+        Root _ -> opts.taskQueue
+        NoPreference -> opts.taskQueue
     , retryPolicy = wfRetryPolicy <|> opts.retryPolicy
     , searchAttributes = Map.fromList wfSearchAttributes <> opts.searchAttributes
     , timeoutOptions = fromMaybe (Temporal.Workflow.timeoutOptions opts) wfTimeouts
@@ -309,7 +317,7 @@ data ActivityAnnotations = ActivityAnnotations
   { actNameOverride :: Maybe Text
   , actAliases :: [Text]
   , actActivityTimeout :: Maybe ActivityTimeoutPolicy
-  , actTaskQueue :: Maybe TaskQueuePreference
+  , actTaskQueue :: TaskQueuePreference
   , actRetryPolicy :: Maybe RetryPolicy
   , actTimeouts :: Maybe TimeoutOptions
   , actActivityCancellationType :: Maybe ActivityCancellationType
@@ -329,12 +337,12 @@ validateActivityAnnotations AllAnnotations {..} = do
           <$> atMostOne "nameOverride" (coerce nameOverrideAnns)
           <*> pure aliasesAnns
           <*> atMostOne "activityTimeout" activityTimeoutAnns
-          <*> atMostOne "taskQueue" taskQueueAnns
+          <*> (fromMaybe NoPreference <$> atMostOne "taskQueue" taskQueueAnns)
           <*> atMostOne "retryPolicy" retryPolicyAnns
           <*> atMostOne "timeouts" timeoutsAnns
           <*> atMostOne "activityCancellationType" activityCancellationTypeAnns
-          <*> atMostOne "scheduleToStartTimeout" scheduleToStartTimeoutAnns
-          <*> atMostOne "heartbeatTimeout" heartbeatTimeoutAnns
+          <*> fmap coerce (atMostOne "scheduleToStartTimeout" scheduleToStartTimeoutAnns)
+          <*> fmap coerce (atMostOne "heartbeatTimeout" heartbeatTimeoutAnns)
        )
 
 
@@ -342,7 +350,7 @@ activityAnnotationsToStartActivityOptionsModifier :: ActivityAnnotations -> Star
 activityAnnotationsToStartActivityOptionsModifier ActivityAnnotations {..} opts =
   opts
     { taskQueue = case actTaskQueue of
-        Just (AlwaysUse tq) -> Just $ TaskQueue tq
+        AlwaysUse tq -> Just tq
         _ -> opts.taskQueue
     , retryPolicy = actRetryPolicy <|> opts.retryPolicy
     , timeout = fromMaybe (timeout opts) actActivityTimeout

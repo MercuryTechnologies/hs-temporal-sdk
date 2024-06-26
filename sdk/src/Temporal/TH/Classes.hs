@@ -63,9 +63,9 @@ type family FnSupportsCodecConstraint' codec purity f where
 
 
 data WorkflowConfig = WorkflowConfig
-  { clientDefaultOptions :: Maybe StartWorkflowOptions
-  , childWorkflowDefaultOptions :: Maybe StartChildWorkflowOptions
-  , workflowNameOverride :: Maybe Text.Text
+  { -- clientDefaultOptions :: Maybe StartWorkflowOptions
+    -- , childWorkflowDefaultOptions :: Maybe StartChildWorkflowOptions
+    workflowNameOverride :: Maybe Text.Text
   , workflowAliases :: [Text.Text]
   -- TODO, add support for custom metadata like alerting channels
   -- , customMetadata :: _
@@ -98,8 +98,18 @@ class (Fn f) => WorkflowFn (f :: Type) where
   workflowConfig _ = defaultWorkflowConfig
 
 
+  workflowClientStartOptions :: Proxy f -> (StartWorkflowOptions -> StartWorkflowOptions)
+
+
+  workflowChildWorkflowStartOptions :: Proxy f -> (StartChildWorkflowOptions -> StartChildWorkflowOptions)
+
+
+class WorkflowFn f => WorkflowRootTaskQueue f where
+  workflowRootTaskQueue :: Proxy f -> TaskQueue
+
+
 defaultWorkflowConfig :: WorkflowConfig
-defaultWorkflowConfig = WorkflowConfig Nothing Nothing Nothing []
+defaultWorkflowConfig = WorkflowConfig Nothing []
 
 
 workflowRefWithCodec

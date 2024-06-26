@@ -218,6 +218,7 @@ module Temporal.Workflow (
   WorkflowType (..),
   RequireCallStack,
   TimeoutOptions (..),
+  defaultTimeoutOptions,
 ) where
 
 import Control.Concurrent (forkIO)

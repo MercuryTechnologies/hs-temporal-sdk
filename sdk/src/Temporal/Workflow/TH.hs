@@ -8,12 +8,11 @@ module Temporal.Workflow.TH (
   start',
 ) where
 
-import Control.Monad.IO.Class
-import Data.Maybe
 import qualified Language.Haskell.TH as TH
 import qualified Language.Haskell.TH.Syntax as TH
 import Temporal.TH.Classes
 import Temporal.TH.Internal
+import Temporal.Workflow.Types (defaultChildWorkflowOptions)
 
 
 execute :: (TH.Quote m, TH.Quasi m) => TH.Name -> m TH.Exp
@@ -24,7 +23,6 @@ execute n = do
   isActivity <- not . null <$> TH.qReifyInstances ''ActivityFn [nconT]
   hasDefaultTimeout <- not . null <$> TH.qReifyInstances ''ActivityTimeout [nconT]
   isWorkflow <- not . null <$> TH.qReifyInstances ''WorkflowFn [nconT]
-  liftIO $ print (n, isActivity, hasDefaultTimeout, isWorkflow)
   if
     | isActivity -> do
         -- Determine if the Activity has a default timeout. If so,
@@ -45,7 +43,7 @@ execute n = do
         [|
           executeChildWorkflow
             (workflowRef $(pure nconE))
-            (fromMaybe defaultChildWorkflowOptions (childWorkflowDefaultOptions $ workflowConfig $(pure nconE)))
+            (workflowChildWorkflowStartOptions $(pure nconE) defaultChildWorkflowOptions)
           |]
     | otherwise -> error "Not a known Activity or Workflow"
 
@@ -75,7 +73,7 @@ start n = do
         [|
           startChildWorkflow
             (workflowRef $(pure nconE))
-            (fromMaybe defaultChildWorkflowOptions (childWorkflowDefaultOptions $ workflowConfig $(pure nconE)))
+            (workflowChildWorkflowStartOptions $(pure nconE) defaultChildWorkflowOptions)
           |]
     | otherwise -> error "Not a known Activity or Workflow"
 

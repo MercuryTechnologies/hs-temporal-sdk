@@ -34,6 +34,8 @@ module Temporal.TH (
   overrideName,
   WorkflowFn,
   ActivityFn,
+  fnSingE,
+  fnSingDataAndConName,
 ) where
 
 import Control.Applicative
@@ -59,16 +61,19 @@ import Validation (Validation (..))
 
 
 register :: forall m. (TH.Quote m, TH.Quasi m) => TH.Name -> m [TH.Dec]
-register n = do
-  fnType <- TH.qReifyType n
+register n = register' n =<< TH.qReifyType n
+
+
+register' :: forall m. (TH.Quote m, TH.Quasi m) => TH.Name -> TH.Type -> m [TH.Dec]
+register' n fnType = do
   let dataName = conT $ fnSingDataAndConName n
-  baseDecls <- makeFnDecls n
+  baseDecls <- makeFnDecls n fnType
   temporalAnns <- findAllAnnotations n
   additionalDecls <-
     if
       | isActivityFunction fnType -> do
           let vActAnns = validateActivityAnnotations temporalAnns
-          ActivityAnnotations {..} <- case vActAnns of
+          anns@ActivityAnnotations {..} <- case vActAnns of
             Failure errs -> error $ formatValidationResults n errs
             Success ok -> pure ok
           let configImpl =
@@ -80,7 +85,7 @@ register n = do
             [d|
               instance ActivityFn $dataName where
                 activityConfig _ = configImpl
-                activityOptions _ = defaultStartActivityOptions
+                activityOptions _ = activityAnnotationsToStartActivityOptionsModifier anns
               |]
           timeoutDefs <- case actTimeouts of
             Just timeout ->
@@ -96,52 +101,33 @@ register n = do
               ]
       | isWorkflowFunction fnType -> do
           let vWfAnns = validateWorkflowAnnotations temporalAnns
-          WorkflowAnnotations {..} <- case vWfAnns of
+          wfAnns@WorkflowAnnotations {..} <- case vWfAnns of
             Failure errs -> error $ formatValidationResults n errs
             Success ok -> pure ok
           let configImpl =
                 defaultWorkflowConfig
                   { workflowNameOverride = wfNameOverride
                   , workflowAliases = wfAliases
-                  , clientDefaultOptions =
-                      let base =
-                            Client.startWorkflowOptions
-                              ( case wfTaskQueue of
-                                  Nothing -> TaskQueue ""
-                                  Just tq -> case tq of
-                                    NoPreference -> TaskQueue ""
-                                    AlwaysUse q -> TaskQueue q
-                                    Root q -> TaskQueue q
-                              )
-                          opts =
-                            base
-                              { Client.workflowIdReusePolicy = wfWorkflowIdReusePolicy <|> Client.workflowIdReusePolicy base
-                              , Client.retryPolicy = wfRetryPolicy <|> Client.retryPolicy base
-                              , Client.searchAttributes = Client.searchAttributes base <> M.fromList wfSearchAttributes
-                              , Client.timeouts = fromMaybe (Client.timeouts base) wfTimeouts
-                              }
-                      in Just opts
-                  , childWorkflowDefaultOptions =
-                      Just $
-                        defaultChildWorkflowOptions
-                          { Cwf.cancellationType = fromMaybe (Cwf.cancellationType defaultChildWorkflowOptions) wfChildWorkflowCancellationType
-                          , Cwf.parentClosePolicy = fromMaybe (parentClosePolicy defaultChildWorkflowOptions) wfParentClosePolicy
-                          , Cwf.timeoutOptions = fromMaybe (timeoutOptions defaultChildWorkflowOptions) wfTimeouts
-                          , Cwf.retryPolicy = wfRetryPolicy <|> Cwf.retryPolicy defaultChildWorkflowOptions
-                          , Cwf.searchAttributes = Cwf.searchAttributes defaultChildWorkflowOptions <> M.fromList wfSearchAttributes
-                          , Cwf.workflowIdReusePolicy = fromMaybe (workflowIdReusePolicy defaultChildWorkflowOptions) wfWorkflowIdReusePolicy
-                          , Cwf.taskQueue = case wfTaskQueue of
-                              Nothing -> Nothing
-                              Just tq -> case tq of
-                                NoPreference -> Nothing
-                                AlwaysUse q -> Just $ TaskQueue q
-                                Root _ -> Nothing
-                          }
                   }
-          [d|
-            instance WorkflowFn $dataName where
-              workflowConfig _ = configImpl
-            |]
+          (<>)
+            <$> [d|
+              instance WorkflowFn $dataName where
+                workflowConfig _ = configImpl
+                workflowClientStartOptions _ = workflowAnnotationsToStartWorkflowOptionsModifier wfAnns
+                workflowChildWorkflowStartOptions _ = workflowAnnotationsToStartChildWorkflowOptionsModifier wfAnns
+              |]
+            <*> case wfTaskQueue of
+              NoPreference -> pure []
+              Root q ->
+                [d|
+                  instance WorkflowRootTaskQueue $dataName where
+                    workflowRootTaskQueue _ = q
+                  |]
+              AlwaysUse q ->
+                [d|
+                  instance WorkflowRootTaskQueue $dataName where
+                    workflowRootTaskQueue _ = q
+                  |]
       | otherwise -> pure []
   pure $ concat [baseDecls, additionalDecls]
 

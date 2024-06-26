@@ -83,12 +83,12 @@ created under the same name. There is no limit to the number of Task Queues a Te
 can maintain.
 -}
 newtype TaskQueue = TaskQueue {rawTaskQueue :: Text}
-  deriving stock (Lift)
+  deriving stock (Data, Lift)
   deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 
 newtype ActivityType = ActivityType {rawActivityType :: Text}
-  deriving stock (Lift)
+  deriving stock (Data, Lift)
   deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 
@@ -374,3 +374,12 @@ data TimeoutOptions = TimeoutOptions
   -- The default value is 10 seconds. This timeout is primarily available to recognize whether a Worker has gone down so that the Workflow Execution can be recovered on a different Worker. The main reason for increasing the default value would be to accommodate a Workflow Execution that has a very long Workflow Execution History that could take longer than 10 seconds for the Worker to load.
   }
   deriving stock (Show, Eq, Lift, Data)
+
+
+defaultTimeoutOptions :: TimeoutOptions
+defaultTimeoutOptions =
+  TimeoutOptions
+    { executionTimeout = Nothing
+    , runTimeout = Nothing
+    , taskTimeout = Nothing
+    }

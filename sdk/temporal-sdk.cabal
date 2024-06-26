@@ -151,7 +151,7 @@ test-suite temporal-sdk-tests
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
-      Spec, ConcurrentAccessSpec, AsyncCompletionSpec, IntegrationSpec, Common
+      Spec, ConcurrentAccessSpec, AsyncCompletionSpec, IntegrationSpec, Common, THCompiles
   hs-source-dirs:
       test
   default-extensions:

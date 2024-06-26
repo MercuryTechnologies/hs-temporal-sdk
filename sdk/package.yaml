@@ -180,4 +180,5 @@ tests:
       ConcurrentAccessSpec,
       AsyncCompletionSpec,
       IntegrationSpec,
-      Common
+      Common,
+      THCompiles

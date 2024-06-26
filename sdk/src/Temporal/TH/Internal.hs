@@ -57,8 +57,8 @@ fnSingDataAndConName n
   | otherwise = TH.mkName $ "Fn_" ++ TH.nameBase n
 
 
-makeFnDecls :: forall m. (TH.Quote m, TH.Quasi m) => TH.Name -> m [TH.Dec]
-makeFnDecls n = do
+makeFnDecls :: forall m. (TH.Quote m, TH.Quasi m) => TH.Name -> TH.Type -> m [TH.Dec]
+makeFnDecls n t = do
   let dName = fnSingDataAndConName n
   dataDec <-
     dataD
@@ -72,7 +72,7 @@ makeFnDecls n = do
   instDecs <-
     [d|
       instance Fn $(conT dName) where
-        type FnType $(conT dName) = $(TH.qReifyType n)
+        type FnType $(conT dName) = $(pure t)
         fnName _ = Text.pack $(TH.litE (TH.stringL $ show n))
         fnDefinition _ = $(varE n)
         fnSing = $(TH.conE dName)
