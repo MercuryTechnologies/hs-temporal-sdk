@@ -43,7 +43,6 @@ module Temporal.Payload (
   ApplyPayloads,
   ArgsOf,
   ResultOf,
-  EncodeResultOf,
   (:->:),
   convertToProtoPayload,
   convertFromProtoPayload,
@@ -92,7 +91,6 @@ import Data.Typeable
 import qualified Data.Vector as V
 import qualified Data.Vector.Fusion.Bundle as B
 import qualified Data.Vector.Generic as VG
-import Fcf hiding (Null)
 import GHC.TypeLits
 import Language.Haskell.TH.Syntax (Lift)
 import Lens.Family2
@@ -298,21 +296,28 @@ instance (Typeable a, Codec base a) => Codec (Around base) a where
       Right x' -> decode base x'
 
 
+type family ArgsAndResult' (f :: Type) (args :: [Type]) :: ([Type], Type) where
+  ArgsAndResult' (arg -> rest) args = ArgsAndResult' rest (arg ': args)
+  ArgsAndResult' result args = '(args, result)
+
+
+type family ArgsAndResult (f :: Type) :: ([Type], Type) where
+  ArgsAndResult f = ArgsAndResult' f '[]
+
+
 type family ArgsOf f where
   ArgsOf (arg -> rest) = arg ': ArgsOf rest
   ArgsOf _ = '[]
+
+
+type family FunctorInnerValue m :: Type -> Type where
+  FunctorInnerValue (m a) = a
 
 
 type family ResultOf (m :: Type -> Type) f where
   ResultOf m (_ -> rest) = ResultOf m rest
   ResultOf m (m result) = result
   ResultOf m result = TypeError ('Text "This function must use the (" ':<>: 'ShowType m ':<>: 'Text ") monad." ':$$: ('Text "Current type: " ':<>: 'ShowType result))
-
-
-class (Codec codec (ResultOf m f), Typeable (ResultOf m f)) => EncodeResultOf codec (m :: Type -> Type) (f :: Type)
-
-
-instance (Codec codec (ResultOf m f), Typeable (ResultOf m f)) => EncodeResultOf codec (m :: Type -> Type) (f :: Type)
 
 
 -- | Construct a function type from a list of argument types and a result type.
@@ -325,7 +330,9 @@ infixr 0 :->:
 
 
 -- | Applies a constraint to all types in a type-level list.
-type AllArgs (c :: Type -> Constraint) (args :: [Type]) = (Constraints <=< Fcf.Map (Pure1 c)) @@ args
+type family AllArgs (c :: Type -> Constraint) (args :: [Type]) :: Constraint where
+  AllArgs _ '[] = ()
+  AllArgs c (arg ': args) = (c arg, AllArgs c args)
 
 
 class VarArgs (args :: [Type]) where
@@ -491,37 +498,6 @@ instance (Codec codec ty, ApplyPayloads codec tys) => ApplyPayloads codec (ty ':
         Right arg -> applyPayloads codec (Proxy @tys) resP (f arg) rest
         Left err -> pure $ Left err
 
-
--- Given a list of function argument types and a codec, produce a function that takes a list of
--- 'Payload's and does something useful with them. This is used to support outbound invocations of
--- child workflows, activities, queries, and signals.
--- class GatherArgs codec (args :: [Type]) where
---   gatherArgs
---     :: Proxy args
---     -> codec
---     -> ([IO Payload] -> [IO Payload])
---     -> ([IO Payload] -> result)
---     -> (args :->: result)
-
--- instance (Codec codec arg, GatherArgs codec args) => GatherArgs codec (arg ': args) where
---   gatherArgs _ c accum f = \arg ->
---     gatherArgs
---       (Proxy @args)
---       c
---       (accum . (encode c arg :))
---       f
-
--- instance GatherArgs codec '[] where
---   gatherArgs _ _ accum f = f $ accum []
-
--- class (GatherArgs codec (ArgsOf f)) => GatherArgsOf codec f
--- instance (GatherArgs codec (ArgsOf f)) => GatherArgsOf codec f
-
--- class (GatherArgs codec args, Codec codec result, Typeable result, ApplyPayloads codec args) => FunctionSupportsCodec codec args result
--- instance (GatherArgs codec args, Codec codec result, Typeable result, ApplyPayloads codec args) => FunctionSupportsCodec codec args result
-
--- class (FunctionSupportsCodec codec (ArgsOf f) (ResultOf m f), f ~ (ArgsOf f :->: m (ResultOf m f))) => FunctionSupportsCodec' (m :: Type -> Type) codec f
--- instance (FunctionSupportsCodec codec (ArgsOf f) (ResultOf m f), f ~ (ArgsOf f :->: m (ResultOf m f))) => FunctionSupportsCodec' m codec f
 
 type GatherArgs codec args = (VarArgs args, AllArgs (Codec codec) args)
 

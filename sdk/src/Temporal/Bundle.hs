@@ -182,7 +182,6 @@ import Temporal.Core.Client
 import Temporal.Payload
 import Temporal.Worker
 import Temporal.Workflow
-import Temporal.Workflow.Definition
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
 import UnliftIO

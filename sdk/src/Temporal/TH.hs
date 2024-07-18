@@ -2,6 +2,7 @@
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveLift #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE InstanceSigs #-}
@@ -22,118 +23,220 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 {-# HLINT ignore "Use ++" #-}
+
+{- |
+Module      : Temporal.TH
+Description : Template Haskell utilities for Temporal Workflow and Activity definitions
+Stability   : experimental
+Portability : POSIX
+
+The `Temporal.TH` module provides Template Haskell-based utilities for defining,
+configuring, and registering Temporal Workflows and Activities in a type-safe and
+declarative manner. This module simplifies the process of integrating Temporal
+with Haskell applications by automating much of the boilerplate code typically
+required for setting up Workflows and Activities.
+
+Key features of this module include:
+
+1. Automatic registration of Workflows and Activities.
+2. Type-safe configuration options for both Workflows and Activities.
+3. Generation of necessary typeclass instances for Workflow and Activity functions.
+4. Support for custom naming and aliasing of Activities.
+5. Integration with Haskell's strong type system to ensure correctness at compile-time.
+
+The main functions provided by this module are:
+
+- 'registerWorkflow' and 'registerWorkflowWithOptions': For registering Workflow functions.
+- 'registerActivity' and 'registerActivityWithOptions': For registering Activity functions.
+- 'discoverDefinitions': For automatically discovering and collecting all defined Workflows and Activities.
+
+When you apply the registration functions to your Workflow and Activity functions,
+a number of things happen automatically:
+
+1. The registration functions generate a new data type with the same name as your Workflow or Activity function (capitalized).
+   Example: If you define a Workflow function named @myWorkflow@, the generated data type will be named @MyWorkflow@.
+2. A number of type classes are generated or derived for your Workflow or Activity function to support invoking them.
+
+Example usage:
+
+@
+{\-# LANGUAGE DerivingVia #-\}
+{\-# LANGUAGE TemplateHaskell #-\}
+{\-# LANGUAGE ImportQualifiedPost #-\}
+
+module MyWorkflows where
+
+import Language.Haskell.TH (newDeclarationGroup)
+import RequireCallStack (provideCallStack)
+import Temporal.Activity
+import Temporal.TH
+import Temporal.TH.Options
+import Temporal.Workflow
+import Temporal.Client qualified as Client
+
+-- Simple activity registration
+actWithoutTimeoutDefault :: Activity () ()
+actWithoutTimeoutDefault = pure ()
+\$(registerActivity 'actWithoutTimeoutDefault)
+
+-- Activity registration with name override
+actWithNameOverride :: Activity () ()
+actWithNameOverride = pure ()
+\$(registerActivityWithOptions 'actWithNameOverride defaultActivityConfiguration
+  { actNameOverride = Just "my-name"
+  })
+
+-- Activity registration with aliases
+actWithAliases :: Activity () ()
+actWithAliases = pure ()
+\$(registerActivityWithOptions 'actWithAliases defaultActivityConfiguration
+  { actAliases = ["alias1", "alias2"]
+  })
+
+-- Workflow registration
+myWorkflow :: Int -> Workflow ()
+myWorkflow _ = pure ()
+\$(registerWorkflow 'myWorkflow)
+
+-- Use newDeclarationGroup to separate Template Haskell splices
+\$(newDeclarationGroup)
+
+-- Workflow referencing a child workflow
+workflowReferencingChild :: Workflow ()
+workflowReferencingChild = provideCallStack do
+  _ <- startChildWorkflow MyWorkflow defaultChildWorkflowOptions 0
+  executeChildWorkflow MyWorkflow defaultChildWorkflowOptions 1
+
+-- Activity referencing a workflow
+actionReferencingWorkflow :: Activity () ()
+actionReferencingWorkflow = provideCallStack do
+  _ <- Client.start MyWorkflow "1" (Client.startWorkflowOptions (TaskQueue "foo")) 1
+  Client.execute MyWorkflow "2" (Client.startWorkflowOptions (TaskQueue "foo")) 1
+@
+
+Note the use of 'newDeclarationGroup' from "Language.Haskell.TH" to separate
+Template Haskell splices, which can be necessary in some cases to avoid
+compilation errors– namely, when you want to invoke a Workflow or Activity later
+in the same module.
+
+The one use case where the TH mechanism struggles is when you want to use the
+'continueAsNew' function from "Temporal.Workflow" in a Workflow to start a new
+instance of the same Workflow. In this case, you can define the machinery manually:
+
+@
+workflowThatContinuesAsNew :: Int -> Workflow ()
+workflowThatContinuesAsNew x = do
+  if x < 1000
+  then continueAsNew WorkflowThatContinuesAsNew defaultContinueAsNewOptions (x + 1)
+  else return ()
+
+data WorkflowThatContinuesAsNew = WorkflowThatContinuesAsNew
+  deriving anyclass (WorkflowFn)
+  deriving (WorkflowDef, WorkflowRef) via WorkflowImpl WorkflowThatContinuesAsNew
+
+instance Fn WorkflowThatContinuesAsNew where
+  fnTHName _ = 'workflowThatContinuesAsNew
+  fnDefinition _ = provideCallStack workflowThatContinuesAsNew
+  fnSing = WorkflowThatContinuesAsNew
+@
+-}
 module Temporal.TH (
   discoverDefinitions,
-  SomeDict (..),
-  register,
-  registerMany,
-  -- , PayloadCodec(..)
-  Aliases (..),
-  aliases,
-  NameOverride (..),
-  overrideName,
-  WorkflowFn,
-  ActivityFn,
+  SomeDict,
+  SomeDictOf (..),
+  registerActivity,
+  registerActivityWithOptions,
+  ActivityConfiguration (..),
+  defaultActivityConfiguration,
+  registerWorkflow,
+  registerWorkflowWithOptions,
+  WorkflowConfiguration (..),
+  defaultWorkflowConfiguration,
+  Fn (..),
+  WorkflowFn (..),
+  WorkflowRef (..),
+  WorkflowDef (..),
+  ActivityFn (..),
+  ActivityRef (..),
+  ActivityDef (..),
   fnSingE,
   fnSingDataAndConName,
+  ActivityImpl (..),
+  WorkflowImpl (..),
 ) where
 
-import Control.Applicative
 import qualified Data.HashMap.Strict as Map
-import qualified Data.Map.Strict as M
-import Data.Maybe
-import qualified Data.Text as Text
 import Data.Typeable
 import DiscoverInstances
 import qualified Language.Haskell.TH as TH
 import Language.Haskell.TH.Lib
 import qualified Language.Haskell.TH.Syntax as TH
 import qualified Temporal.Activity as Act
-import qualified Temporal.Client as Client
-import Temporal.TH.Annotations
+import Temporal.Activity.Definition (ActivityDef (..))
 import Temporal.TH.Classes
 import Temporal.TH.Internal
+import Temporal.TH.Options
 import Temporal.Worker (Definitions (..))
 import Temporal.Workflow
-import qualified Temporal.Workflow as Cwf (StartChildWorkflowOptions (..))
 import qualified Temporal.Workflow as Wf
-import Validation (Validation (..))
+import Temporal.Workflow.Definition (WorkflowDef (..))
 
 
-register :: forall m. (TH.Quote m, TH.Quasi m) => TH.Name -> m [TH.Dec]
-register n = register' n =<< TH.qReifyType n
-
-
-register' :: forall m. (TH.Quote m, TH.Quasi m) => TH.Name -> TH.Type -> m [TH.Dec]
-register' n fnType = do
+registerActivityWithOptions :: forall m. (TH.Quote m, TH.Quasi m) => TH.Name -> ActivityConfiguration -> m [TH.Dec]
+registerActivityWithOptions n ActivityConfiguration {..} = do
+  fnType <- TH.qReifyType n
   let dataName = conT $ fnSingDataAndConName n
   baseDecls <- makeFnDecls n fnType
-  temporalAnns <- findAllAnnotations n
+  let configImpl =
+        defaultActivityConfig
+          { activityNameOverride = actNameOverride
+          , activityAliases = actAliases
+          }
+  actDefs <-
+    [d|
+      instance Temporal.TH.Classes.ActivityFn $dataName where
+        activityConfig _ = configImpl
+
+
+      deriving via (Temporal.TH.Classes.ActivityImpl $dataName) instance ActivityRef $dataName
+
+
+      deriving via (Temporal.TH.Classes.ActivityImpl $dataName) instance ActivityDef $dataName
+      |]
+  pure $ concat [baseDecls, actDefs]
+
+
+registerActivity :: forall m. (TH.Quote m, TH.Quasi m) => TH.Name -> m [TH.Dec]
+registerActivity n = registerActivityWithOptions n defaultActivityConfiguration
+
+
+registerWorkflowWithOptions :: forall m. (TH.Quote m, TH.Quasi m) => TH.Name -> WorkflowConfiguration -> m [TH.Dec]
+registerWorkflowWithOptions n WorkflowConfiguration {..} = do
+  fnType <- TH.qReifyType n
+  let dataName = conT $ fnSingDataAndConName n
+  baseDecls <- makeFnDecls n fnType
+  let configImpl =
+        defaultWorkflowConfig
+          { workflowNameOverride = wfNameOverride
+          , workflowAliases = wfAliases
+          }
   additionalDecls <-
-    if
-      | isActivityFunction fnType -> do
-          let vActAnns = validateActivityAnnotations temporalAnns
-          anns@ActivityAnnotations {..} <- case vActAnns of
-            Failure errs -> error $ formatValidationResults n errs
-            Success ok -> pure ok
-          let configImpl =
-                defaultActivityConfig
-                  { activityNameOverride = actNameOverride
-                  , activityAliases = actAliases
-                  }
-          actDefs <-
-            [d|
-              instance ActivityFn $dataName where
-                activityConfig _ = configImpl
-                activityOptions _ = activityAnnotationsToStartActivityOptionsModifier anns
-              |]
-          timeoutDefs <- case actTimeouts of
-            Just timeout ->
-              [d|
-                instance ActivityTimeout $dataName where
-                  activityTimeout _ = timeout
-                |]
-            Nothing -> pure []
-          pure $
-            concat
-              [ actDefs
-              , timeoutDefs
-              ]
-      | isWorkflowFunction fnType -> do
-          let vWfAnns = validateWorkflowAnnotations temporalAnns
-          wfAnns@WorkflowAnnotations {..} <- case vWfAnns of
-            Failure errs -> error $ formatValidationResults n errs
-            Success ok -> pure ok
-          let configImpl =
-                defaultWorkflowConfig
-                  { workflowNameOverride = wfNameOverride
-                  , workflowAliases = wfAliases
-                  }
-          (<>)
-            <$> [d|
-              instance WorkflowFn $dataName where
-                workflowConfig _ = configImpl
-                workflowClientStartOptions _ = workflowAnnotationsToStartWorkflowOptionsModifier wfAnns
-                workflowChildWorkflowStartOptions _ = workflowAnnotationsToStartChildWorkflowOptionsModifier wfAnns
-              |]
-            <*> case wfTaskQueue of
-              NoPreference -> pure []
-              Root q ->
-                [d|
-                  instance WorkflowRootTaskQueue $dataName where
-                    workflowRootTaskQueue _ = q
-                  |]
-              AlwaysUse q ->
-                [d|
-                  instance WorkflowRootTaskQueue $dataName where
-                    workflowRootTaskQueue _ = q
-                  |]
-      | otherwise -> pure []
+    [d|
+      instance Temporal.TH.Classes.WorkflowFn $dataName where
+        workflowConfig _ = configImpl
+
+
+      deriving via (Temporal.TH.Classes.WorkflowImpl $dataName) instance WorkflowRef $dataName
+
+
+      deriving via (Temporal.TH.Classes.WorkflowImpl $dataName) instance WorkflowDef $dataName
+      |]
+
   pure $ concat [baseDecls, additionalDecls]
 
 
-registerMany :: forall m. (TH.Quote m, TH.Quasi m) => [TH.Name] -> m [TH.Dec]
-registerMany = fmap concat . mapM register
+registerWorkflow :: forall m. (TH.Quote m, TH.Quasi m) => TH.Name -> m [TH.Dec]
+registerWorkflow n = registerWorkflowWithOptions n defaultWorkflowConfiguration
 
 
 ---------------------------------------------------------------------------------------
@@ -150,15 +253,15 @@ discoverDefinitions wfs acts =
     aliasedWfs =
       concatMap
         ( \(SomeDictOf inst) ->
-            let def = Wf.definition $ Temporal.TH.Classes.workflowRef inst
-            in (Wf.workflowName def, def) : map (\alias -> (alias, def {Wf.workflowName = alias})) (workflowAliases $ workflowConfig inst)
+            let def = Wf.definition $ Temporal.TH.Classes.workflowImpl $ fn inst
+            in (Wf.workflowName def, def) : map (\alias -> (alias, def {Wf.workflowName = alias})) (workflowAliases $ workflowConfig $ fn inst)
         )
         wfs
     aliasedActs =
       concatMap
-        ( \(SomeDictOf inst) -> case cast (Act.definition $ Temporal.TH.Classes.activityRef inst) of
+        ( \(SomeDictOf inst) -> case cast (Act.definition $ Temporal.TH.Classes.activityImpl $ fn inst) of
             Just (def :: Act.ActivityDefinition env) ->
-              (Act.activityName def, def) : map (\alias -> (alias, def {Act.activityName = alias})) (activityAliases $ activityConfig inst)
+              (Act.activityName def, def) : map (\alias -> (alias, def {Act.activityName = alias})) (activityAliases $ activityConfig $ fn inst)
             Nothing -> []
         )
         acts

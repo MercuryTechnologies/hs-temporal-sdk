@@ -2,6 +2,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE DeriveLift #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -18,48 +19,30 @@ module Temporal.TH.Classes where
 
 import Data.Kind (Type)
 import Data.Maybe (fromMaybe)
-import Data.Proxy
 import qualified Data.Text as Text
 import Data.Typeable
 import Language.Haskell.TH (Name)
 import qualified Language.Haskell.TH.Syntax as TH
+import RequireCallStack (provideCallStack)
 import Temporal.Activity
+import Temporal.Activity.Definition
 import Temporal.Client
 import Temporal.Payload
 import Temporal.Workflow
+import Temporal.Workflow.Definition
 
 
 class Fn t where
   type FnType t :: Type
-  fnName :: Proxy t -> Text.Text
-  fnDefinition :: Proxy t -> (RequireCallStack => FnType t)
+  fnName :: t -> Text.Text
+  fnName = Text.pack . show . fnTHName
+  fnDefinition :: t -> (RequireCallStack => FnType t)
   fnSing :: t
-  fnTHName :: Proxy t -> Name
+  fnTHName :: t -> Name
 
 
-type family FnArgs (f :: Type) :: [Type] where
-  FnArgs (a -> b) = a ': FnArgs b
-  FnArgs _a = '[]
-
-
-type family FnResult (f :: Type) :: Type where
-  FnResult (_a -> b) = FnResult b
-  FnResult a = a
-
-
-data Pure
-
-
-data Impure (m :: Type -> Type)
-
-
-type family UnwrapFnResult (m :: Type) (result :: Type) :: Type where
-  UnwrapFnResult (Impure m) (m a) = a
-
-
-type family FnSupportsCodecConstraint' codec purity f where
-  FnSupportsCodecConstraint' codec Pure f = (FunctionSupportsCodec codec (FnArgs f) (FnResult f), f ~ (FnArgs f :->: FnResult f))
-  FnSupportsCodecConstraint' codec (Impure m) f = (FunctionSupportsCodec codec (FnArgs f) (UnwrapFnResult (Impure m) (FnResult f)), f ~ (FnArgs f :->: m (UnwrapFnResult (Impure m) (FnResult f))))
+fn :: Fn t => Proxy t -> t
+fn _ = fnSing
 
 
 data WorkflowConfig = WorkflowConfig
@@ -78,34 +61,37 @@ class (Fn f) => WorkflowFn (f :: Type) where
   type WorkflowCodec _ = JSON
 
 
-  workflowCodec :: Proxy f -> WorkflowCodec f
-  default workflowCodec :: (WorkflowCodec f ~ JSON) => Proxy f -> WorkflowCodec f
+  workflowCodec :: f -> WorkflowCodec f
+  default workflowCodec :: (WorkflowCodec f ~ JSON) => f -> WorkflowCodec f
   workflowCodec _ = JSON
 
 
-  workflowRef :: RequireCallStack => Proxy f -> ProvidedWorkflow (FnType f)
-  default workflowRef
+  workflowImpl :: RequireCallStack => f -> ProvidedWorkflow (FnType f)
+  default workflowImpl
     :: ( RequireCallStack
        , FnType f ~ (ArgsOf (FnType f) :->: Workflow (ResultOf Workflow (FnType f)))
        , FunctionSupportsCodec (WorkflowCodec f) (ArgsOf (FnType f)) (ResultOf Workflow (FnType f))
        )
-    => Proxy f
+    => f
     -> ProvidedWorkflow (FnType f)
-  workflowRef x = workflowRefWithCodec x (workflowConfig x) (workflowCodec x)
+  workflowImpl x = workflowRefWithCodec x (workflowConfig x) (workflowCodec x)
 
 
-  workflowConfig :: Proxy f -> WorkflowConfig
+  workflowConfig :: f -> WorkflowConfig
   workflowConfig _ = defaultWorkflowConfig
 
 
-  workflowClientStartOptions :: Proxy f -> (StartWorkflowOptions -> StartWorkflowOptions)
+newtype WorkflowImpl f = WorkflowImpl f
 
 
-  workflowChildWorkflowStartOptions :: Proxy f -> (StartChildWorkflowOptions -> StartChildWorkflowOptions)
+instance (Fn f, WorkflowFn f) => WorkflowDef (WorkflowImpl f) where
+  workflowDefinition (WorkflowImpl f) = provideCallStack (Temporal.TH.Classes.workflowImpl f).definition
 
 
-class WorkflowFn f => WorkflowRootTaskQueue f where
-  workflowRootTaskQueue :: Proxy f -> TaskQueue
+instance (Fn f, WorkflowFn f) => WorkflowRef (WorkflowImpl f) where
+  type WorkflowArgs (WorkflowImpl f) = ArgsOf (FnType f)
+  type WorkflowResult (WorkflowImpl f) = ResultOf Workflow (FnType f)
+  workflowRef (WorkflowImpl f) = provideCallStack (Temporal.TH.Classes.workflowImpl f).reference
 
 
 defaultWorkflowConfig :: WorkflowConfig
@@ -118,7 +104,7 @@ workflowRefWithCodec
      , FnType f ~ (ArgsOf (FnType f) :->: Workflow (ResultOf Workflow (FnType f)))
      , FunctionSupportsCodec codec (ArgsOf (FnType f)) (ResultOf Workflow (FnType f))
      )
-  => Proxy f
+  => f
   -> WorkflowConfig
   -> codec
   -> ProvidedWorkflow (FnType f)
@@ -148,41 +134,47 @@ class (Fn f, Typeable (FnActivityEnv (FnType f))) => ActivityFn f where
   type ActivityCodec _ = JSON
 
 
-  activityCodec :: Proxy f -> ActivityCodec f
-  default activityCodec :: (ActivityCodec f ~ JSON) => Proxy f -> ActivityCodec f
+  activityCodec :: f -> ActivityCodec f
+  default activityCodec :: (ActivityCodec f ~ JSON) => f -> ActivityCodec f
   activityCodec _ = JSON
 
 
-  activityEnvType :: Proxy f -> TypeRep
+  activityEnvType :: f -> TypeRep
   activityEnvType _ = typeRep (Proxy :: Proxy (FnActivityEnv (FnType f)))
 
 
-  activityRef
+  activityImpl
     :: ( RequireCallStack
        )
-    => Proxy f
+    => f
     -> ProvidedActivity (FnActivityEnv (FnType f)) (FnType f)
-  default activityRef
+  default activityImpl
     :: ( RequireCallStack
        , env ~ FnActivityEnv (FnType f)
        , FnType f ~ (ArgsOf (FnType f) :->: Activity env (ResultOf (Activity env) (FnType f)))
        , FunctionSupportsCodec (ActivityCodec f) (ArgsOf (FnType f)) (ResultOf (Activity env) (FnType f))
        )
-    => Proxy f
+    => f
     -> ProvidedActivity (FnActivityEnv (FnType f)) (FnType f)
-  activityRef x = activityRefWithCodec x (activityCodec x)
+  activityImpl x = activityRefWithCodec x (activityCodec x)
 
 
-  activityOptions :: Proxy f -> (StartActivityOptions -> StartActivityOptions)
-  activityOptions _ = id
-
-
-  activityConfig :: Proxy f -> ActivityConfig
+  activityConfig :: f -> ActivityConfig
   activityConfig _ = defaultActivityConfig
 
 
-class ActivityFn f => ActivityTimeout f where
-  activityTimeout :: Proxy f -> ActivityTimeoutPolicy
+newtype ActivityImpl f = ActivityImpl f
+
+
+instance (Fn f, ActivityFn f) => ActivityDef (ActivityImpl f) where
+  type ActivityDefinitionEnv (ActivityImpl f) = FnActivityEnv (FnType f)
+  activityDefinition (ActivityImpl f) = provideCallStack (Temporal.TH.Classes.activityImpl f).definition
+
+
+instance (Fn f, ActivityFn f) => ActivityRef (ActivityImpl f) where
+  type ActivityArgs (ActivityImpl f) = ArgsOf (FnType f)
+  type ActivityResult (ActivityImpl f) = ResultOf (Activity (FnActivityEnv (FnType f))) (FnType f)
+  activityRef (ActivityImpl f) = provideCallStack (Temporal.TH.Classes.activityImpl f).reference
 
 
 activityRefWithCodec
@@ -192,7 +184,7 @@ activityRefWithCodec
      , FnType f ~ (ArgsOf (FnType f) :->: Activity env (ResultOf (Activity env) (FnType f)))
      , FunctionSupportsCodec codec (ArgsOf (FnType f)) (ResultOf (Activity env) (FnType f))
      )
-  => Proxy f
+  => f
   -> codec
   -> ProvidedActivity env (FnType f)
 activityRefWithCodec p c =

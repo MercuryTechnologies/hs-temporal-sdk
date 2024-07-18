@@ -54,7 +54,9 @@ isOperator name =
 fnSingDataAndConName :: TH.Name -> TH.Name
 fnSingDataAndConName n
   | isOperator n = TH.mkName $ ":" ++ TH.nameBase n
-  | otherwise = TH.mkName $ "Fn_" ++ TH.nameBase n
+  | otherwise = TH.mkName $ case TH.nameBase n of
+      (c : rest) -> toUpper c : rest
+      [] -> error "fnSingDataAndConName: empty name"
 
 
 makeFnDecls :: forall m. (TH.Quote m, TH.Quasi m) => TH.Name -> TH.Type -> m [TH.Dec]

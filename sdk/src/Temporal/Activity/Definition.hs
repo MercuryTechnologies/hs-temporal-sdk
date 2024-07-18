@@ -10,7 +10,6 @@ import Control.Monad.Fix
 import Control.Monad.Reader
 import Data.Kind
 import Data.Text (Text)
-import Data.Vector (Vector)
 import GHC.TypeLits
 import Temporal.Activity.Types
 import Temporal.Client.Types
@@ -21,23 +20,12 @@ import Temporal.Workflow.Types
 import UnliftIO
 
 
-data ValidActivityFunction env
-  = forall codec f.
-    ( f ~ (ArgsOf f :->: Activity env (ResultOf (Activity env) f))
-    , FunctionSupportsCodec codec (ArgsOf f) (ResultOf (Activity env) f)
-    ) =>
-    ValidActivityFunction
-      codec
-      f
-      (f -> Vector Payload -> IO (Either String (Activity env (ResultOf (Activity env) f))))
-
-
-class HasActivityDefinition a where
+class ActivityDef a where
   type ActivityDefinitionEnv a :: Type
   activityDefinition :: a -> ActivityDefinition (ActivityDefinitionEnv a)
 
 
-instance HasActivityDefinition (ActivityDefinition env) where
+instance ActivityDef (ActivityDefinition env) where
   type ActivityDefinitionEnv (ActivityDefinition env) = env
   activityDefinition = id
 
@@ -48,7 +36,7 @@ data ProvidedActivity env f = ProvidedActivity
   }
 
 
-instance HasActivityDefinition (ProvidedActivity env f) where
+instance ActivityDef (ProvidedActivity env f) where
   type ActivityDefinitionEnv (ProvidedActivity env f) = env
   activityDefinition (ProvidedActivity def _) = def
 

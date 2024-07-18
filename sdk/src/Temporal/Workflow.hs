@@ -219,6 +219,9 @@ module Temporal.Workflow (
   RequireCallStack,
   TimeoutOptions (..),
   defaultTimeoutOptions,
+
+  -- * Commonly used
+  (:->:),
 ) where
 
 import Control.Concurrent (forkIO)
@@ -370,9 +373,9 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift 
             & Command.maybe'heartbeatTimeout .~ fmap durationToProto activityInput.options.heartbeatTimeout
             & \msg ->
               case activityInput.options.timeout of
-                StartToCloseTimeout (StartToClose t) -> msg & Command.startToCloseTimeout .~ durationToProto t
-                ScheduleToCloseTimeout (ScheduleToClose t) -> msg & Command.scheduleToCloseTimeout .~ durationToProto t
-                StartToCloseAndScheduleToCloseTimeout (StartToClose stc) (ScheduleToClose stc') ->
+                StartToCloseTimeout t -> msg & Command.startToCloseTimeout .~ durationToProto t
+                ScheduleToCloseTimeout t -> msg & Command.scheduleToCloseTimeout .~ durationToProto t
+                StartToCloseAndScheduleToCloseTimeout stc stc' ->
                   msg
                     & Command.startToCloseTimeout .~ durationToProto stc
                     & Command.scheduleToCloseTimeout .~ durationToProto stc'

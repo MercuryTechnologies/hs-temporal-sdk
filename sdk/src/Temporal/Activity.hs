@@ -47,12 +47,14 @@ module Temporal.Activity (
   ProvidedActivity (..),
   KnownActivity (..),
   ActivityDefinition (..),
-  ValidActivityFunction,
 
   -- * Asynchronous Completion
   TaskToken (..),
   CompleteAsync (..),
   completeAsync,
+
+  -- * Commonly used
+  (:->:),
 ) where
 
 import Control.Monad

@@ -23,7 +23,6 @@ library
       Temporal.Bundle.TH
       Temporal.Client
       Temporal.Client.Schedule
-      Temporal.Client.TH
       Temporal.Contrib.OpenTelemetry
       Temporal.Duration
       Temporal.EphemeralServer
@@ -33,13 +32,9 @@ library
       Temporal.Payload
       Temporal.SearchAttributes
       Temporal.TH
-      Temporal.TH.Annotations
-      Temporal.TH.Classes
-      Temporal.TH.Internal
       Temporal.Worker
       Temporal.Workflow
       Temporal.Workflow.Saga
-      Temporal.Workflow.TH
   other-modules:
       Temporal.Activity.Definition
       Temporal.Activity.Worker
@@ -66,6 +61,9 @@ library
       Temporal.Workflow.Types
       Temporal.Logging
       Temporal.SearchAttributes.Internal
+      Temporal.TH.Classes
+      Temporal.TH.Internal
+      Temporal.TH.Options
   hs-source-dirs:
       src
   default-extensions:

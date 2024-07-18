@@ -15,7 +15,8 @@
 {-# LANGUAGE UndecidableInstances #-}
 
 module Temporal.Workflow.Definition (
-  HasWorkflowDefinition (..),
+  WorkflowDef (..),
+  WorkflowRef (..),
   WorkflowDefinition (..),
   KnownWorkflow (..),
   SignalRef (..),
@@ -24,7 +25,6 @@ module Temporal.Workflow.Definition (
   provideWorkflow,
   ProvidedWorkflow (..),
   GatherArgs,
-  WorkflowRef (..),
 ) where
 
 import Control.Monad.IO.Class
@@ -33,9 +33,11 @@ import Data.Text (Text)
 import Data.Typeable
 import Data.Vector (Vector)
 import RequireCallStack
+import Temporal.Client.Types
 import Temporal.Payload
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Signal
+import Temporal.Workflow.Types (StartChildWorkflowOptions)
 
 
 {- | This is a Workflow function that can be called from the outside world.
@@ -50,11 +52,11 @@ data WorkflowDefinition = WorkflowDefinition
   }
 
 
-class HasWorkflowDefinition a where
+class WorkflowDef a where
   workflowDefinition :: a -> WorkflowDefinition
 
 
-instance HasWorkflowDefinition WorkflowDefinition where
+instance WorkflowDef WorkflowDefinition where
   workflowDefinition = id
 
 
@@ -95,7 +97,7 @@ data ProvidedWorkflow f = ProvidedWorkflow
   }
 
 
-instance HasWorkflowDefinition (ProvidedWorkflow f) where
+instance WorkflowDef (ProvidedWorkflow f) where
   workflowDefinition :: ProvidedWorkflow f -> WorkflowDefinition
   workflowDefinition = definition
 

@@ -52,8 +52,8 @@ module Temporal.Worker (
   Core.closeHistory,
 
   -- ** Worker options
-  HasWorkflowDefinition (..),
-  HasActivityDefinition (..),
+  WorkflowDef (..),
+  ActivityDef (..),
   addErrorConverter,
   setLogger,
   setTracerProvider,

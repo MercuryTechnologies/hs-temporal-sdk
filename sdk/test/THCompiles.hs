@@ -1,3 +1,5 @@
+{-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE ImportQualifiedPost #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module THCompiles where
@@ -5,84 +7,52 @@ module THCompiles where
 import Language.Haskell.TH (newDeclarationGroup)
 import RequireCallStack (provideCallStack)
 import Temporal.Activity
-import qualified Temporal.Client.TH as Client
-import Temporal.Duration
+import Temporal.Client qualified as Client
 import Temporal.TH
-import Temporal.TH.Annotations
 import Temporal.Workflow
-import Temporal.Workflow.TH
 
 
 actWithoutTimeoutDefault :: Activity () ()
 actWithoutTimeoutDefault = pure ()
 
 
-{-# ANN actWithTimeoutDefault (activityTimeout $ StartToClose $ seconds 2) #-}
+registerActivity 'actWithoutTimeoutDefault
+
+
 actWithTimeoutDefault :: Activity () ()
 actWithTimeoutDefault = pure ()
 
 
-{-# ANN actWithNameOverride (overrideName "my-name") #-}
+registerActivity 'actWithTimeoutDefault
+
+
 actWithNameOverride :: Activity () ()
 actWithNameOverride = pure ()
 
 
-{-# ANN actWithAliases (aliases ["alias1", "alias2"]) #-}
+registerActivityWithOptions
+  'actWithNameOverride
+  defaultActivityConfiguration
+    { actNameOverride = Just "my-name"
+    }
+
+
 actWithAliases :: Activity () ()
 actWithAliases = pure ()
 
 
-{-# ANN actWithTaskQueue (AlwaysUse "my-task-queue") #-}
-actWithTaskQueue :: Activity () ()
-actWithTaskQueue = pure ()
+registerActivityWithOptions
+  'actWithAliases
+  defaultActivityConfiguration
+    { actAliases = ["alias1", "alias2"]
+    }
 
 
--- {-# ANN actWithTimeouts defaultTimeoutOptions #-}
--- actWithTimeouts :: Activity () ()
--- actWithTimeouts = pure ()
-
-{-# ANN actWithCancellationPolicy ActivityCancellationAbandon #-}
-actWithCancellationPolicy :: Activity () ()
-actWithCancellationPolicy = pure ()
+workflowWithTaskQueue :: Int -> Workflow ()
+workflowWithTaskQueue _ = pure ()
 
 
-{-# ANN actWithRetryPolicy defaultRetryPolicy #-}
-actWithRetryPolicy :: Activity () ()
-actWithRetryPolicy = pure ()
-
-
-{-# ANN actWithHeartbeatTimeout (HeartbeatTimeout $ seconds 10) #-}
-actWithHeartbeatTimeout :: Activity () ()
-actWithHeartbeatTimeout = pure ()
-
-
--- {-# ANN actWithScheduleToStartTimeout (ScheduleToStartTimeout $ seconds 10) #-}
--- actWithScheduleToStartTimeout :: Activity () ()
--- actWithScheduleToStartTimeout = pure ()
-
-{-# ANN workflowWithTaskQueue (AlwaysUse "my-task-queue") #-}
-workflowWithTaskQueue :: Workflow ()
-workflowWithTaskQueue = pure ()
-
-
-workflowWithoutTaskQueue :: Workflow ()
-workflowWithoutTaskQueue = pure ()
-
-
-registerMany
-  [ 'actWithoutTimeoutDefault
-  , 'actWithTimeoutDefault
-  , 'actWithNameOverride
-  , 'actWithAliases
-  , 'actWithTaskQueue
-  , -- , 'actWithTimeouts
-    'actWithCancellationPolicy
-  , 'actWithRetryPolicy
-  , 'actWithHeartbeatTimeout
-  , -- , 'actWithScheduleToStartTimeout
-    'workflowWithTaskQueue
-  , 'workflowWithoutTaskQueue
-  ]
+registerWorkflow 'workflowWithTaskQueue
 
 
 newDeclarationGroup
@@ -90,21 +60,11 @@ newDeclarationGroup
 
 workflowReferencingChild :: Workflow ()
 workflowReferencingChild = provideCallStack do
-  _ <- $(start 'workflowWithTaskQueue)
-  $(execute 'workflowWithTaskQueue)
-  _ <- $(start 'workflowWithoutTaskQueue)
-  $(execute 'workflowWithoutTaskQueue)
+  _ <- startChildWorkflow WorkflowWithTaskQueue defaultChildWorkflowOptions 0
+  executeChildWorkflow WorkflowWithTaskQueue defaultChildWorkflowOptions 1
 
 
 actionReferencingWorkflow :: Activity () ()
 actionReferencingWorkflow = provideCallStack do
-  _ <- $(Client.start 'workflowWithTaskQueue) "1"
-  $(Client.execute 'workflowWithTaskQueue) "2"
-  _ <- $(Client.start 'workflowWithoutTaskQueue) "3" (TaskQueue "foo")
-  $(Client.execute 'workflowWithoutTaskQueue) "4" (TaskQueue "foo")
-
-
-registerMany
-  [ 'workflowReferencingChild
-  , 'actionReferencingWorkflow
-  ]
+  _ <- Client.start WorkflowWithTaskQueue "1" (Client.startWorkflowOptions (TaskQueue "foo")) 1
+  Client.execute WorkflowWithTaskQueue "2" (Client.startWorkflowOptions (TaskQueue "foo")) 1

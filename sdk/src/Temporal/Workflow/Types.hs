@@ -45,9 +45,9 @@ data Info = Info
 
 
 data ActivityTimeoutPolicy
-  = StartToCloseTimeout !StartToClose
-  | ScheduleToCloseTimeout !ScheduleToClose
-  | StartToCloseAndScheduleToCloseTimeout !StartToClose !ScheduleToClose
+  = StartToCloseTimeout !Duration
+  | ScheduleToCloseTimeout !Duration
+  | StartToCloseAndScheduleToCloseTimeout !Duration !Duration
   deriving stock (Eq, Show, Data, Lift)
 
 
@@ -83,23 +83,27 @@ instance StartActivityTimeoutOption ActivityTimeoutPolicy where
 
 
 instance StartActivityTimeoutOption StartToClose where
-  toStartActivityTimeoutOption = StartToCloseTimeout
+  toStartActivityTimeoutOption (StartToClose t) = StartToCloseTimeout t
 
 
 instance StartActivityTimeoutOption ScheduleToClose where
-  toStartActivityTimeoutOption = ScheduleToCloseTimeout
+  toStartActivityTimeoutOption (ScheduleToClose t) = ScheduleToCloseTimeout t
 
 
 instance StartActivityTimeoutOption (StartToClose, ScheduleToClose) where
-  toStartActivityTimeoutOption (s, sc) = StartToCloseAndScheduleToCloseTimeout s sc
+  toStartActivityTimeoutOption (StartToClose s, ScheduleToClose sc) = StartToCloseAndScheduleToCloseTimeout s sc
 
 
 instance StartActivityTimeoutOption (ScheduleToClose, StartToClose) where
-  toStartActivityTimeoutOption (sc, s) = StartToCloseAndScheduleToCloseTimeout s sc
+  toStartActivityTimeoutOption (ScheduleToClose sc, StartToClose s) = StartToCloseAndScheduleToCloseTimeout s sc
 
 
 instance StartActivityTimeoutOption (Either StartToClose ScheduleToClose) where
-  toStartActivityTimeoutOption = either StartToCloseTimeout ScheduleToCloseTimeout
+  toStartActivityTimeoutOption = either toStartActivityTimeoutOption toStartActivityTimeoutOption
+
+
+instance StartActivityTimeoutOption (Either ScheduleToClose StartToClose) where
+  toStartActivityTimeoutOption = either toStartActivityTimeoutOption toStartActivityTimeoutOption
 
 
 defaultStartActivityOptions :: StartActivityTimeoutOption timeout => timeout -> StartActivityOptions
