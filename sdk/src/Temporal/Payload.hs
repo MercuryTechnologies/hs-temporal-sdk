@@ -143,6 +143,7 @@ insertStandardMetadata fmt x (Payload d m) =
 
 
 data JSON = JSON
+  deriving stock (Eq, Show, Lift)
 
 
 instance (Typeable a, Aeson.ToJSON a, Aeson.FromJSON a) => Codec JSON a where
@@ -152,6 +153,7 @@ instance (Typeable a, Aeson.ToJSON a, Aeson.FromJSON a) => Codec JSON a where
 
 
 data Null = Null
+  deriving stock (Eq, Show, Lift)
 
 
 instance Codec Null () where
@@ -176,6 +178,7 @@ using something like the cereal package:
 >   decode _ = Serialize.decode . inputPayloadData
 -}
 data Binary = Binary
+  deriving stock (Eq, Show, Lift)
 
 
 instance Codec Binary ByteString where
@@ -185,6 +188,7 @@ instance Codec Binary ByteString where
 
 
 data Protobuf = Protobuf
+  deriving stock (Eq, Show, Lift)
 
 
 instance (Message a) => Codec Protobuf a where

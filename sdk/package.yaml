@@ -139,7 +139,6 @@ library:
   - Temporal.SearchAttributes.Internal
   - Temporal.TH.Classes
   - Temporal.TH.Internal
-  - Temporal.TH.Options
   when:
   - condition: false
     other-modules: Paths_temporal_sdk

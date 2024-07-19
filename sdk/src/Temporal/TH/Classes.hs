@@ -35,23 +35,22 @@ import Temporal.Workflow.Definition
 class Fn t where
   type FnType t :: Type
   fnName :: t -> Text.Text
-  fnName = Text.pack . show . fnTHName
   fnDefinition :: t -> (RequireCallStack => FnType t)
   fnSing :: t
-  fnTHName :: t -> Name
 
 
 fn :: Fn t => Proxy t -> t
 fn _ = fnSing
 
 
-data WorkflowConfig = WorkflowConfig
+data WorkflowConfig codec = WorkflowConfig
   { -- clientDefaultOptions :: Maybe StartWorkflowOptions
     -- , childWorkflowDefaultOptions :: Maybe StartChildWorkflowOptions
-    workflowNameOverride :: Maybe Text.Text
-  , workflowAliases :: [Text.Text]
-  -- TODO, add support for custom metadata like alerting channels
-  -- , customMetadata :: _
+    workflowConfigNameOverride :: Maybe Text.Text
+  , workflowConfigAliases :: [Text.Text]
+  , -- TODO, add support for custom metadata like alerting channels
+    -- , customMetadata :: _
+    workflowConfigCodec :: codec
   }
   deriving stock (Show, TH.Lift)
 
@@ -59,11 +58,6 @@ data WorkflowConfig = WorkflowConfig
 class (Fn f) => WorkflowFn (f :: Type) where
   type WorkflowCodec f :: Type
   type WorkflowCodec _ = JSON
-
-
-  workflowCodec :: f -> WorkflowCodec f
-  default workflowCodec :: (WorkflowCodec f ~ JSON) => f -> WorkflowCodec f
-  workflowCodec _ = JSON
 
 
   workflowImpl :: RequireCallStack => f -> ProvidedWorkflow (FnType f)
@@ -74,10 +68,11 @@ class (Fn f) => WorkflowFn (f :: Type) where
        )
     => f
     -> ProvidedWorkflow (FnType f)
-  workflowImpl x = workflowRefWithCodec x (workflowConfig x) (workflowCodec x)
+  workflowImpl x = workflowRefWithCodec x (workflowConfig x)
 
 
-  workflowConfig :: f -> WorkflowConfig
+  workflowConfig :: f -> WorkflowConfig (WorkflowCodec f)
+  default workflowConfig :: (WorkflowCodec f ~ JSON) => f -> WorkflowConfig (WorkflowCodec f)
   workflowConfig _ = defaultWorkflowConfig
 
 
@@ -94,8 +89,8 @@ instance (Fn f, WorkflowFn f) => WorkflowRef (WorkflowImpl f) where
   workflowRef (WorkflowImpl f) = provideCallStack (Temporal.TH.Classes.workflowImpl f).reference
 
 
-defaultWorkflowConfig :: WorkflowConfig
-defaultWorkflowConfig = WorkflowConfig Nothing []
+defaultWorkflowConfig :: WorkflowConfig JSON
+defaultWorkflowConfig = WorkflowConfig Nothing [] JSON
 
 
 workflowRefWithCodec
@@ -105,38 +100,34 @@ workflowRefWithCodec
      , FunctionSupportsCodec codec (ArgsOf (FnType f)) (ResultOf Workflow (FnType f))
      )
   => f
-  -> WorkflowConfig
-  -> codec
+  -> WorkflowConfig codec
   -> ProvidedWorkflow (FnType f)
-workflowRefWithCodec p conf c = provideWorkflow c (fromMaybe (fnName p) $ workflowNameOverride conf) $ fnDefinition p
+workflowRefWithCodec p conf = provideWorkflow conf.workflowConfigCodec (fromMaybe (fnName p) $ workflowConfigNameOverride conf) $ fnDefinition p
 
 
-data ActivityConfig = ActivityConfig
-  { activityNameOverride :: Maybe Text.Text
+data ActivityConfig c = ActivityConfig
+  { activityConfigNameOverride :: Maybe Text.Text
   , -- TODO, add support for custom metadata like alerting channels
     -- , customMetadata :: _
-    activityAliases :: [Text.Text]
+    activityConfigAliases :: [Text.Text]
+  , activityConfigCodec :: c
   }
   deriving stock (TH.Lift)
 
 
-defaultActivityConfig :: ActivityConfig
-defaultActivityConfig = ActivityConfig Nothing []
+defaultActivityConfig :: ActivityConfig JSON
+defaultActivityConfig = ActivityConfig Nothing [] JSON
 
 
 type family FnActivityEnv f where
   FnActivityEnv (Activity env _a) = env
   FnActivityEnv (_ -> Activity env _a) = env
+  FnActivityEnv (_ -> b) = FnActivityEnv b
 
 
 class (Fn f, Typeable (FnActivityEnv (FnType f))) => ActivityFn f where
   type ActivityCodec f :: Type
   type ActivityCodec _ = JSON
-
-
-  activityCodec :: f -> ActivityCodec f
-  default activityCodec :: (ActivityCodec f ~ JSON) => f -> ActivityCodec f
-  activityCodec _ = JSON
 
 
   activityEnvType :: f -> TypeRep
@@ -156,10 +147,11 @@ class (Fn f, Typeable (FnActivityEnv (FnType f))) => ActivityFn f where
        )
     => f
     -> ProvidedActivity (FnActivityEnv (FnType f)) (FnType f)
-  activityImpl x = activityRefWithCodec x (activityCodec x)
+  activityImpl x = activityRefWithCodec x (activityConfigCodec $ activityConfig x)
 
 
-  activityConfig :: f -> ActivityConfig
+  activityConfig :: f -> ActivityConfig (ActivityCodec f)
+  default activityConfig :: (ActivityCodec f ~ JSON) => f -> ActivityConfig (ActivityCodec f)
   activityConfig _ = defaultActivityConfig
 
 
@@ -190,5 +182,5 @@ activityRefWithCodec
 activityRefWithCodec p c =
   provideActivity
     c
-    (fromMaybe (fnName p) (activityNameOverride $ activityConfig p))
+    (fromMaybe (fnName p) (activityConfigNameOverride $ activityConfig p))
     (fnDefinition p)

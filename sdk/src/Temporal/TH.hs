@@ -135,7 +135,7 @@ data WorkflowThatContinuesAsNew = WorkflowThatContinuesAsNew
   deriving (WorkflowDef, WorkflowRef) via WorkflowImpl WorkflowThatContinuesAsNew
 
 instance Fn WorkflowThatContinuesAsNew where
-  fnTHName _ = 'workflowThatContinuesAsNew
+  fnName = Text.pack $ show 'workflowThatContinuesAsNew
   fnDefinition _ = provideCallStack workflowThatContinuesAsNew
   fnSing = WorkflowThatContinuesAsNew
 @
@@ -146,12 +146,12 @@ module Temporal.TH (
   SomeDictOf (..),
   registerActivity,
   registerActivityWithOptions,
-  ActivityConfiguration (..),
-  defaultActivityConfiguration,
+  ActivityConfig (..),
+  defaultActivityConfig,
   registerWorkflow,
   registerWorkflowWithOptions,
-  WorkflowConfiguration (..),
-  defaultWorkflowConfiguration,
+  WorkflowConfig (..),
+  defaultWorkflowConfig,
   Fn (..),
   WorkflowFn (..),
   WorkflowRef (..),
@@ -175,27 +175,21 @@ import qualified Temporal.Activity as Act
 import Temporal.Activity.Definition (ActivityDef (..))
 import Temporal.TH.Classes
 import Temporal.TH.Internal
-import Temporal.TH.Options
 import Temporal.Worker (Definitions (..))
 import Temporal.Workflow
 import qualified Temporal.Workflow as Wf
 import Temporal.Workflow.Definition (WorkflowDef (..))
 
 
-registerActivityWithOptions :: forall m. (TH.Quote m, TH.Quasi m) => TH.Name -> ActivityConfiguration -> m [TH.Dec]
-registerActivityWithOptions n ActivityConfiguration {..} = do
+registerActivityWithOptions :: forall codec m. (TH.Quote m, TH.Quasi m, TH.Lift codec) => TH.Name -> ActivityConfig codec -> m [TH.Dec]
+registerActivityWithOptions n conf = do
   fnType <- TH.qReifyType n
   let dataName = conT $ fnSingDataAndConName n
   baseDecls <- makeFnDecls n fnType
-  let configImpl =
-        defaultActivityConfig
-          { activityNameOverride = actNameOverride
-          , activityAliases = actAliases
-          }
   actDefs <-
     [d|
       instance Temporal.TH.Classes.ActivityFn $dataName where
-        activityConfig _ = configImpl
+        activityConfig _ = conf
 
 
       deriving via (Temporal.TH.Classes.ActivityImpl $dataName) instance ActivityRef $dataName
@@ -207,23 +201,18 @@ registerActivityWithOptions n ActivityConfiguration {..} = do
 
 
 registerActivity :: forall m. (TH.Quote m, TH.Quasi m) => TH.Name -> m [TH.Dec]
-registerActivity n = registerActivityWithOptions n defaultActivityConfiguration
+registerActivity n = registerActivityWithOptions n defaultActivityConfig
 
 
-registerWorkflowWithOptions :: forall m. (TH.Quote m, TH.Quasi m) => TH.Name -> WorkflowConfiguration -> m [TH.Dec]
-registerWorkflowWithOptions n WorkflowConfiguration {..} = do
+registerWorkflowWithOptions :: forall codec m. (TH.Quote m, TH.Quasi m, TH.Lift codec) => TH.Name -> WorkflowConfig codec -> m [TH.Dec]
+registerWorkflowWithOptions n conf = do
   fnType <- TH.qReifyType n
   let dataName = conT $ fnSingDataAndConName n
   baseDecls <- makeFnDecls n fnType
-  let configImpl =
-        defaultWorkflowConfig
-          { workflowNameOverride = wfNameOverride
-          , workflowAliases = wfAliases
-          }
   additionalDecls <-
     [d|
       instance Temporal.TH.Classes.WorkflowFn $dataName where
-        workflowConfig _ = configImpl
+        workflowConfig _ = conf
 
 
       deriving via (Temporal.TH.Classes.WorkflowImpl $dataName) instance WorkflowRef $dataName
@@ -236,7 +225,7 @@ registerWorkflowWithOptions n WorkflowConfiguration {..} = do
 
 
 registerWorkflow :: forall m. (TH.Quote m, TH.Quasi m) => TH.Name -> m [TH.Dec]
-registerWorkflow n = registerWorkflowWithOptions n defaultWorkflowConfiguration
+registerWorkflow n = registerWorkflowWithOptions n defaultWorkflowConfig
 
 
 ---------------------------------------------------------------------------------------
@@ -254,14 +243,14 @@ discoverDefinitions wfs acts =
       concatMap
         ( \(SomeDictOf inst) ->
             let def = Wf.definition $ Temporal.TH.Classes.workflowImpl $ fn inst
-            in (Wf.workflowName def, def) : map (\alias -> (alias, def {Wf.workflowName = alias})) (workflowAliases $ workflowConfig $ fn inst)
+            in (Wf.workflowName def, def) : map (\alias -> (alias, def {Wf.workflowName = alias})) (workflowConfigAliases $ workflowConfig $ fn inst)
         )
         wfs
     aliasedActs =
       concatMap
         ( \(SomeDictOf inst) -> case cast (Act.definition $ Temporal.TH.Classes.activityImpl $ fn inst) of
             Just (def :: Act.ActivityDefinition env) ->
-              (Act.activityName def, def) : map (\alias -> (alias, def {Act.activityName = alias})) (activityAliases $ activityConfig $ fn inst)
+              (Act.activityName def, def) : map (\alias -> (alias, def {Act.activityName = alias})) (activityConfigAliases $ activityConfig $ fn inst)
             Nothing -> []
         )
         acts

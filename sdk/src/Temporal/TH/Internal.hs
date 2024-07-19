@@ -78,20 +78,9 @@ makeFnDecls n t = do
         fnName _ = Text.pack $(TH.litE (TH.stringL $ show n))
         fnDefinition _ = $(varE n)
         fnSing = $(TH.conE dName)
-        fnTHName _ = $(TH.liftData n)
       |]
   pure $ dataDec : instDecs
 
-
--- [
--- , instanceD (cxt []) [t|Fn $(conT dName)|]
---   [ tySynInstD $ tySynEqn Nothing [t|FnType $(conT dName)|] (TH.qReifyType n)
---   , funD 'fnName [clause [wildP] (normalB $ TH.varE 'Text.pack `TH.appE` TH.litE (TH.stringL $ show n)) []]
---   , funD 'fnDefinition [clause [wildP] (normalB $ varE n) []]
---   , funD 'fnSing [clause [] (normalB $ TH.conE dName) []]
---   -- , funD 'fnTHName [clause [wildP] (normalB $(n)) []]
---   ]
--- ]
 
 -- Safe to use in other modules, because we're using the Symbol to find it.
 fnSingE :: forall m. (TH.Quote m, TH.Quasi m) => TH.Name -> m TH.Exp
@@ -156,20 +145,6 @@ retypeAsWorkflow
 retypeAsWorkflow extract wrap t = pure $ reapplyArgs (args, makeWorkflowWrapped $ wrap $ extract res)
   where
     (args, res) = splitArgsAndResult t
-
-
--- reifyActivityTimeout :: forall m. (TH.Quote m, TH.Quasi m) => TH.Name -> m (Maybe ActivityTimeoutPolicy)
--- reifyActivityTimeout n = do
---   TH.qReifyAnnotations @m @ActivityTimeoutPolicy (TH.AnnLookupName n) >>= \case
---     [] -> pure Nothing
---     [timeout] -> pure $ Just timeout
---     _ -> error "Multiple ActivityTimeout annotations, not sure which to use"
-
-materializeActivityConfig :: forall m. (TH.Quote m, TH.Quasi m) => TH.Name -> m (TH.TExp (Maybe ActivityConfig))
-materializeActivityConfig n =
-  TH.qReifyInstances ''ActivityFn [TH.ConT $ fnSingDataAndConName n] >>= \case
-    [] -> TH.examineCode [||Nothing||]
-    _ -> TH.examineCode [||Just $$(TH.unsafeCodeCoerce $ varE 'activityConfig `appE` fnSingE n)||]
 
 
 mkNconE :: (TH.Quote m) => TH.Name -> m TH.Exp

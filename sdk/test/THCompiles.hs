@@ -32,8 +32,8 @@ actWithNameOverride = pure ()
 
 registerActivityWithOptions
   'actWithNameOverride
-  defaultActivityConfiguration
-    { actNameOverride = Just "my-name"
+  defaultActivityConfig
+    { activityConfigNameOverride = Just "my-name"
     }
 
 
@@ -43,8 +43,8 @@ actWithAliases = pure ()
 
 registerActivityWithOptions
   'actWithAliases
-  defaultActivityConfiguration
-    { actAliases = ["alias1", "alias2"]
+  defaultActivityConfig
+    { activityConfigAliases = ["alias1", "alias2"]
     }
 
 
@@ -53,6 +53,16 @@ workflowWithTaskQueue _ = pure ()
 
 
 registerWorkflow 'workflowWithTaskQueue
+
+
+data Wibble = Wibble
+
+
+dingoBingo :: String -> Bool -> () -> Activity Wibble ()
+dingoBingo _ _ _ = pure ()
+
+
+registerActivity 'dingoBingo
 
 
 newDeclarationGroup

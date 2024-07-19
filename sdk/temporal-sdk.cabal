@@ -63,7 +63,6 @@ library
       Temporal.SearchAttributes.Internal
       Temporal.TH.Classes
       Temporal.TH.Internal
-      Temporal.TH.Options
   hs-source-dirs:
       src
   default-extensions:
