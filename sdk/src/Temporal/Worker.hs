@@ -212,7 +212,7 @@ instance (ToDefinitions env _1, ToDefinitions env _2, ToDefinitions env _3, ToDe
   toDefinitions (a, b, c, d, e, f) = toDefinitions a <> toDefinitions b <> toDefinitions c <> toDefinitions d <> toDefinitions e <> toDefinitions f
 
 
-addInterceptors :: Interceptors -> ConfigM actEnv ()
+addInterceptors :: Interceptors actEnv -> ConfigM actEnv ()
 addInterceptors i = ConfigM $ modify' $ \conf ->
   conf
     { interceptorConfig = i <> interceptorConfig conf

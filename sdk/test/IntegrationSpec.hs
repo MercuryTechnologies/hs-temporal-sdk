@@ -129,7 +129,7 @@ sillyEncryptionPayloadProcessor = PayloadProcessor incr decr
     decr (Payload data_ meta) = pure $ Right $ Payload (BS.map (\x -> x - 1) data_) meta
 
 
-makeClient :: PortNumber -> Interceptors -> IO (C.WorkflowClient, Client)
+makeClient :: PortNumber -> Interceptors env -> IO (C.WorkflowClient, Client)
 makeClient pn Interceptors {..} = do
   let conf = configWithRetry pn
   c <- connectClient globalRuntime conf
@@ -363,7 +363,7 @@ testConf :: Definitions ()
 testConf = collectTemporalDefinitions testDefs
 
 
-mkBaseConf :: Interceptors -> IO (ConfigM () (), W.TaskQueue)
+mkBaseConf :: Interceptors () -> IO (ConfigM () (), W.TaskQueue)
 mkBaseConf interceptors = do
   taskQueue <- W.TaskQueue <$> uuidText
   pure

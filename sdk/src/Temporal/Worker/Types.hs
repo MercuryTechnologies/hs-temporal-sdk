@@ -32,7 +32,7 @@ data WorkerConfig activityEnv = WorkerConfig
   , actEnv :: activityEnv
   , actDefs :: HashMap Text (ActivityDefinition activityEnv)
   , coreConfig :: Core.WorkerConfig
-  , interceptorConfig :: Interceptors
+  , interceptorConfig :: Interceptors activityEnv
   , applicationErrorConverters :: [ApplicationFailureHandler]
   , tracerProvider :: TracerProvider
   -- ^ This TracerProvider should only need to be supplied if you want to observe
