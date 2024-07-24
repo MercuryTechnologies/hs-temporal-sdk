@@ -176,7 +176,7 @@ askActivityClient = Activity $ asks (getWorkerClient . (.activityWorker))
 
 instance MonadReader env (Activity env) where
   ask = Activity $ asks (.activityEnv)
-  local f (Activity m) = Activity $ local (\a -> a {activityEnv = f $ activityEnv a}) m
+  local f (Activity m) = Activity $ local (\a -> a {Temporal.Activity.Definition.activityEnv = f $ Temporal.Activity.Definition.activityEnv a}) m
 
 
 data ActivityCancelReason

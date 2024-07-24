@@ -21,12 +21,10 @@ import Data.Kind (Type)
 import Data.Maybe (fromMaybe)
 import qualified Data.Text as Text
 import Data.Typeable
-import Language.Haskell.TH (Name)
 import qualified Language.Haskell.TH.Syntax as TH
 import RequireCallStack (provideCallStack)
 import Temporal.Activity
 import Temporal.Activity.Definition
-import Temporal.Client
 import Temporal.Payload
 import Temporal.Workflow
 import Temporal.Workflow.Definition

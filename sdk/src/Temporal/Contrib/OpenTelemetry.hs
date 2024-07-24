@@ -116,7 +116,7 @@ headersPropagator =
 -- CONTINUE_AS_NEW = 'ContinueAsNew',
 
 -- TODO, we will need to account for replays when we support them
-makeOpenTelemetryInterceptor :: MonadIO m => m Interceptors
+makeOpenTelemetryInterceptor :: MonadIO m => m (Interceptors env)
 makeOpenTelemetryInterceptor = do
   tracerProvider <- getGlobalTracerProvider
   let tracer =
@@ -249,7 +249,7 @@ makeOpenTelemetryInterceptor = do
             }
       , activityInboundInterceptors =
           ActivityInboundInterceptor
-            { executeActivity = \input next -> do
+            { executeActivity = \env input next -> do
                 let ActivityInfo {..} = input.activityInfo
                     spanArgs =
                       defaultSpanArguments
@@ -270,7 +270,7 @@ makeOpenTelemetryInterceptor = do
                 ctxt <- extract headersPropagator input.activityHeaders Ctxt.empty
                 _ <- attachContext ctxt
                 inSpan'' tracer ("RunActivity:" <> input.activityInfo.activityType) spanArgs $ \_span -> do
-                  next input
+                  next env input
             }
       , activityOutboundInterceptors = ActivityOutboundInterceptor
       , clientInterceptors =

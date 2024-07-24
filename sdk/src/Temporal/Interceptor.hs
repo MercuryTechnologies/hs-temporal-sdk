@@ -71,51 +71,51 @@ import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
 
 
-data ActivityInboundInterceptor = ActivityInboundInterceptor
-  { executeActivity :: ExecuteActivityInput -> (ExecuteActivityInput -> IO (Either String Payload)) -> IO (Either String Payload)
+data ActivityInboundInterceptor env = ActivityInboundInterceptor
+  { executeActivity :: env -> ExecuteActivityInput -> (env -> ExecuteActivityInput -> IO (Either String Payload)) -> IO (Either String Payload)
   }
 
 
-instance Semigroup ActivityInboundInterceptor where
+instance Semigroup (ActivityInboundInterceptor env) where
   l <> r =
     ActivityInboundInterceptor
-      { executeActivity = \input next -> executeActivity l input $ \input' -> executeActivity r input' next
+      { executeActivity = \env input next -> executeActivity l env input $ \env' input' -> executeActivity r env' input' next
       }
 
 
-instance Monoid ActivityInboundInterceptor where
+instance Monoid (ActivityInboundInterceptor env) where
   mempty =
     ActivityInboundInterceptor
-      { executeActivity = \input next -> next input
+      { executeActivity = \env input next -> next env input
       }
 
 
-data ActivityOutboundInterceptor = ActivityOutboundInterceptor {}
+data ActivityOutboundInterceptor env = ActivityOutboundInterceptor {}
 
 
-instance Semigroup ActivityOutboundInterceptor where
+instance Semigroup (ActivityOutboundInterceptor env) where
   ActivityOutboundInterceptor <> ActivityOutboundInterceptor = ActivityOutboundInterceptor
 
 
-instance Monoid ActivityOutboundInterceptor where
+instance Monoid (ActivityOutboundInterceptor env) where
   mempty = ActivityOutboundInterceptor
 
 
-data Interceptors = Interceptors
+data Interceptors env = Interceptors
   { workflowInboundInterceptors :: WorkflowInboundInterceptor
   , workflowOutboundInterceptors :: WorkflowOutboundInterceptor
-  , activityInboundInterceptors :: ActivityInboundInterceptor
-  , activityOutboundInterceptors :: ActivityOutboundInterceptor
+  , activityInboundInterceptors :: ActivityInboundInterceptor env
+  , activityOutboundInterceptors :: ActivityOutboundInterceptor env
   , clientInterceptors :: ClientInterceptors
   , scheduleClientInterceptors :: ScheduleClientInterceptors
   }
 
 
-instance Semigroup Interceptors where
+instance Semigroup (Interceptors env) where
   Interceptors a b c d e f <> Interceptors a' b' c' d' e' f' = Interceptors (a <> a') (b <> b') (c <> c') (d <> d') (e <> e') (f <> f')
 
 
-instance Monoid Interceptors where
+instance Monoid (Interceptors env) where
   mempty = Interceptors mempty mempty mempty mempty mempty mempty
 
 

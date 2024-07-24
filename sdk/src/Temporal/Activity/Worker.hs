@@ -41,8 +41,8 @@ data ActivityWorker env = ActivityWorker
   , definitions :: {-# UNPACK #-} !(HashMap Text (ActivityDefinition env))
   , runningActivities :: {-# UNPACK #-} !(TVar (HashMap TaskToken (Async ())))
   , workerCore :: {-# UNPACK #-} !(Core.Worker 'Core.Real)
-  , activityInboundInterceptors :: {-# UNPACK #-} !ActivityInboundInterceptor
-  , activityOutboundInterceptors :: {-# UNPACK #-} !ActivityOutboundInterceptor
+  , activityInboundInterceptors :: {-# UNPACK #-} !(ActivityInboundInterceptor env)
+  , activityOutboundInterceptors :: {-# UNPACK #-} !(ActivityOutboundInterceptor env)
   , clientInterceptors :: {-# UNPACK #-} !ClientInterceptors
   , activityErrorConverters :: {-# UNPACK #-} ![ApplicationFailureHandler]
   , payloadProcessor :: {-# UNPACK #-} !PayloadProcessor
@@ -150,7 +150,7 @@ applyActivityTaskStart tsk tt msg = do
     info <- activityInfoFromProto tt msg
     args <- processorDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload (msg ^. AT.vec'input))
     let env = w.initialEnv
-        actEnv = ActivityEnv w.workerCore info w.clientInterceptors w.payloadProcessor env
+        actEnv = ActivityEnv w.workerCore info w.clientInterceptors w.payloadProcessor
         input =
           ExecuteActivityInput
             args
@@ -164,11 +164,11 @@ applyActivityTaskStart tsk tt msg = do
       let c = Core.getWorkerConfig w.workerCore
       runningActivity <- asyncLabelled (T.unpack $ T.concat ["temporal/worker/activity/start/", Core.namespace c, "/", Core.taskQueue c]) $ do
         (ef :: Either SomeException (Either String Payload)) <- liftIO $ UnliftIO.trySyncOrAsync $ do
-          w.activityInboundInterceptors.executeActivity input $ \input' -> do
+          w.activityInboundInterceptors.executeActivity env input $ \env' input' -> do
             case HashMap.lookup info.activityType w.definitions of
               Nothing -> throwIO $ RuntimeError ("Activity type not found: " <> T.unpack info.activityType)
               Just ActivityDefinition {..} ->
-                activityRun actEnv input'
+                activityRun (actEnv env') input'
                   `finally` (takeMVar syncPoint *> atomically (modifyTVar' w.runningActivities (HashMap.delete tt)))
         completionMsg <- case ef >>= first (toException . ValueError) of
           Left err@(SomeException _wrappedErr) -> do

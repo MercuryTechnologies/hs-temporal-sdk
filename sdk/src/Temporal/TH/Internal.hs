@@ -20,23 +20,12 @@
 
 module Temporal.TH.Internal where
 
-import Control.Monad.IO.Class
 import Data.Char
--- import qualified Language.Haskell.TH.Datatype as TH
-
-import Data.Data (Data)
-import Data.Kind (Type)
-import Data.Maybe
-import Data.Proxy (Proxy)
 import qualified Data.Text as Text
-import Data.Typeable
 import qualified Language.Haskell.TH as TH
 import Language.Haskell.TH.Lib
 import qualified Language.Haskell.TH.Syntax as TH
-import Temporal.Activity (Activity, ProvidedActivity, provideActivity)
-import Temporal.Bundle (Def, Ref)
-import Temporal.Client (StartWorkflowOptions)
-import Temporal.Payload
+import Temporal.Activity (Activity)
 import Temporal.TH.Classes
 import Temporal.Workflow
 
