@@ -397,7 +397,7 @@ mkBaseConf interceptors = do
 needsClient :: SpecWith TestEnv
 needsClient = do
   describe "Workflow" $ do
-    fspecify "should run a workflow" $ \TestEnv {..} -> do
+    specify "should run a workflow" $ \TestEnv {..} -> do
       let conf = configure () testConf $ do
             baseConf
       withWorker conf $ do
