@@ -1540,7 +1540,7 @@ result of the others, so they can all explore as far as possible and get blocked
 unblocked in order to provide the result to the subsequent computation.
 -}
 newtype ConcurrentWorkflow a = ConcurrentWorkflow {runConcurrentlWorkflowActions :: Workflow a}
-  deriving newtype (Functor, MonadLogger, Semigroup, Monoid, Alternative, MonadIO, MonadUnliftIO, MonadCatch, MonadThrow, MonadReadStateVar, MonadWriteStateVar)
+  deriving newtype (Functor, MonadLogger, Semigroup, Monoid, Alternative, MonadCatch, MonadThrow)
 
 
 instance Applicative ConcurrentWorkflow where
