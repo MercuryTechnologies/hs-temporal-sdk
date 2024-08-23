@@ -13,6 +13,9 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE ViewPatterns #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Use replicateM" #-}
 
 {- |
 
@@ -152,6 +155,21 @@ module Temporal.Workflow (
   patched,
   deprecatePatch,
 
+  -- * Concurrency within Workflows
+  Temporal.Workflow.race,
+  Temporal.Workflow.race_,
+  Temporal.Workflow.concurrently,
+  Temporal.Workflow.concurrently_,
+  Temporal.Workflow.mapConcurrently,
+  Temporal.Workflow.mapConcurrently_,
+  Temporal.Workflow.replicateConcurrently,
+  Temporal.Workflow.replicateConcurrently_,
+  traverseConcurrently,
+  sequenceConcurrently,
+  ConcurrentWorkflow (..),
+  biselect,
+  biselectOpt,
+
   -- * Interacting with running Workflows
 
   -- ** Queries
@@ -171,9 +189,6 @@ module Temporal.Workflow (
   waitCondition,
 
   -- * Other utilities
-  Temporal.Workflow.race,
-  biselect,
-  biselectOpt,
   unsafeAsyncEffectSink,
 
   -- * State vars
@@ -224,12 +239,15 @@ module Temporal.Workflow (
   (:->:),
 ) where
 
+import Control.Applicative (Alternative (..))
 import Control.Concurrent (forkIO)
 import Control.Monad
+import Control.Monad.Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
 import qualified Data.ByteString.Short as SBS
 import Data.Coerce
+import Data.Foldable (Foldable (..), traverse_)
 import qualified Data.HashMap.Strict as HashMap
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
@@ -1271,6 +1289,13 @@ unsafeAsyncEffectSink m = do
 -- -----------------------------------------------------------------------------
 -- Parallel operations
 
+{-
+If either workflow completes with a Left a result, the computation will short-circuit and immediately return @Left a@.
+This means that if one branch produces a 'Left' result, the other branch's computation will be aborted if it hasn't already completed.
+
+If both workflows complete with Right results, the function will return @Right (b, c)@.
+In this case, both branches will be fully evaluated.
+-}
 biselect
   :: RequireCallStack
   => Workflow (Either a b)
@@ -1279,6 +1304,33 @@ biselect
 biselect = biselectOpt id id Left Right
 
 
+{- | The 'biselectOpt' function combines two workflows and applies optimized selection logic.
+
+This function is inspired by the 'Haxl' library's Haxl.Core.Parallel functions. It takes two workflows
+and combines them, applying discrimination functions to their results to determine the final outcome.
+The function works as follows:
+
+1. It explores both workflows concurrently.
+
+2. If the left workflow completes first:
+   - If the first argument returns 'Left', the result is immediately returned using the third function.
+   - If the first argument returns 'Right', it waits for the right workflow to complete.
+
+3. If the right workflow completes first:
+   - If the second argument returns 'Left', the result is immediately returned using the third function.
+   - If the second argument returns 'Right', it waits for the left workflow to complete.
+
+4. If both workflows complete:
+   - The results are combined using the fourth function if both discriminators return 'Right'.
+
+5. If either workflow throws an exception, the exception is propagated.
+
+6. If either workflow is blocked, the function manages the blocking and resumption of computation.
+
+This function optimizes the execution by short-circuiting when possible and managing concurrency
+efficiently. Be cautious when using this function, as exceptions and evaluation order can be
+unpredictable depending on the discriminator functions provided.
+-}
 {-# INLINE biselectOpt #-}
 biselectOpt
   :: RequireCallStack
@@ -1344,7 +1396,13 @@ biselectOpt discrimA discrimB left right wfL wfR =
 
 
 {- | This function takes two Workflow computations as input, and returns the
-output of whichever computation finished first.
+output of whichever computation finished first. The evaluation of the remaining
+computation is discontinued.
+
+Note: This function doesn't have a way to explicitly signal to the
+incomplete other computation that it will no longer be evaluated,
+so you should be careful about ensuring that incomplete
+computations are not problematic for your problem domain.
 -}
 race
   :: RequireCallStack
@@ -1360,6 +1418,60 @@ race = biselectOpt discrimX discrimY id right
     discrimY b = Left (Right b)
 
     right _ = error "race: We should never have a 'Right ()'"
+
+
+{- | Run two Workflow actions concurrently, and return the first to finish.
+
+Unlike 'Control.Concurrent.Async.race, this function doesn't explicitly cancel
+the other computation. If you want to cancel the other computation,
+you should return sufficient context to do so manually
+-}
+race_ :: RequireCallStack => Workflow a -> Workflow b -> Workflow ()
+race_ l r = void $ Temporal.Workflow.race l r
+
+
+{- | Run two Workflow actions concurrently, and return both results. If either action throws an exception at any time, the other action will run to completion
+as long as the exception is caught and handled.
+-}
+concurrently :: Workflow a -> Workflow b -> Workflow (a, b)
+concurrently l r = runConcurrentlWorkflowActions ((,) <$> ConcurrentWorkflow l <*> ConcurrentWorkflow r)
+
+
+-- | Like 'concurrently', but ignore the result values.
+concurrently_ :: Workflow a -> Workflow b -> Workflow ()
+concurrently_ l r = void $ Temporal.Workflow.concurrently l r
+
+
+{- | Map an effect-performing function over over any 'Traversable' data type, performing each action concurrently,
+returning the original data structure with the arguments replaced with the results.
+-}
+mapConcurrently :: Traversable t => (a -> Workflow b) -> t a -> Workflow (t b)
+mapConcurrently f xs = runConcurrentlWorkflowActions $ traverse (ConcurrentWorkflow . f) xs
+
+
+-- | Like 'mapConcurrently', but ignore the result values.
+mapConcurrently_ :: Foldable t => (a -> Workflow b) -> t a -> Workflow ()
+mapConcurrently_ f xs = runConcurrentlWorkflowActions $ traverse_ (ConcurrentWorkflow . f) xs
+
+
+-- | Perform the action in the given number of evaluation branches.
+replicateConcurrently :: Int -> Workflow a -> Workflow [a]
+replicateConcurrently n = runConcurrentlWorkflowActions . sequenceA . replicate n . ConcurrentWorkflow
+
+
+-- | Perform the action in the given number of evaluation branches, discarding the results
+replicateConcurrently_ :: Int -> Workflow a -> Workflow ()
+replicateConcurrently_ n = runConcurrentlWorkflowActions . fold . replicate n . ConcurrentWorkflow . void
+
+
+-- | Evaluate the action in the given number of evaluation branches, accumulating the results
+traverseConcurrently :: Traversable t => (a -> Workflow b) -> t a -> Workflow (t b)
+traverseConcurrently f xs = runConcurrentlWorkflowActions $ traverse (ConcurrentWorkflow . f) xs
+
+
+-- | Evaluate each Workflow action in the structure concurrently, and collect the results.
+sequenceConcurrently :: Traversable t => t (Workflow a) -> Workflow (t a)
+sequenceConcurrently = runConcurrentlWorkflowActions . traverse ConcurrentWorkflow
 
 
 {-
@@ -1415,3 +1527,29 @@ defaultRetryPolicy =
     , maximumAttempts = 0
     , nonRetryableErrorTypes = mempty
     }
+
+
+{- | A value of type 'ConcurrentWorkflow' a is a 'Workflow' operation that can be composed with other ConcurrentWorkflow values, using the Applicative and Alternative instances.
+
+'ConcurrentWorkflow' effectively operates as a computation DAG. It's evaluated by exploring the expression across all of the branches of computation until every branch becomes blocked
+waiting on results from Temporal.
+
+Once that happens, it submits all commands that it has accumulated to the Temporal orchestrator and waits to be reactivated with commands from the orchestrator that unblock
+computation on one or more branches. This is repeated until the computation completes. When 'Applicative' is used, that means that each computation branch doesn't depend on the
+result of the others, so they can all explore as far as possible and get blocked. If we use 'Monad', then that means that the result of the previous computation has to become
+unblocked in order to provide the result to the subsequent computation.
+-}
+newtype ConcurrentWorkflow a = ConcurrentWorkflow {runConcurrentlWorkflowActions :: Workflow a}
+  deriving newtype (Functor, MonadLogger, Semigroup, Monoid, Alternative, MonadIO, MonadUnliftIO, MonadCatch, MonadThrow, MonadReadStateVar, MonadWriteStateVar)
+
+
+instance Applicative ConcurrentWorkflow where
+  pure = ConcurrentWorkflow . pure
+  ConcurrentWorkflow f <*> ConcurrentWorkflow a = ConcurrentWorkflow (parallelAp f a)
+
+
+instance Monad ConcurrentWorkflow where
+  ConcurrentWorkflow m >>= f = ConcurrentWorkflow $ do
+    x <- m
+    let ConcurrentWorkflow m' = f x
+    m'

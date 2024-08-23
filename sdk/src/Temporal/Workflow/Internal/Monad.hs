@@ -119,33 +119,41 @@ instance Functor Workflow where
 
 instance Applicative Workflow where
   pure a = Workflow $ \_env -> return (Done a)
-  Workflow ff <*> Workflow aa = Workflow $ \env -> do
-    rf <- ff env
-    case rf of
-      Done f -> do
-        ra <- aa env
-        case ra of
-          Done a -> trace_ "Done/Done" $ return (Done (f a))
-          Throw e -> trace_ "Done/Throw" $ return (Throw e)
-          Blocked ivar fcont ->
-            trace_ "Done/Blocked" $
-              return (Blocked ivar (f :<$> fcont))
-      Throw e -> trace_ "Throw" $ return (Throw e)
-      Blocked ivar1 fcont -> do
-        ra <- aa env
-        case ra of
-          Done a ->
-            trace_ "Blocked/Done" $
-              return (Blocked ivar1 (($ a) :<$> fcont))
-          Throw e ->
-            trace_ "Blocked/Throw" $
-              return (Blocked ivar1 (fcont :>>= (\_ -> throw e)))
-          Blocked ivar2 acont ->
-            trace_ "Blocked/Blocked" $
-              blockedBlocked env ivar1 fcont ivar2 acont
 
 
--- Note [Blocked/Blocked]
+  -- TODO: Don't use parallelAp here, because people get too
+  -- confused about what's going on.
+  -- ff <*> aa = ff >>= \f -> aa >>= \a -> pure (f a)
+  (<*>) = parallelAp
+
+
+parallelAp :: Workflow (a -> b) -> Workflow a -> Workflow b
+parallelAp (Workflow ff) (Workflow aa) = Workflow $ \env -> do
+  rf <- ff env
+  case rf of
+    Done f -> do
+      ra <- aa env
+      case ra of
+        Done a -> trace_ "Done/Done" $ return (Done (f a))
+        Throw e -> trace_ "Done/Throw" $ return (Throw e)
+        Blocked ivar fcont ->
+          trace_ "Done/Blocked" $
+            return (Blocked ivar (f :<$> fcont))
+    Throw e -> trace_ "Throw" $ return (Throw e)
+    Blocked ivar1 fcont -> do
+      ra <- aa env
+      case ra of
+        Done a ->
+          trace_ "Blocked/Done" $
+            return (Blocked ivar1 (($ a) :<$> fcont))
+        Throw e ->
+          trace_ "Blocked/Throw" $
+            return (Blocked ivar1 (fcont :>>= (\_ -> throw e)))
+        -- Note [Blocked/Blocked]
+        Blocked ivar2 acont ->
+          trace_ "Blocked/Blocked" $
+            blockedBlocked env ivar1 fcont ivar2 acont
+
 
 blockedBlocked
   :: ContinuationEnv
