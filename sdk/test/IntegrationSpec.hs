@@ -17,11 +17,13 @@ import Common
 import Control.Concurrent
 import Control.Exception
 import Control.Exception.Annotated
+import Control.Monad (replicateM)
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Aeson (FromJSON, ToJSON, Value, eitherDecode, encode)
 import qualified Data.ByteString as BS
+import Data.Foldable (sequenceA_, traverse_)
 import Data.Functor
 import Data.Int
 import Data.Map.Strict (Map)
@@ -80,6 +82,9 @@ temporalBundle
       , nonRetryableFailureAct :: Activity () ()
       , retryableFailureTest :: W.Workflow ()
       , retryableFailureAct :: Activity () ()
+      , -- Workflow with failing children
+        workflowWithFailingChildren :: [Text] -> W.Workflow ()
+      , workflowWithFailingChildrenChild :: W.Workflow ()
       }
       deriving stock (Generic)
     |]
@@ -348,6 +353,19 @@ testImpls =
           if attempt i > 1
             then pure ()
             else error "sad"
+      , workflowWithFailingChildren = \wfs -> do
+          let runWf :: RequireCallStack => WorkflowId -> W.Workflow ()
+              runWf f =
+                W.executeChildWorkflow
+                  testRefs.workflowWithFailingChildrenChild
+                  ( W.defaultChildWorkflowOptions
+                      { W.workflowId = Just f
+                      , W.workflowIdReusePolicy = W.WorkflowIdReusePolicyAllowDuplicateFailedOnly
+                      }
+                  )
+          traverse_ (runWf . WorkflowId) wfs
+      , workflowWithFailingChildrenChild = do
+          W.sleep $ seconds 2
       }
 
 
@@ -379,7 +397,7 @@ mkBaseConf interceptors = do
 needsClient :: SpecWith TestEnv
 needsClient = do
   describe "Workflow" $ do
-    specify "should run a workflow" $ \TestEnv {..} -> do
+    fspecify "should run a workflow" $ \TestEnv {..} -> do
       let conf = configure () testConf $ do
             baseConf
       withWorker conf $ do
@@ -665,6 +683,28 @@ needsClient = do
     --   --   specify "ActivityFailure exception" pending
     --   --   specify "Non-wrapped exception" pending
     describe "Child workflows" $ do
+      specify "failing children" $ \TestEnv {..} -> do
+        let conf = configure () testConf $ do
+              baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  , C.timeouts =
+                      C.TimeoutOptions
+                        { C.runTimeout = Nothing
+                        , C.executionTimeout = Nothing
+                        , C.taskTimeout = Nothing
+                        }
+                  }
+          childWorkflowIds <- replicateM 3 uuidText
+          wfId <- uuidText
+          useClient (C.execute testRefs.workflowWithFailingChildren (WorkflowId wfId) opts childWorkflowIds)
+            `shouldReturn` ()
+          wfId2 <- uuidText
+          useClient (C.execute testRefs.workflowWithFailingChildren (WorkflowId wfId2) opts childWorkflowIds)
+            `shouldReturn` ()
+
       specify "invoke" $ \TestEnv {..} -> do
         parentId <- uuidText
         let isEven :: Int -> W.Workflow Bool
