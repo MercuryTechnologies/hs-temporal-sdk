@@ -703,7 +703,9 @@ needsClient = do
             `shouldReturn` ()
           wfId2 <- uuidText
           useClient (C.execute testRefs.workflowWithFailingChildren (WorkflowId wfId2) opts childWorkflowIds)
-            `shouldReturn` ()
+            `shouldThrow` \case
+              (WorkflowExecutionFailed _) -> True
+              _ -> False
 
       specify "invoke" $ \TestEnv {..} -> do
         parentId <- uuidText
