@@ -1062,10 +1062,10 @@ needsClient = do
   -- Until we have a way to do this in the SDK, we can't test this without manual intervention.
   describe "Search Attributes" $ do
     specify "can read search attributes set at start" $ \TestEnv {..} -> do
-      let workflow :: W.Workflow (Map Text SearchAttributeType)
+      let workflow :: W.Workflow (Map SearchAttributeKey SearchAttributeType)
           workflow = do
             i <- W.info
-            pure (i.searchAttributes :: Map Text SearchAttributeType)
+            pure (i.searchAttributes :: Map SearchAttributeKey SearchAttributeType)
           wf = W.provideWorkflow defaultCodec "readWorkflowInfo" workflow
           conf = configure () wf $ do
             baseConf
@@ -1094,11 +1094,11 @@ needsClient = do
               [ ("attr1", toSearchAttribute True)
               , ("attr2", toSearchAttribute (4 :: Int64))
               ]
-          workflow :: MyWorkflow (Map Text SearchAttributeType)
+          workflow :: MyWorkflow (Map SearchAttributeKey SearchAttributeType)
           workflow = do
             W.upsertSearchAttributes expectedAttrs
             i <- W.info
-            pure (i.searchAttributes :: Map Text SearchAttributeType)
+            pure i.searchAttributes
           wf = W.provideWorkflow defaultCodec "upsertWorkflowInfo" workflow
           conf = configure () wf $ do
             baseConf

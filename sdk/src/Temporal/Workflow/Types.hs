@@ -33,7 +33,7 @@ data Info = Info
   , retryPolicy :: !(Maybe RetryPolicy)
   , runId :: !RunId
   , runTimeout :: !(Maybe Duration)
-  , searchAttributes :: !(Map Text SearchAttributeType)
+  , searchAttributes :: !(Map SearchAttributeKey SearchAttributeType)
   , startTime :: !SystemTime
   , taskQueue :: !TaskQueue
   , taskTimeout :: !Duration
@@ -197,7 +197,7 @@ data StartChildWorkflowOptions = StartChildWorkflowOptions
   , retryPolicy :: Maybe RetryPolicy
   , cronSchedule :: Maybe Text
   , initialMemo :: Map Text Payload
-  , searchAttributes :: Map Text SearchAttributeType
+  , searchAttributes :: Map SearchAttributeKey SearchAttributeType
   , headers :: Map Text Payload
   , workflowIdReusePolicy :: WorkflowIdReusePolicy
   , workflowId :: Maybe WorkflowId
@@ -234,7 +234,7 @@ data ContinueAsNewOptions = ContinueAsNewOptions
   , taskTimeout :: Maybe Duration
   , retryPolicy :: Maybe RetryPolicy
   , memo :: Map Text Payload
-  , searchAttributes :: Map Text SearchAttributeType
+  , searchAttributes :: Map SearchAttributeKey SearchAttributeType
   , headers :: Map Text Payload
   }
   deriving stock (Eq, Show, Lift)

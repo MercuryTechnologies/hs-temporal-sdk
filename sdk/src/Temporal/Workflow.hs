@@ -843,10 +843,10 @@ lookupMemoValue k = Map.lookup k <$> getMemoValues
 
 Using this function will overwrite any existing Search Attributes with the same key.
 -}
-upsertSearchAttributes :: RequireCallStack => Map Text SearchAttributeType -> Workflow ()
+upsertSearchAttributes :: RequireCallStack => Map SearchAttributeKey SearchAttributeType -> Workflow ()
 upsertSearchAttributes values = ilift $ do
   updateCallStack
-  attrs <- liftIO $ traverse (fmap convertToProtoPayload . encode JSON) values
+  attrs <- liftIO $ searchAttributesToProto values
   let cmd =
         defMessage
           & Command.upsertWorkflowSearchAttributes

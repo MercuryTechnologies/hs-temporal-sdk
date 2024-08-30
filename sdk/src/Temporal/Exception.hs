@@ -164,8 +164,8 @@ instance Exception LogicBug
 
 
 data WorkflowAlreadyStarted = WorkflowAlreadyStarted
-  { workflowAlreadyStartedWorkflowId :: Text
-  , workflowAlreadyStartedWorkflowType :: Text
+  { workflowAlreadyStartedWorkflowId :: WorkflowId
+  , workflowAlreadyStartedWorkflowType :: WorkflowType
   }
   deriving stock (Show)
 
@@ -184,8 +184,8 @@ data ChildWorkflowCancelled = ChildWorkflowCancelled
   deriving stock (Show, Eq)
 
 
--- { childWorkflowCancelledWorkflowId :: Text
--- , childWorkflowCancelledWorkflowType :: Text
+-- { childWorkflowCancelledWorkflowId :: WorkflowId
+-- , childWorkflowCancelledWorkflowType :: WorkflowType
 -- , childWorkflowCancelledRunId :: Text
 -- } deriving (Show)
 

@@ -142,6 +142,7 @@ import qualified Data.Aeson as A
 import Data.Data
 import Data.Int
 import Data.Scientific (floatingOrInteger)
+import Data.String (IsString)
 import Data.Text (Text)
 import Data.Time
 import Data.Time.Clock
@@ -214,6 +215,11 @@ instance ToSearchAttribute Word8 where
 
 instance ToSearchAttribute Text where
   toSearchAttribute = KeywordOrText
+
+
+newtype SearchAttributeKey = SearchAttributeKey {unSearchAttributeKey :: Text}
+  deriving stock (Data, Show, Lift)
+  deriving newtype (Eq, Ord, A.FromJSON, A.FromJSONKey, A.ToJSON, A.ToJSONKey, IsString)
 
 
 {- | A search attribute is a key-value pair that can be used to filter workflows.
