@@ -17,6 +17,7 @@ import Common
 import Control.Concurrent
 import Control.Exception
 import Control.Exception.Annotated
+import qualified Control.Exception.Annotated as Annotated
 import Control.Monad (replicateM)
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
@@ -34,6 +35,7 @@ import Data.Time.Clock (UTCTime)
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
 import GHC.Generics
+import GHC.Stack (SrcLoc (..), callStack, fromCallSiteList)
 import OpenTelemetry.Trace
 import RequireCallStack
 import System.Directory
@@ -95,8 +97,15 @@ temporalBundle
     data DerivingStrategiesWork = DerivingStrategiesWork
       { derivingStrategyExampleThing :: Int
       }
-      deriving (Show)
+      deriving stock (Show)
     |]
+
+
+data SampleException = SampleException
+  deriving stock (Show)
+
+
+instance Exception SampleException
 
 
 configWithRetry :: PortNumber -> ClientConfig
@@ -190,43 +199,101 @@ spec = do
     it "should parse a duration from a data type" $ do
       let d = Data.Aeson.encode $ Duration 2 4
       Data.Aeson.eitherDecode d `shouldBe` Right (Duration 2 4)
+  describe "Exception converters" $ do
+    let handlers = mkAnnotatedHandlers standardApplicationFailureHandlers
+    it "exception conversion works" $ do
+      let aFailure = mkApplicationFailure (SomeException SampleException) handlers
+      aFailure
+        `shouldBe` ApplicationFailure
+          { stack = ""
+          , nonRetryable = False
+          , details = []
+          , message = "SampleException"
+          , type' = "SampleException"
+          , nextRetryDelay = Nothing
+          }
+    it "annotated exception conversion works (pt1)" $ do
+      let bFailure = mkApplicationFailure (SomeException $ AnnotatedException [] SampleException) handlers
+      bFailure
+        `shouldBe` ApplicationFailure
+          { stack = ""
+          , nonRetryable = False
+          , details = []
+          , message = "SampleException"
+          , type' = "SampleException"
+          , nextRetryDelay = Nothing
+          }
+    it "annotated exception conversion works (pt2)" $ do
+      let cFailure =
+            mkApplicationFailure
+              ( SomeException
+                  $ AnnotatedException
+                    [ Annotation Foo
+                    , Annotation $
+                        fromCallSiteList
+                          [
+                            ( "Foo"
+                            , SrcLoc
+                                { srcLocPackage = "Foo"
+                                , srcLocModule = "Foo"
+                                , srcLocFile = "Foo.hs"
+                                , srcLocStartLine = 1
+                                , srcLocStartCol = 1
+                                , srcLocEndLine = 1
+                                , srcLocEndCol = 1
+                                }
+                            )
+                          ]
+                    ]
+                  $ SomeException SampleException
+              )
+              handlers
+      cFailure
+        `shouldBe` ApplicationFailure
+          { stack = "Foo, called at Foo.hs:1:1 in Foo:Foo\n"
+          , nonRetryable = False
+          , details = [Payload {payloadData = "\"Annotation @RegressionTask Foo\"", payloadMetadata = Map.fromList [("encoding", "json/plain"), ("messageType", "[Char]")]}]
+          , message = "SampleException"
+          , type' = "SampleException"
+          , nextRetryDelay = Nothing
+          }
   aroundAll setup needsClient
   where
     setup :: (TestEnv -> IO ()) -> IO ()
     setup go = do
       -- fp <- getFreePort
       let fp = 7233
-      mTemporalPath <- findExecutable "temporal"
-      conf <- case mTemporalPath of
-        Nothing -> error "Could not find the 'temporal' executable in PATH"
-        Just temporalPath -> do
-          let serverConfig =
-                defaultTemporalDevServerConfig
-                  { port = Just $ fromIntegral fp
-                  , exe = ExistingPath temporalPath
-                  }
-          pure serverConfig
-      withDevServer globalRuntime conf $ \_ -> do
-        -- interceptors <- makeOpenTelemetryInterceptor
-        let interceptors = mempty
-        (client, coreClient) <- makeClient fp interceptors
+      -- mTemporalPath <- findExecutable "temporal"
+      -- conf <- case mTemporalPath of
+      --   Nothing -> error "Could not find the 'temporal' executable in PATH"
+      --   Just temporalPath -> do
+      --     let serverConfig =
+      --           defaultTemporalDevServerConfig
+      --             { port = Just $ fromIntegral fp
+      --             , exe = ExistingPath temporalPath
+      --             }
+      --     pure serverConfig
+      -- withDevServer globalRuntime conf $ \_ -> do
+      -- interceptors <- makeOpenTelemetryInterceptor
+      let interceptors = mempty
+      (client, coreClient) <- makeClient fp interceptors
 
-        SearchAttributes {customAttributes} <- either throwIO pure =<< listSearchAttributes coreClient (W.Namespace "default")
-        let allTestAttributes =
-              Map.fromList
-                [ ("attr1", Temporal.Operator.Bool)
-                , ("attr2", Temporal.Operator.Int)
-                ]
-        _ <- addSearchAttributes coreClient (W.Namespace "default") (allTestAttributes `Map.difference` customAttributes)
+      SearchAttributes {customAttributes} <- either throwIO pure =<< listSearchAttributes coreClient (W.Namespace "default")
+      let allTestAttributes =
+            Map.fromList
+              [ ("attr1", Temporal.Operator.Bool)
+              , ("attr2", Temporal.Operator.Int)
+              ]
+      _ <- addSearchAttributes coreClient (W.Namespace "default") (allTestAttributes `Map.difference` customAttributes)
 
-        (conf, taskQueue) <- mkBaseConf interceptors
-        go
-          TestEnv
-            { useClient = flip runReaderT client
-            , withWorker = mkWithWorker fp
-            , baseConf = conf
-            , taskQueue
-            }
+      (conf, taskQueue) <- mkBaseConf interceptors
+      go
+        TestEnv
+          { useClient = flip runReaderT client
+          , withWorker = mkWithWorker fp
+          , baseConf = conf
+          , taskQueue
+          }
 
 
 type MyWorkflow a = W.RequireCallStack => W.Workflow a
@@ -1246,10 +1313,45 @@ needsClient = do
             (WorkflowExecutionFailed _) -> True
             _ -> False
 
--- describe "Exception conversion" $ do
---   xspecify "AnnotatedException and SomeException values don't appear in ApplicationFailure" $ do
---     Ann.throw (SomeException )
---     pure ()
+  describe "Exception conversion" $ do
+    specify "AnnotatedException and SomeException values don't appear in ApplicationFailure" $ \TestEnv {..} -> do
+      uuid <- uuidText
+
+      let
+        -- taskMainActivity :: ProvidedActivity () (Activity () ())
+        -- taskMainActivity = provideCallStack $ provideActivity JSON "legacyTaskMainAct" $ do
+        --  pure ()
+
+        taskMainWorkflow :: W.ProvidedWorkflow (W.Workflow ())
+        taskMainWorkflow = provideCallStack $ W.provideWorkflow JSON "AnnotatedExceptionHaver" $ do
+          -- Info{..} <- info
+          -- W.executeActivity
+          --   taskMainActivity.reference
+          --   (W.defaultStartActivityOptions $ W.StartToClose infinity)
+          Annotated.throw SampleException
+
+        definitions =
+          ( -- activityDefinition taskMainActivity
+            -- ,
+            workflowDefinition taskMainWorkflow
+          , testConf
+          )
+        conf = configure () definitions $ do
+          baseConf
+
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts =
+                    C.TimeoutOptions
+                      { C.runTimeout = Just $ seconds 1
+                      , C.executionTimeout = Nothing
+                      , C.taskTimeout = Nothing
+                      }
+                }
+        useClient (C.execute taskMainWorkflow.reference (WorkflowId uuid) opts)
+          `shouldReturn` ()
 
 -- describe "WorkflowClient" $ do
 --   specify "WorkflowExecutionAlreadyStartedError" pending

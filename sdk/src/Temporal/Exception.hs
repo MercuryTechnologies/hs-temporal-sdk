@@ -6,14 +6,22 @@ import Control.Exception
 import Control.Exception.Annotated
 import Data.Annotation
 import Data.Int
+import Data.ProtoLens (Message (..))
 import Data.Text
 import Data.Typeable
 import Data.Vector (Vector)
 import GHC.Stack
+import Lens.Family2
+import qualified Proto.Temporal.Api.Common.V1.Message as Common
+import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Common
 import Proto.Temporal.Api.Failure.V1.Message
+import qualified Proto.Temporal.Api.Failure.V1.Message as F
 import qualified Proto.Temporal.Api.Failure.V1.Message as Proto
+import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import Proto.Temporal.Api.History.V1.Message
+import System.IO.Unsafe (unsafePerformIO)
 import Temporal.Common
+import Temporal.Duration
 import Temporal.Payload
 import Temporal.Workflow.Types
 
@@ -247,8 +255,24 @@ data ApplicationFailure = ApplicationFailure
   , nonRetryable :: Bool
   , details :: [Payload]
   , stack :: Text
+  , nextRetryDelay :: Maybe Duration
   }
   deriving stock (Show, Eq)
+
+
+applicationFailureToFailureProto :: ApplicationFailure -> F.Failure
+applicationFailureToFailureProto appFailure =
+  defMessage
+    & F.message .~ appFailure.message
+    & F.source .~ "hs-temporal-sdk"
+    & F.stackTrace .~ appFailure.stack
+    & F.applicationFailureInfo
+      .~ ( defMessage
+            & F.type' .~ appFailure.type'
+            & F.details .~ (defMessage @Common.Payloads & Common.payloads .~ fmap convertToProtoPayload appFailure.details)
+            & F.nonRetryable .~ appFailure.nonRetryable
+            & F.maybe'nextRetryDelay .~ fmap durationToProto appFailure.nextRetryDelay
+         )
 
 
 instance Exception ApplicationFailure
@@ -258,36 +282,116 @@ class ToApplicationFailure e where
   toApplicationFailure :: e -> ApplicationFailure
 
 
+data SomeApplicationFailure = forall e. (Exception e, ToApplicationFailure e) => SomeApplicationFailure e
+
+
+instance Show SomeApplicationFailure where
+  show :: SomeApplicationFailure -> String
+  show (SomeApplicationFailure e) = show e
+
+
+instance Exception SomeApplicationFailure
+
+
+applicationFailureToException :: (Exception e, ToApplicationFailure e) => e -> SomeException
+applicationFailureToException e = toException $ SomeApplicationFailure e
+
+
+applicationFailureFromException :: Exception e => SomeException -> Maybe e
+applicationFailureFromException e = do
+  (SomeApplicationFailure e') <- fromException e
+  cast e'
+
+
 data ApplicationFailureHandler where
   ApplicationFailureHandler :: Exception e => (e -> ApplicationFailure) -> ApplicationFailureHandler
 
 
+-- Stripped down callstack rendering to work better in the Temporal UI.
+prettySrcLoc :: SrcLoc -> String
+prettySrcLoc SrcLoc {..} =
+  mconcat
+    [ srcLocFile
+    , ":"
+    , show srcLocStartLine
+    , ":"
+    , show srcLocStartCol
+    , " in "
+    , srcLocPackage
+    , ":"
+    , srcLocModule
+    ]
+
+
+{- | Pretty print a 'CallStack'.
+
+@since 4.9.0.0
+-}
+prettyCallStack :: CallStack -> String
+prettyCallStack = Prelude.unlines . prettyCallStackLines
+
+
+prettyCallStackLines :: CallStack -> [String]
+prettyCallStackLines cs = case getCallStack cs of
+  [] -> []
+  stk -> Prelude.map prettyCallSite stk
+  where
+    prettyCallSite (f, loc) = f ++ ", called at " ++ Temporal.Exception.prettySrcLoc loc
+
+
 mkApplicationFailure :: SomeException -> [ApplicationFailureHandler] -> ApplicationFailure
-mkApplicationFailure e = Prelude.foldr tryHandler (ApplicationFailure "" "" False [] "")
+mkApplicationFailure e@(SomeException e') = Prelude.foldr tryHandler (basicHandler e')
   where
     tryHandler (ApplicationFailureHandler hndlr) acc = maybe acc hndlr $ fromException e
 
 
-mkAnnotatedHandlers :: HasCallStack => [ApplicationFailureHandler] -> [ApplicationFailureHandler]
+annToPayload :: Annotation -> Payload
+annToPayload ann = unsafePerformIO $ encode JSON $ show ann
+
+
+annotationHandler :: Exception e => (e -> ApplicationFailure) -> AnnotatedException e -> ApplicationFailure
+annotationHandler hndlr (AnnotatedException anns e) =
+  let
+    -- wrapped = toException
+    base = hndlr e
+    (stack', annsWithoutStack) = tryAnnotations anns
+  in
+    base
+      { type' = pack $ show $ case toException e of
+          (SomeException e') -> typeOf e'
+      , stack =
+          if base.stack == ""
+            then case stack' of
+              (cs : _) -> pack $ Temporal.Exception.prettyCallStack cs
+              _ -> base.stack
+            else base.stack
+      , details = Prelude.map annToPayload annsWithoutStack ++ base.details
+      , nonRetryable = case tryAnnotations anns of
+          (NonRetryableErrorAnnotation b : _, _) -> b || nonRetryable base
+          (_, _) -> nonRetryable base
+      }
+
+
+basicHandler :: Exception e => e -> ApplicationFailure
+basicHandler e =
+  ApplicationFailure
+    { type' = pack $ show $ typeOf e
+    , message = pack $ displayException e
+    , nonRetryable = False
+    , details = []
+    , stack = ""
+    , nextRetryDelay = Nothing
+    }
+
+
+mkAnnotatedHandlers :: [ApplicationFailureHandler] -> [ApplicationFailureHandler]
 mkAnnotatedHandlers xs =
-  xs >>= \(ApplicationFailureHandler hndlr) ->
-    [ ApplicationFailureHandler $ \e -> hndlr e
-    , ApplicationFailureHandler $ \(AnnotatedException anns e) ->
-        let base = hndlr e
-        in base
-            { stack =
-                if base.stack == ""
-                  then case tryAnnotations anns of
-                    (cs : _, _) -> pack $ prettyCallStack cs
-                    (_, _) -> base.stack
-                  else base.stack
-            , -- TODO, convert other annotations to details
-              -- , details = if not $ null (details base) then _ else details base
-              nonRetryable = case tryAnnotations anns of
-                (NonRetryableErrorAnnotation b : _, _) -> b || nonRetryable base
-                (_, _) -> nonRetryable base
-            }
-    ]
+  ( xs >>= \(ApplicationFailureHandler hndlr) ->
+      [ ApplicationFailureHandler hndlr
+      , ApplicationFailureHandler $ \e -> annotationHandler hndlr e
+      ]
+  )
+    ++ [ApplicationFailureHandler $ \e -> annotationHandler basicHandler (e :: AnnotatedException SomeException)]
 
 
 standardApplicationFailureHandlers :: [ApplicationFailureHandler]
@@ -300,14 +404,7 @@ standardApplicationFailureHandlers =
         , nonRetryable = False
         , details = []
         , stack = pack loc
-        }
-  , ApplicationFailureHandler $ \(SomeException e) ->
-      ApplicationFailure
-        { type' = pack $ show $ typeOf e
-        , message = pack $ displayException e
-        , nonRetryable = False
-        , details = []
-        , stack = ""
+        , nextRetryDelay = Nothing
         }
   ]
 

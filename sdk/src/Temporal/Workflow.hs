@@ -280,7 +280,7 @@ import System.Random.Stateful
 import Temporal.Activity.Definition (ActivityRef (..), KnownActivity (..))
 import Temporal.Common
 import Temporal.Common.TimeoutType
-import Temporal.Duration (Duration, durationToProto, seconds)
+import Temporal.Duration (Duration, durationFromProto, durationToProto, seconds)
 import Temporal.Exception
 import Temporal.Payload
 import Temporal.SearchAttributes
@@ -420,7 +420,7 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift 
                       toException $
                         ActivityFailure
                           { message = failure ^. Failure.message
-                          , activityType = ActivityType $ activityInput.activityType
+                          , activityType = ActivityType activityInput.activityType
                           , activityId = ActivityId actId
                           , retryState = retryStateFromProto $ failure ^. Failure.activityFailureInfo . Failure.retryState
                           , identity = failure ^. Failure.activityFailureInfo . Failure.identity
@@ -432,11 +432,12 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift 
                                   , nonRetryable = cause_ ^. Failure.applicationFailureInfo . Failure.nonRetryable
                                   , details = cause_ ^. Failure.applicationFailureInfo . Failure.details . Payloads.payloads . to (fmap convertFromProtoPayload)
                                   , stack = cause_ ^. Failure.stackTrace
+                                  , nextRetryDelay = fmap durationFromProto (cause_ ^. Failure.applicationFailureInfo . Failure.maybe'nextRetryDelay)
                                   }
                           , scheduledEventId = failure ^. Failure.activityFailureInfo . Failure.scheduledEventId
                           , startedEventId = failure ^. Failure.activityFailureInfo . Failure.startedEventId
                           , original = failure ^. Failure.activityFailureInfo
-                          , stack = Text.pack $ prettyCallStack callStack
+                          , stack = Text.pack $ Temporal.Exception.prettyCallStack callStack
                           }
               Just (ActivityResult.ActivityResolution'Cancelled details) -> pure $ Throw $ toException $ ActivityCancelled (details ^. ActivityResult.failure)
               Just (ActivityResult.ActivityResolution'Backoff _doBackoff) -> error "not implemented"
@@ -792,11 +793,12 @@ startLocalActivity (activityRef -> KnownActivity codec n) opts = withWorkflowArg
                                   , nonRetryable = cause_ ^. Failure.applicationFailureInfo . Failure.nonRetryable
                                   , details = cause_ ^. Failure.applicationFailureInfo . Failure.details . Payloads.payloads . to (fmap convertFromProtoPayload)
                                   , stack = cause_ ^. Failure.stackTrace
+                                  , nextRetryDelay = Nothing
                                   }
                           , scheduledEventId = failure ^. Failure.activityFailureInfo . Failure.scheduledEventId
                           , startedEventId = failure ^. Failure.activityFailureInfo . Failure.startedEventId
                           , original = failure ^. Failure.activityFailureInfo
-                          , stack = Text.pack $ prettyCallStack callStack
+                          , stack = Text.pack $ Temporal.Exception.prettyCallStack callStack
                           }
               Just (ActivityResult.ActivityResolution'Cancelled details) -> pure $ Throw $ toException $ ActivityCancelled (details ^. ActivityResult.failure)
               Just (ActivityResult.ActivityResolution'Backoff _doBackoff) -> error "not implemented"

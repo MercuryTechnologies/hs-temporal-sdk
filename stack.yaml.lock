@@ -19,12 +19,12 @@ packages:
   original:
     hackage: ghc-tcplugin-api-0.11.0.0
 - completed:
-    hackage: annotated-exception-0.2.0.5@sha256:d8d343f556e67ac38c8b5c8b9a1d551dd8005f6d28fe9c2accd606c5f9070e24,1785
+    hackage: annotated-exception-0.3.0.1@sha256:fabd2212151572843c40c2cda52f98ece977aed1a1c3bf33e09c9cf8f92e8917,1785
     pantry-tree:
-      sha256: 7e8f91d0899402a6ede549e6a47b169fdc9bb9877f4fe52471c2f43ef05eb167
+      sha256: 7d4277bdc5939ebb9caf4a060598e97d3f47082ed4c14d79367adf28e506e5f0
       size: 776
   original:
-    hackage: annotated-exception-0.2.0.5
+    hackage: annotated-exception-0.3.0.1
 - completed:
     hackage: require-callstack-0.2.0.0@sha256:49c2cf84a07fa6499c5ac180cc08f711420c78843fd0f783001200390b4f9010,1147
     pantry-tree:
