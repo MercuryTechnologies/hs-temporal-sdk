@@ -174,16 +174,7 @@ applyActivityTaskStart tsk tt msg = do
           Left err@(SomeException _wrappedErr) -> do
             $logDebug (T.pack (show err))
             let appFailure = mkApplicationFailure err w.activityErrorConverters
-                enrichedApplicationFailure =
-                  defMessage
-                    & F.message .~ appFailure.message
-                    & F.source .~ "hs-temporal-sdk"
-                    & F.stackTrace .~ appFailure.stack
-                    & F.applicationFailureInfo
-                      .~ ( defMessage
-                            & F.type' .~ Err.type' appFailure
-                            & F.nonRetryable .~ Err.nonRetryable appFailure
-                         )
+                enrichedApplicationFailure = applicationFailureToFailureProto appFailure
             pure $
               defMessage
                 & C.taskToken .~ rawTaskToken tt

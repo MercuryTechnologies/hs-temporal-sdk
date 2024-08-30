@@ -2,6 +2,7 @@
 
 module Temporal.Exception where
 
+import Control.Applicative (Alternative (..))
 import Control.Exception
 import Control.Exception.Annotated
 import Data.Annotation
@@ -355,33 +356,37 @@ annotationHandler hndlr (AnnotatedException anns e) =
     -- wrapped = toException
     base = hndlr e
     (stack', annsWithoutStack) = tryAnnotations anns
+    (nonRetryable', annsWithoutStackOrRetry) = tryAnnotations annsWithoutStack
+    (nextRetryDelay', annsWithoutDelay) = tryAnnotations annsWithoutStackOrRetry
   in
     base
-      { type' = pack $ show $ case toException e of
-          (SomeException e') -> typeOf e'
-      , stack =
+      { stack =
           if base.stack == ""
             then case stack' of
               (cs : _) -> pack $ Temporal.Exception.prettyCallStack cs
               _ -> base.stack
             else base.stack
-      , details = Prelude.map annToPayload annsWithoutStack ++ base.details
-      , nonRetryable = case tryAnnotations anns of
-          (NonRetryableErrorAnnotation b : _, _) -> b || nonRetryable base
-          (_, _) -> nonRetryable base
+      , details = Prelude.map annToPayload annsWithoutDelay ++ base.details
+      , nonRetryable = case nonRetryable' of
+          (NonRetryableError b : _) -> b || nonRetryable base
+          _ -> nonRetryable base
+      , nextRetryDelay = case nextRetryDelay' of
+          (NextRetryDelay d : _) -> d <|> nextRetryDelay base
+          _ -> nextRetryDelay base
       }
 
 
 basicHandler :: Exception e => e -> ApplicationFailure
-basicHandler e =
-  ApplicationFailure
-    { type' = pack $ show $ typeOf e
-    , message = pack $ displayException e
-    , nonRetryable = False
-    , details = []
-    , stack = ""
-    , nextRetryDelay = Nothing
-    }
+basicHandler e = case toException e of
+  (SomeException e') ->
+    ApplicationFailure
+      { type' = pack $ show $ typeOf e'
+      , message = pack $ displayException e'
+      , nonRetryable = False
+      , details = []
+      , stack = ""
+      , nextRetryDelay = Nothing
+      }
 
 
 mkAnnotatedHandlers :: [ApplicationFailureHandler] -> [ApplicationFailureHandler]
@@ -397,6 +402,7 @@ mkAnnotatedHandlers xs =
 standardApplicationFailureHandlers :: [ApplicationFailureHandler]
 standardApplicationFailureHandlers =
   [ ApplicationFailureHandler $ \h@ApplicationFailure {} -> h
+  , ApplicationFailureHandler $ \(SomeApplicationFailure e) -> toApplicationFailure e
   , ApplicationFailureHandler $ \(ErrorCallWithLocation msg loc) ->
       ApplicationFailure
         { type' = "ErrorCallWithLocation"
@@ -427,12 +433,28 @@ data ActivityFailure = ActivityFailure
 instance Exception ActivityFailure
 
 
-data NonRetryableErrorAnnotation = NonRetryableErrorAnnotation Bool
+data NonRetryableError = NonRetryableError Bool
   deriving stock (Show, Eq)
 
 
-nonRetryableError :: Annotation
-nonRetryableError = Annotation $ NonRetryableErrorAnnotation True
+annotateNonRetryableError :: Annotation
+annotateNonRetryableError = Annotation $ NonRetryableError True
+
+
+annotateRetryableError :: Annotation
+annotateRetryableError = Annotation $ NonRetryableError False
+
+
+data NextRetryDelay = NextRetryDelay (Maybe Duration)
+  deriving stock (Show, Eq)
+
+
+annotateNextRetryDelay :: Duration -> Annotation
+annotateNextRetryDelay = Annotation . NextRetryDelay . pure
+
+
+annotateNoRetryDelay :: Annotation
+annotateNoRetryDelay = Annotation $ NextRetryDelay Nothing
 
 
 ---------------------------------------------------------------------
