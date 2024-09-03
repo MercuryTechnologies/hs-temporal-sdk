@@ -212,6 +212,7 @@ module Temporal.Workflow (
   -- $randomness
   randomGen,
   uuid4,
+  uuid7,
   WorkflowGenM,
 
   -- * Continue as new
@@ -245,10 +246,12 @@ import Control.Monad
 import Control.Monad.Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
+import qualified Data.Bits as Bits
 import qualified Data.ByteString.Short as SBS
 import Data.Coerce
 import Data.Foldable (Foldable (..), traverse_)
 import qualified Data.HashMap.Strict as HashMap
+import Data.Int (Int64)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe
@@ -265,6 +268,7 @@ import qualified Data.UUID as UUID
 import Data.UUID.Types.Internal (buildFromBytes)
 import Data.Vector (Vector)
 import qualified Data.Vector as V
+import Data.Word (Word32, Word64, Word8)
 import GHC.Stack
 import Lens.Family2
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Payloads
@@ -996,6 +1000,48 @@ uuid4 = do
       (sbs `SBS.index` 0xD)
       (sbs `SBS.index` 0xE)
       (sbs `SBS.index` 0xF)
+
+
+{- | Generates a UUIDv7 using the current time (from 'time') and
+random data (from 'workflowRandomnessSeed').
+-}
+uuid7 :: RequireCallStack => Workflow UUID
+uuid7 = do
+  t <- time
+  wft <- workflowRandomnessSeed <$> askInstance
+  -- Note that we only need 74 bits (12 + 62) of randomness. That's a little
+  -- more than 9 bytes (72 bits), so we have to request 10 bytes (80 bits) of
+  -- entropy. The extra 6 bits are discarded.
+  b <- uniformShortByteString 10 wft
+  pure $
+    let u8_u64 = fromIntegral :: Word8 -> Word64
+        f = Bits.shift . u8_u64 . SBS.index b
+        r = f 0 0 + f 1 8
+        s = f 2 0 + f 3 8 + f 4 16 + f 5 24 + f 6 32 + f 7 40 + f 8 48 + f 9 56
+    in buildV7 t r s
+  where
+    buildV7
+      -- Corresponds to the @unix_ts_ms@ field.
+      :: SystemTime
+      -- Corresponds to the @rand_a@ field. Only the low 12 bits are used.
+      -> Word64
+      -- Corresponds to the @rand_b@ field. Only the low 62 bits are used.
+      -> Word64
+      -> UUID.UUID
+    buildV7 t r s =
+      let i64_u64 = fromIntegral :: Int64 -> Word64
+          u32_u64 = fromIntegral :: Word32 -> Word64
+          unix_ts_ms =
+            Bits.shift
+              ( (i64_u64 (systemSeconds t) * 1000)
+                  + u32_u64 (div (systemNanoseconds t) 1000000)
+              )
+              16
+          ver = Bits.shift 0x7 12 :: Word64
+          rand_a = r Bits..&. 0x0fff
+          var = Bits.shift 0x2 62 :: Word64
+          rand_b = s Bits..&. 0x3fffffffffffffff
+      in UUID.fromWords64 (unix_ts_ms + ver + rand_a) (var + rand_b)
 
 
 {- $queries
