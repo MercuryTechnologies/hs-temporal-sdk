@@ -316,39 +316,38 @@ spec = do
   where
     setup :: (TestEnv -> IO ()) -> IO ()
     setup go = do
-      -- fp <- getFreePort
-      let fp = 7233
-      -- mTemporalPath <- findExecutable "temporal"
-      -- conf <- case mTemporalPath of
-      --   Nothing -> error "Could not find the 'temporal' executable in PATH"
-      --   Just temporalPath -> do
-      --     let serverConfig =
-      --           defaultTemporalDevServerConfig
-      --             { port = Just $ fromIntegral fp
-      --             , exe = ExistingPath temporalPath
-      --             }
-      --     pure serverConfig
-      -- withDevServer globalRuntime conf $ \_ -> do
-      -- interceptors <- makeOpenTelemetryInterceptor
-      let interceptors = mempty
-      (client, coreClient) <- makeClient fp interceptors
+      fp <- getFreePort
+      -- let fp = 7233
+      mTemporalPath <- findExecutable "temporal"
+      conf <- case mTemporalPath of
+        Nothing -> error "Could not find the 'temporal' executable in PATH"
+        Just temporalPath -> do
+          let serverConfig =
+                defaultTemporalDevServerConfig
+                  { port = Just $ fromIntegral fp
+                  , exe = ExistingPath temporalPath
+                  }
+          pure serverConfig
+      withDevServer globalRuntime conf $ \_ -> do
+        interceptors <- makeOpenTelemetryInterceptor
+        (client, coreClient) <- makeClient fp interceptors
 
-      SearchAttributes {customAttributes} <- either throwIO pure =<< listSearchAttributes coreClient (W.Namespace "default")
-      let allTestAttributes =
-            Map.fromList
-              [ ("attr1", Temporal.Operator.Bool)
-              , ("attr2", Temporal.Operator.Int)
-              ]
-      _ <- addSearchAttributes coreClient (W.Namespace "default") (allTestAttributes `Map.difference` customAttributes)
+        SearchAttributes {customAttributes} <- either throwIO pure =<< listSearchAttributes coreClient (W.Namespace "default")
+        let allTestAttributes =
+              Map.fromList
+                [ ("attr1", Temporal.Operator.Bool)
+                , ("attr2", Temporal.Operator.Int)
+                ]
+        _ <- addSearchAttributes coreClient (W.Namespace "default") (allTestAttributes `Map.difference` customAttributes)
 
-      (conf, taskQueue) <- mkBaseConf interceptors
-      go
-        TestEnv
-          { useClient = flip runReaderT client
-          , withWorker = mkWithWorker fp
-          , baseConf = conf
-          , taskQueue
-          }
+        (conf, taskQueue) <- mkBaseConf interceptors
+        go
+          TestEnv
+            { useClient = flip runReaderT client
+            , withWorker = mkWithWorker fp
+            , baseConf = conf
+            , taskQueue
+            }
 
 
 type MyWorkflow a = W.RequireCallStack => W.Workflow a
@@ -994,7 +993,7 @@ needsClient = do
           result `shouldBe` Right "hello"
     -- specify "query and unblock" pending
     describe "Await condition" $ do
-      xit "signal handlers can unblock workflows" $ \TestEnv {..} -> do
+      it "signal handlers can unblock workflows" $ \TestEnv {..} -> do
         let conf = configure () testConf $ do
               baseConf
         withWorker conf $ do
@@ -1368,7 +1367,7 @@ needsClient = do
             _ -> False
 
   describe "Exception conversion" $ do
-    xspecify "AnnotatedException and SomeException values don't appear in ApplicationFailure" $ \TestEnv {..} -> do
+    specify "AnnotatedException and SomeException values don't appear in ApplicationFailure" $ \TestEnv {..} -> do
       uuid <- uuidText
 
       let
@@ -1404,8 +1403,12 @@ needsClient = do
                       , C.taskTimeout = Nothing
                       }
                 }
-        useClient (C.execute taskMainWorkflow.reference (WorkflowId uuid) opts)
-          `shouldReturn` ()
+        res <- Control.Exception.Annotated.try (useClient (C.execute taskMainWorkflow.reference (WorkflowId uuid) opts))
+        res
+          `shouldSatisfy` ( \case
+                              Left (WorkflowExecutionFailed {}) -> True
+                              _ -> False
+                          )
 
 -- describe "WorkflowClient" $ do
 --   specify "WorkflowExecutionAlreadyStartedError" pending
