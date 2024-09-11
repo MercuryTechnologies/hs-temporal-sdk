@@ -48,7 +48,7 @@ packages:
 extra-deps:
 - if-instance-0.5.1.0
 - ghc-tcplugin-api-0.11.0.0
-- annotated-exception-0.2.0.5
+- annotated-exception-0.3.0.1
 - require-callstack-0.2.0.0
 - validation-selective-0.2.0.0
 # Used for OTel contrib

@@ -17,12 +17,14 @@ import Common
 import Control.Concurrent
 import Control.Exception
 import Control.Exception.Annotated
-import Control.Monad (replicateM)
+import qualified Control.Exception.Annotated as Annotated
+import Control.Monad (replicateM, when)
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Aeson (FromJSON, ToJSON, Value, eitherDecode, encode)
 import qualified Data.ByteString as BS
+import Data.Either (isLeft)
 import Data.Foldable (sequenceA_, traverse_)
 import Data.Functor
 import Data.Int
@@ -34,6 +36,7 @@ import Data.Time.Clock (UTCTime)
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
 import GHC.Generics
+import GHC.Stack (SrcLoc (..), callStack, fromCallSiteList)
 import OpenTelemetry.Trace
 import RequireCallStack
 import System.Directory
@@ -95,8 +98,35 @@ temporalBundle
     data DerivingStrategiesWork = DerivingStrategiesWork
       { derivingStrategyExampleThing :: Int
       }
-      deriving (Show)
+      deriving stock (Show)
     |]
+
+
+data SampleException = SampleException
+  deriving stock (Show)
+
+
+instance Exception SampleException
+
+
+data AnApplicationFailure = AnApplicationFailure
+  deriving stock (Show)
+
+
+instance Exception AnApplicationFailure where
+  toException = applicationFailureToException
+  fromException = applicationFailureFromException
+
+
+instance ToApplicationFailure AnApplicationFailure where
+  toApplicationFailure _ =
+    ApplicationFailure
+      "AnApplicationFailure"
+      "Uh oh"
+      False
+      []
+      ""
+      (Just $ seconds 1)
 
 
 configWithRetry :: PortNumber -> ClientConfig
@@ -190,12 +220,104 @@ spec = do
     it "should parse a duration from a data type" $ do
       let d = Data.Aeson.encode $ Duration 2 4
       Data.Aeson.eitherDecode d `shouldBe` Right (Duration 2 4)
+  describe "Exception converters" $ do
+    let handlers = mkAnnotatedHandlers standardApplicationFailureHandlers
+    it "exception conversion works" $ do
+      let aFailure = mkApplicationFailure (toException SampleException) handlers
+      aFailure
+        `shouldBe` ApplicationFailure
+          { stack = ""
+          , nonRetryable = False
+          , details = []
+          , message = "SampleException"
+          , type' = "SampleException"
+          , nextRetryDelay = Nothing
+          }
+    it "annotated exception conversion works (pt1)" $ do
+      let bFailure = mkApplicationFailure (toException $ AnnotatedException [] SampleException) handlers
+      bFailure
+        `shouldBe` ApplicationFailure
+          { stack = ""
+          , nonRetryable = False
+          , details = []
+          , message = "SampleException"
+          , type' = "SampleException"
+          , nextRetryDelay = Nothing
+          }
+    it "annotated exception conversion works (pt2)" $ do
+      let cFailure =
+            mkApplicationFailure
+              ( SomeException
+                  $ AnnotatedException
+                    [ Annotation Foo
+                    , Annotation $
+                        fromCallSiteList
+                          [
+                            ( "Foo"
+                            , SrcLoc
+                                { srcLocPackage = "Foo"
+                                , srcLocModule = "Foo"
+                                , srcLocFile = "Foo.hs"
+                                , srcLocStartLine = 1
+                                , srcLocStartCol = 1
+                                , srcLocEndLine = 1
+                                , srcLocEndCol = 1
+                                }
+                            )
+                          ]
+                    ]
+                  $ SomeException SampleException
+              )
+              handlers
+      cFailure
+        `shouldBe` ApplicationFailure
+          { stack = "Foo, called at Foo.hs:1:1 in Foo:Foo\n"
+          , nonRetryable = False
+          , details = [Payload {payloadData = "\"Annotation @RegressionTask Foo\"", payloadMetadata = Map.fromList [("encoding", "json/plain"), ("messageType", "[Char]")]}]
+          , message = "SampleException"
+          , type' = "SampleException"
+          , nextRetryDelay = Nothing
+          }
+    it "Straight ApplicationFailure usage works" $ do
+      let basic =
+            ApplicationFailure
+              { stack = "Foo, called at Foo.hs:1:1 in Foo:Foo\n"
+              , nonRetryable = False
+              , details = [Payload {payloadData = "\"Annotation @RegressionTask Foo\"", payloadMetadata = Map.fromList [("encoding", "json/plain"), ("messageType", "[Char]")]}]
+              , message = "SampleException"
+              , type' = "SampleException"
+              , nextRetryDelay = Nothing
+              }
+      mkApplicationFailure (toException basic) handlers `shouldBe` basic
+    it "ApplicationFailure hierarchy works" $ do
+      let anAppFailure = mkApplicationFailure (toException AnApplicationFailure) handlers
+      anAppFailure
+        `shouldBe` toApplicationFailure AnApplicationFailure
+    it "Annotation checkpoints work" $ do
+      eRes <- Annotated.try $ do
+        Annotated.checkpointMany [annotateNonRetryableError, annotateNextRetryDelay $ seconds 2] $ do
+          Control.Exception.Annotated.throw AnApplicationFailure
+      --   pure ()
+      -- eRes `shouldSatisfy` isLeft
+      case eRes of
+        Right () -> fail "Should have failed"
+        Left err -> do
+          let appFailure = mkApplicationFailure err handlers
+          appFailure
+            `shouldBe` ApplicationFailure
+              "AnApplicationFailure"
+              "Uh oh"
+              True
+              []
+              appFailure.stack
+              (Just $ seconds 2)
+
   aroundAll setup needsClient
   where
     setup :: (TestEnv -> IO ()) -> IO ()
     setup go = do
-      -- fp <- getFreePort
-      let fp = 7233
+      fp <- getFreePort
+      -- let fp = 7233
       mTemporalPath <- findExecutable "temporal"
       conf <- case mTemporalPath of
         Nothing -> error "Could not find the 'temporal' executable in PATH"
@@ -207,8 +329,7 @@ spec = do
                   }
           pure serverConfig
       withDevServer globalRuntime conf $ \_ -> do
-        -- interceptors <- makeOpenTelemetryInterceptor
-        let interceptors = mempty
+        interceptors <- makeOpenTelemetryInterceptor
         (client, coreClient) <- makeClient fp interceptors
 
         SearchAttributes {customAttributes} <- either throwIO pure =<< listSearchAttributes coreClient (W.Namespace "default")
@@ -336,7 +457,7 @@ testImpls =
               testRefs.nonRetryableFailureAct
               (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
           W.wait (h :: W.Task ())
-      , nonRetryableFailureAct = checkpoint nonRetryableError $ do
+      , nonRetryableFailureAct = checkpoint annotateNonRetryableError $ do
           error "sad"
       , retryableFailureTest = do
           h <-
@@ -678,7 +799,6 @@ needsClient = do
           t1 `shouldBe` t2
           t3 `shouldSatisfy` (> t2)
 
-    --   -- describe "Activity failures" $ do
     --   --   specify "ApplicationFailure exception" pending
     --   --   specify "ActivityFailure exception" pending
     --   --   specify "Non-wrapped exception" pending
@@ -873,7 +993,7 @@ needsClient = do
           result `shouldBe` Right "hello"
     -- specify "query and unblock" pending
     describe "Await condition" $ do
-      xit "signal handlers can unblock workflows" $ \TestEnv {..} -> do
+      it "signal handlers can unblock workflows" $ \TestEnv {..} -> do
         let conf = configure () testConf $ do
               baseConf
         withWorker conf $ do
@@ -1062,10 +1182,10 @@ needsClient = do
   -- Until we have a way to do this in the SDK, we can't test this without manual intervention.
   describe "Search Attributes" $ do
     specify "can read search attributes set at start" $ \TestEnv {..} -> do
-      let workflow :: W.Workflow (Map Text SearchAttributeType)
+      let workflow :: W.Workflow (Map SearchAttributeKey SearchAttributeType)
           workflow = do
             i <- W.info
-            pure (i.searchAttributes :: Map Text SearchAttributeType)
+            pure (i.searchAttributes :: Map SearchAttributeKey SearchAttributeType)
           wf = W.provideWorkflow defaultCodec "readWorkflowInfo" workflow
           conf = configure () wf $ do
             baseConf
@@ -1094,11 +1214,11 @@ needsClient = do
               [ ("attr1", toSearchAttribute True)
               , ("attr2", toSearchAttribute (4 :: Int64))
               ]
-          workflow :: MyWorkflow (Map Text SearchAttributeType)
+          workflow :: MyWorkflow (Map SearchAttributeKey SearchAttributeType)
           workflow = do
             W.upsertSearchAttributes expectedAttrs
             i <- W.info
-            pure (i.searchAttributes :: Map Text SearchAttributeType)
+            pure i.searchAttributes
           wf = W.provideWorkflow defaultCodec "upsertWorkflowInfo" workflow
           conf = configure () wf $ do
             baseConf
@@ -1246,10 +1366,49 @@ needsClient = do
             (WorkflowExecutionFailed _) -> True
             _ -> False
 
--- describe "Exception conversion" $ do
---   xspecify "AnnotatedException and SomeException values don't appear in ApplicationFailure" $ do
---     Ann.throw (SomeException )
---     pure ()
+  describe "Exception conversion" $ do
+    specify "AnnotatedException and SomeException values don't appear in ApplicationFailure" $ \TestEnv {..} -> do
+      uuid <- uuidText
+
+      let
+        -- taskMainActivity :: ProvidedActivity () (Activity () ())
+        -- taskMainActivity = provideCallStack $ provideActivity JSON "legacyTaskMainAct" $ do
+        --  pure ()
+
+        taskMainWorkflow :: W.ProvidedWorkflow (W.Workflow ())
+        taskMainWorkflow = provideCallStack $ W.provideWorkflow JSON "AnnotatedExceptionHaver" $ do
+          -- Info{..} <- info
+          -- W.executeActivity
+          --   taskMainActivity.reference
+          --   (W.defaultStartActivityOptions $ W.StartToClose infinity)
+          Annotated.throw SampleException
+
+        definitions =
+          ( -- activityDefinition taskMainActivity
+            -- ,
+            workflowDefinition taskMainWorkflow
+          , testConf
+          )
+        conf = configure () definitions $ do
+          baseConf
+
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts =
+                    C.TimeoutOptions
+                      { C.runTimeout = Just $ seconds 1
+                      , C.executionTimeout = Nothing
+                      , C.taskTimeout = Nothing
+                      }
+                }
+        res <- Control.Exception.Annotated.try (useClient (C.execute taskMainWorkflow.reference (WorkflowId uuid) opts))
+        res
+          `shouldSatisfy` ( \case
+                              Left (WorkflowExecutionFailed {}) -> True
+                              _ -> False
+                          )
 
 -- describe "WorkflowClient" $ do
 --   specify "WorkflowExecutionAlreadyStartedError" pending

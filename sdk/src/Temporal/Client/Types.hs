@@ -62,7 +62,7 @@ data StartWorkflowOptions = StartWorkflowOptions
   -- categorize Workflow Executions based on developer-defined criteria. This feature is particularly useful
   -- when dealing with numerous Workflow Executions because it facilitates the addition of context, reminders,
   -- or any other relevant information that aids in understanding or tracking the Workflow Execution.
-  , searchAttributes :: !(Map Text SearchAttributeType)
+  , searchAttributes :: !(Map SearchAttributeKey SearchAttributeType)
   -- ^ Search attributes are indexed by the Temporal server and can be used in queries on the dashboard
   -- or by the Temporal CLI to find Workflows. These values are not encrypted and can be seen by anyone
   -- with access to the Temporal namespace.

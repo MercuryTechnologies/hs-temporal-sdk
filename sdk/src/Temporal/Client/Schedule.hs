@@ -255,7 +255,7 @@ data CreateScheduleRequest = CreateScheduleRequest
   -- ^ Memo attached to the schedule itself.
   , requestId :: !Text
   -- ^ A unique identifier for this create request for idempotence. Typically UUIDv4.
-  , searchAttributes :: !(Map Text SearchAttributeType)
+  , searchAttributes :: !(Map SearchAttributeKey SearchAttributeType)
   -- ^ Search attributes attached to the schedule itself.
   }
   deriving stock (Show, Eq, Ord, Generic)
@@ -341,7 +341,7 @@ data ScheduleListInfo = ScheduleListInfo
 data ScheduleListEntry = ScheduleListEntry
   { scheduleId :: !ScheduleId
   , memo :: !(Map Text Payload)
-  , searchAttributes :: !(Map Text SearchAttributeType)
+  , searchAttributes :: !(Map SearchAttributeKey SearchAttributeType)
   , info :: !(Maybe ScheduleListInfo)
   }
   deriving stock (Show, Eq, Ord, Generic)
@@ -711,7 +711,7 @@ data DescribeScheduleResponse = DescribeScheduleResponse
   -- ^ Extra schedule state info.
   , memo :: !(Map Text Payload)
   -- ^ The memo that the schedule was created with.
-  , searchAttributes :: !(Map Text SearchAttributeType)
+  , searchAttributes :: !(Map SearchAttributeKey SearchAttributeType)
   -- ^ The search attributes that the schedule was created with.
   , conflictToken :: !ByteString
   -- ^ This value can be passed back to UpdateSchedule to ensure that the

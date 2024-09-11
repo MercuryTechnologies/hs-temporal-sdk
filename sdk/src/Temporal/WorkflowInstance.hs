@@ -33,7 +33,7 @@ import qualified Data.Text as Text
 import Data.Time.Clock.System (SystemTime (..))
 import Data.Vector (Vector)
 import qualified Data.Vector as V
-import GHC.Stack (HasCallStack, emptyCallStack, prettyCallStack)
+import GHC.Stack (HasCallStack, emptyCallStack)
 import Lens.Family2
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as Failure
@@ -192,16 +192,7 @@ handleQueriesAfterCompletion = forever $ do
     Left err -> do
       $(logDebug) ("Workflow failure: " <> Text.pack (show err))
       let appFailure = mkApplicationFailure err w.errorConverters
-          enrichedApplicationFailure =
-            defMessage
-              & F.message .~ appFailure.message
-              & F.source .~ "hs-temporal-sdk"
-              & F.stackTrace .~ appFailure.stack
-              & F.applicationFailureInfo
-                .~ ( defMessage
-                      & F.type' .~ Err.type' appFailure
-                      & F.nonRetryable .~ Err.nonRetryable appFailure
-                   )
+          enrichedApplicationFailure = applicationFailureToFailureProto appFailure
 
           failureProto :: Completion.Failure
           failureProto = defMessage & Completion.failure .~ enrichedApplicationFailure
@@ -226,7 +217,7 @@ addStackTraceHandler :: WorkflowInstance -> IO ()
 addStackTraceHandler inst = do
   let specialHandler _ _ _ = do
         cs <- readIORef inst.workflowCallStack
-        Right <$> Temporal.Payload.encode JSON (Text.pack $ prettyCallStack cs)
+        Right <$> Temporal.Payload.encode JSON (Text.pack $ Temporal.Exception.prettyCallStack cs)
   modifyIORef' inst.workflowQueryHandlers (HashMap.insert (Just "__stack_trace") specialHandler)
 
 
@@ -515,8 +506,8 @@ applyResolutions rs = do
                                 ThrowWorkflow $
                                   toException $
                                     WorkflowAlreadyStarted
-                                      { workflowAlreadyStartedWorkflowId = failed ^. Activation.workflowId
-                                      , workflowAlreadyStartedWorkflowType = failed ^. Activation.workflowType
+                                      { workflowAlreadyStartedWorkflowId = WorkflowId (failed ^. Activation.workflowId)
+                                      , workflowAlreadyStartedWorkflowType = WorkflowType (failed ^. Activation.workflowType)
                                       }
                           in ( ActivationResult failure existing.startHandle
                                 : ActivationResult failure existing.firstExecutionRunId
@@ -652,16 +643,7 @@ convertExitVariantToCommand variant = do
     WorkflowExitFailed e -> do
       w <- ask
       let appFailure = mkApplicationFailure e w.errorConverters
-          enrichedApplicationFailure =
-            defMessage
-              & F.message .~ appFailure.message
-              & F.source .~ "hs-temporal-sdk"
-              & F.stackTrace .~ appFailure.stack
-              & F.applicationFailureInfo
-                .~ ( defMessage
-                      & F.type' .~ Err.type' appFailure
-                      & F.nonRetryable .~ Err.nonRetryable appFailure
-                   )
+          enrichedApplicationFailure = applicationFailureToFailureProto appFailure
       pure $
         defMessage
           & Command.failWorkflowExecution
