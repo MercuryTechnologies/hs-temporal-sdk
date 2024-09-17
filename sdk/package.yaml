@@ -182,5 +182,6 @@ tests:
       ConcurrentAccessSpec,
       AsyncCompletionSpec,
       IntegrationSpec,
+      IntegrationSpec.HangingWorkflow,
       Common,
       THCompiles

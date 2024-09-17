@@ -10,6 +10,9 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Redundant bracket" #-}
 
 module IntegrationSpec where
 
@@ -32,11 +35,14 @@ import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import qualified Data.Text as Text
+import Data.Time (Day (ModifiedJulianDay))
 import Data.Time.Clock (UTCTime)
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
+import DiscoverInstances (discoverInstances)
 import GHC.Generics
 import GHC.Stack (SrcLoc (..), callStack, fromCallSiteList)
+import IntegrationSpec.HangingWorkflow
 import OpenTelemetry.Trace
 import RequireCallStack
 import System.Directory
@@ -54,6 +60,7 @@ import Temporal.Interceptor
 import Temporal.Operator (IndexedValueType (..), SearchAttributes (..), addSearchAttributes, listSearchAttributes)
 import Temporal.Payload
 import Temporal.SearchAttributes
+import Temporal.TH (ActivityFn, WorkflowFn, discoverDefinitions)
 import Temporal.Worker
 import qualified Temporal.Workflow as W
 import Test.Hspec
@@ -316,38 +323,38 @@ spec = do
   where
     setup :: (TestEnv -> IO ()) -> IO ()
     setup go = do
-      fp <- getFreePort
-      -- let fp = 7233
-      mTemporalPath <- findExecutable "temporal"
-      conf <- case mTemporalPath of
-        Nothing -> error "Could not find the 'temporal' executable in PATH"
-        Just temporalPath -> do
-          let serverConfig =
-                defaultTemporalDevServerConfig
-                  { port = Just $ fromIntegral fp
-                  , exe = ExistingPath temporalPath
-                  }
-          pure serverConfig
-      withDevServer globalRuntime conf $ \_ -> do
-        interceptors <- makeOpenTelemetryInterceptor
-        (client, coreClient) <- makeClient fp interceptors
+      -- fp <- getFreePort
+      let fp = 7233
+      -- mTemporalPath <- findExecutable "temporal"
+      -- conf <- case mTemporalPath of
+      --   Nothing -> error "Could not find the 'temporal' executable in PATH"
+      --   Just temporalPath -> do
+      --     let serverConfig =
+      --           defaultTemporalDevServerConfig
+      --             { port = Just $ fromIntegral fp
+      --             , exe = ExistingPath temporalPath
+      --             }
+      --     pure serverConfig
+      -- withDevServer globalRuntime conf $ \_ -> do
+      interceptors <- makeOpenTelemetryInterceptor
+      (client, coreClient) <- makeClient fp interceptors
 
-        SearchAttributes {customAttributes} <- either throwIO pure =<< listSearchAttributes coreClient (W.Namespace "default")
-        let allTestAttributes =
-              Map.fromList
-                [ ("attr1", Temporal.Operator.Bool)
-                , ("attr2", Temporal.Operator.Int)
-                ]
-        _ <- addSearchAttributes coreClient (W.Namespace "default") (allTestAttributes `Map.difference` customAttributes)
+      SearchAttributes {customAttributes} <- either throwIO pure =<< listSearchAttributes coreClient (W.Namespace "default")
+      let allTestAttributes =
+            Map.fromList
+              [ ("attr1", Temporal.Operator.Bool)
+              , ("attr2", Temporal.Operator.Int)
+              ]
+      _ <- addSearchAttributes coreClient (W.Namespace "default") (allTestAttributes `Map.difference` customAttributes)
 
-        (conf, taskQueue) <- mkBaseConf interceptors
-        go
-          TestEnv
-            { useClient = flip runReaderT client
-            , withWorker = mkWithWorker fp
-            , baseConf = conf
-            , taskQueue
-            }
+      (conf, taskQueue) <- mkBaseConf interceptors
+      go
+        TestEnv
+          { useClient = flip runReaderT client
+          , withWorker = mkWithWorker fp
+          , baseConf = conf
+          , taskQueue
+          }
 
 
 type MyWorkflow a = W.RequireCallStack => W.Workflow a
@@ -1409,6 +1416,43 @@ needsClient = do
                               Left (WorkflowExecutionFailed {}) -> True
                               _ -> False
                           )
+  describe "Hanging Workflow" $ do
+    fspecify "works" $ \TestEnv {..} -> do
+      let definitions =
+            ( RolloverTransferFundsRequest
+            )
+          conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 1, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                }
+        useClient
+          ( C.execute PerformPartnerBankRollover "hanging-workflow" opts $
+              RolloverRequest
+                { orgId = 1
+                , rolloverId = 1
+                , originBank = Bank1
+                , targetBank = Bank2
+                , createdAccounts =
+                    Accounts
+                      { rolledOverDepositoryAccounts = Map.fromList [(1, 100), (2, 200)]
+                      }
+                , expectedSettlementDate = ModifiedJulianDay 1
+                , effectiveDate = ModifiedJulianDay 1
+                , transferRequests =
+                    [ RolloverTransferFundsRequest
+                        { transactionMetadataId = 1
+                        , toAccountId = 1
+                        , fromAccountId = 2
+                        , amount = 100
+                        }
+                    ]
+                }
+          )
+          `shouldReturn` ()
 
 -- describe "WorkflowClient" $ do
 --   specify "WorkflowExecutionAlreadyStartedError" pending

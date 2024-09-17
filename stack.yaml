@@ -93,7 +93,7 @@ system-ghc: true
 # require-stack-version: ">=2.9"
 #
 # Override the architecture used by Stack, especially useful on Windows
-# arch: aarch64 # i386
+arch: aarch64 # i386
 #
 # Extra directories used by Stack for building
 # extra-include-dirs: [/path/to/dir]

@@ -284,7 +284,7 @@ import System.Random.Stateful
 import Temporal.Activity.Definition (ActivityRef (..), KnownActivity (..))
 import Temporal.Common
 import Temporal.Common.TimeoutType
-import Temporal.Duration (Duration, durationFromProto, durationToProto, seconds)
+import Temporal.Duration (Duration (..), durationFromProto, durationToProto, seconds)
 import Temporal.Exception
 import Temporal.Payload
 import Temporal.SearchAttributes
@@ -1177,12 +1177,13 @@ createTimer ts = ilift $ do
   updateCallStack
   inst <- ask
   s@(Sequence seqId) <- nextTimerSequence
-  let cmd =
+  let ts' = if ts == Duration 0 0 then Duration 0 1 else ts
+      cmd =
         defMessage
           & Command.startTimer
             .~ ( defMessage
                   & Command.seq .~ seqId
-                  & Command.startToFireTimeout .~ durationToProto ts
+                  & Command.startToFireTimeout .~ durationToProto ts'
                )
   $(logDebug) "Add command: sleep"
   res <- newIVar

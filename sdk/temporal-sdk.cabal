@@ -1,6 +1,6 @@
 cabal-version: 3.0
 
--- This file has been generated from package.yaml by hpack version 0.36.0.
+-- This file has been generated from package.yaml by hpack version 0.36.1.
 --
 -- see: https://github.com/sol/hpack
 
@@ -148,7 +148,7 @@ test-suite temporal-sdk-tests
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
-      Spec, ConcurrentAccessSpec, AsyncCompletionSpec, IntegrationSpec, Common, THCompiles
+      Spec, ConcurrentAccessSpec, AsyncCompletionSpec, IntegrationSpec, IntegrationSpec.HangingWorkflow, Common, THCompiles
   hs-source-dirs:
       test
   default-extensions:

@@ -123,9 +123,10 @@ instance Applicative Workflow where
 
   -- TODO: Don't use parallelAp here, because people get too
   -- confused about what's going on.
-  -- ff <*> aa = ff >>= \f -> aa >>= \a -> pure (f a)
-  (<*>) = parallelAp
+  ff <*> aa = ff >>= \f -> aa >>= \a -> pure (f a)
 
+
+-- (<*>) = parallelAp
 
 parallelAp :: Workflow (a -> b) -> Workflow a -> Workflow b
 parallelAp (Workflow ff) (Workflow aa) = Workflow $ \env -> do
