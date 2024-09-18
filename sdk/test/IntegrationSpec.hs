@@ -42,7 +42,6 @@ import qualified Data.UUID.V4 as UUID
 import DiscoverInstances (discoverInstances)
 import GHC.Generics
 import GHC.Stack (SrcLoc (..), callStack, fromCallSiteList)
-import IntegrationSpec.HangingWorkflow
 import OpenTelemetry.Trace
 import RequireCallStack
 import System.Directory

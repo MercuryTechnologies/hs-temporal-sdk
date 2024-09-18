@@ -20,6 +20,7 @@ in {
   packages =
     [
       protogen
+      pkgs.crate2nix
     ]
     ++ (with pkgs;
       lib.optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [

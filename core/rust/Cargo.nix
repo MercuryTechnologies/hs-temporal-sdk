@@ -3379,15 +3379,21 @@ rec {
       };
       "mio" = rec {
         crateName = "mio";
-        version = "0.8.11";
-        edition = "2018";
-        sha256 = "034byyl0ardml5yliy1hmvx8arkmn9rv479pid794sm07ia519m4";
+        version = "1.0.2";
+        edition = "2021";
+        sha256 = "1v1cnnn44awxbcfm4zlavwgkvbyg7gp5zzjm8mqf1apkrwflvq40";
         authors = [
           "Carl Lerche <me@carllerche.com>"
           "Thomas de Zeeuw <thomasdezeeuw@gmail.com>"
           "Tokio Contributors <team@tokio.rs>"
         ];
         dependencies = [
+          {
+            name = "hermit-abi";
+            packageId = "hermit-abi";
+            rename = "libc";
+            target = { target, features }: ("hermit" == target."os" or null);
+          }
           {
             name = "libc";
             packageId = "libc";
@@ -3405,9 +3411,9 @@ rec {
           }
           {
             name = "windows-sys";
-            packageId = "windows-sys 0.48.0";
+            packageId = "windows-sys 0.52.0";
             target = { target, features }: (target."windows" or false);
-            features = [ "Win32_Foundation" "Win32_Networking_WinSock" "Win32_Storage_FileSystem" "Win32_System_IO" "Win32_System_WindowsProgramming" ];
+            features = [ "Wdk_Foundation" "Wdk_Storage_FileSystem" "Wdk_System_IO" "Win32_Foundation" "Win32_Networking_WinSock" "Win32_Storage_FileSystem" "Win32_System_IO" "Win32_System_WindowsProgramming" ];
           }
         ];
         features = {
@@ -3647,28 +3653,6 @@ rec {
           "libm" = [ "dep:libm" ];
         };
         resolvedDefaultFeatures = [ "std" ];
-      };
-      "num_cpus" = rec {
-        crateName = "num_cpus";
-        version = "1.16.0";
-        edition = "2015";
-        sha256 = "0hra6ihpnh06dvfvz9ipscys0xfqa9ca9hzp384d5m02ssvgqqa1";
-        authors = [
-          "Sean McArthur <sean@seanmonstar.com>"
-        ];
-        dependencies = [
-          {
-            name = "hermit-abi";
-            packageId = "hermit-abi";
-            target = { target, features }: ("hermit" == target."os" or null);
-          }
-          {
-            name = "libc";
-            packageId = "libc";
-            target = { target, features }: (!(target."windows" or false));
-          }
-        ];
-
       };
       "object" = rec {
         crateName = "object";
@@ -5803,7 +5787,7 @@ rec {
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
           rev = "42e2a94baad618ca352b9faad5879dfb59ff4a04";
-          sha256 = "07v1jnccyyal3v8wfbdnz4w1rz4k4yaymk78jxhrfp8l9slps59f";
+          sha256 = "05xdl5dxg22xqlfa6pbh9wx6fkr0ng825dabwv1iv1czf03c4jig";
         };
         authors = [
           "Spencer Judge <spencer@temporal.io>"
@@ -5828,7 +5812,7 @@ rec {
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
           rev = "42e2a94baad618ca352b9faad5879dfb59ff4a04";
-          sha256 = "07v1jnccyyal3v8wfbdnz4w1rz4k4yaymk78jxhrfp8l9slps59f";
+          sha256 = "05xdl5dxg22xqlfa6pbh9wx6fkr0ng825dabwv1iv1czf03c4jig";
         };
         procMacro = true;
         authors = [
@@ -5869,7 +5853,7 @@ rec {
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
           rev = "42e2a94baad618ca352b9faad5879dfb59ff4a04";
-          sha256 = "07v1jnccyyal3v8wfbdnz4w1rz4k4yaymk78jxhrfp8l9slps59f";
+          sha256 = "05xdl5dxg22xqlfa6pbh9wx6fkr0ng825dabwv1iv1czf03c4jig";
         };
         authors = [
           "Spencer Judge <spencer@temporal.io>"
@@ -6335,9 +6319,9 @@ rec {
       };
       "serde_json" = rec {
         crateName = "serde_json";
-        version = "1.0.117";
+        version = "1.0.128";
         edition = "2021";
-        sha256 = "1hxziifjlc0kn1cci9d4crmjc7qwnfi20lxwyj9lzca2c7m84la5";
+        sha256 = "1n43nia50ybpcfmh3gcw4lcc627qsg9nyakzwgkk9pm10xklbxbg";
         authors = [
           "Erick Tryzelaar <erick.tryzelaar@gmail.com>"
           "David Tolnay <dtolnay@gmail.com>"
@@ -6346,6 +6330,11 @@ rec {
           {
             name = "itoa";
             packageId = "itoa";
+          }
+          {
+            name = "memchr";
+            packageId = "memchr";
+            usesDefaultFeatures = false;
           }
           {
             name = "ryu";
@@ -6369,7 +6358,7 @@ rec {
           "default" = [ "std" ];
           "indexmap" = [ "dep:indexmap" ];
           "preserve_order" = [ "indexmap" "std" ];
-          "std" = [ "serde/std" ];
+          "std" = [ "memchr/std" "serde/std" ];
         };
         resolvedDefaultFeatures = [ "default" "std" ];
       };
@@ -6882,7 +6871,7 @@ rec {
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
           rev = "42e2a94baad618ca352b9faad5879dfb59ff4a04";
-          sha256 = "07v1jnccyyal3v8wfbdnz4w1rz4k4yaymk78jxhrfp8l9slps59f";
+          sha256 = "05xdl5dxg22xqlfa6pbh9wx6fkr0ng825dabwv1iv1czf03c4jig";
         };
         libName = "temporal_client";
         authors = [
@@ -6991,7 +6980,7 @@ rec {
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
           rev = "42e2a94baad618ca352b9faad5879dfb59ff4a04";
-          sha256 = "07v1jnccyyal3v8wfbdnz4w1rz4k4yaymk78jxhrfp8l9slps59f";
+          sha256 = "05xdl5dxg22xqlfa6pbh9wx6fkr0ng825dabwv1iv1czf03c4jig";
         };
         libName = "temporal_sdk_core";
         authors = [
@@ -7269,7 +7258,7 @@ rec {
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
           rev = "42e2a94baad618ca352b9faad5879dfb59ff4a04";
-          sha256 = "07v1jnccyyal3v8wfbdnz4w1rz4k4yaymk78jxhrfp8l9slps59f";
+          sha256 = "05xdl5dxg22xqlfa6pbh9wx6fkr0ng825dabwv1iv1czf03c4jig";
         };
         libName = "temporal_sdk_core_api";
         authors = [
@@ -7348,7 +7337,7 @@ rec {
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
           rev = "42e2a94baad618ca352b9faad5879dfb59ff4a04";
-          sha256 = "07v1jnccyyal3v8wfbdnz4w1rz4k4yaymk78jxhrfp8l9slps59f";
+          sha256 = "05xdl5dxg22xqlfa6pbh9wx6fkr0ng825dabwv1iv1czf03c4jig";
         };
         libName = "temporal_sdk_core_protos";
         authors = [
@@ -7697,9 +7686,9 @@ rec {
       };
       "tokio" = rec {
         crateName = "tokio";
-        version = "1.38.0";
+        version = "1.40.0";
         edition = "2021";
-        sha256 = "0jjsb2c9dqi93yij3rqzsh9bk0z3qyasmw1n8qkny3d8lw14lkxs";
+        sha256 = "166rllhfkyqp0fs7sxn6crv74iizi4wzd3cvxkcpmlk52qip1c72";
         authors = [
           "Tokio Contributors <team@tokio.rs>"
         ];
@@ -7725,11 +7714,6 @@ rec {
             packageId = "mio";
             optional = true;
             usesDefaultFeatures = false;
-          }
-          {
-            name = "num_cpus";
-            packageId = "num_cpus";
-            optional = true;
           }
           {
             name = "parking_lot";
@@ -7760,7 +7744,7 @@ rec {
           }
           {
             name = "windows-sys";
-            packageId = "windows-sys 0.48.0";
+            packageId = "windows-sys 0.52.0";
             optional = true;
             target = { target, features }: (target."windows" or false);
           }
@@ -7778,7 +7762,7 @@ rec {
           }
           {
             name = "windows-sys";
-            packageId = "windows-sys 0.48.0";
+            packageId = "windows-sys 0.52.0";
             target = {target, features}: (target."windows" or false);
             features = [ "Win32_Foundation" "Win32_Security_Authorization" ];
           }
@@ -7791,10 +7775,9 @@ rec {
           "macros" = [ "tokio-macros" ];
           "mio" = [ "dep:mio" ];
           "net" = [ "libc" "mio/os-poll" "mio/os-ext" "mio/net" "socket2" "windows-sys/Win32_Foundation" "windows-sys/Win32_Security" "windows-sys/Win32_Storage_FileSystem" "windows-sys/Win32_System_Pipes" "windows-sys/Win32_System_SystemServices" ];
-          "num_cpus" = [ "dep:num_cpus" ];
           "parking_lot" = [ "dep:parking_lot" ];
           "process" = [ "bytes" "libc" "mio/os-poll" "mio/os-ext" "mio/net" "signal-hook-registry" "windows-sys/Win32_Foundation" "windows-sys/Win32_System_Threading" "windows-sys/Win32_System_WindowsProgramming" ];
-          "rt-multi-thread" = [ "num_cpus" "rt" ];
+          "rt-multi-thread" = [ "rt" ];
           "signal" = [ "libc" "mio/os-poll" "mio/net" "mio/os-ext" "signal-hook-registry" "windows-sys/Win32_Foundation" "windows-sys/Win32_System_Console" ];
           "signal-hook-registry" = [ "dep:signal-hook-registry" ];
           "socket2" = [ "dep:socket2" ];
@@ -7803,7 +7786,7 @@ rec {
           "tracing" = [ "dep:tracing" ];
           "windows-sys" = [ "dep:windows-sys" ];
         };
-        resolvedDefaultFeatures = [ "bytes" "default" "fs" "io-std" "io-util" "libc" "macros" "mio" "net" "num_cpus" "parking_lot" "process" "rt" "rt-multi-thread" "signal-hook-registry" "socket2" "sync" "time" "tokio-macros" "windows-sys" ];
+        resolvedDefaultFeatures = [ "bytes" "default" "fs" "io-std" "io-util" "libc" "macros" "mio" "net" "parking_lot" "process" "rt" "rt-multi-thread" "signal-hook-registry" "socket2" "sync" "time" "tokio-macros" "windows-sys" ];
       };
       "tokio-io-timeout" = rec {
         crateName = "tokio-io-timeout";
@@ -7836,9 +7819,9 @@ rec {
       };
       "tokio-macros" = rec {
         crateName = "tokio-macros";
-        version = "2.3.0";
+        version = "2.4.0";
         edition = "2021";
-        sha256 = "16nkan0x9b62hnqmjqcyd71j1mgpda2sv7gfm2mvbm39l2cfjnjz";
+        sha256 = "0lnpg14h1v3fh2jvnc8cz7cjf0m7z1xgkwfpcyy632g829imjgb9";
         procMacro = true;
         libName = "tokio_macros";
         authors = [
@@ -7896,9 +7879,9 @@ rec {
       };
       "tokio-stream" = rec {
         crateName = "tokio-stream";
-        version = "0.1.15";
+        version = "0.1.16";
         edition = "2021";
-        sha256 = "1brpbsqyg8yfmfc4y0j9zxvc8xsxjc31d48kb0g6jvpc1fgchyi6";
+        sha256 = "1wc65gprcsyzqlr0k091glswy96kph90i32gffi4ksyh03hnqkjg";
         libName = "tokio_stream";
         authors = [
           "Tokio Contributors <team@tokio.rs>"
@@ -10006,7 +9989,7 @@ rec {
           "Win32_Web" = [ "Win32" ];
           "Win32_Web_InternetExplorer" = [ "Win32_Web" ];
         };
-        resolvedDefaultFeatures = [ "Win32" "Win32_Foundation" "Win32_Networking" "Win32_Networking_WinSock" "Win32_Security" "Win32_Storage" "Win32_Storage_FileSystem" "Win32_System" "Win32_System_Diagnostics" "Win32_System_Diagnostics_Debug" "Win32_System_IO" "Win32_System_Pipes" "Win32_System_Registry" "Win32_System_SystemServices" "Win32_System_Threading" "Win32_System_Time" "Win32_System_WindowsProgramming" "default" ];
+        resolvedDefaultFeatures = [ "Win32" "Win32_Foundation" "Win32_Security" "Win32_Storage" "Win32_Storage_FileSystem" "Win32_System" "Win32_System_Diagnostics" "Win32_System_Diagnostics_Debug" "Win32_System_Registry" "Win32_System_Time" "default" ];
       };
       "windows-sys 0.52.0" = rec {
         crateName = "windows-sys";
@@ -10254,7 +10237,7 @@ rec {
           "Win32_Web" = [ "Win32" ];
           "Win32_Web_InternetExplorer" = [ "Win32_Web" ];
         };
-        resolvedDefaultFeatures = [ "Win32" "Win32_Foundation" "Win32_NetworkManagement" "Win32_NetworkManagement_IpHelper" "Win32_Networking" "Win32_Networking_WinSock" "Win32_Security" "Win32_Security_Authentication" "Win32_Security_Authentication_Identity" "Win32_Security_Credentials" "Win32_Security_Cryptography" "Win32_Storage" "Win32_Storage_FileSystem" "Win32_System" "Win32_System_Com" "Win32_System_Diagnostics" "Win32_System_Diagnostics_Debug" "Win32_System_IO" "Win32_System_Memory" "Win32_System_Threading" "Win32_System_WindowsProgramming" "Win32_UI" "Win32_UI_Shell" "default" ];
+        resolvedDefaultFeatures = [ "Wdk" "Wdk_Foundation" "Wdk_Storage" "Wdk_Storage_FileSystem" "Wdk_System" "Wdk_System_IO" "Win32" "Win32_Foundation" "Win32_NetworkManagement" "Win32_NetworkManagement_IpHelper" "Win32_Networking" "Win32_Networking_WinSock" "Win32_Security" "Win32_Security_Authentication" "Win32_Security_Authentication_Identity" "Win32_Security_Credentials" "Win32_Security_Cryptography" "Win32_Storage" "Win32_Storage_FileSystem" "Win32_System" "Win32_System_Com" "Win32_System_Diagnostics" "Win32_System_Diagnostics_Debug" "Win32_System_IO" "Win32_System_Memory" "Win32_System_Pipes" "Win32_System_SystemServices" "Win32_System_Threading" "Win32_System_WindowsProgramming" "Win32_UI" "Win32_UI_Shell" "default" ];
       };
       "windows-targets 0.48.5" = rec {
         crateName = "windows-targets";
