@@ -42,6 +42,7 @@ import qualified Data.UUID.V4 as UUID
 import DiscoverInstances (discoverInstances)
 import GHC.Generics
 import GHC.Stack (SrcLoc (..), callStack, fromCallSiteList)
+import IntegrationSpec.HangingWorkflow
 import OpenTelemetry.Trace
 import RequireCallStack
 import System.Directory
@@ -322,38 +323,45 @@ spec = do
   where
     setup :: (TestEnv -> IO ()) -> IO ()
     setup go = do
-      -- fp <- getFreePort
-      let fp = 7233
-      -- mTemporalPath <- findExecutable "temporal"
-      -- conf <- case mTemporalPath of
-      --   Nothing -> error "Could not find the 'temporal' executable in PATH"
-      --   Just temporalPath -> do
-      --     let serverConfig =
-      --           defaultTemporalDevServerConfig
-      --             { port = Just $ fromIntegral fp
-      --             , exe = ExistingPath temporalPath
-      --             }
-      --     pure serverConfig
-      -- withDevServer globalRuntime conf $ \_ -> do
-      interceptors <- makeOpenTelemetryInterceptor
-      (client, coreClient) <- makeClient fp interceptors
+      let withServer f = do
+            if True -- Use local server instead of ephemeral server. Flip to use ephemeral server.
+              then do
+                f 7233
+              else do
+                fp <- getFreePort
+                mTemporalPath <- findExecutable "temporal"
+                conf <- case mTemporalPath of
+                  Nothing -> error "Could not find the 'temporal' executable in PATH"
+                  Just temporalPath -> do
+                    let serverConfig =
+                          defaultTemporalDevServerConfig
+                            { port = Just $ fromIntegral fp
+                            , exe = ExistingPath temporalPath
+                            }
+                    pure serverConfig
+                withDevServer globalRuntime conf $ \_ -> do
+                  f fp
 
-      SearchAttributes {customAttributes} <- either throwIO pure =<< listSearchAttributes coreClient (W.Namespace "default")
-      let allTestAttributes =
-            Map.fromList
-              [ ("attr1", Temporal.Operator.Bool)
-              , ("attr2", Temporal.Operator.Int)
-              ]
-      _ <- addSearchAttributes coreClient (W.Namespace "default") (allTestAttributes `Map.difference` customAttributes)
+      withServer $ \fp -> do
+        interceptors <- makeOpenTelemetryInterceptor
+        (client, coreClient) <- makeClient fp interceptors
 
-      (conf, taskQueue) <- mkBaseConf interceptors
-      go
-        TestEnv
-          { useClient = flip runReaderT client
-          , withWorker = mkWithWorker fp
-          , baseConf = conf
-          , taskQueue
-          }
+        SearchAttributes {customAttributes} <- either throwIO pure =<< listSearchAttributes coreClient (W.Namespace "default")
+        let allTestAttributes =
+              Map.fromList
+                [ ("attr1", Temporal.Operator.Bool)
+                , ("attr2", Temporal.Operator.Int)
+                ]
+        _ <- addSearchAttributes coreClient (W.Namespace "default") (allTestAttributes `Map.difference` customAttributes)
+
+        (conf, taskQueue) <- mkBaseConf interceptors
+        go
+          TestEnv
+            { useClient = flip runReaderT client
+            , withWorker = mkWithWorker fp
+            , baseConf = conf
+            , taskQueue
+            }
 
 
 type MyWorkflow a = W.RequireCallStack => W.Workflow a
@@ -455,7 +463,7 @@ testImpls =
           pure ()
       , simpleWait = do
           st <- W.newStateVar False
-          W.waitCondition (W.readStateVar st) <* W.writeStateVar st True
+          W.concurrently_ (W.waitCondition (W.readStateVar st)) (W.writeStateVar st True)
       , multipleArgs = \foo bar baz -> pure (foo, bar, baz)
       , nonRetryableFailureTest = do
           h <-
@@ -1416,7 +1424,7 @@ needsClient = do
                               _ -> False
                           )
   describe "Hanging Workflow" $ do
-    fspecify "works" $ \TestEnv {..} -> do
+    specify "works" $ \TestEnv {..} -> do
       let definitions =
             ( RolloverTransferFundsRequest
             )
@@ -1426,7 +1434,7 @@ needsClient = do
         let opts =
               (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
-                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 1, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
                 }
         useClient
           ( C.execute PerformPartnerBankRollover "hanging-workflow" opts $
