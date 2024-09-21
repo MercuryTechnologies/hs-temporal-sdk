@@ -1,6 +1,10 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 
-module Temporal.Exception where
+module Temporal.Exception (
+  module Temporal.Exception,
+  ActivityType (..),
+  RetryState (..),
+) where
 
 import Control.Applicative (Alternative (..))
 import Control.Exception

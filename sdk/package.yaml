@@ -183,5 +183,6 @@ tests:
       AsyncCompletionSpec,
       IntegrationSpec,
       IntegrationSpec.HangingWorkflow,
+      IntegrationSpec.TimeoutsInWorkflows,
       Common,
       THCompiles

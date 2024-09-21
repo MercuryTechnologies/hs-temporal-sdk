@@ -18,6 +18,8 @@ import qualified Proto.Temporal.Api.Enums.V1.Common as Proto
 import qualified Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields as Proto
 import Temporal.Core.Client
 import qualified Temporal.Core.Client.OperatorService as Core
+import Temporal.SearchAttributes (SearchAttributeKey (..))
+import Temporal.SearchAttributes.Internal
 import Temporal.Workflow (Namespace (..))
 
 
@@ -34,8 +36,8 @@ data IndexedValueType
 
 
 data SearchAttributes = SearchAttributes
-  { customAttributes :: Map Text IndexedValueType
-  , systemAttributes :: Map Text IndexedValueType
+  { customAttributes :: Map SearchAttributeKey IndexedValueType
+  , systemAttributes :: Map SearchAttributeKey IndexedValueType
   , storageSchema :: Map Text Text
   }
 
@@ -72,13 +74,13 @@ listSearchAttributes c (Namespace n) = do
   where
     convert res =
       SearchAttributes
-        { customAttributes = fmap searchAttributeTypeFromProto $ res ^. Proto.customAttributes
-        , systemAttributes = fmap searchAttributeTypeFromProto $ res ^. Proto.systemAttributes
+        { customAttributes = wrappedKeys $ fmap searchAttributeTypeFromProto $ res ^. Proto.customAttributes
+        , systemAttributes = wrappedKeys $ fmap searchAttributeTypeFromProto $ res ^. Proto.systemAttributes
         , storageSchema = res ^. Proto.storageSchema
         }
 
 
-addSearchAttributes :: MonadIO m => Client -> Namespace -> Map Text IndexedValueType -> m (Either RpcError ())
+addSearchAttributes :: MonadIO m => Client -> Namespace -> Map SearchAttributeKey IndexedValueType -> m (Either RpcError ())
 addSearchAttributes c (Namespace n) newAttrs = do
   if null newAttrs
     then pure $ Right ()
@@ -93,4 +95,4 @@ addSearchAttributes c (Namespace n) newAttrs = do
             )
       pure $ void res
   where
-    converted = fmap searchAttributeTypeToProto newAttrs
+    converted = rawKeys $ fmap searchAttributeTypeToProto newAttrs

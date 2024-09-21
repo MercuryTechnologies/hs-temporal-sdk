@@ -15,11 +15,11 @@ unsafeCoerceMapKeys :: forall a b c. Coercible a b => Map.Map a c -> Map.Map b c
 unsafeCoerceMapKeys = unsafeCoerce
 
 
-rawKeys :: Map.Map SearchAttributeKey Message.Payload -> Map.Map Text Message.Payload
+rawKeys :: Map.Map SearchAttributeKey a -> Map.Map Text a
 rawKeys = unsafeCoerceMapKeys
 
 
-wrappedKeys :: Map.Map Text SearchAttributeType -> Map.Map SearchAttributeKey SearchAttributeType
+wrappedKeys :: Map.Map Text a -> Map.Map SearchAttributeKey a
 wrappedKeys = unsafeCoerceMapKeys
 
 

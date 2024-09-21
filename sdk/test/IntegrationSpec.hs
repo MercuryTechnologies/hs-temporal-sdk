@@ -43,6 +43,7 @@ import DiscoverInstances (discoverInstances)
 import GHC.Generics
 import GHC.Stack (SrcLoc (..), callStack, fromCallSiteList)
 import IntegrationSpec.HangingWorkflow
+import IntegrationSpec.TimeoutsInWorkflows
 import OpenTelemetry.Trace
 import RequireCallStack
 import System.Directory
@@ -207,7 +208,7 @@ data TemporalWorkflowJobPayload = TemporalWorkflowJobPayload
   , workflowTaskQueue :: W.TaskQueue
   , workflowRetryPolicy :: Maybe W.RetryPolicy
   , workflowIdReusePolicy :: Maybe W.WorkflowIdReusePolicy
-  , workflowSearchAttributes :: Map Text SearchAttributeType
+  , workflowSearchAttributes :: Map SearchAttributeKey SearchAttributeType
   }
   deriving stock (Eq, Show, Generic)
 
@@ -696,6 +697,23 @@ needsClient = do
                   }
           useClient (C.execute wf.reference "activityCancellationOnHeartbeat" opts)
             `shouldReturn` 1
+      specify "Activity retry exhaustion returns that in the RetryState" $ \TestEnv {..} -> do
+        wfId <- uuidText
+        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+              baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  , C.timeouts =
+                      C.TimeoutOptions
+                        { C.runTimeout = Just $ seconds 4
+                        , C.executionTimeout = Nothing
+                        , C.taskTimeout = Nothing
+                        }
+                  }
+          useClient (C.execute ActivityTimeoutInWorkflow (WorkflowId wfId) opts)
+            `shouldReturn` False
 
     describe "Args and return values" $ do
       specify "args should be passed to the workflow in the correct order" $ \TestEnv {..} -> do
@@ -1425,10 +1443,7 @@ needsClient = do
                           )
   describe "Hanging Workflow" $ do
     specify "works" $ \TestEnv {..} -> do
-      let definitions =
-            ( RolloverTransferFundsRequest
-            )
-          conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
             baseConf
       withWorker conf $ do
         let opts =
