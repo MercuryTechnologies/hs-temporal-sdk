@@ -164,9 +164,14 @@ module Temporal.Workflow (
   Temporal.Workflow.mapConcurrently_,
   Temporal.Workflow.replicateConcurrently,
   Temporal.Workflow.replicateConcurrently_,
+  Temporal.Workflow.forConcurrently,
+  Temporal.Workflow.forConcurrently_,
   traverseConcurrently,
+  traverseConcurrently_,
   sequenceConcurrently,
+  sequenceConcurrently_,
   ConcurrentWorkflow (..),
+  independently,
   biselect,
   biselectOpt,
 
@@ -203,6 +208,7 @@ module Temporal.Workflow (
   sleep,
   Timer,
   createTimer,
+  scheduledTime,
 
   -- * Workflow cancellation
   isCancelRequested,
@@ -242,6 +248,7 @@ module Temporal.Workflow (
 
 import Control.Applicative (Alternative (..))
 import Control.Concurrent (forkIO)
+import Control.Exception.Annotated (throwWithCallStack)
 import Control.Monad
 import Control.Monad.Catch
 import Control.Monad.Logger
@@ -263,6 +270,7 @@ import qualified Data.Text as Text
 import Data.These (These (..))
 import Data.Time.Clock (UTCTime)
 import Data.Time.Clock.System (SystemTime (..), systemToUTCTime)
+import Data.Time.Format
 import Data.UUID (UUID)
 import qualified Data.UUID as UUID
 import Data.UUID.Types.Internal (buildFromBytes)
@@ -881,6 +889,27 @@ now = Workflow $ \_ ->
     pure $! systemToUTCTime t
 
 
+{- | When using the "Schedules" feature of Temporal, this is the effective time that an instance was scheduled to run,
+according to the @TemporalScheduledStartTime@ search attribute.
+
+This is useful for backfilling or retrying a scheduled Workflow if you need the schedule to have a stable start time.
+-}
+scheduledTime :: Workflow (Maybe UTCTime)
+scheduledTime = do
+  i <- info
+  pure $ case Map.lookup "TemporalScheduledStartTime" i.searchAttributes of
+    Just (Datetime utcTime) ->
+      -- The scheduled start time exists and is a datetime, so we can use it
+      -- directly.
+      pure utcTime
+    Just (KeywordOrText text)
+      | Just utcTime <- parseTimeM False defaultTimeLocale "%Y-%m-%dT%H:%M:%SZ" $ Text.unpack text ->
+          -- The scheduled start time exists as a text value and can be parsed
+          -- as a datetime, so we can use it.
+          pure utcTime
+    _ -> Nothing
+
+
 {- $versioning
 
 Versioning (known as "patching" in the Haskell library) lets you update Workflow Definitions
@@ -1483,7 +1512,7 @@ race_ l r = void $ Temporal.Workflow.race l r
 as long as the exception is caught and handled.
 -}
 concurrently :: Workflow a -> Workflow b -> Workflow (a, b)
-concurrently l r = runConcurrentlWorkflowActions ((,) <$> ConcurrentWorkflow l <*> ConcurrentWorkflow r)
+concurrently l r = runConcurrentWorkflowActions ((,) <$> ConcurrentWorkflow l <*> ConcurrentWorkflow r)
 
 
 -- | Like 'concurrently', but ignore the result values.
@@ -1493,34 +1522,66 @@ concurrently_ l r = void $ Temporal.Workflow.concurrently l r
 
 {- | Map an effect-performing function over over any 'Traversable' data type, performing each action concurrently,
 returning the original data structure with the arguments replaced with the results.
+
+This is actually a bit of a misnomer, since it's really 'traverseConcurrently', but this is copied to mimic the 'async' package's naming
+to slightly ease adoption.
 -}
 mapConcurrently :: Traversable t => (a -> Workflow b) -> t a -> Workflow (t b)
-mapConcurrently f xs = runConcurrentlWorkflowActions $ traverse (ConcurrentWorkflow . f) xs
+mapConcurrently = traverseConcurrently
 
 
--- | Like 'mapConcurrently', but ignore the result values.
+-- | Alias for 'traverseConcurrently_'
 mapConcurrently_ :: Foldable t => (a -> Workflow b) -> t a -> Workflow ()
-mapConcurrently_ f xs = runConcurrentlWorkflowActions $ traverse_ (ConcurrentWorkflow . f) xs
+mapConcurrently_ = traverseConcurrently_
 
 
 -- | Perform the action in the given number of evaluation branches.
 replicateConcurrently :: Int -> Workflow a -> Workflow [a]
-replicateConcurrently n = runConcurrentlWorkflowActions . sequenceA . replicate n . ConcurrentWorkflow
+replicateConcurrently n = runConcurrentWorkflowActions . sequenceA . replicate n . ConcurrentWorkflow
 
 
 -- | Perform the action in the given number of evaluation branches, discarding the results
 replicateConcurrently_ :: Int -> Workflow a -> Workflow ()
-replicateConcurrently_ n = runConcurrentlWorkflowActions . fold . replicate n . ConcurrentWorkflow . void
+replicateConcurrently_ n = runConcurrentWorkflowActions . fold . replicate n . ConcurrentWorkflow . void
 
 
 -- | Evaluate the action in the given number of evaluation branches, accumulating the results
 traverseConcurrently :: Traversable t => (a -> Workflow b) -> t a -> Workflow (t b)
-traverseConcurrently f xs = runConcurrentlWorkflowActions $ traverse (ConcurrentWorkflow . f) xs
+traverseConcurrently f xs = runConcurrentWorkflowActions $ traverse (ConcurrentWorkflow . f) xs
+
+
+traverseConcurrently_ :: Foldable t => (a -> Workflow b) -> t a -> Workflow ()
+traverseConcurrently_ f xs = runConcurrentWorkflowActions $ traverse_ (ConcurrentWorkflow . f) xs
 
 
 -- | Evaluate each Workflow action in the structure concurrently, and collect the results.
 sequenceConcurrently :: Traversable t => t (Workflow a) -> Workflow (t a)
-sequenceConcurrently = runConcurrentlWorkflowActions . traverse ConcurrentWorkflow
+sequenceConcurrently = runConcurrentWorkflowActions . traverse ConcurrentWorkflow
+
+
+-- | Evaluate each Workflow action in the structure concurrently, and ignore the results.
+sequenceConcurrently_ :: Foldable t => t (Workflow a) -> Workflow ()
+sequenceConcurrently_ = runConcurrentWorkflowActions . traverse_ ConcurrentWorkflow
+
+
+-- | 'traverseConcurrently' with the arguments flipped.
+forConcurrently :: Traversable t => t a -> (a -> Workflow b) -> Workflow (t b)
+forConcurrently = flip traverseConcurrently
+
+
+-- | 'traverseConcurrently_' with the arguments flipped.
+forConcurrently_ :: Foldable t => t a -> (a -> Workflow b) -> Workflow ()
+forConcurrently_ = flip traverseConcurrently_
+
+
+{- Similar to 'concurrently', but don't let the failure of one computation affect the other. -}
+independently :: Workflow a -> Workflow b -> Workflow (a, b)
+independently l r = do
+  (el, er) <- Temporal.Workflow.concurrently (Control.Monad.Catch.try l) (Control.Monad.Catch.try r)
+  let results = (,) <$> el <*> er
+  case results of
+    Left e -> throwWithCallStack (e :: SomeException)
+    Right ok -> pure ok
 
 
 {-
@@ -1588,7 +1649,7 @@ computation on one or more branches. This is repeated until the computation comp
 result of the others, so they can all explore as far as possible and get blocked. If we use 'Monad', then that means that the result of the previous computation has to become
 unblocked in order to provide the result to the subsequent computation.
 -}
-newtype ConcurrentWorkflow a = ConcurrentWorkflow {runConcurrentlWorkflowActions :: Workflow a}
+newtype ConcurrentWorkflow a = ConcurrentWorkflow {runConcurrentWorkflowActions :: Workflow a}
   deriving newtype (Functor, MonadLogger, Semigroup, Monoid, Alternative, MonadCatch, MonadThrow)
 
 

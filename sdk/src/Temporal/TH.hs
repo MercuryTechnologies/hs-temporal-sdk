@@ -163,6 +163,7 @@ module Temporal.TH (
   fnSingDataAndConName,
   ActivityImpl (..),
   WorkflowImpl (..),
+  bringRegisteredTemporalFunctionsIntoScope,
 ) where
 
 import qualified Data.HashMap.Strict as Map
@@ -226,6 +227,11 @@ registerWorkflowWithOptions n conf = do
 
 registerWorkflow :: forall m. (TH.Quote m, TH.Quasi m) => TH.Name -> m [TH.Dec]
 registerWorkflow n = registerWorkflowWithOptions n defaultWorkflowConfig
+
+
+-- | Alias for 'newDeclarationGroup' that makes the intent a bit more clear.
+bringRegisteredTemporalFunctionsIntoScope :: TH.Q [TH.Dec]
+bringRegisteredTemporalFunctionsIntoScope = TH.newDeclarationGroup
 
 
 ---------------------------------------------------------------------------------------
