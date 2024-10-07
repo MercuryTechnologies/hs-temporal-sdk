@@ -3,6 +3,7 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
@@ -147,9 +148,9 @@ configWithRetry pn =
             { initialIntervalMillis = 500
             , randomizationFactor = 0.2
             , multiplier = 1.5
-            , maxIntervalMillis = 10000
+            , maxIntervalMillis = 10_000
             , maxRetries = 15
-            , maxElapsedTimeMillis = Just 60000
+            , maxElapsedTimeMillis = Just 60_000
             }
             -- , targetUrl = pack ("http://localhost:" <> show pn)
     }
@@ -228,6 +229,31 @@ spec = do
     it "should parse a duration from a data type" $ do
       let d = Data.Aeson.encode $ Duration 2 4
       Data.Aeson.eitherDecode d `shouldBe` Right (Duration 2 4)
+  describe "Duration math" $ do
+    it "nanosecond overflow" $ do
+      let d1 = Duration 1 0
+      let d2 = Duration 0 2_000_000_000
+      addDurations d1 d2 `shouldBe` Duration 3 0
+    it "negative nanosecond added to positive seconds" $ do
+      let d1 = Duration 1 0
+      let d2 = Duration 0 (-1_000_000_000)
+      addDurations d1 d2 `shouldBe` Duration 0 0
+    it "negative nanoseconds and negative seconds" $ do
+      let d1 = Duration (-1) 0
+      let d2 = Duration (-1) (-1_000_000_000)
+      addDurations d1 d2 `shouldBe` Duration (-3) 0
+    it "negative seconds and positive nanoseconds" $ do
+      let d1 = Duration (-1) 0
+      let d2 = Duration 0 1_000_000_000
+      addDurations d1 d2 `shouldBe` Duration 0 0
+    it "negative seconds exceed positive nanoseconds" $ do
+      let d1 = Duration (-2) 0
+      let d2 = Duration 0 1_000_000_000
+      addDurations d1 d2 `shouldBe` Duration (-1) 0
+    it "negative nanoseconds exceed positive seconds" $ do
+      let d1 = Duration 1 0
+      let d2 = Duration 0 (-2_100_000_000)
+      addDurations d1 d2 `shouldBe` Duration (-1) (-100_000_000)
   describe "Exception converters" $ do
     let handlers = mkAnnotatedHandlers standardApplicationFailureHandlers
     it "exception conversion works" $ do
@@ -404,16 +430,16 @@ testImpls =
           pure res
       , raceBlockOnBothSidesWorks = do
           let lhs, rhs :: RequireCallStack => W.Workflow Bool
-              lhs = W.sleep (seconds 5000) >> pure False
+              lhs = W.sleep (seconds 5_000) >> pure False
               rhs = W.sleep (seconds 1) >> pure True
           lhs `W.race` rhs
       , raceThrowsRhsErrorWhenLhsBlocked = do
           let lhs, rhs :: RequireCallStack => W.Workflow Bool
-              lhs = W.sleep (seconds 5000) >> pure False
+              lhs = W.sleep (seconds 5_000) >> pure False
               rhs = error "foo"
           lhs `W.race` rhs
       , raceIgnoresRhsErrorOnLhsSuccess = do
-          pure True `W.race` (W.sleep (seconds 5000) *> error "sad")
+          pure True `W.race` (W.sleep (seconds 5_000) *> error "sad")
       , continueAsNewWorks = \execCount ->
           if execCount < 1
             then W.continueAsNew testRefs.continueAsNewWorks W.defaultContinueAsNewOptions (execCount + 1)
@@ -430,7 +456,7 @@ testImpls =
       , basicActivity = pure 1
       , heartbeatWorks = do
           heartbeat []
-          liftIO $ threadDelay 1000000
+          liftIO $ threadDelay 1_000_000
           pure 1
       , runHeartbeat = do
           h <-
@@ -664,7 +690,7 @@ needsClient = do
       specify "Activity cancellation on heartbeat returns the expected result to workflows" $ \TestEnv {..} -> do
         let testActivity :: Activity () Int
             testActivity = do
-              liftIO $ threadDelay 2000000
+              liftIO $ threadDelay 2_000_000
               heartbeat []
               pure 0
 

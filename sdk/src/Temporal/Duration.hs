@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE NumericUnderscores #-}
+{-# LANGUAGE UnboxedTuples #-}
 
 {- |
 Module: Temporal.Duration
@@ -60,9 +61,17 @@ parseDuration t
 
 -- | Add two durations together. Durations are subject to integer overflow.
 addDurations :: Duration -> Duration -> Duration
-addDurations (Duration s1 ns1) (Duration s2 ns2) = Duration (s1 + s2 + s) $ fromIntegral ns
+addDurations (Duration s1 ns1) (Duration s2 ns2) =
+  let (# s, ns #) = normalize (s1 + s2) (fromIntegral ns1 + fromIntegral ns2)
+  in Duration s ns
   where
-    (s :: Int64, ns :: Int64) = fromIntegral (ns1 + ns2) `divMod` 1_000_000_000
+    normalize :: Int64 -> Int64 -> (# Int64, Int32 #)
+    normalize !s !ns
+      | ns >= 1_000_000_000 = normalize (s + 1) (ns - 1_000_000_000)
+      | ns <= -1_000_000_000 = normalize (s - 1) (ns + 1_000_000_000)
+      | s > 0 && ns < 0 = normalize (s - 1) (ns + 1_000_000_000)
+      | s < 0 && ns > 0 = normalize (s + 1) (ns - 1_000_000_000)
+      | otherwise = (# s, fromIntegral ns #)
 
 
 {- | Convert a 'DiffTime' to a 'Duration'.
