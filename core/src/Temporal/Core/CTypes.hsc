@@ -68,7 +68,7 @@ foreign import ccall "&hs_try_putmvar" tryPutMVarPtr :: TryPutMVarFFI
 -- once for the entire process.
 newtype Runtime = Runtime (ForeignPtr Runtime)
 
-data Periodicity 
+data Periodicity
   = Periodicity
     { seconds :: Word64
     , nanoseconds :: Word32
@@ -82,7 +82,7 @@ instance ToJSON Periodicity where
 
 data TelemetryOptions
   = OtelTelemetryOptions
-    { url :: Text 
+    { url :: Text
     , headers :: Map Text Text
     , metricPeriodicity :: Maybe Periodicity
     , globalTags :: Map Text Text
@@ -90,7 +90,7 @@ data TelemetryOptions
   | PrometheusTelemetryOptions
     { socketAddr :: Text
     , globalTags :: Map Text Text
-    , countersTotalSuffixx :: Bool
+    , countersTotalSuffix :: Bool
     , unitSuffix :: Bool
     }
   | NoTelemetry
@@ -228,15 +228,15 @@ instance Storable CRpcCall where
     #{poke RpcCall, timeout_millis} ptr rpcCallTimeoutMillis
 
 
-data WorkerErrorCode 
-  = SDKError 
-  | InitWorkerFailed 
-  | InitReplayWorkerFailed 
-  | InvalidProto 
-  | ReplayWorkerClosed 
-  | PollShutdown 
-  | PollFailure 
-  | CompletionFailure 
+data WorkerErrorCode
+  = SDKError
+  | InitWorkerFailed
+  | InitReplayWorkerFailed
+  | InvalidProto
+  | ReplayWorkerClosed
+  | PollShutdown
+  | PollFailure
+  | CompletionFailure
   | InvalidWorkerConfig
   | UnknownError Word8
   deriving (Show)
