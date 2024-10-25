@@ -19,7 +19,27 @@ between now and then into a Duration.
 Alternatively, consider using Temporal's scheduling features to schedule a workflow
 to run at one or more specific times in the future.
 -}
-module Temporal.Duration where
+module Temporal.Duration (
+  Duration,
+  durationSeconds,
+  durationNanoseconds,
+  mkDuration,
+  addDurations,
+  diffTimeToDuration,
+  nominalDiffTimeToDuration,
+  nanoseconds,
+  microseconds,
+  milliseconds,
+  seconds,
+  minutes,
+  hours,
+  days,
+  weeks,
+  infinity,
+  durationFromProto,
+  durationToProto,
+  durationToMilliseconds,
+) where
 
 import Data.Aeson
 import Data.Aeson.Types (Parser)
@@ -44,6 +64,19 @@ data Duration = Duration
   deriving stock (Eq, Ord, Show, Data, Lift)
 
 
+instance Semigroup Duration where
+  (<>) = addDurations
+
+
+instance Monoid Duration where
+  mempty = Duration 0 0
+
+
+mkDuration :: Int64 -> Int32 -> Duration
+mkDuration s ns = case normalize s (fromIntegral ns) of
+  (# s', ns' #) -> Duration s' ns'
+
+
 -- | 	Generated output always contains 0, 3, 6, or 9 fractional digits, depending on required precision, followed by the suffix "s". Accepted are any fractional digits (also none) as long as they fit into nano-seconds precision and the suffix "s" is required.
 instance ToJSON Duration where
   toJSON Duration {..} = String $ T.pack $ printf "%d.%09ds" durationSeconds durationNanoseconds
@@ -64,14 +97,15 @@ addDurations :: Duration -> Duration -> Duration
 addDurations (Duration s1 ns1) (Duration s2 ns2) =
   let (# s, ns #) = normalize (s1 + s2) (fromIntegral ns1 + fromIntegral ns2)
   in Duration s ns
-  where
-    normalize :: Int64 -> Int64 -> (# Int64, Int32 #)
-    normalize !s !ns
-      | ns >= 1_000_000_000 = normalize (s + 1) (ns - 1_000_000_000)
-      | ns <= -1_000_000_000 = normalize (s - 1) (ns + 1_000_000_000)
-      | s > 0 && ns < 0 = normalize (s - 1) (ns + 1_000_000_000)
-      | s < 0 && ns > 0 = normalize (s + 1) (ns - 1_000_000_000)
-      | otherwise = (# s, fromIntegral ns #)
+
+
+normalize :: Int64 -> Int64 -> (# Int64, Int32 #)
+normalize !s !ns
+  | ns >= 1_000_000_000 = normalize (s + 1) (ns - 1_000_000_000)
+  | ns <= -1_000_000_000 = normalize (s - 1) (ns + 1_000_000_000)
+  | s > 0 && ns < 0 = normalize (s - 1) (ns + 1_000_000_000)
+  | s < 0 && ns > 0 = normalize (s + 1) (ns - 1_000_000_000)
+  | otherwise = (# s, fromIntegral ns #)
 
 
 {- | Convert a 'DiffTime' to a 'Duration'.
@@ -82,10 +116,9 @@ Word64 values.
 -}
 diffTimeToDuration :: DiffTime -> Duration
 diffTimeToDuration t =
-  Duration
-    { durationSeconds = fromIntegral ds
-    , durationNanoseconds = remainingNanosFromPicos
-    }
+  mkDuration
+    (fromIntegral ds)
+    remainingNanosFromPicos
   where
     totalPicos = max 0 (diffTimeToPicoseconds t)
     picosPerSecond = 1_000_000_000_000
@@ -101,10 +134,9 @@ Word64 values.
 -}
 nominalDiffTimeToDuration :: NominalDiffTime -> Duration
 nominalDiffTimeToDuration t =
-  Duration
-    { durationSeconds = fromIntegral ds
-    , durationNanoseconds = remainingNanosFromPicos
-    }
+  mkDuration
+    (fromIntegral ds)
+    remainingNanosFromPicos
   where
     (MkFixed totalPicos) = max 0 $ nominalDiffTimeToSeconds t
     picosPerSecond = 1_000_000_000_000
@@ -114,21 +146,21 @@ nominalDiffTimeToDuration t =
 
 -- | Create a 'Duration' from a given number of nanoseconds.
 nanoseconds :: Integer -> Duration
-nanoseconds n = Duration (fromIntegral secs) (fromIntegral ns)
+nanoseconds n = mkDuration (fromIntegral secs) (fromIntegral ns)
   where
     (secs, ns) = n `quotRem` 1_000_000_000
 
 
 -- | Create a 'Duration' from a given number of microseconds.
 microseconds :: Integer -> Duration
-microseconds n = Duration (fromIntegral secs) (fromIntegral ns)
+microseconds n = mkDuration (fromIntegral secs) (fromIntegral ns)
   where
     (secs, ns) = n `quotRem` 1_000_000
 
 
 -- | Create a 'Duration' from a given number of milliseconds.
 milliseconds :: Int64 -> Duration
-milliseconds n = Duration secs $ fromIntegral ns
+milliseconds n = mkDuration secs $ fromIntegral ns
   where
     (secs, ns) = n `quotRem` 1_000
 

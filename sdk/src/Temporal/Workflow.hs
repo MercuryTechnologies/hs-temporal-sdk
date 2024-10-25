@@ -292,7 +292,7 @@ import System.Random.Stateful
 import Temporal.Activity.Definition (ActivityRef (..), KnownActivity (..))
 import Temporal.Common
 import Temporal.Common.TimeoutType
-import Temporal.Duration (Duration (..), durationFromProto, durationToProto, seconds)
+import Temporal.Duration (Duration (..), durationFromProto, durationToProto, nanoseconds, seconds)
 import Temporal.Exception
 import Temporal.Payload
 import Temporal.SearchAttributes
@@ -1200,38 +1200,45 @@ but it is intended to fire as close to the expiration as possible.
 Note that the timer is started when the command is received by the Temporal Platform,
 not when the timer is created. The command is sent as soon as the workflow is blocked
 by any operation, such as 'sleep', 'awaitCondition', 'awaitActivity', 'awaitWorkflow', etc.
+
+If the duration is less than or equal to zero, the timer will not be created.
 -}
-createTimer :: RequireCallStack => Duration -> Workflow Timer
-createTimer ts = ilift $ do
-  updateCallStack
+createTimer :: Duration -> Workflow (Maybe Timer)
+createTimer ts = provideCallStack $ ilift $ do
   inst <- ask
   s@(Sequence seqId) <- nextTimerSequence
-  let ts' = if ts == Duration 0 0 then Duration 0 1 else ts
-      cmd =
-        defMessage
-          & Command.startTimer
-            .~ ( defMessage
-                  & Command.seq .~ seqId
-                  & Command.startToFireTimeout .~ durationToProto ts'
-               )
-  $(logDebug) "Add command: sleep"
-  res <- newIVar
-  atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-    seqMaps {timers = HashMap.insert s res seqMaps.timers}
-  addCommand cmd
-  pure $ Timer {timerSequence = s, timerHandle = res}
+  if ts <= mempty
+    then pure Nothing
+    else do
+      let ts' = if ts <= mempty then nanoseconds 1 else ts
+          cmd =
+            defMessage
+              & Command.startTimer
+                .~ ( defMessage
+                      & Command.seq .~ seqId
+                      & Command.startToFireTimeout .~ durationToProto ts'
+                   )
+      $(logDebug) "Add command: sleep"
+      res <- newIVar
+      atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+        seqMaps {timers = HashMap.insert s res seqMaps.timers}
+      addCommand cmd
+      pure $ Just $ Timer {timerSequence = s, timerHandle = res}
 
 
 sleep :: RequireCallStack => Duration -> Workflow ()
 sleep ts = do
   updateCallStackW
   t <- createTimer ts
-  Temporal.Workflow.Unsafe.Handle.wait t
+  mapM_ Temporal.Workflow.Unsafe.Handle.wait t
 
 
 instance Wait Timer where
   type WaitResult Timer = Workflow ()
-  wait = getIVar . timerHandle
+  wait :: RequireCallStack => Timer -> WaitResult Timer
+  wait t = do
+    updateCallStackW
+    getIVar $ timerHandle t
 
 
 instance Cancel Timer where

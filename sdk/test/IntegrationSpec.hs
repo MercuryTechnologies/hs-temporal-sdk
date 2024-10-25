@@ -22,13 +22,12 @@ import Control.Concurrent
 import Control.Exception
 import Control.Exception.Annotated
 import qualified Control.Exception.Annotated as Annotated
-import Control.Monad (replicateM, when)
+import Control.Monad (replicateM)
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
-import Data.Aeson (FromJSON, ToJSON, Value, eitherDecode, encode)
+import Data.Aeson (FromJSON, ToJSON, Value)
 import qualified Data.ByteString as BS
-import Data.Either (isLeft)
 import Data.Foldable (sequenceA_, traverse_)
 import Data.Functor
 import Data.Int
@@ -222,38 +221,6 @@ instance FromJSON TemporalWorkflowJobPayload
 
 spec :: Spec
 spec = do
-  describe "Duration parsing" $ do
-    it "should parse a duration" $ do
-      let d = "\"1.000000001s\""
-      Data.Aeson.eitherDecode d `shouldBe` Right (Duration 1 1)
-    it "should parse a duration from a data type" $ do
-      let d = Data.Aeson.encode $ Duration 2 4
-      Data.Aeson.eitherDecode d `shouldBe` Right (Duration 2 4)
-  describe "Duration math" $ do
-    it "nanosecond overflow" $ do
-      let d1 = Duration 1 0
-      let d2 = Duration 0 2_000_000_000
-      addDurations d1 d2 `shouldBe` Duration 3 0
-    it "negative nanosecond added to positive seconds" $ do
-      let d1 = Duration 1 0
-      let d2 = Duration 0 (-1_000_000_000)
-      addDurations d1 d2 `shouldBe` Duration 0 0
-    it "negative nanoseconds and negative seconds" $ do
-      let d1 = Duration (-1) 0
-      let d2 = Duration (-1) (-1_000_000_000)
-      addDurations d1 d2 `shouldBe` Duration (-3) 0
-    it "negative seconds and positive nanoseconds" $ do
-      let d1 = Duration (-1) 0
-      let d2 = Duration 0 1_000_000_000
-      addDurations d1 d2 `shouldBe` Duration 0 0
-    it "negative seconds exceed positive nanoseconds" $ do
-      let d1 = Duration (-2) 0
-      let d2 = Duration 0 1_000_000_000
-      addDurations d1 d2 `shouldBe` Duration (-1) 0
-    it "negative nanoseconds exceed positive seconds" $ do
-      let d1 = Duration 1 0
-      let d2 = Duration 0 (-2_100_000_000)
-      addDurations d1 d2 `shouldBe` Duration (-1) (-100_000_000)
   describe "Exception converters" $ do
     let handlers = mkAnnotatedHandlers standardApplicationFailureHandlers
     it "exception conversion works" $ do
@@ -1099,7 +1066,7 @@ needsClient = do
             workflow = do
               earlier <- W.now
               t <- W.createTimer $ nanoseconds 10
-              W.wait t
+              mapM_ W.wait t
               later <- W.now
               pure (later > earlier)
             wf = W.provideWorkflow defaultCodec "timer" workflow
@@ -1118,8 +1085,8 @@ needsClient = do
         let workflow :: MyWorkflow Bool
             workflow = do
               t <- W.createTimer $ nanoseconds 1
-              W.cancel t
-              W.wait t
+              mapM_ W.cancel t
+              mapM_ W.wait t
               pure True
             wf = W.provideWorkflow defaultCodec "timerAndCancelImmediately" workflow
             conf = configure () wf $ do
@@ -1143,8 +1110,8 @@ needsClient = do
             workflow = do
               t <- W.createTimer $ seconds 5000
               W.sleep $ nanoseconds 1
-              W.cancel t
-              W.wait t
+              mapM_ W.cancel t
+              mapM_ W.wait t
               pure True
             wf = W.provideWorkflow defaultCodec "timerAndCancelWithDelay" workflow
             conf = configure () wf $ do
@@ -1501,6 +1468,22 @@ needsClient = do
                 }
           )
           `shouldReturn` ()
+  describe "Workflow replay" $ do
+    specify "works" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                }
+            check = useClient $ do
+              wfHandle <- C.start testRefs.workflowWithFailingChildren "replay-workflow" opts ["fizzle", "bizzle", "bazzle"]
+              C.waitWorkflowResult wfHandle
+              history <- C.fetchHistory wfHandle
+              runReplayHistory globalRuntime conf history
+        check `shouldReturn` Right ()
 
 -- describe "WorkflowClient" $ do
 --   specify "WorkflowExecutionAlreadyStartedError" pending

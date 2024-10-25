@@ -68,6 +68,7 @@ default-extensions:
 - LambdaCase
 - MultiParamTypeClasses
 - NamedFieldPuns
+- NumericUnderscores
 - RankNTypes
 - OverloadedRecordDot
 - OverloadedStrings
@@ -160,8 +161,10 @@ tests:
       - temporal-sdk-core
       - bytestring
       - directory
+      - hedgehog
       - hspec
       - hspec-api
+      - hspec-hedgehog
       - text
       - uuid
       - monad-logger
@@ -181,6 +184,7 @@ tests:
       Spec,
       ConcurrentAccessSpec,
       AsyncCompletionSpec,
+      DurationSpec,
       IntegrationSpec,
       IntegrationSpec.HangingWorkflow,
       IntegrationSpec.TimeoutsInWorkflows,

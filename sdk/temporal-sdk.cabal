@@ -78,6 +78,7 @@ library
       LambdaCase
       MultiParamTypeClasses
       NamedFieldPuns
+      NumericUnderscores
       RankNTypes
       OverloadedRecordDot
       OverloadedStrings
@@ -148,7 +149,7 @@ test-suite temporal-sdk-tests
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
-      Spec, ConcurrentAccessSpec, AsyncCompletionSpec, IntegrationSpec, IntegrationSpec.HangingWorkflow, IntegrationSpec.TimeoutsInWorkflows, Common, THCompiles
+      Spec, ConcurrentAccessSpec, AsyncCompletionSpec, DurationSpec, IntegrationSpec, IntegrationSpec.HangingWorkflow, IntegrationSpec.TimeoutsInWorkflows, Common, THCompiles
   hs-source-dirs:
       test
   default-extensions:
@@ -164,6 +165,7 @@ test-suite temporal-sdk-tests
       LambdaCase
       MultiParamTypeClasses
       NamedFieldPuns
+      NumericUnderscores
       RankNTypes
       OverloadedRecordDot
       OverloadedStrings
@@ -193,11 +195,13 @@ test-suite temporal-sdk-tests
     , first-class-families
     , ghc
     , hashable
+    , hedgehog
     , hs-opentelemetry-api
     , hs-opentelemetry-propagator-w3c
     , hs-opentelemetry-sdk
     , hspec
     , hspec-api
+    , hspec-hedgehog
     , lens-family
     , monad-logger
     , mtl

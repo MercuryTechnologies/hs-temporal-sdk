@@ -239,7 +239,7 @@ data WorkerErrorCode
   | CompletionFailure
   | InvalidWorkerConfig
   | UnknownError Word8
-  deriving (Show)
+  deriving (Show, Eq)
 
 instance Storable WorkerErrorCode where
   sizeOf _ = #{size WorkerErrorCode}
@@ -290,7 +290,7 @@ instance Storable CWorkerError where
 data WorkerError = WorkerError
   { code :: WorkerErrorCode
   , message :: Text
-  } deriving (Show)
+  } deriving (Show, Eq)
 
 instance Exception WorkerError
 
