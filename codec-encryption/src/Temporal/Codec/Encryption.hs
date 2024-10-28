@@ -1,3 +1,5 @@
+{-# LANGUAGE DerivingStrategies #-}
+
 module Temporal.Codec.Encryption (
   Key,
   keyFromBytes,
@@ -30,7 +32,7 @@ import Temporal.Payload
 -- An unencoded AES-256 encryption key
 newtype Key where
   Key :: ScrubbedBytes -> Key
-  deriving (Eq, Ord, Show)
+  deriving newtype (Eq, Ord, Show)
 
 
 newtype Cipher where

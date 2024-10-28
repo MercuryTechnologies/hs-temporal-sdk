@@ -46,10 +46,11 @@ module Temporal.Worker (
   -- replay a workflow execution from history. This is useful for test suites,
   -- as it allows you to ensure that changes to your workflow code do not
   -- break determinism.
-  startReplayWorker,
-  Core.HistoryPusher,
-  Core.pushHistory,
-  Core.closeHistory,
+  runReplayHistory,
+  -- startReplayWorker,
+  -- Core.HistoryPusher,
+  -- Core.pushHistory,
+  -- Core.closeHistory,
 
   -- ** Worker options
   WorkflowDef (..),
@@ -90,12 +91,17 @@ import Data.Either (lefts)
 import Data.Foldable
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
+import Data.ProtoLens (encodeMessage)
 import Data.Text (Text)
 import qualified Data.Text as T
+import qualified Data.Text.Encoding as T
 import Data.Word
+import Lens.Family2
 import OpenTelemetry.Trace.Core hiding (inSpan)
 import qualified OpenTelemetry.Trace.Core as OT
 import OpenTelemetry.Trace.Monad
+import Proto.Temporal.Api.History.V1.Message (History)
+import Proto.Temporal.Api.History.V1.Message_Fields (maybe'workflowExecutionStartedEventAttributes, vec'events, workflowId)
 import RequireCallStack
 import System.IO.Unsafe
 import Temporal.Activity.Definition
@@ -103,7 +109,7 @@ import qualified Temporal.Activity.Worker as Activity
 import Temporal.Common
 import Temporal.Common.Async
 import Temporal.Core.Client
-import Temporal.Core.Worker (InactiveForReplay)
+import Temporal.Core.Worker (InactiveForReplay, WorkerError)
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
 import Temporal.Interceptor
@@ -486,6 +492,20 @@ startReplayWorker rt conf = provideCallStack $ runWorkerContext conf $ do
     Workflow.execute workflowWorker
       `UnliftIO.finally` $(logDebug) "Exiting workflow worker loop"
   pure (Temporal.Worker.Worker {..}, replay)
+
+
+{- | Run a worker in replay mode, feeding a history to the worker in order to ensure that
+the worker execution still works as expected.
+-}
+runReplayHistory :: (MonadUnliftIO m, MonadCatch m) => Runtime -> WorkerConfig actEnv -> History -> m (Either WorkerError ())
+runReplayHistory rt conf history = UnliftIO.bracket (startReplayWorker rt conf) (\(worker, pusher) -> liftIO (Core.closeHistory pusher) *> shutdown worker) $ \(_, pusher) -> liftIO $ do
+  let mWfId = history ^? vec'events . traverse . maybe'workflowExecutionStartedEventAttributes . traverse . workflowId . to T.encodeUtf8
+  wfId <- maybe (throwIO $ userError "No workflow ID found in history") pure mWfId
+  UnliftIO.try $ do
+    res <- Core.pushHistory pusher wfId (Left $ encodeMessage history)
+    case res of
+      Left e -> throwIO e
+      Right () -> pure ()
 
 
 traced :: WorkerConfig env -> ReaderT Tracer m a -> m a

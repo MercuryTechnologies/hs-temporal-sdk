@@ -96,6 +96,7 @@ temporalBundle
       , -- Workflow with failing children
         workflowWithFailingChildren :: [Text] -> W.Workflow ()
       , workflowWithFailingChildrenChild :: W.Workflow ()
+      , replayWorkflowExample :: W.Workflow ()
       }
       deriving stock (Generic)
     |]
@@ -495,6 +496,9 @@ testImpls =
           traverse_ (runWf . WorkflowId) wfs
       , workflowWithFailingChildrenChild = do
           W.sleep $ seconds 2
+      , replayWorkflowExample = do
+          W.sleep $ milliseconds 100
+          W.sleep $ milliseconds 200
       }
 
 
@@ -1469,17 +1473,18 @@ needsClient = do
           )
           `shouldReturn` ()
   describe "Workflow replay" $ do
-    specify "works" $ \TestEnv {..} -> do
-      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+    fspecify "works" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () testConf $ do
             baseConf
       withWorker conf $ do
+        uuid <- uuidText
         let opts =
               (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
                 }
             check = useClient $ do
-              wfHandle <- C.start testRefs.workflowWithFailingChildren "replay-workflow" opts ["fizzle", "bizzle", "bazzle"]
+              wfHandle <- C.start testRefs.replayWorkflowExample (WorkflowId uuid) opts
               C.waitWorkflowResult wfHandle
               history <- C.fetchHistory wfHandle
               runReplayHistory globalRuntime conf history

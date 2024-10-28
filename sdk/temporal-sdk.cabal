@@ -10,10 +10,6 @@ license:        BSD-3-Clause
 license-file:   LICENSE
 build-type:     Simple
 
-flag replay-json
-  manual: True
-  default: False
-
 library
   exposed-modules:
       Data.EvalRecord
@@ -30,6 +26,7 @@ library
       Temporal.Interceptor
       Temporal.Operator
       Temporal.Payload
+      Temporal.Replay
       Temporal.SearchAttributes
       Temporal.TH
       Temporal.Worker
@@ -139,11 +136,6 @@ library
         Paths_temporal_sdk
     autogen-modules:
         Paths_temporal_sdk
-  if flag(replay-json)
-    exposed-modules:
-        Temporal.Replay
-    build-depends:
-        proto-lens-json
 
 test-suite temporal-sdk-tests
   type: exitcode-stdio-1.0

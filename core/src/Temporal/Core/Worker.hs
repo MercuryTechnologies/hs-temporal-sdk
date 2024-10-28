@@ -34,7 +34,7 @@ module Temporal.Core.Worker (
   initiateShutdown,
   finalizeShutdown,
   HistoryPusher,
-  HistoryEvent,
+  History,
   pushHistory,
   closeHistory,
 ) where
@@ -55,7 +55,7 @@ import Foreign.ForeignPtr
 import Foreign.Marshal
 import Foreign.Ptr
 import Foreign.Storable
-import Proto.Temporal.Api.History.V1.Message (HistoryEvent)
+import Proto.Temporal.Api.History.V1.Message (History)
 import Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask (ActivityTask)
 import Proto.Temporal.Sdk.Core.CoreInterface (ActivityHeartbeat, ActivityTaskCompletion)
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation (WorkflowActivation)
@@ -348,11 +348,10 @@ finalizeShutdown (Worker w _ _ _) = withForeignPtr w $ \wp -> do
 foreign import ccall "hs_temporal_history_pusher_push_history" raw_pushHistory :: Ptr HistoryPusher -> Ptr (CArray Word8) -> Ptr (CArray Word8) -> TokioCall CWorkerError CUnit
 
 
--- TODO not sure if HistoryEvent is the right protobuf type here.
-pushHistory :: HistoryPusher -> WorkflowId -> HistoryEvent -> IO (Either WorkerError ())
+pushHistory :: HistoryPusher -> WorkflowId -> Either ByteString History -> IO (Either WorkerError ())
 pushHistory (HistoryPusher hp) wf p =
   withCArrayBS wf $ \wfPtr -> do
-    withCArrayBS (encodeMessage p) $ \pPtr -> do
+    withCArrayBS (either id encodeMessage p) $ \pPtr -> do
       res <-
         makeTokioAsyncCall
           (raw_pushHistory hp wfPtr pPtr)

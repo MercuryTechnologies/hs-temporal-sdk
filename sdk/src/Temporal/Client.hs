@@ -59,7 +59,8 @@ module Temporal.Client (
   -- * Producing handles for existing workflows
   getHandle,
 
-  -- * Miscellaneous
+  -- * Workflow history utilities
+  fetchHistory,
   streamEvents,
   FollowOption (..),
 ) where
@@ -97,7 +98,7 @@ import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Common
 import qualified Proto.Temporal.Api.Enums.V1.Query as Query
 import Proto.Temporal.Api.Enums.V1.TaskQueue (TaskQueueKind (..))
 import Proto.Temporal.Api.Enums.V1.Workflow (HistoryEventFilterType (..), WorkflowExecutionStatus (..))
-import Proto.Temporal.Api.History.V1.Message (HistoryEvent, HistoryEvent'Attributes (..))
+import Proto.Temporal.Api.History.V1.Message (History, HistoryEvent, HistoryEvent'Attributes (..))
 import qualified Proto.Temporal.Api.History.V1.Message_Fields as History
 import qualified Proto.Temporal.Api.Query.V1.Message_Fields as Query
 import qualified Proto.Temporal.Api.Taskqueue.V1.Message_Fields as TQ
@@ -741,6 +742,31 @@ data WorkflowContinuedAsNewException = WorkflowContinuedAsNewException
 
 
 instance Exception WorkflowContinuedAsNewException
+
+
+{- | Fetch the history of a Workflow execution as it currently stands.
+
+This is useful for Workflow replay tests.
+-}
+fetchHistory :: MonadIO m => WorkflowHandle a -> m History
+fetchHistory h = do
+  let startingReq :: GetWorkflowExecutionHistoryRequest
+      startingReq =
+        defMessage
+          & RR.namespace .~ rawNamespace h.workflowHandleClient.clientConfig.namespace
+          & RR.execution
+            .~ ( defMessage
+                  & Common.workflowId .~ rawWorkflowId h.workflowHandleWorkflowId
+                  & case h.workflowHandleRunId of
+                    Nothing -> Prelude.id
+                    Just rId -> Common.runId .~ rawRunId rId
+               )
+          & RR.maximumPageSize .~ 100
+          & RR.waitNewEvent .~ False
+          & RR.historyEventFilterType .~ HISTORY_EVENT_FILTER_TYPE_ALL_EVENT
+          & RR.skipArchival .~ True
+  allEvents <- runReaderT (sourceToList (streamEvents FollowRuns startingReq)) h.workflowHandleClient
+  pure $ build (History.events .~ allEvents)
 
 
 applyNewExecutionRunId

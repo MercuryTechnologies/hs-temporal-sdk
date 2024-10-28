@@ -25,9 +25,9 @@ bothSignsMatchAssertion d =
     )
 
 
-{-# ANN spec "HLint: ignore Monoid law, right identity" #-}
-{-# ANN spec "HLint: ignore Monoid law, left identity" #-}
-{-# ANN spec "HLint: ignore Use fold" #-}
+{-# ANN spec ("HLint: ignore Monoid law, right identity" :: String) #-}
+{-# ANN spec ("HLint: ignore Monoid law, left identity" :: String) #-}
+{-# ANN spec ("HLint: ignore Use fold" :: String) #-}
 spec :: Spec
 spec = describe "Duration" $ do
   describe "parsing" $ do
