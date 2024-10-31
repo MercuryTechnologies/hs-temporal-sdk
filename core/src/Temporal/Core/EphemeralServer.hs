@@ -80,6 +80,7 @@ data TemporalDevServerConfig = TemporalDevServerConfig
   , port :: Maybe Word16
   , dbFilename :: Maybe FilePath
   , ui :: Bool
+  , uiPort :: Maybe Word16
   , log :: (String, String)
   , extraArgs :: [String]
   }

@@ -22,6 +22,7 @@ in {
       protogen
       pkgs.crate2nix
       pkgs.protobuf
+      pkgs.rust-cbindgen
     ]
     ++ (with pkgs;
       lib.optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [

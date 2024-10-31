@@ -75,6 +75,8 @@ pub struct TemporalDevServerConfigDef {
     pub db_filename: Option<String>,
     /// Whether to enable the UI.
     pub ui: bool,
+    /// What port to run the UI on.
+    pub ui_port: Option<u16>,
     /// Log format and level
     pub log: (String, String),
     /// Additional arguments to Temporalite.

@@ -132,6 +132,11 @@ data WorkerConfig = WorkerConfig
   , maxActivitiesPerSecond :: Maybe Double
   , maxTaskQueueActivitiesPerSecond :: Maybe Double
   , gracefulShutdownPeriodMillis :: Word64
+  , nondeterminismAsWorkflowFail :: Bool
+  , nondeterminismAsWorkflowFailForTypes :: [Text]
+  -- TODO:
+  -- useWorkerVersioning
+  -- tuner
   }
 
 

@@ -1,3 +1,4 @@
+use std::collections::{HashMap, HashSet};
 use ffi_convert::{CArray, RawPointerConverter, AsRust, CReprOf, CDrop, CDropError, RawBorrow};
 use libc::c_char;
 use prost::Message;
@@ -6,6 +7,7 @@ use std::sync::Arc;
 use std::time::Duration;
 use temporal_sdk_core::api::errors::{PollActivityError, PollWfError};
 use temporal_sdk_core::replay::{HistoryForReplay, ReplayWorkerInput};
+use temporal_sdk_core_api::errors::WorkflowErrorType;
 use temporal_sdk_core_api::{Worker};
 use temporal_sdk_core_protos::coresdk::workflow_completion::WorkflowActivationCompletion;
 use temporal_sdk_core_protos::coresdk::{ActivityHeartbeat, ActivityTaskCompletion};
@@ -42,6 +44,8 @@ pub struct WorkerConfig {
   max_activities_per_second: Option<f64>,
   max_task_queue_activities_per_second: Option<f64>,
   graceful_shutdown_period_millis: u64,
+  nondeterminism_as_workflow_fail: bool,
+  nondeterminism_as_workflow_fail_for_types: Vec<String>,
 }
 
 impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
@@ -76,6 +80,22 @@ impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
           // auto-cancel-activity behavior of shutdown will not occur, so we
           // always set it even if 0.
           .graceful_shutdown_period(Duration::from_millis(conf.graceful_shutdown_period_millis))
+          .workflow_failure_errors(if conf.nondeterminism_as_workflow_fail {
+            HashSet::from([WorkflowErrorType::Nondeterminism])
+          } else {
+            HashSet::new()
+          })
+          .workflow_types_to_failure_errors(conf
+            .nondeterminism_as_workflow_fail_for_types
+            .iter()
+            .map(|s| {
+              (
+                s.to_owned(),
+                HashSet::from([WorkflowErrorType::Nondeterminism]),
+              )
+            })
+            .collect::<HashMap<String, HashSet<WorkflowErrorType>>>(),
+          )
           .build()
           .map_err(|err| WorkerError {
             code: WorkerErrorCode::InvalidWorkerConfig,
@@ -137,6 +157,17 @@ pub struct WorkerError {
 pub struct CWorkerError {
   code: WorkerErrorCode,
   message: *const c_char,
+}
+
+struct FormattedError {
+    message: String,    
+}
+
+#[repr(C)]
+#[derive(CReprOf, AsRust, RawPointerConverter, CDrop)]
+#[target_type(FormattedError)]
+pub struct CWorkerValidationError {
+    message: *const c_char
 }
 
 #[no_mangle]
@@ -247,7 +278,7 @@ pub extern "C" fn hs_temporal_new_replay_worker(runtime: *mut runtime::RuntimeRe
       let result = new_replay_worker(runtime_ref, config);
       match result {
         Ok((worker_ref, history_pusher)) => {
-          unsafe { 
+          unsafe {
             *worker_slot = Box::into_raw(Box::new(worker_ref));
             *history_slot = Box::into_raw(Box::new(history_pusher));
           }
@@ -399,6 +430,34 @@ impl WorkerRef {
         Ok(CUnit{})
       })
   }
+}
+
+#[no_mangle]
+pub extern "C" fn hs_temporal_validate_worker(
+  worker: *mut WorkerRef,
+  mvar: *mut MVar,
+  cap: Capability,
+  error_slot: *mut*mut CWorkerValidationError,
+  result_slot: *mut*mut CUnit
+) {
+    let worker = unsafe { &mut *worker };
+    let hs = HsCallback {
+        mvar,
+        cap,
+        error_slot,
+        result_slot
+    };
+
+    let w = worker.worker.as_ref().unwrap().clone();
+    worker.runtime.future_result_into_hs(hs, async move {
+        let result = w.validate().await;
+        match result {
+            Ok(()) => Ok(CUnit{}),
+            Err(err) => Err(CWorkerValidationError::c_repr_of(FormattedError {
+              message: format!("{}", err)
+            }).unwrap())
+        }
+    })
 }
 
 #[no_mangle]
@@ -612,9 +671,9 @@ pub extern "C" fn hs_temporal_history_pusher_push_history(
   history_pusher: *mut HistoryPusher,
   workflow_id: *const CArray<u8>,
   history_proto: *const CArray<u8>,
-  mvar: *mut MVar, 
-  cap: Capability, 
-  error_slot: *mut*mut CWorkerError, 
+  mvar: *mut MVar,
+  cap: Capability,
+  error_slot: *mut*mut CWorkerError,
   result_slot: *mut*mut CUnit
 ) {
   let history_pusher = unsafe { &mut *history_pusher };
