@@ -1473,7 +1473,7 @@ needsClient = do
           )
           `shouldReturn` ()
   describe "Workflow replay" $ do
-    fspecify "works" $ \TestEnv {..} -> do
+    specify "works" $ \TestEnv {..} -> do
       let conf = provideCallStack $ configure () testConf $ do
             baseConf
       withWorker conf $ do

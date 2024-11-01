@@ -536,6 +536,10 @@ startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "sta
       "Core.newWorker"
       defaultSpanArguments
       (either throwIO pure =<< liftIO (Core.newWorker client conf.coreConfig))
+  validationRes <- liftIO $ Core.validateWorker workerCore
+  case validationRes of
+    Left err -> throwIO err
+    Right () -> pure ()
   runningWorkflows <- newTVarIO mempty
   runningActivities <- newTVarIO mempty
   let errorConverters = mkAnnotatedHandlers conf.applicationErrorConverters

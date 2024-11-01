@@ -160,7 +160,7 @@ pub struct CWorkerError {
 }
 
 struct FormattedError {
-    message: String,    
+    message: String,
 }
 
 #[repr(C)]
@@ -168,6 +168,11 @@ struct FormattedError {
 #[target_type(FormattedError)]
 pub struct CWorkerValidationError {
     message: *const c_char
+}
+
+#[no_mangle]
+pub extern "C" fn hs_temporal_drop_worker_validation_error(err: *mut CWorkerValidationError) -> () {
+  unsafe { drop(CWorkerValidationError::from_raw_pointer_mut(err)) }
 }
 
 #[no_mangle]
