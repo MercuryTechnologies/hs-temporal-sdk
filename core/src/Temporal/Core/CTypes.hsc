@@ -299,8 +299,33 @@ peekWorkerError CWorkerError{..} = do
   message <- fromPtr0 $ castPtr message
   pure WorkerError{..}
 
+data CWorkerValidationError = CWorkerValidationError
+  { message :: CString
+  }
+
+instance Storable CWorkerValidationError where
+  sizeOf _ = #{size CWorkerValidationError}
+  alignment _ = #{alignment CWorkerValidationError}
+  peek ptr = do
+    message <- #{peek CWorkerValidationError, message} ptr
+    pure CWorkerValidationError {..}
+
+data WorkerValidationError = WorkerValidationError
+  { message :: Text
+  } deriving (Show, Eq)
+
+instance Exception WorkerValidationError
+
+peekWorkerValidationError :: CWorkerValidationError -> IO WorkerValidationError
+peekWorkerValidationError CWorkerValidationError{..} = do
+  message <- fromPtr0 $ castPtr message
+  pure WorkerValidationError{..}
+
+foreign import ccall "hs_temporal_drop_worker_validation_error" rust_dropWorkerValidationError :: FinalizerPtr CWorkerValidationError
+
 foreign import ccall "&hs_temporal_drop_worker_error" rust_dropWorkerError :: FinalizerPtr CWorkerError
 
 data CUnit = CUnit
 
+foreign import ccall "hs_temporal_drop_unit" rust_dropUnitNow :: Ptr CUnit -> IO ()
 foreign import ccall "&hs_temporal_drop_unit" rust_dropUnit :: FinalizerPtr CUnit

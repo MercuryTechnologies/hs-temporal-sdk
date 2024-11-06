@@ -22,6 +22,7 @@ in {
       protogen
       pkgs.crate2nix
       pkgs.protobuf
+      pkgs.rust-cbindgen
     ]
     ++ (with pkgs;
       lib.optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [
@@ -30,7 +31,10 @@ in {
         SystemConfiguration
       ]));
 
-  languages.rust.enable = true;
+  languages.rust = {
+    enable = true;
+    channel = "nightly";
+  };
 
   pre-commit.hooks = {
     crate2nix = {

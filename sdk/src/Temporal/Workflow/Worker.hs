@@ -41,6 +41,13 @@ import Temporal.WorkflowInstance
 import UnliftIO
 
 
+data EvictionWithRunID = EvictionWithRunID
+  { runId :: RunId
+  , eviction :: RemoveFromCache
+  }
+  deriving stock (Show)
+
+
 data WorkflowWorker = forall ty.
   WorkflowWorker
   { workerWorkflowFunctions :: {-# UNPACK #-} !(HashMap Text WorkflowDefinition)
@@ -53,6 +60,7 @@ data WorkflowWorker = forall ty.
   , workerTaskQueue :: TaskQueue
   , workerErrorConverters :: [Err.ApplicationFailureHandler]
   , processor :: {-# UNPACK #-} !PayloadProcessor
+  , workerEvictionEmitter :: TChan EvictionWithRunID
   }
 
 
@@ -308,6 +316,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
             join $ atomically $ do
               currentWorkflows <- readTVar worker.runningWorkflows
               writeTVar worker.runningWorkflows $ HashMap.delete runId_ currentWorkflows
+              writeTChan worker.workerEvictionEmitter EvictionWithRunID {runId = runId_, eviction = removeFromCache}
               case HashMap.lookup runId_ currentWorkflows of
                 Nothing -> do
                   let msg = Text.pack ("Eviction request on an unknown workflow with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))

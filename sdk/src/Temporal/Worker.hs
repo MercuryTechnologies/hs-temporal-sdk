@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -47,6 +48,12 @@ module Temporal.Worker (
   -- as it allows you to ensure that changes to your workflow code do not
   -- break determinism.
   runReplayHistory,
+  ReplayHistoryFailure (..),
+  subscribeToEvictions,
+  subscribeToEvictionsSTM,
+  Workflow.EvictionWithRunID (..),
+  evictionMessage,
+  evictionWasFatal,
   -- startReplayWorker,
   -- Core.HistoryPusher,
   -- Core.pushHistory,
@@ -82,6 +89,7 @@ module Temporal.Worker (
 ) where
 
 import Control.Concurrent
+import Control.Exception (Exception (..))
 import Control.Monad
 import Control.Monad.Catch
 import Control.Monad.Logger
@@ -95,6 +103,9 @@ import Data.ProtoLens (encodeMessage)
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
+import Data.UUID (UUID)
+import qualified Data.UUID as UUID
+import Data.UUID.V4 (nextRandom)
 import Data.Word
 import Lens.Family2
 import OpenTelemetry.Trace.Core hiding (inSpan)
@@ -102,6 +113,8 @@ import qualified OpenTelemetry.Trace.Core as OT
 import OpenTelemetry.Trace.Monad
 import Proto.Temporal.Api.History.V1.Message (History)
 import Proto.Temporal.Api.History.V1.Message_Fields (maybe'workflowExecutionStartedEventAttributes, vec'events, workflowId)
+import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
+import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
 import RequireCallStack
 import System.IO.Unsafe
 import Temporal.Activity.Definition
@@ -466,17 +479,21 @@ data Worker = forall ty.
   , workerActivityLoop :: InactiveForReplay ty (Async ())
   , workerCore :: Core.Worker ty
   , workerTracer :: Tracer
+  , workerEvictionEmitter :: TChan Workflow.EvictionWithRunID
   }
 
 
 startReplayWorker :: (MonadUnliftIO m, MonadCatch m) => Runtime -> WorkerConfig actEnv -> m (Temporal.Worker.Worker, Core.HistoryPusher)
 startReplayWorker rt conf = provideCallStack $ runWorkerContext conf $ do
   $(logDebug) "Starting worker"
-  (workerCore, replay) <- either throwIO pure =<< liftIO (Core.newReplayWorker rt conf.coreConfig)
+  let coreConfig' = conf.coreConfig {Core.nondeterminismAsWorkflowFail = True}
+  (workerCore, replay) <- either throwIO pure =<< liftIO (Core.newReplayWorker rt coreConfig')
   $(logDebug) "Instantiated core"
+  workerEvictionEmitter <- newBroadcastTChanIO
   runningWorkflows <- newTVarIO mempty
+  uuid <- liftIO nextRandom
   let workerWorkflowFunctions = conf.wfDefs
-      workerTaskQueue = TaskQueue $ Core.taskQueue conf.coreConfig
+      workerTaskQueue = TaskQueue (Core.taskQueue conf.coreConfig <> "-" <> UUID.toText uuid)
       workerInboundInterceptors = conf.interceptorConfig.workflowInboundInterceptors
       workerOutboundInterceptors = conf.interceptorConfig.workflowOutboundInterceptors
       workerDeadlockTimeout = conf.deadlockTimeout
@@ -494,18 +511,32 @@ startReplayWorker rt conf = provideCallStack $ runWorkerContext conf $ do
   pure (Temporal.Worker.Worker {..}, replay)
 
 
+data ReplayHistoryFailure = ReplayHistoryFailure
+  { message :: Text
+  }
+  deriving stock (Show, Eq)
+  deriving anyclass (Exception)
+
+
 {- | Run a worker in replay mode, feeding a history to the worker in order to ensure that
 the worker execution still works as expected.
 -}
-runReplayHistory :: (MonadUnliftIO m, MonadCatch m) => Runtime -> WorkerConfig actEnv -> History -> m (Either WorkerError ())
-runReplayHistory rt conf history = UnliftIO.bracket (startReplayWorker rt conf) (\(worker, pusher) -> liftIO (Core.closeHistory pusher) *> shutdown worker) $ \(_, pusher) -> liftIO $ do
+runReplayHistory :: (MonadUnliftIO m, MonadCatch m) => Runtime -> WorkerConfig actEnv -> History -> m (Either ReplayHistoryFailure ())
+runReplayHistory rt conf history = runWorkerContext conf $ UnliftIO.bracket (startReplayWorker rt conf) (\(worker, pusher) -> liftIO (Core.closeHistory pusher) *> shutdown worker) $ \(worker, pusher) -> do
+  evictions <- subscribeToEvictions worker
   let mWfId = history ^? vec'events . traverse . maybe'workflowExecutionStartedEventAttributes . traverse . workflowId . to T.encodeUtf8
   wfId <- maybe (throwIO $ userError "No workflow ID found in history") pure mWfId
-  UnliftIO.try $ do
-    res <- Core.pushHistory pusher wfId (Left $ encodeMessage history)
-    case res of
-      Left e -> throwIO e
-      Right () -> pure ()
+  $(logDebug) $ "Pushing history for workflow ID " <> T.pack (show wfId)
+  $(logDebug) $ T.pack $ show history
+  res <- liftIO $ Core.pushHistory pusher wfId (Left $ encodeMessage history)
+  $(logDebug) $ "Pushed history for workflow ID " <> T.pack (show wfId)
+  case res of
+    Left e -> pure $ Left $ ReplayHistoryFailure {message = e.message}
+    Right () -> do
+      res <- atomically $ readTChan evictions
+      if evictionWasFatal res
+        then pure $ Left $ ReplayHistoryFailure {message = evictionMessage res}
+        else pure $ Right ()
 
 
 traced :: WorkerConfig env -> ReaderT Tracer m a -> m a
@@ -536,6 +567,11 @@ startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "sta
       "Core.newWorker"
       defaultSpanArguments
       (either throwIO pure =<< liftIO (Core.newWorker client conf.coreConfig))
+  validationRes <- liftIO $ Core.validateWorker workerCore
+  workerEvictionEmitter <- newBroadcastTChanIO
+  case validationRes of
+    Left err -> throwIO err
+    Right () -> pure ()
   runningWorkflows <- newTVarIO mempty
   runningActivities <- newTVarIO mempty
   let errorConverters = mkAnnotatedHandlers conf.applicationErrorConverters
@@ -664,6 +700,26 @@ shutdown worker@Temporal.Worker.Worker {workerCore, workerTracer} = OT.inSpan wo
     Left err -> throwIO err
     Right () -> pure ()
 
+
 -- logs <- liftIO $ fetchLogs globalRuntime
 -- forM_ logs $ \l -> do
 --   $(logInfo) $ Text.pack $ show l
+
+-- | Subscribe to evictions from the worker. This is not generally needed, but can be useful for debugging.
+subscribeToEvictions :: MonadIO m => Temporal.Worker.Worker -> m (TChan Workflow.EvictionWithRunID)
+subscribeToEvictions worker = liftIO $ atomically $ dupTChan worker.workerEvictionEmitter
+
+
+-- | Subscribe to evictions from the worker. This is not generally needed, but can be useful for debugging.
+subscribeToEvictionsSTM :: Temporal.Worker.Worker -> STM (TChan Workflow.EvictionWithRunID)
+subscribeToEvictionsSTM worker = dupTChan worker.workerEvictionEmitter
+
+
+evictionMessage :: Workflow.EvictionWithRunID -> Text
+evictionMessage Workflow.EvictionWithRunID {eviction} = eviction ^. Activation.message
+
+
+evictionWasFatal :: Workflow.EvictionWithRunID -> Bool
+evictionWasFatal Workflow.EvictionWithRunID {eviction} = case eviction ^. Activation.reason of
+  RemoveFromCache'FATAL -> True
+  _ -> False

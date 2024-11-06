@@ -6,8 +6,6 @@ use tonic::{metadata::{MetadataKey, errors::InvalidMetadataValue}};
 use ffi_convert::*;
 use crate::runtime::{self, Capability, MVar, HsCallback};
 use std::collections::HashMap;
-use std::sync::Arc;
-use parking_lot::RwLock;
 use std::ffi::CStr;
 use std::time::Duration;
 use serde::{Deserialize, Serialize};
@@ -181,17 +179,11 @@ pub fn connect_client(
   config: ClientConfig,
   hs_callback: HsCallback<ClientRef, CArray<u8>>,
 ) -> () {
-  let headers = if config.metadata.is_empty() {
-      None
-  } else {
-      Some(Arc::new(RwLock::new(config.metadata.clone())))
-  };
-
   let opts: ClientOptions = client_config_to_options(config).unwrap();
   let runtime = runtime_ref.runtime.clone();
   runtime_ref.runtime.future_result_into_hs(hs_callback, async move {
     let retry_client_result = opts
-          .connect_no_namespace(runtime.core.as_ref().telemetry().get_metric_meter(), headers)
+          .connect_no_namespace(runtime.core.as_ref().telemetry().get_metric_meter())
           .await;
         
     match retry_client_result {

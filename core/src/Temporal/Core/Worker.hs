@@ -17,6 +17,7 @@ module Temporal.Core.Worker (
   SWorkerType (..),
   SomeWorkerType (..),
   newWorker,
+  validateWorker,
   newReplayWorker,
   closeWorker,
   InactiveForReplay,
@@ -132,6 +133,11 @@ data WorkerConfig = WorkerConfig
   , maxActivitiesPerSecond :: Maybe Double
   , maxTaskQueueActivitiesPerSecond :: Maybe Double
   , gracefulShutdownPeriodMillis :: Word64
+  , nondeterminismAsWorkflowFail :: Bool
+  , nondeterminismAsWorkflowFailForTypes :: [Text]
+  -- TODO:
+  -- useWorkerVersioning
+  -- tuner
   }
 
 
@@ -159,10 +165,23 @@ defaultWorkerConfig =
     , maxActivitiesPerSecond = Nothing
     , maxTaskQueueActivitiesPerSecond = Nothing
     , gracefulShutdownPeriodMillis = 0
+    , nondeterminismAsWorkflowFail = False
+    , nondeterminismAsWorkflowFailForTypes = []
     }
 
 
 foreign import ccall "hs_temporal_new_worker" raw_newWorker :: Ptr CoreClient -> Ptr (CArray Word8) -> Ptr (Ptr (Worker 'Real)) -> Ptr (Ptr CWorkerError) -> IO ()
+
+
+foreign import ccall "hs_temporal_validate_worker" raw_validateWorker :: Ptr (Worker ty) -> TokioCall CWorkerValidationError CUnit
+
+
+validateWorker :: Worker 'Real -> IO (Either WorkerValidationError ())
+validateWorker (Worker w _ _ _) = withForeignPtr w $ \wp -> do
+  res <- makeTokioAsyncCall (raw_validateWorker wp) (Just rust_dropWorkerValidationError) (Just rust_dropUnit)
+  case res of
+    Left err -> Left <$> withForeignPtr err (peek >=> peekWorkerValidationError)
+    Right _ -> pure $ Right ()
 
 
 foreign import ccall "&hs_temporal_drop_worker" raw_closeWorker :: FinalizerPtr (Worker ty)
@@ -301,7 +320,7 @@ recordActivityHeartbeat (Worker w _ _ _) p = withForeignPtr w $ \wp ->
         errPtr <- peek errPtrPtr
         if errPtr == nullPtr
           then do
-            newForeignPtr rust_dropUnit =<< peek resPtrPtr
+            rust_dropUnitNow =<< peek resPtrPtr
             pure $ Right ()
           else Left <$> getWorkerError errPtr
 

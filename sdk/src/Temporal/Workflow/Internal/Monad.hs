@@ -626,7 +626,17 @@ instance MonadReadStateVar Query where
 
 
 newtype InstanceM (a :: Type) = InstanceM {unInstanceM :: ReaderT WorkflowInstance IO a}
-  deriving newtype (Functor, Applicative, Monad, MonadIO, MonadReader WorkflowInstance, MonadUnliftIO)
+  deriving newtype
+    ( Functor
+    , Applicative
+    , Monad
+    , MonadIO
+    , MonadReader WorkflowInstance
+    , MonadUnliftIO
+    , Catch.MonadThrow
+    , Catch.MonadCatch
+    , Catch.MonadMask
+    )
 
 
 instance MonadLogger InstanceM where
