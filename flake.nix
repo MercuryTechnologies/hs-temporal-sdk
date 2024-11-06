@@ -11,6 +11,11 @@
       url = "file+file:///dev/null";
       flake = false;
     };
+
+    fenix = {
+      url = "github:nix-community/fenix";
+      inputs = {nixpkgs.follows = "nixpkgs";};
+    };
   };
 
   outputs = inputs @ {

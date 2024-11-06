@@ -96,7 +96,6 @@ temporalBundle
       , -- Workflow with failing children
         workflowWithFailingChildren :: [Text] -> W.Workflow ()
       , workflowWithFailingChildrenChild :: W.Workflow ()
-      , replayWorkflowExample :: W.Workflow ()
       }
       deriving stock (Generic)
     |]
@@ -496,9 +495,6 @@ testImpls =
           traverse_ (runWf . WorkflowId) wfs
       , workflowWithFailingChildrenChild = do
           W.sleep $ seconds 2
-      , replayWorkflowExample = do
-          W.sleep $ milliseconds 100
-          W.sleep $ milliseconds 200
       }
 
 
@@ -1473,22 +1469,51 @@ needsClient = do
           )
           `shouldReturn` ()
   describe "Workflow replay" $ do
-    specify "works" $ \TestEnv {..} -> do
-      let conf = provideCallStack $ configure () testConf $ do
+    fspecify "works" $ \TestEnv {..} -> do
+      let originalWorkflow :: W.ProvidedWorkflow (W.Workflow ())
+          originalWorkflow = W.provideWorkflow JSON "replay-workflow" $ provideCallStack $ do
+            W.sleep $ milliseconds 10
+            _ <-
+              W.executeActivity
+                testRefs.basicActivity
+                (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
+            W.sleep $ milliseconds 10
+          modifiedWorkflow :: W.ProvidedWorkflow (W.Workflow ())
+          modifiedWorkflow = W.provideWorkflow JSON "replay-workflow" $ provideCallStack $ do
+            W.sleep $ milliseconds 10
+            _ <-
+              W.executeActivity
+                testRefs.basicActivity
+                (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
+            _ <-
+              W.executeActivity
+                testRefs.basicActivity
+                (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
+            W.sleep $ milliseconds 10
+      let conf = provideCallStack $ configure () (testConf <> toDefinitions originalWorkflow) $ do
             baseConf
-      withWorker conf $ do
+      history <- withWorker conf $ do
         uuid <- uuidText
         let opts =
               (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
                 }
-            check = useClient $ do
-              wfHandle <- C.start testRefs.replayWorkflowExample (WorkflowId uuid) opts
-              C.waitWorkflowResult wfHandle
-              history <- C.fetchHistory wfHandle
-              runReplayHistory globalRuntime conf history
-        check `shouldReturn` Right ()
+        useClient $ do
+          wfHandle <- C.start originalWorkflow (WorkflowId uuid) opts
+          C.waitWorkflowResult wfHandle
+          C.fetchHistory wfHandle
+      let conf' = configure () (testConf <> toDefinitions modifiedWorkflow) $ do
+            baseConf
+      replayResult <- runReplayHistory globalRuntime conf' history
+      replayResult `shouldSatisfy` \case
+        Right () -> False
+        Left _e -> True
+
+      replayResult' <- runReplayHistory globalRuntime conf history
+      replayResult' `shouldSatisfy` \case
+        Right () -> True
+        Left _e -> False
 
 -- describe "WorkflowClient" $ do
 --   specify "WorkflowExecutionAlreadyStartedError" pending

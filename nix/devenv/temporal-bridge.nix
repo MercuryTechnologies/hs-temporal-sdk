@@ -31,7 +31,10 @@ in {
         SystemConfiguration
       ]));
 
-  languages.rust.enable = true;
+  languages.rust = {
+    enable = true;
+    channel = "nightly";
+  };
 
   pre-commit.hooks = {
     crate2nix = {
