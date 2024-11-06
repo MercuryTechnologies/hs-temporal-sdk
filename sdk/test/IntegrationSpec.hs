@@ -1469,7 +1469,7 @@ needsClient = do
           )
           `shouldReturn` ()
   describe "Workflow replay" $ do
-    fspecify "works" $ \TestEnv {..} -> do
+    specify "works" $ \TestEnv {..} -> do
       let originalWorkflow :: W.ProvidedWorkflow (W.Workflow ())
           originalWorkflow = W.provideWorkflow JSON "replay-workflow" $ provideCallStack $ do
             W.sleep $ milliseconds 10
