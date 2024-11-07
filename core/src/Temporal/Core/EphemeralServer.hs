@@ -11,7 +11,6 @@ import Data.Aeson
 import Data.Aeson.TH
 import Data.ByteString (ByteString, useAsCString)
 import qualified Data.ByteString.Lazy as BL
-import Data.Proxy
 import Data.Word
 import Foreign.C.String hiding (withCString)
 import Foreign.ForeignPtr
@@ -98,6 +97,7 @@ defaultTemporalDevServerConfig =
     , port = Nothing
     , dbFilename = Nothing
     , ui = False
+    , uiPort = Nothing
     , log = ("pretty", "warn")
     , extraArgs = []
     }
