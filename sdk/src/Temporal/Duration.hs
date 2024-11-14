@@ -162,7 +162,7 @@ microseconds n = mkDuration (fromIntegral secs) (fromIntegral $ ns * 1_000)
 milliseconds :: Int64 -> Duration
 milliseconds n = mkDuration secs $ fromIntegral $ ns * 1_000_000
   where
-    (secs, ns) = n`quotRem` 1_000
+    (secs, ns) = n `quotRem` 1_000
 
 
 -- | Create a 'Duration' from a given number of seconds.
