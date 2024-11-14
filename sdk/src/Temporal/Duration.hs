@@ -153,16 +153,16 @@ nanoseconds n = mkDuration (fromIntegral secs) (fromIntegral ns)
 
 -- | Create a 'Duration' from a given number of microseconds.
 microseconds :: Integer -> Duration
-microseconds n = mkDuration (fromIntegral secs) (fromIntegral ns)
+microseconds n = mkDuration (fromIntegral secs) (fromIntegral $ ns * 1_000)
   where
     (secs, ns) = n `quotRem` 1_000_000
 
 
 -- | Create a 'Duration' from a given number of milliseconds.
 milliseconds :: Int64 -> Duration
-milliseconds n = mkDuration secs $ fromIntegral ns
+milliseconds n = mkDuration secs $ fromIntegral $ ns * 1_000_000
   where
-    (secs, ns) = n `quotRem` 1_000
+    (secs, ns) = n`quotRem` 1_000
 
 
 -- | Create a 'Duration' from a given number of seconds.
