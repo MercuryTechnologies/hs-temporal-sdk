@@ -1635,17 +1635,6 @@ waitCancellation = do
   throw WorkflowCancelRequested
 
 
-defaultRetryPolicy :: RetryPolicy
-defaultRetryPolicy =
-  RetryPolicy
-    { initialInterval = seconds 1
-    , backoffCoefficient = 2
-    , maximumInterval = Nothing
-    , maximumAttempts = 0
-    , nonRetryableErrorTypes = mempty
-    }
-
-
 {- | A value of type 'ConcurrentWorkflow' a is a 'Workflow' operation that can be composed with other ConcurrentWorkflow values, using the Applicative and Alternative instances.
 
 'ConcurrentWorkflow' effectively operates as a computation DAG. It's evaluated by exploring the expression across all of the branches of computation until every branch becomes blocked

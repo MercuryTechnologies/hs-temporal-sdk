@@ -199,6 +199,17 @@ instance ToJSON RetryPolicy
 instance FromJSON RetryPolicy
 
 
+defaultRetryPolicy :: RetryPolicy
+defaultRetryPolicy =
+  RetryPolicy
+    { initialInterval = seconds 1
+    , backoffCoefficient = 2
+    , maximumInterval = Nothing
+    , maximumAttempts = 10
+    , nonRetryableErrorTypes = mempty
+    }
+
+
 errorType :: Typeable e => proxy e -> Text
 errorType = T.pack . show . typeRep
 
