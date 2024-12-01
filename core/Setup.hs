@@ -23,13 +23,13 @@ import Distribution.Simple.Utils (
   rawSystemStdInOut,
  )
 import Distribution.System
+import Distribution.Utils.Path (coerceSymbolicPath, getSymbolicPath, (</>))
 import Distribution.Verbosity (Verbosity)
 import qualified Distribution.Verbosity as Verbosity
 import System.Directory (
   getCurrentDirectory,
  )
 import System.Environment (getEnv)
-import System.FilePath ((</>))
 import System.Posix.Files (createSymbolicLink)
 
 
@@ -44,7 +44,7 @@ main = defaultMainWithHooks hooks
         , confHook = \a flags -> do
             lbi <- confHook simpleUserHooks a flags >>= rsAddLibraryInfo flags
             unless (cabalFlag externalLibFlag flags) $ do
-              copyTemporalBridge lbi (buildDir lbi)
+              copyTemporalBridge lbi (getSymbolicPath (buildDir lbi))
             pure lbi
         , postClean = \_ flags _ _ ->
             rsClean (fromFlag $ cleanVerbosity flags)
@@ -104,7 +104,7 @@ rsAddLibraryInfo fl lbi' = do
           , extraLibDirs =
               if external
                 then extraLibDirs libBuild
-                else (dir </> buildDir lbi') : extraLibDirs libBuild
+                else (coerceSymbolicPath (buildDir lbi')) : extraLibDirs libBuild
           }
   pure $ updateLbi lbi'
 
