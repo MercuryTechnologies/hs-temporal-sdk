@@ -12,7 +12,7 @@ import Control.Exception.Annotated
 import Data.Annotation
 import Data.Int
 import Data.ProtoLens (Message (..))
-import Data.Text
+import Data.Text hiding (show)
 import Data.Typeable
 import Data.Vector (Vector)
 import GHC.Stack
