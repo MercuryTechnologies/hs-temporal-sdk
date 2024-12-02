@@ -108,6 +108,7 @@ import qualified Data.UUID as UUID
 import Data.UUID.V4 (nextRandom)
 import Data.Word
 import Lens.Family2
+import OpenTelemetry.Attributes (emptyAttributes)
 import OpenTelemetry.Trace.Core hiding (inSpan)
 import qualified OpenTelemetry.Trace.Core as OT
 import OpenTelemetry.Trace.Monad
@@ -503,7 +504,7 @@ startReplayWorker rt conf = provideCallStack $ runWorkerContext conf $ do
       workflowWorker = Workflow.WorkflowWorker {..}
       workerActivityLoop = error "Cannot use activity worker in replay worker"
       workerType = Core.SReplay
-      workerTracer = makeTracer conf.tracerProvider (InstrumentationLibrary "hs-temporal-sdk" "0.0.1.0") tracerOptions
+      workerTracer = makeTracer conf.tracerProvider (InstrumentationLibrary "hs-temporal-sdk" "0.0.1.0" "" emptyAttributes) tracerOptions
   workerWorkflowLoop <- asyncLabelled (T.unpack $ T.concat ["temporal/worker/workflow/", Core.namespace conf.coreConfig, "/", Core.taskQueue conf.coreConfig]) $ do
     $(logDebug) "Starting workflow worker loop"
     Workflow.execute workflowWorker
@@ -544,7 +545,7 @@ traced conf m =
   runReaderT m $
     makeTracer
       conf.tracerProvider
-      (InstrumentationLibrary "hs-temporal-sdk" "0.0.1.0")
+      (InstrumentationLibrary "hs-temporal-sdk" "0.0.1.0" "" emptyAttributes)
       tracerOptions
 
 
@@ -592,7 +593,7 @@ startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "sta
       payloadProcessor = conf.payloadProcessor
       activityWorker = Activity.ActivityWorker {..}
       workerClient = client
-      workerTracer = makeTracer conf.tracerProvider (InstrumentationLibrary "hs-temporal-sdk" "0.0.1.0") tracerOptions
+      workerTracer = makeTracer conf.tracerProvider (InstrumentationLibrary "hs-temporal-sdk" "0.0.1.0" "" emptyAttributes) tracerOptions
   let workerType = Core.SReal
   -- logs <- liftIO $ fetchLogs globalRuntime
   -- forM_ logs $ \l -> case l.level of
