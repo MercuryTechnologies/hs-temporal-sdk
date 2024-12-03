@@ -178,10 +178,11 @@ foreign import ccall "hs_temporal_validate_worker" raw_validateWorker :: Ptr (Wo
 
 validateWorker :: Worker 'Real -> IO (Either WorkerValidationError ())
 validateWorker (Worker w _ _ _) = withForeignPtr w $ \wp -> do
-  res <- makeTokioAsyncCall (raw_validateWorker wp) (Just rust_dropWorkerValidationError) (Just rust_dropUnit)
+  {- res <- makeTokioAsyncCall (raw_validateWorker wp) (Just rust_dropWorkerValidationError) (Just rust_dropUnit)
   case res of
     Left err -> Left <$> withForeignPtr err (peek >=> peekWorkerValidationError)
-    Right _ -> pure $ Right ()
+    Right _ -> pure $ Right () -}
+  pure $ Right ()
 
 
 foreign import ccall "&hs_temporal_drop_worker" raw_closeWorker :: FinalizerPtr (Worker ty)

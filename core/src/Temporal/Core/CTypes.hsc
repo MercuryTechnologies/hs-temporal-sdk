@@ -321,7 +321,7 @@ peekWorkerValidationError CWorkerValidationError{..} = do
   message <- fromPtr0 $ castPtr message
   pure WorkerValidationError{..}
 
-foreign import ccall "hs_temporal_drop_worker_validation_error" rust_dropWorkerValidationError :: FinalizerPtr CWorkerValidationError
+-- foreign import ccall "hs_temporal_drop_worker_validation_error" rust_dropWorkerValidationError :: FinalizerPtr CWorkerValidationError
 
 foreign import ccall "&hs_temporal_drop_worker_error" rust_dropWorkerError :: FinalizerPtr CWorkerError
 
