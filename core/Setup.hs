@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 import Control.Monad
 import Data.Char (toLower)
 import Data.Functor (($>))
@@ -23,7 +25,11 @@ import Distribution.Simple.Utils (
   rawSystemStdInOut,
  )
 import Distribution.System
+#if MIN_VERSION_Cabal(3,14,0)
 import Distribution.Utils.Path (coerceSymbolicPath, getSymbolicPath, (</>))
+#else
+import System.FilePath ((</>))
+#endif
 import Distribution.Verbosity (Verbosity)
 import qualified Distribution.Verbosity as Verbosity
 import System.Directory (
@@ -44,7 +50,11 @@ main = defaultMainWithHooks hooks
         , confHook = \a flags -> do
             lbi <- confHook simpleUserHooks a flags >>= rsAddLibraryInfo flags
             unless (cabalFlag externalLibFlag flags) $ do
+#if MIN_VERSION_Cabal(3,14,0)
               copyTemporalBridge lbi (getSymbolicPath (buildDir lbi))
+#else
+              copyTemporalBridge lbi (buildDir lbi)
+#endif
             pure lbi
         , postClean = \_ flags _ _ ->
             rsClean (fromFlag $ cleanVerbosity flags)
@@ -104,7 +114,11 @@ rsAddLibraryInfo fl lbi' = do
           , extraLibDirs =
               if external
                 then extraLibDirs libBuild
+#if MIN_VERSION_Cabal(3,14,0)
                 else (coerceSymbolicPath (buildDir lbi')) : extraLibDirs libBuild
+#else
+                else (dir </> buildDir lbi') : extraLibDirs libBuild
+#endif
           }
   pure $ updateLbi lbi'
 
