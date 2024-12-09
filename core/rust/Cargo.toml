@@ -9,25 +9,24 @@ edition = "2021"
 crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
-temporal-client = { git = "https://github.com/temporalio/sdk-core", rev = "6e4079151d583afa14180a405785d5420513804e" }
-temporal-sdk-core = { git = "https://github.com/temporalio/sdk-core", rev = "6e4079151d583afa14180a405785d5420513804e", features = ["ephemeral-server"] }
-temporal-sdk-core-api = { git = "https://github.com/temporalio/sdk-core", rev = "6e4079151d583afa14180a405785d5420513804e" }
-temporal-sdk-core-protos = { git = "https://github.com/temporalio/sdk-core", rev = "6e4079151d583afa14180a405785d5420513804e" }
-rustfsm = { git = "https://github.com/temporalio/sdk-core", rev = "6e4079151d583afa14180a405785d5420513804e" }
+temporal-client = { git = "https://github.com/temporalio/sdk-core", branch = "master" }
+temporal-sdk-core = { git = "https://github.com/temporalio/sdk-core", branch = "master", features = ["ephemeral-server"] }
+temporal-sdk-core-api = { git = "https://github.com/temporalio/sdk-core", branch = "master" }
+temporal-sdk-core-protos = { git = "https://github.com/temporalio/sdk-core", branch = "master" }
+rustfsm = { git = "https://github.com/temporalio/sdk-core", branch = "master" }
 tokio = "1.26"
 tokio-stream = "0.1"
-tonic = "0.12"
+tonic = "0.9"
 tracing = "0.1"
-tower = "0.5.1"
 url = "2.2"
 parking_lot = "0.12.1"
 ffi-convert = "0.6.1"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-prost = "0.13"
-prost-types = "0.13"
+prost = "0.11"
+prost-types = "0.11"
 libc = "0.2.144"
-futures-util = { version = "0.3.31", default-features = false }
+futures = "0.3"
 
 [profile.release]
 opt-level = 3
