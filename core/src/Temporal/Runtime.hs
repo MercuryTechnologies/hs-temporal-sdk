@@ -5,7 +5,6 @@ module Temporal.Runtime (
   TelemetryOptions (..),
   Periodicity (..),
   initializeRuntime,
-  destroyRuntime,
   withRuntime,
   fetchLogs,
   CoreLog (..),
@@ -35,15 +34,6 @@ initializeRuntime opts = withCArrayBS (BL.toStrict $ encode opts) $ \optsP ->
   mask_ $ do
     rtP <- initRuntime optsP tryPutMVarPtr
     Runtime <$> newForeignPtr freeRuntime rtP
-
-
-{- | Destroy the core runtime and all associated resources.
-
-If a 'Runtime' value is garbage-collected without being explicitly
-destroyed, this function will be called automatically.
--}
-destroyRuntime :: Runtime -> IO ()
-destroyRuntime (Runtime rvar) = finalizeForeignPtr rvar
 
 
 -- | Access the underlying 'Runtime' pointer for calling out to Rust.

@@ -138,7 +138,7 @@ pub struct HsCallback<A, E> {
 }
 
 impl <A, E> HsCallback<A, E> {
-  pub(crate) fn put_success(self, runtime: &Runtime, result: A) 
+  pub(crate) fn put_success(self, runtime: &Runtime, result: A)
   where
     A: RawPointerConverter<A>,
   {
@@ -149,7 +149,7 @@ impl <A, E> HsCallback<A, E> {
     }
   }
 
-  pub(crate) fn put_failure(self, runtime: &Runtime, error: E) 
+  pub(crate) fn put_failure(self, runtime: &Runtime, error: E)
   where
     E: RawPointerConverter<E>,
   {
@@ -160,7 +160,7 @@ impl <A, E> HsCallback<A, E> {
     }
   }
 
-  pub(crate) fn put_result(self, runtime: &Runtime, result: Result<A, E>) 
+  pub(crate) fn put_result(self, runtime: &Runtime, result: Result<A, E>)
   where
     A: RawPointerConverter<A>,
     E: RawPointerConverter<E>,
@@ -173,16 +173,6 @@ impl <A, E> HsCallback<A, E> {
 }
 
 impl Runtime {
-  // pub fn future_into_hs<F, T>(&self, callback: HsCallback<T, ()>, fut: F)
-  // where
-  //     F: Future<Output = T> + Send + 'static,
-  //     T: RawPointerConverter<T>
-  // {
-  //   let handle = self.core.tokio_handle();
-  //   let _guard = handle.enter();
-  //   let result = handle.block_on(fut);
-  //   callback.put_success(result);
-  // }
 
   pub fn future_result_into_hs<F, T, E>(&self, callback: HsCallback<T, E>, fut: F)
   where

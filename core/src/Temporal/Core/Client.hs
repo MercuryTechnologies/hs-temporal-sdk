@@ -15,6 +15,7 @@ module Temporal.Core.Client (
   defaultClientConfig,
   closeClient,
   clientRuntime,
+  touchClient,
   CoreClient,
   ClientConfig (..),
   ClientTlsConfig (..),
@@ -33,7 +34,7 @@ module Temporal.Core.Client (
   call,
   RpcCall (..),
   RpcError (..),
-  ClientConnectionError (..),
+  ClientError (..),
 
   -- * Primitive access
   CRpcCall,
@@ -133,7 +134,18 @@ clientRuntime = runtime
 
 
 withClient :: Client -> (Ptr CoreClient -> IO a) -> IO a
-withClient (Client cc _ _) f = withMVar cc $ \(CoreClient c) -> withForeignPtr c f
+withClient (Client cc r _) f =
+  withMVar cc $ \(CoreClient c) ->
+    withRuntime r $ \_ ->
+      withForeignPtr c f
+
+
+touchClient :: Client -> IO ()
+touchClient (Client cc _ _) = do
+  mcc <- tryReadMVar cc
+  case mcc of
+    Nothing -> return ()
+    Just (CoreClient c) -> touchForeignPtr c
 
 
 newtype ByteVector = ByteVector {byteVector :: ByteString}
@@ -177,11 +189,13 @@ data RpcCall a = RpcCall
   }
 
 
-data ClientConnectionError = ClientConnectionError Text
+data ClientError
+  = ClientConnectionError Text
+  | ClientClosedError
   deriving (Show)
 
 
-instance Exception ClientConnectionError
+instance Exception ClientError
 
 
 defaultClientConfig :: ClientConfig
@@ -248,7 +262,7 @@ connectClient rt conf = do
 reconnectClient :: Client -> IO ()
 reconnectClient (Client clientPtrSlot rt conf) = mask $ \restore -> do
   (CoreClient clientPtr) <- takeMVar clientPtrSlot
-  (Client newClientPtr _ _) <- restore (connectClient rt conf) `catch` (\c -> putMVar clientPtrSlot (throw (c :: ClientConnectionError)) >> throwIO c)
+  (Client newClientPtr _ _) <- restore (connectClient rt conf) `catch` (\c -> putMVar clientPtrSlot (throw (c :: ClientError)) >> throwIO c)
   takeMVar newClientPtr >>= putMVar clientPtrSlot
 
 
@@ -256,7 +270,7 @@ closeClient :: Client -> IO ()
 closeClient (Client clientPtrSlot _ _) = mask_ $ do
   (CoreClient clientPtr) <- takeMVar clientPtrSlot
   finalizeForeignPtr clientPtr
-  putMVar clientPtrSlot (error "Client has been closed")
+  putMVar clientPtrSlot (throw ClientClosedError)
 
 
 type PrimRpcCall = Ptr CoreClient -> Ptr CRpcCall -> TokioCall CRPCError (CArray Word8)

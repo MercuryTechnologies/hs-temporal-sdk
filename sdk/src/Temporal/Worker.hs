@@ -476,6 +476,7 @@ Haskell the ability to have multiple Worker Entities in a single Worker Process.
 A single Worker Entity can listen to only a single Task Queue. But if a Worker Process has multiple Worker Entities, the Worker Process could be listening to multiple Task Queues.
 -}
 data Worker = forall ty.
+  Core.KnownWorkerType ty =>
   Worker
   { workerType :: !(Core.SWorkerType ty)
   , workerWorkflowLoop :: !(Async ())

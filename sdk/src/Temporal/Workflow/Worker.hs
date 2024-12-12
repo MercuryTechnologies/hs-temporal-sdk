@@ -49,6 +49,7 @@ data EvictionWithRunID = EvictionWithRunID
 
 
 data WorkflowWorker = forall ty.
+  Core.KnownWorkerType ty =>
   WorkflowWorker
   { workerWorkflowFunctions :: {-# UNPACK #-} !(HashMap Text WorkflowDefinition)
   , runningWorkflows :: {-# UNPACK #-} !(TVar (HashMap RunId WorkflowInstance))
