@@ -38,7 +38,7 @@ in {
 
   pre-commit.hooks = {
     crate2nix = {
-      enable = true;
+      enable = false;
       name = "crate2nix";
       files = "Cargo\\.(toml|lock)$";
       language = "system";

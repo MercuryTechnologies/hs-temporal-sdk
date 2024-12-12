@@ -83,7 +83,7 @@ data SomeWorkerType where
 
 type family InactiveForReplay (ty :: WorkerType) a where
   InactiveForReplay 'Real a = a
-  InactiveForReplay 'Replay _ = Void
+  InactiveForReplay 'Replay _ = ()
 
 
 data Worker (ty :: WorkerType) = Worker

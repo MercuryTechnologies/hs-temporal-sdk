@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use ffi_convert::*;
-use temporal_sdk_core::{CoreRuntime};
+use temporal_sdk_core::{CoreRuntime, TokioRuntimeBuilder};
 use temporal_sdk_core::telemetry::{build_otlp_metric_exporter, construct_filter_string, start_prometheus_metric_exporter};
 use temporal_sdk_core_api::telemetry::{CoreTelemetry, TelemetryOptions, TelemetryOptionsBuilder, Logger, OtelCollectorOptionsBuilder, PrometheusExporterOptionsBuilder};
 use std::sync::Arc;
@@ -25,7 +25,7 @@ pub(crate) struct Runtime {
 fn init_runtime(telemetry_config: TelemetryOptions, late_telemetry_options: HsTelemetryOptions, try_put_mvar: extern fn(capability: Capability, mvar: *mut MVar) -> ()) -> Box<RuntimeRef> {
   let mut runtime = CoreRuntime::new(
     telemetry_config,
-    tokio::runtime::Builder::new_multi_thread(),
+    TokioRuntimeBuilder::default()
   ).unwrap();
 
   let _guard = runtime.tokio_handle().enter();
