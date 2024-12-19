@@ -298,6 +298,30 @@ instance Show SomeApplicationFailure where
 instance Exception SomeApplicationFailure
 
 
+{- | A type of exception thrown to a running activity to cancel it due to things happening
+with the worker, such as a shutdown. This differs from a normal activity cancellation, which
+uses the 'cancel' function from the 'async' package.
+-}
+data ActivityCancelReason
+  = -- | The activity no longer exists on the server (may already be completed or its workflow
+    -- may be completed).
+    NotFound
+  | -- | The activity was explicitly cancelled.
+    CancelRequested
+  | -- | Activity timeout caused the activity to be marked cancelled.
+    Timeout
+  | -- | The worker the activity is running on is shutting down.
+    WorkerShutdown
+  | -- | We received a cancellation reason that we don't know how to handle.
+    UnknownCancellationReason
+  deriving stock (Show)
+
+
+instance Exception ActivityCancelReason where
+  toException = asyncExceptionToException
+  fromException = asyncExceptionFromException
+
+
 applicationFailureToException :: (Exception e, ToApplicationFailure e) => e -> SomeException
 applicationFailureToException e = toException $ SomeApplicationFailure e
 

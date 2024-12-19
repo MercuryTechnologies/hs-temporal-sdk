@@ -83,12 +83,14 @@ import qualified Control.Monad.Trans.Writer.CPS as CW
 import qualified Control.Monad.Trans.Writer.Lazy as LW
 import qualified Control.Monad.Trans.Writer.Strict as SW
 import Data.Foldable (for_)
+import Data.Int (Int64)
 import Data.Map (Map)
 import Data.Maybe
 import Data.ProtoLens.Field
 import Data.ProtoLens.Message
 import Data.Proxy
 import Data.Text (Text)
+import Data.Time.Clock.System (SystemTime)
 import Data.Typeable
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
@@ -114,7 +116,7 @@ import Temporal.Client.Types
 import Temporal.Common
 import qualified Temporal.Core.Client as Core
 import Temporal.Core.Client.WorkflowService
-import Temporal.Duration (durationToProto)
+import Temporal.Duration (Duration, durationToProto)
 import Temporal.Exception
 import Temporal.Payload
 import Temporal.SearchAttributes.Internal

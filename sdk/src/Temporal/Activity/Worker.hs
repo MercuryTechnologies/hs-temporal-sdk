@@ -30,10 +30,10 @@ import Temporal.Common.Async
 import qualified Temporal.Core.Worker as Core
 import Temporal.Duration (durationFromProto)
 import Temporal.Exception
-import qualified Temporal.Exception as Err
 import Temporal.Interceptor
 import Temporal.Payload
 import UnliftIO
+import UnliftIO.Concurrent (threadDelay)
 
 
 data ActivityWorker env = ActivityWorker
@@ -47,6 +47,16 @@ data ActivityWorker env = ActivityWorker
   , activityErrorConverters :: {-# UNPACK #-} ![ApplicationFailureHandler]
   , payloadProcessor :: {-# UNPACK #-} !PayloadProcessor
   }
+
+
+notifyShutdown :: MonadIO m => ActivityWorker env -> m ()
+notifyShutdown worker = do
+  let shutdownGracePeriod = fromIntegral (Core.gracefulShutdownPeriodMillis $ Core.getWorkerConfig worker.workerCore)
+  -- TODO logging here
+  when (shutdownGracePeriod > 0) $ do
+    threadDelay (shutdownGracePeriod * 1000)
+  running <- readTVarIO worker.runningActivities
+  forM_ running $ \thread -> cancelWith thread WorkerShutdown
 
 
 newtype ActivityWorkerM env m a = ActivityWorkerM {unActivityWorkerM :: ReaderT (ActivityWorker env) m a}
@@ -179,9 +189,20 @@ applyActivityTaskStart tsk tt msg = do
               defMessage
                 & C.taskToken .~ rawTaskToken tt
                 & C.result .~ case fromException err of
-                  Just AsyncCancelled ->
+                  Just (_cancelled :: ActivityCancelReason) ->
                     defMessage
-                      & AR.cancelled .~ defMessage
+                      & AR.cancelled
+                        .~ ( defMessage
+                              & AR.failure
+                                .~ ( defMessage
+                                      & F.message .~ "Activity cancelled"
+                                      & F.canceledFailureInfo
+                                        .~ ( defMessage
+                                              -- FIXME: provide some details if we have them
+                                              & F.details .~ defMessage
+                                           )
+                                   )
+                           )
                   Nothing ->
                     defMessage
                       & AR.failed
@@ -214,9 +235,15 @@ applyActivityTaskStart tsk tt msg = do
 
 
 applyActivityTaskCancel :: (MonadUnliftIO m, MonadLogger m) => TaskToken -> AT.Cancel -> ActivityWorkerM actEnv m ()
-applyActivityTaskCancel tt _msg = do
+applyActivityTaskCancel tt msg = do
   w <- ask
   $logDebug $ "Cancelling activity: " <> T.pack (show tt)
   running <- readTVarIO w.runningActivities
+  let cancelReason = case msg ^. AT.reason of
+        AT.NOT_FOUND -> NotFound
+        AT.CANCELLED -> CancelRequested
+        AT.TIMED_OUT -> Timeout
+        AT.WORKER_SHUTDOWN -> WorkerShutdown
+        AT.ActivityCancelReason'Unrecognized _ -> UnknownCancellationReason
   forM_ (HashMap.lookup tt running) $ \a ->
-    cancel a `finally` atomically (modifyTVar' w.runningActivities (HashMap.delete tt))
+    cancelWith a cancelReason `finally` atomically (modifyTVar' w.runningActivities (HashMap.delete tt))

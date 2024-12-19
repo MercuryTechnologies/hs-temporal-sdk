@@ -177,17 +177,3 @@ askActivityClient = Activity $ asks (getWorkerClient . (.activityWorker))
 instance MonadReader env (Activity env) where
   ask = Activity $ asks (.activityEnv)
   local f (Activity m) = Activity $ local (\a -> a {Temporal.Activity.Definition.activityEnv = f $ Temporal.Activity.Definition.activityEnv a}) m
-
-
-data ActivityCancelReason
-  = -- | The activity no longer exists on the server (may already be completed or its workflow
-    -- may be completed).
-    GoneFromServer
-  | -- | The was explicitly cancelled.
-    CancelRequested
-  | -- | Activity timeout caused the activity to marked cancelled.
-    Timeout
-  | -- | The worker the activity is running is shutting down.
-    WorkerShutdown
-  | -- | Failed to record heartbeat. This usually only happens if the payload converter fails.
-    HeartbeatRecordFailure

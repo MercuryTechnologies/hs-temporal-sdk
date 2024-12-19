@@ -420,19 +420,26 @@ impl WorkerRef {
   fn finalize_shutdown(&mut self, hs: HsCallback<CUnit, CWorkerError>) -> () {
       // Take the worker out of the option and leave None. This should be the
       // only reference remaining to the worker so try_unwrap will work.
-      let worker = Arc::try_unwrap(self.worker.take().unwrap()).map_err(|arc| {
-          WorkerError {
-            code: WorkerErrorCode::SDKError,
-            message: format!(
-              "Cannot finalize, expected 1 reference, got {}",
-              Arc::strong_count(&arc)
-            ),
+      let core_worker = match Arc::try_unwrap(self.worker.take().unwrap()) {
+          Ok(core_worker) => Ok(core_worker),
+          Err(arc) => Err(
+              WorkerError {
+                  code: WorkerErrorCode::SDKError,
+                  message: format!(
+                      "Cannot finalize, expected 1 reference, got {}",
+                      Arc::strong_count(&arc)
+                  ),
+              }
+          )
+      };
+      self.runtime.clone().future_result_into_hs(hs, async move {
+          match core_worker {
+              Ok(worker) => {
+                  worker.finalize_shutdown().await;
+                  Ok(CUnit{})
+              },
+              Err(err) => Err(CWorkerError::c_repr_of(err).unwrap())
           }
-      });
-      self.runtime.future_result_into_hs(hs, async move {
-        let worker = worker.map_err(|err| CWorkerError::c_repr_of(err).unwrap())?;
-        worker.finalize_shutdown().await;
-        Ok(CUnit{})
       })
   }
 }

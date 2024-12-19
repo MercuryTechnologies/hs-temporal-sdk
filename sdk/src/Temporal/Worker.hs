@@ -455,6 +455,9 @@ setPayloadProcessor p = ConfigM $ modify' $ \conf ->
     }
 
 
+data SomeActivityWorker = forall env. SomeActivityWorker !(Activity.ActivityWorker env)
+
+
 ------------------------------------------------------------------------------------
 
 {- | A Worker is responsible for polling a Task Queue, dequeueing a Task, executing
@@ -473,13 +476,15 @@ Haskell the ability to have multiple Worker Entities in a single Worker Process.
 A single Worker Entity can listen to only a single Task Queue. But if a Worker Process has multiple Worker Entities, the Worker Process could be listening to multiple Task Queues.
 -}
 data Worker = forall ty.
+  Core.KnownWorkerType ty =>
   Worker
-  { workerType :: Core.SWorkerType ty
-  , workerWorkflowLoop :: Async ()
-  , workerActivityLoop :: InactiveForReplay ty (Async ())
-  , workerCore :: Core.Worker ty
-  , workerTracer :: Tracer
-  , workerEvictionEmitter :: TChan Workflow.EvictionWithRunID
+  { workerType :: !(Core.SWorkerType ty)
+  , workerWorkflowLoop :: !(Async ())
+  , workerActivityLoop :: !(InactiveForReplay ty (Async ()))
+  , workerActivityWorker :: !(InactiveForReplay ty SomeActivityWorker)
+  , workerCore :: !(Core.Worker ty)
+  , workerTracer :: !Tracer
+  , workerEvictionEmitter :: !(TChan Workflow.EvictionWithRunID)
   }
 
 
@@ -497,11 +502,12 @@ startReplayWorker rt conf = provideCallStack $ runWorkerContext conf $ do
       workerInboundInterceptors = conf.interceptorConfig.workflowInboundInterceptors
       workerOutboundInterceptors = conf.interceptorConfig.workflowOutboundInterceptors
       workerDeadlockTimeout = conf.deadlockTimeout
-      workerClient = error "Cannot use workflow client in replay worker"
+      workerClient = ()
       workerErrorConverters = conf.applicationErrorConverters
       processor = conf.payloadProcessor
       workflowWorker = Workflow.WorkflowWorker {..}
-      workerActivityLoop = error "Cannot use activity worker in replay worker"
+      workerActivityWorker = ()
+      workerActivityLoop = ()
       workerType = Core.SReplay
       workerTracer = makeTracer conf.tracerProvider (InstrumentationLibrary "hs-temporal-sdk" "0.0.1.0") tracerOptions
   workerWorkflowLoop <- asyncLabelled (T.unpack $ T.concat ["temporal/worker/workflow/", Core.namespace conf.coreConfig, "/", Core.taskQueue conf.coreConfig]) $ do
@@ -590,7 +596,8 @@ startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "sta
       clientInterceptors = conf.interceptorConfig.clientInterceptors
       activityErrorConverters = errorConverters
       payloadProcessor = conf.payloadProcessor
-      activityWorker = Activity.ActivityWorker {..}
+      workerActivityWorker' = Activity.ActivityWorker {..}
+      workerActivityWorker = SomeActivityWorker workerActivityWorker'
       workerClient = client
       workerTracer = makeTracer conf.tracerProvider (InstrumentationLibrary "hs-temporal-sdk" "0.0.1.0") tracerOptions
   let workerType = Core.SReal
@@ -607,7 +614,7 @@ startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "sta
       `UnliftIO.finally` $(logDebug) "Exiting workflow worker loop"
   workerActivityLoop <- asyncLabelled (T.unpack $ T.concat ["temporal/worker/activity/", Core.namespace conf.coreConfig, "/", Core.taskQueue conf.coreConfig]) $ do
     $(logDebug) "Starting activity worker loop"
-    Activity.execute activityWorker
+    Activity.execute workerActivityWorker'
       `UnliftIO.finally` $(logDebug) "Exiting activity worker loop"
   pure Temporal.Worker.Worker {..}
 
@@ -690,8 +697,16 @@ waitWorkerSTM Temporal.Worker.Worker {workerType, workerWorkflowLoop, workerActi
 in-flight tasks to complete before finalizing the shutdown.
 -}
 shutdown :: (MonadUnliftIO m) => Temporal.Worker.Worker -> m ()
-shutdown worker@Temporal.Worker.Worker {workerCore, workerTracer} = OT.inSpan workerTracer "shutdown" defaultSpanArguments $ UnliftIO.mask $ \restore -> do
+shutdown worker@Temporal.Worker.Worker {workerCore, workerTracer, workerType, workerActivityWorker} = OT.inSpan workerTracer "shutdown" defaultSpanArguments $ UnliftIO.mask $ \restore -> do
   OT.inSpan workerTracer "initiateShutdown" defaultSpanArguments $ liftIO $ Core.initiateShutdown workerCore
+
+  -- Worker shutdown will wait on all activities to complete, so if a long-running activity does not respect cancellation,
+  -- the shutdown may never complete. However, we do issue a shutdown notification to the activities in the form of an
+  -- async exception, so they would have to be actively ignoring the shutdown notification to prevent the shutdown from completing.
+  () <- case workerType of
+    Core.SReal -> case workerActivityWorker of
+      SomeActivityWorker w -> Activity.notifyShutdown w
+    Core.SReplay -> pure ()
 
   OT.inSpan workerTracer "waitWorker" defaultSpanArguments $ restore $ waitWorker worker
 
