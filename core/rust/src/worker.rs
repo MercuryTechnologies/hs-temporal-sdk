@@ -170,13 +170,23 @@ pub struct CWorkerValidationError {
     message: *const c_char,
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_drop_worker_validation_error(err: *mut CWorkerValidationError) -> () {
+pub unsafe extern "C" fn hs_temporal_drop_worker_validation_error(
+    err: *mut CWorkerValidationError,
+) -> () {
     unsafe { drop(CWorkerValidationError::from_raw_pointer_mut(err)) }
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_drop_worker_error(err: *mut CWorkerError) -> () {
+pub unsafe extern "C" fn hs_temporal_drop_worker_error(err: *mut CWorkerError) -> () {
     unsafe { drop(CWorkerError::from_raw_pointer_mut(err)) }
 }
 
@@ -186,8 +196,12 @@ pub struct Unit {}
 #[target_type(Unit)]
 pub struct CUnit {}
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_drop_unit(unit: *mut CUnit) -> () {
+pub unsafe extern "C" fn hs_temporal_drop_unit(unit: *mut CUnit) -> () {
     unsafe { drop(CUnit::from_raw_pointer_mut(unit)) }
 }
 
@@ -209,13 +223,21 @@ fn new_worker(client: &client::ClientRef, config: WorkerConfig) -> Result<Worker
     })
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_drop_worker(worker: *mut WorkerRef) -> () {
+pub unsafe extern "C" fn hs_temporal_drop_worker(worker: *mut WorkerRef) -> () {
     unsafe { drop(Box::from_raw(worker)) }
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_new_worker(
+pub unsafe extern "C" fn hs_temporal_new_worker(
     client: *mut client::ClientRef,
     config: *const CArray<u8>,
     result_slot: *mut *mut WorkerRef,
@@ -280,8 +302,12 @@ fn new_replay_worker(
     Ok((worker, history_pusher))
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_new_replay_worker(
+pub unsafe extern "C" fn hs_temporal_new_replay_worker(
     runtime: *mut runtime::RuntimeRef,
     config: *const CArray<u8>,
     worker_slot: *mut *mut WorkerRef,
@@ -473,8 +499,12 @@ impl WorkerRef {
     }
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_validate_worker(
+pub unsafe extern "C" fn hs_temporal_validate_worker(
     worker: *mut WorkerRef,
     mvar: *mut MVar,
     cap: Capability,
@@ -502,8 +532,12 @@ pub extern "C" fn hs_temporal_validate_worker(
     })
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_worker_poll_workflow_activation(
+pub unsafe extern "C" fn hs_temporal_worker_poll_workflow_activation(
     worker: *mut WorkerRef,
     mvar: *mut MVar,
     cap: Capability,
@@ -520,8 +554,12 @@ pub extern "C" fn hs_temporal_worker_poll_workflow_activation(
     worker.poll_workflow_activation(hs)
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_worker_poll_activity_task(
+pub unsafe extern "C" fn hs_temporal_worker_poll_activity_task(
     worker: *mut WorkerRef,
     mvar: *mut MVar,
     cap: Capability,
@@ -538,8 +576,12 @@ pub extern "C" fn hs_temporal_worker_poll_activity_task(
     worker.poll_activity_task(hs)
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_worker_complete_workflow_activation(
+pub unsafe extern "C" fn hs_temporal_worker_complete_workflow_activation(
     worker: *mut WorkerRef,
     proto: *const CArray<u8>,
     mvar: *mut MVar,
@@ -559,8 +601,12 @@ pub extern "C" fn hs_temporal_worker_complete_workflow_activation(
     worker.complete_workflow_activation(hs, proto)
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_worker_complete_activity_task(
+pub unsafe extern "C" fn hs_temporal_worker_complete_activity_task(
     worker: *mut WorkerRef,
     proto: *const CArray<u8>,
     mvar: *mut MVar,
@@ -580,8 +626,12 @@ pub extern "C" fn hs_temporal_worker_complete_activity_task(
     worker.complete_activity_task(hs, proto)
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_worker_record_activity_heartbeat(
+pub unsafe extern "C" fn hs_temporal_worker_record_activity_heartbeat(
     worker: *mut WorkerRef,
     proto: *const CArray<u8>,
     error_slot: *mut *mut CWorkerError,
@@ -606,8 +656,12 @@ pub extern "C" fn hs_temporal_worker_record_activity_heartbeat(
     }
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_worker_request_workflow_eviction(
+pub unsafe extern "C" fn hs_temporal_worker_request_workflow_eviction(
     worker: *mut WorkerRef,
     run_id: *const CArray<u8>,
 ) {
@@ -618,14 +672,22 @@ pub extern "C" fn hs_temporal_worker_request_workflow_eviction(
     worker.request_workflow_eviction(run_id)
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_worker_initiate_shutdown(worker: *mut WorkerRef) {
+pub unsafe extern "C" fn hs_temporal_worker_initiate_shutdown(worker: *mut WorkerRef) {
     let worker = unsafe { &*worker };
     worker.initiate_shutdown()
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_worker_finalize_shutdown(
+pub unsafe extern "C" fn hs_temporal_worker_finalize_shutdown(
     worker: *mut WorkerRef,
     mvar: *mut MVar,
     cap: Capability,
@@ -705,8 +767,12 @@ impl HistoryPusher {
     }
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_history_pusher_push_history(
+pub unsafe extern "C" fn hs_temporal_history_pusher_push_history(
     history_pusher: *mut HistoryPusher,
     workflow_id: *const CArray<u8>,
     history_proto: *const CArray<u8>,
@@ -733,14 +799,28 @@ pub extern "C" fn hs_temporal_history_pusher_push_history(
     )
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
+///
+/// The caller must ensure that the argument is a live pointer to a [`HistoryPusher`], typically from across the FFI
+/// boundary after having been constructed by [`hs_temporal_new_replay_worker`].
 #[no_mangle]
-pub extern "C" fn hs_temporal_history_pusher_close(history_pusher: *mut HistoryPusher) {
+pub unsafe extern "C" fn hs_temporal_history_pusher_close(history_pusher: *mut HistoryPusher) {
     let history_pusher = unsafe { &mut *history_pusher };
     history_pusher.close()
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
+///
+/// The caller must ensure that the argument is a live pointer to a [`HistoryPusher`], typically from across the FFI
+/// boundary after having been constructed by [`hs_temporal_new_replay_worker`].
 #[no_mangle]
-pub extern "C" fn hs_temporal_history_pusher_drop(history_pusher: *mut HistoryPusher) {
+pub unsafe extern "C" fn hs_temporal_history_pusher_drop(history_pusher: *mut HistoryPusher) {
     let history_pusher = unsafe { Box::from_raw(history_pusher) };
     drop(history_pusher)
 }

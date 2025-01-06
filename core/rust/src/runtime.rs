@@ -102,8 +102,12 @@ pub enum HsTelemetryOptions {
     NoTelemetry,
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_init_runtime(
+pub unsafe extern "C" fn hs_temporal_init_runtime(
     telemetry_opts: *const CArray<u8>,
     try_put_mvar: extern "C" fn(Capability, *mut MVar) -> (),
 ) -> *mut RuntimeRef {
@@ -133,6 +137,10 @@ fn safe_drop_runtime(runtime: Box<RuntimeRef>) {
     drop(runtime)
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
 #[no_mangle]
 pub unsafe extern "C" fn hs_temporal_free_runtime(runtime: *mut RuntimeRef) {
     safe_drop_runtime(Box::from_raw(runtime));
@@ -209,8 +217,12 @@ impl Runtime {
     }
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_drop_byte_array(str: *const CArray<u8>) {
+pub unsafe extern "C" fn hs_temporal_drop_byte_array(str: *const CArray<u8>) {
     unsafe {
         drop(CArray::from_raw_pointer(str));
     }
@@ -226,8 +238,12 @@ pub struct CoreLogDef {
     pub span_contexts: Vec<String>,
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_runtime_fetch_logs(
+pub unsafe extern "C" fn hs_temporal_runtime_fetch_logs(
     runtime: *mut RuntimeRef,
 ) -> *const CArray<CArray<u8>> {
     let runtime = unsafe { &*runtime };
@@ -249,8 +265,12 @@ pub extern "C" fn hs_temporal_runtime_fetch_logs(
     CArray::c_repr_of(hs_logs).unwrap().into_raw_pointer()
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_runtime_free_logs(logs: *const CArray<CArray<u8>>) {
+pub unsafe extern "C" fn hs_temporal_runtime_free_logs(logs: *const CArray<CArray<u8>>) {
     unsafe {
         drop(CArray::from_raw_pointer(logs));
     }

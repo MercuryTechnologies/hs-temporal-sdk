@@ -87,8 +87,12 @@ pub struct TemporalDevServerConfigDef {
     pub extra_args: Vec<String>,
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_start_dev_server(
+pub unsafe extern "C" fn hs_temporal_start_dev_server(
     runtime: *mut RuntimeRef,
     json_string: *const c_char,
     mvar: *mut MVar,
@@ -124,8 +128,12 @@ pub extern "C" fn hs_temporal_start_dev_server(
     })
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_shutdown_ephemeral_server(
+pub unsafe extern "C" fn hs_temporal_shutdown_ephemeral_server(
     server: *mut EphemeralServerRef,
     mvar: *mut MVar,
     cap: Capability,
@@ -165,8 +173,12 @@ pub struct TestServerConfigDef {
     pub extra_args: Vec<String>,
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_start_test_server(
+pub unsafe extern "C" fn hs_temporal_start_test_server(
     runtime: *mut RuntimeRef,
     json_string: *const c_char,
     mvar: *mut MVar,

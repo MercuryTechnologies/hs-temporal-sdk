@@ -32,8 +32,12 @@ macro_rules! rpc_call {
 }
 
 // TODO, these are all quite repetitive, can we generate them?
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_count_workflow_executions(
+pub unsafe extern "C" fn hs_count_workflow_executions(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -59,8 +63,12 @@ pub extern "C" fn hs_count_workflow_executions(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_create_schedule(
+pub unsafe extern "C" fn hs_create_schedule(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -86,8 +94,12 @@ pub extern "C" fn hs_create_schedule(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_delete_schedule(
+pub unsafe extern "C" fn hs_delete_schedule(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -113,8 +125,12 @@ pub extern "C" fn hs_delete_schedule(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_deprecate_namespace(
+pub unsafe extern "C" fn hs_deprecate_namespace(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -140,8 +156,12 @@ pub extern "C" fn hs_deprecate_namespace(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_describe_namespace(
+pub unsafe extern "C" fn hs_describe_namespace(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -167,8 +187,12 @@ pub extern "C" fn hs_describe_namespace(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_describe_schedule(
+pub unsafe extern "C" fn hs_describe_schedule(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -194,8 +218,12 @@ pub extern "C" fn hs_describe_schedule(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_describe_task_queue(
+pub unsafe extern "C" fn hs_describe_task_queue(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -221,8 +249,12 @@ pub extern "C" fn hs_describe_task_queue(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_describe_workflow_execution(
+pub unsafe extern "C" fn hs_describe_workflow_execution(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -248,8 +280,12 @@ pub extern "C" fn hs_describe_workflow_execution(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_get_cluster_info(
+pub unsafe extern "C" fn hs_get_cluster_info(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -275,8 +311,12 @@ pub extern "C" fn hs_get_cluster_info(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_get_search_attributes(
+pub unsafe extern "C" fn hs_get_search_attributes(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -302,8 +342,12 @@ pub extern "C" fn hs_get_search_attributes(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_get_system_info(
+pub unsafe extern "C" fn hs_get_system_info(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -329,8 +373,12 @@ pub extern "C" fn hs_get_system_info(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_get_worker_build_id_compatibility(
+pub unsafe extern "C" fn hs_get_worker_build_id_compatibility(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -356,8 +404,12 @@ pub extern "C" fn hs_get_worker_build_id_compatibility(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_get_workflow_execution_history(
+pub unsafe extern "C" fn hs_get_workflow_execution_history(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -383,8 +435,12 @@ pub extern "C" fn hs_get_workflow_execution_history(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_get_workflow_execution_history_reverse(
+pub unsafe extern "C" fn hs_get_workflow_execution_history_reverse(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -410,8 +466,12 @@ pub extern "C" fn hs_get_workflow_execution_history_reverse(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_list_archived_workflow_executions(
+pub unsafe extern "C" fn hs_list_archived_workflow_executions(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -437,8 +497,12 @@ pub extern "C" fn hs_list_archived_workflow_executions(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_list_closed_workflow_executions(
+pub unsafe extern "C" fn hs_list_closed_workflow_executions(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -464,8 +528,12 @@ pub extern "C" fn hs_list_closed_workflow_executions(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_list_namespaces(
+pub unsafe extern "C" fn hs_list_namespaces(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -491,8 +559,12 @@ pub extern "C" fn hs_list_namespaces(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_list_open_workflow_executions(
+pub unsafe extern "C" fn hs_list_open_workflow_executions(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -518,8 +590,12 @@ pub extern "C" fn hs_list_open_workflow_executions(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_list_schedule_matching_times(
+pub unsafe extern "C" fn hs_list_schedule_matching_times(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -545,8 +621,12 @@ pub extern "C" fn hs_list_schedule_matching_times(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_list_schedules(
+pub unsafe extern "C" fn hs_list_schedules(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -572,8 +652,12 @@ pub extern "C" fn hs_list_schedules(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_list_task_queue_partitions(
+pub unsafe extern "C" fn hs_list_task_queue_partitions(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -599,8 +683,12 @@ pub extern "C" fn hs_list_task_queue_partitions(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_list_workflow_executions(
+pub unsafe extern "C" fn hs_list_workflow_executions(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -626,8 +714,12 @@ pub extern "C" fn hs_list_workflow_executions(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_patch_schedule(
+pub unsafe extern "C" fn hs_patch_schedule(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -653,8 +745,12 @@ pub extern "C" fn hs_patch_schedule(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_poll_activity_task_queue(
+pub unsafe extern "C" fn hs_poll_activity_task_queue(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -680,8 +776,12 @@ pub extern "C" fn hs_poll_activity_task_queue(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_poll_workflow_execution_update(
+pub unsafe extern "C" fn hs_poll_workflow_execution_update(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -707,8 +807,12 @@ pub extern "C" fn hs_poll_workflow_execution_update(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_poll_workflow_task_queue(
+pub unsafe extern "C" fn hs_poll_workflow_task_queue(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -734,8 +838,12 @@ pub extern "C" fn hs_poll_workflow_task_queue(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_query_workflow(
+pub unsafe extern "C" fn hs_query_workflow(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -761,8 +869,12 @@ pub extern "C" fn hs_query_workflow(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_record_activity_task_heartbeat(
+pub unsafe extern "C" fn hs_record_activity_task_heartbeat(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -788,8 +900,12 @@ pub extern "C" fn hs_record_activity_task_heartbeat(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_record_activity_task_heartbeat_by_id(
+pub unsafe extern "C" fn hs_record_activity_task_heartbeat_by_id(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -815,8 +931,12 @@ pub extern "C" fn hs_record_activity_task_heartbeat_by_id(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_register_namespace(
+pub unsafe extern "C" fn hs_register_namespace(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -842,8 +962,12 @@ pub extern "C" fn hs_register_namespace(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_request_cancel_workflow_execution(
+pub unsafe extern "C" fn hs_request_cancel_workflow_execution(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -869,8 +993,12 @@ pub extern "C" fn hs_request_cancel_workflow_execution(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_reset_sticky_task_queue(
+pub unsafe extern "C" fn hs_reset_sticky_task_queue(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -896,8 +1024,12 @@ pub extern "C" fn hs_reset_sticky_task_queue(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_reset_workflow_execution(
+pub unsafe extern "C" fn hs_reset_workflow_execution(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -923,8 +1055,12 @@ pub extern "C" fn hs_reset_workflow_execution(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_respond_activity_task_canceled(
+pub unsafe extern "C" fn hs_respond_activity_task_canceled(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -950,8 +1086,12 @@ pub extern "C" fn hs_respond_activity_task_canceled(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_respond_activity_task_canceled_by_id(
+pub unsafe extern "C" fn hs_respond_activity_task_canceled_by_id(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -977,8 +1117,12 @@ pub extern "C" fn hs_respond_activity_task_canceled_by_id(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_respond_activity_task_completed(
+pub unsafe extern "C" fn hs_respond_activity_task_completed(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1004,8 +1148,12 @@ pub extern "C" fn hs_respond_activity_task_completed(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_respond_activity_task_completed_by_id(
+pub unsafe extern "C" fn hs_respond_activity_task_completed_by_id(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1031,8 +1179,12 @@ pub extern "C" fn hs_respond_activity_task_completed_by_id(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_respond_activity_task_failed(
+pub unsafe extern "C" fn hs_respond_activity_task_failed(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1058,8 +1210,12 @@ pub extern "C" fn hs_respond_activity_task_failed(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_respond_activity_task_failed_by_id(
+pub unsafe extern "C" fn hs_respond_activity_task_failed_by_id(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1085,8 +1241,12 @@ pub extern "C" fn hs_respond_activity_task_failed_by_id(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_respond_query_task_completed(
+pub unsafe extern "C" fn hs_respond_query_task_completed(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1112,8 +1272,12 @@ pub extern "C" fn hs_respond_query_task_completed(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_respond_workflow_task_completed(
+pub unsafe extern "C" fn hs_respond_workflow_task_completed(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1139,8 +1303,12 @@ pub extern "C" fn hs_respond_workflow_task_completed(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_respond_workflow_task_failed(
+pub unsafe extern "C" fn hs_respond_workflow_task_failed(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1166,8 +1334,12 @@ pub extern "C" fn hs_respond_workflow_task_failed(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_scan_workflow_executions(
+pub unsafe extern "C" fn hs_scan_workflow_executions(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1193,8 +1365,12 @@ pub extern "C" fn hs_scan_workflow_executions(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_signal_with_start_workflow_execution(
+pub unsafe extern "C" fn hs_signal_with_start_workflow_execution(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1220,8 +1396,12 @@ pub extern "C" fn hs_signal_with_start_workflow_execution(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_signal_workflow_execution(
+pub unsafe extern "C" fn hs_signal_workflow_execution(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1247,8 +1427,12 @@ pub extern "C" fn hs_signal_workflow_execution(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_start_workflow_execution(
+pub unsafe extern "C" fn hs_start_workflow_execution(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1274,8 +1458,12 @@ pub extern "C" fn hs_start_workflow_execution(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_terminate_workflow_execution(
+pub unsafe extern "C" fn hs_terminate_workflow_execution(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1301,8 +1489,12 @@ pub extern "C" fn hs_terminate_workflow_execution(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_update_namespace(
+pub unsafe extern "C" fn hs_update_namespace(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1328,8 +1520,12 @@ pub extern "C" fn hs_update_namespace(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_update_schedule(
+pub unsafe extern "C" fn hs_update_schedule(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1355,8 +1551,12 @@ pub extern "C" fn hs_update_schedule(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_update_workflow_execution(
+pub unsafe extern "C" fn hs_update_workflow_execution(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1382,8 +1582,12 @@ pub extern "C" fn hs_update_workflow_execution(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_update_worker_build_id_compatibility(
+pub unsafe extern "C" fn hs_update_worker_build_id_compatibility(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1409,8 +1613,12 @@ pub extern "C" fn hs_update_worker_build_id_compatibility(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_get_current_time(
+pub unsafe extern "C" fn hs_get_current_time(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1436,8 +1644,12 @@ pub extern "C" fn hs_get_current_time(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_lock_time_skipping(
+pub unsafe extern "C" fn hs_lock_time_skipping(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1463,8 +1675,12 @@ pub extern "C" fn hs_lock_time_skipping(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_sleep_until(
+pub unsafe extern "C" fn hs_sleep_until(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1490,8 +1706,12 @@ pub extern "C" fn hs_sleep_until(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_sleep(
+pub unsafe extern "C" fn hs_sleep(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1517,8 +1737,12 @@ pub extern "C" fn hs_sleep(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_unlock_time_skipping_with_sleep(
+pub unsafe extern "C" fn hs_unlock_time_skipping_with_sleep(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1544,8 +1768,12 @@ pub extern "C" fn hs_unlock_time_skipping_with_sleep(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_unlock_time_skipping(
+pub unsafe extern "C" fn hs_unlock_time_skipping(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1571,8 +1799,12 @@ pub extern "C" fn hs_unlock_time_skipping(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_add_or_update_remote_cluster(
+pub unsafe extern "C" fn hs_add_or_update_remote_cluster(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1598,8 +1830,12 @@ pub extern "C" fn hs_add_or_update_remote_cluster(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_add_search_attributes(
+pub unsafe extern "C" fn hs_add_search_attributes(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1625,8 +1861,12 @@ pub extern "C" fn hs_add_search_attributes(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_delete_namespace(
+pub unsafe extern "C" fn hs_delete_namespace(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1652,8 +1892,12 @@ pub extern "C" fn hs_delete_namespace(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_list_clusters(
+pub unsafe extern "C" fn hs_list_clusters(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1679,8 +1923,12 @@ pub extern "C" fn hs_list_clusters(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_list_search_attributes(
+pub unsafe extern "C" fn hs_list_search_attributes(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1706,8 +1954,12 @@ pub extern "C" fn hs_list_search_attributes(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_remove_remote_cluster(
+pub unsafe extern "C" fn hs_remove_remote_cluster(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,
@@ -1733,8 +1985,12 @@ pub extern "C" fn hs_remove_remote_cluster(
     });
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_remove_search_attributes(
+pub unsafe extern "C" fn hs_remove_search_attributes(
     client: *mut ClientRef,
     c_call: *const RpcCall,
     mvar: *mut MVar,

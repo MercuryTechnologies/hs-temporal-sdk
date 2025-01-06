@@ -98,7 +98,11 @@ pub struct HaskellHashMapEntries {
     next: *const HaskellHashMapEntries,
 }
 
-pub fn convert_hashmap(hashmap: *const HaskellHashMapEntries) -> HashMap<String, String> {
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
+pub unsafe fn convert_hashmap(hashmap: *const HaskellHashMapEntries) -> HashMap<String, String> {
     let mut map = HashMap::new();
     if hashmap.is_null() {
         return map;
@@ -150,7 +154,7 @@ impl From<&RpcCall> for TemporalCall {
                 rust_vec.unwrap().clone()
             },
             retry: rpc_call.retry,
-            metadata: convert_hashmap(rpc_call.metadata),
+            metadata: unsafe { convert_hashmap(rpc_call.metadata) },
             timeout_millis: if rpc_call.timeout_millis.is_null() {
                 None
             } else {
@@ -213,8 +217,12 @@ pub fn connect_client(
         })
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_connect_client(
+pub unsafe extern "C" fn hs_temporal_connect_client(
     runtime_ref: *const runtime::RuntimeRef,
     config_json: *const libc::c_char,
     mvar: *mut MVar,
@@ -234,8 +242,12 @@ pub extern "C" fn hs_temporal_connect_client(
     connect_client(runtime_ref, config, hs_callback);
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_drop_client(client: *mut ClientRef) {
+pub unsafe extern "C" fn hs_temporal_drop_client(client: *mut ClientRef) {
     unsafe {
         drop(Box::from_raw(client));
     }
@@ -288,8 +300,12 @@ impl From<String> for CRPCError {
     }
 }
 
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
 #[no_mangle]
-pub extern "C" fn hs_temporal_drop_rpc_error(error: *mut CRPCError) {
+pub unsafe extern "C" fn hs_temporal_drop_rpc_error(error: *mut CRPCError) {
     unsafe {
         CRPCError::drop_raw_pointer(error).unwrap();
     }
