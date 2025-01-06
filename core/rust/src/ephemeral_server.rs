@@ -1,31 +1,35 @@
-use temporal_sdk_core::ephemeral_server::*;
-use crate::runtime::{RuntimeRef, Runtime, HsCallback, Capability, MVar};
+use crate::runtime::{Capability, HsCallback, MVar, Runtime, RuntimeRef};
 use crate::worker::{CUnit, Unit};
-use std::ffi::{CStr, c_char};
-use serde::Deserialize;
 use ffi_convert::*;
+use serde::Deserialize;
+use std::ffi::{c_char, CStr};
+use temporal_sdk_core::ephemeral_server::*;
 
 pub struct EphemeralServerRef {
-  pub(crate) server: EphemeralServer,
-  runtime: Runtime,
+    pub(crate) server: EphemeralServer,
+    runtime: Runtime,
 }
 
 impl RawPointerConverter<EphemeralServerRef> for EphemeralServerRef {
-  fn into_raw_pointer(self) -> *const EphemeralServerRef {
-    convert_into_raw_pointer(self)
-  }
+    fn into_raw_pointer(self) -> *const EphemeralServerRef {
+        convert_into_raw_pointer(self)
+    }
 
-  fn into_raw_pointer_mut(self) -> *mut EphemeralServerRef {
-    convert_into_raw_pointer_mut(self)
-  }
+    fn into_raw_pointer_mut(self) -> *mut EphemeralServerRef {
+        convert_into_raw_pointer_mut(self)
+    }
 
-  unsafe fn from_raw_pointer(ptr: *const EphemeralServerRef) -> Result<Self, UnexpectedNullPointerError> {
-    take_back_from_raw_pointer(ptr)
-  }
+    unsafe fn from_raw_pointer(
+        ptr: *const EphemeralServerRef,
+    ) -> Result<Self, UnexpectedNullPointerError> {
+        take_back_from_raw_pointer(ptr)
+    }
 
-  unsafe fn from_raw_pointer_mut(ptr: *mut EphemeralServerRef) -> Result<Self, UnexpectedNullPointerError> {
-    take_back_from_raw_pointer_mut(ptr)
-  }
+    unsafe fn from_raw_pointer_mut(
+        ptr: *mut EphemeralServerRef,
+    ) -> Result<Self, UnexpectedNullPointerError> {
+        take_back_from_raw_pointer_mut(ptr)
+    }
 }
 
 /// Where to find an executable. Can be a path or download.
@@ -85,43 +89,67 @@ pub struct TemporalDevServerConfigDef {
 
 #[no_mangle]
 pub extern "C" fn hs_temporal_start_dev_server(
-  runtime: *mut RuntimeRef, 
-  json_string: *const c_char, 
-  mvar: *mut MVar, 
-  cap: Capability, 
-  error_slot: *mut*mut CArray<u8>, 
-  result_slot: *mut*mut EphemeralServerRef
+    runtime: *mut RuntimeRef,
+    json_string: *const c_char,
+    mvar: *mut MVar,
+    cap: Capability,
+    error_slot: *mut *mut CArray<u8>,
+    result_slot: *mut *mut EphemeralServerRef,
 ) {
-  let runtime_ref = unsafe { runtime.as_ref().unwrap() };
-  let runtime = &runtime_ref.runtime;
-  let mut de = serde_json::Deserializer::from_str(unsafe { std::str::from_utf8_unchecked(CStr::from_ptr(json_string).to_bytes()) });
-  let conf = TemporalDevServerConfigDef::deserialize(&mut de).expect("Failed to deserialize config");
-  let hs: HsCallback<EphemeralServerRef, CArray<u8>> = HsCallback { cap, mvar, error_slot, result_slot };
-  runtime.future_result_into_hs(hs, async move {
-    let result = conf.start_server().await;
-    match result {
-      Ok(server) => Ok(EphemeralServerRef {
-        server,
-        runtime: runtime.clone(),
-      }),
-      Err(e) => Err(CArray::c_repr_of(format!("Failed to start server: {}", e).into_bytes()).expect("Failed to convert error to CArray"))
-    }
-  })
-
+    let runtime_ref = unsafe { runtime.as_ref().unwrap() };
+    let runtime = &runtime_ref.runtime;
+    let mut de = serde_json::Deserializer::from_str(unsafe {
+        std::str::from_utf8_unchecked(CStr::from_ptr(json_string).to_bytes())
+    });
+    let conf =
+        TemporalDevServerConfigDef::deserialize(&mut de).expect("Failed to deserialize config");
+    let hs: HsCallback<EphemeralServerRef, CArray<u8>> = HsCallback {
+        cap,
+        mvar,
+        error_slot,
+        result_slot,
+    };
+    runtime.future_result_into_hs(hs, async move {
+        let result = conf.start_server().await;
+        match result {
+            Ok(server) => Ok(EphemeralServerRef {
+                server,
+                runtime: runtime.clone(),
+            }),
+            Err(e) => Err(
+                CArray::c_repr_of(format!("Failed to start server: {}", e).into_bytes())
+                    .expect("Failed to convert error to CArray"),
+            ),
+        }
+    })
 }
 
 #[no_mangle]
-pub extern "C" fn hs_temporal_shutdown_ephemeral_server(server: *mut EphemeralServerRef, mvar: *mut MVar, cap: Capability, error_slot: *mut*mut CArray<u8>, result_slot: *mut*mut CUnit) {
-  let server_ref = unsafe { Box::from_raw(server) };
-  let mut server = server_ref.server;
-  let hs: HsCallback<CUnit, CArray<u8>> = HsCallback { cap, mvar, error_slot, result_slot };
-  server_ref.runtime.future_result_into_hs(hs, async move {
-    let result = server.shutdown().await;
-    match result {
-      Ok(()) => Ok(CUnit::c_repr_of(Unit {}).unwrap()),
-      Err(e) => Err(CArray::c_repr_of(format!("Failed to shutdown server: {}", e).into_bytes()).expect("Failed to convert error to CArray"))
-    }
-  })
+pub extern "C" fn hs_temporal_shutdown_ephemeral_server(
+    server: *mut EphemeralServerRef,
+    mvar: *mut MVar,
+    cap: Capability,
+    error_slot: *mut *mut CArray<u8>,
+    result_slot: *mut *mut CUnit,
+) {
+    let server_ref = unsafe { Box::from_raw(server) };
+    let mut server = server_ref.server;
+    let hs: HsCallback<CUnit, CArray<u8>> = HsCallback {
+        cap,
+        mvar,
+        error_slot,
+        result_slot,
+    };
+    server_ref.runtime.future_result_into_hs(hs, async move {
+        let result = server.shutdown().await;
+        match result {
+            Ok(()) => Ok(CUnit::c_repr_of(Unit {}).unwrap()),
+            Err(e) => Err(CArray::c_repr_of(
+                format!("Failed to shutdown server: {}", e).into_bytes(),
+            )
+            .expect("Failed to convert error to CArray")),
+        }
+    })
 }
 
 /// Configuration for the test server.
@@ -139,26 +167,36 @@ pub struct TestServerConfigDef {
 
 #[no_mangle]
 pub extern "C" fn hs_temporal_start_test_server(
-  runtime: *mut RuntimeRef, 
-  json_string: *const c_char, 
-  mvar: *mut MVar, 
-  cap: Capability,
-  error_slot: *mut*mut CArray<u8>,
-  result_slot: *mut*mut EphemeralServerRef
+    runtime: *mut RuntimeRef,
+    json_string: *const c_char,
+    mvar: *mut MVar,
+    cap: Capability,
+    error_slot: *mut *mut CArray<u8>,
+    result_slot: *mut *mut EphemeralServerRef,
 ) -> () {
-  let runtime_ref = unsafe { runtime.as_ref().unwrap() };
-  let runtime = &runtime_ref.runtime;
-  let mut de = serde_json::Deserializer::from_str(unsafe { std::str::from_utf8_unchecked(CStr::from_ptr(json_string).to_bytes()) });
-  let conf = TestServerConfigDef::deserialize(&mut de).expect("Failed to deserialize config");
-  let hs: HsCallback<EphemeralServerRef, CArray<u8>> = HsCallback { cap, mvar, error_slot, result_slot };
-  runtime.future_result_into_hs(hs, async move {
-    let result = conf.start_server().await;
-    match result {
-      Ok(server) => Ok(EphemeralServerRef {
-        server,
-        runtime: runtime.clone(),
-      }),
-      Err(e) => Err(CArray::c_repr_of(format!("Failed to start server: {}", e).into_bytes()).expect("Failed to convert error to CArray"))
-    }
-  })
+    let runtime_ref = unsafe { runtime.as_ref().unwrap() };
+    let runtime = &runtime_ref.runtime;
+    let mut de = serde_json::Deserializer::from_str(unsafe {
+        std::str::from_utf8_unchecked(CStr::from_ptr(json_string).to_bytes())
+    });
+    let conf = TestServerConfigDef::deserialize(&mut de).expect("Failed to deserialize config");
+    let hs: HsCallback<EphemeralServerRef, CArray<u8>> = HsCallback {
+        cap,
+        mvar,
+        error_slot,
+        result_slot,
+    };
+    runtime.future_result_into_hs(hs, async move {
+        let result = conf.start_server().await;
+        match result {
+            Ok(server) => Ok(EphemeralServerRef {
+                server,
+                runtime: runtime.clone(),
+            }),
+            Err(e) => Err(
+                CArray::c_repr_of(format!("Failed to start server: {}", e).into_bytes())
+                    .expect("Failed to convert error to CArray"),
+            ),
+        }
+    })
 }
