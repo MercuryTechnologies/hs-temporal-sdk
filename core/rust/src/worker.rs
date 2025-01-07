@@ -177,7 +177,7 @@ pub struct CWorkerValidationError {
 #[no_mangle]
 pub unsafe extern "C" fn hs_temporal_drop_worker_validation_error(
     err: *mut CWorkerValidationError,
-) -> () {
+) {
     unsafe { drop(CWorkerValidationError::from_raw_pointer_mut(err)) }
 }
 
@@ -186,7 +186,7 @@ pub unsafe extern "C" fn hs_temporal_drop_worker_validation_error(
 ///
 /// Haskell FFI bridge invariants.
 #[no_mangle]
-pub unsafe extern "C" fn hs_temporal_drop_worker_error(err: *mut CWorkerError) -> () {
+pub unsafe extern "C" fn hs_temporal_drop_worker_error(err: *mut CWorkerError) {
     unsafe { drop(CWorkerError::from_raw_pointer_mut(err)) }
 }
 
@@ -201,7 +201,7 @@ pub struct CUnit {}
 ///
 /// Haskell FFI bridge invariants.
 #[no_mangle]
-pub unsafe extern "C" fn hs_temporal_drop_unit(unit: *mut CUnit) -> () {
+pub unsafe extern "C" fn hs_temporal_drop_unit(unit: *mut CUnit) {
     unsafe { drop(CUnit::from_raw_pointer_mut(unit)) }
 }
 
@@ -228,7 +228,7 @@ fn new_worker(client: &client::ClientRef, config: WorkerConfig) -> Result<Worker
 ///
 /// Haskell FFI bridge invariants.
 #[no_mangle]
-pub unsafe extern "C" fn hs_temporal_drop_worker(worker: *mut WorkerRef) -> () {
+pub unsafe extern "C" fn hs_temporal_drop_worker(worker: *mut WorkerRef) {
     unsafe { drop(Box::from_raw(worker)) }
 }
 
@@ -242,7 +242,7 @@ pub unsafe extern "C" fn hs_temporal_new_worker(
     config: *const CArray<u8>,
     result_slot: *mut *mut WorkerRef,
     error_slot: *mut *mut CWorkerError,
-) -> () {
+) {
     let client_ref = unsafe { client.as_ref() }.expect("client is null");
     let config_json = unsafe { CArray::raw_borrow(config).unwrap() };
     let config = serde_json::from_slice(&config_json.as_rust().unwrap().clone()).map_err(|err| {
@@ -313,7 +313,7 @@ pub unsafe extern "C" fn hs_temporal_new_replay_worker(
     worker_slot: *mut *mut WorkerRef,
     history_slot: *mut *mut HistoryPusher,
     error_slot: *mut *mut CWorkerError,
-) -> () {
+) {
     let runtime_ref = unsafe { runtime.as_ref() }.expect("client is null");
     let config_json = unsafe { CArray::raw_borrow(config).unwrap() };
     let config =
@@ -350,14 +350,14 @@ pub unsafe extern "C" fn hs_temporal_new_replay_worker(
 }
 
 impl WorkerRef {
-    fn poll_workflow_activation(&self, hs: HsCallback<CArray<u8>, CWorkerError>) -> () {
+    fn poll_workflow_activation(&self, hs: HsCallback<CArray<u8>, CWorkerError>) {
         let worker = self.worker.as_ref().unwrap().clone();
         self.runtime.future_result_into_hs(hs, async move {
             let bytes = match worker.poll_workflow_activation().await {
                 Ok(act) => Ok(act.encode_to_vec()),
                 Err(PollWfError::ShutDown) => Err(WorkerError {
                     code: WorkerErrorCode::PollShutdownError,
-                    message: format!("Poll shutdown error"),
+                    message: "Poll shutdown error".to_string(),
                 }),
                 Err(err) => Err(WorkerError {
                     code: WorkerErrorCode::PollFailure,
@@ -371,14 +371,14 @@ impl WorkerRef {
         })
     }
 
-    fn poll_activity_task(&self, hs: HsCallback<CArray<u8>, CWorkerError>) -> () {
+    fn poll_activity_task(&self, hs: HsCallback<CArray<u8>, CWorkerError>) {
         let worker = self.worker.as_ref().unwrap().clone();
         self.runtime.future_result_into_hs(hs, async move {
             let bytes = (match worker.poll_activity_task().await {
                 Ok(task) => Ok(task.encode_to_vec()),
                 Err(PollActivityError::ShutDown) => Err(WorkerError {
                     code: WorkerErrorCode::PollShutdownError,
-                    message: format!("Poll shutdown error"),
+                    message: "Poll shutdown error".to_string(),
                 }),
                 Err(err) => Err(WorkerError {
                     code: WorkerErrorCode::PollFailure,
@@ -394,7 +394,7 @@ impl WorkerRef {
         &self,
         hs: HsCallback<CUnit, CWorkerError>,
         proto: &[u8],
-    ) -> () {
+    ) {
         let worker = self.worker.as_ref().unwrap().clone();
         let completion = WorkflowActivationCompletion::decode(proto);
         self.runtime.future_result_into_hs(hs, async move {
@@ -419,7 +419,7 @@ impl WorkerRef {
         })
     }
 
-    fn complete_activity_task(&self, hs: HsCallback<CUnit, CWorkerError>, proto: &[u8]) -> () {
+    fn complete_activity_task(&self, hs: HsCallback<CUnit, CWorkerError>, proto: &[u8]) {
         let worker = self.worker.as_ref().unwrap().clone();
         let completion = ActivityTaskCompletion::decode(proto);
         self.runtime.future_result_into_hs(hs, async move {
@@ -461,7 +461,7 @@ impl WorkerRef {
         }
     }
 
-    fn request_workflow_eviction(&self, run_id: &str) -> () {
+    fn request_workflow_eviction(&self, run_id: &str) {
         enter_sync!(self.runtime);
         self.worker
             .as_ref()
@@ -469,12 +469,12 @@ impl WorkerRef {
             .request_workflow_eviction(run_id);
     }
 
-    fn initiate_shutdown(&self) -> () {
+    fn initiate_shutdown(&self) {
         let worker = self.worker.as_ref().unwrap().clone();
         worker.initiate_shutdown();
     }
 
-    fn finalize_shutdown(&mut self, hs: HsCallback<CUnit, CWorkerError>) -> () {
+    fn finalize_shutdown(&mut self, hs: HsCallback<CUnit, CWorkerError>) {
         // Take the worker out of the option and leave None. This should be the
         // only reference remaining to the worker so try_unwrap will work.
         let core_worker = match Arc::try_unwrap(self.worker.take().unwrap()) {
@@ -728,7 +728,7 @@ impl HistoryPusher {
         workflow_id: &str,
         history_proto: &[u8],
         hs: HsCallback<CUnit, CWorkerError>,
-    ) -> () {
+    ) {
         let history = History::decode(history_proto).map_err(|err| WorkerError {
             code: WorkerErrorCode::InvalidProto,
             message: format!("Invalid proto: {}", err),
@@ -739,7 +739,7 @@ impl HistoryPusher {
         } else {
             Err(WorkerError {
                 code: WorkerErrorCode::ReplayWorkerClosed,
-                message: format!("Replay worker is no longer accepting new histories"),
+                message: "Replay worker is no longer accepting new histories".to_string(),
             })
         };
         // We accept this doesn't have logging/tracing
@@ -752,9 +752,7 @@ impl HistoryPusher {
                 .map_err(|_| {
                     CWorkerError::c_repr_of(WorkerError {
                         code: WorkerErrorCode::SDKError,
-                        message: format!(
-                            "Channel for history replay was dropped, this is an SDK bug."
-                        ),
+                        message: "Channel for history replay was dropped, this is an SDK bug.".to_string(),
                     })
                     .unwrap()
                 })?;

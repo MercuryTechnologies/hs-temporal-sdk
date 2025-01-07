@@ -185,7 +185,7 @@ pub unsafe extern "C" fn hs_temporal_start_test_server(
     cap: Capability,
     error_slot: *mut *mut CArray<u8>,
     result_slot: *mut *mut EphemeralServerRef,
-) -> () {
+) {
     let runtime_ref = unsafe { runtime.as_ref().unwrap() };
     let runtime = &runtime_ref.runtime;
     let mut de = serde_json::Deserializer::from_str(unsafe {

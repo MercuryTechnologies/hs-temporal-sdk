@@ -53,24 +53,21 @@ fn client_config_to_options(
         .client_version(client_config.client_version)
         .identity(client_config.identity);
 
-    match client_config.tls_config {
-        Some(tls_config) => {
-            let tls_config = TlsConfig {
-                server_root_ca_cert: tls_config.server_root_ca_cert,
-                domain: tls_config.domain,
-                client_tls_config: match (tls_config.client_cert, tls_config.client_private_key) {
-                    (Some(client_cert), Some(client_private_key)) => {
-                        Some(temporal_client::ClientTlsConfig {
-                            client_cert,
-                            client_private_key,
-                        })
-                    }
-                    _ => None,
-                },
-            };
-            options_builder = options_builder.tls_cfg(tls_config);
-        }
-        None => {}
+    if let Some(tls_config) = client_config.tls_config {
+        let tls_config = TlsConfig {
+            server_root_ca_cert: tls_config.server_root_ca_cert,
+            domain: tls_config.domain,
+            client_tls_config: match (tls_config.client_cert, tls_config.client_private_key) {
+                (Some(client_cert), Some(client_private_key)) => {
+                    Some(temporal_client::ClientTlsConfig {
+                        client_cert,
+                        client_private_key,
+                    })
+                }
+                _ => None,
+            },
+        };
+        options_builder = options_builder.tls_cfg(tls_config);
     }
 
     if let Some(retry_config) = client_config.retry_config {
@@ -193,7 +190,7 @@ pub fn connect_client(
     runtime_ref: &runtime::RuntimeRef,
     config: ClientConfig,
     hs_callback: HsCallback<ClientRef, CArray<u8>>,
-) -> () {
+) {
     let opts: ClientOptions = client_config_to_options(config).unwrap();
     let runtime = runtime_ref.runtime.clone();
     runtime_ref
