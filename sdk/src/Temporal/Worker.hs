@@ -31,6 +31,7 @@ module Temporal.Worker (
   linkWorker,
   pollWorkerSTM,
   waitWorkerSTM,
+  replaceEnvironment,
 
   -- * Configuration
   WorkerConfig (..),
@@ -455,9 +456,6 @@ setPayloadProcessor p = ConfigM $ modify' $ \conf ->
     }
 
 
-data SomeActivityWorker = forall env. SomeActivityWorker !(Activity.ActivityWorker env)
-
-
 ------------------------------------------------------------------------------------
 
 {- | A Worker is responsible for polling a Task Queue, dequeueing a Task, executing
@@ -475,20 +473,20 @@ Haskell the ability to have multiple Worker Entities in a single Worker Process.
 
 A single Worker Entity can listen to only a single Task Queue. But if a Worker Process has multiple Worker Entities, the Worker Process could be listening to multiple Task Queues.
 -}
-data Worker = forall ty.
+data Worker env = forall ty.
   Core.KnownWorkerType ty =>
   Worker
   { workerType :: !(Core.SWorkerType ty)
   , workerWorkflowLoop :: !(Async ())
   , workerActivityLoop :: !(InactiveForReplay ty (Async ()))
-  , workerActivityWorker :: !(InactiveForReplay ty SomeActivityWorker)
+  , workerActivityWorker :: !(InactiveForReplay ty (Activity.ActivityWorker env))
   , workerCore :: !(Core.Worker ty)
   , workerTracer :: !Tracer
   , workerEvictionEmitter :: !(TChan Workflow.EvictionWithRunID)
   }
 
 
-startReplayWorker :: (MonadUnliftIO m, MonadCatch m) => Runtime -> WorkerConfig actEnv -> m (Temporal.Worker.Worker, Core.HistoryPusher)
+startReplayWorker :: (MonadUnliftIO m, MonadCatch m) => Runtime -> WorkerConfig actEnv -> m (Temporal.Worker.Worker actEnv, Core.HistoryPusher)
 startReplayWorker rt conf = provideCallStack $ runWorkerContext conf $ do
   $(logDebug) "Starting worker"
   let coreConfig' = conf.coreConfig {Core.nondeterminismAsWorkflowFail = True}
@@ -566,7 +564,7 @@ instance Monad m => MonadTracer (WorkerContextM m) where
   getTracer = WorkerContextM ask
 
 
-startWorker :: (MonadUnliftIO m, MonadCatch m) => Client -> WorkerConfig actEnv -> m Temporal.Worker.Worker
+startWorker :: (MonadUnliftIO m, MonadCatch m) => Client -> WorkerConfig actEnv -> m (Temporal.Worker.Worker actEnv)
 startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "startWorker" defaultSpanArguments $ do
   workerCore <-
     inSpan
@@ -580,6 +578,7 @@ startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "sta
     Right () -> pure ()
   runningWorkflows <- newTVarIO mempty
   runningActivities <- newTVarIO mempty
+  activityEnv <- newIORef conf.actEnv
   let errorConverters = mkAnnotatedHandlers conf.applicationErrorConverters
       workerWorkflowFunctions = conf.wfDefs
       workerTaskQueue = TaskQueue $ Core.taskQueue conf.coreConfig
@@ -589,15 +588,13 @@ startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "sta
       workerErrorConverters = errorConverters
       processor = conf.payloadProcessor
       workflowWorker = Workflow.WorkflowWorker {..}
-      initialEnv = conf.actEnv
       definitions = conf.actDefs
       activityInboundInterceptors = conf.interceptorConfig.activityInboundInterceptors
       activityOutboundInterceptors = conf.interceptorConfig.activityOutboundInterceptors
       clientInterceptors = conf.interceptorConfig.clientInterceptors
       activityErrorConverters = errorConverters
       payloadProcessor = conf.payloadProcessor
-      workerActivityWorker' = Activity.ActivityWorker {..}
-      workerActivityWorker = SomeActivityWorker workerActivityWorker'
+      workerActivityWorker = Activity.ActivityWorker {..}
       workerClient = client
       workerTracer = makeTracer conf.tracerProvider (InstrumentationLibrary "hs-temporal-sdk" "0.0.1.0") tracerOptions
   let workerType = Core.SReal
@@ -614,7 +611,7 @@ startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "sta
       `UnliftIO.finally` $(logDebug) "Exiting workflow worker loop"
   workerActivityLoop <- asyncLabelled (T.unpack $ T.concat ["temporal/worker/activity/", Core.namespace conf.coreConfig, "/", Core.taskQueue conf.coreConfig]) $ do
     $(logDebug) "Starting activity worker loop"
-    Activity.execute workerActivityWorker'
+    Activity.execute workerActivityWorker
       `UnliftIO.finally` $(logDebug) "Exiting activity worker loop"
   pure Temporal.Worker.Worker {..}
 
@@ -625,7 +622,7 @@ Any exceptions thrown by the workflow or activity loops will be rethrown.
 
 This function is generally not needed, as 'shutdown' will wait for the worker to exit.
 -}
-waitWorker :: (MonadIO m) => Temporal.Worker.Worker -> m ()
+waitWorker :: (MonadIO m) => Temporal.Worker.Worker actEnv -> m ()
 waitWorker (Temporal.Worker.Worker {workerType, workerWorkflowLoop, workerActivityLoop}) = do
   case workerType of
     Core.SReal -> do
@@ -646,7 +643,7 @@ waitWorker (Temporal.Worker.Worker {workerType, workerWorkflowLoop, workerActivi
 If the worker has both workflow and activity definitions registered, this will link both the workflow and activity loops.
 If one of the loops fails, the worker will initiate graceful shutdown (but not block) before rethrowing the exception.
 -}
-linkWorker :: Temporal.Worker.Worker -> IO ()
+linkWorker :: Temporal.Worker.Worker actEnv -> IO ()
 linkWorker Temporal.Worker.Worker {workerCore, workerType, workerWorkflowLoop, workerActivityLoop} = do
   tid <- myThreadId
   void $ forkIOLabelled (T.unpack $ T.concat ["temporal/worker/link/", Core.namespace c, "/", Core.taskQueue c]) $ do
@@ -670,7 +667,7 @@ linkWorker Temporal.Worker.Worker {workerCore, workerType, workerWorkflowLoop, w
     c = Core.getWorkerConfig workerCore
 
 
-pollWorkerSTM :: Temporal.Worker.Worker -> STM (Maybe (Either SomeException ()))
+pollWorkerSTM :: Temporal.Worker.Worker actEnv -> STM (Maybe (Either SomeException ()))
 pollWorkerSTM Temporal.Worker.Worker {workerType, workerWorkflowLoop, workerActivityLoop} = do
   case workerType of
     Core.SReal -> do
@@ -684,7 +681,7 @@ pollWorkerSTM Temporal.Worker.Worker {workerType, workerWorkflowLoop, workerActi
     Core.SReplay -> pollSTM workerWorkflowLoop
 
 
-waitWorkerSTM :: Temporal.Worker.Worker -> STM ()
+waitWorkerSTM :: Temporal.Worker.Worker actEnv -> STM ()
 waitWorkerSTM Temporal.Worker.Worker {workerType, workerWorkflowLoop, workerActivityLoop} = do
   case workerType of
     Core.SReal -> do
@@ -696,7 +693,7 @@ waitWorkerSTM Temporal.Worker.Worker {workerType, workerWorkflowLoop, workerActi
 {- | Shut down a worker. This will initiate a graceful shutdown of the worker, waiting for all
 in-flight tasks to complete before finalizing the shutdown.
 -}
-shutdown :: (MonadUnliftIO m) => Temporal.Worker.Worker -> m ()
+shutdown :: (MonadUnliftIO m) => Temporal.Worker.Worker actEnv -> m ()
 shutdown worker@Temporal.Worker.Worker {workerCore, workerTracer, workerType, workerActivityWorker} = OT.inSpan workerTracer "shutdown" defaultSpanArguments $ UnliftIO.mask $ \restore -> do
   OT.inSpan workerTracer "initiateShutdown" defaultSpanArguments $ liftIO $ Core.initiateShutdown workerCore
 
@@ -704,8 +701,7 @@ shutdown worker@Temporal.Worker.Worker {workerCore, workerTracer, workerType, wo
   -- the shutdown may never complete. However, we do issue a shutdown notification to the activities in the form of an
   -- async exception, so they would have to be actively ignoring the shutdown notification to prevent the shutdown from completing.
   () <- case workerType of
-    Core.SReal -> case workerActivityWorker of
-      SomeActivityWorker w -> Activity.notifyShutdown w
+    Core.SReal -> Activity.notifyShutdown workerActivityWorker
     Core.SReplay -> pure ()
 
   OT.inSpan workerTracer "waitWorker" defaultSpanArguments $ restore $ waitWorker worker
@@ -721,12 +717,12 @@ shutdown worker@Temporal.Worker.Worker {workerCore, workerTracer, workerType, wo
 --   $(logInfo) $ Text.pack $ show l
 
 -- | Subscribe to evictions from the worker. This is not generally needed, but can be useful for debugging.
-subscribeToEvictions :: MonadIO m => Temporal.Worker.Worker -> m (TChan Workflow.EvictionWithRunID)
+subscribeToEvictions :: MonadIO m => Temporal.Worker.Worker actEnv -> m (TChan Workflow.EvictionWithRunID)
 subscribeToEvictions worker = liftIO $ atomically $ dupTChan worker.workerEvictionEmitter
 
 
 -- | Subscribe to evictions from the worker. This is not generally needed, but can be useful for debugging.
-subscribeToEvictionsSTM :: Temporal.Worker.Worker -> STM (TChan Workflow.EvictionWithRunID)
+subscribeToEvictionsSTM :: Temporal.Worker.Worker actEnv -> STM (TChan Workflow.EvictionWithRunID)
 subscribeToEvictionsSTM worker = dupTChan worker.workerEvictionEmitter
 
 
@@ -738,3 +734,14 @@ evictionWasFatal :: Workflow.EvictionWithRunID -> Bool
 evictionWasFatal Workflow.EvictionWithRunID {eviction} = case eviction ^. Activation.reason of
   RemoveFromCache'FATAL -> True
   _ -> False
+
+
+{- | Replace the environment for activities run within a Worker. This is generally not needed, but can be useful for reusing
+a Worker under test.
+-}
+replaceEnvironment :: MonadIO m => Temporal.Worker.Worker actEnv -> actEnv -> m ()
+replaceEnvironment Temporal.Worker.Worker {..} env = do
+  case workerType of
+    Core.SReal -> do
+      liftIO $ writeIORef workerActivityWorker.activityEnv env
+    Core.SReplay -> pure ()
