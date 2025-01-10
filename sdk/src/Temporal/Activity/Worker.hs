@@ -37,7 +37,7 @@ import UnliftIO.Concurrent (threadDelay)
 
 
 data ActivityWorker env = ActivityWorker
-  { initialEnv :: env
+  { activityEnv :: {-# UNPACK #-} !(IORef env)
   , definitions :: {-# UNPACK #-} !(HashMap Text (ActivityDefinition env))
   , runningActivities :: {-# UNPACK #-} !(TVar (HashMap TaskToken (Async ())))
   , workerCore :: {-# UNPACK #-} !(Core.Worker 'Core.Real)
@@ -159,13 +159,14 @@ applyActivityTaskStart tsk tt msg = do
   requireActivityNotRunning tt $ do
     info <- activityInfoFromProto tt msg
     args <- processorDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload (msg ^. AT.vec'input))
-    let env = w.initialEnv
-        actEnv = ActivityEnv w.workerCore info w.clientInterceptors w.payloadProcessor
-        input =
-          ExecuteActivityInput
-            args
-            info.headerFields
-            info
+    env <- readIORef w.activityEnv
+    let
+      actEnv = ActivityEnv w.workerCore info w.clientInterceptors w.payloadProcessor
+      input =
+        ExecuteActivityInput
+          args
+          info.headerFields
+          info
     -- We mask here to ensure that the activity is definitely registered
     -- before we start running it. This is important because we need to be able to cancel
     -- it later if the orchestrator requests it.

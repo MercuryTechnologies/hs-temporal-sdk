@@ -552,7 +552,7 @@ inWorkflowProxies s = Rec.zipWithC @(Rec.ClassF (UseAsInWorkflowProxy synchronic
     convertToProxies _ opt ref = useAsInWorkflowProxy s ref opt
 
 
-type Workers rec = rec (ConstFn Worker)
+type Workers env rec = rec (ConstFn (Worker env))
 
 
 type WorkerConfigs env rec = rec (ConstFn (WorkerConfig env))
@@ -563,13 +563,13 @@ type WorkerConfigs env rec = rec (ConstFn (WorkerConfig env))
 This function starts each worker concurrently, waits for them to initialize, and then returns
 a worker for each task queue.
 -}
-startTaskQueues :: forall rec m env. (TraversableRec rec, MonadUnliftIO m, MonadCatch m) => Client -> WorkerConfigs env rec -> m (Workers rec)
+startTaskQueues :: forall rec m env. (TraversableRec rec, MonadUnliftIO m, MonadCatch m) => Client -> WorkerConfigs env rec -> m (Workers env rec)
 startTaskQueues client conf = startWorkers conf >>= awaitWorkersStart
   where
-    startWorkers :: rec (ConstFn (WorkerConfig env)) -> m (rec (ConstFn (Async Worker)))
+    startWorkers :: rec (ConstFn (WorkerConfig env)) -> m (rec (ConstFn (Async (Worker env))))
     startWorkers = Rec.traverse $ \_ workerConfig -> flip runLoggingT workerConfig.logger $ do
       asyncLabelled "temporal/startTaskQueues" (startWorker client workerConfig)
-    awaitWorkersStart :: rec (ConstFn (Async Worker)) -> m (rec (ConstFn Worker))
+    awaitWorkersStart :: rec (ConstFn (Async (Worker env))) -> m (rec (ConstFn (Worker env)))
     awaitWorkersStart = Rec.traverse (\_ workerStartupThread -> UnliftIO.wait workerStartupThread)
 
 
@@ -577,20 +577,20 @@ startTaskQueues client conf = startWorkers conf >>= awaitWorkersStart
 
 This function stops each worker concurrently, waits for them to complete shutdown (gracefully or not), and then returns.
 -}
-shutdownTaskQueues :: forall m rec. (TraversableRec rec, MonadUnliftIO m) => Workers rec -> m (rec (ConstFn (Either SomeException ())))
+shutdownTaskQueues :: forall m rec env. (TraversableRec rec, MonadUnliftIO m) => Workers env rec -> m (rec (ConstFn (Either SomeException ())))
 shutdownTaskQueues workers =
   stopWorkers workers
     >>= awaitWorkersStop
   where
-    stopWorkers :: rec (ConstFn Worker) -> m (rec (ConstFn (Async ())))
+    stopWorkers :: rec (ConstFn (Worker env)) -> m (rec (ConstFn (Async ())))
     stopWorkers = Rec.traverse $ \_ worker -> asyncLabelled "temporal/shutdownTaskQueues" (shutdown worker)
     awaitWorkersStop :: rec (ConstFn (Async ())) -> m (rec (ConstFn (Either SomeException ())))
     awaitWorkersStop = Rec.traverse $ \_ workerShutdownThread -> UnliftIO.waitCatch workerShutdownThread
 
 
-linkTaskQueues :: forall m rec. (TraversableRec rec, MonadUnliftIO m) => Workers rec -> m ()
+linkTaskQueues :: forall m rec env. (TraversableRec rec, MonadUnliftIO m) => Workers env rec -> m ()
 linkTaskQueues = Rec.traverse_ (\_ -> liftIO . linkWorker)
 
 
-withTaskQueues :: forall rec m env a. (TraversableRec rec, MonadUnliftIO m, MonadCatch m) => Client -> WorkerConfigs env rec -> (Workers rec -> m a) -> m a
+withTaskQueues :: forall rec m env a. (TraversableRec rec, MonadUnliftIO m, MonadCatch m) => Client -> WorkerConfigs env rec -> (Workers env rec -> m a) -> m a
 withTaskQueues client conf f = UnliftIO.bracket (startTaskQueues client conf) shutdownTaskQueues $ \ws -> linkTaskQueues ws >> f ws
