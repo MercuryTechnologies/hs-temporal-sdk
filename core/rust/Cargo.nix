@@ -3820,9 +3820,9 @@ rec {
       };
       "libc" = rec {
         crateName = "libc";
-        version = "0.2.168";
+        version = "0.2.169";
         edition = "2021";
-        sha256 = "0vab4inpw0dz78nii02hsxp1skqn06xzh64psw8wl1h63scb5bjs";
+        sha256 = "02m253hs8gw0m1n8iyrsc4n15yzbqwhddi7w1l0ds7i92kdsiaxm";
         authors = [
           "The Rust Project Developers"
         ];
@@ -7091,9 +7091,9 @@ rec {
       };
       "serde" = rec {
         crateName = "serde";
-        version = "1.0.216";
+        version = "1.0.217";
         edition = "2018";
-        sha256 = "13ikqs0cvd220530x4rj1m9ab5wcflrwkw7cpvl9fnlkdq0q35qb";
+        sha256 = "0w2ck1p1ajmrv1cf51qf7igjn2nc51r0izzc00fzmmhkvxjl5z02";
         authors = [
           "Erick Tryzelaar <erick.tryzelaar@gmail.com>"
           "David Tolnay <dtolnay@gmail.com>"
@@ -7125,9 +7125,9 @@ rec {
       };
       "serde_derive" = rec {
         crateName = "serde_derive";
-        version = "1.0.216";
+        version = "1.0.217";
         edition = "2015";
-        sha256 = "0pm5bm4354n40ir12bbs829arlqwjrw0wmzd4xk5r1kkpzdmky26";
+        sha256 = "180r3rj5gi5s1m23q66cr5wlfgc5jrs6n1mdmql2njnhk37zg6ss";
         procMacro = true;
         authors = [
           "Erick Tryzelaar <erick.tryzelaar@gmail.com>"
@@ -7159,9 +7159,9 @@ rec {
       };
       "serde_json" = rec {
         crateName = "serde_json";
-        version = "1.0.133";
+        version = "1.0.135";
         edition = "2021";
-        sha256 = "0xz3bswa527wln3fy0qb7y081nx3cp5yy1ggjhi6n5mrfcjfpz67";
+        sha256 = "1n9hcsbxpr2lg5kvlksbcy6bkvqv9rn3hy59600i21kli2i7n39b";
         authors = [
           "Erick Tryzelaar <erick.tryzelaar@gmail.com>"
           "David Tolnay <dtolnay@gmail.com>"
@@ -8672,9 +8672,9 @@ rec {
       };
       "tokio" = rec {
         crateName = "tokio";
-        version = "1.42.0";
+        version = "1.43.0";
         edition = "2021";
-        sha256 = "0lbmf21h16iibdy7m63ck66grkwa7b1x8yy9gwvp60j5n0hrpv2w";
+        sha256 = "17pdm49ihlhfw3rpxix3kdh2ppl1yv7nwp1kxazi5r1xz97zlq9x";
         authors = [
           "Tokio Contributors <team@tokio.rs>"
         ];
@@ -8776,9 +8776,9 @@ rec {
       };
       "tokio-macros" = rec {
         crateName = "tokio-macros";
-        version = "2.4.0";
+        version = "2.5.0";
         edition = "2021";
-        sha256 = "0lnpg14h1v3fh2jvnc8cz7cjf0m7z1xgkwfpcyy632g829imjgb9";
+        sha256 = "1f6az2xbvqp7am417b78d1za8axbvjvxnmkakz9vr8s52czx81kf";
         procMacro = true;
         libName = "tokio_macros";
         authors = [
