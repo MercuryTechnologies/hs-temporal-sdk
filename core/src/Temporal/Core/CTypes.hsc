@@ -151,7 +151,7 @@ instance Exception RpcError
 data CRPCError = CRPCError
   { code :: Word32
   , message :: CString
-  , details :: CArray Word8
+  , details :: Ptr (CArray Word8)
   }
 
 instance Storable CRPCError where
@@ -172,7 +172,7 @@ foreign import ccall "&hs_temporal_drop_rpc_error" rust_drop_rpc_error :: Finali
 peekCRPCError :: CRPCError -> IO RpcError
 peekCRPCError CRPCError{..} = do
   message <- fromPtr0 $ castPtr message
-  details <- cArrayToByteString details
+  details <- cArrayToByteString =<< peek details
   pure RpcError{..}
 
 newtype CoreClient = CoreClient
