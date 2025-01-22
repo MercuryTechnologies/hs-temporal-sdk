@@ -44,6 +44,7 @@ library
       Temporal.Core.Client.TestService,
       Temporal.Core.Client.OperatorService,
       Temporal.Core.Client,
+      Temporal.Core.Errordetails,
       Temporal.Core.EphemeralServer,
       Temporal.Core.Worker,
       Temporal.Runtime
