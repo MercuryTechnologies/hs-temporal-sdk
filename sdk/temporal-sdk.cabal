@@ -28,6 +28,7 @@ library
       Temporal.Operator
       Temporal.Payload
       Temporal.Replay
+      Temporal.RpcError
       Temporal.SearchAttributes
       Temporal.TH
       Temporal.Worker
