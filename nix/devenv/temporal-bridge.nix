@@ -2,20 +2,35 @@
   proto-lens-protoc,
   temporal-sdk-core,
 }: {pkgs, ...}: let
-  protogen = pkgs.writeShellScriptBin "protogen" ''
-    shopt -s globstar
-    ${pkgs.protobuf}/bin/protoc \
-      --plugin=protoc-gen-haskell=${proto-lens-protoc}/bin/proto-lens-protoc \
-      --haskell_out=${../../protos} \
-      --proto_path=${temporal-sdk-core}/sdk-core-protos/protos/local \
-      --proto_path=${temporal-sdk-core}/sdk-core-protos/protos/api_upstream \
-      --proto_path=${temporal-sdk-core}/sdk-core-protos/protos/grpc \
-      --proto_path=${temporal-sdk-core}/sdk-core-protos/protos/testsrv_upstream \
-      ${temporal-sdk-core}/sdk-core-protos/protos/local/**/*.proto \
-      ${temporal-sdk-core}/sdk-core-protos/protos/api_upstream/**/*.proto \
-      ${temporal-sdk-core}/sdk-core-protos/protos/grpc/**/*.proto \
-      ${temporal-sdk-core}/sdk-core-protos/protos/testsrv_upstream/temporal/**/*.proto
-  '';
+  protogen = pkgs.writeShellApplication {
+    name = "protogen";
+    runtimeInputs = [pkgs.protobuf pkgs.hpack];
+    text = ''
+      shopt -s globstar
+
+      repo_root="$( git rev-parse --show-toplevel )"
+      package_dir="$repo_root/protos"
+
+      protoc \
+        --plugin=protoc-gen-haskell=${pkgs.lib.getExe proto-lens-protoc} \
+        --haskell_out="$package_dir/src" \
+        --proto_path=${temporal-sdk-core}/sdk-core-protos/protos/local \
+        --proto_path=${temporal-sdk-core}/sdk-core-protos/protos/api_upstream \
+        --proto_path=${temporal-sdk-core}/sdk-core-protos/protos/grpc \
+        --proto_path=${temporal-sdk-core}/sdk-core-protos/protos/google \
+        --proto_path=${temporal-sdk-core}/sdk-core-protos/protos/testsrv_upstream \
+        ${temporal-sdk-core}/sdk-core-protos/protos/local/**/*.proto \
+        ${temporal-sdk-core}/sdk-core-protos/protos/api_upstream/**/*.proto \
+        ${temporal-sdk-core}/sdk-core-protos/protos/grpc/**/*.proto \
+        ${temporal-sdk-core}/sdk-core-protos/protos/google/**/*.proto \
+        ${temporal-sdk-core}/sdk-core-protos/protos/testsrv_upstream/temporal/**/*.proto
+
+      # Remove codegen for well-known types (`proto-lens` provides these).
+      rm -rf "$package_dir/src/Proto/Google/Protobuf"
+      # Re-generate cabal file to include new/updated modules. 
+      hpack "$package_dir"
+    '';
+  };
 in {
   packages =
     [
