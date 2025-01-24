@@ -15,6 +15,8 @@ library
       Proto.Dependencies.Gogoproto.Gogo_Fields
       Proto.Health.V1.Health
       Proto.Health.V1.Health_Fields
+      Proto.Rpc.Status
+      Proto.Rpc.Status_Fields
       Proto.Temporal.Api.Batch.V1.Message
       Proto.Temporal.Api.Batch.V1.Message_Fields
       Proto.Temporal.Api.Command.V1.Message
