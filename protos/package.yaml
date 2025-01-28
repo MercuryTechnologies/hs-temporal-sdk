@@ -1,0 +1,21 @@
+verbatim:
+  cabal-version: 3.0
+
+name:         temporal-api-protos
+version:      "1.0.0.0"
+# license-file: LICENSE
+# license:      BSD-3-Clause
+build-type:   Simple
+language: Haskell2010
+
+library:
+  source-dirs: src
+  dependencies:
+    - base >= 4.14 && < 5
+    - proto-lens-runtime
+    - proto-lens-protobuf-types
+  other-modules:
+    - Proto.Google.Api.Annotations
+    - Proto.Google.Api.Annotations_Fields
+    - Proto.Google.Api.Http
+    - Proto.Google.Api.Http_Fields
