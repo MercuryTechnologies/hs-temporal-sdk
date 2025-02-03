@@ -34,6 +34,8 @@ custom-setup
 
 library
     import:           warnings
+
+    extra-libraries: temporal_bridge
     includes:
       rust/temporal_bridge.h
     include-dirs:     rust
