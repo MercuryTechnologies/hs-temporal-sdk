@@ -28,7 +28,8 @@ import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Aeson (FromJSON, ToJSON, Value)
 import qualified Data.ByteString as BS
-import Data.Foldable (sequenceA_, traverse_)
+import System.Environment (lookupEnv)
+import Data.Foldable (traverse_)
 import Data.Functor
 import Data.Int
 import Data.Map.Strict (Map)
@@ -318,10 +319,9 @@ spec = do
     setup :: (TestEnv -> IO ()) -> IO ()
     setup go = do
       let withServer f = do
-            if True -- Use local server instead of ephemeral server. Flip to use ephemeral server.
-              then do
-                f 7233
-              else do
+            lookupEnv "HS_TEMPORAL_SDK_LOCAL_TEST_SERVER" >>= \case
+              Just _ -> f 7233
+              _ -> do
                 fp <- getFreePort
                 mTemporalPath <- findExecutable "temporal"
                 conf <- case mTemporalPath of

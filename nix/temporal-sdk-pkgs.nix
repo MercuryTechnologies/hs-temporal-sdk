@@ -16,19 +16,29 @@
     stdenv
     ;
 in {
-  temporal-sdk-core = overrideCabal (_attrs: {
-    extraLibraries = [
-      temporal-bridge.lib
+  temporal-sdk-core = lib.pipe
+    (final.callCabal2nix "temporal-sdk-core" ../core {
+      temporal_bridge = temporal-bridge.lib;
+    })
+    [
+      (enableCabalFlag "external_lib")
+      (overrideCabal (_attrs: {
+        libraryFrameworkDepends = lib.optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [
+          CoreFoundation
+          Security
+          SystemConfiguration
+        ]);
+      }))
     ];
-    libraryFrameworkDepends = lib.optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [
-      CoreFoundation
-      Security
-      SystemConfiguration
-    ]);
-  }) (enableCabalFlag "external_lib" (final.callCabal2nix "temporal-sdk-core" ../core {}));
-  temporal-sdk = (addTestToolDepend pkgs.temporal-cli (final.callCabal2nix "temporal-sdk" ../sdk {})).overrideAttrs (_: {
-    __darwinAllowLocalNetworking = true;
-  });
+
+  temporal-sdk = lib.pipe
+    (final.callCabal2nix "temporal-sdk" ../sdk {})
+    [
+      (addTestToolDepend pkgs.temporal-cli)
+      (drv: drv.overrideAttrs (_: {
+        __darwinAllowLocalNetworking = true;
+      }))
+    ];
   temporal-sdk-codec-server = final.callCabal2nix "temporal-sdk-codec-server" ../codec-server {};
   temporal-codec-encryption = final.callCabal2nix "temporal-codec-encryption" ../codec-encryption {};
   temporal-sdk-optimal-codec = final.callCabal2nix "temporal-sdk-optimal-codec" ../optimal-codec {};

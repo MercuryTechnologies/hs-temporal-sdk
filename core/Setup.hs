@@ -100,8 +100,7 @@ rsAddLibraryInfo fl lbi' = do
           }
       updateLibBi libBuild =
         libBuild
-          { extraLibs = "temporal_bridge" : extraLibs libBuild
-          , extraLibDirs =
+          { extraLibDirs =
               if external
                 then extraLibDirs libBuild
                 else (dir </> buildDir lbi') : extraLibDirs libBuild
