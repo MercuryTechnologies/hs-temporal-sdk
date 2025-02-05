@@ -1,15 +1,15 @@
 builds:
   - include:
-    - 'checks.x86_64-linux.*'
-    - 'packages.x86_64-linux.*'
-    - 'packages.*.temporal-bridge'
+      # Haskell package sets aren't always cached for 'aarch64-linux'.
+      - 'checks.x86_64-linux.*'
+      - 'packages.x86_64-linux.*'
+      - 'checks.aarch64-darwin.*'
+      - 'packages.aarch64-darwin.*'
+      - 'checks.x86_64-darwin.*'
+      - 'packages.x86_64-darwin.*'
+      # Rust should build just fine for all architectures.
+      - 'packages.*.temporal-bridge'
     exclude:
-    - 'packages.*.default'
-    - 'packages.*.devenv-up'
-    # Unable to build because devenv is impure
-    - 'devShells.*.*'
-  - include:
-    - 'packages.aarch64-darwin.*'
-    - 'packages.aarch64-linux.*'
-    exclude: []
-    branch: main
+      # Unable to build because devenv is impure.
+      - 'devShells.*.*'
+      - 'packages.*.devenv-up'
