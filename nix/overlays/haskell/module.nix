@@ -7,7 +7,8 @@
   flake.haskellOverlays = {
     hs-temporal-sdk = import ./hs-temporal-sdk.nix;
     dependencies = {
-      ghc910 = import ./ghc910.nix;
+      default = import ./deps.nix;
+      ghc910 = import ./ghc910-deps.nix;
     };
   };
 }

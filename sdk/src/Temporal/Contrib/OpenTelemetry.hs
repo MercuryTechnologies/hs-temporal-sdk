@@ -24,6 +24,7 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Text as T
 import Data.Version (showVersion)
 import Data.Word (Word32)
+import OpenTelemetry.Attributes (emptyAttributes)
 import qualified OpenTelemetry.Context as Ctxt
 import OpenTelemetry.Context.ThreadLocal (attachContext, getContext)
 import OpenTelemetry.Propagator
@@ -122,7 +123,7 @@ makeOpenTelemetryInterceptor = do
   let tracer =
         makeTracer
           tracerProvider
-          (InstrumentationLibrary "temporal-sdk" (T.pack $ showVersion Paths_temporal_sdk.version))
+          (InstrumentationLibrary "temporal-sdk" (T.pack $ showVersion Paths_temporal_sdk.version) "" emptyAttributes)
           (TracerOptions Nothing)
   return $
     Interceptors

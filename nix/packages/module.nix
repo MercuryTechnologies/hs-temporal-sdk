@@ -9,9 +9,15 @@ let
           haskell = (prev.haskell or { }) // {
             packages = (prev.haskell.packages or { }) // {
               ghc96 = prev.haskell.packages.ghc96.extend (self.haskellOverlays.hs-temporal-sdk final);
-              ghc98 = prev.haskell.packages.ghc98.extend (self.haskellOverlays.hs-temporal-sdk final);
+              ghc98 = prev.haskell.packages.ghc98.extend (
+                prev.lib.composeManyExtensions [
+                  (self.haskellOverlays.dependencies.default final)
+                  (self.haskellOverlays.hs-temporal-sdk final)
+                ]
+              );
               ghc910 = prev.haskell.packages.ghc910.extend (
                 prev.lib.composeManyExtensions [
+                  (self.haskellOverlays.dependencies.default final)
                   (self.haskellOverlays.dependencies.ghc910 final)
                   (self.haskellOverlays.hs-temporal-sdk final)
                 ]
