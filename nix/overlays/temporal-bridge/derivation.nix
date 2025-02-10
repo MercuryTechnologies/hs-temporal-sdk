@@ -1,4 +1,5 @@
-{pkgs}: let
+pkgs:
+let
   customBuildRustCrateForPkgs = pkgs:
     pkgs.buildRustCrate.override {
       defaultCrateOverrides =
@@ -39,11 +40,10 @@
           };
         };
     };
-  cargoNix = pkgs.callPackage ../core/rust/Cargo.nix {
+  cargoNix = pkgs.callPackage ../../../core/rust/Cargo.nix {
     buildRustCrateForPkgs = customBuildRustCrateForPkgs;
   };
 in {
-  inherit cargoNix;
-  temporal-bridge = cargoNix.rootCrate.build;
+  temporal_bridge = cargoNix.rootCrate.build.lib;
   temporal-sdk-core-src = cargoNix.internal.crates.temporal-sdk-core.src;
 }
