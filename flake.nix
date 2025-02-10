@@ -18,43 +18,8 @@
       imports = [
         ./nix/overlays/temporal-bridge/module.nix
         ./nix/overlays/haskell/module.nix
+        ./nix/packages/module.nix
       ];
-      perSystem =
-        {
-          config,
-          pkgs,
-          system,
-          ...
-        }:
-        {
-          _module.args.pkgs = import inputs.nixpkgs {
-            inherit system;
-            # TODO: factor this out into a development overlay that injects
-            # `temporal_bridge` & extends GHC package sets in our test matrix.
-            overlays = [
-              self.overlays.temporal-bridge
-              (final: prev: {
-                haskell = (prev.haskell or { }) // {
-                  packages = (prev.haskell.packages or { }) // {
-                    ghc96 = prev.haskell.packages.ghc96.extend (self.haskellOverlays.hs-temporal-sdk final);
-                    ghc98 = prev.haskell.packages.ghc98.extend (self.haskellOverlays.hs-temporal-sdk final);
-                    ghc910 = prev.haskell.packages.ghc910.extend (prev.lib.composeManyExtensions [
-                      (self.haskellOverlays.dependencies.ghc910 final)
-                      (self.haskellOverlays.hs-temporal-sdk final)
-                    ]);
-                  };
-                };
-              })
-            ];
-          };
-
-          # TODO: factor this out to generate the flake package outputs we want
-          # to include in our test matrix.
-          packages.temporal_bridge = pkgs.temporal_bridge;
-          packages.temporal-sdk-core-ghc96 = pkgs.haskell.packages.ghc96.temporal-sdk-core;
-          packages.temporal-sdk-core-ghc98 = pkgs.haskell.packages.ghc98.temporal-sdk-core;
-          packages.temporal-sdk-core-ghc910 = pkgs.haskell.packages.ghc910.temporal-sdk-core;
-        };
     };
 
   # --- Flake Local Nix Configuration -----------------------------------------

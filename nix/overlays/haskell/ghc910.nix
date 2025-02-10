@@ -7,9 +7,11 @@
 }:
 hfinal: hprev:
 let
-  inherit (haskell.lib.compose) doJailbreak addSetupDepends appendPatch;
+  inherit (haskell.lib.compose) addSetupDepends appendPatch doJailbreak markUnbroken;
 in
 {
+  hs-opentelemetry-propagator-datadog = markUnbroken hprev.hs-opentelemetry-propagator-datadog;
+
   uuid = doJailbreak hprev.uuid;
   proto-lens = doJailbreak hprev.proto-lens;
   proto-lens-setup = doJailbreak hprev.proto-lens-setup;
