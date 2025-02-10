@@ -15,7 +15,10 @@
     inputs@{ self, ... }:
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       systems = inputs.nixpkgs.lib.systems.flakeExposed;
-      imports = [ ];
+      imports = [
+        ./nix/overlays/temporal-bridge/module.nix
+        ./nix/overlays/haskell/module.nix
+      ];
       perSystem =
         {
           config,
@@ -33,55 +36,25 @@
               (final: prev: {
                 haskell = (prev.haskell or { }) // {
                   packages = (prev.haskell.packages or { }) // {
-                    ghc96 = prev.haskell.packages.ghc96.extend (self.haskellOverlay final);
-                    ghc98 = prev.haskell.packages.ghc98.extend (self.haskellOverlay final);
-                    ghc910 = prev.haskell.packages.ghc910.extend (self.haskellOverlay final);
+                    ghc96 = prev.haskell.packages.ghc96.extend (self.haskellOverlays.hs-temporal-sdk final);
+                    ghc98 = prev.haskell.packages.ghc98.extend (self.haskellOverlays.hs-temporal-sdk final);
+                    ghc910 = prev.haskell.packages.ghc910.extend (prev.lib.composeManyExtensions [
+                      (self.haskellOverlays.dependencies.ghc910 final)
+                      (self.haskellOverlays.hs-temporal-sdk final)
+                    ]);
                   };
                 };
               })
             ];
           };
+
           # TODO: factor this out to generate the flake package outputs we want
           # to include in our test matrix.
           packages.temporal_bridge = pkgs.temporal_bridge;
+          packages.temporal-sdk-core-ghc96 = pkgs.haskell.packages.ghc96.temporal-sdk-core;
           packages.temporal-sdk-core-ghc98 = pkgs.haskell.packages.ghc98.temporal-sdk-core;
           packages.temporal-sdk-core-ghc910 = pkgs.haskell.packages.ghc910.temporal-sdk-core;
         };
-
-      flake = {
-        # TODO: factor this out into its own file so it can be consumed without
-        # having to import the flake.
-        overlays = {
-          # top-level nixpkgs overlay providing `temporal_bridge`.
-          temporal-bridge = final: _prev: {
-            temporal_bridge = final.callPackage ./core/rust { };
-          };
-        };
-        # TODO: factor this out into its own file so it can be consumed without
-        # having to import the flake.
-        #
-        # Haskell overlay providing the non-Rust `hs-temporal-sdk` packages.
-        #
-        # NOTE: This can't be included in 'flake.overlays' directly, as we need
-        # the top-level `pkgs` argument for `pkgs.haskell.lib` + some system
-        # libraries that are outside of the Haskell package overlay.
-        haskellOverlay = pkgs: hfinal: _hprev: {
-          temporal-api-protos = hfinal.callCabal2nix "temporal-api-protos" ./protos { };
-          temporal-sdk-core = pkgs.lib.pipe (hfinal.callCabal2nix "temporal-sdk-core" ./core { }) [
-            (pkgs.haskell.lib.compose.enableCabalFlag "external_lib")
-            (pkgs.haskell.lib.compose.overrideCabal (_attrs: {
-              libraryFrameworkDepends = pkgs.lib.optionals pkgs.stdenv.hostPlatform.isDarwin (
-                with pkgs.darwin.apple_sdk.frameworks;
-                [
-                  CoreFoundation
-                  Security
-                  SystemConfiguration
-                ]
-              );
-            }))
-          ];
-        };
-      };
     };
 
   # --- Flake Local Nix Configuration -----------------------------------------
