@@ -10,14 +10,15 @@
     };
   };
 
-  # TODO: add the `devenv` shell environment back.
   outputs =
     inputs@{ self, ... }:
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       systems = inputs.nixpkgs.lib.systems.flakeExposed;
       imports = [
+        inputs.devenv.flakeModule
         ./nix/overlays/temporal-bridge/module.nix
         ./nix/overlays/haskell/module.nix
+        ./nix/devenv/module.nix
         ./nix/packages/module.nix
       ];
     };
