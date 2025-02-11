@@ -1,5 +1,5 @@
 {
   flake.overlays = {
-    temporal-bridge = final: _prev: (import ./derivation.nix) final;
+    temporal-bridge = import ./overlay.nix;
   };
 }

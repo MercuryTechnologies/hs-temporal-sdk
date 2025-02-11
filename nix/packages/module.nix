@@ -17,13 +17,12 @@ in
         inherit system;
         pkgset = inputs.nixpkgs;
       };
-      packages = {
-        # TODO: factor this out to generate the flake package outputs we want
-        # to include in our test matrix.
+      # TODO: There's almost definitely a cleaner way to do this, but for now
+      # it's quicker to copy the previous implementation and shim it in here.
+      packages = let
+        haskellUtils = (import ../utils/haskell.nix) pkgs;
+      in haskellUtils.localPackageMatrix // {
         temporal-bridge = pkgs.temporal_bridge;
-        temporal-sdk-ghc96 = pkgs.haskell.packages.ghc96.temporal-sdk;
-        temporal-sdk-ghc98 = pkgs.haskell.packages.ghc98.temporal-sdk;
-        temporal-sdk-ghc910 = pkgs.haskell.packages.ghc910.temporal-sdk;
       };
     };
 }

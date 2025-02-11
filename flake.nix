@@ -13,9 +13,8 @@
   outputs =
     inputs@{ self, ... }:
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = inputs.nixpkgs.lib.systems.flakeExposed;
+      systems = (import ./nix/utils/matrix.nix).systems;
       imports = [
-        inputs.devenv.flakeModule
         ./nix/overlays/temporal-bridge/module.nix
         ./nix/overlays/haskell/module.nix
         ./nix/devenv/module.nix
