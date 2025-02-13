@@ -123,7 +123,7 @@ makeOpenTelemetryInterceptor = do
   let tracer =
         makeTracer
           tracerProvider
-          (InstrumentationLibrary "temporal-sdk" (T.pack $ showVersion Paths_temporal_sdk.version) "" emptyAttributes)
+          (InstrumentationLibrary "temporal-sdk" (T.pack $ showVersion Paths_temporal_sdk.version))
           (TracerOptions Nothing)
   return $
     Interceptors
