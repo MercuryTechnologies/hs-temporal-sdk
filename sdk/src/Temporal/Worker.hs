@@ -508,7 +508,7 @@ startReplayWorker rt conf = provideCallStack $ runWorkerContext conf $ do
       workerActivityWorker = ()
       workerActivityLoop = ()
       workerType = Core.SReplay
-      workerTracer = makeTracer conf.tracerProvider (InstrumentationLibrary "hs-temporal-sdk" "0.0.1.0" "" emptyAttributes) tracerOptions
+      workerTracer = makeTracer conf.tracerProvider (InstrumentationLibrary "hs-temporal-sdk" "0.0.1.0") tracerOptions
   workerWorkflowLoop <- asyncLabelled (T.unpack $ T.concat ["temporal/worker/workflow/", Core.namespace conf.coreConfig, "/", Core.taskQueue conf.coreConfig]) $ do
     $(logDebug) "Starting workflow worker loop"
     Workflow.execute workflowWorker
@@ -549,7 +549,7 @@ traced conf m =
   runReaderT m $
     makeTracer
       conf.tracerProvider
-      (InstrumentationLibrary "hs-temporal-sdk" "0.0.1.0" "" emptyAttributes)
+      (InstrumentationLibrary "hs-temporal-sdk" "0.0.1.0")
       tracerOptions
 
 
@@ -597,7 +597,7 @@ startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "sta
       payloadProcessor = conf.payloadProcessor
       workerActivityWorker = Activity.ActivityWorker {..}
       workerClient = client
-      workerTracer = makeTracer conf.tracerProvider (InstrumentationLibrary "hs-temporal-sdk" "0.0.1.0" "" emptyAttributes) tracerOptions
+      workerTracer = makeTracer conf.tracerProvider (InstrumentationLibrary "hs-temporal-sdk" "0.0.1.0") tracerOptions
   let workerType = Core.SReal
   -- logs <- liftIO $ fetchLogs globalRuntime
   -- forM_ logs $ \l -> case l.level of
