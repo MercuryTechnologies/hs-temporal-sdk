@@ -7,7 +7,12 @@
 }:
 hfinal: hprev:
 let
-  inherit (haskell.lib.compose) addSetupDepends appendPatch doJailbreak markUnbroken;
+  inherit (haskell.lib.compose)
+    addSetupDepends
+    appendPatch
+    doJailbreak
+    markUnbroken
+    ;
 in
 {
   uuid = doJailbreak hprev.uuid;

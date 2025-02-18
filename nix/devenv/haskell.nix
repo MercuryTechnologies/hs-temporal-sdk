@@ -1,4 +1,5 @@
-ghcVersion: { pkgs, ... }:
+ghcVersion:
+{ pkgs, ... }:
 let
   haskellUtils = import ../utils/haskell.nix pkgs;
 in
