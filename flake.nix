@@ -17,9 +17,6 @@
     {
       devShells = flakeUtils.forAllSystems (
         { pkgs, ... }:
-
-        # TODO: There's probably a cleaner way to do this; for now it's
-        # quicker to copy the previous implementation.
         let
           inherit (import ./nix/utils/matrix.nix) ghcVersions;
           mkShell =
@@ -32,7 +29,7 @@
                 (import ./nix/devenv/haskell.nix ghcVersion)
               ];
             };
-          shells = inputs.nixpkgs.lib.genAttrs [ "ghc96" "ghc98" "ghc910" ] (version: mkShell version);
+          shells = inputs.nixpkgs.lib.genAttrs ghcVersions (version: mkShell version);
         in
         shells // { default = shells.ghc910; }
       );

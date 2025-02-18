@@ -1,15 +1,19 @@
-{ writeShellApplication
-, lib
-, temporal-sdk-core-src
-, proto-lens-protoc
-, protobuf
-, hpack
-, ...
+{
+  writeShellApplication,
+  lib,
+  temporal-sdk-core-src,
+  proto-lens-protoc,
+  protobuf,
+  hpack,
+  ...
 }:
 
 writeShellApplication {
   name = "protogen";
-  runtimeInputs = [ protobuf hpack ];
+  runtimeInputs = [
+    protobuf
+    hpack
+  ];
   text = ''
     shopt -s globstar
     repo_root="$( git rev-parse --show-toplevel )"
