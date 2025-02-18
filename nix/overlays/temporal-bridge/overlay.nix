@@ -1,1 +1,1 @@
-final: _prev:  (import ./derivation.nix) final
+final: _prev: import ./derivation.nix final
