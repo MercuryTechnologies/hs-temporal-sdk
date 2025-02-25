@@ -3,7 +3,6 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     devenv.url = "github:cachix/devenv/v1.0.5";
-    flake-parts.url = "github:hercules-ci/flake-parts";
     fenix = {
       url = "github:nix-community/fenix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -12,14 +11,82 @@
 
   outputs =
     inputs@{ self, ... }:
-    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = (import ./nix/utils/matrix.nix).systems;
-      imports = [
-        ./nix/overlays/temporal-bridge/module.nix
-        ./nix/overlays/haskell/module.nix
-        ./nix/devenv/module.nix
-        ./nix/packages/module.nix
-      ];
+    let
+      flakeUtils = import ./nix/utils/flake.nix inputs;
+    in
+    {
+      devShells = flakeUtils.forAllSystems (
+        { pkgs, ... }:
+        let
+          inherit (import ./nix/utils/matrix.nix) ghcVersions;
+          mkShell =
+            ghcVersion:
+            inputs.devenv.lib.mkShell {
+              inherit inputs pkgs;
+              modules = [
+                ./nix/devenv/temporal-bridge.nix
+                ./nix/devenv/temporal-dev-server.nix
+                (import ./nix/devenv/haskell.nix ghcVersion)
+              ];
+            };
+          shells = inputs.nixpkgs.lib.genAttrs ghcVersions (version: mkShell version);
+        in
+        shells // { default = shells.ghc910; }
+      );
+
+      packages = flakeUtils.forAllSystems (
+        { pkgs, ... }:
+        let
+          haskellUtils = import ./nix/utils/haskell.nix pkgs;
+        in
+        haskellUtils.localPackageMatrix
+        // {
+          temporal-bridge = pkgs.temporal_bridge;
+        }
+      );
+
+      haskellOverlays = {
+        hs-temporal-sdk = import ./nix/overlays/haskell/hs-temporal-sdk.nix;
+        dependencies = {
+          default = import ./nix/overlays/haskell/deps.nix;
+          ghc910 = import ./nix/overlays/haskell/ghc910-deps.nix;
+        };
+      };
+
+      overlays = {
+        temporal-bridge = import ./nix/overlays/temporal-bridge/overlay.nix;
+        # A top-level nixpkgs overlay that extends supported GHC package sets with
+        # `hs-temporal-sdk` packages & any dependency modifications required for
+        # development.
+        #
+        # NOTE: This is _not_ intendedd for downstream consumption, and is
+        # primarily exposed to support our development & CI environments.
+        haskell-development = final: prev: {
+          haskell = (prev.haskell or { }) // {
+            packages = (prev.haskell.packages or { }) // {
+              ghc96 = prev.haskell.packages.ghc96.extend (
+                prev.lib.composeManyExtensions [
+                  (self.haskellOverlays.dependencies.default final)
+                  (self.haskellOverlays.hs-temporal-sdk final)
+                ]
+              );
+              ghc98 = prev.haskell.packages.ghc98.extend (
+                prev.lib.composeManyExtensions [
+                  (self.haskellOverlays.dependencies.default final)
+                  (self.haskellOverlays.hs-temporal-sdk final)
+                ]
+              );
+              ghc910 = prev.haskell.packages.ghc910.extend (
+                prev.lib.composeManyExtensions [
+                  (self.haskellOverlays.dependencies.default final)
+                  (self.haskellOverlays.dependencies.ghc910 final)
+                  (self.haskellOverlays.hs-temporal-sdk final)
+                ]
+              );
+            };
+          };
+        };
+      };
     };
 
   # --- Flake Local Nix Configuration -----------------------------------------
