@@ -1,0 +1,271 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DuplicateRecordFields #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE TypeApplications #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE TypeFamilies #-}</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="annot"><span class="hs-comment">{- |
+Module: Temporal.Activity
+Description: Define and work with Temporal activities.
+
+Temporal activities are units of work in a Temporal workflow. They encapsulate
+a specific task or operation that needs to be executed within a workflow
+instance. Activities can be synchronous or asynchronous and are designed to
+perform external actions, such as interacting with databases, sending emails,
+or invoking external services.
+
+When writing activities to execute withing a workflow, we recommend writing
+them while keeping the following principles in mind:
+
+1. __Retryable__: Activities can be automatically retried by the Temporal
+   system in case of failures. You can configure the retry behavior, such as
+   the maximum number of retries and retry intervals.
+
+2. __Idempotency__: Since Activities are designed to be retryable,
+   executing an activity multiple times should not have unintended side
+   effects. This is crucial for ensuring the reliability of workflow
+   executions.
+
+3. __Cancellable__: Activities can be cancelled, which means that they can
+   be stopped before they complete execution. This is useful for handling
+   long-running activities that need to be aborted in certain situations.
+   As a consequence, activities should to be written to receive 'ActivityCancelReason'
+   exceptions asynchronously.
+-}</span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Activity.html"><span class="hs-identifier">Temporal.Activity</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-35"></span><span>  </span><span class="annot"><a href="Temporal.Activity.Definition.html#Activity"><span class="hs-identifier">Activity</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Built-in Acitivity primitives</span></span><span>
+</span><span id="line-38"></span><span>  </span><span class="annot"><a href="Temporal.Activity.html#heartbeat"><span class="hs-identifier">heartbeat</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-39"></span><span>  </span><span class="annot"><a href="Temporal.Activity.Types.html#ActivityInfo"><span class="hs-identifier">ActivityInfo</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-40"></span><span>  </span><span class="annot"><a href="Temporal.Activity.Definition.html#askActivityInfo"><span class="hs-identifier">askActivityInfo</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-41"></span><span>  </span><span class="annot"><a href="Temporal.Exception.html#ActivityCancelReason"><span class="hs-identifier">ActivityCancelReason</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-42"></span><span>  </span><span class="annot"><a href="Temporal.Activity.html#activityWorkflowClient"><span class="hs-identifier">activityWorkflowClient</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-43"></span><span>  </span><span class="annot"><a href="Temporal.Activity.Definition.html#askActivityClient"><span class="hs-identifier">askActivityClient</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Defining Activities</span></span><span>
+</span><span id="line-46"></span><span>  </span><span class="annot"><a href="Temporal.Activity.html#provideActivity"><span class="hs-identifier">provideActivity</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-47"></span><span>  </span><span class="annot"><a href="Temporal.Activity.Definition.html#ProvidedActivity"><span class="hs-identifier">ProvidedActivity</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-48"></span><span>  </span><span class="annot"><a href="Temporal.Activity.Definition.html#KnownActivity"><span class="hs-identifier">KnownActivity</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-49"></span><span>  </span><span class="annot"><a href="Temporal.Activity.Definition.html#ActivityDefinition"><span class="hs-identifier">ActivityDefinition</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Asynchronous Completion</span></span><span>
+</span><span id="line-52"></span><span>  </span><span class="annot"><a href="Temporal.Common.html#TaskToken"><span class="hs-identifier">TaskToken</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-53"></span><span>  </span><span class="annot"><a href="Temporal.Exception.html#CompleteAsync"><span class="hs-identifier">CompleteAsync</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-54"></span><span>  </span><span class="annot"><a href="Temporal.Activity.Worker.html#completeAsync"><span class="hs-identifier">completeAsync</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Commonly used</span></span><span>
+</span><span id="line-57"></span><span>  </span><span class="annot"><a href="Temporal.Payload.html#%3A-%3E%3A"><span class="hs-operator">(:-&gt;:)</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-58"></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span>
+</span><span id="line-61"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.IO.Class</span></span><span>
+</span><span id="line-62"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Reader.Class</span></span><span>
+</span><span id="line-63"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens</span></span><span>
+</span><span id="line-64"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Proxy</span></span><span>
+</span><span id="line-65"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-66"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Lens.Family2</span></span><span>
+</span><span id="line-67"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Sdk.Core.CoreInterface_Fields</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Proto</span></span><span>
+</span><span id="line-68"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Activity.Definition.html"><span class="hs-identifier">Temporal.Activity.Definition</span></a></span><span>
+</span><span id="line-69"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html"><span class="hs-identifier">Temporal.Activity.Types</span></a></span><span>
+</span><span id="line-70"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Activity.Worker.html"><span class="hs-identifier">Temporal.Activity.Worker</span></a></span><span>
+</span><span id="line-71"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Client.html"><span class="hs-identifier">Temporal.Client</span></a></span><span>
+</span><span id="line-72"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Common.html"><span class="hs-identifier">Temporal.Common</span></a></span><span>
+</span><span id="line-73"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Temporal.Core.Worker</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">getWorkerClient</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">recordActivityHeartbeat</span></span><span class="hs-special">)</span><span>
+</span><span id="line-74"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Exception.html"><span class="hs-identifier">Temporal.Exception</span></a></span><span>
+</span><span id="line-75"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Payload.html"><span class="hs-identifier">Temporal.Payload</span></a></span><span>
+</span><span id="line-76"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html"><span class="hs-identifier">Temporal.Workflow.Types</span></a></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span class="annot"><span class="hs-comment">{- | A utility function for constructing an 'ActivityDefinition' from a function as well as
+a 'KnownActivity' value. This is useful for keeping the argument, codec, and result types
+in sync with each other so that changes to the function are reflected at their use sites.
+
+&gt; myActivity :: Activity env ()
+&gt; myActivity = liftIO $ putStrLn &quot;Hello world!&quot;
+&gt;
+&gt; myActivityDef :: ActivityDefinition env (Activity env ())
+&gt; myActivityDef = provideWorkflow
+&gt;   JSON -- codec for serializing arguments and results
+&gt;   &quot;myActivity&quot; -- visible name of the workflow
+&gt;   myActivity -- the workflow function
+-}</span></span><span>
+</span><span id="line-92"></span><span class="annot"><a href="Temporal.Activity.html#provideActivity"><span class="hs-identifier hs-type">provideActivity</span></a></span><span>
+</span><span id="line-93"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621680193671"><span class="annot"><a href="#local-6989586621680193671"><span class="hs-identifier hs-type">codec</span></a></span></span><span> </span><span id="local-6989586621680193667"><span class="annot"><a href="#local-6989586621680193667"><span class="hs-identifier hs-type">env</span></a></span></span><span> </span><span id="local-6989586621680193665"><span class="annot"><a href="#local-6989586621680193665"><span class="hs-identifier hs-type">f</span></a></span></span><span>
+</span><span id="line-94"></span><span>   </span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="#local-6989586621680193665"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Payload.html#ArgsOf"><span class="hs-identifier hs-type">ArgsOf</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680193665"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="Temporal.Payload.html#%3A-%3E%3A"><span class="hs-operator hs-type">:-&gt;:</span></a></span><span> </span><span class="annot"><a href="Temporal.Activity.Definition.html#Activity"><span class="hs-identifier hs-type">Activity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680193667"><span class="hs-identifier hs-type">env</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Payload.html#ResultOf"><span class="hs-identifier hs-type">ResultOf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Activity.Definition.html#Activity"><span class="hs-identifier hs-type">Activity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680193667"><span class="hs-identifier hs-type">env</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680193665"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-95"></span><span>     </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Payload.html#FunctionSupportsCodec"><span class="hs-identifier hs-type">FunctionSupportsCodec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680193671"><span class="hs-identifier hs-type">codec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Payload.html#ArgsOf"><span class="hs-identifier hs-type">ArgsOf</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680193665"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Payload.html#ResultOf"><span class="hs-identifier hs-type">ResultOf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Activity.Definition.html#Activity"><span class="hs-identifier hs-type">Activity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680193667"><span class="hs-identifier hs-type">env</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680193665"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-96"></span><span>     </span><span class="hs-special">)</span><span>
+</span><span id="line-97"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680193671"><span class="hs-identifier hs-type">codec</span></a></span><span>
+</span><span id="line-98"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-99"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680193665"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-100"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Activity.Definition.html#ProvidedActivity"><span class="hs-identifier hs-type">ProvidedActivity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680193667"><span class="hs-identifier hs-type">env</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680193665"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-101"></span><span id="provideActivity"><span class="annot"><span class="annottext">provideActivity :: forall codec env f.
+(f ~ (ArgsOf f :-&gt;: Activity env (ResultOf (Activity env) f)),
+ FunctionSupportsCodec
+   codec (ArgsOf f) (ResultOf (Activity env) f)) =&gt;
+codec -&gt; Text -&gt; f -&gt; ProvidedActivity env f
+</span><a href="Temporal.Activity.html#provideActivity"><span class="hs-identifier hs-var hs-var">provideActivity</span></a></span></span><span> </span><span id="local-6989586621680193818"><span class="annot"><span class="annottext">codec
+</span><a href="#local-6989586621680193818"><span class="hs-identifier hs-var">codec</span></a></span></span><span> </span><span id="local-6989586621680193819"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621680193819"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621680193820"><span class="annot"><span class="annottext">f
+</span><a href="#local-6989586621680193820"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-102"></span><span>  </span><span class="annot"><a href="Temporal.Activity.Definition.html#ProvidedActivity"><span class="hs-identifier hs-type">ProvidedActivity</span></a></span><span>
+</span><span id="line-103"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">definition :: ActivityDefinition env
+</span><a href="Temporal.Activity.Definition.html#definition"><span class="hs-identifier hs-var">definition</span></a></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-104"></span><span>        </span><span class="annot"><a href="Temporal.Activity.Definition.html#ActivityDefinition"><span class="hs-identifier hs-type">ActivityDefinition</span></a></span><span>
+</span><span id="line-105"></span><span>          </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">activityName :: Text
+</span><a href="Temporal.Activity.Definition.html#activityName"><span class="hs-identifier hs-var">activityName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621680193819"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><span id="line-106"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">activityRun :: ActivityEnv env
+-&gt; ExecuteActivityInput -&gt; IO (Either String Payload)
+</span><a href="Temporal.Activity.Definition.html#activityRun"><span class="hs-identifier hs-var">activityRun</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621680193825"><span class="annot"><span class="annottext">ActivityEnv env
+</span><a href="#local-6989586621680193825"><span class="hs-identifier hs-var">actEnv</span></a></span></span><span> </span><span id="local-6989586621680193826"><span class="annot"><span class="annottext">ExecuteActivityInput
+</span><a href="#local-6989586621680193826"><span class="hs-identifier hs-var">input</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-107"></span><span>              </span><span id="local-6989586621680193827"><span class="annot"><a href="#local-6989586621680193827"><span class="hs-identifier hs-var">eAct</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-108"></span><span>                </span><span class="annot"><span class="annottext">codec
+-&gt; Proxy (ArgsOf f)
+-&gt; Proxy (Activity env (ResultOf (Activity env) f))
+-&gt; (ArgsOf f :-&gt;: Activity env (ResultOf (Activity env) f))
+-&gt; Vector Payload
+-&gt; IO (Either String (Activity env (ResultOf (Activity env) f)))
+forall result.
+codec
+-&gt; Proxy (ArgsOf f)
+-&gt; Proxy result
+-&gt; (ArgsOf f :-&gt;: result)
+-&gt; Vector Payload
+-&gt; IO (Either String result)
+forall codec (args :: [*]) result.
+ApplyPayloads codec args =&gt;
+codec
+-&gt; Proxy args
+-&gt; Proxy result
+-&gt; (args :-&gt;: result)
+-&gt; Vector Payload
+-&gt; IO (Either String result)
+</span><a href="Temporal.Payload.html#applyPayloads"><span class="hs-identifier hs-var">applyPayloads</span></a></span><span>
+</span><span id="line-109"></span><span>                  </span><span class="annot"><span class="annottext">codec
+</span><a href="#local-6989586621680193818"><span class="hs-identifier hs-var">codec</span></a></span><span>
+</span><span id="line-110"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (t :: [*]). Proxy t
+forall {k} (t :: k). Proxy t
+</span><span class="hs-identifier hs-var">Proxy</span></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Payload.html#ArgsOf"><span class="hs-identifier hs-type">ArgsOf</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680193665"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-111"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall t. Proxy t
+forall {k} (t :: k). Proxy t
+</span><span class="hs-identifier hs-var">Proxy</span></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Activity.Definition.html#Activity"><span class="hs-identifier hs-type">Activity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680193667"><span class="hs-identifier hs-type">env</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Payload.html#ResultOf"><span class="hs-identifier hs-type">ResultOf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Activity.Definition.html#Activity"><span class="hs-identifier hs-type">Activity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680193667"><span class="hs-identifier hs-type">env</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680193665"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-112"></span><span>                  </span><span class="annot"><span class="annottext">f
+ArgsOf f :-&gt;: Activity env (ResultOf (Activity env) f)
+</span><a href="#local-6989586621680193820"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-113"></span><span>                  </span><span class="annot"><span class="annottext">ExecuteActivityInput
+</span><a href="#local-6989586621680193826"><span class="hs-identifier hs-var">input</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">activityArgs</span><span>
+</span><span id="line-114"></span><span>              </span><span class="annot"><span class="hs-identifier hs-type">traverse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Activity.Definition.html#runActivity"><span class="hs-identifier hs-type">runActivity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680193825"><span class="hs-identifier hs-type">actEnv</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">&gt;=&gt;</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#encode"><span class="hs-identifier hs-type">encode</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680193818"><span class="hs-identifier hs-type">codec</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680193827"><span class="hs-identifier hs-type">eAct</span></a></span><span>
+</span><span id="line-115"></span><span>          </span><span class="hs-special">}</span><span>
+</span><span id="line-116"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">reference :: KnownActivity (ArgsOf f) (ResultOf (Activity env) f)
+</span><a href="Temporal.Activity.Definition.html#reference"><span class="hs-identifier hs-var">reference</span></a></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-117"></span><span>        </span><span class="annot"><a href="Temporal.Activity.Definition.html#KnownActivity"><span class="hs-identifier hs-type">KnownActivity</span></a></span><span>
+</span><span id="line-118"></span><span>          </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">knownActivityCodec :: codec
+</span><a href="Temporal.Activity.Definition.html#knownActivityCodec"><span class="hs-identifier hs-var">knownActivityCodec</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">codec
+</span><a href="#local-6989586621680193818"><span class="hs-identifier hs-var">codec</span></a></span><span>
+</span><span id="line-119"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">knownActivityName :: Text
+</span><a href="Temporal.Activity.Definition.html#knownActivityName"><span class="hs-identifier hs-var">knownActivityName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621680193819"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><span id="line-120"></span><span>          </span><span class="hs-special">}</span><span>
+</span><span id="line-121"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span><span>
+</span><span id="line-124"></span><span class="annot"><span class="hs-comment">{- |
+An Activity Heartbeat is a ping from the Worker Process that is executing the Activity to the Temporal Cluster. Each Heartbeat informs the Temporal Cluster that the Activity Execution is making progress and the Worker has not crashed. If the Cluster does not receive a Heartbeat within a Heartbeat Timeout time period, the Activity will be considered failed and another Activity Task Execution may be scheduled according to the Retry Policy.
+
+Heartbeats may not always be sent to the Cluster&#8212;they may be throttled by the Worker.
+
+Activity Cancellations are delivered to Activities from the Cluster when they Heartbeat. Activities that don't Heartbeat can't receive a Cancellation. Heartbeat throttling may lead to Cancellation getting delivered later than expected.
+
+Heartbeats can contain payloads describing the Activity's current progress. If an Activity gets retried, the Activity can access the details from the last Heartbeat that was sent to the Cluster.
+-}</span></span><span>
+</span><span id="line-133"></span><span id="local-6989586621680193710"><span class="annot"><a href="Temporal.Activity.html#heartbeat"><span class="hs-identifier hs-type">heartbeat</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Activity.Definition.html#Activity"><span class="hs-identifier hs-type">Activity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680193710"><span class="hs-identifier hs-type">env</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-134"></span><span id="heartbeat"><span class="annot"><span class="annottext">heartbeat :: forall env. [Payload] -&gt; Activity env ()
+</span><a href="Temporal.Activity.html#heartbeat"><span class="hs-identifier hs-var hs-var">heartbeat</span></a></span></span><span> </span><span id="local-6989586621680193851"><span class="annot"><span class="annottext">[Payload]
+</span><a href="#local-6989586621680193851"><span class="hs-identifier hs-var">baseDetails</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-135"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Common.html#TaskToken"><span class="hs-identifier hs-type">TaskToken</span></a></span><span> </span><span id="local-6989586621680193853"><span class="annot"><a href="#local-6989586621680193853"><span class="hs-identifier hs-var">token</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ActivityInfo -&gt; TaskToken
+</span><a href="Temporal.Activity.Types.html#taskToken"><span class="hs-identifier hs-var">taskToken</span></a></span><span> </span><span class="annot"><span class="annottext">(ActivityInfo -&gt; TaskToken)
+-&gt; Activity env ActivityInfo -&gt; Activity env TaskToken
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Activity env ActivityInfo
+forall env. Activity env ActivityInfo
+</span><a href="Temporal.Activity.Definition.html#askActivityInfo"><span class="hs-identifier hs-var">askActivityInfo</span></a></span><span>
+</span><span id="line-136"></span><span>  </span><span id="local-6989586621680193856"><span class="annot"><a href="#local-6989586621680193856"><span class="hs-identifier hs-var">worker</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Temporal.Activity.Definition.html#askActivityWorker"><span class="hs-identifier hs-type">askActivityWorker</span></a></span><span>
+</span><span id="line-137"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680193858"><span class="annot"><a href="#local-6989586621680193858"><span class="hs-identifier hs-var hs-var">details</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-138"></span><span>        </span><span class="annot"><span class="annottext">ActivityHeartbeat
+forall msg. Message msg =&gt; msg
+</span><span class="hs-identifier hs-var">defMessage</span></span><span>
+</span><span id="line-139"></span><span>          </span><span class="annot"><span class="annottext">ActivityHeartbeat
+-&gt; (ActivityHeartbeat -&gt; ActivityHeartbeat) -&gt; ActivityHeartbeat
+forall s t. s -&gt; (s -&gt; t) -&gt; t
+</span><span class="hs-operator hs-var">&amp;</span></span><span> </span><span class="annot"><span class="annottext">LensLike' f ActivityHeartbeat ByteString
+forall {f :: * -&gt; *}.
+Identical f =&gt;
+LensLike' f ActivityHeartbeat ByteString
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;taskToken&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">Proto.taskToken</span></span><span> </span><span class="annot"><span class="annottext">(forall {f :: * -&gt; *}.
+ Identical f =&gt;
+ LensLike' f ActivityHeartbeat ByteString)
+-&gt; ByteString -&gt; ActivityHeartbeat -&gt; ActivityHeartbeat
+forall s t a b. Setter s t a b -&gt; b -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">.~</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621680193853"><span class="hs-identifier hs-var">token</span></a></span><span>
+</span><span id="line-140"></span><span>          </span><span class="annot"><span class="annottext">ActivityHeartbeat
+-&gt; (ActivityHeartbeat -&gt; ActivityHeartbeat) -&gt; ActivityHeartbeat
+forall s t. s -&gt; (s -&gt; t) -&gt; t
+</span><span class="hs-operator hs-var">&amp;</span></span><span> </span><span class="annot"><span class="annottext">LensLike' f ActivityHeartbeat [Payload]
+forall {f :: * -&gt; *}.
+Identical f =&gt;
+LensLike' f ActivityHeartbeat [Payload]
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;details&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">Proto.details</span></span><span> </span><span class="annot"><span class="annottext">(forall {f :: * -&gt; *}.
+ Identical f =&gt;
+ LensLike' f ActivityHeartbeat [Payload])
+-&gt; [Payload] -&gt; ActivityHeartbeat -&gt; ActivityHeartbeat
+forall s t a b. Setter s t a b -&gt; b -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">.~</span></span><span> </span><span class="annot"><span class="annottext">(Payload -&gt; Payload) -&gt; [Payload] -&gt; [Payload]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">Payload -&gt; Payload
+</span><a href="Temporal.Payload.html#convertToProtoPayload"><span class="hs-identifier hs-var">convertToProtoPayload</span></a></span><span> </span><span class="annot"><span class="annottext">[Payload]
+</span><a href="#local-6989586621680193851"><span class="hs-identifier hs-var">baseDetails</span></a></span><span>
+</span><span id="line-141"></span><span>  </span><span class="hs-comment">-- TODO throw exception if this fails?</span><span>
+</span><span id="line-142"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">void</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">liftIO</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">recordActivityHeartbeat</span></span><span> </span><span class="annot"><a href="#local-6989586621680193856"><span class="hs-identifier hs-type">worker</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680193858"><span class="hs-identifier hs-type">details</span></a></span><span>
+</span><span id="line-143"></span><span>
+</span><span id="line-144"></span><span>
+</span><span id="line-145"></span><span class="annot"><span class="hs-comment">{- | It is very common for an Activity to do things that interact
+with another Workflow, like using 'query' or 'signal'. This function
+provides a 'WorkflowClient' that can be used to accomplish that.
+-}</span></span><span>
+</span><span id="line-149"></span><span id="local-6989586621680193764"><span class="annot"><a href="Temporal.Activity.html#activityWorkflowClient"><span class="hs-identifier hs-type">activityWorkflowClient</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Activity.Definition.html#Activity"><span class="hs-identifier hs-type">Activity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680193764"><span class="hs-identifier hs-type">env</span></a></span><span> </span><span class="annot"><a href="Temporal.Client.Types.html#WorkflowClient"><span class="hs-identifier hs-type">WorkflowClient</span></a></span></span><span>
+</span><span id="line-150"></span><span id="activityWorkflowClient"><span class="annot"><span class="annottext">activityWorkflowClient :: forall env. Activity env WorkflowClient
+</span><a href="Temporal.Activity.html#activityWorkflowClient"><span class="hs-identifier hs-var hs-var">activityWorkflowClient</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReaderT (ActivityEnv env) IO WorkflowClient
+-&gt; Activity env WorkflowClient
+forall env a. ReaderT (ActivityEnv env) IO a -&gt; Activity env a
+</span><a href="Temporal.Activity.Definition.html#Activity"><span class="hs-identifier hs-var">Activity</span></a></span><span> </span><span class="annot"><span class="annottext">(ReaderT (ActivityEnv env) IO WorkflowClient
+ -&gt; Activity env WorkflowClient)
+-&gt; ReaderT (ActivityEnv env) IO WorkflowClient
+-&gt; Activity env WorkflowClient
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-151"></span><span>  </span><span id="local-6989586621680193898"><span class="annot"><a href="#local-6989586621680193898"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ReaderT (ActivityEnv env) IO (ActivityEnv env)
+forall r (m :: * -&gt; *). MonadReader r m =&gt; m r
+</span><span class="hs-identifier hs-var">ask</span></span><span>
+</span><span id="line-152"></span><span>  </span><span class="annot"><a href="Temporal.Client.html#workflowClient"><span class="hs-identifier hs-type">workflowClient</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">getWorkerClient</span></span><span> </span><span class="annot"><span class="hs-identifier">e</span></span><span class="hs-operator">.</span><span class="hs-identifier">activityWorker</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span>
+</span><span id="line-153"></span><span>    </span><span class="annot"><a href="Temporal.Client.Types.html#WorkflowClientConfig"><span class="hs-identifier hs-type">WorkflowClientConfig</span></a></span><span>
+</span><span id="line-154"></span><span>      </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="Temporal.Client.Types.html#namespace"><span class="hs-identifier hs-var">namespace</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier">e</span></span><span class="hs-operator">.</span><span class="hs-identifier">activityInfo</span><span class="hs-operator">.</span><span class="hs-identifier">workflowNamespace</span><span>
+</span><span id="line-155"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Client.Types.html#interceptors"><span class="hs-identifier hs-var">interceptors</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier">e</span></span><span class="hs-operator">.</span><span class="hs-identifier">activityClientInterceptors</span><span>
+</span><span id="line-156"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Client.Types.html#payloadProcessor"><span class="hs-identifier hs-var">payloadProcessor</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier">e</span></span><span class="hs-operator">.</span><span class="hs-identifier">activityPayloadProcessor</span><span>
+</span><span id="line-157"></span><span>      </span><span class="hs-special">}</span><span>
+</span><span id="line-158"></span><span>
+</span><span id="line-159"></span><span>
+</span><span id="line-160"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680193788"><span class="annot"><a href="Temporal.Client.html#HasWorkflowClient"><span class="hs-identifier hs-type">HasWorkflowClient</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Activity.Definition.html#Activity"><span class="hs-identifier hs-type">Activity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680193788"><span class="hs-identifier hs-type">env</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-161"></span><span>  </span><span id="local-6989586621680193908"><span class="annot"><span class="annottext">askWorkflowClient :: Activity env WorkflowClient
+</span><a href="#local-6989586621680193908"><span class="hs-identifier hs-var hs-var hs-var">askWorkflowClient</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Activity env WorkflowClient
+forall env. Activity env WorkflowClient
+</span><a href="Temporal.Activity.html#activityWorkflowClient"><span class="hs-identifier hs-var">activityWorkflowClient</span></a></span><span>
+</span><span id="line-162"></span></pre></body></html>

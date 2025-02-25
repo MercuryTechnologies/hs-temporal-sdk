@@ -1,0 +1,403 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DerivingStrategies #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Codec.Encryption.html"><span class="hs-identifier">Temporal.Codec.Encryption</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-4"></span><span>  </span><span class="annot"><a href="Temporal.Codec.Encryption.html#Key"><span class="hs-identifier">Key</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-5"></span><span>  </span><span class="annot"><a href="Temporal.Codec.Encryption.html#keyFromBytes"><span class="hs-identifier">keyFromBytes</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-6"></span><span>  </span><span class="annot"><a href="Temporal.Codec.Encryption.html#Cipher"><span class="hs-identifier">Cipher</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-7"></span><span>  </span><span class="annot"><a href="Temporal.Codec.Encryption.html#keyToBase64"><span class="hs-identifier">keyToBase64</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-8"></span><span>  </span><span class="annot"><a href="Temporal.Codec.Encryption.html#keyFromBase64"><span class="hs-identifier">keyFromBase64</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-9"></span><span>  </span><span class="annot"><a href="Temporal.Codec.Encryption.html#genSecretKey"><span class="hs-identifier">genSecretKey</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-10"></span><span>  </span><span class="annot"><a href="Temporal.Codec.Encryption.html#initCipher"><span class="hs-identifier">initCipher</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-11"></span><span>  </span><span class="annot"><a href="Temporal.Codec.Encryption.html#Encrypted"><span class="hs-identifier">Encrypted</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-12"></span><span>  </span><span class="annot"><a href="Temporal.Codec.Encryption.html#mkEncryptionCodec"><span class="hs-identifier">mkEncryptionCodec</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-13"></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Error</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Exception</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">displayException</span></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.IO.Class</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Crypto.Cipher.AES</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">AES256</span></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Crypto.Cipher.AESGCMSIV</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">AESGCMSIV</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Crypto.Cipher.Types</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">AuthTag</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">KeySizeSpecifier</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">KeySizeFixed</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">cipherInit</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">cipherKeySize</span></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Crypto.Error</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">CryptoFailable</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Crypto.Random.Types</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">CRT</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteArray</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">ScrubbedBytes</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">convert</span></span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteArray.Encoding</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">ByteString</span></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map.Strict</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Map</span></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map.Strict</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Map</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">decodeMessage</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">encodeMessage</span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Temporal.Payload</span></span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- An unencoded AES-256 encryption key</span><span>
+</span><span id="line-33"></span><span class="hs-keyword">newtype</span><span> </span><span id="Key"><span class="annot"><a href="Temporal.Codec.Encryption.html#Key"><span class="hs-identifier hs-var">Key</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-34"></span><span>  </span><span id="Key"><span class="annot"><a href="Temporal.Codec.Encryption.html#Key"><span class="hs-identifier hs-var">Key</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ScrubbedBytes</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Codec.Encryption.html#Key"><span class="hs-identifier hs-type">Key</span></a></span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">newtype</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679173675"><span id="local-6989586621679173680"><span class="annot"><span class="annottext">Key -&gt; Key -&gt; Bool
+(Key -&gt; Key -&gt; Bool) -&gt; (Key -&gt; Key -&gt; Bool) -&gt; Eq Key
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: Key -&gt; Key -&gt; Bool
+== :: Key -&gt; Key -&gt; Bool
+$c/= :: Key -&gt; Key -&gt; Bool
+/= :: Key -&gt; Key -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679173689"><span id="local-6989586621679173694"><span id="local-6989586621679173698"><span id="local-6989586621679173702"><span id="local-6989586621679173706"><span id="local-6989586621679173710"><span id="local-6989586621679173714"><span class="annot"><span class="annottext">Eq Key
+Eq Key =&gt;
+(Key -&gt; Key -&gt; Ordering)
+-&gt; (Key -&gt; Key -&gt; Bool)
+-&gt; (Key -&gt; Key -&gt; Bool)
+-&gt; (Key -&gt; Key -&gt; Bool)
+-&gt; (Key -&gt; Key -&gt; Bool)
+-&gt; (Key -&gt; Key -&gt; Key)
+-&gt; (Key -&gt; Key -&gt; Key)
+-&gt; Ord Key
+Key -&gt; Key -&gt; Bool
+Key -&gt; Key -&gt; Ordering
+Key -&gt; Key -&gt; Key
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: Key -&gt; Key -&gt; Ordering
+compare :: Key -&gt; Key -&gt; Ordering
+$c&lt; :: Key -&gt; Key -&gt; Bool
+&lt; :: Key -&gt; Key -&gt; Bool
+$c&lt;= :: Key -&gt; Key -&gt; Bool
+&lt;= :: Key -&gt; Key -&gt; Bool
+$c&gt; :: Key -&gt; Key -&gt; Bool
+&gt; :: Key -&gt; Key -&gt; Bool
+$c&gt;= :: Key -&gt; Key -&gt; Bool
+&gt;= :: Key -&gt; Key -&gt; Bool
+$cmax :: Key -&gt; Key -&gt; Key
+max :: Key -&gt; Key -&gt; Key
+$cmin :: Key -&gt; Key -&gt; Key
+min :: Key -&gt; Key -&gt; Key
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679173726"><span id="local-6989586621679173731"><span id="local-6989586621679173735"><span class="annot"><span class="annottext">Int -&gt; Key -&gt; ShowS
+[Key] -&gt; ShowS
+Key -&gt; String
+(Int -&gt; Key -&gt; ShowS)
+-&gt; (Key -&gt; String) -&gt; ([Key] -&gt; ShowS) -&gt; Show Key
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; Key -&gt; ShowS
+showsPrec :: Int -&gt; Key -&gt; ShowS
+$cshow :: Key -&gt; String
+show :: Key -&gt; String
+$cshowList :: [Key] -&gt; ShowS
+showList :: [Key] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">newtype</span><span> </span><span id="Cipher"><span class="annot"><a href="Temporal.Codec.Encryption.html#Cipher"><span class="hs-identifier hs-var">Cipher</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-39"></span><span>  </span><span id="Cipher"><span class="annot"><a href="Temporal.Codec.Encryption.html#Cipher"><span class="hs-identifier hs-var">Cipher</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AES256</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Codec.Encryption.html#Cipher"><span class="hs-identifier hs-type">Temporal.Codec.Encryption.Cipher</span></a></span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="annot"><a href="Temporal.Codec.Encryption.html#keyFromBytes"><span class="hs-identifier hs-type">keyFromBytes</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ScrubbedBytes</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Codec.Encryption.html#Key"><span class="hs-identifier hs-type">Key</span></a></span><span>
+</span><span id="line-43"></span><span id="keyFromBytes"><span class="annot"><span class="annottext">keyFromBytes :: ScrubbedBytes -&gt; Key
+</span><a href="Temporal.Codec.Encryption.html#keyFromBytes"><span class="hs-identifier hs-var hs-var">keyFromBytes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ScrubbedBytes -&gt; Key
+</span><a href="Temporal.Codec.Encryption.html#Key"><span class="hs-identifier hs-var">Key</span></a></span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="annot"><a href="Temporal.Codec.Encryption.html#keyToBase64"><span class="hs-identifier hs-type">keyToBase64</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Codec.Encryption.html#Key"><span class="hs-identifier hs-type">Key</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span>
+</span><span id="line-47"></span><span id="keyToBase64"><span class="annot"><span class="annottext">keyToBase64 :: Key -&gt; ByteString
+</span><a href="Temporal.Codec.Encryption.html#keyToBase64"><span class="hs-identifier hs-var hs-var">keyToBase64</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Codec.Encryption.html#Key"><span class="hs-identifier hs-type">Key</span></a></span><span> </span><span id="local-6989586621679173744"><span class="annot"><span class="annottext">ScrubbedBytes
+</span><a href="#local-6989586621679173744"><span class="hs-identifier hs-var">bytes</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Base -&gt; ScrubbedBytes -&gt; ByteString
+forall bin bout.
+(ByteArrayAccess bin, ByteArray bout) =&gt;
+Base -&gt; bin -&gt; bout
+</span><span class="hs-identifier hs-var">convertToBase</span></span><span> </span><span class="annot"><span class="annottext">Base
+</span><span class="hs-identifier hs-var">Base64</span></span><span> </span><span class="annot"><span class="annottext">ScrubbedBytes
+</span><a href="#local-6989586621679173744"><span class="hs-identifier hs-var">bytes</span></a></span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span class="annot"><a href="Temporal.Codec.Encryption.html#keyFromBase64"><span class="hs-identifier hs-type">keyFromBase64</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="annot"><a href="Temporal.Codec.Encryption.html#Key"><span class="hs-identifier hs-type">Key</span></a></span><span>
+</span><span id="line-51"></span><span id="keyFromBase64"><span class="annot"><span class="annottext">keyFromBase64 :: ByteString -&gt; Either String Key
+</span><a href="Temporal.Codec.Encryption.html#keyFromBase64"><span class="hs-identifier hs-var hs-var">keyFromBase64</span></a></span></span><span> </span><span id="local-6989586621679173747"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679173747"><span class="hs-identifier hs-var">bs64</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Base -&gt; ByteString -&gt; Either String ScrubbedBytes
+forall bin bout.
+(ByteArrayAccess bin, ByteArray bout) =&gt;
+Base -&gt; bin -&gt; Either String bout
+</span><span class="hs-identifier hs-var">convertFromBase</span></span><span> </span><span class="annot"><span class="annottext">Base
+</span><span class="hs-identifier hs-var">Base64</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679173747"><span class="hs-identifier hs-var">bs64</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-52"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621679173749"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679173749"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Either String Key
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679173749"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-53"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679173750"><span class="annot"><span class="annottext">ScrubbedBytes
+</span><a href="#local-6989586621679173750"><span class="hs-identifier hs-var">bs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Key -&gt; Either String Key
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">(Key -&gt; Either String Key) -&gt; Key -&gt; Either String Key
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ScrubbedBytes -&gt; Key
+</span><a href="Temporal.Codec.Encryption.html#Key"><span class="hs-identifier hs-var">Key</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ScrubbedBytes
+</span><a href="#local-6989586621679173750"><span class="hs-identifier hs-var">bs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ScrubbedBytes</span></span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="annot"><span class="hs-comment">-- | Generates a string of bytes (key) of a specific length for a given block cipher</span></span><span>
+</span><span id="line-57"></span><span class="annot"><a href="Temporal.Codec.Encryption.html#genSecretKey"><span class="hs-identifier hs-type">genSecretKey</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679173557"><span class="annot"><a href="#local-6989586621679173557"><span class="hs-identifier hs-type">m</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">CRT.MonadRandom</span></span><span> </span><span class="annot"><a href="#local-6989586621679173557"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679173557"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="Temporal.Codec.Encryption.html#Key"><span class="hs-identifier hs-type">Key</span></a></span><span>
+</span><span id="line-58"></span><span id="genSecretKey"><span class="annot"><span class="annottext">genSecretKey :: forall (m :: * -&gt; *). MonadRandom m =&gt; m Key
+</span><a href="Temporal.Codec.Encryption.html#genSecretKey"><span class="hs-identifier hs-var hs-var">genSecretKey</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(ScrubbedBytes -&gt; Key) -&gt; m ScrubbedBytes -&gt; m Key
+forall a b. (a -&gt; b) -&gt; m a -&gt; m b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">ScrubbedBytes -&gt; Key
+</span><a href="Temporal.Codec.Encryption.html#Key"><span class="hs-identifier hs-var">Key</span></a></span><span> </span><span class="annot"><span class="annottext">(m ScrubbedBytes -&gt; m Key) -&gt; m ScrubbedBytes -&gt; m Key
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; m ScrubbedBytes
+forall byteArray. ByteArray byteArray =&gt; Int -&gt; m byteArray
+forall (m :: * -&gt; *) byteArray.
+(MonadRandom m, ByteArray byteArray) =&gt;
+Int -&gt; m byteArray
+</span><span class="hs-identifier hs-var">CRT.getRandomBytes</span></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; m ScrubbedBytes) -&gt; Int -&gt; m ScrubbedBytes
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">AES256 -&gt; KeySizeSpecifier
+forall cipher. Cipher cipher =&gt; cipher -&gt; KeySizeSpecifier
+</span><span class="hs-identifier hs-var">cipherKeySize</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">AES256
+forall a. HasCallStack =&gt; a
+</span><span class="hs-identifier hs-var">undefined</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AES256</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-59"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">KeySizeFixed</span></span><span> </span><span id="local-6989586621679173768"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679173768"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679173768"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-60"></span><span>  </span><span class="annot"><span class="annottext">KeySizeSpecifier
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Int
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;AES256 key size should fixed&quot;</span></span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span class="annot"><span class="hs-comment">-- | Initialize an AES256 cipher</span></span><span>
+</span><span id="line-64"></span><span class="annot"><a href="Temporal.Codec.Encryption.html#initCipher"><span class="hs-identifier hs-type">initCipher</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Codec.Encryption.html#Key"><span class="hs-identifier hs-type">Key</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="annot"><a href="Temporal.Codec.Encryption.html#Cipher"><span class="hs-identifier hs-type">Cipher</span></a></span><span>
+</span><span id="line-65"></span><span id="initCipher"><span class="annot"><span class="annottext">initCipher :: Key -&gt; Either String Cipher
+</span><a href="Temporal.Codec.Encryption.html#initCipher"><span class="hs-identifier hs-var hs-var">initCipher</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Codec.Encryption.html#Key"><span class="hs-identifier hs-type">Key</span></a></span><span> </span><span id="local-6989586621679173770"><span class="annot"><span class="annottext">ScrubbedBytes
+</span><a href="#local-6989586621679173770"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">ScrubbedBytes -&gt; CryptoFailable AES256
+forall cipher key.
+(Cipher cipher, ByteArray key) =&gt;
+key -&gt; CryptoFailable cipher
+forall key. ByteArray key =&gt; key -&gt; CryptoFailable AES256
+</span><span class="hs-identifier hs-var">cipherInit</span></span><span> </span><span class="annot"><span class="annottext">ScrubbedBytes
+</span><a href="#local-6989586621679173770"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-66"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">CryptoFailed</span></span><span> </span><span id="local-6989586621679173772"><span class="annot"><span class="annottext">CryptoError
+</span><a href="#local-6989586621679173772"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Either String Cipher
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Either String Cipher) -&gt; String -&gt; Either String Cipher
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">CryptoError -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">CryptoError
+</span><a href="#local-6989586621679173772"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-67"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">CryptoPassed</span></span><span> </span><span id="local-6989586621679173774"><span class="annot"><span class="annottext">AES256
+</span><a href="#local-6989586621679173774"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Cipher -&gt; Either String Cipher
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">(Cipher -&gt; Either String Cipher) -&gt; Cipher -&gt; Either String Cipher
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">AES256 -&gt; Cipher
+</span><a href="Temporal.Codec.Encryption.html#Cipher"><span class="hs-identifier hs-var">Cipher</span></a></span><span> </span><span class="annot"><span class="annottext">AES256
+</span><a href="#local-6989586621679173774"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span class="hs-keyword">data</span><span> </span><span id="Encrypted"><span class="annot"><a href="Temporal.Codec.Encryption.html#Encrypted"><span class="hs-identifier hs-var">Encrypted</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Encrypted"><span class="annot"><a href="Temporal.Codec.Encryption.html#Encrypted"><span class="hs-identifier hs-var">Encrypted</span></a></span></span><span>
+</span><span id="line-71"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="encryptionKeys"><span class="annot"><span class="annottext">Encrypted -&gt; Map ByteString Cipher
+</span><a href="Temporal.Codec.Encryption.html#encryptionKeys"><span class="hs-identifier hs-var hs-var">encryptionKeys</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="annot"><a href="Temporal.Codec.Encryption.html#Cipher"><span class="hs-identifier hs-type">Cipher</span></a></span><span>
+</span><span id="line-72"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="defaultKeyName"><span class="annot"><span class="annottext">Encrypted -&gt; ByteString
+</span><a href="Temporal.Codec.Encryption.html#defaultKeyName"><span class="hs-identifier hs-var hs-var">defaultKeyName</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="defaultKey"><span class="annot"><span class="annottext">Encrypted -&gt; Cipher
+</span><a href="Temporal.Codec.Encryption.html#defaultKey"><span class="hs-identifier hs-var hs-var">defaultKey</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Codec.Encryption.html#Cipher"><span class="hs-identifier hs-type">Cipher</span></a></span><span>
+</span><span id="line-74"></span><span>  </span><span class="hs-comment">-- TODO, fetchKey operation to support a KMS (key management system)</span><span>
+</span><span id="line-75"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span id="local-6989586621679173579"><span class="annot"><a href="Temporal.Codec.Encryption.html#mkEncryptionCodec"><span class="hs-identifier hs-type">mkEncryptionCodec</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679173579"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Codec.Encryption.html#Cipher"><span class="hs-identifier hs-type">Cipher</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="annot"><a href="Temporal.Codec.Encryption.html#Cipher"><span class="hs-identifier hs-type">Cipher</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679173579"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="annot"><a href="Temporal.Codec.Encryption.html#Encrypted"><span class="hs-identifier hs-type">Encrypted</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-79"></span><span id="mkEncryptionCodec"><span class="annot"><span class="annottext">mkEncryptionCodec :: forall (m :: * -&gt; *).
+MonadIO m =&gt;
+(ByteString, Cipher)
+-&gt; Map ByteString Cipher -&gt; m (Either String Encrypted)
+</span><a href="Temporal.Codec.Encryption.html#mkEncryptionCodec"><span class="hs-identifier hs-var hs-var">mkEncryptionCodec</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679173785"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679173785"><span class="hs-identifier hs-var">defaultKeyName</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679173786"><span class="annot"><span class="annottext">Cipher
+</span><a href="#local-6989586621679173786"><span class="hs-identifier hs-var">defaultKey</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679173787"><span class="annot"><span class="annottext">Map ByteString Cipher
+</span><a href="#local-6989586621679173787"><span class="hs-identifier hs-var">otherKeys</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO (Either String Encrypted) -&gt; m (Either String Encrypted)
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO (Either String Encrypted) -&gt; m (Either String Encrypted))
+-&gt; IO (Either String Encrypted) -&gt; m (Either String Encrypted)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-80"></span><span>  </span><span class="annot"><span class="annottext">Either String Encrypted -&gt; IO (Either String Encrypted)
+forall a. a -&gt; IO a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(Either String Encrypted -&gt; IO (Either String Encrypted))
+-&gt; Either String Encrypted -&gt; IO (Either String Encrypted)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-81"></span><span>    </span><span class="annot"><span class="annottext">Encrypted -&gt; Either String Encrypted
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">(Encrypted -&gt; Either String Encrypted)
+-&gt; Encrypted -&gt; Either String Encrypted
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-82"></span><span>      </span><span class="annot"><a href="Temporal.Codec.Encryption.html#Encrypted"><span class="hs-identifier hs-type">Encrypted</span></a></span><span>
+</span><span id="line-83"></span><span>        </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">encryptionKeys :: Map ByteString Cipher
+</span><a href="Temporal.Codec.Encryption.html#encryptionKeys"><span class="hs-identifier hs-var">encryptionKeys</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ByteString
+-&gt; Cipher -&gt; Map ByteString Cipher -&gt; Map ByteString Cipher
+forall k a. Ord k =&gt; k -&gt; a -&gt; Map k a -&gt; Map k a
+</span><span class="hs-identifier hs-var">Map.insert</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679173785"><span class="hs-identifier hs-var">defaultKeyName</span></a></span><span> </span><span class="annot"><span class="annottext">Cipher
+</span><a href="#local-6989586621679173786"><span class="hs-identifier hs-var">defaultKey</span></a></span><span> </span><span class="annot"><span class="annottext">Map ByteString Cipher
+</span><a href="#local-6989586621679173787"><span class="hs-identifier hs-var">otherKeys</span></a></span><span>
+</span><span id="line-84"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ByteString
+Cipher
+defaultKeyName :: ByteString
+defaultKey :: Cipher
+defaultKeyName :: ByteString
+defaultKey :: Cipher
+</span><a href="Temporal.Codec.Encryption.html#defaultKeyName"><span class="hs-glyph hs-var hs-var hs-var hs-var">..</span></a></span><span>
+</span><span id="line-85"></span><span>        </span><span class="hs-special">}</span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679173792"><span class="annot"><span class="hs-identifier hs-type">Codec</span></span><span> </span><span class="annot"><a href="Temporal.Codec.Encryption.html#Encrypted"><span class="hs-identifier hs-type">Encrypted</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Payload</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-89"></span><span>  </span><span id="local-6989586621679173801"><span class="annot"><span class="annottext">encoding :: Encrypted -&gt; Proxy Payload -&gt; ByteString
+</span><a href="#local-6989586621679173801"><span class="hs-identifier hs-var hs-var hs-var">encoding</span></a></span></span><span> </span><span class="annot"><span class="annottext">Encrypted
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">Proxy Payload
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;binary/encrypted&quot;</span></span><span>
+</span><span id="line-90"></span><span>  </span><span id="local-6989586621679173837"><span class="annot"><span class="annottext">encode :: Encrypted -&gt; Payload -&gt; IO Payload
+</span><a href="#local-6989586621679173837"><span class="hs-identifier hs-var hs-var hs-var">encode</span></a></span></span><span> </span><span class="annot"><a href="Temporal.Codec.Encryption.html#Encrypted"><span class="hs-identifier hs-type">Encrypted</span></a></span><span> </span><span class="hs-special">{</span><span id="local-6989586621679173839"><span id="local-6989586621679173840"><span id="local-6989586621679173841"><span class="annot"><span class="annottext">ByteString
+Map ByteString Cipher
+Cipher
+encryptionKeys :: Encrypted -&gt; Map ByteString Cipher
+defaultKeyName :: Encrypted -&gt; ByteString
+defaultKey :: Encrypted -&gt; Cipher
+encryptionKeys :: Map ByteString Cipher
+defaultKeyName :: ByteString
+defaultKey :: Cipher
+</span><a href="Temporal.Codec.Encryption.html#encryptionKeys"><span class="hs-glyph hs-var hs-var hs-var hs-var hs-var hs-var">..</span></a></span></span></span></span><span class="hs-special">}</span><span> </span><span id="local-6989586621679173842"><span class="annot"><span class="annottext">Payload
+</span><a href="#local-6989586621679173842"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-91"></span><span>    </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Payload
+</span><a href="#local-6989586621679173842"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">payloadData</span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; ByteString -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;&quot;</span></span><span>
+</span><span id="line-92"></span><span>      </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Payload -&gt; IO Payload
+forall a. a -&gt; IO a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Payload
+</span><a href="#local-6989586621679173842"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-93"></span><span>      </span><span class="hs-keyword">else</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-94"></span><span>        </span><span id="local-6989586621679173843"><span class="annot"><a href="#local-6989586621679173843"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Nonce
+forall (m :: * -&gt; *). MonadRandom m =&gt; m Nonce
+</span><span class="hs-identifier hs-var">AESGCMSIV.generateNonce</span></span><span>
+</span><span id="line-95"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Codec.Encryption.html#Cipher"><span class="hs-identifier hs-type">Cipher</span></a></span><span> </span><span id="local-6989586621679173845"><span class="annot"><a href="#local-6989586621679173845"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679173841"><span class="hs-identifier hs-type">defaultKey</span></a></span><span>
+</span><span id="line-96"></span><span>            </span><span class="hs-special">(</span><span id="local-6989586621679173846"><span class="annot"><a href="#local-6989586621679173846"><span class="hs-identifier hs-var">authTag</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679173847"><span class="annot"><a href="#local-6989586621679173847"><span class="hs-identifier hs-var">encrypted</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AESGCMSIV.encrypt</span></span><span> </span><span class="annot"><a href="#local-6989586621679173845"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679173843"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">mempty</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">encodeMessage</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">convertToProtoPayload</span></span><span> </span><span class="annot"><a href="#local-6989586621679173842"><span class="hs-identifier hs-type">x</span></a></span><span>
+</span><span id="line-97"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span>
+</span><span id="line-98"></span><span>          </span><span class="annot"><span class="hs-identifier hs-type">Payload</span></span><span>
+</span><span id="line-99"></span><span>            </span><span class="annot"><a href="#local-6989586621679173847"><span class="hs-identifier hs-type">encrypted</span></a></span><span>
+</span><span id="line-100"></span><span>            </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map.fromList</span></span><span>
+</span><span id="line-101"></span><span>                </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;encryption-key-id&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679173840"><span class="hs-identifier hs-type">defaultKeyName</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-102"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;encoding&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-string">&quot;binary/encrypted&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-103"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;cipher&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-string">&quot;AESGCMSIV&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-104"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;nonce&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">convert</span></span><span> </span><span class="annot"><a href="#local-6989586621679173843"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-105"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;auth-tag&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">convert</span></span><span> </span><span class="annot"><a href="#local-6989586621679173846"><span class="hs-identifier hs-type">authTag</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-106"></span><span>                </span><span class="hs-special">]</span><span>
+</span><span id="line-107"></span><span>            </span><span class="hs-special">)</span><span>
+</span><span id="line-108"></span><span>  </span><span id="local-6989586621679173922"><span class="annot"><span class="annottext">decode :: Encrypted -&gt; Payload -&gt; IO (Either String Payload)
+</span><a href="#local-6989586621679173922"><span class="hs-identifier hs-var hs-var hs-var">decode</span></a></span></span><span> </span><span class="annot"><a href="Temporal.Codec.Encryption.html#Encrypted"><span class="hs-identifier hs-type">Encrypted</span></a></span><span> </span><span class="hs-special">{</span><span id="local-6989586621679173924"><span id="local-6989586621679173925"><span id="local-6989586621679173926"><span class="annot"><span class="annottext">ByteString
+Map ByteString Cipher
+Cipher
+encryptionKeys :: Encrypted -&gt; Map ByteString Cipher
+defaultKeyName :: Encrypted -&gt; ByteString
+defaultKey :: Encrypted -&gt; Cipher
+encryptionKeys :: Map ByteString Cipher
+defaultKeyName :: ByteString
+defaultKey :: Cipher
+</span><a href="Temporal.Codec.Encryption.html#encryptionKeys"><span class="hs-glyph hs-var hs-var hs-var hs-var hs-var hs-var">..</span></a></span></span></span></span><span class="hs-special">}</span><span> </span><span id="local-6989586621679173927"><span class="annot"><span class="annottext">Payload
+</span><a href="#local-6989586621679173927"><span class="hs-identifier hs-var">payload</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; ByteString -&gt; (ByteString, ByteString))
+-&gt; Maybe ByteString
+-&gt; Maybe (ByteString -&gt; (ByteString, ByteString))
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Payload
+</span><a href="#local-6989586621679173927"><span class="hs-identifier hs-var">payload</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">payloadMetadata</span><span> </span><span class="annot"><span class="annottext">Map Text ByteString -&gt; Text -&gt; Maybe ByteString
+forall k a. Ord k =&gt; Map k a -&gt; k -&gt; Maybe a
+</span><span class="hs-operator hs-var">Map.!?</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;encoding&quot;</span></span><span> </span><span class="annot"><span class="annottext">Maybe (ByteString -&gt; (ByteString, ByteString))
+-&gt; Maybe ByteString -&gt; Maybe (ByteString, ByteString)
+forall a b. Maybe (a -&gt; b) -&gt; Maybe a -&gt; Maybe b
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Payload
+</span><a href="#local-6989586621679173927"><span class="hs-identifier hs-var">payload</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">payloadMetadata</span><span> </span><span class="annot"><span class="annottext">Map Text ByteString -&gt; Text -&gt; Maybe ByteString
+forall k a. Ord k =&gt; Map k a -&gt; k -&gt; Maybe a
+</span><span class="hs-operator hs-var">Map.!?</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;cipher&quot;</span></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-109"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;binary/encrypted&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;AESGCMSIV&quot;</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-110"></span><span>      </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Payload
+</span><a href="#local-6989586621679173927"><span class="hs-identifier hs-var">payload</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">payloadData</span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; ByteString -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;&quot;</span></span><span>
+</span><span id="line-111"></span><span>        </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Either String Payload -&gt; IO (Either String Payload)
+forall a. a -&gt; IO a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(Either String Payload -&gt; IO (Either String Payload))
+-&gt; Either String Payload -&gt; IO (Either String Payload)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Either String Payload
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Payload data is missing&quot;</span></span><span>
+</span><span id="line-112"></span><span>        </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">ExceptT String IO Payload -&gt; IO (Either String Payload)
+forall e (m :: * -&gt; *) a. ExceptT e m a -&gt; m (Either e a)
+</span><span class="hs-identifier hs-var">runExceptT</span></span><span> </span><span class="annot"><span class="annottext">(ExceptT String IO Payload -&gt; IO (Either String Payload))
+-&gt; ExceptT String IO Payload -&gt; IO (Either String Payload)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-113"></span><span>          </span><span id="local-6989586621679173931"><span class="annot"><a href="#local-6989586621679173931"><span class="hs-identifier hs-var">keyName</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; Maybe ByteString -&gt; ExceptT String IO ByteString
+forall (m :: * -&gt; *) e a. Monad m =&gt; e -&gt; Maybe a -&gt; ExceptT e m a
+</span><span class="hs-identifier hs-var">tryJust</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Unable to decrypt Payload without encryption key id'&quot;</span></span><span> </span><span class="annot"><span class="annottext">(Maybe ByteString -&gt; ExceptT String IO ByteString)
+-&gt; Maybe ByteString -&gt; ExceptT String IO ByteString
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Payload
+</span><a href="#local-6989586621679173927"><span class="hs-identifier hs-var">payload</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">payloadMetadata</span><span> </span><span class="annot"><span class="annottext">Map Text ByteString -&gt; Text -&gt; Maybe ByteString
+forall k a. Ord k =&gt; Map k a -&gt; k -&gt; Maybe a
+</span><span class="hs-operator hs-var">Map.!?</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;encryption-key-id&quot;</span></span><span>
+</span><span id="line-114"></span><span>          </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Codec.Encryption.html#Cipher"><span class="hs-identifier hs-type">Cipher</span></a></span><span> </span><span id="local-6989586621679173933"><span class="annot"><a href="#local-6989586621679173933"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">tryJust</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;Could not find encryption key: &quot;</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">show</span></span><span> </span><span class="annot"><a href="#local-6989586621679173931"><span class="hs-identifier hs-type">keyName</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="#local-6989586621679173924"><span class="hs-identifier hs-type">encryptionKeys</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">Map.!?</span></span><span> </span><span class="annot"><a href="#local-6989586621679173931"><span class="hs-identifier hs-type">keyName</span></a></span><span>
+</span><span id="line-115"></span><span>          </span><span id="local-6989586621679173934"><span class="annot"><a href="#local-6989586621679173934"><span class="hs-identifier hs-var">rawNonce</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">tryJust</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Unable to decrypt Payload without nonce&quot;</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier">payload</span></span><span class="hs-operator">.</span><span class="hs-identifier">payloadMetadata</span><span> </span><span class="annot"><span class="hs-operator hs-type">Map.!?</span></span><span> </span><span class="annot"><span class="hs-string">&quot;nonce&quot;</span></span><span>
+</span><span id="line-116"></span><span>          </span><span id="local-6989586621679173935"><span class="annot"><a href="#local-6989586621679173935"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AESGCMSIV.nonce</span></span><span> </span><span class="annot"><a href="#local-6989586621679173934"><span class="hs-identifier hs-type">rawNonce</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-117"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">CryptoPassed</span></span><span> </span><span id="local-6989586621679173937"><span class="annot"><span class="annottext">Nonce
+</span><a href="#local-6989586621679173937"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Nonce -&gt; ExceptT String IO Nonce
+forall a. a -&gt; ExceptT String IO a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Nonce
+</span><a href="#local-6989586621679173937"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-118"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">CryptoFailed</span></span><span> </span><span id="local-6989586621679173938"><span class="annot"><span class="annottext">CryptoError
+</span><a href="#local-6989586621679173938"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; ExceptT String IO Nonce
+forall (m :: * -&gt; *) e a. Monad m =&gt; e -&gt; ExceptT e m a
+</span><span class="hs-identifier hs-var">throwE</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; ExceptT String IO Nonce)
+-&gt; String -&gt; ExceptT String IO Nonce
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">CryptoError -&gt; String
+forall e. Exception e =&gt; e -&gt; String
+</span><span class="hs-identifier hs-var">displayException</span></span><span> </span><span class="annot"><span class="annottext">CryptoError
+</span><a href="#local-6989586621679173938"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-119"></span><span>          </span><span id="local-6989586621679173940"><span class="annot"><a href="#local-6989586621679173940"><span class="hs-identifier hs-var">authTag</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">tryJust</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Unable to decrypt Payload without auth tag&quot;</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier">payload</span></span><span class="hs-operator">.</span><span class="hs-identifier">payloadMetadata</span><span> </span><span class="annot"><span class="hs-operator hs-type">Map.!?</span></span><span> </span><span class="annot"><span class="hs-string">&quot;auth-tag&quot;</span></span><span>
+</span><span id="line-120"></span><span>          </span><span id="local-6989586621679173941"><span class="annot"><a href="#local-6989586621679173941"><span class="hs-identifier hs-var">decrypted</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">tryJust</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Unable to decrypt Payload&quot;</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AESGCMSIV.decrypt</span></span><span> </span><span class="annot"><a href="#local-6989586621679173933"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679173935"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">mempty</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-identifier">payload</span></span><span class="hs-operator">.</span><span class="hs-identifier">payloadData</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">AuthTag</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">convert</span></span><span> </span><span class="annot"><a href="#local-6989586621679173940"><span class="hs-identifier hs-type">authTag</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-121"></span><span>          </span><span id="local-6989586621679173944"><span class="annot"><a href="#local-6989586621679173944"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">tryRight</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">decodeMessage</span></span><span> </span><span class="annot"><a href="#local-6989586621679173941"><span class="hs-identifier hs-type">decrypted</span></a></span><span>
+</span><span id="line-122"></span><span>          </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$!</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">convertFromProtoPayload</span></span><span> </span><span class="annot"><a href="#local-6989586621679173944"><span class="hs-identifier hs-type">p</span></a></span><span>
+</span><span id="line-123"></span><span>    </span><span class="annot"><span class="annottext">Maybe (ByteString, ByteString)
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Either String Payload -&gt; IO (Either String Payload)
+forall a. a -&gt; IO a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(Either String Payload -&gt; IO (Either String Payload))
+-&gt; Either String Payload -&gt; IO (Either String Payload)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Payload -&gt; Either String Payload
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">Payload
+</span><a href="#local-6989586621679173927"><span class="hs-identifier hs-var">payload</span></a></span><span>
+</span><span id="line-124"></span></pre></body></html>

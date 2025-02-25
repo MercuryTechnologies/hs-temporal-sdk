@@ -1,0 +1,966 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE BangPatterns #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE KindSignatures #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-7"></span><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Workflow.Eval.html"><span class="hs-identifier">Temporal.Workflow.Eval</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Logger</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Reader</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Text</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Stack</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RequireCallStack</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Common.html"><span class="hs-identifier">Temporal.Common</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Coroutine.html"><span class="hs-identifier">Temporal.Coroutine</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html"><span class="hs-identifier">Temporal.Workflow.Internal.Monad</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html"><span class="hs-identifier">Temporal.Workflow.Types</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Text.Printf</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">UnliftIO</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Unsafe.Coerce</span></span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="annot"><a href="Temporal.Workflow.Eval.html#withRunId"><span class="hs-identifier hs-type">withRunId</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#InstanceM"><span class="hs-identifier hs-type">InstanceM</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-27"></span><span id="withRunId"><span class="annot"><span class="annottext">withRunId :: Text -&gt; InstanceM Text
+</span><a href="Temporal.Workflow.Eval.html#withRunId"><span class="hs-identifier hs-var hs-var">withRunId</span></a></span></span><span> </span><span id="local-6989586621680173063"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621680173063"><span class="hs-identifier hs-var">arg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-28"></span><span>  </span><span id="local-6989586621680173064"><span class="annot"><a href="#local-6989586621680173064"><span class="hs-identifier hs-var">inst</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">InstanceM WorkflowInstance
+forall r (m :: * -&gt; *). MonadReader r m =&gt; m r
+</span><span class="hs-identifier hs-var">ask</span></span><span>
+</span><span id="line-29"></span><span>  </span><span id="local-6989586621680173066"><span class="annot"><a href="#local-6989586621680173066"><span class="hs-identifier hs-var">info</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">readIORef</span></span><span> </span><span class="annot"><span class="hs-identifier">inst</span></span><span class="hs-operator">.</span><span class="hs-identifier">workflowInstanceInfo</span><span>
+</span><span id="line-30"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;[runId=&quot;</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;&gt;</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#rawRunId"><span class="hs-identifier hs-var">rawRunId</span></a></span><span> </span><span class="annot"><span class="hs-identifier">info</span></span><span class="hs-operator">.</span><span class="hs-identifier">runId</span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;&gt;</span></span><span> </span><span class="annot"><span class="hs-string">&quot;] &quot;</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621680173063"><span class="hs-identifier hs-type">arg</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">type</span><span> </span><span id="SuspendableWorkflowExecution"><span class="annot"><a href="Temporal.Workflow.Eval.html#SuspendableWorkflowExecution"><span class="hs-identifier hs-var">SuspendableWorkflowExecution</span></a></span></span><span> </span><span id="local-6989586621680173069"><span class="annot"><a href="#local-6989586621680173069"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Coroutine.html#Await"><span class="hs-identifier hs-type">Await</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Temporal.Workflow.Eval.html#ActivationResult"><span class="hs-identifier hs-type">ActivationResult</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#InstanceM"><span class="hs-identifier hs-type">InstanceM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680173069"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="annot"><span class="hs-comment">{- | Values that were blocking waiting for an activation, and have now
+been unblocked. The worker feeds these into a suspended workflow
+after converting workflow activation results.
+This unblocks the relevant computations.
+-}</span></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">data</span><span> </span><span id="ActivationResult"><span class="annot"><a href="Temporal.Workflow.Eval.html#ActivationResult"><span class="hs-identifier hs-var">ActivationResult</span></a></span></span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621680173070"><span class="annot"><a href="#local-6989586621680173070"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-43"></span><span>    </span><span id="ActivationResult"><span class="annot"><a href="Temporal.Workflow.Eval.html#ActivationResult"><span class="hs-identifier hs-var">ActivationResult</span></a></span></span><span>
+</span><span id="line-44"></span><span>      </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ResultVal"><span class="hs-identifier hs-type">ResultVal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680173070"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>      </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#IVar"><span class="hs-identifier hs-type">IVar</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680173070"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- How this works:</span><span>
+</span><span id="line-49"></span><span class="hs-comment">--</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- A workflow instance executes a `Workflow` computation on its own thread.</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- There is a cooperative interplay between the main instance thread</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- responsible for executing WorkflowActivations and the workflow thread.</span><span>
+</span><span id="line-53"></span><span class="hs-comment">--</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- The workflow thread evaluates computations as deeply as possible before</span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- blocking and forcing the WorkfowActivation processing code to submit</span><span>
+</span><span id="line-56"></span><span class="hs-comment">-- a WorkflowActivationCompletion to the core worker.</span><span>
+</span><span id="line-57"></span><span class="hs-comment">--</span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- This has a lot of similarities to ideas from Haxl's GenHaxl monad with</span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- regards to suspending and resuming as we get results back, but is different</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- in that we want to treat execution of async tasks</span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- (executeChildWorkflow, timers, etc.) as awaitable and cancellable.</span><span>
+</span><span id="line-62"></span><span class="hs-comment">-- That is, we return a handle similar to an Async value and</span><span>
+</span><span id="line-63"></span><span class="hs-comment">-- let the workflow writer choose if/when to suspend. It's also viable</span><span>
+</span><span id="line-64"></span><span class="hs-comment">-- to just start a workflow or activity for its side effects and ignore the result</span><span>
+</span><span id="line-65"></span><span class="hs-comment">--</span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- Another difference is that workflow signals allow for these handles to be</span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- altered out of band, so we can't just traverse the tree and trust the</span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- computation flow to be fully within our control. I think this is fine,</span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- but it does mean that we might need to update the scheduler code below</span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- to allow injecting these signals into the run queue.</span><span>
+</span><span id="line-71"></span><span class="hs-comment">--</span><span>
+</span><span id="line-72"></span><span class="hs-comment">-- Regardless, once we signal a WorkflowActivationCompletion, we wait in a</span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- suspended state.</span><span>
+</span><span id="line-74"></span><span class="hs-comment">--</span><span>
+</span><span id="line-75"></span><span class="hs-comment">-- The core worker will eventually activate the instance again, at which</span><span>
+</span><span id="line-76"></span><span class="hs-comment">-- point we use Sequence values in the variants of the different workflow</span><span>
+</span><span id="line-77"></span><span class="hs-comment">-- activation jobs to fill any corresponding handles with their</span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- results and continue execution.</span><span>
+</span><span id="line-79"></span><span class="hs-comment">--                                                              &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;</span><span>
+</span><span id="line-80"></span><span class="hs-comment">--                               Run a Workflow action that     &#9474;                    &#9474;</span><span>
+</span><span id="line-81"></span><span class="hs-comment">--                               fills an IVar.                 &#9474;                    &#9474;</span><span>
+</span><span id="line-82"></span><span class="hs-comment">--                                                              &#9474;      schedule      &#9474;</span><span>
+</span><span id="line-83"></span><span class="hs-comment">--                               Once we get the result of the  &#9474;                    &#9474;</span><span>
+</span><span id="line-84"></span><span class="hs-comment">--                               Workflow action, figure out if &#9474;                    &#9474;</span><span>
+</span><span id="line-85"></span><span class="hs-comment">--                               the full computation is        &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;</span><span>
+</span><span id="line-86"></span><span class="hs-comment">--                               completed. If not, reschedule  &#9650;          &#9474;</span><span>
+</span><span id="line-87"></span><span class="hs-comment">--                               to execute more Workflow code. &#9474;          &#9474;</span><span>
+</span><span id="line-88"></span><span class="hs-comment">--                                                              &#9474;          &#9660;</span><span>
+</span><span id="line-89"></span><span class="hs-comment">--                                                              &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;</span><span>
+</span><span id="line-90"></span><span class="hs-comment">--                                                              &#9474;                    &#9474;</span><span>
+</span><span id="line-91"></span><span class="hs-comment">--                                                              &#9474;                    &#9474;</span><span>
+</span><span id="line-92"></span><span class="hs-comment">--                                &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;&#9664;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472; &#9474;     reschedule     &#9474;</span><span>
+</span><span id="line-93"></span><span class="hs-comment">--                                &#9474;                    &#9474;        &#9474;                    &#9474;</span><span>
+</span><span id="line-94"></span><span class="hs-comment">--                                &#9474;                    &#9474;        &#9474;                    &#9474;</span><span>
+</span><span id="line-95"></span><span class="hs-comment">--                  &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9474;   emptyRunQueue    &#9474;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9654;&#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;</span><span>
+</span><span id="line-96"></span><span class="hs-comment">--                  &#9474;             &#9474;                    &#9474;</span><span>
+</span><span id="line-97"></span><span class="hs-comment">--                  &#9474;             &#9474;                    &#9474;</span><span>
+</span><span id="line-98"></span><span class="hs-comment">--                  &#9474;             &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;&#9664;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;</span><span>
+</span><span id="line-99"></span><span class="hs-comment">--                  &#9474;             &#9650;          &#9474;                                           &#9474;</span><span>
+</span><span id="line-100"></span><span class="hs-comment">--                  &#9474;             &#9474;          &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;                                   &#9474;</span><span>
+</span><span id="line-101"></span><span class="hs-comment">--                  &#9474;             &#9474;                  &#9474;                                   &#9474;</span><span>
+</span><span id="line-102"></span><span class="hs-comment">--                  &#9660;             &#9474;                  &#9660;                                   &#9474;</span><span>
+</span><span id="line-103"></span><span class="hs-comment">--     &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488; &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;    &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;</span><span>
+</span><span id="line-104"></span><span class="hs-comment">--     &#9474;                        &#9474; &#9474;                                    &#9474;    &#9474;                        &#9474;</span><span>
+</span><span id="line-105"></span><span class="hs-comment">--     &#9474; checkActivationResults &#9474; &#9474;  flushCommandsAndAwaitActivation   &#9474;&#9472;&#9472;&#9472;&#9654;&#9474; waitActivationResults  &#9474;</span><span>
+</span><span id="line-106"></span><span class="hs-comment">--     &#9474;                        &#9474; &#9474;                                    &#9474;    &#9474;                        &#9474;</span><span>
+</span><span id="line-107"></span><span class="hs-comment">--     &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496; &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;    &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;</span><span>
+</span><span id="line-108"></span><span class="hs-comment">-- Look at queued workflow         If we don't have any filled</span><span>
+</span><span id="line-109"></span><span class="hs-comment">-- computations. If we don't have  IVars after calling</span><span>
+</span><span id="line-110"></span><span class="hs-comment">-- any queued computations to      checkActivationResults, and we         The workflow activation logic</span><span>
+</span><span id="line-111"></span><span class="hs-comment">-- run, we need to see if there    also don't have any more               is fully in charge of</span><span>
+</span><span id="line-112"></span><span class="hs-comment">-- are any activation results      scheduled jobs, then we're             resolving pending IVars, so we</span><span>
+</span><span id="line-113"></span><span class="hs-comment">-- that we've received from        blocked. We have to flush what         just hang out until an</span><span>
+</span><span id="line-114"></span><span class="hs-comment">-- polling and used to fill IVars  we've got, then wait for an            activation is registered.</span><span>
+</span><span id="line-115"></span><span class="hs-comment">-- tracked in the sequence maps.   activation to come in to</span><span>
+</span><span id="line-116"></span><span class="hs-comment">--                                 unblock us.</span><span>
+</span><span id="line-117"></span><span class="hs-comment">-- If we fill an IVar, then we</span><span>
+</span><span id="line-118"></span><span class="hs-comment">-- add any blocked computations</span><span>
+</span><span id="line-119"></span><span class="hs-comment">-- to the scheduled jobs list so</span><span>
+</span><span id="line-120"></span><span class="hs-comment">-- we can resume working on them.</span><span>
+</span><span id="line-121"></span><span class="hs-comment">--</span><span>
+</span><span id="line-122"></span><span class="hs-comment">-- We hand this back to</span><span>
+</span><span id="line-123"></span><span class="hs-comment">-- emptyRunQueue.</span><span>
+</span><span id="line-124"></span><span class="annot"><a href="Temporal.Workflow.Eval.html#runWorkflow"><span class="hs-identifier hs-type">runWorkflow</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621680172922"><span class="annot"><a href="#local-6989586621680172922"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">RequireCallStackImpl</span></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#Workflow"><span class="hs-identifier hs-type">Workflow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680172922"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Eval.html#SuspendableWorkflowExecution"><span class="hs-identifier hs-type">SuspendableWorkflowExecution</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680172922"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-125"></span><span id="runWorkflow"><span class="annot"><span class="annottext">runWorkflow :: forall a.
+HasCallStack =&gt;
+(RequireCallStackImpl =&gt; Workflow a)
+-&gt; SuspendableWorkflowExecution a
+</span><a href="Temporal.Workflow.Eval.html#runWorkflow"><span class="hs-identifier hs-var hs-var">runWorkflow</span></a></span></span><span> </span><span id="local-6989586621680173074"><span class="annot"><span class="annottext">RequireCallStackImpl =&gt; Workflow a
+</span><a href="#local-6989586621680173074"><span class="hs-identifier hs-var">wf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RequireCallStackImpl =&gt; SuspendableWorkflowExecution a)
+-&gt; SuspendableWorkflowExecution a
+forall r. (RequireCallStackImpl =&gt; r) -&gt; r
+</span><span class="hs-identifier hs-var">provideCallStack</span></span><span> </span><span class="annot"><span class="annottext">((RequireCallStackImpl =&gt; SuspendableWorkflowExecution a)
+ -&gt; SuspendableWorkflowExecution a)
+-&gt; (RequireCallStackImpl =&gt; SuspendableWorkflowExecution a)
+-&gt; SuspendableWorkflowExecution a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-126"></span><span>  </span><span id="local-6989586621680173207"><span class="annot"><a href="#local-6989586621680173207"><span class="hs-identifier hs-var">inst</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">InstanceM WorkflowInstance
+-&gt; Coroutine (Await [ActivationResult]) InstanceM WorkflowInstance
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+m a -&gt; Coroutine (Await [ActivationResult]) m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="annot"><span class="annottext">InstanceM WorkflowInstance
+forall r (m :: * -&gt; *). MonadReader r m =&gt; m r
+</span><span class="hs-identifier hs-var">ask</span></span><span>
+</span><span id="line-127"></span><span>  </span><span id="local-6989586621680173209"><span class="annot"><a href="#local-6989586621680173209"><span class="hs-identifier hs-var">pendingActivations</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">lift</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">newTVarIO</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-128"></span><span>  </span><span id="local-6989586621680173211"><span class="annot"><a href="#local-6989586621680173211"><span class="hs-identifier hs-var">finalResult</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#IVar"><span class="hs-identifier hs-type">IVar</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ivarRef"><span class="hs-identifier hs-var">ivarRef</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621680173214"><span class="annot"><a href="#local-6989586621680173214"><span class="hs-identifier hs-var">resultRef</span></a></span></span><span class="hs-special">}</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#newIVar"><span class="hs-identifier hs-type">newIVar</span></a></span><span> </span><span class="hs-comment">-- where to put the final result</span><span>
+</span><span id="line-129"></span><span>  </span><span class="hs-keyword">let</span><span>
+</span><span id="line-130"></span><span>    </span><span class="hs-comment">-- Run a job, and put its result in the given IVar</span><span>
+</span><span id="line-131"></span><span>    </span><span id="local-6989586621680172967"><span class="annot"><a href="#local-6989586621680173216"><span class="hs-identifier hs-type">schedule</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ContinuationEnv"><span class="hs-identifier hs-type">ContinuationEnv</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#JobList"><span class="hs-identifier hs-type">JobList</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#Workflow"><span class="hs-identifier hs-type">Workflow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680172967"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#IVar"><span class="hs-identifier hs-type">IVar</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680172967"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Eval.html#SuspendableWorkflowExecution"><span class="hs-identifier hs-type">SuspendableWorkflowExecution</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-132"></span><span>    </span><span id="local-6989586621680173216"><span class="annot"><a href="#local-6989586621680173216"><span class="hs-identifier hs-var hs-var">schedule</span></a></span></span><span> </span><span id="local-6989586621680173252"><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173252"><span class="hs-identifier hs-var">env</span></a></span></span><span> </span><span id="local-6989586621680173253"><span class="annot"><span class="annottext">JobList
+</span><a href="#local-6989586621680173253"><span class="hs-identifier hs-var">rq</span></a></span></span><span> </span><span id="local-6989586621680173254"><span class="annot"><span class="annottext">Workflow b
+</span><a href="#local-6989586621680173254"><span class="hs-identifier hs-var">wf'</span></a></span></span><span> </span><span id="local-6989586621680173255"><span class="annot"><span class="annottext">ivar :: IVar b
+</span><a href="#local-6989586621680173255"><span class="hs-identifier hs-var">ivar</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#IVar"><span class="hs-identifier hs-type">IVar</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><span class="annottext">ivarRef :: forall a. IVar a -&gt; IORef (IVarContents a)
+</span><a href="Temporal.Workflow.Internal.Monad.html#ivarRef"><span class="hs-identifier hs-var">ivarRef</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621680173256"><span class="annot"><span class="annottext">IORef (IVarContents b)
+</span><a href="#local-6989586621680173256"><span class="hs-identifier hs-var">ref</span></a></span></span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-133"></span><span>      </span><span class="annot"><span class="annottext">InstanceM () -&gt; SuspendableWorkflowExecution ()
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+m a -&gt; Coroutine (Await [ActivationResult]) m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="annot"><span class="annottext">(InstanceM () -&gt; SuspendableWorkflowExecution ())
+-&gt; InstanceM () -&gt; SuspendableWorkflowExecution ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-134"></span><span>        </span><span id="local-6989586621680173257"><span class="annot"><a href="#local-6989586621680173257"><span class="hs-identifier hs-var">cs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IORef CallStack -&gt; InstanceM CallStack
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IORef a -&gt; m a
+</span><span class="hs-identifier hs-var">readIORef</span></span><span> </span><span class="annot"><span class="annottext">WorkflowInstance
+</span><a href="#local-6989586621680173207"><span class="hs-identifier hs-var">inst</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">workflowCallStack</span><span>
+</span><span id="line-135"></span><span>        </span><span id="local-6989586621680173258"><span class="annot"><a href="#local-6989586621680173258"><span class="hs-identifier hs-var">logMsg</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Temporal.Workflow.Eval.html#withRunId"><span class="hs-identifier hs-type">withRunId</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Text.pack</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">printf</span></span><span> </span><span class="annot"><span class="hs-string">&quot;schedule: %d\n%s&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">+</span></span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#lengthJobList"><span class="hs-identifier hs-type">lengthJobList</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680173253"><span class="hs-identifier hs-type">rq</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">prettyCallStack</span></span><span> </span><span class="annot"><a href="#local-6989586621680173257"><span class="hs-identifier hs-type">cs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-136"></span><span>        </span><span class="hs-special">$</span><span class="annot"><span class="hs-identifier hs-type">logDebug</span></span><span> </span><span class="annot"><a href="#local-6989586621680173258"><span class="hs-identifier hs-type">logMsg</span></a></span><span>
+</span><span id="line-137"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="#local-6989586621680173270"><span class="hs-pragma hs-type">result</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-138"></span><span>          </span><span id="local-6989586621680173270"><span class="annot"><span class="annottext">result :: ResultVal b -&gt; SuspendableWorkflowExecution ()
+</span><a href="#local-6989586621680173270"><span class="hs-identifier hs-var hs-var hs-var">result</span></a></span></span><span> </span><span id="local-6989586621680173271"><span class="annot"><span class="annottext">ResultVal b
+</span><a href="#local-6989586621680173271"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-139"></span><span>            </span><span id="local-6989586621680173272"><span class="annot"><a href="#local-6989586621680173272"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">InstanceM (IVarContents b)
+-&gt; Coroutine (Await [ActivationResult]) InstanceM (IVarContents b)
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+m a -&gt; Coroutine (Await [ActivationResult]) m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="annot"><span class="annottext">(InstanceM (IVarContents b)
+ -&gt; Coroutine (Await [ActivationResult]) InstanceM (IVarContents b))
+-&gt; InstanceM (IVarContents b)
+-&gt; Coroutine (Await [ActivationResult]) InstanceM (IVarContents b)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IORef (IVarContents b) -&gt; InstanceM (IVarContents b)
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IORef a -&gt; m a
+</span><span class="hs-identifier hs-var">readIORef</span></span><span> </span><span class="annot"><span class="annottext">IORef (IVarContents b)
+</span><a href="#local-6989586621680173256"><span class="hs-identifier hs-var">ref</span></a></span><span>
+</span><span id="line-140"></span><span>            </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621680173272"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-141"></span><span>              </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#IVarFull"><span class="hs-identifier hs-type">IVarFull</span></a></span><span> </span><span class="annot"><span class="annottext">ResultVal b
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-142"></span><span>                </span><span class="hs-comment">-- An IVar is typically only meant to be written to once</span><span>
+</span><span id="line-143"></span><span>                </span><span class="hs-comment">-- so it's tempting to think we should throw an error here. But there</span><span>
+</span><span id="line-144"></span><span>                </span><span class="hs-comment">-- are legitimate use-cases for writing several times&#8211;&#160;namely</span><span>
+</span><span id="line-145"></span><span>                </span><span class="hs-comment">-- when using race, biselect, etc.</span><span>
+</span><span id="line-146"></span><span>                </span><span class="annot"><span class="annottext">ContinuationEnv -&gt; JobList -&gt; SuspendableWorkflowExecution ()
+</span><a href="#local-6989586621680173274"><span class="hs-identifier hs-var">reschedule</span></a></span><span> </span><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173252"><span class="hs-identifier hs-var">env</span></a></span><span> </span><span class="annot"><span class="annottext">JobList
+</span><a href="#local-6989586621680173253"><span class="hs-identifier hs-var">rq</span></a></span><span>
+</span><span id="line-147"></span><span>              </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#IVarEmpty"><span class="hs-identifier hs-type">IVarEmpty</span></a></span><span> </span><span id="local-6989586621680173276"><span class="annot"><span class="annottext">JobList
+</span><a href="#local-6989586621680173276"><span class="hs-identifier hs-var">workflowActions</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-148"></span><span>                </span><span class="annot"><span class="annottext">InstanceM () -&gt; SuspendableWorkflowExecution ()
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+m a -&gt; Coroutine (Await [ActivationResult]) m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="annot"><span class="annottext">(InstanceM () -&gt; SuspendableWorkflowExecution ())
+-&gt; InstanceM () -&gt; SuspendableWorkflowExecution ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IORef (IVarContents b) -&gt; IVarContents b -&gt; InstanceM ()
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IORef a -&gt; a -&gt; m ()
+</span><span class="hs-identifier hs-var">writeIORef</span></span><span> </span><span class="annot"><span class="annottext">IORef (IVarContents b)
+</span><a href="#local-6989586621680173256"><span class="hs-identifier hs-var">ref</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ResultVal b -&gt; IVarContents b
+forall a. ResultVal a -&gt; IVarContents a
+</span><a href="Temporal.Workflow.Internal.Monad.html#IVarFull"><span class="hs-identifier hs-var">IVarFull</span></a></span><span> </span><span class="annot"><span class="annottext">ResultVal b
+</span><a href="#local-6989586621680173271"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-149"></span><span>                </span><span class="hs-comment">-- Have we got the final result now?</span><span>
+</span><span id="line-150"></span><span>                </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">IORef (IVarContents b)
+</span><a href="#local-6989586621680173256"><span class="hs-identifier hs-var">ref</span></a></span><span> </span><span class="annot"><span class="annottext">IORef (IVarContents b) -&gt; IORef (IVarContents b) -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">IORef (IVarContents a) -&gt; IORef (IVarContents b)
+forall a b. a -&gt; b
+</span><span class="hs-identifier hs-var">unsafeCoerce</span></span><span> </span><span class="annot"><span class="annottext">IORef (IVarContents a)
+</span><a href="#local-6989586621680173214"><span class="hs-identifier hs-var">resultRef</span></a></span><span>
+</span><span id="line-151"></span><span>                  </span><span class="hs-keyword">then</span><span> </span><span class="hs-comment">-- comparing IORefs of different types is safe, it's</span><span>
+</span><span id="line-152"></span><span>                  </span><span class="hs-comment">-- pointer-equality on the MutVar#.</span><span>
+</span><span id="line-153"></span><span>
+</span><span id="line-154"></span><span>                  </span><span class="hs-comment">-- TODO, I don't know if there are any cases where we need</span><span>
+</span><span id="line-155"></span><span>                  </span><span class="hs-comment">-- to worry about discarding unfinished computations, but</span><span>
+</span><span id="line-156"></span><span>                  </span><span class="hs-comment">-- I think exiting at the conclusion of a workflow is the</span><span>
+</span><span id="line-157"></span><span>                  </span><span class="hs-comment">-- right thing to do.</span><span>
+</span><span id="line-158"></span><span>                    </span><span class="annot"><span class="annottext">() -&gt; SuspendableWorkflowExecution ()
+forall a. a -&gt; Coroutine (Await [ActivationResult]) InstanceM a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-159"></span><span>                  </span><span class="hs-keyword">else</span><span> </span><span class="hs-comment">-- We have a result, but don't discard unfinished</span><span>
+</span><span id="line-160"></span><span>                  </span><span class="hs-comment">-- computations in the run queue.</span><span>
+</span><span id="line-161"></span><span>                  </span><span class="hs-comment">--</span><span>
+</span><span id="line-162"></span><span>                  </span><span class="hs-comment">-- In our case, unfinished computations can represent signals.</span><span>
+</span><span id="line-163"></span><span>                  </span><span class="hs-comment">--</span><span>
+</span><span id="line-164"></span><span>                  </span><span class="hs-comment">-- Nothing can depend on the final IVar, so workflowActions must</span><span>
+</span><span id="line-165"></span><span>                  </span><span class="hs-comment">-- be empty.</span><span>
+</span><span id="line-166"></span><span>                  </span><span class="hs-comment">-- case rq of</span><span>
+</span><span id="line-167"></span><span>                  </span><span class="hs-comment">--   JobNil -&gt; return ()</span><span>
+</span><span id="line-168"></span><span>                  </span><span class="hs-comment">--   _ -&gt; modifyIORef' env.runQueueRef (appendJobList rq)</span><span>
+</span><span id="line-169"></span><span>                    </span><span class="annot"><span class="annottext">ContinuationEnv -&gt; JobList -&gt; SuspendableWorkflowExecution ()
+</span><a href="#local-6989586621680173274"><span class="hs-identifier hs-var">reschedule</span></a></span><span> </span><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173252"><span class="hs-identifier hs-var">env</span></a></span><span> </span><span class="annot"><span class="annottext">(JobList -&gt; SuspendableWorkflowExecution ())
+-&gt; JobList -&gt; SuspendableWorkflowExecution ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">JobList -&gt; JobList -&gt; JobList
+</span><a href="Temporal.Workflow.Internal.Monad.html#appendJobList"><span class="hs-identifier hs-var">appendJobList</span></a></span><span> </span><span class="annot"><span class="annottext">JobList
+</span><a href="#local-6989586621680173276"><span class="hs-identifier hs-var">workflowActions</span></a></span><span> </span><span class="annot"><span class="annottext">JobList
+</span><a href="#local-6989586621680173253"><span class="hs-identifier hs-var">rq</span></a></span><span>
+</span><span id="line-170"></span><span>      </span><span id="local-6989586621680173280"><span class="annot"><a href="#local-6989586621680173280"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">InstanceM (Either SomeException (Result b))
+-&gt; Coroutine
+     (Await [ActivationResult])
+     InstanceM
+     (Either SomeException (Result b))
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+m a -&gt; Coroutine (Await [ActivationResult]) m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="annot"><span class="annottext">(InstanceM (Either SomeException (Result b))
+ -&gt; Coroutine
+      (Await [ActivationResult])
+      InstanceM
+      (Either SomeException (Result b)))
+-&gt; InstanceM (Either SomeException (Result b))
+-&gt; Coroutine
+     (Await [ActivationResult])
+     InstanceM
+     (Either SomeException (Result b))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">InstanceM (Result b) -&gt; InstanceM (Either SomeException (Result b))
+forall (m :: * -&gt; *) e a.
+(MonadUnliftIO m, Exception e) =&gt;
+m a -&gt; m (Either e a)
+</span><span class="hs-identifier hs-var">UnliftIO.try</span></span><span> </span><span class="annot"><span class="annottext">(InstanceM (Result b)
+ -&gt; InstanceM (Either SomeException (Result b)))
+-&gt; InstanceM (Result b)
+-&gt; InstanceM (Either SomeException (Result b))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-171"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#Workflow"><span class="hs-identifier hs-type">Workflow</span></a></span><span> </span><span id="local-6989586621680173283"><span class="annot"><span class="annottext">ContinuationEnv -&gt; InstanceM (Result b)
+</span><a href="#local-6989586621680173283"><span class="hs-identifier hs-var">run</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Workflow b
+</span><a href="#local-6989586621680173254"><span class="hs-identifier hs-var">wf'</span></a></span><span>
+</span><span id="line-172"></span><span>        </span><span class="annot"><span class="annottext">ContinuationEnv -&gt; InstanceM (Result b)
+</span><a href="#local-6989586621680173283"><span class="hs-identifier hs-var">run</span></a></span><span> </span><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173252"><span class="hs-identifier hs-var">env</span></a></span><span>
+</span><span id="line-173"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621680173280"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-174"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621680173284"><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621680173284"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-175"></span><span>          </span><span class="annot"><span class="annottext">SomeException -&gt; SuspendableWorkflowExecution ()
+forall (m :: * -&gt; *). MonadIO m =&gt; SomeException -&gt; m ()
+</span><a href="Temporal.Workflow.Eval.html#rethrowAsyncExceptions"><span class="hs-identifier hs-var">rethrowAsyncExceptions</span></a></span><span> </span><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621680173284"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-176"></span><span>          </span><span class="annot"><span class="annottext">ResultVal b -&gt; SuspendableWorkflowExecution ()
+</span><a href="#local-6989586621680173270"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="annot"><span class="annottext">(ResultVal b -&gt; SuspendableWorkflowExecution ())
+-&gt; ResultVal b -&gt; SuspendableWorkflowExecution ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">SomeException -&gt; ResultVal b
+forall a. SomeException -&gt; ResultVal a
+</span><a href="Temporal.Workflow.Internal.Monad.html#ThrowInternal"><span class="hs-identifier hs-var">ThrowInternal</span></a></span><span> </span><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621680173284"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-177"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#Done"><span class="hs-identifier hs-type">Done</span></a></span><span> </span><span id="local-6989586621680173288"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621680173288"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ResultVal b -&gt; SuspendableWorkflowExecution ()
+</span><a href="#local-6989586621680173270"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="annot"><span class="annottext">(ResultVal b -&gt; SuspendableWorkflowExecution ())
+-&gt; ResultVal b -&gt; SuspendableWorkflowExecution ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; ResultVal b
+forall a. a -&gt; ResultVal a
+</span><a href="Temporal.Workflow.Internal.Monad.html#Ok"><span class="hs-identifier hs-var">Ok</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621680173288"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-178"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#Throw"><span class="hs-identifier hs-type">Throw</span></a></span><span> </span><span id="local-6989586621680173291"><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621680173291"><span class="hs-identifier hs-var">ex</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ResultVal b -&gt; SuspendableWorkflowExecution ()
+</span><a href="#local-6989586621680173270"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="annot"><span class="annottext">(ResultVal b -&gt; SuspendableWorkflowExecution ())
+-&gt; ResultVal b -&gt; SuspendableWorkflowExecution ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">SomeException -&gt; ResultVal b
+forall a. SomeException -&gt; ResultVal a
+</span><a href="Temporal.Workflow.Internal.Monad.html#ThrowWorkflow"><span class="hs-identifier hs-var">ThrowWorkflow</span></a></span><span> </span><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621680173291"><span class="hs-identifier hs-var">ex</span></a></span><span>
+</span><span id="line-179"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#Blocked"><span class="hs-identifier hs-type">Blocked</span></a></span><span> </span><span id="local-6989586621680173304"><span class="annot"><span class="annottext">IVar b
+</span><a href="#local-6989586621680173304"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621680173305"><span class="annot"><span class="annottext">Cont b
+</span><a href="#local-6989586621680173305"><span class="hs-identifier hs-var">fn</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-180"></span><span>          </span><span class="annot"><span class="annottext">InstanceM () -&gt; SuspendableWorkflowExecution ()
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+m a -&gt; Coroutine (Await [ActivationResult]) m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">$</span><span class="annot"><span class="annottext">Int
+String
+LogLevel
+String -&gt; Text
+String -&gt; String -&gt; String -&gt; CharPos -&gt; CharPos -&gt; Loc
+Text -&gt; Text
+Loc -&gt; Text -&gt; LogLevel -&gt; Text -&gt; InstanceM ()
+(Text -&gt; InstanceM ()) -&gt; (Text -&gt; Text) -&gt; Text -&gt; InstanceM ()
+forall a. a -&gt; a
+forall msg.
+ToLogStr msg =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; InstanceM ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+pack :: String -&gt; Text
+id :: forall a. a -&gt; a
+. :: forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+monadLoggerLog :: forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">logDebug</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; InstanceM ()) -&gt; InstanceM Text -&gt; InstanceM ()
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; InstanceM Text
+</span><a href="Temporal.Workflow.Eval.html#withRunId"><span class="hs-identifier hs-var">withRunId</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;scheduled job blocked&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-181"></span><span>          </span><span class="annot"><span class="annottext">InstanceM () -&gt; SuspendableWorkflowExecution ()
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+m a -&gt; Coroutine (Await [ActivationResult]) m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="annot"><span class="annottext">(InstanceM () -&gt; SuspendableWorkflowExecution ())
+-&gt; InstanceM () -&gt; SuspendableWorkflowExecution ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ContinuationEnv -&gt; Workflow b -&gt; IVar b -&gt; IVar b -&gt; InstanceM ()
+forall b a.
+ContinuationEnv -&gt; Workflow b -&gt; IVar b -&gt; IVar a -&gt; InstanceM ()
+</span><a href="Temporal.Workflow.Internal.Monad.html#addJob"><span class="hs-identifier hs-var">addJob</span></a></span><span> </span><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173252"><span class="hs-identifier hs-var">env</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Cont b -&gt; Workflow b
+forall a. Cont a -&gt; Workflow a
+</span><a href="Temporal.Workflow.Internal.Monad.html#toWf"><span class="hs-identifier hs-var">toWf</span></a></span><span> </span><span class="annot"><span class="annottext">Cont b
+</span><a href="#local-6989586621680173305"><span class="hs-identifier hs-var">fn</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">IVar b
+</span><a href="#local-6989586621680173255"><span class="hs-identifier hs-var">ivar</span></a></span><span> </span><span class="annot"><span class="annottext">IVar b
+</span><a href="#local-6989586621680173304"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-182"></span><span>          </span><span class="annot"><span class="annottext">ContinuationEnv -&gt; JobList -&gt; SuspendableWorkflowExecution ()
+</span><a href="#local-6989586621680173274"><span class="hs-identifier hs-var">reschedule</span></a></span><span> </span><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173252"><span class="hs-identifier hs-var">env</span></a></span><span> </span><span class="annot"><span class="annottext">JobList
+</span><a href="#local-6989586621680173253"><span class="hs-identifier hs-var">rq</span></a></span><span>
+</span><span id="line-183"></span><span>
+</span><span id="line-184"></span><span>    </span><span class="annot"><a href="#local-6989586621680173274"><span class="hs-identifier hs-type">reschedule</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ContinuationEnv"><span class="hs-identifier hs-type">ContinuationEnv</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#JobList"><span class="hs-identifier hs-type">JobList</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Eval.html#SuspendableWorkflowExecution"><span class="hs-identifier hs-type">SuspendableWorkflowExecution</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-185"></span><span>    </span><span id="local-6989586621680173274"><span class="annot"><a href="#local-6989586621680173274"><span class="hs-identifier hs-var hs-var">reschedule</span></a></span></span><span> </span><span id="local-6989586621680173309"><span class="annot"><span class="annottext">env :: ContinuationEnv
+</span><a href="#local-6989586621680173309"><span class="hs-identifier hs-var">env</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ContinuationEnv"><span class="hs-identifier hs-type">ContinuationEnv</span></a></span><span> </span><span class="hs-special">{</span><span id="local-6989586621680173311"><span class="annot"><span class="annottext">IORef JobList
+runQueueRef :: IORef JobList
+runQueueRef :: ContinuationEnv -&gt; IORef JobList
+</span><a href="#local-6989586621680173311"><span class="hs-glyph hs-var hs-var">..</span></a></span></span><span class="hs-special">}</span><span> </span><span id="local-6989586621680173313"><span class="annot"><span class="annottext">JobList
+</span><a href="#local-6989586621680173313"><span class="hs-identifier hs-var">jobs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-186"></span><span>      </span><span class="annot"><span class="annottext">InstanceM () -&gt; SuspendableWorkflowExecution ()
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+m a -&gt; Coroutine (Await [ActivationResult]) m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">$</span><span class="annot"><span class="annottext">Int
+String
+LogLevel
+String -&gt; Text
+String -&gt; String -&gt; String -&gt; CharPos -&gt; CharPos -&gt; Loc
+Text -&gt; Text
+Loc -&gt; Text -&gt; LogLevel -&gt; Text -&gt; InstanceM ()
+(Text -&gt; InstanceM ()) -&gt; (Text -&gt; Text) -&gt; Text -&gt; InstanceM ()
+forall a. a -&gt; a
+forall msg.
+ToLogStr msg =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; InstanceM ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+pack :: String -&gt; Text
+id :: forall a. a -&gt; a
+. :: forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+monadLoggerLog :: forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">logDebug</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; InstanceM ()) -&gt; InstanceM Text -&gt; InstanceM ()
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; InstanceM Text
+</span><a href="Temporal.Workflow.Eval.html#withRunId"><span class="hs-identifier hs-var">withRunId</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;reschedule&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-187"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">JobList
+</span><a href="#local-6989586621680173313"><span class="hs-identifier hs-var">jobs</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-188"></span><span>        </span><span class="annot"><span class="annottext">JobList
+</span><a href="Temporal.Workflow.Internal.Monad.html#JobNil"><span class="hs-identifier hs-var">JobNil</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-189"></span><span>          </span><span id="local-6989586621680173315"><span class="annot"><a href="#local-6989586621680173315"><span class="hs-identifier hs-var">rq</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">InstanceM JobList
+-&gt; Coroutine (Await [ActivationResult]) InstanceM JobList
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+m a -&gt; Coroutine (Await [ActivationResult]) m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="annot"><span class="annottext">(InstanceM JobList
+ -&gt; Coroutine (Await [ActivationResult]) InstanceM JobList)
+-&gt; InstanceM JobList
+-&gt; Coroutine (Await [ActivationResult]) InstanceM JobList
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IORef JobList -&gt; InstanceM JobList
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IORef a -&gt; m a
+</span><span class="hs-identifier hs-var">readIORef</span></span><span> </span><span class="annot"><span class="annottext">IORef JobList
+</span><a href="#local-6989586621680173311"><span class="hs-identifier hs-var">runQueueRef</span></a></span><span>
+</span><span id="line-190"></span><span>          </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621680173315"><span class="hs-identifier hs-type">rq</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-191"></span><span>            </span><span class="annot"><span class="annottext">JobList
+</span><a href="Temporal.Workflow.Internal.Monad.html#JobNil"><span class="hs-identifier hs-var">JobNil</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ContinuationEnv -&gt; SuspendableWorkflowExecution ()
+</span><a href="#local-6989586621680173316"><span class="hs-identifier hs-var">emptyRunQueue</span></a></span><span> </span><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173309"><span class="hs-identifier hs-var">env</span></a></span><span>
+</span><span id="line-192"></span><span>            </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#JobCons"><span class="hs-identifier hs-type">JobCons</span></a></span><span> </span><span id="local-6989586621680173322"><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173322"><span class="hs-identifier hs-var">env'</span></a></span></span><span> </span><span id="local-6989586621680173323"><span class="annot"><span class="annottext">Workflow a
+</span><a href="#local-6989586621680173323"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621680173324"><span class="annot"><span class="annottext">IVar a
+</span><a href="#local-6989586621680173324"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621680173325"><span class="annot"><span class="annottext">JobList
+</span><a href="#local-6989586621680173325"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-193"></span><span>              </span><span class="annot"><span class="annottext">InstanceM () -&gt; SuspendableWorkflowExecution ()
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+m a -&gt; Coroutine (Await [ActivationResult]) m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="annot"><span class="annottext">(InstanceM () -&gt; SuspendableWorkflowExecution ())
+-&gt; InstanceM () -&gt; SuspendableWorkflowExecution ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IORef JobList -&gt; JobList -&gt; InstanceM ()
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IORef a -&gt; a -&gt; m ()
+</span><span class="hs-identifier hs-var">writeIORef</span></span><span> </span><span class="annot"><span class="annottext">IORef JobList
+</span><a href="#local-6989586621680173311"><span class="hs-identifier hs-var">runQueueRef</span></a></span><span> </span><span class="annot"><span class="annottext">JobList
+</span><a href="Temporal.Workflow.Internal.Monad.html#JobNil"><span class="hs-identifier hs-var">JobNil</span></a></span><span>
+</span><span id="line-194"></span><span>              </span><span class="annot"><span class="annottext">ContinuationEnv
+-&gt; JobList
+-&gt; Workflow a
+-&gt; IVar a
+-&gt; SuspendableWorkflowExecution ()
+forall b.
+ContinuationEnv
+-&gt; JobList
+-&gt; Workflow b
+-&gt; IVar b
+-&gt; SuspendableWorkflowExecution ()
+</span><a href="#local-6989586621680173216"><span class="hs-identifier hs-var">schedule</span></a></span><span> </span><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173322"><span class="hs-identifier hs-var">env'</span></a></span><span> </span><span class="annot"><span class="annottext">JobList
+</span><a href="#local-6989586621680173325"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Workflow a
+</span><a href="#local-6989586621680173323"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">IVar a
+</span><a href="#local-6989586621680173324"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-195"></span><span>        </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#JobCons"><span class="hs-identifier hs-type">JobCons</span></a></span><span> </span><span id="local-6989586621680173326"><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173326"><span class="hs-identifier hs-var">env'</span></a></span></span><span> </span><span id="local-6989586621680173327"><span class="annot"><span class="annottext">Workflow a
+</span><a href="#local-6989586621680173327"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621680173328"><span class="annot"><span class="annottext">IVar a
+</span><a href="#local-6989586621680173328"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621680173329"><span class="annot"><span class="annottext">JobList
+</span><a href="#local-6989586621680173329"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-196"></span><span>          </span><span class="annot"><span class="annottext">ContinuationEnv
+-&gt; JobList
+-&gt; Workflow a
+-&gt; IVar a
+-&gt; SuspendableWorkflowExecution ()
+forall b.
+ContinuationEnv
+-&gt; JobList
+-&gt; Workflow b
+-&gt; IVar b
+-&gt; SuspendableWorkflowExecution ()
+</span><a href="#local-6989586621680173216"><span class="hs-identifier hs-var">schedule</span></a></span><span> </span><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173326"><span class="hs-identifier hs-var">env'</span></a></span><span> </span><span class="annot"><span class="annottext">JobList
+</span><a href="#local-6989586621680173329"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Workflow a
+</span><a href="#local-6989586621680173327"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">IVar a
+</span><a href="#local-6989586621680173328"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-197"></span><span>
+</span><span id="line-198"></span><span>    </span><span class="annot"><a href="#local-6989586621680173316"><span class="hs-identifier hs-type">emptyRunQueue</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ContinuationEnv"><span class="hs-identifier hs-type">ContinuationEnv</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Eval.html#SuspendableWorkflowExecution"><span class="hs-identifier hs-type">SuspendableWorkflowExecution</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-199"></span><span>    </span><span id="local-6989586621680173316"><span class="annot"><a href="#local-6989586621680173316"><span class="hs-identifier hs-var hs-var">emptyRunQueue</span></a></span></span><span> </span><span id="local-6989586621680173330"><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173330"><span class="hs-identifier hs-var">env</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-200"></span><span>      </span><span class="annot"><span class="annottext">InstanceM () -&gt; SuspendableWorkflowExecution ()
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+m a -&gt; Coroutine (Await [ActivationResult]) m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="annot"><span class="annottext">(InstanceM () -&gt; SuspendableWorkflowExecution ())
+-&gt; InstanceM () -&gt; SuspendableWorkflowExecution ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-201"></span><span>        </span><span id="local-6989586621680173331"><span class="annot"><a href="#local-6989586621680173331"><span class="hs-identifier hs-var">logMsg</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Text -&gt; InstanceM Text
+</span><a href="Temporal.Workflow.Eval.html#withRunId"><span class="hs-identifier hs-var">withRunId</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;emptyRunQueue&quot;</span></span><span>
+</span><span id="line-202"></span><span>        </span><span class="hs-special">$</span><span class="annot"><span class="hs-identifier hs-type">logDebug</span></span><span> </span><span class="annot"><a href="#local-6989586621680173331"><span class="hs-identifier hs-type">logMsg</span></a></span><span>
+</span><span id="line-203"></span><span>      </span><span id="local-6989586621680173332"><span class="annot"><a href="#local-6989586621680173332"><span class="hs-identifier hs-var">workflowActions</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ContinuationEnv
+-&gt; Coroutine (Await [ActivationResult]) InstanceM JobList
+</span><a href="#local-6989586621680173333"><span class="hs-identifier hs-var">checkActivationResults</span></a></span><span> </span><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173330"><span class="hs-identifier hs-var">env</span></a></span><span>
+</span><span id="line-204"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621680173332"><span class="hs-identifier hs-type">workflowActions</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-205"></span><span>        </span><span class="annot"><span class="annottext">JobList
+</span><a href="Temporal.Workflow.Internal.Monad.html#JobNil"><span class="hs-identifier hs-var">JobNil</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ContinuationEnv -&gt; SuspendableWorkflowExecution ()
+</span><a href="#local-6989586621680173334"><span class="hs-identifier hs-var">awaitActivation</span></a></span><span> </span><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173330"><span class="hs-identifier hs-var">env</span></a></span><span>
+</span><span id="line-206"></span><span>        </span><span class="annot"><span class="annottext">JobList
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ContinuationEnv -&gt; JobList -&gt; SuspendableWorkflowExecution ()
+</span><a href="#local-6989586621680173274"><span class="hs-identifier hs-var">reschedule</span></a></span><span> </span><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173330"><span class="hs-identifier hs-var">env</span></a></span><span> </span><span class="annot"><span class="annottext">JobList
+</span><a href="#local-6989586621680173332"><span class="hs-identifier hs-var">workflowActions</span></a></span><span>
+</span><span id="line-207"></span><span>
+</span><span id="line-208"></span><span>    </span><span class="annot"><a href="#local-6989586621680173334"><span class="hs-identifier hs-type">awaitActivation</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ContinuationEnv"><span class="hs-identifier hs-type">ContinuationEnv</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Eval.html#SuspendableWorkflowExecution"><span class="hs-identifier hs-type">SuspendableWorkflowExecution</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-209"></span><span>    </span><span id="local-6989586621680173334"><span class="annot"><a href="#local-6989586621680173334"><span class="hs-identifier hs-var hs-var">awaitActivation</span></a></span></span><span> </span><span id="local-6989586621680173335"><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173335"><span class="hs-identifier hs-var">env</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-210"></span><span>      </span><span class="annot"><span class="annottext">InstanceM () -&gt; SuspendableWorkflowExecution ()
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+m a -&gt; Coroutine (Await [ActivationResult]) m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">$</span><span class="annot"><span class="annottext">Int
+String
+LogLevel
+String -&gt; Text
+String -&gt; String -&gt; String -&gt; CharPos -&gt; CharPos -&gt; Loc
+Text -&gt; Text
+Loc -&gt; Text -&gt; LogLevel -&gt; Text -&gt; InstanceM ()
+(Text -&gt; InstanceM ()) -&gt; (Text -&gt; Text) -&gt; Text -&gt; InstanceM ()
+forall a. a -&gt; a
+forall msg.
+ToLogStr msg =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; InstanceM ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+pack :: String -&gt; Text
+id :: forall a. a -&gt; a
+. :: forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+monadLoggerLog :: forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">logDebug</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; InstanceM ()) -&gt; InstanceM Text -&gt; InstanceM ()
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; InstanceM Text
+</span><a href="Temporal.Workflow.Eval.html#withRunId"><span class="hs-identifier hs-var">withRunId</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;flushCommandsAndAwaitActivation&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-211"></span><span>      </span><span class="annot"><span class="annottext">ContinuationEnv -&gt; SuspendableWorkflowExecution ()
+</span><a href="#local-6989586621680173336"><span class="hs-identifier hs-var">waitActivationResults</span></a></span><span> </span><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173335"><span class="hs-identifier hs-var">env</span></a></span><span>
+</span><span id="line-212"></span><span>
+</span><span id="line-213"></span><span>    </span><span class="annot"><a href="#local-6989586621680173333"><span class="hs-identifier hs-type">checkActivationResults</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ContinuationEnv"><span class="hs-identifier hs-type">ContinuationEnv</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Eval.html#SuspendableWorkflowExecution"><span class="hs-identifier hs-type">SuspendableWorkflowExecution</span></a></span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#JobList"><span class="hs-identifier hs-type">JobList</span></a></span><span>
+</span><span id="line-214"></span><span>    </span><span id="local-6989586621680173333"><span class="annot"><a href="#local-6989586621680173333"><span class="hs-identifier hs-var hs-var">checkActivationResults</span></a></span></span><span> </span><span id="local-6989586621680173337"><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173337"><span class="hs-identifier hs-var">_env</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">InstanceM JobList
+-&gt; Coroutine (Await [ActivationResult]) InstanceM JobList
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+m a -&gt; Coroutine (Await [ActivationResult]) m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="annot"><span class="annottext">(InstanceM JobList
+ -&gt; Coroutine (Await [ActivationResult]) InstanceM JobList)
+-&gt; InstanceM JobList
+-&gt; Coroutine (Await [ActivationResult]) InstanceM JobList
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-215"></span><span>      </span><span class="hs-special">$</span><span class="annot"><span class="annottext">Int
+String
+LogLevel
+String -&gt; Text
+String -&gt; String -&gt; String -&gt; CharPos -&gt; CharPos -&gt; Loc
+Text -&gt; Text
+Loc -&gt; Text -&gt; LogLevel -&gt; Text -&gt; InstanceM ()
+(Text -&gt; InstanceM ()) -&gt; (Text -&gt; Text) -&gt; Text -&gt; InstanceM ()
+forall a. a -&gt; a
+forall msg.
+ToLogStr msg =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; InstanceM ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+pack :: String -&gt; Text
+id :: forall a. a -&gt; a
+. :: forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+monadLoggerLog :: forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">logDebug</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; InstanceM ()) -&gt; InstanceM Text -&gt; InstanceM ()
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; InstanceM Text
+</span><a href="Temporal.Workflow.Eval.html#withRunId"><span class="hs-identifier hs-var">withRunId</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;checkActivationResults&quot;</span></span><span>
+</span><span id="line-216"></span><span>      </span><span id="local-6989586621680173338"><span class="annot"><a href="#local-6989586621680173338"><span class="hs-identifier hs-var">comps</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">STM [ActivationResult] -&gt; InstanceM [ActivationResult]
+forall (m :: * -&gt; *) a. MonadIO m =&gt; STM a -&gt; m a
+</span><span class="hs-identifier hs-var">atomically</span></span><span> </span><span class="annot"><span class="annottext">(STM [ActivationResult] -&gt; InstanceM [ActivationResult])
+-&gt; STM [ActivationResult] -&gt; InstanceM [ActivationResult]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-217"></span><span>        </span><span id="local-6989586621680173340"><span class="annot"><a href="#local-6989586621680173340"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">TVar [ActivationResult] -&gt; STM [ActivationResult]
+forall a. TVar a -&gt; STM a
+</span><span class="hs-identifier hs-var">readTVar</span></span><span> </span><span class="annot"><span class="annottext">TVar [ActivationResult]
+</span><a href="#local-6989586621680173209"><span class="hs-identifier hs-var">pendingActivations</span></a></span><span>
+</span><span id="line-218"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">writeTVar</span></span><span> </span><span class="annot"><a href="#local-6989586621680173209"><span class="hs-identifier hs-type">pendingActivations</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-219"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="#local-6989586621680173340"><span class="hs-identifier hs-type">c</span></a></span><span>
+</span><span id="line-220"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621680173338"><span class="hs-identifier hs-type">comps</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-221"></span><span>        </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-222"></span><span>          </span><span class="hs-special">$</span><span class="annot"><span class="annottext">Int
+String
+LogLevel
+String -&gt; Text
+String -&gt; String -&gt; String -&gt; CharPos -&gt; CharPos -&gt; Loc
+Text -&gt; Text
+Loc -&gt; Text -&gt; LogLevel -&gt; Text -&gt; InstanceM ()
+(Text -&gt; InstanceM ()) -&gt; (Text -&gt; Text) -&gt; Text -&gt; InstanceM ()
+forall a. a -&gt; a
+forall msg.
+ToLogStr msg =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; InstanceM ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+pack :: String -&gt; Text
+id :: forall a. a -&gt; a
+. :: forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+monadLoggerLog :: forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">logDebug</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; InstanceM ()) -&gt; InstanceM Text -&gt; InstanceM ()
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; InstanceM Text
+</span><a href="Temporal.Workflow.Eval.html#withRunId"><span class="hs-identifier hs-var">withRunId</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;No new activation results&quot;</span></span><span>
+</span><span id="line-223"></span><span>          </span><span class="annot"><span class="annottext">JobList -&gt; InstanceM JobList
+forall a. a -&gt; InstanceM a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">JobList
+</span><a href="Temporal.Workflow.Internal.Monad.html#JobNil"><span class="hs-identifier hs-var">JobNil</span></a></span><span>
+</span><span id="line-224"></span><span>        </span><span class="annot"><span class="annottext">[ActivationResult]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-225"></span><span>          </span><span class="hs-special">$</span><span class="annot"><span class="annottext">Int
+String
+LogLevel
+String -&gt; Text
+String -&gt; String -&gt; String -&gt; CharPos -&gt; CharPos -&gt; Loc
+Text -&gt; Text
+Loc -&gt; Text -&gt; LogLevel -&gt; Text -&gt; InstanceM ()
+(Text -&gt; InstanceM ()) -&gt; (Text -&gt; Text) -&gt; Text -&gt; InstanceM ()
+forall a. a -&gt; a
+forall msg.
+ToLogStr msg =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; InstanceM ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+pack :: String -&gt; Text
+id :: forall a. a -&gt; a
+. :: forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+monadLoggerLog :: forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">logDebug</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; InstanceM ()) -&gt; InstanceM Text -&gt; InstanceM ()
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; InstanceM Text
+</span><a href="Temporal.Workflow.Eval.html#withRunId"><span class="hs-identifier hs-var">withRunId</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Text
+</span><span class="hs-identifier hs-var">Text.pack</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Text) -&gt; String -&gt; Text
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Int -&gt; String
+forall r. PrintfType r =&gt; String -&gt; r
+</span><span class="hs-identifier hs-var">printf</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;%d complete&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[ActivationResult] -&gt; Int
+forall a. [a] -&gt; Int
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">[ActivationResult]
+</span><a href="#local-6989586621680173338"><span class="hs-identifier hs-var">comps</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-226"></span><span>          </span><span class="hs-keyword">let</span><span>
+</span><span id="line-227"></span><span>            </span><span id="local-6989586621680173344"><span class="annot"><span class="annottext">getComplete :: ActivationResult -&gt; InstanceM JobList
+</span><a href="#local-6989586621680173344"><span class="hs-identifier hs-var hs-var hs-var">getComplete</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Eval.html#ActivationResult"><span class="hs-identifier hs-type">ActivationResult</span></a></span><span> </span><span id="local-6989586621680173356"><span class="annot"><span class="annottext">ResultVal a
+</span><a href="#local-6989586621680173356"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#IVar"><span class="hs-identifier hs-type">IVar</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><span class="annottext">ivarRef :: forall a. IVar a -&gt; IORef (IVarContents a)
+</span><a href="Temporal.Workflow.Internal.Monad.html#ivarRef"><span class="hs-identifier hs-var">ivarRef</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621680173357"><span class="annot"><span class="annottext">IORef (IVarContents a)
+</span><a href="#local-6989586621680173357"><span class="hs-identifier hs-var">cr</span></a></span></span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-228"></span><span>              </span><span id="local-6989586621680173358"><span class="annot"><a href="#local-6989586621680173358"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IORef (IVarContents a) -&gt; InstanceM (IVarContents a)
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IORef a -&gt; m a
+</span><span class="hs-identifier hs-var">readIORef</span></span><span> </span><span class="annot"><span class="annottext">IORef (IVarContents a)
+</span><a href="#local-6989586621680173357"><span class="hs-identifier hs-var">cr</span></a></span><span>
+</span><span id="line-229"></span><span>              </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621680173358"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-230"></span><span>                </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#IVarFull"><span class="hs-identifier hs-type">IVarFull</span></a></span><span> </span><span class="annot"><span class="annottext">ResultVal a
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-231"></span><span>                  </span><span class="hs-special">$</span><span class="annot"><span class="annottext">Int
+String
+LogLevel
+String -&gt; Text
+String -&gt; String -&gt; String -&gt; CharPos -&gt; CharPos -&gt; Loc
+Text -&gt; Text
+Loc -&gt; Text -&gt; LogLevel -&gt; Text -&gt; InstanceM ()
+(Text -&gt; InstanceM ()) -&gt; (Text -&gt; Text) -&gt; Text -&gt; InstanceM ()
+forall a. a -&gt; a
+forall msg.
+ToLogStr msg =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; InstanceM ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+pack :: String -&gt; Text
+id :: forall a. a -&gt; a
+. :: forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+monadLoggerLog :: forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">logDebug</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; InstanceM ()) -&gt; InstanceM Text -&gt; InstanceM ()
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; InstanceM Text
+</span><a href="Temporal.Workflow.Eval.html#withRunId"><span class="hs-identifier hs-var">withRunId</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;existing result&quot;</span></span><span>
+</span><span id="line-232"></span><span>                  </span><span class="annot"><span class="annottext">JobList -&gt; InstanceM JobList
+forall a. a -&gt; InstanceM a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">JobList
+</span><a href="Temporal.Workflow.Internal.Monad.html#JobNil"><span class="hs-identifier hs-var">JobNil</span></a></span><span>
+</span><span id="line-233"></span><span>                </span><span class="hs-comment">-- this happens if a data source reports a result,</span><span>
+</span><span id="line-234"></span><span>                </span><span class="hs-comment">-- and then throws an exception.  We call putResult</span><span>
+</span><span id="line-235"></span><span>                </span><span class="hs-comment">-- a second time for the exception, which comes</span><span>
+</span><span id="line-236"></span><span>                </span><span class="hs-comment">-- ahead of the original request (because it is</span><span>
+</span><span id="line-237"></span><span>                </span><span class="hs-comment">-- pushed on the front of the completions list) and</span><span>
+</span><span id="line-238"></span><span>                </span><span class="hs-comment">-- therefore overrides it.</span><span>
+</span><span id="line-239"></span><span>                </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#IVarEmpty"><span class="hs-identifier hs-type">IVarEmpty</span></a></span><span> </span><span id="local-6989586621680173359"><span class="annot"><span class="annottext">JobList
+</span><a href="#local-6989586621680173359"><span class="hs-identifier hs-var">cv</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-240"></span><span>                  </span><span class="annot"><span class="annottext">IORef (IVarContents a) -&gt; IVarContents a -&gt; InstanceM ()
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IORef a -&gt; a -&gt; m ()
+</span><span class="hs-identifier hs-var">writeIORef</span></span><span> </span><span class="annot"><span class="annottext">IORef (IVarContents a)
+</span><a href="#local-6989586621680173357"><span class="hs-identifier hs-var">cr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ResultVal a -&gt; IVarContents a
+forall a. ResultVal a -&gt; IVarContents a
+</span><a href="Temporal.Workflow.Internal.Monad.html#IVarFull"><span class="hs-identifier hs-var">IVarFull</span></a></span><span> </span><span class="annot"><span class="annottext">ResultVal a
+</span><a href="#local-6989586621680173356"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-241"></span><span>                  </span><span class="annot"><span class="annottext">JobList -&gt; InstanceM JobList
+forall a. a -&gt; InstanceM a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">JobList
+</span><a href="#local-6989586621680173359"><span class="hs-identifier hs-var">cv</span></a></span><span>
+</span><span id="line-242"></span><span>          </span><span id="local-6989586621680173360"><span class="annot"><a href="#local-6989586621680173360"><span class="hs-identifier hs-var">jobs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(ActivationResult -&gt; InstanceM JobList)
+-&gt; [ActivationResult] -&gt; InstanceM [JobList]
+forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Traversable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m (t b)
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; [a] -&gt; m [b]
+</span><span class="hs-identifier hs-var">mapM</span></span><span> </span><span class="annot"><span class="annottext">ActivationResult -&gt; InstanceM JobList
+</span><a href="#local-6989586621680173344"><span class="hs-identifier hs-var">getComplete</span></a></span><span> </span><span class="annot"><span class="annottext">[ActivationResult]
+</span><a href="#local-6989586621680173338"><span class="hs-identifier hs-var">comps</span></a></span><span>
+</span><span id="line-243"></span><span>          </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">foldr</span></span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#appendJobList"><span class="hs-identifier hs-type">appendJobList</span></a></span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#JobNil"><span class="hs-identifier hs-type">JobNil</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680173360"><span class="hs-identifier hs-type">jobs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-244"></span><span>
+</span><span id="line-245"></span><span>    </span><span class="annot"><a href="#local-6989586621680173336"><span class="hs-identifier hs-type">waitActivationResults</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ContinuationEnv"><span class="hs-identifier hs-type">ContinuationEnv</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Eval.html#SuspendableWorkflowExecution"><span class="hs-identifier hs-type">SuspendableWorkflowExecution</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-246"></span><span>    </span><span id="local-6989586621680173336"><span class="annot"><a href="#local-6989586621680173336"><span class="hs-identifier hs-var hs-var">waitActivationResults</span></a></span></span><span> </span><span id="local-6989586621680173363"><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173363"><span class="hs-identifier hs-var">env</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-247"></span><span>      </span><span class="annot"><span class="annottext">InstanceM () -&gt; SuspendableWorkflowExecution ()
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+m a -&gt; Coroutine (Await [ActivationResult]) m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">$</span><span class="annot"><span class="annottext">Int
+String
+LogLevel
+String -&gt; Text
+String -&gt; String -&gt; String -&gt; CharPos -&gt; CharPos -&gt; Loc
+Text -&gt; Text
+Loc -&gt; Text -&gt; LogLevel -&gt; Text -&gt; InstanceM ()
+(Text -&gt; InstanceM ()) -&gt; (Text -&gt; Text) -&gt; Text -&gt; InstanceM ()
+forall a. a -&gt; a
+forall msg.
+ToLogStr msg =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; InstanceM ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+pack :: String -&gt; Text
+id :: forall a. a -&gt; a
+. :: forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+monadLoggerLog :: forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">logDebug</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; InstanceM ()) -&gt; InstanceM Text -&gt; InstanceM ()
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; InstanceM Text
+</span><a href="Temporal.Workflow.Eval.html#withRunId"><span class="hs-identifier hs-var">withRunId</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;waitActivationResults&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-248"></span><span>      </span><span id="local-6989586621680173364"><span class="annot"><a href="#local-6989586621680173364"><span class="hs-identifier hs-var">newActivations</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-249"></span><span>        </span><span id="local-6989586621680173365"><span class="annot"><a href="#local-6989586621680173365"><span class="hs-identifier hs-var">activations</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">InstanceM [ActivationResult]
+-&gt; Coroutine
+     (Await [ActivationResult]) InstanceM [ActivationResult]
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+m a -&gt; Coroutine (Await [ActivationResult]) m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="annot"><span class="annottext">(InstanceM [ActivationResult]
+ -&gt; Coroutine
+      (Await [ActivationResult]) InstanceM [ActivationResult])
+-&gt; InstanceM [ActivationResult]
+-&gt; Coroutine
+     (Await [ActivationResult]) InstanceM [ActivationResult]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TVar [ActivationResult] -&gt; InstanceM [ActivationResult]
+forall (m :: * -&gt; *) a. MonadIO m =&gt; TVar a -&gt; m a
+</span><span class="hs-identifier hs-var">readTVarIO</span></span><span> </span><span class="annot"><span class="annottext">TVar [ActivationResult]
+</span><a href="#local-6989586621680173209"><span class="hs-identifier hs-var">pendingActivations</span></a></span><span>
+</span><span id="line-250"></span><span>        </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="hs-identifier hs-type">null</span></span><span> </span><span class="annot"><a href="#local-6989586621680173365"><span class="hs-identifier hs-type">activations</span></a></span><span>
+</span><span id="line-251"></span><span>          </span><span class="hs-keyword">then</span><span> </span><span class="annot"><a href="Temporal.Coroutine.html#await"><span class="hs-identifier hs-type">await</span></a></span><span>
+</span><span id="line-252"></span><span>          </span><span class="hs-keyword">else</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-253"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">lift</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">atomically</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">writeTVar</span></span><span> </span><span class="annot"><a href="#local-6989586621680173209"><span class="hs-identifier hs-type">pendingActivations</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-254"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="annot"><a href="#local-6989586621680173365"><span class="hs-identifier hs-type">activations</span></a></span><span>
+</span><span id="line-255"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">atomically</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">writeTVar</span></span><span> </span><span class="annot"><a href="#local-6989586621680173209"><span class="hs-identifier hs-type">pendingActivations</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680173364"><span class="hs-identifier hs-type">newActivations</span></a></span><span>
+</span><span id="line-256"></span><span>      </span><span id="local-6989586621680173369"><span class="annot"><a href="#local-6989586621680173369"><span class="hs-identifier hs-var">jobs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">lift</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">readIORef</span></span><span> </span><span class="annot"><span class="hs-identifier">env</span></span><span class="hs-operator">.</span><span class="hs-identifier">runQueueRef</span><span>
+</span><span id="line-257"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621680173369"><span class="hs-identifier hs-type">jobs</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-258"></span><span>        </span><span class="annot"><span class="annottext">JobList
+</span><a href="Temporal.Workflow.Internal.Monad.html#JobNil"><span class="hs-identifier hs-var">JobNil</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-259"></span><span>          </span><span class="annot"><span class="annottext">ContinuationEnv -&gt; SuspendableWorkflowExecution ()
+</span><a href="#local-6989586621680173316"><span class="hs-identifier hs-var">emptyRunQueue</span></a></span><span> </span><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173363"><span class="hs-identifier hs-var">env</span></a></span><span>
+</span><span id="line-260"></span><span>        </span><span class="annot"><span class="annottext">JobList
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-261"></span><span>          </span><span class="annot"><span class="annottext">InstanceM () -&gt; SuspendableWorkflowExecution ()
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+m a -&gt; Coroutine (Await [ActivationResult]) m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="annot"><span class="annottext">(InstanceM () -&gt; SuspendableWorkflowExecution ())
+-&gt; InstanceM () -&gt; SuspendableWorkflowExecution ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IORef JobList -&gt; JobList -&gt; InstanceM ()
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IORef a -&gt; a -&gt; m ()
+</span><span class="hs-identifier hs-var">writeIORef</span></span><span> </span><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173363"><span class="hs-identifier hs-var">env</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">runQueueRef</span><span> </span><span class="annot"><span class="annottext">JobList
+</span><a href="Temporal.Workflow.Internal.Monad.html#JobNil"><span class="hs-identifier hs-var">JobNil</span></a></span><span>
+</span><span id="line-262"></span><span>          </span><span class="annot"><span class="annottext">ContinuationEnv -&gt; JobList -&gt; SuspendableWorkflowExecution ()
+</span><a href="#local-6989586621680173274"><span class="hs-identifier hs-var">reschedule</span></a></span><span> </span><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173363"><span class="hs-identifier hs-var">env</span></a></span><span> </span><span class="annot"><span class="annottext">JobList
+</span><a href="#local-6989586621680173369"><span class="hs-identifier hs-var">jobs</span></a></span><span>
+</span><span id="line-263"></span><span>
+</span><span id="line-264"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680173370"><span class="annot"><a href="#local-6989586621680173370"><span class="hs-identifier hs-var hs-var">env</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WorkflowInstance
+</span><a href="#local-6989586621680173207"><span class="hs-identifier hs-var">inst</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">workflowInstanceContinuationEnv</span><span>
+</span><span id="line-265"></span><span>  </span><span class="annot"><a href="#local-6989586621680173216"><span class="hs-identifier hs-type">schedule</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680173370"><span class="hs-identifier hs-type">env</span></a></span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#JobNil"><span class="hs-identifier hs-type">JobNil</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680173074"><span class="hs-identifier hs-type">wf</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680173211"><span class="hs-identifier hs-type">finalResult</span></a></span><span>
+</span><span id="line-266"></span><span>  </span><span id="local-6989586621680173371"><span class="annot"><a href="#local-6989586621680173371"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">readIORef</span></span><span> </span><span class="annot"><a href="#local-6989586621680173214"><span class="hs-identifier hs-type">resultRef</span></a></span><span>
+</span><span id="line-267"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621680173371"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-268"></span><span>    </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#IVarEmpty"><span class="hs-identifier hs-type">IVarEmpty</span></a></span><span> </span><span class="annot"><span class="annottext">JobList
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; SuspendableWorkflowExecution a
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;runWorkflow: missing result&quot;</span></span><span>
+</span><span id="line-269"></span><span>    </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#IVarFull"><span class="hs-identifier hs-type">IVarFull</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#Ok"><span class="hs-identifier hs-type">Ok</span></a></span><span> </span><span id="local-6989586621680173373"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680173373"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; SuspendableWorkflowExecution a
+forall a. a -&gt; Coroutine (Await [ActivationResult]) InstanceM a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680173373"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-270"></span><span>    </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#IVarFull"><span class="hs-identifier hs-type">IVarFull</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ThrowWorkflow"><span class="hs-identifier hs-type">ThrowWorkflow</span></a></span><span> </span><span id="local-6989586621680173374"><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621680173374"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">SomeException -&gt; SuspendableWorkflowExecution a
+forall (m :: * -&gt; *) e a. (MonadIO m, Exception e) =&gt; e -&gt; m a
+</span><span class="hs-identifier hs-var">throwIO</span></span><span> </span><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621680173374"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-271"></span><span>    </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#IVarFull"><span class="hs-identifier hs-type">IVarFull</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ThrowInternal"><span class="hs-identifier hs-type">ThrowInternal</span></a></span><span> </span><span id="local-6989586621680173376"><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621680173376"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">SomeException -&gt; SuspendableWorkflowExecution a
+forall (m :: * -&gt; *) e a. (MonadIO m, Exception e) =&gt; e -&gt; m a
+</span><span class="hs-identifier hs-var">throwIO</span></span><span> </span><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621680173376"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-272"></span><span>
+</span><span id="line-273"></span><span>
+</span><span id="line-274"></span><span id="local-6989586621680172996"><span class="annot"><a href="Temporal.Workflow.Eval.html#rethrowAsyncExceptions"><span class="hs-identifier hs-type">rethrowAsyncExceptions</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621680172996"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SomeException</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680172996"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-275"></span><span id="rethrowAsyncExceptions"><span class="annot"><span class="annottext">rethrowAsyncExceptions :: forall (m :: * -&gt; *). MonadIO m =&gt; SomeException -&gt; m ()
+</span><a href="Temporal.Workflow.Eval.html#rethrowAsyncExceptions"><span class="hs-identifier hs-var hs-var">rethrowAsyncExceptions</span></a></span></span><span> </span><span id="local-6989586621680173383"><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621680173383"><span class="hs-identifier hs-var">e</span></a></span></span><span>
+</span><span id="line-276"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">SomeAsyncException</span></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">SomeException -&gt; Maybe SomeAsyncException
+forall e. Exception e =&gt; SomeException -&gt; Maybe e
+</span><span class="hs-identifier hs-var">fromException</span></span><span> </span><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621680173383"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SomeException -&gt; m ()
+forall (m :: * -&gt; *) e a. (MonadIO m, Exception e) =&gt; e -&gt; m a
+</span><span class="hs-identifier hs-var">UnliftIO.throwIO</span></span><span> </span><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621680173383"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-277"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">() -&gt; m ()
+forall a. a -&gt; m a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-278"></span><span>
+</span><span id="line-279"></span><span>
+</span><span id="line-280"></span><span class="hs-comment">-- experimental. should help ensure that signals blocking and resuming interop</span><span>
+</span><span id="line-281"></span><span class="hs-comment">-- properly with the main workflow execution.</span><span>
+</span><span id="line-282"></span><span class="annot"><a href="Temporal.Workflow.Eval.html#injectWorkflowSignal"><span class="hs-identifier hs-type">injectWorkflowSignal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#Workflow"><span class="hs-identifier hs-type">Workflow</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#InstanceM"><span class="hs-identifier hs-type">InstanceM</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-283"></span><span id="injectWorkflowSignal"><span class="annot"><span class="annottext">injectWorkflowSignal :: Workflow () -&gt; InstanceM ()
+</span><a href="Temporal.Workflow.Eval.html#injectWorkflowSignal"><span class="hs-identifier hs-var hs-var">injectWorkflowSignal</span></a></span></span><span> </span><span id="local-6989586621680173390"><span class="annot"><span class="annottext">Workflow ()
+</span><a href="#local-6989586621680173390"><span class="hs-identifier hs-var">signal</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-284"></span><span>  </span><span id="local-6989586621680173391"><span class="annot"><a href="#local-6989586621680173391"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">InstanceM (IVar ())
+forall (m :: * -&gt; *) a. MonadIO m =&gt; m (IVar a)
+</span><a href="Temporal.Workflow.Internal.Monad.html#newIVar"><span class="hs-identifier hs-var">newIVar</span></a></span><span>
+</span><span id="line-285"></span><span>  </span><span id="local-6989586621680173392"><span class="annot"><a href="#local-6989586621680173392"><span class="hs-identifier hs-var">inst</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ask</span></span><span>
+</span><span id="line-286"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680173393"><span class="annot"><a href="#local-6989586621680173393"><span class="hs-identifier hs-var">env</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ContinuationEnv"><span class="hs-identifier hs-type">ContinuationEnv</span></a></span><span> </span><span id="local-6989586621680173394"><span class="annot"><a href="#local-6989586621680173394"><span class="hs-identifier hs-var">jobList</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier">inst</span></span><span class="hs-operator">.</span><span class="hs-identifier">workflowInstanceContinuationEnv</span><span>
+</span><span id="line-287"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">modifyIORef'</span></span><span> </span><span class="annot"><a href="#local-6989586621680173394"><span class="hs-identifier hs-type">jobList</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621680173396"><span class="annot"><span class="annottext">JobList
+</span><a href="#local-6989586621680173396"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ContinuationEnv -&gt; Workflow () -&gt; IVar () -&gt; JobList -&gt; JobList
+forall a.
+ContinuationEnv -&gt; Workflow a -&gt; IVar a -&gt; JobList -&gt; JobList
+</span><a href="Temporal.Workflow.Internal.Monad.html#JobCons"><span class="hs-identifier hs-var">JobCons</span></a></span><span> </span><span class="annot"><span class="annottext">ContinuationEnv
+</span><a href="#local-6989586621680173393"><span class="hs-identifier hs-var">env</span></a></span><span> </span><span class="annot"><span class="annottext">Workflow ()
+</span><a href="#local-6989586621680173390"><span class="hs-identifier hs-var">signal</span></a></span><span> </span><span class="annot"><span class="annottext">IVar ()
+</span><a href="#local-6989586621680173391"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="annot"><span class="annottext">JobList
+</span><a href="#local-6989586621680173396"><span class="hs-identifier hs-var">j</span></a></span><span>
+</span><span id="line-288"></span></pre></body></html>

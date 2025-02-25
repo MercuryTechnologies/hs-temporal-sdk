@@ -1,0 +1,1411 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{- This file was auto-generated from temporal/api/protocol/v1/message.proto by the proto-lens-protoc program. -}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-unused-imports#-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-duplicate-exports#-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-dodgy-exports#-}</span><span>
+</span><span id="line-6"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html"><span class="hs-identifier">Proto.Temporal.Api.Protocol.V1.Message</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-7"></span><span>        </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message"><span class="hs-identifier">Message</span></a></span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27SequencingId"><span class="hs-identifier">Message'SequencingId</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27EventId"><span class="hs-identifier">_Message'EventId</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-8"></span><span>        </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27CommandIndex"><span class="hs-identifier">_Message'CommandIndex</span></a></span><span>
+</span><span id="line-9"></span><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Control.DeepSeq</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Prism</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Prism</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Prelude</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Int</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Int</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Monoid</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Monoid</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Word</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Word</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Bytes</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Growing</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Parser.Unsafe</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Wire</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Field</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Field</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Message.Enum</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Service.Types</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Lens.Family2</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Lens.Family2</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Lens.Family2.Unchecked</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Lens.Family2.Unchecked</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Map</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ByteString</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ByteString.Char8</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString.Char8</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Text.Encoding</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text.Encoding</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Vector</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Vector.Generic</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Generic</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Vector.Unboxed</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Unboxed</span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Text.Read</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Text.Read</span></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Google.Protobuf.Any</span></span><span>
+</span><span id="line-36"></span><span class="annot"><span class="hs-comment">{- | Fields :
+     
+         * 'Proto.Temporal.Api.Protocol.V1.Message_Fields.id' @:: Lens' Message Data.Text.Text@
+         * 'Proto.Temporal.Api.Protocol.V1.Message_Fields.protocolInstanceId' @:: Lens' Message Data.Text.Text@
+         * 'Proto.Temporal.Api.Protocol.V1.Message_Fields.body' @:: Lens' Message Proto.Google.Protobuf.Any.Any@
+         * 'Proto.Temporal.Api.Protocol.V1.Message_Fields.maybe'body' @:: Lens' Message (Prelude.Maybe Proto.Google.Protobuf.Any.Any)@
+         * 'Proto.Temporal.Api.Protocol.V1.Message_Fields.maybe'sequencingId' @:: Lens' Message (Prelude.Maybe Message'SequencingId)@
+         * 'Proto.Temporal.Api.Protocol.V1.Message_Fields.maybe'eventId' @:: Lens' Message (Prelude.Maybe Data.Int.Int64)@
+         * 'Proto.Temporal.Api.Protocol.V1.Message_Fields.eventId' @:: Lens' Message Data.Int.Int64@
+         * 'Proto.Temporal.Api.Protocol.V1.Message_Fields.maybe'commandIndex' @:: Lens' Message (Prelude.Maybe Data.Int.Int64)@
+         * 'Proto.Temporal.Api.Protocol.V1.Message_Fields.commandIndex' @:: Lens' Message Data.Int.Int64@ -}</span></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">data</span><span> </span><span id="Message"><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message"><span class="hs-identifier hs-var">Message</span></a></span></span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="Message%27_constructor"><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27_constructor"><span class="hs-identifier hs-var">Message'_constructor</span></a></span></span><span> </span><span class="hs-special">{</span><span id="_Message%27id"><span class="annot"><span class="annottext">Message -&gt; Text
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27id"><span class="hs-identifier hs-var hs-var">_Message'id</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Data.Text.Text</span></span><span class="hs-special">,</span><span>
+</span><span id="line-49"></span><span>                          </span><span id="_Message%27protocolInstanceId"><span class="annot"><span class="annottext">Message -&gt; Text
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27protocolInstanceId"><span class="hs-identifier hs-var hs-var">_Message'protocolInstanceId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Data.Text.Text</span></span><span class="hs-special">,</span><span>
+</span><span id="line-50"></span><span>                          </span><span id="_Message%27body"><span class="annot"><span class="annottext">Message -&gt; Maybe Any
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27body"><span class="hs-identifier hs-var hs-var">_Message'body</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Proto.Google.Protobuf.Any.Any</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-51"></span><span>                          </span><span id="_Message%27sequencingId"><span class="annot"><span class="annottext">Message -&gt; Maybe Message'SequencingId
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27sequencingId"><span class="hs-identifier hs-var hs-var">_Message'sequencingId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.Maybe</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27SequencingId"><span class="hs-identifier hs-type">Message'SequencingId</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-52"></span><span>                          </span><span id="_Message%27_unknownFields"><span class="annot"><span class="annottext">Message -&gt; FieldSet
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27_unknownFields"><span class="hs-identifier hs-var hs-var">_Message'_unknownFields</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldSet</span></span><span class="hs-special">}</span><span>
+</span><span id="line-53"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680297554"><span id="local-6989586621680297567"><span class="annot"><span class="annottext">Message -&gt; Message -&gt; Bool
+(Message -&gt; Message -&gt; Bool)
+-&gt; (Message -&gt; Message -&gt; Bool) -&gt; Eq Message
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: Message -&gt; Message -&gt; Bool
+== :: Message -&gt; Message -&gt; Bool
+$c/= :: Message -&gt; Message -&gt; Bool
+/= :: Message -&gt; Message -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680297577"><span id="local-6989586621680297590"><span id="local-6989586621680297600"><span id="local-6989586621680297604"><span id="local-6989586621680297607"><span id="local-6989586621680297610"><span id="local-6989586621680297613"><span class="annot"><span class="annottext">Eq Message
+Eq Message =&gt;
+(Message -&gt; Message -&gt; Ordering)
+-&gt; (Message -&gt; Message -&gt; Bool)
+-&gt; (Message -&gt; Message -&gt; Bool)
+-&gt; (Message -&gt; Message -&gt; Bool)
+-&gt; (Message -&gt; Message -&gt; Bool)
+-&gt; (Message -&gt; Message -&gt; Message)
+-&gt; (Message -&gt; Message -&gt; Message)
+-&gt; Ord Message
+Message -&gt; Message -&gt; Bool
+Message -&gt; Message -&gt; Ordering
+Message -&gt; Message -&gt; Message
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: Message -&gt; Message -&gt; Ordering
+compare :: Message -&gt; Message -&gt; Ordering
+$c&lt; :: Message -&gt; Message -&gt; Bool
+&lt; :: Message -&gt; Message -&gt; Bool
+$c&lt;= :: Message -&gt; Message -&gt; Bool
+&lt;= :: Message -&gt; Message -&gt; Bool
+$c&gt; :: Message -&gt; Message -&gt; Bool
+&gt; :: Message -&gt; Message -&gt; Bool
+$c&gt;= :: Message -&gt; Message -&gt; Bool
+&gt;= :: Message -&gt; Message -&gt; Bool
+$cmax :: Message -&gt; Message -&gt; Message
+max :: Message -&gt; Message -&gt; Message
+$cmin :: Message -&gt; Message -&gt; Message
+min :: Message -&gt; Message -&gt; Message
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680297625"><span id="local-6989586621680297629"><span class="annot"><span class="hs-identifier hs-type">Prelude.Show</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message"><span class="hs-identifier hs-type">Message</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-55"></span><span>  </span><span id="local-6989586621680297634"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; Message -&gt; ShowS
+</span><a href="#local-6989586621680297634"><span class="hs-identifier hs-var hs-var hs-var">showsPrec</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621680297636"><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297636"><span class="hs-identifier hs-var">__x</span></a></span></span><span> </span><span id="local-6989586621680297637"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680297637"><span class="hs-identifier hs-var">__s</span></a></span></span><span>
+</span><span id="line-56"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
+</span><span class="hs-identifier hs-var">Prelude.showChar</span></span><span>
+</span><span id="line-57"></span><span>        </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'{'</span></span><span>
+</span><span id="line-58"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><span class="hs-identifier hs-var">Prelude.showString</span></span><span>
+</span><span id="line-59"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Message -&gt; String
+forall msg. Message msg =&gt; msg -&gt; String
+</span><span class="hs-identifier hs-var">Data.ProtoLens.showMessageShort</span></span><span> </span><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297636"><span class="hs-identifier hs-var">__x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; ShowS
+</span><span class="hs-identifier hs-var">Prelude.showChar</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'}'</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680297637"><span class="hs-identifier hs-var">__s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-60"></span><span class="hs-keyword">data</span><span> </span><span id="Message%27SequencingId"><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27SequencingId"><span class="hs-identifier hs-var">Message'SequencingId</span></a></span></span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="Message%27EventId"><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27EventId"><span class="hs-identifier hs-var">Message'EventId</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Data.Int.Int64</span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-62"></span><span>    </span><span id="Message%27CommandIndex"><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27CommandIndex"><span class="hs-identifier hs-var">Message'CommandIndex</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Data.Int.Int64</span></span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680297644"><span id="local-6989586621680297652"><span id="local-6989586621680297656"><span class="annot"><span class="annottext">Int -&gt; Message'SequencingId -&gt; ShowS
+[Message'SequencingId] -&gt; ShowS
+Message'SequencingId -&gt; String
+(Int -&gt; Message'SequencingId -&gt; ShowS)
+-&gt; (Message'SequencingId -&gt; String)
+-&gt; ([Message'SequencingId] -&gt; ShowS)
+-&gt; Show Message'SequencingId
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; Message'SequencingId -&gt; ShowS
+showsPrec :: Int -&gt; Message'SequencingId -&gt; ShowS
+$cshow :: Message'SequencingId -&gt; String
+show :: Message'SequencingId -&gt; String
+$cshowList :: [Message'SequencingId] -&gt; ShowS
+showList :: [Message'SequencingId] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680297659"><span id="local-6989586621680297667"><span class="annot"><span class="annottext">Message'SequencingId -&gt; Message'SequencingId -&gt; Bool
+(Message'SequencingId -&gt; Message'SequencingId -&gt; Bool)
+-&gt; (Message'SequencingId -&gt; Message'SequencingId -&gt; Bool)
+-&gt; Eq Message'SequencingId
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: Message'SequencingId -&gt; Message'SequencingId -&gt; Bool
+== :: Message'SequencingId -&gt; Message'SequencingId -&gt; Bool
+$c/= :: Message'SequencingId -&gt; Message'SequencingId -&gt; Bool
+/= :: Message'SequencingId -&gt; Message'SequencingId -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680297672"><span id="local-6989586621680297677"><span id="local-6989586621680297681"><span id="local-6989586621680297684"><span id="local-6989586621680297687"><span id="local-6989586621680297690"><span id="local-6989586621680297693"><span class="annot"><span class="annottext">Eq Message'SequencingId
+Eq Message'SequencingId =&gt;
+(Message'SequencingId -&gt; Message'SequencingId -&gt; Ordering)
+-&gt; (Message'SequencingId -&gt; Message'SequencingId -&gt; Bool)
+-&gt; (Message'SequencingId -&gt; Message'SequencingId -&gt; Bool)
+-&gt; (Message'SequencingId -&gt; Message'SequencingId -&gt; Bool)
+-&gt; (Message'SequencingId -&gt; Message'SequencingId -&gt; Bool)
+-&gt; (Message'SequencingId
+    -&gt; Message'SequencingId -&gt; Message'SequencingId)
+-&gt; (Message'SequencingId
+    -&gt; Message'SequencingId -&gt; Message'SequencingId)
+-&gt; Ord Message'SequencingId
+Message'SequencingId -&gt; Message'SequencingId -&gt; Bool
+Message'SequencingId -&gt; Message'SequencingId -&gt; Ordering
+Message'SequencingId
+-&gt; Message'SequencingId -&gt; Message'SequencingId
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: Message'SequencingId -&gt; Message'SequencingId -&gt; Ordering
+compare :: Message'SequencingId -&gt; Message'SequencingId -&gt; Ordering
+$c&lt; :: Message'SequencingId -&gt; Message'SequencingId -&gt; Bool
+&lt; :: Message'SequencingId -&gt; Message'SequencingId -&gt; Bool
+$c&lt;= :: Message'SequencingId -&gt; Message'SequencingId -&gt; Bool
+&lt;= :: Message'SequencingId -&gt; Message'SequencingId -&gt; Bool
+$c&gt; :: Message'SequencingId -&gt; Message'SequencingId -&gt; Bool
+&gt; :: Message'SequencingId -&gt; Message'SequencingId -&gt; Bool
+$c&gt;= :: Message'SequencingId -&gt; Message'SequencingId -&gt; Bool
+&gt;= :: Message'SequencingId -&gt; Message'SequencingId -&gt; Bool
+$cmax :: Message'SequencingId
+-&gt; Message'SequencingId -&gt; Message'SequencingId
+max :: Message'SequencingId
+-&gt; Message'SequencingId -&gt; Message'SequencingId
+$cmin :: Message'SequencingId
+-&gt; Message'SequencingId -&gt; Message'SequencingId
+min :: Message'SequencingId
+-&gt; Message'SequencingId -&gt; Message'SequencingId
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Field.HasField</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message"><span class="hs-identifier hs-type">Message</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;id&quot;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Text.Text</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-65"></span><span>  </span><span id="local-6989586621680297700"><span class="annot"><span class="annottext">fieldOf :: forall (f :: * -&gt; *).
+Functor f =&gt;
+Proxy# &quot;id&quot; -&gt; (Text -&gt; f Text) -&gt; Message -&gt; f Message
+</span><a href="#local-6989586621680297700"><span class="hs-identifier hs-var hs-var hs-var">fieldOf</span></a></span></span><span> </span><span class="annot"><span class="annottext">Proxy# &quot;id&quot;
+</span><span class="hs-identifier">_</span></span><span>
+</span><span id="line-66"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Text -&gt; f Text) -&gt; Message -&gt; f Message)
+-&gt; ((Text -&gt; f Text) -&gt; Text -&gt; f Text)
+-&gt; (Text -&gt; f Text)
+-&gt; Message
+-&gt; f Message
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-67"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Message -&gt; Text)
+-&gt; (Message -&gt; Text -&gt; Message) -&gt; Lens Message Message Text Text
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">Lens.Family2.Unchecked.lens</span></span><span>
+</span><span id="line-68"></span><span>           </span><span class="annot"><span class="annottext">Message -&gt; Text
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27id"><span class="hs-identifier hs-var">_Message'id</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680297704"><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297704"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span id="local-6989586621680297705"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621680297705"><span class="hs-identifier hs-var">y__</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297704"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27id"><span class="hs-identifier hs-var">_Message'id</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680297705"><span class="hs-identifier hs-type">y__</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-69"></span><span>        </span><span class="annot"><span class="annottext">(Text -&gt; f Text) -&gt; Text -&gt; f Text
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.id</span></span><span>
+</span><span id="line-70"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Field.HasField</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message"><span class="hs-identifier hs-type">Message</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;protocolInstanceId&quot;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Text.Text</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-71"></span><span>  </span><span id="local-6989586621680297711"><span class="annot"><span class="annottext">fieldOf :: forall (f :: * -&gt; *).
+Functor f =&gt;
+Proxy# &quot;protocolInstanceId&quot;
+-&gt; (Text -&gt; f Text) -&gt; Message -&gt; f Message
+</span><span class="hs-identifier hs-var hs-var hs-var">fieldOf</span></span></span><span> </span><span class="annot"><span class="annottext">Proxy# &quot;protocolInstanceId&quot;
+</span><span class="hs-identifier">_</span></span><span>
+</span><span id="line-72"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Text -&gt; f Text) -&gt; Message -&gt; f Message)
+-&gt; ((Text -&gt; f Text) -&gt; Text -&gt; f Text)
+-&gt; (Text -&gt; f Text)
+-&gt; Message
+-&gt; f Message
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-73"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Message -&gt; Text)
+-&gt; (Message -&gt; Text -&gt; Message) -&gt; Lens Message Message Text Text
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">Lens.Family2.Unchecked.lens</span></span><span>
+</span><span id="line-74"></span><span>           </span><span class="annot"><span class="annottext">Message -&gt; Text
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27protocolInstanceId"><span class="hs-identifier hs-var">_Message'protocolInstanceId</span></a></span><span>
+</span><span id="line-75"></span><span>           </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680297712"><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297712"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span id="local-6989586621680297713"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621680297713"><span class="hs-identifier hs-var">y__</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297712"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27protocolInstanceId"><span class="hs-identifier hs-var">_Message'protocolInstanceId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680297713"><span class="hs-identifier hs-type">y__</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-76"></span><span>        </span><span class="annot"><span class="annottext">(Text -&gt; f Text) -&gt; Text -&gt; f Text
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.id</span></span><span>
+</span><span id="line-77"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Field.HasField</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message"><span class="hs-identifier hs-type">Message</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;body&quot;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Proto.Google.Protobuf.Any.Any</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-78"></span><span>  </span><span id="local-6989586621680297721"><span class="annot"><span class="annottext">fieldOf :: forall (f :: * -&gt; *).
+Functor f =&gt;
+Proxy# &quot;body&quot; -&gt; (Any -&gt; f Any) -&gt; Message -&gt; f Message
+</span><span class="hs-identifier hs-var hs-var hs-var">fieldOf</span></span></span><span> </span><span class="annot"><span class="annottext">Proxy# &quot;body&quot;
+</span><span class="hs-identifier">_</span></span><span>
+</span><span id="line-79"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Maybe Any -&gt; f (Maybe Any)) -&gt; Message -&gt; f Message)
+-&gt; ((Any -&gt; f Any) -&gt; Maybe Any -&gt; f (Maybe Any))
+-&gt; (Any -&gt; f Any)
+-&gt; Message
+-&gt; f Message
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-80"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Message -&gt; Maybe Any)
+-&gt; (Message -&gt; Maybe Any -&gt; Message)
+-&gt; Lens Message Message (Maybe Any) (Maybe Any)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">Lens.Family2.Unchecked.lens</span></span><span>
+</span><span id="line-81"></span><span>           </span><span class="annot"><span class="annottext">Message -&gt; Maybe Any
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27body"><span class="hs-identifier hs-var">_Message'body</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680297722"><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297722"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span id="local-6989586621680297723"><span class="annot"><span class="annottext">Maybe Any
+</span><a href="#local-6989586621680297723"><span class="hs-identifier hs-var">y__</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297722"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27body"><span class="hs-identifier hs-var">_Message'body</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680297723"><span class="hs-identifier hs-type">y__</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-82"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Any -&gt; Lens' (Maybe Any) Any
+forall b. b -&gt; Lens' (Maybe b) b
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeLens</span></span><span> </span><span class="annot"><span class="annottext">Any
+forall msg. Message msg =&gt; msg
+</span><span class="hs-identifier hs-var">Data.ProtoLens.defMessage</span></span><span class="hs-special">)</span><span>
+</span><span id="line-83"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Field.HasField</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message"><span class="hs-identifier hs-type">Message</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;maybe'body&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Proto.Google.Protobuf.Any.Any</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-84"></span><span>  </span><span id="local-6989586621680297730"><span class="annot"><span class="annottext">fieldOf :: forall (f :: * -&gt; *).
+Functor f =&gt;
+Proxy# &quot;maybe'body&quot;
+-&gt; (Maybe Any -&gt; f (Maybe Any)) -&gt; Message -&gt; f Message
+</span><span class="hs-identifier hs-var hs-var hs-var">fieldOf</span></span></span><span> </span><span class="annot"><span class="annottext">Proxy# &quot;maybe'body&quot;
+</span><span class="hs-identifier">_</span></span><span>
+</span><span id="line-85"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Maybe Any -&gt; f (Maybe Any)) -&gt; Message -&gt; f Message)
+-&gt; ((Maybe Any -&gt; f (Maybe Any)) -&gt; Maybe Any -&gt; f (Maybe Any))
+-&gt; (Maybe Any -&gt; f (Maybe Any))
+-&gt; Message
+-&gt; f Message
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-86"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Message -&gt; Maybe Any)
+-&gt; (Message -&gt; Maybe Any -&gt; Message)
+-&gt; Lens Message Message (Maybe Any) (Maybe Any)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">Lens.Family2.Unchecked.lens</span></span><span>
+</span><span id="line-87"></span><span>           </span><span class="annot"><span class="annottext">Message -&gt; Maybe Any
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27body"><span class="hs-identifier hs-var">_Message'body</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680297731"><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297731"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span id="local-6989586621680297732"><span class="annot"><span class="annottext">Maybe Any
+</span><a href="#local-6989586621680297732"><span class="hs-identifier hs-var">y__</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297731"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27body"><span class="hs-identifier hs-var">_Message'body</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680297732"><span class="hs-identifier hs-type">y__</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-88"></span><span>        </span><span class="annot"><span class="annottext">(Maybe Any -&gt; f (Maybe Any)) -&gt; Maybe Any -&gt; f (Maybe Any)
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.id</span></span><span>
+</span><span id="line-89"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Field.HasField</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message"><span class="hs-identifier hs-type">Message</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;maybe'sequencingId&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.Maybe</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27SequencingId"><span class="hs-identifier hs-type">Message'SequencingId</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-90"></span><span>  </span><span id="local-6989586621680297737"><span class="annot"><span class="annottext">fieldOf :: forall (f :: * -&gt; *).
+Functor f =&gt;
+Proxy# &quot;maybe'sequencingId&quot;
+-&gt; (Maybe Message'SequencingId -&gt; f (Maybe Message'SequencingId))
+-&gt; Message
+-&gt; f Message
+</span><span class="hs-identifier hs-var hs-var hs-var">fieldOf</span></span></span><span> </span><span class="annot"><span class="annottext">Proxy# &quot;maybe'sequencingId&quot;
+</span><span class="hs-identifier">_</span></span><span>
+</span><span id="line-91"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Maybe Message'SequencingId -&gt; f (Maybe Message'SequencingId))
+ -&gt; Message -&gt; f Message)
+-&gt; ((Maybe Message'SequencingId -&gt; f (Maybe Message'SequencingId))
+    -&gt; Maybe Message'SequencingId -&gt; f (Maybe Message'SequencingId))
+-&gt; (Maybe Message'SequencingId -&gt; f (Maybe Message'SequencingId))
+-&gt; Message
+-&gt; f Message
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-92"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Message -&gt; Maybe Message'SequencingId)
+-&gt; (Message -&gt; Maybe Message'SequencingId -&gt; Message)
+-&gt; Lens
+     Message
+     Message
+     (Maybe Message'SequencingId)
+     (Maybe Message'SequencingId)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">Lens.Family2.Unchecked.lens</span></span><span>
+</span><span id="line-93"></span><span>           </span><span class="annot"><span class="annottext">Message -&gt; Maybe Message'SequencingId
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27sequencingId"><span class="hs-identifier hs-var">_Message'sequencingId</span></a></span><span>
+</span><span id="line-94"></span><span>           </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680297738"><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297738"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span id="local-6989586621680297739"><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><a href="#local-6989586621680297739"><span class="hs-identifier hs-var">y__</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297738"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27sequencingId"><span class="hs-identifier hs-var">_Message'sequencingId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680297739"><span class="hs-identifier hs-type">y__</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-95"></span><span>        </span><span class="annot"><span class="annottext">(Maybe Message'SequencingId -&gt; f (Maybe Message'SequencingId))
+-&gt; Maybe Message'SequencingId -&gt; f (Maybe Message'SequencingId)
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.id</span></span><span>
+</span><span id="line-96"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Field.HasField</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message"><span class="hs-identifier hs-type">Message</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;maybe'eventId&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Int.Int64</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-97"></span><span>  </span><span id="local-6989586621680297747"><span class="annot"><span class="annottext">fieldOf :: forall (f :: * -&gt; *).
+Functor f =&gt;
+Proxy# &quot;maybe'eventId&quot;
+-&gt; (Maybe Int64 -&gt; f (Maybe Int64)) -&gt; Message -&gt; f Message
+</span><span class="hs-identifier hs-var hs-var hs-var">fieldOf</span></span></span><span> </span><span class="annot"><span class="annottext">Proxy# &quot;maybe'eventId&quot;
+</span><span class="hs-identifier">_</span></span><span>
+</span><span id="line-98"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Maybe Message'SequencingId -&gt; f (Maybe Message'SequencingId))
+ -&gt; Message -&gt; f Message)
+-&gt; ((Maybe Int64 -&gt; f (Maybe Int64))
+    -&gt; Maybe Message'SequencingId -&gt; f (Maybe Message'SequencingId))
+-&gt; (Maybe Int64 -&gt; f (Maybe Int64))
+-&gt; Message
+-&gt; f Message
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-99"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Message -&gt; Maybe Message'SequencingId)
+-&gt; (Message -&gt; Maybe Message'SequencingId -&gt; Message)
+-&gt; Lens
+     Message
+     Message
+     (Maybe Message'SequencingId)
+     (Maybe Message'SequencingId)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">Lens.Family2.Unchecked.lens</span></span><span>
+</span><span id="line-100"></span><span>           </span><span class="annot"><span class="annottext">Message -&gt; Maybe Message'SequencingId
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27sequencingId"><span class="hs-identifier hs-var">_Message'sequencingId</span></a></span><span>
+</span><span id="line-101"></span><span>           </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680297748"><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297748"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span id="local-6989586621680297749"><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><a href="#local-6989586621680297749"><span class="hs-identifier hs-var">y__</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297748"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27sequencingId"><span class="hs-identifier hs-var">_Message'sequencingId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680297749"><span class="hs-identifier hs-type">y__</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-102"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Maybe Message'SequencingId -&gt; Maybe Int64)
+-&gt; (Maybe Message'SequencingId
+    -&gt; Maybe Int64 -&gt; Maybe Message'SequencingId)
+-&gt; Lens
+     (Maybe Message'SequencingId)
+     (Maybe Message'SequencingId)
+     (Maybe Int64)
+     (Maybe Int64)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">Lens.Family2.Unchecked.lens</span></span><span>
+</span><span id="line-103"></span><span>           </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680297750"><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><a href="#local-6989586621680297750"><span class="hs-identifier hs-var">x__</span></a></span></span><span>
+</span><span id="line-104"></span><span>              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><a href="#local-6989586621680297750"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-105"></span><span>                   </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27EventId"><span class="hs-identifier hs-type">Message'EventId</span></a></span><span> </span><span id="local-6989586621680297751"><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680297751"><span class="hs-identifier hs-var">x__val</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Maybe Int64
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680297751"><span class="hs-identifier hs-var">x__val</span></a></span><span>
+</span><span id="line-106"></span><span>                   </span><span id="local-6989586621680297752"><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><a href="#local-6989586621680297752"><span class="hs-identifier hs-var">_otherwise</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe Int64
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Nothing</span></span><span class="hs-special">)</span><span>
+</span><span id="line-107"></span><span>           </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621680297753"><span class="annot"><span class="annottext">Maybe Int64
+</span><a href="#local-6989586621680297753"><span class="hs-identifier hs-var">y__</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Int64 -&gt; Message'SequencingId)
+-&gt; Maybe Int64 -&gt; Maybe Message'SequencingId
+forall a b. (a -&gt; b) -&gt; Maybe a -&gt; Maybe b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">Prelude.fmap</span></span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Message'SequencingId
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27EventId"><span class="hs-identifier hs-var">Message'EventId</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe Int64
+</span><a href="#local-6989586621680297753"><span class="hs-identifier hs-var">y__</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-108"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Field.HasField</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message"><span class="hs-identifier hs-type">Message</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;eventId&quot;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Int.Int64</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-109"></span><span>  </span><span id="local-6989586621680297763"><span class="annot"><span class="annottext">fieldOf :: forall (f :: * -&gt; *).
+Functor f =&gt;
+Proxy# &quot;eventId&quot; -&gt; (Int64 -&gt; f Int64) -&gt; Message -&gt; f Message
+</span><span class="hs-identifier hs-var hs-var hs-var">fieldOf</span></span></span><span> </span><span class="annot"><span class="annottext">Proxy# &quot;eventId&quot;
+</span><span class="hs-identifier">_</span></span><span>
+</span><span id="line-110"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Maybe Message'SequencingId -&gt; f (Maybe Message'SequencingId))
+ -&gt; Message -&gt; f Message)
+-&gt; ((Int64 -&gt; f Int64)
+    -&gt; Maybe Message'SequencingId -&gt; f (Maybe Message'SequencingId))
+-&gt; (Int64 -&gt; f Int64)
+-&gt; Message
+-&gt; f Message
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-111"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Message -&gt; Maybe Message'SequencingId)
+-&gt; (Message -&gt; Maybe Message'SequencingId -&gt; Message)
+-&gt; Lens
+     Message
+     Message
+     (Maybe Message'SequencingId)
+     (Maybe Message'SequencingId)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">Lens.Family2.Unchecked.lens</span></span><span>
+</span><span id="line-112"></span><span>           </span><span class="annot"><span class="annottext">Message -&gt; Maybe Message'SequencingId
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27sequencingId"><span class="hs-identifier hs-var">_Message'sequencingId</span></a></span><span>
+</span><span id="line-113"></span><span>           </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680297764"><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297764"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span id="local-6989586621680297765"><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><a href="#local-6989586621680297765"><span class="hs-identifier hs-var">y__</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297764"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27sequencingId"><span class="hs-identifier hs-var">_Message'sequencingId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680297765"><span class="hs-identifier hs-type">y__</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-114"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Maybe Int64 -&gt; f (Maybe Int64))
+ -&gt; Maybe Message'SequencingId -&gt; f (Maybe Message'SequencingId))
+-&gt; ((Int64 -&gt; f Int64) -&gt; Maybe Int64 -&gt; f (Maybe Int64))
+-&gt; (Int64 -&gt; f Int64)
+-&gt; Maybe Message'SequencingId
+-&gt; f (Maybe Message'SequencingId)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-115"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Maybe Message'SequencingId -&gt; Maybe Int64)
+-&gt; (Maybe Message'SequencingId
+    -&gt; Maybe Int64 -&gt; Maybe Message'SequencingId)
+-&gt; Lens
+     (Maybe Message'SequencingId)
+     (Maybe Message'SequencingId)
+     (Maybe Int64)
+     (Maybe Int64)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">Lens.Family2.Unchecked.lens</span></span><span>
+</span><span id="line-116"></span><span>              </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680297766"><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><a href="#local-6989586621680297766"><span class="hs-identifier hs-var">x__</span></a></span></span><span>
+</span><span id="line-117"></span><span>                 </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><a href="#local-6989586621680297766"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-118"></span><span>                      </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27EventId"><span class="hs-identifier hs-type">Message'EventId</span></a></span><span> </span><span id="local-6989586621680297767"><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680297767"><span class="hs-identifier hs-var">x__val</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Maybe Int64
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680297767"><span class="hs-identifier hs-var">x__val</span></a></span><span>
+</span><span id="line-119"></span><span>                      </span><span id="local-6989586621680297768"><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><a href="#local-6989586621680297768"><span class="hs-identifier hs-var">_otherwise</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe Int64
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Nothing</span></span><span class="hs-special">)</span><span>
+</span><span id="line-120"></span><span>              </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621680297769"><span class="annot"><span class="annottext">Maybe Int64
+</span><a href="#local-6989586621680297769"><span class="hs-identifier hs-var">y__</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Int64 -&gt; Message'SequencingId)
+-&gt; Maybe Int64 -&gt; Maybe Message'SequencingId
+forall a b. (a -&gt; b) -&gt; Maybe a -&gt; Maybe b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">Prelude.fmap</span></span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Message'SequencingId
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27EventId"><span class="hs-identifier hs-var">Message'EventId</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe Int64
+</span><a href="#local-6989586621680297769"><span class="hs-identifier hs-var">y__</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-121"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int64 -&gt; Lens' (Maybe Int64) Int64
+forall b. b -&gt; Lens' (Maybe b) b
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeLens</span></span><span> </span><span class="annot"><span class="annottext">Int64
+forall value. FieldDefault value =&gt; value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.fieldDefault</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-122"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Field.HasField</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message"><span class="hs-identifier hs-type">Message</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;maybe'commandIndex&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Int.Int64</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-123"></span><span>  </span><span id="local-6989586621680297777"><span class="annot"><span class="annottext">fieldOf :: forall (f :: * -&gt; *).
+Functor f =&gt;
+Proxy# &quot;maybe'commandIndex&quot;
+-&gt; (Maybe Int64 -&gt; f (Maybe Int64)) -&gt; Message -&gt; f Message
+</span><span class="hs-identifier hs-var hs-var hs-var">fieldOf</span></span></span><span> </span><span class="annot"><span class="annottext">Proxy# &quot;maybe'commandIndex&quot;
+</span><span class="hs-identifier">_</span></span><span>
+</span><span id="line-124"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Maybe Message'SequencingId -&gt; f (Maybe Message'SequencingId))
+ -&gt; Message -&gt; f Message)
+-&gt; ((Maybe Int64 -&gt; f (Maybe Int64))
+    -&gt; Maybe Message'SequencingId -&gt; f (Maybe Message'SequencingId))
+-&gt; (Maybe Int64 -&gt; f (Maybe Int64))
+-&gt; Message
+-&gt; f Message
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-125"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Message -&gt; Maybe Message'SequencingId)
+-&gt; (Message -&gt; Maybe Message'SequencingId -&gt; Message)
+-&gt; Lens
+     Message
+     Message
+     (Maybe Message'SequencingId)
+     (Maybe Message'SequencingId)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">Lens.Family2.Unchecked.lens</span></span><span>
+</span><span id="line-126"></span><span>           </span><span class="annot"><span class="annottext">Message -&gt; Maybe Message'SequencingId
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27sequencingId"><span class="hs-identifier hs-var">_Message'sequencingId</span></a></span><span>
+</span><span id="line-127"></span><span>           </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680297778"><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297778"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span id="local-6989586621680297779"><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><a href="#local-6989586621680297779"><span class="hs-identifier hs-var">y__</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297778"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27sequencingId"><span class="hs-identifier hs-var">_Message'sequencingId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680297779"><span class="hs-identifier hs-type">y__</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-128"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Maybe Message'SequencingId -&gt; Maybe Int64)
+-&gt; (Maybe Message'SequencingId
+    -&gt; Maybe Int64 -&gt; Maybe Message'SequencingId)
+-&gt; Lens
+     (Maybe Message'SequencingId)
+     (Maybe Message'SequencingId)
+     (Maybe Int64)
+     (Maybe Int64)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">Lens.Family2.Unchecked.lens</span></span><span>
+</span><span id="line-129"></span><span>           </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680297780"><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><a href="#local-6989586621680297780"><span class="hs-identifier hs-var">x__</span></a></span></span><span>
+</span><span id="line-130"></span><span>              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><a href="#local-6989586621680297780"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-131"></span><span>                   </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27CommandIndex"><span class="hs-identifier hs-type">Message'CommandIndex</span></a></span><span> </span><span id="local-6989586621680297781"><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680297781"><span class="hs-identifier hs-var">x__val</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Maybe Int64
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680297781"><span class="hs-identifier hs-var">x__val</span></a></span><span>
+</span><span id="line-132"></span><span>                   </span><span id="local-6989586621680297782"><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><a href="#local-6989586621680297782"><span class="hs-identifier hs-var">_otherwise</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe Int64
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Nothing</span></span><span class="hs-special">)</span><span>
+</span><span id="line-133"></span><span>           </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621680297783"><span class="annot"><span class="annottext">Maybe Int64
+</span><a href="#local-6989586621680297783"><span class="hs-identifier hs-var">y__</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Int64 -&gt; Message'SequencingId)
+-&gt; Maybe Int64 -&gt; Maybe Message'SequencingId
+forall a b. (a -&gt; b) -&gt; Maybe a -&gt; Maybe b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">Prelude.fmap</span></span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Message'SequencingId
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27CommandIndex"><span class="hs-identifier hs-var">Message'CommandIndex</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe Int64
+</span><a href="#local-6989586621680297783"><span class="hs-identifier hs-var">y__</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-134"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Field.HasField</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message"><span class="hs-identifier hs-type">Message</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;commandIndex&quot;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Int.Int64</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-135"></span><span>  </span><span id="local-6989586621680297792"><span class="annot"><span class="annottext">fieldOf :: forall (f :: * -&gt; *).
+Functor f =&gt;
+Proxy# &quot;commandIndex&quot; -&gt; (Int64 -&gt; f Int64) -&gt; Message -&gt; f Message
+</span><span class="hs-identifier hs-var hs-var hs-var">fieldOf</span></span></span><span> </span><span class="annot"><span class="annottext">Proxy# &quot;commandIndex&quot;
+</span><span class="hs-identifier">_</span></span><span>
+</span><span id="line-136"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Maybe Message'SequencingId -&gt; f (Maybe Message'SequencingId))
+ -&gt; Message -&gt; f Message)
+-&gt; ((Int64 -&gt; f Int64)
+    -&gt; Maybe Message'SequencingId -&gt; f (Maybe Message'SequencingId))
+-&gt; (Int64 -&gt; f Int64)
+-&gt; Message
+-&gt; f Message
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-137"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Message -&gt; Maybe Message'SequencingId)
+-&gt; (Message -&gt; Maybe Message'SequencingId -&gt; Message)
+-&gt; Lens
+     Message
+     Message
+     (Maybe Message'SequencingId)
+     (Maybe Message'SequencingId)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">Lens.Family2.Unchecked.lens</span></span><span>
+</span><span id="line-138"></span><span>           </span><span class="annot"><span class="annottext">Message -&gt; Maybe Message'SequencingId
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27sequencingId"><span class="hs-identifier hs-var">_Message'sequencingId</span></a></span><span>
+</span><span id="line-139"></span><span>           </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680297793"><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297793"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span id="local-6989586621680297794"><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><a href="#local-6989586621680297794"><span class="hs-identifier hs-var">y__</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297793"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27sequencingId"><span class="hs-identifier hs-var">_Message'sequencingId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680297794"><span class="hs-identifier hs-type">y__</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-140"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Maybe Int64 -&gt; f (Maybe Int64))
+ -&gt; Maybe Message'SequencingId -&gt; f (Maybe Message'SequencingId))
+-&gt; ((Int64 -&gt; f Int64) -&gt; Maybe Int64 -&gt; f (Maybe Int64))
+-&gt; (Int64 -&gt; f Int64)
+-&gt; Maybe Message'SequencingId
+-&gt; f (Maybe Message'SequencingId)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-141"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Maybe Message'SequencingId -&gt; Maybe Int64)
+-&gt; (Maybe Message'SequencingId
+    -&gt; Maybe Int64 -&gt; Maybe Message'SequencingId)
+-&gt; Lens
+     (Maybe Message'SequencingId)
+     (Maybe Message'SequencingId)
+     (Maybe Int64)
+     (Maybe Int64)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">Lens.Family2.Unchecked.lens</span></span><span>
+</span><span id="line-142"></span><span>              </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680297795"><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><a href="#local-6989586621680297795"><span class="hs-identifier hs-var">x__</span></a></span></span><span>
+</span><span id="line-143"></span><span>                 </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><a href="#local-6989586621680297795"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-144"></span><span>                      </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27CommandIndex"><span class="hs-identifier hs-type">Message'CommandIndex</span></a></span><span> </span><span id="local-6989586621680297796"><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680297796"><span class="hs-identifier hs-var">x__val</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Maybe Int64
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680297796"><span class="hs-identifier hs-var">x__val</span></a></span><span>
+</span><span id="line-145"></span><span>                      </span><span id="local-6989586621680297797"><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><a href="#local-6989586621680297797"><span class="hs-identifier hs-var">_otherwise</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe Int64
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Nothing</span></span><span class="hs-special">)</span><span>
+</span><span id="line-146"></span><span>              </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621680297798"><span class="annot"><span class="annottext">Maybe Int64
+</span><a href="#local-6989586621680297798"><span class="hs-identifier hs-var">y__</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Int64 -&gt; Message'SequencingId)
+-&gt; Maybe Int64 -&gt; Maybe Message'SequencingId
+forall a b. (a -&gt; b) -&gt; Maybe a -&gt; Maybe b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">Prelude.fmap</span></span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Message'SequencingId
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27CommandIndex"><span class="hs-identifier hs-var">Message'CommandIndex</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe Int64
+</span><a href="#local-6989586621680297798"><span class="hs-identifier hs-var">y__</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-147"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int64 -&gt; Lens' (Maybe Int64) Int64
+forall b. b -&gt; Lens' (Maybe b) b
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeLens</span></span><span> </span><span class="annot"><span class="annottext">Int64
+forall value. FieldDefault value =&gt; value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.fieldDefault</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-148"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680297805"><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Message</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message"><span class="hs-identifier hs-type">Message</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-149"></span><span>  </span><span id="local-6989586621680297811"><span class="annot"><span class="annottext">messageName :: Proxy Message -&gt; Text
+</span><a href="#local-6989586621680297811"><span class="hs-identifier hs-var hs-var hs-var">messageName</span></a></span></span><span> </span><span class="annot"><span class="annottext">Proxy Message
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Text
+</span><span class="hs-identifier hs-var">Data.Text.pack</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;temporal.api.protocol.v1.Message&quot;</span></span><span>
+</span><span id="line-150"></span><span>  </span><span id="local-6989586621680297815"><span class="annot"><span class="annottext">packedMessageDescriptor :: Proxy Message -&gt; ByteString
+</span><a href="#local-6989586621680297815"><span class="hs-identifier hs-var hs-var hs-var">packedMessageDescriptor</span></a></span></span><span> </span><span class="annot"><span class="annottext">Proxy Message
+</span><span class="hs-identifier">_</span></span><span>
+</span><span id="line-151"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;\n\
+      \\aMessage\DC2\SO\n\
+      \\STXid\CAN\SOH \SOH(\tR\STXid\DC20\n\
+      \\DC4protocol_instance_id\CAN\STX \SOH(\tR\DC2protocolInstanceId\DC2\ESC\n\
+      \\bevent_id\CAN\ETX \SOH(\ETXH\NULR\aeventId\DC2%\n\
+      \\rcommand_index\CAN\EOT \SOH(\ETXH\NULR\fcommandIndex\DC2(\n\
+      \\EOTbody\CAN\ENQ \SOH(\v2\DC4.google.protobuf.AnyR\EOTbodyB\SI\n\
+      \\rsequencing_id&quot;</span></span><span>
+</span><span id="line-159"></span><span>  </span><span id="local-6989586621680297817"><span class="annot"><span class="annottext">packedFileDescriptor :: Proxy Message -&gt; ByteString
+</span><a href="#local-6989586621680297817"><span class="hs-identifier hs-var hs-var hs-var">packedFileDescriptor</span></a></span></span><span> </span><span class="annot"><span class="annottext">Proxy Message
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#packedFileDescriptor"><span class="hs-identifier hs-var">packedFileDescriptor</span></a></span><span>
+</span><span id="line-160"></span><span>  </span><span id="local-6989586621680297822"><span class="annot"><span class="annottext">fieldsByTag :: Map Tag (FieldDescriptor Message)
+</span><a href="#local-6989586621680297822"><span class="hs-identifier hs-var hs-var hs-var">fieldsByTag</span></a></span></span><span>
+</span><span id="line-161"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span>
+</span><span id="line-162"></span><span>        </span><span id="local-6989586621680297827"><span class="annot"><span class="annottext">id__field_descriptor :: FieldDescriptor Message
+</span><a href="#local-6989586621680297827"><span class="hs-identifier hs-var hs-var">id__field_descriptor</span></a></span></span><span>
+</span><span id="line-163"></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; FieldTypeDescriptor Text
+-&gt; FieldAccessor Message Text
+-&gt; FieldDescriptor Message
+forall value msg.
+String
+-&gt; FieldTypeDescriptor value
+-&gt; FieldAccessor msg value
+-&gt; FieldDescriptor msg
+</span><span class="hs-identifier hs-var">Data.ProtoLens.FieldDescriptor</span></span><span>
+</span><span id="line-164"></span><span>              </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;id&quot;</span></span><span>
+</span><span id="line-165"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ScalarField Text -&gt; FieldTypeDescriptor Text
+forall value. ScalarField value -&gt; FieldTypeDescriptor value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.ScalarField</span></span><span> </span><span class="annot"><span class="annottext">ScalarField Text
+</span><span class="hs-identifier hs-var">Data.ProtoLens.StringField</span></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-166"></span><span>                 </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldTypeDescriptor</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Text.Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-167"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">WireDefault Text
+-&gt; Lens Message Message Text Text -&gt; FieldAccessor Message Text
+forall value msg.
+WireDefault value -&gt; Lens' msg value -&gt; FieldAccessor msg value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.PlainField</span></span><span>
+</span><span id="line-168"></span><span>                 </span><span class="annot"><span class="annottext">WireDefault Text
+forall value. (FieldDefault value, Eq value) =&gt; WireDefault value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Optional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (x :: Symbol) s a (f :: * -&gt; *).
+(HasField s x a, Functor f) =&gt;
+(a -&gt; f a) -&gt; s -&gt; f s
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Field.field</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;id&quot;</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-169"></span><span>              </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldDescriptor</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message"><span class="hs-identifier hs-type">Message</span></a></span><span>
+</span><span id="line-170"></span><span>        </span><span id="local-6989586621680297839"><span class="annot"><span class="annottext">protocolInstanceId__field_descriptor :: FieldDescriptor Message
+</span><a href="#local-6989586621680297839"><span class="hs-identifier hs-var hs-var">protocolInstanceId__field_descriptor</span></a></span></span><span>
+</span><span id="line-171"></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; FieldTypeDescriptor Text
+-&gt; FieldAccessor Message Text
+-&gt; FieldDescriptor Message
+forall value msg.
+String
+-&gt; FieldTypeDescriptor value
+-&gt; FieldAccessor msg value
+-&gt; FieldDescriptor msg
+</span><span class="hs-identifier hs-var">Data.ProtoLens.FieldDescriptor</span></span><span>
+</span><span id="line-172"></span><span>              </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;protocol_instance_id&quot;</span></span><span>
+</span><span id="line-173"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ScalarField Text -&gt; FieldTypeDescriptor Text
+forall value. ScalarField value -&gt; FieldTypeDescriptor value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.ScalarField</span></span><span> </span><span class="annot"><span class="annottext">ScalarField Text
+</span><span class="hs-identifier hs-var">Data.ProtoLens.StringField</span></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-174"></span><span>                 </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldTypeDescriptor</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Text.Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-175"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">WireDefault Text
+-&gt; Lens Message Message Text Text -&gt; FieldAccessor Message Text
+forall value msg.
+WireDefault value -&gt; Lens' msg value -&gt; FieldAccessor msg value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.PlainField</span></span><span>
+</span><span id="line-176"></span><span>                 </span><span class="annot"><span class="annottext">WireDefault Text
+forall value. (FieldDefault value, Eq value) =&gt; WireDefault value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Optional</span></span><span>
+</span><span id="line-177"></span><span>                 </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (x :: Symbol) s a (f :: * -&gt; *).
+(HasField s x a, Functor f) =&gt;
+(a -&gt; f a) -&gt; s -&gt; f s
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Field.field</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;protocolInstanceId&quot;</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-178"></span><span>              </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldDescriptor</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message"><span class="hs-identifier hs-type">Message</span></a></span><span>
+</span><span id="line-179"></span><span>        </span><span id="local-6989586621680297844"><span class="annot"><span class="annottext">body__field_descriptor :: FieldDescriptor Message
+</span><a href="#local-6989586621680297844"><span class="hs-identifier hs-var hs-var">body__field_descriptor</span></a></span></span><span>
+</span><span id="line-180"></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; FieldTypeDescriptor Any
+-&gt; FieldAccessor Message Any
+-&gt; FieldDescriptor Message
+forall value msg.
+String
+-&gt; FieldTypeDescriptor value
+-&gt; FieldAccessor msg value
+-&gt; FieldDescriptor msg
+</span><span class="hs-identifier hs-var">Data.ProtoLens.FieldDescriptor</span></span><span>
+</span><span id="line-181"></span><span>              </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;body&quot;</span></span><span>
+</span><span id="line-182"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MessageOrGroup -&gt; FieldTypeDescriptor Any
+forall value.
+Message value =&gt;
+MessageOrGroup -&gt; FieldTypeDescriptor value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.MessageField</span></span><span> </span><span class="annot"><span class="annottext">MessageOrGroup
+</span><span class="hs-identifier hs-var">Data.ProtoLens.MessageType</span></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-183"></span><span>                 </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldTypeDescriptor</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Proto.Google.Protobuf.Any.Any</span></span><span class="hs-special">)</span><span>
+</span><span id="line-184"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Lens Message Message (Maybe Any) (Maybe Any)
+-&gt; FieldAccessor Message Any
+forall msg value.
+Lens' msg (Maybe value) -&gt; FieldAccessor msg value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.OptionalField</span></span><span>
+</span><span id="line-185"></span><span>                 </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (x :: Symbol) s a (f :: * -&gt; *).
+(HasField s x a, Functor f) =&gt;
+(a -&gt; f a) -&gt; s -&gt; f s
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Field.field</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;maybe'body&quot;</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-186"></span><span>              </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldDescriptor</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message"><span class="hs-identifier hs-type">Message</span></a></span><span>
+</span><span id="line-187"></span><span>        </span><span id="local-6989586621680297851"><span class="annot"><span class="annottext">eventId__field_descriptor :: FieldDescriptor Message
+</span><a href="#local-6989586621680297851"><span class="hs-identifier hs-var hs-var">eventId__field_descriptor</span></a></span></span><span>
+</span><span id="line-188"></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; FieldTypeDescriptor Int64
+-&gt; FieldAccessor Message Int64
+-&gt; FieldDescriptor Message
+forall value msg.
+String
+-&gt; FieldTypeDescriptor value
+-&gt; FieldAccessor msg value
+-&gt; FieldDescriptor msg
+</span><span class="hs-identifier hs-var">Data.ProtoLens.FieldDescriptor</span></span><span>
+</span><span id="line-189"></span><span>              </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;event_id&quot;</span></span><span>
+</span><span id="line-190"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ScalarField Int64 -&gt; FieldTypeDescriptor Int64
+forall value. ScalarField value -&gt; FieldTypeDescriptor value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.ScalarField</span></span><span> </span><span class="annot"><span class="annottext">ScalarField Int64
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Int64Field</span></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-191"></span><span>                 </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldTypeDescriptor</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Int.Int64</span></span><span class="hs-special">)</span><span>
+</span><span id="line-192"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Lens' Message (Maybe Int64) -&gt; FieldAccessor Message Int64
+forall msg value.
+Lens' msg (Maybe value) -&gt; FieldAccessor msg value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.OptionalField</span></span><span>
+</span><span id="line-193"></span><span>                 </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (x :: Symbol) s a (f :: * -&gt; *).
+(HasField s x a, Functor f) =&gt;
+(a -&gt; f a) -&gt; s -&gt; f s
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Field.field</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;maybe'eventId&quot;</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-194"></span><span>              </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldDescriptor</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message"><span class="hs-identifier hs-type">Message</span></a></span><span>
+</span><span id="line-195"></span><span>        </span><span id="local-6989586621680297856"><span class="annot"><span class="annottext">commandIndex__field_descriptor :: FieldDescriptor Message
+</span><a href="#local-6989586621680297856"><span class="hs-identifier hs-var hs-var">commandIndex__field_descriptor</span></a></span></span><span>
+</span><span id="line-196"></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; FieldTypeDescriptor Int64
+-&gt; FieldAccessor Message Int64
+-&gt; FieldDescriptor Message
+forall value msg.
+String
+-&gt; FieldTypeDescriptor value
+-&gt; FieldAccessor msg value
+-&gt; FieldDescriptor msg
+</span><span class="hs-identifier hs-var">Data.ProtoLens.FieldDescriptor</span></span><span>
+</span><span id="line-197"></span><span>              </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;command_index&quot;</span></span><span>
+</span><span id="line-198"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ScalarField Int64 -&gt; FieldTypeDescriptor Int64
+forall value. ScalarField value -&gt; FieldTypeDescriptor value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.ScalarField</span></span><span> </span><span class="annot"><span class="annottext">ScalarField Int64
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Int64Field</span></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-199"></span><span>                 </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldTypeDescriptor</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Int.Int64</span></span><span class="hs-special">)</span><span>
+</span><span id="line-200"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Lens' Message (Maybe Int64) -&gt; FieldAccessor Message Int64
+forall msg value.
+Lens' msg (Maybe value) -&gt; FieldAccessor msg value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.OptionalField</span></span><span>
+</span><span id="line-201"></span><span>                 </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (x :: Symbol) s a (f :: * -&gt; *).
+(HasField s x a, Functor f) =&gt;
+(a -&gt; f a) -&gt; s -&gt; f s
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Field.field</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;maybe'commandIndex&quot;</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-202"></span><span>              </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldDescriptor</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message"><span class="hs-identifier hs-type">Message</span></a></span><span>
+</span><span id="line-203"></span><span>      </span><span class="hs-keyword">in</span><span>
+</span><span id="line-204"></span><span>        </span><span class="annot"><span class="annottext">[(Tag, FieldDescriptor Message)]
+-&gt; Map Tag (FieldDescriptor Message)
+forall k a. Ord k =&gt; [(k, a)] -&gt; Map k a
+</span><span class="hs-identifier hs-var">Data.Map.fromList</span></span><span>
+</span><span id="line-205"></span><span>          </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Tag
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Tag</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FieldDescriptor Message
+</span><a href="#local-6989586621680297827"><span class="hs-identifier hs-var">id__field_descriptor</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-206"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Tag
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Tag</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FieldDescriptor Message
+</span><a href="#local-6989586621680297839"><span class="hs-identifier hs-var">protocolInstanceId__field_descriptor</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-207"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Tag
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Tag</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">5</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FieldDescriptor Message
+</span><a href="#local-6989586621680297844"><span class="hs-identifier hs-var">body__field_descriptor</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-208"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Tag
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Tag</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">3</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FieldDescriptor Message
+</span><a href="#local-6989586621680297851"><span class="hs-identifier hs-var">eventId__field_descriptor</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-209"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Tag
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Tag</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">4</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FieldDescriptor Message
+</span><a href="#local-6989586621680297856"><span class="hs-identifier hs-var">commandIndex__field_descriptor</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-210"></span><span>  </span><span id="local-6989586621680297864"><span class="annot"><span class="annottext">unknownFields :: Lens' Message FieldSet
+</span><a href="#local-6989586621680297864"><span class="hs-identifier hs-var hs-var hs-var">unknownFields</span></a></span></span><span>
+</span><span id="line-211"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Message -&gt; FieldSet)
+-&gt; (Message -&gt; FieldSet -&gt; Message) -&gt; Lens' Message FieldSet
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">Lens.Family2.Unchecked.lens</span></span><span>
+</span><span id="line-212"></span><span>        </span><span class="annot"><span class="annottext">Message -&gt; FieldSet
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27_unknownFields"><span class="hs-identifier hs-var">_Message'_unknownFields</span></a></span><span>
+</span><span id="line-213"></span><span>        </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680297866"><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297866"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span id="local-6989586621680297867"><span class="annot"><span class="annottext">FieldSet
+</span><a href="#local-6989586621680297867"><span class="hs-identifier hs-var">y__</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297866"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27_unknownFields"><span class="hs-identifier hs-var">_Message'_unknownFields</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680297867"><span class="hs-identifier hs-type">y__</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-214"></span><span>  </span><span id="local-6989586621680297870"><span class="annot"><span class="annottext">defMessage :: Message
+</span><span class="hs-identifier hs-var hs-var hs-var">defMessage</span></span></span><span>
+</span><span id="line-215"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27_constructor"><span class="hs-identifier hs-type">Message'_constructor</span></a></span><span>
+</span><span id="line-216"></span><span>        </span><span class="hs-special">{</span><span class="annot"><span class="annottext">_Message'id :: Text
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27id"><span class="hs-identifier hs-var">_Message'id</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+forall value. FieldDefault value =&gt; value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.fieldDefault</span></span><span class="hs-special">,</span><span>
+</span><span id="line-217"></span><span>         </span><span class="annot"><span class="annottext">_Message'protocolInstanceId :: Text
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27protocolInstanceId"><span class="hs-identifier hs-var">_Message'protocolInstanceId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+forall value. FieldDefault value =&gt; value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.fieldDefault</span></span><span class="hs-special">,</span><span>
+</span><span id="line-218"></span><span>         </span><span class="annot"><span class="annottext">_Message'body :: Maybe Any
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27body"><span class="hs-identifier hs-var">_Message'body</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Any
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Nothing</span></span><span class="hs-special">,</span><span>
+</span><span id="line-219"></span><span>         </span><span class="annot"><span class="annottext">_Message'sequencingId :: Maybe Message'SequencingId
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27sequencingId"><span class="hs-identifier hs-var">_Message'sequencingId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Message'SequencingId
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Nothing</span></span><span class="hs-special">,</span><span>
+</span><span id="line-220"></span><span>         </span><span class="annot"><span class="annottext">_Message'_unknownFields :: FieldSet
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27_unknownFields"><span class="hs-identifier hs-var">_Message'_unknownFields</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">}</span><span>
+</span><span id="line-221"></span><span>  </span><span id="local-6989586621680297928"><span class="annot"><span class="annottext">parseMessage :: Parser Message
+</span><a href="#local-6989586621680297928"><span class="hs-identifier hs-var hs-var hs-var">parseMessage</span></a></span></span><span>
+</span><span id="line-222"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span>
+</span><span id="line-223"></span><span>        </span><span class="annot"><a href="#local-6989586621680297930"><span class="hs-identifier hs-type">loop</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message"><span class="hs-identifier hs-type">Message</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Encoding.Bytes.Parser</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message"><span class="hs-identifier hs-type">Message</span></a></span><span>
+</span><span id="line-224"></span><span>        </span><span id="local-6989586621680297930"><span class="annot"><span class="annottext">loop :: Message -&gt; Parser Message
+</span><a href="#local-6989586621680297930"><span class="hs-identifier hs-var hs-var">loop</span></a></span></span><span> </span><span id="local-6989586621680297931"><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680297931"><span class="hs-identifier hs-var">x</span></a></span></span><span>
+</span><span id="line-225"></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621680297932"><span class="annot"><a href="#local-6989586621680297932"><span class="hs-identifier hs-var">end</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Bool
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.atEnd</span></span><span>
+</span><span id="line-226"></span><span>               </span><span class="hs-keyword">if</span><span> </span><span class="annot"><a href="#local-6989586621680297932"><span class="hs-identifier hs-type">end</span></a></span><span> </span><span class="hs-keyword">then</span><span>
+</span><span id="line-227"></span><span>                   </span><span class="hs-keyword">do</span><span> </span><span class="hs-special">(</span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680297934"><span class="annot"><a href="#local-6989586621680297934"><span class="hs-identifier hs-var hs-var">missing</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-228"></span><span>                       </span><span class="hs-keyword">in</span><span>
+</span><span id="line-229"></span><span>                         </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prelude.null</span></span><span> </span><span class="annot"><a href="#local-6989586621680297934"><span class="hs-identifier hs-type">missing</span></a></span><span> </span><span class="hs-keyword">then</span><span>
+</span><span id="line-230"></span><span>                             </span><span class="annot"><span class="hs-identifier hs-type">Prelude.return</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-231"></span><span>                         </span><span class="hs-keyword">else</span><span>
+</span><span id="line-232"></span><span>                             </span><span class="annot"><span class="hs-identifier hs-type">Prelude.fail</span></span><span>
+</span><span id="line-233"></span><span>                               </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator hs-type">(Prelude.++)</span></span><span>
+</span><span id="line-234"></span><span>                                  </span><span class="annot"><span class="hs-string">&quot;Missing required fields: &quot;</span></span><span>
+</span><span id="line-235"></span><span>                                  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680297934"><span class="hs-identifier hs-type">missing</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Prelude.String</span></span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-236"></span><span>                      </span><span class="annot"><span class="hs-identifier hs-type">Prelude.return</span></span><span>
+</span><span id="line-237"></span><span>                        </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Lens.Family2.over</span></span><span>
+</span><span id="line-238"></span><span>                           </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.unknownFields</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621680297945"><span class="annot"><span class="annottext">FieldSet
+</span><a href="#local-6989586621680297945"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">FieldSet -&gt; FieldSet
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">Prelude.reverse</span></span><span> </span><span class="annot"><span class="annottext">FieldSet
+</span><a href="#local-6989586621680297945"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680297931"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-239"></span><span>               </span><span class="hs-keyword">else</span><span>
+</span><span id="line-240"></span><span>                   </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621680297947"><span class="annot"><a href="#local-6989586621680297947"><span class="hs-identifier hs-var">tag</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Encoding.Bytes.getVarInt</span></span><span>
+</span><span id="line-241"></span><span>                      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621680297947"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-242"></span><span>                        </span><span class="annot"><span class="annottext">Word64
+</span><span class="hs-number">10</span></span><span>
+</span><span id="line-243"></span><span>                          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621680297949"><span class="annot"><a href="#local-6989586621680297949"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Text -&gt; String -&gt; Parser Text
+forall a. Parser a -&gt; String -&gt; Parser a
+</span><span class="hs-operator hs-var">(Data.ProtoLens.Encoding.Bytes.&lt;?&gt;)</span></span><span>
+</span><span id="line-244"></span><span>                                       </span><span class="hs-special">(</span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621680297951"><span class="annot"><a href="#local-6989586621680297951"><span class="hs-identifier hs-var">len</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Word64
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.getVarInt</span></span><span>
+</span><span id="line-245"></span><span>                                           </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Encoding.Bytes.getText</span></span><span>
+</span><span id="line-246"></span><span>                                             </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.fromIntegral</span></span><span> </span><span class="annot"><a href="#local-6989586621680297951"><span class="hs-identifier hs-type">len</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-247"></span><span>                                       </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;id&quot;</span></span><span>
+</span><span id="line-248"></span><span>                                </span><span class="annot"><a href="#local-6989586621680297930"><span class="hs-identifier hs-type">loop</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Lens.Family2.set</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Field.field</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;id&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680297949"><span class="hs-identifier hs-type">y</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680297931"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-249"></span><span>                        </span><span class="annot"><span class="annottext">Word64
+</span><span class="hs-number">18</span></span><span>
+</span><span id="line-250"></span><span>                          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621680297959"><span class="annot"><a href="#local-6989586621680297959"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Text -&gt; String -&gt; Parser Text
+forall a. Parser a -&gt; String -&gt; Parser a
+</span><span class="hs-operator hs-var">(Data.ProtoLens.Encoding.Bytes.&lt;?&gt;)</span></span><span>
+</span><span id="line-251"></span><span>                                       </span><span class="hs-special">(</span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621680297960"><span class="annot"><a href="#local-6989586621680297960"><span class="hs-identifier hs-var">len</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Word64
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.getVarInt</span></span><span>
+</span><span id="line-252"></span><span>                                           </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Encoding.Bytes.getText</span></span><span>
+</span><span id="line-253"></span><span>                                             </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.fromIntegral</span></span><span> </span><span class="annot"><a href="#local-6989586621680297960"><span class="hs-identifier hs-type">len</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-254"></span><span>                                       </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;protocol_instance_id&quot;</span></span><span>
+</span><span id="line-255"></span><span>                                </span><span class="annot"><a href="#local-6989586621680297930"><span class="hs-identifier hs-type">loop</span></a></span><span>
+</span><span id="line-256"></span><span>                                  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Lens.Family2.set</span></span><span>
+</span><span id="line-257"></span><span>                                     </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Field.field</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;protocolInstanceId&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680297959"><span class="hs-identifier hs-type">y</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680297931"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-258"></span><span>                        </span><span class="annot"><span class="annottext">Word64
+</span><span class="hs-number">42</span></span><span>
+</span><span id="line-259"></span><span>                          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621680297966"><span class="annot"><a href="#local-6989586621680297966"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Any -&gt; String -&gt; Parser Any
+forall a. Parser a -&gt; String -&gt; Parser a
+</span><span class="hs-operator hs-var">(Data.ProtoLens.Encoding.Bytes.&lt;?&gt;)</span></span><span>
+</span><span id="line-260"></span><span>                                       </span><span class="hs-special">(</span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621680297967"><span class="annot"><a href="#local-6989586621680297967"><span class="hs-identifier hs-var">len</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Word64
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.getVarInt</span></span><span>
+</span><span id="line-261"></span><span>                                           </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Encoding.Bytes.isolate</span></span><span>
+</span><span id="line-262"></span><span>                                             </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.fromIntegral</span></span><span> </span><span class="annot"><a href="#local-6989586621680297967"><span class="hs-identifier hs-type">len</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.parseMessage</span></span><span class="hs-special">)</span><span>
+</span><span id="line-263"></span><span>                                       </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;body&quot;</span></span><span>
+</span><span id="line-264"></span><span>                                </span><span class="annot"><a href="#local-6989586621680297930"><span class="hs-identifier hs-type">loop</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Lens.Family2.set</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Field.field</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;body&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680297966"><span class="hs-identifier hs-type">y</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680297931"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-265"></span><span>                        </span><span class="annot"><span class="annottext">Word64
+</span><span class="hs-number">24</span></span><span>
+</span><span id="line-266"></span><span>                          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621680297974"><span class="annot"><a href="#local-6989586621680297974"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Int64 -&gt; String -&gt; Parser Int64
+forall a. Parser a -&gt; String -&gt; Parser a
+</span><span class="hs-operator hs-var">(Data.ProtoLens.Encoding.Bytes.&lt;?&gt;)</span></span><span>
+</span><span id="line-267"></span><span>                                       </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Word64 -&gt; Int64) -&gt; Parser Word64 -&gt; Parser Int64
+forall a b. (a -&gt; b) -&gt; Parser a -&gt; Parser b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">Prelude.fmap</span></span><span>
+</span><span id="line-268"></span><span>                                          </span><span class="annot"><span class="annottext">Word64 -&gt; Int64
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span>
+</span><span id="line-269"></span><span>                                          </span><span class="annot"><span class="annottext">Parser Word64
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.getVarInt</span></span><span class="hs-special">)</span><span>
+</span><span id="line-270"></span><span>                                       </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;event_id&quot;</span></span><span>
+</span><span id="line-271"></span><span>                                </span><span class="annot"><a href="#local-6989586621680297930"><span class="hs-identifier hs-type">loop</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Lens.Family2.set</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Field.field</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;eventId&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680297974"><span class="hs-identifier hs-type">y</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680297931"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-272"></span><span>                        </span><span class="annot"><span class="annottext">Word64
+</span><span class="hs-number">32</span></span><span>
+</span><span id="line-273"></span><span>                          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621680297980"><span class="annot"><a href="#local-6989586621680297980"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Int64 -&gt; String -&gt; Parser Int64
+forall a. Parser a -&gt; String -&gt; Parser a
+</span><span class="hs-operator hs-var">(Data.ProtoLens.Encoding.Bytes.&lt;?&gt;)</span></span><span>
+</span><span id="line-274"></span><span>                                       </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Word64 -&gt; Int64) -&gt; Parser Word64 -&gt; Parser Int64
+forall a b. (a -&gt; b) -&gt; Parser a -&gt; Parser b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">Prelude.fmap</span></span><span>
+</span><span id="line-275"></span><span>                                          </span><span class="annot"><span class="annottext">Word64 -&gt; Int64
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span>
+</span><span id="line-276"></span><span>                                          </span><span class="annot"><span class="annottext">Parser Word64
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.getVarInt</span></span><span class="hs-special">)</span><span>
+</span><span id="line-277"></span><span>                                       </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;command_index&quot;</span></span><span>
+</span><span id="line-278"></span><span>                                </span><span class="annot"><a href="#local-6989586621680297930"><span class="hs-identifier hs-type">loop</span></a></span><span>
+</span><span id="line-279"></span><span>                                  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Lens.Family2.set</span></span><span>
+</span><span id="line-280"></span><span>                                     </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Field.field</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;commandIndex&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680297980"><span class="hs-identifier hs-type">y</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680297931"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-281"></span><span>                        </span><span id="local-6989586621680297986"><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621680297986"><span class="hs-identifier hs-var">wire</span></a></span></span><span>
+</span><span id="line-282"></span><span>                          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621680297987"><span class="annot"><a href="#local-6989586621680297987"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Word64 -&gt; Parser TaggedValue
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire</span></span><span>
+</span><span id="line-283"></span><span>                                        </span><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621680297986"><span class="hs-identifier hs-var">wire</span></a></span><span>
+</span><span id="line-284"></span><span>                                </span><span class="annot"><a href="#local-6989586621680297930"><span class="hs-identifier hs-type">loop</span></a></span><span>
+</span><span id="line-285"></span><span>                                  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Lens.Family2.over</span></span><span>
+</span><span id="line-286"></span><span>                                     </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.unknownFields</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621680297994"><span class="annot"><span class="annottext">FieldSet
+</span><a href="#local-6989586621680297994"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">:</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">TaggedValue
+</span><a href="#local-6989586621680297987"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">FieldSet
+</span><a href="#local-6989586621680297994"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680297931"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-287"></span><span>      </span><span class="hs-keyword">in</span><span>
+</span><span id="line-288"></span><span>        </span><span class="annot"><span class="annottext">Parser Message -&gt; String -&gt; Parser Message
+forall a. Parser a -&gt; String -&gt; Parser a
+</span><span class="hs-operator hs-var">(Data.ProtoLens.Encoding.Bytes.&lt;?&gt;)</span></span><span>
+</span><span id="line-289"></span><span>          </span><span class="hs-special">(</span><span class="hs-keyword">do</span><span> </span><span class="annot"><span class="annottext">Message -&gt; Parser Message
+</span><a href="#local-6989586621680297930"><span class="hs-identifier hs-var">loop</span></a></span><span> </span><span class="annot"><span class="annottext">Message
+forall msg. Message msg =&gt; msg
+</span><span class="hs-identifier hs-var">Data.ProtoLens.defMessage</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Message&quot;</span></span><span>
+</span><span id="line-290"></span><span>  </span><span id="local-6989586621680298046"><span class="annot"><span class="annottext">buildMessage :: Message -&gt; Builder
+</span><a href="#local-6989586621680298046"><span class="hs-identifier hs-var hs-var hs-var">buildMessage</span></a></span></span><span>
+</span><span id="line-291"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680298048"><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680298048"><span class="hs-identifier hs-var">_x</span></a></span></span><span>
+</span><span id="line-292"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Builder -&gt; Builder
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(Data.Monoid.&lt;&gt;)</span></span><span>
+</span><span id="line-293"></span><span>             </span><span class="hs-special">(</span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680298049"><span class="annot"><span class="annottext">_v :: Text
+</span><a href="#local-6989586621680298049"><span class="hs-identifier hs-var hs-var">_v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FoldLike Text Message Message Text Text -&gt; Message -&gt; Text
+forall a s t b. FoldLike a s t a b -&gt; s -&gt; a
+</span><span class="hs-identifier hs-var">Lens.Family2.view</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (x :: Symbol) s a (f :: * -&gt; *).
+(HasField s x a, Functor f) =&gt;
+(a -&gt; f a) -&gt; s -&gt; f s
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Field.field</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;id&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680298048"><span class="hs-identifier hs-var">_x</span></a></span><span>
+</span><span id="line-294"></span><span>              </span><span class="hs-keyword">in</span><span>
+</span><span id="line-295"></span><span>                </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621680298049"><span class="hs-identifier hs-var">_v</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+forall value. FieldDefault value =&gt; value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.fieldDefault</span></span><span> </span><span class="hs-keyword">then</span><span>
+</span><span id="line-296"></span><span>                    </span><span class="annot"><span class="annottext">Builder
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">Data.Monoid.mempty</span></span><span>
+</span><span id="line-297"></span><span>                </span><span class="hs-keyword">else</span><span>
+</span><span id="line-298"></span><span>                    </span><span class="annot"><span class="annottext">Builder -&gt; Builder -&gt; Builder
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(Data.Monoid.&lt;&gt;)</span></span><span>
+</span><span id="line-299"></span><span>                      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word64 -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.putVarInt</span></span><span> </span><span class="annot"><span class="annottext">Word64
+</span><span class="hs-number">10</span></span><span class="hs-special">)</span><span>
+</span><span id="line-300"></span><span>                      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(ByteString -&gt; Builder) -&gt; (Text -&gt; ByteString) -&gt; Text -&gt; Builder
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-301"></span><span>                         </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680298052"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621680298052"><span class="hs-identifier hs-var">bs</span></a></span></span><span>
+</span><span id="line-302"></span><span>                            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Builder -&gt; Builder
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(Data.Monoid.&lt;&gt;)</span></span><span>
+</span><span id="line-303"></span><span>                                 </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word64 -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.putVarInt</span></span><span>
+</span><span id="line-304"></span><span>                                    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Word64
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ByteString -&gt; Int
+</span><span class="hs-identifier hs-var">Data.ByteString.length</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621680298052"><span class="hs-identifier hs-var">bs</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-305"></span><span>                                 </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ByteString -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.putBytes</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621680298052"><span class="hs-identifier hs-var">bs</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-306"></span><span>                         </span><span class="annot"><span class="annottext">Text -&gt; ByteString
+</span><span class="hs-identifier hs-var">Data.Text.Encoding.encodeUtf8</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621680298049"><span class="hs-identifier hs-var">_v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-307"></span><span>             </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Builder -&gt; Builder -&gt; Builder
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(Data.Monoid.&lt;&gt;)</span></span><span>
+</span><span id="line-308"></span><span>                </span><span class="hs-special">(</span><span class="hs-keyword">let</span><span>
+</span><span id="line-309"></span><span>                   </span><span id="local-6989586621680298056"><span class="annot"><span class="annottext">_v :: Text
+</span><a href="#local-6989586621680298056"><span class="hs-identifier hs-var hs-var">_v</span></a></span></span><span>
+</span><span id="line-310"></span><span>                     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FoldLike Text Message Message Text Text -&gt; Message -&gt; Text
+forall a s t b. FoldLike a s t a b -&gt; s -&gt; a
+</span><span class="hs-identifier hs-var">Lens.Family2.view</span></span><span>
+</span><span id="line-311"></span><span>                         </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (x :: Symbol) s a (f :: * -&gt; *).
+(HasField s x a, Functor f) =&gt;
+(a -&gt; f a) -&gt; s -&gt; f s
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Field.field</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;protocolInstanceId&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680298048"><span class="hs-identifier hs-var">_x</span></a></span><span>
+</span><span id="line-312"></span><span>                 </span><span class="hs-keyword">in</span><span>
+</span><span id="line-313"></span><span>                   </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621680298056"><span class="hs-identifier hs-var">_v</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+forall value. FieldDefault value =&gt; value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.fieldDefault</span></span><span> </span><span class="hs-keyword">then</span><span>
+</span><span id="line-314"></span><span>                       </span><span class="annot"><span class="annottext">Builder
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">Data.Monoid.mempty</span></span><span>
+</span><span id="line-315"></span><span>                   </span><span class="hs-keyword">else</span><span>
+</span><span id="line-316"></span><span>                       </span><span class="annot"><span class="annottext">Builder -&gt; Builder -&gt; Builder
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(Data.Monoid.&lt;&gt;)</span></span><span>
+</span><span id="line-317"></span><span>                         </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word64 -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.putVarInt</span></span><span> </span><span class="annot"><span class="annottext">Word64
+</span><span class="hs-number">18</span></span><span class="hs-special">)</span><span>
+</span><span id="line-318"></span><span>                         </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(ByteString -&gt; Builder) -&gt; (Text -&gt; ByteString) -&gt; Text -&gt; Builder
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-319"></span><span>                            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680298057"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621680298057"><span class="hs-identifier hs-var">bs</span></a></span></span><span>
+</span><span id="line-320"></span><span>                               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Builder -&gt; Builder
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(Data.Monoid.&lt;&gt;)</span></span><span>
+</span><span id="line-321"></span><span>                                    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word64 -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.putVarInt</span></span><span>
+</span><span id="line-322"></span><span>                                       </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Word64
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ByteString -&gt; Int
+</span><span class="hs-identifier hs-var">Data.ByteString.length</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621680298057"><span class="hs-identifier hs-var">bs</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-323"></span><span>                                    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ByteString -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.putBytes</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621680298057"><span class="hs-identifier hs-var">bs</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-324"></span><span>                            </span><span class="annot"><span class="annottext">Text -&gt; ByteString
+</span><span class="hs-identifier hs-var">Data.Text.Encoding.encodeUtf8</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621680298056"><span class="hs-identifier hs-var">_v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-325"></span><span>                </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Builder -&gt; Builder -&gt; Builder
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(Data.Monoid.&lt;&gt;)</span></span><span>
+</span><span id="line-326"></span><span>                   </span><span class="hs-special">(</span><span class="hs-keyword">case</span><span>
+</span><span id="line-327"></span><span>                        </span><span class="annot"><span class="annottext">FoldLike (Maybe Any) Message Message (Maybe Any) (Maybe Any)
+-&gt; Message -&gt; Maybe Any
+forall a s t b. FoldLike a s t a b -&gt; s -&gt; a
+</span><span class="hs-identifier hs-var">Lens.Family2.view</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (x :: Symbol) s a (f :: * -&gt; *).
+(HasField s x a, Functor f) =&gt;
+(a -&gt; f a) -&gt; s -&gt; f s
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Field.field</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;maybe'body&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680298048"><span class="hs-identifier hs-var">_x</span></a></span><span>
+</span><span id="line-328"></span><span>                    </span><span class="hs-keyword">of</span><span>
+</span><span id="line-329"></span><span>                      </span><span class="annot"><span class="annottext">Maybe Any
+</span><span class="hs-identifier hs-var">Prelude.Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Builder
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">Data.Monoid.mempty</span></span><span>
+</span><span id="line-330"></span><span>                      </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.Just</span></span><span> </span><span id="local-6989586621680298058"><span class="annot"><span class="annottext">Any
+</span><a href="#local-6989586621680298058"><span class="hs-identifier hs-var">_v</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-331"></span><span>                        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Builder -&gt; Builder
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(Data.Monoid.&lt;&gt;)</span></span><span>
+</span><span id="line-332"></span><span>                             </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word64 -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.putVarInt</span></span><span> </span><span class="annot"><span class="annottext">Word64
+</span><span class="hs-number">42</span></span><span class="hs-special">)</span><span>
+</span><span id="line-333"></span><span>                             </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(ByteString -&gt; Builder) -&gt; (Any -&gt; ByteString) -&gt; Any -&gt; Builder
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-334"></span><span>                                </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680298059"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621680298059"><span class="hs-identifier hs-var">bs</span></a></span></span><span>
+</span><span id="line-335"></span><span>                                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Builder -&gt; Builder
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(Data.Monoid.&lt;&gt;)</span></span><span>
+</span><span id="line-336"></span><span>                                        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word64 -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.putVarInt</span></span><span>
+</span><span id="line-337"></span><span>                                           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Word64
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ByteString -&gt; Int
+</span><span class="hs-identifier hs-var">Data.ByteString.length</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621680298059"><span class="hs-identifier hs-var">bs</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-338"></span><span>                                        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ByteString -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.putBytes</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621680298059"><span class="hs-identifier hs-var">bs</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-339"></span><span>                                </span><span class="annot"><span class="annottext">Any -&gt; ByteString
+forall msg. Message msg =&gt; msg -&gt; ByteString
+</span><span class="hs-identifier hs-var">Data.ProtoLens.encodeMessage</span></span><span> </span><span class="annot"><span class="annottext">Any
+</span><a href="#local-6989586621680298058"><span class="hs-identifier hs-var">_v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-340"></span><span>                   </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Builder -&gt; Builder -&gt; Builder
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(Data.Monoid.&lt;&gt;)</span></span><span>
+</span><span id="line-341"></span><span>                      </span><span class="hs-special">(</span><span class="hs-keyword">case</span><span>
+</span><span id="line-342"></span><span>                           </span><span class="annot"><span class="annottext">FoldLike
+  (Maybe Message'SequencingId)
+  Message
+  Message
+  (Maybe Message'SequencingId)
+  (Maybe Message'SequencingId)
+-&gt; Message -&gt; Maybe Message'SequencingId
+forall a s t b. FoldLike a s t a b -&gt; s -&gt; a
+</span><span class="hs-identifier hs-var">Lens.Family2.view</span></span><span>
+</span><span id="line-343"></span><span>                             </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (x :: Symbol) s a (f :: * -&gt; *).
+(HasField s x a, Functor f) =&gt;
+(a -&gt; f a) -&gt; s -&gt; f s
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Field.field</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;maybe'sequencingId&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680298048"><span class="hs-identifier hs-var">_x</span></a></span><span>
+</span><span id="line-344"></span><span>                       </span><span class="hs-keyword">of</span><span>
+</span><span id="line-345"></span><span>                         </span><span class="annot"><span class="annottext">Maybe Message'SequencingId
+</span><span class="hs-identifier hs-var">Prelude.Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Builder
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">Data.Monoid.mempty</span></span><span>
+</span><span id="line-346"></span><span>                         </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27EventId"><span class="hs-identifier hs-type">Message'EventId</span></a></span><span> </span><span id="local-6989586621680298061"><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680298061"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-347"></span><span>                           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Builder -&gt; Builder
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(Data.Monoid.&lt;&gt;)</span></span><span>
+</span><span id="line-348"></span><span>                                </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word64 -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.putVarInt</span></span><span> </span><span class="annot"><span class="annottext">Word64
+</span><span class="hs-number">24</span></span><span class="hs-special">)</span><span>
+</span><span id="line-349"></span><span>                                </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Word64 -&gt; Builder) -&gt; (Int64 -&gt; Word64) -&gt; Int64 -&gt; Builder
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-350"></span><span>                                   </span><span class="annot"><span class="annottext">Word64 -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.putVarInt</span></span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Word64
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680298061"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-351"></span><span>                         </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27CommandIndex"><span class="hs-identifier hs-type">Message'CommandIndex</span></a></span><span> </span><span id="local-6989586621680298062"><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680298062"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-352"></span><span>                           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Builder -&gt; Builder
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(Data.Monoid.&lt;&gt;)</span></span><span>
+</span><span id="line-353"></span><span>                                </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word64 -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.putVarInt</span></span><span> </span><span class="annot"><span class="annottext">Word64
+</span><span class="hs-number">32</span></span><span class="hs-special">)</span><span>
+</span><span id="line-354"></span><span>                                </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Word64 -&gt; Builder) -&gt; (Int64 -&gt; Word64) -&gt; Int64 -&gt; Builder
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-355"></span><span>                                   </span><span class="annot"><span class="annottext">Word64 -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.putVarInt</span></span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Word64
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680298062"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-356"></span><span>                      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FieldSet -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Wire.buildFieldSet</span></span><span>
+</span><span id="line-357"></span><span>                         </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FoldLike FieldSet Message Message FieldSet FieldSet
+-&gt; Message -&gt; FieldSet
+forall a s t b. FoldLike a s t a b -&gt; s -&gt; a
+</span><span class="hs-identifier hs-var">Lens.Family2.view</span></span><span> </span><span class="annot"><span class="annottext">FoldLike FieldSet Message Message FieldSet FieldSet
+forall msg. Message msg =&gt; Lens' msg FieldSet
+Lens' Message FieldSet
+</span><span class="hs-identifier hs-var">Data.ProtoLens.unknownFields</span></span><span> </span><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680298048"><span class="hs-identifier hs-var">_x</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-358"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Control.DeepSeq.NFData</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message"><span class="hs-identifier hs-type">Message</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-359"></span><span>  </span><span id="local-6989586621680298081"><span class="annot"><span class="annottext">rnf :: Message -&gt; ()
+</span><a href="#local-6989586621680298081"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span>
+</span><span id="line-360"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680298083"><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680298083"><span class="hs-identifier hs-var">x__</span></a></span></span><span>
+</span><span id="line-361"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">FieldSet -&gt; () -&gt; ()
+forall a b. NFData a =&gt; a -&gt; b -&gt; b
+</span><span class="hs-identifier hs-var">Control.DeepSeq.deepseq</span></span><span>
+</span><span id="line-362"></span><span>             </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Message -&gt; FieldSet
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27_unknownFields"><span class="hs-identifier hs-var">_Message'_unknownFields</span></a></span><span> </span><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680298083"><span class="hs-identifier hs-var">x__</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-363"></span><span>             </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Text -&gt; () -&gt; ()
+forall a b. NFData a =&gt; a -&gt; b -&gt; b
+</span><span class="hs-identifier hs-var">Control.DeepSeq.deepseq</span></span><span>
+</span><span id="line-364"></span><span>                </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Message -&gt; Text
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27id"><span class="hs-identifier hs-var">_Message'id</span></a></span><span> </span><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680298083"><span class="hs-identifier hs-var">x__</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-365"></span><span>                </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Text -&gt; () -&gt; ()
+forall a b. NFData a =&gt; a -&gt; b -&gt; b
+</span><span class="hs-identifier hs-var">Control.DeepSeq.deepseq</span></span><span>
+</span><span id="line-366"></span><span>                   </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Message -&gt; Text
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27protocolInstanceId"><span class="hs-identifier hs-var">_Message'protocolInstanceId</span></a></span><span> </span><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680298083"><span class="hs-identifier hs-var">x__</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-367"></span><span>                   </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe Any -&gt; () -&gt; ()
+forall a b. NFData a =&gt; a -&gt; b -&gt; b
+</span><span class="hs-identifier hs-var">Control.DeepSeq.deepseq</span></span><span>
+</span><span id="line-368"></span><span>                      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Message -&gt; Maybe Any
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27body"><span class="hs-identifier hs-var">_Message'body</span></a></span><span> </span><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680298083"><span class="hs-identifier hs-var">x__</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-369"></span><span>                      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe Message'SequencingId -&gt; () -&gt; ()
+forall a b. NFData a =&gt; a -&gt; b -&gt; b
+</span><span class="hs-identifier hs-var">Control.DeepSeq.deepseq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Message -&gt; Maybe Message'SequencingId
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27sequencingId"><span class="hs-identifier hs-var">_Message'sequencingId</span></a></span><span> </span><span class="annot"><span class="annottext">Message
+</span><a href="#local-6989586621680298083"><span class="hs-identifier hs-var">x__</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-370"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Control.DeepSeq.NFData</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27SequencingId"><span class="hs-identifier hs-type">Message'SequencingId</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-371"></span><span>  </span><span id="local-6989586621680298089"><span class="annot"><span class="annottext">rnf :: Message'SequencingId -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var">rnf</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27EventId"><span class="hs-identifier hs-type">Message'EventId</span></a></span><span> </span><span id="local-6989586621680298090"><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680298090"><span class="hs-identifier hs-var">x__</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; ()
+forall a. NFData a =&gt; a -&gt; ()
+</span><span class="hs-identifier hs-var">Control.DeepSeq.rnf</span></span><span> </span><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680298090"><span class="hs-identifier hs-var">x__</span></a></span><span>
+</span><span id="line-372"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">rnf</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27CommandIndex"><span class="hs-identifier hs-type">Message'CommandIndex</span></a></span><span> </span><span id="local-6989586621680298091"><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680298091"><span class="hs-identifier hs-var">x__</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; ()
+forall a. NFData a =&gt; a -&gt; ()
+</span><span class="hs-identifier hs-var">Control.DeepSeq.rnf</span></span><span> </span><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680298091"><span class="hs-identifier hs-var">x__</span></a></span><span>
+</span><span id="line-373"></span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27EventId"><span class="hs-identifier hs-type">_Message'EventId</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-374"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Prism.Prism'</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27SequencingId"><span class="hs-identifier hs-type">Message'SequencingId</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Int.Int64</span></span><span>
+</span><span id="line-375"></span><span id="_Message%27EventId"><span class="annot"><span class="annottext">_Message'EventId :: Prism' Message'SequencingId Int64
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27EventId"><span class="hs-identifier hs-var hs-var">_Message'EventId</span></a></span></span><span>
+</span><span id="line-376"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int64 -&gt; Message'SequencingId)
+-&gt; (Message'SequencingId -&gt; Maybe Int64)
+-&gt; Prism' Message'SequencingId Int64
+forall b s a. (b -&gt; s) -&gt; (s -&gt; Maybe a) -&gt; Prism s s a b
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Prism.prism'</span></span><span>
+</span><span id="line-377"></span><span>      </span><span class="annot"><span class="annottext">Int64 -&gt; Message'SequencingId
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27EventId"><span class="hs-identifier hs-var">Message'EventId</span></a></span><span>
+</span><span id="line-378"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680298097"><span class="annot"><span class="annottext">Message'SequencingId
+</span><a href="#local-6989586621680298097"><span class="hs-identifier hs-var">p__</span></a></span></span><span>
+</span><span id="line-379"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Message'SequencingId
+</span><a href="#local-6989586621680298097"><span class="hs-identifier hs-var">p__</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-380"></span><span>              </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27EventId"><span class="hs-identifier hs-type">Message'EventId</span></a></span><span> </span><span id="local-6989586621680298098"><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680298098"><span class="hs-identifier hs-var">p__val</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Maybe Int64
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680298098"><span class="hs-identifier hs-var">p__val</span></a></span><span>
+</span><span id="line-381"></span><span>              </span><span id="local-6989586621680298099"><span class="annot"><span class="annottext">Message'SequencingId
+</span><a href="#local-6989586621680298099"><span class="hs-identifier hs-var">_otherwise</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe Int64
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Nothing</span></span><span class="hs-special">)</span><span>
+</span><span id="line-382"></span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27CommandIndex"><span class="hs-identifier hs-type">_Message'CommandIndex</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-383"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Prism.Prism'</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27SequencingId"><span class="hs-identifier hs-type">Message'SequencingId</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Int.Int64</span></span><span>
+</span><span id="line-384"></span><span id="_Message%27CommandIndex"><span class="annot"><span class="annottext">_Message'CommandIndex :: Prism' Message'SequencingId Int64
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#_Message%27CommandIndex"><span class="hs-identifier hs-var hs-var">_Message'CommandIndex</span></a></span></span><span>
+</span><span id="line-385"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int64 -&gt; Message'SequencingId)
+-&gt; (Message'SequencingId -&gt; Maybe Int64)
+-&gt; Prism' Message'SequencingId Int64
+forall b s a. (b -&gt; s) -&gt; (s -&gt; Maybe a) -&gt; Prism s s a b
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Prism.prism'</span></span><span>
+</span><span id="line-386"></span><span>      </span><span class="annot"><span class="annottext">Int64 -&gt; Message'SequencingId
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27CommandIndex"><span class="hs-identifier hs-var">Message'CommandIndex</span></a></span><span>
+</span><span id="line-387"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680298104"><span class="annot"><span class="annottext">Message'SequencingId
+</span><a href="#local-6989586621680298104"><span class="hs-identifier hs-var">p__</span></a></span></span><span>
+</span><span id="line-388"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Message'SequencingId
+</span><a href="#local-6989586621680298104"><span class="hs-identifier hs-var">p__</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-389"></span><span>              </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#Message%27CommandIndex"><span class="hs-identifier hs-type">Message'CommandIndex</span></a></span><span> </span><span id="local-6989586621680298105"><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680298105"><span class="hs-identifier hs-var">p__val</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Maybe Int64
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680298105"><span class="hs-identifier hs-var">p__val</span></a></span><span>
+</span><span id="line-390"></span><span>              </span><span id="local-6989586621680298106"><span class="annot"><span class="annottext">Message'SequencingId
+</span><a href="#local-6989586621680298106"><span class="hs-identifier hs-var">_otherwise</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe Int64
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Nothing</span></span><span class="hs-special">)</span><span>
+</span><span id="line-391"></span><span class="annot"><a href="Proto.Temporal.Api.Protocol.V1.Message.html#packedFileDescriptor"><span class="hs-identifier hs-type">packedFileDescriptor</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ByteString.ByteString</span></span><span>
+</span><span id="line-392"></span><span id="packedFileDescriptor"><span class="annot"><span class="annottext">packedFileDescriptor :: ByteString
+</span><a href="Proto.Temporal.Api.Protocol.V1.Message.html#packedFileDescriptor"><span class="hs-identifier hs-var hs-var">packedFileDescriptor</span></a></span></span><span>
+</span><span id="line-393"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;\n\
+    \&amp;temporal/api/protocol/v1/message.proto\DC2\CANtemporal.api.protocol.v1\SUB\EMgoogle/protobuf/any.proto\&quot;\202\SOH\n\
+    \\aMessage\DC2\SO\n\
+    \\STXid\CAN\SOH \SOH(\tR\STXid\DC20\n\
+    \\DC4protocol_instance_id\CAN\STX \SOH(\tR\DC2protocolInstanceId\DC2\ESC\n\
+    \\bevent_id\CAN\ETX \SOH(\ETXH\NULR\aeventId\DC2%\n\
+    \\rcommand_index\CAN\EOT \SOH(\ETXH\NULR\fcommandIndex\DC2(\n\
+    \\EOTbody\CAN\ENQ \SOH(\v2\DC4.google.protobuf.AnyR\EOTbodyB\SI\n\
+    \\rsequencing_idB\147\SOH\n\
+    \\ESCio.temporal.api.protocol.v1B\fMessageProtoP\SOHZ'go.temporal.io/api/protocol/v1;protocol\170\STX\SUBTemporalio.Api.Protocol.V1\234\STX\GSTemporalio::Api::Protocol::V1J\183\DC1\n\
+    \\ACK\DC2\EOT\SYN\NUL8\SOH\n\
+    \\241\b\n\
+    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
+    \\n\
+    \ Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.\n\
+    \\n\
+    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
+    \ of this software and associated documentation files (the \&quot;Software\&quot;), to deal\n\
+    \ in the Software without restriction, including without limitation the rights\n\
+    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
+    \ copies of the Software, and to permit persons to whom the Software is\n\
+    \ furnished to do so, subject to the following conditions:\n\
+    \\n\
+    \ The above copyright notice and this permission notice shall be included in\n\
+    \ all copies or substantial portions of the Software.\n\
+    \\n\
+    \ THE SOFTWARE IS PROVIDED \&quot;AS IS\&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
+    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
+    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
+    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
+    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
+    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
+    \ THE SOFTWARE.\n\
+    \\n\
+    \\b\n\
+    \\SOH\STX\DC2\ETX\CAN\NUL!\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\SUB\NUL&gt;\n\
+    \\t\n\
+    \\STX\b\v\DC2\ETX\SUB\NUL&gt;\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\ESC\NUL4\n\
+    \\t\n\
+    \\STX\b\SOH\DC2\ETX\ESC\NUL4\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\FS\NUL\&quot;\n\
+    \\t\n\
+    \\STX\b\n\
+    \\DC2\ETX\FS\NUL\&quot;\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\GS\NUL-\n\
+    \\t\n\
+    \\STX\b\b\DC2\ETX\GS\NUL-\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\RS\NUL6\n\
+    \\t\n\
+    \\STX\b-\DC2\ETX\RS\NUL6\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\US\NUL7\n\
+    \\t\n\
+    \\STX\b%\DC2\ETX\US\NUL7\n\
+    \\t\n\
+    \\STX\ETX\NUL\DC2\ETX!\NUL#\n\
+    \\135\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT%\NUL8\SOH\SUB{ (-- api-linter: core::0146::any=disabled\n\
+    \     aip.dev/not-precedent: We want runtime extensibility for the body field --)\n\
+    \\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX%\b\SI\n\
+    \/\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX'\EOT\DC2\SUB\&quot; An ID for this specific message.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX'\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX'\v\r\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX'\DLE\DC1\n\
+    \]\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX+\EOT$\SUBP Identifies the specific instance of a protocol to which this message\n\
+    \ belongs.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX+\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX+\v\US\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX+\&quot;#\n\
+    \\233\SOH\n\
+    \\EOT\EOT\NUL\b\NUL\DC2\EOT0\EOT3\ENQ\SUB\218\SOH The event ID or command ID after which this message can be delivered. The\n\
+    \ effects of history up to and including this event ID should be visible to\n\
+    \ the code that handles this message. Omit to opt out of sequencing.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\b\NUL\SOH\DC2\ETX0\n\
+    \\ETB\n\
+    \\v\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX1\b\ESC\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX1\b\r\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX1\SO\SYN\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX1\EM\SUB\n\
+    \\v\n\
+    \\EOT\EOT\NUL\STX\ETX\DC2\ETX2\b \n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\ETX\ENQ\DC2\ETX2\b\r\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX2\SO\ESC\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX2\RS\US\n\
+    \\153\SOH\n\
+    \\EOT\EOT\NUL\STX\EOT\DC2\ETX7\EOT!\SUB\139\SOH The opaque data carried by this message. The protocol type can be\n\
+    \ extracted from the package name of the message carried inside the Any.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\EOT\ACK\DC2\ETX7\EOT\ETB\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETX7\CAN\FS\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETX7\US b\ACKproto3&quot;</span></span></pre></body></html>

@@ -1,0 +1,374 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="annot"><span class="hs-comment">{- |
+Module: Temporal.Operator
+Description: Operator API bindings for Temporal.
+
+This module provides bindings for the Temporal Operator API. The Operator API
+is used to manage Temporal namespaces, clusters, and other administrative
+tasks.
+-}</span></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Operator.html"><span class="hs-identifier">Temporal.Operator</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.IO.Class</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map.Strict</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Map</span></span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Message</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">defMessage</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Lens.Family2</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Api.Enums.V1.Common</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Proto</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Proto</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Temporal.Core.Client</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Temporal.Core.Client.OperatorService</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Core</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html"><span class="hs-identifier">Temporal.SearchAttributes</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeKey"><span class="hs-identifier">SearchAttributeKey</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.Internal.html"><span class="hs-identifier">Temporal.SearchAttributes.Internal</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Workflow.html"><span class="hs-identifier">Temporal.Workflow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Common.html#Namespace"><span class="hs-identifier">Namespace</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">data</span><span> </span><span id="IndexedValueType"><span class="annot"><a href="Temporal.Operator.html#IndexedValueType"><span class="hs-identifier hs-var">IndexedValueType</span></a></span></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="Text"><span class="annot"><a href="Temporal.Operator.html#Text"><span class="hs-identifier hs-var">Text</span></a></span></span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Keyword"><span class="annot"><a href="Temporal.Operator.html#Keyword"><span class="hs-identifier hs-var">Keyword</span></a></span></span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Int"><span class="annot"><a href="Temporal.Operator.html#Int"><span class="hs-identifier hs-var">Int</span></a></span></span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Double"><span class="annot"><a href="Temporal.Operator.html#Double"><span class="hs-identifier hs-var">Double</span></a></span></span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Bool"><span class="annot"><a href="Temporal.Operator.html#Bool"><span class="hs-identifier hs-var">Bool</span></a></span></span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Datetime"><span class="annot"><a href="Temporal.Operator.html#Datetime"><span class="hs-identifier hs-var">Datetime</span></a></span></span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="KeywordList"><span class="annot"><a href="Temporal.Operator.html#KeywordList"><span class="hs-identifier hs-var">KeywordList</span></a></span></span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="UnrecognizedIndexedValueType"><span class="annot"><a href="Temporal.Operator.html#UnrecognizedIndexedValueType"><span class="hs-identifier hs-var">UnrecognizedIndexedValueType</span></a></span></span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680185340"><span id="local-6989586621680185345"><span class="annot"><span class="annottext">IndexedValueType -&gt; IndexedValueType -&gt; Bool
+(IndexedValueType -&gt; IndexedValueType -&gt; Bool)
+-&gt; (IndexedValueType -&gt; IndexedValueType -&gt; Bool)
+-&gt; Eq IndexedValueType
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: IndexedValueType -&gt; IndexedValueType -&gt; Bool
+== :: IndexedValueType -&gt; IndexedValueType -&gt; Bool
+$c/= :: IndexedValueType -&gt; IndexedValueType -&gt; Bool
+/= :: IndexedValueType -&gt; IndexedValueType -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680185350"><span id="local-6989586621680185352"><span id="local-6989586621680185356"><span class="annot"><span class="annottext">Int -&gt; IndexedValueType -&gt; ShowS
+[IndexedValueType] -&gt; ShowS
+IndexedValueType -&gt; String
+(Int -&gt; IndexedValueType -&gt; ShowS)
+-&gt; (IndexedValueType -&gt; String)
+-&gt; ([IndexedValueType] -&gt; ShowS)
+-&gt; Show IndexedValueType
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; IndexedValueType -&gt; ShowS
+showsPrec :: Int -&gt; IndexedValueType -&gt; ShowS
+$cshow :: IndexedValueType -&gt; String
+show :: IndexedValueType -&gt; String
+$cshowList :: [IndexedValueType] -&gt; ShowS
+showList :: [IndexedValueType] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">data</span><span> </span><span id="SearchAttributes"><span class="annot"><a href="Temporal.Operator.html#SearchAttributes"><span class="hs-identifier hs-var">SearchAttributes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="SearchAttributes"><span class="annot"><a href="Temporal.Operator.html#SearchAttributes"><span class="hs-identifier hs-var">SearchAttributes</span></a></span></span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="customAttributes"><span class="annot"><span class="annottext">SearchAttributes -&gt; Map SearchAttributeKey IndexedValueType
+</span><a href="Temporal.Operator.html#customAttributes"><span class="hs-identifier hs-var hs-var">customAttributes</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeKey"><span class="hs-identifier hs-type">SearchAttributeKey</span></a></span><span> </span><span class="annot"><a href="Temporal.Operator.html#IndexedValueType"><span class="hs-identifier hs-type">IndexedValueType</span></a></span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="systemAttributes"><span class="annot"><span class="annottext">SearchAttributes -&gt; Map SearchAttributeKey IndexedValueType
+</span><a href="Temporal.Operator.html#systemAttributes"><span class="hs-identifier hs-var hs-var">systemAttributes</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeKey"><span class="hs-identifier hs-type">SearchAttributeKey</span></a></span><span> </span><span class="annot"><a href="Temporal.Operator.html#IndexedValueType"><span class="hs-identifier hs-type">IndexedValueType</span></a></span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="storageSchema"><span class="annot"><span class="annottext">SearchAttributes -&gt; Map Text Text
+</span><a href="Temporal.Operator.html#storageSchema"><span class="hs-identifier hs-var hs-var">storageSchema</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="annot"><a href="Temporal.Operator.html#searchAttributeTypeFromProto"><span class="hs-identifier hs-type">searchAttributeTypeFromProto</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Proto.IndexedValueType</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Operator.html#IndexedValueType"><span class="hs-identifier hs-type">IndexedValueType</span></a></span><span>
+</span><span id="line-46"></span><span id="searchAttributeTypeFromProto"><span class="annot"><span class="annottext">searchAttributeTypeFromProto :: IndexedValueType -&gt; IndexedValueType
+</span><a href="Temporal.Operator.html#searchAttributeTypeFromProto"><span class="hs-identifier hs-var hs-var">searchAttributeTypeFromProto</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-47"></span><span>  </span><span class="annot"><span class="annottext">IndexedValueType
+</span><span class="hs-identifier hs-var">Proto.INDEXED_VALUE_TYPE_UNSPECIFIED</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IndexedValueType
+</span><a href="Temporal.Operator.html#UnrecognizedIndexedValueType"><span class="hs-identifier hs-var">UnrecognizedIndexedValueType</span></a></span><span>
+</span><span id="line-48"></span><span>  </span><span class="annot"><span class="annottext">IndexedValueType
+</span><span class="hs-identifier hs-var">Proto.INDEXED_VALUE_TYPE_TEXT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IndexedValueType
+</span><a href="Temporal.Operator.html#Text"><span class="hs-identifier hs-var">Text</span></a></span><span>
+</span><span id="line-49"></span><span>  </span><span class="annot"><span class="annottext">IndexedValueType
+</span><span class="hs-identifier hs-var">Proto.INDEXED_VALUE_TYPE_KEYWORD</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IndexedValueType
+</span><a href="Temporal.Operator.html#Keyword"><span class="hs-identifier hs-var">Keyword</span></a></span><span>
+</span><span id="line-50"></span><span>  </span><span class="annot"><span class="annottext">IndexedValueType
+</span><span class="hs-identifier hs-var">Proto.INDEXED_VALUE_TYPE_INT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IndexedValueType
+</span><a href="Temporal.Operator.html#Int"><span class="hs-identifier hs-var">Int</span></a></span><span>
+</span><span id="line-51"></span><span>  </span><span class="annot"><span class="annottext">IndexedValueType
+</span><span class="hs-identifier hs-var">Proto.INDEXED_VALUE_TYPE_DOUBLE</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IndexedValueType
+</span><a href="Temporal.Operator.html#Double"><span class="hs-identifier hs-var">Double</span></a></span><span>
+</span><span id="line-52"></span><span>  </span><span class="annot"><span class="annottext">IndexedValueType
+</span><span class="hs-identifier hs-var">Proto.INDEXED_VALUE_TYPE_BOOL</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IndexedValueType
+</span><a href="Temporal.Operator.html#Bool"><span class="hs-identifier hs-var">Bool</span></a></span><span>
+</span><span id="line-53"></span><span>  </span><span class="annot"><span class="annottext">IndexedValueType
+</span><span class="hs-identifier hs-var">Proto.INDEXED_VALUE_TYPE_DATETIME</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IndexedValueType
+</span><a href="Temporal.Operator.html#Datetime"><span class="hs-identifier hs-var">Datetime</span></a></span><span>
+</span><span id="line-54"></span><span>  </span><span class="annot"><span class="annottext">IndexedValueType
+</span><span class="hs-identifier hs-var">Proto.INDEXED_VALUE_TYPE_KEYWORD_LIST</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IndexedValueType
+</span><a href="Temporal.Operator.html#KeywordList"><span class="hs-identifier hs-var">KeywordList</span></a></span><span>
+</span><span id="line-55"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Proto.IndexedValueType'Unrecognized</span></span><span> </span><span class="annot"><span class="annottext">IndexedValueType'UnrecognizedValue
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IndexedValueType
+</span><a href="Temporal.Operator.html#UnrecognizedIndexedValueType"><span class="hs-identifier hs-var">UnrecognizedIndexedValueType</span></a></span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="annot"><a href="Temporal.Operator.html#searchAttributeTypeToProto"><span class="hs-identifier hs-type">searchAttributeTypeToProto</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Operator.html#IndexedValueType"><span class="hs-identifier hs-type">IndexedValueType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Proto.IndexedValueType</span></span><span>
+</span><span id="line-59"></span><span id="searchAttributeTypeToProto"><span class="annot"><span class="annottext">searchAttributeTypeToProto :: IndexedValueType -&gt; IndexedValueType
+</span><a href="Temporal.Operator.html#searchAttributeTypeToProto"><span class="hs-identifier hs-var hs-var">searchAttributeTypeToProto</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-60"></span><span>  </span><span class="annot"><span class="annottext">IndexedValueType
+</span><a href="Temporal.Operator.html#UnrecognizedIndexedValueType"><span class="hs-identifier hs-var">UnrecognizedIndexedValueType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IndexedValueType
+</span><span class="hs-identifier hs-var">Proto.INDEXED_VALUE_TYPE_UNSPECIFIED</span></span><span>
+</span><span id="line-61"></span><span>  </span><span class="annot"><span class="annottext">IndexedValueType
+</span><a href="Temporal.Operator.html#Text"><span class="hs-identifier hs-var">Text</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IndexedValueType
+</span><span class="hs-identifier hs-var">Proto.INDEXED_VALUE_TYPE_TEXT</span></span><span>
+</span><span id="line-62"></span><span>  </span><span class="annot"><span class="annottext">IndexedValueType
+</span><a href="Temporal.Operator.html#Keyword"><span class="hs-identifier hs-var">Keyword</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IndexedValueType
+</span><span class="hs-identifier hs-var">Proto.INDEXED_VALUE_TYPE_KEYWORD</span></span><span>
+</span><span id="line-63"></span><span>  </span><span class="annot"><span class="annottext">IndexedValueType
+</span><a href="Temporal.Operator.html#Int"><span class="hs-identifier hs-var">Int</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IndexedValueType
+</span><span class="hs-identifier hs-var">Proto.INDEXED_VALUE_TYPE_INT</span></span><span>
+</span><span id="line-64"></span><span>  </span><span class="annot"><span class="annottext">IndexedValueType
+</span><a href="Temporal.Operator.html#Double"><span class="hs-identifier hs-var">Double</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IndexedValueType
+</span><span class="hs-identifier hs-var">Proto.INDEXED_VALUE_TYPE_DOUBLE</span></span><span>
+</span><span id="line-65"></span><span>  </span><span class="annot"><span class="annottext">IndexedValueType
+</span><a href="Temporal.Operator.html#Bool"><span class="hs-identifier hs-var">Bool</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IndexedValueType
+</span><span class="hs-identifier hs-var">Proto.INDEXED_VALUE_TYPE_BOOL</span></span><span>
+</span><span id="line-66"></span><span>  </span><span class="annot"><span class="annottext">IndexedValueType
+</span><a href="Temporal.Operator.html#Datetime"><span class="hs-identifier hs-var">Datetime</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IndexedValueType
+</span><span class="hs-identifier hs-var">Proto.INDEXED_VALUE_TYPE_DATETIME</span></span><span>
+</span><span id="line-67"></span><span>  </span><span class="annot"><span class="annottext">IndexedValueType
+</span><a href="Temporal.Operator.html#KeywordList"><span class="hs-identifier hs-var">KeywordList</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IndexedValueType
+</span><span class="hs-identifier hs-var">Proto.INDEXED_VALUE_TYPE_KEYWORD_LIST</span></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span id="local-6989586621680185255"><span class="annot"><a href="Temporal.Operator.html#listSearchAttributes"><span class="hs-identifier hs-type">listSearchAttributes</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621680185255"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Client</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Common.html#Namespace"><span class="hs-identifier hs-type">Namespace</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680185255"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">RpcError</span></span><span> </span><span class="annot"><a href="Temporal.Operator.html#SearchAttributes"><span class="hs-identifier hs-type">SearchAttributes</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-71"></span><span id="listSearchAttributes"><span class="annot"><span class="annottext">listSearchAttributes :: forall (m :: * -&gt; *).
+MonadIO m =&gt;
+Client -&gt; Namespace -&gt; m (Either RpcError SearchAttributes)
+</span><a href="Temporal.Operator.html#listSearchAttributes"><span class="hs-identifier hs-var hs-var">listSearchAttributes</span></a></span></span><span> </span><span id="local-6989586621680185394"><span class="annot"><span class="annottext">Client
+</span><a href="#local-6989586621680185394"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Common.html#Namespace"><span class="hs-identifier hs-type">Namespace</span></a></span><span> </span><span id="local-6989586621680185396"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621680185396"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-72"></span><span>  </span><span id="local-6989586621680185397"><span class="annot"><a href="#local-6989586621680185397"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO (Either RpcError ListSearchAttributesResponse)
+-&gt; m (Either RpcError ListSearchAttributesResponse)
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO (Either RpcError ListSearchAttributesResponse)
+ -&gt; m (Either RpcError ListSearchAttributesResponse))
+-&gt; IO (Either RpcError ListSearchAttributesResponse)
+-&gt; m (Either RpcError ListSearchAttributesResponse)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Client
+-&gt; ListSearchAttributesRequest
+-&gt; IO (Either RpcError ListSearchAttributesResponse)
+</span><span class="hs-identifier hs-var">Core.listSearchAttributes</span></span><span> </span><span class="annot"><span class="annottext">Client
+</span><a href="#local-6989586621680185394"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ListSearchAttributesRequest
+forall msg. Message msg =&gt; msg
+</span><span class="hs-identifier hs-var">defMessage</span></span><span> </span><span class="annot"><span class="annottext">ListSearchAttributesRequest
+-&gt; (ListSearchAttributesRequest -&gt; ListSearchAttributesRequest)
+-&gt; ListSearchAttributesRequest
+forall s t. s -&gt; (s -&gt; t) -&gt; t
+</span><span class="hs-operator hs-var">&amp;</span></span><span> </span><span class="annot"><span class="annottext">LensLike' f ListSearchAttributesRequest Text
+forall {f :: * -&gt; *}.
+Identical f =&gt;
+LensLike' f ListSearchAttributesRequest Text
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;namespace&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">Proto.namespace</span></span><span> </span><span class="annot"><span class="annottext">(forall {f :: * -&gt; *}.
+ Identical f =&gt;
+ LensLike' f ListSearchAttributesRequest Text)
+-&gt; Text
+-&gt; ListSearchAttributesRequest
+-&gt; ListSearchAttributesRequest
+forall s t a b. Setter s t a b -&gt; b -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">.~</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621680185396"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-73"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">fmap</span></span><span> </span><span class="annot"><a href="#local-6989586621680185411"><span class="hs-identifier hs-type">convert</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680185397"><span class="hs-identifier hs-type">res</span></a></span><span>
+</span><span id="line-74"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-75"></span><span>    </span><span id="local-6989586621680185411"><span class="annot"><span class="annottext">convert :: t -&gt; SearchAttributes
+</span><a href="#local-6989586621680185411"><span class="hs-identifier hs-var hs-var">convert</span></a></span></span><span> </span><span id="local-6989586621680185425"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621680185425"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-76"></span><span>      </span><span class="annot"><a href="Temporal.Operator.html#SearchAttributes"><span class="hs-identifier hs-type">SearchAttributes</span></a></span><span>
+</span><span id="line-77"></span><span>        </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">customAttributes :: Map SearchAttributeKey IndexedValueType
+</span><a href="Temporal.Operator.html#customAttributes"><span class="hs-identifier hs-var">customAttributes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map Text IndexedValueType
+-&gt; Map SearchAttributeKey IndexedValueType
+forall a. Map Text a -&gt; Map SearchAttributeKey a
+</span><a href="Temporal.SearchAttributes.Internal.html#wrappedKeys"><span class="hs-identifier hs-var">wrappedKeys</span></a></span><span> </span><span class="annot"><span class="annottext">(Map Text IndexedValueType
+ -&gt; Map SearchAttributeKey IndexedValueType)
+-&gt; Map Text IndexedValueType
+-&gt; Map SearchAttributeKey IndexedValueType
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(IndexedValueType -&gt; IndexedValueType)
+-&gt; Map Text IndexedValueType -&gt; Map Text IndexedValueType
+forall a b. (a -&gt; b) -&gt; Map Text a -&gt; Map Text b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">IndexedValueType -&gt; IndexedValueType
+</span><a href="Temporal.Operator.html#searchAttributeTypeFromProto"><span class="hs-identifier hs-var">searchAttributeTypeFromProto</span></a></span><span> </span><span class="annot"><span class="annottext">(Map Text IndexedValueType -&gt; Map Text IndexedValueType)
+-&gt; Map Text IndexedValueType -&gt; Map Text IndexedValueType
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621680185425"><span class="hs-identifier hs-var">res</span></a></span><span> </span><span class="annot"><span class="annottext">t
+-&gt; FoldLike
+     (Map Text IndexedValueType)
+     t
+     t
+     (Map Text IndexedValueType)
+     (Map Text IndexedValueType)
+-&gt; Map Text IndexedValueType
+forall s a t b. s -&gt; FoldLike a s t a b -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">FoldLike
+  (Map Text IndexedValueType)
+  t
+  t
+  (Map Text IndexedValueType)
+  (Map Text IndexedValueType)
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;customAttributes&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">Proto.customAttributes</span></span><span>
+</span><span id="line-78"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">systemAttributes :: Map SearchAttributeKey IndexedValueType
+</span><a href="Temporal.Operator.html#systemAttributes"><span class="hs-identifier hs-var">systemAttributes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map Text IndexedValueType
+-&gt; Map SearchAttributeKey IndexedValueType
+forall a. Map Text a -&gt; Map SearchAttributeKey a
+</span><a href="Temporal.SearchAttributes.Internal.html#wrappedKeys"><span class="hs-identifier hs-var">wrappedKeys</span></a></span><span> </span><span class="annot"><span class="annottext">(Map Text IndexedValueType
+ -&gt; Map SearchAttributeKey IndexedValueType)
+-&gt; Map Text IndexedValueType
+-&gt; Map SearchAttributeKey IndexedValueType
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(IndexedValueType -&gt; IndexedValueType)
+-&gt; Map Text IndexedValueType -&gt; Map Text IndexedValueType
+forall a b. (a -&gt; b) -&gt; Map Text a -&gt; Map Text b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">IndexedValueType -&gt; IndexedValueType
+</span><a href="Temporal.Operator.html#searchAttributeTypeFromProto"><span class="hs-identifier hs-var">searchAttributeTypeFromProto</span></a></span><span> </span><span class="annot"><span class="annottext">(Map Text IndexedValueType -&gt; Map Text IndexedValueType)
+-&gt; Map Text IndexedValueType -&gt; Map Text IndexedValueType
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621680185425"><span class="hs-identifier hs-var">res</span></a></span><span> </span><span class="annot"><span class="annottext">t
+-&gt; FoldLike
+     (Map Text IndexedValueType)
+     t
+     t
+     (Map Text IndexedValueType)
+     (Map Text IndexedValueType)
+-&gt; Map Text IndexedValueType
+forall s a t b. s -&gt; FoldLike a s t a b -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">FoldLike
+  (Map Text IndexedValueType)
+  t
+  t
+  (Map Text IndexedValueType)
+  (Map Text IndexedValueType)
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;systemAttributes&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">Proto.systemAttributes</span></span><span>
+</span><span id="line-79"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">storageSchema :: Map Text Text
+</span><a href="Temporal.Operator.html#storageSchema"><span class="hs-identifier hs-var">storageSchema</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621680185425"><span class="hs-identifier hs-var">res</span></a></span><span> </span><span class="annot"><span class="annottext">t
+-&gt; FoldLike (Map Text Text) t t (Map Text Text) (Map Text Text)
+-&gt; Map Text Text
+forall s a t b. s -&gt; FoldLike a s t a b -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">FoldLike (Map Text Text) t t (Map Text Text) (Map Text Text)
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;storageSchema&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">Proto.storageSchema</span></span><span>
+</span><span id="line-80"></span><span>        </span><span class="hs-special">}</span><span>
+</span><span id="line-81"></span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span id="local-6989586621680185313"><span class="annot"><a href="Temporal.Operator.html#addSearchAttributes"><span class="hs-identifier hs-type">addSearchAttributes</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621680185313"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Client</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Common.html#Namespace"><span class="hs-identifier hs-type">Namespace</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeKey"><span class="hs-identifier hs-type">SearchAttributeKey</span></a></span><span> </span><span class="annot"><a href="Temporal.Operator.html#IndexedValueType"><span class="hs-identifier hs-type">IndexedValueType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680185313"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">RpcError</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span></span><span>
+</span><span id="line-84"></span><span id="addSearchAttributes"><span class="annot"><span class="annottext">addSearchAttributes :: forall (m :: * -&gt; *).
+MonadIO m =&gt;
+Client
+-&gt; Namespace
+-&gt; Map SearchAttributeKey IndexedValueType
+-&gt; m (Either RpcError ())
+</span><a href="Temporal.Operator.html#addSearchAttributes"><span class="hs-identifier hs-var hs-var">addSearchAttributes</span></a></span></span><span> </span><span id="local-6989586621680185445"><span class="annot"><span class="annottext">Client
+</span><a href="#local-6989586621680185445"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Common.html#Namespace"><span class="hs-identifier hs-type">Namespace</span></a></span><span> </span><span id="local-6989586621680185446"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621680185446"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621680185447"><span class="annot"><span class="annottext">Map SearchAttributeKey IndexedValueType
+</span><a href="#local-6989586621680185447"><span class="hs-identifier hs-var">newAttrs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-85"></span><span>  </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Map SearchAttributeKey IndexedValueType -&gt; Bool
+forall a. Map SearchAttributeKey a -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">Map SearchAttributeKey IndexedValueType
+</span><a href="#local-6989586621680185447"><span class="hs-identifier hs-var">newAttrs</span></a></span><span>
+</span><span id="line-86"></span><span>    </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Either RpcError () -&gt; m (Either RpcError ())
+forall a. a -&gt; m a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(Either RpcError () -&gt; m (Either RpcError ()))
+-&gt; Either RpcError () -&gt; m (Either RpcError ())
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">() -&gt; Either RpcError ()
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-87"></span><span>    </span><span class="hs-keyword">else</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-88"></span><span>      </span><span id="local-6989586621680185449"><span class="annot"><a href="#local-6989586621680185449"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-89"></span><span>        </span><span class="annot"><span class="annottext">IO (Either RpcError AddSearchAttributesResponse)
+-&gt; m (Either RpcError AddSearchAttributesResponse)
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO (Either RpcError AddSearchAttributesResponse)
+ -&gt; m (Either RpcError AddSearchAttributesResponse))
+-&gt; IO (Either RpcError AddSearchAttributesResponse)
+-&gt; m (Either RpcError AddSearchAttributesResponse)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-90"></span><span>          </span><span class="annot"><span class="annottext">Client
+-&gt; AddSearchAttributesRequest
+-&gt; IO (Either RpcError AddSearchAttributesResponse)
+</span><span class="hs-identifier hs-var">Core.addSearchAttributes</span></span><span>
+</span><span id="line-91"></span><span>            </span><span class="annot"><span class="annottext">Client
+</span><a href="#local-6989586621680185445"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><span id="line-92"></span><span>            </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">AddSearchAttributesRequest
+forall msg. Message msg =&gt; msg
+</span><span class="hs-identifier hs-var">defMessage</span></span><span>
+</span><span id="line-93"></span><span>                </span><span class="annot"><span class="annottext">AddSearchAttributesRequest
+-&gt; (AddSearchAttributesRequest -&gt; AddSearchAttributesRequest)
+-&gt; AddSearchAttributesRequest
+forall s t. s -&gt; (s -&gt; t) -&gt; t
+</span><span class="hs-operator hs-var">&amp;</span></span><span> </span><span class="annot"><span class="annottext">LensLike' f AddSearchAttributesRequest Text
+forall {f :: * -&gt; *}.
+Identical f =&gt;
+LensLike' f AddSearchAttributesRequest Text
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;namespace&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">Proto.namespace</span></span><span> </span><span class="annot"><span class="annottext">(forall {f :: * -&gt; *}.
+ Identical f =&gt;
+ LensLike' f AddSearchAttributesRequest Text)
+-&gt; Text -&gt; AddSearchAttributesRequest -&gt; AddSearchAttributesRequest
+forall s t a b. Setter s t a b -&gt; b -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">.~</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621680185446"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-94"></span><span>                </span><span class="annot"><span class="annottext">AddSearchAttributesRequest
+-&gt; (AddSearchAttributesRequest -&gt; AddSearchAttributesRequest)
+-&gt; AddSearchAttributesRequest
+forall s t. s -&gt; (s -&gt; t) -&gt; t
+</span><span class="hs-operator hs-var">&amp;</span></span><span> </span><span class="annot"><span class="annottext">LensLike' f AddSearchAttributesRequest (Map Text IndexedValueType)
+forall {f :: * -&gt; *}.
+Identical f =&gt;
+LensLike' f AddSearchAttributesRequest (Map Text IndexedValueType)
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;searchAttributes&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">Proto.searchAttributes</span></span><span> </span><span class="annot"><span class="annottext">(forall {f :: * -&gt; *}.
+ Identical f =&gt;
+ LensLike' f AddSearchAttributesRequest (Map Text IndexedValueType))
+-&gt; Map Text IndexedValueType
+-&gt; AddSearchAttributesRequest
+-&gt; AddSearchAttributesRequest
+forall s t a b. Setter s t a b -&gt; b -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">.~</span></span><span> </span><span class="annot"><span class="annottext">Map Text IndexedValueType
+</span><a href="#local-6989586621680185464"><span class="hs-identifier hs-var">converted</span></a></span><span>
+</span><span id="line-95"></span><span>            </span><span class="hs-special">)</span><span>
+</span><span id="line-96"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">void</span></span><span> </span><span class="annot"><a href="#local-6989586621680185449"><span class="hs-identifier hs-type">res</span></a></span><span>
+</span><span id="line-97"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-98"></span><span>    </span><span id="local-6989586621680185464"><span class="annot"><span class="annottext">converted :: Map Text IndexedValueType
+</span><a href="#local-6989586621680185464"><span class="hs-identifier hs-var hs-var">converted</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map SearchAttributeKey IndexedValueType
+-&gt; Map Text IndexedValueType
+forall a. Map SearchAttributeKey a -&gt; Map Text a
+</span><a href="Temporal.SearchAttributes.Internal.html#rawKeys"><span class="hs-identifier hs-var">rawKeys</span></a></span><span> </span><span class="annot"><span class="annottext">(Map SearchAttributeKey IndexedValueType
+ -&gt; Map Text IndexedValueType)
+-&gt; Map SearchAttributeKey IndexedValueType
+-&gt; Map Text IndexedValueType
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(IndexedValueType -&gt; IndexedValueType)
+-&gt; Map SearchAttributeKey IndexedValueType
+-&gt; Map SearchAttributeKey IndexedValueType
+forall a b.
+(a -&gt; b) -&gt; Map SearchAttributeKey a -&gt; Map SearchAttributeKey b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">IndexedValueType -&gt; IndexedValueType
+</span><a href="Temporal.Operator.html#searchAttributeTypeToProto"><span class="hs-identifier hs-var">searchAttributeTypeToProto</span></a></span><span> </span><span class="annot"><span class="annottext">Map SearchAttributeKey IndexedValueType
+</span><a href="#local-6989586621680185447"><span class="hs-identifier hs-var">newAttrs</span></a></span><span>
+</span><span id="line-99"></span></pre></body></html>

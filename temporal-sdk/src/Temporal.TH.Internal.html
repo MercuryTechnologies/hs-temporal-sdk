@@ -1,0 +1,340 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DefaultSignatures #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE DeriveLift #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE GADTs #-}</span><span>
+</span><span id="line-7"></span><span class="hs-pragma">{-# LANGUAGE InstanceSigs #-}</span><span>
+</span><span id="line-8"></span><span class="hs-pragma">{-# LANGUAGE LambdaCase #-}</span><span>
+</span><span id="line-9"></span><span class="hs-pragma">{-# LANGUAGE MultiParamTypeClasses #-}</span><span>
+</span><span id="line-10"></span><span class="hs-pragma">{-# LANGUAGE MultiWayIf #-}</span><span>
+</span><span id="line-11"></span><span class="hs-pragma">{-# LANGUAGE PolyKinds #-}</span><span>
+</span><span id="line-12"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
+</span><span id="line-13"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-14"></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-15"></span><span class="hs-pragma">{-# LANGUAGE TypeApplications #-}</span><span>
+</span><span id="line-16"></span><span class="hs-pragma">{-# LANGUAGE TypeFamilies #-}</span><span>
+</span><span id="line-17"></span><span class="hs-pragma">{-# LANGUAGE TypeOperators #-}</span><span>
+</span><span id="line-18"></span><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-19"></span><span class="hs-pragma">{-# LANGUAGE UndecidableSuperClasses #-}</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.TH.Internal.html"><span class="hs-identifier">Temporal.TH.Internal</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Char</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Text</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">TH</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Lib</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">TH</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Activity.html"><span class="hs-identifier">Temporal.Activity</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Activity.Definition.html#Activity"><span class="hs-identifier">Activity</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.TH.Classes.html"><span class="hs-identifier">Temporal.TH.Classes</span></a></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Workflow.html"><span class="hs-identifier">Temporal.Workflow</span></a></span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="annot"><a href="Temporal.TH.Internal.html#isOperator"><span class="hs-identifier hs-type">isOperator</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-34"></span><span id="isOperator"><span class="annot"><span class="annottext">isOperator :: Name -&gt; Bool
+</span><a href="Temporal.TH.Internal.html#isOperator"><span class="hs-identifier hs-var hs-var">isOperator</span></a></span></span><span> </span><span id="local-6989586621680194390"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680194390"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Name -&gt; [Char]
+</span><span class="hs-identifier hs-var">TH.nameBase</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680194390"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-36"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621680194392"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621680194392"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Bool
+</span><span class="hs-identifier hs-var">isSymbol</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621680194392"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
+</span><span class="hs-identifier hs-var">isPunctuation</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621680194392"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621680194392"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'_'</span></span><span>
+</span><span id="line-37"></span><span>    </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- N.B. This is used for declaring an instance in the current module,</span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- so it can't be used outside of local instance declaration code, as it will</span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- be out of scope.</span><span>
+</span><span id="line-43"></span><span class="annot"><a href="Temporal.TH.Internal.html#fnSingDataAndConName"><span class="hs-identifier hs-type">fnSingDataAndConName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Name</span></span><span>
+</span><span id="line-44"></span><span id="fnSingDataAndConName"><span class="annot"><span class="annottext">fnSingDataAndConName :: Name -&gt; Name
+</span><a href="Temporal.TH.Internal.html#fnSingDataAndConName"><span class="hs-identifier hs-var hs-var">fnSingDataAndConName</span></a></span></span><span> </span><span id="local-6989586621680194399"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680194399"><span class="hs-identifier hs-var">n</span></a></span></span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Bool
+</span><a href="Temporal.TH.Internal.html#isOperator"><span class="hs-identifier hs-var">isOperator</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680194399"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Name
+</span><span class="hs-identifier hs-var">TH.mkName</span></span><span> </span><span class="annot"><span class="annottext">([Char] -&gt; Name) -&gt; [Char] -&gt; Name
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;:&quot;</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; [Char] -&gt; [Char]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; [Char]
+</span><span class="hs-identifier hs-var">TH.nameBase</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680194399"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-46"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Name
+</span><span class="hs-identifier hs-var">TH.mkName</span></span><span> </span><span class="annot"><span class="annottext">([Char] -&gt; Name) -&gt; [Char] -&gt; Name
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Name -&gt; [Char]
+</span><span class="hs-identifier hs-var">TH.nameBase</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680194399"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-47"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621680194400"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621680194400"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621680194401"><span class="annot"><span class="annottext">[Char]
+</span><a href="#local-6989586621680194401"><span class="hs-identifier hs-var">rest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char
+</span><span class="hs-identifier hs-var">toUpper</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621680194400"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; [Char] -&gt; [Char]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><a href="#local-6989586621680194401"><span class="hs-identifier hs-var">rest</span></a></span><span>
+</span><span id="line-48"></span><span>      </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; [Char]
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;fnSingDataAndConName: empty name&quot;</span></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="annot"><a href="Temporal.TH.Internal.html#makeFnDecls"><span class="hs-identifier hs-type">makeFnDecls</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621680194342"><span class="annot"><a href="#local-6989586621680194342"><span class="hs-identifier hs-type">m</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TH.Quote</span></span><span> </span><span class="annot"><a href="#local-6989586621680194342"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Quasi</span></span><span> </span><span class="annot"><a href="#local-6989586621680194342"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680194342"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">TH.Dec</span></span><span class="hs-special">]</span><span>
+</span><span id="line-52"></span><span id="makeFnDecls"><span class="annot"><span class="annottext">makeFnDecls :: forall (m :: * -&gt; *). (Quote m, Quasi m) =&gt; Name -&gt; Type -&gt; m [Dec]
+</span><a href="Temporal.TH.Internal.html#makeFnDecls"><span class="hs-identifier hs-var hs-var">makeFnDecls</span></a></span></span><span> </span><span id="local-6989586621680194426"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680194426"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621680194427"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194427"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-53"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680194428"><span class="annot"><span class="annottext">dName :: Name
+</span><a href="#local-6989586621680194428"><span class="hs-identifier hs-var hs-var hs-var">dName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Name
+</span><a href="Temporal.TH.Internal.html#fnSingDataAndConName"><span class="hs-identifier hs-var">fnSingDataAndConName</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680194426"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-54"></span><span>  </span><span id="local-6989586621680194429"><span class="annot"><a href="#local-6989586621680194429"><span class="hs-identifier hs-var">dataDec</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-55"></span><span>    </span><span class="annot"><span class="annottext">m Cxt
+-&gt; Name
+-&gt; [TyVarBndr BndrVis]
+-&gt; Maybe Type
+-&gt; [m Con]
+-&gt; [m DerivClause]
+-&gt; m Dec
+forall (m :: * -&gt; *).
+Quote m =&gt;
+m Cxt
+-&gt; Name
+-&gt; [TyVarBndr BndrVis]
+-&gt; Maybe Type
+-&gt; [m Con]
+-&gt; [m DerivClause]
+-&gt; m Dec
+</span><span class="hs-identifier hs-var">dataD</span></span><span>
+</span><span id="line-56"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[m Type] -&gt; m Cxt
+forall (m :: * -&gt; *). Quote m =&gt; [m Type] -&gt; m Cxt
+</span><span class="hs-identifier hs-var">cxt</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-57"></span><span>      </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680194428"><span class="hs-identifier hs-var">dName</span></a></span><span>
+</span><span id="line-58"></span><span>      </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-59"></span><span>      </span><span class="annot"><span class="annottext">Maybe Type
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-60"></span><span>      </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Name -&gt; [m BangType] -&gt; m Con
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; [m BangType] -&gt; m Con
+</span><span class="hs-identifier hs-var">normalC</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680194428"><span class="hs-identifier hs-var">dName</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-61"></span><span>      </span><span class="hs-special">]</span><span>
+</span><span id="line-62"></span><span>      </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-63"></span><span>  </span><span id="local-6989586621680194431"><span class="annot"><a href="#local-6989586621680194431"><span class="hs-identifier hs-var">instDecs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-64"></span><span>    </span><span class="hs-special">[d|</span><span>
+</span><span id="line-65"></span><span>      </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Temporal.TH.Classes.html#Fn"><span class="hs-identifier hs-type">Fn</span></a></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">conT</span></span><span> </span><span class="annot"><a href="#local-6989586621680194428"><span class="hs-identifier hs-type">dName</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-66"></span><span>        </span><span class="hs-keyword">type</span><span> </span><span id="FnType"><span class="annot"><a href="Temporal.TH.Classes.html#FnType"><span class="hs-identifier hs-var">FnType</span></a></span></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">conT</span></span><span> </span><span class="annot"><a href="#local-6989586621680194428"><span class="hs-identifier hs-type">dName</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="#local-6989586621680194427"><span class="hs-identifier hs-type">t</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-67"></span><span>        </span><span class="annot"><a href="Temporal.TH.Classes.html#fnName"><span class="hs-identifier hs-var hs-var">fnName</span></a></span><span> </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text.pack</span></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TH.litE</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TH.stringL</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">show</span></span><span> </span><span class="annot"><a href="#local-6989586621680194426"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-68"></span><span>        </span><span class="annot"><a href="Temporal.TH.Classes.html#fnDefinition"><span class="hs-identifier hs-var hs-var">fnDefinition</span></a></span><span> </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">varE</span></span><span> </span><span class="annot"><a href="#local-6989586621680194426"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-69"></span><span>        </span><span class="annot"><a href="Temporal.TH.Classes.html#fnSing"><span class="hs-identifier hs-var hs-var">fnSing</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TH.conE</span></span><span> </span><span class="annot"><a href="#local-6989586621680194428"><span class="hs-identifier hs-type">dName</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span><span>      </span><span class="hs-special">|]</span><span>
+</span><span id="line-71"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="#local-6989586621680194429"><span class="hs-identifier hs-type">dataDec</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621680194431"><span class="hs-identifier hs-type">instDecs</span></a></span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- Safe to use in other modules, because we're using the Symbol to find it.</span><span>
+</span><span id="line-75"></span><span class="annot"><a href="Temporal.TH.Internal.html#fnSingE"><span class="hs-identifier hs-type">fnSingE</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621680194360"><span class="annot"><a href="#local-6989586621680194360"><span class="hs-identifier hs-type">m</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TH.Quote</span></span><span> </span><span class="annot"><a href="#local-6989586621680194360"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Quasi</span></span><span> </span><span class="annot"><a href="#local-6989586621680194360"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680194360"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Exp</span></span><span>
+</span><span id="line-76"></span><span id="fnSingE"><span class="annot"><span class="annottext">fnSingE :: forall (m :: * -&gt; *). (Quote m, Quasi m) =&gt; Name -&gt; m Exp
+</span><a href="Temporal.TH.Internal.html#fnSingE"><span class="hs-identifier hs-var hs-var">fnSingE</span></a></span></span><span> </span><span id="local-6989586621680194444"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680194444"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[e|</span><span class="annot"><a href="Temporal.TH.Classes.html#fnSing"><span class="hs-identifier hs-type">fnSing</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; m Type
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Type
+</span><span class="hs-identifier hs-var">conT</span></span><span> </span><span class="annot"><span class="annottext">(Name -&gt; m Type) -&gt; Name -&gt; m Type
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; Name
+</span><a href="Temporal.TH.Internal.html#fnSingDataAndConName"><span class="hs-identifier hs-var">fnSingDataAndConName</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680194444"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span class="hs-special">|]</span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span class="annot"><a href="Temporal.TH.Internal.html#splitArgsAndResult"><span class="hs-identifier hs-type">splitArgsAndResult</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span class="hs-special">)</span><span>
+</span><span id="line-80"></span><span id="splitArgsAndResult"><span class="annot"><span class="annottext">splitArgsAndResult :: Type -&gt; (Cxt, Type)
+</span><a href="Temporal.TH.Internal.html#splitArgsAndResult"><span class="hs-identifier hs-var hs-var">splitArgsAndResult</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TH.AppT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TH.AppT</span></span><span> </span><span class="annot"><span class="annottext">Type
+</span><span class="hs-identifier hs-var">TH.ArrowT</span></span><span> </span><span id="local-6989586621680194448"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194448"><span class="hs-identifier hs-var">arg</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621680194449"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194449"><span class="hs-identifier hs-var">res</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680194450"><span class="annot"><span class="annottext">Cxt
+</span><a href="#local-6989586621680194450"><span class="hs-identifier hs-var">args</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680194451"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194451"><span class="hs-identifier hs-var">result</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Type -&gt; (Cxt, Type)
+</span><a href="Temporal.TH.Internal.html#splitArgsAndResult"><span class="hs-identifier hs-var">splitArgsAndResult</span></a></span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194449"><span class="hs-identifier hs-var">res</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194448"><span class="hs-identifier hs-var">arg</span></a></span><span> </span><span class="annot"><span class="annottext">Type -&gt; Cxt -&gt; Cxt
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">Cxt
+</span><a href="#local-6989586621680194450"><span class="hs-identifier hs-var">args</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194451"><span class="hs-identifier hs-var">result</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-81"></span><span class="annot"><a href="Temporal.TH.Internal.html#splitArgsAndResult"><span class="hs-identifier hs-var">splitArgsAndResult</span></a></span><span> </span><span id="local-6989586621680194452"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194452"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194452"><span class="hs-identifier hs-var">res</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span class="hs-comment">-- Get the 'a' out of 'Activity env a'</span><span>
+</span><span id="line-85"></span><span class="annot"><a href="Temporal.TH.Internal.html#extractActivityResultType"><span class="hs-identifier hs-type">extractActivityResultType</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span>
+</span><span id="line-86"></span><span id="extractActivityResultType"><span class="annot"><span class="annottext">extractActivityResultType :: Type -&gt; Type
+</span><a href="Temporal.TH.Internal.html#extractActivityResultType"><span class="hs-identifier hs-var hs-var">extractActivityResultType</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TH.AppT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TH.AppT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TH.ConT</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Type
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621680194455"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194455"><span class="hs-identifier hs-var">res</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194455"><span class="hs-identifier hs-var">res</span></a></span><span>
+</span><span id="line-87"></span><span class="annot"><a href="Temporal.TH.Internal.html#extractActivityResultType"><span class="hs-identifier hs-var">extractActivityResultType</span></a></span><span> </span><span class="annot"><span class="annottext">Type
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Type
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;Not a type application on Activity&quot;</span></span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span>
+</span><span id="line-90"></span><span class="hs-comment">-- Get the 'a' out of 'Workflow a'</span><span>
+</span><span id="line-91"></span><span class="annot"><a href="Temporal.TH.Internal.html#extractWorkflowResultType"><span class="hs-identifier hs-type">extractWorkflowResultType</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span>
+</span><span id="line-92"></span><span id="extractWorkflowResultType"><span class="annot"><span class="annottext">extractWorkflowResultType :: Type -&gt; Type
+</span><a href="Temporal.TH.Internal.html#extractWorkflowResultType"><span class="hs-identifier hs-var hs-var">extractWorkflowResultType</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TH.AppT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TH.ConT</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621680194457"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194457"><span class="hs-identifier hs-var">res</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194457"><span class="hs-identifier hs-var">res</span></a></span><span>
+</span><span id="line-93"></span><span class="annot"><a href="Temporal.TH.Internal.html#extractWorkflowResultType"><span class="hs-identifier hs-var">extractWorkflowResultType</span></a></span><span> </span><span class="annot"><span class="annottext">Type
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Type
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;Not a type application on Workflow&quot;</span></span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span class="annot"><a href="Temporal.TH.Internal.html#isWorkflowFunction"><span class="hs-identifier hs-type">isWorkflowFunction</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-97"></span><span id="isWorkflowFunction"><span class="annot"><span class="annottext">isWorkflowFunction :: Type -&gt; Bool
+</span><a href="Temporal.TH.Internal.html#isWorkflowFunction"><span class="hs-identifier hs-var hs-var">isWorkflowFunction</span></a></span></span><span> </span><span id="local-6989586621680194459"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194459"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Type -&gt; (Cxt, Type)
+</span><a href="Temporal.TH.Internal.html#splitArgsAndResult"><span class="hs-identifier hs-var">splitArgsAndResult</span></a></span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194459"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-98"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Cxt
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.AppT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TH.ConT</span></span><span> </span><span id="local-6989586621680194460"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680194460"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Type
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680194460"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; Name -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="hs-special">''</span><span class="hs-identifier">Workflow</span><span>
+</span><span id="line-99"></span><span>  </span><span class="annot"><span class="annottext">(Cxt, Type)
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span class="annot"><a href="Temporal.TH.Internal.html#isActivityFunction"><span class="hs-identifier hs-type">isActivityFunction</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-103"></span><span id="isActivityFunction"><span class="annot"><span class="annottext">isActivityFunction :: Type -&gt; Bool
+</span><a href="Temporal.TH.Internal.html#isActivityFunction"><span class="hs-identifier hs-var hs-var">isActivityFunction</span></a></span></span><span> </span><span id="local-6989586621680194462"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194462"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Type -&gt; (Cxt, Type)
+</span><a href="Temporal.TH.Internal.html#splitArgsAndResult"><span class="hs-identifier hs-var">splitArgsAndResult</span></a></span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194462"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-104"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Cxt
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.AppT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TH.AppT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TH.ConT</span></span><span> </span><span id="local-6989586621680194463"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680194463"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Type
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Type
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680194463"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; Name -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="hs-special">''</span><span class="hs-identifier">Activity</span><span>
+</span><span id="line-105"></span><span>  </span><span class="annot"><span class="annottext">(Cxt, Type)
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span class="annot"><a href="Temporal.TH.Internal.html#makeWorkflowWrapped"><span class="hs-identifier hs-type">makeWorkflowWrapped</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span>
+</span><span id="line-109"></span><span id="makeWorkflowWrapped"><span class="annot"><span class="annottext">makeWorkflowWrapped :: Type -&gt; Type
+</span><a href="Temporal.TH.Internal.html#makeWorkflowWrapped"><span class="hs-identifier hs-var hs-var">makeWorkflowWrapped</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Type -&gt; Type -&gt; Type
+</span><span class="hs-identifier hs-var">TH.AppT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Type
+</span><span class="hs-identifier hs-var">TH.ConT</span></span><span> </span><span class="hs-special">''</span><span class="hs-identifier">Workflow</span><span class="hs-special">)</span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span>
+</span><span id="line-112"></span><span class="annot"><a href="Temporal.TH.Internal.html#makeWorkflowResultWrapped"><span class="hs-identifier hs-type">makeWorkflowResultWrapped</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span>
+</span><span id="line-113"></span><span id="makeWorkflowResultWrapped"><span class="annot"><span class="annottext">makeWorkflowResultWrapped :: Type -&gt; Type
+</span><a href="Temporal.TH.Internal.html#makeWorkflowResultWrapped"><span class="hs-identifier hs-var hs-var">makeWorkflowResultWrapped</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Type -&gt; Type -&gt; Type
+</span><span class="hs-identifier hs-var">TH.AppT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Type
+</span><span class="hs-identifier hs-var">TH.ConT</span></span><span> </span><span class="hs-special">''</span><span class="hs-identifier">WorkflowResult</span><span class="hs-special">)</span><span>
+</span><span id="line-114"></span><span>
+</span><span id="line-115"></span><span>
+</span><span id="line-116"></span><span class="annot"><a href="Temporal.TH.Internal.html#makeTaskWrapped"><span class="hs-identifier hs-type">makeTaskWrapped</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span>
+</span><span id="line-117"></span><span id="makeTaskWrapped"><span class="annot"><span class="annottext">makeTaskWrapped :: Type -&gt; Type
+</span><a href="Temporal.TH.Internal.html#makeTaskWrapped"><span class="hs-identifier hs-var hs-var">makeTaskWrapped</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Type -&gt; Type -&gt; Type
+</span><span class="hs-identifier hs-var">TH.AppT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Type
+</span><span class="hs-identifier hs-var">TH.ConT</span></span><span> </span><span class="hs-special">''</span><span class="hs-identifier">Task</span><span class="hs-special">)</span><span>
+</span><span id="line-118"></span><span>
+</span><span id="line-119"></span><span>
+</span><span id="line-120"></span><span class="annot"><a href="Temporal.TH.Internal.html#reapplyArgs"><span class="hs-identifier hs-type">reapplyArgs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span>
+</span><span id="line-121"></span><span id="reapplyArgs"><span class="annot"><span class="annottext">reapplyArgs :: (Cxt, Type) -&gt; Type
+</span><a href="Temporal.TH.Internal.html#reapplyArgs"><span class="hs-identifier hs-var hs-var">reapplyArgs</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680194468"><span class="annot"><span class="annottext">Cxt
+</span><a href="#local-6989586621680194468"><span class="hs-identifier hs-var">args</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680194469"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194469"><span class="hs-identifier hs-var">res</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-122"></span><span>  </span><span class="hs-comment">-- add an arrow between all of the args into the result</span><span>
+</span><span id="line-123"></span><span>  </span><span class="annot"><span class="annottext">(Type -&gt; Type -&gt; Type) -&gt; Type -&gt; Cxt -&gt; Type
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; [a] -&gt; b
+forall (t :: * -&gt; *) a b.
+Foldable t =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Type -&gt; Type -&gt; Type
+</span><span class="hs-identifier hs-var">TH.AppT</span></span><span> </span><span class="annot"><span class="annottext">(Type -&gt; Type -&gt; Type) -&gt; (Type -&gt; Type) -&gt; Type -&gt; Type -&gt; Type
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Type -&gt; Type -&gt; Type
+</span><span class="hs-identifier hs-var">TH.AppT</span></span><span> </span><span class="annot"><span class="annottext">Type
+</span><span class="hs-identifier hs-var">TH.ArrowT</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194469"><span class="hs-identifier hs-var">res</span></a></span><span> </span><span class="annot"><span class="annottext">Cxt
+</span><a href="#local-6989586621680194468"><span class="hs-identifier hs-var">args</span></a></span><span>
+</span><span id="line-124"></span><span>
+</span><span id="line-125"></span><span>
+</span><span id="line-126"></span><span id="local-6989586621680194368"><span class="annot"><a href="Temporal.TH.Internal.html#retypeAsWorkflow"><span class="hs-identifier hs-type">retypeAsWorkflow</span></a></span><span>
+</span><span id="line-127"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621680194368"><span class="hs-identifier hs-type">m</span></a></span><span>
+</span><span id="line-128"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span class="hs-special">)</span><span>
+</span><span id="line-129"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ Result extractor</span></span><span>
+</span><span id="line-130"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span class="hs-special">)</span><span>
+</span><span id="line-131"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ Result wrapper</span></span><span>
+</span><span id="line-132"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span><span>
+</span><span id="line-133"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680194368"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Type</span></span></span><span>
+</span><span id="line-134"></span><span id="retypeAsWorkflow"><span class="annot"><span class="annottext">retypeAsWorkflow :: forall (m :: * -&gt; *).
+Monad m =&gt;
+(Type -&gt; Type) -&gt; (Type -&gt; Type) -&gt; Type -&gt; m Type
+</span><a href="Temporal.TH.Internal.html#retypeAsWorkflow"><span class="hs-identifier hs-var hs-var">retypeAsWorkflow</span></a></span></span><span> </span><span id="local-6989586621680194476"><span class="annot"><span class="annottext">Type -&gt; Type
+</span><a href="#local-6989586621680194476"><span class="hs-identifier hs-var">extract</span></a></span></span><span> </span><span id="local-6989586621680194477"><span class="annot"><span class="annottext">Type -&gt; Type
+</span><a href="#local-6989586621680194477"><span class="hs-identifier hs-var">wrap</span></a></span></span><span> </span><span id="local-6989586621680194478"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194478"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Type -&gt; m Type
+forall a. a -&gt; m a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(Type -&gt; m Type) -&gt; Type -&gt; m Type
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Cxt, Type) -&gt; Type
+</span><a href="Temporal.TH.Internal.html#reapplyArgs"><span class="hs-identifier hs-var">reapplyArgs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Cxt
+</span><a href="#local-6989586621680194479"><span class="hs-identifier hs-var">args</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Type -&gt; Type
+</span><a href="Temporal.TH.Internal.html#makeWorkflowWrapped"><span class="hs-identifier hs-var">makeWorkflowWrapped</span></a></span><span> </span><span class="annot"><span class="annottext">(Type -&gt; Type) -&gt; Type -&gt; Type
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Type -&gt; Type
+</span><a href="#local-6989586621680194477"><span class="hs-identifier hs-var">wrap</span></a></span><span> </span><span class="annot"><span class="annottext">(Type -&gt; Type) -&gt; Type -&gt; Type
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Type -&gt; Type
+</span><a href="#local-6989586621680194476"><span class="hs-identifier hs-var">extract</span></a></span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194480"><span class="hs-identifier hs-var">res</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-135"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-136"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621680194479"><span class="annot"><span class="annottext">Cxt
+</span><a href="#local-6989586621680194479"><span class="hs-identifier hs-var">args</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680194480"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194480"><span class="hs-identifier hs-var">res</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Type -&gt; (Cxt, Type)
+</span><a href="Temporal.TH.Internal.html#splitArgsAndResult"><span class="hs-identifier hs-var">splitArgsAndResult</span></a></span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621680194478"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-137"></span><span>
+</span><span id="line-138"></span><span>
+</span><span id="line-139"></span><span id="local-6989586621680194481"><span class="annot"><a href="Temporal.TH.Internal.html#mkNconE"><span class="hs-identifier hs-type">mkNconE</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TH.Quote</span></span><span> </span><span class="annot"><a href="#local-6989586621680194481"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680194481"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">TH.Exp</span></span></span><span>
+</span><span id="line-140"></span><span id="mkNconE"><span class="annot"><span class="annottext">mkNconE :: forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><a href="Temporal.TH.Internal.html#mkNconE"><span class="hs-identifier hs-var hs-var">mkNconE</span></a></span></span><span> </span><span id="local-6989586621680194487"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680194487"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; m Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">TH.varE</span></span><span> </span><span class="hs-special">'</span><span class="hs-identifier">pure</span><span> </span><span class="annot"><span class="annottext">m Exp -&gt; m Exp -&gt; m Exp
+forall (m :: * -&gt; *). Quote m =&gt; m Exp -&gt; m Exp -&gt; m Exp
+</span><span class="hs-operator hs-var">`TH.appE`</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; m Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">TH.conE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680194487"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-141"></span></pre></body></html>

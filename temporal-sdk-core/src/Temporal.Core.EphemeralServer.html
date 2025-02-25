@@ -1,0 +1,525 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DuplicateRecordFields #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE TypeApplications #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE TypeFamilies #-}</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Core.EphemeralServer.html"><span class="hs-identifier">Temporal.Core.EphemeralServer</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson.TH</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">ByteString</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">useAsCString</span></span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString.Lazy</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">BL</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Word</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.C.String</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">withCString</span></span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.ForeignPtr</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.Ptr</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.Storable</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html"><span class="hs-identifier">Temporal.Core.CTypes</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Internal.FFI.html"><span class="hs-identifier">Temporal.Internal.FFI</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Runtime.html"><span class="hs-identifier">Temporal.Runtime</span></a></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">data</span><span> </span><span id="SDKDefault"><span class="annot"><a href="Temporal.Core.EphemeralServer.html#SDKDefault"><span class="hs-identifier hs-var">SDKDefault</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="SDKDefault"><span class="annot"><a href="Temporal.Core.EphemeralServer.html#SDKDefault"><span class="hs-identifier hs-var">SDKDefault</span></a></span></span><span> </span><span class="hs-special">{</span><span id="sdkName"><span class="annot"><span class="annottext">SDKDefault -&gt; String
+</span><a href="Temporal.Core.EphemeralServer.html#sdkName"><span class="hs-identifier hs-var hs-var">sdkName</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">,</span><span> </span><span id="sdkVersion"><span class="annot"><span class="annottext">SDKDefault -&gt; String
+</span><a href="Temporal.Core.EphemeralServer.html#sdkVersion"><span class="hs-identifier hs-var hs-var">sdkVersion</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">}</span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">data</span><span> </span><span id="EphemeralExeVersion"><span class="annot"><a href="Temporal.Core.EphemeralServer.html#EphemeralExeVersion"><span class="hs-identifier hs-var">EphemeralExeVersion</span></a></span></span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-comment">-- | Use a default version for the given SDK name and version.</span></span><span>
+</span><span id="line-29"></span><span>    </span><span id="Default"><span class="annot"><a href="Temporal.Core.EphemeralServer.html#Default"><span class="hs-identifier hs-var">Default</span></a></span></span><span> </span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#SDKDefault"><span class="hs-identifier hs-type">SDKDefault</span></a></span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-comment">-- | Specific version.</span></span><span>
+</span><span id="line-31"></span><span>    </span><span id="Fixed"><span class="annot"><a href="Temporal.Core.EphemeralServer.html#Fixed"><span class="hs-identifier hs-var">Fixed</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679252361"><span id="local-6989586621679252365"><span id="local-6989586621679252368"><span id="local-6989586621679252371"><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#EphemeralExeVersion"><span class="hs-identifier hs-type">EphemeralExeVersion</span></a></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-35"></span><span>  </span><span id="local-6989586621679252403"><span class="annot"><span class="annottext">toJSON :: EphemeralExeVersion -&gt; Value
+</span><a href="#local-6989586621679252403"><span class="hs-identifier hs-var hs-var hs-var">toJSON</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#Default"><span class="hs-identifier hs-type">Default</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#SDKDefault"><span class="hs-identifier hs-type">SDKDefault</span></a></span><span> </span><span id="local-6989586621679252405"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679252405"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621679252406"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679252406"><span class="hs-identifier hs-var">version</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-36"></span><span>    </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span>
+</span><span id="line-37"></span><span>      </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;type&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Value -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Value
+</span><span class="hs-identifier hs-var">String</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;SDKDefault&quot;</span></span><span>
+</span><span id="line-38"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;contents&quot;</span></span><span>
+</span><span id="line-39"></span><span>          </span><span class="annot"><span class="annottext">Key -&gt; Value -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span>
+</span><span id="line-40"></span><span>            </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;sdk_name&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; String -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679252405"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><span id="line-41"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;sdk_version&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; String -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679252406"><span class="hs-identifier hs-var">version</span></a></span><span>
+</span><span id="line-42"></span><span>            </span><span class="hs-special">]</span><span>
+</span><span id="line-43"></span><span>      </span><span class="hs-special">]</span><span>
+</span><span id="line-44"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#Fixed"><span class="hs-identifier hs-type">Fixed</span></a></span><span> </span><span id="local-6989586621679252410"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679252410"><span class="hs-identifier hs-var">version</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-45"></span><span>    </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span>
+</span><span id="line-46"></span><span>      </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;type&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Value -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Value
+</span><span class="hs-identifier hs-var">String</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;Fixed&quot;</span></span><span>
+</span><span id="line-47"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;contents&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; String -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679252410"><span class="hs-identifier hs-var">version</span></a></span><span>
+</span><span id="line-48"></span><span>      </span><span class="hs-special">]</span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-keyword">data</span><span> </span><span id="EphemeralExe"><span class="annot"><a href="Temporal.Core.EphemeralServer.html#EphemeralExe"><span class="hs-identifier hs-var">EphemeralExe</span></a></span></span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-comment">-- | Existing path on the filesystem for the executable.</span></span><span>
+</span><span id="line-53"></span><span>    </span><span id="ExistingPath"><span class="annot"><a href="Temporal.Core.EphemeralServer.html#ExistingPath"><span class="hs-identifier hs-var">ExistingPath</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
+</span><span id="line-54"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-comment">-- | Download the executable if not already there.</span></span><span>
+</span><span id="line-55"></span><span>    </span><span id="CachedDownload"><span class="annot"><a href="Temporal.Core.EphemeralServer.html#CachedDownload"><span class="hs-identifier hs-var">CachedDownload</span></a></span></span><span> </span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#EphemeralExeVersion"><span class="hs-identifier hs-type">EphemeralExeVersion</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">)</span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679252416"><span id="local-6989586621679252420"><span id="local-6989586621679252423"><span id="local-6989586621679252426"><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#EphemeralExe"><span class="hs-identifier hs-type">EphemeralExe</span></a></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-59"></span><span>  </span><span id="local-6989586621679252452"><span class="annot"><span class="annottext">toJSON :: EphemeralExe -&gt; Value
+</span><span class="hs-identifier hs-var hs-var hs-var">toJSON</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#ExistingPath"><span class="hs-identifier hs-type">ExistingPath</span></a></span><span> </span><span id="local-6989586621679252453"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679252453"><span class="hs-identifier hs-var">path</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-60"></span><span>    </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span>
+</span><span id="line-61"></span><span>      </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;type&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Value -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Value
+</span><span class="hs-identifier hs-var">String</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;ExistingPath&quot;</span></span><span>
+</span><span id="line-62"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;contents&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; String -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679252453"><span class="hs-identifier hs-var">path</span></a></span><span>
+</span><span id="line-63"></span><span>      </span><span class="hs-special">]</span><span>
+</span><span id="line-64"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#CachedDownload"><span class="hs-identifier hs-type">CachedDownload</span></a></span><span> </span><span id="local-6989586621679252454"><span class="annot"><span class="annottext">EphemeralExeVersion
+</span><a href="#local-6989586621679252454"><span class="hs-identifier hs-var">version</span></a></span></span><span> </span><span id="local-6989586621679252455"><span class="annot"><span class="annottext">Maybe String
+</span><a href="#local-6989586621679252455"><span class="hs-identifier hs-var">destDir</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-65"></span><span>    </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span>
+</span><span id="line-66"></span><span>      </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;type&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Value -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Value
+</span><span class="hs-identifier hs-var">String</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;CachedDownload&quot;</span></span><span>
+</span><span id="line-67"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;contents&quot;</span></span><span>
+</span><span id="line-68"></span><span>          </span><span class="annot"><span class="annottext">Key -&gt; Value -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span>
+</span><span id="line-69"></span><span>            </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;version&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; EphemeralExeVersion -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">EphemeralExeVersion
+</span><a href="#local-6989586621679252454"><span class="hs-identifier hs-var">version</span></a></span><span>
+</span><span id="line-70"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;dest_dir&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Maybe String -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Maybe String
+</span><a href="#local-6989586621679252455"><span class="hs-identifier hs-var">destDir</span></a></span><span>
+</span><span id="line-71"></span><span>            </span><span class="hs-special">]</span><span>
+</span><span id="line-72"></span><span>      </span><span class="hs-special">]</span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span class="hs-keyword">data</span><span> </span><span id="TemporalDevServerConfig"><span class="annot"><a href="Temporal.Core.EphemeralServer.html#TemporalDevServerConfig"><span class="hs-identifier hs-var">TemporalDevServerConfig</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="TemporalDevServerConfig"><span class="annot"><a href="Temporal.Core.EphemeralServer.html#TemporalDevServerConfig"><span class="hs-identifier hs-var">TemporalDevServerConfig</span></a></span></span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="exe"><span class="annot"><span class="annottext">TemporalDevServerConfig -&gt; EphemeralExe
+</span><a href="Temporal.Core.EphemeralServer.html#exe"><span class="hs-identifier hs-var hs-var">exe</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#EphemeralExe"><span class="hs-identifier hs-type">EphemeralExe</span></a></span><span>
+</span><span id="line-77"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="namespace"><span class="annot"><span class="annottext">TemporalDevServerConfig -&gt; String
+</span><a href="Temporal.Core.EphemeralServer.html#namespace"><span class="hs-identifier hs-var hs-var">namespace</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
+</span><span id="line-78"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="ip"><span class="annot"><span class="annottext">TemporalDevServerConfig -&gt; String
+</span><a href="Temporal.Core.EphemeralServer.html#ip"><span class="hs-identifier hs-var hs-var">ip</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-79"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="port"><span class="annot"><span class="annottext">TemporalDevServerConfig -&gt; Maybe Word16
+</span><a href="Temporal.Core.EphemeralServer.html#port"><span class="hs-identifier hs-var hs-var">port</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word16</span></span><span>
+</span><span id="line-80"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="dbFilename"><span class="annot"><span class="annottext">TemporalDevServerConfig -&gt; Maybe String
+</span><a href="Temporal.Core.EphemeralServer.html#dbFilename"><span class="hs-identifier hs-var hs-var">dbFilename</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
+</span><span id="line-81"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="ui"><span class="annot"><span class="annottext">TemporalDevServerConfig -&gt; Bool
+</span><a href="Temporal.Core.EphemeralServer.html#ui"><span class="hs-identifier hs-var hs-var">ui</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-82"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="uiPort"><span class="annot"><span class="annottext">TemporalDevServerConfig -&gt; Maybe Word16
+</span><a href="Temporal.Core.EphemeralServer.html#uiPort"><span class="hs-identifier hs-var hs-var">uiPort</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word16</span></span><span>
+</span><span id="line-83"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="log"><span class="annot"><span class="annottext">TemporalDevServerConfig -&gt; (String, String)
+</span><a href="Temporal.Core.EphemeralServer.html#log"><span class="hs-identifier hs-var hs-var">log</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">)</span><span>
+</span><span id="line-84"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="extraArgs"><span class="annot"><span class="annottext">TemporalDevServerConfig -&gt; [String]
+</span><a href="Temporal.Core.EphemeralServer.html#extraArgs"><span class="hs-identifier hs-var hs-var">extraArgs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span>
+</span><span id="line-85"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span id="local-6989586621679252467"><span id="local-6989586621679252514"><span id="local-6989586621679252549"><span id="local-6989586621679252552"><span id="local-6989586621679252555"><span class="hs-identifier">deriveToJSON</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">defaultOptions</span><span> </span><span class="hs-special">{</span><span class="hs-identifier">fieldLabelModifier</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">camelTo2</span><span> </span><span class="hs-char">'_'</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">TemporalDevServerConfig</span></span></span></span></span></span><span>
+</span><span id="line-89"></span><span>
+</span><span id="line-90"></span><span>
+</span><span id="line-91"></span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#defaultTemporalDevServerConfig"><span class="hs-identifier hs-type">defaultTemporalDevServerConfig</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#TemporalDevServerConfig"><span class="hs-identifier hs-type">TemporalDevServerConfig</span></a></span><span>
+</span><span id="line-92"></span><span id="defaultTemporalDevServerConfig"><span class="annot"><span class="annottext">defaultTemporalDevServerConfig :: TemporalDevServerConfig
+</span><a href="Temporal.Core.EphemeralServer.html#defaultTemporalDevServerConfig"><span class="hs-identifier hs-var hs-var">defaultTemporalDevServerConfig</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-93"></span><span>  </span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#TemporalDevServerConfig"><span class="hs-identifier hs-type">TemporalDevServerConfig</span></a></span><span>
+</span><span id="line-94"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">exe :: EphemeralExe
+</span><a href="Temporal.Core.EphemeralServer.html#exe"><span class="hs-identifier hs-var">exe</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EphemeralExeVersion -&gt; Maybe String -&gt; EphemeralExe
+</span><a href="Temporal.Core.EphemeralServer.html#CachedDownload"><span class="hs-identifier hs-var">CachedDownload</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SDKDefault -&gt; EphemeralExeVersion
+</span><a href="Temporal.Core.EphemeralServer.html#Default"><span class="hs-identifier hs-var">Default</span></a></span><span> </span><span class="annot"><span class="annottext">(SDKDefault -&gt; EphemeralExeVersion)
+-&gt; SDKDefault -&gt; EphemeralExeVersion
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; SDKDefault
+</span><a href="Temporal.Core.EphemeralServer.html#SDKDefault"><span class="hs-identifier hs-var">SDKDefault</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;community-haskell&quot;</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;0.1.0.0&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe String
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-95"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">namespace :: String
+</span><a href="Temporal.Core.EphemeralServer.html#namespace"><span class="hs-identifier hs-var">namespace</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;default&quot;</span></span><span>
+</span><span id="line-96"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ip :: String
+</span><a href="Temporal.Core.EphemeralServer.html#ip"><span class="hs-identifier hs-var">ip</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;127.0.0.1&quot;</span></span><span>
+</span><span id="line-97"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">port :: Maybe Word16
+</span><a href="Temporal.Core.EphemeralServer.html#port"><span class="hs-identifier hs-var">port</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Word16
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-98"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">dbFilename :: Maybe String
+</span><a href="Temporal.Core.EphemeralServer.html#dbFilename"><span class="hs-identifier hs-var">dbFilename</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe String
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-99"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ui :: Bool
+</span><a href="Temporal.Core.EphemeralServer.html#ui"><span class="hs-identifier hs-var">ui</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-100"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">uiPort :: Maybe Word16
+</span><a href="Temporal.Core.EphemeralServer.html#uiPort"><span class="hs-identifier hs-var">uiPort</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Word16
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-101"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">log :: (String, String)
+</span><a href="Temporal.Core.EphemeralServer.html#log"><span class="hs-identifier hs-var">log</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;pretty&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;warn&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-102"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">extraArgs :: [String]
+</span><a href="Temporal.Core.EphemeralServer.html#extraArgs"><span class="hs-identifier hs-var">extraArgs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-103"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-104"></span><span>
+</span><span id="line-105"></span><span>
+</span><span id="line-106"></span><span class="hs-keyword">newtype</span><span> </span><span id="EphemeralServer"><span class="annot"><a href="Temporal.Core.EphemeralServer.html#EphemeralServer"><span class="hs-identifier hs-var">EphemeralServer</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="EphemeralServer"><span class="annot"><a href="Temporal.Core.EphemeralServer.html#EphemeralServer"><span class="hs-identifier hs-var">EphemeralServer</span></a></span></span><span> </span><span class="hs-special">{</span><span id="ephemeralServerPtr"><span class="annot"><span class="annottext">EphemeralServer -&gt; ForeignPtr EphemeralServer
+</span><a href="Temporal.Core.EphemeralServer.html#ephemeralServerPtr"><span class="hs-identifier hs-var hs-var">ephemeralServerPtr</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ForeignPtr</span></span><span> </span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#EphemeralServer"><span class="hs-identifier hs-type">EphemeralServer</span></a></span><span class="hs-special">}</span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span>
+</span><span id="line-109"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_temporal_start_dev_server&quot;</span></span><span>
+</span><span id="line-110"></span><span>  </span><span id="raw_startDevServer"><span class="annot"><a href="Temporal.Core.EphemeralServer.html#raw_startDevServer"><span class="hs-identifier hs-var">raw_startDevServer</span></a></span></span><span>
+</span><span id="line-111"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ptr</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#Runtime"><span class="hs-identifier hs-type">Runtime</span></a></span><span>
+</span><span id="line-112"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CString</span></span><span>
+</span><span id="line-113"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Internal.FFI.html#TokioCall"><span class="hs-identifier hs-type">TokioCall</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Core.CTypes.html#CArray"><span class="hs-identifier hs-type">CArray</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word8</span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#EphemeralServer"><span class="hs-identifier hs-type">EphemeralServer</span></a></span><span>
+</span><span id="line-114"></span><span>
+</span><span id="line-115"></span><span>
+</span><span id="line-116"></span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#startDevServer"><span class="hs-identifier hs-type">startDevServer</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#Runtime"><span class="hs-identifier hs-type">Runtime</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#TemporalDevServerConfig"><span class="hs-identifier hs-type">TemporalDevServerConfig</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#EphemeralServer"><span class="hs-identifier hs-type">EphemeralServer</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-117"></span><span id="startDevServer"><span class="annot"><span class="annottext">startDevServer :: Runtime
+-&gt; TemporalDevServerConfig
+-&gt; IO (Either ByteString EphemeralServer)
+</span><a href="Temporal.Core.EphemeralServer.html#startDevServer"><span class="hs-identifier hs-var hs-var">startDevServer</span></a></span></span><span> </span><span id="local-6989586621679252599"><span class="annot"><span class="annottext">Runtime
+</span><a href="#local-6989586621679252599"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621679252600"><span class="annot"><span class="annottext">TemporalDevServerConfig
+</span><a href="#local-6989586621679252600"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Runtime
+-&gt; (Ptr Runtime -&gt; IO (Either ByteString EphemeralServer))
+-&gt; IO (Either ByteString EphemeralServer)
+forall a. Runtime -&gt; (Ptr Runtime -&gt; IO a) -&gt; IO a
+</span><a href="Temporal.Runtime.html#withRuntime"><span class="hs-identifier hs-var">withRuntime</span></a></span><span> </span><span class="annot"><span class="annottext">Runtime
+</span><a href="#local-6989586621679252599"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr Runtime -&gt; IO (Either ByteString EphemeralServer))
+ -&gt; IO (Either ByteString EphemeralServer))
+-&gt; (Ptr Runtime -&gt; IO (Either ByteString EphemeralServer))
+-&gt; IO (Either ByteString EphemeralServer)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679252602"><span class="annot"><span class="annottext">Ptr Runtime
+</span><a href="#local-6989586621679252602"><span class="hs-identifier hs-var">rp</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ByteString
+-&gt; (CString -&gt; IO (Either ByteString EphemeralServer))
+-&gt; IO (Either ByteString EphemeralServer)
+forall a. ByteString -&gt; (CString -&gt; IO a) -&gt; IO a
+</span><span class="hs-identifier hs-var">useAsCString</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LazyByteString -&gt; ByteString
+</span><span class="hs-identifier hs-var">BL.toStrict</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TemporalDevServerConfig -&gt; LazyByteString
+forall a. ToJSON a =&gt; a -&gt; LazyByteString
+</span><span class="hs-identifier hs-var">encode</span></span><span> </span><span class="annot"><span class="annottext">TemporalDevServerConfig
+</span><a href="#local-6989586621679252600"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((CString -&gt; IO (Either ByteString EphemeralServer))
+ -&gt; IO (Either ByteString EphemeralServer))
+-&gt; (CString -&gt; IO (Either ByteString EphemeralServer))
+-&gt; IO (Either ByteString EphemeralServer)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679252605"><span class="annot"><span class="annottext">CString
+</span><a href="#local-6989586621679252605"><span class="hs-identifier hs-var">cstr</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-118"></span><span>  </span><span id="local-6989586621679252606"><span class="annot"><a href="#local-6989586621679252606"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-119"></span><span>    </span><span class="annot"><span class="annottext">TokioCall (CArray Word8) EphemeralServer
+-&gt; Maybe (FinalizerPtr (CArray Word8))
+-&gt; Maybe (FinalizerPtr EphemeralServer)
+-&gt; IO
+     (Either (ForeignPtr (CArray Word8)) (ForeignPtr EphemeralServer))
+forall err res.
+TokioCall err res
+-&gt; Maybe (FinalizerPtr err)
+-&gt; Maybe (FinalizerPtr res)
+-&gt; IO (Either (ForeignPtr err) (ForeignPtr res))
+</span><a href="Temporal.Internal.FFI.html#makeTokioAsyncCall"><span class="hs-identifier hs-var">makeTokioAsyncCall</span></a></span><span>
+</span><span id="line-120"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr Runtime -&gt; CString -&gt; TokioCall (CArray Word8) EphemeralServer
+</span><a href="Temporal.Core.EphemeralServer.html#raw_startDevServer"><span class="hs-identifier hs-var">raw_startDevServer</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr Runtime
+</span><a href="#local-6989586621679252602"><span class="hs-identifier hs-var">rp</span></a></span><span> </span><span class="annot"><span class="annottext">CString
+</span><a href="#local-6989586621679252605"><span class="hs-identifier hs-var">cstr</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-121"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FinalizerPtr (CArray Word8) -&gt; Maybe (FinalizerPtr (CArray Word8))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">FinalizerPtr (CArray Word8)
+</span><a href="Temporal.Core.CTypes.html#rust_dropByteArray"><span class="hs-identifier hs-var">rust_dropByteArray</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-122"></span><span>      </span><span class="annot"><span class="annottext">Maybe (FinalizerPtr EphemeralServer)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-123"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621679252606"><span class="hs-identifier hs-type">res</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-124"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621679252609"><span class="annot"><span class="annottext">ForeignPtr (CArray Word8)
+</span><a href="#local-6989586621679252609"><span class="hs-identifier hs-var">err</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Either ByteString EphemeralServer
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; Either ByteString EphemeralServer)
+-&gt; IO ByteString -&gt; IO (Either ByteString EphemeralServer)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ForeignPtr (CArray Word8)
+-&gt; (Ptr (CArray Word8) -&gt; IO ByteString) -&gt; IO ByteString
+forall a b. ForeignPtr a -&gt; (Ptr a -&gt; IO b) -&gt; IO b
+</span><span class="hs-identifier hs-var">withForeignPtr</span></span><span> </span><span class="annot"><span class="annottext">ForeignPtr (CArray Word8)
+</span><a href="#local-6989586621679252609"><span class="hs-identifier hs-var">err</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr (CArray Word8) -&gt; IO (CArray Word8)
+forall a. Storable a =&gt; Ptr a -&gt; IO a
+</span><span class="hs-identifier hs-var">peek</span></span><span> </span><span class="annot"><span class="annottext">(Ptr (CArray Word8) -&gt; IO (CArray Word8))
+-&gt; (CArray Word8 -&gt; IO ByteString)
+-&gt; Ptr (CArray Word8)
+-&gt; IO ByteString
+forall (m :: * -&gt; *) a b c.
+Monad m =&gt;
+(a -&gt; m b) -&gt; (b -&gt; m c) -&gt; a -&gt; m c
+</span><span class="hs-operator hs-var">&gt;=&gt;</span></span><span> </span><span class="annot"><span class="annottext">CArray Word8 -&gt; IO ByteString
+</span><a href="Temporal.Core.CTypes.html#cArrayToByteString"><span class="hs-identifier hs-var">cArrayToByteString</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-125"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679252615"><span class="annot"><span class="annottext">ForeignPtr EphemeralServer
+</span><a href="#local-6989586621679252615"><span class="hs-identifier hs-var">srv</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Either ByteString EphemeralServer
+-&gt; IO (Either ByteString EphemeralServer)
+forall a. a -&gt; IO a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(Either ByteString EphemeralServer
+ -&gt; IO (Either ByteString EphemeralServer))
+-&gt; Either ByteString EphemeralServer
+-&gt; IO (Either ByteString EphemeralServer)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">EphemeralServer -&gt; Either ByteString EphemeralServer
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">(EphemeralServer -&gt; Either ByteString EphemeralServer)
+-&gt; EphemeralServer -&gt; Either ByteString EphemeralServer
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ForeignPtr EphemeralServer -&gt; EphemeralServer
+</span><a href="Temporal.Core.EphemeralServer.html#EphemeralServer"><span class="hs-identifier hs-var">EphemeralServer</span></a></span><span> </span><span class="annot"><span class="annottext">ForeignPtr EphemeralServer
+</span><a href="#local-6989586621679252615"><span class="hs-identifier hs-var">srv</span></a></span><span>
+</span><span id="line-126"></span><span>
+</span><span id="line-127"></span><span>
+</span><span id="line-128"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_temporal_shutdown_ephemeral_server&quot;</span></span><span> </span><span id="raw_shutdownEphemeralServer"><span class="annot"><a href="Temporal.Core.EphemeralServer.html#raw_shutdownEphemeralServer"><span class="hs-identifier hs-var">raw_shutdownEphemeralServer</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ptr</span></span><span> </span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#EphemeralServer"><span class="hs-identifier hs-type">EphemeralServer</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Internal.FFI.html#TokioCall"><span class="hs-identifier hs-type">TokioCall</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Core.CTypes.html#CArray"><span class="hs-identifier hs-type">CArray</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word8</span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#CUnit"><span class="hs-identifier hs-type">CUnit</span></a></span><span>
+</span><span id="line-129"></span><span>
+</span><span id="line-130"></span><span>
+</span><span id="line-131"></span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#shutdownEphemeralServer"><span class="hs-identifier hs-type">shutdownEphemeralServer</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#EphemeralServer"><span class="hs-identifier hs-type">EphemeralServer</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-132"></span><span id="shutdownEphemeralServer"><span class="annot"><span class="annottext">shutdownEphemeralServer :: EphemeralServer -&gt; IO (Either ByteString ())
+</span><a href="Temporal.Core.EphemeralServer.html#shutdownEphemeralServer"><span class="hs-identifier hs-var hs-var">shutdownEphemeralServer</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#EphemeralServer"><span class="hs-identifier hs-type">EphemeralServer</span></a></span><span> </span><span id="local-6989586621679252618"><span class="annot"><span class="annottext">ForeignPtr EphemeralServer
+</span><a href="#local-6989586621679252618"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ForeignPtr EphemeralServer
+-&gt; (Ptr EphemeralServer -&gt; IO (Either ByteString ()))
+-&gt; IO (Either ByteString ())
+forall a b. ForeignPtr a -&gt; (Ptr a -&gt; IO b) -&gt; IO b
+</span><span class="hs-identifier hs-var">withForeignPtr</span></span><span> </span><span class="annot"><span class="annottext">ForeignPtr EphemeralServer
+</span><a href="#local-6989586621679252618"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr EphemeralServer -&gt; IO (Either ByteString ()))
+ -&gt; IO (Either ByteString ()))
+-&gt; (Ptr EphemeralServer -&gt; IO (Either ByteString ()))
+-&gt; IO (Either ByteString ())
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679252619"><span class="annot"><span class="annottext">Ptr EphemeralServer
+</span><a href="#local-6989586621679252619"><span class="hs-identifier hs-var">ep</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-133"></span><span>  </span><span id="local-6989586621679252620"><span class="annot"><a href="#local-6989586621679252620"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-134"></span><span>    </span><span class="annot"><span class="annottext">TokioCall (CArray Word8) CUnit
+-&gt; Maybe (FinalizerPtr (CArray Word8))
+-&gt; Maybe (FinalizerPtr CUnit)
+-&gt; IO (Either (ForeignPtr (CArray Word8)) (ForeignPtr CUnit))
+forall err res.
+TokioCall err res
+-&gt; Maybe (FinalizerPtr err)
+-&gt; Maybe (FinalizerPtr res)
+-&gt; IO (Either (ForeignPtr err) (ForeignPtr res))
+</span><a href="Temporal.Internal.FFI.html#makeTokioAsyncCall"><span class="hs-identifier hs-var">makeTokioAsyncCall</span></a></span><span>
+</span><span id="line-135"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr EphemeralServer -&gt; TokioCall (CArray Word8) CUnit
+</span><a href="Temporal.Core.EphemeralServer.html#raw_shutdownEphemeralServer"><span class="hs-identifier hs-var">raw_shutdownEphemeralServer</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr EphemeralServer
+</span><a href="#local-6989586621679252619"><span class="hs-identifier hs-var">ep</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-136"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FinalizerPtr (CArray Word8) -&gt; Maybe (FinalizerPtr (CArray Word8))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">FinalizerPtr (CArray Word8)
+</span><a href="Temporal.Core.CTypes.html#rust_dropByteArray"><span class="hs-identifier hs-var">rust_dropByteArray</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FinalizerPtr CUnit -&gt; Maybe (FinalizerPtr CUnit)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">FinalizerPtr CUnit
+</span><a href="Temporal.Core.CTypes.html#rust_dropUnit"><span class="hs-identifier hs-var">rust_dropUnit</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-138"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621679252620"><span class="hs-identifier hs-type">res</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-139"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621679252622"><span class="annot"><span class="annottext">ForeignPtr (CArray Word8)
+</span><a href="#local-6989586621679252622"><span class="hs-identifier hs-var">err</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Either ByteString ()
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; Either ByteString ())
+-&gt; IO ByteString -&gt; IO (Either ByteString ())
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ForeignPtr (CArray Word8)
+-&gt; (Ptr (CArray Word8) -&gt; IO ByteString) -&gt; IO ByteString
+forall a b. ForeignPtr a -&gt; (Ptr a -&gt; IO b) -&gt; IO b
+</span><span class="hs-identifier hs-var">withForeignPtr</span></span><span> </span><span class="annot"><span class="annottext">ForeignPtr (CArray Word8)
+</span><a href="#local-6989586621679252622"><span class="hs-identifier hs-var">err</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr (CArray Word8) -&gt; IO (CArray Word8)
+forall a. Storable a =&gt; Ptr a -&gt; IO a
+</span><span class="hs-identifier hs-var">peek</span></span><span> </span><span class="annot"><span class="annottext">(Ptr (CArray Word8) -&gt; IO (CArray Word8))
+-&gt; (CArray Word8 -&gt; IO ByteString)
+-&gt; Ptr (CArray Word8)
+-&gt; IO ByteString
+forall (m :: * -&gt; *) a b c.
+Monad m =&gt;
+(a -&gt; m b) -&gt; (b -&gt; m c) -&gt; a -&gt; m c
+</span><span class="hs-operator hs-var">&gt;=&gt;</span></span><span> </span><span class="annot"><span class="annottext">CArray Word8 -&gt; IO ByteString
+</span><a href="Temporal.Core.CTypes.html#cArrayToByteString"><span class="hs-identifier hs-var">cArrayToByteString</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-140"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span class="annot"><span class="annottext">ForeignPtr CUnit
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Either ByteString () -&gt; IO (Either ByteString ())
+forall a. a -&gt; IO a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(Either ByteString () -&gt; IO (Either ByteString ()))
+-&gt; Either ByteString () -&gt; IO (Either ByteString ())
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">() -&gt; Either ByteString ()
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-141"></span><span>
+</span><span id="line-142"></span><span>
+</span><span id="line-143"></span><span class="hs-comment">-- TODO</span><span>
+</span><span id="line-144"></span><span class="hs-comment">-- startDevServerWithOutput</span><span>
+</span><span id="line-145"></span><span>
+</span><span id="line-146"></span><span class="hs-keyword">data</span><span> </span><span id="TestServerConfig"><span class="annot"><a href="Temporal.Core.EphemeralServer.html#TestServerConfig"><span class="hs-identifier hs-var">TestServerConfig</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="TestServerConfig"><span class="annot"><a href="Temporal.Core.EphemeralServer.html#TestServerConfig"><span class="hs-identifier hs-var">TestServerConfig</span></a></span></span><span>
+</span><span id="line-147"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="exe"><span class="annot"><span class="annottext">TestServerConfig -&gt; EphemeralExe
+</span><a href="Temporal.Core.EphemeralServer.html#exe"><span class="hs-identifier hs-var hs-var">exe</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#EphemeralExe"><span class="hs-identifier hs-type">EphemeralExe</span></a></span><span>
+</span><span id="line-148"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="port"><span class="annot"><span class="annottext">TestServerConfig -&gt; Maybe Word16
+</span><a href="Temporal.Core.EphemeralServer.html#port"><span class="hs-identifier hs-var hs-var">port</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word16</span></span><span>
+</span><span id="line-149"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="extraArgs"><span class="annot"><span class="annottext">TestServerConfig -&gt; [String]
+</span><a href="Temporal.Core.EphemeralServer.html#extraArgs"><span class="hs-identifier hs-var hs-var">extraArgs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span>
+</span><span id="line-150"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-151"></span><span>
+</span><span id="line-152"></span><span>
+</span><span id="line-153"></span><span id="local-6989586621679252628"><span id="local-6989586621679252645"><span id="local-6989586621679252659"><span id="local-6989586621679252662"><span id="local-6989586621679252665"><span class="hs-identifier">deriveToJSON</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">defaultOptions</span><span> </span><span class="hs-special">{</span><span class="hs-identifier">fieldLabelModifier</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">camelTo2</span><span> </span><span class="hs-char">'_'</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">TestServerConfig</span></span></span></span></span></span><span>
+</span><span id="line-154"></span><span>
+</span><span id="line-155"></span><span>
+</span><span id="line-156"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_temporal_start_test_server&quot;</span></span><span>
+</span><span id="line-157"></span><span>  </span><span id="raw_startTestServer"><span class="annot"><a href="Temporal.Core.EphemeralServer.html#raw_startTestServer"><span class="hs-identifier hs-var">raw_startTestServer</span></a></span></span><span>
+</span><span id="line-158"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ptr</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#Runtime"><span class="hs-identifier hs-type">Runtime</span></a></span><span>
+</span><span id="line-159"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CString</span></span><span>
+</span><span id="line-160"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Internal.FFI.html#TokioCall"><span class="hs-identifier hs-type">TokioCall</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Core.CTypes.html#CArray"><span class="hs-identifier hs-type">CArray</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word8</span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#EphemeralServer"><span class="hs-identifier hs-type">EphemeralServer</span></a></span><span>
+</span><span id="line-161"></span><span>
+</span><span id="line-162"></span><span>
+</span><span id="line-163"></span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#startTestServer"><span class="hs-identifier hs-type">startTestServer</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#Runtime"><span class="hs-identifier hs-type">Runtime</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#TestServerConfig"><span class="hs-identifier hs-type">TestServerConfig</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="annot"><a href="Temporal.Core.EphemeralServer.html#EphemeralServer"><span class="hs-identifier hs-type">EphemeralServer</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-164"></span><span id="startTestServer"><span class="annot"><span class="annottext">startTestServer :: Runtime
+-&gt; TestServerConfig -&gt; IO (Either ByteString EphemeralServer)
+</span><a href="Temporal.Core.EphemeralServer.html#startTestServer"><span class="hs-identifier hs-var hs-var">startTestServer</span></a></span></span><span> </span><span id="local-6989586621679252682"><span class="annot"><span class="annottext">Runtime
+</span><a href="#local-6989586621679252682"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621679252683"><span class="annot"><span class="annottext">TestServerConfig
+</span><a href="#local-6989586621679252683"><span class="hs-identifier hs-var">conf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Runtime
+-&gt; (Ptr Runtime -&gt; IO (Either ByteString EphemeralServer))
+-&gt; IO (Either ByteString EphemeralServer)
+forall a. Runtime -&gt; (Ptr Runtime -&gt; IO a) -&gt; IO a
+</span><a href="Temporal.Runtime.html#withRuntime"><span class="hs-identifier hs-var">withRuntime</span></a></span><span> </span><span class="annot"><span class="annottext">Runtime
+</span><a href="#local-6989586621679252682"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr Runtime -&gt; IO (Either ByteString EphemeralServer))
+ -&gt; IO (Either ByteString EphemeralServer))
+-&gt; (Ptr Runtime -&gt; IO (Either ByteString EphemeralServer))
+-&gt; IO (Either ByteString EphemeralServer)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679252684"><span class="annot"><span class="annottext">Ptr Runtime
+</span><a href="#local-6989586621679252684"><span class="hs-identifier hs-var">rp</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ByteString
+-&gt; (CString -&gt; IO (Either ByteString EphemeralServer))
+-&gt; IO (Either ByteString EphemeralServer)
+forall a. ByteString -&gt; (CString -&gt; IO a) -&gt; IO a
+</span><span class="hs-identifier hs-var">useAsCString</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LazyByteString -&gt; ByteString
+</span><span class="hs-identifier hs-var">BL.toStrict</span></span><span> </span><span class="annot"><span class="annottext">(LazyByteString -&gt; ByteString) -&gt; LazyByteString -&gt; ByteString
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TestServerConfig -&gt; LazyByteString
+forall a. ToJSON a =&gt; a -&gt; LazyByteString
+</span><span class="hs-identifier hs-var">encode</span></span><span> </span><span class="annot"><span class="annottext">TestServerConfig
+</span><a href="#local-6989586621679252683"><span class="hs-identifier hs-var">conf</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((CString -&gt; IO (Either ByteString EphemeralServer))
+ -&gt; IO (Either ByteString EphemeralServer))
+-&gt; (CString -&gt; IO (Either ByteString EphemeralServer))
+-&gt; IO (Either ByteString EphemeralServer)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679252685"><span class="annot"><span class="annottext">CString
+</span><a href="#local-6989586621679252685"><span class="hs-identifier hs-var">cstr</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-165"></span><span>  </span><span id="local-6989586621679252686"><span class="annot"><a href="#local-6989586621679252686"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-166"></span><span>    </span><span class="annot"><span class="annottext">TokioCall (CArray Word8) EphemeralServer
+-&gt; Maybe (FinalizerPtr (CArray Word8))
+-&gt; Maybe (FinalizerPtr EphemeralServer)
+-&gt; IO
+     (Either (ForeignPtr (CArray Word8)) (ForeignPtr EphemeralServer))
+forall err res.
+TokioCall err res
+-&gt; Maybe (FinalizerPtr err)
+-&gt; Maybe (FinalizerPtr res)
+-&gt; IO (Either (ForeignPtr err) (ForeignPtr res))
+</span><a href="Temporal.Internal.FFI.html#makeTokioAsyncCall"><span class="hs-identifier hs-var">makeTokioAsyncCall</span></a></span><span>
+</span><span id="line-167"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr Runtime -&gt; CString -&gt; TokioCall (CArray Word8) EphemeralServer
+</span><a href="Temporal.Core.EphemeralServer.html#raw_startTestServer"><span class="hs-identifier hs-var">raw_startTestServer</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr Runtime
+</span><a href="#local-6989586621679252684"><span class="hs-identifier hs-var">rp</span></a></span><span> </span><span class="annot"><span class="annottext">CString
+</span><a href="#local-6989586621679252685"><span class="hs-identifier hs-var">cstr</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-168"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FinalizerPtr (CArray Word8) -&gt; Maybe (FinalizerPtr (CArray Word8))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">FinalizerPtr (CArray Word8)
+</span><a href="Temporal.Core.CTypes.html#rust_dropByteArray"><span class="hs-identifier hs-var">rust_dropByteArray</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-169"></span><span>      </span><span class="annot"><span class="annottext">Maybe (FinalizerPtr EphemeralServer)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-170"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621679252686"><span class="hs-identifier hs-type">res</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-171"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621679252687"><span class="annot"><span class="annottext">ForeignPtr (CArray Word8)
+</span><a href="#local-6989586621679252687"><span class="hs-identifier hs-var">err</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Either ByteString EphemeralServer
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; Either ByteString EphemeralServer)
+-&gt; IO ByteString -&gt; IO (Either ByteString EphemeralServer)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ForeignPtr (CArray Word8)
+-&gt; (Ptr (CArray Word8) -&gt; IO ByteString) -&gt; IO ByteString
+forall a b. ForeignPtr a -&gt; (Ptr a -&gt; IO b) -&gt; IO b
+</span><span class="hs-identifier hs-var">withForeignPtr</span></span><span> </span><span class="annot"><span class="annottext">ForeignPtr (CArray Word8)
+</span><a href="#local-6989586621679252687"><span class="hs-identifier hs-var">err</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr (CArray Word8) -&gt; IO (CArray Word8)
+forall a. Storable a =&gt; Ptr a -&gt; IO a
+</span><span class="hs-identifier hs-var">peek</span></span><span> </span><span class="annot"><span class="annottext">(Ptr (CArray Word8) -&gt; IO (CArray Word8))
+-&gt; (CArray Word8 -&gt; IO ByteString)
+-&gt; Ptr (CArray Word8)
+-&gt; IO ByteString
+forall (m :: * -&gt; *) a b c.
+Monad m =&gt;
+(a -&gt; m b) -&gt; (b -&gt; m c) -&gt; a -&gt; m c
+</span><span class="hs-operator hs-var">&gt;=&gt;</span></span><span> </span><span class="annot"><span class="annottext">CArray Word8 -&gt; IO ByteString
+</span><a href="Temporal.Core.CTypes.html#cArrayToByteString"><span class="hs-identifier hs-var">cArrayToByteString</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-172"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679252688"><span class="annot"><span class="annottext">ForeignPtr EphemeralServer
+</span><a href="#local-6989586621679252688"><span class="hs-identifier hs-var">srv</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Either ByteString EphemeralServer
+-&gt; IO (Either ByteString EphemeralServer)
+forall a. a -&gt; IO a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(Either ByteString EphemeralServer
+ -&gt; IO (Either ByteString EphemeralServer))
+-&gt; Either ByteString EphemeralServer
+-&gt; IO (Either ByteString EphemeralServer)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">EphemeralServer -&gt; Either ByteString EphemeralServer
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">(EphemeralServer -&gt; Either ByteString EphemeralServer)
+-&gt; EphemeralServer -&gt; Either ByteString EphemeralServer
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ForeignPtr EphemeralServer -&gt; EphemeralServer
+</span><a href="Temporal.Core.EphemeralServer.html#EphemeralServer"><span class="hs-identifier hs-var">EphemeralServer</span></a></span><span> </span><span class="annot"><span class="annottext">ForeignPtr EphemeralServer
+</span><a href="#local-6989586621679252688"><span class="hs-identifier hs-var">srv</span></a></span><span>
+</span><span id="line-173"></span></pre></body></html>

@@ -1,0 +1,1201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{- This file was auto-generated from temporal/api/enums/v1/namespace.proto by the proto-lens-protoc program. -}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-unused-imports#-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-duplicate-exports#-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-dodgy-exports#-}</span><span>
+</span><span id="line-6"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html"><span class="hs-identifier">Proto.Temporal.Api.Enums.V1.Namespace</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-7"></span><span>        </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ArchivalState"><span class="hs-identifier">ArchivalState</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ArchivalState"><span class="hs-identifier">ArchivalState</span></a></span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-8"></span><span>        </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ArchivalState%27UnrecognizedValue"><span class="hs-identifier">ArchivalState'UnrecognizedValue</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NamespaceState"><span class="hs-identifier">NamespaceState</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-9"></span><span>        </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NamespaceState"><span class="hs-identifier">NamespaceState</span></a></span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NamespaceState%27UnrecognizedValue"><span class="hs-identifier">NamespaceState'UnrecognizedValue</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-10"></span><span>        </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ReplicationState"><span class="hs-identifier">ReplicationState</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ReplicationState"><span class="hs-identifier">ReplicationState</span></a></span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-11"></span><span>        </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ReplicationState%27UnrecognizedValue"><span class="hs-identifier">ReplicationState'UnrecognizedValue</span></a></span><span>
+</span><span id="line-12"></span><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Control.DeepSeq</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Prism</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Prism</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Prelude</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Int</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Int</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Monoid</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Monoid</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Word</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Word</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Bytes</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Growing</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Parser.Unsafe</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Wire</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Field</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Field</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Message.Enum</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Service.Types</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Lens.Family2</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Lens.Family2</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Lens.Family2.Unchecked</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Lens.Family2.Unchecked</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Map</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ByteString</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ByteString.Char8</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString.Char8</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Text.Encoding</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text.Encoding</span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Vector</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Vector.Generic</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Generic</span></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Vector.Unboxed</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Unboxed</span></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Text.Read</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Text.Read</span></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">newtype</span><span> </span><span id="ArchivalState%27UnrecognizedValue"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ArchivalState%27UnrecognizedValue"><span class="hs-identifier hs-var">ArchivalState'UnrecognizedValue</span></a></span></span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="ArchivalState%27UnrecognizedValue"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ArchivalState%27UnrecognizedValue"><span class="hs-identifier hs-var">ArchivalState'UnrecognizedValue</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Int.Int32</span></span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680257192"><span id="local-6989586621680257196"><span class="annot"><span class="annottext">ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue -&gt; Bool
+(ArchivalState'UnrecognizedValue
+ -&gt; ArchivalState'UnrecognizedValue -&gt; Bool)
+-&gt; (ArchivalState'UnrecognizedValue
+    -&gt; ArchivalState'UnrecognizedValue -&gt; Bool)
+-&gt; Eq ArchivalState'UnrecognizedValue
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue -&gt; Bool
+== :: ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue -&gt; Bool
+$c/= :: ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue -&gt; Bool
+/= :: ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680257203"><span id="local-6989586621680257207"><span id="local-6989586621680257210"><span id="local-6989586621680257214"><span id="local-6989586621680257217"><span id="local-6989586621680257220"><span id="local-6989586621680257223"><span class="annot"><span class="annottext">Eq ArchivalState'UnrecognizedValue
+Eq ArchivalState'UnrecognizedValue =&gt;
+(ArchivalState'UnrecognizedValue
+ -&gt; ArchivalState'UnrecognizedValue -&gt; Ordering)
+-&gt; (ArchivalState'UnrecognizedValue
+    -&gt; ArchivalState'UnrecognizedValue -&gt; Bool)
+-&gt; (ArchivalState'UnrecognizedValue
+    -&gt; ArchivalState'UnrecognizedValue -&gt; Bool)
+-&gt; (ArchivalState'UnrecognizedValue
+    -&gt; ArchivalState'UnrecognizedValue -&gt; Bool)
+-&gt; (ArchivalState'UnrecognizedValue
+    -&gt; ArchivalState'UnrecognizedValue -&gt; Bool)
+-&gt; (ArchivalState'UnrecognizedValue
+    -&gt; ArchivalState'UnrecognizedValue
+    -&gt; ArchivalState'UnrecognizedValue)
+-&gt; (ArchivalState'UnrecognizedValue
+    -&gt; ArchivalState'UnrecognizedValue
+    -&gt; ArchivalState'UnrecognizedValue)
+-&gt; Ord ArchivalState'UnrecognizedValue
+ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue -&gt; Bool
+ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue -&gt; Ordering
+ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue -&gt; Ordering
+compare :: ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue -&gt; Ordering
+$c&lt; :: ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue -&gt; Bool
+&lt; :: ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue -&gt; Bool
+$c&lt;= :: ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue -&gt; Bool
+&lt;= :: ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue -&gt; Bool
+$c&gt; :: ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue -&gt; Bool
+&gt; :: ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue -&gt; Bool
+$c&gt;= :: ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue -&gt; Bool
+&gt;= :: ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue -&gt; Bool
+$cmax :: ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue
+max :: ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue
+$cmin :: ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue
+min :: ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue
+-&gt; ArchivalState'UnrecognizedValue
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680257231"><span id="local-6989586621680257237"><span id="local-6989586621680257241"><span class="annot"><span class="annottext">Int -&gt; ArchivalState'UnrecognizedValue -&gt; ShowS
+[ArchivalState'UnrecognizedValue] -&gt; ShowS
+ArchivalState'UnrecognizedValue -&gt; String
+(Int -&gt; ArchivalState'UnrecognizedValue -&gt; ShowS)
+-&gt; (ArchivalState'UnrecognizedValue -&gt; String)
+-&gt; ([ArchivalState'UnrecognizedValue] -&gt; ShowS)
+-&gt; Show ArchivalState'UnrecognizedValue
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; ArchivalState'UnrecognizedValue -&gt; ShowS
+showsPrec :: Int -&gt; ArchivalState'UnrecognizedValue -&gt; ShowS
+$cshow :: ArchivalState'UnrecognizedValue -&gt; String
+show :: ArchivalState'UnrecognizedValue -&gt; String
+$cshowList :: [ArchivalState'UnrecognizedValue] -&gt; ShowS
+showList :: [ArchivalState'UnrecognizedValue] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span class="hs-keyword">data</span><span> </span><span id="ArchivalState"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ArchivalState"><span class="hs-identifier hs-var">ArchivalState</span></a></span></span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="ARCHIVAL_STATE_UNSPECIFIED"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_UNSPECIFIED</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-43"></span><span>    </span><span id="ARCHIVAL_STATE_DISABLED"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_DISABLED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_DISABLED</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-44"></span><span>    </span><span id="ARCHIVAL_STATE_ENABLED"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_ENABLED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_ENABLED</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-45"></span><span>    </span><span id="ArchivalState%27Unrecognized"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ArchivalState%27Unrecognized"><span class="hs-identifier hs-var">ArchivalState'Unrecognized</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ArchivalState%27UnrecognizedValue"><span class="hs-identifier hs-type">ArchivalState'UnrecognizedValue</span></a></span><span>
+</span><span id="line-46"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680257250"><span id="local-6989586621680257254"><span id="local-6989586621680257258"><span class="annot"><span class="annottext">Int -&gt; ArchivalState -&gt; ShowS
+[ArchivalState] -&gt; ShowS
+ArchivalState -&gt; String
+(Int -&gt; ArchivalState -&gt; ShowS)
+-&gt; (ArchivalState -&gt; String)
+-&gt; ([ArchivalState] -&gt; ShowS)
+-&gt; Show ArchivalState
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; ArchivalState -&gt; ShowS
+showsPrec :: Int -&gt; ArchivalState -&gt; ShowS
+$cshow :: ArchivalState -&gt; String
+show :: ArchivalState -&gt; String
+$cshowList :: [ArchivalState] -&gt; ShowS
+showList :: [ArchivalState] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680257261"><span id="local-6989586621680257267"><span class="annot"><span class="annottext">ArchivalState -&gt; ArchivalState -&gt; Bool
+(ArchivalState -&gt; ArchivalState -&gt; Bool)
+-&gt; (ArchivalState -&gt; ArchivalState -&gt; Bool) -&gt; Eq ArchivalState
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: ArchivalState -&gt; ArchivalState -&gt; Bool
+== :: ArchivalState -&gt; ArchivalState -&gt; Bool
+$c/= :: ArchivalState -&gt; ArchivalState -&gt; Bool
+/= :: ArchivalState -&gt; ArchivalState -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680257273"><span id="local-6989586621680257278"><span id="local-6989586621680257282"><span id="local-6989586621680257285"><span id="local-6989586621680257288"><span id="local-6989586621680257291"><span id="local-6989586621680257294"><span class="annot"><span class="annottext">Eq ArchivalState
+Eq ArchivalState =&gt;
+(ArchivalState -&gt; ArchivalState -&gt; Ordering)
+-&gt; (ArchivalState -&gt; ArchivalState -&gt; Bool)
+-&gt; (ArchivalState -&gt; ArchivalState -&gt; Bool)
+-&gt; (ArchivalState -&gt; ArchivalState -&gt; Bool)
+-&gt; (ArchivalState -&gt; ArchivalState -&gt; Bool)
+-&gt; (ArchivalState -&gt; ArchivalState -&gt; ArchivalState)
+-&gt; (ArchivalState -&gt; ArchivalState -&gt; ArchivalState)
+-&gt; Ord ArchivalState
+ArchivalState -&gt; ArchivalState -&gt; Bool
+ArchivalState -&gt; ArchivalState -&gt; Ordering
+ArchivalState -&gt; ArchivalState -&gt; ArchivalState
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: ArchivalState -&gt; ArchivalState -&gt; Ordering
+compare :: ArchivalState -&gt; ArchivalState -&gt; Ordering
+$c&lt; :: ArchivalState -&gt; ArchivalState -&gt; Bool
+&lt; :: ArchivalState -&gt; ArchivalState -&gt; Bool
+$c&lt;= :: ArchivalState -&gt; ArchivalState -&gt; Bool
+&lt;= :: ArchivalState -&gt; ArchivalState -&gt; Bool
+$c&gt; :: ArchivalState -&gt; ArchivalState -&gt; Bool
+&gt; :: ArchivalState -&gt; ArchivalState -&gt; Bool
+$c&gt;= :: ArchivalState -&gt; ArchivalState -&gt; Bool
+&gt;= :: ArchivalState -&gt; ArchivalState -&gt; Bool
+$cmax :: ArchivalState -&gt; ArchivalState -&gt; ArchivalState
+max :: ArchivalState -&gt; ArchivalState -&gt; ArchivalState
+$cmin :: ArchivalState -&gt; ArchivalState -&gt; ArchivalState
+min :: ArchivalState -&gt; ArchivalState -&gt; ArchivalState
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.MessageEnum</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ArchivalState"><span class="hs-identifier hs-type">ArchivalState</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-48"></span><span>  </span><span id="local-6989586621680257319"><span class="annot"><span class="annottext">maybeToEnum :: Int -&gt; Maybe ArchivalState
+</span><a href="#local-6989586621680257319"><span class="hs-identifier hs-var hs-var hs-var">maybeToEnum</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ArchivalState -&gt; Maybe ArchivalState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-49"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ArchivalState -&gt; Maybe ArchivalState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_DISABLED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_DISABLED</span></a></span><span>
+</span><span id="line-50"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ArchivalState -&gt; Maybe ArchivalState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_ENABLED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_ENABLED</span></a></span><span>
+</span><span id="line-51"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span id="local-6989586621680257321"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680257321"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><span id="line-52"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ArchivalState -&gt; Maybe ArchivalState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span>
+</span><span id="line-53"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ArchivalState'UnrecognizedValue -&gt; ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ArchivalState%27Unrecognized"><span class="hs-identifier hs-var">ArchivalState'Unrecognized</span></a></span><span>
+</span><span id="line-54"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int32 -&gt; ArchivalState'UnrecognizedValue
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ArchivalState%27UnrecognizedValue"><span class="hs-identifier hs-var">ArchivalState'UnrecognizedValue</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int32
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680257321"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>  </span><span id="local-6989586621680257323"><span class="annot"><span class="annottext">showEnum :: ArchivalState -&gt; String
+</span><a href="#local-6989586621680257323"><span class="hs-identifier hs-var hs-var hs-var">showEnum</span></a></span></span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_UNSPECIFIED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;ARCHIVAL_STATE_UNSPECIFIED&quot;</span></span><span>
+</span><span id="line-56"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_DISABLED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_DISABLED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;ARCHIVAL_STATE_DISABLED&quot;</span></span><span>
+</span><span id="line-57"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_ENABLED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_ENABLED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;ARCHIVAL_STATE_ENABLED&quot;</span></span><span>
+</span><span id="line-58"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span>
+</span><span id="line-59"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ArchivalState%27Unrecognized"><span class="hs-identifier hs-type">ArchivalState'Unrecognized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ArchivalState%27UnrecognizedValue"><span class="hs-identifier hs-type">ArchivalState'UnrecognizedValue</span></a></span><span> </span><span id="local-6989586621680257325"><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680257325"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-60"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int32 -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">Prelude.show</span></span><span> </span><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680257325"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-61"></span><span>  </span><span id="local-6989586621680257343"><span class="annot"><span class="annottext">readEnum :: String -&gt; Maybe ArchivalState
+</span><a href="#local-6989586621680257343"><span class="hs-identifier hs-var hs-var hs-var">readEnum</span></a></span></span><span> </span><span id="local-6989586621680257345"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257345"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><span id="line-62"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257345"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;ARCHIVAL_STATE_UNSPECIFIED&quot;</span></span><span>
+</span><span id="line-63"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ArchivalState -&gt; Maybe ArchivalState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-64"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257345"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;ARCHIVAL_STATE_DISABLED&quot;</span></span><span>
+</span><span id="line-65"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ArchivalState -&gt; Maybe ArchivalState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_DISABLED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_DISABLED</span></a></span><span>
+</span><span id="line-66"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257345"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;ARCHIVAL_STATE_ENABLED&quot;</span></span><span>
+</span><span id="line-67"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ArchivalState -&gt; Maybe ArchivalState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_ENABLED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_ENABLED</span></a></span><span>
+</span><span id="line-68"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">Prelude.otherwise</span></span><span>
+</span><span id="line-69"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Int -&gt; (Int -&gt; Maybe ArchivalState) -&gt; Maybe ArchivalState
+forall a b. Maybe a -&gt; (a -&gt; Maybe b) -&gt; Maybe b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">(Prelude.&gt;&gt;=)</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Maybe Int
+forall a. Read a =&gt; String -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Text.Read.readMaybe</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257345"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Maybe ArchivalState
+forall a. MessageEnum a =&gt; Int -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeToEnum</span></span><span>
+</span><span id="line-70"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prelude.Bounded</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ArchivalState"><span class="hs-identifier hs-type">ArchivalState</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-71"></span><span>  </span><span id="local-6989586621680257350"><span class="annot"><span class="annottext">minBound :: ArchivalState
+</span><a href="#local-6989586621680257350"><span class="hs-identifier hs-var hs-var hs-var">minBound</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-72"></span><span>  </span><span id="local-6989586621680257352"><span class="annot"><span class="annottext">maxBound :: ArchivalState
+</span><a href="#local-6989586621680257352"><span class="hs-identifier hs-var hs-var hs-var">maxBound</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_ENABLED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_ENABLED</span></a></span><span>
+</span><span id="line-73"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prelude.Enum</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ArchivalState"><span class="hs-identifier hs-type">ArchivalState</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-74"></span><span>  </span><span id="local-6989586621680257370"><span class="annot"><span class="annottext">toEnum :: Int -&gt; ArchivalState
+</span><a href="#local-6989586621680257370"><span class="hs-identifier hs-var hs-var hs-var">toEnum</span></a></span></span><span> </span><span id="local-6989586621680257372"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680257372"><span class="hs-identifier hs-var">k__</span></a></span></span><span>
+</span><span id="line-75"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ArchivalState
+-&gt; (ArchivalState -&gt; ArchivalState)
+-&gt; Maybe ArchivalState
+-&gt; ArchivalState
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.maybe</span></span><span>
+</span><span id="line-76"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ArchivalState
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-77"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">(Prelude.++)</span></span><span>
+</span><span id="line-78"></span><span>              </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;toEnum: unknown value for enum ArchivalState: &quot;</span></span><span>
+</span><span id="line-79"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">Prelude.show</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680257372"><span class="hs-identifier hs-var">k__</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-80"></span><span>        </span><span class="annot"><span class="annottext">ArchivalState -&gt; ArchivalState
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.id</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Maybe ArchivalState
+forall a. MessageEnum a =&gt; Int -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680257372"><span class="hs-identifier hs-var">k__</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-81"></span><span>  </span><span id="local-6989586621680257379"><span class="annot"><span class="annottext">fromEnum :: ArchivalState -&gt; Int
+</span><a href="#local-6989586621680257379"><span class="hs-identifier hs-var hs-var hs-var">fromEnum</span></a></span></span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_UNSPECIFIED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-82"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_DISABLED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_DISABLED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-83"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_ENABLED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_ENABLED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span>
+</span><span id="line-84"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span>
+</span><span id="line-85"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ArchivalState%27Unrecognized"><span class="hs-identifier hs-type">ArchivalState'Unrecognized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ArchivalState%27UnrecognizedValue"><span class="hs-identifier hs-type">ArchivalState'UnrecognizedValue</span></a></span><span> </span><span id="local-6989586621680257381"><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680257381"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-86"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int32 -&gt; Int
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680257381"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-87"></span><span>  </span><span id="local-6989586621680257386"><span class="annot"><span class="annottext">succ :: ArchivalState -&gt; ArchivalState
+</span><a href="#local-6989586621680257386"><span class="hs-identifier hs-var hs-var hs-var">succ</span></a></span></span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_ENABLED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_ENABLED</span></a></span><span>
+</span><span id="line-88"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; ArchivalState
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-89"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;ArchivalState.succ: bad argument ARCHIVAL_STATE_ENABLED. This value would be out of bounds.&quot;</span></span><span>
+</span><span id="line-90"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_UNSPECIFIED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_DISABLED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_DISABLED</span></a></span><span>
+</span><span id="line-91"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_DISABLED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_DISABLED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_ENABLED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_ENABLED</span></a></span><span>
+</span><span id="line-92"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ArchivalState%27Unrecognized"><span class="hs-identifier hs-type">ArchivalState'Unrecognized</span></a></span><span> </span><span class="annot"><span class="annottext">ArchivalState'UnrecognizedValue
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-93"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; ArchivalState
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-94"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;ArchivalState.succ: bad argument: unrecognized value&quot;</span></span><span>
+</span><span id="line-95"></span><span>  </span><span id="local-6989586621680257392"><span class="annot"><span class="annottext">pred :: ArchivalState -&gt; ArchivalState
+</span><a href="#local-6989586621680257392"><span class="hs-identifier hs-var hs-var hs-var">pred</span></a></span></span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-96"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; ArchivalState
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-97"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;ArchivalState.pred: bad argument ARCHIVAL_STATE_UNSPECIFIED. This value would be out of bounds.&quot;</span></span><span>
+</span><span id="line-98"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_DISABLED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_DISABLED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-99"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_ENABLED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_ENABLED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_DISABLED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_DISABLED</span></a></span><span>
+</span><span id="line-100"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ArchivalState%27Unrecognized"><span class="hs-identifier hs-type">ArchivalState'Unrecognized</span></a></span><span> </span><span class="annot"><span class="annottext">ArchivalState'UnrecognizedValue
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-101"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; ArchivalState
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-102"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;ArchivalState.pred: bad argument: unrecognized value&quot;</span></span><span>
+</span><span id="line-103"></span><span>  </span><span id="local-6989586621680257396"><span class="annot"><span class="annottext">enumFrom :: ArchivalState -&gt; [ArchivalState]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFrom</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ArchivalState -&gt; [ArchivalState]
+forall a. (Enum a, Bounded a) =&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFrom</span></span><span>
+</span><span id="line-104"></span><span>  </span><span id="local-6989586621680257399"><span class="annot"><span class="annottext">enumFromTo :: ArchivalState -&gt; ArchivalState -&gt; [ArchivalState]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromTo</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ArchivalState -&gt; ArchivalState -&gt; [ArchivalState]
+forall a. Enum a =&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromTo</span></span><span>
+</span><span id="line-105"></span><span>  </span><span id="local-6989586621680257403"><span class="annot"><span class="annottext">enumFromThen :: ArchivalState -&gt; ArchivalState -&gt; [ArchivalState]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromThen</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ArchivalState -&gt; ArchivalState -&gt; [ArchivalState]
+forall a. (Enum a, Bounded a) =&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromThen</span></span><span>
+</span><span id="line-106"></span><span>  </span><span id="local-6989586621680257406"><span class="annot"><span class="annottext">enumFromThenTo :: ArchivalState -&gt; ArchivalState -&gt; ArchivalState -&gt; [ArchivalState]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromThenTo</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ArchivalState -&gt; ArchivalState -&gt; ArchivalState -&gt; [ArchivalState]
+forall a. Enum a =&gt; a -&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromThenTo</span></span><span>
+</span><span id="line-107"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldDefault</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ArchivalState"><span class="hs-identifier hs-type">ArchivalState</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-108"></span><span>  </span><span id="local-6989586621680257411"><span class="annot"><span class="annottext">fieldDefault :: ArchivalState
+</span><a href="#local-6989586621680257411"><span class="hs-identifier hs-var hs-var hs-var">fieldDefault</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ARCHIVAL_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">ARCHIVAL_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-109"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Control.DeepSeq.NFData</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ArchivalState"><span class="hs-identifier hs-type">ArchivalState</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-110"></span><span>  </span><span id="local-6989586621680257416"><span class="annot"><span class="annottext">rnf :: ArchivalState -&gt; ()
+</span><a href="#local-6989586621680257416"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span id="local-6989586621680257418"><span class="annot"><span class="annottext">ArchivalState
+</span><a href="#local-6989586621680257418"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ArchivalState -&gt; () -&gt; ()
+forall a b. a -&gt; b -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.seq</span></span><span> </span><span class="annot"><span class="annottext">ArchivalState
+</span><a href="#local-6989586621680257418"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-111"></span><span class="hs-keyword">newtype</span><span> </span><span id="NamespaceState%27UnrecognizedValue"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NamespaceState%27UnrecognizedValue"><span class="hs-identifier hs-var">NamespaceState'UnrecognizedValue</span></a></span></span><span>
+</span><span id="line-112"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="NamespaceState%27UnrecognizedValue"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NamespaceState%27UnrecognizedValue"><span class="hs-identifier hs-var">NamespaceState'UnrecognizedValue</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Int.Int32</span></span><span>
+</span><span id="line-113"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680257421"><span id="local-6989586621680257424"><span class="annot"><span class="annottext">NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue -&gt; Bool
+(NamespaceState'UnrecognizedValue
+ -&gt; NamespaceState'UnrecognizedValue -&gt; Bool)
+-&gt; (NamespaceState'UnrecognizedValue
+    -&gt; NamespaceState'UnrecognizedValue -&gt; Bool)
+-&gt; Eq NamespaceState'UnrecognizedValue
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue -&gt; Bool
+== :: NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue -&gt; Bool
+$c/= :: NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue -&gt; Bool
+/= :: NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680257430"><span id="local-6989586621680257433"><span id="local-6989586621680257436"><span id="local-6989586621680257440"><span id="local-6989586621680257443"><span id="local-6989586621680257446"><span id="local-6989586621680257449"><span class="annot"><span class="annottext">Eq NamespaceState'UnrecognizedValue
+Eq NamespaceState'UnrecognizedValue =&gt;
+(NamespaceState'UnrecognizedValue
+ -&gt; NamespaceState'UnrecognizedValue -&gt; Ordering)
+-&gt; (NamespaceState'UnrecognizedValue
+    -&gt; NamespaceState'UnrecognizedValue -&gt; Bool)
+-&gt; (NamespaceState'UnrecognizedValue
+    -&gt; NamespaceState'UnrecognizedValue -&gt; Bool)
+-&gt; (NamespaceState'UnrecognizedValue
+    -&gt; NamespaceState'UnrecognizedValue -&gt; Bool)
+-&gt; (NamespaceState'UnrecognizedValue
+    -&gt; NamespaceState'UnrecognizedValue -&gt; Bool)
+-&gt; (NamespaceState'UnrecognizedValue
+    -&gt; NamespaceState'UnrecognizedValue
+    -&gt; NamespaceState'UnrecognizedValue)
+-&gt; (NamespaceState'UnrecognizedValue
+    -&gt; NamespaceState'UnrecognizedValue
+    -&gt; NamespaceState'UnrecognizedValue)
+-&gt; Ord NamespaceState'UnrecognizedValue
+NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue -&gt; Bool
+NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue -&gt; Ordering
+NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue -&gt; Ordering
+compare :: NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue -&gt; Ordering
+$c&lt; :: NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue -&gt; Bool
+&lt; :: NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue -&gt; Bool
+$c&lt;= :: NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue -&gt; Bool
+&lt;= :: NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue -&gt; Bool
+$c&gt; :: NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue -&gt; Bool
+&gt; :: NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue -&gt; Bool
+$c&gt;= :: NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue -&gt; Bool
+&gt;= :: NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue -&gt; Bool
+$cmax :: NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue
+max :: NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue
+$cmin :: NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue
+min :: NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue
+-&gt; NamespaceState'UnrecognizedValue
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680257452"><span id="local-6989586621680257456"><span id="local-6989586621680257460"><span class="annot"><span class="annottext">Int -&gt; NamespaceState'UnrecognizedValue -&gt; ShowS
+[NamespaceState'UnrecognizedValue] -&gt; ShowS
+NamespaceState'UnrecognizedValue -&gt; String
+(Int -&gt; NamespaceState'UnrecognizedValue -&gt; ShowS)
+-&gt; (NamespaceState'UnrecognizedValue -&gt; String)
+-&gt; ([NamespaceState'UnrecognizedValue] -&gt; ShowS)
+-&gt; Show NamespaceState'UnrecognizedValue
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; NamespaceState'UnrecognizedValue -&gt; ShowS
+showsPrec :: Int -&gt; NamespaceState'UnrecognizedValue -&gt; ShowS
+$cshow :: NamespaceState'UnrecognizedValue -&gt; String
+show :: NamespaceState'UnrecognizedValue -&gt; String
+$cshowList :: [NamespaceState'UnrecognizedValue] -&gt; ShowS
+showList :: [NamespaceState'UnrecognizedValue] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-114"></span><span class="hs-keyword">data</span><span> </span><span id="NamespaceState"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NamespaceState"><span class="hs-identifier hs-var">NamespaceState</span></a></span></span><span>
+</span><span id="line-115"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="NAMESPACE_STATE_UNSPECIFIED"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">NAMESPACE_STATE_UNSPECIFIED</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-116"></span><span>    </span><span id="NAMESPACE_STATE_REGISTERED"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_REGISTERED"><span class="hs-identifier hs-var">NAMESPACE_STATE_REGISTERED</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-117"></span><span>    </span><span id="NAMESPACE_STATE_DEPRECATED"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_DEPRECATED"><span class="hs-identifier hs-var">NAMESPACE_STATE_DEPRECATED</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-118"></span><span>    </span><span id="NAMESPACE_STATE_DELETED"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_DELETED"><span class="hs-identifier hs-var">NAMESPACE_STATE_DELETED</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-119"></span><span>    </span><span id="NamespaceState%27Unrecognized"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NamespaceState%27Unrecognized"><span class="hs-identifier hs-var">NamespaceState'Unrecognized</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NamespaceState%27UnrecognizedValue"><span class="hs-identifier hs-type">NamespaceState'UnrecognizedValue</span></a></span><span>
+</span><span id="line-120"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680257468"><span id="local-6989586621680257472"><span id="local-6989586621680257476"><span class="annot"><span class="annottext">Int -&gt; NamespaceState -&gt; ShowS
+[NamespaceState] -&gt; ShowS
+NamespaceState -&gt; String
+(Int -&gt; NamespaceState -&gt; ShowS)
+-&gt; (NamespaceState -&gt; String)
+-&gt; ([NamespaceState] -&gt; ShowS)
+-&gt; Show NamespaceState
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; NamespaceState -&gt; ShowS
+showsPrec :: Int -&gt; NamespaceState -&gt; ShowS
+$cshow :: NamespaceState -&gt; String
+show :: NamespaceState -&gt; String
+$cshowList :: [NamespaceState] -&gt; ShowS
+showList :: [NamespaceState] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680257479"><span id="local-6989586621680257484"><span class="annot"><span class="annottext">NamespaceState -&gt; NamespaceState -&gt; Bool
+(NamespaceState -&gt; NamespaceState -&gt; Bool)
+-&gt; (NamespaceState -&gt; NamespaceState -&gt; Bool) -&gt; Eq NamespaceState
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: NamespaceState -&gt; NamespaceState -&gt; Bool
+== :: NamespaceState -&gt; NamespaceState -&gt; Bool
+$c/= :: NamespaceState -&gt; NamespaceState -&gt; Bool
+/= :: NamespaceState -&gt; NamespaceState -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680257490"><span id="local-6989586621680257495"><span id="local-6989586621680257499"><span id="local-6989586621680257502"><span id="local-6989586621680257505"><span id="local-6989586621680257508"><span id="local-6989586621680257511"><span class="annot"><span class="annottext">Eq NamespaceState
+Eq NamespaceState =&gt;
+(NamespaceState -&gt; NamespaceState -&gt; Ordering)
+-&gt; (NamespaceState -&gt; NamespaceState -&gt; Bool)
+-&gt; (NamespaceState -&gt; NamespaceState -&gt; Bool)
+-&gt; (NamespaceState -&gt; NamespaceState -&gt; Bool)
+-&gt; (NamespaceState -&gt; NamespaceState -&gt; Bool)
+-&gt; (NamespaceState -&gt; NamespaceState -&gt; NamespaceState)
+-&gt; (NamespaceState -&gt; NamespaceState -&gt; NamespaceState)
+-&gt; Ord NamespaceState
+NamespaceState -&gt; NamespaceState -&gt; Bool
+NamespaceState -&gt; NamespaceState -&gt; Ordering
+NamespaceState -&gt; NamespaceState -&gt; NamespaceState
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: NamespaceState -&gt; NamespaceState -&gt; Ordering
+compare :: NamespaceState -&gt; NamespaceState -&gt; Ordering
+$c&lt; :: NamespaceState -&gt; NamespaceState -&gt; Bool
+&lt; :: NamespaceState -&gt; NamespaceState -&gt; Bool
+$c&lt;= :: NamespaceState -&gt; NamespaceState -&gt; Bool
+&lt;= :: NamespaceState -&gt; NamespaceState -&gt; Bool
+$c&gt; :: NamespaceState -&gt; NamespaceState -&gt; Bool
+&gt; :: NamespaceState -&gt; NamespaceState -&gt; Bool
+$c&gt;= :: NamespaceState -&gt; NamespaceState -&gt; Bool
+&gt;= :: NamespaceState -&gt; NamespaceState -&gt; Bool
+$cmax :: NamespaceState -&gt; NamespaceState -&gt; NamespaceState
+max :: NamespaceState -&gt; NamespaceState -&gt; NamespaceState
+$cmin :: NamespaceState -&gt; NamespaceState -&gt; NamespaceState
+min :: NamespaceState -&gt; NamespaceState -&gt; NamespaceState
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-121"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.MessageEnum</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NamespaceState"><span class="hs-identifier hs-type">NamespaceState</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-122"></span><span>  </span><span id="local-6989586621680257533"><span class="annot"><span class="annottext">maybeToEnum :: Int -&gt; Maybe NamespaceState
+</span><span class="hs-identifier hs-var hs-var hs-var">maybeToEnum</span></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState -&gt; Maybe NamespaceState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">NAMESPACE_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-123"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState -&gt; Maybe NamespaceState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_REGISTERED"><span class="hs-identifier hs-var">NAMESPACE_STATE_REGISTERED</span></a></span><span>
+</span><span id="line-124"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState -&gt; Maybe NamespaceState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_DEPRECATED"><span class="hs-identifier hs-var">NAMESPACE_STATE_DEPRECATED</span></a></span><span>
+</span><span id="line-125"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">3</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState -&gt; Maybe NamespaceState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_DELETED"><span class="hs-identifier hs-var">NAMESPACE_STATE_DELETED</span></a></span><span>
+</span><span id="line-126"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span id="local-6989586621680257534"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680257534"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><span id="line-127"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState -&gt; Maybe NamespaceState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span>
+</span><span id="line-128"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NamespaceState'UnrecognizedValue -&gt; NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NamespaceState%27Unrecognized"><span class="hs-identifier hs-var">NamespaceState'Unrecognized</span></a></span><span>
+</span><span id="line-129"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int32 -&gt; NamespaceState'UnrecognizedValue
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NamespaceState%27UnrecognizedValue"><span class="hs-identifier hs-var">NamespaceState'UnrecognizedValue</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int32
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680257534"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-130"></span><span>  </span><span id="local-6989586621680257536"><span class="annot"><span class="annottext">showEnum :: NamespaceState -&gt; String
+</span><span class="hs-identifier hs-var hs-var hs-var">showEnum</span></span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">NAMESPACE_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-131"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;NAMESPACE_STATE_UNSPECIFIED&quot;</span></span><span>
+</span><span id="line-132"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_REGISTERED"><span class="hs-identifier hs-var">NAMESPACE_STATE_REGISTERED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;NAMESPACE_STATE_REGISTERED&quot;</span></span><span>
+</span><span id="line-133"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_DEPRECATED"><span class="hs-identifier hs-var">NAMESPACE_STATE_DEPRECATED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;NAMESPACE_STATE_DEPRECATED&quot;</span></span><span>
+</span><span id="line-134"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_DELETED"><span class="hs-identifier hs-var">NAMESPACE_STATE_DELETED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;NAMESPACE_STATE_DELETED&quot;</span></span><span>
+</span><span id="line-135"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span>
+</span><span id="line-136"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NamespaceState%27Unrecognized"><span class="hs-identifier hs-type">NamespaceState'Unrecognized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NamespaceState%27UnrecognizedValue"><span class="hs-identifier hs-type">NamespaceState'UnrecognizedValue</span></a></span><span> </span><span id="local-6989586621680257537"><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680257537"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int32 -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">Prelude.show</span></span><span> </span><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680257537"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-138"></span><span>  </span><span id="local-6989586621680257551"><span class="annot"><span class="annottext">readEnum :: String -&gt; Maybe NamespaceState
+</span><span class="hs-identifier hs-var hs-var hs-var">readEnum</span></span></span><span> </span><span id="local-6989586621680257552"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257552"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><span id="line-139"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257552"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;NAMESPACE_STATE_UNSPECIFIED&quot;</span></span><span>
+</span><span id="line-140"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState -&gt; Maybe NamespaceState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">NAMESPACE_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-141"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257552"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;NAMESPACE_STATE_REGISTERED&quot;</span></span><span>
+</span><span id="line-142"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState -&gt; Maybe NamespaceState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_REGISTERED"><span class="hs-identifier hs-var">NAMESPACE_STATE_REGISTERED</span></a></span><span>
+</span><span id="line-143"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257552"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;NAMESPACE_STATE_DEPRECATED&quot;</span></span><span>
+</span><span id="line-144"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState -&gt; Maybe NamespaceState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_DEPRECATED"><span class="hs-identifier hs-var">NAMESPACE_STATE_DEPRECATED</span></a></span><span>
+</span><span id="line-145"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257552"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;NAMESPACE_STATE_DELETED&quot;</span></span><span>
+</span><span id="line-146"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState -&gt; Maybe NamespaceState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_DELETED"><span class="hs-identifier hs-var">NAMESPACE_STATE_DELETED</span></a></span><span>
+</span><span id="line-147"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">Prelude.otherwise</span></span><span>
+</span><span id="line-148"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Int -&gt; (Int -&gt; Maybe NamespaceState) -&gt; Maybe NamespaceState
+forall a b. Maybe a -&gt; (a -&gt; Maybe b) -&gt; Maybe b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">(Prelude.&gt;&gt;=)</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Maybe Int
+forall a. Read a =&gt; String -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Text.Read.readMaybe</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257552"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Maybe NamespaceState
+forall a. MessageEnum a =&gt; Int -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeToEnum</span></span><span>
+</span><span id="line-149"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prelude.Bounded</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NamespaceState"><span class="hs-identifier hs-type">NamespaceState</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-150"></span><span>  </span><span id="local-6989586621680257555"><span class="annot"><span class="annottext">minBound :: NamespaceState
+</span><span class="hs-identifier hs-var hs-var hs-var">minBound</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">NAMESPACE_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-151"></span><span>  </span><span id="local-6989586621680257556"><span class="annot"><span class="annottext">maxBound :: NamespaceState
+</span><span class="hs-identifier hs-var hs-var hs-var">maxBound</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_DELETED"><span class="hs-identifier hs-var">NAMESPACE_STATE_DELETED</span></a></span><span>
+</span><span id="line-152"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prelude.Enum</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NamespaceState"><span class="hs-identifier hs-type">NamespaceState</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-153"></span><span>  </span><span id="local-6989586621680257571"><span class="annot"><span class="annottext">toEnum :: Int -&gt; NamespaceState
+</span><span class="hs-identifier hs-var hs-var hs-var">toEnum</span></span></span><span> </span><span id="local-6989586621680257572"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680257572"><span class="hs-identifier hs-var">k__</span></a></span></span><span>
+</span><span id="line-154"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState
+-&gt; (NamespaceState -&gt; NamespaceState)
+-&gt; Maybe NamespaceState
+-&gt; NamespaceState
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.maybe</span></span><span>
+</span><span id="line-155"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; NamespaceState
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-156"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">(Prelude.++)</span></span><span>
+</span><span id="line-157"></span><span>              </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;toEnum: unknown value for enum NamespaceState: &quot;</span></span><span>
+</span><span id="line-158"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">Prelude.show</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680257572"><span class="hs-identifier hs-var">k__</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-159"></span><span>        </span><span class="annot"><span class="annottext">NamespaceState -&gt; NamespaceState
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.id</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Maybe NamespaceState
+forall a. MessageEnum a =&gt; Int -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680257572"><span class="hs-identifier hs-var">k__</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-160"></span><span>  </span><span id="local-6989586621680257575"><span class="annot"><span class="annottext">fromEnum :: NamespaceState -&gt; Int
+</span><span class="hs-identifier hs-var hs-var hs-var">fromEnum</span></span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">NAMESPACE_STATE_UNSPECIFIED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-161"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_REGISTERED"><span class="hs-identifier hs-var">NAMESPACE_STATE_REGISTERED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-162"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_DEPRECATED"><span class="hs-identifier hs-var">NAMESPACE_STATE_DEPRECATED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span>
+</span><span id="line-163"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_DELETED"><span class="hs-identifier hs-var">NAMESPACE_STATE_DELETED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">3</span></span><span>
+</span><span id="line-164"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span>
+</span><span id="line-165"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NamespaceState%27Unrecognized"><span class="hs-identifier hs-type">NamespaceState'Unrecognized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NamespaceState%27UnrecognizedValue"><span class="hs-identifier hs-type">NamespaceState'UnrecognizedValue</span></a></span><span> </span><span id="local-6989586621680257576"><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680257576"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-166"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int32 -&gt; Int
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680257576"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-167"></span><span>  </span><span id="local-6989586621680257581"><span class="annot"><span class="annottext">succ :: NamespaceState -&gt; NamespaceState
+</span><span class="hs-identifier hs-var hs-var hs-var">succ</span></span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_DELETED"><span class="hs-identifier hs-var">NAMESPACE_STATE_DELETED</span></a></span><span>
+</span><span id="line-168"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; NamespaceState
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-169"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;NamespaceState.succ: bad argument NAMESPACE_STATE_DELETED. This value would be out of bounds.&quot;</span></span><span>
+</span><span id="line-170"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">NAMESPACE_STATE_UNSPECIFIED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_REGISTERED"><span class="hs-identifier hs-var">NAMESPACE_STATE_REGISTERED</span></a></span><span>
+</span><span id="line-171"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_REGISTERED"><span class="hs-identifier hs-var">NAMESPACE_STATE_REGISTERED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_DEPRECATED"><span class="hs-identifier hs-var">NAMESPACE_STATE_DEPRECATED</span></a></span><span>
+</span><span id="line-172"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_DEPRECATED"><span class="hs-identifier hs-var">NAMESPACE_STATE_DEPRECATED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_DELETED"><span class="hs-identifier hs-var">NAMESPACE_STATE_DELETED</span></a></span><span>
+</span><span id="line-173"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NamespaceState%27Unrecognized"><span class="hs-identifier hs-type">NamespaceState'Unrecognized</span></a></span><span> </span><span class="annot"><span class="annottext">NamespaceState'UnrecognizedValue
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-174"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; NamespaceState
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-175"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;NamespaceState.succ: bad argument: unrecognized value&quot;</span></span><span>
+</span><span id="line-176"></span><span>  </span><span id="local-6989586621680257586"><span class="annot"><span class="annottext">pred :: NamespaceState -&gt; NamespaceState
+</span><span class="hs-identifier hs-var hs-var hs-var">pred</span></span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">NAMESPACE_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-177"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; NamespaceState
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-178"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;NamespaceState.pred: bad argument NAMESPACE_STATE_UNSPECIFIED. This value would be out of bounds.&quot;</span></span><span>
+</span><span id="line-179"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_REGISTERED"><span class="hs-identifier hs-var">NAMESPACE_STATE_REGISTERED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">NAMESPACE_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-180"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_DEPRECATED"><span class="hs-identifier hs-var">NAMESPACE_STATE_DEPRECATED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_REGISTERED"><span class="hs-identifier hs-var">NAMESPACE_STATE_REGISTERED</span></a></span><span>
+</span><span id="line-181"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_DELETED"><span class="hs-identifier hs-var">NAMESPACE_STATE_DELETED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_DEPRECATED"><span class="hs-identifier hs-var">NAMESPACE_STATE_DEPRECATED</span></a></span><span>
+</span><span id="line-182"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NamespaceState%27Unrecognized"><span class="hs-identifier hs-type">NamespaceState'Unrecognized</span></a></span><span> </span><span class="annot"><span class="annottext">NamespaceState'UnrecognizedValue
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-183"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; NamespaceState
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-184"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;NamespaceState.pred: bad argument: unrecognized value&quot;</span></span><span>
+</span><span id="line-185"></span><span>  </span><span id="local-6989586621680257589"><span class="annot"><span class="annottext">enumFrom :: NamespaceState -&gt; [NamespaceState]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFrom</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState -&gt; [NamespaceState]
+forall a. (Enum a, Bounded a) =&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFrom</span></span><span>
+</span><span id="line-186"></span><span>  </span><span id="local-6989586621680257591"><span class="annot"><span class="annottext">enumFromTo :: NamespaceState -&gt; NamespaceState -&gt; [NamespaceState]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromTo</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState -&gt; NamespaceState -&gt; [NamespaceState]
+forall a. Enum a =&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromTo</span></span><span>
+</span><span id="line-187"></span><span>  </span><span id="local-6989586621680257594"><span class="annot"><span class="annottext">enumFromThen :: NamespaceState -&gt; NamespaceState -&gt; [NamespaceState]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromThen</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState -&gt; NamespaceState -&gt; [NamespaceState]
+forall a. (Enum a, Bounded a) =&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromThen</span></span><span>
+</span><span id="line-188"></span><span>  </span><span id="local-6989586621680257596"><span class="annot"><span class="annottext">enumFromThenTo :: NamespaceState
+-&gt; NamespaceState -&gt; NamespaceState -&gt; [NamespaceState]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromThenTo</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState
+-&gt; NamespaceState -&gt; NamespaceState -&gt; [NamespaceState]
+forall a. Enum a =&gt; a -&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromThenTo</span></span><span>
+</span><span id="line-189"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldDefault</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NamespaceState"><span class="hs-identifier hs-type">NamespaceState</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-190"></span><span>  </span><span id="local-6989586621680257599"><span class="annot"><span class="annottext">fieldDefault :: NamespaceState
+</span><span class="hs-identifier hs-var hs-var hs-var">fieldDefault</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NAMESPACE_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">NAMESPACE_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-191"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Control.DeepSeq.NFData</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#NamespaceState"><span class="hs-identifier hs-type">NamespaceState</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-192"></span><span>  </span><span id="local-6989586621680257602"><span class="annot"><span class="annottext">rnf :: NamespaceState -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var">rnf</span></span></span><span> </span><span id="local-6989586621680257603"><span class="annot"><span class="annottext">NamespaceState
+</span><a href="#local-6989586621680257603"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NamespaceState -&gt; () -&gt; ()
+forall a b. a -&gt; b -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.seq</span></span><span> </span><span class="annot"><span class="annottext">NamespaceState
+</span><a href="#local-6989586621680257603"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-193"></span><span class="hs-keyword">newtype</span><span> </span><span id="ReplicationState%27UnrecognizedValue"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ReplicationState%27UnrecognizedValue"><span class="hs-identifier hs-var">ReplicationState'UnrecognizedValue</span></a></span></span><span>
+</span><span id="line-194"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="ReplicationState%27UnrecognizedValue"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ReplicationState%27UnrecognizedValue"><span class="hs-identifier hs-var">ReplicationState'UnrecognizedValue</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Int.Int32</span></span><span>
+</span><span id="line-195"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680257606"><span id="local-6989586621680257609"><span class="annot"><span class="annottext">ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue -&gt; Bool
+(ReplicationState'UnrecognizedValue
+ -&gt; ReplicationState'UnrecognizedValue -&gt; Bool)
+-&gt; (ReplicationState'UnrecognizedValue
+    -&gt; ReplicationState'UnrecognizedValue -&gt; Bool)
+-&gt; Eq ReplicationState'UnrecognizedValue
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue -&gt; Bool
+== :: ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue -&gt; Bool
+$c/= :: ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue -&gt; Bool
+/= :: ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680257615"><span id="local-6989586621680257618"><span id="local-6989586621680257621"><span id="local-6989586621680257625"><span id="local-6989586621680257628"><span id="local-6989586621680257631"><span id="local-6989586621680257634"><span class="annot"><span class="annottext">Eq ReplicationState'UnrecognizedValue
+Eq ReplicationState'UnrecognizedValue =&gt;
+(ReplicationState'UnrecognizedValue
+ -&gt; ReplicationState'UnrecognizedValue -&gt; Ordering)
+-&gt; (ReplicationState'UnrecognizedValue
+    -&gt; ReplicationState'UnrecognizedValue -&gt; Bool)
+-&gt; (ReplicationState'UnrecognizedValue
+    -&gt; ReplicationState'UnrecognizedValue -&gt; Bool)
+-&gt; (ReplicationState'UnrecognizedValue
+    -&gt; ReplicationState'UnrecognizedValue -&gt; Bool)
+-&gt; (ReplicationState'UnrecognizedValue
+    -&gt; ReplicationState'UnrecognizedValue -&gt; Bool)
+-&gt; (ReplicationState'UnrecognizedValue
+    -&gt; ReplicationState'UnrecognizedValue
+    -&gt; ReplicationState'UnrecognizedValue)
+-&gt; (ReplicationState'UnrecognizedValue
+    -&gt; ReplicationState'UnrecognizedValue
+    -&gt; ReplicationState'UnrecognizedValue)
+-&gt; Ord ReplicationState'UnrecognizedValue
+ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue -&gt; Bool
+ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue -&gt; Ordering
+ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue -&gt; Ordering
+compare :: ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue -&gt; Ordering
+$c&lt; :: ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue -&gt; Bool
+&lt; :: ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue -&gt; Bool
+$c&lt;= :: ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue -&gt; Bool
+&lt;= :: ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue -&gt; Bool
+$c&gt; :: ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue -&gt; Bool
+&gt; :: ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue -&gt; Bool
+$c&gt;= :: ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue -&gt; Bool
+&gt;= :: ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue -&gt; Bool
+$cmax :: ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue
+max :: ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue
+$cmin :: ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue
+min :: ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue
+-&gt; ReplicationState'UnrecognizedValue
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680257637"><span id="local-6989586621680257641"><span id="local-6989586621680257645"><span class="annot"><span class="annottext">Int -&gt; ReplicationState'UnrecognizedValue -&gt; ShowS
+[ReplicationState'UnrecognizedValue] -&gt; ShowS
+ReplicationState'UnrecognizedValue -&gt; String
+(Int -&gt; ReplicationState'UnrecognizedValue -&gt; ShowS)
+-&gt; (ReplicationState'UnrecognizedValue -&gt; String)
+-&gt; ([ReplicationState'UnrecognizedValue] -&gt; ShowS)
+-&gt; Show ReplicationState'UnrecognizedValue
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; ReplicationState'UnrecognizedValue -&gt; ShowS
+showsPrec :: Int -&gt; ReplicationState'UnrecognizedValue -&gt; ShowS
+$cshow :: ReplicationState'UnrecognizedValue -&gt; String
+show :: ReplicationState'UnrecognizedValue -&gt; String
+$cshowList :: [ReplicationState'UnrecognizedValue] -&gt; ShowS
+showList :: [ReplicationState'UnrecognizedValue] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-196"></span><span class="hs-keyword">data</span><span> </span><span id="ReplicationState"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ReplicationState"><span class="hs-identifier hs-var">ReplicationState</span></a></span></span><span>
+</span><span id="line-197"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="REPLICATION_STATE_UNSPECIFIED"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">REPLICATION_STATE_UNSPECIFIED</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-198"></span><span>    </span><span id="REPLICATION_STATE_NORMAL"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_NORMAL"><span class="hs-identifier hs-var">REPLICATION_STATE_NORMAL</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-199"></span><span>    </span><span id="REPLICATION_STATE_HANDOVER"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_HANDOVER"><span class="hs-identifier hs-var">REPLICATION_STATE_HANDOVER</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-200"></span><span>    </span><span id="ReplicationState%27Unrecognized"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ReplicationState%27Unrecognized"><span class="hs-identifier hs-var">ReplicationState'Unrecognized</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ReplicationState%27UnrecognizedValue"><span class="hs-identifier hs-type">ReplicationState'UnrecognizedValue</span></a></span><span>
+</span><span id="line-201"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680257652"><span id="local-6989586621680257656"><span id="local-6989586621680257660"><span class="annot"><span class="annottext">Int -&gt; ReplicationState -&gt; ShowS
+[ReplicationState] -&gt; ShowS
+ReplicationState -&gt; String
+(Int -&gt; ReplicationState -&gt; ShowS)
+-&gt; (ReplicationState -&gt; String)
+-&gt; ([ReplicationState] -&gt; ShowS)
+-&gt; Show ReplicationState
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; ReplicationState -&gt; ShowS
+showsPrec :: Int -&gt; ReplicationState -&gt; ShowS
+$cshow :: ReplicationState -&gt; String
+show :: ReplicationState -&gt; String
+$cshowList :: [ReplicationState] -&gt; ShowS
+showList :: [ReplicationState] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680257663"><span id="local-6989586621680257668"><span class="annot"><span class="annottext">ReplicationState -&gt; ReplicationState -&gt; Bool
+(ReplicationState -&gt; ReplicationState -&gt; Bool)
+-&gt; (ReplicationState -&gt; ReplicationState -&gt; Bool)
+-&gt; Eq ReplicationState
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: ReplicationState -&gt; ReplicationState -&gt; Bool
+== :: ReplicationState -&gt; ReplicationState -&gt; Bool
+$c/= :: ReplicationState -&gt; ReplicationState -&gt; Bool
+/= :: ReplicationState -&gt; ReplicationState -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680257674"><span id="local-6989586621680257679"><span id="local-6989586621680257683"><span id="local-6989586621680257686"><span id="local-6989586621680257689"><span id="local-6989586621680257692"><span id="local-6989586621680257695"><span class="annot"><span class="annottext">Eq ReplicationState
+Eq ReplicationState =&gt;
+(ReplicationState -&gt; ReplicationState -&gt; Ordering)
+-&gt; (ReplicationState -&gt; ReplicationState -&gt; Bool)
+-&gt; (ReplicationState -&gt; ReplicationState -&gt; Bool)
+-&gt; (ReplicationState -&gt; ReplicationState -&gt; Bool)
+-&gt; (ReplicationState -&gt; ReplicationState -&gt; Bool)
+-&gt; (ReplicationState -&gt; ReplicationState -&gt; ReplicationState)
+-&gt; (ReplicationState -&gt; ReplicationState -&gt; ReplicationState)
+-&gt; Ord ReplicationState
+ReplicationState -&gt; ReplicationState -&gt; Bool
+ReplicationState -&gt; ReplicationState -&gt; Ordering
+ReplicationState -&gt; ReplicationState -&gt; ReplicationState
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: ReplicationState -&gt; ReplicationState -&gt; Ordering
+compare :: ReplicationState -&gt; ReplicationState -&gt; Ordering
+$c&lt; :: ReplicationState -&gt; ReplicationState -&gt; Bool
+&lt; :: ReplicationState -&gt; ReplicationState -&gt; Bool
+$c&lt;= :: ReplicationState -&gt; ReplicationState -&gt; Bool
+&lt;= :: ReplicationState -&gt; ReplicationState -&gt; Bool
+$c&gt; :: ReplicationState -&gt; ReplicationState -&gt; Bool
+&gt; :: ReplicationState -&gt; ReplicationState -&gt; Bool
+$c&gt;= :: ReplicationState -&gt; ReplicationState -&gt; Bool
+&gt;= :: ReplicationState -&gt; ReplicationState -&gt; Bool
+$cmax :: ReplicationState -&gt; ReplicationState -&gt; ReplicationState
+max :: ReplicationState -&gt; ReplicationState -&gt; ReplicationState
+$cmin :: ReplicationState -&gt; ReplicationState -&gt; ReplicationState
+min :: ReplicationState -&gt; ReplicationState -&gt; ReplicationState
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-202"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.MessageEnum</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ReplicationState"><span class="hs-identifier hs-type">ReplicationState</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-203"></span><span>  </span><span id="local-6989586621680257715"><span class="annot"><span class="annottext">maybeToEnum :: Int -&gt; Maybe ReplicationState
+</span><span class="hs-identifier hs-var hs-var hs-var">maybeToEnum</span></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplicationState -&gt; Maybe ReplicationState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">REPLICATION_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-204"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplicationState -&gt; Maybe ReplicationState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_NORMAL"><span class="hs-identifier hs-var">REPLICATION_STATE_NORMAL</span></a></span><span>
+</span><span id="line-205"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplicationState -&gt; Maybe ReplicationState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_HANDOVER"><span class="hs-identifier hs-var">REPLICATION_STATE_HANDOVER</span></a></span><span>
+</span><span id="line-206"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span id="local-6989586621680257716"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680257716"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><span id="line-207"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplicationState -&gt; Maybe ReplicationState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span>
+</span><span id="line-208"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ReplicationState'UnrecognizedValue -&gt; ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ReplicationState%27Unrecognized"><span class="hs-identifier hs-var">ReplicationState'Unrecognized</span></a></span><span>
+</span><span id="line-209"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int32 -&gt; ReplicationState'UnrecognizedValue
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ReplicationState%27UnrecognizedValue"><span class="hs-identifier hs-var">ReplicationState'UnrecognizedValue</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int32
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680257716"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-210"></span><span>  </span><span id="local-6989586621680257718"><span class="annot"><span class="annottext">showEnum :: ReplicationState -&gt; String
+</span><span class="hs-identifier hs-var hs-var hs-var">showEnum</span></span></span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">REPLICATION_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-211"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;REPLICATION_STATE_UNSPECIFIED&quot;</span></span><span>
+</span><span id="line-212"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_NORMAL"><span class="hs-identifier hs-var">REPLICATION_STATE_NORMAL</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;REPLICATION_STATE_NORMAL&quot;</span></span><span>
+</span><span id="line-213"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_HANDOVER"><span class="hs-identifier hs-var">REPLICATION_STATE_HANDOVER</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;REPLICATION_STATE_HANDOVER&quot;</span></span><span>
+</span><span id="line-214"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span>
+</span><span id="line-215"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ReplicationState%27Unrecognized"><span class="hs-identifier hs-type">ReplicationState'Unrecognized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ReplicationState%27UnrecognizedValue"><span class="hs-identifier hs-type">ReplicationState'UnrecognizedValue</span></a></span><span> </span><span id="local-6989586621680257719"><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680257719"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-216"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int32 -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">Prelude.show</span></span><span> </span><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680257719"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-217"></span><span>  </span><span id="local-6989586621680257731"><span class="annot"><span class="annottext">readEnum :: String -&gt; Maybe ReplicationState
+</span><span class="hs-identifier hs-var hs-var hs-var">readEnum</span></span></span><span> </span><span id="local-6989586621680257732"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257732"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><span id="line-218"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257732"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;REPLICATION_STATE_UNSPECIFIED&quot;</span></span><span>
+</span><span id="line-219"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplicationState -&gt; Maybe ReplicationState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">REPLICATION_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-220"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257732"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;REPLICATION_STATE_NORMAL&quot;</span></span><span>
+</span><span id="line-221"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplicationState -&gt; Maybe ReplicationState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_NORMAL"><span class="hs-identifier hs-var">REPLICATION_STATE_NORMAL</span></a></span><span>
+</span><span id="line-222"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257732"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;REPLICATION_STATE_HANDOVER&quot;</span></span><span>
+</span><span id="line-223"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplicationState -&gt; Maybe ReplicationState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_HANDOVER"><span class="hs-identifier hs-var">REPLICATION_STATE_HANDOVER</span></a></span><span>
+</span><span id="line-224"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">Prelude.otherwise</span></span><span>
+</span><span id="line-225"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Int
+-&gt; (Int -&gt; Maybe ReplicationState) -&gt; Maybe ReplicationState
+forall a b. Maybe a -&gt; (a -&gt; Maybe b) -&gt; Maybe b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">(Prelude.&gt;&gt;=)</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Maybe Int
+forall a. Read a =&gt; String -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Text.Read.readMaybe</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257732"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Maybe ReplicationState
+forall a. MessageEnum a =&gt; Int -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeToEnum</span></span><span>
+</span><span id="line-226"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prelude.Bounded</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ReplicationState"><span class="hs-identifier hs-type">ReplicationState</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-227"></span><span>  </span><span id="local-6989586621680257735"><span class="annot"><span class="annottext">minBound :: ReplicationState
+</span><span class="hs-identifier hs-var hs-var hs-var">minBound</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">REPLICATION_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-228"></span><span>  </span><span id="local-6989586621680257736"><span class="annot"><span class="annottext">maxBound :: ReplicationState
+</span><span class="hs-identifier hs-var hs-var hs-var">maxBound</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_HANDOVER"><span class="hs-identifier hs-var">REPLICATION_STATE_HANDOVER</span></a></span><span>
+</span><span id="line-229"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prelude.Enum</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ReplicationState"><span class="hs-identifier hs-type">ReplicationState</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-230"></span><span>  </span><span id="local-6989586621680257751"><span class="annot"><span class="annottext">toEnum :: Int -&gt; ReplicationState
+</span><span class="hs-identifier hs-var hs-var hs-var">toEnum</span></span></span><span> </span><span id="local-6989586621680257752"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680257752"><span class="hs-identifier hs-var">k__</span></a></span></span><span>
+</span><span id="line-231"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplicationState
+-&gt; (ReplicationState -&gt; ReplicationState)
+-&gt; Maybe ReplicationState
+-&gt; ReplicationState
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.maybe</span></span><span>
+</span><span id="line-232"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ReplicationState
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-233"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">(Prelude.++)</span></span><span>
+</span><span id="line-234"></span><span>              </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;toEnum: unknown value for enum ReplicationState: &quot;</span></span><span>
+</span><span id="line-235"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">Prelude.show</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680257752"><span class="hs-identifier hs-var">k__</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-236"></span><span>        </span><span class="annot"><span class="annottext">ReplicationState -&gt; ReplicationState
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.id</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Maybe ReplicationState
+forall a. MessageEnum a =&gt; Int -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680257752"><span class="hs-identifier hs-var">k__</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-237"></span><span>  </span><span id="local-6989586621680257755"><span class="annot"><span class="annottext">fromEnum :: ReplicationState -&gt; Int
+</span><span class="hs-identifier hs-var hs-var hs-var">fromEnum</span></span></span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">REPLICATION_STATE_UNSPECIFIED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-238"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_NORMAL"><span class="hs-identifier hs-var">REPLICATION_STATE_NORMAL</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-239"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_HANDOVER"><span class="hs-identifier hs-var">REPLICATION_STATE_HANDOVER</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span>
+</span><span id="line-240"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span>
+</span><span id="line-241"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ReplicationState%27Unrecognized"><span class="hs-identifier hs-type">ReplicationState'Unrecognized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ReplicationState%27UnrecognizedValue"><span class="hs-identifier hs-type">ReplicationState'UnrecognizedValue</span></a></span><span> </span><span id="local-6989586621680257756"><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680257756"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-242"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int32 -&gt; Int
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680257756"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-243"></span><span>  </span><span id="local-6989586621680257761"><span class="annot"><span class="annottext">succ :: ReplicationState -&gt; ReplicationState
+</span><span class="hs-identifier hs-var hs-var hs-var">succ</span></span></span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_HANDOVER"><span class="hs-identifier hs-var">REPLICATION_STATE_HANDOVER</span></a></span><span>
+</span><span id="line-244"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; ReplicationState
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-245"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;ReplicationState.succ: bad argument REPLICATION_STATE_HANDOVER. This value would be out of bounds.&quot;</span></span><span>
+</span><span id="line-246"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">REPLICATION_STATE_UNSPECIFIED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_NORMAL"><span class="hs-identifier hs-var">REPLICATION_STATE_NORMAL</span></a></span><span>
+</span><span id="line-247"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_NORMAL"><span class="hs-identifier hs-var">REPLICATION_STATE_NORMAL</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_HANDOVER"><span class="hs-identifier hs-var">REPLICATION_STATE_HANDOVER</span></a></span><span>
+</span><span id="line-248"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ReplicationState%27Unrecognized"><span class="hs-identifier hs-type">ReplicationState'Unrecognized</span></a></span><span> </span><span class="annot"><span class="annottext">ReplicationState'UnrecognizedValue
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-249"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; ReplicationState
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-250"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;ReplicationState.succ: bad argument: unrecognized value&quot;</span></span><span>
+</span><span id="line-251"></span><span>  </span><span id="local-6989586621680257766"><span class="annot"><span class="annottext">pred :: ReplicationState -&gt; ReplicationState
+</span><span class="hs-identifier hs-var hs-var hs-var">pred</span></span></span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">REPLICATION_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-252"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; ReplicationState
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-253"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;ReplicationState.pred: bad argument REPLICATION_STATE_UNSPECIFIED. This value would be out of bounds.&quot;</span></span><span>
+</span><span id="line-254"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_NORMAL"><span class="hs-identifier hs-var">REPLICATION_STATE_NORMAL</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">REPLICATION_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-255"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_HANDOVER"><span class="hs-identifier hs-var">REPLICATION_STATE_HANDOVER</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_NORMAL"><span class="hs-identifier hs-var">REPLICATION_STATE_NORMAL</span></a></span><span>
+</span><span id="line-256"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ReplicationState%27Unrecognized"><span class="hs-identifier hs-type">ReplicationState'Unrecognized</span></a></span><span> </span><span class="annot"><span class="annottext">ReplicationState'UnrecognizedValue
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-257"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; ReplicationState
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-258"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;ReplicationState.pred: bad argument: unrecognized value&quot;</span></span><span>
+</span><span id="line-259"></span><span>  </span><span id="local-6989586621680257769"><span class="annot"><span class="annottext">enumFrom :: ReplicationState -&gt; [ReplicationState]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFrom</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplicationState -&gt; [ReplicationState]
+forall a. (Enum a, Bounded a) =&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFrom</span></span><span>
+</span><span id="line-260"></span><span>  </span><span id="local-6989586621680257771"><span class="annot"><span class="annottext">enumFromTo :: ReplicationState -&gt; ReplicationState -&gt; [ReplicationState]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromTo</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplicationState -&gt; ReplicationState -&gt; [ReplicationState]
+forall a. Enum a =&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromTo</span></span><span>
+</span><span id="line-261"></span><span>  </span><span id="local-6989586621680257774"><span class="annot"><span class="annottext">enumFromThen :: ReplicationState -&gt; ReplicationState -&gt; [ReplicationState]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromThen</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplicationState -&gt; ReplicationState -&gt; [ReplicationState]
+forall a. (Enum a, Bounded a) =&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromThen</span></span><span>
+</span><span id="line-262"></span><span>  </span><span id="local-6989586621680257776"><span class="annot"><span class="annottext">enumFromThenTo :: ReplicationState
+-&gt; ReplicationState -&gt; ReplicationState -&gt; [ReplicationState]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromThenTo</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplicationState
+-&gt; ReplicationState -&gt; ReplicationState -&gt; [ReplicationState]
+forall a. Enum a =&gt; a -&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromThenTo</span></span><span>
+</span><span id="line-263"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldDefault</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ReplicationState"><span class="hs-identifier hs-type">ReplicationState</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-264"></span><span>  </span><span id="local-6989586621680257779"><span class="annot"><span class="annottext">fieldDefault :: ReplicationState
+</span><span class="hs-identifier hs-var hs-var hs-var">fieldDefault</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#REPLICATION_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">REPLICATION_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-265"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Control.DeepSeq.NFData</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Namespace.html#ReplicationState"><span class="hs-identifier hs-type">ReplicationState</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-266"></span><span>  </span><span id="local-6989586621680257782"><span class="annot"><span class="annottext">rnf :: ReplicationState -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var">rnf</span></span></span><span> </span><span id="local-6989586621680257783"><span class="annot"><span class="annottext">ReplicationState
+</span><a href="#local-6989586621680257783"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplicationState -&gt; () -&gt; ()
+forall a b. a -&gt; b -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.seq</span></span><span> </span><span class="annot"><span class="annottext">ReplicationState
+</span><a href="#local-6989586621680257783"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-267"></span></pre></body></html>

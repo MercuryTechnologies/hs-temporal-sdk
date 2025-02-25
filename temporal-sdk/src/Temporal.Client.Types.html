@@ -1,0 +1,698 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DeriveLift #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Client.Types.html"><span class="hs-identifier">Temporal.Client.Types</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map.Strict</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Map</span></span><span class="hs-special">)</span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Vector</span></span><span class="hs-special">)</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Lift</span></span><span class="hs-special">)</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Common.html"><span class="hs-identifier">Temporal.Common</span></a></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Temporal.Core.Client</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Client</span></span><span class="hs-special">)</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Duration.html"><span class="hs-identifier">Temporal.Duration</span></a></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Payload.html"><span class="hs-identifier">Temporal.Payload</span></a></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html"><span class="hs-identifier">Temporal.SearchAttributes</span></a></span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="annot"><span class="hs-comment">-- | Configuration parameters for starting a workflow execution.</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">data</span><span> </span><span id="StartWorkflowOptions"><span class="annot"><a href="Temporal.Client.Types.html#StartWorkflowOptions"><span class="hs-identifier hs-var">StartWorkflowOptions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="StartWorkflowOptions"><span class="annot"><a href="Temporal.Client.Types.html#StartWorkflowOptions"><span class="hs-identifier hs-var">StartWorkflowOptions</span></a></span></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="taskQueue"><span class="annot"><span class="annottext">StartWorkflowOptions -&gt; TaskQueue
+</span><a href="Temporal.Client.Types.html#taskQueue"><span class="hs-identifier hs-var hs-var">taskQueue</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Common.html#TaskQueue"><span class="hs-identifier hs-type">TaskQueue</span></a></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-comment">-- ^ A Task Queue is a lightweight, dynamically allocated queue that one or more Worker Entities poll for Tasks.</span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-comment">-- Task Queues are very lightweight components. Task Queues do not require explicit registration but instead are created on demand when</span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-comment">-- a Workflow Execution spawns or when a Worker Process subscribes to it. When a Task Queue is created, both a Workflow Task Queue and</span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-comment">-- an Activity Task Queue are created under the same name. There is no limit to the number of Task Queues a Temporal Application</span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-comment">-- can use or a Temporal Cluster can maintain.</span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="followRuns"><span class="annot"><span class="annottext">StartWorkflowOptions -&gt; Bool
+</span><a href="Temporal.Client.Types.html#followRuns"><span class="hs-identifier hs-var hs-var">followRuns</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="workflowIdReusePolicy"><span class="annot"><span class="annottext">StartWorkflowOptions -&gt; Maybe WorkflowIdReusePolicy
+</span><a href="Temporal.Client.Types.html#workflowIdReusePolicy"><span class="hs-identifier hs-var hs-var">workflowIdReusePolicy</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#WorkflowIdReusePolicy"><span class="hs-identifier hs-type">WorkflowIdReusePolicy</span></a></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-comment">-- ^ A Workflow Id Reuse Policy determines whether a Workflow Execution is allowed to spawn with a particular Workflow Id, if that Workflow Id has been used with a previous, and now Closed, Workflow Execution.</span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-comment">-- It is not possible for a new Workflow Execution to spawn with the same Workflow Id as another Open Workflow Execution, regardless of the Workflow Id Reuse Policy. In some cases, an attempt to spawn a Workflow</span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-comment">-- Execution with a Workflow Id that is the same as the Id of a currently Open Workflow Execution results in a @Workflow execution already started@ error.</span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="retryPolicy"><span class="annot"><span class="annottext">StartWorkflowOptions -&gt; Maybe RetryPolicy
+</span><a href="Temporal.Client.Types.html#retryPolicy"><span class="hs-identifier hs-var hs-var">retryPolicy</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#RetryPolicy"><span class="hs-identifier hs-type">RetryPolicy</span></a></span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-comment">-- ^ A Retry Policy can work in cooperation with the timeouts to provide fine controls to optimize the execution experience.</span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-comment">-- Use a Retry Policy to retry a Workflow Execution in the event of a failure.</span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-comment">-- Workflow Executions do not retry by default, and Retry Policies should be used with Workflow Executions only in</span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-comment">-- certain situations.</span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-comment">-- This should not be confused with Activity retry policies, which are used to retry Activities and specified at those</span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-comment">-- callsites.</span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="cronSchedule"><span class="annot"><span class="annottext">StartWorkflowOptions -&gt; Maybe Text
+</span><a href="Temporal.Client.Types.html#cronSchedule"><span class="hs-identifier hs-var hs-var">cronSchedule</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-comment">-- ^ A Temporal Cron Job is the series of Workflow Executions that occur when a Cron Schedule is</span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-comment">-- provided in the call to spawn a Workflow Execution.</span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-comment">-- A Cron Schedule is provided as an option when the call to spawn a Workflow Execution is made.</span><span>
+</span><span id="line-46"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-comment">-- You can set each Workflow to repeat on a schedule with the cronSchedule option:</span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-comment">-- &gt;</span><span>
+</span><span id="line-50"></span><span>  </span><span class="hs-comment">-- &gt; Temporal.Client.start scheduledWorkflow</span><span>
+</span><span id="line-51"></span><span>  </span><span class="hs-comment">-- &gt;   (Temporal.Client.startWorkflowOptions &quot;my-workflow&quot; &quot;my-task-queue&quot;) { cronSchedule = Just &quot;* * * * *&quot; } -- start every minute</span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-comment">-- &gt;</span><span>
+</span><span id="line-53"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-54"></span><span>  </span><span class="hs-comment">-- Note that Temporal offers more advanced scheduling support via 'Temporal.Client.Schedule', so</span><span>
+</span><span id="line-55"></span><span>  </span><span class="hs-comment">-- it is generally recommended to use that instead of Cron Schedules.</span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="memo"><span class="annot"><span class="annottext">StartWorkflowOptions -&gt; Map Text Payload
+</span><a href="Temporal.Client.Types.html#memo"><span class="hs-identifier hs-var hs-var">memo</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-comment">-- ^ A Memo is a non-indexed set of Workflow Execution metadata that developers supply at start time or</span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-comment">-- in Workflow code and that is returned when you describe or list Workflow Executions.</span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-60"></span><span>  </span><span class="hs-comment">-- The primary purpose of using a Memo is to enhance the organization and management of Workflow Executions.</span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-comment">-- Add your own metadata, such as notes or descriptions, to a Workflow Execution, which lets you annotate and</span><span>
+</span><span id="line-62"></span><span>  </span><span class="hs-comment">-- categorize Workflow Executions based on developer-defined criteria. This feature is particularly useful</span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-comment">-- when dealing with numerous Workflow Executions because it facilitates the addition of context, reminders,</span><span>
+</span><span id="line-64"></span><span>  </span><span class="hs-comment">-- or any other relevant information that aids in understanding or tracking the Workflow Execution.</span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="searchAttributes"><span class="annot"><span class="annottext">StartWorkflowOptions -&gt; Map SearchAttributeKey SearchAttributeType
+</span><a href="Temporal.Client.Types.html#searchAttributes"><span class="hs-identifier hs-var hs-var">searchAttributes</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeKey"><span class="hs-identifier hs-type">SearchAttributeKey</span></a></span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeType"><span class="hs-identifier hs-type">SearchAttributeType</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-comment">-- ^ Search attributes are indexed by the Temporal server and can be used in queries on the dashboard</span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-comment">-- or by the Temporal CLI to find Workflows. These values are not encrypted and can be seen by anyone</span><span>
+</span><span id="line-68"></span><span>  </span><span class="hs-comment">-- with access to the Temporal namespace.</span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="headers"><span class="annot"><span class="annottext">StartWorkflowOptions -&gt; Map Text Payload
+</span><a href="Temporal.Client.Types.html#headers"><span class="hs-identifier hs-var hs-var">headers</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span><span>  </span><span class="hs-comment">-- ^ Custom headers to be added to the Workflow Execution. These are generally more useful for interceptors</span><span>
+</span><span id="line-71"></span><span>  </span><span class="hs-comment">-- to add metadata to the Workflow rather than for application code.</span><span>
+</span><span id="line-72"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="timeouts"><span class="annot"><span class="annottext">StartWorkflowOptions -&gt; TimeoutOptions
+</span><a href="Temporal.Client.Types.html#timeouts"><span class="hs-identifier hs-var hs-var">timeouts</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Common.html#TimeoutOptions"><span class="hs-identifier hs-type">TimeoutOptions</span></a></span><span>
+</span><span id="line-73"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ Each Workflow timeout controls the maximum duration of a different aspect of a Workflow Execution.</span></span><span>
+</span><span id="line-74"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="requestEagerExecution"><span class="annot"><span class="annottext">StartWorkflowOptions -&gt; Bool
+</span><a href="Temporal.Client.Types.html#requestEagerExecution"><span class="hs-identifier hs-var hs-var">requestEagerExecution</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-75"></span><span>  </span><span class="hs-comment">-- ^ Eager activity execution is an optimization on some servers that sends activities</span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-comment">-- back to the same worker as the calling workflow if they can run there.</span><span>
+</span><span id="line-77"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="workflowStartDelay"><span class="annot"><span class="annottext">StartWorkflowOptions -&gt; Maybe Duration
+</span><a href="Temporal.Client.Types.html#workflowStartDelay"><span class="hs-identifier hs-var hs-var">workflowStartDelay</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Duration.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span>
+</span><span id="line-78"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-79"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680166745"><span id="local-6989586621680166772"><span id="local-6989586621680166776"><span class="annot"><span class="annottext">Int -&gt; StartWorkflowOptions -&gt; ShowS
+[StartWorkflowOptions] -&gt; ShowS
+StartWorkflowOptions -&gt; String
+(Int -&gt; StartWorkflowOptions -&gt; ShowS)
+-&gt; (StartWorkflowOptions -&gt; String)
+-&gt; ([StartWorkflowOptions] -&gt; ShowS)
+-&gt; Show StartWorkflowOptions
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; StartWorkflowOptions -&gt; ShowS
+showsPrec :: Int -&gt; StartWorkflowOptions -&gt; ShowS
+$cshow :: StartWorkflowOptions -&gt; String
+show :: StartWorkflowOptions -&gt; String
+$cshowList :: [StartWorkflowOptions] -&gt; ShowS
+showList :: [StartWorkflowOptions] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680166788"><span id="local-6989586621680166813"><span class="annot"><span class="annottext">StartWorkflowOptions -&gt; StartWorkflowOptions -&gt; Bool
+(StartWorkflowOptions -&gt; StartWorkflowOptions -&gt; Bool)
+-&gt; (StartWorkflowOptions -&gt; StartWorkflowOptions -&gt; Bool)
+-&gt; Eq StartWorkflowOptions
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: StartWorkflowOptions -&gt; StartWorkflowOptions -&gt; Bool
+== :: StartWorkflowOptions -&gt; StartWorkflowOptions -&gt; Bool
+$c/= :: StartWorkflowOptions -&gt; StartWorkflowOptions -&gt; Bool
+/= :: StartWorkflowOptions -&gt; StartWorkflowOptions -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680166825"><span id="local-6989586621680166863"><span class="annot"><span class="annottext">(forall (m :: * -&gt; *). Quote m =&gt; StartWorkflowOptions -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *).
+    Quote m =&gt;
+    StartWorkflowOptions -&gt; Code m StartWorkflowOptions)
+-&gt; Lift StartWorkflowOptions
+forall t.
+(forall (m :: * -&gt; *). Quote m =&gt; t -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *). Quote m =&gt; t -&gt; Code m t) -&gt; Lift t
+forall (m :: * -&gt; *). Quote m =&gt; StartWorkflowOptions -&gt; m Exp
+forall (m :: * -&gt; *).
+Quote m =&gt;
+StartWorkflowOptions -&gt; Code m StartWorkflowOptions
+$clift :: forall (m :: * -&gt; *). Quote m =&gt; StartWorkflowOptions -&gt; m Exp
+lift :: forall (m :: * -&gt; *). Quote m =&gt; StartWorkflowOptions -&gt; m Exp
+$cliftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+StartWorkflowOptions -&gt; Code m StartWorkflowOptions
+liftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+StartWorkflowOptions -&gt; Code m StartWorkflowOptions
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Lift</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span>
+</span><span id="line-82"></span><span class="annot"><span class="hs-comment">{- | Smart constructor for 'StartWorkflowOptions'.
+
+At a minimum, a 'Workflow' execution requires a 'WorkflowId' and a 'TaskQueue'.
+
+It is recommend to specify 'WorkflowId' in most cases, as it is used to uniquely identify a 'Workflow' execution,
+but if one is not specified then a random UUID will be generated.
+-}</span></span><span>
+</span><span id="line-89"></span><span class="annot"><a href="Temporal.Client.Types.html#startWorkflowOptions"><span class="hs-identifier hs-type">startWorkflowOptions</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Common.html#TaskQueue"><span class="hs-identifier hs-type">TaskQueue</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Client.Types.html#StartWorkflowOptions"><span class="hs-identifier hs-type">StartWorkflowOptions</span></a></span><span>
+</span><span id="line-90"></span><span id="startWorkflowOptions"><span class="annot"><span class="annottext">startWorkflowOptions :: TaskQueue -&gt; StartWorkflowOptions
+</span><a href="Temporal.Client.Types.html#startWorkflowOptions"><span class="hs-identifier hs-var hs-var">startWorkflowOptions</span></a></span></span><span> </span><span id="local-6989586621680166907"><span class="annot"><span class="annottext">TaskQueue
+</span><a href="#local-6989586621680166907"><span class="hs-identifier hs-var">tq</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-91"></span><span>  </span><span class="annot"><a href="Temporal.Client.Types.html#StartWorkflowOptions"><span class="hs-identifier hs-type">StartWorkflowOptions</span></a></span><span>
+</span><span id="line-92"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">taskQueue :: TaskQueue
+</span><a href="Temporal.Client.Types.html#taskQueue"><span class="hs-identifier hs-var">taskQueue</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TaskQueue
+</span><a href="#local-6989586621680166907"><span class="hs-identifier hs-var">tq</span></a></span><span>
+</span><span id="line-93"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">followRuns :: Bool
+</span><a href="Temporal.Client.Types.html#followRuns"><span class="hs-identifier hs-var">followRuns</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-94"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">workflowIdReusePolicy :: Maybe WorkflowIdReusePolicy
+</span><a href="Temporal.Client.Types.html#workflowIdReusePolicy"><span class="hs-identifier hs-var">workflowIdReusePolicy</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe WorkflowIdReusePolicy
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-95"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">retryPolicy :: Maybe RetryPolicy
+</span><a href="Temporal.Client.Types.html#retryPolicy"><span class="hs-identifier hs-var">retryPolicy</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe RetryPolicy
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-96"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">cronSchedule :: Maybe Text
+</span><a href="Temporal.Client.Types.html#cronSchedule"><span class="hs-identifier hs-var">cronSchedule</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Text
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-97"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">memo :: Map Text Payload
+</span><a href="Temporal.Client.Types.html#memo"><span class="hs-identifier hs-var">memo</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map Text Payload
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-98"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">searchAttributes :: Map SearchAttributeKey SearchAttributeType
+</span><a href="Temporal.Client.Types.html#searchAttributes"><span class="hs-identifier hs-var">searchAttributes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map SearchAttributeKey SearchAttributeType
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-99"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">headers :: Map Text Payload
+</span><a href="Temporal.Client.Types.html#headers"><span class="hs-identifier hs-var">headers</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map Text Payload
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-100"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">timeouts :: TimeoutOptions
+</span><a href="Temporal.Client.Types.html#timeouts"><span class="hs-identifier hs-var">timeouts</span></a></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-101"></span><span>        </span><span class="annot"><a href="Temporal.Common.html#TimeoutOptions"><span class="hs-identifier hs-type">TimeoutOptions</span></a></span><span>
+</span><span id="line-102"></span><span>          </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">executionTimeout :: Maybe Duration
+</span><a href="Temporal.Common.html#executionTimeout"><span class="hs-identifier hs-var">executionTimeout</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Duration
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-103"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">runTimeout :: Maybe Duration
+</span><a href="Temporal.Common.html#runTimeout"><span class="hs-identifier hs-var">runTimeout</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Duration
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-104"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">taskTimeout :: Maybe Duration
+</span><a href="Temporal.Common.html#taskTimeout"><span class="hs-identifier hs-var">taskTimeout</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Duration
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-105"></span><span>          </span><span class="hs-special">}</span><span>
+</span><span id="line-106"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">requestEagerExecution :: Bool
+</span><a href="Temporal.Client.Types.html#requestEagerExecution"><span class="hs-identifier hs-var">requestEagerExecution</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-107"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">workflowStartDelay :: Maybe Duration
+</span><a href="Temporal.Client.Types.html#workflowStartDelay"><span class="hs-identifier hs-var">workflowStartDelay</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Duration
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-108"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span class="hs-keyword">data</span><span> </span><span id="WorkflowClientConfig"><span class="annot"><a href="Temporal.Client.Types.html#WorkflowClientConfig"><span class="hs-identifier hs-var">WorkflowClientConfig</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="WorkflowClientConfig"><span class="annot"><a href="Temporal.Client.Types.html#WorkflowClientConfig"><span class="hs-identifier hs-var">WorkflowClientConfig</span></a></span></span><span>
+</span><span id="line-112"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="namespace"><span class="annot"><span class="annottext">WorkflowClientConfig -&gt; Namespace
+</span><a href="Temporal.Client.Types.html#namespace"><span class="hs-identifier hs-var hs-var">namespace</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Temporal.Common.html#Namespace"><span class="hs-identifier hs-type">Namespace</span></a></span><span>
+</span><span id="line-113"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ Default namespace for all workflows started by this client.</span></span><span>
+</span><span id="line-114"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="interceptors"><span class="annot"><span class="annottext">WorkflowClientConfig -&gt; ClientInterceptors
+</span><a href="Temporal.Client.Types.html#interceptors"><span class="hs-identifier hs-var hs-var">interceptors</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Temporal.Client.Types.html#ClientInterceptors"><span class="hs-identifier hs-type">ClientInterceptors</span></a></span><span>
+</span><span id="line-115"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ Interceptors to be used by the client.</span></span><span>
+</span><span id="line-116"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="payloadProcessor"><span class="annot"><span class="annottext">WorkflowClientConfig -&gt; PayloadProcessor
+</span><a href="Temporal.Client.Types.html#payloadProcessor"><span class="hs-identifier hs-var hs-var">payloadProcessor</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Temporal.Payload.html#PayloadProcessor"><span class="hs-identifier hs-type">PayloadProcessor</span></a></span><span>
+</span><span id="line-117"></span><span>  </span><span class="hs-comment">-- ^ The payload processor to be used by the client.</span><span>
+</span><span id="line-118"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-119"></span><span>  </span><span class="hs-comment">-- This can be used to apply encryption and compression to payloads.</span><span>
+</span><span id="line-120"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-121"></span><span>
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span><span class="hs-comment">-- TODO</span><span>
+</span><span id="line-124"></span><span class="hs-comment">-- , clientHeaders :: Map Text Payload</span><span>
+</span><span id="line-125"></span><span>
+</span><span id="line-126"></span><span class="annot"><a href="Temporal.Client.Types.html#mkWorkflowClientConfig"><span class="hs-identifier hs-type">mkWorkflowClientConfig</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Common.html#Namespace"><span class="hs-identifier hs-type">Namespace</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Client.Types.html#WorkflowClientConfig"><span class="hs-identifier hs-type">WorkflowClientConfig</span></a></span><span>
+</span><span id="line-127"></span><span id="mkWorkflowClientConfig"><span class="annot"><span class="annottext">mkWorkflowClientConfig :: Namespace -&gt; WorkflowClientConfig
+</span><a href="Temporal.Client.Types.html#mkWorkflowClientConfig"><span class="hs-identifier hs-var hs-var">mkWorkflowClientConfig</span></a></span></span><span> </span><span id="local-6989586621680166917"><span class="annot"><span class="annottext">Namespace
+</span><a href="#local-6989586621680166917"><span class="hs-identifier hs-var">ns</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-128"></span><span>  </span><span class="annot"><a href="Temporal.Client.Types.html#WorkflowClientConfig"><span class="hs-identifier hs-type">WorkflowClientConfig</span></a></span><span>
+</span><span id="line-129"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">namespace :: Namespace
+</span><a href="Temporal.Client.Types.html#namespace"><span class="hs-identifier hs-var">namespace</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Namespace
+</span><a href="#local-6989586621680166917"><span class="hs-identifier hs-var">ns</span></a></span><span>
+</span><span id="line-130"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">interceptors :: ClientInterceptors
+</span><a href="Temporal.Client.Types.html#interceptors"><span class="hs-identifier hs-var">interceptors</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ClientInterceptors
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-131"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">payloadProcessor :: PayloadProcessor
+</span><a href="Temporal.Client.Types.html#payloadProcessor"><span class="hs-identifier hs-var">payloadProcessor</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Payload -&gt; IO Payload)
+-&gt; (Payload -&gt; IO (Either String Payload)) -&gt; PayloadProcessor
+</span><a href="Temporal.Payload.html#PayloadProcessor"><span class="hs-identifier hs-var">PayloadProcessor</span></a></span><span> </span><span class="annot"><span class="annottext">Payload -&gt; IO Payload
+forall a. a -&gt; IO a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Either String Payload -&gt; IO (Either String Payload)
+forall a. a -&gt; IO a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(Either String Payload -&gt; IO (Either String Payload))
+-&gt; (Payload -&gt; Either String Payload)
+-&gt; Payload
+-&gt; IO (Either String Payload)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Payload -&gt; Either String Payload
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span class="hs-special">)</span><span>
+</span><span id="line-132"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-133"></span><span>
+</span><span id="line-134"></span><span>
+</span><span id="line-135"></span><span class="hs-keyword">data</span><span> </span><span id="WorkflowClient"><span class="annot"><a href="Temporal.Client.Types.html#WorkflowClient"><span class="hs-identifier hs-var">WorkflowClient</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="WorkflowClient"><span class="annot"><a href="Temporal.Client.Types.html#WorkflowClient"><span class="hs-identifier hs-var">WorkflowClient</span></a></span></span><span>
+</span><span id="line-136"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="clientCore"><span class="annot"><span class="annottext">WorkflowClient -&gt; Client
+</span><a href="Temporal.Client.Types.html#clientCore"><span class="hs-identifier hs-var hs-var">clientCore</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Client</span></span><span>
+</span><span id="line-137"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="clientConfig"><span class="annot"><span class="annottext">WorkflowClient -&gt; WorkflowClientConfig
+</span><a href="Temporal.Client.Types.html#clientConfig"><span class="hs-identifier hs-var hs-var">clientConfig</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Temporal.Client.Types.html#WorkflowClientConfig"><span class="hs-identifier hs-type">WorkflowClientConfig</span></a></span><span>
+</span><span id="line-138"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-139"></span><span>
+</span><span id="line-140"></span><span>
+</span><span id="line-141"></span><span class="hs-keyword">data</span><span> </span><span id="WorkflowHandle"><span class="annot"><a href="Temporal.Client.Types.html#WorkflowHandle"><span class="hs-identifier hs-var">WorkflowHandle</span></a></span></span><span> </span><span id="local-6989586621680166683"><span class="annot"><a href="#local-6989586621680166683"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="WorkflowHandle"><span class="annot"><a href="Temporal.Client.Types.html#WorkflowHandle"><span class="hs-identifier hs-var">WorkflowHandle</span></a></span></span><span>
+</span><span id="line-142"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="workflowHandleReadResult"><span class="annot"><span class="annottext">forall a. WorkflowHandle a -&gt; Payload -&gt; IO a
+</span><a href="Temporal.Client.Types.html#workflowHandleReadResult"><span class="hs-identifier hs-var hs-var">workflowHandleReadResult</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621680166683"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-143"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="workflowHandleType"><span class="annot"><span class="annottext">forall a. WorkflowHandle a -&gt; WorkflowType
+</span><a href="Temporal.Client.Types.html#workflowHandleType"><span class="hs-identifier hs-var hs-var">workflowHandleType</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Common.html#WorkflowType"><span class="hs-identifier hs-type">WorkflowType</span></a></span><span>
+</span><span id="line-144"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="workflowHandleClient"><span class="annot"><span class="annottext">forall a. WorkflowHandle a -&gt; WorkflowClient
+</span><a href="Temporal.Client.Types.html#workflowHandleClient"><span class="hs-identifier hs-var hs-var">workflowHandleClient</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Client.Types.html#WorkflowClient"><span class="hs-identifier hs-type">WorkflowClient</span></a></span><span>
+</span><span id="line-145"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="workflowHandleWorkflowId"><span class="annot"><span class="annottext">forall a. WorkflowHandle a -&gt; WorkflowId
+</span><a href="Temporal.Client.Types.html#workflowHandleWorkflowId"><span class="hs-identifier hs-var hs-var">workflowHandleWorkflowId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Common.html#WorkflowId"><span class="hs-identifier hs-type">WorkflowId</span></a></span><span>
+</span><span id="line-146"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="workflowHandleRunId"><span class="annot"><span class="annottext">forall a. WorkflowHandle a -&gt; Maybe RunId
+</span><a href="Temporal.Client.Types.html#workflowHandleRunId"><span class="hs-identifier hs-var hs-var">workflowHandleRunId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#RunId"><span class="hs-identifier hs-type">RunId</span></a></span><span>
+</span><span id="line-147"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-148"></span><span>
+</span><span id="line-149"></span><span>
+</span><span id="line-150"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680166931"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="Temporal.Client.Types.html#WorkflowHandle"><span class="hs-identifier hs-type">WorkflowHandle</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-151"></span><span>  </span><span id="local-6989586621680166937"><span class="annot"><span class="annottext">fmap :: forall a b. (a -&gt; b) -&gt; WorkflowHandle a -&gt; WorkflowHandle b
+</span><span class="hs-identifier hs-var hs-var hs-var">fmap</span></span></span><span> </span><span id="local-6989586621680166938"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680166938"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621680166939"><span class="annot"><span class="annottext">WorkflowHandle a
+</span><a href="#local-6989586621680166939"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WorkflowHandle a
+</span><a href="#local-6989586621680166939"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><a href="Temporal.Client.Types.html#workflowHandleReadResult"><span class="hs-identifier hs-var">workflowHandleReadResult</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">fmap</span></span><span> </span><span class="annot"><a href="#local-6989586621680166938"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">.</span></span><span> </span><span class="annot"><a href="Temporal.Client.Types.html#workflowHandleReadResult"><span class="hs-identifier hs-var">workflowHandleReadResult</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680166939"><span class="hs-identifier hs-type">w</span></a></span><span class="hs-special">}</span><span>
+</span><span id="line-152"></span><span>
+</span><span id="line-153"></span><span>
+</span><span id="line-154"></span><span class="annot"><span class="hs-comment">-- | QueryRejectCondition can used to reject the query if workflow state does not satisfy condition.</span></span><span>
+</span><span id="line-155"></span><span class="hs-keyword">data</span><span> </span><span id="QueryRejectCondition"><span class="annot"><a href="Temporal.Client.Types.html#QueryRejectCondition"><span class="hs-identifier hs-var">QueryRejectCondition</span></a></span></span><span>
+</span><span id="line-156"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-comment">-- | indicates that query should not be rejected</span></span><span>
+</span><span id="line-157"></span><span>    </span><span id="QueryRejectConditionRejectNone"><span class="annot"><a href="Temporal.Client.Types.html#QueryRejectConditionRejectNone"><span class="hs-identifier hs-var">QueryRejectConditionRejectNone</span></a></span></span><span>
+</span><span id="line-158"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-comment">-- | indicates that query should be rejected if workflow is not open</span></span><span>
+</span><span id="line-159"></span><span>    </span><span id="QueryRejectConditionNotOpen"><span class="annot"><a href="Temporal.Client.Types.html#QueryRejectConditionNotOpen"><span class="hs-identifier hs-var">QueryRejectConditionNotOpen</span></a></span></span><span>
+</span><span id="line-160"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-comment">-- | indicates that query should be rejected if workflow did not complete cleanly</span></span><span>
+</span><span id="line-161"></span><span>    </span><span id="QueryRejectConditionNotCompletedCleanly"><span class="annot"><a href="Temporal.Client.Types.html#QueryRejectConditionNotCompletedCleanly"><span class="hs-identifier hs-var">QueryRejectConditionNotCompletedCleanly</span></a></span></span><span>
+</span><span id="line-162"></span><span>
+</span><span id="line-163"></span><span>
+</span><span id="line-164"></span><span class="hs-keyword">data</span><span> </span><span id="QueryWorkflowInput"><span class="annot"><a href="Temporal.Client.Types.html#QueryWorkflowInput"><span class="hs-identifier hs-var">QueryWorkflowInput</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="QueryWorkflowInput"><span class="annot"><a href="Temporal.Client.Types.html#QueryWorkflowInput"><span class="hs-identifier hs-var">QueryWorkflowInput</span></a></span></span><span>
+</span><span id="line-165"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="queryWorkflowWorkflowId"><span class="annot"><span class="annottext">QueryWorkflowInput -&gt; WorkflowId
+</span><a href="Temporal.Client.Types.html#queryWorkflowWorkflowId"><span class="hs-identifier hs-var hs-var">queryWorkflowWorkflowId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Common.html#WorkflowId"><span class="hs-identifier hs-type">WorkflowId</span></a></span><span>
+</span><span id="line-166"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="queryWorkflowRejectCondition"><span class="annot"><span class="annottext">QueryWorkflowInput -&gt; QueryRejectCondition
+</span><a href="Temporal.Client.Types.html#queryWorkflowRejectCondition"><span class="hs-identifier hs-var hs-var">queryWorkflowRejectCondition</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Client.Types.html#QueryRejectCondition"><span class="hs-identifier hs-type">QueryRejectCondition</span></a></span><span>
+</span><span id="line-167"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="queryWorkflowHeaders"><span class="annot"><span class="annottext">QueryWorkflowInput -&gt; Map Text Payload
+</span><a href="Temporal.Client.Types.html#queryWorkflowHeaders"><span class="hs-identifier hs-var hs-var">queryWorkflowHeaders</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span>
+</span><span id="line-168"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="queryWorkflowType"><span class="annot"><span class="annottext">QueryWorkflowInput -&gt; Text
+</span><a href="Temporal.Client.Types.html#queryWorkflowType"><span class="hs-identifier hs-var hs-var">queryWorkflowType</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-169"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="queryWorkflowRunId"><span class="annot"><span class="annottext">QueryWorkflowInput -&gt; Maybe RunId
+</span><a href="Temporal.Client.Types.html#queryWorkflowRunId"><span class="hs-identifier hs-var hs-var">queryWorkflowRunId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#RunId"><span class="hs-identifier hs-type">RunId</span></a></span><span>
+</span><span id="line-170"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="queryWorkflowArgs"><span class="annot"><span class="annottext">QueryWorkflowInput -&gt; Vector Payload
+</span><a href="Temporal.Client.Types.html#queryWorkflowArgs"><span class="hs-identifier hs-var hs-var">queryWorkflowArgs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span>
+</span><span id="line-171"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-172"></span><span>
+</span><span id="line-173"></span><span>
+</span><span id="line-174"></span><span class="hs-keyword">data</span><span> </span><span id="WorkflowExecutionStatus"><span class="annot"><a href="Temporal.Client.Types.html#WorkflowExecutionStatus"><span class="hs-identifier hs-var">WorkflowExecutionStatus</span></a></span></span><span>
+</span><span id="line-175"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="Running"><span class="annot"><a href="Temporal.Client.Types.html#Running"><span class="hs-identifier hs-var">Running</span></a></span></span><span>
+</span><span id="line-176"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Completed"><span class="annot"><a href="Temporal.Client.Types.html#Completed"><span class="hs-identifier hs-var">Completed</span></a></span></span><span>
+</span><span id="line-177"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Failed"><span class="annot"><a href="Temporal.Client.Types.html#Failed"><span class="hs-identifier hs-var">Failed</span></a></span></span><span>
+</span><span id="line-178"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Canceled"><span class="annot"><a href="Temporal.Client.Types.html#Canceled"><span class="hs-identifier hs-var">Canceled</span></a></span></span><span>
+</span><span id="line-179"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Terminated"><span class="annot"><a href="Temporal.Client.Types.html#Terminated"><span class="hs-identifier hs-var">Terminated</span></a></span></span><span>
+</span><span id="line-180"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ContinuedAsNew"><span class="annot"><a href="Temporal.Client.Types.html#ContinuedAsNew"><span class="hs-identifier hs-var">ContinuedAsNew</span></a></span></span><span>
+</span><span id="line-181"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="TimedOut"><span class="annot"><a href="Temporal.Client.Types.html#TimedOut"><span class="hs-identifier hs-var">TimedOut</span></a></span></span><span>
+</span><span id="line-182"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="UnknownStatus"><span class="annot"><a href="Temporal.Client.Types.html#UnknownStatus"><span class="hs-identifier hs-var">UnknownStatus</span></a></span></span><span>
+</span><span id="line-183"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680166959"><span id="local-6989586621680166963"><span id="local-6989586621680166966"><span id="local-6989586621680166977"><span class="annot"><span class="annottext">ReadPrec [WorkflowExecutionStatus]
+ReadPrec WorkflowExecutionStatus
+Int -&gt; ReadS WorkflowExecutionStatus
+ReadS [WorkflowExecutionStatus]
+(Int -&gt; ReadS WorkflowExecutionStatus)
+-&gt; ReadS [WorkflowExecutionStatus]
+-&gt; ReadPrec WorkflowExecutionStatus
+-&gt; ReadPrec [WorkflowExecutionStatus]
+-&gt; Read WorkflowExecutionStatus
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+$creadsPrec :: Int -&gt; ReadS WorkflowExecutionStatus
+readsPrec :: Int -&gt; ReadS WorkflowExecutionStatus
+$creadList :: ReadS [WorkflowExecutionStatus]
+readList :: ReadS [WorkflowExecutionStatus]
+$creadPrec :: ReadPrec WorkflowExecutionStatus
+readPrec :: ReadPrec WorkflowExecutionStatus
+$creadListPrec :: ReadPrec [WorkflowExecutionStatus]
+readListPrec :: ReadPrec [WorkflowExecutionStatus]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680166984"><span id="local-6989586621680166986"><span id="local-6989586621680166990"><span class="annot"><span class="annottext">Int -&gt; WorkflowExecutionStatus -&gt; ShowS
+[WorkflowExecutionStatus] -&gt; ShowS
+WorkflowExecutionStatus -&gt; String
+(Int -&gt; WorkflowExecutionStatus -&gt; ShowS)
+-&gt; (WorkflowExecutionStatus -&gt; String)
+-&gt; ([WorkflowExecutionStatus] -&gt; ShowS)
+-&gt; Show WorkflowExecutionStatus
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; WorkflowExecutionStatus -&gt; ShowS
+showsPrec :: Int -&gt; WorkflowExecutionStatus -&gt; ShowS
+$cshow :: WorkflowExecutionStatus -&gt; String
+show :: WorkflowExecutionStatus -&gt; String
+$cshowList :: [WorkflowExecutionStatus] -&gt; ShowS
+showList :: [WorkflowExecutionStatus] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680166993"><span id="local-6989586621680166998"><span class="annot"><span class="annottext">WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Bool
+(WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Bool)
+-&gt; (WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Bool)
+-&gt; Eq WorkflowExecutionStatus
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Bool
+== :: WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Bool
+$c/= :: WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Bool
+/= :: WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680167004"><span id="local-6989586621680167008"><span id="local-6989586621680167012"><span id="local-6989586621680167016"><span id="local-6989586621680167019"><span id="local-6989586621680167022"><span id="local-6989586621680167025"><span class="annot"><span class="annottext">Eq WorkflowExecutionStatus
+Eq WorkflowExecutionStatus =&gt;
+(WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Ordering)
+-&gt; (WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Bool)
+-&gt; (WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Bool)
+-&gt; (WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Bool)
+-&gt; (WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Bool)
+-&gt; (WorkflowExecutionStatus
+    -&gt; WorkflowExecutionStatus -&gt; WorkflowExecutionStatus)
+-&gt; (WorkflowExecutionStatus
+    -&gt; WorkflowExecutionStatus -&gt; WorkflowExecutionStatus)
+-&gt; Ord WorkflowExecutionStatus
+WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Bool
+WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Ordering
+WorkflowExecutionStatus
+-&gt; WorkflowExecutionStatus -&gt; WorkflowExecutionStatus
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Ordering
+compare :: WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Ordering
+$c&lt; :: WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Bool
+&lt; :: WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Bool
+$c&lt;= :: WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Bool
+&lt;= :: WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Bool
+$c&gt; :: WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Bool
+&gt; :: WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Bool
+$c&gt;= :: WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Bool
+&gt;= :: WorkflowExecutionStatus -&gt; WorkflowExecutionStatus -&gt; Bool
+$cmax :: WorkflowExecutionStatus
+-&gt; WorkflowExecutionStatus -&gt; WorkflowExecutionStatus
+max :: WorkflowExecutionStatus
+-&gt; WorkflowExecutionStatus -&gt; WorkflowExecutionStatus
+$cmin :: WorkflowExecutionStatus
+-&gt; WorkflowExecutionStatus -&gt; WorkflowExecutionStatus
+min :: WorkflowExecutionStatus
+-&gt; WorkflowExecutionStatus -&gt; WorkflowExecutionStatus
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-184"></span><span>
+</span><span id="line-185"></span><span>
+</span><span id="line-186"></span><span class="hs-keyword">data</span><span> </span><span id="QueryRejected"><span class="annot"><a href="Temporal.Client.Types.html#QueryRejected"><span class="hs-identifier hs-var">QueryRejected</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="QueryRejected"><span class="annot"><a href="Temporal.Client.Types.html#QueryRejected"><span class="hs-identifier hs-var">QueryRejected</span></a></span></span><span>
+</span><span id="line-187"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="status"><span class="annot"><span class="annottext">QueryRejected -&gt; WorkflowExecutionStatus
+</span><a href="Temporal.Client.Types.html#status"><span class="hs-identifier hs-var hs-var">status</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Client.Types.html#WorkflowExecutionStatus"><span class="hs-identifier hs-type">WorkflowExecutionStatus</span></a></span><span>
+</span><span id="line-188"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-189"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680167035"><span id="local-6989586621680167039"><span id="local-6989586621680167042"><span id="local-6989586621680167050"><span class="annot"><span class="annottext">ReadPrec [QueryRejected]
+ReadPrec QueryRejected
+Int -&gt; ReadS QueryRejected
+ReadS [QueryRejected]
+(Int -&gt; ReadS QueryRejected)
+-&gt; ReadS [QueryRejected]
+-&gt; ReadPrec QueryRejected
+-&gt; ReadPrec [QueryRejected]
+-&gt; Read QueryRejected
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+$creadsPrec :: Int -&gt; ReadS QueryRejected
+readsPrec :: Int -&gt; ReadS QueryRejected
+$creadList :: ReadS [QueryRejected]
+readList :: ReadS [QueryRejected]
+$creadPrec :: ReadPrec QueryRejected
+readPrec :: ReadPrec QueryRejected
+$creadListPrec :: ReadPrec [QueryRejected]
+readListPrec :: ReadPrec [QueryRejected]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680167053"><span id="local-6989586621680167057"><span id="local-6989586621680167061"><span class="annot"><span class="annottext">Int -&gt; QueryRejected -&gt; ShowS
+[QueryRejected] -&gt; ShowS
+QueryRejected -&gt; String
+(Int -&gt; QueryRejected -&gt; ShowS)
+-&gt; (QueryRejected -&gt; String)
+-&gt; ([QueryRejected] -&gt; ShowS)
+-&gt; Show QueryRejected
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; QueryRejected -&gt; ShowS
+showsPrec :: Int -&gt; QueryRejected -&gt; ShowS
+$cshow :: QueryRejected -&gt; String
+show :: QueryRejected -&gt; String
+$cshowList :: [QueryRejected] -&gt; ShowS
+showList :: [QueryRejected] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680167064"><span id="local-6989586621680167067"><span class="annot"><span class="annottext">QueryRejected -&gt; QueryRejected -&gt; Bool
+(QueryRejected -&gt; QueryRejected -&gt; Bool)
+-&gt; (QueryRejected -&gt; QueryRejected -&gt; Bool) -&gt; Eq QueryRejected
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: QueryRejected -&gt; QueryRejected -&gt; Bool
+== :: QueryRejected -&gt; QueryRejected -&gt; Bool
+$c/= :: QueryRejected -&gt; QueryRejected -&gt; Bool
+/= :: QueryRejected -&gt; QueryRejected -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680167073"><span id="local-6989586621680167076"><span id="local-6989586621680167079"><span id="local-6989586621680167083"><span id="local-6989586621680167086"><span id="local-6989586621680167089"><span id="local-6989586621680167092"><span class="annot"><span class="annottext">Eq QueryRejected
+Eq QueryRejected =&gt;
+(QueryRejected -&gt; QueryRejected -&gt; Ordering)
+-&gt; (QueryRejected -&gt; QueryRejected -&gt; Bool)
+-&gt; (QueryRejected -&gt; QueryRejected -&gt; Bool)
+-&gt; (QueryRejected -&gt; QueryRejected -&gt; Bool)
+-&gt; (QueryRejected -&gt; QueryRejected -&gt; Bool)
+-&gt; (QueryRejected -&gt; QueryRejected -&gt; QueryRejected)
+-&gt; (QueryRejected -&gt; QueryRejected -&gt; QueryRejected)
+-&gt; Ord QueryRejected
+QueryRejected -&gt; QueryRejected -&gt; Bool
+QueryRejected -&gt; QueryRejected -&gt; Ordering
+QueryRejected -&gt; QueryRejected -&gt; QueryRejected
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: QueryRejected -&gt; QueryRejected -&gt; Ordering
+compare :: QueryRejected -&gt; QueryRejected -&gt; Ordering
+$c&lt; :: QueryRejected -&gt; QueryRejected -&gt; Bool
+&lt; :: QueryRejected -&gt; QueryRejected -&gt; Bool
+$c&lt;= :: QueryRejected -&gt; QueryRejected -&gt; Bool
+&lt;= :: QueryRejected -&gt; QueryRejected -&gt; Bool
+$c&gt; :: QueryRejected -&gt; QueryRejected -&gt; Bool
+&gt; :: QueryRejected -&gt; QueryRejected -&gt; Bool
+$c&gt;= :: QueryRejected -&gt; QueryRejected -&gt; Bool
+&gt;= :: QueryRejected -&gt; QueryRejected -&gt; Bool
+$cmax :: QueryRejected -&gt; QueryRejected -&gt; QueryRejected
+max :: QueryRejected -&gt; QueryRejected -&gt; QueryRejected
+$cmin :: QueryRejected -&gt; QueryRejected -&gt; QueryRejected
+min :: QueryRejected -&gt; QueryRejected -&gt; QueryRejected
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-190"></span><span>
+</span><span id="line-191"></span><span>
+</span><span id="line-192"></span><span class="hs-keyword">data</span><span> </span><span id="SignalWithStartWorkflowInput"><span class="annot"><a href="Temporal.Client.Types.html#SignalWithStartWorkflowInput"><span class="hs-identifier hs-var">SignalWithStartWorkflowInput</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="SignalWithStartWorkflowInput"><span class="annot"><a href="Temporal.Client.Types.html#SignalWithStartWorkflowInput"><span class="hs-identifier hs-var">SignalWithStartWorkflowInput</span></a></span></span><span>
+</span><span id="line-193"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="signalWithStartWorkflowType"><span class="annot"><span class="annottext">SignalWithStartWorkflowInput -&gt; WorkflowType
+</span><a href="Temporal.Client.Types.html#signalWithStartWorkflowType"><span class="hs-identifier hs-var hs-var">signalWithStartWorkflowType</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Common.html#WorkflowType"><span class="hs-identifier hs-type">WorkflowType</span></a></span><span>
+</span><span id="line-194"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="signalWithStartWorkflowId"><span class="annot"><span class="annottext">SignalWithStartWorkflowInput -&gt; WorkflowId
+</span><a href="Temporal.Client.Types.html#signalWithStartWorkflowId"><span class="hs-identifier hs-var hs-var">signalWithStartWorkflowId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Common.html#WorkflowId"><span class="hs-identifier hs-type">WorkflowId</span></a></span><span>
+</span><span id="line-195"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="signalWithStartArgs"><span class="annot"><span class="annottext">SignalWithStartWorkflowInput -&gt; Vector Payload
+</span><a href="Temporal.Client.Types.html#signalWithStartArgs"><span class="hs-identifier hs-var hs-var">signalWithStartArgs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span>
+</span><span id="line-196"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="signalWithStartSignalName"><span class="annot"><span class="annottext">SignalWithStartWorkflowInput -&gt; Text
+</span><a href="Temporal.Client.Types.html#signalWithStartSignalName"><span class="hs-identifier hs-var hs-var">signalWithStartSignalName</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-197"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="signalWithStartSignalArgs"><span class="annot"><span class="annottext">SignalWithStartWorkflowInput -&gt; Vector Payload
+</span><a href="Temporal.Client.Types.html#signalWithStartSignalArgs"><span class="hs-identifier hs-var hs-var">signalWithStartSignalArgs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span>
+</span><span id="line-198"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="signalWithStartOptions"><span class="annot"><span class="annottext">SignalWithStartWorkflowInput -&gt; StartWorkflowOptions
+</span><a href="Temporal.Client.Types.html#signalWithStartOptions"><span class="hs-identifier hs-var hs-var">signalWithStartOptions</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Client.Types.html#StartWorkflowOptions"><span class="hs-identifier hs-type">StartWorkflowOptions</span></a></span><span>
+</span><span id="line-199"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-200"></span><span>
+</span><span id="line-201"></span><span>
+</span><span id="line-202"></span><span class="hs-keyword">data</span><span> </span><span id="ClientInterceptors"><span class="annot"><a href="Temporal.Client.Types.html#ClientInterceptors"><span class="hs-identifier hs-var">ClientInterceptors</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ClientInterceptors"><span class="annot"><a href="Temporal.Client.Types.html#ClientInterceptors"><span class="hs-identifier hs-var">ClientInterceptors</span></a></span></span><span>
+</span><span id="line-203"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="start"><span class="annot"><span class="annottext">ClientInterceptors
+-&gt; WorkflowType
+-&gt; WorkflowId
+-&gt; StartWorkflowOptions
+-&gt; Vector Payload
+-&gt; (WorkflowType
+    -&gt; WorkflowId
+    -&gt; StartWorkflowOptions
+    -&gt; Vector Payload
+    -&gt; IO (WorkflowHandle Payload))
+-&gt; IO (WorkflowHandle Payload)
+</span><a href="Temporal.Client.Types.html#start"><span class="hs-identifier hs-var hs-var">start</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Common.html#WorkflowType"><span class="hs-identifier hs-type">WorkflowType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Common.html#WorkflowId"><span class="hs-identifier hs-type">WorkflowId</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Client.Types.html#StartWorkflowOptions"><span class="hs-identifier hs-type">StartWorkflowOptions</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Common.html#WorkflowType"><span class="hs-identifier hs-type">WorkflowType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Common.html#WorkflowId"><span class="hs-identifier hs-type">WorkflowId</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Client.Types.html#StartWorkflowOptions"><span class="hs-identifier hs-type">StartWorkflowOptions</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Client.Types.html#WorkflowHandle"><span class="hs-identifier hs-type">WorkflowHandle</span></a></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Client.Types.html#WorkflowHandle"><span class="hs-identifier hs-type">WorkflowHandle</span></a></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-204"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="queryWorkflow"><span class="annot"><span class="annottext">ClientInterceptors
+-&gt; QueryWorkflowInput
+-&gt; (QueryWorkflowInput -&gt; IO (Either QueryRejected Payload))
+-&gt; IO (Either QueryRejected Payload)
+</span><a href="Temporal.Client.Types.html#queryWorkflow"><span class="hs-identifier hs-var hs-var">queryWorkflow</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Client.Types.html#QueryWorkflowInput"><span class="hs-identifier hs-type">QueryWorkflowInput</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Client.Types.html#QueryWorkflowInput"><span class="hs-identifier hs-type">QueryWorkflowInput</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Client.Types.html#QueryRejected"><span class="hs-identifier hs-type">QueryRejected</span></a></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Client.Types.html#QueryRejected"><span class="hs-identifier hs-type">QueryRejected</span></a></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-205"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="signalWithStart"><span class="annot"><span class="annottext">ClientInterceptors
+-&gt; SignalWithStartWorkflowInput
+-&gt; (SignalWithStartWorkflowInput -&gt; IO (WorkflowHandle Payload))
+-&gt; IO (WorkflowHandle Payload)
+</span><a href="Temporal.Client.Types.html#signalWithStart"><span class="hs-identifier hs-var hs-var">signalWithStart</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Client.Types.html#SignalWithStartWorkflowInput"><span class="hs-identifier hs-type">SignalWithStartWorkflowInput</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Client.Types.html#SignalWithStartWorkflowInput"><span class="hs-identifier hs-type">SignalWithStartWorkflowInput</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Client.Types.html#WorkflowHandle"><span class="hs-identifier hs-type">WorkflowHandle</span></a></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Client.Types.html#WorkflowHandle"><span class="hs-identifier hs-type">WorkflowHandle</span></a></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-206"></span><span>  </span><span class="hs-comment">-- TODO</span><span>
+</span><span id="line-207"></span><span>  </span><span class="hs-comment">-- signal</span><span>
+</span><span id="line-208"></span><span>  </span><span class="hs-comment">-- terminate</span><span>
+</span><span id="line-209"></span><span>  </span><span class="hs-comment">-- cancel</span><span>
+</span><span id="line-210"></span><span>  </span><span class="hs-comment">-- describe</span><span>
+</span><span id="line-211"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-212"></span><span>
+</span><span id="line-213"></span><span>
+</span><span id="line-214"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680167107"><span id="local-6989586621680167111"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Temporal.Client.Types.html#ClientInterceptors"><span class="hs-identifier hs-type">ClientInterceptors</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-215"></span><span>  </span><span id="local-6989586621680167122"><span class="annot"><span class="annottext">ClientInterceptors
+</span><a href="#local-6989586621680167122"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621680167123"><span class="annot"><span class="annottext">&lt;&gt; :: ClientInterceptors -&gt; ClientInterceptors -&gt; ClientInterceptors
+</span><span class="hs-operator hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span id="local-6989586621680167124"><span class="annot"><span class="annottext">ClientInterceptors
+</span><a href="#local-6989586621680167124"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-216"></span><span>    </span><span class="annot"><a href="Temporal.Client.Types.html#ClientInterceptors"><span class="hs-identifier hs-type">ClientInterceptors</span></a></span><span>
+</span><span id="line-217"></span><span>      </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">start :: WorkflowType
+-&gt; WorkflowId
+-&gt; StartWorkflowOptions
+-&gt; Vector Payload
+-&gt; (WorkflowType
+    -&gt; WorkflowId
+    -&gt; StartWorkflowOptions
+    -&gt; Vector Payload
+    -&gt; IO (WorkflowHandle Payload))
+-&gt; IO (WorkflowHandle Payload)
+</span><a href="Temporal.Client.Types.html#start"><span class="hs-identifier hs-var">start</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621680167125"><span class="annot"><span class="annottext">WorkflowType
+</span><a href="#local-6989586621680167125"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621680167126"><span class="annot"><span class="annottext">WorkflowId
+</span><a href="#local-6989586621680167126"><span class="hs-identifier hs-var">wfId</span></a></span></span><span> </span><span id="local-6989586621680167127"><span class="annot"><span class="annottext">StartWorkflowOptions
+</span><a href="#local-6989586621680167127"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span id="local-6989586621680167128"><span class="annot"><span class="annottext">Vector Payload
+</span><a href="#local-6989586621680167128"><span class="hs-identifier hs-var">ps</span></a></span></span><span> </span><span id="local-6989586621680167129"><span class="annot"><span class="annottext">WorkflowType
+-&gt; WorkflowId
+-&gt; StartWorkflowOptions
+-&gt; Vector Payload
+-&gt; IO (WorkflowHandle Payload)
+</span><a href="#local-6989586621680167129"><span class="hs-identifier hs-var">next</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ClientInterceptors
+</span><a href="#local-6989586621680167122"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">start</span><span> </span><span class="annot"><span class="annottext">WorkflowType
+</span><a href="#local-6989586621680167125"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">WorkflowId
+</span><a href="#local-6989586621680167126"><span class="hs-identifier hs-var">wfId</span></a></span><span> </span><span class="annot"><span class="annottext">StartWorkflowOptions
+</span><a href="#local-6989586621680167127"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">Vector Payload
+</span><a href="#local-6989586621680167128"><span class="hs-identifier hs-var">ps</span></a></span><span> </span><span class="annot"><span class="annottext">((WorkflowType
+  -&gt; WorkflowId
+  -&gt; StartWorkflowOptions
+  -&gt; Vector Payload
+  -&gt; IO (WorkflowHandle Payload))
+ -&gt; IO (WorkflowHandle Payload))
+-&gt; (WorkflowType
+    -&gt; WorkflowId
+    -&gt; StartWorkflowOptions
+    -&gt; Vector Payload
+    -&gt; IO (WorkflowHandle Payload))
+-&gt; IO (WorkflowHandle Payload)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621680167130"><span class="annot"><span class="annottext">WorkflowType
+</span><a href="#local-6989586621680167130"><span class="hs-identifier hs-var">t'</span></a></span></span><span> </span><span id="local-6989586621680167131"><span class="annot"><span class="annottext">WorkflowId
+</span><a href="#local-6989586621680167131"><span class="hs-identifier hs-var">wfId'</span></a></span></span><span> </span><span id="local-6989586621680167132"><span class="annot"><span class="annottext">StartWorkflowOptions
+</span><a href="#local-6989586621680167132"><span class="hs-identifier hs-var">o'</span></a></span></span><span> </span><span id="local-6989586621680167133"><span class="annot"><span class="annottext">Vector Payload
+</span><a href="#local-6989586621680167133"><span class="hs-identifier hs-var">ps'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ClientInterceptors
+</span><a href="#local-6989586621680167124"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">start</span><span> </span><span class="annot"><span class="annottext">WorkflowType
+</span><a href="#local-6989586621680167130"><span class="hs-identifier hs-var">t'</span></a></span><span> </span><span class="annot"><span class="annottext">WorkflowId
+</span><a href="#local-6989586621680167131"><span class="hs-identifier hs-var">wfId'</span></a></span><span> </span><span class="annot"><span class="annottext">StartWorkflowOptions
+</span><a href="#local-6989586621680167132"><span class="hs-identifier hs-var">o'</span></a></span><span> </span><span class="annot"><span class="annottext">Vector Payload
+</span><a href="#local-6989586621680167133"><span class="hs-identifier hs-var">ps'</span></a></span><span> </span><span class="annot"><span class="annottext">WorkflowType
+-&gt; WorkflowId
+-&gt; StartWorkflowOptions
+-&gt; Vector Payload
+-&gt; IO (WorkflowHandle Payload)
+</span><a href="#local-6989586621680167129"><span class="hs-identifier hs-var">next</span></a></span><span>
+</span><span id="line-218"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">queryWorkflow :: QueryWorkflowInput
+-&gt; (QueryWorkflowInput -&gt; IO (Either QueryRejected Payload))
+-&gt; IO (Either QueryRejected Payload)
+</span><a href="Temporal.Client.Types.html#queryWorkflow"><span class="hs-identifier hs-var">queryWorkflow</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621680167134"><span class="annot"><span class="annottext">QueryWorkflowInput
+</span><a href="#local-6989586621680167134"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621680167135"><span class="annot"><span class="annottext">QueryWorkflowInput -&gt; IO (Either QueryRejected Payload)
+</span><a href="#local-6989586621680167135"><span class="hs-identifier hs-var">next</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ClientInterceptors
+</span><a href="#local-6989586621680167122"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">queryWorkflow</span><span> </span><span class="annot"><span class="annottext">QueryWorkflowInput
+</span><a href="#local-6989586621680167134"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">((QueryWorkflowInput -&gt; IO (Either QueryRejected Payload))
+ -&gt; IO (Either QueryRejected Payload))
+-&gt; (QueryWorkflowInput -&gt; IO (Either QueryRejected Payload))
+-&gt; IO (Either QueryRejected Payload)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621680167136"><span class="annot"><span class="annottext">QueryWorkflowInput
+</span><a href="#local-6989586621680167136"><span class="hs-identifier hs-var">i'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ClientInterceptors
+</span><a href="#local-6989586621680167124"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">queryWorkflow</span><span> </span><span class="annot"><span class="annottext">QueryWorkflowInput
+</span><a href="#local-6989586621680167136"><span class="hs-identifier hs-var">i'</span></a></span><span> </span><span class="annot"><span class="annottext">QueryWorkflowInput -&gt; IO (Either QueryRejected Payload)
+</span><a href="#local-6989586621680167135"><span class="hs-identifier hs-var">next</span></a></span><span>
+</span><span id="line-219"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">signalWithStart :: SignalWithStartWorkflowInput
+-&gt; (SignalWithStartWorkflowInput -&gt; IO (WorkflowHandle Payload))
+-&gt; IO (WorkflowHandle Payload)
+</span><a href="Temporal.Client.Types.html#signalWithStart"><span class="hs-identifier hs-var">signalWithStart</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621680167137"><span class="annot"><span class="annottext">SignalWithStartWorkflowInput
+</span><a href="#local-6989586621680167137"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621680167138"><span class="annot"><span class="annottext">SignalWithStartWorkflowInput -&gt; IO (WorkflowHandle Payload)
+</span><a href="#local-6989586621680167138"><span class="hs-identifier hs-var">next</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ClientInterceptors
+</span><a href="#local-6989586621680167122"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">signalWithStart</span><span> </span><span class="annot"><span class="annottext">SignalWithStartWorkflowInput
+</span><a href="#local-6989586621680167137"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">((SignalWithStartWorkflowInput -&gt; IO (WorkflowHandle Payload))
+ -&gt; IO (WorkflowHandle Payload))
+-&gt; (SignalWithStartWorkflowInput -&gt; IO (WorkflowHandle Payload))
+-&gt; IO (WorkflowHandle Payload)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621680167139"><span class="annot"><span class="annottext">SignalWithStartWorkflowInput
+</span><a href="#local-6989586621680167139"><span class="hs-identifier hs-var">i'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ClientInterceptors
+</span><a href="#local-6989586621680167124"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">signalWithStart</span><span> </span><span class="annot"><span class="annottext">SignalWithStartWorkflowInput
+</span><a href="#local-6989586621680167139"><span class="hs-identifier hs-var">i'</span></a></span><span> </span><span class="annot"><span class="annottext">SignalWithStartWorkflowInput -&gt; IO (WorkflowHandle Payload)
+</span><a href="#local-6989586621680167138"><span class="hs-identifier hs-var">next</span></a></span><span>
+</span><span id="line-220"></span><span>      </span><span class="hs-special">}</span><span>
+</span><span id="line-221"></span><span>
+</span><span id="line-222"></span><span>
+</span><span id="line-223"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680167144"><span id="local-6989586621680167147"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Temporal.Client.Types.html#ClientInterceptors"><span class="hs-identifier hs-type">ClientInterceptors</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-224"></span><span>  </span><span id="local-6989586621680167150"><span class="annot"><span class="annottext">mempty :: ClientInterceptors
+</span><span class="hs-identifier hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-225"></span><span>    </span><span class="annot"><span class="annottext">(WorkflowType
+ -&gt; WorkflowId
+ -&gt; StartWorkflowOptions
+ -&gt; Vector Payload
+ -&gt; (WorkflowType
+     -&gt; WorkflowId
+     -&gt; StartWorkflowOptions
+     -&gt; Vector Payload
+     -&gt; IO (WorkflowHandle Payload))
+ -&gt; IO (WorkflowHandle Payload))
+-&gt; (QueryWorkflowInput
+    -&gt; (QueryWorkflowInput -&gt; IO (Either QueryRejected Payload))
+    -&gt; IO (Either QueryRejected Payload))
+-&gt; (SignalWithStartWorkflowInput
+    -&gt; (SignalWithStartWorkflowInput -&gt; IO (WorkflowHandle Payload))
+    -&gt; IO (WorkflowHandle Payload))
+-&gt; ClientInterceptors
+</span><a href="Temporal.Client.Types.html#ClientInterceptors"><span class="hs-identifier hs-var">ClientInterceptors</span></a></span><span>
+</span><span id="line-226"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680167151"><span class="annot"><span class="annottext">WorkflowType
+</span><a href="#local-6989586621680167151"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621680167152"><span class="annot"><span class="annottext">WorkflowId
+</span><a href="#local-6989586621680167152"><span class="hs-identifier hs-var">wf</span></a></span></span><span> </span><span id="local-6989586621680167153"><span class="annot"><span class="annottext">StartWorkflowOptions
+</span><a href="#local-6989586621680167153"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span id="local-6989586621680167154"><span class="annot"><span class="annottext">Vector Payload
+</span><a href="#local-6989586621680167154"><span class="hs-identifier hs-var">ps</span></a></span></span><span> </span><span id="local-6989586621680167155"><span class="annot"><span class="annottext">WorkflowType
+-&gt; WorkflowId
+-&gt; StartWorkflowOptions
+-&gt; Vector Payload
+-&gt; IO (WorkflowHandle Payload)
+</span><a href="#local-6989586621680167155"><span class="hs-identifier hs-var">next</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">WorkflowType
+-&gt; WorkflowId
+-&gt; StartWorkflowOptions
+-&gt; Vector Payload
+-&gt; IO (WorkflowHandle Payload)
+</span><a href="#local-6989586621680167155"><span class="hs-identifier hs-var">next</span></a></span><span> </span><span class="annot"><span class="annottext">WorkflowType
+</span><a href="#local-6989586621680167151"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">WorkflowId
+</span><a href="#local-6989586621680167152"><span class="hs-identifier hs-var">wf</span></a></span><span> </span><span class="annot"><span class="annottext">StartWorkflowOptions
+</span><a href="#local-6989586621680167153"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">Vector Payload
+</span><a href="#local-6989586621680167154"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-227"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680167156"><span class="annot"><span class="annottext">QueryWorkflowInput
+</span><a href="#local-6989586621680167156"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621680167157"><span class="annot"><span class="annottext">QueryWorkflowInput -&gt; IO (Either QueryRejected Payload)
+</span><a href="#local-6989586621680167157"><span class="hs-identifier hs-var">next</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">QueryWorkflowInput -&gt; IO (Either QueryRejected Payload)
+</span><a href="#local-6989586621680167157"><span class="hs-identifier hs-var">next</span></a></span><span> </span><span class="annot"><span class="annottext">QueryWorkflowInput
+</span><a href="#local-6989586621680167156"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-228"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680167158"><span class="annot"><span class="annottext">SignalWithStartWorkflowInput
+</span><a href="#local-6989586621680167158"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621680167159"><span class="annot"><span class="annottext">SignalWithStartWorkflowInput -&gt; IO (WorkflowHandle Payload)
+</span><a href="#local-6989586621680167159"><span class="hs-identifier hs-var">next</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">SignalWithStartWorkflowInput -&gt; IO (WorkflowHandle Payload)
+</span><a href="#local-6989586621680167159"><span class="hs-identifier hs-var">next</span></a></span><span> </span><span class="annot"><span class="annottext">SignalWithStartWorkflowInput
+</span><a href="#local-6989586621680167158"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-229"></span><span>
+</span><span id="line-230"></span><span class="hs-comment">-- , signal :: SignalWorkflowInput -&gt; (SignalWorkflowInput -&gt; IO ()) -&gt; IO ()</span><span>
+</span><span id="line-231"></span><span class="hs-comment">--   -- , signalWithStart :: SignalWithStartWorkflowInput -&gt; (SignalWithStartWorkflowInput -&gt; IO ()) -&gt; IO ()</span><span>
+</span><span id="line-232"></span><span class="hs-comment">--   -- , query :: QueryWorkflowInput -&gt; (QueryWorkflowInput -&gt; IO ()) -&gt; IO ()</span><span>
+</span><span id="line-233"></span><span class="hs-comment">--   -- , terminate :: TerminateWorkflowInput -&gt; (TerminateWorkflowInput -&gt; IO ()) -&gt; IO ()</span><span>
+</span><span id="line-234"></span><span class="hs-comment">--   -- , cancel :: CancelWorkflowInput -&gt; (CancelWorkflowInput -&gt; IO ()) -&gt; IO ()</span><span>
+</span><span id="line-235"></span><span class="hs-comment">--   -- , describe :: DescribeWorkflowInput -&gt; (DescribeWorkflowInput -&gt; IO ()) -&gt; IO ()</span><span>
+</span><span id="line-236"></span><span class="hs-comment">--   }</span><span>
+</span><span id="line-237"></span></pre></body></html>

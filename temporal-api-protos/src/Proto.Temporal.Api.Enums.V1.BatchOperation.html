@@ -1,0 +1,925 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{- This file was auto-generated from temporal/api/enums/v1/batch_operation.proto by the proto-lens-protoc program. -}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-unused-imports#-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-duplicate-exports#-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-dodgy-exports#-}</span><span>
+</span><span id="line-6"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html"><span class="hs-identifier">Proto.Temporal.Api.Enums.V1.BatchOperation</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-7"></span><span>        </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationState"><span class="hs-identifier">BatchOperationState</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationState"><span class="hs-identifier">BatchOperationState</span></a></span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-8"></span><span>        </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationState%27UnrecognizedValue"><span class="hs-identifier">BatchOperationState'UnrecognizedValue</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationType"><span class="hs-identifier">BatchOperationType</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-9"></span><span>        </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationType"><span class="hs-identifier">BatchOperationType</span></a></span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationType%27UnrecognizedValue"><span class="hs-identifier">BatchOperationType'UnrecognizedValue</span></a></span><span>
+</span><span id="line-10"></span><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Control.DeepSeq</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Prism</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Prism</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Prelude</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Int</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Int</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Monoid</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Monoid</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Word</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Word</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Bytes</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Growing</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Parser.Unsafe</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Wire</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Field</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Field</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Message.Enum</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Service.Types</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Lens.Family2</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Lens.Family2</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Lens.Family2.Unchecked</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Lens.Family2.Unchecked</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Map</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ByteString</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ByteString.Char8</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString.Char8</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Text.Encoding</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text.Encoding</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Vector</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Vector.Generic</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Generic</span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Vector.Unboxed</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Unboxed</span></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Text.Read</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Text.Read</span></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">newtype</span><span> </span><span id="BatchOperationState%27UnrecognizedValue"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationState%27UnrecognizedValue"><span class="hs-identifier hs-var">BatchOperationState'UnrecognizedValue</span></a></span></span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="BatchOperationState%27UnrecognizedValue"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationState%27UnrecognizedValue"><span class="hs-identifier hs-var">BatchOperationState'UnrecognizedValue</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Int.Int32</span></span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680253228"><span id="local-6989586621680253232"><span class="annot"><span class="annottext">BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue -&gt; Bool
+(BatchOperationState'UnrecognizedValue
+ -&gt; BatchOperationState'UnrecognizedValue -&gt; Bool)
+-&gt; (BatchOperationState'UnrecognizedValue
+    -&gt; BatchOperationState'UnrecognizedValue -&gt; Bool)
+-&gt; Eq BatchOperationState'UnrecognizedValue
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue -&gt; Bool
+== :: BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue -&gt; Bool
+$c/= :: BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue -&gt; Bool
+/= :: BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680253239"><span id="local-6989586621680253243"><span id="local-6989586621680253246"><span id="local-6989586621680253250"><span id="local-6989586621680253253"><span id="local-6989586621680253256"><span id="local-6989586621680253259"><span class="annot"><span class="annottext">Eq BatchOperationState'UnrecognizedValue
+Eq BatchOperationState'UnrecognizedValue =&gt;
+(BatchOperationState'UnrecognizedValue
+ -&gt; BatchOperationState'UnrecognizedValue -&gt; Ordering)
+-&gt; (BatchOperationState'UnrecognizedValue
+    -&gt; BatchOperationState'UnrecognizedValue -&gt; Bool)
+-&gt; (BatchOperationState'UnrecognizedValue
+    -&gt; BatchOperationState'UnrecognizedValue -&gt; Bool)
+-&gt; (BatchOperationState'UnrecognizedValue
+    -&gt; BatchOperationState'UnrecognizedValue -&gt; Bool)
+-&gt; (BatchOperationState'UnrecognizedValue
+    -&gt; BatchOperationState'UnrecognizedValue -&gt; Bool)
+-&gt; (BatchOperationState'UnrecognizedValue
+    -&gt; BatchOperationState'UnrecognizedValue
+    -&gt; BatchOperationState'UnrecognizedValue)
+-&gt; (BatchOperationState'UnrecognizedValue
+    -&gt; BatchOperationState'UnrecognizedValue
+    -&gt; BatchOperationState'UnrecognizedValue)
+-&gt; Ord BatchOperationState'UnrecognizedValue
+BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue -&gt; Bool
+BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue -&gt; Ordering
+BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue -&gt; Ordering
+compare :: BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue -&gt; Ordering
+$c&lt; :: BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue -&gt; Bool
+&lt; :: BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue -&gt; Bool
+$c&lt;= :: BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue -&gt; Bool
+&lt;= :: BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue -&gt; Bool
+$c&gt; :: BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue -&gt; Bool
+&gt; :: BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue -&gt; Bool
+$c&gt;= :: BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue -&gt; Bool
+&gt;= :: BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue -&gt; Bool
+$cmax :: BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue
+max :: BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue
+$cmin :: BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue
+min :: BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue
+-&gt; BatchOperationState'UnrecognizedValue
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680253267"><span id="local-6989586621680253273"><span id="local-6989586621680253277"><span class="annot"><span class="annottext">Int -&gt; BatchOperationState'UnrecognizedValue -&gt; ShowS
+[BatchOperationState'UnrecognizedValue] -&gt; ShowS
+BatchOperationState'UnrecognizedValue -&gt; String
+(Int -&gt; BatchOperationState'UnrecognizedValue -&gt; ShowS)
+-&gt; (BatchOperationState'UnrecognizedValue -&gt; String)
+-&gt; ([BatchOperationState'UnrecognizedValue] -&gt; ShowS)
+-&gt; Show BatchOperationState'UnrecognizedValue
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; BatchOperationState'UnrecognizedValue -&gt; ShowS
+showsPrec :: Int -&gt; BatchOperationState'UnrecognizedValue -&gt; ShowS
+$cshow :: BatchOperationState'UnrecognizedValue -&gt; String
+show :: BatchOperationState'UnrecognizedValue -&gt; String
+$cshowList :: [BatchOperationState'UnrecognizedValue] -&gt; ShowS
+showList :: [BatchOperationState'UnrecognizedValue] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span class="hs-keyword">data</span><span> </span><span id="BatchOperationState"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationState"><span class="hs-identifier hs-var">BatchOperationState</span></a></span></span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="BATCH_OPERATION_STATE_UNSPECIFIED"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_UNSPECIFIED</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-41"></span><span>    </span><span id="BATCH_OPERATION_STATE_RUNNING"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_RUNNING"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_RUNNING</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-42"></span><span>    </span><span id="BATCH_OPERATION_STATE_COMPLETED"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_COMPLETED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_COMPLETED</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-43"></span><span>    </span><span id="BATCH_OPERATION_STATE_FAILED"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_FAILED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_FAILED</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-44"></span><span>    </span><span id="BatchOperationState%27Unrecognized"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationState%27Unrecognized"><span class="hs-identifier hs-var">BatchOperationState'Unrecognized</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationState%27UnrecognizedValue"><span class="hs-identifier hs-type">BatchOperationState'UnrecognizedValue</span></a></span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680253287"><span id="local-6989586621680253291"><span id="local-6989586621680253295"><span class="annot"><span class="annottext">Int -&gt; BatchOperationState -&gt; ShowS
+[BatchOperationState] -&gt; ShowS
+BatchOperationState -&gt; String
+(Int -&gt; BatchOperationState -&gt; ShowS)
+-&gt; (BatchOperationState -&gt; String)
+-&gt; ([BatchOperationState] -&gt; ShowS)
+-&gt; Show BatchOperationState
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; BatchOperationState -&gt; ShowS
+showsPrec :: Int -&gt; BatchOperationState -&gt; ShowS
+$cshow :: BatchOperationState -&gt; String
+show :: BatchOperationState -&gt; String
+$cshowList :: [BatchOperationState] -&gt; ShowS
+showList :: [BatchOperationState] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680253298"><span id="local-6989586621680253304"><span class="annot"><span class="annottext">BatchOperationState -&gt; BatchOperationState -&gt; Bool
+(BatchOperationState -&gt; BatchOperationState -&gt; Bool)
+-&gt; (BatchOperationState -&gt; BatchOperationState -&gt; Bool)
+-&gt; Eq BatchOperationState
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: BatchOperationState -&gt; BatchOperationState -&gt; Bool
+== :: BatchOperationState -&gt; BatchOperationState -&gt; Bool
+$c/= :: BatchOperationState -&gt; BatchOperationState -&gt; Bool
+/= :: BatchOperationState -&gt; BatchOperationState -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680253310"><span id="local-6989586621680253315"><span id="local-6989586621680253319"><span id="local-6989586621680253322"><span id="local-6989586621680253325"><span id="local-6989586621680253328"><span id="local-6989586621680253331"><span class="annot"><span class="annottext">Eq BatchOperationState
+Eq BatchOperationState =&gt;
+(BatchOperationState -&gt; BatchOperationState -&gt; Ordering)
+-&gt; (BatchOperationState -&gt; BatchOperationState -&gt; Bool)
+-&gt; (BatchOperationState -&gt; BatchOperationState -&gt; Bool)
+-&gt; (BatchOperationState -&gt; BatchOperationState -&gt; Bool)
+-&gt; (BatchOperationState -&gt; BatchOperationState -&gt; Bool)
+-&gt; (BatchOperationState
+    -&gt; BatchOperationState -&gt; BatchOperationState)
+-&gt; (BatchOperationState
+    -&gt; BatchOperationState -&gt; BatchOperationState)
+-&gt; Ord BatchOperationState
+BatchOperationState -&gt; BatchOperationState -&gt; Bool
+BatchOperationState -&gt; BatchOperationState -&gt; Ordering
+BatchOperationState -&gt; BatchOperationState -&gt; BatchOperationState
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: BatchOperationState -&gt; BatchOperationState -&gt; Ordering
+compare :: BatchOperationState -&gt; BatchOperationState -&gt; Ordering
+$c&lt; :: BatchOperationState -&gt; BatchOperationState -&gt; Bool
+&lt; :: BatchOperationState -&gt; BatchOperationState -&gt; Bool
+$c&lt;= :: BatchOperationState -&gt; BatchOperationState -&gt; Bool
+&lt;= :: BatchOperationState -&gt; BatchOperationState -&gt; Bool
+$c&gt; :: BatchOperationState -&gt; BatchOperationState -&gt; Bool
+&gt; :: BatchOperationState -&gt; BatchOperationState -&gt; Bool
+$c&gt;= :: BatchOperationState -&gt; BatchOperationState -&gt; Bool
+&gt;= :: BatchOperationState -&gt; BatchOperationState -&gt; Bool
+$cmax :: BatchOperationState -&gt; BatchOperationState -&gt; BatchOperationState
+max :: BatchOperationState -&gt; BatchOperationState -&gt; BatchOperationState
+$cmin :: BatchOperationState -&gt; BatchOperationState -&gt; BatchOperationState
+min :: BatchOperationState -&gt; BatchOperationState -&gt; BatchOperationState
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.MessageEnum</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationState"><span class="hs-identifier hs-type">BatchOperationState</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-47"></span><span>  </span><span id="local-6989586621680253358"><span class="annot"><span class="annottext">maybeToEnum :: Int -&gt; Maybe BatchOperationState
+</span><a href="#local-6989586621680253358"><span class="hs-identifier hs-var hs-var hs-var">maybeToEnum</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState -&gt; Maybe BatchOperationState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-48"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState -&gt; Maybe BatchOperationState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_RUNNING"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_RUNNING</span></a></span><span>
+</span><span id="line-49"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState -&gt; Maybe BatchOperationState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_COMPLETED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_COMPLETED</span></a></span><span>
+</span><span id="line-50"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">3</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState -&gt; Maybe BatchOperationState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_FAILED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_FAILED</span></a></span><span>
+</span><span id="line-51"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span id="local-6989586621680253360"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680253360"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><span id="line-52"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState -&gt; Maybe BatchOperationState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span>
+</span><span id="line-53"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BatchOperationState'UnrecognizedValue -&gt; BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationState%27Unrecognized"><span class="hs-identifier hs-var">BatchOperationState'Unrecognized</span></a></span><span>
+</span><span id="line-54"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int32 -&gt; BatchOperationState'UnrecognizedValue
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationState%27UnrecognizedValue"><span class="hs-identifier hs-var">BatchOperationState'UnrecognizedValue</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int32
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680253360"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>  </span><span id="local-6989586621680253362"><span class="annot"><span class="annottext">showEnum :: BatchOperationState -&gt; String
+</span><a href="#local-6989586621680253362"><span class="hs-identifier hs-var hs-var hs-var">showEnum</span></a></span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-56"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BATCH_OPERATION_STATE_UNSPECIFIED&quot;</span></span><span>
+</span><span id="line-57"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_RUNNING"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_RUNNING</span></a></span><span>
+</span><span id="line-58"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BATCH_OPERATION_STATE_RUNNING&quot;</span></span><span>
+</span><span id="line-59"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_COMPLETED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_COMPLETED</span></a></span><span>
+</span><span id="line-60"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BATCH_OPERATION_STATE_COMPLETED&quot;</span></span><span>
+</span><span id="line-61"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_FAILED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_FAILED</span></a></span><span>
+</span><span id="line-62"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BATCH_OPERATION_STATE_FAILED&quot;</span></span><span>
+</span><span id="line-63"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span>
+</span><span id="line-64"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationState%27Unrecognized"><span class="hs-identifier hs-type">BatchOperationState'Unrecognized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationState%27UnrecognizedValue"><span class="hs-identifier hs-type">BatchOperationState'UnrecognizedValue</span></a></span><span> </span><span id="local-6989586621680253364"><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680253364"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-65"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int32 -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">Prelude.show</span></span><span> </span><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680253364"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-66"></span><span>  </span><span id="local-6989586621680253384"><span class="annot"><span class="annottext">readEnum :: String -&gt; Maybe BatchOperationState
+</span><a href="#local-6989586621680253384"><span class="hs-identifier hs-var hs-var hs-var">readEnum</span></a></span></span><span> </span><span id="local-6989586621680253386"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680253386"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><span id="line-67"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680253386"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BATCH_OPERATION_STATE_UNSPECIFIED&quot;</span></span><span>
+</span><span id="line-68"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState -&gt; Maybe BatchOperationState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-69"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680253386"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BATCH_OPERATION_STATE_RUNNING&quot;</span></span><span>
+</span><span id="line-70"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState -&gt; Maybe BatchOperationState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_RUNNING"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_RUNNING</span></a></span><span>
+</span><span id="line-71"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680253386"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BATCH_OPERATION_STATE_COMPLETED&quot;</span></span><span>
+</span><span id="line-72"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState -&gt; Maybe BatchOperationState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_COMPLETED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_COMPLETED</span></a></span><span>
+</span><span id="line-73"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680253386"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BATCH_OPERATION_STATE_FAILED&quot;</span></span><span>
+</span><span id="line-74"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState -&gt; Maybe BatchOperationState
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_FAILED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_FAILED</span></a></span><span>
+</span><span id="line-75"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">Prelude.otherwise</span></span><span>
+</span><span id="line-76"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Int
+-&gt; (Int -&gt; Maybe BatchOperationState) -&gt; Maybe BatchOperationState
+forall a b. Maybe a -&gt; (a -&gt; Maybe b) -&gt; Maybe b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">(Prelude.&gt;&gt;=)</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Maybe Int
+forall a. Read a =&gt; String -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Text.Read.readMaybe</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680253386"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Maybe BatchOperationState
+forall a. MessageEnum a =&gt; Int -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeToEnum</span></span><span>
+</span><span id="line-77"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prelude.Bounded</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationState"><span class="hs-identifier hs-type">BatchOperationState</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-78"></span><span>  </span><span id="local-6989586621680253391"><span class="annot"><span class="annottext">minBound :: BatchOperationState
+</span><a href="#local-6989586621680253391"><span class="hs-identifier hs-var hs-var hs-var">minBound</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-79"></span><span>  </span><span id="local-6989586621680253393"><span class="annot"><span class="annottext">maxBound :: BatchOperationState
+</span><a href="#local-6989586621680253393"><span class="hs-identifier hs-var hs-var hs-var">maxBound</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_FAILED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_FAILED</span></a></span><span>
+</span><span id="line-80"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prelude.Enum</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationState"><span class="hs-identifier hs-type">BatchOperationState</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-81"></span><span>  </span><span id="local-6989586621680253411"><span class="annot"><span class="annottext">toEnum :: Int -&gt; BatchOperationState
+</span><a href="#local-6989586621680253411"><span class="hs-identifier hs-var hs-var hs-var">toEnum</span></a></span></span><span> </span><span id="local-6989586621680253413"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680253413"><span class="hs-identifier hs-var">k__</span></a></span></span><span>
+</span><span id="line-82"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+-&gt; (BatchOperationState -&gt; BatchOperationState)
+-&gt; Maybe BatchOperationState
+-&gt; BatchOperationState
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.maybe</span></span><span>
+</span><span id="line-83"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; BatchOperationState
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-84"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">(Prelude.++)</span></span><span>
+</span><span id="line-85"></span><span>              </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;toEnum: unknown value for enum BatchOperationState: &quot;</span></span><span>
+</span><span id="line-86"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">Prelude.show</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680253413"><span class="hs-identifier hs-var">k__</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-87"></span><span>        </span><span class="annot"><span class="annottext">BatchOperationState -&gt; BatchOperationState
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.id</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Maybe BatchOperationState
+forall a. MessageEnum a =&gt; Int -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680253413"><span class="hs-identifier hs-var">k__</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-88"></span><span>  </span><span id="local-6989586621680253420"><span class="annot"><span class="annottext">fromEnum :: BatchOperationState -&gt; Int
+</span><a href="#local-6989586621680253420"><span class="hs-identifier hs-var hs-var hs-var">fromEnum</span></a></span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_UNSPECIFIED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-89"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_RUNNING"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_RUNNING</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-90"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_COMPLETED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_COMPLETED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span>
+</span><span id="line-91"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_FAILED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_FAILED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">3</span></span><span>
+</span><span id="line-92"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span>
+</span><span id="line-93"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationState%27Unrecognized"><span class="hs-identifier hs-type">BatchOperationState'Unrecognized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationState%27UnrecognizedValue"><span class="hs-identifier hs-type">BatchOperationState'UnrecognizedValue</span></a></span><span> </span><span id="local-6989586621680253422"><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680253422"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-94"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int32 -&gt; Int
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680253422"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-95"></span><span>  </span><span id="local-6989586621680253427"><span class="annot"><span class="annottext">succ :: BatchOperationState -&gt; BatchOperationState
+</span><a href="#local-6989586621680253427"><span class="hs-identifier hs-var hs-var hs-var">succ</span></a></span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_FAILED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_FAILED</span></a></span><span>
+</span><span id="line-96"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; BatchOperationState
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-97"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BatchOperationState.succ: bad argument BATCH_OPERATION_STATE_FAILED. This value would be out of bounds.&quot;</span></span><span>
+</span><span id="line-98"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-99"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_RUNNING"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_RUNNING</span></a></span><span>
+</span><span id="line-100"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_RUNNING"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_RUNNING</span></a></span><span>
+</span><span id="line-101"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_COMPLETED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_COMPLETED</span></a></span><span>
+</span><span id="line-102"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_COMPLETED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_COMPLETED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_FAILED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_FAILED</span></a></span><span>
+</span><span id="line-103"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationState%27Unrecognized"><span class="hs-identifier hs-type">BatchOperationState'Unrecognized</span></a></span><span> </span><span class="annot"><span class="annottext">BatchOperationState'UnrecognizedValue
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-104"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; BatchOperationState
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-105"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BatchOperationState.succ: bad argument: unrecognized value&quot;</span></span><span>
+</span><span id="line-106"></span><span>  </span><span id="local-6989586621680253433"><span class="annot"><span class="annottext">pred :: BatchOperationState -&gt; BatchOperationState
+</span><a href="#local-6989586621680253433"><span class="hs-identifier hs-var hs-var hs-var">pred</span></a></span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-107"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; BatchOperationState
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-108"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BatchOperationState.pred: bad argument BATCH_OPERATION_STATE_UNSPECIFIED. This value would be out of bounds.&quot;</span></span><span>
+</span><span id="line-109"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_RUNNING"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_RUNNING</span></a></span><span>
+</span><span id="line-110"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-111"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_COMPLETED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_COMPLETED</span></a></span><span>
+</span><span id="line-112"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_RUNNING"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_RUNNING</span></a></span><span>
+</span><span id="line-113"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_FAILED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_FAILED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_COMPLETED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_COMPLETED</span></a></span><span>
+</span><span id="line-114"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationState%27Unrecognized"><span class="hs-identifier hs-type">BatchOperationState'Unrecognized</span></a></span><span> </span><span class="annot"><span class="annottext">BatchOperationState'UnrecognizedValue
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-115"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; BatchOperationState
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-116"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BatchOperationState.pred: bad argument: unrecognized value&quot;</span></span><span>
+</span><span id="line-117"></span><span>  </span><span id="local-6989586621680253437"><span class="annot"><span class="annottext">enumFrom :: BatchOperationState -&gt; [BatchOperationState]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFrom</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState -&gt; [BatchOperationState]
+forall a. (Enum a, Bounded a) =&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFrom</span></span><span>
+</span><span id="line-118"></span><span>  </span><span id="local-6989586621680253440"><span class="annot"><span class="annottext">enumFromTo :: BatchOperationState -&gt; BatchOperationState -&gt; [BatchOperationState]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromTo</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState -&gt; BatchOperationState -&gt; [BatchOperationState]
+forall a. Enum a =&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromTo</span></span><span>
+</span><span id="line-119"></span><span>  </span><span id="local-6989586621680253444"><span class="annot"><span class="annottext">enumFromThen :: BatchOperationState -&gt; BatchOperationState -&gt; [BatchOperationState]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromThen</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState -&gt; BatchOperationState -&gt; [BatchOperationState]
+forall a. (Enum a, Bounded a) =&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromThen</span></span><span>
+</span><span id="line-120"></span><span>  </span><span id="local-6989586621680253447"><span class="annot"><span class="annottext">enumFromThenTo :: BatchOperationState
+-&gt; BatchOperationState
+-&gt; BatchOperationState
+-&gt; [BatchOperationState]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromThenTo</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+-&gt; BatchOperationState
+-&gt; BatchOperationState
+-&gt; [BatchOperationState]
+forall a. Enum a =&gt; a -&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromThenTo</span></span><span>
+</span><span id="line-121"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldDefault</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationState"><span class="hs-identifier hs-type">BatchOperationState</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-122"></span><span>  </span><span id="local-6989586621680253452"><span class="annot"><span class="annottext">fieldDefault :: BatchOperationState
+</span><a href="#local-6989586621680253452"><span class="hs-identifier hs-var hs-var hs-var">fieldDefault</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_STATE_UNSPECIFIED"><span class="hs-identifier hs-var">BATCH_OPERATION_STATE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-123"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Control.DeepSeq.NFData</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationState"><span class="hs-identifier hs-type">BatchOperationState</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-124"></span><span>  </span><span id="local-6989586621680253457"><span class="annot"><span class="annottext">rnf :: BatchOperationState -&gt; ()
+</span><a href="#local-6989586621680253457"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span id="local-6989586621680253459"><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="#local-6989586621680253459"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationState -&gt; () -&gt; ()
+forall a b. a -&gt; b -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.seq</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationState
+</span><a href="#local-6989586621680253459"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-125"></span><span class="hs-keyword">newtype</span><span> </span><span id="BatchOperationType%27UnrecognizedValue"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationType%27UnrecognizedValue"><span class="hs-identifier hs-var">BatchOperationType'UnrecognizedValue</span></a></span></span><span>
+</span><span id="line-126"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="BatchOperationType%27UnrecognizedValue"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationType%27UnrecognizedValue"><span class="hs-identifier hs-var">BatchOperationType'UnrecognizedValue</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Int.Int32</span></span><span>
+</span><span id="line-127"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680253462"><span id="local-6989586621680253465"><span class="annot"><span class="annottext">BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue -&gt; Bool
+(BatchOperationType'UnrecognizedValue
+ -&gt; BatchOperationType'UnrecognizedValue -&gt; Bool)
+-&gt; (BatchOperationType'UnrecognizedValue
+    -&gt; BatchOperationType'UnrecognizedValue -&gt; Bool)
+-&gt; Eq BatchOperationType'UnrecognizedValue
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue -&gt; Bool
+== :: BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue -&gt; Bool
+$c/= :: BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue -&gt; Bool
+/= :: BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680253471"><span id="local-6989586621680253474"><span id="local-6989586621680253477"><span id="local-6989586621680253481"><span id="local-6989586621680253484"><span id="local-6989586621680253487"><span id="local-6989586621680253490"><span class="annot"><span class="annottext">Eq BatchOperationType'UnrecognizedValue
+Eq BatchOperationType'UnrecognizedValue =&gt;
+(BatchOperationType'UnrecognizedValue
+ -&gt; BatchOperationType'UnrecognizedValue -&gt; Ordering)
+-&gt; (BatchOperationType'UnrecognizedValue
+    -&gt; BatchOperationType'UnrecognizedValue -&gt; Bool)
+-&gt; (BatchOperationType'UnrecognizedValue
+    -&gt; BatchOperationType'UnrecognizedValue -&gt; Bool)
+-&gt; (BatchOperationType'UnrecognizedValue
+    -&gt; BatchOperationType'UnrecognizedValue -&gt; Bool)
+-&gt; (BatchOperationType'UnrecognizedValue
+    -&gt; BatchOperationType'UnrecognizedValue -&gt; Bool)
+-&gt; (BatchOperationType'UnrecognizedValue
+    -&gt; BatchOperationType'UnrecognizedValue
+    -&gt; BatchOperationType'UnrecognizedValue)
+-&gt; (BatchOperationType'UnrecognizedValue
+    -&gt; BatchOperationType'UnrecognizedValue
+    -&gt; BatchOperationType'UnrecognizedValue)
+-&gt; Ord BatchOperationType'UnrecognizedValue
+BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue -&gt; Bool
+BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue -&gt; Ordering
+BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue -&gt; Ordering
+compare :: BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue -&gt; Ordering
+$c&lt; :: BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue -&gt; Bool
+&lt; :: BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue -&gt; Bool
+$c&lt;= :: BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue -&gt; Bool
+&lt;= :: BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue -&gt; Bool
+$c&gt; :: BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue -&gt; Bool
+&gt; :: BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue -&gt; Bool
+$c&gt;= :: BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue -&gt; Bool
+&gt;= :: BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue -&gt; Bool
+$cmax :: BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue
+max :: BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue
+$cmin :: BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue
+min :: BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue
+-&gt; BatchOperationType'UnrecognizedValue
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680253493"><span id="local-6989586621680253497"><span id="local-6989586621680253501"><span class="annot"><span class="annottext">Int -&gt; BatchOperationType'UnrecognizedValue -&gt; ShowS
+[BatchOperationType'UnrecognizedValue] -&gt; ShowS
+BatchOperationType'UnrecognizedValue -&gt; String
+(Int -&gt; BatchOperationType'UnrecognizedValue -&gt; ShowS)
+-&gt; (BatchOperationType'UnrecognizedValue -&gt; String)
+-&gt; ([BatchOperationType'UnrecognizedValue] -&gt; ShowS)
+-&gt; Show BatchOperationType'UnrecognizedValue
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; BatchOperationType'UnrecognizedValue -&gt; ShowS
+showsPrec :: Int -&gt; BatchOperationType'UnrecognizedValue -&gt; ShowS
+$cshow :: BatchOperationType'UnrecognizedValue -&gt; String
+show :: BatchOperationType'UnrecognizedValue -&gt; String
+$cshowList :: [BatchOperationType'UnrecognizedValue] -&gt; ShowS
+showList :: [BatchOperationType'UnrecognizedValue] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-128"></span><span class="hs-keyword">data</span><span> </span><span id="BatchOperationType"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationType"><span class="hs-identifier hs-var">BatchOperationType</span></a></span></span><span>
+</span><span id="line-129"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="BATCH_OPERATION_TYPE_UNSPECIFIED"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_UNSPECIFIED"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_UNSPECIFIED</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-130"></span><span>    </span><span id="BATCH_OPERATION_TYPE_TERMINATE"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_TERMINATE"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_TERMINATE</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-131"></span><span>    </span><span id="BATCH_OPERATION_TYPE_CANCEL"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_CANCEL"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_CANCEL</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-132"></span><span>    </span><span id="BATCH_OPERATION_TYPE_SIGNAL"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_SIGNAL"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_SIGNAL</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-133"></span><span>    </span><span id="BATCH_OPERATION_TYPE_DELETE"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_DELETE"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_DELETE</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-134"></span><span>    </span><span id="BATCH_OPERATION_TYPE_RESET"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_RESET"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_RESET</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-135"></span><span>    </span><span id="BatchOperationType%27Unrecognized"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationType%27Unrecognized"><span class="hs-identifier hs-var">BatchOperationType'Unrecognized</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationType%27UnrecognizedValue"><span class="hs-identifier hs-type">BatchOperationType'UnrecognizedValue</span></a></span><span>
+</span><span id="line-136"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680253511"><span id="local-6989586621680253515"><span id="local-6989586621680253519"><span class="annot"><span class="annottext">Int -&gt; BatchOperationType -&gt; ShowS
+[BatchOperationType] -&gt; ShowS
+BatchOperationType -&gt; String
+(Int -&gt; BatchOperationType -&gt; ShowS)
+-&gt; (BatchOperationType -&gt; String)
+-&gt; ([BatchOperationType] -&gt; ShowS)
+-&gt; Show BatchOperationType
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; BatchOperationType -&gt; ShowS
+showsPrec :: Int -&gt; BatchOperationType -&gt; ShowS
+$cshow :: BatchOperationType -&gt; String
+show :: BatchOperationType -&gt; String
+$cshowList :: [BatchOperationType] -&gt; ShowS
+showList :: [BatchOperationType] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680253522"><span id="local-6989586621680253527"><span class="annot"><span class="annottext">BatchOperationType -&gt; BatchOperationType -&gt; Bool
+(BatchOperationType -&gt; BatchOperationType -&gt; Bool)
+-&gt; (BatchOperationType -&gt; BatchOperationType -&gt; Bool)
+-&gt; Eq BatchOperationType
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: BatchOperationType -&gt; BatchOperationType -&gt; Bool
+== :: BatchOperationType -&gt; BatchOperationType -&gt; Bool
+$c/= :: BatchOperationType -&gt; BatchOperationType -&gt; Bool
+/= :: BatchOperationType -&gt; BatchOperationType -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680253533"><span id="local-6989586621680253538"><span id="local-6989586621680253542"><span id="local-6989586621680253545"><span id="local-6989586621680253548"><span id="local-6989586621680253551"><span id="local-6989586621680253554"><span class="annot"><span class="annottext">Eq BatchOperationType
+Eq BatchOperationType =&gt;
+(BatchOperationType -&gt; BatchOperationType -&gt; Ordering)
+-&gt; (BatchOperationType -&gt; BatchOperationType -&gt; Bool)
+-&gt; (BatchOperationType -&gt; BatchOperationType -&gt; Bool)
+-&gt; (BatchOperationType -&gt; BatchOperationType -&gt; Bool)
+-&gt; (BatchOperationType -&gt; BatchOperationType -&gt; Bool)
+-&gt; (BatchOperationType -&gt; BatchOperationType -&gt; BatchOperationType)
+-&gt; (BatchOperationType -&gt; BatchOperationType -&gt; BatchOperationType)
+-&gt; Ord BatchOperationType
+BatchOperationType -&gt; BatchOperationType -&gt; Bool
+BatchOperationType -&gt; BatchOperationType -&gt; Ordering
+BatchOperationType -&gt; BatchOperationType -&gt; BatchOperationType
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: BatchOperationType -&gt; BatchOperationType -&gt; Ordering
+compare :: BatchOperationType -&gt; BatchOperationType -&gt; Ordering
+$c&lt; :: BatchOperationType -&gt; BatchOperationType -&gt; Bool
+&lt; :: BatchOperationType -&gt; BatchOperationType -&gt; Bool
+$c&lt;= :: BatchOperationType -&gt; BatchOperationType -&gt; Bool
+&lt;= :: BatchOperationType -&gt; BatchOperationType -&gt; Bool
+$c&gt; :: BatchOperationType -&gt; BatchOperationType -&gt; Bool
+&gt; :: BatchOperationType -&gt; BatchOperationType -&gt; Bool
+$c&gt;= :: BatchOperationType -&gt; BatchOperationType -&gt; Bool
+&gt;= :: BatchOperationType -&gt; BatchOperationType -&gt; Bool
+$cmax :: BatchOperationType -&gt; BatchOperationType -&gt; BatchOperationType
+max :: BatchOperationType -&gt; BatchOperationType -&gt; BatchOperationType
+$cmin :: BatchOperationType -&gt; BatchOperationType -&gt; BatchOperationType
+min :: BatchOperationType -&gt; BatchOperationType -&gt; BatchOperationType
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.MessageEnum</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationType"><span class="hs-identifier hs-type">BatchOperationType</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-138"></span><span>  </span><span id="local-6989586621680253580"><span class="annot"><span class="annottext">maybeToEnum :: Int -&gt; Maybe BatchOperationType
+</span><span class="hs-identifier hs-var hs-var hs-var">maybeToEnum</span></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType -&gt; Maybe BatchOperationType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_UNSPECIFIED"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-139"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType -&gt; Maybe BatchOperationType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_TERMINATE"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_TERMINATE</span></a></span><span>
+</span><span id="line-140"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType -&gt; Maybe BatchOperationType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_CANCEL"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_CANCEL</span></a></span><span>
+</span><span id="line-141"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">3</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType -&gt; Maybe BatchOperationType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_SIGNAL"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_SIGNAL</span></a></span><span>
+</span><span id="line-142"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">4</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType -&gt; Maybe BatchOperationType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_DELETE"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_DELETE</span></a></span><span>
+</span><span id="line-143"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">5</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType -&gt; Maybe BatchOperationType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_RESET"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_RESET</span></a></span><span>
+</span><span id="line-144"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span id="local-6989586621680253581"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680253581"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><span id="line-145"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType -&gt; Maybe BatchOperationType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span>
+</span><span id="line-146"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BatchOperationType'UnrecognizedValue -&gt; BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationType%27Unrecognized"><span class="hs-identifier hs-var">BatchOperationType'Unrecognized</span></a></span><span>
+</span><span id="line-147"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int32 -&gt; BatchOperationType'UnrecognizedValue
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationType%27UnrecognizedValue"><span class="hs-identifier hs-var">BatchOperationType'UnrecognizedValue</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int32
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680253581"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-148"></span><span>  </span><span id="local-6989586621680253583"><span class="annot"><span class="annottext">showEnum :: BatchOperationType -&gt; String
+</span><span class="hs-identifier hs-var hs-var hs-var">showEnum</span></span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_UNSPECIFIED"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-149"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BATCH_OPERATION_TYPE_UNSPECIFIED&quot;</span></span><span>
+</span><span id="line-150"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_TERMINATE"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_TERMINATE</span></a></span><span>
+</span><span id="line-151"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BATCH_OPERATION_TYPE_TERMINATE&quot;</span></span><span>
+</span><span id="line-152"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_CANCEL"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_CANCEL</span></a></span><span>
+</span><span id="line-153"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BATCH_OPERATION_TYPE_CANCEL&quot;</span></span><span>
+</span><span id="line-154"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_SIGNAL"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_SIGNAL</span></a></span><span>
+</span><span id="line-155"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BATCH_OPERATION_TYPE_SIGNAL&quot;</span></span><span>
+</span><span id="line-156"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_DELETE"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_DELETE</span></a></span><span>
+</span><span id="line-157"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BATCH_OPERATION_TYPE_DELETE&quot;</span></span><span>
+</span><span id="line-158"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_RESET"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_RESET</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BATCH_OPERATION_TYPE_RESET&quot;</span></span><span>
+</span><span id="line-159"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span>
+</span><span id="line-160"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationType%27Unrecognized"><span class="hs-identifier hs-type">BatchOperationType'Unrecognized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationType%27UnrecognizedValue"><span class="hs-identifier hs-type">BatchOperationType'UnrecognizedValue</span></a></span><span> </span><span id="local-6989586621680253584"><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680253584"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-161"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int32 -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">Prelude.show</span></span><span> </span><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680253584"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-162"></span><span>  </span><span id="local-6989586621680253602"><span class="annot"><span class="annottext">readEnum :: String -&gt; Maybe BatchOperationType
+</span><span class="hs-identifier hs-var hs-var hs-var">readEnum</span></span></span><span> </span><span id="local-6989586621680253603"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680253603"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><span id="line-163"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680253603"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BATCH_OPERATION_TYPE_UNSPECIFIED&quot;</span></span><span>
+</span><span id="line-164"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType -&gt; Maybe BatchOperationType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_UNSPECIFIED"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-165"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680253603"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BATCH_OPERATION_TYPE_TERMINATE&quot;</span></span><span>
+</span><span id="line-166"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType -&gt; Maybe BatchOperationType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_TERMINATE"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_TERMINATE</span></a></span><span>
+</span><span id="line-167"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680253603"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BATCH_OPERATION_TYPE_CANCEL&quot;</span></span><span>
+</span><span id="line-168"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType -&gt; Maybe BatchOperationType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_CANCEL"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_CANCEL</span></a></span><span>
+</span><span id="line-169"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680253603"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BATCH_OPERATION_TYPE_SIGNAL&quot;</span></span><span>
+</span><span id="line-170"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType -&gt; Maybe BatchOperationType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_SIGNAL"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_SIGNAL</span></a></span><span>
+</span><span id="line-171"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680253603"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BATCH_OPERATION_TYPE_DELETE&quot;</span></span><span>
+</span><span id="line-172"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType -&gt; Maybe BatchOperationType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_DELETE"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_DELETE</span></a></span><span>
+</span><span id="line-173"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680253603"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BATCH_OPERATION_TYPE_RESET&quot;</span></span><span>
+</span><span id="line-174"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType -&gt; Maybe BatchOperationType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_RESET"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_RESET</span></a></span><span>
+</span><span id="line-175"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">Prelude.otherwise</span></span><span>
+</span><span id="line-176"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Int
+-&gt; (Int -&gt; Maybe BatchOperationType) -&gt; Maybe BatchOperationType
+forall a b. Maybe a -&gt; (a -&gt; Maybe b) -&gt; Maybe b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">(Prelude.&gt;&gt;=)</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Maybe Int
+forall a. Read a =&gt; String -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Text.Read.readMaybe</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680253603"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Maybe BatchOperationType
+forall a. MessageEnum a =&gt; Int -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeToEnum</span></span><span>
+</span><span id="line-177"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prelude.Bounded</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationType"><span class="hs-identifier hs-type">BatchOperationType</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-178"></span><span>  </span><span id="local-6989586621680253606"><span class="annot"><span class="annottext">minBound :: BatchOperationType
+</span><span class="hs-identifier hs-var hs-var hs-var">minBound</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_UNSPECIFIED"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-179"></span><span>  </span><span id="local-6989586621680253607"><span class="annot"><span class="annottext">maxBound :: BatchOperationType
+</span><span class="hs-identifier hs-var hs-var hs-var">maxBound</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_RESET"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_RESET</span></a></span><span>
+</span><span id="line-180"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prelude.Enum</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationType"><span class="hs-identifier hs-type">BatchOperationType</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-181"></span><span>  </span><span id="local-6989586621680253622"><span class="annot"><span class="annottext">toEnum :: Int -&gt; BatchOperationType
+</span><span class="hs-identifier hs-var hs-var hs-var">toEnum</span></span></span><span> </span><span id="local-6989586621680253623"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680253623"><span class="hs-identifier hs-var">k__</span></a></span></span><span>
+</span><span id="line-182"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+-&gt; (BatchOperationType -&gt; BatchOperationType)
+-&gt; Maybe BatchOperationType
+-&gt; BatchOperationType
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.maybe</span></span><span>
+</span><span id="line-183"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; BatchOperationType
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-184"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">(Prelude.++)</span></span><span>
+</span><span id="line-185"></span><span>              </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;toEnum: unknown value for enum BatchOperationType: &quot;</span></span><span>
+</span><span id="line-186"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">Prelude.show</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680253623"><span class="hs-identifier hs-var">k__</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-187"></span><span>        </span><span class="annot"><span class="annottext">BatchOperationType -&gt; BatchOperationType
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.id</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Maybe BatchOperationType
+forall a. MessageEnum a =&gt; Int -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680253623"><span class="hs-identifier hs-var">k__</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-188"></span><span>  </span><span id="local-6989586621680253626"><span class="annot"><span class="annottext">fromEnum :: BatchOperationType -&gt; Int
+</span><span class="hs-identifier hs-var hs-var hs-var">fromEnum</span></span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_UNSPECIFIED"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_UNSPECIFIED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-189"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_TERMINATE"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_TERMINATE</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-190"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_CANCEL"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_CANCEL</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span>
+</span><span id="line-191"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_SIGNAL"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_SIGNAL</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">3</span></span><span>
+</span><span id="line-192"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_DELETE"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_DELETE</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">4</span></span><span>
+</span><span id="line-193"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_RESET"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_RESET</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">5</span></span><span>
+</span><span id="line-194"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span>
+</span><span id="line-195"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationType%27Unrecognized"><span class="hs-identifier hs-type">BatchOperationType'Unrecognized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationType%27UnrecognizedValue"><span class="hs-identifier hs-type">BatchOperationType'UnrecognizedValue</span></a></span><span> </span><span id="local-6989586621680253627"><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680253627"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-196"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int32 -&gt; Int
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680253627"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-197"></span><span>  </span><span id="local-6989586621680253632"><span class="annot"><span class="annottext">succ :: BatchOperationType -&gt; BatchOperationType
+</span><span class="hs-identifier hs-var hs-var hs-var">succ</span></span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_RESET"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_RESET</span></a></span><span>
+</span><span id="line-198"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; BatchOperationType
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-199"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BatchOperationType.succ: bad argument BATCH_OPERATION_TYPE_RESET. This value would be out of bounds.&quot;</span></span><span>
+</span><span id="line-200"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_UNSPECIFIED"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-201"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_TERMINATE"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_TERMINATE</span></a></span><span>
+</span><span id="line-202"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_TERMINATE"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_TERMINATE</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_CANCEL"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_CANCEL</span></a></span><span>
+</span><span id="line-203"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_CANCEL"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_CANCEL</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_SIGNAL"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_SIGNAL</span></a></span><span>
+</span><span id="line-204"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_SIGNAL"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_SIGNAL</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_DELETE"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_DELETE</span></a></span><span>
+</span><span id="line-205"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_DELETE"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_DELETE</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_RESET"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_RESET</span></a></span><span>
+</span><span id="line-206"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationType%27Unrecognized"><span class="hs-identifier hs-type">BatchOperationType'Unrecognized</span></a></span><span> </span><span class="annot"><span class="annottext">BatchOperationType'UnrecognizedValue
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-207"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; BatchOperationType
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-208"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BatchOperationType.succ: bad argument: unrecognized value&quot;</span></span><span>
+</span><span id="line-209"></span><span>  </span><span id="local-6989586621680253637"><span class="annot"><span class="annottext">pred :: BatchOperationType -&gt; BatchOperationType
+</span><span class="hs-identifier hs-var hs-var hs-var">pred</span></span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_UNSPECIFIED"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-210"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; BatchOperationType
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-211"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BatchOperationType.pred: bad argument BATCH_OPERATION_TYPE_UNSPECIFIED. This value would be out of bounds.&quot;</span></span><span>
+</span><span id="line-212"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_TERMINATE"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_TERMINATE</span></a></span><span>
+</span><span id="line-213"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_UNSPECIFIED"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-214"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_CANCEL"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_CANCEL</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_TERMINATE"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_TERMINATE</span></a></span><span>
+</span><span id="line-215"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_SIGNAL"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_SIGNAL</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_CANCEL"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_CANCEL</span></a></span><span>
+</span><span id="line-216"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_DELETE"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_DELETE</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_SIGNAL"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_SIGNAL</span></a></span><span>
+</span><span id="line-217"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_RESET"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_RESET</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_DELETE"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_DELETE</span></a></span><span>
+</span><span id="line-218"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationType%27Unrecognized"><span class="hs-identifier hs-type">BatchOperationType'Unrecognized</span></a></span><span> </span><span class="annot"><span class="annottext">BatchOperationType'UnrecognizedValue
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-219"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; BatchOperationType
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-220"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;BatchOperationType.pred: bad argument: unrecognized value&quot;</span></span><span>
+</span><span id="line-221"></span><span>  </span><span id="local-6989586621680253640"><span class="annot"><span class="annottext">enumFrom :: BatchOperationType -&gt; [BatchOperationType]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFrom</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType -&gt; [BatchOperationType]
+forall a. (Enum a, Bounded a) =&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFrom</span></span><span>
+</span><span id="line-222"></span><span>  </span><span id="local-6989586621680253642"><span class="annot"><span class="annottext">enumFromTo :: BatchOperationType -&gt; BatchOperationType -&gt; [BatchOperationType]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromTo</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType -&gt; BatchOperationType -&gt; [BatchOperationType]
+forall a. Enum a =&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromTo</span></span><span>
+</span><span id="line-223"></span><span>  </span><span id="local-6989586621680253645"><span class="annot"><span class="annottext">enumFromThen :: BatchOperationType -&gt; BatchOperationType -&gt; [BatchOperationType]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromThen</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType -&gt; BatchOperationType -&gt; [BatchOperationType]
+forall a. (Enum a, Bounded a) =&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromThen</span></span><span>
+</span><span id="line-224"></span><span>  </span><span id="local-6989586621680253647"><span class="annot"><span class="annottext">enumFromThenTo :: BatchOperationType
+-&gt; BatchOperationType -&gt; BatchOperationType -&gt; [BatchOperationType]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromThenTo</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+-&gt; BatchOperationType -&gt; BatchOperationType -&gt; [BatchOperationType]
+forall a. Enum a =&gt; a -&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromThenTo</span></span><span>
+</span><span id="line-225"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldDefault</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationType"><span class="hs-identifier hs-type">BatchOperationType</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-226"></span><span>  </span><span id="local-6989586621680253650"><span class="annot"><span class="annottext">fieldDefault :: BatchOperationType
+</span><span class="hs-identifier hs-var hs-var hs-var">fieldDefault</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BATCH_OPERATION_TYPE_UNSPECIFIED"><span class="hs-identifier hs-var">BATCH_OPERATION_TYPE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-227"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Control.DeepSeq.NFData</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.BatchOperation.html#BatchOperationType"><span class="hs-identifier hs-type">BatchOperationType</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-228"></span><span>  </span><span id="local-6989586621680253653"><span class="annot"><span class="annottext">rnf :: BatchOperationType -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var">rnf</span></span></span><span> </span><span id="local-6989586621680253654"><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="#local-6989586621680253654"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BatchOperationType -&gt; () -&gt; ()
+forall a b. a -&gt; b -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.seq</span></span><span> </span><span class="annot"><span class="annottext">BatchOperationType
+</span><a href="#local-6989586621680253654"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-229"></span></pre></body></html>

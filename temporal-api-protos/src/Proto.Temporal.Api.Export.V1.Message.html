@@ -1,0 +1,926 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{- This file was auto-generated from temporal/api/export/v1/message.proto by the proto-lens-protoc program. -}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-unused-imports#-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-duplicate-exports#-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-dodgy-exports#-}</span><span>
+</span><span id="line-6"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html"><span class="hs-identifier">Proto.Temporal.Api.Export.V1.Message</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-7"></span><span>        </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecution"><span class="hs-identifier">WorkflowExecution</span></a></span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecutions"><span class="hs-identifier">WorkflowExecutions</span></a></span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-8"></span><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Control.DeepSeq</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Prism</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Prism</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Prelude</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Int</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Int</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Monoid</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Monoid</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Word</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Word</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Bytes</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Growing</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Parser.Unsafe</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Wire</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Field</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Field</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Message.Enum</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Service.Types</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Lens.Family2</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Lens.Family2</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Lens.Family2.Unchecked</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Lens.Family2.Unchecked</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Map</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ByteString</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ByteString.Char8</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString.Char8</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Text.Encoding</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text.Encoding</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Vector</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Vector.Generic</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Generic</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Vector.Unboxed</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Unboxed</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Text.Read</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Text.Read</span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.History.V1.Message.html"><span class="hs-identifier">Proto.Temporal.Api.History.V1.Message</span></a></span><span>
+</span><span id="line-35"></span><span class="annot"><span class="hs-comment">{- | Fields :
+     
+         * 'Proto.Temporal.Api.Export.V1.Message_Fields.history' @:: Lens' WorkflowExecution Proto.Temporal.Api.History.V1.Message.History@
+         * 'Proto.Temporal.Api.Export.V1.Message_Fields.maybe'history' @:: Lens' WorkflowExecution (Prelude.Maybe Proto.Temporal.Api.History.V1.Message.History)@ -}</span></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">data</span><span> </span><span id="WorkflowExecution"><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecution"><span class="hs-identifier hs-var">WorkflowExecution</span></a></span></span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="WorkflowExecution%27_constructor"><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecution%27_constructor"><span class="hs-identifier hs-var">WorkflowExecution'_constructor</span></a></span></span><span> </span><span class="hs-special">{</span><span id="_WorkflowExecution%27history"><span class="annot"><span class="annottext">WorkflowExecution -&gt; Maybe History
+</span><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecution%27history"><span class="hs-identifier hs-var hs-var">_WorkflowExecution'history</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.Maybe</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.History.V1.Message.html#History"><span class="hs-identifier hs-type">Proto.Temporal.Api.History.V1.Message.History</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-41"></span><span>                                    </span><span id="_WorkflowExecution%27_unknownFields"><span class="annot"><span class="annottext">WorkflowExecution -&gt; FieldSet
+</span><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecution%27_unknownFields"><span class="hs-identifier hs-var hs-var">_WorkflowExecution'_unknownFields</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldSet</span></span><span class="hs-special">}</span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680370433"><span id="local-6989586621680370441"><span class="annot"><span class="annottext">WorkflowExecution -&gt; WorkflowExecution -&gt; Bool
+(WorkflowExecution -&gt; WorkflowExecution -&gt; Bool)
+-&gt; (WorkflowExecution -&gt; WorkflowExecution -&gt; Bool)
+-&gt; Eq WorkflowExecution
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: WorkflowExecution -&gt; WorkflowExecution -&gt; Bool
+== :: WorkflowExecution -&gt; WorkflowExecution -&gt; Bool
+$c/= :: WorkflowExecution -&gt; WorkflowExecution -&gt; Bool
+/= :: WorkflowExecution -&gt; WorkflowExecution -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680370450"><span id="local-6989586621680370458"><span id="local-6989586621680370464"><span id="local-6989586621680370468"><span id="local-6989586621680370471"><span id="local-6989586621680370474"><span id="local-6989586621680370477"><span class="annot"><span class="annottext">Eq WorkflowExecution
+Eq WorkflowExecution =&gt;
+(WorkflowExecution -&gt; WorkflowExecution -&gt; Ordering)
+-&gt; (WorkflowExecution -&gt; WorkflowExecution -&gt; Bool)
+-&gt; (WorkflowExecution -&gt; WorkflowExecution -&gt; Bool)
+-&gt; (WorkflowExecution -&gt; WorkflowExecution -&gt; Bool)
+-&gt; (WorkflowExecution -&gt; WorkflowExecution -&gt; Bool)
+-&gt; (WorkflowExecution -&gt; WorkflowExecution -&gt; WorkflowExecution)
+-&gt; (WorkflowExecution -&gt; WorkflowExecution -&gt; WorkflowExecution)
+-&gt; Ord WorkflowExecution
+WorkflowExecution -&gt; WorkflowExecution -&gt; Bool
+WorkflowExecution -&gt; WorkflowExecution -&gt; Ordering
+WorkflowExecution -&gt; WorkflowExecution -&gt; WorkflowExecution
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: WorkflowExecution -&gt; WorkflowExecution -&gt; Ordering
+compare :: WorkflowExecution -&gt; WorkflowExecution -&gt; Ordering
+$c&lt; :: WorkflowExecution -&gt; WorkflowExecution -&gt; Bool
+&lt; :: WorkflowExecution -&gt; WorkflowExecution -&gt; Bool
+$c&lt;= :: WorkflowExecution -&gt; WorkflowExecution -&gt; Bool
+&lt;= :: WorkflowExecution -&gt; WorkflowExecution -&gt; Bool
+$c&gt; :: WorkflowExecution -&gt; WorkflowExecution -&gt; Bool
+&gt; :: WorkflowExecution -&gt; WorkflowExecution -&gt; Bool
+$c&gt;= :: WorkflowExecution -&gt; WorkflowExecution -&gt; Bool
+&gt;= :: WorkflowExecution -&gt; WorkflowExecution -&gt; Bool
+$cmax :: WorkflowExecution -&gt; WorkflowExecution -&gt; WorkflowExecution
+max :: WorkflowExecution -&gt; WorkflowExecution -&gt; WorkflowExecution
+$cmin :: WorkflowExecution -&gt; WorkflowExecution -&gt; WorkflowExecution
+min :: WorkflowExecution -&gt; WorkflowExecution -&gt; WorkflowExecution
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680370488"><span id="local-6989586621680370492"><span class="annot"><span class="hs-identifier hs-type">Prelude.Show</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecution"><span class="hs-identifier hs-type">WorkflowExecution</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-44"></span><span>  </span><span id="local-6989586621680370497"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; WorkflowExecution -&gt; ShowS
+</span><a href="#local-6989586621680370497"><span class="hs-identifier hs-var hs-var hs-var">showsPrec</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621680370499"><span class="annot"><span class="annottext">WorkflowExecution
+</span><a href="#local-6989586621680370499"><span class="hs-identifier hs-var">__x</span></a></span></span><span> </span><span id="local-6989586621680370500"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680370500"><span class="hs-identifier hs-var">__s</span></a></span></span><span>
+</span><span id="line-45"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
+</span><span class="hs-identifier hs-var">Prelude.showChar</span></span><span>
+</span><span id="line-46"></span><span>        </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'{'</span></span><span>
+</span><span id="line-47"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><span class="hs-identifier hs-var">Prelude.showString</span></span><span>
+</span><span id="line-48"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">WorkflowExecution -&gt; String
+forall msg. Message msg =&gt; msg -&gt; String
+</span><span class="hs-identifier hs-var">Data.ProtoLens.showMessageShort</span></span><span> </span><span class="annot"><span class="annottext">WorkflowExecution
+</span><a href="#local-6989586621680370499"><span class="hs-identifier hs-var">__x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; ShowS
+</span><span class="hs-identifier hs-var">Prelude.showChar</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'}'</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680370500"><span class="hs-identifier hs-var">__s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-49"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Field.HasField</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecution"><span class="hs-identifier hs-type">WorkflowExecution</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;history&quot;</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.History.V1.Message.html#History"><span class="hs-identifier hs-type">Proto.Temporal.Api.History.V1.Message.History</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-50"></span><span>  </span><span id="local-6989586621680370512"><span class="annot"><span class="annottext">fieldOf :: forall (f :: * -&gt; *).
+Functor f =&gt;
+Proxy# &quot;history&quot;
+-&gt; (History -&gt; f History)
+-&gt; WorkflowExecution
+-&gt; f WorkflowExecution
+</span><a href="#local-6989586621680370512"><span class="hs-identifier hs-var hs-var hs-var">fieldOf</span></a></span></span><span> </span><span class="annot"><span class="annottext">Proxy# &quot;history&quot;
+</span><span class="hs-identifier">_</span></span><span>
+</span><span id="line-51"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Maybe History -&gt; f (Maybe History))
+ -&gt; WorkflowExecution -&gt; f WorkflowExecution)
+-&gt; ((History -&gt; f History) -&gt; Maybe History -&gt; f (Maybe History))
+-&gt; (History -&gt; f History)
+-&gt; WorkflowExecution
+-&gt; f WorkflowExecution
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-52"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(WorkflowExecution -&gt; Maybe History)
+-&gt; (WorkflowExecution -&gt; Maybe History -&gt; WorkflowExecution)
+-&gt; Lens
+     WorkflowExecution WorkflowExecution (Maybe History) (Maybe History)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">Lens.Family2.Unchecked.lens</span></span><span>
+</span><span id="line-53"></span><span>           </span><span class="annot"><span class="annottext">WorkflowExecution -&gt; Maybe History
+</span><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecution%27history"><span class="hs-identifier hs-var">_WorkflowExecution'history</span></a></span><span>
+</span><span id="line-54"></span><span>           </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680370516"><span class="annot"><span class="annottext">WorkflowExecution
+</span><a href="#local-6989586621680370516"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span id="local-6989586621680370517"><span class="annot"><span class="annottext">Maybe History
+</span><a href="#local-6989586621680370517"><span class="hs-identifier hs-var">y__</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">WorkflowExecution
+</span><a href="#local-6989586621680370516"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecution%27history"><span class="hs-identifier hs-var">_WorkflowExecution'history</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680370517"><span class="hs-identifier hs-type">y__</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">History -&gt; Lens' (Maybe History) History
+forall b. b -&gt; Lens' (Maybe b) b
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeLens</span></span><span> </span><span class="annot"><span class="annottext">History
+forall msg. Message msg =&gt; msg
+</span><span class="hs-identifier hs-var">Data.ProtoLens.defMessage</span></span><span class="hs-special">)</span><span>
+</span><span id="line-56"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Field.HasField</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecution"><span class="hs-identifier hs-type">WorkflowExecution</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;maybe'history&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.Maybe</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.History.V1.Message.html#History"><span class="hs-identifier hs-type">Proto.Temporal.Api.History.V1.Message.History</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-57"></span><span>  </span><span id="local-6989586621680370524"><span class="annot"><span class="annottext">fieldOf :: forall (f :: * -&gt; *).
+Functor f =&gt;
+Proxy# &quot;maybe'history&quot;
+-&gt; (Maybe History -&gt; f (Maybe History))
+-&gt; WorkflowExecution
+-&gt; f WorkflowExecution
+</span><span class="hs-identifier hs-var hs-var hs-var">fieldOf</span></span></span><span> </span><span class="annot"><span class="annottext">Proxy# &quot;maybe'history&quot;
+</span><span class="hs-identifier">_</span></span><span>
+</span><span id="line-58"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Maybe History -&gt; f (Maybe History))
+ -&gt; WorkflowExecution -&gt; f WorkflowExecution)
+-&gt; ((Maybe History -&gt; f (Maybe History))
+    -&gt; Maybe History -&gt; f (Maybe History))
+-&gt; (Maybe History -&gt; f (Maybe History))
+-&gt; WorkflowExecution
+-&gt; f WorkflowExecution
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-59"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(WorkflowExecution -&gt; Maybe History)
+-&gt; (WorkflowExecution -&gt; Maybe History -&gt; WorkflowExecution)
+-&gt; Lens
+     WorkflowExecution WorkflowExecution (Maybe History) (Maybe History)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">Lens.Family2.Unchecked.lens</span></span><span>
+</span><span id="line-60"></span><span>           </span><span class="annot"><span class="annottext">WorkflowExecution -&gt; Maybe History
+</span><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecution%27history"><span class="hs-identifier hs-var">_WorkflowExecution'history</span></a></span><span>
+</span><span id="line-61"></span><span>           </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680370525"><span class="annot"><span class="annottext">WorkflowExecution
+</span><a href="#local-6989586621680370525"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span id="local-6989586621680370526"><span class="annot"><span class="annottext">Maybe History
+</span><a href="#local-6989586621680370526"><span class="hs-identifier hs-var">y__</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">WorkflowExecution
+</span><a href="#local-6989586621680370525"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecution%27history"><span class="hs-identifier hs-var">_WorkflowExecution'history</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680370526"><span class="hs-identifier hs-type">y__</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-62"></span><span>        </span><span class="annot"><span class="annottext">(Maybe History -&gt; f (Maybe History))
+-&gt; Maybe History -&gt; f (Maybe History)
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.id</span></span><span>
+</span><span id="line-63"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680370534"><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Message</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecution"><span class="hs-identifier hs-type">WorkflowExecution</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-64"></span><span>  </span><span id="local-6989586621680370540"><span class="annot"><span class="annottext">messageName :: Proxy WorkflowExecution -&gt; Text
+</span><a href="#local-6989586621680370540"><span class="hs-identifier hs-var hs-var hs-var">messageName</span></a></span></span><span> </span><span class="annot"><span class="annottext">Proxy WorkflowExecution
+</span><span class="hs-identifier">_</span></span><span>
+</span><span id="line-65"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Text
+</span><span class="hs-identifier hs-var">Data.Text.pack</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;temporal.api.export.v1.WorkflowExecution&quot;</span></span><span>
+</span><span id="line-66"></span><span>  </span><span id="local-6989586621680370544"><span class="annot"><span class="annottext">packedMessageDescriptor :: Proxy WorkflowExecution -&gt; ByteString
+</span><a href="#local-6989586621680370544"><span class="hs-identifier hs-var hs-var hs-var">packedMessageDescriptor</span></a></span></span><span> </span><span class="annot"><span class="annottext">Proxy WorkflowExecution
+</span><span class="hs-identifier">_</span></span><span>
+</span><span id="line-67"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;\n\
+      \\DC1WorkflowExecution\DC2:\n\
+      \\ahistory\CAN\SOH \SOH(\v2 .temporal.api.history.v1.HistoryR\ahistory&quot;</span></span><span>
+</span><span id="line-70"></span><span>  </span><span id="local-6989586621680370546"><span class="annot"><span class="annottext">packedFileDescriptor :: Proxy WorkflowExecution -&gt; ByteString
+</span><a href="#local-6989586621680370546"><span class="hs-identifier hs-var hs-var hs-var">packedFileDescriptor</span></a></span></span><span> </span><span class="annot"><span class="annottext">Proxy WorkflowExecution
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="Proto.Temporal.Api.Export.V1.Message.html#packedFileDescriptor"><span class="hs-identifier hs-var">packedFileDescriptor</span></a></span><span>
+</span><span id="line-71"></span><span>  </span><span id="local-6989586621680370551"><span class="annot"><span class="annottext">fieldsByTag :: Map Tag (FieldDescriptor WorkflowExecution)
+</span><a href="#local-6989586621680370551"><span class="hs-identifier hs-var hs-var hs-var">fieldsByTag</span></a></span></span><span>
+</span><span id="line-72"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span>
+</span><span id="line-73"></span><span>        </span><span id="local-6989586621680370554"><span class="annot"><span class="annottext">history__field_descriptor :: FieldDescriptor WorkflowExecution
+</span><a href="#local-6989586621680370554"><span class="hs-identifier hs-var hs-var">history__field_descriptor</span></a></span></span><span>
+</span><span id="line-74"></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; FieldTypeDescriptor History
+-&gt; FieldAccessor WorkflowExecution History
+-&gt; FieldDescriptor WorkflowExecution
+forall value msg.
+String
+-&gt; FieldTypeDescriptor value
+-&gt; FieldAccessor msg value
+-&gt; FieldDescriptor msg
+</span><span class="hs-identifier hs-var">Data.ProtoLens.FieldDescriptor</span></span><span>
+</span><span id="line-75"></span><span>              </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;history&quot;</span></span><span>
+</span><span id="line-76"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MessageOrGroup -&gt; FieldTypeDescriptor History
+forall value.
+Message value =&gt;
+MessageOrGroup -&gt; FieldTypeDescriptor value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.MessageField</span></span><span> </span><span class="annot"><span class="annottext">MessageOrGroup
+</span><span class="hs-identifier hs-var">Data.ProtoLens.MessageType</span></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-77"></span><span>                 </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldTypeDescriptor</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.History.V1.Message.html#History"><span class="hs-identifier hs-type">Proto.Temporal.Api.History.V1.Message.History</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-78"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Lens
+  WorkflowExecution WorkflowExecution (Maybe History) (Maybe History)
+-&gt; FieldAccessor WorkflowExecution History
+forall msg value.
+Lens' msg (Maybe value) -&gt; FieldAccessor msg value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.OptionalField</span></span><span>
+</span><span id="line-79"></span><span>                 </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (x :: Symbol) s a (f :: * -&gt; *).
+(HasField s x a, Functor f) =&gt;
+(a -&gt; f a) -&gt; s -&gt; f s
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Field.field</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;maybe'history&quot;</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-80"></span><span>              </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldDescriptor</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecution"><span class="hs-identifier hs-type">WorkflowExecution</span></a></span><span>
+</span><span id="line-81"></span><span>      </span><span class="hs-keyword">in</span><span>
+</span><span id="line-82"></span><span>        </span><span class="annot"><span class="annottext">[(Tag, FieldDescriptor WorkflowExecution)]
+-&gt; Map Tag (FieldDescriptor WorkflowExecution)
+forall k a. Ord k =&gt; [(k, a)] -&gt; Map k a
+</span><span class="hs-identifier hs-var">Data.Map.fromList</span></span><span>
+</span><span id="line-83"></span><span>          </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Tag
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Tag</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FieldDescriptor WorkflowExecution
+</span><a href="#local-6989586621680370554"><span class="hs-identifier hs-var">history__field_descriptor</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-84"></span><span>  </span><span id="local-6989586621680370567"><span class="annot"><span class="annottext">unknownFields :: Lens' WorkflowExecution FieldSet
+</span><a href="#local-6989586621680370567"><span class="hs-identifier hs-var hs-var hs-var">unknownFields</span></a></span></span><span>
+</span><span id="line-85"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(WorkflowExecution -&gt; FieldSet)
+-&gt; (WorkflowExecution -&gt; FieldSet -&gt; WorkflowExecution)
+-&gt; Lens' WorkflowExecution FieldSet
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">Lens.Family2.Unchecked.lens</span></span><span>
+</span><span id="line-86"></span><span>        </span><span class="annot"><span class="annottext">WorkflowExecution -&gt; FieldSet
+</span><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecution%27_unknownFields"><span class="hs-identifier hs-var">_WorkflowExecution'_unknownFields</span></a></span><span>
+</span><span id="line-87"></span><span>        </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680370569"><span class="annot"><span class="annottext">WorkflowExecution
+</span><a href="#local-6989586621680370569"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span id="local-6989586621680370570"><span class="annot"><span class="annottext">FieldSet
+</span><a href="#local-6989586621680370570"><span class="hs-identifier hs-var">y__</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">WorkflowExecution
+</span><a href="#local-6989586621680370569"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecution%27_unknownFields"><span class="hs-identifier hs-var">_WorkflowExecution'_unknownFields</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680370570"><span class="hs-identifier hs-type">y__</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-88"></span><span>  </span><span id="local-6989586621680370571"><span class="annot"><span class="annottext">defMessage :: WorkflowExecution
+</span><span class="hs-identifier hs-var hs-var hs-var">defMessage</span></span></span><span>
+</span><span id="line-89"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecution%27_constructor"><span class="hs-identifier hs-type">WorkflowExecution'_constructor</span></a></span><span>
+</span><span id="line-90"></span><span>        </span><span class="hs-special">{</span><span class="annot"><span class="annottext">_WorkflowExecution'history :: Maybe History
+</span><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecution%27history"><span class="hs-identifier hs-var">_WorkflowExecution'history</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe History
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Nothing</span></span><span class="hs-special">,</span><span>
+</span><span id="line-91"></span><span>         </span><span class="annot"><span class="annottext">_WorkflowExecution'_unknownFields :: FieldSet
+</span><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecution%27_unknownFields"><span class="hs-identifier hs-var">_WorkflowExecution'_unknownFields</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">}</span><span>
+</span><span id="line-92"></span><span>  </span><span id="local-6989586621680370603"><span class="annot"><span class="annottext">parseMessage :: Parser WorkflowExecution
+</span><a href="#local-6989586621680370603"><span class="hs-identifier hs-var hs-var hs-var">parseMessage</span></a></span></span><span>
+</span><span id="line-93"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span>
+</span><span id="line-94"></span><span>        </span><span class="annot"><a href="#local-6989586621680370605"><span class="hs-identifier hs-type">loop</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-95"></span><span>          </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecution"><span class="hs-identifier hs-type">WorkflowExecution</span></a></span><span>
+</span><span id="line-96"></span><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Encoding.Bytes.Parser</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecution"><span class="hs-identifier hs-type">WorkflowExecution</span></a></span><span>
+</span><span id="line-97"></span><span>        </span><span id="local-6989586621680370605"><span class="annot"><span class="annottext">loop :: WorkflowExecution -&gt; Parser WorkflowExecution
+</span><a href="#local-6989586621680370605"><span class="hs-identifier hs-var hs-var">loop</span></a></span></span><span> </span><span id="local-6989586621680370606"><span class="annot"><span class="annottext">WorkflowExecution
+</span><a href="#local-6989586621680370606"><span class="hs-identifier hs-var">x</span></a></span></span><span>
+</span><span id="line-98"></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621680370607"><span class="annot"><a href="#local-6989586621680370607"><span class="hs-identifier hs-var">end</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Bool
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.atEnd</span></span><span>
+</span><span id="line-99"></span><span>               </span><span class="hs-keyword">if</span><span> </span><span class="annot"><a href="#local-6989586621680370607"><span class="hs-identifier hs-type">end</span></a></span><span> </span><span class="hs-keyword">then</span><span>
+</span><span id="line-100"></span><span>                   </span><span class="hs-keyword">do</span><span> </span><span class="hs-special">(</span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680370609"><span class="annot"><a href="#local-6989586621680370609"><span class="hs-identifier hs-var hs-var">missing</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-101"></span><span>                       </span><span class="hs-keyword">in</span><span>
+</span><span id="line-102"></span><span>                         </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prelude.null</span></span><span> </span><span class="annot"><a href="#local-6989586621680370609"><span class="hs-identifier hs-type">missing</span></a></span><span> </span><span class="hs-keyword">then</span><span>
+</span><span id="line-103"></span><span>                             </span><span class="annot"><span class="hs-identifier hs-type">Prelude.return</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-104"></span><span>                         </span><span class="hs-keyword">else</span><span>
+</span><span id="line-105"></span><span>                             </span><span class="annot"><span class="hs-identifier hs-type">Prelude.fail</span></span><span>
+</span><span id="line-106"></span><span>                               </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator hs-type">(Prelude.++)</span></span><span>
+</span><span id="line-107"></span><span>                                  </span><span class="annot"><span class="hs-string">&quot;Missing required fields: &quot;</span></span><span>
+</span><span id="line-108"></span><span>                                  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680370609"><span class="hs-identifier hs-type">missing</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Prelude.String</span></span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-109"></span><span>                      </span><span class="annot"><span class="hs-identifier hs-type">Prelude.return</span></span><span>
+</span><span id="line-110"></span><span>                        </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Lens.Family2.over</span></span><span>
+</span><span id="line-111"></span><span>                           </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.unknownFields</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621680370620"><span class="annot"><span class="annottext">FieldSet
+</span><a href="#local-6989586621680370620"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">FieldSet -&gt; FieldSet
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">Prelude.reverse</span></span><span> </span><span class="annot"><span class="annottext">FieldSet
+</span><a href="#local-6989586621680370620"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680370606"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-112"></span><span>               </span><span class="hs-keyword">else</span><span>
+</span><span id="line-113"></span><span>                   </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621680370622"><span class="annot"><a href="#local-6989586621680370622"><span class="hs-identifier hs-var">tag</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Encoding.Bytes.getVarInt</span></span><span>
+</span><span id="line-114"></span><span>                      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621680370622"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-115"></span><span>                        </span><span class="annot"><span class="annottext">Word64
+</span><span class="hs-number">10</span></span><span>
+</span><span id="line-116"></span><span>                          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621680370624"><span class="annot"><a href="#local-6989586621680370624"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser History -&gt; String -&gt; Parser History
+forall a. Parser a -&gt; String -&gt; Parser a
+</span><span class="hs-operator hs-var">(Data.ProtoLens.Encoding.Bytes.&lt;?&gt;)</span></span><span>
+</span><span id="line-117"></span><span>                                       </span><span class="hs-special">(</span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621680370626"><span class="annot"><a href="#local-6989586621680370626"><span class="hs-identifier hs-var">len</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Word64
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.getVarInt</span></span><span>
+</span><span id="line-118"></span><span>                                           </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Encoding.Bytes.isolate</span></span><span>
+</span><span id="line-119"></span><span>                                             </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.fromIntegral</span></span><span> </span><span class="annot"><a href="#local-6989586621680370626"><span class="hs-identifier hs-type">len</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.parseMessage</span></span><span class="hs-special">)</span><span>
+</span><span id="line-120"></span><span>                                       </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;history&quot;</span></span><span>
+</span><span id="line-121"></span><span>                                </span><span class="annot"><a href="#local-6989586621680370605"><span class="hs-identifier hs-type">loop</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Lens.Family2.set</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Field.field</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;history&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680370624"><span class="hs-identifier hs-type">y</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680370606"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-122"></span><span>                        </span><span id="local-6989586621680370634"><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621680370634"><span class="hs-identifier hs-var">wire</span></a></span></span><span>
+</span><span id="line-123"></span><span>                          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621680370635"><span class="annot"><a href="#local-6989586621680370635"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Word64 -&gt; Parser TaggedValue
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire</span></span><span>
+</span><span id="line-124"></span><span>                                        </span><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621680370634"><span class="hs-identifier hs-var">wire</span></a></span><span>
+</span><span id="line-125"></span><span>                                </span><span class="annot"><a href="#local-6989586621680370605"><span class="hs-identifier hs-type">loop</span></a></span><span>
+</span><span id="line-126"></span><span>                                  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Lens.Family2.over</span></span><span>
+</span><span id="line-127"></span><span>                                     </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.unknownFields</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621680370642"><span class="annot"><span class="annottext">FieldSet
+</span><a href="#local-6989586621680370642"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">:</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">TaggedValue
+</span><a href="#local-6989586621680370635"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">FieldSet
+</span><a href="#local-6989586621680370642"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680370606"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-128"></span><span>      </span><span class="hs-keyword">in</span><span>
+</span><span id="line-129"></span><span>        </span><span class="annot"><span class="annottext">Parser WorkflowExecution -&gt; String -&gt; Parser WorkflowExecution
+forall a. Parser a -&gt; String -&gt; Parser a
+</span><span class="hs-operator hs-var">(Data.ProtoLens.Encoding.Bytes.&lt;?&gt;)</span></span><span>
+</span><span id="line-130"></span><span>          </span><span class="hs-special">(</span><span class="hs-keyword">do</span><span> </span><span class="annot"><span class="annottext">WorkflowExecution -&gt; Parser WorkflowExecution
+</span><a href="#local-6989586621680370605"><span class="hs-identifier hs-var">loop</span></a></span><span> </span><span class="annot"><span class="annottext">WorkflowExecution
+forall msg. Message msg =&gt; msg
+</span><span class="hs-identifier hs-var">Data.ProtoLens.defMessage</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;WorkflowExecution&quot;</span></span><span>
+</span><span id="line-131"></span><span>  </span><span id="local-6989586621680370659"><span class="annot"><span class="annottext">buildMessage :: WorkflowExecution -&gt; Builder
+</span><a href="#local-6989586621680370659"><span class="hs-identifier hs-var hs-var hs-var">buildMessage</span></a></span></span><span>
+</span><span id="line-132"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680370661"><span class="annot"><span class="annottext">WorkflowExecution
+</span><a href="#local-6989586621680370661"><span class="hs-identifier hs-var">_x</span></a></span></span><span>
+</span><span id="line-133"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Builder -&gt; Builder
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(Data.Monoid.&lt;&gt;)</span></span><span>
+</span><span id="line-134"></span><span>             </span><span class="hs-special">(</span><span class="hs-keyword">case</span><span>
+</span><span id="line-135"></span><span>                  </span><span class="annot"><span class="annottext">FoldLike
+  (Maybe History)
+  WorkflowExecution
+  WorkflowExecution
+  (Maybe History)
+  (Maybe History)
+-&gt; WorkflowExecution -&gt; Maybe History
+forall a s t b. FoldLike a s t a b -&gt; s -&gt; a
+</span><span class="hs-identifier hs-var">Lens.Family2.view</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (x :: Symbol) s a (f :: * -&gt; *).
+(HasField s x a, Functor f) =&gt;
+(a -&gt; f a) -&gt; s -&gt; f s
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Field.field</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;maybe'history&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">WorkflowExecution
+</span><a href="#local-6989586621680370661"><span class="hs-identifier hs-var">_x</span></a></span><span>
+</span><span id="line-136"></span><span>              </span><span class="hs-keyword">of</span><span>
+</span><span id="line-137"></span><span>                </span><span class="annot"><span class="annottext">Maybe History
+</span><span class="hs-identifier hs-var">Prelude.Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Builder
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">Data.Monoid.mempty</span></span><span>
+</span><span id="line-138"></span><span>                </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.Just</span></span><span> </span><span id="local-6989586621680370663"><span class="annot"><span class="annottext">History
+</span><a href="#local-6989586621680370663"><span class="hs-identifier hs-var">_v</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-139"></span><span>                  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Builder -&gt; Builder
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(Data.Monoid.&lt;&gt;)</span></span><span>
+</span><span id="line-140"></span><span>                       </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word64 -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.putVarInt</span></span><span> </span><span class="annot"><span class="annottext">Word64
+</span><span class="hs-number">10</span></span><span class="hs-special">)</span><span>
+</span><span id="line-141"></span><span>                       </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(ByteString -&gt; Builder)
+-&gt; (History -&gt; ByteString) -&gt; History -&gt; Builder
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-142"></span><span>                          </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680370665"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621680370665"><span class="hs-identifier hs-var">bs</span></a></span></span><span>
+</span><span id="line-143"></span><span>                             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Builder -&gt; Builder
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(Data.Monoid.&lt;&gt;)</span></span><span>
+</span><span id="line-144"></span><span>                                  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word64 -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.putVarInt</span></span><span>
+</span><span id="line-145"></span><span>                                     </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Word64
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ByteString -&gt; Int
+</span><span class="hs-identifier hs-var">Data.ByteString.length</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621680370665"><span class="hs-identifier hs-var">bs</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-146"></span><span>                                  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ByteString -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.putBytes</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621680370665"><span class="hs-identifier hs-var">bs</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-147"></span><span>                          </span><span class="annot"><span class="annottext">History -&gt; ByteString
+forall msg. Message msg =&gt; msg -&gt; ByteString
+</span><span class="hs-identifier hs-var">Data.ProtoLens.encodeMessage</span></span><span> </span><span class="annot"><span class="annottext">History
+</span><a href="#local-6989586621680370663"><span class="hs-identifier hs-var">_v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-148"></span><span>             </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FieldSet -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Wire.buildFieldSet</span></span><span>
+</span><span id="line-149"></span><span>                </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FoldLike
+  FieldSet WorkflowExecution WorkflowExecution FieldSet FieldSet
+-&gt; WorkflowExecution -&gt; FieldSet
+forall a s t b. FoldLike a s t a b -&gt; s -&gt; a
+</span><span class="hs-identifier hs-var">Lens.Family2.view</span></span><span> </span><span class="annot"><span class="annottext">FoldLike
+  FieldSet WorkflowExecution WorkflowExecution FieldSet FieldSet
+forall msg. Message msg =&gt; Lens' msg FieldSet
+Lens' WorkflowExecution FieldSet
+</span><span class="hs-identifier hs-var">Data.ProtoLens.unknownFields</span></span><span> </span><span class="annot"><span class="annottext">WorkflowExecution
+</span><a href="#local-6989586621680370661"><span class="hs-identifier hs-var">_x</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-150"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Control.DeepSeq.NFData</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecution"><span class="hs-identifier hs-type">WorkflowExecution</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-151"></span><span>  </span><span id="local-6989586621680370681"><span class="annot"><span class="annottext">rnf :: WorkflowExecution -&gt; ()
+</span><a href="#local-6989586621680370681"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span>
+</span><span id="line-152"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680370683"><span class="annot"><span class="annottext">WorkflowExecution
+</span><a href="#local-6989586621680370683"><span class="hs-identifier hs-var">x__</span></a></span></span><span>
+</span><span id="line-153"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">FieldSet -&gt; () -&gt; ()
+forall a b. NFData a =&gt; a -&gt; b -&gt; b
+</span><span class="hs-identifier hs-var">Control.DeepSeq.deepseq</span></span><span>
+</span><span id="line-154"></span><span>             </span><span class="hs-special">(</span><span class="annot"><span class="annottext">WorkflowExecution -&gt; FieldSet
+</span><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecution%27_unknownFields"><span class="hs-identifier hs-var">_WorkflowExecution'_unknownFields</span></a></span><span> </span><span class="annot"><span class="annottext">WorkflowExecution
+</span><a href="#local-6989586621680370683"><span class="hs-identifier hs-var">x__</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-155"></span><span>             </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe History -&gt; () -&gt; ()
+forall a b. NFData a =&gt; a -&gt; b -&gt; b
+</span><span class="hs-identifier hs-var">Control.DeepSeq.deepseq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">WorkflowExecution -&gt; Maybe History
+</span><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecution%27history"><span class="hs-identifier hs-var">_WorkflowExecution'history</span></a></span><span> </span><span class="annot"><span class="annottext">WorkflowExecution
+</span><a href="#local-6989586621680370683"><span class="hs-identifier hs-var">x__</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-156"></span><span class="annot"><span class="hs-comment">{- | Fields :
+     
+         * 'Proto.Temporal.Api.Export.V1.Message_Fields.items' @:: Lens' WorkflowExecutions [WorkflowExecution]@
+         * 'Proto.Temporal.Api.Export.V1.Message_Fields.vec'items' @:: Lens' WorkflowExecutions (Data.Vector.Vector WorkflowExecution)@ -}</span></span><span>
+</span><span id="line-160"></span><span class="hs-keyword">data</span><span> </span><span id="WorkflowExecutions"><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecutions"><span class="hs-identifier hs-var">WorkflowExecutions</span></a></span></span><span>
+</span><span id="line-161"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="WorkflowExecutions%27_constructor"><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecutions%27_constructor"><span class="hs-identifier hs-var">WorkflowExecutions'_constructor</span></a></span></span><span> </span><span class="hs-special">{</span><span id="_WorkflowExecutions%27items"><span class="annot"><span class="annottext">WorkflowExecutions -&gt; Vector WorkflowExecution
+</span><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecutions%27items"><span class="hs-identifier hs-var hs-var">_WorkflowExecutions'items</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Data.Vector.Vector</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecution"><span class="hs-identifier hs-type">WorkflowExecution</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-162"></span><span>                                     </span><span id="_WorkflowExecutions%27_unknownFields"><span class="annot"><span class="annottext">WorkflowExecutions -&gt; FieldSet
+</span><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecutions%27_unknownFields"><span class="hs-identifier hs-var hs-var">_WorkflowExecutions'_unknownFields</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldSet</span></span><span class="hs-special">}</span><span>
+</span><span id="line-163"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680370689"><span id="local-6989586621680370696"><span class="annot"><span class="annottext">WorkflowExecutions -&gt; WorkflowExecutions -&gt; Bool
+(WorkflowExecutions -&gt; WorkflowExecutions -&gt; Bool)
+-&gt; (WorkflowExecutions -&gt; WorkflowExecutions -&gt; Bool)
+-&gt; Eq WorkflowExecutions
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: WorkflowExecutions -&gt; WorkflowExecutions -&gt; Bool
+== :: WorkflowExecutions -&gt; WorkflowExecutions -&gt; Bool
+$c/= :: WorkflowExecutions -&gt; WorkflowExecutions -&gt; Bool
+/= :: WorkflowExecutions -&gt; WorkflowExecutions -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680370702"><span id="local-6989586621680370709"><span id="local-6989586621680370715"><span id="local-6989586621680370719"><span id="local-6989586621680370722"><span id="local-6989586621680370725"><span id="local-6989586621680370728"><span class="annot"><span class="annottext">Eq WorkflowExecutions
+Eq WorkflowExecutions =&gt;
+(WorkflowExecutions -&gt; WorkflowExecutions -&gt; Ordering)
+-&gt; (WorkflowExecutions -&gt; WorkflowExecutions -&gt; Bool)
+-&gt; (WorkflowExecutions -&gt; WorkflowExecutions -&gt; Bool)
+-&gt; (WorkflowExecutions -&gt; WorkflowExecutions -&gt; Bool)
+-&gt; (WorkflowExecutions -&gt; WorkflowExecutions -&gt; Bool)
+-&gt; (WorkflowExecutions -&gt; WorkflowExecutions -&gt; WorkflowExecutions)
+-&gt; (WorkflowExecutions -&gt; WorkflowExecutions -&gt; WorkflowExecutions)
+-&gt; Ord WorkflowExecutions
+WorkflowExecutions -&gt; WorkflowExecutions -&gt; Bool
+WorkflowExecutions -&gt; WorkflowExecutions -&gt; Ordering
+WorkflowExecutions -&gt; WorkflowExecutions -&gt; WorkflowExecutions
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: WorkflowExecutions -&gt; WorkflowExecutions -&gt; Ordering
+compare :: WorkflowExecutions -&gt; WorkflowExecutions -&gt; Ordering
+$c&lt; :: WorkflowExecutions -&gt; WorkflowExecutions -&gt; Bool
+&lt; :: WorkflowExecutions -&gt; WorkflowExecutions -&gt; Bool
+$c&lt;= :: WorkflowExecutions -&gt; WorkflowExecutions -&gt; Bool
+&lt;= :: WorkflowExecutions -&gt; WorkflowExecutions -&gt; Bool
+$c&gt; :: WorkflowExecutions -&gt; WorkflowExecutions -&gt; Bool
+&gt; :: WorkflowExecutions -&gt; WorkflowExecutions -&gt; Bool
+$c&gt;= :: WorkflowExecutions -&gt; WorkflowExecutions -&gt; Bool
+&gt;= :: WorkflowExecutions -&gt; WorkflowExecutions -&gt; Bool
+$cmax :: WorkflowExecutions -&gt; WorkflowExecutions -&gt; WorkflowExecutions
+max :: WorkflowExecutions -&gt; WorkflowExecutions -&gt; WorkflowExecutions
+$cmin :: WorkflowExecutions -&gt; WorkflowExecutions -&gt; WorkflowExecutions
+min :: WorkflowExecutions -&gt; WorkflowExecutions -&gt; WorkflowExecutions
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-164"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680370732"><span id="local-6989586621680370736"><span class="annot"><span class="hs-identifier hs-type">Prelude.Show</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecutions"><span class="hs-identifier hs-type">WorkflowExecutions</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-165"></span><span>  </span><span id="local-6989586621680370740"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; WorkflowExecutions -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var">showsPrec</span></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621680370741"><span class="annot"><span class="annottext">WorkflowExecutions
+</span><a href="#local-6989586621680370741"><span class="hs-identifier hs-var">__x</span></a></span></span><span> </span><span id="local-6989586621680370742"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680370742"><span class="hs-identifier hs-var">__s</span></a></span></span><span>
+</span><span id="line-166"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
+</span><span class="hs-identifier hs-var">Prelude.showChar</span></span><span>
+</span><span id="line-167"></span><span>        </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'{'</span></span><span>
+</span><span id="line-168"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><span class="hs-identifier hs-var">Prelude.showString</span></span><span>
+</span><span id="line-169"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">WorkflowExecutions -&gt; String
+forall msg. Message msg =&gt; msg -&gt; String
+</span><span class="hs-identifier hs-var">Data.ProtoLens.showMessageShort</span></span><span> </span><span class="annot"><span class="annottext">WorkflowExecutions
+</span><a href="#local-6989586621680370741"><span class="hs-identifier hs-var">__x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; ShowS
+</span><span class="hs-identifier hs-var">Prelude.showChar</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'}'</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680370742"><span class="hs-identifier hs-var">__s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-170"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Field.HasField</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecutions"><span class="hs-identifier hs-type">WorkflowExecutions</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;items&quot;</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecution"><span class="hs-identifier hs-type">WorkflowExecution</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-171"></span><span>  </span><span id="local-6989586621680370751"><span class="annot"><span class="annottext">fieldOf :: forall (f :: * -&gt; *).
+Functor f =&gt;
+Proxy# &quot;items&quot;
+-&gt; ([WorkflowExecution] -&gt; f [WorkflowExecution])
+-&gt; WorkflowExecutions
+-&gt; f WorkflowExecutions
+</span><span class="hs-identifier hs-var hs-var hs-var">fieldOf</span></span></span><span> </span><span class="annot"><span class="annottext">Proxy# &quot;items&quot;
+</span><span class="hs-identifier">_</span></span><span>
+</span><span id="line-172"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Vector WorkflowExecution -&gt; f (Vector WorkflowExecution))
+ -&gt; WorkflowExecutions -&gt; f WorkflowExecutions)
+-&gt; (([WorkflowExecution] -&gt; f [WorkflowExecution])
+    -&gt; Vector WorkflowExecution -&gt; f (Vector WorkflowExecution))
+-&gt; ([WorkflowExecution] -&gt; f [WorkflowExecution])
+-&gt; WorkflowExecutions
+-&gt; f WorkflowExecutions
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-173"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(WorkflowExecutions -&gt; Vector WorkflowExecution)
+-&gt; (WorkflowExecutions
+    -&gt; Vector WorkflowExecution -&gt; WorkflowExecutions)
+-&gt; Lens
+     WorkflowExecutions
+     WorkflowExecutions
+     (Vector WorkflowExecution)
+     (Vector WorkflowExecution)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">Lens.Family2.Unchecked.lens</span></span><span>
+</span><span id="line-174"></span><span>           </span><span class="annot"><span class="annottext">WorkflowExecutions -&gt; Vector WorkflowExecution
+</span><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecutions%27items"><span class="hs-identifier hs-var">_WorkflowExecutions'items</span></a></span><span>
+</span><span id="line-175"></span><span>           </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680370752"><span class="annot"><span class="annottext">WorkflowExecutions
+</span><a href="#local-6989586621680370752"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span id="local-6989586621680370753"><span class="annot"><span class="annottext">Vector WorkflowExecution
+</span><a href="#local-6989586621680370753"><span class="hs-identifier hs-var">y__</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">WorkflowExecutions
+</span><a href="#local-6989586621680370752"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecutions%27items"><span class="hs-identifier hs-var">_WorkflowExecutions'items</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680370753"><span class="hs-identifier hs-type">y__</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-176"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Vector WorkflowExecution -&gt; [WorkflowExecution])
+-&gt; (Vector WorkflowExecution
+    -&gt; [WorkflowExecution] -&gt; Vector WorkflowExecution)
+-&gt; Lens
+     (Vector WorkflowExecution)
+     (Vector WorkflowExecution)
+     [WorkflowExecution]
+     [WorkflowExecution]
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">Lens.Family2.Unchecked.lens</span></span><span>
+</span><span id="line-177"></span><span>           </span><span class="annot"><span class="annottext">Vector WorkflowExecution -&gt; [WorkflowExecution]
+forall (v :: * -&gt; *) a. Vector v a =&gt; v a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.Vector.Generic.toList</span></span><span>
+</span><span id="line-178"></span><span>           </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span class="annot"><span class="annottext">Vector WorkflowExecution
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621680370755"><span class="annot"><span class="annottext">[WorkflowExecution]
+</span><a href="#local-6989586621680370755"><span class="hs-identifier hs-var">y__</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[WorkflowExecution] -&gt; Vector WorkflowExecution
+forall (v :: * -&gt; *) a. Vector v a =&gt; [a] -&gt; v a
+</span><span class="hs-identifier hs-var">Data.Vector.Generic.fromList</span></span><span> </span><span class="annot"><span class="annottext">[WorkflowExecution]
+</span><a href="#local-6989586621680370755"><span class="hs-identifier hs-var">y__</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-179"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Field.HasField</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecutions"><span class="hs-identifier hs-type">WorkflowExecutions</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;vec'items&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Data.Vector.Vector</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecution"><span class="hs-identifier hs-type">WorkflowExecution</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-180"></span><span>  </span><span id="local-6989586621680370761"><span class="annot"><span class="annottext">fieldOf :: forall (f :: * -&gt; *).
+Functor f =&gt;
+Proxy# &quot;vec'items&quot;
+-&gt; (Vector WorkflowExecution -&gt; f (Vector WorkflowExecution))
+-&gt; WorkflowExecutions
+-&gt; f WorkflowExecutions
+</span><span class="hs-identifier hs-var hs-var hs-var">fieldOf</span></span></span><span> </span><span class="annot"><span class="annottext">Proxy# &quot;vec'items&quot;
+</span><span class="hs-identifier">_</span></span><span>
+</span><span id="line-181"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Vector WorkflowExecution -&gt; f (Vector WorkflowExecution))
+ -&gt; WorkflowExecutions -&gt; f WorkflowExecutions)
+-&gt; ((Vector WorkflowExecution -&gt; f (Vector WorkflowExecution))
+    -&gt; Vector WorkflowExecution -&gt; f (Vector WorkflowExecution))
+-&gt; (Vector WorkflowExecution -&gt; f (Vector WorkflowExecution))
+-&gt; WorkflowExecutions
+-&gt; f WorkflowExecutions
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-182"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(WorkflowExecutions -&gt; Vector WorkflowExecution)
+-&gt; (WorkflowExecutions
+    -&gt; Vector WorkflowExecution -&gt; WorkflowExecutions)
+-&gt; Lens
+     WorkflowExecutions
+     WorkflowExecutions
+     (Vector WorkflowExecution)
+     (Vector WorkflowExecution)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">Lens.Family2.Unchecked.lens</span></span><span>
+</span><span id="line-183"></span><span>           </span><span class="annot"><span class="annottext">WorkflowExecutions -&gt; Vector WorkflowExecution
+</span><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecutions%27items"><span class="hs-identifier hs-var">_WorkflowExecutions'items</span></a></span><span>
+</span><span id="line-184"></span><span>           </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680370762"><span class="annot"><span class="annottext">WorkflowExecutions
+</span><a href="#local-6989586621680370762"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span id="local-6989586621680370763"><span class="annot"><span class="annottext">Vector WorkflowExecution
+</span><a href="#local-6989586621680370763"><span class="hs-identifier hs-var">y__</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">WorkflowExecutions
+</span><a href="#local-6989586621680370762"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecutions%27items"><span class="hs-identifier hs-var">_WorkflowExecutions'items</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680370763"><span class="hs-identifier hs-type">y__</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-185"></span><span>        </span><span class="annot"><span class="annottext">(Vector WorkflowExecution -&gt; f (Vector WorkflowExecution))
+-&gt; Vector WorkflowExecution -&gt; f (Vector WorkflowExecution)
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.id</span></span><span>
+</span><span id="line-186"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680370770"><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Message</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecutions"><span class="hs-identifier hs-type">WorkflowExecutions</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-187"></span><span>  </span><span id="local-6989586621680370775"><span class="annot"><span class="annottext">messageName :: Proxy WorkflowExecutions -&gt; Text
+</span><span class="hs-identifier hs-var hs-var hs-var">messageName</span></span></span><span> </span><span class="annot"><span class="annottext">Proxy WorkflowExecutions
+</span><span class="hs-identifier">_</span></span><span>
+</span><span id="line-188"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Text
+</span><span class="hs-identifier hs-var">Data.Text.pack</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;temporal.api.export.v1.WorkflowExecutions&quot;</span></span><span>
+</span><span id="line-189"></span><span>  </span><span id="local-6989586621680370777"><span class="annot"><span class="annottext">packedMessageDescriptor :: Proxy WorkflowExecutions -&gt; ByteString
+</span><span class="hs-identifier hs-var hs-var hs-var">packedMessageDescriptor</span></span></span><span> </span><span class="annot"><span class="annottext">Proxy WorkflowExecutions
+</span><span class="hs-identifier">_</span></span><span>
+</span><span id="line-190"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;\n\
+      \\DC2WorkflowExecutions\DC2?\n\
+      \\ENQitems\CAN\SOH \ETX(\v2).temporal.api.export.v1.WorkflowExecutionR\ENQitems&quot;</span></span><span>
+</span><span id="line-193"></span><span>  </span><span id="local-6989586621680370778"><span class="annot"><span class="annottext">packedFileDescriptor :: Proxy WorkflowExecutions -&gt; ByteString
+</span><span class="hs-identifier hs-var hs-var hs-var">packedFileDescriptor</span></span></span><span> </span><span class="annot"><span class="annottext">Proxy WorkflowExecutions
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="Proto.Temporal.Api.Export.V1.Message.html#packedFileDescriptor"><span class="hs-identifier hs-var">packedFileDescriptor</span></a></span><span>
+</span><span id="line-194"></span><span>  </span><span id="local-6989586621680370780"><span class="annot"><span class="annottext">fieldsByTag :: Map Tag (FieldDescriptor WorkflowExecutions)
+</span><span class="hs-identifier hs-var hs-var hs-var">fieldsByTag</span></span></span><span>
+</span><span id="line-195"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span>
+</span><span id="line-196"></span><span>        </span><span id="local-6989586621680370782"><span class="annot"><span class="annottext">items__field_descriptor :: FieldDescriptor WorkflowExecutions
+</span><a href="#local-6989586621680370782"><span class="hs-identifier hs-var hs-var">items__field_descriptor</span></a></span></span><span>
+</span><span id="line-197"></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; FieldTypeDescriptor WorkflowExecution
+-&gt; FieldAccessor WorkflowExecutions WorkflowExecution
+-&gt; FieldDescriptor WorkflowExecutions
+forall value msg.
+String
+-&gt; FieldTypeDescriptor value
+-&gt; FieldAccessor msg value
+-&gt; FieldDescriptor msg
+</span><span class="hs-identifier hs-var">Data.ProtoLens.FieldDescriptor</span></span><span>
+</span><span id="line-198"></span><span>              </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;items&quot;</span></span><span>
+</span><span id="line-199"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MessageOrGroup -&gt; FieldTypeDescriptor WorkflowExecution
+forall value.
+Message value =&gt;
+MessageOrGroup -&gt; FieldTypeDescriptor value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.MessageField</span></span><span> </span><span class="annot"><span class="annottext">MessageOrGroup
+</span><span class="hs-identifier hs-var">Data.ProtoLens.MessageType</span></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-200"></span><span>                 </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldTypeDescriptor</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecution"><span class="hs-identifier hs-type">WorkflowExecution</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-201"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Packing
+-&gt; Lens' WorkflowExecutions [WorkflowExecution]
+-&gt; FieldAccessor WorkflowExecutions WorkflowExecution
+forall msg value.
+Packing -&gt; Lens' msg [value] -&gt; FieldAccessor msg value
+</span><span class="hs-identifier hs-var">Data.ProtoLens.RepeatedField</span></span><span>
+</span><span id="line-202"></span><span>                 </span><span class="annot"><span class="annottext">Packing
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Unpacked</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (x :: Symbol) s a (f :: * -&gt; *).
+(HasField s x a, Functor f) =&gt;
+(a -&gt; f a) -&gt; s -&gt; f s
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Field.field</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;items&quot;</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-203"></span><span>              </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldDescriptor</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecutions"><span class="hs-identifier hs-type">WorkflowExecutions</span></a></span><span>
+</span><span id="line-204"></span><span>      </span><span class="hs-keyword">in</span><span>
+</span><span id="line-205"></span><span>        </span><span class="annot"><span class="annottext">[(Tag, FieldDescriptor WorkflowExecutions)]
+-&gt; Map Tag (FieldDescriptor WorkflowExecutions)
+forall k a. Ord k =&gt; [(k, a)] -&gt; Map k a
+</span><span class="hs-identifier hs-var">Data.Map.fromList</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Tag
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Tag</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FieldDescriptor WorkflowExecutions
+</span><a href="#local-6989586621680370782"><span class="hs-identifier hs-var">items__field_descriptor</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-206"></span><span>  </span><span id="local-6989586621680370790"><span class="annot"><span class="annottext">unknownFields :: Lens' WorkflowExecutions FieldSet
+</span><span class="hs-identifier hs-var hs-var hs-var">unknownFields</span></span></span><span>
+</span><span id="line-207"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(WorkflowExecutions -&gt; FieldSet)
+-&gt; (WorkflowExecutions -&gt; FieldSet -&gt; WorkflowExecutions)
+-&gt; Lens' WorkflowExecutions FieldSet
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><span class="hs-identifier hs-var">Lens.Family2.Unchecked.lens</span></span><span>
+</span><span id="line-208"></span><span>        </span><span class="annot"><span class="annottext">WorkflowExecutions -&gt; FieldSet
+</span><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecutions%27_unknownFields"><span class="hs-identifier hs-var">_WorkflowExecutions'_unknownFields</span></a></span><span>
+</span><span id="line-209"></span><span>        </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680370791"><span class="annot"><span class="annottext">WorkflowExecutions
+</span><a href="#local-6989586621680370791"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span id="local-6989586621680370792"><span class="annot"><span class="annottext">FieldSet
+</span><a href="#local-6989586621680370792"><span class="hs-identifier hs-var">y__</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">WorkflowExecutions
+</span><a href="#local-6989586621680370791"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecutions%27_unknownFields"><span class="hs-identifier hs-var">_WorkflowExecutions'_unknownFields</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680370792"><span class="hs-identifier hs-type">y__</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-210"></span><span>  </span><span id="local-6989586621680370794"><span class="annot"><span class="annottext">defMessage :: WorkflowExecutions
+</span><span class="hs-identifier hs-var hs-var hs-var">defMessage</span></span></span><span>
+</span><span id="line-211"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecutions%27_constructor"><span class="hs-identifier hs-type">WorkflowExecutions'_constructor</span></a></span><span>
+</span><span id="line-212"></span><span>        </span><span class="hs-special">{</span><span class="annot"><span class="annottext">_WorkflowExecutions'items :: Vector WorkflowExecution
+</span><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecutions%27items"><span class="hs-identifier hs-var">_WorkflowExecutions'items</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector WorkflowExecution
+forall (v :: * -&gt; *) a. Vector v a =&gt; v a
+</span><span class="hs-identifier hs-var">Data.Vector.Generic.empty</span></span><span class="hs-special">,</span><span>
+</span><span id="line-213"></span><span>         </span><span class="annot"><span class="annottext">_WorkflowExecutions'_unknownFields :: FieldSet
+</span><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecutions%27_unknownFields"><span class="hs-identifier hs-var">_WorkflowExecutions'_unknownFields</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">}</span><span>
+</span><span id="line-214"></span><span>  </span><span id="local-6989586621680370827"><span class="annot"><span class="annottext">parseMessage :: Parser WorkflowExecutions
+</span><span class="hs-identifier hs-var hs-var hs-var">parseMessage</span></span></span><span>
+</span><span id="line-215"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span>
+</span><span id="line-216"></span><span>        </span><span class="annot"><a href="#local-6989586621680370828"><span class="hs-identifier hs-type">loop</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-217"></span><span>          </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecutions"><span class="hs-identifier hs-type">WorkflowExecutions</span></a></span><span>
+</span><span id="line-218"></span><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Encoding.Growing.Growing</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Vector.Vector</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Encoding.Growing.RealWorld</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecution"><span class="hs-identifier hs-type">WorkflowExecution</span></a></span><span>
+</span><span id="line-219"></span><span>             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Encoding.Bytes.Parser</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecutions"><span class="hs-identifier hs-type">WorkflowExecutions</span></a></span><span>
+</span><span id="line-220"></span><span>        </span><span id="local-6989586621680370828"><span class="annot"><span class="annottext">loop :: WorkflowExecutions
+-&gt; Growing Vector RealWorld WorkflowExecution
+-&gt; Parser WorkflowExecutions
+</span><a href="#local-6989586621680370828"><span class="hs-identifier hs-var hs-var">loop</span></a></span></span><span> </span><span id="local-6989586621680370829"><span class="annot"><span class="annottext">WorkflowExecutions
+</span><a href="#local-6989586621680370829"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621680370830"><span class="annot"><span class="annottext">Growing Vector RealWorld WorkflowExecution
+</span><a href="#local-6989586621680370830"><span class="hs-identifier hs-var">mutable'items</span></a></span></span><span>
+</span><span id="line-221"></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621680370831"><span class="annot"><a href="#local-6989586621680370831"><span class="hs-identifier hs-var">end</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Bool
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.atEnd</span></span><span>
+</span><span id="line-222"></span><span>               </span><span class="hs-keyword">if</span><span> </span><span class="annot"><a href="#local-6989586621680370831"><span class="hs-identifier hs-type">end</span></a></span><span> </span><span class="hs-keyword">then</span><span>
+</span><span id="line-223"></span><span>                   </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621680370832"><span class="annot"><a href="#local-6989586621680370832"><span class="hs-identifier hs-var">frozen'items</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO</span></span><span>
+</span><span id="line-224"></span><span>                                        </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Encoding.Growing.unsafeFreeze</span></span><span> </span><span class="annot"><a href="#local-6989586621680370830"><span class="hs-identifier hs-type">mutable'items</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-225"></span><span>                      </span><span class="hs-special">(</span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680370835"><span class="annot"><a href="#local-6989586621680370835"><span class="hs-identifier hs-var hs-var">missing</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-226"></span><span>                       </span><span class="hs-keyword">in</span><span>
+</span><span id="line-227"></span><span>                         </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prelude.null</span></span><span> </span><span class="annot"><a href="#local-6989586621680370835"><span class="hs-identifier hs-type">missing</span></a></span><span> </span><span class="hs-keyword">then</span><span>
+</span><span id="line-228"></span><span>                             </span><span class="annot"><span class="hs-identifier hs-type">Prelude.return</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-229"></span><span>                         </span><span class="hs-keyword">else</span><span>
+</span><span id="line-230"></span><span>                             </span><span class="annot"><span class="hs-identifier hs-type">Prelude.fail</span></span><span>
+</span><span id="line-231"></span><span>                               </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator hs-type">(Prelude.++)</span></span><span>
+</span><span id="line-232"></span><span>                                  </span><span class="annot"><span class="hs-string">&quot;Missing required fields: &quot;</span></span><span>
+</span><span id="line-233"></span><span>                                  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680370835"><span class="hs-identifier hs-type">missing</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Prelude.String</span></span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-234"></span><span>                      </span><span class="annot"><span class="hs-identifier hs-type">Prelude.return</span></span><span>
+</span><span id="line-235"></span><span>                        </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Lens.Family2.over</span></span><span>
+</span><span id="line-236"></span><span>                           </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.unknownFields</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621680370841"><span class="annot"><span class="annottext">FieldSet
+</span><a href="#local-6989586621680370841"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">FieldSet -&gt; FieldSet
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">Prelude.reverse</span></span><span> </span><span class="annot"><span class="annottext">FieldSet
+</span><a href="#local-6989586621680370841"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-237"></span><span>                           </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Lens.Family2.set</span></span><span>
+</span><span id="line-238"></span><span>                              </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Field.field</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;vec'items&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680370832"><span class="hs-identifier hs-type">frozen'items</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680370829"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-239"></span><span>               </span><span class="hs-keyword">else</span><span>
+</span><span id="line-240"></span><span>                   </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621680370847"><span class="annot"><a href="#local-6989586621680370847"><span class="hs-identifier hs-var">tag</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Encoding.Bytes.getVarInt</span></span><span>
+</span><span id="line-241"></span><span>                      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621680370847"><span class="hs-identifier hs-type">tag</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-242"></span><span>                        </span><span class="annot"><span class="annottext">Word64
+</span><span class="hs-number">10</span></span><span>
+</span><span id="line-243"></span><span>                          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621680370848"><span class="annot"><a href="#local-6989586621680370848"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser WorkflowExecution -&gt; String -&gt; Parser WorkflowExecution
+forall a. Parser a -&gt; String -&gt; Parser a
+</span><span class="hs-operator hs-var">(Data.ProtoLens.Encoding.Bytes.&lt;?&gt;)</span></span><span>
+</span><span id="line-244"></span><span>                                        </span><span class="hs-special">(</span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621680370849"><span class="annot"><a href="#local-6989586621680370849"><span class="hs-identifier hs-var">len</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Parser Word64
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.getVarInt</span></span><span>
+</span><span id="line-245"></span><span>                                            </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Encoding.Bytes.isolate</span></span><span>
+</span><span id="line-246"></span><span>                                              </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Prelude.fromIntegral</span></span><span> </span><span class="annot"><a href="#local-6989586621680370849"><span class="hs-identifier hs-type">len</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-247"></span><span>                                              </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.parseMessage</span></span><span class="hs-special">)</span><span>
+</span><span id="line-248"></span><span>                                        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;items&quot;</span></span><span>
+</span><span id="line-249"></span><span>                                </span><span id="local-6989586621680370850"><span class="annot"><a href="#local-6989586621680370850"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO</span></span><span>
+</span><span id="line-250"></span><span>                                       </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.Encoding.Growing.append</span></span><span> </span><span class="annot"><a href="#local-6989586621680370830"><span class="hs-identifier hs-type">mutable'items</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680370848"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-251"></span><span>                                </span><span class="annot"><a href="#local-6989586621680370828"><span class="hs-identifier hs-type">loop</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680370829"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680370850"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><span id="line-252"></span><span>                        </span><span id="local-6989586621680370852"><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621680370852"><span class="hs-identifier hs-var">wire</span></a></span></span><span>
+</span><span id="line-253"></span><span>                          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621680370853"><span class="annot"><a href="#local-6989586621680370853"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Word64 -&gt; Parser TaggedValue
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire</span></span><span>
+</span><span id="line-254"></span><span>                                        </span><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621680370852"><span class="hs-identifier hs-var">wire</span></a></span><span>
+</span><span id="line-255"></span><span>                                </span><span class="annot"><a href="#local-6989586621680370828"><span class="hs-identifier hs-type">loop</span></a></span><span>
+</span><span id="line-256"></span><span>                                  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Lens.Family2.over</span></span><span>
+</span><span id="line-257"></span><span>                                     </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.unknownFields</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621680370859"><span class="annot"><span class="annottext">FieldSet
+</span><a href="#local-6989586621680370859"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">:</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">TaggedValue
+</span><a href="#local-6989586621680370853"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">FieldSet
+</span><a href="#local-6989586621680370859"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680370829"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-258"></span><span>                                  </span><span class="annot"><a href="#local-6989586621680370830"><span class="hs-identifier hs-type">mutable'items</span></a></span><span>
+</span><span id="line-259"></span><span>      </span><span class="hs-keyword">in</span><span>
+</span><span id="line-260"></span><span>        </span><span class="annot"><span class="annottext">Parser WorkflowExecutions -&gt; String -&gt; Parser WorkflowExecutions
+forall a. Parser a -&gt; String -&gt; Parser a
+</span><span class="hs-operator hs-var">(Data.ProtoLens.Encoding.Bytes.&lt;?&gt;)</span></span><span>
+</span><span id="line-261"></span><span>          </span><span class="hs-special">(</span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621680370860"><span class="annot"><a href="#local-6989586621680370860"><span class="hs-identifier hs-var">mutable'items</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO (Growing Vector RealWorld WorkflowExecution)
+-&gt; Parser (Growing Vector RealWorld WorkflowExecution)
+forall a. IO a -&gt; Parser a
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO</span></span><span>
+</span><span id="line-262"></span><span>                                 </span><span class="annot"><span class="annottext">IO (Growing Vector RealWorld WorkflowExecution)
+IO (Growing Vector (PrimState IO) WorkflowExecution)
+forall (m :: * -&gt; *) (v :: * -&gt; *) a.
+(PrimMonad m, Vector v a) =&gt;
+m (Growing v (PrimState m) a)
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Growing.new</span></span><span>
+</span><span id="line-263"></span><span>              </span><span class="annot"><a href="#local-6989586621680370828"><span class="hs-identifier hs-type">loop</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.defMessage</span></span><span> </span><span class="annot"><a href="#local-6989586621680370860"><span class="hs-identifier hs-type">mutable'items</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-264"></span><span>          </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;WorkflowExecutions&quot;</span></span><span>
+</span><span id="line-265"></span><span>  </span><span id="local-6989586621680370874"><span class="annot"><span class="annottext">buildMessage :: WorkflowExecutions -&gt; Builder
+</span><span class="hs-identifier hs-var hs-var hs-var">buildMessage</span></span></span><span>
+</span><span id="line-266"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680370875"><span class="annot"><span class="annottext">WorkflowExecutions
+</span><a href="#local-6989586621680370875"><span class="hs-identifier hs-var">_x</span></a></span></span><span>
+</span><span id="line-267"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Builder -&gt; Builder
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(Data.Monoid.&lt;&gt;)</span></span><span>
+</span><span id="line-268"></span><span>             </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(WorkflowExecution -&gt; Builder)
+-&gt; Vector WorkflowExecution -&gt; Builder
+forall (v :: * -&gt; *) a.
+Vector v a =&gt;
+(a -&gt; Builder) -&gt; v a -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.foldMapBuilder</span></span><span>
+</span><span id="line-269"></span><span>                </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680370877"><span class="annot"><span class="annottext">WorkflowExecution
+</span><a href="#local-6989586621680370877"><span class="hs-identifier hs-var">_v</span></a></span></span><span>
+</span><span id="line-270"></span><span>                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Builder -&gt; Builder
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(Data.Monoid.&lt;&gt;)</span></span><span>
+</span><span id="line-271"></span><span>                        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word64 -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.putVarInt</span></span><span> </span><span class="annot"><span class="annottext">Word64
+</span><span class="hs-number">10</span></span><span class="hs-special">)</span><span>
+</span><span id="line-272"></span><span>                        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(ByteString -&gt; Builder)
+-&gt; (WorkflowExecution -&gt; ByteString)
+-&gt; WorkflowExecution
+-&gt; Builder
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(Prelude..)</span></span><span>
+</span><span id="line-273"></span><span>                           </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680370878"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621680370878"><span class="hs-identifier hs-var">bs</span></a></span></span><span>
+</span><span id="line-274"></span><span>                              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Builder -&gt; Builder
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(Data.Monoid.&lt;&gt;)</span></span><span>
+</span><span id="line-275"></span><span>                                   </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word64 -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.putVarInt</span></span><span>
+</span><span id="line-276"></span><span>                                      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Word64
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ByteString -&gt; Int
+</span><span class="hs-identifier hs-var">Data.ByteString.length</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621680370878"><span class="hs-identifier hs-var">bs</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-277"></span><span>                                   </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ByteString -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Bytes.putBytes</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621680370878"><span class="hs-identifier hs-var">bs</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-278"></span><span>                           </span><span class="annot"><span class="annottext">WorkflowExecution -&gt; ByteString
+forall msg. Message msg =&gt; msg -&gt; ByteString
+</span><span class="hs-identifier hs-var">Data.ProtoLens.encodeMessage</span></span><span> </span><span class="annot"><span class="annottext">WorkflowExecution
+</span><a href="#local-6989586621680370877"><span class="hs-identifier hs-var">_v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-279"></span><span>                </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FoldLike
+  (Vector WorkflowExecution)
+  WorkflowExecutions
+  WorkflowExecutions
+  (Vector WorkflowExecution)
+  (Vector WorkflowExecution)
+-&gt; WorkflowExecutions -&gt; Vector WorkflowExecution
+forall a s t b. FoldLike a s t a b -&gt; s -&gt; a
+</span><span class="hs-identifier hs-var">Lens.Family2.view</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (x :: Symbol) s a (f :: * -&gt; *).
+(HasField s x a, Functor f) =&gt;
+(a -&gt; f a) -&gt; s -&gt; f s
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Field.field</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;vec'items&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">WorkflowExecutions
+</span><a href="#local-6989586621680370875"><span class="hs-identifier hs-var">_x</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-280"></span><span>             </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FieldSet -&gt; Builder
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Encoding.Wire.buildFieldSet</span></span><span>
+</span><span id="line-281"></span><span>                </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FoldLike
+  FieldSet WorkflowExecutions WorkflowExecutions FieldSet FieldSet
+-&gt; WorkflowExecutions -&gt; FieldSet
+forall a s t b. FoldLike a s t a b -&gt; s -&gt; a
+</span><span class="hs-identifier hs-var">Lens.Family2.view</span></span><span> </span><span class="annot"><span class="annottext">FoldLike
+  FieldSet WorkflowExecutions WorkflowExecutions FieldSet FieldSet
+forall msg. Message msg =&gt; Lens' msg FieldSet
+Lens' WorkflowExecutions FieldSet
+</span><span class="hs-identifier hs-var">Data.ProtoLens.unknownFields</span></span><span> </span><span class="annot"><span class="annottext">WorkflowExecutions
+</span><a href="#local-6989586621680370875"><span class="hs-identifier hs-var">_x</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-282"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Control.DeepSeq.NFData</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#WorkflowExecutions"><span class="hs-identifier hs-type">WorkflowExecutions</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-283"></span><span>  </span><span id="local-6989586621680370886"><span class="annot"><span class="annottext">rnf :: WorkflowExecutions -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var">rnf</span></span></span><span>
+</span><span id="line-284"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621680370887"><span class="annot"><span class="annottext">WorkflowExecutions
+</span><a href="#local-6989586621680370887"><span class="hs-identifier hs-var">x__</span></a></span></span><span>
+</span><span id="line-285"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">FieldSet -&gt; () -&gt; ()
+forall a b. NFData a =&gt; a -&gt; b -&gt; b
+</span><span class="hs-identifier hs-var">Control.DeepSeq.deepseq</span></span><span>
+</span><span id="line-286"></span><span>             </span><span class="hs-special">(</span><span class="annot"><span class="annottext">WorkflowExecutions -&gt; FieldSet
+</span><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecutions%27_unknownFields"><span class="hs-identifier hs-var">_WorkflowExecutions'_unknownFields</span></a></span><span> </span><span class="annot"><span class="annottext">WorkflowExecutions
+</span><a href="#local-6989586621680370887"><span class="hs-identifier hs-var">x__</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-287"></span><span>             </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector WorkflowExecution -&gt; () -&gt; ()
+forall a b. NFData a =&gt; a -&gt; b -&gt; b
+</span><span class="hs-identifier hs-var">Control.DeepSeq.deepseq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">WorkflowExecutions -&gt; Vector WorkflowExecution
+</span><a href="Proto.Temporal.Api.Export.V1.Message.html#_WorkflowExecutions%27items"><span class="hs-identifier hs-var">_WorkflowExecutions'items</span></a></span><span> </span><span class="annot"><span class="annottext">WorkflowExecutions
+</span><a href="#local-6989586621680370887"><span class="hs-identifier hs-var">x__</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-288"></span><span class="annot"><a href="Proto.Temporal.Api.Export.V1.Message.html#packedFileDescriptor"><span class="hs-identifier hs-type">packedFileDescriptor</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ByteString.ByteString</span></span><span>
+</span><span id="line-289"></span><span id="packedFileDescriptor"><span class="annot"><span class="annottext">packedFileDescriptor :: ByteString
+</span><a href="Proto.Temporal.Api.Export.V1.Message.html#packedFileDescriptor"><span class="hs-identifier hs-var hs-var">packedFileDescriptor</span></a></span></span><span>
+</span><span id="line-290"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;\n\
+    \$temporal/api/export/v1/message.proto\DC2\SYNtemporal.api.export.v1\SUB%temporal/api/history/v1/message.proto\&quot;O\n\
+    \\DC1WorkflowExecution\DC2:\n\
+    \\ahistory\CAN\SOH \SOH(\v2 .temporal.api.history.v1.HistoryR\ahistory\&quot;U\n\
+    \\DC2WorkflowExecutions\DC2?\n\
+    \\ENQitems\CAN\SOH \ETX(\v2).temporal.api.export.v1.WorkflowExecutionR\ENQitemsB\137\SOH\n\
+    \\EMio.temporal.api.export.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/export/v1;export\170\STX\CANTemporalio.Api.Export.V1\234\STX\ESCTemporalio::Api::Export::V1J\219\f\n\
+    \\ACK\DC2\EOT\SYN\NUL+\SOH\n\
+    \\241\b\n\
+    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
+    \\n\
+    \ Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.\n\
+    \\n\
+    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
+    \ of this software and associated documentation files (the \&quot;Software\&quot;), to deal\n\
+    \ in the Software without restriction, including without limitation the rights\n\
+    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
+    \ copies of the Software, and to permit persons to whom the Software is\n\
+    \ furnished to do so, subject to the following conditions:\n\
+    \\n\
+    \ The above copyright notice and this permission notice shall be included in\n\
+    \ all copies or substantial portions of the Software.\n\
+    \\n\
+    \ THE SOFTWARE IS PROVIDED \&quot;AS IS\&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
+    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
+    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
+    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
+    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
+    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
+    \ THE SOFTWARE.\n\
+    \\n\
+    \\b\n\
+    \\SOH\STX\DC2\ETX\CAN\NUL\US\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\SUB\NUL:\n\
+    \\t\n\
+    \\STX\b\v\DC2\ETX\SUB\NUL:\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\ESC\NUL2\n\
+    \\t\n\
+    \\STX\b\SOH\DC2\ETX\ESC\NUL2\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\FS\NUL\&quot;\n\
+    \\t\n\
+    \\STX\b\n\
+    \\DC2\ETX\FS\NUL\&quot;\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\GS\NUL-\n\
+    \\t\n\
+    \\STX\b\b\DC2\ETX\GS\NUL-\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\RS\NUL4\n\
+    \\t\n\
+    \\STX\b-\DC2\ETX\RS\NUL4\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\US\NUL5\n\
+    \\t\n\
+    \\STX\b%\DC2\ETX\US\NUL5\n\
+    \\t\n\
+    \\STX\ETX\NUL\DC2\ETX!\NUL/\n\
+    \\n\
+    \\n\
+    \\STX\EOT\NUL\DC2\EOT#\NUL%\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX#\b\EM\n\
+    \\v\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX$\EOT0\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX$\EOT#\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX$$+\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX$./\n\
+    \\169\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT)\NUL+\SOH\SUB\156\SOH WorkflowExecutions is used by the Cloud Export feature to deserialize \n\
+    \ the exported file. It encapsulates a collection of workflow execution information.\n\
+    \\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX)\b\SUB\n\
+    \\v\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX*\EOT)\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\NUL\EOT\DC2\ETX*\EOT\f\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX*\r\RS\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX*\US$\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX*'(b\ACKproto3&quot;</span></span></pre></body></html>

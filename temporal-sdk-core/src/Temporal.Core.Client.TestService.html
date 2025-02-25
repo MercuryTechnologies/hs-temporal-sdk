@@ -1,0 +1,148 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE TypeApplications #-}</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Core.Client.TestService.html"><span class="hs-identifier">Temporal.Core.Client.TestService</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Message</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">defMessage</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Api.Testservice.V1.RequestResponse</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Api.Testservice.V1.Service</span></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html"><span class="hs-identifier">Temporal.Core.Client</span></a></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Internal.FFI.html"><span class="hs-identifier">Temporal.Internal.FFI</span></a></span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_get_current_time&quot;</span></span><span> </span><span id="hs_get_current_time"><span class="annot"><a href="Temporal.Core.Client.TestService.html#hs_get_current_time"><span class="hs-identifier hs-var">hs_get_current_time</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="annot"><span class="hs-comment">{- | GetCurrentTime returns the current Temporal Test Server time
+
+This time might not be equal to {@link System#currentTimeMillis()} due to time skipping.
+-}</span></span><span>
+</span><span id="line-20"></span><span class="annot"><a href="Temporal.Core.Client.TestService.html#getCurrentTime"><span class="hs-identifier hs-type">getCurrentTime</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">GetCurrentTimeResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span id="getCurrentTime"><span class="annot"><span class="annottext">getCurrentTime :: Client -&gt; IO (Either RpcError GetCurrentTimeResponse)
+</span><a href="Temporal.Core.Client.TestService.html#getCurrentTime"><span class="hs-identifier hs-var hs-var">getCurrentTime</span></a></span></span><span> </span><span id="local-6989586621679254870"><span class="annot"><span class="annottext">Client
+</span><a href="#local-6989586621679254870"><span class="hs-identifier hs-var">client</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">TestService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;getCurrentTime&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.TestService.html#hs_get_current_time"><span class="hs-identifier hs-var">hs_get_current_time</span></a></span><span> </span><span class="annot"><span class="annottext">Client
+</span><a href="#local-6989586621679254870"><span class="hs-identifier hs-var">client</span></a></span><span> </span><span class="annot"><span class="annottext">MethodInput TestService &quot;getCurrentTime&quot;
+Empty
+forall msg. Message msg =&gt; msg
+</span><span class="hs-identifier hs-var">defMessage</span></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_lock_time_skipping&quot;</span></span><span> </span><span id="hs_lock_time_skipping"><span class="annot"><a href="Temporal.Core.Client.TestService.html#hs_lock_time_skipping"><span class="hs-identifier hs-var">hs_lock_time_skipping</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="annot"><span class="hs-comment">{- | lockTimeSkipping increments Time Locking Counter by one.
+
+If Time Locking Counter is positive, time skipping is locked (disabled).
+When time skipping is disabled, the time in test server is moving normally, with a real time pace.
+Test Server is typically started with locked time skipping and Time Locking Counter = 1.
+
+LockTimeSkipping and UnlockTimeSkipping calls are counted.
+-}</span></span><span>
+</span><span id="line-35"></span><span class="annot"><a href="Temporal.Core.Client.TestService.html#lockTimeSkipping"><span class="hs-identifier hs-type">lockTimeSkipping</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">LockTimeSkippingRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">LockTimeSkippingResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span id="lockTimeSkipping"><span class="annot"><span class="annottext">lockTimeSkipping :: Client
+-&gt; LockTimeSkippingRequest
+-&gt; IO (Either RpcError LockTimeSkippingResponse)
+</span><a href="Temporal.Core.Client.TestService.html#lockTimeSkipping"><span class="hs-identifier hs-var hs-var">lockTimeSkipping</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">TestService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;lockTimeSkipping&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.TestService.html#hs_lock_time_skipping"><span class="hs-identifier hs-var">hs_lock_time_skipping</span></a></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_sleep_until&quot;</span></span><span> </span><span id="hs_sleep_until"><span class="annot"><a href="Temporal.Core.Client.TestService.html#hs_sleep_until"><span class="hs-identifier hs-var">hs_sleep_until</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="annot"><span class="hs-comment">{- | This call returns only when the Test Server Time advances to the specified timestamp.
+
+If the current Test Server Time is beyond the specified timestamp, returns immediately.
+This is an EXPERIMENTAL API.
+-}</span></span><span>
+</span><span id="line-47"></span><span class="annot"><a href="Temporal.Core.Client.TestService.html#sleepUntil"><span class="hs-identifier hs-type">sleepUntil</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SleepUntilRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">SleepResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-48"></span><span id="sleepUntil"><span class="annot"><span class="annottext">sleepUntil :: Client -&gt; SleepUntilRequest -&gt; IO (Either RpcError SleepResponse)
+</span><a href="Temporal.Core.Client.TestService.html#sleepUntil"><span class="hs-identifier hs-var hs-var">sleepUntil</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">TestService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;sleepUntil&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.TestService.html#hs_sleep_until"><span class="hs-identifier hs-var">hs_sleep_until</span></a></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_sleep&quot;</span></span><span> </span><span id="hs_sleep"><span class="annot"><a href="Temporal.Core.Client.TestService.html#hs_sleep"><span class="hs-identifier hs-var">hs_sleep</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="annot"><span class="hs-comment">{- | This call returns only when the Test Server Time advances by the specified duration.
+This is an EXPERIMENTAL API.
+-}</span></span><span>
+</span><span id="line-57"></span><span class="annot"><a href="Temporal.Core.Client.TestService.html#sleep"><span class="hs-identifier hs-type">sleep</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SleepRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">SleepResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-58"></span><span id="sleep"><span class="annot"><span class="annottext">sleep :: Client -&gt; SleepRequest -&gt; IO (Either RpcError SleepResponse)
+</span><a href="Temporal.Core.Client.TestService.html#sleep"><span class="hs-identifier hs-var hs-var">sleep</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">TestService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;sleep&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.TestService.html#hs_sleep"><span class="hs-identifier hs-var">hs_sleep</span></a></span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_unlock_time_skipping_with_sleep&quot;</span></span><span> </span><span id="hs_unlock_time_skipping_with_sleep"><span class="annot"><a href="Temporal.Core.Client.TestService.html#hs_unlock_time_skipping_with_sleep"><span class="hs-identifier hs-var">hs_unlock_time_skipping_with_sleep</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="annot"><span class="hs-comment">{- | UnlockTimeSkippingWhileSleep decreases time locking counter by one and increases it back
+once the Test Server Time advances by the duration specified in the request.
+
+This call returns only when the Test Server Time advances by the specified duration.
+
+If it is called when Time Locking Counter is
+  - more than 1 and no other unlocks are coming in, rpc call will block for the specified duration, time will not be fast forwarded.
+  - 1, it will lead to fast forwarding of the time by the duration specified in the request and quick return of this rpc call.
+  - 0 will lead to rpc call failure same way as an unbalanced UnlockTimeSkipping.
+-}</span></span><span>
+</span><span id="line-74"></span><span class="annot"><a href="Temporal.Core.Client.TestService.html#unlockTimeSkippingWithSleep"><span class="hs-identifier hs-type">unlockTimeSkippingWithSleep</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SleepRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">SleepResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-75"></span><span id="unlockTimeSkippingWithSleep"><span class="annot"><span class="annottext">unlockTimeSkippingWithSleep :: Client -&gt; SleepRequest -&gt; IO (Either RpcError SleepResponse)
+</span><a href="Temporal.Core.Client.TestService.html#unlockTimeSkippingWithSleep"><span class="hs-identifier hs-var hs-var">unlockTimeSkippingWithSleep</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">TestService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;unlockTimeSkippingWithSleep&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.TestService.html#hs_unlock_time_skipping_with_sleep"><span class="hs-identifier hs-var">hs_unlock_time_skipping_with_sleep</span></a></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="annot"><span class="hs-comment">{- | UnlockTimeSkipping decrements Time Locking Counter by one.
+
+If the counter reaches 0, it unlocks time skipping and fast forwards time.
+LockTimeSkipping and UnlockTimeSkipping calls are counted. Calling UnlockTimeSkipping does not
+guarantee that time is going to be fast forwarded as another lock can be holding it.
+
+Time Locking Counter can't be negative, unbalanced calls to UnlockTimeSkipping will lead to rpc call failure
+-}</span></span><span>
+</span><span id="line-86"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_unlock_time_skipping&quot;</span></span><span> </span><span id="hs_unlock_time_skipping"><span class="annot"><a href="Temporal.Core.Client.TestService.html#hs_unlock_time_skipping"><span class="hs-identifier hs-var">hs_unlock_time_skipping</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span class="annot"><a href="Temporal.Core.Client.TestService.html#unlockTimeSkipping"><span class="hs-identifier hs-type">unlockTimeSkipping</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">UnlockTimeSkippingRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">UnlockTimeSkippingResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-90"></span><span id="unlockTimeSkipping"><span class="annot"><span class="annottext">unlockTimeSkipping :: Client
+-&gt; UnlockTimeSkippingRequest
+-&gt; IO (Either RpcError UnlockTimeSkippingResponse)
+</span><a href="Temporal.Core.Client.TestService.html#unlockTimeSkipping"><span class="hs-identifier hs-var hs-var">unlockTimeSkipping</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">TestService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;unlockTimeSkipping&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.TestService.html#hs_unlock_time_skipping"><span class="hs-identifier hs-var">hs_unlock_time_skipping</span></a></span><span>
+</span><span id="line-91"></span></pre></body></html>

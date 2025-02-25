@@ -1,0 +1,270 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# OPTIONS_GHC -fplugin=IfSat.Plugin #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Codec.Optimal.html"><span class="hs-identifier">Temporal.Codec.Optimal</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-4"></span><span>  </span><span class="annot"><a href="Temporal.Codec.Optimal.html#defaultCodec"><span class="hs-identifier">defaultCodec</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-5"></span><span>  </span><span class="annot"><a href="Temporal.Codec.Optimal.html#Composite"><span class="hs-identifier">Composite</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-6"></span><span>  </span><span class="hs-keyword">module</span><span> </span><span class="annot"><span class="hs-identifier">Data.Constraint.If</span></span><span class="hs-special">,</span><span>
+</span><span id="line-7"></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Constraint.If</span></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Kind</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map.Strict</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Map</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Proxy</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.TypeLits</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Temporal.Payload</span></span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="annot"><span class="hs-comment">{- | The 'Composite' codec allows you to combine multiple codecs into one.
+
+The codecs are tried in order, and the first one that succeeds is used.
+If none of the codecs succeed, the compile-time error message will indicate
+the type that didn't satisfy any of the specified codecs.
+
+This Codec is useful when you want to support multiple serialization formats
+and choose the best / most performant one for each type.
+
+Note that this Codec relies upon the 'if-instance' package, which supplies
+a compiler plugin that allows us to use this. You must add the following
+pragma to the module that registers your workflow code:
+
+&gt; {\-# OPTIONS_GHC -fplugin=IfSat.Plugin #-\}
+&gt; -- ^ Put this at the top of the module that registers your workflow code.
+&gt;
+&gt; let testFn :: Int -&gt; Text -&gt; Bool -&gt; W.Workflow () () (Int, Text, Bool)
+&gt;     testFn a b c = pure (a, b, c)
+&gt;     wf = W.provideWorkflow defaultCodec &quot;test&quot; () testFn
+&gt;     conf = configure () () $ do
+&gt;       addWorkflow wf
+
+If you forget to add this pragma, your code will fail to compile with
+a message like:
+
+&gt; hs-temporal/test/IntegrationSpec.hs:66:16: error:
+&gt;    &#8226; No instance for (Codec Null ()
+&gt;                       Data.Constraint.If.|| Codec
+&gt;                                               (Temporal.Payload.Composite
+&gt;                                                  '[Binary, Protobuf, JSON])
+&gt;                                               ())
+&gt;        arising from a use of &#8216;W.provideWorkflow&#8217;
+&gt;    &#8226; In the expression:
+&gt;        W.provideWorkflow defaultCodec &quot;test&quot; () testFn
+&gt;      In an equation for &#8216;wf&#8217;:
+&gt;          wf = W.provideWorkflow defaultCodec &quot;test&quot; () testFn
+&gt;      In the expression:
+&gt;        do taskQueue &lt;- W.TaskQueue &lt;$&gt; uuidText
+&gt;           let testFn :: W.Workflow () () ()
+&gt;               testFn = pure ()
+&gt;               ....
+&gt;           withWorker conf
+&gt;             $ do wfId &lt;- uuidText
+&gt;                  let ...
+&gt;                  ....
+&gt;   |
+&gt;66 |           wf = W.provideWorkflow defaultCodec &quot;test&quot; () testFn
+&gt;   |                ^^^^^^^^^^^^^^^^^
+-}</span></span><span>
+</span><span id="line-66"></span><span class="hs-keyword">data</span><span> </span><span id="Composite"><span class="annot"><a href="Temporal.Codec.Optimal.html#Composite"><span class="hs-identifier hs-var">Composite</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679143590"><span class="annot"><a href="#local-6989586621679143590"><span class="hs-identifier hs-type">codecs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Type</span></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-67"></span><span>  </span><span id="CompositeNil"><span class="annot"><a href="Temporal.Codec.Optimal.html#CompositeNil"><span class="hs-identifier hs-var">CompositeNil</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Codec.Optimal.html#Composite"><span class="hs-identifier hs-type">Composite</span></a></span><span> </span><span class="hs-special">'</span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-68"></span><span>  </span><span id="local-6989586621679143592"><span id="local-6989586621679143593"><span id="CompositeCons"><span class="annot"><a href="Temporal.Codec.Optimal.html#CompositeCons"><span class="hs-identifier hs-var">CompositeCons</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679143592"><span class="hs-identifier hs-type">codec</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Codec.Optimal.html#Composite"><span class="hs-identifier hs-type">Composite</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679143593"><span class="hs-identifier hs-type">codecs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Codec.Optimal.html#Composite"><span class="hs-identifier hs-type">Composite</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679143592"><span class="hs-identifier hs-type">codec</span></a></span><span> </span><span class="hs-special">'</span><span class="hs-glyph">:</span><span> </span><span class="annot"><a href="#local-6989586621679143593"><span class="hs-identifier hs-type">codecs</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679143528"><span class="annot"><span class="hs-identifier hs-type">TypeError</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">'</span><span class="annot"><span class="hs-identifier hs-type">ShowType</span></span><span> </span><span class="annot"><a href="#local-6989586621679143528"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">'</span><span class="hs-operator">:&lt;&gt;:</span><span> </span><span class="hs-special">'</span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><span class="hs-string">&quot; is not supported by any of the provided codecs&quot;</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Codec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Codec.Optimal.html#Composite"><span class="hs-identifier hs-type">Composite</span></a></span><span> </span><span class="hs-special">'</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679143528"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-72"></span><span>  </span><span id="local-6989586621679143604"><span class="annot"><span class="annottext">messageType :: Composite '[] -&gt; a -&gt; ByteString
+</span><a href="#local-6989586621679143604"><span class="hs-identifier hs-var hs-var hs-var">messageType</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Composite '[] -&gt; a -&gt; ByteString
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;unreachable&quot;</span></span><span>
+</span><span id="line-73"></span><span>  </span><span id="local-6989586621679143609"><span class="annot"><span class="annottext">encoding :: Composite '[] -&gt; Proxy a -&gt; ByteString
+</span><a href="#local-6989586621679143609"><span class="hs-identifier hs-var hs-var hs-var">encoding</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Composite '[] -&gt; Proxy a -&gt; ByteString
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;unreachable&quot;</span></span><span>
+</span><span id="line-74"></span><span>  </span><span id="local-6989586621679143613"><span class="annot"><span class="annottext">encode :: Composite '[] -&gt; a -&gt; IO Payload
+</span><a href="#local-6989586621679143613"><span class="hs-identifier hs-var hs-var hs-var">encode</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Composite '[] -&gt; a -&gt; IO Payload
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;unreachable&quot;</span></span><span>
+</span><span id="line-75"></span><span>  </span><span id="local-6989586621679143620"><span class="annot"><span class="annottext">decode :: Composite '[] -&gt; Payload -&gt; IO (Either String a)
+</span><a href="#local-6989586621679143620"><span class="hs-identifier hs-var hs-var hs-var">decode</span></a></span></span><span> </span><span class="annot"><span class="annottext">Composite '[]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">Payload
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Either String a -&gt; IO (Either String a)
+forall a. a -&gt; IO a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(Either String a -&gt; IO (Either String a))
+-&gt; Either String a -&gt; IO (Either String a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Either String a
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;No recognized codec for this type&quot;</span></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679143549"><span id="local-6989586621679143550"><span id="local-6989586621679143551"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Codec</span></span><span> </span><span class="annot"><a href="#local-6989586621679143549"><span class="hs-identifier hs-type">fmt</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679143550"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">||</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Codec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Codec.Optimal.html#Composite"><span class="hs-identifier hs-type">Composite</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679143551"><span class="hs-identifier hs-type">codecs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679143550"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Codec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Codec.Optimal.html#Composite"><span class="hs-identifier hs-type">Composite</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679143549"><span class="hs-identifier hs-type">fmt</span></a></span><span> </span><span class="hs-special">'</span><span class="hs-glyph">:</span><span> </span><span class="annot"><a href="#local-6989586621679143551"><span class="hs-identifier hs-type">codecs</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679143550"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-79"></span><span>  </span><span id="local-6989586621679143629"><span class="annot"><span class="annottext">encoding :: Composite (fmt : codecs) -&gt; Proxy a -&gt; ByteString
+</span><span class="hs-identifier hs-var hs-var hs-var">encoding</span></span></span><span> </span><span id="local-6989586621679143630"><span class="annot"><span class="annottext">Composite (fmt : codecs)
+</span><a href="#local-6989586621679143630"><span class="hs-identifier hs-var">fmt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-80"></span><span>    </span><span class="annot"><span class="annottext">forall (c :: Constraint) (d :: Constraint) r.
+(c || d) =&gt;
+((IsSat c ~ 'True, c) =&gt; r)
+-&gt; ((IsSat c ~ 'False, IsSat d ~ 'True, d) =&gt; r) -&gt; r
+</span><span class="hs-identifier hs-var">dispatch</span></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Codec</span></span><span> </span><span class="annot"><a href="#local-6989586621679143549"><span class="hs-identifier hs-type">fmt</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679143550"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Codec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Codec.Optimal.html#Composite"><span class="hs-identifier hs-type">Composite</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679143551"><span class="hs-identifier hs-type">codecs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679143550"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-81"></span><span>      </span><span class="hs-special">(</span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Composite (fmt : codecs)
+</span><a href="#local-6989586621679143630"><span class="hs-identifier hs-var">fmt</span></a></span><span> </span><span class="hs-keyword">of</span><span> </span><span class="annot"><a href="Temporal.Codec.Optimal.html#CompositeCons"><span class="hs-identifier hs-type">CompositeCons</span></a></span><span> </span><span id="local-6989586621679143638"><span class="annot"><span class="annottext">codec
+</span><a href="#local-6989586621679143638"><span class="hs-identifier hs-var">codec</span></a></span></span><span> </span><span class="annot"><span class="annottext">Composite codecs
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">codec -&gt; Proxy a -&gt; ByteString
+forall fmt a. Codec fmt a =&gt; fmt -&gt; Proxy a -&gt; ByteString
+</span><span class="hs-identifier hs-var">encoding</span></span><span> </span><span class="annot"><span class="annottext">codec
+</span><a href="#local-6989586621679143638"><span class="hs-identifier hs-var">codec</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-82"></span><span>      </span><span class="hs-special">(</span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Composite (fmt : codecs)
+</span><a href="#local-6989586621679143630"><span class="hs-identifier hs-var">fmt</span></a></span><span> </span><span class="hs-keyword">of</span><span> </span><span class="annot"><a href="Temporal.Codec.Optimal.html#CompositeCons"><span class="hs-identifier hs-type">CompositeCons</span></a></span><span> </span><span class="annot"><span class="annottext">codec
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679143646"><span class="annot"><span class="annottext">Composite codecs
+</span><a href="#local-6989586621679143646"><span class="hs-identifier hs-var">codecs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Composite codecs -&gt; Proxy a -&gt; ByteString
+forall fmt a. Codec fmt a =&gt; fmt -&gt; Proxy a -&gt; ByteString
+</span><span class="hs-identifier hs-var">encoding</span></span><span> </span><span class="annot"><span class="annottext">Composite codecs
+</span><a href="#local-6989586621679143646"><span class="hs-identifier hs-var">codecs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-83"></span><span>  </span><span id="local-6989586621679143648"><span class="annot"><span class="annottext">messageType :: Composite (fmt : codecs) -&gt; a -&gt; ByteString
+</span><span class="hs-identifier hs-var hs-var hs-var">messageType</span></span></span><span> </span><span id="local-6989586621679143649"><span class="annot"><span class="annottext">Composite (fmt : codecs)
+</span><a href="#local-6989586621679143649"><span class="hs-identifier hs-var">fmt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-84"></span><span>    </span><span class="annot"><span class="annottext">forall (c :: Constraint) (d :: Constraint) r.
+(c || d) =&gt;
+((IsSat c ~ 'True, c) =&gt; r)
+-&gt; ((IsSat c ~ 'False, IsSat d ~ 'True, d) =&gt; r) -&gt; r
+</span><span class="hs-identifier hs-var">dispatch</span></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Codec</span></span><span> </span><span class="annot"><a href="#local-6989586621679143549"><span class="hs-identifier hs-type">fmt</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679143550"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Codec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Codec.Optimal.html#Composite"><span class="hs-identifier hs-type">Composite</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679143551"><span class="hs-identifier hs-type">codecs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679143550"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-85"></span><span>      </span><span class="hs-special">(</span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Composite (fmt : codecs)
+</span><a href="#local-6989586621679143649"><span class="hs-identifier hs-var">fmt</span></a></span><span> </span><span class="hs-keyword">of</span><span> </span><span class="annot"><a href="Temporal.Codec.Optimal.html#CompositeCons"><span class="hs-identifier hs-type">CompositeCons</span></a></span><span> </span><span id="local-6989586621679143656"><span class="annot"><span class="annottext">codec
+</span><a href="#local-6989586621679143656"><span class="hs-identifier hs-var">codec</span></a></span></span><span> </span><span class="annot"><span class="annottext">Composite codecs
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">codec -&gt; a -&gt; ByteString
+forall fmt a. Codec fmt a =&gt; fmt -&gt; a -&gt; ByteString
+</span><span class="hs-identifier hs-var">messageType</span></span><span> </span><span class="annot"><span class="annottext">codec
+</span><a href="#local-6989586621679143656"><span class="hs-identifier hs-var">codec</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-86"></span><span>      </span><span class="hs-special">(</span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Composite (fmt : codecs)
+</span><a href="#local-6989586621679143649"><span class="hs-identifier hs-var">fmt</span></a></span><span> </span><span class="hs-keyword">of</span><span> </span><span class="annot"><a href="Temporal.Codec.Optimal.html#CompositeCons"><span class="hs-identifier hs-type">CompositeCons</span></a></span><span> </span><span class="annot"><span class="annottext">codec
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679143664"><span class="annot"><span class="annottext">Composite codecs
+</span><a href="#local-6989586621679143664"><span class="hs-identifier hs-var">codecs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Composite codecs -&gt; a -&gt; ByteString
+forall fmt a. Codec fmt a =&gt; fmt -&gt; a -&gt; ByteString
+</span><span class="hs-identifier hs-var">messageType</span></span><span> </span><span class="annot"><span class="annottext">Composite codecs
+</span><a href="#local-6989586621679143664"><span class="hs-identifier hs-var">codecs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-87"></span><span>  </span><span id="local-6989586621679143666"><span class="annot"><span class="annottext">encode :: Composite (fmt : codecs) -&gt; a -&gt; IO Payload
+</span><span class="hs-identifier hs-var hs-var hs-var">encode</span></span></span><span> </span><span id="local-6989586621679143667"><span class="annot"><span class="annottext">Composite (fmt : codecs)
+</span><a href="#local-6989586621679143667"><span class="hs-identifier hs-var">fmt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-88"></span><span>    </span><span class="annot"><span class="annottext">forall (c :: Constraint) (d :: Constraint) r.
+(c || d) =&gt;
+((IsSat c ~ 'True, c) =&gt; r)
+-&gt; ((IsSat c ~ 'False, IsSat d ~ 'True, d) =&gt; r) -&gt; r
+</span><span class="hs-identifier hs-var">dispatch</span></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Codec</span></span><span> </span><span class="annot"><a href="#local-6989586621679143549"><span class="hs-identifier hs-type">fmt</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679143550"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Codec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Codec.Optimal.html#Composite"><span class="hs-identifier hs-type">Composite</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679143551"><span class="hs-identifier hs-type">codecs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679143550"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-89"></span><span>      </span><span class="hs-special">(</span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Composite (fmt : codecs)
+</span><a href="#local-6989586621679143667"><span class="hs-identifier hs-var">fmt</span></a></span><span> </span><span class="hs-keyword">of</span><span> </span><span class="annot"><a href="Temporal.Codec.Optimal.html#CompositeCons"><span class="hs-identifier hs-type">CompositeCons</span></a></span><span> </span><span id="local-6989586621679143674"><span class="annot"><span class="annottext">codec
+</span><a href="#local-6989586621679143674"><span class="hs-identifier hs-var">codec</span></a></span></span><span> </span><span class="annot"><span class="annottext">Composite codecs
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">codec -&gt; a -&gt; IO Payload
+forall fmt a. Codec fmt a =&gt; fmt -&gt; a -&gt; IO Payload
+</span><span class="hs-identifier hs-var">encode</span></span><span> </span><span class="annot"><span class="annottext">codec
+</span><a href="#local-6989586621679143674"><span class="hs-identifier hs-var">codec</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-90"></span><span>      </span><span class="hs-special">(</span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Composite (fmt : codecs)
+</span><a href="#local-6989586621679143667"><span class="hs-identifier hs-var">fmt</span></a></span><span> </span><span class="hs-keyword">of</span><span> </span><span class="annot"><a href="Temporal.Codec.Optimal.html#CompositeCons"><span class="hs-identifier hs-type">CompositeCons</span></a></span><span> </span><span class="annot"><span class="annottext">codec
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679143682"><span class="annot"><span class="annottext">Composite codecs
+</span><a href="#local-6989586621679143682"><span class="hs-identifier hs-var">codecs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Composite codecs -&gt; a -&gt; IO Payload
+forall fmt a. Codec fmt a =&gt; fmt -&gt; a -&gt; IO Payload
+</span><span class="hs-identifier hs-var">encode</span></span><span> </span><span class="annot"><span class="annottext">Composite codecs
+</span><a href="#local-6989586621679143682"><span class="hs-identifier hs-var">codecs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-91"></span><span>  </span><span id="local-6989586621679143684"><span class="annot"><span class="annottext">decode :: Composite (fmt : codecs) -&gt; Payload -&gt; IO (Either String a)
+</span><span class="hs-identifier hs-var hs-var hs-var">decode</span></span></span><span> </span><span id="local-6989586621679143685"><span class="annot"><span class="annottext">Composite (fmt : codecs)
+</span><a href="#local-6989586621679143685"><span class="hs-identifier hs-var">fmt</span></a></span></span><span> </span><span id="local-6989586621679143686"><span class="annot"><span class="annottext">Payload
+</span><a href="#local-6989586621679143686"><span class="hs-identifier hs-var">payload</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-92"></span><span>    </span><span class="annot"><span class="annottext">forall (c :: Constraint) (d :: Constraint) r.
+(c || d) =&gt;
+((IsSat c ~ 'True, c) =&gt; r)
+-&gt; ((IsSat c ~ 'False, IsSat d ~ 'True, d) =&gt; r) -&gt; r
+</span><span class="hs-identifier hs-var">dispatch</span></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Codec</span></span><span> </span><span class="annot"><a href="#local-6989586621679143549"><span class="hs-identifier hs-type">fmt</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679143550"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Codec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Codec.Optimal.html#Composite"><span class="hs-identifier hs-type">Composite</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679143551"><span class="hs-identifier hs-type">codecs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679143550"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-93"></span><span>      </span><span class="hs-special">(</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Composite (fmt : codecs)
+</span><a href="#local-6989586621679143685"><span class="hs-identifier hs-var">fmt</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-94"></span><span>          </span><span class="annot"><a href="Temporal.Codec.Optimal.html#CompositeCons"><span class="hs-identifier hs-type">CompositeCons</span></a></span><span> </span><span id="local-6989586621679143708"><span class="annot"><span class="annottext">codec
+</span><a href="#local-6989586621679143708"><span class="hs-identifier hs-var">codec</span></a></span></span><span> </span><span id="local-6989586621679143709"><span class="annot"><span class="annottext">Composite codecs
+</span><a href="#local-6989586621679143709"><span class="hs-identifier hs-var">codecs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-95"></span><span>            </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Maybe ByteString
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">codec -&gt; Proxy a -&gt; ByteString
+forall fmt a. Codec fmt a =&gt; fmt -&gt; Proxy a -&gt; ByteString
+</span><span class="hs-identifier hs-var">encoding</span></span><span> </span><span class="annot"><span class="annottext">codec
+</span><a href="#local-6989586621679143708"><span class="hs-identifier hs-var">codec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall t. Proxy t
+forall {k} (t :: k). Proxy t
+</span><span class="hs-identifier hs-var">Proxy</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="#local-6989586621679143550"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe ByteString -&gt; Maybe ByteString -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Payload
+</span><a href="#local-6989586621679143686"><span class="hs-identifier hs-var">payload</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">payloadMetadata</span><span> </span><span class="annot"><span class="annottext">Map Text ByteString -&gt; Text -&gt; Maybe ByteString
+forall k a. Ord k =&gt; Map k a -&gt; k -&gt; Maybe a
+</span><span class="hs-operator hs-var">Map.!?</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;encoding&quot;</span></span><span>
+</span><span id="line-96"></span><span>              </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">codec -&gt; Payload -&gt; IO (Either String a)
+forall fmt a. Codec fmt a =&gt; fmt -&gt; Payload -&gt; IO (Either String a)
+</span><span class="hs-identifier hs-var">decode</span></span><span> </span><span class="annot"><span class="annottext">codec
+</span><a href="#local-6989586621679143708"><span class="hs-identifier hs-var">codec</span></a></span><span> </span><span class="annot"><span class="annottext">Payload
+</span><a href="#local-6989586621679143686"><span class="hs-identifier hs-var">payload</span></a></span><span>
+</span><span id="line-97"></span><span>              </span><span class="hs-keyword">else</span><span>
+</span><span id="line-98"></span><span>                </span><span class="annot"><span class="annottext">forall (ct :: Constraint) r.
+IfSat ct =&gt;
+((IsSat ct ~ 'True, ct) =&gt; r) -&gt; ((IsSat ct ~ 'False) =&gt; r) -&gt; r
+</span><span class="hs-identifier hs-var">ifSat</span></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Codec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Codec.Optimal.html#Composite"><span class="hs-identifier hs-type">Composite</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679143551"><span class="hs-identifier hs-type">codecs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679143550"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-99"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Composite codecs -&gt; Payload -&gt; IO (Either String a)
+forall fmt a. Codec fmt a =&gt; fmt -&gt; Payload -&gt; IO (Either String a)
+</span><span class="hs-identifier hs-var">decode</span></span><span> </span><span class="annot"><span class="annottext">Composite codecs
+</span><a href="#local-6989586621679143709"><span class="hs-identifier hs-var">codecs</span></a></span><span> </span><span class="annot"><span class="annottext">Payload
+</span><a href="#local-6989586621679143686"><span class="hs-identifier hs-var">payload</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-100"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Either String a -&gt; IO (Either String a)
+forall a. a -&gt; IO a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(Either String a -&gt; IO (Either String a))
+-&gt; Either String a -&gt; IO (Either String a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Either String a
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;No codec for this type supports this payload&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-101"></span><span>      </span><span class="hs-special">)</span><span>
+</span><span id="line-102"></span><span>      </span><span class="hs-special">(</span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Composite (fmt : codecs)
+</span><a href="#local-6989586621679143685"><span class="hs-identifier hs-var">fmt</span></a></span><span> </span><span class="hs-keyword">of</span><span> </span><span class="annot"><a href="Temporal.Codec.Optimal.html#CompositeCons"><span class="hs-identifier hs-type">CompositeCons</span></a></span><span> </span><span class="annot"><span class="annottext">codec
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679143727"><span class="annot"><span class="annottext">Composite codecs
+</span><a href="#local-6989586621679143727"><span class="hs-identifier hs-var">codecs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Composite codecs -&gt; Payload -&gt; IO (Either String a)
+forall fmt a. Codec fmt a =&gt; fmt -&gt; Payload -&gt; IO (Either String a)
+</span><span class="hs-identifier hs-var">decode</span></span><span> </span><span class="annot"><span class="annottext">Composite codecs
+</span><a href="#local-6989586621679143727"><span class="hs-identifier hs-var">codecs</span></a></span><span> </span><span class="annot"><span class="annottext">Payload
+</span><a href="#local-6989586621679143686"><span class="hs-identifier hs-var">payload</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span>
+</span><span id="line-105"></span><span class="annot"><a href="Temporal.Codec.Optimal.html#defaultCodec"><span class="hs-identifier hs-type">defaultCodec</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Codec.Optimal.html#Composite"><span class="hs-identifier hs-type">Composite</span></a></span><span> </span><span class="hs-special">'</span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Null</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Protobuf</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">JSON</span></span><span class="hs-special">]</span><span>
+</span><span id="line-106"></span><span id="defaultCodec"><span class="annot"><span class="annottext">defaultCodec :: Composite '[Null, Binary, Protobuf, JSON]
+</span><a href="Temporal.Codec.Optimal.html#defaultCodec"><span class="hs-identifier hs-var hs-var">defaultCodec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Null
+-&gt; Composite '[Binary, Protobuf, JSON]
+-&gt; Composite '[Null, Binary, Protobuf, JSON]
+forall codec (codecs :: [*]).
+codec -&gt; Composite codecs -&gt; Composite (codec : codecs)
+</span><a href="Temporal.Codec.Optimal.html#CompositeCons"><span class="hs-identifier hs-var">CompositeCons</span></a></span><span> </span><span class="annot"><span class="annottext">Null
+</span><span class="hs-identifier hs-var">Temporal.Payload.Null</span></span><span> </span><span class="annot"><span class="annottext">(Composite '[Binary, Protobuf, JSON]
+ -&gt; Composite '[Null, Binary, Protobuf, JSON])
+-&gt; Composite '[Binary, Protobuf, JSON]
+-&gt; Composite '[Null, Binary, Protobuf, JSON]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Binary
+-&gt; Composite '[Protobuf, JSON]
+-&gt; Composite '[Binary, Protobuf, JSON]
+forall codec (codecs :: [*]).
+codec -&gt; Composite codecs -&gt; Composite (codec : codecs)
+</span><a href="Temporal.Codec.Optimal.html#CompositeCons"><span class="hs-identifier hs-var">CompositeCons</span></a></span><span> </span><span class="annot"><span class="annottext">Binary
+</span><span class="hs-identifier hs-var">Binary</span></span><span> </span><span class="annot"><span class="annottext">(Composite '[Protobuf, JSON]
+ -&gt; Composite '[Binary, Protobuf, JSON])
+-&gt; Composite '[Protobuf, JSON]
+-&gt; Composite '[Binary, Protobuf, JSON]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Protobuf -&gt; Composite '[JSON] -&gt; Composite '[Protobuf, JSON]
+forall codec (codecs :: [*]).
+codec -&gt; Composite codecs -&gt; Composite (codec : codecs)
+</span><a href="Temporal.Codec.Optimal.html#CompositeCons"><span class="hs-identifier hs-var">CompositeCons</span></a></span><span> </span><span class="annot"><span class="annottext">Protobuf
+</span><span class="hs-identifier hs-var">Protobuf</span></span><span> </span><span class="annot"><span class="annottext">(Composite '[JSON] -&gt; Composite '[Protobuf, JSON])
+-&gt; Composite '[JSON] -&gt; Composite '[Protobuf, JSON]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">JSON -&gt; Composite '[] -&gt; Composite '[JSON]
+forall codec (codecs :: [*]).
+codec -&gt; Composite codecs -&gt; Composite (codec : codecs)
+</span><a href="Temporal.Codec.Optimal.html#CompositeCons"><span class="hs-identifier hs-var">CompositeCons</span></a></span><span> </span><span class="annot"><span class="annottext">JSON
+</span><span class="hs-identifier hs-var">JSON</span></span><span> </span><span class="annot"><span class="annottext">Composite '[]
+</span><a href="Temporal.Codec.Optimal.html#CompositeNil"><span class="hs-identifier hs-var">CompositeNil</span></a></span><span>
+</span><span id="line-107"></span></pre></body></html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DuplicateRecordFields #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Runtime.html"><span class="hs-identifier">Temporal.Runtime</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-4"></span><span>  </span><span class="annot"><a href="Temporal.Core.CTypes.html#Runtime"><span class="hs-identifier">Runtime</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-5"></span><span>  </span><span class="annot"><a href="Temporal.Core.CTypes.html#TelemetryOptions"><span class="hs-identifier">TelemetryOptions</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-6"></span><span>  </span><span class="annot"><a href="Temporal.Core.CTypes.html#Periodicity"><span class="hs-identifier">Periodicity</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-7"></span><span>  </span><span class="annot"><a href="Temporal.Runtime.html#initializeRuntime"><span class="hs-identifier">initializeRuntime</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-8"></span><span>  </span><span class="annot"><a href="Temporal.Runtime.html#withRuntime"><span class="hs-identifier">withRuntime</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-9"></span><span>  </span><span class="annot"><a href="Temporal.Runtime.html#fetchLogs"><span class="hs-identifier">fetchLogs</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-10"></span><span>  </span><span class="annot"><a href="Temporal.Core.CTypes.html#CoreLog"><span class="hs-identifier">CoreLog</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-11"></span><span>  </span><span class="annot"><a href="Temporal.Core.CTypes.html#LogLevel"><span class="hs-identifier">LogLevel</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-12"></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Concurrent</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Exception</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString.Lazy</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">BL</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">V</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.C.String</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.C.Types</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">CInt</span></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.ForeignPtr</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.Marshal</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.Ptr</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.StablePtr</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.Storable</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">System.IO.Unsafe</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html"><span class="hs-identifier">Temporal.Core.CTypes</span></a></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Internal.FFI.html"><span class="hs-identifier">Temporal.Internal.FFI</span></a></span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="annot"><span class="hs-comment">-- | Initialize the Rust runtime and thread-pool.</span></span><span>
+</span><span id="line-32"></span><span class="annot"><a href="Temporal.Runtime.html#initializeRuntime"><span class="hs-identifier hs-type">initializeRuntime</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#TelemetryOptions"><span class="hs-identifier hs-type">TelemetryOptions</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#Runtime"><span class="hs-identifier hs-type">Runtime</span></a></span><span>
+</span><span id="line-33"></span><span id="initializeRuntime"><span class="annot"><span class="annottext">initializeRuntime :: TelemetryOptions -&gt; IO Runtime
+</span><a href="Temporal.Runtime.html#initializeRuntime"><span class="hs-identifier hs-var hs-var">initializeRuntime</span></a></span></span><span> </span><span id="local-6989586621679252194"><span class="annot"><span class="annottext">TelemetryOptions
+</span><a href="#local-6989586621679252194"><span class="hs-identifier hs-var">opts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; (Ptr (CArray Word8) -&gt; IO Runtime) -&gt; IO Runtime
+forall b. ByteString -&gt; (Ptr (CArray Word8) -&gt; IO b) -&gt; IO b
+</span><a href="Temporal.Internal.FFI.html#withCArrayBS"><span class="hs-identifier hs-var">withCArrayBS</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LazyByteString -&gt; ByteString
+</span><span class="hs-identifier hs-var">BL.toStrict</span></span><span> </span><span class="annot"><span class="annottext">(LazyByteString -&gt; ByteString) -&gt; LazyByteString -&gt; ByteString
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TelemetryOptions -&gt; LazyByteString
+forall a. ToJSON a =&gt; a -&gt; LazyByteString
+</span><span class="hs-identifier hs-var">encode</span></span><span> </span><span class="annot"><span class="annottext">TelemetryOptions
+</span><a href="#local-6989586621679252194"><span class="hs-identifier hs-var">opts</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Ptr (CArray Word8) -&gt; IO Runtime) -&gt; IO Runtime)
+-&gt; (Ptr (CArray Word8) -&gt; IO Runtime) -&gt; IO Runtime
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679252198"><span class="annot"><span class="annottext">Ptr (CArray Word8)
+</span><a href="#local-6989586621679252198"><span class="hs-identifier hs-var">optsP</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-34"></span><span>  </span><span class="annot"><span class="annottext">IO Runtime -&gt; IO Runtime
+forall a. IO a -&gt; IO a
+</span><span class="hs-identifier hs-var">mask_</span></span><span> </span><span class="annot"><span class="annottext">(IO Runtime -&gt; IO Runtime) -&gt; IO Runtime -&gt; IO Runtime
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-35"></span><span>    </span><span id="local-6989586621679252200"><span class="annot"><a href="#local-6989586621679252200"><span class="hs-identifier hs-var">rtP</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Ptr (CArray Word8) -&gt; TryPutMVarFFI -&gt; IO (Ptr Runtime)
+</span><a href="Temporal.Core.CTypes.html#initRuntime"><span class="hs-identifier hs-var">initRuntime</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr (CArray Word8)
+</span><a href="#local-6989586621679252198"><span class="hs-identifier hs-var">optsP</span></a></span><span> </span><span class="annot"><span class="annottext">TryPutMVarFFI
+</span><a href="Temporal.Core.CTypes.html#tryPutMVarPtr"><span class="hs-identifier hs-var">tryPutMVarPtr</span></a></span><span>
+</span><span id="line-36"></span><span>    </span><span class="annot"><a href="Temporal.Core.CTypes.html#Runtime"><span class="hs-identifier hs-type">Runtime</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">newForeignPtr</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#freeRuntime"><span class="hs-identifier hs-type">freeRuntime</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679252200"><span class="hs-identifier hs-type">rtP</span></a></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="annot"><span class="hs-comment">-- | Access the underlying 'Runtime' pointer for calling out to Rust.</span></span><span>
+</span><span id="line-40"></span><span id="local-6989586621679252153"><span class="annot"><a href="Temporal.Runtime.html#withRuntime"><span class="hs-identifier hs-type">withRuntime</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#Runtime"><span class="hs-identifier hs-type">Runtime</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ptr</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#Runtime"><span class="hs-identifier hs-type">Runtime</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679252153"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679252153"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-41"></span><span id="withRuntime"><span class="annot"><span class="annottext">withRuntime :: forall a. Runtime -&gt; (Ptr Runtime -&gt; IO a) -&gt; IO a
+</span><a href="Temporal.Runtime.html#withRuntime"><span class="hs-identifier hs-var hs-var">withRuntime</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Core.CTypes.html#Runtime"><span class="hs-identifier hs-type">Runtime</span></a></span><span> </span><span id="local-6989586621679252207"><span class="annot"><span class="annottext">ForeignPtr Runtime
+</span><a href="#local-6989586621679252207"><span class="hs-identifier hs-var">rvar</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ForeignPtr Runtime -&gt; (Ptr Runtime -&gt; IO a) -&gt; IO a
+forall a b. ForeignPtr a -&gt; (Ptr a -&gt; IO b) -&gt; IO b
+</span><span class="hs-identifier hs-var">withForeignPtr</span></span><span> </span><span class="annot"><span class="annottext">ForeignPtr Runtime
+</span><a href="#local-6989586621679252207"><span class="hs-identifier hs-var">rvar</span></a></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="annot"><span class="hs-comment">{- | The Rust runtime exports logs to the Haskell runtime. This function fetches
+those logs so they can be fed through a logging framework.
+-}</span></span><span>
+</span><span id="line-47"></span><span class="annot"><a href="Temporal.Runtime.html#fetchLogs"><span class="hs-identifier hs-type">fetchLogs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#Runtime"><span class="hs-identifier hs-type">Runtime</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">V.Vector</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#CoreLog"><span class="hs-identifier hs-type">CoreLog</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-48"></span><span id="fetchLogs"><span class="annot"><span class="annottext">fetchLogs :: Runtime -&gt; IO (Vector CoreLog)
+</span><a href="Temporal.Runtime.html#fetchLogs"><span class="hs-identifier hs-var hs-var">fetchLogs</span></a></span></span><span> </span><span id="local-6989586621679252209"><span class="annot"><span class="annottext">Runtime
+</span><a href="#local-6989586621679252209"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Runtime
+-&gt; (Ptr Runtime -&gt; IO (Vector CoreLog)) -&gt; IO (Vector CoreLog)
+forall a. Runtime -&gt; (Ptr Runtime -&gt; IO a) -&gt; IO a
+</span><a href="Temporal.Runtime.html#withRuntime"><span class="hs-identifier hs-var">withRuntime</span></a></span><span> </span><span class="annot"><span class="annottext">Runtime
+</span><a href="#local-6989586621679252209"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr Runtime -&gt; IO (Vector CoreLog)) -&gt; IO (Vector CoreLog))
+-&gt; (Ptr Runtime -&gt; IO (Vector CoreLog)) -&gt; IO (Vector CoreLog)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679252210"><span class="annot"><span class="annottext">Ptr Runtime
+</span><a href="#local-6989586621679252210"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-49"></span><span>  </span><span class="annot"><span class="annottext">IO (Ptr (CArray (CArray Word8)))
+-&gt; (Ptr (CArray (CArray Word8)) -&gt; IO ())
+-&gt; (Ptr (CArray (CArray Word8)) -&gt; IO (Vector CoreLog))
+-&gt; IO (Vector CoreLog)
+forall a b c. IO a -&gt; (a -&gt; IO b) -&gt; (a -&gt; IO c) -&gt; IO c
+</span><span class="hs-identifier hs-var">bracket</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr Runtime -&gt; IO (Ptr (CArray (CArray Word8)))
+</span><a href="Temporal.Core.CTypes.html#raw_fetchLogs"><span class="hs-identifier hs-var">raw_fetchLogs</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr Runtime
+</span><a href="#local-6989586621679252210"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Ptr (CArray (CArray Word8)) -&gt; IO ()
+</span><a href="Temporal.Core.CTypes.html#raw_freeLogs"><span class="hs-identifier hs-var">raw_freeLogs</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr (CArray (CArray Word8)) -&gt; IO (Vector CoreLog))
+ -&gt; IO (Vector CoreLog))
+-&gt; (Ptr (CArray (CArray Word8)) -&gt; IO (Vector CoreLog))
+-&gt; IO (Vector CoreLog)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679252214"><span class="annot"><span class="annottext">Ptr (CArray (CArray Word8))
+</span><a href="#local-6989586621679252214"><span class="hs-identifier hs-var">clogs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-50"></span><span>    </span><span id="local-6989586621679252215"><span class="annot"><a href="#local-6989586621679252215"><span class="hs-identifier hs-var">logs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Ptr (CArray (CArray Word8)) -&gt; IO (CArray (CArray Word8))
+forall a. Storable a =&gt; Ptr a -&gt; IO a
+</span><span class="hs-identifier hs-var">peek</span></span><span> </span><span class="annot"><span class="annottext">Ptr (CArray (CArray Word8))
+</span><a href="#local-6989586621679252214"><span class="hs-identifier hs-var">clogs</span></a></span><span>
+</span><span id="line-51"></span><span>    </span><span id="local-6989586621679252217"><span class="annot"><a href="#local-6989586621679252217"><span class="hs-identifier hs-var">vec</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#cArrayToVector"><span class="hs-identifier hs-type">cArrayToVector</span></a></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#cArrayToByteString"><span class="hs-identifier hs-type">cArrayToByteString</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679252215"><span class="hs-identifier hs-type">logs</span></a></span><span>
+</span><span id="line-52"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">V.mapM</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">throwDecodeStrict</span></span><span> </span><span class="annot"><a href="#local-6989586621679252217"><span class="hs-identifier hs-type">vec</span></a></span><span>
+</span><span id="line-53"></span></pre></body></html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DeriveAnyClass #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE GADTs #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# OPTIONS_GHC -fno-warn-orphans #-}</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="annot"><span class="hs-comment">{- | Temporal.Replay supports replaying a workflow from its event history. Use for troubleshooting and backwards compatibility unit tests.
+
+For example, if a workflow fails, in production, then its history can be downloaded through the UI or CLI and replayed in a debugger as many times as necessary.
+
+Use 'newReplayWorker' to create unit tests that check if workflow changes are backwards compatible. It is important to maintain backwards compatibility to ensure that new deployments are not going to break open workflows.
+-}</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Replay.html"><span class="hs-identifier">Temporal.Replay</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-15"></span><span>  </span><span class="annot"><a href="Temporal.Replay.html#readHistoryProtobufFile"><span class="hs-identifier">readHistoryProtobufFile</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-16"></span><span>  </span><span class="annot"><a href="Temporal.Replay.html#writeHistoryProtobufFile"><span class="hs-identifier">writeHistoryProtobufFile</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-17"></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Exception</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.IO.Class</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-22"></span><span class="hs-comment">-- import Data.List.Split (wordsBy)</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">BS</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Char</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">intersperse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text.Encoding</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Vector</span></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Lens.Family2</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Api.History.V1.Message</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Api.History.V1.Message_Fields</span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Common.html"><span class="hs-identifier">Temporal.Common</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Common.html#WorkflowId"><span class="hs-identifier">WorkflowId</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Temporal.Core.Worker</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">HistoryPusher</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">closeHistory</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">newReplayWorker</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">pushHistory</span></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">data</span><span> </span><span id="InvalidHistoryException"><span class="annot"><a href="Temporal.Replay.html#InvalidHistoryException"><span class="hs-identifier hs-var">InvalidHistoryException</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="InvalidHistoryProtobufException"><span class="annot"><a href="Temporal.Replay.html#InvalidHistoryProtobufException"><span class="hs-identifier hs-var">InvalidHistoryProtobufException</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680165696"><span id="local-6989586621680165703"><span id="local-6989586621680165707"><span class="annot"><span class="annottext">Int -&gt; InvalidHistoryException -&gt; ShowS
+[InvalidHistoryException] -&gt; ShowS
+InvalidHistoryException -&gt; String
+(Int -&gt; InvalidHistoryException -&gt; ShowS)
+-&gt; (InvalidHistoryException -&gt; String)
+-&gt; ([InvalidHistoryException] -&gt; ShowS)
+-&gt; Show InvalidHistoryException
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; InvalidHistoryException -&gt; ShowS
+showsPrec :: Int -&gt; InvalidHistoryException -&gt; ShowS
+$cshow :: InvalidHistoryException -&gt; String
+show :: InvalidHistoryException -&gt; String
+$cshowList :: [InvalidHistoryException] -&gt; ShowS
+showList :: [InvalidHistoryException] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680165713"><span id="local-6989586621680165718"><span class="annot"><span class="annottext">InvalidHistoryException -&gt; InvalidHistoryException -&gt; Bool
+(InvalidHistoryException -&gt; InvalidHistoryException -&gt; Bool)
+-&gt; (InvalidHistoryException -&gt; InvalidHistoryException -&gt; Bool)
+-&gt; Eq InvalidHistoryException
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: InvalidHistoryException -&gt; InvalidHistoryException -&gt; Bool
+== :: InvalidHistoryException -&gt; InvalidHistoryException -&gt; Bool
+$c/= :: InvalidHistoryException -&gt; InvalidHistoryException -&gt; Bool
+/= :: InvalidHistoryException -&gt; InvalidHistoryException -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">anyclass</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680165728"><span id="local-6989586621680165732"><span id="local-6989586621680165735"><span id="local-6989586621680165738"><span class="annot"><span class="annottext">Show InvalidHistoryException
+Typeable InvalidHistoryException
+(Typeable InvalidHistoryException, Show InvalidHistoryException) =&gt;
+(InvalidHistoryException -&gt; SomeException)
+-&gt; (SomeException -&gt; Maybe InvalidHistoryException)
+-&gt; (InvalidHistoryException -&gt; String)
+-&gt; (InvalidHistoryException -&gt; Bool)
+-&gt; Exception InvalidHistoryException
+SomeException -&gt; Maybe InvalidHistoryException
+InvalidHistoryException -&gt; Bool
+InvalidHistoryException -&gt; String
+InvalidHistoryException -&gt; SomeException
+forall e.
+(Typeable e, Show e) =&gt;
+(e -&gt; SomeException)
+-&gt; (SomeException -&gt; Maybe e)
+-&gt; (e -&gt; String)
+-&gt; (e -&gt; Bool)
+-&gt; Exception e
+$ctoException :: InvalidHistoryException -&gt; SomeException
+toException :: InvalidHistoryException -&gt; SomeException
+$cfromException :: SomeException -&gt; Maybe InvalidHistoryException
+fromException :: SomeException -&gt; Maybe InvalidHistoryException
+$cdisplayException :: InvalidHistoryException -&gt; String
+displayException :: InvalidHistoryException -&gt; String
+$cbacktraceDesired :: InvalidHistoryException -&gt; Bool
+backtraceDesired :: InvalidHistoryException -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Exception</span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span id="local-6989586621680165663"><span class="annot"><a href="Temporal.Replay.html#readHistoryProtobufFile"><span class="hs-identifier hs-type">readHistoryProtobufFile</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621680165663"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680165663"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">History</span></span></span><span>
+</span><span id="line-44"></span><span id="readHistoryProtobufFile"><span class="annot"><span class="annottext">readHistoryProtobufFile :: forall (m :: * -&gt; *). MonadIO m =&gt; String -&gt; m History
+</span><a href="Temporal.Replay.html#readHistoryProtobufFile"><span class="hs-identifier hs-var hs-var">readHistoryProtobufFile</span></a></span></span><span> </span><span id="local-6989586621680165754"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680165754"><span class="hs-identifier hs-var">fp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO History -&gt; m History
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO History -&gt; m History) -&gt; IO History -&gt; m History
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-45"></span><span>  </span><span id="local-6989586621680165756"><span class="annot"><a href="#local-6989586621680165756"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Either String History
+forall msg. Message msg =&gt; ByteString -&gt; Either String msg
+</span><span class="hs-identifier hs-var">decodeMessage</span></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; Either String History)
+-&gt; IO ByteString -&gt; IO (Either String History)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; IO ByteString
+</span><span class="hs-identifier hs-var">BS.readFile</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680165754"><span class="hs-identifier hs-var">fp</span></a></span><span>
+</span><span id="line-46"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621680165756"><span class="hs-identifier hs-type">res</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-47"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621680165760"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680165760"><span class="hs-identifier hs-var">err</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">InvalidHistoryException -&gt; IO History
+forall e a. (HasCallStack, Exception e) =&gt; e -&gt; IO a
+</span><span class="hs-identifier hs-var">throwIO</span></span><span> </span><span class="annot"><span class="annottext">(InvalidHistoryException -&gt; IO History)
+-&gt; InvalidHistoryException -&gt; IO History
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; InvalidHistoryException
+</span><a href="Temporal.Replay.html#InvalidHistoryProtobufException"><span class="hs-identifier hs-var">InvalidHistoryProtobufException</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680165760"><span class="hs-identifier hs-var">err</span></a></span><span>
+</span><span id="line-48"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621680165762"><span class="annot"><span class="annottext">History
+</span><a href="#local-6989586621680165762"><span class="hs-identifier hs-var">ok</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">History -&gt; IO History
+forall a. a -&gt; IO a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">History
+</span><a href="#local-6989586621680165762"><span class="hs-identifier hs-var">ok</span></a></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="annot"><a href="Temporal.Replay.html#writeHistoryProtobufFile"><span class="hs-identifier hs-type">writeHistoryProtobufFile</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">History</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span id="writeHistoryProtobufFile"><span class="annot"><span class="annottext">writeHistoryProtobufFile :: String -&gt; History -&gt; IO ()
+</span><a href="Temporal.Replay.html#writeHistoryProtobufFile"><span class="hs-identifier hs-var hs-var">writeHistoryProtobufFile</span></a></span></span><span> </span><span id="local-6989586621680165763"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680165763"><span class="hs-identifier hs-var">fp</span></a></span></span><span> </span><span id="local-6989586621680165764"><span class="annot"><span class="annottext">History
+</span><a href="#local-6989586621680165764"><span class="hs-identifier hs-var">hist</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; ByteString -&gt; IO ()
+</span><span class="hs-identifier hs-var">BS.writeFile</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680165763"><span class="hs-identifier hs-var">fp</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">History -&gt; ByteString
+forall msg. Message msg =&gt; msg -&gt; ByteString
+</span><span class="hs-identifier hs-var">encodeMessage</span></span><span> </span><span class="annot"><span class="annottext">History
+</span><a href="#local-6989586621680165764"><span class="hs-identifier hs-var">hist</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span></pre></body></html>

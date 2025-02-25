@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.Internal.html"><span class="hs-identifier">Temporal.SearchAttributes.Internal</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Except</span></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Coerce</span></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map.Strict</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Map</span></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Api.Common.V1.Message</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Message</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Payload.html"><span class="hs-identifier">Temporal.Payload</span></a></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html"><span class="hs-identifier">Temporal.SearchAttributes</span></a></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Unsafe.Coerce</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">unsafeCoerce</span></span><span class="hs-special">)</span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- This is only safe if Eq/Ord instances are the same results for a and b</span><span>
+</span><span id="line-14"></span><span class="annot"><a href="Temporal.SearchAttributes.Internal.html#unsafeCoerceMapKeys"><span class="hs-identifier hs-type">unsafeCoerceMapKeys</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621680167174"><span class="annot"><a href="#local-6989586621680167174"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span id="local-6989586621680167175"><span class="annot"><a href="#local-6989586621680167175"><span class="hs-identifier hs-type">b</span></a></span></span><span> </span><span id="local-6989586621680167176"><span class="annot"><a href="#local-6989586621680167176"><span class="hs-identifier hs-type">c</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Coercible</span></span><span> </span><span class="annot"><a href="#local-6989586621680167174"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167175"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map.Map</span></span><span> </span><span class="annot"><a href="#local-6989586621680167174"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167176"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map.Map</span></span><span> </span><span class="annot"><a href="#local-6989586621680167175"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167176"><span class="hs-identifier hs-type">c</span></a></span><span>
+</span><span id="line-15"></span><span id="unsafeCoerceMapKeys"><span class="annot"><span class="annottext">unsafeCoerceMapKeys :: forall a b c. Coercible a b =&gt; Map a c -&gt; Map b c
+</span><a href="Temporal.SearchAttributes.Internal.html#unsafeCoerceMapKeys"><span class="hs-identifier hs-var hs-var">unsafeCoerceMapKeys</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map a c -&gt; Map b c
+forall a b. a -&gt; b
+</span><span class="hs-identifier hs-var">unsafeCoerce</span></span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span id="local-6989586621680167182"><span class="annot"><a href="Temporal.SearchAttributes.Internal.html#rawKeys"><span class="hs-identifier hs-type">rawKeys</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map.Map</span></span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeKey"><span class="hs-identifier hs-type">SearchAttributeKey</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167182"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map.Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="#local-6989586621680167182"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-19"></span><span id="rawKeys"><span class="annot"><span class="annottext">rawKeys :: forall a. Map SearchAttributeKey a -&gt; Map Text a
+</span><a href="Temporal.SearchAttributes.Internal.html#rawKeys"><span class="hs-identifier hs-var hs-var">rawKeys</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map SearchAttributeKey a -&gt; Map Text a
+forall a b c. Coercible a b =&gt; Map a c -&gt; Map b c
+</span><a href="Temporal.SearchAttributes.Internal.html#unsafeCoerceMapKeys"><span class="hs-identifier hs-var">unsafeCoerceMapKeys</span></a></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span id="local-6989586621680167187"><span class="annot"><a href="Temporal.SearchAttributes.Internal.html#wrappedKeys"><span class="hs-identifier hs-type">wrappedKeys</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map.Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="#local-6989586621680167187"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map.Map</span></span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeKey"><span class="hs-identifier hs-type">SearchAttributeKey</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167187"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-23"></span><span id="wrappedKeys"><span class="annot"><span class="annottext">wrappedKeys :: forall a. Map Text a -&gt; Map SearchAttributeKey a
+</span><a href="Temporal.SearchAttributes.Internal.html#wrappedKeys"><span class="hs-identifier hs-var hs-var">wrappedKeys</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map Text a -&gt; Map SearchAttributeKey a
+forall a b c. Coercible a b =&gt; Map a c -&gt; Map b c
+</span><a href="Temporal.SearchAttributes.Internal.html#unsafeCoerceMapKeys"><span class="hs-identifier hs-var">unsafeCoerceMapKeys</span></a></span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="annot"><a href="Temporal.SearchAttributes.Internal.html#searchAttributesToProto"><span class="hs-identifier hs-type">searchAttributesToProto</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map.Map</span></span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeKey"><span class="hs-identifier hs-type">SearchAttributeKey</span></a></span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeType"><span class="hs-identifier hs-type">SearchAttributeType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Map.Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Message.Payload</span></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span id="searchAttributesToProto"><span class="annot"><span class="annottext">searchAttributesToProto :: Map SearchAttributeKey SearchAttributeType -&gt; IO (Map Text Payload)
+</span><a href="Temporal.SearchAttributes.Internal.html#searchAttributesToProto"><span class="hs-identifier hs-var hs-var">searchAttributesToProto</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Map SearchAttributeKey Payload -&gt; Map Text Payload)
+-&gt; IO (Map SearchAttributeKey Payload) -&gt; IO (Map Text Payload)
+forall a b. (a -&gt; b) -&gt; IO a -&gt; IO b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">Map SearchAttributeKey Payload -&gt; Map Text Payload
+forall a. Map SearchAttributeKey a -&gt; Map Text a
+</span><a href="Temporal.SearchAttributes.Internal.html#rawKeys"><span class="hs-identifier hs-var">rawKeys</span></a></span><span> </span><span class="annot"><span class="annottext">(IO (Map SearchAttributeKey Payload) -&gt; IO (Map Text Payload))
+-&gt; (Map SearchAttributeKey SearchAttributeType
+    -&gt; IO (Map SearchAttributeKey Payload))
+-&gt; Map SearchAttributeKey SearchAttributeType
+-&gt; IO (Map Text Payload)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(SearchAttributeType -&gt; IO Payload)
+-&gt; Map SearchAttributeKey SearchAttributeType
+-&gt; IO (Map SearchAttributeKey Payload)
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b)
+-&gt; Map SearchAttributeKey a -&gt; f (Map SearchAttributeKey b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Payload -&gt; Payload) -&gt; IO Payload -&gt; IO Payload
+forall a b. (a -&gt; b) -&gt; IO a -&gt; IO b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">Payload -&gt; Payload
+</span><a href="Temporal.Payload.html#convertToProtoPayload"><span class="hs-identifier hs-var">convertToProtoPayload</span></a></span><span> </span><span class="annot"><span class="annottext">(IO Payload -&gt; IO Payload)
+-&gt; (SearchAttributeType -&gt; IO Payload)
+-&gt; SearchAttributeType
+-&gt; IO Payload
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">JSON -&gt; SearchAttributeType -&gt; IO Payload
+forall fmt a. Codec fmt a =&gt; fmt -&gt; a -&gt; IO Payload
+</span><a href="Temporal.Payload.html#encode"><span class="hs-identifier hs-var">encode</span></a></span><span> </span><span class="annot"><span class="annottext">JSON
+</span><a href="Temporal.Payload.html#JSON"><span class="hs-identifier hs-var">JSON</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="annot"><a href="Temporal.SearchAttributes.Internal.html#searchAttributesFromProto"><span class="hs-identifier hs-type">searchAttributesFromProto</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map.Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Message.Payload</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Map.Map</span></span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeKey"><span class="hs-identifier hs-type">SearchAttributeKey</span></a></span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeType"><span class="hs-identifier hs-type">SearchAttributeType</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span id="searchAttributesFromProto"><span class="annot"><span class="annottext">searchAttributesFromProto :: Map Text Payload
+-&gt; IO (Either String (Map SearchAttributeKey SearchAttributeType))
+</span><a href="Temporal.SearchAttributes.Internal.html#searchAttributesFromProto"><span class="hs-identifier hs-var hs-var">searchAttributesFromProto</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Either String (Map Text SearchAttributeType)
+ -&gt; Either String (Map SearchAttributeKey SearchAttributeType))
+-&gt; IO (Either String (Map Text SearchAttributeType))
+-&gt; IO (Either String (Map SearchAttributeKey SearchAttributeType))
+forall a b. (a -&gt; b) -&gt; IO a -&gt; IO b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Map Text SearchAttributeType
+ -&gt; Map SearchAttributeKey SearchAttributeType)
+-&gt; Either String (Map Text SearchAttributeType)
+-&gt; Either String (Map SearchAttributeKey SearchAttributeType)
+forall a b. (a -&gt; b) -&gt; Either String a -&gt; Either String b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">Map Text SearchAttributeType
+-&gt; Map SearchAttributeKey SearchAttributeType
+forall a. Map Text a -&gt; Map SearchAttributeKey a
+</span><a href="Temporal.SearchAttributes.Internal.html#wrappedKeys"><span class="hs-identifier hs-var">wrappedKeys</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(IO (Either String (Map Text SearchAttributeType))
+ -&gt; IO (Either String (Map SearchAttributeKey SearchAttributeType)))
+-&gt; (Map Text Payload
+    -&gt; IO (Either String (Map Text SearchAttributeType)))
+-&gt; Map Text Payload
+-&gt; IO (Either String (Map SearchAttributeKey SearchAttributeType))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ExceptT String IO (Map Text SearchAttributeType)
+-&gt; IO (Either String (Map Text SearchAttributeType))
+forall e (m :: * -&gt; *) a. ExceptT e m a -&gt; m (Either e a)
+</span><span class="hs-identifier hs-var">runExceptT</span></span><span> </span><span class="annot"><span class="annottext">(ExceptT String IO (Map Text SearchAttributeType)
+ -&gt; IO (Either String (Map Text SearchAttributeType)))
+-&gt; (Map Text Payload
+    -&gt; ExceptT String IO (Map Text SearchAttributeType))
+-&gt; Map Text Payload
+-&gt; IO (Either String (Map Text SearchAttributeType))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Payload -&gt; ExceptT String IO SearchAttributeType)
+-&gt; Map Text Payload
+-&gt; ExceptT String IO (Map Text SearchAttributeType)
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Map Text a -&gt; f (Map Text b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IO (Either String SearchAttributeType)
+-&gt; ExceptT String IO SearchAttributeType
+forall e (m :: * -&gt; *) a. m (Either e a) -&gt; ExceptT e m a
+</span><span class="hs-identifier hs-var">ExceptT</span></span><span> </span><span class="annot"><span class="annottext">(IO (Either String SearchAttributeType)
+ -&gt; ExceptT String IO SearchAttributeType)
+-&gt; (Payload -&gt; IO (Either String SearchAttributeType))
+-&gt; Payload
+-&gt; ExceptT String IO SearchAttributeType
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">JSON -&gt; Payload -&gt; IO (Either String SearchAttributeType)
+forall fmt a. Codec fmt a =&gt; fmt -&gt; Payload -&gt; IO (Either String a)
+</span><a href="Temporal.Payload.html#decode"><span class="hs-identifier hs-var">decode</span></a></span><span> </span><span class="annot"><span class="annottext">JSON
+</span><a href="Temporal.Payload.html#JSON"><span class="hs-identifier hs-var">JSON</span></a></span><span> </span><span class="annot"><span class="annottext">(Payload -&gt; IO (Either String SearchAttributeType))
+-&gt; (Payload -&gt; Payload)
+-&gt; Payload
+-&gt; IO (Either String SearchAttributeType)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Payload -&gt; Payload
+</span><a href="Temporal.Payload.html#convertFromProtoPayload"><span class="hs-identifier hs-var">convertFromProtoPayload</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span></pre></body></html>

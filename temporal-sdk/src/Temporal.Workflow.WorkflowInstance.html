@@ -1,0 +1,23 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE ConstraintKinds #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE TypeFamilies #-}</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Workflow.WorkflowInstance.html"><span class="hs-identifier">Temporal.Workflow.WorkflowInstance</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Command</span></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html"><span class="hs-identifier">Temporal.Workflow.Types</span></a></span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="annot"><a href="Temporal.Workflow.WorkflowInstance.html#activityCancellationTypeToProto"><span class="hs-identifier hs-type">activityCancellationTypeToProto</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html#ActivityCancellationType"><span class="hs-identifier hs-type">ActivityCancellationType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Command.ActivityCancellationType</span></span><span>
+</span><span id="line-13"></span><span id="activityCancellationTypeToProto"><span class="annot"><span class="annottext">activityCancellationTypeToProto :: ActivityCancellationType -&gt; ActivityCancellationType
+</span><a href="Temporal.Workflow.WorkflowInstance.html#activityCancellationTypeToProto"><span class="hs-identifier hs-var hs-var">activityCancellationTypeToProto</span></a></span></span><span> </span><span class="annot"><span class="annottext">ActivityCancellationType
+</span><a href="Temporal.Workflow.Types.html#ActivityCancellationTryCancel"><span class="hs-identifier hs-var">ActivityCancellationTryCancel</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ActivityCancellationType
+</span><span class="hs-identifier hs-var">Command.TRY_CANCEL</span></span><span>
+</span><span id="line-14"></span><span class="annot"><a href="Temporal.Workflow.WorkflowInstance.html#activityCancellationTypeToProto"><span class="hs-identifier hs-var">activityCancellationTypeToProto</span></a></span><span> </span><span class="annot"><span class="annottext">ActivityCancellationType
+</span><a href="Temporal.Workflow.Types.html#ActivityCancellationWaitCancellationCompleted"><span class="hs-identifier hs-var">ActivityCancellationWaitCancellationCompleted</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ActivityCancellationType
+</span><span class="hs-identifier hs-var">Command.WAIT_CANCELLATION_COMPLETED</span></span><span>
+</span><span id="line-15"></span><span class="annot"><a href="Temporal.Workflow.WorkflowInstance.html#activityCancellationTypeToProto"><span class="hs-identifier hs-var">activityCancellationTypeToProto</span></a></span><span> </span><span class="annot"><span class="annottext">ActivityCancellationType
+</span><a href="Temporal.Workflow.Types.html#ActivityCancellationAbandon"><span class="hs-identifier hs-var">ActivityCancellationAbandon</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ActivityCancellationType
+</span><span class="hs-identifier hs-var">Command.ABANDON</span></span><span>
+</span><span id="line-16"></span></pre></body></html>

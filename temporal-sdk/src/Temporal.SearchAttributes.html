@@ -1,0 +1,1114 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621680165966"><span id="local-6989586621680165967"><span id="local-6989586621680165968"><span id="local-6989586621680165969"><span id="local-6989586621680165970"><span id="local-6989586621680165971"><span id="local-6989586621680165972"><span id="local-6989586621680165973"><span id="local-6989586621680165974"></span></span></span></span></span></span></span></span></span><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE DeriveLift #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-7"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}</span><span>
+</span><span id="line-8"></span><span class="hs-pragma">{-# OPTIONS_GHC -fno-warn-orphans #-}</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-pragma">{-# HLINT ignore &quot;Unused LANGUAGE pragma&quot; #-}</span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="annot"><span class="hs-comment">{- |
+Module: Temporal.SearchAttributes
+Description: Annotate Workflow Executions with key-value pairs for filtering and searching.
+
+A Search Attribute is an indexed field used in a List Filter to filter a list of Workflow Executions that have the Search Attribute in their metadata.
+
+Each Search Attribute is a key-value pair metadata object included in a Workflow Execution's Visibility information. This information is available in the Visibility store.
+
+Note: Search Attribute values are not encrypted because the Temporal Server must be able to read these values from the Visibility store when retrieving Workflow Execution details.
+
+Temporal provides some default Search Attributes, such as ExecutionStatus, the current state of your Workflow Executions. You can also create custom Search Attribute keys in your Visibility store and assign values when starting a Workflow Execution or in Workflow code.
+
+When using Continue-As-New or a Temporal Cron Job, Search Attribute keys are carried over to the new Workflow Run by default. Search Attribute values are only available for as long as the Workflow is.
+
+Search Attributes are most effective for search purposes or tasks requiring collection-based result sets. For business logic in which you need to get information about a Workflow Execution, consider one of the following:
+
+* Storing state in a local variable and exposing it with a Query.
+* Storing state in an external datastore through Activities and fetching it directly from the store.
+
+If your business logic requires high throughput or low latency, store and fetch the data through Activities. You might experience lag due to time passing between the Workflow's state change and the Activity updating the Visibility store.
+
+= Default Search Attributes
+
+A Temporal Cluster has a set of default Search Attributes already available. Default Search Attributes are set globally in any Namespace. These Search Attributes are created when the initial index is created.
+
++--------------------------+--------------+--------------------------+
+| NAME                     | TYPE         | DEFINITION               |
++==========================+==============+==========================+
+| BatcherUser              | Keyword      | Used by internal batcher |
+|                          |              | Workflow that runs in    |
+|                          |              | @TemporalBatcher@        |
+|                          |              | Namespace division to    |
+|                          |              | indicate the user who    |
+|                          |              | started the batch        |
+|                          |              | operation.               |
++--------------------------+--------------+--------------------------+
+| BinaryChecksums          | Keyword List | List of binary Ids of    |
+|                          |              | Workers that run the     |
+|                          |              | Workflow Execution.      |
+|                          |              | Deprecated since server  |
+|                          |              | version 1.21 in favor of |
+|                          |              | the @BuildIds@ search    |
+|                          |              | attribute.               |
++--------------------------+--------------+--------------------------+
+| BuildIds                 | Keyword List | List of Worker Build Ids |
+|                          |              | that have processed the  |
+|                          |              | Workflow Execution,      |
+|                          |              | formatted as             |
+|                          |              | @versioned:{BuildId}@ or |
+|                          |              | @unversioned:{BuildId}@, |
+|                          |              | or the sentinel          |
+|                          |              | @unversioned@ value.     |
+|                          |              | Available from server    |
+|                          |              | version 1.21.            |
++--------------------------+--------------+--------------------------+
+| CloseTime                | Datetime     | The time at which the    |
+|                          |              | Workflow Execution       |
+|                          |              | completed.               |
++--------------------------+--------------+--------------------------+
+| ExecutionDuration        | Int          | The time needed to run   |
+|                          |              | the Workflow Execution   |
+|                          |              | (in nanoseconds).        |
+|                          |              | Available only for       |
+|                          |              | closed Workflows.        |
++--------------------------+--------------+--------------------------+
+| ExecutionStatus          | Keyword      | The current state of the |
+|                          |              | Workflow Execution.      |
++--------------------------+--------------+--------------------------+
+| ExecutionTime            | Datetime     | The time at which the    |
+|                          |              | Workflow Execution       |
+|                          |              | actually begins running; |
+|                          |              | same as @StartTime@ for  |
+|                          |              | most cases but different |
+|                          |              | for Cron Workflows and   |
+|                          |              | retried Workflows.       |
++--------------------------+--------------+--------------------------+
+| HistoryLength            | Int          | The number of events in  |
+|                          |              | the history of Workflow  |
+|                          |              | Execution. Available     |
+|                          |              | only for closed          |
+|                          |              | Workflows.               |
++--------------------------+--------------+--------------------------+
+| HistorySizeBytes         | Long         | The size of the Event    |
+|                          |              | History.                 |
++--------------------------+--------------+--------------------------+
+| RunId                    | Keyword      | Identifies the current   |
+|                          |              | Workflow Execution Run.  |
++--------------------------+--------------+--------------------------+
+| StartTime                | Datetime     | The time at which the    |
+|                          |              | Workflow Execution       |
+|                          |              | started.                 |
++--------------------------+--------------+--------------------------+
+| StateTransitionCount     | Int          | The number of times that |
+|                          |              | Workflow Execution has   |
+|                          |              | persisted its state.     |
+|                          |              | Available only for       |
+|                          |              | closed Workflows.        |
++--------------------------+--------------+--------------------------+
+| TaskQueue                | Keyword      | Task Queue used by       |
+|                          |              | Workflow Execution.      |
++--------------------------+--------------+--------------------------+
+| TemporalChangeVersion    | Keyword List | Stores change\/version   |
+|                          |              | pairs if the GetVersion  |
+|                          |              | API is enabled.          |
++--------------------------+--------------+--------------------------+
+| Te                       | Datetime     | The time that the        |
+| mporalScheduledStartTime |              | Workflow is schedule to  |
+|                          |              | start according to the   |
+|                          |              | Schedule Spec. Can be    |
+|                          |              | manually triggered. Set  |
+|                          |              | on Schedules.            |
++--------------------------+--------------+--------------------------+
+| TemporalScheduledById    | Keyword      | The Id of the Schedule   |
+|                          |              | that started the         |
+|                          |              | Workflow.                |
++--------------------------+--------------+--------------------------+
+| TemporalSchedulePaused   | Boolean      | Indicates whether the    |
+|                          |              | Schedule has been        |
+|                          |              | paused. Set on           |
+|                          |              | Schedules.               |
++--------------------------+--------------+--------------------------+
+| WorkflowId               | Keyword      | Identifies the Workflow  |
+|                          |              | Execution.               |
++--------------------------+--------------+--------------------------+
+| WorkflowType             | Keyword      | The type of Workflow.    |
++--------------------------+--------------+--------------------------+
+-}</span></span><span>
+</span><span id="line-139"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html"><span class="hs-identifier">Temporal.SearchAttributes</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-140"></span><span>
+</span><span id="line-141"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">A</span></span><span>
+</span><span id="line-142"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Data</span></span><span>
+</span><span id="line-143"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Int</span></span><span>
+</span><span id="line-144"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Scientific</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">floatingOrInteger</span></span><span class="hs-special">)</span><span>
+</span><span id="line-145"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.String</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">IsString</span></span><span class="hs-special">)</span><span>
+</span><span id="line-146"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-147"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Time</span></span><span>
+</span><span id="line-148"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Time.Clock</span></span><span>
+</span><span id="line-149"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Vector</span></span><span class="hs-special">)</span><span>
+</span><span id="line-150"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Word</span></span><span>
+</span><span id="line-151"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.TypeLits</span></span><span>
+</span><span id="line-152"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Instances.TH.Lift</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-153"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Lift</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-154"></span><span>
+</span><span id="line-155"></span><span>
+</span><span id="line-156"></span><span class="hs-keyword">class</span><span> </span><span id="ToSearchAttribute"><span class="annot"><a href="Temporal.SearchAttributes.html#ToSearchAttribute"><span class="hs-identifier hs-var">ToSearchAttribute</span></a></span></span><span> </span><span id="local-6989586621680165793"><span class="annot"><a href="#local-6989586621680165793"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-157"></span><span>  </span><span id="toSearchAttribute"><span class="annot"><a href="Temporal.SearchAttributes.html#toSearchAttribute"><span class="hs-identifier hs-type">toSearchAttribute</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621680165793"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeType"><span class="hs-identifier hs-type">SearchAttributeType</span></a></span><span>
+</span><span id="line-158"></span><span>
+</span><span id="line-159"></span><span>
+</span><span id="line-160"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#ToSearchAttribute"><span class="hs-identifier hs-type">ToSearchAttribute</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-161"></span><span>  </span><span id="local-6989586621680165980"><span class="annot"><span class="annottext">toSearchAttribute :: Bool -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#toSearchAttribute"><span class="hs-identifier hs-var hs-var hs-var">toSearchAttribute</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#Bool"><span class="hs-identifier hs-var">Bool</span></a></span><span>
+</span><span id="line-162"></span><span>
+</span><span id="line-163"></span><span>
+</span><span id="line-164"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#ToSearchAttribute"><span class="hs-identifier hs-type">ToSearchAttribute</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">UTCTime</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-165"></span><span>  </span><span id="local-6989586621680165984"><span class="annot"><span class="annottext">toSearchAttribute :: UTCTime -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#toSearchAttribute"><span class="hs-identifier hs-var hs-var hs-var">toSearchAttribute</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UTCTime -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#Datetime"><span class="hs-identifier hs-var">Datetime</span></a></span><span>
+</span><span id="line-166"></span><span>
+</span><span id="line-167"></span><span>
+</span><span id="line-168"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#ToSearchAttribute"><span class="hs-identifier hs-type">ToSearchAttribute</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-169"></span><span>  </span><span id="local-6989586621680165988"><span class="annot"><span class="annottext">toSearchAttribute :: Double -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#toSearchAttribute"><span class="hs-identifier hs-var hs-var hs-var">toSearchAttribute</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#Double"><span class="hs-identifier hs-var">Double</span></a></span><span>
+</span><span id="line-170"></span><span>
+</span><span id="line-171"></span><span>
+</span><span id="line-172"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#ToSearchAttribute"><span class="hs-identifier hs-type">ToSearchAttribute</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Float</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-173"></span><span>  </span><span id="local-6989586621680165996"><span class="annot"><span class="annottext">toSearchAttribute :: Float -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#toSearchAttribute"><span class="hs-identifier hs-var hs-var hs-var">toSearchAttribute</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#Double"><span class="hs-identifier hs-var">Double</span></a></span><span> </span><span class="annot"><span class="annottext">(Double -&gt; SearchAttributeType)
+-&gt; (Float -&gt; Double) -&gt; Float -&gt; SearchAttributeType
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Float -&gt; Double
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span>
+</span><span id="line-174"></span><span>
+</span><span id="line-175"></span><span>
+</span><span id="line-176"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#ToSearchAttribute"><span class="hs-identifier hs-type">ToSearchAttribute</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-177"></span><span>  </span><span id="local-6989586621680166004"><span class="annot"><span class="annottext">toSearchAttribute :: Int -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#toSearchAttribute"><span class="hs-identifier hs-var hs-var hs-var">toSearchAttribute</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#Int"><span class="hs-identifier hs-var">Int</span></a></span><span> </span><span class="annot"><span class="annottext">(Int64 -&gt; SearchAttributeType)
+-&gt; (Int -&gt; Int64) -&gt; Int -&gt; SearchAttributeType
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int64
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span>
+</span><span id="line-178"></span><span>
+</span><span id="line-179"></span><span>
+</span><span id="line-180"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#ToSearchAttribute"><span class="hs-identifier hs-type">ToSearchAttribute</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int64</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-181"></span><span>  </span><span id="local-6989586621680166008"><span class="annot"><span class="annottext">toSearchAttribute :: Int64 -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#toSearchAttribute"><span class="hs-identifier hs-var hs-var hs-var">toSearchAttribute</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#Int"><span class="hs-identifier hs-var">Int</span></a></span><span>
+</span><span id="line-182"></span><span>
+</span><span id="line-183"></span><span>
+</span><span id="line-184"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#ToSearchAttribute"><span class="hs-identifier hs-type">ToSearchAttribute</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int32</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-185"></span><span>  </span><span id="local-6989586621680166014"><span class="annot"><span class="annottext">toSearchAttribute :: Int32 -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#toSearchAttribute"><span class="hs-identifier hs-var hs-var hs-var">toSearchAttribute</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#Int"><span class="hs-identifier hs-var">Int</span></a></span><span> </span><span class="annot"><span class="annottext">(Int64 -&gt; SearchAttributeType)
+-&gt; (Int32 -&gt; Int64) -&gt; Int32 -&gt; SearchAttributeType
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int32 -&gt; Int64
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span>
+</span><span id="line-186"></span><span>
+</span><span id="line-187"></span><span>
+</span><span id="line-188"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#ToSearchAttribute"><span class="hs-identifier hs-type">ToSearchAttribute</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int16</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-189"></span><span>  </span><span id="local-6989586621680166020"><span class="annot"><span class="annottext">toSearchAttribute :: Int16 -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#toSearchAttribute"><span class="hs-identifier hs-var hs-var hs-var">toSearchAttribute</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#Int"><span class="hs-identifier hs-var">Int</span></a></span><span> </span><span class="annot"><span class="annottext">(Int64 -&gt; SearchAttributeType)
+-&gt; (Int16 -&gt; Int64) -&gt; Int16 -&gt; SearchAttributeType
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int16 -&gt; Int64
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span>
+</span><span id="line-190"></span><span>
+</span><span id="line-191"></span><span>
+</span><span id="line-192"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#ToSearchAttribute"><span class="hs-identifier hs-type">ToSearchAttribute</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int8</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-193"></span><span>  </span><span id="local-6989586621680166026"><span class="annot"><span class="annottext">toSearchAttribute :: Int8 -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#toSearchAttribute"><span class="hs-identifier hs-var hs-var hs-var">toSearchAttribute</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#Int"><span class="hs-identifier hs-var">Int</span></a></span><span> </span><span class="annot"><span class="annottext">(Int64 -&gt; SearchAttributeType)
+-&gt; (Int8 -&gt; Int64) -&gt; Int8 -&gt; SearchAttributeType
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int8 -&gt; Int64
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span>
+</span><span id="line-194"></span><span>
+</span><span id="line-195"></span><span>
+</span><span id="line-196"></span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TypeError</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">'</span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Converting a Word to a search attribute can cause a signed value overflow&quot;</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#ToSearchAttribute"><span class="hs-identifier hs-type">ToSearchAttribute</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-197"></span><span>  </span><span id="local-6989586621680166032"><span class="annot"><span class="annottext">toSearchAttribute :: Word -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#toSearchAttribute"><span class="hs-identifier hs-var hs-var hs-var">toSearchAttribute</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Word -&gt; SearchAttributeType
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;Converting a Word to a search attribute can cause a signed value overflow&quot;</span></span><span>
+</span><span id="line-198"></span><span>
+</span><span id="line-199"></span><span>
+</span><span id="line-200"></span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TypeError</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">'</span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Converting a Word64 to a search attribute can cause a signed value overflow&quot;</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#ToSearchAttribute"><span class="hs-identifier hs-type">ToSearchAttribute</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word64</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-201"></span><span>  </span><span id="local-6989586621680166039"><span class="annot"><span class="annottext">toSearchAttribute :: Word64 -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#toSearchAttribute"><span class="hs-identifier hs-var hs-var hs-var">toSearchAttribute</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Word64 -&gt; SearchAttributeType
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;Converting a Word64 to a search attribute can cause a signed value overflow&quot;</span></span><span>
+</span><span id="line-202"></span><span>
+</span><span id="line-203"></span><span>
+</span><span id="line-204"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#ToSearchAttribute"><span class="hs-identifier hs-type">ToSearchAttribute</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word32</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-205"></span><span>  </span><span id="local-6989586621680166045"><span class="annot"><span class="annottext">toSearchAttribute :: Word32 -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#toSearchAttribute"><span class="hs-identifier hs-var hs-var hs-var">toSearchAttribute</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#Int"><span class="hs-identifier hs-var">Int</span></a></span><span> </span><span class="annot"><span class="annottext">(Int64 -&gt; SearchAttributeType)
+-&gt; (Word32 -&gt; Int64) -&gt; Word32 -&gt; SearchAttributeType
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; Int64
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span>
+</span><span id="line-206"></span><span>
+</span><span id="line-207"></span><span>
+</span><span id="line-208"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#ToSearchAttribute"><span class="hs-identifier hs-type">ToSearchAttribute</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word16</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-209"></span><span>  </span><span id="local-6989586621680166051"><span class="annot"><span class="annottext">toSearchAttribute :: Word16 -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#toSearchAttribute"><span class="hs-identifier hs-var hs-var hs-var">toSearchAttribute</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#Int"><span class="hs-identifier hs-var">Int</span></a></span><span> </span><span class="annot"><span class="annottext">(Int64 -&gt; SearchAttributeType)
+-&gt; (Word16 -&gt; Int64) -&gt; Word16 -&gt; SearchAttributeType
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Word16 -&gt; Int64
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span>
+</span><span id="line-210"></span><span>
+</span><span id="line-211"></span><span>
+</span><span id="line-212"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#ToSearchAttribute"><span class="hs-identifier hs-type">ToSearchAttribute</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word8</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-213"></span><span>  </span><span id="local-6989586621680166057"><span class="annot"><span class="annottext">toSearchAttribute :: Word8 -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#toSearchAttribute"><span class="hs-identifier hs-var hs-var hs-var">toSearchAttribute</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#Int"><span class="hs-identifier hs-var">Int</span></a></span><span> </span><span class="annot"><span class="annottext">(Int64 -&gt; SearchAttributeType)
+-&gt; (Word8 -&gt; Int64) -&gt; Word8 -&gt; SearchAttributeType
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Word8 -&gt; Int64
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span>
+</span><span id="line-214"></span><span>
+</span><span id="line-215"></span><span>
+</span><span id="line-216"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#ToSearchAttribute"><span class="hs-identifier hs-type">ToSearchAttribute</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-217"></span><span>  </span><span id="local-6989586621680166060"><span class="annot"><span class="annottext">toSearchAttribute :: Text -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#toSearchAttribute"><span class="hs-identifier hs-var hs-var hs-var">toSearchAttribute</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#KeywordOrText"><span class="hs-identifier hs-var">KeywordOrText</span></a></span><span>
+</span><span id="line-218"></span><span>
+</span><span id="line-219"></span><span>
+</span><span id="line-220"></span><span class="hs-keyword">newtype</span><span> </span><span id="SearchAttributeKey"><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeKey"><span class="hs-identifier hs-var">SearchAttributeKey</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="SearchAttributeKey"><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeKey"><span class="hs-identifier hs-var">SearchAttributeKey</span></a></span></span><span> </span><span class="hs-special">{</span><span id="unSearchAttributeKey"><span class="annot"><span class="annottext">SearchAttributeKey -&gt; Text
+</span><a href="Temporal.SearchAttributes.html#unSearchAttributeKey"><span class="hs-identifier hs-var hs-var">unSearchAttributeKey</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span class="hs-special">}</span><span>
+</span><span id="line-221"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680166067"><span id="local-6989586621680166071"><span id="local-6989586621680166074"><span id="local-6989586621680166076"><span id="local-6989586621680166078"><span id="local-6989586621680166084"><span id="local-6989586621680166089"><span id="local-6989586621680166092"><span id="local-6989586621680166095"><span id="local-6989586621680166098"><span id="local-6989586621680166101"><span id="local-6989586621680166104"><span id="local-6989586621680166109"><span id="local-6989586621680166114"><span class="annot"><span class="annottext">Typeable SearchAttributeKey
+Typeable SearchAttributeKey =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g)
+ -&gt; SearchAttributeKey
+ -&gt; c SearchAttributeKey)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c SearchAttributeKey)
+-&gt; (SearchAttributeKey -&gt; Constr)
+-&gt; (SearchAttributeKey -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c SearchAttributeKey))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e))
+    -&gt; Maybe (c SearchAttributeKey))
+-&gt; ((forall b. Data b =&gt; b -&gt; b)
+    -&gt; SearchAttributeKey -&gt; SearchAttributeKey)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; SearchAttributeKey -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; SearchAttributeKey -&gt; r)
+-&gt; (forall u.
+    (forall d. Data d =&gt; d -&gt; u) -&gt; SearchAttributeKey -&gt; [u])
+-&gt; (forall u.
+    Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; SearchAttributeKey -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; SearchAttributeKey -&gt; m SearchAttributeKey)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; SearchAttributeKey -&gt; m SearchAttributeKey)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; SearchAttributeKey -&gt; m SearchAttributeKey)
+-&gt; Data SearchAttributeKey
+SearchAttributeKey -&gt; Constr
+SearchAttributeKey -&gt; DataType
+(forall b. Data b =&gt; b -&gt; b)
+-&gt; SearchAttributeKey -&gt; SearchAttributeKey
+forall a.
+Typeable a =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; a -&gt; c a)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c a)
+-&gt; (a -&gt; Constr)
+-&gt; (a -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c a))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c a))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; a -&gt; a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; [u])
+-&gt; (forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; Data a
+forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; SearchAttributeKey -&gt; u
+forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; SearchAttributeKey -&gt; [u]
+forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; SearchAttributeKey -&gt; r
+forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; SearchAttributeKey -&gt; r
+forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; SearchAttributeKey -&gt; m SearchAttributeKey
+forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; SearchAttributeKey -&gt; m SearchAttributeKey
+forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c SearchAttributeKey
+forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g)
+-&gt; SearchAttributeKey
+-&gt; c SearchAttributeKey
+forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c SearchAttributeKey)
+forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c SearchAttributeKey)
+$cgfoldl :: forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g)
+-&gt; SearchAttributeKey
+-&gt; c SearchAttributeKey
+gfoldl :: forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g)
+-&gt; SearchAttributeKey
+-&gt; c SearchAttributeKey
+$cgunfold :: forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c SearchAttributeKey
+gunfold :: forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c SearchAttributeKey
+$ctoConstr :: SearchAttributeKey -&gt; Constr
+toConstr :: SearchAttributeKey -&gt; Constr
+$cdataTypeOf :: SearchAttributeKey -&gt; DataType
+dataTypeOf :: SearchAttributeKey -&gt; DataType
+$cdataCast1 :: forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c SearchAttributeKey)
+dataCast1 :: forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c SearchAttributeKey)
+$cdataCast2 :: forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c SearchAttributeKey)
+dataCast2 :: forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c SearchAttributeKey)
+$cgmapT :: (forall b. Data b =&gt; b -&gt; b)
+-&gt; SearchAttributeKey -&gt; SearchAttributeKey
+gmapT :: (forall b. Data b =&gt; b -&gt; b)
+-&gt; SearchAttributeKey -&gt; SearchAttributeKey
+$cgmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; SearchAttributeKey -&gt; r
+gmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; SearchAttributeKey -&gt; r
+$cgmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; SearchAttributeKey -&gt; r
+gmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; SearchAttributeKey -&gt; r
+$cgmapQ :: forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; SearchAttributeKey -&gt; [u]
+gmapQ :: forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; SearchAttributeKey -&gt; [u]
+$cgmapQi :: forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; SearchAttributeKey -&gt; u
+gmapQi :: forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; SearchAttributeKey -&gt; u
+$cgmapM :: forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; SearchAttributeKey -&gt; m SearchAttributeKey
+gmapM :: forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; SearchAttributeKey -&gt; m SearchAttributeKey
+$cgmapMp :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; SearchAttributeKey -&gt; m SearchAttributeKey
+gmapMp :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; SearchAttributeKey -&gt; m SearchAttributeKey
+$cgmapMo :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; SearchAttributeKey -&gt; m SearchAttributeKey
+gmapMo :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; SearchAttributeKey -&gt; m SearchAttributeKey
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680166124"><span id="local-6989586621680166130"><span id="local-6989586621680166134"><span class="annot"><span class="annottext">Int -&gt; SearchAttributeKey -&gt; ShowS
+[SearchAttributeKey] -&gt; ShowS
+SearchAttributeKey -&gt; [Char]
+(Int -&gt; SearchAttributeKey -&gt; ShowS)
+-&gt; (SearchAttributeKey -&gt; [Char])
+-&gt; ([SearchAttributeKey] -&gt; ShowS)
+-&gt; Show SearchAttributeKey
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; [Char]) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; SearchAttributeKey -&gt; ShowS
+showsPrec :: Int -&gt; SearchAttributeKey -&gt; ShowS
+$cshow :: SearchAttributeKey -&gt; [Char]
+show :: SearchAttributeKey -&gt; [Char]
+$cshowList :: [SearchAttributeKey] -&gt; ShowS
+showList :: [SearchAttributeKey] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680166139"><span id="local-6989586621680166146"><span class="annot"><span class="annottext">(forall (m :: * -&gt; *). Quote m =&gt; SearchAttributeKey -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *).
+    Quote m =&gt;
+    SearchAttributeKey -&gt; Code m SearchAttributeKey)
+-&gt; Lift SearchAttributeKey
+forall t.
+(forall (m :: * -&gt; *). Quote m =&gt; t -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *). Quote m =&gt; t -&gt; Code m t) -&gt; Lift t
+forall (m :: * -&gt; *). Quote m =&gt; SearchAttributeKey -&gt; m Exp
+forall (m :: * -&gt; *).
+Quote m =&gt;
+SearchAttributeKey -&gt; Code m SearchAttributeKey
+$clift :: forall (m :: * -&gt; *). Quote m =&gt; SearchAttributeKey -&gt; m Exp
+lift :: forall (m :: * -&gt; *). Quote m =&gt; SearchAttributeKey -&gt; m Exp
+$cliftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+SearchAttributeKey -&gt; Code m SearchAttributeKey
+liftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+SearchAttributeKey -&gt; Code m SearchAttributeKey
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Lift</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-222"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">newtype</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680166154"><span id="local-6989586621680166159"><span class="annot"><span class="annottext">SearchAttributeKey -&gt; SearchAttributeKey -&gt; Bool
+(SearchAttributeKey -&gt; SearchAttributeKey -&gt; Bool)
+-&gt; (SearchAttributeKey -&gt; SearchAttributeKey -&gt; Bool)
+-&gt; Eq SearchAttributeKey
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: SearchAttributeKey -&gt; SearchAttributeKey -&gt; Bool
+== :: SearchAttributeKey -&gt; SearchAttributeKey -&gt; Bool
+$c/= :: SearchAttributeKey -&gt; SearchAttributeKey -&gt; Bool
+/= :: SearchAttributeKey -&gt; SearchAttributeKey -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680166168"><span id="local-6989586621680166173"><span id="local-6989586621680166177"><span id="local-6989586621680166181"><span id="local-6989586621680166185"><span id="local-6989586621680166189"><span id="local-6989586621680166193"><span class="annot"><span class="annottext">Eq SearchAttributeKey
+Eq SearchAttributeKey =&gt;
+(SearchAttributeKey -&gt; SearchAttributeKey -&gt; Ordering)
+-&gt; (SearchAttributeKey -&gt; SearchAttributeKey -&gt; Bool)
+-&gt; (SearchAttributeKey -&gt; SearchAttributeKey -&gt; Bool)
+-&gt; (SearchAttributeKey -&gt; SearchAttributeKey -&gt; Bool)
+-&gt; (SearchAttributeKey -&gt; SearchAttributeKey -&gt; Bool)
+-&gt; (SearchAttributeKey -&gt; SearchAttributeKey -&gt; SearchAttributeKey)
+-&gt; (SearchAttributeKey -&gt; SearchAttributeKey -&gt; SearchAttributeKey)
+-&gt; Ord SearchAttributeKey
+SearchAttributeKey -&gt; SearchAttributeKey -&gt; Bool
+SearchAttributeKey -&gt; SearchAttributeKey -&gt; Ordering
+SearchAttributeKey -&gt; SearchAttributeKey -&gt; SearchAttributeKey
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: SearchAttributeKey -&gt; SearchAttributeKey -&gt; Ordering
+compare :: SearchAttributeKey -&gt; SearchAttributeKey -&gt; Ordering
+$c&lt; :: SearchAttributeKey -&gt; SearchAttributeKey -&gt; Bool
+&lt; :: SearchAttributeKey -&gt; SearchAttributeKey -&gt; Bool
+$c&lt;= :: SearchAttributeKey -&gt; SearchAttributeKey -&gt; Bool
+&lt;= :: SearchAttributeKey -&gt; SearchAttributeKey -&gt; Bool
+$c&gt; :: SearchAttributeKey -&gt; SearchAttributeKey -&gt; Bool
+&gt; :: SearchAttributeKey -&gt; SearchAttributeKey -&gt; Bool
+$c&gt;= :: SearchAttributeKey -&gt; SearchAttributeKey -&gt; Bool
+&gt;= :: SearchAttributeKey -&gt; SearchAttributeKey -&gt; Bool
+$cmax :: SearchAttributeKey -&gt; SearchAttributeKey -&gt; SearchAttributeKey
+max :: SearchAttributeKey -&gt; SearchAttributeKey -&gt; SearchAttributeKey
+$cmin :: SearchAttributeKey -&gt; SearchAttributeKey -&gt; SearchAttributeKey
+min :: SearchAttributeKey -&gt; SearchAttributeKey -&gt; SearchAttributeKey
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680166205"><span id="local-6989586621680166210"><span id="local-6989586621680166214"><span class="annot"><span class="annottext">Maybe SearchAttributeKey
+Value -&gt; Parser [SearchAttributeKey]
+Value -&gt; Parser SearchAttributeKey
+(Value -&gt; Parser SearchAttributeKey)
+-&gt; (Value -&gt; Parser [SearchAttributeKey])
+-&gt; Maybe SearchAttributeKey
+-&gt; FromJSON SearchAttributeKey
+forall a.
+(Value -&gt; Parser a)
+-&gt; (Value -&gt; Parser [a]) -&gt; Maybe a -&gt; FromJSON a
+$cparseJSON :: Value -&gt; Parser SearchAttributeKey
+parseJSON :: Value -&gt; Parser SearchAttributeKey
+$cparseJSONList :: Value -&gt; Parser [SearchAttributeKey]
+parseJSONList :: Value -&gt; Parser [SearchAttributeKey]
+$comittedField :: Maybe SearchAttributeKey
+omittedField :: Maybe SearchAttributeKey
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">A.FromJSON</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680166223"><span id="local-6989586621680166228"><span class="annot"><span class="annottext">FromJSONKeyFunction [SearchAttributeKey]
+FromJSONKeyFunction SearchAttributeKey
+FromJSONKeyFunction SearchAttributeKey
+-&gt; FromJSONKeyFunction [SearchAttributeKey]
+-&gt; FromJSONKey SearchAttributeKey
+forall a.
+FromJSONKeyFunction a -&gt; FromJSONKeyFunction [a] -&gt; FromJSONKey a
+$cfromJSONKey :: FromJSONKeyFunction SearchAttributeKey
+fromJSONKey :: FromJSONKeyFunction SearchAttributeKey
+$cfromJSONKeyList :: FromJSONKeyFunction [SearchAttributeKey]
+fromJSONKeyList :: FromJSONKeyFunction [SearchAttributeKey]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">A.FromJSONKey</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680166236"><span id="local-6989586621680166241"><span id="local-6989586621680166245"><span id="local-6989586621680166249"><span id="local-6989586621680166253"><span class="annot"><span class="annottext">[SearchAttributeKey] -&gt; Value
+[SearchAttributeKey] -&gt; Encoding
+SearchAttributeKey -&gt; Bool
+SearchAttributeKey -&gt; Value
+SearchAttributeKey -&gt; Encoding
+(SearchAttributeKey -&gt; Value)
+-&gt; (SearchAttributeKey -&gt; Encoding)
+-&gt; ([SearchAttributeKey] -&gt; Value)
+-&gt; ([SearchAttributeKey] -&gt; Encoding)
+-&gt; (SearchAttributeKey -&gt; Bool)
+-&gt; ToJSON SearchAttributeKey
+forall a.
+(a -&gt; Value)
+-&gt; (a -&gt; Encoding)
+-&gt; ([a] -&gt; Value)
+-&gt; ([a] -&gt; Encoding)
+-&gt; (a -&gt; Bool)
+-&gt; ToJSON a
+$ctoJSON :: SearchAttributeKey -&gt; Value
+toJSON :: SearchAttributeKey -&gt; Value
+$ctoEncoding :: SearchAttributeKey -&gt; Encoding
+toEncoding :: SearchAttributeKey -&gt; Encoding
+$ctoJSONList :: [SearchAttributeKey] -&gt; Value
+toJSONList :: [SearchAttributeKey] -&gt; Value
+$ctoEncodingList :: [SearchAttributeKey] -&gt; Encoding
+toEncodingList :: [SearchAttributeKey] -&gt; Encoding
+$comitField :: SearchAttributeKey -&gt; Bool
+omitField :: SearchAttributeKey -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">A.ToJSON</span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680166264"><span id="local-6989586621680166269"><span class="annot"><span class="annottext">ToJSONKeyFunction [SearchAttributeKey]
+ToJSONKeyFunction SearchAttributeKey
+ToJSONKeyFunction SearchAttributeKey
+-&gt; ToJSONKeyFunction [SearchAttributeKey]
+-&gt; ToJSONKey SearchAttributeKey
+forall a.
+ToJSONKeyFunction a -&gt; ToJSONKeyFunction [a] -&gt; ToJSONKey a
+$ctoJSONKey :: ToJSONKeyFunction SearchAttributeKey
+toJSONKey :: ToJSONKeyFunction SearchAttributeKey
+$ctoJSONKeyList :: ToJSONKeyFunction [SearchAttributeKey]
+toJSONKeyList :: ToJSONKeyFunction [SearchAttributeKey]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">A.ToJSONKey</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680166277"><span class="annot"><span class="annottext">[Char] -&gt; SearchAttributeKey
+([Char] -&gt; SearchAttributeKey) -&gt; IsString SearchAttributeKey
+forall a. ([Char] -&gt; a) -&gt; IsString a
+$cfromString :: [Char] -&gt; SearchAttributeKey
+fromString :: [Char] -&gt; SearchAttributeKey
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">IsString</span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-223"></span><span>
+</span><span id="line-224"></span><span>
+</span><span id="line-225"></span><span class="annot"><span class="hs-comment">{- | A search attribute is a key-value pair that can be used to filter workflows.
+
+Search attributes are indexed by the Temporal server
+
+See &lt;https://docs.temporal.io/visibility#types&gt; for more information about search attributes.
+-}</span></span><span>
+</span><span id="line-231"></span><span class="hs-keyword">data</span><span> </span><span id="SearchAttributeType"><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeType"><span class="hs-identifier hs-var">SearchAttributeType</span></a></span></span><span>
+</span><span id="line-232"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="Bool"><span class="annot"><a href="Temporal.SearchAttributes.html#Bool"><span class="hs-identifier hs-var">Bool</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-233"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Datetime"><span class="annot"><a href="Temporal.SearchAttributes.html#Datetime"><span class="hs-identifier hs-var">Datetime</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">UTCTime</span></span><span>
+</span><span id="line-234"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Double"><span class="annot"><a href="Temporal.SearchAttributes.html#Double"><span class="hs-identifier hs-var">Double</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
+</span><span id="line-235"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Int"><span class="annot"><a href="Temporal.SearchAttributes.html#Int"><span class="hs-identifier hs-var">Int</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int64</span></span><span>
+</span><span id="line-236"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="hs-comment">-- | Keyword and Text types are concepts taken from Elasticsearch.</span><span>
+</span><span id="line-237"></span><span>    </span><span class="hs-comment">-- Each word in a Text is considered a searchable keyword.</span><span>
+</span><span id="line-238"></span><span>    </span><span class="hs-comment">-- For a UUID, that can be problematic because Elasticsearch</span><span>
+</span><span id="line-239"></span><span>    </span><span class="hs-comment">-- indexes each portion of the UUID separately. To have the whole string</span><span>
+</span><span id="line-240"></span><span>    </span><span class="hs-comment">-- considered as a searchable keyword, use the Keyword type.</span><span>
+</span><span id="line-241"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-242"></span><span>    </span><span class="hs-comment">-- For example, if the key ProductId has the value of 2dd29ab7-2dd8-4668-83e0-89cae261cfb1:</span><span>
+</span><span id="line-243"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-244"></span><span>    </span><span class="hs-comment">-- - As a Keyword it would be matched only by ProductId = &quot;2dd29ab7-2dd8-4668-83e0-89cae261cfb1&quot;</span><span>
+</span><span id="line-245"></span><span>    </span><span class="hs-comment">-- - As a Text it would be matched by ProductId = 2dd8, which could cause unwanted matches.</span><span>
+</span><span id="line-246"></span><span>    </span><span id="KeywordOrText"><span class="annot"><a href="Temporal.SearchAttributes.html#KeywordOrText"><span class="hs-identifier hs-var">KeywordOrText</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-247"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="KeywordList"><span class="annot"><a href="Temporal.SearchAttributes.html#KeywordList"><span class="hs-identifier hs-var">KeywordList</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-248"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680166285"><span id="local-6989586621680166304"><span id="local-6989586621680166308"><span class="annot"><span class="annottext">Int -&gt; SearchAttributeType -&gt; ShowS
+[SearchAttributeType] -&gt; ShowS
+SearchAttributeType -&gt; [Char]
+(Int -&gt; SearchAttributeType -&gt; ShowS)
+-&gt; (SearchAttributeType -&gt; [Char])
+-&gt; ([SearchAttributeType] -&gt; ShowS)
+-&gt; Show SearchAttributeType
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; [Char]) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; SearchAttributeType -&gt; ShowS
+showsPrec :: Int -&gt; SearchAttributeType -&gt; ShowS
+$cshow :: SearchAttributeType -&gt; [Char]
+show :: SearchAttributeType -&gt; [Char]
+$cshowList :: [SearchAttributeType] -&gt; ShowS
+showList :: [SearchAttributeType] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680166311"><span id="local-6989586621680166327"><span class="annot"><span class="annottext">SearchAttributeType -&gt; SearchAttributeType -&gt; Bool
+(SearchAttributeType -&gt; SearchAttributeType -&gt; Bool)
+-&gt; (SearchAttributeType -&gt; SearchAttributeType -&gt; Bool)
+-&gt; Eq SearchAttributeType
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: SearchAttributeType -&gt; SearchAttributeType -&gt; Bool
+== :: SearchAttributeType -&gt; SearchAttributeType -&gt; Bool
+$c/= :: SearchAttributeType -&gt; SearchAttributeType -&gt; Bool
+/= :: SearchAttributeType -&gt; SearchAttributeType -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680166333"><span id="local-6989586621680166348"><span id="local-6989586621680166352"><span id="local-6989586621680166355"><span id="local-6989586621680166358"><span id="local-6989586621680166361"><span id="local-6989586621680166364"><span class="annot"><span class="annottext">Eq SearchAttributeType
+Eq SearchAttributeType =&gt;
+(SearchAttributeType -&gt; SearchAttributeType -&gt; Ordering)
+-&gt; (SearchAttributeType -&gt; SearchAttributeType -&gt; Bool)
+-&gt; (SearchAttributeType -&gt; SearchAttributeType -&gt; Bool)
+-&gt; (SearchAttributeType -&gt; SearchAttributeType -&gt; Bool)
+-&gt; (SearchAttributeType -&gt; SearchAttributeType -&gt; Bool)
+-&gt; (SearchAttributeType
+    -&gt; SearchAttributeType -&gt; SearchAttributeType)
+-&gt; (SearchAttributeType
+    -&gt; SearchAttributeType -&gt; SearchAttributeType)
+-&gt; Ord SearchAttributeType
+SearchAttributeType -&gt; SearchAttributeType -&gt; Bool
+SearchAttributeType -&gt; SearchAttributeType -&gt; Ordering
+SearchAttributeType -&gt; SearchAttributeType -&gt; SearchAttributeType
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: SearchAttributeType -&gt; SearchAttributeType -&gt; Ordering
+compare :: SearchAttributeType -&gt; SearchAttributeType -&gt; Ordering
+$c&lt; :: SearchAttributeType -&gt; SearchAttributeType -&gt; Bool
+&lt; :: SearchAttributeType -&gt; SearchAttributeType -&gt; Bool
+$c&lt;= :: SearchAttributeType -&gt; SearchAttributeType -&gt; Bool
+&lt;= :: SearchAttributeType -&gt; SearchAttributeType -&gt; Bool
+$c&gt; :: SearchAttributeType -&gt; SearchAttributeType -&gt; Bool
+&gt; :: SearchAttributeType -&gt; SearchAttributeType -&gt; Bool
+$c&gt;= :: SearchAttributeType -&gt; SearchAttributeType -&gt; Bool
+&gt;= :: SearchAttributeType -&gt; SearchAttributeType -&gt; Bool
+$cmax :: SearchAttributeType -&gt; SearchAttributeType -&gt; SearchAttributeType
+max :: SearchAttributeType -&gt; SearchAttributeType -&gt; SearchAttributeType
+$cmin :: SearchAttributeType -&gt; SearchAttributeType -&gt; SearchAttributeType
+min :: SearchAttributeType -&gt; SearchAttributeType -&gt; SearchAttributeType
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680166367"><span id="local-6989586621680166393"><span class="annot"><span class="annottext">(forall (m :: * -&gt; *). Quote m =&gt; SearchAttributeType -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *).
+    Quote m =&gt;
+    SearchAttributeType -&gt; Code m SearchAttributeType)
+-&gt; Lift SearchAttributeType
+forall t.
+(forall (m :: * -&gt; *). Quote m =&gt; t -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *). Quote m =&gt; t -&gt; Code m t) -&gt; Lift t
+forall (m :: * -&gt; *). Quote m =&gt; SearchAttributeType -&gt; m Exp
+forall (m :: * -&gt; *).
+Quote m =&gt;
+SearchAttributeType -&gt; Code m SearchAttributeType
+$clift :: forall (m :: * -&gt; *). Quote m =&gt; SearchAttributeType -&gt; m Exp
+lift :: forall (m :: * -&gt; *). Quote m =&gt; SearchAttributeType -&gt; m Exp
+$cliftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+SearchAttributeType -&gt; Code m SearchAttributeType
+liftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+SearchAttributeType -&gt; Code m SearchAttributeType
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Lift</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680166417"><span id="local-6989586621680166430"><span id="local-6989586621680166438"><span id="local-6989586621680166440"><span id="local-6989586621680166442"><span id="local-6989586621680166448"><span id="local-6989586621680166453"><span id="local-6989586621680166456"><span id="local-6989586621680166459"><span id="local-6989586621680166462"><span id="local-6989586621680166465"><span id="local-6989586621680166468"><span id="local-6989586621680166473"><span id="local-6989586621680166478"><span class="annot"><span class="annottext">Typeable SearchAttributeType
+Typeable SearchAttributeType =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g)
+ -&gt; SearchAttributeType
+ -&gt; c SearchAttributeType)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c SearchAttributeType)
+-&gt; (SearchAttributeType -&gt; Constr)
+-&gt; (SearchAttributeType -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c SearchAttributeType))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e))
+    -&gt; Maybe (c SearchAttributeType))
+-&gt; ((forall b. Data b =&gt; b -&gt; b)
+    -&gt; SearchAttributeType -&gt; SearchAttributeType)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; SearchAttributeType -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; SearchAttributeType -&gt; r)
+-&gt; (forall u.
+    (forall d. Data d =&gt; d -&gt; u) -&gt; SearchAttributeType -&gt; [u])
+-&gt; (forall u.
+    Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; SearchAttributeType -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; SearchAttributeType -&gt; m SearchAttributeType)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; SearchAttributeType -&gt; m SearchAttributeType)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; SearchAttributeType -&gt; m SearchAttributeType)
+-&gt; Data SearchAttributeType
+SearchAttributeType -&gt; Constr
+SearchAttributeType -&gt; DataType
+(forall b. Data b =&gt; b -&gt; b)
+-&gt; SearchAttributeType -&gt; SearchAttributeType
+forall a.
+Typeable a =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; a -&gt; c a)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c a)
+-&gt; (a -&gt; Constr)
+-&gt; (a -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c a))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c a))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; a -&gt; a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; [u])
+-&gt; (forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; Data a
+forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; SearchAttributeType -&gt; u
+forall u.
+(forall d. Data d =&gt; d -&gt; u) -&gt; SearchAttributeType -&gt; [u]
+forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; SearchAttributeType -&gt; r
+forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; SearchAttributeType -&gt; r
+forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; SearchAttributeType -&gt; m SearchAttributeType
+forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; SearchAttributeType -&gt; m SearchAttributeType
+forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c SearchAttributeType
+forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g)
+-&gt; SearchAttributeType
+-&gt; c SearchAttributeType
+forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c SearchAttributeType)
+forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c SearchAttributeType)
+$cgfoldl :: forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g)
+-&gt; SearchAttributeType
+-&gt; c SearchAttributeType
+gfoldl :: forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g)
+-&gt; SearchAttributeType
+-&gt; c SearchAttributeType
+$cgunfold :: forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c SearchAttributeType
+gunfold :: forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c SearchAttributeType
+$ctoConstr :: SearchAttributeType -&gt; Constr
+toConstr :: SearchAttributeType -&gt; Constr
+$cdataTypeOf :: SearchAttributeType -&gt; DataType
+dataTypeOf :: SearchAttributeType -&gt; DataType
+$cdataCast1 :: forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c SearchAttributeType)
+dataCast1 :: forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c SearchAttributeType)
+$cdataCast2 :: forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c SearchAttributeType)
+dataCast2 :: forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c SearchAttributeType)
+$cgmapT :: (forall b. Data b =&gt; b -&gt; b)
+-&gt; SearchAttributeType -&gt; SearchAttributeType
+gmapT :: (forall b. Data b =&gt; b -&gt; b)
+-&gt; SearchAttributeType -&gt; SearchAttributeType
+$cgmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; SearchAttributeType -&gt; r
+gmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; SearchAttributeType -&gt; r
+$cgmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; SearchAttributeType -&gt; r
+gmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; SearchAttributeType -&gt; r
+$cgmapQ :: forall u.
+(forall d. Data d =&gt; d -&gt; u) -&gt; SearchAttributeType -&gt; [u]
+gmapQ :: forall u.
+(forall d. Data d =&gt; d -&gt; u) -&gt; SearchAttributeType -&gt; [u]
+$cgmapQi :: forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; SearchAttributeType -&gt; u
+gmapQi :: forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; SearchAttributeType -&gt; u
+$cgmapM :: forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; SearchAttributeType -&gt; m SearchAttributeType
+gmapM :: forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; SearchAttributeType -&gt; m SearchAttributeType
+$cgmapMp :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; SearchAttributeType -&gt; m SearchAttributeType
+gmapMp :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; SearchAttributeType -&gt; m SearchAttributeType
+$cgmapMo :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; SearchAttributeType -&gt; m SearchAttributeType
+gmapMo :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; SearchAttributeType -&gt; m SearchAttributeType
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span class="hs-cpp">
+
+#if MIN_VERSION_time(1,14,0)
+</span><span class="hs-cpp">#else
+</span><span id="local-6989586621680166483"><span id="local-6989586621680166493"><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Lift</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">UTCTime</span></span></span></span><span>
+</span><span id="line-253"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Lift</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DiffTime</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-254"></span><span>  </span><span id="local-6989586621680166511"><span class="annot"><span class="annottext">lift :: forall (m :: * -&gt; *). Quote m =&gt; DiffTime -&gt; m Exp
+</span><span class="hs-identifier hs-var hs-var hs-var">lift</span></span></span><span> </span><span id="local-6989586621680166512"><span class="annot"><span class="annottext">DiffTime
+</span><a href="#local-6989586621680166512"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680166513"><span class="annot"><span class="annottext">t' :: Rational
+</span><a href="#local-6989586621680166513"><span class="hs-identifier hs-var hs-var">t'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DiffTime -&gt; Rational
+forall a. Real a =&gt; a -&gt; Rational
+</span><span class="hs-identifier hs-var">toRational</span></span><span> </span><span class="annot"><span class="annottext">DiffTime
+</span><a href="#local-6989586621680166512"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">[|</span><span> </span><span class="annot"><span class="hs-identifier hs-type">fromRational</span></span><span> </span><span class="annot"><a href="#local-6989586621680166513"><span class="hs-identifier hs-type">t'</span></a></span><span> </span><span class="hs-special">|]</span><span>
+</span><span id="line-255"></span><span>  </span><span id="local-6989586621680166521"><span class="annot"><span class="annottext">liftTyped :: forall (m :: * -&gt; *). Quote m =&gt; DiffTime -&gt; Code m DiffTime
+</span><span class="hs-identifier hs-var hs-var hs-var">liftTyped</span></span></span><span> </span><span id="local-6989586621680166522"><span class="annot"><span class="annottext">DiffTime
+</span><a href="#local-6989586621680166522"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680166523"><span class="annot"><span class="annottext">t' :: Rational
+</span><a href="#local-6989586621680166523"><span class="hs-identifier hs-var hs-var">t'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DiffTime -&gt; Rational
+forall a. Real a =&gt; a -&gt; Rational
+</span><span class="hs-identifier hs-var">toRational</span></span><span> </span><span class="annot"><span class="annottext">DiffTime
+</span><a href="#local-6989586621680166522"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">[||</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; a
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621680166523"><span class="hs-identifier hs-var">t'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DiffTime</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">||]</span><span>
+</span><span id="line-256"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Lift</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NominalDiffTime</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-257"></span><span>  </span><span id="local-6989586621680166534"><span class="annot"><span class="annottext">lift :: forall (m :: * -&gt; *). Quote m =&gt; NominalDiffTime -&gt; m Exp
+</span><span class="hs-identifier hs-var hs-var hs-var">lift</span></span></span><span> </span><span id="local-6989586621680166535"><span class="annot"><span class="annottext">NominalDiffTime
+</span><a href="#local-6989586621680166535"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680166536"><span class="annot"><span class="annottext">t' :: Rational
+</span><a href="#local-6989586621680166536"><span class="hs-identifier hs-var hs-var">t'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NominalDiffTime -&gt; Rational
+forall a. Real a =&gt; a -&gt; Rational
+</span><span class="hs-identifier hs-var">toRational</span></span><span> </span><span class="annot"><span class="annottext">NominalDiffTime
+</span><a href="#local-6989586621680166535"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">[|</span><span> </span><span class="annot"><span class="hs-identifier hs-type">fromRational</span></span><span> </span><span class="annot"><a href="#local-6989586621680166536"><span class="hs-identifier hs-type">t'</span></a></span><span> </span><span class="hs-special">|]</span><span>
+</span><span id="line-258"></span><span>  </span><span id="local-6989586621680166544"><span class="annot"><span class="annottext">liftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+NominalDiffTime -&gt; Code m NominalDiffTime
+</span><span class="hs-identifier hs-var hs-var hs-var">liftTyped</span></span></span><span> </span><span id="local-6989586621680166545"><span class="annot"><span class="annottext">NominalDiffTime
+</span><a href="#local-6989586621680166545"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680166546"><span class="annot"><span class="annottext">t' :: Rational
+</span><a href="#local-6989586621680166546"><span class="hs-identifier hs-var hs-var">t'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NominalDiffTime -&gt; Rational
+forall a. Real a =&gt; a -&gt; Rational
+</span><span class="hs-identifier hs-var">toRational</span></span><span> </span><span class="annot"><span class="annottext">NominalDiffTime
+</span><a href="#local-6989586621680166545"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">[||</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; a
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621680166546"><span class="hs-identifier hs-var">t'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NominalDiffTime</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">||]</span><span>
+</span><span id="line-259"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Lift</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Day</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-260"></span><span>  </span><span id="local-6989586621680166554"><span class="annot"><span class="annottext">lift :: forall (m :: * -&gt; *). Quote m =&gt; Day -&gt; m Exp
+</span><span class="hs-identifier hs-var hs-var hs-var">lift</span></span></span><span> </span><span id="local-6989586621680166555"><span class="annot"><span class="annottext">Day
+</span><a href="#local-6989586621680166555"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680166556"><span class="annot"><span class="annottext">t' :: Integer
+</span><a href="#local-6989586621680166556"><span class="hs-identifier hs-var hs-var">t'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Day -&gt; Integer
+</span><span class="hs-identifier hs-var">toModifiedJulianDay</span></span><span> </span><span class="annot"><span class="annottext">Day
+</span><a href="#local-6989586621680166555"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">[|</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ModifiedJulianDay</span></span><span> </span><span class="annot"><a href="#local-6989586621680166556"><span class="hs-identifier hs-type">t'</span></a></span><span> </span><span class="hs-special">|]</span><span>
+</span><span id="line-261"></span><span>  </span><span id="local-6989586621680166562"><span class="annot"><span class="annottext">liftTyped :: forall (m :: * -&gt; *). Quote m =&gt; Day -&gt; Code m Day
+</span><span class="hs-identifier hs-var hs-var hs-var">liftTyped</span></span></span><span> </span><span id="local-6989586621680166563"><span class="annot"><span class="annottext">Day
+</span><a href="#local-6989586621680166563"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680166564"><span class="annot"><span class="annottext">t' :: Integer
+</span><a href="#local-6989586621680166564"><span class="hs-identifier hs-var hs-var">t'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Day -&gt; Integer
+</span><span class="hs-identifier hs-var">toModifiedJulianDay</span></span><span> </span><span class="annot"><span class="annottext">Day
+</span><a href="#local-6989586621680166563"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">[||</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Day
+</span><span class="hs-identifier hs-var">ModifiedJulianDay</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621680166564"><span class="hs-identifier hs-var">t'</span></a></span><span> </span><span class="hs-special">||]</span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-264"></span><span>
+</span><span id="line-265"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680166567"><span id="local-6989586621680166571"><span id="local-6989586621680166574"><span id="local-6989586621680166577"><span class="annot"><span class="hs-identifier hs-type">A.ToJSON</span></span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeType"><span class="hs-identifier hs-type">SearchAttributeType</span></a></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-266"></span><span>  </span><span id="local-6989586621680166590"><span class="annot"><span class="annottext">toJSON :: SearchAttributeType -&gt; Value
+</span><span class="hs-identifier hs-var hs-var hs-var">toJSON</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.SearchAttributes.html#Bool"><span class="hs-identifier hs-type">Bool</span></a></span><span> </span><span id="local-6989586621680166591"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621680166591"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Value
+forall a. ToJSON a =&gt; a -&gt; Value
+</span><span class="hs-identifier hs-var">A.toJSON</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621680166591"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-267"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.SearchAttributes.html#Datetime"><span class="hs-identifier hs-type">Datetime</span></a></span><span> </span><span id="local-6989586621680166592"><span class="annot"><span class="annottext">UTCTime
+</span><a href="#local-6989586621680166592"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UTCTime -&gt; Value
+forall a. ToJSON a =&gt; a -&gt; Value
+</span><span class="hs-identifier hs-var">A.toJSON</span></span><span> </span><span class="annot"><span class="annottext">UTCTime
+</span><a href="#local-6989586621680166592"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-268"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.SearchAttributes.html#Double"><span class="hs-identifier hs-type">Double</span></a></span><span> </span><span id="local-6989586621680166593"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621680166593"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Value
+forall a. ToJSON a =&gt; a -&gt; Value
+</span><span class="hs-identifier hs-var">A.toJSON</span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621680166593"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-269"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.SearchAttributes.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span> </span><span id="local-6989586621680166594"><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680166594"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Value
+forall a. ToJSON a =&gt; a -&gt; Value
+</span><span class="hs-identifier hs-var">A.toJSON</span></span><span> </span><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680166594"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-270"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.SearchAttributes.html#KeywordOrText"><span class="hs-identifier hs-type">KeywordOrText</span></a></span><span> </span><span id="local-6989586621680166595"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621680166595"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; Value
+forall a. ToJSON a =&gt; a -&gt; Value
+</span><span class="hs-identifier hs-var">A.toJSON</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621680166595"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-271"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.SearchAttributes.html#KeywordList"><span class="hs-identifier hs-type">KeywordList</span></a></span><span> </span><span id="local-6989586621680166596"><span class="annot"><span class="annottext">Vector Text
+</span><a href="#local-6989586621680166596"><span class="hs-identifier hs-var">ts</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector Text -&gt; Value
+forall a. ToJSON a =&gt; a -&gt; Value
+</span><span class="hs-identifier hs-var">A.toJSON</span></span><span> </span><span class="annot"><span class="annottext">Vector Text
+</span><a href="#local-6989586621680166596"><span class="hs-identifier hs-var">ts</span></a></span><span>
+</span><span id="line-272"></span><span>
+</span><span id="line-273"></span><span>
+</span><span id="line-274"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680166599"><span id="local-6989586621680166603"><span class="annot"><span class="hs-identifier hs-type">A.FromJSON</span></span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeType"><span class="hs-identifier hs-type">SearchAttributeType</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-275"></span><span>  </span><span id="local-6989586621680166623"><span class="annot"><span class="annottext">parseJSON :: Value -&gt; Parser SearchAttributeType
+</span><span class="hs-identifier hs-var hs-var hs-var">parseJSON</span></span></span><span> </span><span id="local-6989586621680166624"><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621680166624"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621680166624"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-276"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">A.Bool</span></span><span> </span><span id="local-6989586621680166626"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621680166626"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">SearchAttributeType -&gt; Parser SearchAttributeType
+forall a. a -&gt; Parser a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(SearchAttributeType -&gt; Parser SearchAttributeType)
+-&gt; SearchAttributeType -&gt; Parser SearchAttributeType
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#Bool"><span class="hs-identifier hs-var">Bool</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621680166626"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-277"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">A.String</span></span><span> </span><span id="local-6989586621680166628"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621680166628"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">SearchAttributeType -&gt; Parser SearchAttributeType
+forall a. a -&gt; Parser a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(SearchAttributeType -&gt; Parser SearchAttributeType)
+-&gt; SearchAttributeType -&gt; Parser SearchAttributeType
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#KeywordOrText"><span class="hs-identifier hs-var">KeywordOrText</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621680166628"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-278"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">A.Number</span></span><span> </span><span id="local-6989586621680166630"><span class="annot"><span class="annottext">Scientific
+</span><a href="#local-6989586621680166630"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Scientific -&gt; Either Double Int64
+forall r i. (RealFloat r, Integral i) =&gt; Scientific -&gt; Either r i
+</span><span class="hs-identifier hs-var">floatingOrInteger</span></span><span> </span><span class="annot"><span class="annottext">Scientific
+</span><a href="#local-6989586621680166630"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-279"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621680166631"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621680166631"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">SearchAttributeType -&gt; Parser SearchAttributeType
+forall a. a -&gt; Parser a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(SearchAttributeType -&gt; Parser SearchAttributeType)
+-&gt; SearchAttributeType -&gt; Parser SearchAttributeType
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#Double"><span class="hs-identifier hs-var">Double</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621680166631"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-280"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621680166632"><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680166632"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">SearchAttributeType -&gt; Parser SearchAttributeType
+forall a. a -&gt; Parser a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(SearchAttributeType -&gt; Parser SearchAttributeType)
+-&gt; SearchAttributeType -&gt; Parser SearchAttributeType
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#Int"><span class="hs-identifier hs-var">Int</span></a></span><span> </span><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621680166632"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-281"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">A.Array</span></span><span> </span><span id="local-6989586621680166634"><span class="annot"><span class="annottext">Array
+</span><a href="#local-6989586621680166634"><span class="hs-identifier hs-var">arr</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Vector Text -&gt; SearchAttributeType
+</span><a href="Temporal.SearchAttributes.html#KeywordList"><span class="hs-identifier hs-var">KeywordList</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector Text -&gt; SearchAttributeType)
+-&gt; Parser (Vector Text) -&gt; Parser SearchAttributeType
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(Value -&gt; Parser Text) -&gt; Array -&gt; Parser (Vector Text)
+forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Traversable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m (t b)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Vector a -&gt; m (Vector b)
+</span><span class="hs-identifier hs-var">mapM</span></span><span> </span><span class="annot"><span class="annottext">Value -&gt; Parser Text
+forall a. FromJSON a =&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">A.parseJSON</span></span><span> </span><span class="annot"><span class="annottext">Array
+</span><a href="#local-6989586621680166634"><span class="hs-identifier hs-var">arr</span></a></span><span>
+</span><span id="line-282"></span><span>    </span><span class="annot"><span class="annottext">Value
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Parser SearchAttributeType
+forall a. [Char] -&gt; Parser a
+forall (m :: * -&gt; *) a. MonadFail m =&gt; [Char] -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;Invalid search attribute type&quot;</span></span><span>
+</span><span id="line-283"></span></pre></body></html>

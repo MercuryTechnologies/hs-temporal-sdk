@@ -1,0 +1,1132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE ConstraintKinds #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DuplicateRecordFields #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE FlexibleInstances #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Activity.Worker.html"><span class="hs-identifier">Temporal.Activity.Worker</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Exception.Annotated</span></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Logger</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Reader</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bifunctor</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.HashMap.Strict</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">HashMap</span></span><span class="hs-special">)</span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.HashMap.Strict</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">HashMap</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Lens.Family2</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Api.Common.V1.Message_Fields</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">P</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Api.Failure.V1.Message_Fields</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">AR</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">AT</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">AT</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Sdk.Core.CoreInterface_Fields</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">C</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Activity.Definition.html"><span class="hs-identifier">Temporal.Activity.Definition</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html"><span class="hs-identifier">Temporal.Activity.Types</span></a></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Common.html"><span class="hs-identifier">Temporal.Common</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Common.Async.html"><span class="hs-identifier">Temporal.Common.Async</span></a></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Temporal.Core.Worker</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Core</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Duration.html"><span class="hs-identifier">Temporal.Duration</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Duration.html#durationFromProto"><span class="hs-identifier">durationFromProto</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Exception.html"><span class="hs-identifier">Temporal.Exception</span></a></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Interceptor.html"><span class="hs-identifier">Temporal.Interceptor</span></a></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Payload.html"><span class="hs-identifier">Temporal.Payload</span></a></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">UnliftIO</span></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">UnliftIO.Concurrent</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">threadDelay</span></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">data</span><span> </span><span id="ActivityWorker"><span class="annot"><a href="Temporal.Activity.Worker.html#ActivityWorker"><span class="hs-identifier hs-var">ActivityWorker</span></a></span></span><span> </span><span id="local-6989586621680174441"><span class="annot"><a href="#local-6989586621680174441"><span class="hs-identifier hs-type">env</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ActivityWorker"><span class="annot"><a href="Temporal.Activity.Worker.html#ActivityWorker"><span class="hs-identifier hs-var">ActivityWorker</span></a></span></span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="activityEnv"><span class="annot"><span class="annottext">forall env. ActivityWorker env -&gt; IORef env
+</span><a href="Temporal.Activity.Worker.html#activityEnv"><span class="hs-identifier hs-var hs-var">activityEnv</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IORef</span></span><span> </span><span class="annot"><a href="#local-6989586621680174441"><span class="hs-identifier hs-type">env</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="definitions"><span class="annot"><span class="annottext">forall env.
+ActivityWorker env -&gt; HashMap Text (ActivityDefinition env)
+</span><a href="Temporal.Activity.Worker.html#definitions"><span class="hs-identifier hs-var hs-var">definitions</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HashMap</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Activity.Definition.html#ActivityDefinition"><span class="hs-identifier hs-type">ActivityDefinition</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174441"><span class="hs-identifier hs-type">env</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="runningActivities"><span class="annot"><span class="annottext">forall env.
+ActivityWorker env -&gt; TVar (HashMap TaskToken (Async ()))
+</span><a href="Temporal.Activity.Worker.html#runningActivities"><span class="hs-identifier hs-var hs-var">runningActivities</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TVar</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HashMap</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#TaskToken"><span class="hs-identifier hs-type">TaskToken</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Async</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="workerCore"><span class="annot"><span class="annottext">forall env. ActivityWorker env -&gt; Worker 'Real
+</span><a href="Temporal.Activity.Worker.html#workerCore"><span class="hs-identifier hs-var hs-var">workerCore</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Core.Worker</span></span><span> </span><span class="hs-special">'</span><span class="annot"><span class="hs-identifier hs-type">Core.Real</span></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="activityInboundInterceptors"><span class="annot"><span class="annottext">forall env. ActivityWorker env -&gt; ActivityInboundInterceptor env
+</span><a href="Temporal.Activity.Worker.html#activityInboundInterceptors"><span class="hs-identifier hs-var hs-var">activityInboundInterceptors</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Interceptor.html#ActivityInboundInterceptor"><span class="hs-identifier hs-type">ActivityInboundInterceptor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174441"><span class="hs-identifier hs-type">env</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="activityOutboundInterceptors"><span class="annot"><span class="annottext">forall env. ActivityWorker env -&gt; ActivityOutboundInterceptor env
+</span><a href="Temporal.Activity.Worker.html#activityOutboundInterceptors"><span class="hs-identifier hs-var hs-var">activityOutboundInterceptors</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Interceptor.html#ActivityOutboundInterceptor"><span class="hs-identifier hs-type">ActivityOutboundInterceptor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174441"><span class="hs-identifier hs-type">env</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="clientInterceptors"><span class="annot"><span class="annottext">forall env. ActivityWorker env -&gt; ClientInterceptors
+</span><a href="Temporal.Activity.Worker.html#clientInterceptors"><span class="hs-identifier hs-var hs-var">clientInterceptors</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Temporal.Client.Types.html#ClientInterceptors"><span class="hs-identifier hs-type">ClientInterceptors</span></a></span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="activityErrorConverters"><span class="annot"><span class="annottext">forall env. ActivityWorker env -&gt; [ApplicationFailureHandler]
+</span><a href="Temporal.Activity.Worker.html#activityErrorConverters"><span class="hs-identifier hs-var hs-var">activityErrorConverters</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">[</span><span class="annot"><a href="Temporal.Exception.html#ApplicationFailureHandler"><span class="hs-identifier hs-type">ApplicationFailureHandler</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="payloadProcessor"><span class="annot"><span class="annottext">forall env. ActivityWorker env -&gt; PayloadProcessor
+</span><a href="Temporal.Activity.Worker.html#payloadProcessor"><span class="hs-identifier hs-var hs-var">payloadProcessor</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Temporal.Payload.html#PayloadProcessor"><span class="hs-identifier hs-type">PayloadProcessor</span></a></span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span id="local-6989586621680174466"><span id="local-6989586621680174468"><span class="annot"><a href="Temporal.Activity.Worker.html#notifyShutdown"><span class="hs-identifier hs-type">notifyShutdown</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621680174466"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Temporal.Activity.Worker.html#ActivityWorker"><span class="hs-identifier hs-type">ActivityWorker</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174468"><span class="hs-identifier hs-type">env</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680174466"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-53"></span><span id="notifyShutdown"><span class="annot"><span class="annottext">notifyShutdown :: forall (m :: * -&gt; *) env. MonadIO m =&gt; ActivityWorker env -&gt; m ()
+</span><a href="Temporal.Activity.Worker.html#notifyShutdown"><span class="hs-identifier hs-var hs-var">notifyShutdown</span></a></span></span><span> </span><span id="local-6989586621680174933"><span class="annot"><span class="annottext">ActivityWorker env
+</span><a href="#local-6989586621680174933"><span class="hs-identifier hs-var">worker</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-54"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680174934"><span class="annot"><span class="annottext">shutdownGracePeriod :: Int
+</span><a href="#local-6989586621680174934"><span class="hs-identifier hs-var hs-var hs-var">shutdownGracePeriod</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Word64 -&gt; Int
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">WorkerConfig -&gt; Word64
+</span><span class="hs-identifier hs-var">Core.gracefulShutdownPeriodMillis</span></span><span> </span><span class="annot"><span class="annottext">(WorkerConfig -&gt; Word64) -&gt; WorkerConfig -&gt; Word64
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Worker 'Real -&gt; WorkerConfig
+forall (ty :: WorkerType). Worker ty -&gt; WorkerConfig
+</span><span class="hs-identifier hs-var">Core.getWorkerConfig</span></span><span> </span><span class="annot"><span class="annottext">ActivityWorker env
+</span><a href="#local-6989586621680174933"><span class="hs-identifier hs-var">worker</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">workerCore</span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>  </span><span class="hs-comment">-- TODO logging here</span><span>
+</span><span id="line-56"></span><span>  </span><span class="annot"><span class="annottext">Bool -&gt; m () -&gt; m ()
+forall (f :: * -&gt; *). Applicative f =&gt; Bool -&gt; f () -&gt; f ()
+</span><span class="hs-identifier hs-var">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680174934"><span class="hs-identifier hs-var">shutdownGracePeriod</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(m () -&gt; m ()) -&gt; m () -&gt; m ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-57"></span><span>    </span><span class="annot"><span class="annottext">Int -&gt; m ()
+forall (m :: * -&gt; *). MonadIO m =&gt; Int -&gt; m ()
+</span><span class="hs-identifier hs-var">threadDelay</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680174934"><span class="hs-identifier hs-var">shutdownGracePeriod</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1000</span></span><span class="hs-special">)</span><span>
+</span><span id="line-58"></span><span>  </span><span id="local-6989586621680174940"><span class="annot"><a href="#local-6989586621680174940"><span class="hs-identifier hs-var">running</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">TVar (HashMap TaskToken (Async ()))
+-&gt; m (HashMap TaskToken (Async ()))
+forall (m :: * -&gt; *) a. MonadIO m =&gt; TVar a -&gt; m a
+</span><span class="hs-identifier hs-var">readTVarIO</span></span><span> </span><span class="annot"><span class="annottext">ActivityWorker env
+</span><a href="#local-6989586621680174933"><span class="hs-identifier hs-var">worker</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">runningActivities</span><span>
+</span><span id="line-59"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">forM_</span></span><span> </span><span class="annot"><a href="#local-6989586621680174940"><span class="hs-identifier hs-type">running</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621680174943"><span class="annot"><span class="annottext">Async ()
+</span><a href="#local-6989586621680174943"><span class="hs-identifier hs-var">thread</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Async () -&gt; ActivityCancelReason -&gt; m ()
+forall e (m :: * -&gt; *) a.
+(Exception e, MonadIO m) =&gt;
+Async a -&gt; e -&gt; m ()
+</span><span class="hs-identifier hs-var">cancelWith</span></span><span> </span><span class="annot"><span class="annottext">Async ()
+</span><a href="#local-6989586621680174943"><span class="hs-identifier hs-var">thread</span></a></span><span> </span><span class="annot"><span class="annottext">ActivityCancelReason
+</span><a href="Temporal.Exception.html#WorkerShutdown"><span class="hs-identifier hs-var">WorkerShutdown</span></a></span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span class="hs-keyword">newtype</span><span> </span><span id="ActivityWorkerM"><span class="annot"><a href="Temporal.Activity.Worker.html#ActivityWorkerM"><span class="hs-identifier hs-var">ActivityWorkerM</span></a></span></span><span> </span><span id="local-6989586621680174498"><span class="annot"><a href="#local-6989586621680174498"><span class="hs-identifier hs-type">env</span></a></span></span><span> </span><span id="local-6989586621680174499"><span class="annot"><a href="#local-6989586621680174499"><span class="hs-identifier hs-type">m</span></a></span></span><span> </span><span id="local-6989586621680174500"><span class="annot"><a href="#local-6989586621680174500"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ActivityWorkerM"><span class="annot"><a href="Temporal.Activity.Worker.html#ActivityWorkerM"><span class="hs-identifier hs-var">ActivityWorkerM</span></a></span></span><span> </span><span class="hs-special">{</span><span id="unActivityWorkerM"><span class="annot"><span class="annottext">forall env (m :: * -&gt; *) a.
+ActivityWorkerM env m a -&gt; ReaderT (ActivityWorker env) m a
+</span><a href="Temporal.Activity.Worker.html#unActivityWorkerM"><span class="hs-identifier hs-var hs-var">unActivityWorkerM</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ReaderT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Activity.Worker.html#ActivityWorker"><span class="hs-identifier hs-type">ActivityWorker</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174498"><span class="hs-identifier hs-type">env</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680174499"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174500"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">}</span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">newtype</span></span><span>
+</span><span id="line-64"></span><span>    </span><span class="hs-special">(</span><span> </span><span id="local-6989586621680174950"><span id="local-6989586621680174955"><span class="annot"><span class="annottext">(forall a b.
+ (a -&gt; b) -&gt; ActivityWorkerM env m a -&gt; ActivityWorkerM env m b)
+-&gt; (forall a b.
+    a -&gt; ActivityWorkerM env m b -&gt; ActivityWorkerM env m a)
+-&gt; Functor (ActivityWorkerM env m)
+forall a b. a -&gt; ActivityWorkerM env m b -&gt; ActivityWorkerM env m a
+forall a b.
+(a -&gt; b) -&gt; ActivityWorkerM env m a -&gt; ActivityWorkerM env m b
+forall env (m :: * -&gt; *) a b.
+Functor m =&gt;
+a -&gt; ActivityWorkerM env m b -&gt; ActivityWorkerM env m a
+forall env (m :: * -&gt; *) a b.
+Functor m =&gt;
+(a -&gt; b) -&gt; ActivityWorkerM env m a -&gt; ActivityWorkerM env m b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall env (m :: * -&gt; *) a b.
+Functor m =&gt;
+(a -&gt; b) -&gt; ActivityWorkerM env m a -&gt; ActivityWorkerM env m b
+fmap :: forall a b.
+(a -&gt; b) -&gt; ActivityWorkerM env m a -&gt; ActivityWorkerM env m b
+$c&lt;$ :: forall env (m :: * -&gt; *) a b.
+Functor m =&gt;
+a -&gt; ActivityWorkerM env m b -&gt; ActivityWorkerM env m a
+&lt;$ :: forall a b. a -&gt; ActivityWorkerM env m b -&gt; ActivityWorkerM env m a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span>
+</span><span id="line-65"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621680174966"><span id="local-6989586621680174971"><span id="local-6989586621680174975"><span id="local-6989586621680174979"><span id="local-6989586621680174983"><span class="annot"><span class="annottext">Functor (ActivityWorkerM env m)
+Functor (ActivityWorkerM env m) =&gt;
+(forall a. a -&gt; ActivityWorkerM env m a)
+-&gt; (forall a b.
+    ActivityWorkerM env m (a -&gt; b)
+    -&gt; ActivityWorkerM env m a -&gt; ActivityWorkerM env m b)
+-&gt; (forall a b c.
+    (a -&gt; b -&gt; c)
+    -&gt; ActivityWorkerM env m a
+    -&gt; ActivityWorkerM env m b
+    -&gt; ActivityWorkerM env m c)
+-&gt; (forall a b.
+    ActivityWorkerM env m a
+    -&gt; ActivityWorkerM env m b -&gt; ActivityWorkerM env m b)
+-&gt; (forall a b.
+    ActivityWorkerM env m a
+    -&gt; ActivityWorkerM env m b -&gt; ActivityWorkerM env m a)
+-&gt; Applicative (ActivityWorkerM env m)
+forall a. a -&gt; ActivityWorkerM env m a
+forall a b.
+ActivityWorkerM env m a
+-&gt; ActivityWorkerM env m b -&gt; ActivityWorkerM env m a
+forall a b.
+ActivityWorkerM env m a
+-&gt; ActivityWorkerM env m b -&gt; ActivityWorkerM env m b
+forall a b.
+ActivityWorkerM env m (a -&gt; b)
+-&gt; ActivityWorkerM env m a -&gt; ActivityWorkerM env m b
+forall a b c.
+(a -&gt; b -&gt; c)
+-&gt; ActivityWorkerM env m a
+-&gt; ActivityWorkerM env m b
+-&gt; ActivityWorkerM env m c
+forall env (m :: * -&gt; *).
+Applicative m =&gt;
+Functor (ActivityWorkerM env m)
+forall env (m :: * -&gt; *) a.
+Applicative m =&gt;
+a -&gt; ActivityWorkerM env m a
+forall env (m :: * -&gt; *) a b.
+Applicative m =&gt;
+ActivityWorkerM env m a
+-&gt; ActivityWorkerM env m b -&gt; ActivityWorkerM env m a
+forall env (m :: * -&gt; *) a b.
+Applicative m =&gt;
+ActivityWorkerM env m a
+-&gt; ActivityWorkerM env m b -&gt; ActivityWorkerM env m b
+forall env (m :: * -&gt; *) a b.
+Applicative m =&gt;
+ActivityWorkerM env m (a -&gt; b)
+-&gt; ActivityWorkerM env m a -&gt; ActivityWorkerM env m b
+forall env (m :: * -&gt; *) a b c.
+Applicative m =&gt;
+(a -&gt; b -&gt; c)
+-&gt; ActivityWorkerM env m a
+-&gt; ActivityWorkerM env m b
+-&gt; ActivityWorkerM env m c
+forall (f :: * -&gt; *).
+Functor f =&gt;
+(forall a. a -&gt; f a)
+-&gt; (forall a b. f (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b c. (a -&gt; b -&gt; c) -&gt; f a -&gt; f b -&gt; f c)
+-&gt; (forall a b. f a -&gt; f b -&gt; f b)
+-&gt; (forall a b. f a -&gt; f b -&gt; f a)
+-&gt; Applicative f
+$cpure :: forall env (m :: * -&gt; *) a.
+Applicative m =&gt;
+a -&gt; ActivityWorkerM env m a
+pure :: forall a. a -&gt; ActivityWorkerM env m a
+$c&lt;*&gt; :: forall env (m :: * -&gt; *) a b.
+Applicative m =&gt;
+ActivityWorkerM env m (a -&gt; b)
+-&gt; ActivityWorkerM env m a -&gt; ActivityWorkerM env m b
+&lt;*&gt; :: forall a b.
+ActivityWorkerM env m (a -&gt; b)
+-&gt; ActivityWorkerM env m a -&gt; ActivityWorkerM env m b
+$cliftA2 :: forall env (m :: * -&gt; *) a b c.
+Applicative m =&gt;
+(a -&gt; b -&gt; c)
+-&gt; ActivityWorkerM env m a
+-&gt; ActivityWorkerM env m b
+-&gt; ActivityWorkerM env m c
+liftA2 :: forall a b c.
+(a -&gt; b -&gt; c)
+-&gt; ActivityWorkerM env m a
+-&gt; ActivityWorkerM env m b
+-&gt; ActivityWorkerM env m c
+$c*&gt; :: forall env (m :: * -&gt; *) a b.
+Applicative m =&gt;
+ActivityWorkerM env m a
+-&gt; ActivityWorkerM env m b -&gt; ActivityWorkerM env m b
+*&gt; :: forall a b.
+ActivityWorkerM env m a
+-&gt; ActivityWorkerM env m b -&gt; ActivityWorkerM env m b
+$c&lt;* :: forall env (m :: * -&gt; *) a b.
+Applicative m =&gt;
+ActivityWorkerM env m a
+-&gt; ActivityWorkerM env m b -&gt; ActivityWorkerM env m a
+&lt;* :: forall a b.
+ActivityWorkerM env m a
+-&gt; ActivityWorkerM env m b -&gt; ActivityWorkerM env m a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Applicative</span></span></span></span></span></span></span><span>
+</span><span id="line-66"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621680174996"><span id="local-6989586621680175001"><span id="local-6989586621680175005"><span class="annot"><span class="annottext">Applicative (ActivityWorkerM env m)
+Applicative (ActivityWorkerM env m) =&gt;
+(forall a b.
+ ActivityWorkerM env m a
+ -&gt; (a -&gt; ActivityWorkerM env m b) -&gt; ActivityWorkerM env m b)
+-&gt; (forall a b.
+    ActivityWorkerM env m a
+    -&gt; ActivityWorkerM env m b -&gt; ActivityWorkerM env m b)
+-&gt; (forall a. a -&gt; ActivityWorkerM env m a)
+-&gt; Monad (ActivityWorkerM env m)
+forall a. a -&gt; ActivityWorkerM env m a
+forall a b.
+ActivityWorkerM env m a
+-&gt; ActivityWorkerM env m b -&gt; ActivityWorkerM env m b
+forall a b.
+ActivityWorkerM env m a
+-&gt; (a -&gt; ActivityWorkerM env m b) -&gt; ActivityWorkerM env m b
+forall env (m :: * -&gt; *).
+Monad m =&gt;
+Applicative (ActivityWorkerM env m)
+forall env (m :: * -&gt; *) a. Monad m =&gt; a -&gt; ActivityWorkerM env m a
+forall env (m :: * -&gt; *) a b.
+Monad m =&gt;
+ActivityWorkerM env m a
+-&gt; ActivityWorkerM env m b -&gt; ActivityWorkerM env m b
+forall env (m :: * -&gt; *) a b.
+Monad m =&gt;
+ActivityWorkerM env m a
+-&gt; (a -&gt; ActivityWorkerM env m b) -&gt; ActivityWorkerM env m b
+forall (m :: * -&gt; *).
+Applicative m =&gt;
+(forall a b. m a -&gt; (a -&gt; m b) -&gt; m b)
+-&gt; (forall a b. m a -&gt; m b -&gt; m b)
+-&gt; (forall a. a -&gt; m a)
+-&gt; Monad m
+$c&gt;&gt;= :: forall env (m :: * -&gt; *) a b.
+Monad m =&gt;
+ActivityWorkerM env m a
+-&gt; (a -&gt; ActivityWorkerM env m b) -&gt; ActivityWorkerM env m b
+&gt;&gt;= :: forall a b.
+ActivityWorkerM env m a
+-&gt; (a -&gt; ActivityWorkerM env m b) -&gt; ActivityWorkerM env m b
+$c&gt;&gt; :: forall env (m :: * -&gt; *) a b.
+Monad m =&gt;
+ActivityWorkerM env m a
+-&gt; ActivityWorkerM env m b -&gt; ActivityWorkerM env m b
+&gt;&gt; :: forall a b.
+ActivityWorkerM env m a
+-&gt; ActivityWorkerM env m b -&gt; ActivityWorkerM env m b
+$creturn :: forall env (m :: * -&gt; *) a. Monad m =&gt; a -&gt; ActivityWorkerM env m a
+return :: forall a. a -&gt; ActivityWorkerM env m a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Monad</span></span></span></span></span><span>
+</span><span id="line-67"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621680175015"><span class="annot"><span class="annottext">Monad (ActivityWorkerM env m)
+Monad (ActivityWorkerM env m) =&gt;
+(forall a. IO a -&gt; ActivityWorkerM env m a)
+-&gt; MonadIO (ActivityWorkerM env m)
+forall a. IO a -&gt; ActivityWorkerM env m a
+forall env (m :: * -&gt; *).
+MonadIO m =&gt;
+Monad (ActivityWorkerM env m)
+forall env (m :: * -&gt; *) a.
+MonadIO m =&gt;
+IO a -&gt; ActivityWorkerM env m a
+forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall a. IO a -&gt; m a) -&gt; MonadIO m
+$cliftIO :: forall env (m :: * -&gt; *) a.
+MonadIO m =&gt;
+IO a -&gt; ActivityWorkerM env m a
+liftIO :: forall a. IO a -&gt; ActivityWorkerM env m a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var">MonadIO</span></span></span><span>
+</span><span id="line-68"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621680175026"><span id="local-6989586621680175031"><span id="local-6989586621680175035"><span class="annot"><span class="hs-identifier hs-type">MonadReader</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Activity.Worker.html#ActivityWorker"><span class="hs-identifier hs-type">ActivityWorker</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174498"><span class="hs-identifier hs-type">env</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-69"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621680175048"><span class="annot"><span class="annottext">MonadIO (ActivityWorkerM env m)
+MonadIO (ActivityWorkerM env m) =&gt;
+(forall b.
+ ((forall a. ActivityWorkerM env m a -&gt; IO a) -&gt; IO b)
+ -&gt; ActivityWorkerM env m b)
+-&gt; MonadUnliftIO (ActivityWorkerM env m)
+forall b.
+((forall a. ActivityWorkerM env m a -&gt; IO a) -&gt; IO b)
+-&gt; ActivityWorkerM env m b
+forall env (m :: * -&gt; *).
+MonadUnliftIO m =&gt;
+MonadIO (ActivityWorkerM env m)
+forall env (m :: * -&gt; *) b.
+MonadUnliftIO m =&gt;
+((forall a. ActivityWorkerM env m a -&gt; IO a) -&gt; IO b)
+-&gt; ActivityWorkerM env m b
+forall (m :: * -&gt; *).
+MonadIO m =&gt;
+(forall b. ((forall a. m a -&gt; IO a) -&gt; IO b) -&gt; m b)
+-&gt; MonadUnliftIO m
+$cwithRunInIO :: forall env (m :: * -&gt; *) b.
+MonadUnliftIO m =&gt;
+((forall a. ActivityWorkerM env m a -&gt; IO a) -&gt; IO b)
+-&gt; ActivityWorkerM env m b
+withRunInIO :: forall b.
+((forall a. ActivityWorkerM env m a -&gt; IO a) -&gt; IO b)
+-&gt; ActivityWorkerM env m b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var">MonadUnliftIO</span></span></span><span>
+</span><span id="line-70"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621680175063"><span class="annot"><span class="annottext">Monad (ActivityWorkerM env m)
+Monad (ActivityWorkerM env m) =&gt;
+(forall msg.
+ ToLogStr msg =&gt;
+ Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; ActivityWorkerM env m ())
+-&gt; MonadLogger (ActivityWorkerM env m)
+forall msg.
+ToLogStr msg =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; ActivityWorkerM env m ()
+forall env (m :: * -&gt; *).
+MonadLogger m =&gt;
+Monad (ActivityWorkerM env m)
+forall env (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; ActivityWorkerM env m ()
+forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall msg.
+ ToLogStr msg =&gt;
+ Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ())
+-&gt; MonadLogger m
+$cmonadLoggerLog :: forall env (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; ActivityWorkerM env m ()
+monadLoggerLog :: forall msg.
+ToLogStr msg =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; ActivityWorkerM env m ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var">MonadLogger</span></span></span><span>
+</span><span id="line-71"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621680175081"><span class="annot"><span class="annottext">MonadIO (ActivityWorkerM env m)
+MonadLogger (ActivityWorkerM env m)
+ActivityWorkerM env m (Loc -&gt; Text -&gt; LogLevel -&gt; LogStr -&gt; IO ())
+(MonadLogger (ActivityWorkerM env m),
+ MonadIO (ActivityWorkerM env m)) =&gt;
+ActivityWorkerM env m (Loc -&gt; Text -&gt; LogLevel -&gt; LogStr -&gt; IO ())
+-&gt; MonadLoggerIO (ActivityWorkerM env m)
+forall env (m :: * -&gt; *).
+MonadLoggerIO m =&gt;
+MonadIO (ActivityWorkerM env m)
+forall env (m :: * -&gt; *).
+MonadLoggerIO m =&gt;
+MonadLogger (ActivityWorkerM env m)
+forall env (m :: * -&gt; *).
+MonadLoggerIO m =&gt;
+ActivityWorkerM env m (Loc -&gt; Text -&gt; LogLevel -&gt; LogStr -&gt; IO ())
+forall (m :: * -&gt; *).
+(MonadLogger m, MonadIO m) =&gt;
+m (Loc -&gt; Text -&gt; LogLevel -&gt; LogStr -&gt; IO ()) -&gt; MonadLoggerIO m
+$caskLoggerIO :: forall env (m :: * -&gt; *).
+MonadLoggerIO m =&gt;
+ActivityWorkerM env m (Loc -&gt; Text -&gt; LogLevel -&gt; LogStr -&gt; IO ())
+askLoggerIO :: ActivityWorkerM env m (Loc -&gt; Text -&gt; LogLevel -&gt; LogStr -&gt; IO ())
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">MonadLoggerIO</span></span></span><span>
+</span><span id="line-72"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span id="local-6989586621680174622"><span id="local-6989586621680174623"><span id="local-6989586621680174624"><span class="annot"><a href="Temporal.Activity.Worker.html#runActivityWorker"><span class="hs-identifier hs-type">runActivityWorker</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadUnliftIO</span></span><span> </span><span class="annot"><a href="#local-6989586621680174622"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadLogger</span></span><span> </span><span class="annot"><a href="#local-6989586621680174622"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Temporal.Activity.Worker.html#ActivityWorker"><span class="hs-identifier hs-type">ActivityWorker</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174623"><span class="hs-identifier hs-type">env</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Activity.Worker.html#ActivityWorkerM"><span class="hs-identifier hs-type">ActivityWorkerM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174623"><span class="hs-identifier hs-type">env</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174622"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174624"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680174622"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174624"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-76"></span><span id="runActivityWorker"><span class="annot"><span class="annottext">runActivityWorker :: forall (m :: * -&gt; *) env a.
+(MonadUnliftIO m, MonadLogger m) =&gt;
+ActivityWorker env -&gt; ActivityWorkerM env m a -&gt; m a
+</span><a href="Temporal.Activity.Worker.html#runActivityWorker"><span class="hs-identifier hs-var hs-var">runActivityWorker</span></a></span></span><span> </span><span id="local-6989586621680175093"><span class="annot"><span class="annottext">ActivityWorker env
+</span><a href="#local-6989586621680175093"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span id="local-6989586621680175094"><span class="annot"><span class="annottext">ActivityWorkerM env m a
+</span><a href="#local-6989586621680175094"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReaderT (ActivityWorker env) m a -&gt; ActivityWorker env -&gt; m a
+forall r (m :: * -&gt; *) a. ReaderT r m a -&gt; r -&gt; m a
+</span><span class="hs-identifier hs-var">runReaderT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ActivityWorkerM env m a -&gt; ReaderT (ActivityWorker env) m a
+forall env (m :: * -&gt; *) a.
+ActivityWorkerM env m a -&gt; ReaderT (ActivityWorker env) m a
+</span><a href="Temporal.Activity.Worker.html#unActivityWorkerM"><span class="hs-identifier hs-var">unActivityWorkerM</span></a></span><span> </span><span class="annot"><span class="annottext">ActivityWorkerM env m a
+</span><a href="#local-6989586621680175094"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ActivityWorker env
+</span><a href="#local-6989586621680175093"><span class="hs-identifier hs-var">w</span></a></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span id="local-6989586621680174631"><span id="local-6989586621680174632"><span class="annot"><a href="Temporal.Activity.Worker.html#execute"><span class="hs-identifier hs-type">execute</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadUnliftIO</span></span><span> </span><span class="annot"><a href="#local-6989586621680174631"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadLogger</span></span><span> </span><span class="annot"><a href="#local-6989586621680174631"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Temporal.Activity.Worker.html#ActivityWorker"><span class="hs-identifier hs-type">ActivityWorker</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174632"><span class="hs-identifier hs-type">actEnv</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680174631"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-80"></span><span id="execute"><span class="annot"><span class="annottext">execute :: forall (m :: * -&gt; *) actEnv.
+(MonadUnliftIO m, MonadLogger m) =&gt;
+ActivityWorker actEnv -&gt; m ()
+</span><a href="Temporal.Activity.Worker.html#execute"><span class="hs-identifier hs-var hs-var">execute</span></a></span></span><span> </span><span id="local-6989586621680175122"><span class="annot"><span class="annottext">ActivityWorker actEnv
+</span><a href="#local-6989586621680175122"><span class="hs-identifier hs-var">worker</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ActivityWorker actEnv -&gt; ActivityWorkerM actEnv m () -&gt; m ()
+forall (m :: * -&gt; *) env a.
+(MonadUnliftIO m, MonadLogger m) =&gt;
+ActivityWorker env -&gt; ActivityWorkerM env m a -&gt; m a
+</span><a href="Temporal.Activity.Worker.html#runActivityWorker"><span class="hs-identifier hs-var">runActivityWorker</span></a></span><span> </span><span class="annot"><span class="annottext">ActivityWorker actEnv
+</span><a href="#local-6989586621680175122"><span class="hs-identifier hs-var">worker</span></a></span><span> </span><span class="annot"><span class="annottext">ActivityWorkerM actEnv m ()
+</span><a href="#local-6989586621680175123"><span class="hs-identifier hs-var">go</span></a></span><span>
+</span><span id="line-81"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-82"></span><span>    </span><span id="local-6989586621680175123"><span class="annot"><span class="annottext">go :: ActivityWorkerM actEnv m ()
+</span><a href="#local-6989586621680175123"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-83"></span><span>      </span><span id="local-6989586621680175124"><span class="annot"><a href="#local-6989586621680175124"><span class="hs-identifier hs-var">eTask</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO (Either WorkerError ActivityTask)
+-&gt; ActivityWorkerM actEnv m (Either WorkerError ActivityTask)
+forall a. IO a -&gt; ActivityWorkerM actEnv m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO (Either WorkerError ActivityTask)
+ -&gt; ActivityWorkerM actEnv m (Either WorkerError ActivityTask))
+-&gt; IO (Either WorkerError ActivityTask)
+-&gt; ActivityWorkerM actEnv m (Either WorkerError ActivityTask)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Worker 'Real -&gt; IO (Either WorkerError ActivityTask)
+forall (ty :: WorkerType).
+KnownWorkerType ty =&gt;
+Worker ty -&gt; IO (Either WorkerError ActivityTask)
+</span><span class="hs-identifier hs-var">Core.pollActivityTask</span></span><span> </span><span class="annot"><span class="annottext">ActivityWorker actEnv
+</span><a href="#local-6989586621680175122"><span class="hs-identifier hs-var">worker</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">workerCore</span><span>
+</span><span id="line-84"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621680175124"><span class="hs-identifier hs-type">eTask</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-85"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Core.WorkerError</span></span><span> </span><span class="annot"><span class="annottext">WorkerErrorCode
+</span><span class="hs-identifier hs-var">Core.PollShutdown</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-86"></span><span>          </span><span class="annot"><span class="annottext">() -&gt; ActivityWorkerM actEnv m ()
+forall a. a -&gt; ActivityWorkerM actEnv m a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-87"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621680175128"><span class="annot"><span class="annottext">WorkerError
+</span><a href="#local-6989586621680175128"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-88"></span><span>          </span><span class="hs-special">$</span><span class="annot"><span class="annottext">Int
+String
+LogLevel
+String -&gt; Text
+String -&gt; String -&gt; String -&gt; CharPos -&gt; CharPos -&gt; Loc
+Text -&gt; Text
+Loc -&gt; Text -&gt; LogLevel -&gt; Text -&gt; ActivityWorkerM actEnv m ()
+(Text -&gt; ActivityWorkerM actEnv m ())
+-&gt; (Text -&gt; Text) -&gt; Text -&gt; ActivityWorkerM actEnv m ()
+forall a. a -&gt; a
+forall msg.
+ToLogStr msg =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; ActivityWorkerM actEnv m ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+monadLoggerLog :: forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+id :: forall a. a -&gt; a
+. :: forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+pack :: String -&gt; Text
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">logError</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Text
+</span><span class="hs-identifier hs-var">T.pack</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">WorkerError -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">WorkerError
+</span><a href="#local-6989586621680175128"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-89"></span><span>          </span><span class="annot"><span class="annottext">WorkerError -&gt; ActivityWorkerM actEnv m ()
+forall (m :: * -&gt; *) e a. (MonadIO m, Exception e) =&gt; e -&gt; m a
+</span><span class="hs-identifier hs-var">throwIO</span></span><span> </span><span class="annot"><span class="annottext">WorkerError
+</span><a href="#local-6989586621680175128"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-90"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621680175137"><span class="annot"><span class="annottext">ActivityTask
+</span><a href="#local-6989586621680175137"><span class="hs-identifier hs-var">task</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-91"></span><span>          </span><span class="annot"><span class="annottext">ActivityTask -&gt; ActivityWorkerM actEnv m ()
+forall (m :: * -&gt; *) actEnv.
+(MonadUnliftIO m, MonadLogger m) =&gt;
+ActivityTask -&gt; ActivityWorkerM actEnv m ()
+</span><a href="Temporal.Activity.Worker.html#applyActivityTask"><span class="hs-identifier hs-var">applyActivityTask</span></a></span><span> </span><span class="annot"><span class="annottext">ActivityTask
+</span><a href="#local-6989586621680175137"><span class="hs-identifier hs-var">task</span></a></span><span>
+</span><span id="line-92"></span><span>          </span><span class="annot"><span class="annottext">ActivityWorkerM actEnv m ()
+</span><a href="#local-6989586621680175123"><span class="hs-identifier hs-var">go</span></a></span><span>
+</span><span id="line-93"></span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span id="local-6989586621680174651"><span id="local-6989586621680174653"><span class="annot"><a href="Temporal.Activity.Worker.html#activityInfoFromProto"><span class="hs-identifier hs-type">activityInfoFromProto</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621680174651"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Temporal.Common.html#TaskToken"><span class="hs-identifier hs-type">TaskToken</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.Start</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Activity.Worker.html#ActivityWorkerM"><span class="hs-identifier hs-type">ActivityWorkerM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174653"><span class="hs-identifier hs-type">actEnv</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174651"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html#ActivityInfo"><span class="hs-identifier hs-type">ActivityInfo</span></a></span></span></span><span>
+</span><span id="line-96"></span><span id="activityInfoFromProto"><span class="annot"><span class="annottext">activityInfoFromProto :: forall (m :: * -&gt; *) actEnv.
+MonadIO m =&gt;
+TaskToken -&gt; Start -&gt; ActivityWorkerM actEnv m ActivityInfo
+</span><a href="Temporal.Activity.Worker.html#activityInfoFromProto"><span class="hs-identifier hs-var hs-var">activityInfoFromProto</span></a></span></span><span> </span><span id="local-6989586621680175226"><span class="annot"><span class="annottext">TaskToken
+</span><a href="#local-6989586621680175226"><span class="hs-identifier hs-var">tt</span></a></span></span><span> </span><span id="local-6989586621680175227"><span class="annot"><span class="annottext">Start
+</span><a href="#local-6989586621680175227"><span class="hs-identifier hs-var">msg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-97"></span><span>  </span><span id="local-6989586621680175228"><span class="annot"><a href="#local-6989586621680175228"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ActivityWorkerM actEnv m (ActivityWorker actEnv)
+forall r (m :: * -&gt; *). MonadReader r m =&gt; m r
+</span><span class="hs-identifier hs-var">ask</span></span><span>
+</span><span id="line-98"></span><span>  </span><span id="local-6989586621680175229"><span class="annot"><a href="#local-6989586621680175229"><span class="hs-identifier hs-var">hdrs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Temporal.Payload.html#processorDecodePayloads"><span class="hs-identifier hs-type">processorDecodePayloads</span></a></span><span> </span><span class="annot"><span class="hs-identifier">w</span></span><span class="hs-operator">.</span><span class="hs-identifier">payloadProcessor</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">fmap</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#convertFromProtoPayload"><span class="hs-identifier hs-type">convertFromProtoPayload</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680175227"><span class="hs-identifier hs-type">msg</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">^.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.headerFields</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-99"></span><span>  </span><span id="local-6989586621680175234"><span class="annot"><a href="#local-6989586621680175234"><span class="hs-identifier hs-var">heartbeats</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Temporal.Payload.html#processorDecodePayloads"><span class="hs-identifier hs-type">processorDecodePayloads</span></a></span><span> </span><span class="annot"><span class="hs-identifier">w</span></span><span class="hs-operator">.</span><span class="hs-identifier">payloadProcessor</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">fmap</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#convertFromProtoPayload"><span class="hs-identifier hs-type">convertFromProtoPayload</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680175227"><span class="hs-identifier hs-type">msg</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">^.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.vec'heartbeatDetails</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-100"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span>
+</span><span id="line-101"></span><span>    </span><span class="annot"><a href="Temporal.Activity.Types.html#ActivityInfo"><span class="hs-identifier hs-type">ActivityInfo</span></a></span><span>
+</span><span id="line-102"></span><span>      </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html#workflowNamespace"><span class="hs-identifier hs-var">workflowNamespace</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Temporal.Common.html#Namespace"><span class="hs-identifier hs-type">Namespace</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="#local-6989586621680175227"><span class="hs-identifier hs-type">msg</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">^.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.workflowNamespace</span></span><span>
+</span><span id="line-103"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html#workflowType"><span class="hs-identifier hs-var">workflowType</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Temporal.Common.html#WorkflowType"><span class="hs-identifier hs-type">WorkflowType</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="#local-6989586621680175227"><span class="hs-identifier hs-type">msg</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">^.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.workflowType</span></span><span>
+</span><span id="line-104"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html#workflowId"><span class="hs-identifier hs-var">workflowId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Temporal.Common.html#WorkflowId"><span class="hs-identifier hs-type">WorkflowId</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="#local-6989586621680175227"><span class="hs-identifier hs-type">msg</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">^.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.workflowExecution</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">P.workflowId</span></span><span>
+</span><span id="line-105"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html#runId"><span class="hs-identifier hs-var">runId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Temporal.Common.html#RunId"><span class="hs-identifier hs-type">RunId</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="#local-6989586621680175227"><span class="hs-identifier hs-type">msg</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">^.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.workflowExecution</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">P.runId</span></span><span>
+</span><span id="line-106"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html#activityId"><span class="hs-identifier hs-var">activityId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Temporal.Common.html#ActivityId"><span class="hs-identifier hs-type">ActivityId</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="#local-6989586621680175227"><span class="hs-identifier hs-type">msg</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">^.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.activityId</span></span><span>
+</span><span id="line-107"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html#activityType"><span class="hs-identifier hs-var">activityType</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680175227"><span class="hs-identifier hs-type">msg</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">^.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.activityType</span></span><span>
+</span><span id="line-108"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html#headerFields"><span class="hs-identifier hs-var">headerFields</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680175229"><span class="hs-identifier hs-type">hdrs</span></a></span><span>
+</span><span id="line-109"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html#heartbeatDetails"><span class="hs-identifier hs-var">heartbeatDetails</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680175234"><span class="hs-identifier hs-type">heartbeats</span></a></span><span>
+</span><span id="line-110"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html#scheduledTime"><span class="hs-identifier hs-var">scheduledTime</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680175227"><span class="hs-identifier hs-type">msg</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">^.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.scheduledTime</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">to</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#timespecFromTimestamp"><span class="hs-identifier hs-type">timespecFromTimestamp</span></a></span><span>
+</span><span id="line-111"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html#currentAttemptScheduledTime"><span class="hs-identifier hs-var">currentAttemptScheduledTime</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680175227"><span class="hs-identifier hs-type">msg</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">^.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.currentAttemptScheduledTime</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">to</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#timespecFromTimestamp"><span class="hs-identifier hs-type">timespecFromTimestamp</span></a></span><span>
+</span><span id="line-112"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html#startedTime"><span class="hs-identifier hs-var">startedTime</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680175227"><span class="hs-identifier hs-type">msg</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">^.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.startedTime</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">to</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#timespecFromTimestamp"><span class="hs-identifier hs-type">timespecFromTimestamp</span></a></span><span>
+</span><span id="line-113"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html#attempt"><span class="hs-identifier hs-var">attempt</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680175227"><span class="hs-identifier hs-type">msg</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">^.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.attempt</span></span><span>
+</span><span id="line-114"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html#scheduleToCloseTimeout"><span class="hs-identifier hs-var">scheduleToCloseTimeout</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">fmap</span></span><span> </span><span class="annot"><a href="Temporal.Duration.html#durationFromProto"><span class="hs-identifier hs-type">durationFromProto</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680175227"><span class="hs-identifier hs-type">msg</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">^.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.maybe'scheduleToCloseTimeout</span></span><span class="hs-special">)</span><span>
+</span><span id="line-115"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html#startToCloseTimeout"><span class="hs-identifier hs-var">startToCloseTimeout</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">fmap</span></span><span> </span><span class="annot"><a href="Temporal.Duration.html#durationFromProto"><span class="hs-identifier hs-type">durationFromProto</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680175227"><span class="hs-identifier hs-type">msg</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">^.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.maybe'startToCloseTimeout</span></span><span class="hs-special">)</span><span>
+</span><span id="line-116"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html#heartbeatTimeout"><span class="hs-identifier hs-var">heartbeatTimeout</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">fmap</span></span><span> </span><span class="annot"><a href="Temporal.Duration.html#durationFromProto"><span class="hs-identifier hs-type">durationFromProto</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680175227"><span class="hs-identifier hs-type">msg</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">^.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.maybe'heartbeatTimeout</span></span><span class="hs-special">)</span><span>
+</span><span id="line-117"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html#retryPolicy"><span class="hs-identifier hs-var">retryPolicy</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">fmap</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#retryPolicyFromProto"><span class="hs-identifier hs-type">retryPolicyFromProto</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680175227"><span class="hs-identifier hs-type">msg</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">^.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.maybe'retryPolicy</span></span><span class="hs-special">)</span><span>
+</span><span id="line-118"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html#isLocal"><span class="hs-identifier hs-var">isLocal</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680175227"><span class="hs-identifier hs-type">msg</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">^.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.isLocal</span></span><span>
+</span><span id="line-119"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html#taskToken"><span class="hs-identifier hs-var">taskToken</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621680175226"><span class="hs-identifier hs-type">tt</span></a></span><span>
+</span><span id="line-120"></span><span>      </span><span class="hs-special">}</span><span>
+</span><span id="line-121"></span><span>
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span><span class="annot"><span class="hs-comment">{- | Signal to the Temporal worker that the activity will be completed asynchronously (out of band).
+
+In order to complete the activity once it has been moved to async, use 'Temporal.Client.AsyncActivity.complete', 'Temporal.Client.AsyncActivity.fail', or 'Temporal.Client.AsyncActivity.reportCancellation'.
+
+Note: Under the hood, this throws a 'CompleteAsync' exception, which is caught and handled by the Temporal worker.
+
+Make sure that your own code does not swallow or rewrap this exception, otherwise the activity will fail instead
+of signalling that it will be completed asynchronously.
+-}</span></span><span>
+</span><span id="line-132"></span><span id="local-6989586621680174747"><span class="annot"><a href="Temporal.Activity.Worker.html#completeAsync"><span class="hs-identifier hs-type">completeAsync</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621680174747"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680174747"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-133"></span><span id="completeAsync"><span class="annot"><span class="annottext">completeAsync :: forall (m :: * -&gt; *). MonadIO m =&gt; m ()
+</span><a href="Temporal.Activity.Worker.html#completeAsync"><span class="hs-identifier hs-var hs-var">completeAsync</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CompleteAsync -&gt; m ()
+forall (m :: * -&gt; *) e a. (MonadIO m, Exception e) =&gt; e -&gt; m a
+</span><span class="hs-identifier hs-var">throwIO</span></span><span> </span><span class="annot"><span class="annottext">CompleteAsync
+</span><a href="Temporal.Exception.html#CompleteAsync"><span class="hs-identifier hs-var">CompleteAsync</span></a></span><span>
+</span><span id="line-134"></span><span>
+</span><span id="line-135"></span><span>
+</span><span id="line-136"></span><span id="local-6989586621680174649"><span id="local-6989586621680174650"><span class="annot"><a href="Temporal.Activity.Worker.html#applyActivityTask"><span class="hs-identifier hs-type">applyActivityTask</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadUnliftIO</span></span><span> </span><span class="annot"><a href="#local-6989586621680174649"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadLogger</span></span><span> </span><span class="annot"><a href="#local-6989586621680174649"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.ActivityTask</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Activity.Worker.html#ActivityWorkerM"><span class="hs-identifier hs-type">ActivityWorkerM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174650"><span class="hs-identifier hs-type">actEnv</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174649"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-137"></span><span id="applyActivityTask"><span class="annot"><span class="annottext">applyActivityTask :: forall (m :: * -&gt; *) actEnv.
+(MonadUnliftIO m, MonadLogger m) =&gt;
+ActivityTask -&gt; ActivityWorkerM actEnv m ()
+</span><a href="Temporal.Activity.Worker.html#applyActivityTask"><span class="hs-identifier hs-var hs-var">applyActivityTask</span></a></span></span><span> </span><span id="local-6989586621680175301"><span class="annot"><span class="annottext">ActivityTask
+</span><a href="#local-6989586621680175301"><span class="hs-identifier hs-var">task</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">ActivityTask
+</span><a href="#local-6989586621680175301"><span class="hs-identifier hs-var">task</span></a></span><span> </span><span class="annot"><span class="annottext">ActivityTask
+-&gt; FoldLike
+     (Maybe ActivityTask'Variant)
+     ActivityTask
+     ActivityTask
+     (Maybe ActivityTask'Variant)
+     (Maybe ActivityTask'Variant)
+-&gt; Maybe ActivityTask'Variant
+forall s a t b. s -&gt; FoldLike a s t a b -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">FoldLike
+  (Maybe ActivityTask'Variant)
+  ActivityTask
+  ActivityTask
+  (Maybe ActivityTask'Variant)
+  (Maybe ActivityTask'Variant)
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;maybe'variant&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">AT.maybe'variant</span></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-138"></span><span>  </span><span class="annot"><span class="annottext">Maybe ActivityTask'Variant
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RuntimeError -&gt; ActivityWorkerM actEnv m ()
+forall (m :: * -&gt; *) e a. (MonadIO m, Exception e) =&gt; e -&gt; m a
+</span><span class="hs-identifier hs-var">throwIO</span></span><span> </span><span class="annot"><span class="annottext">(RuntimeError -&gt; ActivityWorkerM actEnv m ())
+-&gt; RuntimeError -&gt; ActivityWorkerM actEnv m ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; RuntimeError
+</span><a href="Temporal.Exception.html#RuntimeError"><span class="hs-identifier hs-var">RuntimeError</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Activity task has no variant or an unknown variant&quot;</span></span><span>
+</span><span id="line-139"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">AT.ActivityTask'Start</span></span><span> </span><span id="local-6989586621680175305"><span class="annot"><span class="annottext">Start
+</span><a href="#local-6989586621680175305"><span class="hs-identifier hs-var">msg</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ActivityTask -&gt; TaskToken -&gt; Start -&gt; ActivityWorkerM actEnv m ()
+forall (m :: * -&gt; *) actEnv.
+(MonadUnliftIO m, MonadLogger m) =&gt;
+ActivityTask -&gt; TaskToken -&gt; Start -&gt; ActivityWorkerM actEnv m ()
+</span><a href="Temporal.Activity.Worker.html#applyActivityTaskStart"><span class="hs-identifier hs-var">applyActivityTaskStart</span></a></span><span> </span><span class="annot"><span class="annottext">ActivityTask
+</span><a href="#local-6989586621680175301"><span class="hs-identifier hs-var">task</span></a></span><span> </span><span class="annot"><span class="annottext">TaskToken
+</span><a href="#local-6989586621680175307"><span class="hs-identifier hs-var">tt</span></a></span><span> </span><span class="annot"><span class="annottext">Start
+</span><a href="#local-6989586621680175305"><span class="hs-identifier hs-var">msg</span></a></span><span>
+</span><span id="line-140"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">AT.ActivityTask'Cancel</span></span><span> </span><span id="local-6989586621680175309"><span class="annot"><span class="annottext">Cancel
+</span><a href="#local-6989586621680175309"><span class="hs-identifier hs-var">msg</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">TaskToken -&gt; Cancel -&gt; ActivityWorkerM actEnv m ()
+forall (m :: * -&gt; *) actEnv.
+(MonadUnliftIO m, MonadLogger m) =&gt;
+TaskToken -&gt; Cancel -&gt; ActivityWorkerM actEnv m ()
+</span><a href="Temporal.Activity.Worker.html#applyActivityTaskCancel"><span class="hs-identifier hs-var">applyActivityTaskCancel</span></a></span><span> </span><span class="annot"><span class="annottext">TaskToken
+</span><a href="#local-6989586621680175307"><span class="hs-identifier hs-var">tt</span></a></span><span> </span><span class="annot"><span class="annottext">Cancel
+</span><a href="#local-6989586621680175309"><span class="hs-identifier hs-var">msg</span></a></span><span>
+</span><span id="line-141"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-142"></span><span>    </span><span id="local-6989586621680175307"><span class="annot"><span class="annottext">tt :: TaskToken
+</span><a href="#local-6989586621680175307"><span class="hs-identifier hs-var hs-var">tt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; TaskToken
+</span><a href="Temporal.Common.html#TaskToken"><span class="hs-identifier hs-var">TaskToken</span></a></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; TaskToken) -&gt; ByteString -&gt; TaskToken
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ActivityTask
+</span><a href="#local-6989586621680175301"><span class="hs-identifier hs-var">task</span></a></span><span> </span><span class="annot"><span class="annottext">ActivityTask
+-&gt; FoldLike
+     ByteString ActivityTask ActivityTask ByteString ByteString
+-&gt; ByteString
+forall s a t b. s -&gt; FoldLike a s t a b -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">FoldLike ByteString ActivityTask ActivityTask ByteString ByteString
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;taskToken&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">AT.taskToken</span></span><span>
+</span><span id="line-143"></span><span>
+</span><span id="line-144"></span><span>
+</span><span id="line-145"></span><span id="local-6989586621680174766"><span id="local-6989586621680174767"><span class="annot"><a href="Temporal.Activity.Worker.html#requireActivityNotRunning"><span class="hs-identifier hs-type">requireActivityNotRunning</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadUnliftIO</span></span><span> </span><span class="annot"><a href="#local-6989586621680174766"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Temporal.Common.html#TaskToken"><span class="hs-identifier hs-type">TaskToken</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Activity.Worker.html#ActivityWorkerM"><span class="hs-identifier hs-type">ActivityWorkerM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174767"><span class="hs-identifier hs-type">actEnv</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174766"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Activity.Worker.html#ActivityWorkerM"><span class="hs-identifier hs-type">ActivityWorkerM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174767"><span class="hs-identifier hs-type">actEnv</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174766"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-146"></span><span id="requireActivityNotRunning"><span class="annot"><span class="annottext">requireActivityNotRunning :: forall (m :: * -&gt; *) actEnv.
+MonadUnliftIO m =&gt;
+TaskToken
+-&gt; ActivityWorkerM actEnv m () -&gt; ActivityWorkerM actEnv m ()
+</span><a href="Temporal.Activity.Worker.html#requireActivityNotRunning"><span class="hs-identifier hs-var hs-var">requireActivityNotRunning</span></a></span></span><span> </span><span id="local-6989586621680175328"><span class="annot"><span class="annottext">TaskToken
+</span><a href="#local-6989586621680175328"><span class="hs-identifier hs-var">tt</span></a></span></span><span> </span><span id="local-6989586621680175329"><span class="annot"><span class="annottext">ActivityWorkerM actEnv m ()
+</span><a href="#local-6989586621680175329"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-147"></span><span>  </span><span id="local-6989586621680175330"><span class="annot"><a href="#local-6989586621680175330"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ActivityWorkerM actEnv m (ActivityWorker actEnv)
+forall r (m :: * -&gt; *). MonadReader r m =&gt; m r
+</span><span class="hs-identifier hs-var">ask</span></span><span>
+</span><span id="line-148"></span><span>  </span><span id="local-6989586621680175331"><span class="annot"><a href="#local-6989586621680175331"><span class="hs-identifier hs-var">running</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">readTVarIO</span></span><span> </span><span class="annot"><span class="hs-identifier">w</span></span><span class="hs-operator">.</span><span class="hs-identifier">runningActivities</span><span>
+</span><span id="line-149"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HashMap.lookup</span></span><span> </span><span class="annot"><a href="#local-6989586621680175328"><span class="hs-identifier hs-type">tt</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175331"><span class="hs-identifier hs-type">running</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-150"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="annottext">Async ()
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RuntimeError -&gt; ActivityWorkerM actEnv m ()
+forall (m :: * -&gt; *) e a. (MonadIO m, Exception e) =&gt; e -&gt; m a
+</span><span class="hs-identifier hs-var">throwIO</span></span><span> </span><span class="annot"><span class="annottext">(RuntimeError -&gt; ActivityWorkerM actEnv m ())
+-&gt; RuntimeError -&gt; ActivityWorkerM actEnv m ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; RuntimeError
+</span><a href="Temporal.Exception.html#RuntimeError"><span class="hs-identifier hs-var">RuntimeError</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Activity task already running&quot;</span></span><span>
+</span><span id="line-151"></span><span>    </span><span class="annot"><span class="annottext">Maybe (Async ())
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ActivityWorkerM actEnv m ()
+</span><a href="#local-6989586621680175329"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-152"></span><span>
+</span><span id="line-153"></span><span>
+</span><span id="line-154"></span><span class="hs-comment">-- TODO, where should async exception masking happen?</span><span>
+</span><span id="line-155"></span><span id="local-6989586621680174758"><span id="local-6989586621680174759"><span class="annot"><a href="Temporal.Activity.Worker.html#applyActivityTaskStart"><span class="hs-identifier hs-type">applyActivityTaskStart</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadUnliftIO</span></span><span> </span><span class="annot"><a href="#local-6989586621680174758"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadLogger</span></span><span> </span><span class="annot"><a href="#local-6989586621680174758"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.ActivityTask</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Common.html#TaskToken"><span class="hs-identifier hs-type">TaskToken</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.Start</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Activity.Worker.html#ActivityWorkerM"><span class="hs-identifier hs-type">ActivityWorkerM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174759"><span class="hs-identifier hs-type">actEnv</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174758"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-156"></span><span id="applyActivityTaskStart"><span class="annot"><span class="annottext">applyActivityTaskStart :: forall (m :: * -&gt; *) actEnv.
+(MonadUnliftIO m, MonadLogger m) =&gt;
+ActivityTask -&gt; TaskToken -&gt; Start -&gt; ActivityWorkerM actEnv m ()
+</span><a href="Temporal.Activity.Worker.html#applyActivityTaskStart"><span class="hs-identifier hs-var hs-var">applyActivityTaskStart</span></a></span></span><span> </span><span id="local-6989586621680175449"><span class="annot"><span class="annottext">ActivityTask
+</span><a href="#local-6989586621680175449"><span class="hs-identifier hs-var">tsk</span></a></span></span><span> </span><span id="local-6989586621680175450"><span class="annot"><span class="annottext">TaskToken
+</span><a href="#local-6989586621680175450"><span class="hs-identifier hs-var">tt</span></a></span></span><span> </span><span id="local-6989586621680175451"><span class="annot"><span class="annottext">Start
+</span><a href="#local-6989586621680175451"><span class="hs-identifier hs-var">msg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-157"></span><span>  </span><span id="local-6989586621680175452"><span class="annot"><a href="#local-6989586621680175452"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ActivityWorkerM actEnv m (ActivityWorker actEnv)
+forall r (m :: * -&gt; *). MonadReader r m =&gt; m r
+</span><span class="hs-identifier hs-var">ask</span></span><span>
+</span><span id="line-158"></span><span>  </span><span class="hs-special">$</span><span class="annot"><span class="hs-identifier hs-type">logDebug</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Starting activity: &quot;</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.pack</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">show</span></span><span> </span><span class="annot"><a href="#local-6989586621680175449"><span class="hs-identifier hs-type">tsk</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-159"></span><span>  </span><span class="annot"><a href="Temporal.Activity.Worker.html#requireActivityNotRunning"><span class="hs-identifier hs-type">requireActivityNotRunning</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175450"><span class="hs-identifier hs-type">tt</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-160"></span><span>    </span><span id="local-6989586621680175455"><span class="annot"><a href="#local-6989586621680175455"><span class="hs-identifier hs-var">info</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Temporal.Activity.Worker.html#activityInfoFromProto"><span class="hs-identifier hs-type">activityInfoFromProto</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175450"><span class="hs-identifier hs-type">tt</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175451"><span class="hs-identifier hs-type">msg</span></a></span><span>
+</span><span id="line-161"></span><span>    </span><span id="local-6989586621680175456"><span class="annot"><a href="#local-6989586621680175456"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Temporal.Payload.html#processorDecodePayloads"><span class="hs-identifier hs-type">processorDecodePayloads</span></a></span><span> </span><span class="annot"><span class="hs-identifier">w</span></span><span class="hs-operator">.</span><span class="hs-identifier">payloadProcessor</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">fmap</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#convertFromProtoPayload"><span class="hs-identifier hs-type">convertFromProtoPayload</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680175451"><span class="hs-identifier hs-type">msg</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">^.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.vec'input</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-162"></span><span>    </span><span id="local-6989586621680175458"><span class="annot"><a href="#local-6989586621680175458"><span class="hs-identifier hs-var">env</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">readIORef</span></span><span> </span><span class="annot"><span class="hs-identifier">w</span></span><span class="hs-operator">.</span><span class="hs-identifier">activityEnv</span><span>
+</span><span id="line-163"></span><span>    </span><span class="hs-keyword">let</span><span>
+</span><span id="line-164"></span><span>      </span><span id="local-6989586621680175460"><span class="annot"><a href="#local-6989586621680175460"><span class="hs-identifier hs-var hs-var">actEnv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Worker 'Real
+-&gt; ActivityInfo
+-&gt; ClientInterceptors
+-&gt; PayloadProcessor
+-&gt; actEnv
+-&gt; ActivityEnv actEnv
+forall env.
+Worker 'Real
+-&gt; ActivityInfo
+-&gt; ClientInterceptors
+-&gt; PayloadProcessor
+-&gt; env
+-&gt; ActivityEnv env
+</span><a href="Temporal.Activity.Definition.html#ActivityEnv"><span class="hs-identifier hs-var">ActivityEnv</span></a></span><span> </span><span class="annot"><span class="annottext">ActivityWorker actEnv
+</span><a href="#local-6989586621680175452"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">workerCore</span><span> </span><span class="annot"><span class="annottext">ActivityInfo
+</span><a href="#local-6989586621680175455"><span class="hs-identifier hs-var">info</span></a></span><span> </span><span class="annot"><span class="annottext">ActivityWorker actEnv
+</span><a href="#local-6989586621680175452"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">clientInterceptors</span><span> </span><span class="annot"><span class="annottext">ActivityWorker actEnv
+</span><a href="#local-6989586621680175452"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">payloadProcessor</span><span>
+</span><span id="line-165"></span><span>      </span><span id="local-6989586621680175462"><span class="annot"><a href="#local-6989586621680175462"><span class="hs-identifier hs-var hs-var">input</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-166"></span><span>        </span><span class="annot"><span class="annottext">Vector Payload
+-&gt; Map Text Payload -&gt; ActivityInfo -&gt; ExecuteActivityInput
+</span><a href="Temporal.Workflow.Types.html#ExecuteActivityInput"><span class="hs-identifier hs-var">ExecuteActivityInput</span></a></span><span>
+</span><span id="line-167"></span><span>          </span><span class="annot"><span class="annottext">Vector Payload
+</span><a href="#local-6989586621680175456"><span class="hs-identifier hs-var">args</span></a></span><span>
+</span><span id="line-168"></span><span>          </span><span class="annot"><span class="annottext">ActivityInfo
+</span><a href="#local-6989586621680175455"><span class="hs-identifier hs-var">info</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">headerFields</span><span>
+</span><span id="line-169"></span><span>          </span><span class="annot"><span class="annottext">ActivityInfo
+</span><a href="#local-6989586621680175455"><span class="hs-identifier hs-var">info</span></a></span><span>
+</span><span id="line-170"></span><span>    </span><span class="hs-comment">-- We mask here to ensure that the activity is definitely registered</span><span>
+</span><span id="line-171"></span><span>    </span><span class="hs-comment">-- before we start running it. This is important because we need to be able to cancel</span><span>
+</span><span id="line-172"></span><span>    </span><span class="hs-comment">-- it later if the orchestrator requests it.</span><span>
+</span><span id="line-173"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">mask_</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-174"></span><span>      </span><span id="local-6989586621680175465"><span class="annot"><a href="#local-6989586621680175465"><span class="hs-identifier hs-var">syncPoint</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">newEmptyMVar</span></span><span>
+</span><span id="line-175"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680175467"><span class="annot"><a href="#local-6989586621680175467"><span class="hs-identifier hs-var hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Worker 'Real -&gt; WorkerConfig
+forall (ty :: WorkerType). Worker ty -&gt; WorkerConfig
+</span><span class="hs-identifier hs-var">Core.getWorkerConfig</span></span><span> </span><span class="annot"><span class="annottext">ActivityWorker actEnv
+</span><a href="#local-6989586621680175452"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">workerCore</span><span>
+</span><span id="line-176"></span><span>      </span><span id="local-6989586621680175468"><span class="annot"><a href="#local-6989586621680175468"><span class="hs-identifier hs-var">runningActivity</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Temporal.Common.Async.html#asyncLabelled"><span class="hs-identifier hs-type">asyncLabelled</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">T.unpack</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.concat</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-string">&quot;temporal/worker/activity/start/&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-var">Core.namespace</span></span><span> </span><span class="annot"><a href="#local-6989586621680175467"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-string">&quot;/&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-var">Core.taskQueue</span></span><span> </span><span class="annot"><a href="#local-6989586621680175467"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-177"></span><span>        </span><span class="hs-special">(</span><span id="local-6989586621680175474"><span class="annot"><a href="#local-6989586621680175474"><span class="hs-identifier hs-var">ef</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier">Either</span></span><span> </span><span class="annot"><span class="hs-identifier">SomeException</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Either</span></span><span> </span><span class="annot"><span class="hs-identifier">String</span></span><span> </span><span class="annot"><span class="hs-identifier">Payload</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">liftIO</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">UnliftIO.trySyncOrAsync</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-178"></span><span>          </span><span class="annot"><span class="hs-identifier">w</span></span><span class="hs-operator">.</span><span class="hs-identifier">activityInboundInterceptors</span><span class="hs-operator">.</span><span class="hs-identifier">executeActivity</span><span> </span><span class="annot"><a href="#local-6989586621680175458"><span class="hs-identifier hs-type">env</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175462"><span class="hs-identifier hs-type">input</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621680175476"><span class="annot"><span class="annottext">actEnv
+</span><a href="#local-6989586621680175476"><span class="hs-identifier hs-var">env'</span></a></span></span><span> </span><span id="local-6989586621680175477"><span class="annot"><span class="annottext">ExecuteActivityInput
+</span><a href="#local-6989586621680175477"><span class="hs-identifier hs-var">input'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-179"></span><span>            </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Text
+-&gt; HashMap Text (ActivityDefinition actEnv)
+-&gt; Maybe (ActivityDefinition actEnv)
+forall k v. (Eq k, Hashable k) =&gt; k -&gt; HashMap k v -&gt; Maybe v
+</span><span class="hs-identifier hs-var">HashMap.lookup</span></span><span> </span><span class="annot"><span class="annottext">ActivityInfo
+</span><a href="#local-6989586621680175455"><span class="hs-identifier hs-var">info</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">activityType</span><span> </span><span class="annot"><span class="annottext">ActivityWorker actEnv
+</span><a href="#local-6989586621680175452"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">definitions</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-180"></span><span>              </span><span class="annot"><span class="annottext">Maybe (ActivityDefinition actEnv)
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RuntimeError -&gt; IO (Either String Payload)
+forall (m :: * -&gt; *) e a. (MonadIO m, Exception e) =&gt; e -&gt; m a
+</span><span class="hs-identifier hs-var">throwIO</span></span><span> </span><span class="annot"><span class="annottext">(RuntimeError -&gt; IO (Either String Payload))
+-&gt; RuntimeError -&gt; IO (Either String Payload)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; RuntimeError
+</span><a href="Temporal.Exception.html#RuntimeError"><span class="hs-identifier hs-var">RuntimeError</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Activity type not found: &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; String
+</span><span class="hs-identifier hs-var">T.unpack</span></span><span> </span><span class="annot"><span class="annottext">ActivityInfo
+</span><a href="#local-6989586621680175455"><span class="hs-identifier hs-var">info</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">activityType</span><span class="hs-special">)</span><span>
+</span><span id="line-181"></span><span>              </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><a href="Temporal.Activity.Definition.html#ActivityDefinition"><span class="hs-identifier hs-type">ActivityDefinition</span></a></span><span> </span><span class="hs-special">{</span><span id="local-6989586621680175479"><span id="local-6989586621680175480"><span class="annot"><span class="annottext">Text
+ActivityEnv actEnv
+-&gt; ExecuteActivityInput -&gt; IO (Either String Payload)
+activityName :: Text
+activityRun :: ActivityEnv actEnv
+-&gt; ExecuteActivityInput -&gt; IO (Either String Payload)
+activityRun :: forall env.
+ActivityDefinition env
+-&gt; ActivityEnv env
+-&gt; ExecuteActivityInput
+-&gt; IO (Either String Payload)
+activityName :: forall env. ActivityDefinition env -&gt; Text
+</span><a href="#local-6989586621680175479"><span class="hs-glyph hs-var hs-var hs-var hs-var">..</span></a></span></span></span><span class="hs-special">}</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-182"></span><span>                </span><span class="annot"><span class="annottext">ActivityEnv actEnv
+-&gt; ExecuteActivityInput -&gt; IO (Either String Payload)
+</span><a href="#local-6989586621680175480"><span class="hs-identifier hs-var">activityRun</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">actEnv -&gt; ActivityEnv actEnv
+</span><a href="#local-6989586621680175460"><span class="hs-identifier hs-var">actEnv</span></a></span><span> </span><span class="annot"><span class="annottext">actEnv
+</span><a href="#local-6989586621680175476"><span class="hs-identifier hs-var">env'</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ExecuteActivityInput
+</span><a href="#local-6989586621680175477"><span class="hs-identifier hs-var">input'</span></a></span><span>
+</span><span id="line-183"></span><span>                  </span><span class="annot"><span class="annottext">IO (Either String Payload) -&gt; IO () -&gt; IO (Either String Payload)
+forall (m :: * -&gt; *) a b. MonadUnliftIO m =&gt; m a -&gt; m b -&gt; m a
+</span><span class="hs-operator hs-var">`finally`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MVar () -&gt; IO ()
+forall (m :: * -&gt; *) a. MonadIO m =&gt; MVar a -&gt; m a
+</span><span class="hs-identifier hs-var">takeMVar</span></span><span> </span><span class="annot"><span class="annottext">MVar ()
+</span><a href="#local-6989586621680175465"><span class="hs-identifier hs-var">syncPoint</span></a></span><span> </span><span class="annot"><span class="annottext">IO () -&gt; IO () -&gt; IO ()
+forall a b. IO a -&gt; IO b -&gt; IO b
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
+</span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">STM () -&gt; IO ()
+forall (m :: * -&gt; *) a. MonadIO m =&gt; STM a -&gt; m a
+</span><span class="hs-identifier hs-var">atomically</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TVar (HashMap TaskToken (Async ()))
+-&gt; (HashMap TaskToken (Async ()) -&gt; HashMap TaskToken (Async ()))
+-&gt; STM ()
+forall a. TVar a -&gt; (a -&gt; a) -&gt; STM ()
+</span><span class="hs-identifier hs-var">modifyTVar'</span></span><span> </span><span class="annot"><span class="annottext">ActivityWorker actEnv
+</span><a href="#local-6989586621680175452"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">runningActivities</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TaskToken
+-&gt; HashMap TaskToken (Async ()) -&gt; HashMap TaskToken (Async ())
+forall k v. (Eq k, Hashable k) =&gt; k -&gt; HashMap k v -&gt; HashMap k v
+</span><span class="hs-identifier hs-var">HashMap.delete</span></span><span> </span><span class="annot"><span class="annottext">TaskToken
+</span><a href="#local-6989586621680175450"><span class="hs-identifier hs-var">tt</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-184"></span><span>        </span><span id="local-6989586621680175488"><span class="annot"><a href="#local-6989586621680175488"><span class="hs-identifier hs-var">completionMsg</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621680175474"><span class="hs-identifier hs-type">ef</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">first</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">toException</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">.</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#ValueError"><span class="hs-identifier hs-type">ValueError</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-185"></span><span>          </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621680175492"><span class="annot"><span class="annottext">err :: SomeException
+</span><a href="#local-6989586621680175492"><span class="hs-identifier hs-var">err</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SomeException</span></span><span> </span><span id="local-6989586621680175518"><span class="annot"><span class="annottext">e
+</span><a href="#local-6989586621680175518"><span class="hs-identifier hs-var">_wrappedErr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-186"></span><span>            </span><span class="hs-special">$</span><span class="annot"><span class="annottext">Int
+String
+LogLevel
+String -&gt; Text
+String -&gt; String -&gt; String -&gt; CharPos -&gt; CharPos -&gt; Loc
+Text -&gt; Text
+Loc -&gt; Text -&gt; LogLevel -&gt; Text -&gt; ActivityWorkerM actEnv m ()
+(Text -&gt; ActivityWorkerM actEnv m ())
+-&gt; (Text -&gt; Text) -&gt; Text -&gt; ActivityWorkerM actEnv m ()
+forall a. a -&gt; a
+forall msg.
+ToLogStr msg =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; ActivityWorkerM actEnv m ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+monadLoggerLog :: forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+id :: forall a. a -&gt; a
+. :: forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+pack :: String -&gt; Text
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">logDebug</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Text
+</span><span class="hs-identifier hs-var">T.pack</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SomeException -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621680175492"><span class="hs-identifier hs-var">err</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-187"></span><span>            </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680175519"><span class="annot"><span class="annottext">appFailure :: ApplicationFailure
+</span><a href="#local-6989586621680175519"><span class="hs-identifier hs-var hs-var">appFailure</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SomeException -&gt; [ApplicationFailureHandler] -&gt; ApplicationFailure
+</span><a href="Temporal.Exception.html#mkApplicationFailure"><span class="hs-identifier hs-var">mkApplicationFailure</span></a></span><span> </span><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621680175492"><span class="hs-identifier hs-var">err</span></a></span><span> </span><span class="annot"><span class="annottext">ActivityWorker actEnv
+</span><a href="#local-6989586621680175452"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">activityErrorConverters</span><span>
+</span><span id="line-188"></span><span>                </span><span id="local-6989586621680175521"><span class="annot"><span class="annottext">enrichedApplicationFailure :: Failure
+</span><a href="#local-6989586621680175521"><span class="hs-identifier hs-var hs-var">enrichedApplicationFailure</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ApplicationFailure -&gt; Failure
+</span><a href="Temporal.Exception.html#applicationFailureToFailureProto"><span class="hs-identifier hs-var">applicationFailureToFailureProto</span></a></span><span> </span><span class="annot"><span class="annottext">ApplicationFailure
+</span><a href="#local-6989586621680175519"><span class="hs-identifier hs-var">appFailure</span></a></span><span>
+</span><span id="line-189"></span><span>            </span><span class="annot"><span class="annottext">ActivityTaskCompletion
+-&gt; ActivityWorkerM actEnv m ActivityTaskCompletion
+forall a. a -&gt; ActivityWorkerM actEnv m a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(ActivityTaskCompletion
+ -&gt; ActivityWorkerM actEnv m ActivityTaskCompletion)
+-&gt; ActivityTaskCompletion
+-&gt; ActivityWorkerM actEnv m ActivityTaskCompletion
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-190"></span><span>              </span><span class="annot"><span class="annottext">ActivityTaskCompletion
+forall msg. Message msg =&gt; msg
+</span><span class="hs-identifier hs-var">defMessage</span></span><span>
+</span><span id="line-191"></span><span>                </span><span class="annot"><span class="annottext">ActivityTaskCompletion
+-&gt; (ActivityTaskCompletion -&gt; ActivityTaskCompletion)
+-&gt; ActivityTaskCompletion
+forall s t. s -&gt; (s -&gt; t) -&gt; t
+</span><span class="hs-operator hs-var">&amp;</span></span><span> </span><span class="annot"><span class="annottext">LensLike' f ActivityTaskCompletion ByteString
+forall {f :: * -&gt; *}.
+Identical f =&gt;
+LensLike' f ActivityTaskCompletion ByteString
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;taskToken&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">C.taskToken</span></span><span> </span><span class="annot"><span class="annottext">(forall {f :: * -&gt; *}.
+ Identical f =&gt;
+ LensLike' f ActivityTaskCompletion ByteString)
+-&gt; ByteString -&gt; ActivityTaskCompletion -&gt; ActivityTaskCompletion
+forall s t a b. Setter s t a b -&gt; b -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">.~</span></span><span> </span><span class="annot"><span class="annottext">TaskToken -&gt; ByteString
+</span><a href="Temporal.Common.html#rawTaskToken"><span class="hs-identifier hs-var">rawTaskToken</span></a></span><span> </span><span class="annot"><span class="annottext">TaskToken
+</span><a href="#local-6989586621680175450"><span class="hs-identifier hs-var">tt</span></a></span><span>
+</span><span id="line-192"></span><span>                </span><span class="annot"><span class="annottext">ActivityTaskCompletion
+-&gt; (ActivityTaskCompletion -&gt; ActivityTaskCompletion)
+-&gt; ActivityTaskCompletion
+forall s t. s -&gt; (s -&gt; t) -&gt; t
+</span><span class="hs-operator hs-var">&amp;</span></span><span> </span><span class="annot"><span class="annottext">LensLike' f ActivityTaskCompletion ActivityExecutionResult
+forall {f :: * -&gt; *}.
+Identical f =&gt;
+LensLike' f ActivityTaskCompletion ActivityExecutionResult
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;result&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">C.result</span></span><span> </span><span class="annot"><span class="annottext">(forall {f :: * -&gt; *}.
+ Identical f =&gt;
+ LensLike' f ActivityTaskCompletion ActivityExecutionResult)
+-&gt; ActivityExecutionResult
+-&gt; ActivityTaskCompletion
+-&gt; ActivityTaskCompletion
+forall s t a b. Setter s t a b -&gt; b -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">.~</span></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">SomeException -&gt; Maybe ActivityCancelReason
+forall e. Exception e =&gt; SomeException -&gt; Maybe e
+</span><span class="hs-identifier hs-var">fromException</span></span><span> </span><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621680175492"><span class="hs-identifier hs-var">err</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-193"></span><span>                  </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680175544"><span class="annot"><span class="annottext">ActivityCancelReason
+</span><a href="#local-6989586621680175544"><span class="hs-identifier hs-var">_cancelled</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Exception.html#ActivityCancelReason"><span class="hs-identifier hs-type">ActivityCancelReason</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-194"></span><span>                    </span><span class="annot"><span class="annottext">ActivityExecutionResult
+forall msg. Message msg =&gt; msg
+</span><span class="hs-identifier hs-var">defMessage</span></span><span>
+</span><span id="line-195"></span><span>                      </span><span class="annot"><span class="annottext">ActivityExecutionResult
+-&gt; (ActivityExecutionResult -&gt; ActivityExecutionResult)
+-&gt; ActivityExecutionResult
+forall s t. s -&gt; (s -&gt; t) -&gt; t
+</span><span class="hs-operator hs-var">&amp;</span></span><span> </span><span class="annot"><span class="annottext">LensLike' f ActivityExecutionResult Cancellation
+forall {f :: * -&gt; *}.
+Identical f =&gt;
+LensLike' f ActivityExecutionResult Cancellation
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;cancelled&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">AR.cancelled</span></span><span>
+</span><span id="line-196"></span><span>                        </span><span class="annot"><span class="annottext">(forall {f :: * -&gt; *}.
+ Identical f =&gt;
+ LensLike' f ActivityExecutionResult Cancellation)
+-&gt; Cancellation
+-&gt; ActivityExecutionResult
+-&gt; ActivityExecutionResult
+forall s t a b. Setter s t a b -&gt; b -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">.~</span></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">Cancellation
+forall msg. Message msg =&gt; msg
+</span><span class="hs-identifier hs-var">defMessage</span></span><span>
+</span><span id="line-197"></span><span>                              </span><span class="annot"><span class="annottext">Cancellation -&gt; (Cancellation -&gt; Cancellation) -&gt; Cancellation
+forall s t. s -&gt; (s -&gt; t) -&gt; t
+</span><span class="hs-operator hs-var">&amp;</span></span><span> </span><span class="annot"><span class="annottext">LensLike' f Cancellation Failure
+forall {f :: * -&gt; *}.
+Identical f =&gt;
+LensLike' f Cancellation Failure
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;failure&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">AR.failure</span></span><span>
+</span><span id="line-198"></span><span>                                </span><span class="annot"><span class="annottext">(forall {f :: * -&gt; *}.
+ Identical f =&gt;
+ LensLike' f Cancellation Failure)
+-&gt; Failure -&gt; Cancellation -&gt; Cancellation
+forall s t a b. Setter s t a b -&gt; b -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">.~</span></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">Failure
+forall msg. Message msg =&gt; msg
+</span><span class="hs-identifier hs-var">defMessage</span></span><span>
+</span><span id="line-199"></span><span>                                      </span><span class="annot"><span class="annottext">Failure -&gt; (Failure -&gt; Failure) -&gt; Failure
+forall s t. s -&gt; (s -&gt; t) -&gt; t
+</span><span class="hs-operator hs-var">&amp;</span></span><span> </span><span class="annot"><span class="annottext">LensLike' f Failure Text
+forall {f :: * -&gt; *}. Identical f =&gt; LensLike' f Failure Text
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;message&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">F.message</span></span><span> </span><span class="annot"><span class="annottext">(forall {f :: * -&gt; *}. Identical f =&gt; LensLike' f Failure Text)
+-&gt; Text -&gt; Failure -&gt; Failure
+forall s t a b. Setter s t a b -&gt; b -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">.~</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;Activity cancelled&quot;</span></span><span>
+</span><span id="line-200"></span><span>                                      </span><span class="annot"><span class="annottext">Failure -&gt; (Failure -&gt; Failure) -&gt; Failure
+forall s t. s -&gt; (s -&gt; t) -&gt; t
+</span><span class="hs-operator hs-var">&amp;</span></span><span> </span><span class="annot"><span class="annottext">LensLike' f Failure CanceledFailureInfo
+forall {f :: * -&gt; *}.
+Identical f =&gt;
+LensLike' f Failure CanceledFailureInfo
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;canceledFailureInfo&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">F.canceledFailureInfo</span></span><span>
+</span><span id="line-201"></span><span>                                        </span><span class="annot"><span class="annottext">(forall {f :: * -&gt; *}.
+ Identical f =&gt;
+ LensLike' f Failure CanceledFailureInfo)
+-&gt; CanceledFailureInfo -&gt; Failure -&gt; Failure
+forall s t a b. Setter s t a b -&gt; b -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">.~</span></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">CanceledFailureInfo
+forall msg. Message msg =&gt; msg
+</span><span class="hs-identifier hs-var">defMessage</span></span><span>
+</span><span id="line-202"></span><span>                                              </span><span class="hs-comment">-- FIXME: provide some details if we have them</span><span>
+</span><span id="line-203"></span><span>                                              </span><span class="annot"><span class="annottext">CanceledFailureInfo
+-&gt; (CanceledFailureInfo -&gt; CanceledFailureInfo)
+-&gt; CanceledFailureInfo
+forall s t. s -&gt; (s -&gt; t) -&gt; t
+</span><span class="hs-operator hs-var">&amp;</span></span><span> </span><span class="annot"><span class="annottext">LensLike' f CanceledFailureInfo Payloads
+forall {f :: * -&gt; *}.
+Identical f =&gt;
+LensLike' f CanceledFailureInfo Payloads
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;details&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">F.details</span></span><span> </span><span class="annot"><span class="annottext">(forall {f :: * -&gt; *}.
+ Identical f =&gt;
+ LensLike' f CanceledFailureInfo Payloads)
+-&gt; Payloads -&gt; CanceledFailureInfo -&gt; CanceledFailureInfo
+forall s t a b. Setter s t a b -&gt; b -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">.~</span></span><span> </span><span class="annot"><span class="annottext">Payloads
+forall msg. Message msg =&gt; msg
+</span><span class="hs-identifier hs-var">defMessage</span></span><span>
+</span><span id="line-204"></span><span>                                           </span><span class="hs-special">)</span><span>
+</span><span id="line-205"></span><span>                                   </span><span class="hs-special">)</span><span>
+</span><span id="line-206"></span><span>                           </span><span class="hs-special">)</span><span>
+</span><span id="line-207"></span><span>                  </span><span class="annot"><span class="annottext">Maybe ActivityCancelReason
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-208"></span><span>                    </span><span class="annot"><span class="annottext">ActivityExecutionResult
+forall msg. Message msg =&gt; msg
+</span><span class="hs-identifier hs-var">defMessage</span></span><span>
+</span><span id="line-209"></span><span>                      </span><span class="annot"><span class="annottext">ActivityExecutionResult
+-&gt; (ActivityExecutionResult -&gt; ActivityExecutionResult)
+-&gt; ActivityExecutionResult
+forall s t. s -&gt; (s -&gt; t) -&gt; t
+</span><span class="hs-operator hs-var">&amp;</span></span><span> </span><span class="annot"><span class="annottext">LensLike' f ActivityExecutionResult Failure
+forall {f :: * -&gt; *}.
+Identical f =&gt;
+LensLike' f ActivityExecutionResult Failure
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;failed&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">AR.failed</span></span><span>
+</span><span id="line-210"></span><span>                        </span><span class="annot"><span class="annottext">(forall {f :: * -&gt; *}.
+ Identical f =&gt;
+ LensLike' f ActivityExecutionResult Failure)
+-&gt; Failure -&gt; ActivityExecutionResult -&gt; ActivityExecutionResult
+forall s t a b. Setter s t a b -&gt; b -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">.~</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Failure
+forall msg. Message msg =&gt; msg
+</span><span class="hs-identifier hs-var">defMessage</span></span><span> </span><span class="annot"><span class="annottext">Failure -&gt; (Failure -&gt; Failure) -&gt; Failure
+forall s t. s -&gt; (s -&gt; t) -&gt; t
+</span><span class="hs-operator hs-var">&amp;</span></span><span> </span><span class="annot"><span class="annottext">LensLike' f Failure Failure
+forall {f :: * -&gt; *}. Identical f =&gt; LensLike' f Failure Failure
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;failure&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">AR.failure</span></span><span> </span><span class="annot"><span class="annottext">(forall {f :: * -&gt; *}. Identical f =&gt; LensLike' f Failure Failure)
+-&gt; Failure -&gt; Failure -&gt; Failure
+forall s t a b. Setter s t a b -&gt; b -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">.~</span></span><span> </span><span class="annot"><span class="annottext">Failure
+</span><a href="#local-6989586621680175521"><span class="hs-identifier hs-var">enrichedApplicationFailure</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-211"></span><span>          </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621680175593"><span class="annot"><span class="annottext">Payload
+</span><a href="#local-6989586621680175593"><span class="hs-identifier hs-var">ok</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-212"></span><span>            </span><span class="hs-special">$</span><span class="annot"><span class="annottext">Int
+String
+LogLevel
+String -&gt; Text
+String -&gt; String -&gt; String -&gt; CharPos -&gt; CharPos -&gt; Loc
+Text -&gt; Text
+Loc -&gt; Text -&gt; LogLevel -&gt; Text -&gt; ActivityWorkerM actEnv m ()
+(Text -&gt; ActivityWorkerM actEnv m ())
+-&gt; (Text -&gt; Text) -&gt; Text -&gt; ActivityWorkerM actEnv m ()
+forall a. a -&gt; a
+forall msg.
+ToLogStr msg =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; ActivityWorkerM actEnv m ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+monadLoggerLog :: forall (m :: * -&gt; *) msg.
+(MonadLogger m, ToLogStr msg) =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; m ()
+id :: forall a. a -&gt; a
+. :: forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+pack :: String -&gt; Text
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">logDebug</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;Got activity result&quot;</span></span><span>
+</span><span id="line-213"></span><span>            </span><span id="local-6989586621680175594"><span class="annot"><a href="#local-6989586621680175594"><span class="hs-identifier hs-var">ok'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Payload -&gt; ActivityWorkerM actEnv m Payload
+forall a. IO a -&gt; ActivityWorkerM actEnv m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO Payload -&gt; ActivityWorkerM actEnv m Payload)
+-&gt; IO Payload -&gt; ActivityWorkerM actEnv m Payload
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PayloadProcessor -&gt; Payload -&gt; IO Payload
+</span><a href="Temporal.Payload.html#payloadProcessorEncode"><span class="hs-identifier hs-var">payloadProcessorEncode</span></a></span><span> </span><span class="annot"><span class="annottext">ActivityWorker actEnv
+</span><a href="#local-6989586621680175452"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">payloadProcessor</span><span> </span><span class="annot"><span class="annottext">Payload
+</span><a href="#local-6989586621680175593"><span class="hs-identifier hs-var">ok</span></a></span><span>
+</span><span id="line-214"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span>
+</span><span id="line-215"></span><span>              </span><span class="annot"><span class="hs-identifier hs-type">defMessage</span></span><span>
+</span><span id="line-216"></span><span>                </span><span class="annot"><span class="hs-operator hs-type">&amp;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.taskToken</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">.~</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#rawTaskToken"><span class="hs-identifier hs-var">rawTaskToken</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175450"><span class="hs-identifier hs-type">tt</span></a></span><span>
+</span><span id="line-217"></span><span>                </span><span class="annot"><span class="hs-operator hs-type">&amp;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">C.result</span></span><span>
+</span><span id="line-218"></span><span>                  </span><span class="annot"><span class="hs-operator hs-type">.~</span></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">defMessage</span></span><span>
+</span><span id="line-219"></span><span>                        </span><span class="annot"><span class="hs-operator hs-type">&amp;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AR.completed</span></span><span>
+</span><span id="line-220"></span><span>                          </span><span class="annot"><span class="hs-operator hs-type">.~</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">defMessage</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">&amp;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AR.result</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">.~</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#convertToProtoPayload"><span class="hs-identifier hs-type">convertToProtoPayload</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175594"><span class="hs-identifier hs-type">ok'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-221"></span><span>                     </span><span class="hs-special">)</span><span>
+</span><span id="line-222"></span><span>        </span><span class="hs-special">$</span><span class="annot"><span class="hs-identifier hs-type">logDebug</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;Activity completion message: &quot;</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.pack</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">show</span></span><span> </span><span class="annot"><a href="#local-6989586621680175488"><span class="hs-identifier hs-type">completionMsg</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-223"></span><span>        </span><span id="local-6989586621680175621"><span class="annot"><a href="#local-6989586621680175621"><span class="hs-identifier hs-var">completionResult</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">liftIO</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Core.completeActivityTask</span></span><span> </span><span class="annot"><span class="hs-identifier">w</span></span><span class="hs-operator">.</span><span class="hs-identifier">workerCore</span><span> </span><span class="annot"><a href="#local-6989586621680175488"><span class="hs-identifier hs-type">completionMsg</span></a></span><span>
+</span><span id="line-224"></span><span>        </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621680175621"><span class="hs-identifier hs-type">completionResult</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-225"></span><span>          </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621680175623"><span class="annot"><span class="annottext">WorkerError
+</span><a href="#local-6989586621680175623"><span class="hs-identifier hs-var">err</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">WorkerError -&gt; ActivityWorkerM actEnv m ()
+forall (m :: * -&gt; *) e a. (MonadIO m, Exception e) =&gt; e -&gt; m a
+</span><span class="hs-identifier hs-var">throwIO</span></span><span> </span><span class="annot"><span class="annottext">WorkerError
+</span><a href="#local-6989586621680175623"><span class="hs-identifier hs-var">err</span></a></span><span>
+</span><span id="line-226"></span><span>          </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span class="annot"><span class="annottext">()
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">() -&gt; ActivityWorkerM actEnv m ()
+forall a. a -&gt; ActivityWorkerM actEnv m a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-227"></span><span>
+</span><span id="line-228"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">atomically</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">modifyTVar'</span></span><span> </span><span class="annot"><span class="hs-identifier">w</span></span><span class="hs-operator">.</span><span class="hs-identifier">runningActivities</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HashMap.insert</span></span><span> </span><span class="annot"><a href="#local-6989586621680175450"><span class="hs-identifier hs-type">tt</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175468"><span class="hs-identifier hs-type">runningActivity</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-229"></span><span>      </span><span class="hs-comment">-- We should only be throwing this exception if the activity has a logical error</span><span>
+</span><span id="line-230"></span><span>      </span><span class="hs-comment">-- that is an internal error to the Temporal worker. If the activity throws an</span><span>
+</span><span id="line-231"></span><span>      </span><span class="hs-comment">-- exception, that should be caught and fed to completeActivityTask.</span><span>
+</span><span id="line-232"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-233"></span><span>      </span><span class="hs-comment">-- We use link here to kill the worker thread if the activity throws an exception.</span><span>
+</span><span id="line-234"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">link</span></span><span> </span><span class="annot"><a href="#local-6989586621680175468"><span class="hs-identifier hs-type">runningActivity</span></a></span><span>
+</span><span id="line-235"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">putMVar</span></span><span> </span><span class="annot"><a href="#local-6989586621680175465"><span class="hs-identifier hs-type">syncPoint</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-236"></span><span>
+</span><span id="line-237"></span><span>
+</span><span id="line-238"></span><span id="local-6989586621680174761"><span id="local-6989586621680174762"><span class="annot"><a href="Temporal.Activity.Worker.html#applyActivityTaskCancel"><span class="hs-identifier hs-type">applyActivityTaskCancel</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadUnliftIO</span></span><span> </span><span class="annot"><a href="#local-6989586621680174761"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadLogger</span></span><span> </span><span class="annot"><a href="#local-6989586621680174761"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Temporal.Common.html#TaskToken"><span class="hs-identifier hs-type">TaskToken</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AT.Cancel</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Activity.Worker.html#ActivityWorkerM"><span class="hs-identifier hs-type">ActivityWorkerM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174762"><span class="hs-identifier hs-type">actEnv</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680174761"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-239"></span><span id="applyActivityTaskCancel"><span class="annot"><span class="annottext">applyActivityTaskCancel :: forall (m :: * -&gt; *) actEnv.
+(MonadUnliftIO m, MonadLogger m) =&gt;
+TaskToken -&gt; Cancel -&gt; ActivityWorkerM actEnv m ()
+</span><a href="Temporal.Activity.Worker.html#applyActivityTaskCancel"><span class="hs-identifier hs-var hs-var">applyActivityTaskCancel</span></a></span></span><span> </span><span id="local-6989586621680175658"><span class="annot"><span class="annottext">TaskToken
+</span><a href="#local-6989586621680175658"><span class="hs-identifier hs-var">tt</span></a></span></span><span> </span><span id="local-6989586621680175659"><span class="annot"><span class="annottext">Cancel
+</span><a href="#local-6989586621680175659"><span class="hs-identifier hs-var">msg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-240"></span><span>  </span><span id="local-6989586621680175660"><span class="annot"><a href="#local-6989586621680175660"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ActivityWorkerM actEnv m (ActivityWorker actEnv)
+forall r (m :: * -&gt; *). MonadReader r m =&gt; m r
+</span><span class="hs-identifier hs-var">ask</span></span><span>
+</span><span id="line-241"></span><span>  </span><span class="hs-special">$</span><span class="annot"><span class="hs-identifier hs-type">logDebug</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Cancelling activity: &quot;</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.pack</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">show</span></span><span> </span><span class="annot"><a href="#local-6989586621680175658"><span class="hs-identifier hs-type">tt</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-242"></span><span>  </span><span id="local-6989586621680175661"><span class="annot"><a href="#local-6989586621680175661"><span class="hs-identifier hs-var">running</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">readTVarIO</span></span><span> </span><span class="annot"><span class="hs-identifier">w</span></span><span class="hs-operator">.</span><span class="hs-identifier">runningActivities</span><span>
+</span><span id="line-243"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680175662"><span class="annot"><a href="#local-6989586621680175662"><span class="hs-identifier hs-var hs-var">cancelReason</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Cancel
+</span><a href="#local-6989586621680175659"><span class="hs-identifier hs-var">msg</span></a></span><span> </span><span class="annot"><span class="annottext">Cancel
+-&gt; FoldLike
+     ActivityCancelReason
+     Cancel
+     Cancel
+     ActivityCancelReason
+     ActivityCancelReason
+-&gt; ActivityCancelReason
+forall s a t b. s -&gt; FoldLike a s t a b -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">FoldLike
+  ActivityCancelReason
+  Cancel
+  Cancel
+  ActivityCancelReason
+  ActivityCancelReason
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;reason&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">AT.reason</span></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-244"></span><span>        </span><span class="annot"><span class="annottext">ActivityCancelReason
+</span><span class="hs-identifier hs-var">AT.NOT_FOUND</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ActivityCancelReason
+</span><a href="Temporal.Exception.html#NotFound"><span class="hs-identifier hs-var">NotFound</span></a></span><span>
+</span><span id="line-245"></span><span>        </span><span class="annot"><span class="annottext">ActivityCancelReason
+</span><span class="hs-identifier hs-var">AT.CANCELLED</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ActivityCancelReason
+</span><a href="Temporal.Exception.html#CancelRequested"><span class="hs-identifier hs-var">CancelRequested</span></a></span><span>
+</span><span id="line-246"></span><span>        </span><span class="annot"><span class="annottext">ActivityCancelReason
+</span><span class="hs-identifier hs-var">AT.TIMED_OUT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ActivityCancelReason
+</span><a href="Temporal.Exception.html#Timeout"><span class="hs-identifier hs-var">Timeout</span></a></span><span>
+</span><span id="line-247"></span><span>        </span><span class="annot"><span class="annottext">ActivityCancelReason
+</span><span class="hs-identifier hs-var">AT.WORKER_SHUTDOWN</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ActivityCancelReason
+</span><a href="Temporal.Exception.html#WorkerShutdown"><span class="hs-identifier hs-var">WorkerShutdown</span></a></span><span>
+</span><span id="line-248"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">AT.ActivityCancelReason'Unrecognized</span></span><span> </span><span class="annot"><span class="annottext">ActivityCancelReason'UnrecognizedValue
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ActivityCancelReason
+</span><a href="Temporal.Exception.html#UnknownCancellationReason"><span class="hs-identifier hs-var">UnknownCancellationReason</span></a></span><span>
+</span><span id="line-249"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">forM_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HashMap.lookup</span></span><span> </span><span class="annot"><a href="#local-6989586621680175658"><span class="hs-identifier hs-type">tt</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175661"><span class="hs-identifier hs-type">running</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621680175673"><span class="annot"><span class="annottext">Async ()
+</span><a href="#local-6989586621680175673"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-250"></span><span>    </span><span class="annot"><span class="annottext">Async () -&gt; ActivityCancelReason -&gt; ActivityWorkerM actEnv m ()
+forall e (m :: * -&gt; *) a.
+(Exception e, MonadIO m) =&gt;
+Async a -&gt; e -&gt; m ()
+</span><span class="hs-identifier hs-var">cancelWith</span></span><span> </span><span class="annot"><span class="annottext">Async ()
+</span><a href="#local-6989586621680175673"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">ActivityCancelReason
+</span><a href="#local-6989586621680175662"><span class="hs-identifier hs-var">cancelReason</span></a></span><span> </span><span class="annot"><span class="annottext">ActivityWorkerM actEnv m ()
+-&gt; ActivityWorkerM actEnv m () -&gt; ActivityWorkerM actEnv m ()
+forall (m :: * -&gt; *) a b. MonadUnliftIO m =&gt; m a -&gt; m b -&gt; m a
+</span><span class="hs-operator hs-var">`finally`</span></span><span> </span><span class="annot"><span class="annottext">STM () -&gt; ActivityWorkerM actEnv m ()
+forall (m :: * -&gt; *) a. MonadIO m =&gt; STM a -&gt; m a
+</span><span class="hs-identifier hs-var">atomically</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TVar (HashMap TaskToken (Async ()))
+-&gt; (HashMap TaskToken (Async ()) -&gt; HashMap TaskToken (Async ()))
+-&gt; STM ()
+forall a. TVar a -&gt; (a -&gt; a) -&gt; STM ()
+</span><span class="hs-identifier hs-var">modifyTVar'</span></span><span> </span><span class="annot"><span class="annottext">ActivityWorker actEnv
+</span><a href="#local-6989586621680175660"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">runningActivities</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TaskToken
+-&gt; HashMap TaskToken (Async ()) -&gt; HashMap TaskToken (Async ())
+forall k v. (Eq k, Hashable k) =&gt; k -&gt; HashMap k v -&gt; HashMap k v
+</span><span class="hs-identifier hs-var">HashMap.delete</span></span><span> </span><span class="annot"><span class="annottext">TaskToken
+</span><a href="#local-6989586621680175658"><span class="hs-identifier hs-var">tt</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-251"></span></pre></body></html>

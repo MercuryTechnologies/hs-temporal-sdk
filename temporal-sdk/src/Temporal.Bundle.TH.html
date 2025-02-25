@@ -1,0 +1,40 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DerivingVia #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE FlexibleInstances #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE PolyKinds #-}</span><span>
+</span><span id="line-7"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
+</span><span id="line-8"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-9"></span><span class="hs-pragma">{-# LANGUAGE TypeFamilies #-}</span><span>
+</span><span id="line-10"></span><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="annot"><span class="hs-comment">{- |
+Module: Temporal.Bundle.TH
+Description: Reduce Temporal.Bundle boilerplate with Template Haskell.
+
+This module provides Template Haskell functions for generating the
+boilerplate required to use the Temporal.Bundle module.
+
+This is generally the easiest way to define groups of related
+activities and workflows with minimal boilerplate.
+
+See 'Temporal.Bundle' for more example code.
+-}</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Bundle.TH.html"><span class="hs-identifier">Temporal.Bundle.TH</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-25"></span><span>  </span><span class="annot"><a href="Temporal.Bundle.TH.html#temporalBundle"><span class="hs-identifier">temporalBundle</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-26"></span><span>  </span><span class="annot"><a href="Data.EvalRecord.TH.html#DeclareRecordConfig"><span class="hs-identifier">DeclareRecordConfig</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-27"></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.EvalRecord.TH.html"><span class="hs-identifier">Data.EvalRecord.TH</span></a></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">DecsQ</span></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="annot"><span class="hs-comment">{- | Defines a synonym for the bare type with the same name.
+The strippable definition is suffixed by B, and the covered type is suffixed by H.
+-}</span></span><span>
+</span><span id="line-36"></span><span class="annot"><a href="Temporal.Bundle.TH.html#temporalBundle"><span class="hs-identifier hs-type">temporalBundle</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DecsQ</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DecsQ</span></span><span>
+</span><span id="line-37"></span><span id="temporalBundle"><span class="annot"><span class="annottext">temporalBundle :: DecsQ -&gt; DecsQ
+</span><a href="Temporal.Bundle.TH.html#temporalBundle"><span class="hs-identifier hs-var hs-var">temporalBundle</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DecsQ -&gt; DecsQ
+</span><a href="Data.EvalRecord.TH.html#mkEvalRecord"><span class="hs-identifier hs-var">mkEvalRecord</span></a></span><span>
+</span><span id="line-38"></span></pre></body></html>

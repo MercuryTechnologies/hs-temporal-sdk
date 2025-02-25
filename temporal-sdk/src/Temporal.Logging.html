@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621680160248"><span id="local-6989586621680160249"></span></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Logging.html"><span class="hs-identifier">Temporal.Logging</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.HashMap.Strict</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">HashMap</span></span><span class="hs-special">)</span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Time.Clock</span></span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">data</span><span> </span><span id="Level"><span class="annot"><a href="Temporal.Logging.html#Level"><span class="hs-identifier hs-var">Level</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Debug"><span class="annot"><a href="Temporal.Logging.html#Debug"><span class="hs-identifier hs-var">Debug</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Info"><span class="annot"><a href="Temporal.Logging.html#Info"><span class="hs-identifier hs-var">Info</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Warn"><span class="annot"><a href="Temporal.Logging.html#Warn"><span class="hs-identifier hs-var">Warn</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Error"><span class="annot"><a href="Temporal.Logging.html#Error"><span class="hs-identifier hs-var">Error</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Fatal"><span class="annot"><a href="Temporal.Logging.html#Fatal"><span class="hs-identifier hs-var">Fatal</span></a></span></span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680160256"><span id="local-6989586621680160261"><span class="annot"><span class="annottext">Level -&gt; Level -&gt; Bool
+(Level -&gt; Level -&gt; Bool) -&gt; (Level -&gt; Level -&gt; Bool) -&gt; Eq Level
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: Level -&gt; Level -&gt; Bool
+== :: Level -&gt; Level -&gt; Bool
+$c/= :: Level -&gt; Level -&gt; Bool
+/= :: Level -&gt; Level -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680160268"><span id="local-6989586621680160272"><span id="local-6989586621680160276"><span id="local-6989586621680160280"><span id="local-6989586621680160283"><span id="local-6989586621680160286"><span id="local-6989586621680160289"><span class="annot"><span class="annottext">Eq Level
+Eq Level =&gt;
+(Level -&gt; Level -&gt; Ordering)
+-&gt; (Level -&gt; Level -&gt; Bool)
+-&gt; (Level -&gt; Level -&gt; Bool)
+-&gt; (Level -&gt; Level -&gt; Bool)
+-&gt; (Level -&gt; Level -&gt; Bool)
+-&gt; (Level -&gt; Level -&gt; Level)
+-&gt; (Level -&gt; Level -&gt; Level)
+-&gt; Ord Level
+Level -&gt; Level -&gt; Bool
+Level -&gt; Level -&gt; Ordering
+Level -&gt; Level -&gt; Level
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: Level -&gt; Level -&gt; Ordering
+compare :: Level -&gt; Level -&gt; Ordering
+$c&lt; :: Level -&gt; Level -&gt; Bool
+&lt; :: Level -&gt; Level -&gt; Bool
+$c&lt;= :: Level -&gt; Level -&gt; Bool
+&lt;= :: Level -&gt; Level -&gt; Bool
+$c&gt; :: Level -&gt; Level -&gt; Bool
+&gt; :: Level -&gt; Level -&gt; Bool
+$c&gt;= :: Level -&gt; Level -&gt; Bool
+&gt;= :: Level -&gt; Level -&gt; Bool
+$cmax :: Level -&gt; Level -&gt; Level
+max :: Level -&gt; Level -&gt; Level
+$cmin :: Level -&gt; Level -&gt; Level
+min :: Level -&gt; Level -&gt; Level
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680160297"><span id="local-6989586621680160299"><span id="local-6989586621680160303"><span class="annot"><span class="annottext">Int -&gt; Level -&gt; ShowS
+[Level] -&gt; ShowS
+Level -&gt; String
+(Int -&gt; Level -&gt; ShowS)
+-&gt; (Level -&gt; String) -&gt; ([Level] -&gt; ShowS) -&gt; Show Level
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; Level -&gt; ShowS
+showsPrec :: Int -&gt; Level -&gt; ShowS
+$cshow :: Level -&gt; String
+show :: Level -&gt; String
+$cshowList :: [Level] -&gt; ShowS
+showList :: [Level] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680160308"><span id="local-6989586621680160312"><span id="local-6989586621680160315"><span id="local-6989586621680160323"><span class="annot"><span class="annottext">ReadPrec [Level]
+ReadPrec Level
+Int -&gt; ReadS Level
+ReadS [Level]
+(Int -&gt; ReadS Level)
+-&gt; ReadS [Level]
+-&gt; ReadPrec Level
+-&gt; ReadPrec [Level]
+-&gt; Read Level
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+$creadsPrec :: Int -&gt; ReadS Level
+readsPrec :: Int -&gt; ReadS Level
+$creadList :: ReadS [Level]
+readList :: ReadS [Level]
+$creadPrec :: ReadPrec Level
+readPrec :: ReadPrec Level
+$creadListPrec :: ReadPrec [Level]
+readListPrec :: ReadPrec [Level]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680160330"><span id="local-6989586621680160339"><span id="local-6989586621680160346"><span id="local-6989586621680160360"><span id="local-6989586621680160363"><span id="local-6989586621680160368"><span id="local-6989586621680160374"><span id="local-6989586621680160378"><span class="annot"><span class="annottext">Int -&gt; Level
+Level -&gt; Int
+Level -&gt; [Level]
+Level -&gt; Level
+Level -&gt; Level -&gt; [Level]
+Level -&gt; Level -&gt; Level -&gt; [Level]
+(Level -&gt; Level)
+-&gt; (Level -&gt; Level)
+-&gt; (Int -&gt; Level)
+-&gt; (Level -&gt; Int)
+-&gt; (Level -&gt; [Level])
+-&gt; (Level -&gt; Level -&gt; [Level])
+-&gt; (Level -&gt; Level -&gt; [Level])
+-&gt; (Level -&gt; Level -&gt; Level -&gt; [Level])
+-&gt; Enum Level
+forall a.
+(a -&gt; a)
+-&gt; (a -&gt; a)
+-&gt; (Int -&gt; a)
+-&gt; (a -&gt; Int)
+-&gt; (a -&gt; [a])
+-&gt; (a -&gt; a -&gt; [a])
+-&gt; (a -&gt; a -&gt; [a])
+-&gt; (a -&gt; a -&gt; a -&gt; [a])
+-&gt; Enum a
+$csucc :: Level -&gt; Level
+succ :: Level -&gt; Level
+$cpred :: Level -&gt; Level
+pred :: Level -&gt; Level
+$ctoEnum :: Int -&gt; Level
+toEnum :: Int -&gt; Level
+$cfromEnum :: Level -&gt; Int
+fromEnum :: Level -&gt; Int
+$cenumFrom :: Level -&gt; [Level]
+enumFrom :: Level -&gt; [Level]
+$cenumFromThen :: Level -&gt; Level -&gt; [Level]
+enumFromThen :: Level -&gt; Level -&gt; [Level]
+$cenumFromTo :: Level -&gt; Level -&gt; [Level]
+enumFromTo :: Level -&gt; Level -&gt; [Level]
+$cenumFromThenTo :: Level -&gt; Level -&gt; Level -&gt; [Level]
+enumFromThenTo :: Level -&gt; Level -&gt; Level -&gt; [Level]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680160386"><span id="local-6989586621680160388"><span class="annot"><span class="annottext">Level
+Level -&gt; Level -&gt; Bounded Level
+forall a. a -&gt; a -&gt; Bounded a
+$cminBound :: Level
+minBound :: Level
+$cmaxBound :: Level
+maxBound :: Level
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Bounded</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">data</span><span> </span><span id="LogItem"><span class="annot"><a href="Temporal.Logging.html#LogItem"><span class="hs-identifier hs-var">LogItem</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="LogItem"><span class="annot"><a href="Temporal.Logging.html#LogItem"><span class="hs-identifier hs-var">LogItem</span></a></span></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="message"><span class="annot"><span class="annottext">LogItem -&gt; Text
+</span><a href="Temporal.Logging.html#message"><span class="hs-identifier hs-var hs-var">message</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="timestamp"><span class="annot"><span class="annottext">LogItem -&gt; UTCTime
+</span><a href="Temporal.Logging.html#timestamp"><span class="hs-identifier hs-var hs-var">timestamp</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">UTCTime</span></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="level"><span class="annot"><span class="annottext">LogItem -&gt; Level
+</span><a href="Temporal.Logging.html#level"><span class="hs-identifier hs-var hs-var">level</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Temporal.Logging.html#Level"><span class="hs-identifier hs-type">Level</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="fields"><span class="annot"><span class="annottext">LogItem -&gt; HashMap Text Text
+</span><a href="Temporal.Logging.html#fields"><span class="hs-identifier hs-var hs-var">fields</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HashMap</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- -- The module this message originated from</span><span>
+</span><span id="line-20"></span><span class="hs-comment">-- pub target: String,</span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- -- Log message</span><span>
+</span><span id="line-22"></span><span class="hs-comment">-- pub message: String,</span><span>
+</span><span id="line-23"></span><span class="hs-comment">-- -- Time log was generated (not when it was exported to lang)</span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- pub timestamp: SystemTime,</span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- -- Message level</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- pub level: Level,</span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- -- Arbitrary k/v pairs (span k/vs are collapsed with event k/vs here). We could change this</span><span>
+</span><span id="line-28"></span><span class="hs-comment">-- -- to include them in `span_contexts` instead, but there's probably not much value for log</span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- -- forwarding.</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- pub fields: HashMap&lt;String, serde_json::Value&gt;,</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- /// A list of the outermost to the innermost span names</span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- pub span_contexts: Vec&lt;String&gt;,</span><span>
+</span><span id="line-33"></span></pre></body></html>

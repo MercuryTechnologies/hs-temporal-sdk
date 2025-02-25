@@ -1,0 +1,284 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE FlexibleInstances #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE TypeFamilies #-}</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Internal.FFI.html"><span class="hs-identifier">Temporal.Internal.FFI</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Concurrent</span></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Exception</span></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">ByteString</span></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">ByteString</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Coerce</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Kind</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Type</span></span><span class="hs-special">)</span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Proxy</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Text</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text.Foreign</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Text</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Storable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Vector</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Word</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.C.String</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.C.Types</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.ForeignPtr</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.Marshal.Alloc</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.Marshal.Utils</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Marshal</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.Ptr</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.StablePtr</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.Storable</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Conc</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">PrimMVar</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">newStablePtrPrimMVar</span></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html"><span class="hs-identifier">Temporal.Core.CTypes</span></a></span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span id="local-6989586621679251927"><span id="local-6989586621679251931"><span class="annot"><a href="Temporal.Internal.FFI.html#withCArray"><span class="hs-identifier hs-type">withCArray</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Storable</span></span><span> </span><span class="annot"><a href="#local-6989586621679251927"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector.Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679251927"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ptr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Core.CTypes.html#CArray"><span class="hs-identifier hs-type">CArray</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679251927"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679251931"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679251931"><span class="hs-identifier hs-type">b</span></a></span></span></span><span>
+</span><span id="line-34"></span><span id="withCArray"><span class="annot"><span class="annottext">withCArray :: forall a b.
+Storable a =&gt;
+Vector a -&gt; (Ptr (CArray a) -&gt; IO b) -&gt; IO b
+</span><a href="Temporal.Internal.FFI.html#withCArray"><span class="hs-identifier hs-var hs-var">withCArray</span></a></span></span><span> </span><span id="local-6989586621679252021"><span class="annot"><span class="annottext">Vector a
+</span><a href="#local-6989586621679252021"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679252022"><span class="annot"><span class="annottext">Ptr (CArray a) -&gt; IO b
+</span><a href="#local-6989586621679252022"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector a -&gt; (Ptr a -&gt; IO b) -&gt; IO b
+forall a b. Storable a =&gt; Vector a -&gt; (Ptr a -&gt; IO b) -&gt; IO b
+</span><span class="hs-identifier hs-var">Vector.unsafeWith</span></span><span> </span><span class="annot"><span class="annottext">Vector a
+</span><a href="#local-6989586621679252021"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr a -&gt; IO b) -&gt; IO b) -&gt; (Ptr a -&gt; IO b) -&gt; IO b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679252024"><span class="annot"><span class="annottext">Ptr a
+</span><a href="#local-6989586621679252024"><span class="hs-identifier hs-var">vPtr</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-35"></span><span>  </span><span class="annot"><span class="annottext">CArray a -&gt; (Ptr (CArray a) -&gt; IO b) -&gt; IO b
+forall a b. Storable a =&gt; a -&gt; (Ptr a -&gt; IO b) -&gt; IO b
+</span><span class="hs-identifier hs-var">Marshal.with</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr a -&gt; Word64 -&gt; CArray a
+forall a. Ptr a -&gt; Word64 -&gt; CArray a
+</span><a href="Temporal.Core.CTypes.html#CArray"><span class="hs-identifier hs-var">CArray</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr a
+</span><a href="#local-6989586621679252024"><span class="hs-identifier hs-var">vPtr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Word64
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector a -&gt; Int
+forall a. Storable a =&gt; Vector a -&gt; Int
+</span><span class="hs-identifier hs-var">Vector.length</span></span><span> </span><span class="annot"><span class="annottext">Vector a
+</span><a href="#local-6989586621679252021"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Ptr (CArray a) -&gt; IO b
+</span><a href="#local-6989586621679252022"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span id="local-6989586621679251948"><span class="annot"><a href="Temporal.Internal.FFI.html#withCArrayBS"><span class="hs-identifier hs-type">withCArrayBS</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ByteString</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ptr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Core.CTypes.html#CArray"><span class="hs-identifier hs-type">CArray</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word8</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679251948"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679251948"><span class="hs-identifier hs-type">b</span></a></span></span><span>
+</span><span id="line-39"></span><span id="withCArrayBS"><span class="annot"><span class="annottext">withCArrayBS :: forall b. ByteString -&gt; (Ptr (CArray Word8) -&gt; IO b) -&gt; IO b
+</span><a href="Temporal.Internal.FFI.html#withCArrayBS"><span class="hs-identifier hs-var hs-var">withCArrayBS</span></a></span></span><span> </span><span id="local-6989586621679252034"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679252034"><span class="hs-identifier hs-var">bs</span></a></span></span><span> </span><span id="local-6989586621679252035"><span class="annot"><span class="annottext">Ptr (CArray Word8) -&gt; IO b
+</span><a href="#local-6989586621679252035"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; (CStringLen -&gt; IO b) -&gt; IO b
+forall a. ByteString -&gt; (CStringLen -&gt; IO a) -&gt; IO a
+</span><span class="hs-identifier hs-var">ByteString.useAsCStringLen</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679252034"><span class="hs-identifier hs-var">bs</span></a></span><span> </span><span class="annot"><span class="annottext">((CStringLen -&gt; IO b) -&gt; IO b) -&gt; (CStringLen -&gt; IO b) -&gt; IO b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679252037"><span class="annot"><span class="annottext">Ptr CChar
+</span><a href="#local-6989586621679252037"><span class="hs-identifier hs-var">bytes</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679252038"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679252038"><span class="hs-identifier hs-var">len</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-40"></span><span>  </span><span class="annot"><span class="annottext">CArray Word8 -&gt; (Ptr (CArray Word8) -&gt; IO b) -&gt; IO b
+forall a b. Storable a =&gt; a -&gt; (Ptr a -&gt; IO b) -&gt; IO b
+</span><span class="hs-identifier hs-var">Marshal.with</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr Word8 -&gt; Word64 -&gt; CArray Word8
+forall a. Ptr a -&gt; Word64 -&gt; CArray a
+</span><a href="Temporal.Core.CTypes.html#CArray"><span class="hs-identifier hs-var">CArray</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr CChar -&gt; Ptr Word8
+forall a b. Ptr a -&gt; Ptr b
+</span><span class="hs-identifier hs-var">castPtr</span></span><span> </span><span class="annot"><span class="annottext">Ptr CChar
+</span><a href="#local-6989586621679252037"><span class="hs-identifier hs-var">bytes</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Word64
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679252038"><span class="hs-identifier hs-var">len</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Ptr (CArray Word8) -&gt; IO b
+</span><a href="#local-6989586621679252035"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span id="local-6989586621679251956"><span class="annot"><a href="Temporal.Internal.FFI.html#withCArrayText"><span class="hs-identifier hs-type">withCArrayText</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ptr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Core.CTypes.html#CArray"><span class="hs-identifier hs-type">CArray</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word8</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679251956"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679251956"><span class="hs-identifier hs-type">b</span></a></span></span><span>
+</span><span id="line-44"></span><span id="withCArrayText"><span class="annot"><span class="annottext">withCArrayText :: forall b. Text -&gt; (Ptr (CArray Word8) -&gt; IO b) -&gt; IO b
+</span><a href="Temporal.Internal.FFI.html#withCArrayText"><span class="hs-identifier hs-var hs-var">withCArrayText</span></a></span></span><span> </span><span id="local-6989586621679252045"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679252045"><span class="hs-identifier hs-var">txt</span></a></span></span><span> </span><span id="local-6989586621679252046"><span class="annot"><span class="annottext">Ptr (CArray Word8) -&gt; IO b
+</span><a href="#local-6989586621679252046"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; (CStringLen -&gt; IO b) -&gt; IO b
+forall a. Text -&gt; (CStringLen -&gt; IO a) -&gt; IO a
+</span><span class="hs-identifier hs-var">Text.withCStringLen</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679252045"><span class="hs-identifier hs-var">txt</span></a></span><span> </span><span class="annot"><span class="annottext">((CStringLen -&gt; IO b) -&gt; IO b) -&gt; (CStringLen -&gt; IO b) -&gt; IO b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679252048"><span class="annot"><span class="annottext">Ptr CChar
+</span><a href="#local-6989586621679252048"><span class="hs-identifier hs-var">bytes</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679252049"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679252049"><span class="hs-identifier hs-var">len</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-45"></span><span>  </span><span class="annot"><span class="annottext">CArray Word8 -&gt; (Ptr (CArray Word8) -&gt; IO b) -&gt; IO b
+forall a b. Storable a =&gt; a -&gt; (Ptr a -&gt; IO b) -&gt; IO b
+</span><span class="hs-identifier hs-var">Marshal.with</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr Word8 -&gt; Word64 -&gt; CArray Word8
+forall a. Ptr a -&gt; Word64 -&gt; CArray a
+</span><a href="Temporal.Core.CTypes.html#CArray"><span class="hs-identifier hs-var">CArray</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr CChar -&gt; Ptr Word8
+forall a b. Ptr a -&gt; Ptr b
+</span><span class="hs-identifier hs-var">castPtr</span></span><span> </span><span class="annot"><span class="annottext">Ptr CChar
+</span><a href="#local-6989586621679252048"><span class="hs-identifier hs-var">bytes</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Word64
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679252049"><span class="hs-identifier hs-var">len</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Ptr (CArray Word8) -&gt; IO b
+</span><a href="#local-6989586621679252046"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span id="local-6989586621679251959"><span id="local-6989586621679251961"><span class="annot"><a href="Temporal.Internal.FFI.html#withTokioResult"><span class="hs-identifier hs-type">withTokioResult</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Internal.FFI.html#TokioResult"><span class="hs-identifier hs-type">TokioResult</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679251959"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ptr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ptr</span></span><span> </span><span class="annot"><a href="#local-6989586621679251959"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679251961"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679251961"><span class="hs-identifier hs-type">b</span></a></span></span></span><span>
+</span><span id="line-49"></span><span id="withTokioResult"><span class="annot"><span class="annottext">withTokioResult :: forall a b. TokioResult a -&gt; (Ptr (Ptr a) -&gt; IO b) -&gt; IO b
+</span><a href="Temporal.Internal.FFI.html#withTokioResult"><span class="hs-identifier hs-var hs-var">withTokioResult</span></a></span></span><span> </span><span id="local-6989586621679252055"><span class="annot"><span class="annottext">TokioResult a
+</span><a href="#local-6989586621679252055"><span class="hs-identifier hs-var">fp</span></a></span></span><span> </span><span id="local-6989586621679252056"><span class="annot"><span class="annottext">Ptr (Ptr a) -&gt; IO b
+</span><a href="#local-6989586621679252056"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TokioResult a -&gt; (Ptr (Ptr a) -&gt; IO b) -&gt; IO b
+forall a b. ForeignPtr a -&gt; (Ptr a -&gt; IO b) -&gt; IO b
+</span><span class="hs-identifier hs-var">withForeignPtr</span></span><span> </span><span class="annot"><span class="annottext">TokioResult a
+</span><a href="#local-6989586621679252055"><span class="hs-identifier hs-var">fp</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr (Ptr a) -&gt; IO b) -&gt; IO b) -&gt; (Ptr (Ptr a) -&gt; IO b) -&gt; IO b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679252058"><span class="annot"><span class="annottext">Ptr (Ptr a)
+</span><a href="#local-6989586621679252058"><span class="hs-identifier hs-var">ptr</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-50"></span><span>  </span><span class="annot"><span class="annottext">Ptr (Ptr a) -&gt; Ptr a -&gt; IO ()
+forall a. Storable a =&gt; Ptr a -&gt; a -&gt; IO ()
+</span><span class="hs-identifier hs-var">poke</span></span><span> </span><span class="annot"><span class="annottext">Ptr (Ptr a)
+</span><a href="#local-6989586621679252058"><span class="hs-identifier hs-var">ptr</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr a
+forall a. Ptr a
+</span><span class="hs-identifier hs-var">nullPtr</span></span><span>
+</span><span id="line-51"></span><span>  </span><span class="annot"><span class="annottext">Ptr (Ptr a) -&gt; IO b
+</span><a href="#local-6989586621679252056"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr (Ptr a)
+</span><a href="#local-6989586621679252058"><span class="hs-identifier hs-var">ptr</span></a></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span id="local-6989586621679251970"><span class="annot"><a href="Temporal.Internal.FFI.html#peekTokioResult"><span class="hs-identifier hs-type">peekTokioResult</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Internal.FFI.html#TokioSlot"><span class="hs-identifier hs-type">TokioSlot</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679251970"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FinalizerPtr</span></span><span> </span><span class="annot"><a href="#local-6989586621679251970"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ForeignPtr</span></span><span> </span><span class="annot"><a href="#local-6989586621679251970"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span><span>
+</span><span id="line-55"></span><span id="peekTokioResult"><span class="annot"><span class="annottext">peekTokioResult :: forall a.
+TokioSlot a -&gt; Maybe (FinalizerPtr a) -&gt; IO (Maybe (ForeignPtr a))
+</span><a href="Temporal.Internal.FFI.html#peekTokioResult"><span class="hs-identifier hs-var hs-var">peekTokioResult</span></a></span></span><span> </span><span id="local-6989586621679252069"><span class="annot"><span class="annottext">TokioSlot a
+</span><a href="#local-6989586621679252069"><span class="hs-identifier hs-var">slot</span></a></span></span><span> </span><span id="local-6989586621679252070"><span class="annot"><span class="annottext">Maybe (FinalizerPtr a)
+</span><a href="#local-6989586621679252070"><span class="hs-identifier hs-var">mfp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-56"></span><span>  </span><span id="local-6989586621679252071"><span class="annot"><a href="#local-6989586621679252071"><span class="hs-identifier hs-var">inner</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">TokioSlot a -&gt; IO (Ptr a)
+forall a. Storable a =&gt; Ptr a -&gt; IO a
+</span><span class="hs-identifier hs-var">peek</span></span><span> </span><span class="annot"><span class="annottext">TokioSlot a
+</span><a href="#local-6989586621679252069"><span class="hs-identifier hs-var">slot</span></a></span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-keyword">if</span><span> </span><span class="annot"><a href="#local-6989586621679252071"><span class="hs-identifier hs-type">inner</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">==</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">nullPtr</span></span><span>
+</span><span id="line-58"></span><span>    </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span>
+</span><span id="line-59"></span><span>    </span><span class="hs-keyword">else</span><span>
+</span><span id="line-60"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;$&gt;</span></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621679252070"><span class="hs-identifier hs-type">mfp</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-61"></span><span>        </span><span class="annot"><span class="annottext">Maybe (FinalizerPtr a)
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr a -&gt; IO (ForeignPtr a)
+forall a. Ptr a -&gt; IO (ForeignPtr a)
+</span><span class="hs-identifier hs-var">newForeignPtr_</span></span><span> </span><span class="annot"><span class="annottext">Ptr a
+</span><a href="#local-6989586621679252071"><span class="hs-identifier hs-var">inner</span></a></span><span>
+</span><span id="line-62"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679252075"><span class="annot"><span class="annottext">FinalizerPtr a
+</span><a href="#local-6989586621679252075"><span class="hs-identifier hs-var">fp</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">FinalizerPtr a -&gt; Ptr a -&gt; IO (ForeignPtr a)
+forall a. FinalizerPtr a -&gt; Ptr a -&gt; IO (ForeignPtr a)
+</span><span class="hs-identifier hs-var">newForeignPtr</span></span><span> </span><span class="annot"><span class="annottext">FinalizerPtr a
+</span><a href="#local-6989586621679252075"><span class="hs-identifier hs-var">fp</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr a
+</span><a href="#local-6989586621679252071"><span class="hs-identifier hs-var">inner</span></a></span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="hs-keyword">type</span><span> </span><span id="TokioCall"><span class="annot"><a href="Temporal.Internal.FFI.html#TokioCall"><span class="hs-identifier hs-var">TokioCall</span></a></span></span><span> </span><span id="local-6989586621679252077"><span class="annot"><a href="#local-6989586621679252077"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621679252078"><span class="annot"><a href="#local-6989586621679252078"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">StablePtr</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PrimMVar</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Internal.FFI.html#TokioSlot"><span class="hs-identifier hs-type">TokioSlot</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679252077"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Internal.FFI.html#TokioSlot"><span class="hs-identifier hs-type">TokioSlot</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679252078"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span class="hs-keyword">type</span><span> </span><span id="TokioSlot"><span class="annot"><a href="Temporal.Internal.FFI.html#TokioSlot"><span class="hs-identifier hs-var">TokioSlot</span></a></span></span><span> </span><span id="local-6989586621679252079"><span class="annot"><a href="#local-6989586621679252079"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ptr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ptr</span></span><span> </span><span class="annot"><a href="#local-6989586621679252079"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="hs-keyword">type</span><span> </span><span id="TokioResult"><span class="annot"><a href="Temporal.Internal.FFI.html#TokioResult"><span class="hs-identifier hs-var">TokioResult</span></a></span></span><span> </span><span id="local-6989586621679252080"><span class="annot"><a href="#local-6989586621679252080"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ForeignPtr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ptr</span></span><span> </span><span class="annot"><a href="#local-6989586621679252080"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="annot"><span class="hs-comment">{- | Dropping can't be done automatically if the result is returned without async exceptions
+intervening, because we don't want to drop things like `Client` while they're still in use.
+So we should return ForeignPtrs for things that need to stay alive, and then we can drop when we're done.
+-}</span></span><span>
+</span><span id="line-78"></span><span id="local-6989586621679251984"><span id="local-6989586621679251985"><span class="annot"><a href="Temporal.Internal.FFI.html#makeTokioAsyncCall"><span class="hs-identifier hs-type">makeTokioAsyncCall</span></a></span><span>
+</span><span id="line-79"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Internal.FFI.html#TokioCall"><span class="hs-identifier hs-type">TokioCall</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679251984"><span class="hs-identifier hs-type">err</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679251985"><span class="hs-identifier hs-type">res</span></a></span><span>
+</span><span id="line-80"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FinalizerPtr</span></span><span> </span><span class="annot"><a href="#local-6989586621679251984"><span class="hs-identifier hs-type">err</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-81"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FinalizerPtr</span></span><span> </span><span class="annot"><a href="#local-6989586621679251985"><span class="hs-identifier hs-type">res</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-82"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ForeignPtr</span></span><span> </span><span class="annot"><a href="#local-6989586621679251984"><span class="hs-identifier hs-type">err</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ForeignPtr</span></span><span> </span><span class="annot"><a href="#local-6989586621679251985"><span class="hs-identifier hs-type">res</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-83"></span><span id="makeTokioAsyncCall"><span class="annot"><span class="annottext">makeTokioAsyncCall :: forall err res.
+TokioCall err res
+-&gt; Maybe (FinalizerPtr err)
+-&gt; Maybe (FinalizerPtr res)
+-&gt; IO (Either (ForeignPtr err) (ForeignPtr res))
+</span><a href="Temporal.Internal.FFI.html#makeTokioAsyncCall"><span class="hs-identifier hs-var hs-var">makeTokioAsyncCall</span></a></span></span><span> </span><span id="local-6989586621679252100"><span class="annot"><span class="annottext">TokioCall err res
+</span><a href="#local-6989586621679252100"><span class="hs-identifier hs-var">call</span></a></span></span><span> </span><span id="local-6989586621679252101"><span class="annot"><span class="annottext">Maybe (FinalizerPtr err)
+</span><a href="#local-6989586621679252101"><span class="hs-identifier hs-var">readErr</span></a></span></span><span> </span><span id="local-6989586621679252102"><span class="annot"><span class="annottext">Maybe (FinalizerPtr res)
+</span><a href="#local-6989586621679252102"><span class="hs-identifier hs-var">readSuccess</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((forall a. IO a -&gt; IO a)
+ -&gt; IO (Either (ForeignPtr err) (ForeignPtr res)))
+-&gt; IO (Either (ForeignPtr err) (ForeignPtr res))
+forall b. ((forall a. IO a -&gt; IO a) -&gt; IO b) -&gt; IO b
+</span><span class="hs-identifier hs-var">uninterruptibleMask</span></span><span> </span><span class="annot"><span class="annottext">(((forall a. IO a -&gt; IO a)
+  -&gt; IO (Either (ForeignPtr err) (ForeignPtr res)))
+ -&gt; IO (Either (ForeignPtr err) (ForeignPtr res)))
+-&gt; ((forall a. IO a -&gt; IO a)
+    -&gt; IO (Either (ForeignPtr err) (ForeignPtr res)))
+-&gt; IO (Either (ForeignPtr err) (ForeignPtr res))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679252104"><span class="annot"><span class="annottext">forall a. IO a -&gt; IO a
+</span><a href="#local-6989586621679252104"><span class="hs-identifier hs-var">restore</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-84"></span><span>  </span><span id="local-6989586621679252105"><span class="annot"><a href="#local-6989586621679252105"><span class="hs-identifier hs-var">mvar</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO (MVar ())
+forall a. IO (MVar a)
+</span><span class="hs-identifier hs-var">newEmptyMVar</span></span><span>
+</span><span id="line-85"></span><span>  </span><span id="local-6989586621679252107"><span class="annot"><a href="#local-6989586621679252107"><span class="hs-identifier hs-var">sp</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">newStablePtrPrimMVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679252105"><span class="hs-identifier hs-type">mvar</span></a></span><span>
+</span><span id="line-86"></span><span>  </span><span id="local-6989586621679252108"><span class="annot"><a href="#local-6989586621679252108"><span class="hs-identifier hs-var">errorSlot</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">mallocForeignPtr</span></span><span>
+</span><span id="line-87"></span><span>  </span><span id="local-6989586621679252110"><span class="annot"><a href="#local-6989586621679252110"><span class="hs-identifier hs-var">resultSlot</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">mallocForeignPtr</span></span><span>
+</span><span id="line-88"></span><span>  </span><span class="annot"><a href="Temporal.Internal.FFI.html#withTokioResult"><span class="hs-identifier hs-type">withTokioResult</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679252108"><span class="hs-identifier hs-type">errorSlot</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679252111"><span class="annot"><span class="annottext">Ptr (Ptr err)
+</span><a href="#local-6989586621679252111"><span class="hs-identifier hs-var">err</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ForeignPtr (Ptr res)
+-&gt; (Ptr (Ptr res) -&gt; IO (Either (ForeignPtr err) (ForeignPtr res)))
+-&gt; IO (Either (ForeignPtr err) (ForeignPtr res))
+forall a b. TokioResult a -&gt; (Ptr (Ptr a) -&gt; IO b) -&gt; IO b
+</span><a href="Temporal.Internal.FFI.html#withTokioResult"><span class="hs-identifier hs-var">withTokioResult</span></a></span><span> </span><span class="annot"><span class="annottext">ForeignPtr (Ptr res)
+</span><a href="#local-6989586621679252110"><span class="hs-identifier hs-var">resultSlot</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr (Ptr res) -&gt; IO (Either (ForeignPtr err) (ForeignPtr res)))
+ -&gt; IO (Either (ForeignPtr err) (ForeignPtr res)))
+-&gt; (Ptr (Ptr res) -&gt; IO (Either (ForeignPtr err) (ForeignPtr res)))
+-&gt; IO (Either (ForeignPtr err) (ForeignPtr res))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679252112"><span class="annot"><span class="annottext">Ptr (Ptr res)
+</span><a href="#local-6989586621679252112"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-89"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679252113"><span class="annot"><span class="annottext">peekEither :: IO (Either (ForeignPtr err) (ForeignPtr res))
+</span><a href="#local-6989586621679252113"><span class="hs-identifier hs-var hs-var hs-var">peekEither</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-90"></span><span>          </span><span id="local-6989586621679252114"><span class="annot"><a href="#local-6989586621679252114"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Ptr (Ptr err)
+-&gt; Maybe (FinalizerPtr err) -&gt; IO (Maybe (ForeignPtr err))
+forall a.
+TokioSlot a -&gt; Maybe (FinalizerPtr a) -&gt; IO (Maybe (ForeignPtr a))
+</span><a href="Temporal.Internal.FFI.html#peekTokioResult"><span class="hs-identifier hs-var">peekTokioResult</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr (Ptr err)
+</span><a href="#local-6989586621679252111"><span class="hs-identifier hs-var">err</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe (FinalizerPtr err)
+</span><a href="#local-6989586621679252101"><span class="hs-identifier hs-var">readErr</span></a></span><span>
+</span><span id="line-91"></span><span>          </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621679252114"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-92"></span><span>            </span><span class="annot"><span class="annottext">Maybe (ForeignPtr err)
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-93"></span><span>              </span><span id="local-6989586621679252115"><span class="annot"><a href="#local-6989586621679252115"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Ptr (Ptr res)
+-&gt; Maybe (FinalizerPtr res) -&gt; IO (Maybe (ForeignPtr res))
+forall a.
+TokioSlot a -&gt; Maybe (FinalizerPtr a) -&gt; IO (Maybe (ForeignPtr a))
+</span><a href="Temporal.Internal.FFI.html#peekTokioResult"><span class="hs-identifier hs-var">peekTokioResult</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr (Ptr res)
+</span><a href="#local-6989586621679252112"><span class="hs-identifier hs-var">res</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe (FinalizerPtr res)
+</span><a href="#local-6989586621679252102"><span class="hs-identifier hs-var">readSuccess</span></a></span><span>
+</span><span id="line-94"></span><span>              </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621679252115"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-95"></span><span>                </span><span class="annot"><span class="annottext">Maybe (ForeignPtr res)
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; IO (Either (ForeignPtr err) (ForeignPtr res))
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;Both error and result are null&quot;</span></span><span>
+</span><span id="line-96"></span><span>                </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679252117"><span class="annot"><span class="annottext">ForeignPtr res
+</span><a href="#local-6989586621679252117"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Either (ForeignPtr err) (ForeignPtr res)
+-&gt; IO (Either (ForeignPtr err) (ForeignPtr res))
+forall a. a -&gt; IO a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ForeignPtr res -&gt; Either (ForeignPtr err) (ForeignPtr res)
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">ForeignPtr res
+</span><a href="#local-6989586621679252117"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-97"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679252118"><span class="annot"><span class="annottext">ForeignPtr err
+</span><a href="#local-6989586621679252118"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Either (ForeignPtr err) (ForeignPtr res)
+-&gt; IO (Either (ForeignPtr err) (ForeignPtr res))
+forall a. a -&gt; IO a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ForeignPtr err -&gt; Either (ForeignPtr err) (ForeignPtr res)
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">ForeignPtr err
+</span><a href="#local-6989586621679252118"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-98"></span><span>
+</span><span id="line-99"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679252119"><span class="annot"><a href="#local-6989586621679252119"><span class="hs-identifier hs-var">cap</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ThreadId -&gt; IO (Int, Bool)
+</span><span class="hs-identifier hs-var">threadCapability</span></span><span> </span><span class="annot"><span class="annottext">(ThreadId -&gt; IO (Int, Bool)) -&gt; IO ThreadId -&gt; IO (Int, Bool)
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">IO ThreadId
+</span><span class="hs-identifier hs-var">myThreadId</span></span><span>
+</span><span id="line-100"></span><span>    </span><span class="annot"><a href="#local-6989586621679252100"><span class="hs-identifier hs-type">call</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679252107"><span class="hs-identifier hs-type">sp</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679252119"><span class="hs-identifier hs-type">cap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679252111"><span class="hs-identifier hs-type">err</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679252112"><span class="hs-identifier hs-type">res</span></a></span><span>
+</span><span id="line-101"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679252123"><span class="annot"><a href="#local-6989586621679252123"><span class="hs-identifier hs-var hs-var">handleCleanup</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO () -&gt; IO ThreadId
+</span><span class="hs-identifier hs-var">forkIO</span></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; IO ThreadId) -&gt; IO () -&gt; IO ThreadId
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-102"></span><span>          </span><span class="annot"><span class="annottext">MVar () -&gt; IO ()
+forall a. MVar a -&gt; IO a
+</span><span class="hs-identifier hs-var">takeMVar</span></span><span> </span><span class="annot"><span class="annottext">MVar ()
+</span><a href="#local-6989586621679252105"><span class="hs-identifier hs-var">mvar</span></a></span><span>
+</span><span id="line-103"></span><span>          </span><span class="hs-comment">-- We still need to get the result out of the slot and into a ForeignPtr so that we can drop it</span><span>
+</span><span id="line-104"></span><span>          </span><span class="annot"><span class="annottext">IO (Either (ForeignPtr err) (ForeignPtr res)) -&gt; IO ()
+forall (f :: * -&gt; *) a. Functor f =&gt; f a -&gt; f ()
+</span><span class="hs-identifier hs-var">void</span></span><span> </span><span class="annot"><span class="annottext">IO (Either (ForeignPtr err) (ForeignPtr res))
+</span><a href="#local-6989586621679252113"><span class="hs-identifier hs-var">peekEither</span></a></span><span>
+</span><span id="line-105"></span><span>    </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="#local-6989586621679252104"><span class="hs-identifier hs-type">restore</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">takeMVar</span></span><span> </span><span class="annot"><a href="#local-6989586621679252105"><span class="hs-identifier hs-type">mvar</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">`onException`</span></span><span> </span><span class="annot"><a href="#local-6989586621679252123"><span class="hs-identifier hs-type">handleCleanup</span></a></span><span>
+</span><span id="line-106"></span><span>    </span><span class="annot"><a href="#local-6989586621679252113"><span class="hs-identifier hs-type">peekEither</span></a></span><span>
+</span><span id="line-107"></span></pre></body></html>

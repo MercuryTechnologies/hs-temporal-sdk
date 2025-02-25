@@ -1,0 +1,849 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{- This file was auto-generated from temporal/api/enums/v1/query.proto by the proto-lens-protoc program. -}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-unused-imports#-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-duplicate-exports#-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-dodgy-exports#-}</span><span>
+</span><span id="line-6"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html"><span class="hs-identifier">Proto.Temporal.Api.Enums.V1.Query</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-7"></span><span>        </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryRejectCondition"><span class="hs-identifier">QueryRejectCondition</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryRejectCondition"><span class="hs-identifier">QueryRejectCondition</span></a></span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-8"></span><span>        </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryRejectCondition%27UnrecognizedValue"><span class="hs-identifier">QueryRejectCondition'UnrecognizedValue</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryResultType"><span class="hs-identifier">QueryResultType</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-9"></span><span>        </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryResultType"><span class="hs-identifier">QueryResultType</span></a></span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryResultType%27UnrecognizedValue"><span class="hs-identifier">QueryResultType'UnrecognizedValue</span></a></span><span>
+</span><span id="line-10"></span><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Control.DeepSeq</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Prism</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Prism</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Prelude</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Int</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Int</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Monoid</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Monoid</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Word</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Word</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Bytes</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Growing</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Parser.Unsafe</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Wire</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Field</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Field</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Message.Enum</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Service.Types</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Lens.Family2</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Lens.Family2</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Lens.Family2.Unchecked</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Lens.Family2.Unchecked</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Map</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ByteString</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ByteString.Char8</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString.Char8</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Text.Encoding</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text.Encoding</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Vector</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Vector.Generic</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Generic</span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Vector.Unboxed</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Unboxed</span></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Text.Read</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Text.Read</span></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">newtype</span><span> </span><span id="QueryRejectCondition%27UnrecognizedValue"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryRejectCondition%27UnrecognizedValue"><span class="hs-identifier hs-var">QueryRejectCondition'UnrecognizedValue</span></a></span></span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="QueryRejectCondition%27UnrecognizedValue"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryRejectCondition%27UnrecognizedValue"><span class="hs-identifier hs-var">QueryRejectCondition'UnrecognizedValue</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Int.Int32</span></span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680257829"><span id="local-6989586621680257833"><span class="annot"><span class="annottext">QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue -&gt; Bool
+(QueryRejectCondition'UnrecognizedValue
+ -&gt; QueryRejectCondition'UnrecognizedValue -&gt; Bool)
+-&gt; (QueryRejectCondition'UnrecognizedValue
+    -&gt; QueryRejectCondition'UnrecognizedValue -&gt; Bool)
+-&gt; Eq QueryRejectCondition'UnrecognizedValue
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue -&gt; Bool
+== :: QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue -&gt; Bool
+$c/= :: QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue -&gt; Bool
+/= :: QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680257840"><span id="local-6989586621680257844"><span id="local-6989586621680257847"><span id="local-6989586621680257851"><span id="local-6989586621680257854"><span id="local-6989586621680257857"><span id="local-6989586621680257860"><span class="annot"><span class="annottext">Eq QueryRejectCondition'UnrecognizedValue
+Eq QueryRejectCondition'UnrecognizedValue =&gt;
+(QueryRejectCondition'UnrecognizedValue
+ -&gt; QueryRejectCondition'UnrecognizedValue -&gt; Ordering)
+-&gt; (QueryRejectCondition'UnrecognizedValue
+    -&gt; QueryRejectCondition'UnrecognizedValue -&gt; Bool)
+-&gt; (QueryRejectCondition'UnrecognizedValue
+    -&gt; QueryRejectCondition'UnrecognizedValue -&gt; Bool)
+-&gt; (QueryRejectCondition'UnrecognizedValue
+    -&gt; QueryRejectCondition'UnrecognizedValue -&gt; Bool)
+-&gt; (QueryRejectCondition'UnrecognizedValue
+    -&gt; QueryRejectCondition'UnrecognizedValue -&gt; Bool)
+-&gt; (QueryRejectCondition'UnrecognizedValue
+    -&gt; QueryRejectCondition'UnrecognizedValue
+    -&gt; QueryRejectCondition'UnrecognizedValue)
+-&gt; (QueryRejectCondition'UnrecognizedValue
+    -&gt; QueryRejectCondition'UnrecognizedValue
+    -&gt; QueryRejectCondition'UnrecognizedValue)
+-&gt; Ord QueryRejectCondition'UnrecognizedValue
+QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue -&gt; Bool
+QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue -&gt; Ordering
+QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue -&gt; Ordering
+compare :: QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue -&gt; Ordering
+$c&lt; :: QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue -&gt; Bool
+&lt; :: QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue -&gt; Bool
+$c&lt;= :: QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue -&gt; Bool
+&lt;= :: QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue -&gt; Bool
+$c&gt; :: QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue -&gt; Bool
+&gt; :: QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue -&gt; Bool
+$c&gt;= :: QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue -&gt; Bool
+&gt;= :: QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue -&gt; Bool
+$cmax :: QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue
+max :: QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue
+$cmin :: QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue
+min :: QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue
+-&gt; QueryRejectCondition'UnrecognizedValue
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680257868"><span id="local-6989586621680257874"><span id="local-6989586621680257878"><span class="annot"><span class="annottext">Int -&gt; QueryRejectCondition'UnrecognizedValue -&gt; ShowS
+[QueryRejectCondition'UnrecognizedValue] -&gt; ShowS
+QueryRejectCondition'UnrecognizedValue -&gt; String
+(Int -&gt; QueryRejectCondition'UnrecognizedValue -&gt; ShowS)
+-&gt; (QueryRejectCondition'UnrecognizedValue -&gt; String)
+-&gt; ([QueryRejectCondition'UnrecognizedValue] -&gt; ShowS)
+-&gt; Show QueryRejectCondition'UnrecognizedValue
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; QueryRejectCondition'UnrecognizedValue -&gt; ShowS
+showsPrec :: Int -&gt; QueryRejectCondition'UnrecognizedValue -&gt; ShowS
+$cshow :: QueryRejectCondition'UnrecognizedValue -&gt; String
+show :: QueryRejectCondition'UnrecognizedValue -&gt; String
+$cshowList :: [QueryRejectCondition'UnrecognizedValue] -&gt; ShowS
+showList :: [QueryRejectCondition'UnrecognizedValue] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span class="hs-keyword">data</span><span> </span><span id="QueryRejectCondition"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryRejectCondition"><span class="hs-identifier hs-var">QueryRejectCondition</span></a></span></span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="QUERY_REJECT_CONDITION_UNSPECIFIED"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_UNSPECIFIED"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_UNSPECIFIED</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-41"></span><span>    </span><span id="QUERY_REJECT_CONDITION_NONE"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NONE"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NONE</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-42"></span><span>    </span><span id="QUERY_REJECT_CONDITION_NOT_OPEN"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NOT_OPEN"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NOT_OPEN</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-43"></span><span>    </span><span id="QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-44"></span><span>    </span><span id="QueryRejectCondition%27Unrecognized"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryRejectCondition%27Unrecognized"><span class="hs-identifier hs-var">QueryRejectCondition'Unrecognized</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryRejectCondition%27UnrecognizedValue"><span class="hs-identifier hs-type">QueryRejectCondition'UnrecognizedValue</span></a></span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680257888"><span id="local-6989586621680257892"><span id="local-6989586621680257896"><span class="annot"><span class="annottext">Int -&gt; QueryRejectCondition -&gt; ShowS
+[QueryRejectCondition] -&gt; ShowS
+QueryRejectCondition -&gt; String
+(Int -&gt; QueryRejectCondition -&gt; ShowS)
+-&gt; (QueryRejectCondition -&gt; String)
+-&gt; ([QueryRejectCondition] -&gt; ShowS)
+-&gt; Show QueryRejectCondition
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; QueryRejectCondition -&gt; ShowS
+showsPrec :: Int -&gt; QueryRejectCondition -&gt; ShowS
+$cshow :: QueryRejectCondition -&gt; String
+show :: QueryRejectCondition -&gt; String
+$cshowList :: [QueryRejectCondition] -&gt; ShowS
+showList :: [QueryRejectCondition] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680257899"><span id="local-6989586621680257905"><span class="annot"><span class="annottext">QueryRejectCondition -&gt; QueryRejectCondition -&gt; Bool
+(QueryRejectCondition -&gt; QueryRejectCondition -&gt; Bool)
+-&gt; (QueryRejectCondition -&gt; QueryRejectCondition -&gt; Bool)
+-&gt; Eq QueryRejectCondition
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: QueryRejectCondition -&gt; QueryRejectCondition -&gt; Bool
+== :: QueryRejectCondition -&gt; QueryRejectCondition -&gt; Bool
+$c/= :: QueryRejectCondition -&gt; QueryRejectCondition -&gt; Bool
+/= :: QueryRejectCondition -&gt; QueryRejectCondition -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680257911"><span id="local-6989586621680257916"><span id="local-6989586621680257920"><span id="local-6989586621680257923"><span id="local-6989586621680257926"><span id="local-6989586621680257929"><span id="local-6989586621680257932"><span class="annot"><span class="annottext">Eq QueryRejectCondition
+Eq QueryRejectCondition =&gt;
+(QueryRejectCondition -&gt; QueryRejectCondition -&gt; Ordering)
+-&gt; (QueryRejectCondition -&gt; QueryRejectCondition -&gt; Bool)
+-&gt; (QueryRejectCondition -&gt; QueryRejectCondition -&gt; Bool)
+-&gt; (QueryRejectCondition -&gt; QueryRejectCondition -&gt; Bool)
+-&gt; (QueryRejectCondition -&gt; QueryRejectCondition -&gt; Bool)
+-&gt; (QueryRejectCondition
+    -&gt; QueryRejectCondition -&gt; QueryRejectCondition)
+-&gt; (QueryRejectCondition
+    -&gt; QueryRejectCondition -&gt; QueryRejectCondition)
+-&gt; Ord QueryRejectCondition
+QueryRejectCondition -&gt; QueryRejectCondition -&gt; Bool
+QueryRejectCondition -&gt; QueryRejectCondition -&gt; Ordering
+QueryRejectCondition
+-&gt; QueryRejectCondition -&gt; QueryRejectCondition
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: QueryRejectCondition -&gt; QueryRejectCondition -&gt; Ordering
+compare :: QueryRejectCondition -&gt; QueryRejectCondition -&gt; Ordering
+$c&lt; :: QueryRejectCondition -&gt; QueryRejectCondition -&gt; Bool
+&lt; :: QueryRejectCondition -&gt; QueryRejectCondition -&gt; Bool
+$c&lt;= :: QueryRejectCondition -&gt; QueryRejectCondition -&gt; Bool
+&lt;= :: QueryRejectCondition -&gt; QueryRejectCondition -&gt; Bool
+$c&gt; :: QueryRejectCondition -&gt; QueryRejectCondition -&gt; Bool
+&gt; :: QueryRejectCondition -&gt; QueryRejectCondition -&gt; Bool
+$c&gt;= :: QueryRejectCondition -&gt; QueryRejectCondition -&gt; Bool
+&gt;= :: QueryRejectCondition -&gt; QueryRejectCondition -&gt; Bool
+$cmax :: QueryRejectCondition
+-&gt; QueryRejectCondition -&gt; QueryRejectCondition
+max :: QueryRejectCondition
+-&gt; QueryRejectCondition -&gt; QueryRejectCondition
+$cmin :: QueryRejectCondition
+-&gt; QueryRejectCondition -&gt; QueryRejectCondition
+min :: QueryRejectCondition
+-&gt; QueryRejectCondition -&gt; QueryRejectCondition
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.MessageEnum</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryRejectCondition"><span class="hs-identifier hs-type">QueryRejectCondition</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-47"></span><span>  </span><span id="local-6989586621680257959"><span class="annot"><span class="annottext">maybeToEnum :: Int -&gt; Maybe QueryRejectCondition
+</span><a href="#local-6989586621680257959"><span class="hs-identifier hs-var hs-var hs-var">maybeToEnum</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition -&gt; Maybe QueryRejectCondition
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_UNSPECIFIED"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_UNSPECIFIED</span></a></span><span>
+</span><span id="line-48"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition -&gt; Maybe QueryRejectCondition
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NONE"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NONE</span></a></span><span>
+</span><span id="line-49"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition -&gt; Maybe QueryRejectCondition
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NOT_OPEN"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NOT_OPEN</span></a></span><span>
+</span><span id="line-50"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">3</span></span><span>
+</span><span id="line-51"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition -&gt; Maybe QueryRejectCondition
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY</span></a></span><span>
+</span><span id="line-52"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span id="local-6989586621680257961"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680257961"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><span id="line-53"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition -&gt; Maybe QueryRejectCondition
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span>
+</span><span id="line-54"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">QueryRejectCondition'UnrecognizedValue -&gt; QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryRejectCondition%27Unrecognized"><span class="hs-identifier hs-var">QueryRejectCondition'Unrecognized</span></a></span><span>
+</span><span id="line-55"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int32 -&gt; QueryRejectCondition'UnrecognizedValue
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryRejectCondition%27UnrecognizedValue"><span class="hs-identifier hs-var">QueryRejectCondition'UnrecognizedValue</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int32
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680257961"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-56"></span><span>  </span><span id="local-6989586621680257963"><span class="annot"><span class="annottext">showEnum :: QueryRejectCondition -&gt; String
+</span><a href="#local-6989586621680257963"><span class="hs-identifier hs-var hs-var hs-var">showEnum</span></a></span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_UNSPECIFIED"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_UNSPECIFIED</span></a></span><span>
+</span><span id="line-57"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QUERY_REJECT_CONDITION_UNSPECIFIED&quot;</span></span><span>
+</span><span id="line-58"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NONE"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NONE</span></a></span><span>
+</span><span id="line-59"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QUERY_REJECT_CONDITION_NONE&quot;</span></span><span>
+</span><span id="line-60"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NOT_OPEN"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NOT_OPEN</span></a></span><span>
+</span><span id="line-61"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QUERY_REJECT_CONDITION_NOT_OPEN&quot;</span></span><span>
+</span><span id="line-62"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY</span></a></span><span>
+</span><span id="line-63"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY&quot;</span></span><span>
+</span><span id="line-64"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span>
+</span><span id="line-65"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryRejectCondition%27Unrecognized"><span class="hs-identifier hs-type">QueryRejectCondition'Unrecognized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryRejectCondition%27UnrecognizedValue"><span class="hs-identifier hs-type">QueryRejectCondition'UnrecognizedValue</span></a></span><span> </span><span id="local-6989586621680257965"><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680257965"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-66"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int32 -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">Prelude.show</span></span><span> </span><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680257965"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-67"></span><span>  </span><span id="local-6989586621680257985"><span class="annot"><span class="annottext">readEnum :: String -&gt; Maybe QueryRejectCondition
+</span><a href="#local-6989586621680257985"><span class="hs-identifier hs-var hs-var hs-var">readEnum</span></a></span></span><span> </span><span id="local-6989586621680257987"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257987"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><span id="line-68"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257987"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QUERY_REJECT_CONDITION_UNSPECIFIED&quot;</span></span><span>
+</span><span id="line-69"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition -&gt; Maybe QueryRejectCondition
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_UNSPECIFIED"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_UNSPECIFIED</span></a></span><span>
+</span><span id="line-70"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257987"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QUERY_REJECT_CONDITION_NONE&quot;</span></span><span>
+</span><span id="line-71"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition -&gt; Maybe QueryRejectCondition
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NONE"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NONE</span></a></span><span>
+</span><span id="line-72"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257987"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QUERY_REJECT_CONDITION_NOT_OPEN&quot;</span></span><span>
+</span><span id="line-73"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition -&gt; Maybe QueryRejectCondition
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NOT_OPEN"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NOT_OPEN</span></a></span><span>
+</span><span id="line-74"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257987"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY&quot;</span></span><span>
+</span><span id="line-75"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition -&gt; Maybe QueryRejectCondition
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY</span></a></span><span>
+</span><span id="line-76"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">Prelude.otherwise</span></span><span>
+</span><span id="line-77"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Int
+-&gt; (Int -&gt; Maybe QueryRejectCondition)
+-&gt; Maybe QueryRejectCondition
+forall a b. Maybe a -&gt; (a -&gt; Maybe b) -&gt; Maybe b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">(Prelude.&gt;&gt;=)</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Maybe Int
+forall a. Read a =&gt; String -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Text.Read.readMaybe</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680257987"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Maybe QueryRejectCondition
+forall a. MessageEnum a =&gt; Int -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeToEnum</span></span><span>
+</span><span id="line-78"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prelude.Bounded</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryRejectCondition"><span class="hs-identifier hs-type">QueryRejectCondition</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-79"></span><span>  </span><span id="local-6989586621680257992"><span class="annot"><span class="annottext">minBound :: QueryRejectCondition
+</span><a href="#local-6989586621680257992"><span class="hs-identifier hs-var hs-var hs-var">minBound</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_UNSPECIFIED"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_UNSPECIFIED</span></a></span><span>
+</span><span id="line-80"></span><span>  </span><span id="local-6989586621680257994"><span class="annot"><span class="annottext">maxBound :: QueryRejectCondition
+</span><a href="#local-6989586621680257994"><span class="hs-identifier hs-var hs-var hs-var">maxBound</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY</span></a></span><span>
+</span><span id="line-81"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prelude.Enum</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryRejectCondition"><span class="hs-identifier hs-type">QueryRejectCondition</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-82"></span><span>  </span><span id="local-6989586621680258012"><span class="annot"><span class="annottext">toEnum :: Int -&gt; QueryRejectCondition
+</span><a href="#local-6989586621680258012"><span class="hs-identifier hs-var hs-var hs-var">toEnum</span></a></span></span><span> </span><span id="local-6989586621680258014"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680258014"><span class="hs-identifier hs-var">k__</span></a></span></span><span>
+</span><span id="line-83"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+-&gt; (QueryRejectCondition -&gt; QueryRejectCondition)
+-&gt; Maybe QueryRejectCondition
+-&gt; QueryRejectCondition
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.maybe</span></span><span>
+</span><span id="line-84"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; QueryRejectCondition
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-85"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">(Prelude.++)</span></span><span>
+</span><span id="line-86"></span><span>              </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;toEnum: unknown value for enum QueryRejectCondition: &quot;</span></span><span>
+</span><span id="line-87"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">Prelude.show</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680258014"><span class="hs-identifier hs-var">k__</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-88"></span><span>        </span><span class="annot"><span class="annottext">QueryRejectCondition -&gt; QueryRejectCondition
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.id</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Maybe QueryRejectCondition
+forall a. MessageEnum a =&gt; Int -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680258014"><span class="hs-identifier hs-var">k__</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-89"></span><span>  </span><span id="local-6989586621680258021"><span class="annot"><span class="annottext">fromEnum :: QueryRejectCondition -&gt; Int
+</span><a href="#local-6989586621680258021"><span class="hs-identifier hs-var hs-var hs-var">fromEnum</span></a></span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_UNSPECIFIED"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_UNSPECIFIED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-90"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NONE"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NONE</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-91"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NOT_OPEN"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NOT_OPEN</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span>
+</span><span id="line-92"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">3</span></span><span>
+</span><span id="line-93"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span>
+</span><span id="line-94"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryRejectCondition%27Unrecognized"><span class="hs-identifier hs-type">QueryRejectCondition'Unrecognized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryRejectCondition%27UnrecognizedValue"><span class="hs-identifier hs-type">QueryRejectCondition'UnrecognizedValue</span></a></span><span> </span><span id="local-6989586621680258023"><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680258023"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-95"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int32 -&gt; Int
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680258023"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-96"></span><span>  </span><span id="local-6989586621680258028"><span class="annot"><span class="annottext">succ :: QueryRejectCondition -&gt; QueryRejectCondition
+</span><a href="#local-6989586621680258028"><span class="hs-identifier hs-var hs-var hs-var">succ</span></a></span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY</span></a></span><span>
+</span><span id="line-97"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; QueryRejectCondition
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-98"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QueryRejectCondition.succ: bad argument QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY. This value would be out of bounds.&quot;</span></span><span>
+</span><span id="line-99"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_UNSPECIFIED"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_UNSPECIFIED</span></a></span><span>
+</span><span id="line-100"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NONE"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NONE</span></a></span><span>
+</span><span id="line-101"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NONE"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NONE</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NOT_OPEN"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NOT_OPEN</span></a></span><span>
+</span><span id="line-102"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NOT_OPEN"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NOT_OPEN</span></a></span><span>
+</span><span id="line-103"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY</span></a></span><span>
+</span><span id="line-104"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryRejectCondition%27Unrecognized"><span class="hs-identifier hs-type">QueryRejectCondition'Unrecognized</span></a></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition'UnrecognizedValue
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-105"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; QueryRejectCondition
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-106"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QueryRejectCondition.succ: bad argument: unrecognized value&quot;</span></span><span>
+</span><span id="line-107"></span><span>  </span><span id="local-6989586621680258034"><span class="annot"><span class="annottext">pred :: QueryRejectCondition -&gt; QueryRejectCondition
+</span><a href="#local-6989586621680258034"><span class="hs-identifier hs-var hs-var hs-var">pred</span></a></span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_UNSPECIFIED"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_UNSPECIFIED</span></a></span><span>
+</span><span id="line-108"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; QueryRejectCondition
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-109"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QueryRejectCondition.pred: bad argument QUERY_REJECT_CONDITION_UNSPECIFIED. This value would be out of bounds.&quot;</span></span><span>
+</span><span id="line-110"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NONE"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NONE</span></a></span><span>
+</span><span id="line-111"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_UNSPECIFIED"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_UNSPECIFIED</span></a></span><span>
+</span><span id="line-112"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NOT_OPEN"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NOT_OPEN</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NONE"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NONE</span></a></span><span>
+</span><span id="line-113"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY</span></a></span><span>
+</span><span id="line-114"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_NOT_OPEN"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_NOT_OPEN</span></a></span><span>
+</span><span id="line-115"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryRejectCondition%27Unrecognized"><span class="hs-identifier hs-type">QueryRejectCondition'Unrecognized</span></a></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition'UnrecognizedValue
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-116"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; QueryRejectCondition
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-117"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QueryRejectCondition.pred: bad argument: unrecognized value&quot;</span></span><span>
+</span><span id="line-118"></span><span>  </span><span id="local-6989586621680258038"><span class="annot"><span class="annottext">enumFrom :: QueryRejectCondition -&gt; [QueryRejectCondition]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFrom</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition -&gt; [QueryRejectCondition]
+forall a. (Enum a, Bounded a) =&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFrom</span></span><span>
+</span><span id="line-119"></span><span>  </span><span id="local-6989586621680258041"><span class="annot"><span class="annottext">enumFromTo :: QueryRejectCondition
+-&gt; QueryRejectCondition -&gt; [QueryRejectCondition]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromTo</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+-&gt; QueryRejectCondition -&gt; [QueryRejectCondition]
+forall a. Enum a =&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromTo</span></span><span>
+</span><span id="line-120"></span><span>  </span><span id="local-6989586621680258045"><span class="annot"><span class="annottext">enumFromThen :: QueryRejectCondition
+-&gt; QueryRejectCondition -&gt; [QueryRejectCondition]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromThen</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+-&gt; QueryRejectCondition -&gt; [QueryRejectCondition]
+forall a. (Enum a, Bounded a) =&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromThen</span></span><span>
+</span><span id="line-121"></span><span>  </span><span id="local-6989586621680258048"><span class="annot"><span class="annottext">enumFromThenTo :: QueryRejectCondition
+-&gt; QueryRejectCondition
+-&gt; QueryRejectCondition
+-&gt; [QueryRejectCondition]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromThenTo</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+-&gt; QueryRejectCondition
+-&gt; QueryRejectCondition
+-&gt; [QueryRejectCondition]
+forall a. Enum a =&gt; a -&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromThenTo</span></span><span>
+</span><span id="line-122"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldDefault</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryRejectCondition"><span class="hs-identifier hs-type">QueryRejectCondition</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-123"></span><span>  </span><span id="local-6989586621680258053"><span class="annot"><span class="annottext">fieldDefault :: QueryRejectCondition
+</span><a href="#local-6989586621680258053"><span class="hs-identifier hs-var hs-var hs-var">fieldDefault</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_REJECT_CONDITION_UNSPECIFIED"><span class="hs-identifier hs-var">QUERY_REJECT_CONDITION_UNSPECIFIED</span></a></span><span>
+</span><span id="line-124"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Control.DeepSeq.NFData</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryRejectCondition"><span class="hs-identifier hs-type">QueryRejectCondition</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-125"></span><span>  </span><span id="local-6989586621680258058"><span class="annot"><span class="annottext">rnf :: QueryRejectCondition -&gt; ()
+</span><a href="#local-6989586621680258058"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span id="local-6989586621680258060"><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="#local-6989586621680258060"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition -&gt; () -&gt; ()
+forall a b. a -&gt; b -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.seq</span></span><span> </span><span class="annot"><span class="annottext">QueryRejectCondition
+</span><a href="#local-6989586621680258060"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-126"></span><span class="hs-keyword">newtype</span><span> </span><span id="QueryResultType%27UnrecognizedValue"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryResultType%27UnrecognizedValue"><span class="hs-identifier hs-var">QueryResultType'UnrecognizedValue</span></a></span></span><span>
+</span><span id="line-127"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="QueryResultType%27UnrecognizedValue"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryResultType%27UnrecognizedValue"><span class="hs-identifier hs-var">QueryResultType'UnrecognizedValue</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Int.Int32</span></span><span>
+</span><span id="line-128"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680258063"><span id="local-6989586621680258066"><span class="annot"><span class="annottext">QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue -&gt; Bool
+(QueryResultType'UnrecognizedValue
+ -&gt; QueryResultType'UnrecognizedValue -&gt; Bool)
+-&gt; (QueryResultType'UnrecognizedValue
+    -&gt; QueryResultType'UnrecognizedValue -&gt; Bool)
+-&gt; Eq QueryResultType'UnrecognizedValue
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue -&gt; Bool
+== :: QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue -&gt; Bool
+$c/= :: QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue -&gt; Bool
+/= :: QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680258072"><span id="local-6989586621680258075"><span id="local-6989586621680258078"><span id="local-6989586621680258082"><span id="local-6989586621680258085"><span id="local-6989586621680258088"><span id="local-6989586621680258091"><span class="annot"><span class="annottext">Eq QueryResultType'UnrecognizedValue
+Eq QueryResultType'UnrecognizedValue =&gt;
+(QueryResultType'UnrecognizedValue
+ -&gt; QueryResultType'UnrecognizedValue -&gt; Ordering)
+-&gt; (QueryResultType'UnrecognizedValue
+    -&gt; QueryResultType'UnrecognizedValue -&gt; Bool)
+-&gt; (QueryResultType'UnrecognizedValue
+    -&gt; QueryResultType'UnrecognizedValue -&gt; Bool)
+-&gt; (QueryResultType'UnrecognizedValue
+    -&gt; QueryResultType'UnrecognizedValue -&gt; Bool)
+-&gt; (QueryResultType'UnrecognizedValue
+    -&gt; QueryResultType'UnrecognizedValue -&gt; Bool)
+-&gt; (QueryResultType'UnrecognizedValue
+    -&gt; QueryResultType'UnrecognizedValue
+    -&gt; QueryResultType'UnrecognizedValue)
+-&gt; (QueryResultType'UnrecognizedValue
+    -&gt; QueryResultType'UnrecognizedValue
+    -&gt; QueryResultType'UnrecognizedValue)
+-&gt; Ord QueryResultType'UnrecognizedValue
+QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue -&gt; Bool
+QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue -&gt; Ordering
+QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue -&gt; Ordering
+compare :: QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue -&gt; Ordering
+$c&lt; :: QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue -&gt; Bool
+&lt; :: QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue -&gt; Bool
+$c&lt;= :: QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue -&gt; Bool
+&lt;= :: QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue -&gt; Bool
+$c&gt; :: QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue -&gt; Bool
+&gt; :: QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue -&gt; Bool
+$c&gt;= :: QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue -&gt; Bool
+&gt;= :: QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue -&gt; Bool
+$cmax :: QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue
+max :: QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue
+$cmin :: QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue
+min :: QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue
+-&gt; QueryResultType'UnrecognizedValue
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680258094"><span id="local-6989586621680258098"><span id="local-6989586621680258102"><span class="annot"><span class="annottext">Int -&gt; QueryResultType'UnrecognizedValue -&gt; ShowS
+[QueryResultType'UnrecognizedValue] -&gt; ShowS
+QueryResultType'UnrecognizedValue -&gt; String
+(Int -&gt; QueryResultType'UnrecognizedValue -&gt; ShowS)
+-&gt; (QueryResultType'UnrecognizedValue -&gt; String)
+-&gt; ([QueryResultType'UnrecognizedValue] -&gt; ShowS)
+-&gt; Show QueryResultType'UnrecognizedValue
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; QueryResultType'UnrecognizedValue -&gt; ShowS
+showsPrec :: Int -&gt; QueryResultType'UnrecognizedValue -&gt; ShowS
+$cshow :: QueryResultType'UnrecognizedValue -&gt; String
+show :: QueryResultType'UnrecognizedValue -&gt; String
+$cshowList :: [QueryResultType'UnrecognizedValue] -&gt; ShowS
+showList :: [QueryResultType'UnrecognizedValue] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-129"></span><span class="hs-keyword">data</span><span> </span><span id="QueryResultType"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryResultType"><span class="hs-identifier hs-var">QueryResultType</span></a></span></span><span>
+</span><span id="line-130"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="QUERY_RESULT_TYPE_UNSPECIFIED"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_UNSPECIFIED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_UNSPECIFIED</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-131"></span><span>    </span><span id="QUERY_RESULT_TYPE_ANSWERED"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_ANSWERED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_ANSWERED</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-132"></span><span>    </span><span id="QUERY_RESULT_TYPE_FAILED"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_FAILED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_FAILED</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-133"></span><span>    </span><span id="QueryResultType%27Unrecognized"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryResultType%27Unrecognized"><span class="hs-identifier hs-var">QueryResultType'Unrecognized</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryResultType%27UnrecognizedValue"><span class="hs-identifier hs-type">QueryResultType'UnrecognizedValue</span></a></span><span>
+</span><span id="line-134"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680258109"><span id="local-6989586621680258113"><span id="local-6989586621680258117"><span class="annot"><span class="annottext">Int -&gt; QueryResultType -&gt; ShowS
+[QueryResultType] -&gt; ShowS
+QueryResultType -&gt; String
+(Int -&gt; QueryResultType -&gt; ShowS)
+-&gt; (QueryResultType -&gt; String)
+-&gt; ([QueryResultType] -&gt; ShowS)
+-&gt; Show QueryResultType
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; QueryResultType -&gt; ShowS
+showsPrec :: Int -&gt; QueryResultType -&gt; ShowS
+$cshow :: QueryResultType -&gt; String
+show :: QueryResultType -&gt; String
+$cshowList :: [QueryResultType] -&gt; ShowS
+showList :: [QueryResultType] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680258120"><span id="local-6989586621680258125"><span class="annot"><span class="annottext">QueryResultType -&gt; QueryResultType -&gt; Bool
+(QueryResultType -&gt; QueryResultType -&gt; Bool)
+-&gt; (QueryResultType -&gt; QueryResultType -&gt; Bool)
+-&gt; Eq QueryResultType
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: QueryResultType -&gt; QueryResultType -&gt; Bool
+== :: QueryResultType -&gt; QueryResultType -&gt; Bool
+$c/= :: QueryResultType -&gt; QueryResultType -&gt; Bool
+/= :: QueryResultType -&gt; QueryResultType -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680258131"><span id="local-6989586621680258136"><span id="local-6989586621680258140"><span id="local-6989586621680258143"><span id="local-6989586621680258146"><span id="local-6989586621680258149"><span id="local-6989586621680258152"><span class="annot"><span class="annottext">Eq QueryResultType
+Eq QueryResultType =&gt;
+(QueryResultType -&gt; QueryResultType -&gt; Ordering)
+-&gt; (QueryResultType -&gt; QueryResultType -&gt; Bool)
+-&gt; (QueryResultType -&gt; QueryResultType -&gt; Bool)
+-&gt; (QueryResultType -&gt; QueryResultType -&gt; Bool)
+-&gt; (QueryResultType -&gt; QueryResultType -&gt; Bool)
+-&gt; (QueryResultType -&gt; QueryResultType -&gt; QueryResultType)
+-&gt; (QueryResultType -&gt; QueryResultType -&gt; QueryResultType)
+-&gt; Ord QueryResultType
+QueryResultType -&gt; QueryResultType -&gt; Bool
+QueryResultType -&gt; QueryResultType -&gt; Ordering
+QueryResultType -&gt; QueryResultType -&gt; QueryResultType
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: QueryResultType -&gt; QueryResultType -&gt; Ordering
+compare :: QueryResultType -&gt; QueryResultType -&gt; Ordering
+$c&lt; :: QueryResultType -&gt; QueryResultType -&gt; Bool
+&lt; :: QueryResultType -&gt; QueryResultType -&gt; Bool
+$c&lt;= :: QueryResultType -&gt; QueryResultType -&gt; Bool
+&lt;= :: QueryResultType -&gt; QueryResultType -&gt; Bool
+$c&gt; :: QueryResultType -&gt; QueryResultType -&gt; Bool
+&gt; :: QueryResultType -&gt; QueryResultType -&gt; Bool
+$c&gt;= :: QueryResultType -&gt; QueryResultType -&gt; Bool
+&gt;= :: QueryResultType -&gt; QueryResultType -&gt; Bool
+$cmax :: QueryResultType -&gt; QueryResultType -&gt; QueryResultType
+max :: QueryResultType -&gt; QueryResultType -&gt; QueryResultType
+$cmin :: QueryResultType -&gt; QueryResultType -&gt; QueryResultType
+min :: QueryResultType -&gt; QueryResultType -&gt; QueryResultType
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-135"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.MessageEnum</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryResultType"><span class="hs-identifier hs-type">QueryResultType</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-136"></span><span>  </span><span id="local-6989586621680258172"><span class="annot"><span class="annottext">maybeToEnum :: Int -&gt; Maybe QueryResultType
+</span><span class="hs-identifier hs-var hs-var hs-var">maybeToEnum</span></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryResultType -&gt; Maybe QueryResultType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_UNSPECIFIED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-137"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryResultType -&gt; Maybe QueryResultType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_ANSWERED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_ANSWERED</span></a></span><span>
+</span><span id="line-138"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryResultType -&gt; Maybe QueryResultType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_FAILED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_FAILED</span></a></span><span>
+</span><span id="line-139"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span id="local-6989586621680258173"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680258173"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><span id="line-140"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryResultType -&gt; Maybe QueryResultType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span>
+</span><span id="line-141"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">QueryResultType'UnrecognizedValue -&gt; QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryResultType%27Unrecognized"><span class="hs-identifier hs-var">QueryResultType'Unrecognized</span></a></span><span>
+</span><span id="line-142"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int32 -&gt; QueryResultType'UnrecognizedValue
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryResultType%27UnrecognizedValue"><span class="hs-identifier hs-var">QueryResultType'UnrecognizedValue</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int32
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680258173"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-143"></span><span>  </span><span id="local-6989586621680258175"><span class="annot"><span class="annottext">showEnum :: QueryResultType -&gt; String
+</span><span class="hs-identifier hs-var hs-var hs-var">showEnum</span></span></span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_UNSPECIFIED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-144"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QUERY_RESULT_TYPE_UNSPECIFIED&quot;</span></span><span>
+</span><span id="line-145"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_ANSWERED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_ANSWERED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QUERY_RESULT_TYPE_ANSWERED&quot;</span></span><span>
+</span><span id="line-146"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_FAILED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_FAILED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QUERY_RESULT_TYPE_FAILED&quot;</span></span><span>
+</span><span id="line-147"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span>
+</span><span id="line-148"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryResultType%27Unrecognized"><span class="hs-identifier hs-type">QueryResultType'Unrecognized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryResultType%27UnrecognizedValue"><span class="hs-identifier hs-type">QueryResultType'UnrecognizedValue</span></a></span><span> </span><span id="local-6989586621680258176"><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680258176"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-149"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int32 -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">Prelude.show</span></span><span> </span><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680258176"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-150"></span><span>  </span><span id="local-6989586621680258188"><span class="annot"><span class="annottext">readEnum :: String -&gt; Maybe QueryResultType
+</span><span class="hs-identifier hs-var hs-var hs-var">readEnum</span></span></span><span> </span><span id="local-6989586621680258189"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680258189"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><span id="line-151"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680258189"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QUERY_RESULT_TYPE_UNSPECIFIED&quot;</span></span><span>
+</span><span id="line-152"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryResultType -&gt; Maybe QueryResultType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_UNSPECIFIED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-153"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680258189"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QUERY_RESULT_TYPE_ANSWERED&quot;</span></span><span>
+</span><span id="line-154"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryResultType -&gt; Maybe QueryResultType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_ANSWERED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_ANSWERED</span></a></span><span>
+</span><span id="line-155"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680258189"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QUERY_RESULT_TYPE_FAILED&quot;</span></span><span>
+</span><span id="line-156"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryResultType -&gt; Maybe QueryResultType
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_FAILED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_FAILED</span></a></span><span>
+</span><span id="line-157"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">Prelude.otherwise</span></span><span>
+</span><span id="line-158"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Int
+-&gt; (Int -&gt; Maybe QueryResultType) -&gt; Maybe QueryResultType
+forall a b. Maybe a -&gt; (a -&gt; Maybe b) -&gt; Maybe b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">(Prelude.&gt;&gt;=)</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Maybe Int
+forall a. Read a =&gt; String -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Text.Read.readMaybe</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680258189"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Maybe QueryResultType
+forall a. MessageEnum a =&gt; Int -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeToEnum</span></span><span>
+</span><span id="line-159"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prelude.Bounded</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryResultType"><span class="hs-identifier hs-type">QueryResultType</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-160"></span><span>  </span><span id="local-6989586621680258192"><span class="annot"><span class="annottext">minBound :: QueryResultType
+</span><span class="hs-identifier hs-var hs-var hs-var">minBound</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_UNSPECIFIED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-161"></span><span>  </span><span id="local-6989586621680258193"><span class="annot"><span class="annottext">maxBound :: QueryResultType
+</span><span class="hs-identifier hs-var hs-var hs-var">maxBound</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_FAILED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_FAILED</span></a></span><span>
+</span><span id="line-162"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prelude.Enum</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryResultType"><span class="hs-identifier hs-type">QueryResultType</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-163"></span><span>  </span><span id="local-6989586621680258208"><span class="annot"><span class="annottext">toEnum :: Int -&gt; QueryResultType
+</span><span class="hs-identifier hs-var hs-var hs-var">toEnum</span></span></span><span> </span><span id="local-6989586621680258209"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680258209"><span class="hs-identifier hs-var">k__</span></a></span></span><span>
+</span><span id="line-164"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryResultType
+-&gt; (QueryResultType -&gt; QueryResultType)
+-&gt; Maybe QueryResultType
+-&gt; QueryResultType
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.maybe</span></span><span>
+</span><span id="line-165"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; QueryResultType
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-166"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">(Prelude.++)</span></span><span>
+</span><span id="line-167"></span><span>              </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;toEnum: unknown value for enum QueryResultType: &quot;</span></span><span>
+</span><span id="line-168"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">Prelude.show</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680258209"><span class="hs-identifier hs-var">k__</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-169"></span><span>        </span><span class="annot"><span class="annottext">QueryResultType -&gt; QueryResultType
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.id</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Maybe QueryResultType
+forall a. MessageEnum a =&gt; Int -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680258209"><span class="hs-identifier hs-var">k__</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-170"></span><span>  </span><span id="local-6989586621680258212"><span class="annot"><span class="annottext">fromEnum :: QueryResultType -&gt; Int
+</span><span class="hs-identifier hs-var hs-var hs-var">fromEnum</span></span></span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_UNSPECIFIED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_UNSPECIFIED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-171"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_ANSWERED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_ANSWERED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-172"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_FAILED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_FAILED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span>
+</span><span id="line-173"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span>
+</span><span id="line-174"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryResultType%27Unrecognized"><span class="hs-identifier hs-type">QueryResultType'Unrecognized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryResultType%27UnrecognizedValue"><span class="hs-identifier hs-type">QueryResultType'UnrecognizedValue</span></a></span><span> </span><span id="local-6989586621680258213"><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680258213"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-175"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int32 -&gt; Int
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680258213"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-176"></span><span>  </span><span id="local-6989586621680258218"><span class="annot"><span class="annottext">succ :: QueryResultType -&gt; QueryResultType
+</span><span class="hs-identifier hs-var hs-var hs-var">succ</span></span></span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_FAILED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_FAILED</span></a></span><span>
+</span><span id="line-177"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; QueryResultType
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-178"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QueryResultType.succ: bad argument QUERY_RESULT_TYPE_FAILED. This value would be out of bounds.&quot;</span></span><span>
+</span><span id="line-179"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_UNSPECIFIED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_UNSPECIFIED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_ANSWERED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_ANSWERED</span></a></span><span>
+</span><span id="line-180"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_ANSWERED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_ANSWERED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_FAILED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_FAILED</span></a></span><span>
+</span><span id="line-181"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryResultType%27Unrecognized"><span class="hs-identifier hs-type">QueryResultType'Unrecognized</span></a></span><span> </span><span class="annot"><span class="annottext">QueryResultType'UnrecognizedValue
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-182"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; QueryResultType
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-183"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QueryResultType.succ: bad argument: unrecognized value&quot;</span></span><span>
+</span><span id="line-184"></span><span>  </span><span id="local-6989586621680258223"><span class="annot"><span class="annottext">pred :: QueryResultType -&gt; QueryResultType
+</span><span class="hs-identifier hs-var hs-var hs-var">pred</span></span></span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_UNSPECIFIED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-185"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; QueryResultType
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-186"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QueryResultType.pred: bad argument QUERY_RESULT_TYPE_UNSPECIFIED. This value would be out of bounds.&quot;</span></span><span>
+</span><span id="line-187"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_ANSWERED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_ANSWERED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_UNSPECIFIED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-188"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_FAILED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_FAILED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_ANSWERED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_ANSWERED</span></a></span><span>
+</span><span id="line-189"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryResultType%27Unrecognized"><span class="hs-identifier hs-type">QueryResultType'Unrecognized</span></a></span><span> </span><span class="annot"><span class="annottext">QueryResultType'UnrecognizedValue
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-190"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; QueryResultType
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-191"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;QueryResultType.pred: bad argument: unrecognized value&quot;</span></span><span>
+</span><span id="line-192"></span><span>  </span><span id="local-6989586621680258226"><span class="annot"><span class="annottext">enumFrom :: QueryResultType -&gt; [QueryResultType]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFrom</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryResultType -&gt; [QueryResultType]
+forall a. (Enum a, Bounded a) =&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFrom</span></span><span>
+</span><span id="line-193"></span><span>  </span><span id="local-6989586621680258228"><span class="annot"><span class="annottext">enumFromTo :: QueryResultType -&gt; QueryResultType -&gt; [QueryResultType]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromTo</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryResultType -&gt; QueryResultType -&gt; [QueryResultType]
+forall a. Enum a =&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromTo</span></span><span>
+</span><span id="line-194"></span><span>  </span><span id="local-6989586621680258231"><span class="annot"><span class="annottext">enumFromThen :: QueryResultType -&gt; QueryResultType -&gt; [QueryResultType]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromThen</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryResultType -&gt; QueryResultType -&gt; [QueryResultType]
+forall a. (Enum a, Bounded a) =&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromThen</span></span><span>
+</span><span id="line-195"></span><span>  </span><span id="local-6989586621680258233"><span class="annot"><span class="annottext">enumFromThenTo :: QueryResultType
+-&gt; QueryResultType -&gt; QueryResultType -&gt; [QueryResultType]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromThenTo</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryResultType
+-&gt; QueryResultType -&gt; QueryResultType -&gt; [QueryResultType]
+forall a. Enum a =&gt; a -&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromThenTo</span></span><span>
+</span><span id="line-196"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldDefault</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryResultType"><span class="hs-identifier hs-type">QueryResultType</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-197"></span><span>  </span><span id="local-6989586621680258236"><span class="annot"><span class="annottext">fieldDefault :: QueryResultType
+</span><span class="hs-identifier hs-var hs-var hs-var">fieldDefault</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="Proto.Temporal.Api.Enums.V1.Query.html#QUERY_RESULT_TYPE_UNSPECIFIED"><span class="hs-identifier hs-var">QUERY_RESULT_TYPE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-198"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Control.DeepSeq.NFData</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Query.html#QueryResultType"><span class="hs-identifier hs-type">QueryResultType</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-199"></span><span>  </span><span id="local-6989586621680258239"><span class="annot"><span class="annottext">rnf :: QueryResultType -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var">rnf</span></span></span><span> </span><span id="local-6989586621680258240"><span class="annot"><span class="annottext">QueryResultType
+</span><a href="#local-6989586621680258240"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">QueryResultType -&gt; () -&gt; ()
+forall a b. a -&gt; b -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.seq</span></span><span> </span><span class="annot"><span class="annottext">QueryResultType
+</span><a href="#local-6989586621680258240"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-200"></span></pre></body></html>

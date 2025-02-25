@@ -1,0 +1,405 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DerivingStrategies #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE StandaloneDeriving #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Workflow.Saga.html"><span class="hs-identifier">Temporal.Workflow.Saga</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-9"></span><span>  </span><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier">SagaT</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-10"></span><span>  </span><span class="annot"><a href="Temporal.Workflow.Saga.html#runSaga"><span class="hs-identifier">runSaga</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-11"></span><span>  </span><span class="annot"><a href="Temporal.Workflow.Saga.html#compensated"><span class="hs-identifier">compensated</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-12"></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span class="hs-cpp">
+
+
+#if MIN_VERSION_mtl(2,3,0)
+</span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Accum</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Select</span></span><span class="hs-cpp">
+#endif
+</span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Applicative</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Catch</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">MonadCatch</span></span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Catch</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Catch</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Cont</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Error.Class</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">MonadError</span></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Fix</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">MonadFix</span></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Logger</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">MonadLogger</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">logError</span></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.RWS</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">MonadReader</span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.State</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Writer</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Functor.Contravariant</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="annot"><span class="hs-comment">{- | The saga pattern is a failure management pattern that helps establish consistency in distributed applications,
+and coordinates transactions between multiple services to attempt to maintain data consistency.
+
+If you&#8217;re wondering if the saga pattern is right for your scenario, ask yourself:
+
+Does your logic involve multiple steps, some of which span machines, services, shards, or databases, for which partial execution is undesirable?
+
+Turns out, this is exactly where sagas are useful. Maybe you are checking inventory, charging a user&#8217;s credit card, and then fulfilling the order.
+Maybe you are managing a supply chain.
+
+The saga pattern is helpful because it basically functions as a state machine storing program progress,
+preventing multiple credit card charges, reverting if necessary, and knowing exactly how to safely resume
+in a consistent state in the event of power loss.
+
+There are many &#8220;do it all, or don&#8217;t bother&#8221; software applications in the real-world:
+
+- If you successfully charge the user for an item but your fulfillment service reports that the item is out of stock, you&#8217;re going to have upset
+  users if you don&#8217;t refund the charge. If you have the opposite problem and accidentally deliver items &#8220;for free,&#8221; you&#8217;ll be out of business.
+- If the machine coordinating a machine learning data processing pipeline crashes but the follower machines carry on processing the data with
+  nowhere to report their data to, you may have a very expensive compute resources bill on your hands.
+
+In all of these cases having some sort of &#8220;progress tracking&#8221; and compensation code to deal with these &#8220;do-it-all-or-don&#8217;t-do-any-of-it&#8221; tasks is exactly what the saga pattern provides. In saga parlance, these sorts of &#8220;all or nothing&#8221; tasks are called long-running transactions. This doesn&#8217;t necessarily mean such actions run for a &#8220;long&#8221; time, just that they require more steps in
+logical time than something running locally interacting with a single database.
+
+A saga is composed of two parts:
+
+1. Defined behavior for &#8220;going backwards&#8221; if you need to &#8220;undo&#8221; something (i.e., compensations)
+2. Behavior for striving towards forward progress (i.e., saving state to know where to recover
+   from in the face of failure). This second part is often called the &#8220;orchestration logic&#8221; of the saga.
+   For Temporal, execution of the orchestration logic is handled by the Temporal server, and the saga
+   monad transformer here simply needs to handle the compensation logic.
+
+Lastly, note that compensation actions are still subject to the same restrictions as any other workflow code.
+This means that compensation Actions run within a Workflow monad can be timed out, and they can be retried.
+Make sure in this case that whatever retry / timeout policies you have in place for your workflow are appropriate
+for the compensation actions you are running.
+
+For more information on the saga pattern, see the following resources:
+
+- [Saga Pattern Made Easy](https://temporal.io/blog/saga-pattern-made-easy-with-temporal/)
+- [The Saga Pattern in Distributed Systems](https://www.cs.cornell.edu/andru/cs711/2002fa/reading/sagas.pdf)
+-}</span></span><span>
+</span><span id="line-77"></span><span class="hs-keyword">newtype</span><span> </span><span id="SagaT"><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-var">SagaT</span></a></span></span><span> </span><span id="local-6989586621680167282"><span class="annot"><a href="#local-6989586621680167282"><span class="hs-identifier hs-type">m</span></a></span></span><span> </span><span id="local-6989586621680167283"><span class="annot"><a href="#local-6989586621680167283"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="SagaT"><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-var">SagaT</span></a></span></span><span> </span><span class="hs-special">{</span><span id="unSagaT"><span class="annot"><span class="annottext">forall (m :: * -&gt; *) a. SagaT m a -&gt; StateT [m ()] m a
+</span><a href="Temporal.Workflow.Saga.html#unSagaT"><span class="hs-identifier hs-var hs-var">unSagaT</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">StateT</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621680167282"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="annot"><a href="#local-6989586621680167282"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167283"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">}</span><span>
+</span><span id="line-78"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">newtype</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680167590"><span id="local-6989586621680167595"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; SagaT m a -&gt; SagaT m b)
+-&gt; (forall a b. a -&gt; SagaT m b -&gt; SagaT m a) -&gt; Functor (SagaT m)
+forall a b. a -&gt; SagaT m b -&gt; SagaT m a
+forall a b. (a -&gt; b) -&gt; SagaT m a -&gt; SagaT m b
+forall (m :: * -&gt; *) a b. Functor m =&gt; a -&gt; SagaT m b -&gt; SagaT m a
+forall (m :: * -&gt; *) a b.
+Functor m =&gt;
+(a -&gt; b) -&gt; SagaT m a -&gt; SagaT m b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall (m :: * -&gt; *) a b.
+Functor m =&gt;
+(a -&gt; b) -&gt; SagaT m a -&gt; SagaT m b
+fmap :: forall a b. (a -&gt; b) -&gt; SagaT m a -&gt; SagaT m b
+$c&lt;$ :: forall (m :: * -&gt; *) a b. Functor m =&gt; a -&gt; SagaT m b -&gt; SagaT m a
+&lt;$ :: forall a b. a -&gt; SagaT m b -&gt; SagaT m a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680167606"><span id="local-6989586621680167611"><span id="local-6989586621680167615"><span id="local-6989586621680167619"><span id="local-6989586621680167623"><span class="annot"><span class="annottext">Functor (SagaT m)
+Functor (SagaT m) =&gt;
+(forall a. a -&gt; SagaT m a)
+-&gt; (forall a b. SagaT m (a -&gt; b) -&gt; SagaT m a -&gt; SagaT m b)
+-&gt; (forall a b c.
+    (a -&gt; b -&gt; c) -&gt; SagaT m a -&gt; SagaT m b -&gt; SagaT m c)
+-&gt; (forall a b. SagaT m a -&gt; SagaT m b -&gt; SagaT m b)
+-&gt; (forall a b. SagaT m a -&gt; SagaT m b -&gt; SagaT m a)
+-&gt; Applicative (SagaT m)
+forall a. a -&gt; SagaT m a
+forall a b. SagaT m a -&gt; SagaT m b -&gt; SagaT m a
+forall a b. SagaT m a -&gt; SagaT m b -&gt; SagaT m b
+forall a b. SagaT m (a -&gt; b) -&gt; SagaT m a -&gt; SagaT m b
+forall a b c. (a -&gt; b -&gt; c) -&gt; SagaT m a -&gt; SagaT m b -&gt; SagaT m c
+forall (m :: * -&gt; *). Monad m =&gt; Functor (SagaT m)
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; SagaT m a
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+SagaT m a -&gt; SagaT m b -&gt; SagaT m a
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+SagaT m a -&gt; SagaT m b -&gt; SagaT m b
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+SagaT m (a -&gt; b) -&gt; SagaT m a -&gt; SagaT m b
+forall (m :: * -&gt; *) a b c.
+Monad m =&gt;
+(a -&gt; b -&gt; c) -&gt; SagaT m a -&gt; SagaT m b -&gt; SagaT m c
+forall (f :: * -&gt; *).
+Functor f =&gt;
+(forall a. a -&gt; f a)
+-&gt; (forall a b. f (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b c. (a -&gt; b -&gt; c) -&gt; f a -&gt; f b -&gt; f c)
+-&gt; (forall a b. f a -&gt; f b -&gt; f b)
+-&gt; (forall a b. f a -&gt; f b -&gt; f a)
+-&gt; Applicative f
+$cpure :: forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; SagaT m a
+pure :: forall a. a -&gt; SagaT m a
+$c&lt;*&gt; :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+SagaT m (a -&gt; b) -&gt; SagaT m a -&gt; SagaT m b
+&lt;*&gt; :: forall a b. SagaT m (a -&gt; b) -&gt; SagaT m a -&gt; SagaT m b
+$cliftA2 :: forall (m :: * -&gt; *) a b c.
+Monad m =&gt;
+(a -&gt; b -&gt; c) -&gt; SagaT m a -&gt; SagaT m b -&gt; SagaT m c
+liftA2 :: forall a b c. (a -&gt; b -&gt; c) -&gt; SagaT m a -&gt; SagaT m b -&gt; SagaT m c
+$c*&gt; :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+SagaT m a -&gt; SagaT m b -&gt; SagaT m b
+*&gt; :: forall a b. SagaT m a -&gt; SagaT m b -&gt; SagaT m b
+$c&lt;* :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+SagaT m a -&gt; SagaT m b -&gt; SagaT m a
+&lt;* :: forall a b. SagaT m a -&gt; SagaT m b -&gt; SagaT m a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Applicative</span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680167637"><span id="local-6989586621680167642"><span id="local-6989586621680167646"><span class="annot"><span class="annottext">Applicative (SagaT m)
+Applicative (SagaT m) =&gt;
+(forall a b. SagaT m a -&gt; (a -&gt; SagaT m b) -&gt; SagaT m b)
+-&gt; (forall a b. SagaT m a -&gt; SagaT m b -&gt; SagaT m b)
+-&gt; (forall a. a -&gt; SagaT m a)
+-&gt; Monad (SagaT m)
+forall a. a -&gt; SagaT m a
+forall a b. SagaT m a -&gt; SagaT m b -&gt; SagaT m b
+forall a b. SagaT m a -&gt; (a -&gt; SagaT m b) -&gt; SagaT m b
+forall (m :: * -&gt; *). Monad m =&gt; Applicative (SagaT m)
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; SagaT m a
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+SagaT m a -&gt; SagaT m b -&gt; SagaT m b
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+SagaT m a -&gt; (a -&gt; SagaT m b) -&gt; SagaT m b
+forall (m :: * -&gt; *).
+Applicative m =&gt;
+(forall a b. m a -&gt; (a -&gt; m b) -&gt; m b)
+-&gt; (forall a b. m a -&gt; m b -&gt; m b)
+-&gt; (forall a. a -&gt; m a)
+-&gt; Monad m
+$c&gt;&gt;= :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+SagaT m a -&gt; (a -&gt; SagaT m b) -&gt; SagaT m b
+&gt;&gt;= :: forall a b. SagaT m a -&gt; (a -&gt; SagaT m b) -&gt; SagaT m b
+$c&gt;&gt; :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+SagaT m a -&gt; SagaT m b -&gt; SagaT m b
+&gt;&gt; :: forall a b. SagaT m a -&gt; SagaT m b -&gt; SagaT m b
+$creturn :: forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; SagaT m a
+return :: forall a. a -&gt; SagaT m a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Monad</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680167656"><span class="annot"><span class="annottext">Monad (SagaT m)
+Monad (SagaT m) =&gt;
+(forall a. IO a -&gt; SagaT m a) -&gt; MonadIO (SagaT m)
+forall a. IO a -&gt; SagaT m a
+forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall a. IO a -&gt; m a) -&gt; MonadIO m
+forall (m :: * -&gt; *). MonadIO m =&gt; Monad (SagaT m)
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; SagaT m a
+$cliftIO :: forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; SagaT m a
+liftIO :: forall a. IO a -&gt; SagaT m a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var">MonadIO</span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span id="local-6989586621680167352"><span id="local-6989586621680167356"><span class="annot"><a href="Temporal.Workflow.Saga.html#runSaga"><span class="hs-identifier hs-type">runSaga</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadCatch</span></span><span> </span><span class="annot"><a href="#local-6989586621680167352"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadLogger</span></span><span> </span><span class="annot"><a href="#local-6989586621680167352"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Catch.SomeException</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680167352"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-type">SagaT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167352"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167356"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680167352"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167356"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-82"></span><span id="runSaga"><span class="annot"><span class="annottext">runSaga :: forall (m :: * -&gt; *) a.
+(MonadCatch m, MonadLogger m) =&gt;
+(SomeException -&gt; m ()) -&gt; SagaT m a -&gt; m a
+</span><a href="Temporal.Workflow.Saga.html#runSaga"><span class="hs-identifier hs-var hs-var">runSaga</span></a></span></span><span> </span><span id="local-6989586621680167675"><span class="annot"><span class="annottext">SomeException -&gt; m ()
+</span><a href="#local-6989586621680167675"><span class="hs-identifier hs-var">compensationExceptionHandler</span></a></span></span><span> </span><span id="local-6989586621680167676"><span class="annot"><span class="annottext">SagaT m a
+</span><a href="#local-6989586621680167676"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(StateT [m ()] m a -&gt; [m ()] -&gt; m a)
+-&gt; [m ()] -&gt; StateT [m ()] m a -&gt; m a
+forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
+</span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="annot"><span class="annottext">StateT [m ()] m a -&gt; [m ()] -&gt; m a
+forall (m :: * -&gt; *) s a. Monad m =&gt; StateT s m a -&gt; s -&gt; m a
+</span><span class="hs-identifier hs-var">evalStateT</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">(StateT [m ()] m a -&gt; m a) -&gt; StateT [m ()] m a -&gt; m a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-83"></span><span>  </span><span class="annot"><span class="annottext">SagaT m a -&gt; StateT [m ()] m a
+forall (m :: * -&gt; *) a. SagaT m a -&gt; StateT [m ()] m a
+</span><a href="Temporal.Workflow.Saga.html#unSagaT"><span class="hs-identifier hs-var">unSagaT</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SagaT m a
+</span><a href="#local-6989586621680167676"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SagaT m a -&gt; SagaT m () -&gt; SagaT m a
+forall (m :: * -&gt; *) a b.
+(HasCallStack, MonadCatch m) =&gt;
+m a -&gt; m b -&gt; m a
+</span><span class="hs-operator hs-var">`Catch.onException`</span></span><span> </span><span class="annot"><span class="annottext">(SomeException -&gt; m ()) -&gt; SagaT m ()
+forall (m :: * -&gt; *).
+(MonadCatch m, MonadLogger m) =&gt;
+(SomeException -&gt; m ()) -&gt; SagaT m ()
+</span><a href="Temporal.Workflow.Saga.html#compensate"><span class="hs-identifier hs-var">compensate</span></a></span><span> </span><span class="annot"><span class="annottext">SomeException -&gt; m ()
+</span><a href="#local-6989586621680167675"><span class="hs-identifier hs-var">compensationExceptionHandler</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span>
+</span><span id="line-86"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadTrans</span></span><span> </span><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-type">SagaT</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-87"></span><span>  </span><span id="local-6989586621680167690"><span class="annot"><span class="annottext">lift :: forall (m :: * -&gt; *) a. Monad m =&gt; m a -&gt; SagaT m a
+</span><a href="#local-6989586621680167690"><span class="hs-identifier hs-var hs-var hs-var">lift</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StateT [m ()] m a -&gt; SagaT m a
+forall (m :: * -&gt; *) a. StateT [m ()] m a -&gt; SagaT m a
+</span><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-var">SagaT</span></a></span><span> </span><span class="annot"><span class="annottext">(StateT [m ()] m a -&gt; SagaT m a)
+-&gt; (m a -&gt; StateT [m ()] m a) -&gt; m a -&gt; SagaT m a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">m a -&gt; StateT [m ()] m a
+forall (m :: * -&gt; *) a. Monad m =&gt; m a -&gt; StateT [m ()] m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span>
+</span><span id="line-90"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680167393"><span id="local-6989586621680167394"><span id="local-6989586621680167700"><span class="annot"><span class="hs-identifier hs-type">MonadState</span></span><span> </span><span class="annot"><a href="#local-6989586621680167393"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167394"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadState</span></span><span> </span><span class="annot"><a href="#local-6989586621680167393"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-type">SagaT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167394"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-91"></span><span>  </span><span id="local-6989586621680167708"><span class="annot"><span class="annottext">get :: SagaT m s
+</span><a href="#local-6989586621680167708"><span class="hs-identifier hs-var hs-var hs-var">get</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m s -&gt; SagaT m s
+forall (m :: * -&gt; *) a. Monad m =&gt; m a -&gt; SagaT m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="annot"><span class="annottext">m s
+forall s (m :: * -&gt; *). MonadState s m =&gt; m s
+</span><span class="hs-identifier hs-var">get</span></span><span>
+</span><span id="line-92"></span><span>  </span><span id="local-6989586621680167713"><span class="annot"><span class="annottext">put :: s -&gt; SagaT m ()
+</span><a href="#local-6989586621680167713"><span class="hs-identifier hs-var hs-var hs-var">put</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m () -&gt; SagaT m ()
+forall (m :: * -&gt; *) a. Monad m =&gt; m a -&gt; SagaT m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="annot"><span class="annottext">(m () -&gt; SagaT m ()) -&gt; (s -&gt; m ()) -&gt; s -&gt; SagaT m ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">s -&gt; m ()
+forall s (m :: * -&gt; *). MonadState s m =&gt; s -&gt; m ()
+</span><span class="hs-identifier hs-var">put</span></span><span>
+</span><span id="line-93"></span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span id="local-6989586621680167720"><span id="local-6989586621680167725"><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621680167407"><span id="local-6989586621680167408"><span class="annot"><a href="#local-6989586621680167407"><span class="hs-keyword hs-type hs-type">newtype</span></a></span></span></span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadError</span></span><span> </span><span class="annot"><a href="#local-6989586621680167407"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167408"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadError</span></span><span> </span><span class="annot"><a href="#local-6989586621680167407"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-type">SagaT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167408"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span>
+</span><span id="line-98"></span><span id="local-6989586621680167738"><span id="local-6989586621680167743"><span id="local-6989586621680167747"><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621680167421"><span id="local-6989586621680167422"><span class="annot"><a href="#local-6989586621680167421"><span class="hs-keyword hs-type hs-type">newtype</span></a></span></span></span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadReader</span></span><span> </span><span class="annot"><a href="#local-6989586621680167421"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167422"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadReader</span></span><span> </span><span class="annot"><a href="#local-6989586621680167421"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-type">SagaT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167422"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span></span></span><span class="hs-cpp">
+#if MIN_VERSION_mtl(2,3,0)
+</span><span id="local-6989586621680167764"><span id="local-6989586621680167769"><span id="local-6989586621680167773"><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621680167433"><span id="local-6989586621680167434"><span class="annot"><a href="#local-6989586621680167433"><span class="hs-keyword hs-type hs-type">newtype</span></a></span></span></span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadAccum</span></span><span> </span><span class="annot"><a href="#local-6989586621680167433"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167434"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadAccum</span></span><span> </span><span class="annot"><a href="#local-6989586621680167433"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-type">SagaT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167434"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-101"></span><span id="local-6989586621680167788"><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621680167445"><span id="local-6989586621680167446"><span class="annot"><a href="#local-6989586621680167445"><span class="hs-keyword hs-type hs-type">newtype</span></a></span></span></span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadSelect</span></span><span> </span><span class="annot"><a href="#local-6989586621680167445"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167446"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadSelect</span></span><span> </span><span class="annot"><a href="#local-6989586621680167445"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-type">SagaT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167446"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-104"></span><span>
+</span><span id="line-105"></span><span id="local-6989586621680167804"><span id="local-6989586621680167809"><span id="local-6989586621680167813"><span id="local-6989586621680167817"><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621680167461"><span id="local-6989586621680167462"><span class="annot"><a href="#local-6989586621680167461"><span class="hs-keyword hs-type hs-type">newtype</span></a></span></span></span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadWriter</span></span><span> </span><span class="annot"><a href="#local-6989586621680167461"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167462"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadWriter</span></span><span> </span><span class="annot"><a href="#local-6989586621680167461"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-type">SagaT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167462"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span id="local-6989586621680167833"><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621680167469"><span class="annot"><a href="#local-6989586621680167469"><span class="hs-keyword hs-type">newtype</span></a></span></span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadFail</span></span><span> </span><span class="annot"><a href="#local-6989586621680167469"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadFail</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-type">SagaT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167469"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span id="local-6989586621680167845"><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621680167476"><span class="annot"><a href="#local-6989586621680167476"><span class="hs-keyword hs-type">newtype</span></a></span></span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadFix</span></span><span> </span><span class="annot"><a href="#local-6989586621680167476"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadFix</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-type">SagaT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167476"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-112"></span><span>
+</span><span id="line-113"></span><span>
+</span><span id="line-114"></span><span id="local-6989586621680167854"><span id="local-6989586621680167859"><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621680167490"><span class="annot"><a href="#local-6989586621680167490"><span class="hs-keyword hs-type">newtype</span></a></span></span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Contravariant</span></span><span> </span><span class="annot"><a href="#local-6989586621680167490"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Contravariant</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-type">SagaT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167490"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-115"></span><span>
+</span><span id="line-116"></span><span>
+</span><span id="line-117"></span><span id="local-6989586621680167871"><span id="local-6989586621680167877"><span id="local-6989586621680167881"><span id="local-6989586621680167885"><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621680167505"><span class="annot"><a href="#local-6989586621680167505"><span class="hs-keyword hs-type">newtype</span></a></span></span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadPlus</span></span><span> </span><span class="annot"><a href="#local-6989586621680167505"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Alternative</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-type">SagaT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167505"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-118"></span><span>
+</span><span id="line-119"></span><span>
+</span><span id="line-120"></span><span id="local-6989586621680167906"><span id="local-6989586621680167911"><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621680167513"><span class="annot"><a href="#local-6989586621680167513"><span class="hs-keyword hs-type">newtype</span></a></span></span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadPlus</span></span><span> </span><span class="annot"><a href="#local-6989586621680167513"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadPlus</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-type">SagaT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167513"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-121"></span><span>
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span><span id="local-6989586621680167923"><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621680167523"><span class="annot"><a href="#local-6989586621680167523"><span class="hs-keyword hs-type">newtype</span></a></span></span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadCont</span></span><span> </span><span class="annot"><a href="#local-6989586621680167523"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadCont</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-type">SagaT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167523"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-124"></span><span>
+</span><span id="line-125"></span><span>
+</span><span id="line-126"></span><span id="local-6989586621680167938"><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621680167534"><span class="annot"><a href="#local-6989586621680167534"><span class="hs-keyword hs-type">newtype</span></a></span></span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadLogger</span></span><span> </span><span class="annot"><a href="#local-6989586621680167534"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadLogger</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-type">SagaT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167534"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-127"></span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span id="local-6989586621680167957"><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621680167546"><span class="annot"><a href="#local-6989586621680167546"><span class="hs-keyword hs-type">newtype</span></a></span></span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Catch.MonadThrow</span></span><span> </span><span class="annot"><a href="#local-6989586621680167546"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Catch.MonadThrow</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-type">SagaT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167546"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-130"></span><span>
+</span><span id="line-131"></span><span>
+</span><span id="line-132"></span><span id="local-6989586621680167980"><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621680167359"><span class="annot"><a href="#local-6989586621680167359"><span class="hs-keyword hs-type">newtype</span></a></span></span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Catch.MonadCatch</span></span><span> </span><span class="annot"><a href="#local-6989586621680167359"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Catch.MonadCatch</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-type">SagaT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167359"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-133"></span><span>
+</span><span id="line-134"></span><span>
+</span><span id="line-135"></span><span class="annot"><span class="hs-comment">-- | Run all compensation actions that have been added to the saga.</span></span><span>
+</span><span id="line-136"></span><span id="local-6989586621680167375"><span class="annot"><a href="Temporal.Workflow.Saga.html#compensate"><span class="hs-identifier hs-type">compensate</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadCatch</span></span><span> </span><span class="annot"><a href="#local-6989586621680167375"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadLogger</span></span><span> </span><span class="annot"><a href="#local-6989586621680167375"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Catch.SomeException</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680167375"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-type">SagaT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167375"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-137"></span><span id="compensate"><span class="annot"><span class="annottext">compensate :: forall (m :: * -&gt; *).
+(MonadCatch m, MonadLogger m) =&gt;
+(SomeException -&gt; m ()) -&gt; SagaT m ()
+</span><a href="Temporal.Workflow.Saga.html#compensate"><span class="hs-identifier hs-var hs-var">compensate</span></a></span></span><span> </span><span id="local-6989586621680168026"><span class="annot"><span class="annottext">SomeException -&gt; m ()
+</span><a href="#local-6989586621680168026"><span class="hs-identifier hs-var">compensationExceptionHandler</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StateT [m ()] m () -&gt; SagaT m ()
+forall (m :: * -&gt; *) a. StateT [m ()] m a -&gt; SagaT m a
+</span><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-var">SagaT</span></a></span><span> </span><span class="annot"><span class="annottext">(StateT [m ()] m () -&gt; SagaT m ())
+-&gt; StateT [m ()] m () -&gt; SagaT m ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-138"></span><span>  </span><span id="local-6989586621680168027"><span class="annot"><a href="#local-6989586621680168027"><span class="hs-identifier hs-var">actions</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">StateT [m ()] m [m ()]
+forall s (m :: * -&gt; *). MonadState s m =&gt; m s
+</span><span class="hs-identifier hs-var">get</span></span><span>
+</span><span id="line-139"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">put</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-140"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">lift</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">forM_</span></span><span> </span><span class="annot"><a href="#local-6989586621680168027"><span class="hs-identifier hs-type">actions</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621680168029"><span class="annot"><span class="annottext">m ()
+</span><a href="#local-6989586621680168029"><span class="hs-identifier hs-var">action</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-141"></span><span>    </span><span id="local-6989586621680168030"><span class="annot"><a href="#local-6989586621680168030"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m () -&gt; m (Either SomeException ())
+forall (m :: * -&gt; *) e a.
+(HasCallStack, MonadCatch m, Exception e) =&gt;
+m a -&gt; m (Either e a)
+</span><span class="hs-identifier hs-var">Catch.try</span></span><span> </span><span class="annot"><span class="annottext">m ()
+</span><a href="#local-6989586621680168029"><span class="hs-identifier hs-var">action</span></a></span><span>
+</span><span id="line-142"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621680168030"><span class="hs-identifier hs-type">res</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-143"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680168032"><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621680168032"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Catch.SomeException</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-144"></span><span>        </span><span class="annot"><span class="annottext">m () -&gt; (SomeException -&gt; m ()) -&gt; m ()
+forall (m :: * -&gt; *) a.
+(HasCallStack, MonadCatch m) =&gt;
+m a -&gt; (SomeException -&gt; m a) -&gt; m a
+</span><span class="hs-identifier hs-var">Catch.catchAll</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SomeException -&gt; m ()
+</span><a href="#local-6989586621680168026"><span class="hs-identifier hs-var">compensationExceptionHandler</span></a></span><span> </span><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621680168032"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((SomeException -&gt; m ()) -&gt; m ())
+-&gt; (SomeException -&gt; m ()) -&gt; m ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621680168034"><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621680168034"><span class="hs-identifier hs-var">e'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-145"></span><span>          </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">logError</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(LogSource -&gt; m ()) -&gt; LogSource -&gt; m ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; LogSource
+</span><span class="hs-identifier hs-var">T.pack</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; LogSource) -&gt; String -&gt; LogSource
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Saga compensation error handler threw exception: &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">SomeException -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621680168034"><span class="hs-identifier hs-var">e'</span></a></span><span>
+</span><span id="line-146"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">() -&gt; m ()
+forall a. a -&gt; m a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-147"></span><span>
+</span><span id="line-148"></span><span>
+</span><span id="line-149"></span><span id="local-6989586621680167575"><span class="annot"><a href="Temporal.Workflow.Saga.html#addCompensation"><span class="hs-identifier hs-type">addCompensation</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621680167575"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680167575"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-type">SagaT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167575"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-150"></span><span id="addCompensation"><span class="annot"><span class="annottext">addCompensation :: forall (m :: * -&gt; *). Monad m =&gt; m () -&gt; SagaT m ()
+</span><a href="Temporal.Workflow.Saga.html#addCompensation"><span class="hs-identifier hs-var hs-var">addCompensation</span></a></span></span><span> </span><span id="local-6989586621680168044"><span class="annot"><span class="annottext">m ()
+</span><a href="#local-6989586621680168044"><span class="hs-identifier hs-var">action</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StateT [m ()] m () -&gt; SagaT m ()
+forall (m :: * -&gt; *) a. StateT [m ()] m a -&gt; SagaT m a
+</span><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-var">SagaT</span></a></span><span> </span><span class="annot"><span class="annottext">(StateT [m ()] m () -&gt; SagaT m ())
+-&gt; StateT [m ()] m () -&gt; SagaT m ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">([m ()] -&gt; [m ()]) -&gt; StateT [m ()] m ()
+forall s (m :: * -&gt; *). MonadState s m =&gt; (s -&gt; s) -&gt; m ()
+</span><span class="hs-identifier hs-var">modify</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">m ()
+</span><a href="#local-6989586621680168044"><span class="hs-identifier hs-var">action</span></a></span><span> </span><span class="annot"><span class="annottext">m () -&gt; [m ()] -&gt; [m ()]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="hs-special">)</span><span>
+</span><span id="line-151"></span><span>
+</span><span id="line-152"></span><span>
+</span><span id="line-153"></span><span id="local-6989586621680167579"><span id="local-6989586621680167580"><span class="annot"><a href="Temporal.Workflow.Saga.html#compensated"><span class="hs-identifier hs-type">compensated</span></a></span><span>
+</span><span id="line-154"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadCatch</span></span><span> </span><span class="annot"><a href="#local-6989586621680167579"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-155"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680167579"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-156"></span><span>  </span><span class="hs-comment">-- ^ The compensation action to run if this saga step fails.</span><span>
+</span><span id="line-157"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-158"></span><span>  </span><span class="hs-comment">-- This action will be run in the event of any subsequent failure,</span><span>
+</span><span id="line-159"></span><span>  </span><span class="hs-comment">-- not just the failure of this saga step.</span><span>
+</span><span id="line-160"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-161"></span><span>  </span><span class="hs-comment">-- Saga compensation actions will be run in reverse order</span><span>
+</span><span id="line-162"></span><span>  </span><span class="hs-comment">-- of their addition to the saga.</span><span>
+</span><span id="line-163"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-164"></span><span>  </span><span class="hs-comment">-- Lastly, note that all sync exceptions thrown by the compensation</span><span>
+</span><span id="line-165"></span><span>  </span><span class="hs-comment">-- action will be swallowed.</span><span>
+</span><span id="line-166"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680167579"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167580"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-167"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ The saga step to run.</span></span><span>
+</span><span id="line-168"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Saga.html#SagaT"><span class="hs-identifier hs-type">SagaT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167579"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680167580"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-169"></span><span id="compensated"><span class="annot"><span class="annottext">compensated :: forall (m :: * -&gt; *) a. MonadCatch m =&gt; m () -&gt; m a -&gt; SagaT m a
+</span><a href="Temporal.Workflow.Saga.html#compensated"><span class="hs-identifier hs-var hs-var">compensated</span></a></span></span><span> </span><span id="local-6989586621680168055"><span class="annot"><span class="annottext">m ()
+</span><a href="#local-6989586621680168055"><span class="hs-identifier hs-var">compensation</span></a></span></span><span> </span><span id="local-6989586621680168056"><span class="annot"><span class="annottext">m a
+</span><a href="#local-6989586621680168056"><span class="hs-identifier hs-var">step</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-170"></span><span>  </span><span id="local-6989586621680168057"><span class="annot"><a href="#local-6989586621680168057"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m a -&gt; SagaT m a
+forall (m :: * -&gt; *) a. Monad m =&gt; m a -&gt; SagaT m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="annot"><span class="annottext">m a
+</span><a href="#local-6989586621680168056"><span class="hs-identifier hs-var">step</span></a></span><span>
+</span><span id="line-171"></span><span>  </span><span class="annot"><a href="Temporal.Workflow.Saga.html#addCompensation"><span class="hs-identifier hs-type">addCompensation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680168055"><span class="hs-identifier hs-type">compensation</span></a></span><span>
+</span><span id="line-172"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="#local-6989586621680168057"><span class="hs-identifier hs-type">res</span></a></span><span>
+</span><span id="line-173"></span></pre></body></html>

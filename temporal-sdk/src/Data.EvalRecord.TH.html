@@ -1,0 +1,979 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DerivingVia #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE RecordWildCards #-}</span><span>
+</span><span id="line-5"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Data.EvalRecord.TH.html"><span class="hs-identifier">Data.EvalRecord.TH</span></a></span><span>
+</span><span id="line-6"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.EvalRecord.TH.html#mkEvalRecord"><span class="hs-identifier">mkEvalRecord</span></a></span><span>
+</span><span id="line-7"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.EvalRecord.TH.html#mkEvalRecordWith"><span class="hs-identifier">mkEvalRecordWith</span></a></span><span>
+</span><span id="line-8"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.EvalRecord.TH.html#DeclareRecordConfig"><span class="hs-identifier">DeclareRecordConfig</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.EvalRecord.TH.html#passthrough"><span class="hs-identifier">passthrough</span></a></span><span>
+</span><span id="line-10"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- This file is a modified version of Barbies.TH from the barbies-th package.</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- The original license is reproduced below.</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--</span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- Copyright Fumiaki Kinoshita (c) 2019</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- All rights reserved.</span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- Redistribution and use in source and binary forms, with or without</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- modification, are permitted provided that the following conditions are met:</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-comment">--     * Redistributions of source code must retain the above copyright</span><span>
+</span><span id="line-22"></span><span class="hs-comment">--       notice, this list of conditions and the following disclaimer.</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-comment">--     * Redistributions in binary form must reproduce the above</span><span>
+</span><span id="line-25"></span><span class="hs-comment">--       copyright notice, this list of conditions and the following</span><span>
+</span><span id="line-26"></span><span class="hs-comment">--       disclaimer in the documentation and/or other materials provided</span><span>
+</span><span id="line-27"></span><span class="hs-comment">--       with the distribution.</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-comment">--     * Neither the name of Fumiaki Kinoshita nor the names of other</span><span>
+</span><span id="line-30"></span><span class="hs-comment">--       contributors may be used to endorse or promote products derived</span><span>
+</span><span id="line-31"></span><span class="hs-comment">--       from this software without specific prior written permission.</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">cxt</span></span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Name</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">mkOccName</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">occString</span></span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">void</span></span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.String</span></span><span>
+</span><span id="line-48"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">foldl'</span></span><span class="hs-special">)</span><span>
+</span><span id="line-49"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">partition</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">nub</span></span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NE</span></span><span>
+</span><span id="line-51"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Data.EvalRecord.html"><span class="hs-identifier">Data.EvalRecord</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Rec</span></span><span>
+</span><span id="line-52"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.Split</span></span><span>
+</span><span id="line-54"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span>
+</span><span id="line-55"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Fcf</span></span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span class="hs-keyword">data</span><span> </span><span id="DeclareRecordConfig"><span class="annot"><a href="Data.EvalRecord.TH.html#DeclareRecordConfig"><span class="hs-identifier hs-var">DeclareRecordConfig</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="DeclareRecordConfig"><span class="annot"><a href="Data.EvalRecord.TH.html#DeclareRecordConfig"><span class="hs-identifier hs-var">DeclareRecordConfig</span></a></span></span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="friends"><span class="annot"><span class="annottext">DeclareRecordConfig -&gt; [Name]
+</span><a href="Data.EvalRecord.TH.html#friends"><span class="hs-identifier hs-var hs-var">friends</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="hs-comment">-- ^ Members with these types won't be wrapped with 'f @@'</span></span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="unwrappedName"><span class="annot"><span class="annottext">DeclareRecordConfig -&gt; [Char] -&gt; Maybe [Char]
+</span><a href="Data.EvalRecord.TH.html#unwrappedName"><span class="hs-identifier hs-var hs-var">unwrappedName</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-60"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ generate a type synonym for the 'Pure' version of the type?</span></span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="baseName"><span class="annot"><span class="annottext">DeclareRecordConfig -&gt; [Char] -&gt; [Char]
+</span><a href="Data.EvalRecord.TH.html#baseName"><span class="hs-identifier hs-var hs-var">baseName</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-62"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ modify the name of the datatype</span></span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="wrapperName"><span class="annot"><span class="annottext">DeclareRecordConfig -&gt; Q Name
+</span><a href="Data.EvalRecord.TH.html#wrapperName"><span class="hs-identifier hs-var hs-var">wrapperName</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Q</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span>
+</span><span id="line-64"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ the name of the type parameter of the wrapper for each field</span></span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- | Defines a synonym for the bare type with the same name.</span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- The basic definition is suffixed by F, and the unwrapped basic type has no suffix.</span><span>
+</span><span id="line-69"></span><span class="annot"><a href="Data.EvalRecord.TH.html#passthrough"><span class="hs-identifier hs-type">passthrough</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.EvalRecord.TH.html#DeclareRecordConfig"><span class="hs-identifier hs-type">DeclareRecordConfig</span></a></span><span>
+</span><span id="line-70"></span><span id="passthrough"><span class="annot"><span class="annottext">passthrough :: DeclareRecordConfig
+</span><a href="Data.EvalRecord.TH.html#passthrough"><span class="hs-identifier hs-var hs-var">passthrough</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.EvalRecord.TH.html#DeclareRecordConfig"><span class="hs-identifier hs-type">DeclareRecordConfig</span></a></span><span>
+</span><span id="line-71"></span><span>  </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">friends :: [Name]
+</span><a href="Data.EvalRecord.TH.html#friends"><span class="hs-identifier hs-var">friends</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-72"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">unwrappedName :: [Char] -&gt; Maybe [Char]
+</span><a href="Data.EvalRecord.TH.html#unwrappedName"><span class="hs-identifier hs-var">unwrappedName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Maybe [Char]
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">baseName :: [Char] -&gt; [Char]
+</span><a href="Data.EvalRecord.TH.html#baseName"><span class="hs-identifier hs-var">baseName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Char] -&gt; [Char] -&gt; [Char]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;F&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-74"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">wrapperName :: Q Name
+</span><a href="Data.EvalRecord.TH.html#wrapperName"><span class="hs-identifier hs-var">wrapperName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Q Name
+forall (m :: * -&gt; *). Quote m =&gt; [Char] -&gt; m Name
+</span><span class="hs-identifier hs-var">newName</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;f&quot;</span></span><span>
+</span><span id="line-75"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span class="annot"><span class="hs-comment">-- | Doesn't define a synonym for the bare type.</span></span><span>
+</span><span id="line-78"></span><span class="annot"><a href="Data.EvalRecord.TH.html#classic"><span class="hs-identifier hs-type">classic</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.EvalRecord.TH.html#DeclareRecordConfig"><span class="hs-identifier hs-type">DeclareRecordConfig</span></a></span><span>
+</span><span id="line-79"></span><span id="classic"><span class="annot"><span class="annottext">classic :: DeclareRecordConfig
+</span><a href="Data.EvalRecord.TH.html#classic"><span class="hs-identifier hs-var hs-var">classic</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.EvalRecord.TH.html#DeclareRecordConfig"><span class="hs-identifier hs-type">DeclareRecordConfig</span></a></span><span>
+</span><span id="line-80"></span><span>  </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">friends :: [Name]
+</span><a href="Data.EvalRecord.TH.html#friends"><span class="hs-identifier hs-var">friends</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-81"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">unwrappedName :: [Char] -&gt; Maybe [Char]
+</span><a href="Data.EvalRecord.TH.html#unwrappedName"><span class="hs-identifier hs-var">unwrappedName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe [Char] -&gt; [Char] -&gt; Maybe [Char]
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">Maybe [Char]
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-82"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">baseName :: [Char] -&gt; [Char]
+</span><a href="Data.EvalRecord.TH.html#baseName"><span class="hs-identifier hs-var">baseName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; [Char]
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span>
+</span><span id="line-83"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">wrapperName :: Q Name
+</span><a href="Data.EvalRecord.TH.html#wrapperName"><span class="hs-identifier hs-var">wrapperName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Q Name
+forall (m :: * -&gt; *). Quote m =&gt; [Char] -&gt; m Name
+</span><span class="hs-identifier hs-var">newName</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;f&quot;</span></span><span>
+</span><span id="line-84"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-85"></span><span>
+</span><span id="line-86"></span><span class="hs-comment">-- | Defines a synonym for the bare type with the same name.</span><span>
+</span><span id="line-87"></span><span class="hs-comment">-- The strippable definition is suffixed by B, and the covered type is suffixed by H.</span><span>
+</span><span id="line-88"></span><span class="annot"><a href="Data.EvalRecord.TH.html#mkEvalRecord"><span class="hs-identifier hs-type">mkEvalRecord</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DecsQ</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DecsQ</span></span><span>
+</span><span id="line-89"></span><span id="mkEvalRecord"><span class="annot"><span class="annottext">mkEvalRecord :: DecsQ -&gt; DecsQ
+</span><a href="Data.EvalRecord.TH.html#mkEvalRecord"><span class="hs-identifier hs-var hs-var">mkEvalRecord</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DeclareRecordConfig -&gt; DecsQ -&gt; DecsQ
+</span><a href="Data.EvalRecord.TH.html#mkEvalRecordWith"><span class="hs-identifier hs-var">mkEvalRecordWith</span></a></span><span> </span><span class="annot"><span class="annottext">DeclareRecordConfig
+</span><a href="Data.EvalRecord.TH.html#classic"><span class="hs-identifier hs-var">classic</span></a></span><span>
+</span><span id="line-90"></span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- | Generate a higher-kinded data declaration using a custom config.</span><span>
+</span><span id="line-92"></span><span class="hs-comment">--</span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- Note that sum types are not currently supported.</span><span>
+</span><span id="line-94"></span><span class="annot"><a href="Data.EvalRecord.TH.html#mkEvalRecordWith"><span class="hs-identifier hs-type">mkEvalRecordWith</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.EvalRecord.TH.html#DeclareRecordConfig"><span class="hs-identifier hs-type">DeclareRecordConfig</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DecsQ</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DecsQ</span></span><span>
+</span><span id="line-95"></span><span id="mkEvalRecordWith"><span class="annot"><span class="annottext">mkEvalRecordWith :: DeclareRecordConfig -&gt; DecsQ -&gt; DecsQ
+</span><a href="Data.EvalRecord.TH.html#mkEvalRecordWith"><span class="hs-identifier hs-var hs-var">mkEvalRecordWith</span></a></span></span><span> </span><span class="annot"><a href="Data.EvalRecord.TH.html#DeclareRecordConfig"><span class="hs-identifier hs-type">DeclareRecordConfig</span></a></span><span class="hs-special">{</span><span id="local-6989586621680158175"><span id="local-6989586621680158176"><span id="local-6989586621680158177"><span id="local-6989586621680158178"><span class="annot"><span class="annottext">[Name]
+Q Name
+[Char] -&gt; [Char]
+[Char] -&gt; Maybe [Char]
+friends :: DeclareRecordConfig -&gt; [Name]
+unwrappedName :: DeclareRecordConfig -&gt; [Char] -&gt; Maybe [Char]
+baseName :: DeclareRecordConfig -&gt; [Char] -&gt; [Char]
+wrapperName :: DeclareRecordConfig -&gt; Q Name
+friends :: [Name]
+unwrappedName :: [Char] -&gt; Maybe [Char]
+baseName :: [Char] -&gt; [Char]
+wrapperName :: Q Name
+</span><a href="Data.EvalRecord.TH.html#friends"><span class="hs-glyph hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">..</span></a></span></span></span></span></span><span class="hs-special">}</span><span> </span><span id="local-6989586621680158179"><span class="annot"><span class="annottext">DecsQ
+</span><a href="#local-6989586621680158179"><span class="hs-identifier hs-var">decsQ</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-96"></span><span>  </span><span id="local-6989586621680158180"><span class="annot"><a href="#local-6989586621680158180"><span class="hs-identifier hs-var">decs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DecsQ
+</span><a href="#local-6989586621680158179"><span class="hs-identifier hs-var">decsQ</span></a></span><span>
+</span><span id="line-97"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680158181"><span class="annot"><a href="#local-6989586621680158181"><span class="hs-identifier hs-var hs-var">otherBarbieNames</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158182"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Name
+</span><span class="hs-identifier hs-var">mkName</span></span><span> </span><span class="annot"><span class="annottext">([Char] -&gt; Name) -&gt; [Char] -&gt; Name
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; [Char]
+</span><a href="#local-6989586621680158177"><span class="hs-identifier hs-var">baseName</span></a></span><span> </span><span class="annot"><span class="annottext">([Char] -&gt; [Char]) -&gt; [Char] -&gt; [Char]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; [Char]
+</span><span class="hs-identifier hs-var">nameBase</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158182"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621680158182"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158182"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Dec] -&gt; [Name]
+</span><a href="Data.EvalRecord.TH.html#dataDecNames"><span class="hs-identifier hs-var">dataDecNames</span></a></span><span> </span><span class="annot"><span class="annottext">[Dec]
+</span><a href="#local-6989586621680158180"><span class="hs-identifier hs-var">decs</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><span id="line-98"></span><span>          </span><span class="annot"><span class="annottext">[(Name, Name)] -&gt; [(Name, Name)] -&gt; [(Name, Name)]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">(Name -&gt; (Name, Name)) -&gt; [Name] -&gt; [(Name, Name)]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680158185"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158185"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158185"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158185"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Name]
+</span><a href="#local-6989586621680158175"><span class="hs-identifier hs-var">friends</span></a></span><span>
+</span><span id="line-99"></span><span>  </span><span id="local-6989586621680158186"><span class="annot"><a href="#local-6989586621680158186"><span class="hs-identifier hs-var">decs'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">traverse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680158188"><span class="hs-identifier hs-type">go</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158181"><span class="hs-identifier hs-type">otherBarbieNames</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680158180"><span class="hs-identifier hs-type">decs</span></a></span><span>
+</span><span id="line-100"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">concat</span></span><span> </span><span class="annot"><a href="#local-6989586621680158186"><span class="hs-identifier hs-type">decs'</span></a></span><span>
+</span><span id="line-101"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-102"></span><span>    </span><span id="local-6989586621680158188"><span class="annot"><span class="annottext">go :: [(Name, Name)] -&gt; Dec -&gt; DecsQ
+</span><a href="#local-6989586621680158188"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621680158190"><span class="annot"><span class="annottext">[(Name, Name)]
+</span><a href="#local-6989586621680158190"><span class="hs-identifier hs-var">otherBarbieNames</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DataD</span></span><span> </span><span class="annot"><span class="annottext">[Pred]
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621680158192"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158192"><span class="hs-identifier hs-var">dataName0</span></a></span></span><span> </span><span id="local-6989586621680158193"><span class="annot"><span class="annottext">[TyVarBndr BndrVis]
+</span><a href="#local-6989586621680158193"><span class="hs-identifier hs-var">tvbs</span></a></span></span><span> </span><span class="annot"><span class="annottext">Maybe Pred
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">[</span><span id="local-6989586621680158194"><span class="annot"><span class="annottext">con :: Con
+</span><a href="#local-6989586621680158194"><span class="hs-identifier hs-var">con</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">RecC</span></span><span> </span><span id="local-6989586621680158196"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158196"><span class="hs-identifier hs-var">nDataCon</span></a></span></span><span> </span><span id="local-6989586621680158197"><span class="annot"><span class="annottext">[VarBangType]
+</span><a href="#local-6989586621680158197"><span class="hs-identifier hs-var">mangledfields</span></a></span></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span id="local-6989586621680158198"><span class="annot"><span class="annottext">[DerivClause]
+</span><a href="#local-6989586621680158198"><span class="hs-identifier hs-var">classes</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-103"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680158199"><span class="annot"><span class="annottext">dataName :: Name
+</span><a href="#local-6989586621680158199"><span class="hs-identifier hs-var hs-var hs-var">dataName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Name
+</span><span class="hs-identifier hs-var">mkName</span></span><span> </span><span class="annot"><span class="annottext">([Char] -&gt; Name) -&gt; [Char] -&gt; Name
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; [Char]
+</span><a href="#local-6989586621680158177"><span class="hs-identifier hs-var">baseName</span></a></span><span> </span><span class="annot"><span class="annottext">([Char] -&gt; [Char]) -&gt; [Char] -&gt; [Char]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; [Char]
+</span><span class="hs-identifier hs-var">nameBase</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158192"><span class="hs-identifier hs-var">dataName0</span></a></span><span>
+</span><span id="line-104"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680158200"><span class="annot"><span class="annottext">fields :: [VarBangType]
+</span><a href="#local-6989586621680158200"><span class="hs-identifier hs-var hs-var hs-var">fields</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Name
+</span><a href="Data.EvalRecord.TH.html#unmangle"><span class="hs-identifier hs-var">unmangle</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158202"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bang
+</span><a href="#local-6989586621680158203"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Pred
+</span><a href="#local-6989586621680158204"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680158202"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158202"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680158203"><span class="annot"><span class="annottext">Bang
+</span><a href="#local-6989586621680158203"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680158204"><span class="annot"><span class="annottext">Pred
+</span><a href="#local-6989586621680158204"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[VarBangType]
+</span><a href="#local-6989586621680158197"><span class="hs-identifier hs-var">mangledfields</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-105"></span><span>      </span><span id="local-6989586621680158205"><span class="annot"><a href="#local-6989586621680158205"><span class="hs-identifier hs-var">nWrap</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Q Name
+</span><a href="#local-6989586621680158178"><span class="hs-identifier hs-var">wrapperName</span></a></span><span>
+</span><span id="line-106"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680158206"><span class="annot"><a href="#local-6989586621680158206"><span class="hs-identifier hs-var hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; [VarBangType] -&gt; [Name]
+</span><a href="Data.EvalRecord.TH.html#varNames"><span class="hs-identifier hs-var">varNames</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;x&quot;</span></span><span> </span><span class="annot"><span class="annottext">[VarBangType]
+</span><a href="#local-6989586621680158200"><span class="hs-identifier hs-var">fields</span></a></span><span>
+</span><span id="line-107"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680158208"><span class="annot"><a href="#local-6989586621680158208"><span class="hs-identifier hs-var hs-var">ys</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; [VarBangType] -&gt; [Name]
+</span><a href="Data.EvalRecord.TH.html#varNames"><span class="hs-identifier hs-var">varNames</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;y&quot;</span></span><span> </span><span class="annot"><span class="annottext">[VarBangType]
+</span><a href="#local-6989586621680158200"><span class="hs-identifier hs-var">fields</span></a></span><span>
+</span><span id="line-108"></span><span>      </span><span class="hs-comment">-- 'mapMembers' applies one of two functions to elements of a list</span><span>
+</span><span id="line-109"></span><span>      </span><span class="hs-comment">-- according to whether or not they align with another barbie</span><span>
+</span><span id="line-110"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680158209"><span class="annot"><a href="#local-6989586621680158209"><span class="hs-identifier hs-var hs-var">otherBarbieMask</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Pred
+</span><a href="#local-6989586621680158210"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-111"></span><span>                                </span><span class="annot"><span class="hs-identifier hs-type">ConT</span></span><span> </span><span id="local-6989586621680158212"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158212"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621680158213"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158213"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Name -&gt; [(Name, Name)] -&gt; Maybe Name
+forall a b. Eq a =&gt; a -&gt; [(a, b)] -&gt; Maybe b
+</span><span class="hs-identifier hs-var">lookup</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158212"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">[(Name, Name)]
+</span><a href="#local-6989586621680158190"><span class="hs-identifier hs-var">otherBarbieNames</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Maybe Name
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158213"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-112"></span><span>                                </span><span class="annot"><span class="annottext">Pred
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe Name
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-113"></span><span>                            </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bang
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680158210"><span class="annot"><span class="annottext">Pred
+</span><a href="#local-6989586621680158210"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[VarBangType]
+</span><a href="#local-6989586621680158200"><span class="hs-identifier hs-var">fields</span></a></span><span>
+</span><span id="line-114"></span><span>                            </span><span class="hs-special">]</span><span>
+</span><span id="line-115"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680157906"><span id="local-6989586621680157907"><span class="annot"><a href="#local-6989586621680158215"><span class="hs-identifier hs-type">mapMembers</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680157906"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680157907"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680157906"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680157907"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621680157906"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621680157907"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-116"></span><span>          </span><span id="local-6989586621680158215"><span class="annot"><a href="#local-6989586621680158215"><span class="hs-identifier hs-var hs-var">mapMembers</span></a></span></span><span> </span><span id="local-6989586621680158216"><span class="annot"><span class="annottext">b -&gt; c
+</span><a href="#local-6989586621680158216"><span class="hs-identifier hs-var">normal</span></a></span></span><span> </span><span id="local-6989586621680158217"><span class="annot"><span class="annottext">b -&gt; c
+</span><a href="#local-6989586621680158217"><span class="hs-identifier hs-var">otherBarbie</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Maybe Name -&gt; b -&gt; c) -&gt; [Maybe Name] -&gt; [b] -&gt; [c]
+forall a b c. (a -&gt; b -&gt; c) -&gt; [a] -&gt; [b] -&gt; [c]
+</span><span class="hs-identifier hs-var">zipWith</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(b -&gt; c) -&gt; (Name -&gt; b -&gt; c) -&gt; Maybe Name -&gt; b -&gt; c
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; c
+</span><a href="#local-6989586621680158216"><span class="hs-identifier hs-var">normal</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(b -&gt; c) -&gt; Name -&gt; b -&gt; c
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; c
+</span><a href="#local-6989586621680158217"><span class="hs-identifier hs-var">otherBarbie</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Maybe Name]
+</span><a href="#local-6989586621680158209"><span class="hs-identifier hs-var">otherBarbieMask</span></a></span><span>
+</span><span id="line-117"></span><span>      </span><span id="local-6989586621680158220"><span class="annot"><a href="#local-6989586621680158220"><span class="hs-identifier hs-var">nData</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">newName</span></span><span> </span><span class="annot"><span class="hs-string">&quot;b&quot;</span></span><span>
+</span><span id="line-118"></span><span>      </span><span id="local-6989586621680158221"><span class="annot"><a href="#local-6989586621680158221"><span class="hs-identifier hs-var">nConstr</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">newName</span></span><span> </span><span class="annot"><span class="hs-string">&quot;c&quot;</span></span><span>
+</span><span id="line-119"></span><span>      </span><span id="local-6989586621680158222"><span class="annot"><a href="#local-6989586621680158222"><span class="hs-identifier hs-var">nX</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">newName</span></span><span> </span><span class="annot"><span class="hs-string">&quot;x&quot;</span></span><span>
+</span><span id="line-120"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680158223"><span class="annot"><a href="#local-6989586621680158223"><span class="hs-identifier hs-var hs-var">transformed</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(Name, Name)] -&gt; Name -&gt; Con -&gt; Con
+</span><a href="Data.EvalRecord.TH.html#transformCon"><span class="hs-identifier hs-var">transformCon</span></a></span><span> </span><span class="annot"><span class="annottext">[(Name, Name)]
+</span><a href="#local-6989586621680158190"><span class="hs-identifier hs-var">otherBarbieNames</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158205"><span class="hs-identifier hs-var">nWrap</span></a></span><span> </span><span class="annot"><span class="annottext">Con
+</span><a href="#local-6989586621680158194"><span class="hs-identifier hs-var">con</span></a></span><span>
+</span><span id="line-121"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680158225"><span class="annot"><a href="#local-6989586621680158225"><span class="hs-identifier hs-var hs-var">reconE</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Q Exp -&gt; Q Exp -&gt; Q Exp) -&gt; Q Exp -&gt; [Q Exp] -&gt; Q Exp
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; [a] -&gt; b
+forall (t :: * -&gt; *) b a.
+Foldable t =&gt;
+(b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">foldl'</span></span><span> </span><span class="annot"><span class="annottext">Q Exp -&gt; Q Exp -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; m Exp -&gt; m Exp -&gt; m Exp
+</span><span class="hs-identifier hs-var">appE</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">conE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158196"><span class="hs-identifier hs-var">nDataCon</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-122"></span><span>          </span><span class="hs-comment">-- field names for FieldNamesB</span><span>
+</span><span id="line-123"></span><span>          </span><span id="local-6989586621680158238"><span class="annot"><a href="#local-6989586621680158238"><span class="hs-identifier hs-var hs-var">strLit</span></a></span></span><span> </span><span id="local-6989586621680158239"><span class="annot"><span class="annottext">[Char]
+</span><a href="#local-6989586621680158239"><span class="hs-identifier hs-var">str</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[|</span><span> </span><span class="annot"><span class="hs-identifier hs-type">fromString</span></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Lit -&gt; m Exp
+forall (m :: * -&gt; *). Quote m =&gt; Lit -&gt; m Exp
+</span><span class="hs-identifier hs-var">litE</span></span><span> </span><span class="annot"><span class="annottext">(Lit -&gt; m Exp) -&gt; Lit -&gt; m Exp
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Lit
+</span><span class="hs-identifier hs-var">StringL</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><a href="#local-6989586621680158239"><span class="hs-identifier hs-var">str</span></a></span><span class="hs-special">)</span><span class="hs-special">|]</span><span>
+</span><span id="line-124"></span><span>          </span><span id="local-6989586621680158241"><span class="annot"><a href="#local-6989586621680158241"><span class="hs-identifier hs-var hs-var">fieldNamesE</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Q Exp] -&gt; Q Exp
+</span><a href="#local-6989586621680158225"><span class="hs-identifier hs-var">reconE</span></a></span><span> </span><span class="annot"><span class="annottext">([Q Exp] -&gt; Q Exp) -&gt; [Q Exp] -&gt; Q Exp
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(VarBangType -&gt; Q Exp)
+-&gt; (VarBangType -&gt; Q Exp) -&gt; [VarBangType] -&gt; [Q Exp]
+forall b c. (b -&gt; c) -&gt; (b -&gt; c) -&gt; [b] -&gt; [c]
+</span><a href="#local-6989586621680158215"><span class="hs-identifier hs-var">mapMembers</span></a></span><span>
+</span><span id="line-125"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621680158242"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158242"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Bang
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Pred
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">conE</span></span><span> </span><span class="hs-special">'</span><span class="hs-identifier">Rec.Metadata</span><span> </span><span class="annot"><span class="annottext">Q Exp -&gt; Q Exp -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; m Exp -&gt; m Exp -&gt; m Exp
+</span><span class="hs-operator hs-var">`appE`</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Q Exp
+forall {m :: * -&gt; *}. Quote m =&gt; [Char] -&gt; m Exp
+</span><a href="#local-6989586621680158238"><span class="hs-identifier hs-var">strLit</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; [Char]
+</span><span class="hs-identifier hs-var">nameBase</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158242"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-126"></span><span>            </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Q Exp -&gt; VarBangType -&gt; Q Exp
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="hs-special">[|</span><span class="annot"><a href="Data.EvalRecord.html#typeProxies"><span class="hs-identifier hs-type">Rec.typeProxies</span></a></span><span class="hs-special">|]</span><span class="hs-special">)</span><span>
+</span><span id="line-127"></span><span>            </span><span class="annot"><span class="annottext">[VarBangType]
+</span><a href="#local-6989586621680158200"><span class="hs-identifier hs-var">fields</span></a></span><span>
+</span><span id="line-128"></span><span>          </span><span id="local-6989586621680158244"><span class="annot"><a href="#local-6989586621680158244"><span class="hs-identifier hs-var hs-var">nestedFieldNamesE</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Q Exp] -&gt; Q Exp
+</span><a href="#local-6989586621680158225"><span class="hs-identifier hs-var">reconE</span></a></span><span> </span><span class="annot"><span class="annottext">([Q Exp] -&gt; Q Exp) -&gt; [Q Exp] -&gt; Q Exp
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(VarBangType -&gt; Q Exp)
+-&gt; (VarBangType -&gt; Q Exp) -&gt; [VarBangType] -&gt; [Q Exp]
+forall b c. (b -&gt; c) -&gt; (b -&gt; c) -&gt; [b] -&gt; [c]
+</span><a href="#local-6989586621680158215"><span class="hs-identifier hs-var">mapMembers</span></a></span><span>
+</span><span id="line-129"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621680158245"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158245"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Bang
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Pred
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[|</span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Char] -&gt; Q Exp
+forall {m :: * -&gt; *}. Quote m =&gt; [Char] -&gt; m Exp
+</span><a href="#local-6989586621680158238"><span class="hs-identifier hs-var">strLit</span></a></span><span> </span><span class="annot"><span class="annottext">([Char] -&gt; Q Exp) -&gt; [Char] -&gt; Q Exp
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; [Char]
+</span><span class="hs-identifier hs-var">nameBase</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158245"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span class="hs-special">|]</span><span class="hs-special">)</span><span>
+</span><span id="line-130"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621680158246"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158246"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Bang
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Pred
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[|</span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NE.cons</span></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Char] -&gt; Q Exp
+forall {m :: * -&gt; *}. Quote m =&gt; [Char] -&gt; m Exp
+</span><a href="#local-6989586621680158238"><span class="hs-identifier hs-var">strLit</span></a></span><span> </span><span class="annot"><span class="annottext">([Char] -&gt; Q Exp) -&gt; [Char] -&gt; Q Exp
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; [Char]
+</span><span class="hs-identifier hs-var">nameBase</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158246"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Data.EvalRecord.html#map"><span class="hs-operator hs-type">`Rec.map`</span></a></span><span> </span><span class="annot"><a href="Data.EvalRecord.html#nestedFieldNames"><span class="hs-identifier hs-type">Rec.nestedFieldNames</span></a></span><span class="hs-special">|]</span><span class="hs-special">)</span><span>
+</span><span id="line-131"></span><span>            </span><span class="annot"><span class="annottext">[VarBangType]
+</span><a href="#local-6989586621680158200"><span class="hs-identifier hs-var">fields</span></a></span><span>
+</span><span id="line-132"></span><span>          </span><span id="local-6989586621680158250"><span class="annot"><a href="#local-6989586621680158250"><span class="hs-identifier hs-var hs-var">accessorsE</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Q Exp] -&gt; Q Exp
+</span><a href="#local-6989586621680158225"><span class="hs-identifier hs-var">reconE</span></a></span><span> </span><span class="annot"><span class="annottext">([Q Exp] -&gt; Q Exp) -&gt; [Q Exp] -&gt; Q Exp
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Name -&gt; Q Exp) -&gt; (Name -&gt; Q Exp) -&gt; [Name] -&gt; [Q Exp]
+forall b c. (b -&gt; c) -&gt; (b -&gt; c) -&gt; [b] -&gt; [c]
+</span><a href="#local-6989586621680158215"><span class="hs-identifier hs-var">mapMembers</span></a></span><span>
+</span><span id="line-133"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680158251"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158251"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[|</span><span class="annot"><a href="Data.EvalRecord.html#LensRec"><span class="hs-identifier hs-type">Rec.LensRec</span></a></span><span>
+</span><span id="line-134"></span><span>                </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158251"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-135"></span><span>                </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Pat
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Pat
+</span><span class="hs-identifier hs-var">varP</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158222"><span class="hs-identifier hs-var">nX</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Pat
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Pat
+</span><span class="hs-identifier hs-var">varP</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158220"><span class="hs-identifier hs-var">nData</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Q Exp -&gt; [Q (Name, Exp)] -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; m Exp -&gt; [m (Name, Exp)] -&gt; m Exp
+</span><span class="hs-identifier hs-var">recUpdE</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158220"><span class="hs-identifier hs-var">nData</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">(Name, Exp) -&gt; Q (Name, Exp)
+forall a. a -&gt; Q a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158251"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Exp
+</span><span class="hs-identifier hs-var">VarE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158222"><span class="hs-identifier hs-var">nX</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">|]</span><span>
+</span><span id="line-136"></span><span>            </span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680158254"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158254"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[|</span><span>
+</span><span id="line-138"></span><span>                          </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier">nestLens</span></span><span>
+</span><span id="line-139"></span><span>                             </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Pat
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Pat
+</span><span class="hs-identifier hs-var">varP</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158220"><span class="hs-identifier hs-var">nData</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Pat
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Pat
+</span><span class="hs-identifier hs-var">varP</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158222"><span class="hs-identifier hs-var">nX</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Q Exp -&gt; [Q (Name, Exp)] -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; m Exp -&gt; [m (Name, Exp)] -&gt; m Exp
+</span><span class="hs-identifier hs-var">recUpdE</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158220"><span class="hs-identifier hs-var">nData</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">(Name, Exp) -&gt; Q (Name, Exp)
+forall a. a -&gt; Q a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158254"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Exp
+</span><span class="hs-identifier hs-var">VarE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158222"><span class="hs-identifier hs-var">nX</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-140"></span><span>                                                 </span><span class="hs-special">,</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158254"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158220"><span class="hs-identifier hs-var">nData</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-141"></span><span>                                                 </span><span class="hs-special">)</span><span>
+</span><span id="line-142"></span><span>                             </span><span class="hs-special">)</span><span>
+</span><span id="line-143"></span><span>                          </span><span class="hs-special">)</span><span>
+</span><span id="line-144"></span><span>                          </span><span class="annot"><a href="Data.EvalRecord.html#map"><span class="hs-operator hs-type">`Rec.map`</span></a></span><span>
+</span><span id="line-145"></span><span>                          </span><span class="annot"><span class="hs-identifier">getAccessors</span></span><span>
+</span><span id="line-146"></span><span>                      </span><span class="hs-special">|]</span><span>
+</span><span id="line-147"></span><span>            </span><span class="hs-special">)</span><span>
+</span><span id="line-148"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158255"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680158255"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158255"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Bang
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Pred
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[VarBangType]
+</span><a href="#local-6989586621680158200"><span class="hs-identifier hs-var">fields</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-149"></span><span>
+</span><span id="line-150"></span><span>          </span><span class="hs-comment">-- Turn TyVarBndr into just a Name such that we can</span><span>
+</span><span id="line-151"></span><span>          </span><span class="hs-comment">-- reconstruct the constructor applied to already-present</span><span>
+</span><span id="line-152"></span><span>          </span><span class="hs-comment">-- type variables below.</span><span class="hs-cpp">
+#if MIN_VERSION_template_haskell(2,17,0)
+</span><span>          </span><span id="local-6989586621680158256"><span class="annot"><a href="#local-6989586621680158256"><span class="hs-identifier hs-var hs-var">varName</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PlainTV</span></span><span> </span><span id="local-6989586621680158258"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158258"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="annot"><span class="annottext">flag
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158258"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-155"></span><span>          </span><span class="annot"><a href="#local-6989586621680158256"><span class="hs-identifier hs-var">varName</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">KindedTV</span></span><span> </span><span id="local-6989586621680158260"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158260"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="annot"><span class="annottext">flag
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">Pred
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158260"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-cpp">
+#else
+</span><span>          </span><span class="hs-identifier">varName</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">PlainTV</span><span> </span><span class="hs-identifier">n</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">n</span><span>
+</span><span id="line-158"></span><span>          </span><span class="hs-identifier">varName</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">KindedTV</span><span> </span><span class="hs-identifier">n</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">n</span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-161"></span><span>          </span><span class="hs-comment">-- The type name as present originally along with its type</span><span>
+</span><span id="line-162"></span><span>          </span><span class="hs-comment">-- variables.</span><span>
+</span><span id="line-163"></span><span>          </span><span id="local-6989586621680158261"><span class="annot"><a href="#local-6989586621680158261"><span class="hs-identifier hs-var hs-var">vanillaType</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Q Pred -&gt; Q Pred -&gt; Q Pred) -&gt; Q Pred -&gt; [Q Pred] -&gt; Q Pred
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; [a] -&gt; b
+forall (t :: * -&gt; *) b a.
+Foldable t =&gt;
+(b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">foldl'</span></span><span> </span><span class="annot"><span class="annottext">Q Pred -&gt; Q Pred -&gt; Q Pred
+forall (m :: * -&gt; *). Quote m =&gt; m Pred -&gt; m Pred -&gt; m Pred
+</span><span class="hs-identifier hs-var">appT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Pred
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Pred
+</span><span class="hs-identifier hs-var">conT</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158199"><span class="hs-identifier hs-var">dataName</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Pred
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Pred
+</span><span class="hs-identifier hs-var">varT</span></span><span> </span><span class="annot"><span class="annottext">(Name -&gt; Q Pred)
+-&gt; (TyVarBndr BndrVis -&gt; Name) -&gt; TyVarBndr BndrVis -&gt; Q Pred
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">TyVarBndr BndrVis -&gt; Name
+forall {flag}. TyVarBndr flag -&gt; Name
+</span><a href="#local-6989586621680158256"><span class="hs-identifier hs-var">varName</span></a></span><span> </span><span class="annot"><span class="annottext">(TyVarBndr BndrVis -&gt; Q Pred) -&gt; [TyVarBndr BndrVis] -&gt; [Q Pred]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">[TyVarBndr BndrVis]
+</span><a href="#local-6989586621680158193"><span class="hs-identifier hs-var">tvbs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-164"></span><span>
+</span><span id="line-165"></span><span>      </span><span class="hs-comment">-- bare/covered types</span><span>
+</span><span id="line-166"></span><span>      </span><span id="local-6989586621680158264"><span class="annot"><a href="#local-6989586621680158264"><span class="hs-identifier hs-var">bareType</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[t|</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680158261"><span class="hs-identifier hs-type">vanillaType</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Pure</span></span><span> </span><span class="hs-special">|]</span><span>
+</span><span id="line-167"></span><span>      </span><span id="local-6989586621680158265"><span class="annot"><a href="#local-6989586621680158265"><span class="hs-identifier hs-var">coveredType</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[t|</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680158261"><span class="hs-identifier hs-type">vanillaType</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">|]</span><span>
+</span><span id="line-168"></span><span>
+</span><span id="line-169"></span><span>      </span><span class="hs-comment">-- max arity = 62</span><span>
+</span><span id="line-170"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680158266"><span class="annot"><a href="#local-6989586621680158266"><span class="hs-identifier hs-var hs-var">typeChunks</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Q Pred] -&gt; [[Q Pred]]
+forall e. Int -&gt; [e] -&gt; [[e]]
+</span><span class="hs-identifier hs-var">chunksOf</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">62</span></span><span>
+</span><span id="line-171"></span><span>            </span><span class="hs-special">[</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe Name
+</span><a href="#local-6989586621680158268"><span class="hs-identifier hs-var">mask</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-172"></span><span>              </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621680158269"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158269"><span class="hs-identifier hs-var">t'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[t|</span><span> </span><span class="annot"><a href="Data.EvalRecord.html#AllRec"><span class="hs-identifier hs-type">Rec.AllRec</span></a></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Pred
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Pred
+</span><span class="hs-identifier hs-var">varT</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158221"><span class="hs-identifier hs-var">nConstr</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Pred
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Pred
+</span><span class="hs-identifier hs-var">conT</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158269"><span class="hs-identifier hs-var">t'</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">|]</span><span>
+</span><span id="line-173"></span><span>              </span><span class="annot"><span class="annottext">Maybe Name
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Q Pred
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Pred
+</span><span class="hs-identifier hs-var">varT</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158221"><span class="hs-identifier hs-var">nConstr</span></a></span><span> </span><span class="annot"><span class="annottext">Q Pred -&gt; Q Pred -&gt; Q Pred
+forall (m :: * -&gt; *). Quote m =&gt; m Pred -&gt; m Pred -&gt; m Pred
+</span><span class="hs-operator hs-var">`appT`</span></span><span> </span><span class="annot"><span class="annottext">Pred -&gt; Q Pred
+forall a. a -&gt; Q a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Pred
+</span><a href="#local-6989586621680158271"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-174"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bang
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680158271"><span class="annot"><span class="annottext">Pred
+</span><a href="#local-6989586621680158271"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span id="local-6989586621680158268"><span class="annot"><span class="annottext">Maybe Name
+</span><a href="#local-6989586621680158268"><span class="hs-identifier hs-var">mask</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[VarBangType] -&gt; [Maybe Name] -&gt; [(VarBangType, Maybe Name)]
+forall a b. [a] -&gt; [b] -&gt; [(a, b)]
+</span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="annot"><span class="annottext">[VarBangType]
+</span><a href="#local-6989586621680158200"><span class="hs-identifier hs-var">fields</span></a></span><span> </span><span class="annot"><span class="annottext">[Maybe Name]
+</span><a href="#local-6989586621680158209"><span class="hs-identifier hs-var">otherBarbieMask</span></a></span><span>
+</span><span id="line-175"></span><span>            </span><span class="hs-special">]</span><span>
+</span><span id="line-176"></span><span>          </span><span id="local-6989586621680158284"><span class="annot"><a href="#local-6989586621680158284"><span class="hs-identifier hs-var hs-var">mkConstraints</span></a></span></span><span> </span><span id="local-6989586621680158285"><span class="annot"><span class="annottext">t (m Pred)
+</span><a href="#local-6989586621680158285"><span class="hs-identifier hs-var">ps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(m Pred -&gt; m Pred -&gt; m Pred) -&gt; m Pred -&gt; t (m Pred) -&gt; m Pred
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b
+forall (t :: * -&gt; *) b a.
+Foldable t =&gt;
+(b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">foldl</span></span><span> </span><span class="annot"><span class="annottext">m Pred -&gt; m Pred -&gt; m Pred
+forall (m :: * -&gt; *). Quote m =&gt; m Pred -&gt; m Pred -&gt; m Pred
+</span><span class="hs-identifier hs-var">appT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; m Pred
+forall (m :: * -&gt; *). Quote m =&gt; Int -&gt; m Pred
+</span><span class="hs-identifier hs-var">tupleT</span></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; m Pred) -&gt; Int -&gt; m Pred
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">t (m Pred) -&gt; Int
+forall a. t a -&gt; Int
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">t (m Pred)
+</span><a href="#local-6989586621680158285"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">t (m Pred)
+</span><a href="#local-6989586621680158285"><span class="hs-identifier hs-var">ps</span></a></span><span>
+</span><span id="line-177"></span><span>          </span><span id="local-6989586621680158288"><span class="annot"><a href="#local-6989586621680158288"><span class="hs-identifier hs-var hs-var">allConstr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">[[Q Pred]]
+</span><a href="#local-6989586621680158266"><span class="hs-identifier hs-var">typeChunks</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-178"></span><span>            </span><span class="hs-special">[</span><span id="local-6989586621680158289"><span class="annot"><span class="annottext">[Q Pred]
+</span><a href="#local-6989586621680158289"><span class="hs-identifier hs-var">ps</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Q Pred] -&gt; Q Pred
+forall {t :: * -&gt; *} {m :: * -&gt; *}.
+(Foldable t, Quote m) =&gt;
+t (m Pred) -&gt; m Pred
+</span><a href="#local-6989586621680158284"><span class="hs-identifier hs-var">mkConstraints</span></a></span><span> </span><span class="annot"><span class="annottext">[Q Pred]
+</span><a href="#local-6989586621680158289"><span class="hs-identifier hs-var">ps</span></a></span><span>
+</span><span id="line-179"></span><span>            </span><span id="local-6989586621680158290"><span class="annot"><span class="annottext">[[Q Pred]]
+</span><a href="#local-6989586621680158290"><span class="hs-identifier hs-var">pss</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Q Pred] -&gt; Q Pred
+forall {t :: * -&gt; *} {m :: * -&gt; *}.
+(Foldable t, Quote m) =&gt;
+t (m Pred) -&gt; m Pred
+</span><a href="#local-6989586621680158284"><span class="hs-identifier hs-var">mkConstraints</span></a></span><span> </span><span class="annot"><span class="annottext">([Q Pred] -&gt; Q Pred) -&gt; [Q Pred] -&gt; Q Pred
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">([Q Pred] -&gt; Q Pred) -&gt; [[Q Pred]] -&gt; [Q Pred]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">[Q Pred] -&gt; Q Pred
+forall {t :: * -&gt; *} {m :: * -&gt; *}.
+(Foldable t, Quote m) =&gt;
+t (m Pred) -&gt; m Pred
+</span><a href="#local-6989586621680158284"><span class="hs-identifier hs-var">mkConstraints</span></a></span><span> </span><span class="annot"><span class="annottext">[[Q Pred]]
+</span><a href="#local-6989586621680158290"><span class="hs-identifier hs-var">pss</span></a></span><span>
+</span><span id="line-180"></span><span>          </span><span class="hs-comment">-- fieldNamesAndTypesAsTupleList = foldr</span><span>
+</span><span id="line-181"></span><span>          </span><span class="hs-comment">--   (\(n, _, t) fs -&gt; PromotedConsT `AppT` (PromotedTupleT 2 `AppT` LitT (StrTyLit $ nameBase n) `AppT` t) `AppT` fs)</span><span>
+</span><span id="line-182"></span><span>          </span><span class="hs-comment">--   PromotedNilT</span><span>
+</span><span id="line-183"></span><span>          </span><span class="hs-comment">--   fields</span><span>
+</span><span id="line-184"></span><span>          </span><span class="hs-comment">--   --strTyLit</span><span>
+</span><span id="line-185"></span><span>
+</span><span id="line-186"></span><span>      </span><span class="hs-comment">-- let datC = pure coveredType</span><span>
+</span><span id="line-187"></span><span>      </span><span id="local-6989586621680158291"><span class="annot"><a href="#local-6989586621680158291"><span class="hs-identifier hs-var">decs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[d|</span><span>
+</span><span id="line-188"></span><span>        </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.EvalRecord.html#WitnessFieldTypes"><span class="hs-identifier hs-type">Rec.WitnessFieldTypes</span></a></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="#local-6989586621680158265"><span class="hs-identifier hs-type">coveredType</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-189"></span><span>          </span><span class="hs-comment">-- type FieldMetadata $(pure coveredType) = $(pure fieldNamesAndTypesAsTupleList)</span><span>
+</span><span id="line-190"></span><span>          </span><span class="annot"><a href="Data.EvalRecord.html#typeProxies"><span class="hs-identifier hs-var hs-var">typeProxies</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680158241"><span class="hs-identifier hs-type">fieldNamesE</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-191"></span><span>          </span><span class="annot"><a href="Data.EvalRecord.html#getAccessors"><span class="hs-identifier hs-var hs-var">getAccessors</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680158250"><span class="hs-identifier hs-type">accessorsE</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-192"></span><span>          </span><span class="annot"><a href="Data.EvalRecord.html#nestedFieldNames"><span class="hs-identifier hs-var hs-var">nestedFieldNames</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680158244"><span class="hs-identifier hs-type">nestedFieldNamesE</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-193"></span><span>
+</span><span id="line-194"></span><span>        </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.EvalRecord.html#FunctorRec"><span class="hs-identifier hs-type">Rec.FunctorRec</span></a></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="#local-6989586621680158265"><span class="hs-identifier hs-type">coveredType</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-195"></span><span>          </span><span class="annot"><a href="Data.EvalRecord.html#map"><span class="hs-identifier hs-var hs-var">map</span></a></span><span> </span><span id="local-6989586621680158295"><span class="annot"><a href="#local-6989586621680158295"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">conP</span></span><span> </span><span class="annot"><a href="#local-6989586621680158196"><span class="hs-identifier hs-type">nDataCon</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">varP</span></span><span> </span><span class="annot"><a href="#local-6989586621680158206"><span class="hs-identifier hs-type">xs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-196"></span><span>            </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680158225"><span class="hs-identifier hs-type">reconE</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="#local-6989586621680158215"><span class="hs-identifier hs-type">mapMembers</span></a></span><span>
+</span><span id="line-197"></span><span>                  </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680158297"><span class="annot"><span class="annottext">tup :: VarBangType
+</span><a href="#local-6989586621680158297"><span class="hs-identifier hs-var">tup</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621680158298"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158298"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bang
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Pred
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[|</span><span class="annot"><a href="#local-6989586621680158295"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158298"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Data.EvalRecord.html#typeProxies"><span class="hs-identifier hs-type">Rec.typeProxies</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="annot"><span class="annottext">(Name -&gt; Q Exp) -&gt; Name -&gt; Q Exp
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; VarBangType -&gt; Name
+</span><a href="Data.EvalRecord.TH.html#mkVarName"><span class="hs-identifier hs-var">mkVarName</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;x&quot;</span></span><span> </span><span class="annot"><span class="annottext">VarBangType
+</span><a href="#local-6989586621680158297"><span class="hs-identifier hs-var">tup</span></a></span><span class="hs-special">)</span><span class="hs-special">|]</span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-198"></span><span>                  </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680158300"><span class="annot"><span class="annottext">VarBangType
+</span><a href="#local-6989586621680158300"><span class="hs-identifier hs-var">tup</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Q Exp -&gt; Q Exp -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; m Exp -&gt; m Exp -&gt; m Exp
+</span><span class="hs-identifier hs-var">appE</span></span><span> </span><span class="hs-special">[|</span><span class="annot"><a href="Data.EvalRecord.html#map"><span class="hs-identifier hs-type">Rec.map</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158295"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">|]</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="annot"><span class="annottext">(Name -&gt; Q Exp) -&gt; Name -&gt; Q Exp
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; VarBangType -&gt; Name
+</span><a href="Data.EvalRecord.TH.html#mkVarName"><span class="hs-identifier hs-var">mkVarName</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;x&quot;</span></span><span> </span><span class="annot"><span class="annottext">VarBangType
+</span><a href="#local-6989586621680158300"><span class="hs-identifier hs-var">tup</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-199"></span><span>                  </span><span class="annot"><a href="#local-6989586621680158200"><span class="hs-identifier hs-type">fields</span></a></span><span>
+</span><span id="line-200"></span><span>               </span><span class="hs-special">)</span><span>
+</span><span id="line-201"></span><span>
+</span><span id="line-202"></span><span>        </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.EvalRecord.html#DistributiveRec"><span class="hs-identifier hs-type">Rec.DistributiveRec</span></a></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="#local-6989586621680158265"><span class="hs-identifier hs-type">coveredType</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-203"></span><span>          </span><span class="annot"><a href="Data.EvalRecord.html#distribute"><span class="hs-identifier hs-var hs-var">distribute</span></a></span><span> </span><span id="local-6989586621680158303"><span class="annot"><a href="#local-6989586621680158303"><span class="hs-identifier hs-var">fb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680158225"><span class="hs-identifier hs-type">reconE</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span>
+</span><span id="line-204"></span><span>              </span><span class="hs-comment">-- TODO: NoFieldSelectors</span><span>
+</span><span id="line-205"></span><span>              </span><span class="annot"><a href="#local-6989586621680158215"><span class="hs-identifier hs-type">mapMembers</span></a></span><span>
+</span><span id="line-206"></span><span>                </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680158304"><span class="annot"><span class="annottext">Q Exp
+</span><a href="#local-6989586621680158304"><span class="hs-identifier hs-var">fd</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[|</span><span> </span><span class="hs-special">(</span><span class="hs-special">$</span><span class="annot"><span class="annottext">Q Exp
+</span><a href="#local-6989586621680158304"><span class="hs-identifier hs-var">fd</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;$&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621680158303"><span class="hs-identifier hs-type">fb</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">|]</span><span class="hs-special">)</span><span>
+</span><span id="line-207"></span><span>                </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680158305"><span class="annot"><span class="annottext">Q Exp
+</span><a href="#local-6989586621680158305"><span class="hs-identifier hs-var">fd</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[|</span><span> </span><span class="annot"><span class="hs-identifier">distribute</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">$</span><span class="annot"><span class="annottext">Q Exp
+</span><a href="#local-6989586621680158305"><span class="hs-identifier hs-var">fd</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;$&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621680158303"><span class="hs-identifier hs-type">fb</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">|]</span><span class="hs-special">)</span><span>
+</span><span id="line-208"></span><span>                </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">varE</span></span><span> </span><span class="annot"><a href="#local-6989586621680158306"><span class="hs-identifier hs-type">fd</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680158306"><span class="annot"><a href="#local-6989586621680158306"><span class="hs-identifier hs-var">fd</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="#local-6989586621680158200"><span class="hs-identifier hs-type">fields</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-209"></span><span>            </span><span class="hs-special">)</span><span>
+</span><span id="line-210"></span><span>
+</span><span id="line-211"></span><span>        </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.EvalRecord.html#TraversableRec"><span class="hs-identifier hs-type">Rec.TraversableRec</span></a></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="#local-6989586621680158265"><span class="hs-identifier hs-type">coveredType</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-212"></span><span>          </span><span class="annot"><a href="Data.EvalRecord.html#traverse"><span class="hs-identifier hs-var hs-var">traverse</span></a></span><span> </span><span id="local-6989586621680158309"><span class="annot"><a href="#local-6989586621680158309"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">conP</span></span><span> </span><span class="annot"><a href="#local-6989586621680158196"><span class="hs-identifier hs-type">nDataCon</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">varP</span></span><span> </span><span class="annot"><a href="#local-6989586621680158206"><span class="hs-identifier hs-type">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">fst</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">foldl'</span></span><span>
+</span><span id="line-213"></span><span>              </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621680158311"><span class="annot"><span class="annottext">Q Exp
+</span><a href="#local-6989586621680158311"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680158312"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158312"><span class="hs-identifier hs-var">op</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621680158313"><span class="annot"><span class="annottext">Q Exp
+</span><a href="#local-6989586621680158313"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe (Q Exp) -&gt; Q Exp -&gt; Maybe (Q Exp) -&gt; Q Exp
+forall (m :: * -&gt; *).
+Quote m =&gt;
+Maybe (m Exp) -&gt; m Exp -&gt; Maybe (m Exp) -&gt; m Exp
+</span><span class="hs-identifier hs-var">infixE</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Q Exp -&gt; Maybe (Q Exp)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Q Exp
+</span><a href="#local-6989586621680158311"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158312"><span class="hs-identifier hs-var">op</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Q Exp -&gt; Maybe (Q Exp)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Q Exp
+</span><a href="#local-6989586621680158313"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">'</span><span class="hs-special">(</span><span class="hs-operator">&lt;*&gt;</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-214"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">conE</span></span><span> </span><span class="annot"><a href="#local-6989586621680158196"><span class="hs-identifier hs-type">nDataCon</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">'</span><span class="hs-special">(</span><span class="hs-operator">&lt;$&gt;</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-215"></span><span>              </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680158215"><span class="hs-identifier hs-type">mapMembers</span></a></span><span>
+</span><span id="line-216"></span><span>                </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680158314"><span class="annot"><span class="annottext">tup :: VarBangType
+</span><a href="#local-6989586621680158314"><span class="hs-identifier hs-var">tup</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621680158315"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158315"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bang
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Pred
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[|</span><span class="annot"><a href="#local-6989586621680158309"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158315"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Data.EvalRecord.html#typeProxies"><span class="hs-identifier hs-type">Rec.typeProxies</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="annot"><span class="annottext">(Name -&gt; Q Exp) -&gt; Name -&gt; Q Exp
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; VarBangType -&gt; Name
+</span><a href="Data.EvalRecord.TH.html#mkVarName"><span class="hs-identifier hs-var">mkVarName</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;x&quot;</span></span><span> </span><span class="annot"><span class="annottext">VarBangType
+</span><a href="#local-6989586621680158314"><span class="hs-identifier hs-var">tup</span></a></span><span class="hs-special">)</span><span class="hs-special">|]</span><span class="hs-special">)</span><span>
+</span><span id="line-217"></span><span>                </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680158316"><span class="annot"><span class="annottext">VarBangType
+</span><a href="#local-6989586621680158316"><span class="hs-identifier hs-var">tup</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[|</span><span class="annot"><a href="Data.EvalRecord.html#traverse"><span class="hs-identifier hs-type">Rec.traverse</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158309"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="annot"><span class="annottext">(Name -&gt; Q Exp) -&gt; Name -&gt; Q Exp
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; VarBangType -&gt; Name
+</span><a href="Data.EvalRecord.TH.html#mkVarName"><span class="hs-identifier hs-var">mkVarName</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;x&quot;</span></span><span> </span><span class="annot"><span class="annottext">VarBangType
+</span><a href="#local-6989586621680158316"><span class="hs-identifier hs-var">tup</span></a></span><span class="hs-special">)</span><span class="hs-special">|]</span><span class="hs-special">)</span><span>
+</span><span id="line-218"></span><span>                </span><span class="annot"><a href="#local-6989586621680158200"><span class="hs-identifier hs-type">fields</span></a></span><span>
+</span><span id="line-219"></span><span>              </span><span class="hs-special">)</span><span>
+</span><span id="line-220"></span><span>            </span><span class="hs-special">)</span><span>
+</span><span id="line-221"></span><span>          </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.EvalRecord.html#traverse"><span class="hs-pragma hs-type">Rec.traverse</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-222"></span><span>          </span><span class="annot"><a href="Data.EvalRecord.html#traverse_"><span class="hs-identifier hs-var hs-var">traverse_</span></a></span><span> </span><span id="local-6989586621680158318"><span class="annot"><a href="#local-6989586621680158318"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">conP</span></span><span> </span><span class="annot"><a href="#local-6989586621680158196"><span class="hs-identifier hs-type">nDataCon</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">varP</span></span><span> </span><span class="annot"><a href="#local-6989586621680158206"><span class="hs-identifier hs-type">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span>
+</span><span id="line-223"></span><span>              </span><span class="hs-keyword">case</span><span>
+</span><span id="line-224"></span><span>                </span><span class="annot"><a href="#local-6989586621680158215"><span class="hs-identifier hs-type">mapMembers</span></a></span><span>
+</span><span id="line-225"></span><span>                  </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680158319"><span class="annot"><span class="annottext">tup :: VarBangType
+</span><a href="#local-6989586621680158319"><span class="hs-identifier hs-var">tup</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621680158320"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158320"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bang
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Pred
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[|</span><span class="annot"><a href="#local-6989586621680158318"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158320"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Data.EvalRecord.html#typeProxies"><span class="hs-identifier hs-type">Rec.typeProxies</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="annot"><span class="annottext">(Name -&gt; Q Exp) -&gt; Name -&gt; Q Exp
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; VarBangType -&gt; Name
+</span><a href="Data.EvalRecord.TH.html#mkVarName"><span class="hs-identifier hs-var">mkVarName</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;x&quot;</span></span><span> </span><span class="annot"><span class="annottext">VarBangType
+</span><a href="#local-6989586621680158319"><span class="hs-identifier hs-var">tup</span></a></span><span class="hs-special">)</span><span class="hs-special">|]</span><span class="hs-special">)</span><span>
+</span><span id="line-226"></span><span>                  </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680158321"><span class="annot"><span class="annottext">VarBangType
+</span><a href="#local-6989586621680158321"><span class="hs-identifier hs-var">tup</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[|</span><span class="annot"><a href="Data.EvalRecord.html#traverse_"><span class="hs-identifier hs-type">Rec.traverse_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158318"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="annot"><span class="annottext">(Name -&gt; Q Exp) -&gt; Name -&gt; Q Exp
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; VarBangType -&gt; Name
+</span><a href="Data.EvalRecord.TH.html#mkVarName"><span class="hs-identifier hs-var">mkVarName</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;x&quot;</span></span><span> </span><span class="annot"><span class="annottext">VarBangType
+</span><a href="#local-6989586621680158321"><span class="hs-identifier hs-var">tup</span></a></span><span class="hs-special">)</span><span class="hs-special">|]</span><span class="hs-special">)</span><span>
+</span><span id="line-227"></span><span>                  </span><span class="annot"><a href="#local-6989586621680158200"><span class="hs-identifier hs-type">fields</span></a></span><span>
+</span><span id="line-228"></span><span>                </span><span class="hs-keyword">of</span><span>
+</span><span id="line-229"></span><span>                  </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="hs-special">'</span><span class="hs-identifier">pure</span><span> </span><span class="annot"><span class="annottext">Q Exp -&gt; Q Exp -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; m Exp -&gt; m Exp -&gt; m Exp
+</span><span class="hs-operator hs-var">`appE`</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">conE</span></span><span> </span><span class="hs-special">'</span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-230"></span><span>                  </span><span id="local-6989586621680158322"><span class="annot"><span class="annottext">[Q Exp]
+</span><a href="#local-6989586621680158322"><span class="hs-identifier hs-var">exprs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="hs-special">'</span><span class="hs-identifier">void</span><span> </span><span class="annot"><span class="annottext">Q Exp -&gt; Q Exp -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; m Exp -&gt; m Exp -&gt; m Exp
+</span><span class="hs-operator hs-var">`appE`</span></span><span>
+</span><span id="line-231"></span><span>                    </span><span class="annot"><span class="annottext">(Q Exp -&gt; Q Exp -&gt; Q Exp) -&gt; [Q Exp] -&gt; Q Exp
+forall a. (a -&gt; a -&gt; a) -&gt; [a] -&gt; a
+forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; a -&gt; a) -&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">foldr1</span></span><span>
+</span><span id="line-232"></span><span>                      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680158324"><span class="annot"><span class="annottext">Q Exp
+</span><a href="#local-6989586621680158324"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621680158325"><span class="annot"><span class="annottext">Q Exp
+</span><a href="#local-6989586621680158325"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Q Exp) -&gt; Q Exp -&gt; Maybe (Q Exp) -&gt; Q Exp
+forall (m :: * -&gt; *).
+Quote m =&gt;
+Maybe (m Exp) -&gt; m Exp -&gt; Maybe (m Exp) -&gt; m Exp
+</span><span class="hs-identifier hs-var">infixE</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Q Exp -&gt; Maybe (Q Exp)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Q Exp
+</span><a href="#local-6989586621680158324"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="hs-special">'</span><span class="hs-special">(</span><span class="hs-operator">*&gt;</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Q Exp -&gt; Maybe (Q Exp)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Q Exp
+</span><a href="#local-6989586621680158325"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-233"></span><span>                      </span><span class="annot"><span class="annottext">[Q Exp]
+</span><a href="#local-6989586621680158322"><span class="hs-identifier hs-var">exprs</span></a></span><span>
+</span><span id="line-234"></span><span>
+</span><span id="line-235"></span><span>            </span><span class="hs-special">)</span><span>
+</span><span id="line-236"></span><span>          </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.EvalRecord.html#traverse_"><span class="hs-pragma hs-type">Rec.traverse_</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-237"></span><span>
+</span><span id="line-238"></span><span>        </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.EvalRecord.html#ConstraintsRec"><span class="hs-identifier hs-type">Rec.ConstraintsRec</span></a></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="#local-6989586621680158265"><span class="hs-identifier hs-type">coveredType</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-239"></span><span>          </span><span class="hs-keyword">type</span><span> </span><span id="AllRec"><span class="annot"><a href="Data.EvalRecord.html#AllRec"><span class="hs-identifier hs-var">AllRec</span></a></span></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">varT</span></span><span> </span><span class="annot"><a href="#local-6989586621680158221"><span class="hs-identifier hs-type">nConstr</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="#local-6989586621680158265"><span class="hs-identifier hs-type">coveredType</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">$</span><span class="annot"><a href="#local-6989586621680158288"><span class="hs-identifier hs-type">allConstr</span></a></span><span>
+</span><span id="line-240"></span><span>          </span><span class="annot"><a href="Data.EvalRecord.html#addDicts"><span class="hs-identifier hs-var hs-var">addDicts</span></a></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">conP</span></span><span> </span><span class="annot"><a href="#local-6989586621680158196"><span class="hs-identifier hs-type">nDataCon</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">varP</span></span><span> </span><span class="annot"><a href="#local-6989586621680158206"><span class="hs-identifier hs-type">xs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-241"></span><span>            </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680158225"><span class="hs-identifier hs-type">reconE</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="#local-6989586621680158215"><span class="hs-identifier hs-type">mapMembers</span></a></span><span>
+</span><span id="line-242"></span><span>                </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680158328"><span class="annot"><span class="annottext">Q Exp
+</span><a href="#local-6989586621680158328"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[|</span><span class="hs-special">(</span><span class="annot"><a href="Data.EvalRecord.html#Dict"><span class="hs-identifier hs-type">Rec.Dict</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">$</span><span class="annot"><span class="annottext">Q Exp
+</span><a href="#local-6989586621680158328"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span class="hs-special">|]</span><span class="hs-special">)</span><span>
+</span><span id="line-243"></span><span>                </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680158330"><span class="annot"><span class="annottext">Q Exp
+</span><a href="#local-6989586621680158330"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[|</span><span class="annot"><span class="hs-identifier">addDicts</span></span><span> </span><span class="hs-special">$</span><span class="annot"><span class="annottext">Q Exp
+</span><a href="#local-6989586621680158330"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">|]</span><span class="hs-special">)</span><span>
+</span><span id="line-244"></span><span>                </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">varE</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;$&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621680158206"><span class="hs-identifier hs-type">xs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-245"></span><span>              </span><span class="hs-special">)</span><span>
+</span><span id="line-246"></span><span>        </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.EvalRecord.html#ApplicativeRec"><span class="hs-identifier hs-type">Rec.ApplicativeRec</span></a></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="#local-6989586621680158265"><span class="hs-identifier hs-type">coveredType</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-247"></span><span>          </span><span class="annot"><a href="Data.EvalRecord.html#pure"><span class="hs-identifier hs-var hs-var">pure</span></a></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">varP</span></span><span> </span><span class="annot"><a href="#local-6989586621680158222"><span class="hs-identifier hs-type">nX</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680158225"><span class="hs-identifier hs-type">reconE</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="#local-6989586621680158215"><span class="hs-identifier hs-type">mapMembers</span></a></span><span>
+</span><span id="line-248"></span><span>                              </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621680158333"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158333"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bang
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Pred
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[|</span><span class="hs-special">(</span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158222"><span class="hs-identifier hs-var">nX</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158333"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="Data.EvalRecord.html#typeProxies"><span class="hs-identifier hs-type">Rec.typeProxies</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">|]</span><span class="hs-special">)</span><span>
+</span><span id="line-249"></span><span>                              </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">const</span></span><span> </span><span class="hs-special">[|</span><span class="annot"><a href="Data.EvalRecord.html#pure"><span class="hs-identifier hs-type">Rec.pure</span></a></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">varE</span></span><span> </span><span class="annot"><a href="#local-6989586621680158222"><span class="hs-identifier hs-type">nX</span></a></span><span class="hs-special">)</span><span class="hs-special">|]</span><span class="hs-special">)</span><span>
+</span><span id="line-250"></span><span>                              </span><span class="annot"><a href="#local-6989586621680158200"><span class="hs-identifier hs-type">fields</span></a></span><span>
+</span><span id="line-251"></span><span>                            </span><span class="hs-special">)</span><span>
+</span><span id="line-252"></span><span>          </span><span class="annot"><a href="Data.EvalRecord.html#prod"><span class="hs-identifier hs-var hs-var">prod</span></a></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">conP</span></span><span> </span><span class="annot"><a href="#local-6989586621680158196"><span class="hs-identifier hs-type">nDataCon</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">varP</span></span><span> </span><span class="annot"><a href="#local-6989586621680158206"><span class="hs-identifier hs-type">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">conP</span></span><span> </span><span class="annot"><a href="#local-6989586621680158196"><span class="hs-identifier hs-type">nDataCon</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">varP</span></span><span> </span><span class="annot"><a href="#local-6989586621680158208"><span class="hs-identifier hs-type">ys</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">foldl'</span></span><span>
+</span><span id="line-253"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621680158335"><span class="annot"><span class="annottext">Q Exp
+</span><a href="#local-6989586621680158335"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680158336"><span class="annot"><span class="annottext">Maybe Name
+</span><a href="#local-6989586621680158336"><span class="hs-identifier hs-var">isOtherBarbie</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680158337"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158337"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680158338"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158338"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-254"></span><span>              </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Maybe Name -&gt; Bool
+forall a. Maybe a -&gt; Bool
+</span><span class="hs-identifier hs-var">isJust</span></span><span> </span><span class="annot"><span class="annottext">Maybe Name
+</span><a href="#local-6989586621680158336"><span class="hs-identifier hs-var">isOtherBarbie</span></a></span><span>
+</span><span id="line-255"></span><span>                </span><span class="hs-keyword">then</span><span> </span><span class="hs-special">[|</span><span class="hs-special">$</span><span class="annot"><span class="annottext">Q Exp
+</span><a href="#local-6989586621680158335"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.EvalRecord.html#prod"><span class="hs-identifier hs-type">Rec.prod</span></a></span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158337"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158338"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">|]</span><span>
+</span><span id="line-256"></span><span>                </span><span class="hs-keyword">else</span><span> </span><span class="hs-special">[|</span><span class="hs-special">$</span><span class="annot"><span class="annottext">Q Exp
+</span><a href="#local-6989586621680158335"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158337"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Q Exp
+forall (m :: * -&gt; *). Quote m =&gt; Name -&gt; m Exp
+</span><span class="hs-identifier hs-var">varE</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158338"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">|]</span><span class="hs-special">)</span><span>
+</span><span id="line-257"></span><span>            </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">conE</span></span><span> </span><span class="annot"><a href="#local-6989586621680158196"><span class="hs-identifier hs-type">nDataCon</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">zip3</span></span><span> </span><span class="annot"><a href="#local-6989586621680158209"><span class="hs-identifier hs-type">otherBarbieMask</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158206"><span class="hs-identifier hs-type">xs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158208"><span class="hs-identifier hs-type">ys</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-258"></span><span>        </span><span class="hs-special">|]</span><span>
+</span><span id="line-259"></span><span>      </span><span class="hs-comment">-- strip deriving Generic</span><span>
+</span><span id="line-260"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621680158341"><span class="annot"><a href="#local-6989586621680158341"><span class="hs-identifier hs-var hs-var">classes'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(DerivClause -&gt; ([Pred], DerivClause))
+-&gt; [DerivClause] -&gt; [([Pred], DerivClause)]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DerivClause</span></span><span> </span><span id="local-6989586621680158343"><span class="annot"><span class="annottext">Maybe DerivStrategy
+</span><a href="#local-6989586621680158343"><span class="hs-identifier hs-var">strat</span></a></span></span><span> </span><span id="local-6989586621680158344"><span class="annot"><span class="annottext">[Pred]
+</span><a href="#local-6989586621680158344"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe DerivStrategy -&gt; [Pred] -&gt; DerivClause
+</span><span class="hs-identifier hs-var">DerivClause</span></span><span> </span><span class="annot"><span class="annottext">Maybe DerivStrategy
+</span><a href="#local-6989586621680158343"><span class="hs-identifier hs-var">strat</span></a></span><span> </span><span class="annot"><span class="annottext">([Pred] -&gt; DerivClause)
+-&gt; ([Pred], [Pred]) -&gt; ([Pred], DerivClause)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(Pred -&gt; Bool) -&gt; [Pred] -&gt; ([Pred], [Pred])
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
+</span><span class="hs-identifier hs-var">partition</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Pred -&gt; Pred -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; Pred
+</span><span class="hs-identifier hs-var">ConT</span></span><span> </span><span class="hs-special">''</span><span class="hs-identifier">Generic</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Pred]
+</span><a href="#local-6989586621680158344"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[DerivClause]
+</span><a href="#local-6989586621680158198"><span class="hs-identifier hs-var">classes</span></a></span><span>
+</span><span id="line-261"></span><span>
+</span><span id="line-262"></span><span>      </span><span id="local-6989586621680158345"><span class="annot"><a href="#local-6989586621680158345"><span class="hs-identifier hs-var">specifyStockStrategy</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">isExtEnabled</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DerivingStrategies</span></span><span>
+</span><span id="line-263"></span><span>      </span><span class="hs-comment">-- Redefine instances of the bare type with the original strategy</span><span>
+</span><span id="line-264"></span><span>      </span><span id="local-6989586621680158348"><span class="annot"><a href="#local-6989586621680158348"><span class="hs-identifier hs-var">bareDrvs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">traverse</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621680158349"><span class="annot"><span class="annottext">Maybe DerivStrategy
+</span><a href="#local-6989586621680158349"><span class="hs-identifier hs-var">strat</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680158350"><span class="annot"><span class="annottext">Q Pred
+</span><a href="#local-6989586621680158350"><span class="hs-identifier hs-var">cls</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-265"></span><span>        </span><span id="local-6989586621680158351"><span class="annot"><a href="#local-6989586621680158351"><span class="hs-identifier hs-var">param</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Q Name
+forall (m :: * -&gt; *). Quote m =&gt; [Char] -&gt; m Name
+</span><span class="hs-identifier hs-var">newName</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;f&quot;</span></span><span>
+</span><span id="line-266"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">standaloneDerivWithStrategyD</span></span><span>
+</span><span id="line-267"></span><span>          </span><span class="annot"><a href="#local-6989586621680158349"><span class="hs-identifier hs-type">strat</span></a></span><span>
+</span><span id="line-268"></span><span>          </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">sequence</span></span><span>
+</span><span id="line-269"></span><span>            </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="hs-identifier hs-type">conT</span></span><span> </span><span class="hs-special">''</span><span class="hs-identifier">Rec.AllRecF</span><span> </span><span class="annot"><span class="hs-operator hs-type">`appT`</span></span><span> </span><span class="annot"><a href="#local-6989586621680158350"><span class="hs-identifier hs-type">cls</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">`appT`</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">varT</span></span><span> </span><span class="annot"><a href="#local-6989586621680158351"><span class="hs-identifier hs-type">param</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">`appT`</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="#local-6989586621680158265"><span class="hs-identifier hs-type">coveredType</span></a></span><span>
+</span><span id="line-270"></span><span>            </span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-271"></span><span>          </span><span class="hs-special">[t|</span><span class="hs-special">$</span><span class="annot"><a href="#local-6989586621680158350"><span class="hs-identifier hs-type">cls</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="#local-6989586621680158265"><span class="hs-identifier hs-type">coveredType</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">$</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">varT</span></span><span> </span><span class="annot"><a href="#local-6989586621680158351"><span class="hs-identifier hs-type">param</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">|]</span><span class="hs-special">)</span><span>
+</span><span id="line-272"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680158354"><span class="hs-identifier hs-type">strat</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="#local-6989586621680158355"><span class="hs-identifier hs-type">t</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DerivClause</span></span><span> </span><span id="local-6989586621680158354"><span class="annot"><a href="#local-6989586621680158354"><span class="hs-identifier hs-var">strat</span></a></span></span><span> </span><span id="local-6989586621680158356"><span class="annot"><a href="#local-6989586621680158356"><span class="hs-identifier hs-var">preds</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="#local-6989586621680158341"><span class="hs-identifier hs-type">classes'</span></a></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680158355"><span class="annot"><a href="#local-6989586621680158355"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="#local-6989586621680158356"><span class="hs-identifier hs-type">preds</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><span id="line-273"></span><span>
+</span><span id="line-274"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DataD</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><a href="#local-6989586621680158199"><span class="hs-identifier hs-type">dataName</span></a></span><span class="hs-cpp">
+#if MIN_VERSION_template_haskell(2,21,0)
+</span><span>        </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680158193"><span class="hs-identifier hs-type">tvbs</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">++</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">PlainTV</span></span><span> </span><span class="annot"><a href="#local-6989586621680158205"><span class="hs-identifier hs-type">nWrap</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">BndrReq</span></span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-cpp">
+#elif MIN_VERSION_template_haskell(2,17,0)
+</span><span>        </span><span class="hs-special">(</span><span class="hs-identifier">tvbs</span><span> </span><span class="hs-operator">++</span><span> </span><span class="hs-special">[</span><span class="hs-identifier">PlainTV</span><span> </span><span class="hs-identifier">nWrap</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-cpp">
+#else
+</span><span>        </span><span class="hs-special">(</span><span class="hs-identifier">tvbs</span><span> </span><span class="hs-operator">++</span><span> </span><span class="hs-special">[</span><span class="hs-identifier">PlainTV</span><span> </span><span class="hs-identifier">nWrap</span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-cpp">
+#endif
+</span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span>
+</span><span id="line-283"></span><span>        </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621680158223"><span class="hs-identifier hs-type">transformed</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-284"></span><span>        </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">DerivClause</span></span><span> </span><span class="hs-special">(</span><span class="hs-keyword">if</span><span> </span><span class="annot"><a href="#local-6989586621680158345"><span class="hs-identifier hs-type">specifyStockStrategy</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">StockStrategy</span></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">concatMap</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">fst</span></span><span> </span><span class="annot"><a href="#local-6989586621680158341"><span class="hs-identifier hs-type">classes'</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-285"></span><span>        </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621680158291"><span class="hs-identifier hs-type">decs</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">++</span></span><span> </span><span class="annot"><a href="#local-6989586621680158348"><span class="hs-identifier hs-type">bareDrvs</span></a></span><span>
+</span><span id="line-286"></span><span>        </span><span class="annot"><span class="hs-operator hs-type">++</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TySynD</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">mkName</span></span><span> </span><span class="annot"><a href="#local-6989586621680158361"><span class="hs-identifier hs-type">name</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680158193"><span class="hs-identifier hs-type">tvbs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158264"><span class="hs-identifier hs-type">bareType</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621680158361"><span class="annot"><a href="#local-6989586621680158361"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">maybeToList</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="#local-6989586621680158176"><span class="hs-identifier hs-type">unwrappedName</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">nameBase</span></span><span> </span><span class="annot"><a href="#local-6989586621680158192"><span class="hs-identifier hs-type">dataName0</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-287"></span><span>    </span><span class="annot"><a href="#local-6989586621680158188"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">[(Name, Name)]
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621680158363"><span class="annot"><span class="annottext">Dec
+</span><a href="#local-6989586621680158363"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Dec] -&gt; DecsQ
+forall a. a -&gt; Q a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Dec
+</span><a href="#local-6989586621680158363"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-288"></span><span>
+</span><span id="line-289"></span><span class="annot"><a href="Data.EvalRecord.TH.html#dataDecNames"><span class="hs-identifier hs-type">dataDecNames</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Dec</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span class="hs-special">]</span><span>
+</span><span id="line-290"></span><span id="dataDecNames"><span class="annot"><span class="annottext">dataDecNames :: [Dec] -&gt; [Name]
+</span><a href="Data.EvalRecord.TH.html#dataDecNames"><span class="hs-identifier hs-var hs-var">dataDecNames</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Name] -&gt; [Name]
+forall a. Eq a =&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">nub</span></span><span> </span><span class="annot"><span class="annottext">([Name] -&gt; [Name]) -&gt; ([Dec] -&gt; [Name]) -&gt; [Dec] -&gt; [Name]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Dec -&gt; Maybe Name) -&gt; [Dec] -&gt; [Name]
+forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="annot"><span class="annottext">Dec -&gt; Maybe Name
+</span><a href="#local-6989586621680158365"><span class="hs-identifier hs-var">decName</span></a></span><span>
+</span><span id="line-291"></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-292"></span><span>  </span><span class="annot"><a href="#local-6989586621680158365"><span class="hs-identifier hs-type">decName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dec</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span>
+</span><span id="line-293"></span><span>  </span><span id="local-6989586621680158365"><span class="annot"><span class="annottext">decName :: Dec -&gt; Maybe Name
+</span><a href="#local-6989586621680158365"><span class="hs-identifier hs-var hs-var">decName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-294"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">DataD</span></span><span>    </span><span class="annot"><span class="annottext">[Pred]
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621680158366"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158366"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="annot"><span class="annottext">[TyVarBndr BndrVis]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">Maybe Pred
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">[Con]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">[DerivClause]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Maybe Name
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158366"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-295"></span><span>    </span><span class="annot"><span class="annottext">Dec
+</span><span class="hs-identifier">_</span></span><span>                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe Name
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-296"></span><span>
+</span><span id="line-297"></span><span class="annot"><a href="Data.EvalRecord.TH.html#mkVarName"><span class="hs-identifier hs-type">mkVarName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">VarBangType</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span>
+</span><span id="line-298"></span><span id="mkVarName"><span class="annot"><span class="annottext">mkVarName :: [Char] -&gt; VarBangType -&gt; Name
+</span><a href="Data.EvalRecord.TH.html#mkVarName"><span class="hs-identifier hs-var hs-var">mkVarName</span></a></span></span><span> </span><span id="local-6989586621680158367"><span class="annot"><span class="annottext">[Char]
+</span><a href="#local-6989586621680158367"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680158368"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158368"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bang
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Pred
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Name
+</span><span class="hs-identifier hs-var">mkName</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Char]
+</span><a href="#local-6989586621680158367"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; [Char] -&gt; [Char]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; [Char]
+</span><span class="hs-identifier hs-var">nameBase</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158368"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-299"></span><span>
+</span><span id="line-300"></span><span class="annot"><a href="Data.EvalRecord.TH.html#varNames"><span class="hs-identifier hs-type">varNames</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">VarBangType</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span class="hs-special">]</span><span>
+</span><span id="line-301"></span><span id="varNames"><span class="annot"><span class="annottext">varNames :: [Char] -&gt; [VarBangType] -&gt; [Name]
+</span><a href="Data.EvalRecord.TH.html#varNames"><span class="hs-identifier hs-var hs-var">varNames</span></a></span></span><span> </span><span id="local-6989586621680158369"><span class="annot"><span class="annottext">[Char]
+</span><a href="#local-6989586621680158369"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621680158370"><span class="annot"><span class="annottext">[VarBangType]
+</span><a href="#local-6989586621680158370"><span class="hs-identifier hs-var">vbt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">[Char] -&gt; VarBangType -&gt; Name
+</span><a href="Data.EvalRecord.TH.html#mkVarName"><span class="hs-identifier hs-var">mkVarName</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><a href="#local-6989586621680158369"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">VarBangType
+</span><a href="#local-6989586621680158371"><span class="hs-identifier hs-var">tup</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621680158371"><span class="annot"><span class="annottext">VarBangType
+</span><a href="#local-6989586621680158371"><span class="hs-identifier hs-var">tup</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[VarBangType]
+</span><a href="#local-6989586621680158370"><span class="hs-identifier hs-var">vbt</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-302"></span><span>
+</span><span id="line-303"></span><span class="annot"><a href="Data.EvalRecord.TH.html#transformCon"><span class="hs-identifier hs-type">transformCon</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="hs-comment">-- ^ Names of other barbies</span></span><span>
+</span><span id="line-304"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ wrapper variable</span></span><span>
+</span><span id="line-305"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Con</span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ original constructor</span></span><span>
+</span><span id="line-306"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Con</span></span><span>
+</span><span id="line-307"></span><span id="transformCon"><span class="annot"><span class="annottext">transformCon :: [(Name, Name)] -&gt; Name -&gt; Con -&gt; Con
+</span><a href="Data.EvalRecord.TH.html#transformCon"><span class="hs-identifier hs-var hs-var">transformCon</span></a></span></span><span> </span><span id="local-6989586621680158372"><span class="annot"><span class="annottext">[(Name, Name)]
+</span><a href="#local-6989586621680158372"><span class="hs-identifier hs-var">otherBarbieNames</span></a></span></span><span> </span><span id="local-6989586621680158373"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158373"><span class="hs-identifier hs-var">wrapperName</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">RecC</span></span><span> </span><span id="local-6989586621680158374"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158374"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621680158375"><span class="annot"><span class="annottext">[VarBangType]
+</span><a href="#local-6989586621680158375"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; [VarBangType] -&gt; Con
+</span><span class="hs-identifier hs-var">RecC</span></span><span>
+</span><span id="line-308"></span><span>  </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158374"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><span id="line-309"></span><span>  </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Name
+</span><a href="Data.EvalRecord.TH.html#unmangle"><span class="hs-identifier hs-var">unmangle</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158376"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bang
+</span><a href="#local-6989586621680158377"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Pred
+</span><a href="#local-6989586621680158378"><span class="hs-identifier hs-var">t'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-310"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621680158376"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158376"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680158377"><span class="annot"><span class="annottext">Bang
+</span><a href="#local-6989586621680158377"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680158379"><span class="annot"><span class="annottext">Pred
+</span><a href="#local-6989586621680158379"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[VarBangType]
+</span><a href="#local-6989586621680158375"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-311"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">let</span><span>
+</span><span id="line-312"></span><span>    </span><span id="local-6989586621680158378"><span class="annot"><span class="annottext">t' :: Pred
+</span><a href="#local-6989586621680158378"><span class="hs-identifier hs-var hs-var">t'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Pred
+</span><a href="#local-6989586621680158379"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-313"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">ConT</span></span><span> </span><span id="local-6989586621680158380"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158380"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621680158381"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158381"><span class="hs-identifier hs-var">n'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Name -&gt; [(Name, Name)] -&gt; Maybe Name
+forall a b. Eq a =&gt; a -&gt; [(a, b)] -&gt; Maybe b
+</span><span class="hs-identifier hs-var">lookup</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158380"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">[(Name, Name)]
+</span><a href="#local-6989586621680158372"><span class="hs-identifier hs-var">otherBarbieNames</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-314"></span><span>        </span><span class="annot"><span class="annottext">Name -&gt; Pred
+</span><span class="hs-identifier hs-var">ConT</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158381"><span class="hs-identifier hs-var">n'</span></a></span><span> </span><span class="annot"><span class="annottext">Pred -&gt; Pred -&gt; Pred
+</span><span class="hs-operator hs-var">`AppT`</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; Pred
+</span><span class="hs-identifier hs-var">VarT</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158373"><span class="hs-identifier hs-var">wrapperName</span></a></span><span>
+</span><span id="line-315"></span><span>      </span><span class="annot"><span class="annottext">Pred
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Pred -&gt; Name -&gt; Pred -&gt; Pred
+</span><span class="hs-identifier hs-var">InfixT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Pred
+</span><span class="hs-identifier hs-var">VarT</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158373"><span class="hs-identifier hs-var">wrapperName</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">''</span><span class="hs-special">(</span><span class="hs-operator">@@</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Pred
+</span><a href="#local-6989586621680158379"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-316"></span><span>  </span><span class="hs-special">]</span><span>
+</span><span id="line-317"></span><span class="annot"><a href="Data.EvalRecord.TH.html#transformCon"><span class="hs-identifier hs-var">transformCon</span></a></span><span> </span><span id="local-6989586621680158385"><span class="annot"><span class="annottext">[(Name, Name)]
+</span><a href="#local-6989586621680158385"><span class="hs-identifier hs-var">otherBarbieNames</span></a></span></span><span> </span><span id="local-6989586621680158386"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158386"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ForallC</span></span><span> </span><span id="local-6989586621680158388"><span class="annot"><span class="annottext">[TyVarBndr Specificity]
+</span><a href="#local-6989586621680158388"><span class="hs-identifier hs-var">tvbs</span></a></span></span><span> </span><span id="local-6989586621680158389"><span class="annot"><span class="annottext">[Pred]
+</span><a href="#local-6989586621680158389"><span class="hs-identifier hs-var">cxt</span></a></span></span><span> </span><span id="local-6989586621680158390"><span class="annot"><span class="annottext">Con
+</span><a href="#local-6989586621680158390"><span class="hs-identifier hs-var">con</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-318"></span><span>  </span><span class="annot"><span class="annottext">[TyVarBndr Specificity] -&gt; [Pred] -&gt; Con -&gt; Con
+</span><span class="hs-identifier hs-var">ForallC</span></span><span> </span><span class="annot"><span class="annottext">[TyVarBndr Specificity]
+</span><a href="#local-6989586621680158388"><span class="hs-identifier hs-var">tvbs</span></a></span><span> </span><span class="annot"><span class="annottext">[Pred]
+</span><a href="#local-6989586621680158389"><span class="hs-identifier hs-var">cxt</span></a></span><span> </span><span class="annot"><span class="annottext">(Con -&gt; Con) -&gt; Con -&gt; Con
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[(Name, Name)] -&gt; Name -&gt; Con -&gt; Con
+</span><a href="Data.EvalRecord.TH.html#transformCon"><span class="hs-identifier hs-var">transformCon</span></a></span><span> </span><span class="annot"><span class="annottext">[(Name, Name)]
+</span><a href="#local-6989586621680158385"><span class="hs-identifier hs-var">otherBarbieNames</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621680158386"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">Con
+</span><a href="#local-6989586621680158390"><span class="hs-identifier hs-var">con</span></a></span><span>
+</span><span id="line-319"></span><span class="annot"><a href="Data.EvalRecord.TH.html#transformCon"><span class="hs-identifier hs-var">transformCon</span></a></span><span> </span><span class="annot"><span class="annottext">[(Name, Name)]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621680158391"><span class="annot"><span class="annottext">Con
+</span><a href="#local-6989586621680158391"><span class="hs-identifier hs-var">con</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Con
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">([Char] -&gt; Con) -&gt; [Char] -&gt; Con
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;transformCon: unsupported &quot;</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; [Char] -&gt; [Char]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Con -&gt; [Char]
+forall a. Show a =&gt; a -&gt; [Char]
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Con
+</span><a href="#local-6989586621680158391"><span class="hs-identifier hs-var">con</span></a></span><span>
+</span><span id="line-320"></span><span>
+</span><span id="line-321"></span><span class="hs-comment">-- | Unmangle record field names</span><span>
+</span><span id="line-322"></span><span class="hs-comment">--</span><span>
+</span><span id="line-323"></span><span class="hs-comment">-- When 'DuplicateRecordFields' is turned on, record field names are mangled.</span><span>
+</span><span id="line-324"></span><span class="hs-comment">-- (see https://gitlab.haskell.org/ghc/ghc/-/wikis/records/overloaded-record-fields/duplicate-record-fields#mangling-selector-names)</span><span>
+</span><span id="line-325"></span><span class="hs-comment">-- We undo that because these mangled field names don't round-trip through TH splices.</span><span>
+</span><span id="line-326"></span><span class="annot"><a href="Data.EvalRecord.TH.html#unmangle"><span class="hs-identifier hs-type">unmangle</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span>
+</span><span id="line-327"></span><span id="unmangle"><span class="annot"><span class="annottext">unmangle :: Name -&gt; Name
+</span><a href="Data.EvalRecord.TH.html#unmangle"><span class="hs-identifier hs-var hs-var">unmangle</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Name</span></span><span> </span><span id="local-6989586621680158396"><span class="annot"><span class="annottext">OccName
+</span><a href="#local-6989586621680158396"><span class="hs-identifier hs-var">occ</span></a></span></span><span> </span><span id="local-6989586621680158397"><span class="annot"><span class="annottext">NameFlavour
+</span><a href="#local-6989586621680158397"><span class="hs-identifier hs-var">flavour</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OccName -&gt; NameFlavour -&gt; Name
+</span><span class="hs-identifier hs-var">Name</span></span><span> </span><span class="annot"><span class="annottext">OccName
+</span><a href="#local-6989586621680158398"><span class="hs-identifier hs-var">occ'</span></a></span><span> </span><span class="annot"><span class="annottext">NameFlavour
+</span><a href="#local-6989586621680158397"><span class="hs-identifier hs-var">flavour</span></a></span><span>
+</span><span id="line-328"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-329"></span><span>    </span><span id="local-6989586621680158398"><span class="annot"><span class="annottext">occ' :: OccName
+</span><a href="#local-6989586621680158398"><span class="hs-identifier hs-var hs-var">occ'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; [Char] -&gt; [[Char]]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [[a]]
+</span><span class="hs-identifier hs-var">wordsBy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">':'</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OccName -&gt; [Char]
+</span><span class="hs-identifier hs-var">occString</span></span><span> </span><span class="annot"><span class="annottext">OccName
+</span><a href="#local-6989586621680158396"><span class="hs-identifier hs-var">occ</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-330"></span><span>        </span><span class="hs-special">[</span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;$sel&quot;</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680158400"><span class="annot"><span class="annottext">[Char]
+</span><a href="#local-6989586621680158400"><span class="hs-identifier hs-var">fd</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680158401"><span class="annot"><span class="annottext">[Char]
+</span><a href="#local-6989586621680158401"><span class="hs-identifier hs-var">_qual</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; OccName
+</span><span class="hs-identifier hs-var">mkOccName</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><a href="#local-6989586621680158400"><span class="hs-identifier hs-var">fd</span></a></span><span>
+</span><span id="line-331"></span><span>        </span><span class="annot"><span class="annottext">[[Char]]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">OccName
+</span><a href="#local-6989586621680158396"><span class="hs-identifier hs-var">occ</span></a></span><span>
+</span><span id="line-332"></span></pre></body></html>

@@ -1,0 +1,1769 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621680168347"><span id="local-6989586621680168348"><span id="local-6989586621680168349"><span id="local-6989586621680168350"><span id="local-6989586621680168351"><span id="local-6989586621680168352"><span id="local-6989586621680168353"><span id="local-6989586621680168354"><span id="local-6989586621680168355"><span id="local-6989586621680168356"><span id="local-6989586621680168357"><span id="local-6989586621680168358"><span id="local-6989586621680168359"><span id="local-6989586621680168360"><span id="local-6989586621680168361"><span id="local-6989586621680168362"><span id="local-6989586621680168363"><span id="local-6989586621680168364"></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveLift #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DuplicateRecordFields #-}</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html"><span class="hs-identifier">Temporal.Workflow.Types</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Data</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Data</span></span><span class="hs-special">)</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map.Strict</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Map</span></span><span class="hs-special">)</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Time.Clock.System</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">SystemTime</span></span><span class="hs-special">)</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Vector</span></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Word</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Word32</span></span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Lift</span></span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">ChildWorkflow</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html"><span class="hs-identifier">Temporal.Activity.Types</span></a></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Common.html"><span class="hs-identifier">Temporal.Common</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Common.TimeoutType.html"><span class="hs-identifier">Temporal.Common.TimeoutType</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Duration.html"><span class="hs-identifier">Temporal.Duration</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Payload.html"><span class="hs-identifier">Temporal.Payload</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html"><span class="hs-identifier">Temporal.SearchAttributes</span></a></span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">data</span><span> </span><span id="Info"><span class="annot"><a href="Temporal.Workflow.Types.html#Info"><span class="hs-identifier hs-var">Info</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Info"><span class="annot"><a href="Temporal.Workflow.Types.html#Info"><span class="hs-identifier hs-var">Info</span></a></span></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="historyLength"><span class="annot"><span class="annottext">Info -&gt; Word32
+</span><a href="Temporal.Workflow.Types.html#historyLength"><span class="hs-identifier hs-var hs-var">historyLength</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Word32</span></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="attempt"><span class="annot"><span class="annottext">Info -&gt; Int
+</span><a href="Temporal.Workflow.Types.html#attempt"><span class="hs-identifier hs-var hs-var">attempt</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="continuedRunId"><span class="annot"><span class="annottext">Info -&gt; Maybe RunId
+</span><a href="Temporal.Workflow.Types.html#continuedRunId"><span class="hs-identifier hs-var hs-var">continuedRunId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#RunId"><span class="hs-identifier hs-type">RunId</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="cronSchedule"><span class="annot"><span class="annottext">Info -&gt; Maybe Text
+</span><a href="Temporal.Workflow.Types.html#cronSchedule"><span class="hs-identifier hs-var hs-var">cronSchedule</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="executionTimeout"><span class="annot"><span class="annottext">Info -&gt; Maybe Duration
+</span><a href="Temporal.Workflow.Types.html#executionTimeout"><span class="hs-identifier hs-var hs-var">executionTimeout</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Duration.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="headers"><span class="annot"><span class="annottext">Info -&gt; Map Text Payload
+</span><a href="Temporal.Workflow.Types.html#headers"><span class="hs-identifier hs-var hs-var">headers</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="namespace"><span class="annot"><span class="annottext">Info -&gt; Namespace
+</span><a href="Temporal.Workflow.Types.html#namespace"><span class="hs-identifier hs-var hs-var">namespace</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Temporal.Common.html#Namespace"><span class="hs-identifier hs-type">Namespace</span></a></span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="parent"><span class="annot"><span class="annottext">Info -&gt; Maybe ParentInfo
+</span><a href="Temporal.Workflow.Types.html#parent"><span class="hs-identifier hs-var hs-var">parent</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#ParentInfo"><span class="hs-identifier hs-type">ParentInfo</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="rawMemo"><span class="annot"><span class="annottext">Info -&gt; Map Text Payload
+</span><a href="Temporal.Workflow.Types.html#rawMemo"><span class="hs-identifier hs-var hs-var">rawMemo</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="retryPolicy"><span class="annot"><span class="annottext">Info -&gt; Maybe RetryPolicy
+</span><a href="Temporal.Workflow.Types.html#retryPolicy"><span class="hs-identifier hs-var hs-var">retryPolicy</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#RetryPolicy"><span class="hs-identifier hs-type">RetryPolicy</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="runId"><span class="annot"><span class="annottext">Info -&gt; RunId
+</span><a href="Temporal.Workflow.Types.html#runId"><span class="hs-identifier hs-var hs-var">runId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Temporal.Common.html#RunId"><span class="hs-identifier hs-type">RunId</span></a></span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="runTimeout"><span class="annot"><span class="annottext">Info -&gt; Maybe Duration
+</span><a href="Temporal.Workflow.Types.html#runTimeout"><span class="hs-identifier hs-var hs-var">runTimeout</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Duration.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="searchAttributes"><span class="annot"><span class="annottext">Info -&gt; Map SearchAttributeKey SearchAttributeType
+</span><a href="Temporal.Workflow.Types.html#searchAttributes"><span class="hs-identifier hs-var hs-var">searchAttributes</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeKey"><span class="hs-identifier hs-type">SearchAttributeKey</span></a></span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeType"><span class="hs-identifier hs-type">SearchAttributeType</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="startTime"><span class="annot"><span class="annottext">Info -&gt; SystemTime
+</span><a href="Temporal.Workflow.Types.html#startTime"><span class="hs-identifier hs-var hs-var">startTime</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">SystemTime</span></span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="taskQueue"><span class="annot"><span class="annottext">Info -&gt; TaskQueue
+</span><a href="Temporal.Workflow.Types.html#taskQueue"><span class="hs-identifier hs-var hs-var">taskQueue</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Temporal.Common.html#TaskQueue"><span class="hs-identifier hs-type">TaskQueue</span></a></span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="taskTimeout"><span class="annot"><span class="annottext">Info -&gt; Duration
+</span><a href="Temporal.Workflow.Types.html#taskTimeout"><span class="hs-identifier hs-var hs-var">taskTimeout</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Temporal.Duration.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="workflowId"><span class="annot"><span class="annottext">Info -&gt; WorkflowId
+</span><a href="Temporal.Workflow.Types.html#workflowId"><span class="hs-identifier hs-var hs-var">workflowId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Temporal.Common.html#WorkflowId"><span class="hs-identifier hs-type">WorkflowId</span></a></span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="workflowType"><span class="annot"><span class="annottext">Info -&gt; WorkflowType
+</span><a href="Temporal.Workflow.Types.html#workflowType"><span class="hs-identifier hs-var hs-var">workflowType</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Temporal.Common.html#WorkflowType"><span class="hs-identifier hs-type">WorkflowType</span></a></span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="continueAsNewSuggested"><span class="annot"><span class="annottext">Info -&gt; Bool
+</span><a href="Temporal.Workflow.Types.html#continueAsNewSuggested"><span class="hs-identifier hs-var hs-var">continueAsNewSuggested</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680168397"><span id="local-6989586621680168438"><span id="local-6989586621680168442"><span class="annot"><span class="annottext">Int -&gt; Info -&gt; ShowS
+[Info] -&gt; ShowS
+Info -&gt; String
+(Int -&gt; Info -&gt; ShowS)
+-&gt; (Info -&gt; String) -&gt; ([Info] -&gt; ShowS) -&gt; Show Info
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; Info -&gt; ShowS
+showsPrec :: Int -&gt; Info -&gt; ShowS
+$cshow :: Info -&gt; String
+show :: Info -&gt; String
+$cshowList :: [Info] -&gt; ShowS
+showList :: [Info] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">data</span><span> </span><span id="ActivityTimeoutPolicy"><span class="annot"><a href="Temporal.Workflow.Types.html#ActivityTimeoutPolicy"><span class="hs-identifier hs-var">ActivityTimeoutPolicy</span></a></span></span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="StartToCloseTimeout"><span class="annot"><a href="Temporal.Workflow.Types.html#StartToCloseTimeout"><span class="hs-identifier hs-var">StartToCloseTimeout</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Temporal.Duration.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ScheduleToCloseTimeout"><span class="annot"><a href="Temporal.Workflow.Types.html#ScheduleToCloseTimeout"><span class="hs-identifier hs-var">ScheduleToCloseTimeout</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Temporal.Duration.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span>
+</span><span id="line-50"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="StartToCloseAndScheduleToCloseTimeout"><span class="annot"><a href="Temporal.Workflow.Types.html#StartToCloseAndScheduleToCloseTimeout"><span class="hs-identifier hs-var">StartToCloseAndScheduleToCloseTimeout</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Temporal.Duration.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Temporal.Duration.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span>
+</span><span id="line-51"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680168458"><span id="local-6989586621680168468"><span class="annot"><span class="annottext">ActivityTimeoutPolicy -&gt; ActivityTimeoutPolicy -&gt; Bool
+(ActivityTimeoutPolicy -&gt; ActivityTimeoutPolicy -&gt; Bool)
+-&gt; (ActivityTimeoutPolicy -&gt; ActivityTimeoutPolicy -&gt; Bool)
+-&gt; Eq ActivityTimeoutPolicy
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: ActivityTimeoutPolicy -&gt; ActivityTimeoutPolicy -&gt; Bool
+== :: ActivityTimeoutPolicy -&gt; ActivityTimeoutPolicy -&gt; Bool
+$c/= :: ActivityTimeoutPolicy -&gt; ActivityTimeoutPolicy -&gt; Bool
+/= :: ActivityTimeoutPolicy -&gt; ActivityTimeoutPolicy -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680168473"><span id="local-6989586621680168482"><span id="local-6989586621680168486"><span class="annot"><span class="annottext">Int -&gt; ActivityTimeoutPolicy -&gt; ShowS
+[ActivityTimeoutPolicy] -&gt; ShowS
+ActivityTimeoutPolicy -&gt; String
+(Int -&gt; ActivityTimeoutPolicy -&gt; ShowS)
+-&gt; (ActivityTimeoutPolicy -&gt; String)
+-&gt; ([ActivityTimeoutPolicy] -&gt; ShowS)
+-&gt; Show ActivityTimeoutPolicy
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; ActivityTimeoutPolicy -&gt; ShowS
+showsPrec :: Int -&gt; ActivityTimeoutPolicy -&gt; ShowS
+$cshow :: ActivityTimeoutPolicy -&gt; String
+show :: ActivityTimeoutPolicy -&gt; String
+$cshowList :: [ActivityTimeoutPolicy] -&gt; ShowS
+showList :: [ActivityTimeoutPolicy] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680168491"><span id="local-6989586621680168498"><span id="local-6989586621680168504"><span id="local-6989586621680168506"><span id="local-6989586621680168508"><span id="local-6989586621680168514"><span id="local-6989586621680168519"><span id="local-6989586621680168522"><span id="local-6989586621680168525"><span id="local-6989586621680168528"><span id="local-6989586621680168531"><span id="local-6989586621680168534"><span id="local-6989586621680168539"><span id="local-6989586621680168544"><span class="annot"><span class="annottext">Typeable ActivityTimeoutPolicy
+Typeable ActivityTimeoutPolicy =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g)
+ -&gt; ActivityTimeoutPolicy
+ -&gt; c ActivityTimeoutPolicy)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c ActivityTimeoutPolicy)
+-&gt; (ActivityTimeoutPolicy -&gt; Constr)
+-&gt; (ActivityTimeoutPolicy -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c ActivityTimeoutPolicy))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e))
+    -&gt; Maybe (c ActivityTimeoutPolicy))
+-&gt; ((forall b. Data b =&gt; b -&gt; b)
+    -&gt; ActivityTimeoutPolicy -&gt; ActivityTimeoutPolicy)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r)
+    -&gt; r
+    -&gt; (forall d. Data d =&gt; d -&gt; r')
+    -&gt; ActivityTimeoutPolicy
+    -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r)
+    -&gt; r
+    -&gt; (forall d. Data d =&gt; d -&gt; r')
+    -&gt; ActivityTimeoutPolicy
+    -&gt; r)
+-&gt; (forall u.
+    (forall d. Data d =&gt; d -&gt; u) -&gt; ActivityTimeoutPolicy -&gt; [u])
+-&gt; (forall u.
+    Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; ActivityTimeoutPolicy -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; ActivityTimeoutPolicy -&gt; m ActivityTimeoutPolicy)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; ActivityTimeoutPolicy -&gt; m ActivityTimeoutPolicy)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; ActivityTimeoutPolicy -&gt; m ActivityTimeoutPolicy)
+-&gt; Data ActivityTimeoutPolicy
+ActivityTimeoutPolicy -&gt; Constr
+ActivityTimeoutPolicy -&gt; DataType
+(forall b. Data b =&gt; b -&gt; b)
+-&gt; ActivityTimeoutPolicy -&gt; ActivityTimeoutPolicy
+forall a.
+Typeable a =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; a -&gt; c a)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c a)
+-&gt; (a -&gt; Constr)
+-&gt; (a -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c a))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c a))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; a -&gt; a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; [u])
+-&gt; (forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; Data a
+forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; ActivityTimeoutPolicy -&gt; u
+forall u.
+(forall d. Data d =&gt; d -&gt; u) -&gt; ActivityTimeoutPolicy -&gt; [u]
+forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ActivityTimeoutPolicy -&gt; r
+forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ActivityTimeoutPolicy -&gt; r
+forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ActivityTimeoutPolicy -&gt; m ActivityTimeoutPolicy
+forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ActivityTimeoutPolicy -&gt; m ActivityTimeoutPolicy
+forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c ActivityTimeoutPolicy
+forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g)
+-&gt; ActivityTimeoutPolicy
+-&gt; c ActivityTimeoutPolicy
+forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c ActivityTimeoutPolicy)
+forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c ActivityTimeoutPolicy)
+$cgfoldl :: forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g)
+-&gt; ActivityTimeoutPolicy
+-&gt; c ActivityTimeoutPolicy
+gfoldl :: forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g)
+-&gt; ActivityTimeoutPolicy
+-&gt; c ActivityTimeoutPolicy
+$cgunfold :: forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c ActivityTimeoutPolicy
+gunfold :: forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c ActivityTimeoutPolicy
+$ctoConstr :: ActivityTimeoutPolicy -&gt; Constr
+toConstr :: ActivityTimeoutPolicy -&gt; Constr
+$cdataTypeOf :: ActivityTimeoutPolicy -&gt; DataType
+dataTypeOf :: ActivityTimeoutPolicy -&gt; DataType
+$cdataCast1 :: forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c ActivityTimeoutPolicy)
+dataCast1 :: forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c ActivityTimeoutPolicy)
+$cdataCast2 :: forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c ActivityTimeoutPolicy)
+dataCast2 :: forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c ActivityTimeoutPolicy)
+$cgmapT :: (forall b. Data b =&gt; b -&gt; b)
+-&gt; ActivityTimeoutPolicy -&gt; ActivityTimeoutPolicy
+gmapT :: (forall b. Data b =&gt; b -&gt; b)
+-&gt; ActivityTimeoutPolicy -&gt; ActivityTimeoutPolicy
+$cgmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ActivityTimeoutPolicy -&gt; r
+gmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ActivityTimeoutPolicy -&gt; r
+$cgmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ActivityTimeoutPolicy -&gt; r
+gmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ActivityTimeoutPolicy -&gt; r
+$cgmapQ :: forall u.
+(forall d. Data d =&gt; d -&gt; u) -&gt; ActivityTimeoutPolicy -&gt; [u]
+gmapQ :: forall u.
+(forall d. Data d =&gt; d -&gt; u) -&gt; ActivityTimeoutPolicy -&gt; [u]
+$cgmapQi :: forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; ActivityTimeoutPolicy -&gt; u
+gmapQi :: forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; ActivityTimeoutPolicy -&gt; u
+$cgmapM :: forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ActivityTimeoutPolicy -&gt; m ActivityTimeoutPolicy
+gmapM :: forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ActivityTimeoutPolicy -&gt; m ActivityTimeoutPolicy
+$cgmapMp :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ActivityTimeoutPolicy -&gt; m ActivityTimeoutPolicy
+gmapMp :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ActivityTimeoutPolicy -&gt; m ActivityTimeoutPolicy
+$cgmapMo :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ActivityTimeoutPolicy -&gt; m ActivityTimeoutPolicy
+gmapMo :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ActivityTimeoutPolicy -&gt; m ActivityTimeoutPolicy
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680168554"><span id="local-6989586621680168569"><span class="annot"><span class="annottext">(forall (m :: * -&gt; *). Quote m =&gt; ActivityTimeoutPolicy -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *).
+    Quote m =&gt;
+    ActivityTimeoutPolicy -&gt; Code m ActivityTimeoutPolicy)
+-&gt; Lift ActivityTimeoutPolicy
+forall t.
+(forall (m :: * -&gt; *). Quote m =&gt; t -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *). Quote m =&gt; t -&gt; Code m t) -&gt; Lift t
+forall (m :: * -&gt; *). Quote m =&gt; ActivityTimeoutPolicy -&gt; m Exp
+forall (m :: * -&gt; *).
+Quote m =&gt;
+ActivityTimeoutPolicy -&gt; Code m ActivityTimeoutPolicy
+$clift :: forall (m :: * -&gt; *). Quote m =&gt; ActivityTimeoutPolicy -&gt; m Exp
+lift :: forall (m :: * -&gt; *). Quote m =&gt; ActivityTimeoutPolicy -&gt; m Exp
+$cliftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+ActivityTimeoutPolicy -&gt; Code m ActivityTimeoutPolicy
+liftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+ActivityTimeoutPolicy -&gt; Code m ActivityTimeoutPolicy
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Lift</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="hs-keyword">data</span><span> </span><span id="StartActivityOptions"><span class="annot"><a href="Temporal.Workflow.Types.html#StartActivityOptions"><span class="hs-identifier hs-var">StartActivityOptions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="StartActivityOptions"><span class="annot"><a href="Temporal.Workflow.Types.html#StartActivityOptions"><span class="hs-identifier hs-var">StartActivityOptions</span></a></span></span><span>
+</span><span id="line-55"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="activityId"><span class="annot"><span class="annottext">StartActivityOptions -&gt; Maybe ActivityId
+</span><a href="Temporal.Workflow.Types.html#activityId"><span class="hs-identifier hs-var hs-var">activityId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#ActivityId"><span class="hs-identifier hs-type">ActivityId</span></a></span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-comment">-- ^ The identifier for an Activity Execution. The identifier can be generated by the system, or it can be provided by the Workflow code that spawns the Activity Execution. The identifier is unique among the open Activity Executions of a Workflow Run. (A single Workflow Run may reuse an Activity Id if an earlier Activity Execution with the same Id has closed.)</span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-comment">-- An Activity Id can be used to complete the Activity asynchronously.</span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="taskQueue"><span class="annot"><span class="annottext">StartActivityOptions -&gt; Maybe TaskQueue
+</span><a href="Temporal.Workflow.Types.html#taskQueue"><span class="hs-identifier hs-var hs-var">taskQueue</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#TaskQueue"><span class="hs-identifier hs-type">TaskQueue</span></a></span><span>
+</span><span id="line-60"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="timeout"><span class="annot"><span class="annottext">StartActivityOptions -&gt; ActivityTimeoutPolicy
+</span><a href="Temporal.Workflow.Types.html#timeout"><span class="hs-identifier hs-var hs-var">timeout</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html#ActivityTimeoutPolicy"><span class="hs-identifier hs-type">ActivityTimeoutPolicy</span></a></span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="scheduleToStartTimeout"><span class="annot"><span class="annottext">StartActivityOptions -&gt; Maybe Duration
+</span><a href="Temporal.Workflow.Types.html#scheduleToStartTimeout"><span class="hs-identifier hs-var hs-var">scheduleToStartTimeout</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Duration.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span>
+</span><span id="line-62"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ A Schedule-To-Start Timeout is the maximum amount of time that is allowed from when an Activity Task is scheduled (that is, placed in a Task Queue) to when a Worker starts (that is, picks up from the Task Queue) that Activity Task. In other words, it's a limit for how long an Activity Task can be enqueued.</span></span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="heartbeatTimeout"><span class="annot"><span class="annottext">StartActivityOptions -&gt; Maybe Duration
+</span><a href="Temporal.Workflow.Types.html#heartbeatTimeout"><span class="hs-identifier hs-var hs-var">heartbeatTimeout</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Duration.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span>
+</span><span id="line-64"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ A Heartbeat Timeout is the maximum time between Activity Heartbeats. If this timeout is reached, the Activity Task fails and a retry occurs if a Retry Policy dictates it.</span></span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="retryPolicy"><span class="annot"><span class="annottext">StartActivityOptions -&gt; Maybe RetryPolicy
+</span><a href="Temporal.Workflow.Types.html#retryPolicy"><span class="hs-identifier hs-var hs-var">retryPolicy</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#RetryPolicy"><span class="hs-identifier hs-type">RetryPolicy</span></a></span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-comment">-- ^ A Retry Policy works in cooperation with the timeouts to provide fine controls to optimize the execution experience.</span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-68"></span><span>  </span><span class="hs-comment">-- A Retry Policy is a collection of attributes that instructs the Temporal Server how to retry a failure of a Workflow Execution or an Activity Task Execution. (Retry Policies do not apply to Workflow Task Executions, which always retry indefinitely.)</span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="cancellationType"><span class="annot"><span class="annottext">StartActivityOptions -&gt; ActivityCancellationType
+</span><a href="Temporal.Workflow.Types.html#cancellationType"><span class="hs-identifier hs-var hs-var">cancellationType</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html#ActivityCancellationType"><span class="hs-identifier hs-type">ActivityCancellationType</span></a></span><span>
+</span><span id="line-70"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="headers"><span class="annot"><span class="annottext">StartActivityOptions -&gt; Map Text Payload
+</span><a href="Temporal.Workflow.Types.html#headers"><span class="hs-identifier hs-var hs-var">headers</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span>
+</span><span id="line-71"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="disableEagerExecution"><span class="annot"><span class="annottext">StartActivityOptions -&gt; Bool
+</span><a href="Temporal.Workflow.Types.html#disableEagerExecution"><span class="hs-identifier hs-var hs-var">disableEagerExecution</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-72"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ If true, will disable eager activity execution. Eager activity execution is an optimization on some servers that sends activities back to the same worker as the calling workflow if they can run there. This setting is experimental and may be removed in a future release.</span></span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-74"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680168595"><span id="local-6989586621680168614"><span id="local-6989586621680168618"><span class="annot"><span class="annottext">Int -&gt; StartActivityOptions -&gt; ShowS
+[StartActivityOptions] -&gt; ShowS
+StartActivityOptions -&gt; String
+(Int -&gt; StartActivityOptions -&gt; ShowS)
+-&gt; (StartActivityOptions -&gt; String)
+-&gt; ([StartActivityOptions] -&gt; ShowS)
+-&gt; Show StartActivityOptions
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; StartActivityOptions -&gt; ShowS
+showsPrec :: Int -&gt; StartActivityOptions -&gt; ShowS
+$cshow :: StartActivityOptions -&gt; String
+show :: StartActivityOptions -&gt; String
+$cshowList :: [StartActivityOptions] -&gt; ShowS
+showList :: [StartActivityOptions] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680168622"><span id="local-6989586621680168654"><span class="annot"><span class="annottext">(forall (m :: * -&gt; *). Quote m =&gt; StartActivityOptions -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *).
+    Quote m =&gt;
+    StartActivityOptions -&gt; Code m StartActivityOptions)
+-&gt; Lift StartActivityOptions
+forall t.
+(forall (m :: * -&gt; *). Quote m =&gt; t -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *). Quote m =&gt; t -&gt; Code m t) -&gt; Lift t
+forall (m :: * -&gt; *). Quote m =&gt; StartActivityOptions -&gt; m Exp
+forall (m :: * -&gt; *).
+Quote m =&gt;
+StartActivityOptions -&gt; Code m StartActivityOptions
+$clift :: forall (m :: * -&gt; *). Quote m =&gt; StartActivityOptions -&gt; m Exp
+lift :: forall (m :: * -&gt; *). Quote m =&gt; StartActivityOptions -&gt; m Exp
+$cliftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+StartActivityOptions -&gt; Code m StartActivityOptions
+liftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+StartActivityOptions -&gt; Code m StartActivityOptions
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Lift</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span class="hs-keyword">class</span><span> </span><span id="StartActivityTimeoutOption"><span class="annot"><a href="Temporal.Workflow.Types.html#StartActivityTimeoutOption"><span class="hs-identifier hs-var">StartActivityTimeoutOption</span></a></span></span><span> </span><span id="local-6989586621680168207"><span class="annot"><a href="#local-6989586621680168207"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-78"></span><span>  </span><span id="toStartActivityTimeoutOption"><span class="annot"><a href="Temporal.Workflow.Types.html#toStartActivityTimeoutOption"><span class="hs-identifier hs-type">toStartActivityTimeoutOption</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621680168207"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html#ActivityTimeoutPolicy"><span class="hs-identifier hs-type">ActivityTimeoutPolicy</span></a></span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html#StartActivityTimeoutOption"><span class="hs-identifier hs-type">StartActivityTimeoutOption</span></a></span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html#ActivityTimeoutPolicy"><span class="hs-identifier hs-type">ActivityTimeoutPolicy</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-82"></span><span>  </span><span id="local-6989586621680168691"><span class="annot"><span class="annottext">toStartActivityTimeoutOption :: ActivityTimeoutPolicy -&gt; ActivityTimeoutPolicy
+</span><a href="Temporal.Workflow.Types.html#toStartActivityTimeoutOption"><span class="hs-identifier hs-var hs-var hs-var">toStartActivityTimeoutOption</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ActivityTimeoutPolicy -&gt; ActivityTimeoutPolicy
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html#StartActivityTimeoutOption"><span class="hs-identifier hs-type">StartActivityTimeoutOption</span></a></span><span> </span><span class="annot"><a href="Temporal.Common.TimeoutType.html#StartToClose"><span class="hs-identifier hs-type">StartToClose</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-86"></span><span>  </span><span id="local-6989586621680168695"><span class="annot"><span class="annottext">toStartActivityTimeoutOption :: StartToClose -&gt; ActivityTimeoutPolicy
+</span><a href="Temporal.Workflow.Types.html#toStartActivityTimeoutOption"><span class="hs-identifier hs-var hs-var hs-var">toStartActivityTimeoutOption</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Common.TimeoutType.html#StartToClose"><span class="hs-identifier hs-type">StartToClose</span></a></span><span> </span><span id="local-6989586621680168697"><span class="annot"><span class="annottext">Duration
+</span><a href="#local-6989586621680168697"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Duration -&gt; ActivityTimeoutPolicy
+</span><a href="Temporal.Workflow.Types.html#StartToCloseTimeout"><span class="hs-identifier hs-var">StartToCloseTimeout</span></a></span><span> </span><span class="annot"><span class="annottext">Duration
+</span><a href="#local-6989586621680168697"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html#StartActivityTimeoutOption"><span class="hs-identifier hs-type">StartActivityTimeoutOption</span></a></span><span> </span><span class="annot"><a href="Temporal.Common.TimeoutType.html#ScheduleToClose"><span class="hs-identifier hs-type">ScheduleToClose</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-90"></span><span>  </span><span id="local-6989586621680168700"><span class="annot"><span class="annottext">toStartActivityTimeoutOption :: ScheduleToClose -&gt; ActivityTimeoutPolicy
+</span><a href="Temporal.Workflow.Types.html#toStartActivityTimeoutOption"><span class="hs-identifier hs-var hs-var hs-var">toStartActivityTimeoutOption</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Common.TimeoutType.html#ScheduleToClose"><span class="hs-identifier hs-type">ScheduleToClose</span></a></span><span> </span><span id="local-6989586621680168702"><span class="annot"><span class="annottext">Duration
+</span><a href="#local-6989586621680168702"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Duration -&gt; ActivityTimeoutPolicy
+</span><a href="Temporal.Workflow.Types.html#ScheduleToCloseTimeout"><span class="hs-identifier hs-var">ScheduleToCloseTimeout</span></a></span><span> </span><span class="annot"><span class="annottext">Duration
+</span><a href="#local-6989586621680168702"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html#StartActivityTimeoutOption"><span class="hs-identifier hs-type">StartActivityTimeoutOption</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Common.TimeoutType.html#StartToClose"><span class="hs-identifier hs-type">StartToClose</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Common.TimeoutType.html#ScheduleToClose"><span class="hs-identifier hs-type">ScheduleToClose</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-94"></span><span>  </span><span id="local-6989586621680168705"><span class="annot"><span class="annottext">toStartActivityTimeoutOption :: (StartToClose, ScheduleToClose) -&gt; ActivityTimeoutPolicy
+</span><a href="Temporal.Workflow.Types.html#toStartActivityTimeoutOption"><span class="hs-identifier hs-var hs-var hs-var">toStartActivityTimeoutOption</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Common.TimeoutType.html#StartToClose"><span class="hs-identifier hs-type">StartToClose</span></a></span><span> </span><span id="local-6989586621680168706"><span class="annot"><span class="annottext">Duration
+</span><a href="#local-6989586621680168706"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Common.TimeoutType.html#ScheduleToClose"><span class="hs-identifier hs-type">ScheduleToClose</span></a></span><span> </span><span id="local-6989586621680168707"><span class="annot"><span class="annottext">Duration
+</span><a href="#local-6989586621680168707"><span class="hs-identifier hs-var">sc</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Duration -&gt; Duration -&gt; ActivityTimeoutPolicy
+</span><a href="Temporal.Workflow.Types.html#StartToCloseAndScheduleToCloseTimeout"><span class="hs-identifier hs-var">StartToCloseAndScheduleToCloseTimeout</span></a></span><span> </span><span class="annot"><span class="annottext">Duration
+</span><a href="#local-6989586621680168706"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">Duration
+</span><a href="#local-6989586621680168707"><span class="hs-identifier hs-var">sc</span></a></span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html#StartActivityTimeoutOption"><span class="hs-identifier hs-type">StartActivityTimeoutOption</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Common.TimeoutType.html#ScheduleToClose"><span class="hs-identifier hs-type">ScheduleToClose</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Common.TimeoutType.html#StartToClose"><span class="hs-identifier hs-type">StartToClose</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-98"></span><span>  </span><span id="local-6989586621680168710"><span class="annot"><span class="annottext">toStartActivityTimeoutOption :: (ScheduleToClose, StartToClose) -&gt; ActivityTimeoutPolicy
+</span><a href="Temporal.Workflow.Types.html#toStartActivityTimeoutOption"><span class="hs-identifier hs-var hs-var hs-var">toStartActivityTimeoutOption</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Common.TimeoutType.html#ScheduleToClose"><span class="hs-identifier hs-type">ScheduleToClose</span></a></span><span> </span><span id="local-6989586621680168711"><span class="annot"><span class="annottext">Duration
+</span><a href="#local-6989586621680168711"><span class="hs-identifier hs-var">sc</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Temporal.Common.TimeoutType.html#StartToClose"><span class="hs-identifier hs-type">StartToClose</span></a></span><span> </span><span id="local-6989586621680168712"><span class="annot"><span class="annottext">Duration
+</span><a href="#local-6989586621680168712"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Duration -&gt; Duration -&gt; ActivityTimeoutPolicy
+</span><a href="Temporal.Workflow.Types.html#StartToCloseAndScheduleToCloseTimeout"><span class="hs-identifier hs-var">StartToCloseAndScheduleToCloseTimeout</span></a></span><span> </span><span class="annot"><span class="annottext">Duration
+</span><a href="#local-6989586621680168712"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">Duration
+</span><a href="#local-6989586621680168711"><span class="hs-identifier hs-var">sc</span></a></span><span>
+</span><span id="line-99"></span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html#StartActivityTimeoutOption"><span class="hs-identifier hs-type">StartActivityTimeoutOption</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Common.TimeoutType.html#StartToClose"><span class="hs-identifier hs-type">StartToClose</span></a></span><span> </span><span class="annot"><a href="Temporal.Common.TimeoutType.html#ScheduleToClose"><span class="hs-identifier hs-type">ScheduleToClose</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-102"></span><span>  </span><span id="local-6989586621680168717"><span class="annot"><span class="annottext">toStartActivityTimeoutOption :: Either StartToClose ScheduleToClose -&gt; ActivityTimeoutPolicy
+</span><a href="Temporal.Workflow.Types.html#toStartActivityTimeoutOption"><span class="hs-identifier hs-var hs-var hs-var">toStartActivityTimeoutOption</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(StartToClose -&gt; ActivityTimeoutPolicy)
+-&gt; (ScheduleToClose -&gt; ActivityTimeoutPolicy)
+-&gt; Either StartToClose ScheduleToClose
+-&gt; ActivityTimeoutPolicy
+forall a c b. (a -&gt; c) -&gt; (b -&gt; c) -&gt; Either a b -&gt; c
+</span><span class="hs-identifier hs-var">either</span></span><span> </span><span class="annot"><span class="annottext">StartToClose -&gt; ActivityTimeoutPolicy
+forall a.
+StartActivityTimeoutOption a =&gt;
+a -&gt; ActivityTimeoutPolicy
+</span><a href="Temporal.Workflow.Types.html#toStartActivityTimeoutOption"><span class="hs-identifier hs-var">toStartActivityTimeoutOption</span></a></span><span> </span><span class="annot"><span class="annottext">ScheduleToClose -&gt; ActivityTimeoutPolicy
+forall a.
+StartActivityTimeoutOption a =&gt;
+a -&gt; ActivityTimeoutPolicy
+</span><a href="Temporal.Workflow.Types.html#toStartActivityTimeoutOption"><span class="hs-identifier hs-var">toStartActivityTimeoutOption</span></a></span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span>
+</span><span id="line-105"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html#StartActivityTimeoutOption"><span class="hs-identifier hs-type">StartActivityTimeoutOption</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Common.TimeoutType.html#ScheduleToClose"><span class="hs-identifier hs-type">ScheduleToClose</span></a></span><span> </span><span class="annot"><a href="Temporal.Common.TimeoutType.html#StartToClose"><span class="hs-identifier hs-type">StartToClose</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-106"></span><span>  </span><span id="local-6989586621680168723"><span class="annot"><span class="annottext">toStartActivityTimeoutOption :: Either ScheduleToClose StartToClose -&gt; ActivityTimeoutPolicy
+</span><a href="Temporal.Workflow.Types.html#toStartActivityTimeoutOption"><span class="hs-identifier hs-var hs-var hs-var">toStartActivityTimeoutOption</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(ScheduleToClose -&gt; ActivityTimeoutPolicy)
+-&gt; (StartToClose -&gt; ActivityTimeoutPolicy)
+-&gt; Either ScheduleToClose StartToClose
+-&gt; ActivityTimeoutPolicy
+forall a c b. (a -&gt; c) -&gt; (b -&gt; c) -&gt; Either a b -&gt; c
+</span><span class="hs-identifier hs-var">either</span></span><span> </span><span class="annot"><span class="annottext">ScheduleToClose -&gt; ActivityTimeoutPolicy
+forall a.
+StartActivityTimeoutOption a =&gt;
+a -&gt; ActivityTimeoutPolicy
+</span><a href="Temporal.Workflow.Types.html#toStartActivityTimeoutOption"><span class="hs-identifier hs-var">toStartActivityTimeoutOption</span></a></span><span> </span><span class="annot"><span class="annottext">StartToClose -&gt; ActivityTimeoutPolicy
+forall a.
+StartActivityTimeoutOption a =&gt;
+a -&gt; ActivityTimeoutPolicy
+</span><a href="Temporal.Workflow.Types.html#toStartActivityTimeoutOption"><span class="hs-identifier hs-var">toStartActivityTimeoutOption</span></a></span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span>
+</span><span id="line-109"></span><span id="local-6989586621680168214"><span class="annot"><a href="Temporal.Workflow.Types.html#defaultStartActivityOptions"><span class="hs-identifier hs-type">defaultStartActivityOptions</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html#StartActivityTimeoutOption"><span class="hs-identifier hs-type">StartActivityTimeoutOption</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680168214"><span class="hs-identifier hs-type">timeout</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680168214"><span class="hs-identifier hs-type">timeout</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html#StartActivityOptions"><span class="hs-identifier hs-type">StartActivityOptions</span></a></span></span><span>
+</span><span id="line-110"></span><span id="defaultStartActivityOptions"><span class="annot"><span class="annottext">defaultStartActivityOptions :: forall timeout.
+StartActivityTimeoutOption timeout =&gt;
+timeout -&gt; StartActivityOptions
+</span><a href="Temporal.Workflow.Types.html#defaultStartActivityOptions"><span class="hs-identifier hs-var hs-var">defaultStartActivityOptions</span></a></span></span><span> </span><span id="local-6989586621680168728"><span class="annot"><span class="annottext">timeout
+</span><a href="#local-6989586621680168728"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-111"></span><span>  </span><span class="annot"><a href="Temporal.Workflow.Types.html#StartActivityOptions"><span class="hs-identifier hs-type">StartActivityOptions</span></a></span><span>
+</span><span id="line-112"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">activityId :: Maybe ActivityId
+</span><a href="Temporal.Workflow.Types.html#activityId"><span class="hs-identifier hs-var">activityId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe ActivityId
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-113"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">taskQueue :: Maybe TaskQueue
+</span><a href="Temporal.Workflow.Types.html#taskQueue"><span class="hs-identifier hs-var">taskQueue</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe TaskQueue
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-114"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">timeout :: ActivityTimeoutPolicy
+</span><a href="Temporal.Workflow.Types.html#timeout"><span class="hs-identifier hs-var">timeout</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">timeout -&gt; ActivityTimeoutPolicy
+forall a.
+StartActivityTimeoutOption a =&gt;
+a -&gt; ActivityTimeoutPolicy
+</span><a href="Temporal.Workflow.Types.html#toStartActivityTimeoutOption"><span class="hs-identifier hs-var">toStartActivityTimeoutOption</span></a></span><span> </span><span class="annot"><span class="annottext">timeout
+</span><a href="#local-6989586621680168728"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-115"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">scheduleToStartTimeout :: Maybe Duration
+</span><a href="Temporal.Workflow.Types.html#scheduleToStartTimeout"><span class="hs-identifier hs-var">scheduleToStartTimeout</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Duration
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-116"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">heartbeatTimeout :: Maybe Duration
+</span><a href="Temporal.Workflow.Types.html#heartbeatTimeout"><span class="hs-identifier hs-var">heartbeatTimeout</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Duration
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-117"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">retryPolicy :: Maybe RetryPolicy
+</span><a href="Temporal.Workflow.Types.html#retryPolicy"><span class="hs-identifier hs-var">retryPolicy</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe RetryPolicy
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-118"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">cancellationType :: ActivityCancellationType
+</span><a href="Temporal.Workflow.Types.html#cancellationType"><span class="hs-identifier hs-var">cancellationType</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ActivityCancellationType
+</span><a href="Temporal.Workflow.Types.html#ActivityCancellationTryCancel"><span class="hs-identifier hs-var">ActivityCancellationTryCancel</span></a></span><span>
+</span><span id="line-119"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">headers :: Map Text Payload
+</span><a href="Temporal.Workflow.Types.html#headers"><span class="hs-identifier hs-var">headers</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map Text Payload
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-120"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">disableEagerExecution :: Bool
+</span><a href="Temporal.Workflow.Types.html#disableEagerExecution"><span class="hs-identifier hs-var">disableEagerExecution</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-121"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span><span>
+</span><span id="line-124"></span><span class="hs-comment">-- TODO default to WaitCancellationCompleted per protobuf docs</span><span>
+</span><span id="line-125"></span><span>
+</span><span id="line-126"></span><span class="annot"><span class="hs-comment">{- |
+Defines how the workflow will wait (or not) for cancellation of the
+activity to be confirmed.
+-}</span></span><span>
+</span><span id="line-130"></span><span class="hs-keyword">data</span><span> </span><span id="ActivityCancellationType"><span class="annot"><a href="Temporal.Workflow.Types.html#ActivityCancellationType"><span class="hs-identifier hs-var">ActivityCancellationType</span></a></span></span><span>
+</span><span id="line-131"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-comment">-- | Initiate a cancellation request and immediately report cancellation to the workflow.</span></span><span>
+</span><span id="line-132"></span><span>    </span><span id="ActivityCancellationTryCancel"><span class="annot"><a href="Temporal.Workflow.Types.html#ActivityCancellationTryCancel"><span class="hs-identifier hs-var">ActivityCancellationTryCancel</span></a></span></span><span>
+</span><span id="line-133"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="hs-comment">-- | Wait for activity cancellation completion. Note that activity must heartbeat to receive a</span><span>
+</span><span id="line-134"></span><span>    </span><span class="hs-comment">-- cancellation notification. This can block the cancellation for a long time if activity</span><span>
+</span><span id="line-135"></span><span>    </span><span class="hs-comment">-- doesn't heartbeat or chooses to ignore the cancellation request.</span><span>
+</span><span id="line-136"></span><span>    </span><span id="ActivityCancellationWaitCancellationCompleted"><span class="annot"><a href="Temporal.Workflow.Types.html#ActivityCancellationWaitCancellationCompleted"><span class="hs-identifier hs-var">ActivityCancellationWaitCancellationCompleted</span></a></span></span><span>
+</span><span id="line-137"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="hs-comment">-- | Do not request cancellation of the activity and immediately report cancellation to the</span><span>
+</span><span id="line-138"></span><span>    </span><span class="hs-comment">-- workflow</span><span>
+</span><span id="line-139"></span><span>    </span><span id="ActivityCancellationAbandon"><span class="annot"><a href="Temporal.Workflow.Types.html#ActivityCancellationAbandon"><span class="hs-identifier hs-var">ActivityCancellationAbandon</span></a></span></span><span>
+</span><span id="line-140"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680168733"><span id="local-6989586621680168735"><span id="local-6989586621680168738"><span class="annot"><span class="annottext">Int -&gt; ActivityCancellationType -&gt; ShowS
+[ActivityCancellationType] -&gt; ShowS
+ActivityCancellationType -&gt; String
+(Int -&gt; ActivityCancellationType -&gt; ShowS)
+-&gt; (ActivityCancellationType -&gt; String)
+-&gt; ([ActivityCancellationType] -&gt; ShowS)
+-&gt; Show ActivityCancellationType
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; ActivityCancellationType -&gt; ShowS
+showsPrec :: Int -&gt; ActivityCancellationType -&gt; ShowS
+$cshow :: ActivityCancellationType -&gt; String
+show :: ActivityCancellationType -&gt; String
+$cshowList :: [ActivityCancellationType] -&gt; ShowS
+showList :: [ActivityCancellationType] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680168741"><span id="local-6989586621680168745"><span class="annot"><span class="annottext">ActivityCancellationType -&gt; ActivityCancellationType -&gt; Bool
+(ActivityCancellationType -&gt; ActivityCancellationType -&gt; Bool)
+-&gt; (ActivityCancellationType -&gt; ActivityCancellationType -&gt; Bool)
+-&gt; Eq ActivityCancellationType
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: ActivityCancellationType -&gt; ActivityCancellationType -&gt; Bool
+== :: ActivityCancellationType -&gt; ActivityCancellationType -&gt; Bool
+$c/= :: ActivityCancellationType -&gt; ActivityCancellationType -&gt; Bool
+/= :: ActivityCancellationType -&gt; ActivityCancellationType -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680168749"><span id="local-6989586621680168755"><span class="annot"><span class="annottext">(forall (m :: * -&gt; *).
+ Quote m =&gt;
+ ActivityCancellationType -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *).
+    Quote m =&gt;
+    ActivityCancellationType -&gt; Code m ActivityCancellationType)
+-&gt; Lift ActivityCancellationType
+forall t.
+(forall (m :: * -&gt; *). Quote m =&gt; t -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *). Quote m =&gt; t -&gt; Code m t) -&gt; Lift t
+forall (m :: * -&gt; *). Quote m =&gt; ActivityCancellationType -&gt; m Exp
+forall (m :: * -&gt; *).
+Quote m =&gt;
+ActivityCancellationType -&gt; Code m ActivityCancellationType
+$clift :: forall (m :: * -&gt; *). Quote m =&gt; ActivityCancellationType -&gt; m Exp
+lift :: forall (m :: * -&gt; *). Quote m =&gt; ActivityCancellationType -&gt; m Exp
+$cliftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+ActivityCancellationType -&gt; Code m ActivityCancellationType
+liftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+ActivityCancellationType -&gt; Code m ActivityCancellationType
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Lift</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680168763"><span id="local-6989586621680168765"><span id="local-6989586621680168767"><span id="local-6989586621680168769"><span id="local-6989586621680168771"><span id="local-6989586621680168777"><span id="local-6989586621680168782"><span id="local-6989586621680168785"><span id="local-6989586621680168788"><span id="local-6989586621680168791"><span id="local-6989586621680168794"><span id="local-6989586621680168797"><span id="local-6989586621680168802"><span id="local-6989586621680168807"><span class="annot"><span class="annottext">Typeable ActivityCancellationType
+Typeable ActivityCancellationType =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g)
+ -&gt; ActivityCancellationType
+ -&gt; c ActivityCancellationType)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c ActivityCancellationType)
+-&gt; (ActivityCancellationType -&gt; Constr)
+-&gt; (ActivityCancellationType -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d))
+    -&gt; Maybe (c ActivityCancellationType))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e))
+    -&gt; Maybe (c ActivityCancellationType))
+-&gt; ((forall b. Data b =&gt; b -&gt; b)
+    -&gt; ActivityCancellationType -&gt; ActivityCancellationType)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r)
+    -&gt; r
+    -&gt; (forall d. Data d =&gt; d -&gt; r')
+    -&gt; ActivityCancellationType
+    -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r)
+    -&gt; r
+    -&gt; (forall d. Data d =&gt; d -&gt; r')
+    -&gt; ActivityCancellationType
+    -&gt; r)
+-&gt; (forall u.
+    (forall d. Data d =&gt; d -&gt; u) -&gt; ActivityCancellationType -&gt; [u])
+-&gt; (forall u.
+    Int
+    -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; ActivityCancellationType -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; ActivityCancellationType -&gt; m ActivityCancellationType)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; ActivityCancellationType -&gt; m ActivityCancellationType)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; ActivityCancellationType -&gt; m ActivityCancellationType)
+-&gt; Data ActivityCancellationType
+ActivityCancellationType -&gt; Constr
+ActivityCancellationType -&gt; DataType
+(forall b. Data b =&gt; b -&gt; b)
+-&gt; ActivityCancellationType -&gt; ActivityCancellationType
+forall a.
+Typeable a =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; a -&gt; c a)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c a)
+-&gt; (a -&gt; Constr)
+-&gt; (a -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c a))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c a))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; a -&gt; a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; [u])
+-&gt; (forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; Data a
+forall u.
+Int
+-&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; ActivityCancellationType -&gt; u
+forall u.
+(forall d. Data d =&gt; d -&gt; u) -&gt; ActivityCancellationType -&gt; [u]
+forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r
+-&gt; (forall d. Data d =&gt; d -&gt; r')
+-&gt; ActivityCancellationType
+-&gt; r
+forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r
+-&gt; (forall d. Data d =&gt; d -&gt; r')
+-&gt; ActivityCancellationType
+-&gt; r
+forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ActivityCancellationType -&gt; m ActivityCancellationType
+forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ActivityCancellationType -&gt; m ActivityCancellationType
+forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c ActivityCancellationType
+forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g)
+-&gt; ActivityCancellationType
+-&gt; c ActivityCancellationType
+forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c ActivityCancellationType)
+forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c ActivityCancellationType)
+$cgfoldl :: forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g)
+-&gt; ActivityCancellationType
+-&gt; c ActivityCancellationType
+gfoldl :: forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g)
+-&gt; ActivityCancellationType
+-&gt; c ActivityCancellationType
+$cgunfold :: forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c ActivityCancellationType
+gunfold :: forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c ActivityCancellationType
+$ctoConstr :: ActivityCancellationType -&gt; Constr
+toConstr :: ActivityCancellationType -&gt; Constr
+$cdataTypeOf :: ActivityCancellationType -&gt; DataType
+dataTypeOf :: ActivityCancellationType -&gt; DataType
+$cdataCast1 :: forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c ActivityCancellationType)
+dataCast1 :: forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c ActivityCancellationType)
+$cdataCast2 :: forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c ActivityCancellationType)
+dataCast2 :: forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c ActivityCancellationType)
+$cgmapT :: (forall b. Data b =&gt; b -&gt; b)
+-&gt; ActivityCancellationType -&gt; ActivityCancellationType
+gmapT :: (forall b. Data b =&gt; b -&gt; b)
+-&gt; ActivityCancellationType -&gt; ActivityCancellationType
+$cgmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r
+-&gt; (forall d. Data d =&gt; d -&gt; r')
+-&gt; ActivityCancellationType
+-&gt; r
+gmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r
+-&gt; (forall d. Data d =&gt; d -&gt; r')
+-&gt; ActivityCancellationType
+-&gt; r
+$cgmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r
+-&gt; (forall d. Data d =&gt; d -&gt; r')
+-&gt; ActivityCancellationType
+-&gt; r
+gmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r
+-&gt; (forall d. Data d =&gt; d -&gt; r')
+-&gt; ActivityCancellationType
+-&gt; r
+$cgmapQ :: forall u.
+(forall d. Data d =&gt; d -&gt; u) -&gt; ActivityCancellationType -&gt; [u]
+gmapQ :: forall u.
+(forall d. Data d =&gt; d -&gt; u) -&gt; ActivityCancellationType -&gt; [u]
+$cgmapQi :: forall u.
+Int
+-&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; ActivityCancellationType -&gt; u
+gmapQi :: forall u.
+Int
+-&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; ActivityCancellationType -&gt; u
+$cgmapM :: forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ActivityCancellationType -&gt; m ActivityCancellationType
+gmapM :: forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ActivityCancellationType -&gt; m ActivityCancellationType
+$cgmapMp :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ActivityCancellationType -&gt; m ActivityCancellationType
+gmapMp :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ActivityCancellationType -&gt; m ActivityCancellationType
+$cgmapMo :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ActivityCancellationType -&gt; m ActivityCancellationType
+gmapMo :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ActivityCancellationType -&gt; m ActivityCancellationType
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-141"></span><span>
+</span><span id="line-142"></span><span>
+</span><span id="line-143"></span><span class="hs-keyword">data</span><span> </span><span id="ExecuteActivityInput"><span class="annot"><a href="Temporal.Workflow.Types.html#ExecuteActivityInput"><span class="hs-identifier hs-var">ExecuteActivityInput</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ExecuteActivityInput"><span class="annot"><a href="Temporal.Workflow.Types.html#ExecuteActivityInput"><span class="hs-identifier hs-var">ExecuteActivityInput</span></a></span></span><span>
+</span><span id="line-144"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="activityArgs"><span class="annot"><span class="annottext">ExecuteActivityInput -&gt; Vector Payload
+</span><a href="Temporal.Workflow.Types.html#activityArgs"><span class="hs-identifier hs-var hs-var">activityArgs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span>
+</span><span id="line-145"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="activityHeaders"><span class="annot"><span class="annottext">ExecuteActivityInput -&gt; Map Text Payload
+</span><a href="Temporal.Workflow.Types.html#activityHeaders"><span class="hs-identifier hs-var hs-var">activityHeaders</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span>
+</span><span id="line-146"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="activityInfo"><span class="annot"><span class="annottext">ExecuteActivityInput -&gt; ActivityInfo
+</span><a href="Temporal.Workflow.Types.html#activityInfo"><span class="hs-identifier hs-var hs-var">activityInfo</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html#ActivityInfo"><span class="hs-identifier hs-type">ActivityInfo</span></a></span><span>
+</span><span id="line-147"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-148"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680168816"><span id="local-6989586621680168826"><span id="local-6989586621680168830"><span class="annot"><span class="annottext">Int -&gt; ExecuteActivityInput -&gt; ShowS
+[ExecuteActivityInput] -&gt; ShowS
+ExecuteActivityInput -&gt; String
+(Int -&gt; ExecuteActivityInput -&gt; ShowS)
+-&gt; (ExecuteActivityInput -&gt; String)
+-&gt; ([ExecuteActivityInput] -&gt; ShowS)
+-&gt; Show ExecuteActivityInput
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; ExecuteActivityInput -&gt; ShowS
+showsPrec :: Int -&gt; ExecuteActivityInput -&gt; ShowS
+$cshow :: ExecuteActivityInput -&gt; String
+show :: ExecuteActivityInput -&gt; String
+$cshowList :: [ExecuteActivityInput] -&gt; ShowS
+showList :: [ExecuteActivityInput] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-149"></span><span>
+</span><span id="line-150"></span><span>
+</span><span id="line-151"></span><span class="annot"><span class="hs-comment">-- | Controls at which point to report back when a child workflow is cancelled.</span></span><span>
+</span><span id="line-152"></span><span class="hs-keyword">data</span><span> </span><span id="ChildWorkflowCancellationType"><span class="annot"><a href="Temporal.Workflow.Types.html#ChildWorkflowCancellationType"><span class="hs-identifier hs-var">ChildWorkflowCancellationType</span></a></span></span><span>
+</span><span id="line-153"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-comment">-- |  Do not request cancellation of the child workflow if already scheduled</span></span><span>
+</span><span id="line-154"></span><span>    </span><span id="ChildWorkflowCancellationAbandon"><span class="annot"><a href="Temporal.Workflow.Types.html#ChildWorkflowCancellationAbandon"><span class="hs-identifier hs-var">ChildWorkflowCancellationAbandon</span></a></span></span><span>
+</span><span id="line-155"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-comment">-- | Initiate a cancellation request and immediately report cancellation to the parent workflow</span></span><span>
+</span><span id="line-156"></span><span>    </span><span id="ChildWorkflowCancellationTryCancel"><span class="annot"><a href="Temporal.Workflow.Types.html#ChildWorkflowCancellationTryCancel"><span class="hs-identifier hs-var">ChildWorkflowCancellationTryCancel</span></a></span></span><span>
+</span><span id="line-157"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-comment">-- | Wait for child cancellation completion.</span></span><span>
+</span><span id="line-158"></span><span>    </span><span id="ChildWorkflowCancellationWaitCancellationCompleted"><span class="annot"><a href="Temporal.Workflow.Types.html#ChildWorkflowCancellationWaitCancellationCompleted"><span class="hs-identifier hs-var">ChildWorkflowCancellationWaitCancellationCompleted</span></a></span></span><span>
+</span><span id="line-159"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-comment">-- | Request cancellation of the child and wait for confirmation that the request was received.</span></span><span>
+</span><span id="line-160"></span><span>    </span><span id="ChildWorkflowCancellationWaitCancellationRequested"><span class="annot"><a href="Temporal.Workflow.Types.html#ChildWorkflowCancellationWaitCancellationRequested"><span class="hs-identifier hs-var">ChildWorkflowCancellationWaitCancellationRequested</span></a></span></span><span>
+</span><span id="line-161"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680168837"><span id="local-6989586621680168839"><span id="local-6989586621680168843"><span class="annot"><span class="annottext">Int -&gt; ChildWorkflowCancellationType -&gt; ShowS
+[ChildWorkflowCancellationType] -&gt; ShowS
+ChildWorkflowCancellationType -&gt; String
+(Int -&gt; ChildWorkflowCancellationType -&gt; ShowS)
+-&gt; (ChildWorkflowCancellationType -&gt; String)
+-&gt; ([ChildWorkflowCancellationType] -&gt; ShowS)
+-&gt; Show ChildWorkflowCancellationType
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; ChildWorkflowCancellationType -&gt; ShowS
+showsPrec :: Int -&gt; ChildWorkflowCancellationType -&gt; ShowS
+$cshow :: ChildWorkflowCancellationType -&gt; String
+show :: ChildWorkflowCancellationType -&gt; String
+$cshowList :: [ChildWorkflowCancellationType] -&gt; ShowS
+showList :: [ChildWorkflowCancellationType] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680168846"><span id="local-6989586621680168850"><span class="annot"><span class="annottext">ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; Bool
+(ChildWorkflowCancellationType
+ -&gt; ChildWorkflowCancellationType -&gt; Bool)
+-&gt; (ChildWorkflowCancellationType
+    -&gt; ChildWorkflowCancellationType -&gt; Bool)
+-&gt; Eq ChildWorkflowCancellationType
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; Bool
+== :: ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; Bool
+$c/= :: ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; Bool
+/= :: ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680168856"><span id="local-6989586621680168860"><span id="local-6989586621680168864"><span id="local-6989586621680168868"><span id="local-6989586621680168871"><span id="local-6989586621680168874"><span id="local-6989586621680168877"><span class="annot"><span class="annottext">Eq ChildWorkflowCancellationType
+Eq ChildWorkflowCancellationType =&gt;
+(ChildWorkflowCancellationType
+ -&gt; ChildWorkflowCancellationType -&gt; Ordering)
+-&gt; (ChildWorkflowCancellationType
+    -&gt; ChildWorkflowCancellationType -&gt; Bool)
+-&gt; (ChildWorkflowCancellationType
+    -&gt; ChildWorkflowCancellationType -&gt; Bool)
+-&gt; (ChildWorkflowCancellationType
+    -&gt; ChildWorkflowCancellationType -&gt; Bool)
+-&gt; (ChildWorkflowCancellationType
+    -&gt; ChildWorkflowCancellationType -&gt; Bool)
+-&gt; (ChildWorkflowCancellationType
+    -&gt; ChildWorkflowCancellationType -&gt; ChildWorkflowCancellationType)
+-&gt; (ChildWorkflowCancellationType
+    -&gt; ChildWorkflowCancellationType -&gt; ChildWorkflowCancellationType)
+-&gt; Ord ChildWorkflowCancellationType
+ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; Bool
+ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; Ordering
+ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; ChildWorkflowCancellationType
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; Ordering
+compare :: ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; Ordering
+$c&lt; :: ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; Bool
+&lt; :: ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; Bool
+$c&lt;= :: ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; Bool
+&lt;= :: ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; Bool
+$c&gt; :: ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; Bool
+&gt; :: ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; Bool
+$c&gt;= :: ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; Bool
+&gt;= :: ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; Bool
+$cmax :: ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; ChildWorkflowCancellationType
+max :: ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; ChildWorkflowCancellationType
+$cmin :: ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; ChildWorkflowCancellationType
+min :: ChildWorkflowCancellationType
+-&gt; ChildWorkflowCancellationType -&gt; ChildWorkflowCancellationType
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680168885"><span id="local-6989586621680168892"><span class="annot"><span class="annottext">(forall (m :: * -&gt; *).
+ Quote m =&gt;
+ ChildWorkflowCancellationType -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *).
+    Quote m =&gt;
+    ChildWorkflowCancellationType
+    -&gt; Code m ChildWorkflowCancellationType)
+-&gt; Lift ChildWorkflowCancellationType
+forall t.
+(forall (m :: * -&gt; *). Quote m =&gt; t -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *). Quote m =&gt; t -&gt; Code m t) -&gt; Lift t
+forall (m :: * -&gt; *).
+Quote m =&gt;
+ChildWorkflowCancellationType -&gt; m Exp
+forall (m :: * -&gt; *).
+Quote m =&gt;
+ChildWorkflowCancellationType
+-&gt; Code m ChildWorkflowCancellationType
+$clift :: forall (m :: * -&gt; *).
+Quote m =&gt;
+ChildWorkflowCancellationType -&gt; m Exp
+lift :: forall (m :: * -&gt; *).
+Quote m =&gt;
+ChildWorkflowCancellationType -&gt; m Exp
+$cliftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+ChildWorkflowCancellationType
+-&gt; Code m ChildWorkflowCancellationType
+liftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+ChildWorkflowCancellationType
+-&gt; Code m ChildWorkflowCancellationType
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Lift</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680168902"><span id="local-6989586621680168904"><span id="local-6989586621680168906"><span id="local-6989586621680168908"><span id="local-6989586621680168910"><span id="local-6989586621680168916"><span id="local-6989586621680168921"><span id="local-6989586621680168924"><span id="local-6989586621680168927"><span id="local-6989586621680168930"><span id="local-6989586621680168933"><span id="local-6989586621680168936"><span id="local-6989586621680168941"><span id="local-6989586621680168946"><span class="annot"><span class="annottext">Typeable ChildWorkflowCancellationType
+Typeable ChildWorkflowCancellationType =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g)
+ -&gt; ChildWorkflowCancellationType
+ -&gt; c ChildWorkflowCancellationType)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r)
+    -&gt; Constr
+    -&gt; c ChildWorkflowCancellationType)
+-&gt; (ChildWorkflowCancellationType -&gt; Constr)
+-&gt; (ChildWorkflowCancellationType -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d))
+    -&gt; Maybe (c ChildWorkflowCancellationType))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e))
+    -&gt; Maybe (c ChildWorkflowCancellationType))
+-&gt; ((forall b. Data b =&gt; b -&gt; b)
+    -&gt; ChildWorkflowCancellationType -&gt; ChildWorkflowCancellationType)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r)
+    -&gt; r
+    -&gt; (forall d. Data d =&gt; d -&gt; r')
+    -&gt; ChildWorkflowCancellationType
+    -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r)
+    -&gt; r
+    -&gt; (forall d. Data d =&gt; d -&gt; r')
+    -&gt; ChildWorkflowCancellationType
+    -&gt; r)
+-&gt; (forall u.
+    (forall d. Data d =&gt; d -&gt; u)
+    -&gt; ChildWorkflowCancellationType -&gt; [u])
+-&gt; (forall u.
+    Int
+    -&gt; (forall d. Data d =&gt; d -&gt; u)
+    -&gt; ChildWorkflowCancellationType
+    -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; ChildWorkflowCancellationType
+    -&gt; m ChildWorkflowCancellationType)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; ChildWorkflowCancellationType
+    -&gt; m ChildWorkflowCancellationType)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; ChildWorkflowCancellationType
+    -&gt; m ChildWorkflowCancellationType)
+-&gt; Data ChildWorkflowCancellationType
+ChildWorkflowCancellationType -&gt; Constr
+ChildWorkflowCancellationType -&gt; DataType
+(forall b. Data b =&gt; b -&gt; b)
+-&gt; ChildWorkflowCancellationType -&gt; ChildWorkflowCancellationType
+forall a.
+Typeable a =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; a -&gt; c a)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c a)
+-&gt; (a -&gt; Constr)
+-&gt; (a -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c a))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c a))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; a -&gt; a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; [u])
+-&gt; (forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; Data a
+forall u.
+Int
+-&gt; (forall d. Data d =&gt; d -&gt; u)
+-&gt; ChildWorkflowCancellationType
+-&gt; u
+forall u.
+(forall d. Data d =&gt; d -&gt; u)
+-&gt; ChildWorkflowCancellationType -&gt; [u]
+forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r
+-&gt; (forall d. Data d =&gt; d -&gt; r')
+-&gt; ChildWorkflowCancellationType
+-&gt; r
+forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r
+-&gt; (forall d. Data d =&gt; d -&gt; r')
+-&gt; ChildWorkflowCancellationType
+-&gt; r
+forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ChildWorkflowCancellationType -&gt; m ChildWorkflowCancellationType
+forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ChildWorkflowCancellationType -&gt; m ChildWorkflowCancellationType
+forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r)
+-&gt; Constr
+-&gt; c ChildWorkflowCancellationType
+forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g)
+-&gt; ChildWorkflowCancellationType
+-&gt; c ChildWorkflowCancellationType
+forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d))
+-&gt; Maybe (c ChildWorkflowCancellationType)
+forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c ChildWorkflowCancellationType)
+$cgfoldl :: forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g)
+-&gt; ChildWorkflowCancellationType
+-&gt; c ChildWorkflowCancellationType
+gfoldl :: forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g)
+-&gt; ChildWorkflowCancellationType
+-&gt; c ChildWorkflowCancellationType
+$cgunfold :: forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r)
+-&gt; Constr
+-&gt; c ChildWorkflowCancellationType
+gunfold :: forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r)
+-&gt; Constr
+-&gt; c ChildWorkflowCancellationType
+$ctoConstr :: ChildWorkflowCancellationType -&gt; Constr
+toConstr :: ChildWorkflowCancellationType -&gt; Constr
+$cdataTypeOf :: ChildWorkflowCancellationType -&gt; DataType
+dataTypeOf :: ChildWorkflowCancellationType -&gt; DataType
+$cdataCast1 :: forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d))
+-&gt; Maybe (c ChildWorkflowCancellationType)
+dataCast1 :: forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d))
+-&gt; Maybe (c ChildWorkflowCancellationType)
+$cdataCast2 :: forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c ChildWorkflowCancellationType)
+dataCast2 :: forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c ChildWorkflowCancellationType)
+$cgmapT :: (forall b. Data b =&gt; b -&gt; b)
+-&gt; ChildWorkflowCancellationType -&gt; ChildWorkflowCancellationType
+gmapT :: (forall b. Data b =&gt; b -&gt; b)
+-&gt; ChildWorkflowCancellationType -&gt; ChildWorkflowCancellationType
+$cgmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r
+-&gt; (forall d. Data d =&gt; d -&gt; r')
+-&gt; ChildWorkflowCancellationType
+-&gt; r
+gmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r
+-&gt; (forall d. Data d =&gt; d -&gt; r')
+-&gt; ChildWorkflowCancellationType
+-&gt; r
+$cgmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r
+-&gt; (forall d. Data d =&gt; d -&gt; r')
+-&gt; ChildWorkflowCancellationType
+-&gt; r
+gmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r
+-&gt; (forall d. Data d =&gt; d -&gt; r')
+-&gt; ChildWorkflowCancellationType
+-&gt; r
+$cgmapQ :: forall u.
+(forall d. Data d =&gt; d -&gt; u)
+-&gt; ChildWorkflowCancellationType -&gt; [u]
+gmapQ :: forall u.
+(forall d. Data d =&gt; d -&gt; u)
+-&gt; ChildWorkflowCancellationType -&gt; [u]
+$cgmapQi :: forall u.
+Int
+-&gt; (forall d. Data d =&gt; d -&gt; u)
+-&gt; ChildWorkflowCancellationType
+-&gt; u
+gmapQi :: forall u.
+Int
+-&gt; (forall d. Data d =&gt; d -&gt; u)
+-&gt; ChildWorkflowCancellationType
+-&gt; u
+$cgmapM :: forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ChildWorkflowCancellationType -&gt; m ChildWorkflowCancellationType
+gmapM :: forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ChildWorkflowCancellationType -&gt; m ChildWorkflowCancellationType
+$cgmapMp :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ChildWorkflowCancellationType -&gt; m ChildWorkflowCancellationType
+gmapMp :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ChildWorkflowCancellationType -&gt; m ChildWorkflowCancellationType
+$cgmapMo :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ChildWorkflowCancellationType -&gt; m ChildWorkflowCancellationType
+gmapMo :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ChildWorkflowCancellationType -&gt; m ChildWorkflowCancellationType
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-162"></span><span>
+</span><span id="line-163"></span><span>
+</span><span id="line-164"></span><span class="annot"><a href="Temporal.Workflow.Types.html#childWorkflowCancellationTypeToProto"><span class="hs-identifier hs-type">childWorkflowCancellationTypeToProto</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html#ChildWorkflowCancellationType"><span class="hs-identifier hs-type">ChildWorkflowCancellationType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ChildWorkflow.ChildWorkflowCancellationType</span></span><span>
+</span><span id="line-165"></span><span id="childWorkflowCancellationTypeToProto"><span class="annot"><span class="annottext">childWorkflowCancellationTypeToProto :: ChildWorkflowCancellationType -&gt; ChildWorkflowCancellationType
+</span><a href="Temporal.Workflow.Types.html#childWorkflowCancellationTypeToProto"><span class="hs-identifier hs-var hs-var">childWorkflowCancellationTypeToProto</span></a></span></span><span> </span><span class="annot"><span class="annottext">ChildWorkflowCancellationType
+</span><a href="Temporal.Workflow.Types.html#ChildWorkflowCancellationAbandon"><span class="hs-identifier hs-var">ChildWorkflowCancellationAbandon</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ChildWorkflowCancellationType
+</span><span class="hs-identifier hs-var">ChildWorkflow.ABANDON</span></span><span>
+</span><span id="line-166"></span><span class="annot"><a href="Temporal.Workflow.Types.html#childWorkflowCancellationTypeToProto"><span class="hs-identifier hs-var">childWorkflowCancellationTypeToProto</span></a></span><span> </span><span class="annot"><span class="annottext">ChildWorkflowCancellationType
+</span><a href="Temporal.Workflow.Types.html#ChildWorkflowCancellationTryCancel"><span class="hs-identifier hs-var">ChildWorkflowCancellationTryCancel</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ChildWorkflowCancellationType
+</span><span class="hs-identifier hs-var">ChildWorkflow.TRY_CANCEL</span></span><span>
+</span><span id="line-167"></span><span class="annot"><a href="Temporal.Workflow.Types.html#childWorkflowCancellationTypeToProto"><span class="hs-identifier hs-var">childWorkflowCancellationTypeToProto</span></a></span><span> </span><span class="annot"><span class="annottext">ChildWorkflowCancellationType
+</span><a href="Temporal.Workflow.Types.html#ChildWorkflowCancellationWaitCancellationCompleted"><span class="hs-identifier hs-var">ChildWorkflowCancellationWaitCancellationCompleted</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ChildWorkflowCancellationType
+</span><span class="hs-identifier hs-var">ChildWorkflow.WAIT_CANCELLATION_COMPLETED</span></span><span>
+</span><span id="line-168"></span><span class="annot"><a href="Temporal.Workflow.Types.html#childWorkflowCancellationTypeToProto"><span class="hs-identifier hs-var">childWorkflowCancellationTypeToProto</span></a></span><span> </span><span class="annot"><span class="annottext">ChildWorkflowCancellationType
+</span><a href="Temporal.Workflow.Types.html#ChildWorkflowCancellationWaitCancellationRequested"><span class="hs-identifier hs-var">ChildWorkflowCancellationWaitCancellationRequested</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ChildWorkflowCancellationType
+</span><span class="hs-identifier hs-var">ChildWorkflow.WAIT_CANCELLATION_REQUESTED</span></span><span>
+</span><span id="line-169"></span><span>
+</span><span id="line-170"></span><span>
+</span><span id="line-171"></span><span class="annot"><span class="hs-comment">{- | Used by the service to determine the fate of a child workflow
+in case its parent is closed.
+-}</span></span><span>
+</span><span id="line-174"></span><span class="hs-keyword">data</span><span> </span><span id="ParentClosePolicy"><span class="annot"><a href="Temporal.Workflow.Types.html#ParentClosePolicy"><span class="hs-identifier hs-var">ParentClosePolicy</span></a></span></span><span>
+</span><span id="line-175"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-comment">-- | Lets the server set the default.</span></span><span>
+</span><span id="line-176"></span><span>    </span><span id="ParentClosePolicyUnspecified"><span class="annot"><a href="Temporal.Workflow.Types.html#ParentClosePolicyUnspecified"><span class="hs-identifier hs-var">ParentClosePolicyUnspecified</span></a></span></span><span>
+</span><span id="line-177"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-comment">-- | Terminate the child workflow.</span></span><span>
+</span><span id="line-178"></span><span>    </span><span id="ParentClosePolicyTerminate"><span class="annot"><a href="Temporal.Workflow.Types.html#ParentClosePolicyTerminate"><span class="hs-identifier hs-var">ParentClosePolicyTerminate</span></a></span></span><span>
+</span><span id="line-179"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-comment">-- | Do not terminate the child workflow. The child workflow continues to run.</span></span><span>
+</span><span id="line-180"></span><span>    </span><span id="ParentClosePolicyAbandon"><span class="annot"><a href="Temporal.Workflow.Types.html#ParentClosePolicyAbandon"><span class="hs-identifier hs-var">ParentClosePolicyAbandon</span></a></span></span><span>
+</span><span id="line-181"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-comment">-- | Request cancellation on the child workflow.</span></span><span>
+</span><span id="line-182"></span><span>    </span><span id="ParentClosePolicyRequestCancel"><span class="annot"><a href="Temporal.Workflow.Types.html#ParentClosePolicyRequestCancel"><span class="hs-identifier hs-var">ParentClosePolicyRequestCancel</span></a></span></span><span>
+</span><span id="line-183"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680168960"><span id="local-6989586621680168964"><span class="annot"><span class="annottext">ParentClosePolicy -&gt; ParentClosePolicy -&gt; Bool
+(ParentClosePolicy -&gt; ParentClosePolicy -&gt; Bool)
+-&gt; (ParentClosePolicy -&gt; ParentClosePolicy -&gt; Bool)
+-&gt; Eq ParentClosePolicy
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: ParentClosePolicy -&gt; ParentClosePolicy -&gt; Bool
+== :: ParentClosePolicy -&gt; ParentClosePolicy -&gt; Bool
+$c/= :: ParentClosePolicy -&gt; ParentClosePolicy -&gt; Bool
+/= :: ParentClosePolicy -&gt; ParentClosePolicy -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680168970"><span id="local-6989586621680168974"><span id="local-6989586621680168978"><span id="local-6989586621680168982"><span id="local-6989586621680168985"><span id="local-6989586621680168988"><span id="local-6989586621680168991"><span class="annot"><span class="annottext">Eq ParentClosePolicy
+Eq ParentClosePolicy =&gt;
+(ParentClosePolicy -&gt; ParentClosePolicy -&gt; Ordering)
+-&gt; (ParentClosePolicy -&gt; ParentClosePolicy -&gt; Bool)
+-&gt; (ParentClosePolicy -&gt; ParentClosePolicy -&gt; Bool)
+-&gt; (ParentClosePolicy -&gt; ParentClosePolicy -&gt; Bool)
+-&gt; (ParentClosePolicy -&gt; ParentClosePolicy -&gt; Bool)
+-&gt; (ParentClosePolicy -&gt; ParentClosePolicy -&gt; ParentClosePolicy)
+-&gt; (ParentClosePolicy -&gt; ParentClosePolicy -&gt; ParentClosePolicy)
+-&gt; Ord ParentClosePolicy
+ParentClosePolicy -&gt; ParentClosePolicy -&gt; Bool
+ParentClosePolicy -&gt; ParentClosePolicy -&gt; Ordering
+ParentClosePolicy -&gt; ParentClosePolicy -&gt; ParentClosePolicy
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: ParentClosePolicy -&gt; ParentClosePolicy -&gt; Ordering
+compare :: ParentClosePolicy -&gt; ParentClosePolicy -&gt; Ordering
+$c&lt; :: ParentClosePolicy -&gt; ParentClosePolicy -&gt; Bool
+&lt; :: ParentClosePolicy -&gt; ParentClosePolicy -&gt; Bool
+$c&lt;= :: ParentClosePolicy -&gt; ParentClosePolicy -&gt; Bool
+&lt;= :: ParentClosePolicy -&gt; ParentClosePolicy -&gt; Bool
+$c&gt; :: ParentClosePolicy -&gt; ParentClosePolicy -&gt; Bool
+&gt; :: ParentClosePolicy -&gt; ParentClosePolicy -&gt; Bool
+$c&gt;= :: ParentClosePolicy -&gt; ParentClosePolicy -&gt; Bool
+&gt;= :: ParentClosePolicy -&gt; ParentClosePolicy -&gt; Bool
+$cmax :: ParentClosePolicy -&gt; ParentClosePolicy -&gt; ParentClosePolicy
+max :: ParentClosePolicy -&gt; ParentClosePolicy -&gt; ParentClosePolicy
+$cmin :: ParentClosePolicy -&gt; ParentClosePolicy -&gt; ParentClosePolicy
+min :: ParentClosePolicy -&gt; ParentClosePolicy -&gt; ParentClosePolicy
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680168994"><span id="local-6989586621680168996"><span id="local-6989586621680169000"><span class="annot"><span class="annottext">Int -&gt; ParentClosePolicy -&gt; ShowS
+[ParentClosePolicy] -&gt; ShowS
+ParentClosePolicy -&gt; String
+(Int -&gt; ParentClosePolicy -&gt; ShowS)
+-&gt; (ParentClosePolicy -&gt; String)
+-&gt; ([ParentClosePolicy] -&gt; ShowS)
+-&gt; Show ParentClosePolicy
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; ParentClosePolicy -&gt; ShowS
+showsPrec :: Int -&gt; ParentClosePolicy -&gt; ShowS
+$cshow :: ParentClosePolicy -&gt; String
+show :: ParentClosePolicy -&gt; String
+$cshowList :: [ParentClosePolicy] -&gt; ShowS
+showList :: [ParentClosePolicy] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680169003"><span id="local-6989586621680169010"><span class="annot"><span class="annottext">(forall (m :: * -&gt; *). Quote m =&gt; ParentClosePolicy -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *).
+    Quote m =&gt;
+    ParentClosePolicy -&gt; Code m ParentClosePolicy)
+-&gt; Lift ParentClosePolicy
+forall t.
+(forall (m :: * -&gt; *). Quote m =&gt; t -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *). Quote m =&gt; t -&gt; Code m t) -&gt; Lift t
+forall (m :: * -&gt; *). Quote m =&gt; ParentClosePolicy -&gt; m Exp
+forall (m :: * -&gt; *).
+Quote m =&gt;
+ParentClosePolicy -&gt; Code m ParentClosePolicy
+$clift :: forall (m :: * -&gt; *). Quote m =&gt; ParentClosePolicy -&gt; m Exp
+lift :: forall (m :: * -&gt; *). Quote m =&gt; ParentClosePolicy -&gt; m Exp
+$cliftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+ParentClosePolicy -&gt; Code m ParentClosePolicy
+liftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+ParentClosePolicy -&gt; Code m ParentClosePolicy
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Lift</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680169020"><span id="local-6989586621680169022"><span id="local-6989586621680169024"><span id="local-6989586621680169026"><span id="local-6989586621680169028"><span id="local-6989586621680169034"><span id="local-6989586621680169039"><span id="local-6989586621680169042"><span id="local-6989586621680169045"><span id="local-6989586621680169048"><span id="local-6989586621680169051"><span id="local-6989586621680169054"><span id="local-6989586621680169059"><span id="local-6989586621680169064"><span class="annot"><span class="annottext">Typeable ParentClosePolicy
+Typeable ParentClosePolicy =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g)
+ -&gt; ParentClosePolicy
+ -&gt; c ParentClosePolicy)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c ParentClosePolicy)
+-&gt; (ParentClosePolicy -&gt; Constr)
+-&gt; (ParentClosePolicy -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c ParentClosePolicy))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e))
+    -&gt; Maybe (c ParentClosePolicy))
+-&gt; ((forall b. Data b =&gt; b -&gt; b)
+    -&gt; ParentClosePolicy -&gt; ParentClosePolicy)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ParentClosePolicy -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ParentClosePolicy -&gt; r)
+-&gt; (forall u.
+    (forall d. Data d =&gt; d -&gt; u) -&gt; ParentClosePolicy -&gt; [u])
+-&gt; (forall u.
+    Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; ParentClosePolicy -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; ParentClosePolicy -&gt; m ParentClosePolicy)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; ParentClosePolicy -&gt; m ParentClosePolicy)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; ParentClosePolicy -&gt; m ParentClosePolicy)
+-&gt; Data ParentClosePolicy
+ParentClosePolicy -&gt; Constr
+ParentClosePolicy -&gt; DataType
+(forall b. Data b =&gt; b -&gt; b)
+-&gt; ParentClosePolicy -&gt; ParentClosePolicy
+forall a.
+Typeable a =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; a -&gt; c a)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c a)
+-&gt; (a -&gt; Constr)
+-&gt; (a -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c a))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c a))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; a -&gt; a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; [u])
+-&gt; (forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; Data a
+forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; ParentClosePolicy -&gt; u
+forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; ParentClosePolicy -&gt; [u]
+forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ParentClosePolicy -&gt; r
+forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ParentClosePolicy -&gt; r
+forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ParentClosePolicy -&gt; m ParentClosePolicy
+forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ParentClosePolicy -&gt; m ParentClosePolicy
+forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c ParentClosePolicy
+forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; ParentClosePolicy -&gt; c ParentClosePolicy
+forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c ParentClosePolicy)
+forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c ParentClosePolicy)
+$cgfoldl :: forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; ParentClosePolicy -&gt; c ParentClosePolicy
+gfoldl :: forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; ParentClosePolicy -&gt; c ParentClosePolicy
+$cgunfold :: forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c ParentClosePolicy
+gunfold :: forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c ParentClosePolicy
+$ctoConstr :: ParentClosePolicy -&gt; Constr
+toConstr :: ParentClosePolicy -&gt; Constr
+$cdataTypeOf :: ParentClosePolicy -&gt; DataType
+dataTypeOf :: ParentClosePolicy -&gt; DataType
+$cdataCast1 :: forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c ParentClosePolicy)
+dataCast1 :: forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c ParentClosePolicy)
+$cdataCast2 :: forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c ParentClosePolicy)
+dataCast2 :: forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c ParentClosePolicy)
+$cgmapT :: (forall b. Data b =&gt; b -&gt; b)
+-&gt; ParentClosePolicy -&gt; ParentClosePolicy
+gmapT :: (forall b. Data b =&gt; b -&gt; b)
+-&gt; ParentClosePolicy -&gt; ParentClosePolicy
+$cgmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ParentClosePolicy -&gt; r
+gmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ParentClosePolicy -&gt; r
+$cgmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ParentClosePolicy -&gt; r
+gmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ParentClosePolicy -&gt; r
+$cgmapQ :: forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; ParentClosePolicy -&gt; [u]
+gmapQ :: forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; ParentClosePolicy -&gt; [u]
+$cgmapQi :: forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; ParentClosePolicy -&gt; u
+gmapQi :: forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; ParentClosePolicy -&gt; u
+$cgmapM :: forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ParentClosePolicy -&gt; m ParentClosePolicy
+gmapM :: forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ParentClosePolicy -&gt; m ParentClosePolicy
+$cgmapMp :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ParentClosePolicy -&gt; m ParentClosePolicy
+gmapMp :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ParentClosePolicy -&gt; m ParentClosePolicy
+$cgmapMo :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ParentClosePolicy -&gt; m ParentClosePolicy
+gmapMo :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ParentClosePolicy -&gt; m ParentClosePolicy
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-184"></span><span>
+</span><span id="line-185"></span><span>
+</span><span id="line-186"></span><span class="annot"><a href="Temporal.Workflow.Types.html#parentClosePolicyToProto"><span class="hs-identifier hs-type">parentClosePolicyToProto</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html#ParentClosePolicy"><span class="hs-identifier hs-type">ParentClosePolicy</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ChildWorkflow.ParentClosePolicy</span></span><span>
+</span><span id="line-187"></span><span id="parentClosePolicyToProto"><span class="annot"><span class="annottext">parentClosePolicyToProto :: ParentClosePolicy -&gt; ParentClosePolicy
+</span><a href="Temporal.Workflow.Types.html#parentClosePolicyToProto"><span class="hs-identifier hs-var hs-var">parentClosePolicyToProto</span></a></span></span><span> </span><span class="annot"><span class="annottext">ParentClosePolicy
+</span><a href="Temporal.Workflow.Types.html#ParentClosePolicyUnspecified"><span class="hs-identifier hs-var">ParentClosePolicyUnspecified</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ParentClosePolicy
+</span><span class="hs-identifier hs-var">ChildWorkflow.PARENT_CLOSE_POLICY_UNSPECIFIED</span></span><span>
+</span><span id="line-188"></span><span class="annot"><a href="Temporal.Workflow.Types.html#parentClosePolicyToProto"><span class="hs-identifier hs-var">parentClosePolicyToProto</span></a></span><span> </span><span class="annot"><span class="annottext">ParentClosePolicy
+</span><a href="Temporal.Workflow.Types.html#ParentClosePolicyTerminate"><span class="hs-identifier hs-var">ParentClosePolicyTerminate</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ParentClosePolicy
+</span><span class="hs-identifier hs-var">ChildWorkflow.PARENT_CLOSE_POLICY_TERMINATE</span></span><span>
+</span><span id="line-189"></span><span class="annot"><a href="Temporal.Workflow.Types.html#parentClosePolicyToProto"><span class="hs-identifier hs-var">parentClosePolicyToProto</span></a></span><span> </span><span class="annot"><span class="annottext">ParentClosePolicy
+</span><a href="Temporal.Workflow.Types.html#ParentClosePolicyAbandon"><span class="hs-identifier hs-var">ParentClosePolicyAbandon</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ParentClosePolicy
+</span><span class="hs-identifier hs-var">ChildWorkflow.PARENT_CLOSE_POLICY_ABANDON</span></span><span>
+</span><span id="line-190"></span><span class="annot"><a href="Temporal.Workflow.Types.html#parentClosePolicyToProto"><span class="hs-identifier hs-var">parentClosePolicyToProto</span></a></span><span> </span><span class="annot"><span class="annottext">ParentClosePolicy
+</span><a href="Temporal.Workflow.Types.html#ParentClosePolicyRequestCancel"><span class="hs-identifier hs-var">ParentClosePolicyRequestCancel</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ParentClosePolicy
+</span><span class="hs-identifier hs-var">ChildWorkflow.PARENT_CLOSE_POLICY_REQUEST_CANCEL</span></span><span>
+</span><span id="line-191"></span><span>
+</span><span id="line-192"></span><span>
+</span><span id="line-193"></span><span class="hs-keyword">data</span><span> </span><span id="StartChildWorkflowOptions"><span class="annot"><a href="Temporal.Workflow.Types.html#StartChildWorkflowOptions"><span class="hs-identifier hs-var">StartChildWorkflowOptions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="StartChildWorkflowOptions"><span class="annot"><a href="Temporal.Workflow.Types.html#StartChildWorkflowOptions"><span class="hs-identifier hs-var">StartChildWorkflowOptions</span></a></span></span><span>
+</span><span id="line-194"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="cancellationType"><span class="annot"><span class="annottext">StartChildWorkflowOptions -&gt; ChildWorkflowCancellationType
+</span><a href="Temporal.Workflow.Types.html#cancellationType"><span class="hs-identifier hs-var hs-var">cancellationType</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html#ChildWorkflowCancellationType"><span class="hs-identifier hs-type">ChildWorkflowCancellationType</span></a></span><span>
+</span><span id="line-195"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="parentClosePolicy"><span class="annot"><span class="annottext">StartChildWorkflowOptions -&gt; ParentClosePolicy
+</span><a href="Temporal.Workflow.Types.html#parentClosePolicy"><span class="hs-identifier hs-var hs-var">parentClosePolicy</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html#ParentClosePolicy"><span class="hs-identifier hs-type">ParentClosePolicy</span></a></span><span>
+</span><span id="line-196"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="timeoutOptions"><span class="annot"><span class="annottext">StartChildWorkflowOptions -&gt; TimeoutOptions
+</span><a href="Temporal.Workflow.Types.html#timeoutOptions"><span class="hs-identifier hs-var hs-var">timeoutOptions</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Common.html#TimeoutOptions"><span class="hs-identifier hs-type">TimeoutOptions</span></a></span><span>
+</span><span id="line-197"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="retryPolicy"><span class="annot"><span class="annottext">StartChildWorkflowOptions -&gt; Maybe RetryPolicy
+</span><a href="Temporal.Workflow.Types.html#retryPolicy"><span class="hs-identifier hs-var hs-var">retryPolicy</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#RetryPolicy"><span class="hs-identifier hs-type">RetryPolicy</span></a></span><span>
+</span><span id="line-198"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="cronSchedule"><span class="annot"><span class="annottext">StartChildWorkflowOptions -&gt; Maybe Text
+</span><a href="Temporal.Workflow.Types.html#cronSchedule"><span class="hs-identifier hs-var hs-var">cronSchedule</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-199"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="initialMemo"><span class="annot"><span class="annottext">StartChildWorkflowOptions -&gt; Map Text Payload
+</span><a href="Temporal.Workflow.Types.html#initialMemo"><span class="hs-identifier hs-var hs-var">initialMemo</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span>
+</span><span id="line-200"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="searchAttributes"><span class="annot"><span class="annottext">StartChildWorkflowOptions
+-&gt; Map SearchAttributeKey SearchAttributeType
+</span><a href="Temporal.Workflow.Types.html#searchAttributes"><span class="hs-identifier hs-var hs-var">searchAttributes</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeKey"><span class="hs-identifier hs-type">SearchAttributeKey</span></a></span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeType"><span class="hs-identifier hs-type">SearchAttributeType</span></a></span><span>
+</span><span id="line-201"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="headers"><span class="annot"><span class="annottext">StartChildWorkflowOptions -&gt; Map Text Payload
+</span><a href="Temporal.Workflow.Types.html#headers"><span class="hs-identifier hs-var hs-var">headers</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span>
+</span><span id="line-202"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="workflowIdReusePolicy"><span class="annot"><span class="annottext">StartChildWorkflowOptions -&gt; WorkflowIdReusePolicy
+</span><a href="Temporal.Workflow.Types.html#workflowIdReusePolicy"><span class="hs-identifier hs-var hs-var">workflowIdReusePolicy</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Common.html#WorkflowIdReusePolicy"><span class="hs-identifier hs-type">WorkflowIdReusePolicy</span></a></span><span>
+</span><span id="line-203"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="workflowId"><span class="annot"><span class="annottext">StartChildWorkflowOptions -&gt; Maybe WorkflowId
+</span><a href="Temporal.Workflow.Types.html#workflowId"><span class="hs-identifier hs-var hs-var">workflowId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#WorkflowId"><span class="hs-identifier hs-type">WorkflowId</span></a></span><span>
+</span><span id="line-204"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="taskQueue"><span class="annot"><span class="annottext">StartChildWorkflowOptions -&gt; Maybe TaskQueue
+</span><a href="Temporal.Workflow.Types.html#taskQueue"><span class="hs-identifier hs-var hs-var">taskQueue</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#TaskQueue"><span class="hs-identifier hs-type">TaskQueue</span></a></span><span>
+</span><span id="line-205"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-206"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680169086"><span id="local-6989586621680169109"><span id="local-6989586621680169113"><span class="annot"><span class="annottext">Int -&gt; StartChildWorkflowOptions -&gt; ShowS
+[StartChildWorkflowOptions] -&gt; ShowS
+StartChildWorkflowOptions -&gt; String
+(Int -&gt; StartChildWorkflowOptions -&gt; ShowS)
+-&gt; (StartChildWorkflowOptions -&gt; String)
+-&gt; ([StartChildWorkflowOptions] -&gt; ShowS)
+-&gt; Show StartChildWorkflowOptions
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; StartChildWorkflowOptions -&gt; ShowS
+showsPrec :: Int -&gt; StartChildWorkflowOptions -&gt; ShowS
+$cshow :: StartChildWorkflowOptions -&gt; String
+show :: StartChildWorkflowOptions -&gt; String
+$cshowList :: [StartChildWorkflowOptions] -&gt; ShowS
+showList :: [StartChildWorkflowOptions] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680169116"><span id="local-6989586621680169151"><span class="annot"><span class="annottext">(forall (m :: * -&gt; *).
+ Quote m =&gt;
+ StartChildWorkflowOptions -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *).
+    Quote m =&gt;
+    StartChildWorkflowOptions -&gt; Code m StartChildWorkflowOptions)
+-&gt; Lift StartChildWorkflowOptions
+forall t.
+(forall (m :: * -&gt; *). Quote m =&gt; t -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *). Quote m =&gt; t -&gt; Code m t) -&gt; Lift t
+forall (m :: * -&gt; *). Quote m =&gt; StartChildWorkflowOptions -&gt; m Exp
+forall (m :: * -&gt; *).
+Quote m =&gt;
+StartChildWorkflowOptions -&gt; Code m StartChildWorkflowOptions
+$clift :: forall (m :: * -&gt; *). Quote m =&gt; StartChildWorkflowOptions -&gt; m Exp
+lift :: forall (m :: * -&gt; *). Quote m =&gt; StartChildWorkflowOptions -&gt; m Exp
+$cliftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+StartChildWorkflowOptions -&gt; Code m StartChildWorkflowOptions
+liftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+StartChildWorkflowOptions -&gt; Code m StartChildWorkflowOptions
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Lift</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-207"></span><span>
+</span><span id="line-208"></span><span>
+</span><span id="line-209"></span><span class="annot"><a href="Temporal.Workflow.Types.html#defaultChildWorkflowOptions"><span class="hs-identifier hs-type">defaultChildWorkflowOptions</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html#StartChildWorkflowOptions"><span class="hs-identifier hs-type">StartChildWorkflowOptions</span></a></span><span>
+</span><span id="line-210"></span><span id="defaultChildWorkflowOptions"><span class="annot"><span class="annottext">defaultChildWorkflowOptions :: StartChildWorkflowOptions
+</span><a href="Temporal.Workflow.Types.html#defaultChildWorkflowOptions"><span class="hs-identifier hs-var hs-var">defaultChildWorkflowOptions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-211"></span><span>  </span><span class="annot"><a href="Temporal.Workflow.Types.html#StartChildWorkflowOptions"><span class="hs-identifier hs-type">StartChildWorkflowOptions</span></a></span><span>
+</span><span id="line-212"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">cancellationType :: ChildWorkflowCancellationType
+</span><a href="Temporal.Workflow.Types.html#cancellationType"><span class="hs-identifier hs-var">cancellationType</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ChildWorkflowCancellationType
+</span><a href="Temporal.Workflow.Types.html#ChildWorkflowCancellationAbandon"><span class="hs-identifier hs-var">ChildWorkflowCancellationAbandon</span></a></span><span>
+</span><span id="line-213"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">parentClosePolicy :: ParentClosePolicy
+</span><a href="Temporal.Workflow.Types.html#parentClosePolicy"><span class="hs-identifier hs-var">parentClosePolicy</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ParentClosePolicy
+</span><a href="Temporal.Workflow.Types.html#ParentClosePolicyUnspecified"><span class="hs-identifier hs-var">ParentClosePolicyUnspecified</span></a></span><span>
+</span><span id="line-214"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">timeoutOptions :: TimeoutOptions
+</span><a href="Temporal.Workflow.Types.html#timeoutOptions"><span class="hs-identifier hs-var">timeoutOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-215"></span><span>        </span><span class="annot"><a href="Temporal.Common.html#TimeoutOptions"><span class="hs-identifier hs-type">TimeoutOptions</span></a></span><span>
+</span><span id="line-216"></span><span>          </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">executionTimeout :: Maybe Duration
+</span><a href="Temporal.Common.html#executionTimeout"><span class="hs-identifier hs-var">executionTimeout</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Duration
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-217"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">runTimeout :: Maybe Duration
+</span><a href="Temporal.Common.html#runTimeout"><span class="hs-identifier hs-var">runTimeout</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Duration
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-218"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">taskTimeout :: Maybe Duration
+</span><a href="Temporal.Common.html#taskTimeout"><span class="hs-identifier hs-var">taskTimeout</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Duration
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-219"></span><span>          </span><span class="hs-special">}</span><span>
+</span><span id="line-220"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">retryPolicy :: Maybe RetryPolicy
+</span><a href="Temporal.Workflow.Types.html#retryPolicy"><span class="hs-identifier hs-var">retryPolicy</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe RetryPolicy
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-221"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">cronSchedule :: Maybe Text
+</span><a href="Temporal.Workflow.Types.html#cronSchedule"><span class="hs-identifier hs-var">cronSchedule</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Text
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-222"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">initialMemo :: Map Text Payload
+</span><a href="Temporal.Workflow.Types.html#initialMemo"><span class="hs-identifier hs-var">initialMemo</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map Text Payload
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-223"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">searchAttributes :: Map SearchAttributeKey SearchAttributeType
+</span><a href="Temporal.Workflow.Types.html#searchAttributes"><span class="hs-identifier hs-var">searchAttributes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map SearchAttributeKey SearchAttributeType
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-224"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">headers :: Map Text Payload
+</span><a href="Temporal.Workflow.Types.html#headers"><span class="hs-identifier hs-var">headers</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map Text Payload
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-225"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">workflowIdReusePolicy :: WorkflowIdReusePolicy
+</span><a href="Temporal.Workflow.Types.html#workflowIdReusePolicy"><span class="hs-identifier hs-var">workflowIdReusePolicy</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WorkflowIdReusePolicy
+</span><a href="Temporal.Common.html#WorkflowIdReusePolicyUnspecified"><span class="hs-identifier hs-var">WorkflowIdReusePolicyUnspecified</span></a></span><span>
+</span><span id="line-226"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">workflowId :: Maybe WorkflowId
+</span><a href="Temporal.Workflow.Types.html#workflowId"><span class="hs-identifier hs-var">workflowId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe WorkflowId
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-227"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">taskQueue :: Maybe TaskQueue
+</span><a href="Temporal.Workflow.Types.html#taskQueue"><span class="hs-identifier hs-var">taskQueue</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe TaskQueue
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-228"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-229"></span><span>
+</span><span id="line-230"></span><span>
+</span><span id="line-231"></span><span class="hs-keyword">data</span><span> </span><span id="ContinueAsNewOptions"><span class="annot"><a href="Temporal.Workflow.Types.html#ContinueAsNewOptions"><span class="hs-identifier hs-var">ContinueAsNewOptions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ContinueAsNewOptions"><span class="annot"><a href="Temporal.Workflow.Types.html#ContinueAsNewOptions"><span class="hs-identifier hs-var">ContinueAsNewOptions</span></a></span></span><span>
+</span><span id="line-232"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="taskQueue"><span class="annot"><span class="annottext">ContinueAsNewOptions -&gt; Maybe TaskQueue
+</span><a href="Temporal.Workflow.Types.html#taskQueue"><span class="hs-identifier hs-var hs-var">taskQueue</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#TaskQueue"><span class="hs-identifier hs-type">TaskQueue</span></a></span><span>
+</span><span id="line-233"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="runTimeout"><span class="annot"><span class="annottext">ContinueAsNewOptions -&gt; Maybe Duration
+</span><a href="Temporal.Workflow.Types.html#runTimeout"><span class="hs-identifier hs-var hs-var">runTimeout</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Duration.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span>
+</span><span id="line-234"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="taskTimeout"><span class="annot"><span class="annottext">ContinueAsNewOptions -&gt; Maybe Duration
+</span><a href="Temporal.Workflow.Types.html#taskTimeout"><span class="hs-identifier hs-var hs-var">taskTimeout</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Duration.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span>
+</span><span id="line-235"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="retryPolicy"><span class="annot"><span class="annottext">ContinueAsNewOptions -&gt; Maybe RetryPolicy
+</span><a href="Temporal.Workflow.Types.html#retryPolicy"><span class="hs-identifier hs-var hs-var">retryPolicy</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#RetryPolicy"><span class="hs-identifier hs-type">RetryPolicy</span></a></span><span>
+</span><span id="line-236"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="memo"><span class="annot"><span class="annottext">ContinueAsNewOptions -&gt; Map Text Payload
+</span><a href="Temporal.Workflow.Types.html#memo"><span class="hs-identifier hs-var hs-var">memo</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span>
+</span><span id="line-237"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="searchAttributes"><span class="annot"><span class="annottext">ContinueAsNewOptions -&gt; Map SearchAttributeKey SearchAttributeType
+</span><a href="Temporal.Workflow.Types.html#searchAttributes"><span class="hs-identifier hs-var hs-var">searchAttributes</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeKey"><span class="hs-identifier hs-type">SearchAttributeKey</span></a></span><span> </span><span class="annot"><a href="Temporal.SearchAttributes.html#SearchAttributeType"><span class="hs-identifier hs-type">SearchAttributeType</span></a></span><span>
+</span><span id="line-238"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="headers"><span class="annot"><span class="annottext">ContinueAsNewOptions -&gt; Map Text Payload
+</span><a href="Temporal.Workflow.Types.html#headers"><span class="hs-identifier hs-var hs-var">headers</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span>
+</span><span id="line-239"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-240"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680169202"><span id="local-6989586621680169220"><span class="annot"><span class="annottext">ContinueAsNewOptions -&gt; ContinueAsNewOptions -&gt; Bool
+(ContinueAsNewOptions -&gt; ContinueAsNewOptions -&gt; Bool)
+-&gt; (ContinueAsNewOptions -&gt; ContinueAsNewOptions -&gt; Bool)
+-&gt; Eq ContinueAsNewOptions
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: ContinueAsNewOptions -&gt; ContinueAsNewOptions -&gt; Bool
+== :: ContinueAsNewOptions -&gt; ContinueAsNewOptions -&gt; Bool
+$c/= :: ContinueAsNewOptions -&gt; ContinueAsNewOptions -&gt; Bool
+/= :: ContinueAsNewOptions -&gt; ContinueAsNewOptions -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680169230"><span id="local-6989586621680169247"><span id="local-6989586621680169251"><span class="annot"><span class="annottext">Int -&gt; ContinueAsNewOptions -&gt; ShowS
+[ContinueAsNewOptions] -&gt; ShowS
+ContinueAsNewOptions -&gt; String
+(Int -&gt; ContinueAsNewOptions -&gt; ShowS)
+-&gt; (ContinueAsNewOptions -&gt; String)
+-&gt; ([ContinueAsNewOptions] -&gt; ShowS)
+-&gt; Show ContinueAsNewOptions
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; ContinueAsNewOptions -&gt; ShowS
+showsPrec :: Int -&gt; ContinueAsNewOptions -&gt; ShowS
+$cshow :: ContinueAsNewOptions -&gt; String
+show :: ContinueAsNewOptions -&gt; String
+$cshowList :: [ContinueAsNewOptions] -&gt; ShowS
+showList :: [ContinueAsNewOptions] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680169254"><span id="local-6989586621680169279"><span class="annot"><span class="annottext">(forall (m :: * -&gt; *). Quote m =&gt; ContinueAsNewOptions -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *).
+    Quote m =&gt;
+    ContinueAsNewOptions -&gt; Code m ContinueAsNewOptions)
+-&gt; Lift ContinueAsNewOptions
+forall t.
+(forall (m :: * -&gt; *). Quote m =&gt; t -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *). Quote m =&gt; t -&gt; Code m t) -&gt; Lift t
+forall (m :: * -&gt; *). Quote m =&gt; ContinueAsNewOptions -&gt; m Exp
+forall (m :: * -&gt; *).
+Quote m =&gt;
+ContinueAsNewOptions -&gt; Code m ContinueAsNewOptions
+$clift :: forall (m :: * -&gt; *). Quote m =&gt; ContinueAsNewOptions -&gt; m Exp
+lift :: forall (m :: * -&gt; *). Quote m =&gt; ContinueAsNewOptions -&gt; m Exp
+$cliftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+ContinueAsNewOptions -&gt; Code m ContinueAsNewOptions
+liftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+ContinueAsNewOptions -&gt; Code m ContinueAsNewOptions
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Lift</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-241"></span><span>
+</span><span id="line-242"></span><span>
+</span><span id="line-243"></span><span class="annot"><a href="Temporal.Workflow.Types.html#defaultContinueAsNewOptions"><span class="hs-identifier hs-type">defaultContinueAsNewOptions</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Workflow.Types.html#ContinueAsNewOptions"><span class="hs-identifier hs-type">ContinueAsNewOptions</span></a></span><span>
+</span><span id="line-244"></span><span id="defaultContinueAsNewOptions"><span class="annot"><span class="annottext">defaultContinueAsNewOptions :: ContinueAsNewOptions
+</span><a href="Temporal.Workflow.Types.html#defaultContinueAsNewOptions"><span class="hs-identifier hs-var hs-var">defaultContinueAsNewOptions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-245"></span><span>  </span><span class="annot"><a href="Temporal.Workflow.Types.html#ContinueAsNewOptions"><span class="hs-identifier hs-type">ContinueAsNewOptions</span></a></span><span>
+</span><span id="line-246"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">taskQueue :: Maybe TaskQueue
+</span><a href="Temporal.Workflow.Types.html#taskQueue"><span class="hs-identifier hs-var">taskQueue</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe TaskQueue
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-247"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">runTimeout :: Maybe Duration
+</span><a href="Temporal.Workflow.Types.html#runTimeout"><span class="hs-identifier hs-var">runTimeout</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Duration
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-248"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">taskTimeout :: Maybe Duration
+</span><a href="Temporal.Workflow.Types.html#taskTimeout"><span class="hs-identifier hs-var">taskTimeout</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Duration
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-249"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">retryPolicy :: Maybe RetryPolicy
+</span><a href="Temporal.Workflow.Types.html#retryPolicy"><span class="hs-identifier hs-var">retryPolicy</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe RetryPolicy
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-250"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">memo :: Map Text Payload
+</span><a href="Temporal.Workflow.Types.html#memo"><span class="hs-identifier hs-var">memo</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map Text Payload
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-251"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">searchAttributes :: Map SearchAttributeKey SearchAttributeType
+</span><a href="Temporal.Workflow.Types.html#searchAttributes"><span class="hs-identifier hs-var">searchAttributes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map SearchAttributeKey SearchAttributeType
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-252"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">headers :: Map Text Payload
+</span><a href="Temporal.Workflow.Types.html#headers"><span class="hs-identifier hs-var">headers</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map Text Payload
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-253"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-254"></span></pre></body></html>

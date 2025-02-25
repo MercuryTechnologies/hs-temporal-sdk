@@ -1,0 +1,363 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="annot"><span class="hs-comment">-- | The internals of Workflow handles. They are exposed here primarily for interceptor implementations.</span></span><span>
+</span><span id="line-2"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html"><span class="hs-identifier">Temporal.Workflow.Unsafe.Handle</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Reader</span></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.HashMap.Strict</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">HashMap</span></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Kind</span></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Lens.Family2</span></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">ChildWorkflow</span></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow_Fields</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">ChildWorkflow</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Sdk.Core.Common.Common_Fields</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Common</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Activation</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Command</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">RequireCallStack</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Common.html"><span class="hs-identifier">Temporal.Common</span></a></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Exception.html"><span class="hs-identifier">Temporal.Exception</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Payload.html"><span class="hs-identifier">Temporal.Payload</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Instance.html"><span class="hs-identifier">Temporal.Workflow.Internal.Instance</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html"><span class="hs-identifier">Temporal.Workflow.Internal.Monad</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">UnliftIO</span></span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="annot"><span class="hs-comment">{- | Some tasks in a Workflow return a handle that can be used to wait for the task to complete.
+
+This class provides a common interface for waiting on these handles.
+-}</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">class</span><span> </span><span id="Wait"><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html#Wait"><span class="hs-identifier hs-var">Wait</span></a></span></span><span> </span><span id="local-6989586621680175679"><span class="annot"><a href="#local-6989586621680175679"><span class="hs-identifier hs-type">h</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="WaitResult"><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html#WaitResult"><span class="hs-identifier hs-var">WaitResult</span></a></span></span><span> </span><span id="local-6989586621680175679"><span class="annot"><a href="#local-6989586621680175679"><span class="hs-identifier hs-type">h</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Type</span></span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-comment">-- | Wait for a handle on an an action to complete.</span><span>
+</span><span id="line-32"></span><span>  </span><span id="wait"><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html#wait"><span class="hs-identifier hs-type">wait</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RequireCallStack</span></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680175679"><span class="hs-identifier hs-type">h</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html#WaitResult"><span class="hs-identifier hs-type">WaitResult</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175679"><span class="hs-identifier hs-type">h</span></a></span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="annot"><span class="hs-comment">{- | Some tasks in a Workflow return a handle that can be used to cancel a task.
+
+This class provides a common interface for performing cancellation on these handles.
+-}</span></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">class</span><span> </span><span id="Cancel"><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html#Cancel"><span class="hs-identifier hs-var">Cancel</span></a></span></span><span> </span><span id="local-6989586621680175689"><span class="annot"><a href="#local-6989586621680175689"><span class="hs-identifier hs-type">h</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="CancelResult"><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html#CancelResult"><span class="hs-identifier hs-var">CancelResult</span></a></span></span><span> </span><span id="local-6989586621680175689"><span class="annot"><a href="#local-6989586621680175689"><span class="hs-identifier hs-type">h</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Type</span></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-comment">-- | Signal to Temporal that a handle representing an async action should be cancelled.</span><span>
+</span><span id="line-44"></span><span>  </span><span id="cancel"><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html#cancel"><span class="hs-identifier hs-type">cancel</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RequireCallStack</span></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680175689"><span class="hs-identifier hs-type">h</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html#CancelResult"><span class="hs-identifier hs-type">CancelResult</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175689"><span class="hs-identifier hs-type">h</span></a></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680175680"><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html#Wait"><span class="hs-identifier hs-type">Wait</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#Task"><span class="hs-identifier hs-type">Task</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175680"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="WaitResult"><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html#WaitResult"><span class="hs-identifier hs-var">WaitResult</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#Task"><span class="hs-identifier hs-type">Task</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175680"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#Workflow"><span class="hs-identifier hs-type">Workflow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175680"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-49"></span><span>  </span><span id="local-6989586621680175852"><span class="annot"><span class="annottext">wait :: RequireCallStack =&gt; Task a -&gt; WaitResult (Task a)
+</span><a href="Temporal.Workflow.Unsafe.Handle.html#wait"><span class="hs-identifier hs-var hs-var hs-var">wait</span></a></span></span><span> </span><span id="local-6989586621680175853"><span class="annot"><span class="annottext">Task a
+</span><a href="#local-6989586621680175853"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-50"></span><span>    </span><span class="annot"><span class="annottext">Workflow ()
+RequireCallStack =&gt; Workflow ()
+</span><a href="Temporal.Workflow.Internal.Monad.html#updateCallStackW"><span class="hs-identifier hs-var">updateCallStackW</span></a></span><span>
+</span><span id="line-51"></span><span>    </span><span class="annot"><span class="annottext">Task a
+</span><a href="#local-6989586621680175853"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">waitAction</span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680175690"><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html#Cancel"><span class="hs-identifier hs-type">Cancel</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#Task"><span class="hs-identifier hs-type">Task</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175690"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-55"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="CancelResult"><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html#CancelResult"><span class="hs-identifier hs-var">CancelResult</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#Task"><span class="hs-identifier hs-type">Task</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175690"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#Workflow"><span class="hs-identifier hs-type">Workflow</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-56"></span><span>  </span><span id="local-6989586621680175866"><span class="annot"><span class="annottext">cancel :: RequireCallStack =&gt; Task a -&gt; CancelResult (Task a)
+</span><a href="Temporal.Workflow.Unsafe.Handle.html#cancel"><span class="hs-identifier hs-var hs-var hs-var">cancel</span></a></span></span><span> </span><span id="local-6989586621680175867"><span class="annot"><span class="annottext">Task a
+</span><a href="#local-6989586621680175867"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-57"></span><span>    </span><span class="annot"><span class="annottext">Workflow ()
+RequireCallStack =&gt; Workflow ()
+</span><a href="Temporal.Workflow.Internal.Monad.html#updateCallStackW"><span class="hs-identifier hs-var">updateCallStackW</span></a></span><span>
+</span><span id="line-58"></span><span>    </span><span class="annot"><span class="annottext">Task a
+</span><a href="#local-6989586621680175867"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">cancelAction</span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="annot"><span class="hs-comment">{- | Returns an action that can be used to await cancellation of an external workflow.
+
+Throws 'CancelExternalWorkflowFailed' if the cancellation request failed.
+-}</span></span><span>
+</span><span id="line-65"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680175693"><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html#Cancel"><span class="hs-identifier hs-type">Cancel</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ExternalWorkflowHandle"><span class="hs-identifier hs-type">ExternalWorkflowHandle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175693"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="CancelResult"><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html#CancelResult"><span class="hs-identifier hs-var">CancelResult</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ExternalWorkflowHandle"><span class="hs-identifier hs-type">ExternalWorkflowHandle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175693"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#Workflow"><span class="hs-identifier hs-type">Workflow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#Workflow"><span class="hs-identifier hs-type">Workflow</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span>  </span><span id="local-6989586621680175916"><span class="annot"><span class="annottext">cancel :: RequireCallStack =&gt;
+ExternalWorkflowHandle a -&gt; CancelResult (ExternalWorkflowHandle a)
+</span><a href="Temporal.Workflow.Unsafe.Handle.html#cancel"><span class="hs-identifier hs-var hs-var hs-var">cancel</span></a></span></span><span> </span><span id="local-6989586621680175917"><span class="annot"><span class="annottext">ExternalWorkflowHandle a
+</span><a href="#local-6989586621680175917"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">InstanceM (Workflow ()) -&gt; Workflow (Workflow ())
+forall a. RequireCallStack =&gt; InstanceM a -&gt; Workflow a
+</span><a href="Temporal.Workflow.Internal.Monad.html#ilift"><span class="hs-identifier hs-var">ilift</span></a></span><span> </span><span class="annot"><span class="annottext">(InstanceM (Workflow ()) -&gt; Workflow (Workflow ()))
+-&gt; InstanceM (Workflow ()) -&gt; Workflow (Workflow ())
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-70"></span><span>    </span><span id="local-6989586621680175919"><span class="annot"><a href="#local-6989586621680175919"><span class="hs-identifier hs-var">inst</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">InstanceM WorkflowInstance
+forall r (m :: * -&gt; *). MonadReader r m =&gt; m r
+</span><span class="hs-identifier hs-var">ask</span></span><span>
+</span><span id="line-71"></span><span>    </span><span id="local-6989586621680175921"><span class="annot"><a href="#local-6989586621680175921"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Common.html#Sequence"><span class="hs-identifier hs-type">Sequence</span></a></span><span> </span><span id="local-6989586621680175923"><span class="annot"><a href="#local-6989586621680175923"><span class="hs-identifier hs-var">sVal</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Instance.html#nextExternalSignalSequence"><span class="hs-identifier hs-type">nextExternalSignalSequence</span></a></span><span>
+</span><span id="line-72"></span><span>    </span><span id="local-6989586621680175925"><span class="annot"><a href="#local-6989586621680175925"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#newIVar"><span class="hs-identifier hs-type">newIVar</span></a></span><span>
+</span><span id="line-73"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">atomically</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">modifyTVar'</span></span><span> </span><span class="annot"><span class="hs-identifier">inst</span></span><span class="hs-operator">.</span><span class="hs-identifier">workflowSequenceMaps</span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621680175929"><span class="annot"><span class="annottext">SequenceMaps
+</span><a href="#local-6989586621680175929"><span class="hs-identifier hs-var">seqMaps</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-74"></span><span>      </span><span class="annot"><span class="annottext">SequenceMaps
+</span><a href="#local-6989586621680175929"><span class="hs-identifier hs-var">seqMaps</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#externalSignals"><span class="hs-identifier hs-var">externalSignals</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HashMap.insert</span></span><span> </span><span class="annot"><a href="#local-6989586621680175921"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175925"><span class="hs-identifier hs-type">res</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#externalSignals"><span class="hs-identifier hs-var">externalSignals</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175929"><span class="hs-identifier hs-type">seqMaps</span></a></span><span class="hs-special">)</span><span class="hs-special">}</span><span>
+</span><span id="line-75"></span><span>    </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#addCommand"><span class="hs-identifier hs-type">addCommand</span></a></span><span>
+</span><span id="line-76"></span><span>      </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">defMessage</span></span><span>
+</span><span id="line-77"></span><span>          </span><span class="annot"><span class="hs-operator hs-type">&amp;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Command.requestCancelExternalWorkflowExecution</span></span><span>
+</span><span id="line-78"></span><span>            </span><span class="annot"><span class="hs-operator hs-type">.~</span></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">defMessage</span></span><span>
+</span><span id="line-79"></span><span>                  </span><span class="annot"><span class="hs-operator hs-type">&amp;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Command.seq</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">.~</span></span><span> </span><span class="annot"><a href="#local-6989586621680175923"><span class="hs-identifier hs-type">sVal</span></a></span><span>
+</span><span id="line-80"></span><span>                  </span><span class="annot"><span class="hs-operator hs-type">&amp;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Command.workflowExecution</span></span><span>
+</span><span id="line-81"></span><span>                    </span><span class="annot"><span class="hs-operator hs-type">.~</span></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">defMessage</span></span><span>
+</span><span id="line-82"></span><span>                          </span><span class="annot"><span class="hs-operator hs-type">&amp;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Common.workflowId</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">.~</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#rawWorkflowId"><span class="hs-identifier hs-var">rawWorkflowId</span></a></span><span> </span><span class="annot"><span class="hs-identifier">h</span></span><span class="hs-operator">.</span><span class="hs-identifier">externalWorkflowWorkflowId</span><span>
+</span><span id="line-83"></span><span>                          </span><span class="annot"><span class="hs-operator hs-type">&amp;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Common.runId</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">.~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">maybe</span></span><span> </span><span class="annot"><span class="hs-string">&quot;&quot;</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#rawRunId"><span class="hs-identifier hs-var">rawRunId</span></a></span><span> </span><span class="annot"><span class="hs-identifier">h</span></span><span class="hs-operator">.</span><span class="hs-identifier">externalWorkflowRunId</span><span>
+</span><span id="line-84"></span><span>                       </span><span class="hs-special">)</span><span>
+</span><span id="line-85"></span><span>               </span><span class="hs-special">)</span><span>
+</span><span id="line-86"></span><span>      </span><span class="hs-special">)</span><span>
+</span><span id="line-87"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-88"></span><span>      </span><span id="local-6989586621680175976"><span class="annot"><a href="#local-6989586621680175976"><span class="hs-identifier hs-var">res'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#getIVar"><span class="hs-identifier hs-type">getIVar</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175925"><span class="hs-identifier hs-type">res</span></a></span><span>
+</span><span id="line-89"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621680175976"><span class="hs-identifier hs-type">res'</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">^.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Activation.maybe'failure</span></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-90"></span><span>        </span><span class="annot"><span class="annottext">Maybe Failure
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">() -&gt; Workflow ()
+forall a. a -&gt; Workflow a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-91"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621680175980"><span class="annot"><span class="annottext">Failure
+</span><a href="#local-6989586621680175980"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CancelExternalWorkflowFailed -&gt; Workflow ()
+forall e a. (HasCallStack, Exception e) =&gt; e -&gt; Workflow a
+</span><a href="Temporal.Workflow.Internal.Monad.html#throw"><span class="hs-identifier hs-var">throw</span></a></span><span> </span><span class="annot"><span class="annottext">(CancelExternalWorkflowFailed -&gt; Workflow ())
+-&gt; CancelExternalWorkflowFailed -&gt; Workflow ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Failure -&gt; CancelExternalWorkflowFailed
+</span><a href="Temporal.Exception.html#CancelExternalWorkflowFailed"><span class="hs-identifier hs-var">CancelExternalWorkflowFailed</span></a></span><span> </span><span class="annot"><span class="annottext">Failure
+</span><a href="#local-6989586621680175980"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span>
+</span><span id="line-94"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680175783"><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html#Wait"><span class="hs-identifier hs-type">Wait</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ChildWorkflowHandle"><span class="hs-identifier hs-type">ChildWorkflowHandle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175783"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-95"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="WaitResult"><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html#WaitResult"><span class="hs-identifier hs-var">WaitResult</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ChildWorkflowHandle"><span class="hs-identifier hs-type">ChildWorkflowHandle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175783"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#Workflow"><span class="hs-identifier hs-type">Workflow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175783"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-96"></span><span>  </span><span id="local-6989586621680175990"><span class="annot"><span class="annottext">wait :: RequireCallStack =&gt;
+ChildWorkflowHandle a -&gt; WaitResult (ChildWorkflowHandle a)
+</span><a href="Temporal.Workflow.Unsafe.Handle.html#wait"><span class="hs-identifier hs-var hs-var hs-var">wait</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ChildWorkflowHandle a -&gt; Workflow a
+ChildWorkflowHandle a -&gt; WaitResult (ChildWorkflowHandle a)
+forall result.
+RequireCallStack =&gt;
+ChildWorkflowHandle result -&gt; Workflow result
+</span><a href="Temporal.Workflow.Unsafe.Handle.html#waitChildWorkflowResult"><span class="hs-identifier hs-var">waitChildWorkflowResult</span></a></span><span>
+</span><span id="line-97"></span><span>
+</span><span id="line-98"></span><span>
+</span><span id="line-99"></span><span id="local-6989586621680175785"><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html#waitChildWorkflowStart"><span class="hs-identifier hs-type">waitChildWorkflowStart</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RequireCallStack</span></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ChildWorkflowHandle"><span class="hs-identifier hs-type">ChildWorkflowHandle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175785"><span class="hs-identifier hs-type">result</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#Workflow"><span class="hs-identifier hs-type">Workflow</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-100"></span><span id="waitChildWorkflowStart"><span class="annot"><span class="annottext">waitChildWorkflowStart :: forall result.
+RequireCallStack =&gt;
+ChildWorkflowHandle result -&gt; Workflow ()
+</span><a href="Temporal.Workflow.Unsafe.Handle.html#waitChildWorkflowStart"><span class="hs-identifier hs-var hs-var">waitChildWorkflowStart</span></a></span></span><span> </span><span id="local-6989586621680176001"><span class="annot"><span class="annottext">ChildWorkflowHandle result
+</span><a href="#local-6989586621680176001"><span class="hs-identifier hs-var">wfHandle</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-101"></span><span>  </span><span class="annot"><span class="annottext">Workflow ()
+RequireCallStack =&gt; Workflow ()
+</span><a href="Temporal.Workflow.Internal.Monad.html#updateCallStackW"><span class="hs-identifier hs-var">updateCallStackW</span></a></span><span>
+</span><span id="line-102"></span><span>  </span><span class="annot"><span class="annottext">IVar () -&gt; Workflow ()
+forall a. IVar a -&gt; Workflow a
+</span><a href="Temporal.Workflow.Internal.Monad.html#getIVar"><span class="hs-identifier hs-var">getIVar</span></a></span><span> </span><span class="annot"><span class="annottext">ChildWorkflowHandle result
+</span><a href="#local-6989586621680176001"><span class="hs-identifier hs-var">wfHandle</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">startHandle</span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span>
+</span><span id="line-105"></span><span id="local-6989586621680175784"><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html#waitChildWorkflowResult"><span class="hs-identifier hs-type">waitChildWorkflowResult</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RequireCallStack</span></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ChildWorkflowHandle"><span class="hs-identifier hs-type">ChildWorkflowHandle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175784"><span class="hs-identifier hs-type">result</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#Workflow"><span class="hs-identifier hs-type">Workflow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175784"><span class="hs-identifier hs-type">result</span></a></span></span><span>
+</span><span id="line-106"></span><span id="waitChildWorkflowResult"><span class="annot"><span class="annottext">waitChildWorkflowResult :: forall result.
+RequireCallStack =&gt;
+ChildWorkflowHandle result -&gt; Workflow result
+</span><a href="Temporal.Workflow.Unsafe.Handle.html#waitChildWorkflowResult"><span class="hs-identifier hs-var hs-var">waitChildWorkflowResult</span></a></span></span><span> </span><span id="local-6989586621680176048"><span class="annot"><span class="annottext">wfHandle :: ChildWorkflowHandle result
+</span><a href="#local-6989586621680176048"><span class="hs-identifier hs-var">wfHandle</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ChildWorkflowHandle"><span class="hs-identifier hs-type">ChildWorkflowHandle</span></a></span><span> </span><span class="hs-special">{</span><span id="local-6989586621680176050"><span class="annot"><span class="annottext">Payload -&gt; IO result
+childWorkflowResultConverter :: Payload -&gt; IO result
+childWorkflowResultConverter :: forall result. ChildWorkflowHandle result -&gt; Payload -&gt; IO result
+</span><a href="#local-6989586621680176050"><span class="hs-identifier hs-var hs-var">childWorkflowResultConverter</span></a></span></span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-107"></span><span>  </span><span class="annot"><span class="annottext">ChildWorkflowHandle result -&gt; Workflow ()
+forall result.
+RequireCallStack =&gt;
+ChildWorkflowHandle result -&gt; Workflow ()
+</span><a href="Temporal.Workflow.Unsafe.Handle.html#waitChildWorkflowStart"><span class="hs-identifier hs-var">waitChildWorkflowStart</span></a></span><span> </span><span class="annot"><span class="annottext">ChildWorkflowHandle result
+</span><a href="#local-6989586621680176048"><span class="hs-identifier hs-var">wfHandle</span></a></span><span> </span><span class="annot"><span class="annottext">Workflow () -&gt; Workflow result -&gt; Workflow result
+forall a b. Workflow a -&gt; Workflow b -&gt; Workflow b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; m b -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-108"></span><span>    </span><span class="annot"><span class="annottext">Workflow ()
+RequireCallStack =&gt; Workflow ()
+</span><a href="Temporal.Workflow.Internal.Monad.html#updateCallStackW"><span class="hs-identifier hs-var">updateCallStackW</span></a></span><span>
+</span><span id="line-109"></span><span>    </span><span id="local-6989586621680176052"><span class="annot"><a href="#local-6989586621680176052"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IVar ResolveChildWorkflowExecution
+-&gt; Workflow ResolveChildWorkflowExecution
+forall a. IVar a -&gt; Workflow a
+</span><a href="Temporal.Workflow.Internal.Monad.html#getIVar"><span class="hs-identifier hs-var">getIVar</span></a></span><span> </span><span class="annot"><span class="annottext">ChildWorkflowHandle result
+</span><a href="#local-6989586621680176048"><span class="hs-identifier hs-var">wfHandle</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">resultHandle</span><span>
+</span><span id="line-110"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621680176052"><span class="hs-identifier hs-type">res</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">^.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Activation.result</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ChildWorkflow.maybe'status</span></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-111"></span><span>      </span><span class="annot"><span class="annottext">Maybe ChildWorkflowResult'Status
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">InstanceM result -&gt; Workflow result
+forall a. RequireCallStack =&gt; InstanceM a -&gt; Workflow a
+</span><a href="Temporal.Workflow.Internal.Monad.html#ilift"><span class="hs-identifier hs-var">ilift</span></a></span><span> </span><span class="annot"><span class="annottext">(InstanceM result -&gt; Workflow result)
+-&gt; InstanceM result -&gt; Workflow result
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">RuntimeError -&gt; InstanceM result
+forall (m :: * -&gt; *) e a. (MonadIO m, Exception e) =&gt; e -&gt; m a
+</span><span class="hs-identifier hs-var">throwIO</span></span><span> </span><span class="annot"><span class="annottext">(RuntimeError -&gt; InstanceM result)
+-&gt; RuntimeError -&gt; InstanceM result
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; RuntimeError
+</span><a href="Temporal.Exception.html#RuntimeError"><span class="hs-identifier hs-var">RuntimeError</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Unrecognized child workflow result status&quot;</span></span><span>
+</span><span id="line-112"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621680176058"><span class="annot"><span class="annottext">ChildWorkflowResult'Status
+</span><a href="#local-6989586621680176058"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">ChildWorkflowResult'Status
+</span><a href="#local-6989586621680176058"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-113"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">ChildWorkflow.ChildWorkflowResult'Completed</span></span><span> </span><span id="local-6989586621680176060"><span class="annot"><span class="annottext">Success
+</span><a href="#local-6989586621680176060"><span class="hs-identifier hs-var">res'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-114"></span><span>          </span><span id="local-6989586621680176061"><span class="annot"><a href="#local-6989586621680176061"><span class="hs-identifier hs-var">eVal</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">InstanceM (Either SomeException result)
+-&gt; Workflow (Either SomeException result)
+forall a. RequireCallStack =&gt; InstanceM a -&gt; Workflow a
+</span><a href="Temporal.Workflow.Internal.Monad.html#ilift"><span class="hs-identifier hs-var">ilift</span></a></span><span> </span><span class="annot"><span class="annottext">(InstanceM (Either SomeException result)
+ -&gt; Workflow (Either SomeException result))
+-&gt; InstanceM (Either SomeException result)
+-&gt; Workflow (Either SomeException result)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IO (Either SomeException result)
+-&gt; InstanceM (Either SomeException result)
+forall a. IO a -&gt; InstanceM a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO (Either SomeException result)
+ -&gt; InstanceM (Either SomeException result))
+-&gt; IO (Either SomeException result)
+-&gt; InstanceM (Either SomeException result)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IO result -&gt; IO (Either SomeException result)
+forall (m :: * -&gt; *) e a.
+(MonadUnliftIO m, Exception e) =&gt;
+m a -&gt; m (Either e a)
+</span><span class="hs-identifier hs-var">UnliftIO.try</span></span><span> </span><span class="annot"><span class="annottext">(IO result -&gt; IO (Either SomeException result))
+-&gt; IO result -&gt; IO (Either SomeException result)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Payload -&gt; IO result
+</span><a href="#local-6989586621680176050"><span class="hs-identifier hs-var">childWorkflowResultConverter</span></a></span><span> </span><span class="annot"><span class="annottext">(Payload -&gt; IO result) -&gt; Payload -&gt; IO result
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Payload -&gt; Payload
+</span><a href="Temporal.Payload.html#convertFromProtoPayload"><span class="hs-identifier hs-var">convertFromProtoPayload</span></a></span><span> </span><span class="annot"><span class="annottext">(Payload -&gt; Payload) -&gt; Payload -&gt; Payload
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Success
+</span><a href="#local-6989586621680176060"><span class="hs-identifier hs-var">res'</span></a></span><span> </span><span class="annot"><span class="annottext">Success
+-&gt; FoldLike Payload Success Success Payload Payload -&gt; Payload
+forall s a t b. s -&gt; FoldLike a s t a b -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">FoldLike Payload Success Success Payload Payload
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;result&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">ChildWorkflow.result</span></span><span>
+</span><span id="line-115"></span><span>          </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621680176061"><span class="hs-identifier hs-type">eVal</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-116"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621680176066"><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621680176066"><span class="hs-identifier hs-var">err</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">SomeException -&gt; Workflow result
+forall e a. (HasCallStack, Exception e) =&gt; e -&gt; Workflow a
+</span><a href="Temporal.Workflow.Internal.Monad.html#throw"><span class="hs-identifier hs-var">throw</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621680176066"><span class="hs-identifier hs-var">err</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SomeException</span></span><span class="hs-special">)</span><span>
+</span><span id="line-117"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621680176067"><span class="annot"><span class="annottext">result
+</span><a href="#local-6989586621680176067"><span class="hs-identifier hs-var">ok</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">result -&gt; Workflow result
+forall a. a -&gt; Workflow a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">result
+</span><a href="#local-6989586621680176067"><span class="hs-identifier hs-var">ok</span></a></span><span>
+</span><span id="line-118"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">ChildWorkflow.ChildWorkflowResult'Failed</span></span><span> </span><span id="local-6989586621680176069"><span class="annot"><span class="annottext">Failure
+</span><a href="#local-6989586621680176069"><span class="hs-identifier hs-var">res'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ChildWorkflowFailed -&gt; Workflow result
+forall e a. (HasCallStack, Exception e) =&gt; e -&gt; Workflow a
+</span><a href="Temporal.Workflow.Internal.Monad.html#throw"><span class="hs-identifier hs-var">throw</span></a></span><span> </span><span class="annot"><span class="annottext">(ChildWorkflowFailed -&gt; Workflow result)
+-&gt; ChildWorkflowFailed -&gt; Workflow result
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Failure -&gt; ChildWorkflowFailed
+</span><a href="Temporal.Exception.html#ChildWorkflowFailed"><span class="hs-identifier hs-var">ChildWorkflowFailed</span></a></span><span> </span><span class="annot"><span class="annottext">(Failure -&gt; ChildWorkflowFailed) -&gt; Failure -&gt; ChildWorkflowFailed
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Failure
+</span><a href="#local-6989586621680176069"><span class="hs-identifier hs-var">res'</span></a></span><span> </span><span class="annot"><span class="annottext">Failure
+-&gt; FoldLike Failure Failure Failure Failure Failure -&gt; Failure
+forall s a t b. s -&gt; FoldLike a s t a b -&gt; a
+</span><span class="hs-operator hs-var">^.</span></span><span> </span><span class="annot"><span class="annottext">FoldLike Failure Failure Failure Failure Failure
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;failure&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">ChildWorkflow.failure</span></span><span>
+</span><span id="line-119"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">ChildWorkflow.ChildWorkflowResult'Cancelled</span></span><span> </span><span class="annot"><span class="annottext">Cancellation
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ChildWorkflowCancelled -&gt; Workflow result
+forall e a. (HasCallStack, Exception e) =&gt; e -&gt; Workflow a
+</span><a href="Temporal.Workflow.Internal.Monad.html#throw"><span class="hs-identifier hs-var">throw</span></a></span><span> </span><span class="annot"><span class="annottext">ChildWorkflowCancelled
+</span><a href="Temporal.Exception.html#ChildWorkflowCancelled"><span class="hs-identifier hs-var">ChildWorkflowCancelled</span></a></span><span>
+</span><span id="line-120"></span><span>
+</span><span id="line-121"></span><span>
+</span><span id="line-122"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680175826"><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html#Cancel"><span class="hs-identifier hs-type">Cancel</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ChildWorkflowHandle"><span class="hs-identifier hs-type">ChildWorkflowHandle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175826"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-123"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="CancelResult"><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html#CancelResult"><span class="hs-identifier hs-var">CancelResult</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ChildWorkflowHandle"><span class="hs-identifier hs-type">ChildWorkflowHandle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680175826"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#Workflow"><span class="hs-identifier hs-type">Workflow</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-124"></span><span>  </span><span id="local-6989586621680176084"><span class="annot"><span class="annottext">cancel :: RequireCallStack =&gt;
+ChildWorkflowHandle a -&gt; CancelResult (ChildWorkflowHandle a)
+</span><a href="Temporal.Workflow.Unsafe.Handle.html#cancel"><span class="hs-identifier hs-var hs-var hs-var">cancel</span></a></span></span><span> </span><span id="local-6989586621680176085"><span class="annot"><span class="annottext">ChildWorkflowHandle a
+</span><a href="#local-6989586621680176085"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-125"></span><span>    </span><span class="annot"><span class="annottext">Workflow ()
+RequireCallStack =&gt; Workflow ()
+</span><a href="Temporal.Workflow.Internal.Monad.html#updateCallStackW"><span class="hs-identifier hs-var">updateCallStackW</span></a></span><span>
+</span><span id="line-126"></span><span>    </span><span class="annot"><span class="annottext">ChildWorkflowHandle a -&gt; Workflow ()
+forall result.
+RequireCallStack =&gt;
+ChildWorkflowHandle result -&gt; Workflow ()
+</span><a href="Temporal.Workflow.Unsafe.Handle.html#cancelChildWorkflowExecution"><span class="hs-identifier hs-var">cancelChildWorkflowExecution</span></a></span><span> </span><span class="annot"><span class="annottext">ChildWorkflowHandle a
+</span><a href="#local-6989586621680176085"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-127"></span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span id="local-6989586621680176087"><span class="annot"><a href="Temporal.Workflow.Unsafe.Handle.html#cancelChildWorkflowExecution"><span class="hs-identifier hs-type">cancelChildWorkflowExecution</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RequireCallStack</span></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ChildWorkflowHandle"><span class="hs-identifier hs-type">ChildWorkflowHandle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680176087"><span class="hs-identifier hs-type">result</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#Workflow"><span class="hs-identifier hs-type">Workflow</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-130"></span><span id="cancelChildWorkflowExecution"><span class="annot"><span class="annottext">cancelChildWorkflowExecution :: forall result.
+RequireCallStack =&gt;
+ChildWorkflowHandle result -&gt; Workflow ()
+</span><a href="Temporal.Workflow.Unsafe.Handle.html#cancelChildWorkflowExecution"><span class="hs-identifier hs-var hs-var">cancelChildWorkflowExecution</span></a></span></span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ChildWorkflowHandle"><span class="hs-identifier hs-type">ChildWorkflowHandle</span></a></span><span> </span><span class="hs-special">{</span><span id="local-6989586621680176099"><span class="annot"><span class="annottext">Sequence
+childWorkflowSequence :: Sequence
+childWorkflowSequence :: forall result. ChildWorkflowHandle result -&gt; Sequence
+</span><a href="#local-6989586621680176099"><span class="hs-identifier hs-var hs-var">childWorkflowSequence</span></a></span></span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">InstanceM () -&gt; Workflow ()
+forall a. RequireCallStack =&gt; InstanceM a -&gt; Workflow a
+</span><a href="Temporal.Workflow.Internal.Monad.html#ilift"><span class="hs-identifier hs-var">ilift</span></a></span><span> </span><span class="annot"><span class="annottext">(InstanceM () -&gt; Workflow ()) -&gt; InstanceM () -&gt; Workflow ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-131"></span><span>  </span><span class="annot"><span class="annottext">InstanceM ()
+RequireCallStack =&gt; InstanceM ()
+</span><a href="Temporal.Workflow.Internal.Monad.html#updateCallStack"><span class="hs-identifier hs-var">updateCallStack</span></a></span><span>
+</span><span id="line-132"></span><span>  </span><span class="hs-comment">-- I don't see a way to block on this? I guess Temporal wants us to rely on the orchestrator</span><span>
+</span><span id="line-133"></span><span>  </span><span class="hs-comment">-- managing the cancellation. Compare with ResolveRequestCancelExternalWorkflow. I think</span><span>
+</span><span id="line-134"></span><span>  </span><span class="hs-comment">-- external workflows need a resolution step because they may not even exist.</span><span>
+</span><span id="line-135"></span><span>  </span><span class="annot"><span class="annottext">WorkflowCommand -&gt; InstanceM ()
+</span><a href="Temporal.Workflow.Internal.Monad.html#addCommand"><span class="hs-identifier hs-var">addCommand</span></a></span><span> </span><span class="annot"><span class="annottext">(WorkflowCommand -&gt; InstanceM ())
+-&gt; WorkflowCommand -&gt; InstanceM ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-136"></span><span>    </span><span class="annot"><span class="annottext">WorkflowCommand
+forall msg. Message msg =&gt; msg
+</span><span class="hs-identifier hs-var">defMessage</span></span><span>
+</span><span id="line-137"></span><span>      </span><span class="annot"><span class="annottext">WorkflowCommand
+-&gt; (WorkflowCommand -&gt; WorkflowCommand) -&gt; WorkflowCommand
+forall s t. s -&gt; (s -&gt; t) -&gt; t
+</span><span class="hs-operator hs-var">&amp;</span></span><span> </span><span class="annot"><span class="annottext">LensLike' f WorkflowCommand CancelChildWorkflowExecution
+forall {f :: * -&gt; *}.
+Identical f =&gt;
+LensLike' f WorkflowCommand CancelChildWorkflowExecution
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;cancelChildWorkflowExecution&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">Command.cancelChildWorkflowExecution</span></span><span>
+</span><span id="line-138"></span><span>        </span><span class="annot"><span class="annottext">(forall {f :: * -&gt; *}.
+ Identical f =&gt;
+ LensLike' f WorkflowCommand CancelChildWorkflowExecution)
+-&gt; CancelChildWorkflowExecution
+-&gt; WorkflowCommand
+-&gt; WorkflowCommand
+forall s t a b. Setter s t a b -&gt; b -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">.~</span></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">CancelChildWorkflowExecution
+forall msg. Message msg =&gt; msg
+</span><span class="hs-identifier hs-var">defMessage</span></span><span>
+</span><span id="line-139"></span><span>              </span><span class="annot"><span class="annottext">CancelChildWorkflowExecution
+-&gt; (CancelChildWorkflowExecution -&gt; CancelChildWorkflowExecution)
+-&gt; CancelChildWorkflowExecution
+forall s t. s -&gt; (s -&gt; t) -&gt; t
+</span><span class="hs-operator hs-var">&amp;</span></span><span> </span><span class="annot"><span class="annottext">LensLike' f CancelChildWorkflowExecution Word32
+forall {f :: * -&gt; *}.
+Identical f =&gt;
+LensLike' f CancelChildWorkflowExecution Word32
+forall (f :: * -&gt; *) s a.
+(Functor f, HasField s &quot;childWorkflowSeq&quot; a) =&gt;
+LensLike' f s a
+</span><span class="hs-identifier hs-var">Command.childWorkflowSeq</span></span><span> </span><span class="annot"><span class="annottext">(forall {f :: * -&gt; *}.
+ Identical f =&gt;
+ LensLike' f CancelChildWorkflowExecution Word32)
+-&gt; Word32
+-&gt; CancelChildWorkflowExecution
+-&gt; CancelChildWorkflowExecution
+forall s t a b. Setter s t a b -&gt; b -&gt; s -&gt; t
+</span><span class="hs-operator hs-var">.~</span></span><span> </span><span class="annot"><span class="annottext">Sequence -&gt; Word32
+</span><a href="Temporal.Common.html#rawSequence"><span class="hs-identifier hs-var">rawSequence</span></a></span><span> </span><span class="annot"><span class="annottext">Sequence
+</span><a href="#local-6989586621680176099"><span class="hs-identifier hs-var">childWorkflowSequence</span></a></span><span>
+</span><span id="line-140"></span><span>           </span><span class="hs-special">)</span><span>
+</span><span id="line-141"></span></pre></body></html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Activity.Types.html"><span class="hs-identifier">Temporal.Activity.Types</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Map</span></span><span class="hs-special">)</span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Time.Clock.System</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">SystemTime</span></span><span class="hs-special">)</span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Vector</span></span><span class="hs-special">)</span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Word</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Word32</span></span><span class="hs-special">)</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Common.html"><span class="hs-identifier">Temporal.Common</span></a></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Duration.html"><span class="hs-identifier">Temporal.Duration</span></a></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Payload.html"><span class="hs-identifier">Temporal.Payload</span></a></span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="annot"><span class="hs-comment">{- | 'ActivityInfo' provides information about the currently executing activity.
+
+It can be used for logging, introspection, etc.
+-}</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">data</span><span> </span><span id="ActivityInfo"><span class="annot"><a href="Temporal.Activity.Types.html#ActivityInfo"><span class="hs-identifier hs-var">ActivityInfo</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ActivityInfo"><span class="annot"><a href="Temporal.Activity.Types.html#ActivityInfo"><span class="hs-identifier hs-var">ActivityInfo</span></a></span></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="workflowNamespace"><span class="annot"><span class="annottext">ActivityInfo -&gt; Namespace
+</span><a href="Temporal.Activity.Types.html#workflowNamespace"><span class="hs-identifier hs-var hs-var">workflowNamespace</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Common.html#Namespace"><span class="hs-identifier hs-type">Namespace</span></a></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="workflowType"><span class="annot"><span class="annottext">ActivityInfo -&gt; WorkflowType
+</span><a href="Temporal.Activity.Types.html#workflowType"><span class="hs-identifier hs-var hs-var">workflowType</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Common.html#WorkflowType"><span class="hs-identifier hs-type">WorkflowType</span></a></span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="workflowId"><span class="annot"><span class="annottext">ActivityInfo -&gt; WorkflowId
+</span><a href="Temporal.Activity.Types.html#workflowId"><span class="hs-identifier hs-var hs-var">workflowId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Common.html#WorkflowId"><span class="hs-identifier hs-type">WorkflowId</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="runId"><span class="annot"><span class="annottext">ActivityInfo -&gt; RunId
+</span><a href="Temporal.Activity.Types.html#runId"><span class="hs-identifier hs-var hs-var">runId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Common.html#RunId"><span class="hs-identifier hs-type">RunId</span></a></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="activityId"><span class="annot"><span class="annottext">ActivityInfo -&gt; ActivityId
+</span><a href="Temporal.Activity.Types.html#activityId"><span class="hs-identifier hs-var hs-var">activityId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Common.html#ActivityId"><span class="hs-identifier hs-type">ActivityId</span></a></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="activityType"><span class="annot"><span class="annottext">ActivityInfo -&gt; Text
+</span><a href="Temporal.Activity.Types.html#activityType"><span class="hs-identifier hs-var hs-var">activityType</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="headerFields"><span class="annot"><span class="annottext">ActivityInfo -&gt; Map Text Payload
+</span><a href="Temporal.Activity.Types.html#headerFields"><span class="hs-identifier hs-var hs-var">headerFields</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-comment">-- input</span><span>
+</span><span id="line-26"></span><span>    </span><span id="heartbeatDetails"><span class="annot"><span class="annottext">ActivityInfo -&gt; Vector Payload
+</span><a href="Temporal.Activity.Types.html#heartbeatDetails"><span class="hs-identifier hs-var hs-var">heartbeatDetails</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><a href="Temporal.Payload.html#Payload"><span class="hs-identifier hs-type">Payload</span></a></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="scheduledTime"><span class="annot"><span class="annottext">ActivityInfo -&gt; SystemTime
+</span><a href="Temporal.Activity.Types.html#scheduledTime"><span class="hs-identifier hs-var hs-var">scheduledTime</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SystemTime</span></span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="currentAttemptScheduledTime"><span class="annot"><span class="annottext">ActivityInfo -&gt; SystemTime
+</span><a href="Temporal.Activity.Types.html#currentAttemptScheduledTime"><span class="hs-identifier hs-var hs-var">currentAttemptScheduledTime</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SystemTime</span></span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="startedTime"><span class="annot"><span class="annottext">ActivityInfo -&gt; SystemTime
+</span><a href="Temporal.Activity.Types.html#startedTime"><span class="hs-identifier hs-var hs-var">startedTime</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SystemTime</span></span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="attempt"><span class="annot"><span class="annottext">ActivityInfo -&gt; Word32
+</span><a href="Temporal.Activity.Types.html#attempt"><span class="hs-identifier hs-var hs-var">attempt</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word32</span></span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-comment">-- TODO, are we in charge of honoring these timeouts?</span><span>
+</span><span id="line-32"></span><span>    </span><span class="hs-comment">-- Or does the server send cancel requests if we don't?</span><span>
+</span><span id="line-33"></span><span>    </span><span id="scheduleToCloseTimeout"><span class="annot"><span class="annottext">ActivityInfo -&gt; Maybe Duration
+</span><a href="Temporal.Activity.Types.html#scheduleToCloseTimeout"><span class="hs-identifier hs-var hs-var">scheduleToCloseTimeout</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Duration.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="startToCloseTimeout"><span class="annot"><span class="annottext">ActivityInfo -&gt; Maybe Duration
+</span><a href="Temporal.Activity.Types.html#startToCloseTimeout"><span class="hs-identifier hs-var hs-var">startToCloseTimeout</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Duration.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="heartbeatTimeout"><span class="annot"><span class="annottext">ActivityInfo -&gt; Maybe Duration
+</span><a href="Temporal.Activity.Types.html#heartbeatTimeout"><span class="hs-identifier hs-var hs-var">heartbeatTimeout</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Duration.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="retryPolicy"><span class="annot"><span class="annottext">ActivityInfo -&gt; Maybe RetryPolicy
+</span><a href="Temporal.Activity.Types.html#retryPolicy"><span class="hs-identifier hs-var hs-var">retryPolicy</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Common.html#RetryPolicy"><span class="hs-identifier hs-type">RetryPolicy</span></a></span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="isLocal"><span class="annot"><span class="annottext">ActivityInfo -&gt; Bool
+</span><a href="Temporal.Activity.Types.html#isLocal"><span class="hs-identifier hs-var hs-var">isLocal</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="taskToken"><span class="annot"><span class="annottext">ActivityInfo -&gt; TaskToken
+</span><a href="Temporal.Activity.Types.html#taskToken"><span class="hs-identifier hs-var hs-var">taskToken</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Common.html#TaskToken"><span class="hs-identifier hs-type">TaskToken</span></a></span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680165559"><span id="local-6989586621680165597"><span id="local-6989586621680165601"><span class="annot"><span class="annottext">Int -&gt; ActivityInfo -&gt; ShowS
+[ActivityInfo] -&gt; ShowS
+ActivityInfo -&gt; String
+(Int -&gt; ActivityInfo -&gt; ShowS)
+-&gt; (ActivityInfo -&gt; String)
+-&gt; ([ActivityInfo] -&gt; ShowS)
+-&gt; Show ActivityInfo
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; ActivityInfo -&gt; ShowS
+showsPrec :: Int -&gt; ActivityInfo -&gt; ShowS
+$cshow :: ActivityInfo -&gt; String
+show :: ActivityInfo -&gt; String
+$cshowList :: [ActivityInfo] -&gt; ShowS
+showList :: [ActivityInfo] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680165609"><span id="local-6989586621680165645"><span class="annot"><span class="annottext">ActivityInfo -&gt; ActivityInfo -&gt; Bool
+(ActivityInfo -&gt; ActivityInfo -&gt; Bool)
+-&gt; (ActivityInfo -&gt; ActivityInfo -&gt; Bool) -&gt; Eq ActivityInfo
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: ActivityInfo -&gt; ActivityInfo -&gt; Bool
+== :: ActivityInfo -&gt; ActivityInfo -&gt; Bool
+$c/= :: ActivityInfo -&gt; ActivityInfo -&gt; Bool
+/= :: ActivityInfo -&gt; ActivityInfo -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span></pre></body></html>

@@ -1,0 +1,1130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE AllowAmbiguousTypes #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE KindSignatures #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE TypeApplications #-}</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html"><span class="hs-identifier">Temporal.Core.Client.WorkflowService</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-8"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#countWorkflowExecutions"><span class="hs-identifier">countWorkflowExecutions</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-9"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#createSchedule"><span class="hs-identifier">createSchedule</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-10"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#deleteSchedule"><span class="hs-identifier">deleteSchedule</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-11"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#deprecateNamespace"><span class="hs-identifier">deprecateNamespace</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-12"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#describeNamespace"><span class="hs-identifier">describeNamespace</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-13"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#describeSchedule"><span class="hs-identifier">describeSchedule</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-14"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#describeTaskQueue"><span class="hs-identifier">describeTaskQueue</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-15"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#describeWorkflowExecution"><span class="hs-identifier">describeWorkflowExecution</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-16"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#getClusterInfo"><span class="hs-identifier">getClusterInfo</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-17"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#getSearchAttributes"><span class="hs-identifier">getSearchAttributes</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-18"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#getSystemInfo"><span class="hs-identifier">getSystemInfo</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-19"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#getWorkerBuildIdCompatibility"><span class="hs-identifier">getWorkerBuildIdCompatibility</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-20"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#getWorkflowExecutionHistory"><span class="hs-identifier">getWorkflowExecutionHistory</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-21"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#getWorkflowExecutionHistoryReverse"><span class="hs-identifier">getWorkflowExecutionHistoryReverse</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-22"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#listArchivedWorkflowExecutions"><span class="hs-identifier">listArchivedWorkflowExecutions</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-23"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#listClosedWorkflowExecutions"><span class="hs-identifier">listClosedWorkflowExecutions</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-24"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#listNamespaces"><span class="hs-identifier">listNamespaces</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-25"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#listOpenWorkflowExecutions"><span class="hs-identifier">listOpenWorkflowExecutions</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-26"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#listScheduleMatchingTimes"><span class="hs-identifier">listScheduleMatchingTimes</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-27"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#listSchedules"><span class="hs-identifier">listSchedules</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-28"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#listTaskQueuePartitions"><span class="hs-identifier">listTaskQueuePartitions</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-29"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#listWorkflowExecutions"><span class="hs-identifier">listWorkflowExecutions</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-30"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#patchSchedule"><span class="hs-identifier">patchSchedule</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-31"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#pollActivityTaskQueue"><span class="hs-identifier">pollActivityTaskQueue</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-32"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#pollWorkflowExecutionUpdate"><span class="hs-identifier">pollWorkflowExecutionUpdate</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-33"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#pollWorkflowTaskQueue"><span class="hs-identifier">pollWorkflowTaskQueue</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-34"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#queryWorkflow"><span class="hs-identifier">queryWorkflow</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-35"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#recordActivityTaskHeartbeat"><span class="hs-identifier">recordActivityTaskHeartbeat</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-36"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#recordActivityTaskHeartbeatById"><span class="hs-identifier">recordActivityTaskHeartbeatById</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-37"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#registerNamespace"><span class="hs-identifier">registerNamespace</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-38"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#requestCancelWorkflowExecution"><span class="hs-identifier">requestCancelWorkflowExecution</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-39"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#resetStickyTaskQueue"><span class="hs-identifier">resetStickyTaskQueue</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-40"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#resetWorkflowExecution"><span class="hs-identifier">resetWorkflowExecution</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-41"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#respondActivityTaskCanceled"><span class="hs-identifier">respondActivityTaskCanceled</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-42"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#respondActivityTaskCanceledById"><span class="hs-identifier">respondActivityTaskCanceledById</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-43"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#respondActivityTaskCompleted"><span class="hs-identifier">respondActivityTaskCompleted</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-44"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#respondActivityTaskCompletedById"><span class="hs-identifier">respondActivityTaskCompletedById</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-45"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#respondActivityTaskFailed"><span class="hs-identifier">respondActivityTaskFailed</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-46"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#respondActivityTaskFailedById"><span class="hs-identifier">respondActivityTaskFailedById</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-47"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#respondQueryTaskCompleted"><span class="hs-identifier">respondQueryTaskCompleted</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-48"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#respondWorkflowTaskCompleted"><span class="hs-identifier">respondWorkflowTaskCompleted</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-49"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#respondWorkflowTaskFailed"><span class="hs-identifier">respondWorkflowTaskFailed</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-50"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#scanWorkflowExecutions"><span class="hs-identifier">scanWorkflowExecutions</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-51"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#signalWithStartWorkflowExecution"><span class="hs-identifier">signalWithStartWorkflowExecution</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-52"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#signalWorkflowExecution"><span class="hs-identifier">signalWorkflowExecution</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-53"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#startWorkflowExecution"><span class="hs-identifier">startWorkflowExecution</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-54"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#terminateWorkflowExecution"><span class="hs-identifier">terminateWorkflowExecution</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-55"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#updateNamespace"><span class="hs-identifier">updateNamespace</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-56"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#updateSchedule"><span class="hs-identifier">updateSchedule</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-57"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#updateWorkflowExecution"><span class="hs-identifier">updateWorkflowExecution</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-58"></span><span>  </span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#updateWorkerBuildIdCompatibility"><span class="hs-identifier">updateWorkerBuildIdCompatibility</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-59"></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Api.Workflowservice.V1.RequestResponse</span></span><span>
+</span><span id="line-62"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Api.Workflowservice.V1.Service</span></span><span>
+</span><span id="line-63"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html"><span class="hs-identifier">Temporal.Core.Client</span></a></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- TODO the way that the generated protobuf code is structured, it might be nicer to just have a single</span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- workflow service call that ensures the protobuf in question is the right one.</span><span>
+</span><span id="line-68"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_count_workflow_executions&quot;</span></span><span> </span><span id="hs_count_workflow_executions"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_count_workflow_executions"><span class="hs-identifier hs-var">hs_count_workflow_executions</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="annot"><span class="hs-comment">-- | CountWorkflowExecutions is a visibility API to count of workflow executions in a specific namespace.</span></span><span>
+</span><span id="line-72"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#countWorkflowExecutions"><span class="hs-identifier hs-type">countWorkflowExecutions</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CountWorkflowExecutionsRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">CountWorkflowExecutionsResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-73"></span><span id="countWorkflowExecutions"><span class="annot"><span class="annottext">countWorkflowExecutions :: Client
+-&gt; CountWorkflowExecutionsRequest
+-&gt; IO (Either RpcError CountWorkflowExecutionsResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#countWorkflowExecutions"><span class="hs-identifier hs-var hs-var">countWorkflowExecutions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;countWorkflowExecutions&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_count_workflow_executions"><span class="hs-identifier hs-var">hs_count_workflow_executions</span></a></span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_create_schedule&quot;</span></span><span> </span><span id="hs_create_schedule"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_create_schedule"><span class="hs-identifier hs-var">hs_create_schedule</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span class="annot"><span class="hs-comment">-- | Creates a new schedule.</span></span><span>
+</span><span id="line-80"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#createSchedule"><span class="hs-identifier hs-type">createSchedule</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CreateScheduleRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">CreateScheduleResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-81"></span><span id="createSchedule"><span class="annot"><span class="annottext">createSchedule :: Client
+-&gt; CreateScheduleRequest
+-&gt; IO (Either RpcError CreateScheduleResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#createSchedule"><span class="hs-identifier hs-var hs-var">createSchedule</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;createSchedule&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_create_schedule"><span class="hs-identifier hs-var">hs_create_schedule</span></a></span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_delete_schedule&quot;</span></span><span> </span><span id="hs_delete_schedule"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_delete_schedule"><span class="hs-identifier hs-var">hs_delete_schedule</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-85"></span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span class="annot"><span class="hs-comment">-- | Deletes a schedule, removing it from the system.</span></span><span>
+</span><span id="line-88"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#deleteSchedule"><span class="hs-identifier hs-type">deleteSchedule</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DeleteScheduleRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DeleteScheduleResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-89"></span><span id="deleteSchedule"><span class="annot"><span class="annottext">deleteSchedule :: Client
+-&gt; DeleteScheduleRequest
+-&gt; IO (Either RpcError DeleteScheduleResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#deleteSchedule"><span class="hs-identifier hs-var hs-var">deleteSchedule</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;deleteSchedule&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_delete_schedule"><span class="hs-identifier hs-var">hs_delete_schedule</span></a></span><span>
+</span><span id="line-90"></span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_deprecate_namespace&quot;</span></span><span> </span><span id="hs_deprecate_namespace"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_deprecate_namespace"><span class="hs-identifier hs-var">hs_deprecate_namespace</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-93"></span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span class="annot"><span class="hs-comment">-- | Returns the schedule description and current state of an existing schedule.</span></span><span>
+</span><span id="line-96"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#deprecateNamespace"><span class="hs-identifier hs-type">deprecateNamespace</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DeprecateNamespaceRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DeprecateNamespaceResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-97"></span><span id="deprecateNamespace"><span class="annot"><span class="annottext">deprecateNamespace :: Client
+-&gt; DeprecateNamespaceRequest
+-&gt; IO (Either RpcError DeprecateNamespaceResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#deprecateNamespace"><span class="hs-identifier hs-var hs-var">deprecateNamespace</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;deprecateNamespace&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_deprecate_namespace"><span class="hs-identifier hs-var">hs_deprecate_namespace</span></a></span><span>
+</span><span id="line-98"></span><span>
+</span><span id="line-99"></span><span>
+</span><span id="line-100"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_describe_namespace&quot;</span></span><span> </span><span id="hs_describe_namespace"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_describe_namespace"><span class="hs-identifier hs-var">hs_describe_namespace</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span>
+</span><span id="line-103"></span><span class="annot"><span class="hs-comment">-- |  DescribeNamespace returns the information and configuration for a registered namespace.</span></span><span>
+</span><span id="line-104"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#describeNamespace"><span class="hs-identifier hs-type">describeNamespace</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DescribeNamespaceRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DescribeNamespaceResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-105"></span><span id="describeNamespace"><span class="annot"><span class="annottext">describeNamespace :: Client
+-&gt; DescribeNamespaceRequest
+-&gt; IO (Either RpcError DescribeNamespaceResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#describeNamespace"><span class="hs-identifier hs-var hs-var">describeNamespace</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;describeNamespace&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_describe_namespace"><span class="hs-identifier hs-var">hs_describe_namespace</span></a></span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_describe_schedule&quot;</span></span><span> </span><span id="hs_describe_schedule"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_describe_schedule"><span class="hs-identifier hs-var">hs_describe_schedule</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#describeSchedule"><span class="hs-identifier hs-type">describeSchedule</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DescribeScheduleRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DescribeScheduleResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-112"></span><span id="describeSchedule"><span class="annot"><span class="annottext">describeSchedule :: Client
+-&gt; DescribeScheduleRequest
+-&gt; IO (Either RpcError DescribeScheduleResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#describeSchedule"><span class="hs-identifier hs-var hs-var">describeSchedule</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;describeSchedule&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_describe_schedule"><span class="hs-identifier hs-var">hs_describe_schedule</span></a></span><span>
+</span><span id="line-113"></span><span>
+</span><span id="line-114"></span><span>
+</span><span id="line-115"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_describe_task_queue&quot;</span></span><span> </span><span id="hs_describe_task_queue"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_describe_task_queue"><span class="hs-identifier hs-var">hs_describe_task_queue</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-116"></span><span>
+</span><span id="line-117"></span><span>
+</span><span id="line-118"></span><span class="annot"><span class="hs-comment">-- | DescribeTaskQueue returns information about the target task queue.</span></span><span>
+</span><span id="line-119"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#describeTaskQueue"><span class="hs-identifier hs-type">describeTaskQueue</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DescribeTaskQueueRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DescribeTaskQueueResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-120"></span><span id="describeTaskQueue"><span class="annot"><span class="annottext">describeTaskQueue :: Client
+-&gt; DescribeTaskQueueRequest
+-&gt; IO (Either RpcError DescribeTaskQueueResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#describeTaskQueue"><span class="hs-identifier hs-var hs-var">describeTaskQueue</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;describeTaskQueue&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_describe_task_queue"><span class="hs-identifier hs-var">hs_describe_task_queue</span></a></span><span>
+</span><span id="line-121"></span><span>
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_describe_workflow_execution&quot;</span></span><span> </span><span id="hs_describe_workflow_execution"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_describe_workflow_execution"><span class="hs-identifier hs-var">hs_describe_workflow_execution</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-124"></span><span>
+</span><span id="line-125"></span><span>
+</span><span id="line-126"></span><span class="annot"><span class="hs-comment">-- | DescribeWorkflowExecution returns information about the specified workflow execution.</span></span><span>
+</span><span id="line-127"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#describeWorkflowExecution"><span class="hs-identifier hs-type">describeWorkflowExecution</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DescribeWorkflowExecutionRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DescribeWorkflowExecutionResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-128"></span><span id="describeWorkflowExecution"><span class="annot"><span class="annottext">describeWorkflowExecution :: Client
+-&gt; DescribeWorkflowExecutionRequest
+-&gt; IO (Either RpcError DescribeWorkflowExecutionResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#describeWorkflowExecution"><span class="hs-identifier hs-var hs-var">describeWorkflowExecution</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;describeWorkflowExecution&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_describe_workflow_execution"><span class="hs-identifier hs-var">hs_describe_workflow_execution</span></a></span><span>
+</span><span id="line-129"></span><span>
+</span><span id="line-130"></span><span>
+</span><span id="line-131"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_get_cluster_info&quot;</span></span><span> </span><span id="hs_get_cluster_info"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_get_cluster_info"><span class="hs-identifier hs-var">hs_get_cluster_info</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-132"></span><span>
+</span><span id="line-133"></span><span>
+</span><span id="line-134"></span><span class="annot"><span class="hs-comment">-- | GetClusterInfo returns information about temporal cluster</span></span><span>
+</span><span id="line-135"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#getClusterInfo"><span class="hs-identifier hs-type">getClusterInfo</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">GetClusterInfoRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">GetClusterInfoResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-136"></span><span id="getClusterInfo"><span class="annot"><span class="annottext">getClusterInfo :: Client
+-&gt; GetClusterInfoRequest
+-&gt; IO (Either RpcError GetClusterInfoResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#getClusterInfo"><span class="hs-identifier hs-var hs-var">getClusterInfo</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;getClusterInfo&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_get_cluster_info"><span class="hs-identifier hs-var">hs_get_cluster_info</span></a></span><span>
+</span><span id="line-137"></span><span>
+</span><span id="line-138"></span><span>
+</span><span id="line-139"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_get_search_attributes&quot;</span></span><span> </span><span id="hs_get_search_attributes"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_get_search_attributes"><span class="hs-identifier hs-var">hs_get_search_attributes</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-140"></span><span>
+</span><span id="line-141"></span><span>
+</span><span id="line-142"></span><span class="annot"><span class="hs-comment">-- | GetSearchAttributes is a visibility API to get all legal keys that could be used in list APIs</span></span><span>
+</span><span id="line-143"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#getSearchAttributes"><span class="hs-identifier hs-type">getSearchAttributes</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">GetSearchAttributesRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">GetSearchAttributesResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-144"></span><span id="getSearchAttributes"><span class="annot"><span class="annottext">getSearchAttributes :: Client
+-&gt; GetSearchAttributesRequest
+-&gt; IO (Either RpcError GetSearchAttributesResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#getSearchAttributes"><span class="hs-identifier hs-var hs-var">getSearchAttributes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;getSearchAttributes&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_get_search_attributes"><span class="hs-identifier hs-var">hs_get_search_attributes</span></a></span><span>
+</span><span id="line-145"></span><span>
+</span><span id="line-146"></span><span>
+</span><span id="line-147"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_get_system_info&quot;</span></span><span> </span><span id="hs_get_system_info"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_get_system_info"><span class="hs-identifier hs-var">hs_get_system_info</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-148"></span><span>
+</span><span id="line-149"></span><span>
+</span><span id="line-150"></span><span class="annot"><span class="hs-comment">-- | GetSystemInfo returns information about the system.</span></span><span>
+</span><span id="line-151"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#getSystemInfo"><span class="hs-identifier hs-type">getSystemInfo</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">GetSystemInfoRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">GetSystemInfoResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-152"></span><span id="getSystemInfo"><span class="annot"><span class="annottext">getSystemInfo :: Client
+-&gt; GetSystemInfoRequest
+-&gt; IO (Either RpcError GetSystemInfoResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#getSystemInfo"><span class="hs-identifier hs-var hs-var">getSystemInfo</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;getSystemInfo&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_get_system_info"><span class="hs-identifier hs-var">hs_get_system_info</span></a></span><span>
+</span><span id="line-153"></span><span>
+</span><span id="line-154"></span><span>
+</span><span id="line-155"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_get_worker_build_id_compatibility&quot;</span></span><span> </span><span id="hs_get_worker_build_id_compatibility"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_get_worker_build_id_compatibility"><span class="hs-identifier hs-var">hs_get_worker_build_id_compatibility</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-156"></span><span>
+</span><span id="line-157"></span><span>
+</span><span id="line-158"></span><span class="annot"><span class="hs-comment">-- | Fetches the worker build id versioning sets for some task queue and related metadata.</span></span><span>
+</span><span id="line-159"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#getWorkerBuildIdCompatibility"><span class="hs-identifier hs-type">getWorkerBuildIdCompatibility</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">GetWorkerBuildIdCompatibilityRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">GetWorkerBuildIdCompatibilityResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-160"></span><span id="getWorkerBuildIdCompatibility"><span class="annot"><span class="annottext">getWorkerBuildIdCompatibility :: Client
+-&gt; GetWorkerBuildIdCompatibilityRequest
+-&gt; IO (Either RpcError GetWorkerBuildIdCompatibilityResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#getWorkerBuildIdCompatibility"><span class="hs-identifier hs-var hs-var">getWorkerBuildIdCompatibility</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;getWorkerBuildIdCompatibility&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_get_worker_build_id_compatibility"><span class="hs-identifier hs-var">hs_get_worker_build_id_compatibility</span></a></span><span>
+</span><span id="line-161"></span><span>
+</span><span id="line-162"></span><span>
+</span><span id="line-163"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_get_workflow_execution_history&quot;</span></span><span> </span><span id="hs_get_workflow_execution_history"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_get_workflow_execution_history"><span class="hs-identifier hs-var">hs_get_workflow_execution_history</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-164"></span><span>
+</span><span id="line-165"></span><span>
+</span><span id="line-166"></span><span class="annot"><span class="hs-comment">{- |
+GetWorkflowExecutionHistory returns the history of specified workflow execution. Fails with
+`NotFound` if the specified workflow execution is unknown to the service.
+-}</span></span><span>
+</span><span id="line-170"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#getWorkflowExecutionHistory"><span class="hs-identifier hs-type">getWorkflowExecutionHistory</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">GetWorkflowExecutionHistoryRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">GetWorkflowExecutionHistoryResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-171"></span><span id="getWorkflowExecutionHistory"><span class="annot"><span class="annottext">getWorkflowExecutionHistory :: Client
+-&gt; GetWorkflowExecutionHistoryRequest
+-&gt; IO (Either RpcError GetWorkflowExecutionHistoryResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#getWorkflowExecutionHistory"><span class="hs-identifier hs-var hs-var">getWorkflowExecutionHistory</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;getWorkflowExecutionHistory&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_get_workflow_execution_history"><span class="hs-identifier hs-var">hs_get_workflow_execution_history</span></a></span><span>
+</span><span id="line-172"></span><span>
+</span><span id="line-173"></span><span>
+</span><span id="line-174"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_get_workflow_execution_history_reverse&quot;</span></span><span> </span><span id="hs_get_workflow_execution_history_reverse"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_get_workflow_execution_history_reverse"><span class="hs-identifier hs-var">hs_get_workflow_execution_history_reverse</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-175"></span><span>
+</span><span id="line-176"></span><span>
+</span><span id="line-177"></span><span class="annot"><span class="hs-comment">{- |
+GetWorkflowExecutionHistoryReverse returns the history of specified workflow execution in reverse
+order (starting from last event). Fails with`NotFound` if the specified workflow execution is
+unknown to the service.
+-}</span></span><span>
+</span><span id="line-182"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#getWorkflowExecutionHistoryReverse"><span class="hs-identifier hs-type">getWorkflowExecutionHistoryReverse</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">GetWorkflowExecutionHistoryReverseRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">GetWorkflowExecutionHistoryReverseResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-183"></span><span id="getWorkflowExecutionHistoryReverse"><span class="annot"><span class="annottext">getWorkflowExecutionHistoryReverse :: Client
+-&gt; GetWorkflowExecutionHistoryReverseRequest
+-&gt; IO (Either RpcError GetWorkflowExecutionHistoryReverseResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#getWorkflowExecutionHistoryReverse"><span class="hs-identifier hs-var hs-var">getWorkflowExecutionHistoryReverse</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;getWorkflowExecutionHistoryReverse&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_get_workflow_execution_history_reverse"><span class="hs-identifier hs-var">hs_get_workflow_execution_history_reverse</span></a></span><span>
+</span><span id="line-184"></span><span>
+</span><span id="line-185"></span><span>
+</span><span id="line-186"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_list_archived_workflow_executions&quot;</span></span><span> </span><span id="hs_list_archived_workflow_executions"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_list_archived_workflow_executions"><span class="hs-identifier hs-var">hs_list_archived_workflow_executions</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-187"></span><span>
+</span><span id="line-188"></span><span>
+</span><span id="line-189"></span><span class="annot"><span class="hs-comment">-- | ListArchivedWorkflowExecutions is a visibility API to list archived workflow executions in a specific namespace.</span></span><span>
+</span><span id="line-190"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#listArchivedWorkflowExecutions"><span class="hs-identifier hs-type">listArchivedWorkflowExecutions</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ListArchivedWorkflowExecutionsRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ListArchivedWorkflowExecutionsResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-191"></span><span id="listArchivedWorkflowExecutions"><span class="annot"><span class="annottext">listArchivedWorkflowExecutions :: Client
+-&gt; ListArchivedWorkflowExecutionsRequest
+-&gt; IO (Either RpcError ListArchivedWorkflowExecutionsResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#listArchivedWorkflowExecutions"><span class="hs-identifier hs-var hs-var">listArchivedWorkflowExecutions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;listArchivedWorkflowExecutions&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_list_archived_workflow_executions"><span class="hs-identifier hs-var">hs_list_archived_workflow_executions</span></a></span><span>
+</span><span id="line-192"></span><span>
+</span><span id="line-193"></span><span>
+</span><span id="line-194"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_list_closed_workflow_executions&quot;</span></span><span> </span><span id="hs_list_closed_workflow_executions"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_list_closed_workflow_executions"><span class="hs-identifier hs-var">hs_list_closed_workflow_executions</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-195"></span><span>
+</span><span id="line-196"></span><span>
+</span><span id="line-197"></span><span class="annot"><span class="hs-comment">-- | ListClosedWorkflowExecutions is a visibility API to list the closed executions in a specific namespace.</span></span><span>
+</span><span id="line-198"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#listClosedWorkflowExecutions"><span class="hs-identifier hs-type">listClosedWorkflowExecutions</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ListClosedWorkflowExecutionsRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ListClosedWorkflowExecutionsResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-199"></span><span id="listClosedWorkflowExecutions"><span class="annot"><span class="annottext">listClosedWorkflowExecutions :: Client
+-&gt; ListClosedWorkflowExecutionsRequest
+-&gt; IO (Either RpcError ListClosedWorkflowExecutionsResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#listClosedWorkflowExecutions"><span class="hs-identifier hs-var hs-var">listClosedWorkflowExecutions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;listClosedWorkflowExecutions&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_list_closed_workflow_executions"><span class="hs-identifier hs-var">hs_list_closed_workflow_executions</span></a></span><span>
+</span><span id="line-200"></span><span>
+</span><span id="line-201"></span><span>
+</span><span id="line-202"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_list_namespaces&quot;</span></span><span> </span><span id="hs_list_namespaces"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_list_namespaces"><span class="hs-identifier hs-var">hs_list_namespaces</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-203"></span><span>
+</span><span id="line-204"></span><span>
+</span><span id="line-205"></span><span class="annot"><span class="hs-comment">-- | ListNamespaces returns the information and configuration for all namespaces.</span></span><span>
+</span><span id="line-206"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#listNamespaces"><span class="hs-identifier hs-type">listNamespaces</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ListNamespacesRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ListNamespacesResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-207"></span><span id="listNamespaces"><span class="annot"><span class="annottext">listNamespaces :: Client
+-&gt; ListNamespacesRequest
+-&gt; IO (Either RpcError ListNamespacesResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#listNamespaces"><span class="hs-identifier hs-var hs-var">listNamespaces</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;listNamespaces&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_list_namespaces"><span class="hs-identifier hs-var">hs_list_namespaces</span></a></span><span>
+</span><span id="line-208"></span><span>
+</span><span id="line-209"></span><span>
+</span><span id="line-210"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_list_open_workflow_executions&quot;</span></span><span> </span><span id="hs_list_open_workflow_executions"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_list_open_workflow_executions"><span class="hs-identifier hs-var">hs_list_open_workflow_executions</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-211"></span><span>
+</span><span id="line-212"></span><span>
+</span><span id="line-213"></span><span class="annot"><span class="hs-comment">-- | ListOpenWorkflowExecutions is a visibility API to list the open executions in a specific namespace.</span></span><span>
+</span><span id="line-214"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#listOpenWorkflowExecutions"><span class="hs-identifier hs-type">listOpenWorkflowExecutions</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ListOpenWorkflowExecutionsRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ListOpenWorkflowExecutionsResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-215"></span><span id="listOpenWorkflowExecutions"><span class="annot"><span class="annottext">listOpenWorkflowExecutions :: Client
+-&gt; ListOpenWorkflowExecutionsRequest
+-&gt; IO (Either RpcError ListOpenWorkflowExecutionsResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#listOpenWorkflowExecutions"><span class="hs-identifier hs-var hs-var">listOpenWorkflowExecutions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;listOpenWorkflowExecutions&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_list_open_workflow_executions"><span class="hs-identifier hs-var">hs_list_open_workflow_executions</span></a></span><span>
+</span><span id="line-216"></span><span>
+</span><span id="line-217"></span><span>
+</span><span id="line-218"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_list_schedule_matching_times&quot;</span></span><span> </span><span id="hs_list_schedule_matching_times"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_list_schedule_matching_times"><span class="hs-identifier hs-var">hs_list_schedule_matching_times</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-219"></span><span>
+</span><span id="line-220"></span><span>
+</span><span id="line-221"></span><span class="annot"><span class="hs-comment">-- | ListWorkflowExecutions is a visibility API to list workflow executions in a specific namespace.</span></span><span>
+</span><span id="line-222"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#listScheduleMatchingTimes"><span class="hs-identifier hs-type">listScheduleMatchingTimes</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ListScheduleMatchingTimesRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ListScheduleMatchingTimesResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-223"></span><span id="listScheduleMatchingTimes"><span class="annot"><span class="annottext">listScheduleMatchingTimes :: Client
+-&gt; ListScheduleMatchingTimesRequest
+-&gt; IO (Either RpcError ListScheduleMatchingTimesResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#listScheduleMatchingTimes"><span class="hs-identifier hs-var hs-var">listScheduleMatchingTimes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;listScheduleMatchingTimes&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_list_schedule_matching_times"><span class="hs-identifier hs-var">hs_list_schedule_matching_times</span></a></span><span>
+</span><span id="line-224"></span><span>
+</span><span id="line-225"></span><span>
+</span><span id="line-226"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_list_schedules&quot;</span></span><span> </span><span id="hs_list_schedules"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_list_schedules"><span class="hs-identifier hs-var">hs_list_schedules</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-227"></span><span>
+</span><span id="line-228"></span><span>
+</span><span id="line-229"></span><span class="annot"><span class="hs-comment">-- | Lists matching times within a range.</span></span><span>
+</span><span id="line-230"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#listSchedules"><span class="hs-identifier hs-type">listSchedules</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ListSchedulesRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ListSchedulesResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-231"></span><span id="listSchedules"><span class="annot"><span class="annottext">listSchedules :: Client
+-&gt; ListSchedulesRequest
+-&gt; IO (Either RpcError ListSchedulesResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#listSchedules"><span class="hs-identifier hs-var hs-var">listSchedules</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;listSchedules&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_list_schedules"><span class="hs-identifier hs-var">hs_list_schedules</span></a></span><span>
+</span><span id="line-232"></span><span>
+</span><span id="line-233"></span><span>
+</span><span id="line-234"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_list_task_queue_partitions&quot;</span></span><span> </span><span id="hs_list_task_queue_partitions"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_list_task_queue_partitions"><span class="hs-identifier hs-var">hs_list_task_queue_partitions</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-235"></span><span>
+</span><span id="line-236"></span><span>
+</span><span id="line-237"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#listTaskQueuePartitions"><span class="hs-identifier hs-type">listTaskQueuePartitions</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ListTaskQueuePartitionsRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ListTaskQueuePartitionsResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-238"></span><span id="listTaskQueuePartitions"><span class="annot"><span class="annottext">listTaskQueuePartitions :: Client
+-&gt; ListTaskQueuePartitionsRequest
+-&gt; IO (Either RpcError ListTaskQueuePartitionsResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#listTaskQueuePartitions"><span class="hs-identifier hs-var hs-var">listTaskQueuePartitions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;listTaskQueuePartitions&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_list_task_queue_partitions"><span class="hs-identifier hs-var">hs_list_task_queue_partitions</span></a></span><span>
+</span><span id="line-239"></span><span>
+</span><span id="line-240"></span><span>
+</span><span id="line-241"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_list_workflow_executions&quot;</span></span><span> </span><span id="hs_list_workflow_executions"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_list_workflow_executions"><span class="hs-identifier hs-var">hs_list_workflow_executions</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-242"></span><span>
+</span><span id="line-243"></span><span>
+</span><span id="line-244"></span><span class="annot"><span class="hs-comment">-- |  ListWorkflowExecutions is a visibility API to list workflow executions in a specific namespace.</span></span><span>
+</span><span id="line-245"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#listWorkflowExecutions"><span class="hs-identifier hs-type">listWorkflowExecutions</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ListWorkflowExecutionsRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ListWorkflowExecutionsResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-246"></span><span id="listWorkflowExecutions"><span class="annot"><span class="annottext">listWorkflowExecutions :: Client
+-&gt; ListWorkflowExecutionsRequest
+-&gt; IO (Either RpcError ListWorkflowExecutionsResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#listWorkflowExecutions"><span class="hs-identifier hs-var hs-var">listWorkflowExecutions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;listWorkflowExecutions&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_list_workflow_executions"><span class="hs-identifier hs-var">hs_list_workflow_executions</span></a></span><span>
+</span><span id="line-247"></span><span>
+</span><span id="line-248"></span><span>
+</span><span id="line-249"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_patch_schedule&quot;</span></span><span> </span><span id="hs_patch_schedule"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_patch_schedule"><span class="hs-identifier hs-var">hs_patch_schedule</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-250"></span><span>
+</span><span id="line-251"></span><span>
+</span><span id="line-252"></span><span class="annot"><span class="hs-comment">-- | Makes a specific change to a schedule or triggers an immediate action.</span></span><span>
+</span><span id="line-253"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#patchSchedule"><span class="hs-identifier hs-type">patchSchedule</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PatchScheduleRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PatchScheduleResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-254"></span><span id="patchSchedule"><span class="annot"><span class="annottext">patchSchedule :: Client
+-&gt; PatchScheduleRequest
+-&gt; IO (Either RpcError PatchScheduleResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#patchSchedule"><span class="hs-identifier hs-var hs-var">patchSchedule</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;patchSchedule&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_patch_schedule"><span class="hs-identifier hs-var">hs_patch_schedule</span></a></span><span>
+</span><span id="line-255"></span><span>
+</span><span id="line-256"></span><span>
+</span><span id="line-257"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_poll_activity_task_queue&quot;</span></span><span> </span><span id="hs_poll_activity_task_queue"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_poll_activity_task_queue"><span class="hs-identifier hs-var">hs_poll_activity_task_queue</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-258"></span><span>
+</span><span id="line-259"></span><span>
+</span><span id="line-260"></span><span class="annot"><span class="hs-comment">{- |
+PollActivityTaskQueue is called by workers to process activity tasks from a specific task
+queue.
+
+The worker is expected to call one of the `RespondActivityTaskXXX` methods when it is done
+processing the task.
+
+An activity task is dispatched whenever a `SCHEDULE_ACTIVITY_TASK` command is produced during
+workflow execution. An in memory `ACTIVITY_TASK_STARTED` event is written to mutable state
+before the task is dispatched to the worker. The started event, and the final event
+(`ACTIVITY_TASK_COMPLETED` / `ACTIVITY_TASK_FAILED` / `ACTIVITY_TASK_TIMED_OUT`) will both be
+written permanently to Workflow execution history when Activity is finished. This is done to
+avoid writing many events in the case of a failure/retry loop.
+-}</span></span><span>
+</span><span id="line-274"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#pollActivityTaskQueue"><span class="hs-identifier hs-type">pollActivityTaskQueue</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PollActivityTaskQueueRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PollActivityTaskQueueResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-275"></span><span id="pollActivityTaskQueue"><span class="annot"><span class="annottext">pollActivityTaskQueue :: Client
+-&gt; PollActivityTaskQueueRequest
+-&gt; IO (Either RpcError PollActivityTaskQueueResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#pollActivityTaskQueue"><span class="hs-identifier hs-var hs-var">pollActivityTaskQueue</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;pollActivityTaskQueue&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_poll_activity_task_queue"><span class="hs-identifier hs-var">hs_poll_activity_task_queue</span></a></span><span>
+</span><span id="line-276"></span><span>
+</span><span id="line-277"></span><span>
+</span><span id="line-278"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_poll_workflow_execution_update&quot;</span></span><span> </span><span id="hs_poll_workflow_execution_update"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_poll_workflow_execution_update"><span class="hs-identifier hs-var">hs_poll_workflow_execution_update</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-279"></span><span>
+</span><span id="line-280"></span><span>
+</span><span id="line-281"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#pollWorkflowExecutionUpdate"><span class="hs-identifier hs-type">pollWorkflowExecutionUpdate</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PollWorkflowExecutionUpdateRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PollWorkflowExecutionUpdateResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-282"></span><span id="pollWorkflowExecutionUpdate"><span class="annot"><span class="annottext">pollWorkflowExecutionUpdate :: Client
+-&gt; PollWorkflowExecutionUpdateRequest
+-&gt; IO (Either RpcError PollWorkflowExecutionUpdateResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#pollWorkflowExecutionUpdate"><span class="hs-identifier hs-var hs-var">pollWorkflowExecutionUpdate</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;pollWorkflowExecutionUpdate&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_poll_workflow_execution_update"><span class="hs-identifier hs-var">hs_poll_workflow_execution_update</span></a></span><span>
+</span><span id="line-283"></span><span>
+</span><span id="line-284"></span><span>
+</span><span id="line-285"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_poll_workflow_task_queue&quot;</span></span><span> </span><span id="hs_poll_workflow_task_queue"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_poll_workflow_task_queue"><span class="hs-identifier hs-var">hs_poll_workflow_task_queue</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-286"></span><span>
+</span><span id="line-287"></span><span>
+</span><span id="line-288"></span><span class="annot"><span class="hs-comment">{- |
+PollWorkflowTaskQueue is called by workers to make progress on workflows.
+
+A WorkflowTask is dispatched to callers for active workflow executions with pending workflow
+tasks. The worker is expected to call `RespondWorkflowTaskCompleted` when it is done
+processing the task. The service will create a `WorkflowTaskStarted` event in the history for
+this task before handing it to the worker.
+-}</span></span><span>
+</span><span id="line-296"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#pollWorkflowTaskQueue"><span class="hs-identifier hs-type">pollWorkflowTaskQueue</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PollWorkflowTaskQueueRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PollWorkflowTaskQueueResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-297"></span><span id="pollWorkflowTaskQueue"><span class="annot"><span class="annottext">pollWorkflowTaskQueue :: Client
+-&gt; PollWorkflowTaskQueueRequest
+-&gt; IO (Either RpcError PollWorkflowTaskQueueResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#pollWorkflowTaskQueue"><span class="hs-identifier hs-var hs-var">pollWorkflowTaskQueue</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;pollWorkflowTaskQueue&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_poll_workflow_task_queue"><span class="hs-identifier hs-var">hs_poll_workflow_task_queue</span></a></span><span>
+</span><span id="line-298"></span><span>
+</span><span id="line-299"></span><span>
+</span><span id="line-300"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_query_workflow&quot;</span></span><span> </span><span id="hs_query_workflow"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_query_workflow"><span class="hs-identifier hs-var">hs_query_workflow</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-301"></span><span>
+</span><span id="line-302"></span><span>
+</span><span id="line-303"></span><span class="annot"><span class="hs-comment">{- |
+QueryWorkflow requests a query be executed for a specified workflow execution.
+-}</span></span><span>
+</span><span id="line-306"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#queryWorkflow"><span class="hs-identifier hs-type">queryWorkflow</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">QueryWorkflowRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">QueryWorkflowResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-307"></span><span id="queryWorkflow"><span class="annot"><span class="annottext">queryWorkflow :: Client
+-&gt; QueryWorkflowRequest
+-&gt; IO (Either RpcError QueryWorkflowResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#queryWorkflow"><span class="hs-identifier hs-var hs-var">queryWorkflow</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;queryWorkflow&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_query_workflow"><span class="hs-identifier hs-var">hs_query_workflow</span></a></span><span>
+</span><span id="line-308"></span><span>
+</span><span id="line-309"></span><span>
+</span><span id="line-310"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_record_activity_task_heartbeat&quot;</span></span><span> </span><span id="hs_record_activity_task_heartbeat"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_record_activity_task_heartbeat"><span class="hs-identifier hs-var">hs_record_activity_task_heartbeat</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-311"></span><span>
+</span><span id="line-312"></span><span>
+</span><span id="line-313"></span><span class="annot"><span class="hs-comment">{- |
+RecordActivityTaskHeartbeat is optionally called by workers while they execute activities.
+
+If worker fails to heartbeat within the `heartbeat_timeout` interval for the activity task,
+then it will be marked as timed out and an `ACTIVITY_TASK_TIMED_OUT` event will be written to
+the workflow history. Calling `RecordActivityTaskHeartbeat` will fail with `NotFound` in
+such situations, in that event, the SDK should request cancellation of the activity.
+-}</span></span><span>
+</span><span id="line-321"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#recordActivityTaskHeartbeat"><span class="hs-identifier hs-type">recordActivityTaskHeartbeat</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RecordActivityTaskHeartbeatRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">RecordActivityTaskHeartbeatResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-322"></span><span id="recordActivityTaskHeartbeat"><span class="annot"><span class="annottext">recordActivityTaskHeartbeat :: Client
+-&gt; RecordActivityTaskHeartbeatRequest
+-&gt; IO (Either RpcError RecordActivityTaskHeartbeatResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#recordActivityTaskHeartbeat"><span class="hs-identifier hs-var hs-var">recordActivityTaskHeartbeat</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;recordActivityTaskHeartbeat&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_record_activity_task_heartbeat"><span class="hs-identifier hs-var">hs_record_activity_task_heartbeat</span></a></span><span>
+</span><span id="line-323"></span><span>
+</span><span id="line-324"></span><span>
+</span><span id="line-325"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_record_activity_task_heartbeat_by_id&quot;</span></span><span> </span><span id="hs_record_activity_task_heartbeat_by_id"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_record_activity_task_heartbeat_by_id"><span class="hs-identifier hs-var">hs_record_activity_task_heartbeat_by_id</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-326"></span><span>
+</span><span id="line-327"></span><span>
+</span><span id="line-328"></span><span class="annot"><span class="hs-comment">{- |
+See `RecordActivityTaskHeartbeat`. This version allows clients to record heartbeats by
+namespace/workflow id/activity id instead of task token.
+-}</span></span><span>
+</span><span id="line-332"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#recordActivityTaskHeartbeatById"><span class="hs-identifier hs-type">recordActivityTaskHeartbeatById</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RecordActivityTaskHeartbeatByIdRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">RecordActivityTaskHeartbeatByIdResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-333"></span><span id="recordActivityTaskHeartbeatById"><span class="annot"><span class="annottext">recordActivityTaskHeartbeatById :: Client
+-&gt; RecordActivityTaskHeartbeatByIdRequest
+-&gt; IO (Either RpcError RecordActivityTaskHeartbeatByIdResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#recordActivityTaskHeartbeatById"><span class="hs-identifier hs-var hs-var">recordActivityTaskHeartbeatById</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;recordActivityTaskHeartbeatById&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_record_activity_task_heartbeat_by_id"><span class="hs-identifier hs-var">hs_record_activity_task_heartbeat_by_id</span></a></span><span>
+</span><span id="line-334"></span><span>
+</span><span id="line-335"></span><span>
+</span><span id="line-336"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_register_namespace&quot;</span></span><span> </span><span id="hs_register_namespace"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_register_namespace"><span class="hs-identifier hs-var">hs_register_namespace</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-337"></span><span>
+</span><span id="line-338"></span><span>
+</span><span id="line-339"></span><span class="hs-comment">{-
+RegisterNamespace creates a new namespace which can be used as a container for all resources.
+
+A Namespace is a top level entity within Temporal, and is used as a container for resources
+like workflow executions, task queues, etc. A Namespace acts as a sandbox and provides
+isolation for all resources within the namespace. All resources belongs to exactly one namespace.
+-}</span><span>
+</span><span id="line-346"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#registerNamespace"><span class="hs-identifier hs-type">registerNamespace</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RegisterNamespaceRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">RegisterNamespaceResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-347"></span><span id="registerNamespace"><span class="annot"><span class="annottext">registerNamespace :: Client
+-&gt; RegisterNamespaceRequest
+-&gt; IO (Either RpcError RegisterNamespaceResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#registerNamespace"><span class="hs-identifier hs-var hs-var">registerNamespace</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;registerNamespace&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_register_namespace"><span class="hs-identifier hs-var">hs_register_namespace</span></a></span><span>
+</span><span id="line-348"></span><span>
+</span><span id="line-349"></span><span>
+</span><span id="line-350"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_request_cancel_workflow_execution&quot;</span></span><span> </span><span id="hs_request_cancel_workflow_execution"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_request_cancel_workflow_execution"><span class="hs-identifier hs-var">hs_request_cancel_workflow_execution</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-351"></span><span>
+</span><span id="line-352"></span><span>
+</span><span id="line-353"></span><span class="annot"><span class="hs-comment">{- |
+RequestCancelWorkflowExecution is called by workers when they want to request cancellation of
+a workflow execution.
+
+This results in a new `WORKFLOW_EXECUTION_CANCEL_REQUESTED` event being written to the
+workflow history and a new workflow task created for the workflow. It returns success if the requested
+workflow is already closed. It fails with 'NotFound' if the requested workflow doesn't exist.
+-}</span></span><span>
+</span><span id="line-361"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#requestCancelWorkflowExecution"><span class="hs-identifier hs-type">requestCancelWorkflowExecution</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RequestCancelWorkflowExecutionRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">RequestCancelWorkflowExecutionResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-362"></span><span id="requestCancelWorkflowExecution"><span class="annot"><span class="annottext">requestCancelWorkflowExecution :: Client
+-&gt; RequestCancelWorkflowExecutionRequest
+-&gt; IO (Either RpcError RequestCancelWorkflowExecutionResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#requestCancelWorkflowExecution"><span class="hs-identifier hs-var hs-var">requestCancelWorkflowExecution</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;requestCancelWorkflowExecution&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_request_cancel_workflow_execution"><span class="hs-identifier hs-var">hs_request_cancel_workflow_execution</span></a></span><span>
+</span><span id="line-363"></span><span>
+</span><span id="line-364"></span><span>
+</span><span id="line-365"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_reset_sticky_task_queue&quot;</span></span><span> </span><span id="hs_reset_sticky_task_queue"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_reset_sticky_task_queue"><span class="hs-identifier hs-var">hs_reset_sticky_task_queue</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-366"></span><span>
+</span><span id="line-367"></span><span>
+</span><span id="line-368"></span><span class="annot"><span class="hs-comment">{- |
+ResetStickyTaskQueue resets the sticky task queue related information in the mutable state of
+a given workflow. This is prudent for workers to perform if a workflow has been paged out of
+their cache.
+
+Things cleared are:
+1. StickyTaskQueue
+2. StickyScheduleToStartTimeout
+-}</span></span><span>
+</span><span id="line-377"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#resetStickyTaskQueue"><span class="hs-identifier hs-type">resetStickyTaskQueue</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ResetStickyTaskQueueRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ResetStickyTaskQueueResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-378"></span><span id="resetStickyTaskQueue"><span class="annot"><span class="annottext">resetStickyTaskQueue :: Client
+-&gt; ResetStickyTaskQueueRequest
+-&gt; IO (Either RpcError ResetStickyTaskQueueResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#resetStickyTaskQueue"><span class="hs-identifier hs-var hs-var">resetStickyTaskQueue</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;resetStickyTaskQueue&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_reset_sticky_task_queue"><span class="hs-identifier hs-var">hs_reset_sticky_task_queue</span></a></span><span>
+</span><span id="line-379"></span><span>
+</span><span id="line-380"></span><span>
+</span><span id="line-381"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_reset_workflow_execution&quot;</span></span><span> </span><span id="hs_reset_workflow_execution"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_reset_workflow_execution"><span class="hs-identifier hs-var">hs_reset_workflow_execution</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-382"></span><span>
+</span><span id="line-383"></span><span>
+</span><span id="line-384"></span><span class="annot"><span class="hs-comment">{- |
+ResetWorkflowExecution will reset an existing workflow execution to a specified
+`WORKFLOW_TASK_COMPLETED` event (exclusive). It will immediately terminate the current
+execution instance.
+-}</span></span><span>
+</span><span id="line-389"></span><span>
+</span><span id="line-390"></span><span class="hs-comment">-- TODO: Does exclusive here mean *just* the completed event, or also WFT started? Otherwise the task is doomed to time out?</span><span>
+</span><span id="line-391"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#resetWorkflowExecution"><span class="hs-identifier hs-type">resetWorkflowExecution</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ResetWorkflowExecutionRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ResetWorkflowExecutionResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-392"></span><span id="resetWorkflowExecution"><span class="annot"><span class="annottext">resetWorkflowExecution :: Client
+-&gt; ResetWorkflowExecutionRequest
+-&gt; IO (Either RpcError ResetWorkflowExecutionResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#resetWorkflowExecution"><span class="hs-identifier hs-var hs-var">resetWorkflowExecution</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;resetWorkflowExecution&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_reset_workflow_execution"><span class="hs-identifier hs-var">hs_reset_workflow_execution</span></a></span><span>
+</span><span id="line-393"></span><span>
+</span><span id="line-394"></span><span>
+</span><span id="line-395"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_respond_activity_task_canceled&quot;</span></span><span> </span><span id="hs_respond_activity_task_canceled"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_respond_activity_task_canceled"><span class="hs-identifier hs-var">hs_respond_activity_task_canceled</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-396"></span><span>
+</span><span id="line-397"></span><span>
+</span><span id="line-398"></span><span class="annot"><span class="hs-comment">{- |
+RespondActivityTaskFailed is called by workers when processing an activity task fails.
+
+This results in a new `ACTIVITY_TASK_CANCELED` event being written to the workflow history
+and a new workflow task created for the workflow. Fails with `NotFound` if the task token is
+no longer valid due to activity timeout, already being completed, or never having existed.
+-}</span></span><span>
+</span><span id="line-405"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#respondActivityTaskCanceled"><span class="hs-identifier hs-type">respondActivityTaskCanceled</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RespondActivityTaskCanceledRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">RespondActivityTaskCanceledResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-406"></span><span id="respondActivityTaskCanceled"><span class="annot"><span class="annottext">respondActivityTaskCanceled :: Client
+-&gt; RespondActivityTaskCanceledRequest
+-&gt; IO (Either RpcError RespondActivityTaskCanceledResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#respondActivityTaskCanceled"><span class="hs-identifier hs-var hs-var">respondActivityTaskCanceled</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;respondActivityTaskCanceled&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_respond_activity_task_canceled"><span class="hs-identifier hs-var">hs_respond_activity_task_canceled</span></a></span><span>
+</span><span id="line-407"></span><span>
+</span><span id="line-408"></span><span>
+</span><span id="line-409"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_respond_activity_task_canceled_by_id&quot;</span></span><span> </span><span id="hs_respond_activity_task_canceled_by_id"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_respond_activity_task_canceled_by_id"><span class="hs-identifier hs-var">hs_respond_activity_task_canceled_by_id</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-410"></span><span>
+</span><span id="line-411"></span><span>
+</span><span id="line-412"></span><span class="annot"><span class="hs-comment">{- |
+See `RecordActivityTaskCanceled`. This version allows clients to record failures by
+namespace/workflow id/activity id instead of task token.
+-}</span></span><span>
+</span><span id="line-416"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#respondActivityTaskCanceledById"><span class="hs-identifier hs-type">respondActivityTaskCanceledById</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RespondActivityTaskCanceledByIdRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">RespondActivityTaskCanceledByIdResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-417"></span><span id="respondActivityTaskCanceledById"><span class="annot"><span class="annottext">respondActivityTaskCanceledById :: Client
+-&gt; RespondActivityTaskCanceledByIdRequest
+-&gt; IO (Either RpcError RespondActivityTaskCanceledByIdResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#respondActivityTaskCanceledById"><span class="hs-identifier hs-var hs-var">respondActivityTaskCanceledById</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;respondActivityTaskCanceledById&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_respond_activity_task_canceled_by_id"><span class="hs-identifier hs-var">hs_respond_activity_task_canceled_by_id</span></a></span><span>
+</span><span id="line-418"></span><span>
+</span><span id="line-419"></span><span>
+</span><span id="line-420"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_respond_activity_task_completed&quot;</span></span><span> </span><span id="hs_respond_activity_task_completed"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_respond_activity_task_completed"><span class="hs-identifier hs-var">hs_respond_activity_task_completed</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-421"></span><span>
+</span><span id="line-422"></span><span>
+</span><span id="line-423"></span><span class="annot"><span class="hs-comment">{- |
+RespondActivityTaskCompleted is called by workers when they successfully complete an activity
+task.
+
+This results in a new `ACTIVITY_TASK_COMPLETED` event being written to the workflow history
+and a new workflow task created for the workflow. Fails with `NotFound` if the task token is
+no longer valid due to activity timeout, already being completed, or never having existed.
+-}</span></span><span>
+</span><span id="line-431"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#respondActivityTaskCompleted"><span class="hs-identifier hs-type">respondActivityTaskCompleted</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RespondActivityTaskCompletedRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">RespondActivityTaskCompletedResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-432"></span><span id="respondActivityTaskCompleted"><span class="annot"><span class="annottext">respondActivityTaskCompleted :: Client
+-&gt; RespondActivityTaskCompletedRequest
+-&gt; IO (Either RpcError RespondActivityTaskCompletedResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#respondActivityTaskCompleted"><span class="hs-identifier hs-var hs-var">respondActivityTaskCompleted</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;respondActivityTaskCompleted&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_respond_activity_task_completed"><span class="hs-identifier hs-var">hs_respond_activity_task_completed</span></a></span><span>
+</span><span id="line-433"></span><span>
+</span><span id="line-434"></span><span>
+</span><span id="line-435"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_respond_activity_task_completed_by_id&quot;</span></span><span> </span><span id="hs_respond_activity_task_completed_by_id"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_respond_activity_task_completed_by_id"><span class="hs-identifier hs-var">hs_respond_activity_task_completed_by_id</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-436"></span><span>
+</span><span id="line-437"></span><span>
+</span><span id="line-438"></span><span class="annot"><span class="hs-comment">{- |
+See `RecordActivityTaskCompleted`. This version allows clients to record completions by
+namespace/workflow id/activity id instead of task token.
+-}</span></span><span>
+</span><span id="line-442"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#respondActivityTaskCompletedById"><span class="hs-identifier hs-type">respondActivityTaskCompletedById</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RespondActivityTaskCompletedByIdRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">RespondActivityTaskCompletedByIdResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-443"></span><span id="respondActivityTaskCompletedById"><span class="annot"><span class="annottext">respondActivityTaskCompletedById :: Client
+-&gt; RespondActivityTaskCompletedByIdRequest
+-&gt; IO (Either RpcError RespondActivityTaskCompletedByIdResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#respondActivityTaskCompletedById"><span class="hs-identifier hs-var hs-var">respondActivityTaskCompletedById</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;respondActivityTaskCompletedById&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_respond_activity_task_completed_by_id"><span class="hs-identifier hs-var">hs_respond_activity_task_completed_by_id</span></a></span><span>
+</span><span id="line-444"></span><span>
+</span><span id="line-445"></span><span>
+</span><span id="line-446"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_respond_activity_task_failed&quot;</span></span><span> </span><span id="hs_respond_activity_task_failed"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_respond_activity_task_failed"><span class="hs-identifier hs-var">hs_respond_activity_task_failed</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-447"></span><span>
+</span><span id="line-448"></span><span>
+</span><span id="line-449"></span><span class="annot"><span class="hs-comment">{- |
+RespondActivityTaskFailed is called by workers when processing an activity task fails.
+
+This results in a new `ACTIVITY_TASK_FAILED` event being written to the workflow history and
+a new workflow task created for the workflow. Fails with `NotFound` if the task token is no
+longer valid due to activity timeout, already being completed, or never having existed.
+-}</span></span><span>
+</span><span id="line-456"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#respondActivityTaskFailed"><span class="hs-identifier hs-type">respondActivityTaskFailed</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RespondActivityTaskFailedRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">RespondActivityTaskFailedResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-457"></span><span id="respondActivityTaskFailed"><span class="annot"><span class="annottext">respondActivityTaskFailed :: Client
+-&gt; RespondActivityTaskFailedRequest
+-&gt; IO (Either RpcError RespondActivityTaskFailedResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#respondActivityTaskFailed"><span class="hs-identifier hs-var hs-var">respondActivityTaskFailed</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;respondActivityTaskFailed&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_respond_activity_task_failed"><span class="hs-identifier hs-var">hs_respond_activity_task_failed</span></a></span><span>
+</span><span id="line-458"></span><span>
+</span><span id="line-459"></span><span>
+</span><span id="line-460"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_respond_activity_task_failed_by_id&quot;</span></span><span> </span><span id="hs_respond_activity_task_failed_by_id"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_respond_activity_task_failed_by_id"><span class="hs-identifier hs-var">hs_respond_activity_task_failed_by_id</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-461"></span><span>
+</span><span id="line-462"></span><span>
+</span><span id="line-463"></span><span class="annot"><span class="hs-comment">{- |
+See `RecordActivityTaskCompleted`. This version allows clients to record completions by
+namespace/workflow id/activity id instead of task token.
+-}</span></span><span>
+</span><span id="line-467"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#respondActivityTaskFailedById"><span class="hs-identifier hs-type">respondActivityTaskFailedById</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RespondActivityTaskFailedByIdRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">RespondActivityTaskFailedByIdResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-468"></span><span id="respondActivityTaskFailedById"><span class="annot"><span class="annottext">respondActivityTaskFailedById :: Client
+-&gt; RespondActivityTaskFailedByIdRequest
+-&gt; IO (Either RpcError RespondActivityTaskFailedByIdResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#respondActivityTaskFailedById"><span class="hs-identifier hs-var hs-var">respondActivityTaskFailedById</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;respondActivityTaskFailedById&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_respond_activity_task_failed_by_id"><span class="hs-identifier hs-var">hs_respond_activity_task_failed_by_id</span></a></span><span>
+</span><span id="line-469"></span><span>
+</span><span id="line-470"></span><span>
+</span><span id="line-471"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_respond_query_task_completed&quot;</span></span><span> </span><span id="hs_respond_query_task_completed"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_respond_query_task_completed"><span class="hs-identifier hs-var">hs_respond_query_task_completed</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-472"></span><span>
+</span><span id="line-473"></span><span>
+</span><span id="line-474"></span><span class="annot"><span class="hs-comment">{- |
+RespondQueryTaskCompleted is called by workers to complete queries which were delivered on
+the `query` (not `queries`) field of a `PollWorkflowTaskQueueResponse`.
+
+Completing the query will unblock the corresponding client call to `QueryWorkflow` and return
+the query result a response.
+-}</span></span><span>
+</span><span id="line-481"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#respondQueryTaskCompleted"><span class="hs-identifier hs-type">respondQueryTaskCompleted</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RespondQueryTaskCompletedRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">RespondQueryTaskCompletedResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-482"></span><span id="respondQueryTaskCompleted"><span class="annot"><span class="annottext">respondQueryTaskCompleted :: Client
+-&gt; RespondQueryTaskCompletedRequest
+-&gt; IO (Either RpcError RespondQueryTaskCompletedResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#respondQueryTaskCompleted"><span class="hs-identifier hs-var hs-var">respondQueryTaskCompleted</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;respondQueryTaskCompleted&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_respond_query_task_completed"><span class="hs-identifier hs-var">hs_respond_query_task_completed</span></a></span><span>
+</span><span id="line-483"></span><span>
+</span><span id="line-484"></span><span>
+</span><span id="line-485"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_respond_workflow_task_completed&quot;</span></span><span> </span><span id="hs_respond_workflow_task_completed"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_respond_workflow_task_completed"><span class="hs-identifier hs-var">hs_respond_workflow_task_completed</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-486"></span><span>
+</span><span id="line-487"></span><span>
+</span><span id="line-488"></span><span class="annot"><span class="hs-comment">{- |
+RespondWorkflowTaskCompleted is called by workers to successfully complete workflow tasks
+they received from `PollWorkflowTaskQueue`.
+
+Completing a WorkflowTask will write a `WORKFLOW_TASK_COMPLETED` event to the workflow's
+history, along with events corresponding to whatever commands the SDK generated while
+executing the task (ex timer started, activity task scheduled, etc).
+-}</span></span><span>
+</span><span id="line-496"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#respondWorkflowTaskCompleted"><span class="hs-identifier hs-type">respondWorkflowTaskCompleted</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RespondWorkflowTaskCompletedRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">RespondWorkflowTaskCompletedResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-497"></span><span id="respondWorkflowTaskCompleted"><span class="annot"><span class="annottext">respondWorkflowTaskCompleted :: Client
+-&gt; RespondWorkflowTaskCompletedRequest
+-&gt; IO (Either RpcError RespondWorkflowTaskCompletedResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#respondWorkflowTaskCompleted"><span class="hs-identifier hs-var hs-var">respondWorkflowTaskCompleted</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;respondWorkflowTaskCompleted&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_respond_workflow_task_completed"><span class="hs-identifier hs-var">hs_respond_workflow_task_completed</span></a></span><span>
+</span><span id="line-498"></span><span>
+</span><span id="line-499"></span><span>
+</span><span id="line-500"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_respond_workflow_task_failed&quot;</span></span><span> </span><span id="hs_respond_workflow_task_failed"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_respond_workflow_task_failed"><span class="hs-identifier hs-var">hs_respond_workflow_task_failed</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-501"></span><span>
+</span><span id="line-502"></span><span>
+</span><span id="line-503"></span><span class="annot"><span class="hs-comment">{- |
+RespondWorkflowTaskFailed is called by workers to indicate the processing of a workflow task
+failed.
+
+This results in a `WORKFLOW_TASK_FAILED` event written to the history, and a new workflow
+task will be scheduled. This API can be used to report unhandled failures resulting from
+applying the workflow task.
+
+Temporal will only append first WorkflowTaskFailed event to the history of workflow execution
+for consecutive failures.
+-}</span></span><span>
+</span><span id="line-514"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#respondWorkflowTaskFailed"><span class="hs-identifier hs-type">respondWorkflowTaskFailed</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RespondWorkflowTaskFailedRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">RespondWorkflowTaskFailedResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-515"></span><span id="respondWorkflowTaskFailed"><span class="annot"><span class="annottext">respondWorkflowTaskFailed :: Client
+-&gt; RespondWorkflowTaskFailedRequest
+-&gt; IO (Either RpcError RespondWorkflowTaskFailedResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#respondWorkflowTaskFailed"><span class="hs-identifier hs-var hs-var">respondWorkflowTaskFailed</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;respondWorkflowTaskFailed&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_respond_workflow_task_failed"><span class="hs-identifier hs-var">hs_respond_workflow_task_failed</span></a></span><span>
+</span><span id="line-516"></span><span>
+</span><span id="line-517"></span><span>
+</span><span id="line-518"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_scan_workflow_executions&quot;</span></span><span> </span><span id="hs_scan_workflow_executions"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_scan_workflow_executions"><span class="hs-identifier hs-var">hs_scan_workflow_executions</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-519"></span><span>
+</span><span id="line-520"></span><span>
+</span><span id="line-521"></span><span class="annot"><span class="hs-comment">-- | ScanWorkflowExecutions is a visibility API to list large amount of workflow executions in a specific namespace without order.</span></span><span>
+</span><span id="line-522"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#scanWorkflowExecutions"><span class="hs-identifier hs-type">scanWorkflowExecutions</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ScanWorkflowExecutionsRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ScanWorkflowExecutionsResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-523"></span><span id="scanWorkflowExecutions"><span class="annot"><span class="annottext">scanWorkflowExecutions :: Client
+-&gt; ScanWorkflowExecutionsRequest
+-&gt; IO (Either RpcError ScanWorkflowExecutionsResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#scanWorkflowExecutions"><span class="hs-identifier hs-var hs-var">scanWorkflowExecutions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;scanWorkflowExecutions&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_scan_workflow_executions"><span class="hs-identifier hs-var">hs_scan_workflow_executions</span></a></span><span>
+</span><span id="line-524"></span><span>
+</span><span id="line-525"></span><span>
+</span><span id="line-526"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_signal_with_start_workflow_execution&quot;</span></span><span> </span><span id="hs_signal_with_start_workflow_execution"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_signal_with_start_workflow_execution"><span class="hs-identifier hs-var">hs_signal_with_start_workflow_execution</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-527"></span><span>
+</span><span id="line-528"></span><span>
+</span><span id="line-529"></span><span class="annot"><span class="hs-comment">{- |
+SignalWithStartWorkflowExecution is used to ensure a signal is sent to a workflow, even if
+it isn't yet started.
+
+If the workflow is running, a `WORKFLOW_EXECUTION_SIGNALED` event is recorded in the history
+and a workflow task is generated.
+
+If the workflow is not running or not found, then the workflow is created with
+`WORKFLOW_EXECUTION_STARTED` and `WORKFLOW_EXECUTION_SIGNALED` events in its history, and a
+workflow task is generated.
+-}</span></span><span>
+</span><span id="line-540"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#signalWithStartWorkflowExecution"><span class="hs-identifier hs-type">signalWithStartWorkflowExecution</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SignalWithStartWorkflowExecutionRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">SignalWithStartWorkflowExecutionResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-541"></span><span id="signalWithStartWorkflowExecution"><span class="annot"><span class="annottext">signalWithStartWorkflowExecution :: Client
+-&gt; SignalWithStartWorkflowExecutionRequest
+-&gt; IO (Either RpcError SignalWithStartWorkflowExecutionResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#signalWithStartWorkflowExecution"><span class="hs-identifier hs-var hs-var">signalWithStartWorkflowExecution</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;signalWithStartWorkflowExecution&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_signal_with_start_workflow_execution"><span class="hs-identifier hs-var">hs_signal_with_start_workflow_execution</span></a></span><span>
+</span><span id="line-542"></span><span>
+</span><span id="line-543"></span><span>
+</span><span id="line-544"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_signal_workflow_execution&quot;</span></span><span> </span><span id="hs_signal_workflow_execution"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_signal_workflow_execution"><span class="hs-identifier hs-var">hs_signal_workflow_execution</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-545"></span><span>
+</span><span id="line-546"></span><span>
+</span><span id="line-547"></span><span class="annot"><span class="hs-comment">{- |
+SignalWorkflowExecution is used to send a signal to a running workflow execution.
+
+This results in a `WORKFLOW_EXECUTION_SIGNALED` event recorded in the history and a workflow
+task being created for the execution.
+-}</span></span><span>
+</span><span id="line-553"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#signalWorkflowExecution"><span class="hs-identifier hs-type">signalWorkflowExecution</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SignalWorkflowExecutionRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">SignalWorkflowExecutionResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-554"></span><span id="signalWorkflowExecution"><span class="annot"><span class="annottext">signalWorkflowExecution :: Client
+-&gt; SignalWorkflowExecutionRequest
+-&gt; IO (Either RpcError SignalWorkflowExecutionResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#signalWorkflowExecution"><span class="hs-identifier hs-var hs-var">signalWorkflowExecution</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;signalWorkflowExecution&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_signal_workflow_execution"><span class="hs-identifier hs-var">hs_signal_workflow_execution</span></a></span><span>
+</span><span id="line-555"></span><span>
+</span><span id="line-556"></span><span>
+</span><span id="line-557"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_start_workflow_execution&quot;</span></span><span> </span><span id="hs_start_workflow_execution"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_start_workflow_execution"><span class="hs-identifier hs-var">hs_start_workflow_execution</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-558"></span><span>
+</span><span id="line-559"></span><span>
+</span><span id="line-560"></span><span class="hs-comment">{-
+  Starts a new workflow execution.
+
+  It will create the execution with a `WORKFLOW_EXECUTION_STARTED` event in its history and
+  also schedule the first workflow task. Returns `WorkflowExecutionAlreadyStarted`, if an
+  instance already exists with same workflow id.
+-}</span><span>
+</span><span id="line-567"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#startWorkflowExecution"><span class="hs-identifier hs-type">startWorkflowExecution</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">StartWorkflowExecutionRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">StartWorkflowExecutionResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-568"></span><span id="startWorkflowExecution"><span class="annot"><span class="annottext">startWorkflowExecution :: Client
+-&gt; StartWorkflowExecutionRequest
+-&gt; IO (Either RpcError StartWorkflowExecutionResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#startWorkflowExecution"><span class="hs-identifier hs-var hs-var">startWorkflowExecution</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;startWorkflowExecution&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_start_workflow_execution"><span class="hs-identifier hs-var">hs_start_workflow_execution</span></a></span><span>
+</span><span id="line-569"></span><span>
+</span><span id="line-570"></span><span>
+</span><span id="line-571"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_terminate_workflow_execution&quot;</span></span><span> </span><span id="hs_terminate_workflow_execution"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_terminate_workflow_execution"><span class="hs-identifier hs-var">hs_terminate_workflow_execution</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-572"></span><span>
+</span><span id="line-573"></span><span>
+</span><span id="line-574"></span><span class="annot"><span class="hs-comment">{- |
+terminates an existing workflow execution by recording a
+`WORKFLOW_EXECUTION_TERMINATED` event in the history and immediately terminating the
+execution instance.
+-}</span></span><span>
+</span><span id="line-579"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#terminateWorkflowExecution"><span class="hs-identifier hs-type">terminateWorkflowExecution</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TerminateWorkflowExecutionRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">TerminateWorkflowExecutionResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-580"></span><span id="terminateWorkflowExecution"><span class="annot"><span class="annottext">terminateWorkflowExecution :: Client
+-&gt; TerminateWorkflowExecutionRequest
+-&gt; IO (Either RpcError TerminateWorkflowExecutionResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#terminateWorkflowExecution"><span class="hs-identifier hs-var hs-var">terminateWorkflowExecution</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;terminateWorkflowExecution&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_terminate_workflow_execution"><span class="hs-identifier hs-var">hs_terminate_workflow_execution</span></a></span><span>
+</span><span id="line-581"></span><span>
+</span><span id="line-582"></span><span>
+</span><span id="line-583"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_update_namespace&quot;</span></span><span> </span><span id="hs_update_namespace"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_update_namespace"><span class="hs-identifier hs-var">hs_update_namespace</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-584"></span><span>
+</span><span id="line-585"></span><span>
+</span><span id="line-586"></span><span class="annot"><span class="hs-comment">{- | UpdateNamespace is used to update the information and configuration of a registered
+namespace.
+-}</span></span><span>
+</span><span id="line-589"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#updateNamespace"><span class="hs-identifier hs-type">updateNamespace</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">UpdateNamespaceRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">UpdateNamespaceResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-590"></span><span id="updateNamespace"><span class="annot"><span class="annottext">updateNamespace :: Client
+-&gt; UpdateNamespaceRequest
+-&gt; IO (Either RpcError UpdateNamespaceResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#updateNamespace"><span class="hs-identifier hs-var hs-var">updateNamespace</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;updateNamespace&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_update_namespace"><span class="hs-identifier hs-var">hs_update_namespace</span></a></span><span>
+</span><span id="line-591"></span><span>
+</span><span id="line-592"></span><span>
+</span><span id="line-593"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_update_schedule&quot;</span></span><span> </span><span id="hs_update_schedule"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_update_schedule"><span class="hs-identifier hs-var">hs_update_schedule</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-594"></span><span>
+</span><span id="line-595"></span><span>
+</span><span id="line-596"></span><span class="annot"><span class="hs-comment">-- |  Changes the configuration or state of an existing schedule.</span></span><span>
+</span><span id="line-597"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#updateSchedule"><span class="hs-identifier hs-type">updateSchedule</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">UpdateScheduleRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">UpdateScheduleResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-598"></span><span id="updateSchedule"><span class="annot"><span class="annottext">updateSchedule :: Client
+-&gt; UpdateScheduleRequest
+-&gt; IO (Either RpcError UpdateScheduleResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#updateSchedule"><span class="hs-identifier hs-var hs-var">updateSchedule</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;updateSchedule&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_update_schedule"><span class="hs-identifier hs-var">hs_update_schedule</span></a></span><span>
+</span><span id="line-599"></span><span>
+</span><span id="line-600"></span><span>
+</span><span id="line-601"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_update_workflow_execution&quot;</span></span><span> </span><span id="hs_update_workflow_execution"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_update_workflow_execution"><span class="hs-identifier hs-var">hs_update_workflow_execution</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-602"></span><span>
+</span><span id="line-603"></span><span>
+</span><span id="line-604"></span><span class="annot"><span class="hs-comment">-- | Invokes the specified update function on user workflow code.</span></span><span>
+</span><span id="line-605"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#updateWorkflowExecution"><span class="hs-identifier hs-type">updateWorkflowExecution</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">UpdateWorkflowExecutionRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">UpdateWorkflowExecutionResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-606"></span><span id="updateWorkflowExecution"><span class="annot"><span class="annottext">updateWorkflowExecution :: Client
+-&gt; UpdateWorkflowExecutionRequest
+-&gt; IO (Either RpcError UpdateWorkflowExecutionResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#updateWorkflowExecution"><span class="hs-identifier hs-var hs-var">updateWorkflowExecution</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;updateWorkflowExecution&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_update_workflow_execution"><span class="hs-identifier hs-var">hs_update_workflow_execution</span></a></span><span>
+</span><span id="line-607"></span><span>
+</span><span id="line-608"></span><span>
+</span><span id="line-609"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_update_worker_build_id_compatibility&quot;</span></span><span> </span><span id="hs_update_worker_build_id_compatibility"><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#hs_update_worker_build_id_compatibility"><span class="hs-identifier hs-var">hs_update_worker_build_id_compatibility</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-610"></span><span>
+</span><span id="line-611"></span><span>
+</span><span id="line-612"></span><span class="annot"><span class="hs-comment">{- |
+Allows users to specify sets of worker build id versions on a per task queue basis. Versions
+are ordered, and may be either compatible with some extant version, or a new incompatible
+version, forming sets of ids which are incompatible with each other, but whose contained
+members are compatible with one another.
+-}</span></span><span>
+</span><span id="line-618"></span><span class="annot"><a href="Temporal.Core.Client.WorkflowService.html#updateWorkerBuildIdCompatibility"><span class="hs-identifier hs-type">updateWorkerBuildIdCompatibility</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">UpdateWorkerBuildIdCompatibilityRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">UpdateWorkerBuildIdCompatibilityResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-619"></span><span id="updateWorkerBuildIdCompatibility"><span class="annot"><span class="annottext">updateWorkerBuildIdCompatibility :: Client
+-&gt; UpdateWorkerBuildIdCompatibilityRequest
+-&gt; IO (Either RpcError UpdateWorkerBuildIdCompatibilityResponse)
+</span><a href="Temporal.Core.Client.WorkflowService.html#updateWorkerBuildIdCompatibility"><span class="hs-identifier hs-var hs-var">updateWorkerBuildIdCompatibility</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">WorkflowService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;updateWorkerBuildIdCompatibility&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.WorkflowService.html#hs_update_worker_build_id_compatibility"><span class="hs-identifier hs-var">hs_update_worker_build_id_compatibility</span></a></span><span>
+</span><span id="line-620"></span></pre></body></html>

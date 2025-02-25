@@ -1,0 +1,341 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DuplicateRecordFields #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE PolyKinds #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE TypeFamilies #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Worker.Types.html"><span class="hs-identifier">Temporal.Worker.Types</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Logger</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Reader</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.HashMap.Strict</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">HashMap</span></span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">OpenTelemetry.Trace.Core</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Activity.Definition.html"><span class="hs-identifier">Temporal.Activity.Definition</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Activity.Definition.html#ActivityDefinition"><span class="hs-identifier">ActivityDefinition</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Activity.Worker.html"><span class="hs-identifier">Temporal.Activity.Worker</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Activity.Worker.html#ActivityWorker"><span class="hs-identifier">ActivityWorker</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Common.html"><span class="hs-identifier">Temporal.Common</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Temporal.Core.Worker</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">InactiveForReplay</span></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Temporal.Core.Worker</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Core</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Exception.html"><span class="hs-identifier">Temporal.Exception</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Exception.html#ApplicationFailureHandler"><span class="hs-identifier">ApplicationFailureHandler</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Interceptor.html"><span class="hs-identifier">Temporal.Interceptor</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Payload.html"><span class="hs-identifier">Temporal.Payload</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Workflow.Definition.html"><span class="hs-identifier">Temporal.Workflow.Definition</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Definition.html#WorkflowDefinition"><span class="hs-identifier">WorkflowDefinition</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html"><span class="hs-identifier">Temporal.Workflow.Internal.Monad</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Workflow.Worker.html"><span class="hs-identifier">Temporal.Workflow.Worker</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Worker.html#WorkflowWorker"><span class="hs-identifier">WorkflowWorker</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">UnliftIO</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">race</span></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">data</span><span> </span><span id="WorkerConfig"><span class="annot"><a href="Temporal.Worker.Types.html#WorkerConfig"><span class="hs-identifier hs-var">WorkerConfig</span></a></span></span><span> </span><span id="local-6989586621680179454"><span class="annot"><a href="#local-6989586621680179454"><span class="hs-identifier hs-type">activityEnv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="WorkerConfig"><span class="annot"><a href="Temporal.Worker.Types.html#WorkerConfig"><span class="hs-identifier hs-var">WorkerConfig</span></a></span></span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="deadlockTimeout"><span class="annot"><span class="annottext">forall activityEnv. WorkerConfig activityEnv -&gt; Maybe Int
+</span><a href="Temporal.Worker.Types.html#deadlockTimeout"><span class="hs-identifier hs-var hs-var">deadlockTimeout</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="wfDefs"><span class="annot"><span class="annottext">forall activityEnv.
+WorkerConfig activityEnv -&gt; HashMap Text WorkflowDefinition
+</span><a href="Temporal.Worker.Types.html#wfDefs"><span class="hs-identifier hs-var hs-var">wfDefs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HashMap</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="Temporal.Workflow.Definition.html#WorkflowDefinition"><span class="hs-identifier hs-type">WorkflowDefinition</span></a></span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="actEnv"><span class="annot"><span class="annottext">forall activityEnv. WorkerConfig activityEnv -&gt; activityEnv
+</span><a href="Temporal.Worker.Types.html#actEnv"><span class="hs-identifier hs-var hs-var">actEnv</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621680179454"><span class="hs-identifier hs-type">activityEnv</span></a></span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="actDefs"><span class="annot"><span class="annottext">forall activityEnv.
+WorkerConfig activityEnv
+-&gt; HashMap Text (ActivityDefinition activityEnv)
+</span><a href="Temporal.Worker.Types.html#actDefs"><span class="hs-identifier hs-var hs-var">actDefs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HashMap</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Activity.Definition.html#ActivityDefinition"><span class="hs-identifier hs-type">ActivityDefinition</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680179454"><span class="hs-identifier hs-type">activityEnv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="coreConfig"><span class="annot"><span class="annottext">forall activityEnv. WorkerConfig activityEnv -&gt; WorkerConfig
+</span><a href="Temporal.Worker.Types.html#coreConfig"><span class="hs-identifier hs-var hs-var">coreConfig</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Core.WorkerConfig</span></span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="interceptorConfig"><span class="annot"><span class="annottext">forall activityEnv.
+WorkerConfig activityEnv -&gt; Interceptors activityEnv
+</span><a href="Temporal.Worker.Types.html#interceptorConfig"><span class="hs-identifier hs-var hs-var">interceptorConfig</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Interceptor.html#Interceptors"><span class="hs-identifier hs-type">Interceptors</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680179454"><span class="hs-identifier hs-type">activityEnv</span></a></span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="applicationErrorConverters"><span class="annot"><span class="annottext">forall activityEnv.
+WorkerConfig activityEnv -&gt; [ApplicationFailureHandler]
+</span><a href="Temporal.Worker.Types.html#applicationErrorConverters"><span class="hs-identifier hs-var hs-var">applicationErrorConverters</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Temporal.Exception.html#ApplicationFailureHandler"><span class="hs-identifier hs-type">ApplicationFailureHandler</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="tracerProvider"><span class="annot"><span class="annottext">forall activityEnv. WorkerConfig activityEnv -&gt; TracerProvider
+</span><a href="Temporal.Worker.Types.html#tracerProvider"><span class="hs-identifier hs-var hs-var">tracerProvider</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TracerProvider</span></span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-comment">-- ^ This TracerProvider should only need to be supplied if you want to observe</span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-comment">-- Worker-internal traces for debugging purposes.</span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="logger"><span class="annot"><span class="annottext">forall activityEnv.
+WorkerConfig activityEnv
+-&gt; Loc -&gt; Text -&gt; LogLevel -&gt; LogStr -&gt; IO ()
+</span><a href="Temporal.Worker.Types.html#logger"><span class="hs-identifier hs-var hs-var">logger</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Loc</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">LogSource</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">LogLevel</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">LogStr</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="payloadProcessor"><span class="annot"><span class="annottext">forall activityEnv. WorkerConfig activityEnv -&gt; PayloadProcessor
+</span><a href="Temporal.Worker.Types.html#payloadProcessor"><span class="hs-identifier hs-var hs-var">payloadProcessor</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Payload.html#PayloadProcessor"><span class="hs-identifier hs-type">PayloadProcessor</span></a></span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">data</span><span> </span><span id="Worker"><span class="annot"><a href="Temporal.Worker.Types.html#Worker"><span class="hs-identifier hs-var">Worker</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680179479"><span class="annot"><a href="#local-6989586621680179479"><span class="hs-identifier hs-type">ty</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Core.WorkerType</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621680179480"><span class="annot"><a href="#local-6989586621680179480"><span class="hs-identifier hs-type">activityEnv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Worker"><span class="annot"><a href="Temporal.Worker.Types.html#Worker"><span class="hs-identifier hs-var">Worker</span></a></span></span><span>
+</span><span id="line-46"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="workerCore"><span class="annot"><span class="annottext">forall (ty :: WorkerType) activityEnv.
+Worker ty activityEnv -&gt; Worker ty
+</span><a href="Temporal.Worker.Types.html#workerCore"><span class="hs-identifier hs-var hs-var">workerCore</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Core.Worker</span></span><span> </span><span class="annot"><a href="#local-6989586621680179479"><span class="hs-identifier hs-type">ty</span></a></span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="workerTaskQueue"><span class="annot"><span class="annottext">forall (ty :: WorkerType) activityEnv.
+Worker ty activityEnv -&gt; TaskQueue
+</span><a href="Temporal.Worker.Types.html#workerTaskQueue"><span class="hs-identifier hs-var hs-var">workerTaskQueue</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Common.html#TaskQueue"><span class="hs-identifier hs-type">TaskQueue</span></a></span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="workerConfig"><span class="annot"><span class="annottext">forall (ty :: WorkerType) activityEnv.
+Worker ty activityEnv -&gt; WorkerConfig activityEnv
+</span><a href="Temporal.Worker.Types.html#workerConfig"><span class="hs-identifier hs-var hs-var">workerConfig</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Worker.Types.html#WorkerConfig"><span class="hs-identifier hs-type">WorkerConfig</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680179480"><span class="hs-identifier hs-type">activityEnv</span></a></span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="workerLogFn"><span class="annot"><span class="annottext">forall (ty :: WorkerType) activityEnv.
+Worker ty activityEnv -&gt; Loc -&gt; Text -&gt; LogLevel -&gt; LogStr -&gt; IO ()
+</span><a href="Temporal.Worker.Types.html#workerLogFn"><span class="hs-identifier hs-var hs-var">workerLogFn</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Loc</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">LogSource</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">LogLevel</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">LogStr</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="workflowWorker"><span class="annot"><span class="annottext">forall (ty :: WorkerType) activityEnv.
+Worker ty activityEnv -&gt; WorkflowWorker
+</span><a href="Temporal.Worker.Types.html#workflowWorker"><span class="hs-identifier hs-var hs-var">workflowWorker</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Workflow.Worker.html#WorkflowWorker"><span class="hs-identifier hs-type">WorkflowWorker</span></a></span><span>
+</span><span id="line-51"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="activityWorker"><span class="annot"><span class="annottext">forall (ty :: WorkerType) activityEnv.
+Worker ty activityEnv
+-&gt; InactiveForReplay ty (ActivityWorker activityEnv)
+</span><a href="Temporal.Worker.Types.html#activityWorker"><span class="hs-identifier hs-var hs-var">activityWorker</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">InactiveForReplay</span></span><span> </span><span class="annot"><a href="#local-6989586621680179479"><span class="hs-identifier hs-type">ty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Activity.Worker.html#ActivityWorker"><span class="hs-identifier hs-type">ActivityWorker</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680179480"><span class="hs-identifier hs-type">activityEnv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span class="hs-keyword">newtype</span><span> </span><span id="WorkerM"><span class="annot"><a href="Temporal.Worker.Types.html#WorkerM"><span class="hs-identifier hs-var">WorkerM</span></a></span></span><span> </span><span id="local-6989586621680179499"><span class="annot"><a href="#local-6989586621680179499"><span class="hs-identifier hs-type">ty</span></a></span></span><span> </span><span id="local-6989586621680179500"><span class="annot"><a href="#local-6989586621680179500"><span class="hs-identifier hs-type">activityEnv</span></a></span></span><span> </span><span id="local-6989586621680179501"><span class="annot"><a href="#local-6989586621680179501"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="WorkerM"><span class="annot"><a href="Temporal.Worker.Types.html#WorkerM"><span class="hs-identifier hs-var">WorkerM</span></a></span></span><span> </span><span class="hs-special">{</span><span id="unWorkerM"><span class="annot"><span class="annottext">forall (ty :: WorkerType) activityEnv a.
+WorkerM ty activityEnv a -&gt; ReaderT (Worker ty activityEnv) IO a
+</span><a href="Temporal.Worker.Types.html#unWorkerM"><span class="hs-identifier hs-var hs-var">unWorkerM</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ReaderT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Worker.Types.html#Worker"><span class="hs-identifier hs-type">Worker</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680179499"><span class="hs-identifier hs-type">ty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680179500"><span class="hs-identifier hs-type">activityEnv</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621680179501"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">}</span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">newtype</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680179655"><span id="local-6989586621680179661"><span class="annot"><span class="annottext">(forall a b.
+ (a -&gt; b) -&gt; WorkerM ty activityEnv a -&gt; WorkerM ty activityEnv b)
+-&gt; (forall a b.
+    a -&gt; WorkerM ty activityEnv b -&gt; WorkerM ty activityEnv a)
+-&gt; Functor (WorkerM ty activityEnv)
+forall a b.
+a -&gt; WorkerM ty activityEnv b -&gt; WorkerM ty activityEnv a
+forall a b.
+(a -&gt; b) -&gt; WorkerM ty activityEnv a -&gt; WorkerM ty activityEnv b
+forall (ty :: WorkerType) activityEnv a b.
+a -&gt; WorkerM ty activityEnv b -&gt; WorkerM ty activityEnv a
+forall (ty :: WorkerType) activityEnv a b.
+(a -&gt; b) -&gt; WorkerM ty activityEnv a -&gt; WorkerM ty activityEnv b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall (ty :: WorkerType) activityEnv a b.
+(a -&gt; b) -&gt; WorkerM ty activityEnv a -&gt; WorkerM ty activityEnv b
+fmap :: forall a b.
+(a -&gt; b) -&gt; WorkerM ty activityEnv a -&gt; WorkerM ty activityEnv b
+$c&lt;$ :: forall (ty :: WorkerType) activityEnv a b.
+a -&gt; WorkerM ty activityEnv b -&gt; WorkerM ty activityEnv a
+&lt;$ :: forall a b.
+a -&gt; WorkerM ty activityEnv b -&gt; WorkerM ty activityEnv a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680179672"><span id="local-6989586621680179678"><span id="local-6989586621680179683"><span id="local-6989586621680179688"><span id="local-6989586621680179693"><span class="annot"><span class="annottext">Functor (WorkerM ty activityEnv)
+Functor (WorkerM ty activityEnv) =&gt;
+(forall a. a -&gt; WorkerM ty activityEnv a)
+-&gt; (forall a b.
+    WorkerM ty activityEnv (a -&gt; b)
+    -&gt; WorkerM ty activityEnv a -&gt; WorkerM ty activityEnv b)
+-&gt; (forall a b c.
+    (a -&gt; b -&gt; c)
+    -&gt; WorkerM ty activityEnv a
+    -&gt; WorkerM ty activityEnv b
+    -&gt; WorkerM ty activityEnv c)
+-&gt; (forall a b.
+    WorkerM ty activityEnv a
+    -&gt; WorkerM ty activityEnv b -&gt; WorkerM ty activityEnv b)
+-&gt; (forall a b.
+    WorkerM ty activityEnv a
+    -&gt; WorkerM ty activityEnv b -&gt; WorkerM ty activityEnv a)
+-&gt; Applicative (WorkerM ty activityEnv)
+forall a. a -&gt; WorkerM ty activityEnv a
+forall a b.
+WorkerM ty activityEnv a
+-&gt; WorkerM ty activityEnv b -&gt; WorkerM ty activityEnv a
+forall a b.
+WorkerM ty activityEnv a
+-&gt; WorkerM ty activityEnv b -&gt; WorkerM ty activityEnv b
+forall a b.
+WorkerM ty activityEnv (a -&gt; b)
+-&gt; WorkerM ty activityEnv a -&gt; WorkerM ty activityEnv b
+forall a b c.
+(a -&gt; b -&gt; c)
+-&gt; WorkerM ty activityEnv a
+-&gt; WorkerM ty activityEnv b
+-&gt; WorkerM ty activityEnv c
+forall (ty :: WorkerType) activityEnv.
+Functor (WorkerM ty activityEnv)
+forall (ty :: WorkerType) activityEnv a.
+a -&gt; WorkerM ty activityEnv a
+forall (ty :: WorkerType) activityEnv a b.
+WorkerM ty activityEnv a
+-&gt; WorkerM ty activityEnv b -&gt; WorkerM ty activityEnv a
+forall (ty :: WorkerType) activityEnv a b.
+WorkerM ty activityEnv a
+-&gt; WorkerM ty activityEnv b -&gt; WorkerM ty activityEnv b
+forall (ty :: WorkerType) activityEnv a b.
+WorkerM ty activityEnv (a -&gt; b)
+-&gt; WorkerM ty activityEnv a -&gt; WorkerM ty activityEnv b
+forall (ty :: WorkerType) activityEnv a b c.
+(a -&gt; b -&gt; c)
+-&gt; WorkerM ty activityEnv a
+-&gt; WorkerM ty activityEnv b
+-&gt; WorkerM ty activityEnv c
+forall (f :: * -&gt; *).
+Functor f =&gt;
+(forall a. a -&gt; f a)
+-&gt; (forall a b. f (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b c. (a -&gt; b -&gt; c) -&gt; f a -&gt; f b -&gt; f c)
+-&gt; (forall a b. f a -&gt; f b -&gt; f b)
+-&gt; (forall a b. f a -&gt; f b -&gt; f a)
+-&gt; Applicative f
+$cpure :: forall (ty :: WorkerType) activityEnv a.
+a -&gt; WorkerM ty activityEnv a
+pure :: forall a. a -&gt; WorkerM ty activityEnv a
+$c&lt;*&gt; :: forall (ty :: WorkerType) activityEnv a b.
+WorkerM ty activityEnv (a -&gt; b)
+-&gt; WorkerM ty activityEnv a -&gt; WorkerM ty activityEnv b
+&lt;*&gt; :: forall a b.
+WorkerM ty activityEnv (a -&gt; b)
+-&gt; WorkerM ty activityEnv a -&gt; WorkerM ty activityEnv b
+$cliftA2 :: forall (ty :: WorkerType) activityEnv a b c.
+(a -&gt; b -&gt; c)
+-&gt; WorkerM ty activityEnv a
+-&gt; WorkerM ty activityEnv b
+-&gt; WorkerM ty activityEnv c
+liftA2 :: forall a b c.
+(a -&gt; b -&gt; c)
+-&gt; WorkerM ty activityEnv a
+-&gt; WorkerM ty activityEnv b
+-&gt; WorkerM ty activityEnv c
+$c*&gt; :: forall (ty :: WorkerType) activityEnv a b.
+WorkerM ty activityEnv a
+-&gt; WorkerM ty activityEnv b -&gt; WorkerM ty activityEnv b
+*&gt; :: forall a b.
+WorkerM ty activityEnv a
+-&gt; WorkerM ty activityEnv b -&gt; WorkerM ty activityEnv b
+$c&lt;* :: forall (ty :: WorkerType) activityEnv a b.
+WorkerM ty activityEnv a
+-&gt; WorkerM ty activityEnv b -&gt; WorkerM ty activityEnv a
+&lt;* :: forall a b.
+WorkerM ty activityEnv a
+-&gt; WorkerM ty activityEnv b -&gt; WorkerM ty activityEnv a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Applicative</span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680179705"><span id="local-6989586621680179711"><span id="local-6989586621680179716"><span class="annot"><span class="annottext">Applicative (WorkerM ty activityEnv)
+Applicative (WorkerM ty activityEnv) =&gt;
+(forall a b.
+ WorkerM ty activityEnv a
+ -&gt; (a -&gt; WorkerM ty activityEnv b) -&gt; WorkerM ty activityEnv b)
+-&gt; (forall a b.
+    WorkerM ty activityEnv a
+    -&gt; WorkerM ty activityEnv b -&gt; WorkerM ty activityEnv b)
+-&gt; (forall a. a -&gt; WorkerM ty activityEnv a)
+-&gt; Monad (WorkerM ty activityEnv)
+forall a. a -&gt; WorkerM ty activityEnv a
+forall a b.
+WorkerM ty activityEnv a
+-&gt; WorkerM ty activityEnv b -&gt; WorkerM ty activityEnv b
+forall a b.
+WorkerM ty activityEnv a
+-&gt; (a -&gt; WorkerM ty activityEnv b) -&gt; WorkerM ty activityEnv b
+forall (ty :: WorkerType) activityEnv.
+Applicative (WorkerM ty activityEnv)
+forall (ty :: WorkerType) activityEnv a.
+a -&gt; WorkerM ty activityEnv a
+forall (ty :: WorkerType) activityEnv a b.
+WorkerM ty activityEnv a
+-&gt; WorkerM ty activityEnv b -&gt; WorkerM ty activityEnv b
+forall (ty :: WorkerType) activityEnv a b.
+WorkerM ty activityEnv a
+-&gt; (a -&gt; WorkerM ty activityEnv b) -&gt; WorkerM ty activityEnv b
+forall (m :: * -&gt; *).
+Applicative m =&gt;
+(forall a b. m a -&gt; (a -&gt; m b) -&gt; m b)
+-&gt; (forall a b. m a -&gt; m b -&gt; m b)
+-&gt; (forall a. a -&gt; m a)
+-&gt; Monad m
+$c&gt;&gt;= :: forall (ty :: WorkerType) activityEnv a b.
+WorkerM ty activityEnv a
+-&gt; (a -&gt; WorkerM ty activityEnv b) -&gt; WorkerM ty activityEnv b
+&gt;&gt;= :: forall a b.
+WorkerM ty activityEnv a
+-&gt; (a -&gt; WorkerM ty activityEnv b) -&gt; WorkerM ty activityEnv b
+$c&gt;&gt; :: forall (ty :: WorkerType) activityEnv a b.
+WorkerM ty activityEnv a
+-&gt; WorkerM ty activityEnv b -&gt; WorkerM ty activityEnv b
+&gt;&gt; :: forall a b.
+WorkerM ty activityEnv a
+-&gt; WorkerM ty activityEnv b -&gt; WorkerM ty activityEnv b
+$creturn :: forall (ty :: WorkerType) activityEnv a.
+a -&gt; WorkerM ty activityEnv a
+return :: forall a. a -&gt; WorkerM ty activityEnv a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Monad</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680179726"><span class="annot"><span class="annottext">Monad (WorkerM ty activityEnv)
+Monad (WorkerM ty activityEnv) =&gt;
+(forall a. IO a -&gt; WorkerM ty activityEnv a)
+-&gt; MonadIO (WorkerM ty activityEnv)
+forall a. IO a -&gt; WorkerM ty activityEnv a
+forall (ty :: WorkerType) activityEnv.
+Monad (WorkerM ty activityEnv)
+forall (ty :: WorkerType) activityEnv a.
+IO a -&gt; WorkerM ty activityEnv a
+forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall a. IO a -&gt; m a) -&gt; MonadIO m
+$cliftIO :: forall (ty :: WorkerType) activityEnv a.
+IO a -&gt; WorkerM ty activityEnv a
+liftIO :: forall a. IO a -&gt; WorkerM ty activityEnv a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var">MonadIO</span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680179738"><span id="local-6989586621680179744"><span id="local-6989586621680179749"><span class="annot"><span class="hs-identifier hs-type">MonadReader</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Worker.Types.html#Worker"><span class="hs-identifier hs-type">Worker</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680179499"><span class="hs-identifier hs-type">ty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680179500"><span class="hs-identifier hs-type">activityEnv</span></a></span><span class="hs-special">)</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680179761"><span class="annot"><span class="annottext">MonadIO (WorkerM ty activityEnv)
+MonadIO (WorkerM ty activityEnv) =&gt;
+(forall b.
+ ((forall a. WorkerM ty activityEnv a -&gt; IO a) -&gt; IO b)
+ -&gt; WorkerM ty activityEnv b)
+-&gt; MonadUnliftIO (WorkerM ty activityEnv)
+forall b.
+((forall a. WorkerM ty activityEnv a -&gt; IO a) -&gt; IO b)
+-&gt; WorkerM ty activityEnv b
+forall (ty :: WorkerType) activityEnv.
+MonadIO (WorkerM ty activityEnv)
+forall (ty :: WorkerType) activityEnv b.
+((forall a. WorkerM ty activityEnv a -&gt; IO a) -&gt; IO b)
+-&gt; WorkerM ty activityEnv b
+forall (m :: * -&gt; *).
+MonadIO m =&gt;
+(forall b. ((forall a. m a -&gt; IO a) -&gt; IO b) -&gt; m b)
+-&gt; MonadUnliftIO m
+$cwithRunInIO :: forall (ty :: WorkerType) activityEnv b.
+((forall a. WorkerM ty activityEnv a -&gt; IO a) -&gt; IO b)
+-&gt; WorkerM ty activityEnv b
+withRunInIO :: forall b.
+((forall a. WorkerM ty activityEnv a -&gt; IO a) -&gt; IO b)
+-&gt; WorkerM ty activityEnv b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var">MonadUnliftIO</span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680179609"><span id="local-6989586621680179610"><span class="annot"><span class="hs-identifier hs-type">MonadLogger</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Worker.Types.html#WorkerM"><span class="hs-identifier hs-type">WorkerM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680179609"><span class="hs-identifier hs-type">ty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680179610"><span class="hs-identifier hs-type">activityEnv</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-60"></span><span>  </span><span id="local-6989586621680179781"><span class="annot"><span class="annottext">monadLoggerLog :: forall msg.
+ToLogStr msg =&gt;
+Loc -&gt; Text -&gt; LogLevel -&gt; msg -&gt; WorkerM ty activityEnv ()
+</span><a href="#local-6989586621680179781"><span class="hs-identifier hs-var hs-var hs-var">monadLoggerLog</span></a></span></span><span> </span><span id="local-6989586621680179783"><span class="annot"><span class="annottext">Loc
+</span><a href="#local-6989586621680179783"><span class="hs-identifier hs-var">loc</span></a></span></span><span> </span><span id="local-6989586621680179784"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621680179784"><span class="hs-identifier hs-var">src</span></a></span></span><span> </span><span id="local-6989586621680179785"><span class="annot"><span class="annottext">LogLevel
+</span><a href="#local-6989586621680179785"><span class="hs-identifier hs-var">level</span></a></span></span><span> </span><span id="local-6989586621680179786"><span class="annot"><span class="annottext">msg
+</span><a href="#local-6989586621680179786"><span class="hs-identifier hs-var">msg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-61"></span><span>    </span><span id="local-6989586621680179787"><span class="annot"><a href="#local-6989586621680179787"><span class="hs-identifier hs-var">worker</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">WorkerM ty activityEnv (Worker ty activityEnv)
+forall r (m :: * -&gt; *). MonadReader r m =&gt; m r
+</span><span class="hs-identifier hs-var">ask</span></span><span>
+</span><span id="line-62"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">liftIO</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier">worker</span></span><span class="hs-operator">.</span><span class="hs-identifier">workerLogFn</span><span> </span><span class="annot"><a href="#local-6989586621680179783"><span class="hs-identifier hs-type">loc</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680179784"><span class="hs-identifier hs-type">src</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680179785"><span class="hs-identifier hs-type">level</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">toLogStr</span></span><span> </span><span class="annot"><a href="#local-6989586621680179786"><span class="hs-identifier hs-type">msg</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680179621"><span id="local-6989586621680179622"><span class="annot"><span class="hs-identifier hs-type">MonadLoggerIO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Worker.Types.html#WorkerM"><span class="hs-identifier hs-type">WorkerM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680179621"><span class="hs-identifier hs-type">ty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680179622"><span class="hs-identifier hs-type">activityEnv</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-66"></span><span>  </span><span id="local-6989586621680179800"><span class="annot"><span class="annottext">askLoggerIO :: WorkerM ty activityEnv (Loc -&gt; Text -&gt; LogLevel -&gt; LogStr -&gt; IO ())
+</span><a href="#local-6989586621680179800"><span class="hs-identifier hs-var hs-var hs-var">askLoggerIO</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-67"></span><span>    </span><span id="local-6989586621680179802"><span class="annot"><a href="#local-6989586621680179802"><span class="hs-identifier hs-var">worker</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">WorkerM ty activityEnv (Worker ty activityEnv)
+forall r (m :: * -&gt; *). MonadReader r m =&gt; m r
+</span><span class="hs-identifier hs-var">ask</span></span><span>
+</span><span id="line-68"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><span class="hs-identifier">worker</span></span><span class="hs-operator">.</span><span class="hs-identifier">workerLogFn</span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="annot"><span class="hs-comment">{- | Values that were blocking waiting for an activation, and have now
+been unblocked.  The worker adds these to a queue ('activationResults') using
+'putResult'; the scheduler collects them from the queue and unblocks
+the relevant computations.
+-}</span></span><span>
+</span><span id="line-76"></span><span class="hs-keyword">data</span><span> </span><span id="ActivationResult"><span class="annot"><a href="Temporal.Worker.Types.html#ActivationResult"><span class="hs-identifier hs-var">ActivationResult</span></a></span></span><span>
+</span><span id="line-77"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621680179804"><span class="annot"><a href="#local-6989586621680179804"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-78"></span><span>    </span><span id="ActivationResult"><span class="annot"><a href="Temporal.Worker.Types.html#ActivationResult"><span class="hs-identifier hs-var">ActivationResult</span></a></span></span><span>
+</span><span id="line-79"></span><span>      </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#ResultVal"><span class="hs-identifier hs-type">ResultVal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680179804"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-80"></span><span>      </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Workflow.Internal.Monad.html#IVar"><span class="hs-identifier hs-type">IVar</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680179804"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-81"></span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span id="local-6989586621680179623"><span id="local-6989586621680179624"><span id="local-6989586621680179625"><span class="annot"><a href="Temporal.Worker.Types.html#runWorkerM"><span class="hs-identifier hs-type">runWorkerM</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Worker.Types.html#Worker"><span class="hs-identifier hs-type">Worker</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680179623"><span class="hs-identifier hs-type">ty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680179624"><span class="hs-identifier hs-type">actEnv</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Worker.Types.html#WorkerM"><span class="hs-identifier hs-type">WorkerM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680179623"><span class="hs-identifier hs-type">ty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680179624"><span class="hs-identifier hs-type">actEnv</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680179625"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621680179625"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-84"></span><span id="runWorkerM"><span class="annot"><span class="annottext">runWorkerM :: forall (ty :: WorkerType) actEnv a.
+Worker ty actEnv -&gt; WorkerM ty actEnv a -&gt; IO a
+</span><a href="Temporal.Worker.Types.html#runWorkerM"><span class="hs-identifier hs-var hs-var">runWorkerM</span></a></span></span><span> </span><span id="local-6989586621680179809"><span class="annot"><span class="annottext">Worker ty actEnv
+</span><a href="#local-6989586621680179809"><span class="hs-identifier hs-var">worker</span></a></span></span><span> </span><span id="local-6989586621680179810"><span class="annot"><span class="annottext">WorkerM ty actEnv a
+</span><a href="#local-6989586621680179810"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReaderT (Worker ty actEnv) IO a -&gt; Worker ty actEnv -&gt; IO a
+forall r (m :: * -&gt; *) a. ReaderT r m a -&gt; r -&gt; m a
+</span><span class="hs-identifier hs-var">runReaderT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">WorkerM ty actEnv a -&gt; ReaderT (Worker ty actEnv) IO a
+forall (ty :: WorkerType) activityEnv a.
+WorkerM ty activityEnv a -&gt; ReaderT (Worker ty activityEnv) IO a
+</span><a href="Temporal.Worker.Types.html#unWorkerM"><span class="hs-identifier hs-var">unWorkerM</span></a></span><span> </span><span class="annot"><span class="annottext">WorkerM ty actEnv a
+</span><a href="#local-6989586621680179810"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Worker ty actEnv
+</span><a href="#local-6989586621680179809"><span class="hs-identifier hs-var">worker</span></a></span><span>
+</span><span id="line-85"></span></pre></body></html>

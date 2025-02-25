@@ -1,0 +1,541 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621680159719"><span id="local-6989586621680159720"><span id="local-6989586621680159721"><span id="local-6989586621680159722"></span></span></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveLift #-}</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Common.TimeoutType.html"><span class="hs-identifier">Temporal.Common.TimeoutType</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Data</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Data</span></span><span class="hs-special">)</span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Lift</span></span><span class="hs-special">)</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Duration.html"><span class="hs-identifier">Temporal.Duration</span></a></span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="annot"><span class="hs-comment">{- | An Activity Execution must have either this timeout (Start-To-Close) or the Schedule-To-Close Timeout set.
+We recommend always setting this timeout; however, make sure that Start-To-Close Timeout is always set to be
+longer than the maximum possible time for the Activity Execution to complete. For long running Activity Executions,
+we recommend also using Activity Heartbeats and Heartbeat Timeouts.
+
+Tip: We strongly recommend setting a Start-To-Close Timeout.
+
+The Temporal Server doesn't detect failures when a Worker loses communication with the Server or crashes. Therefore, the Temporal Server relies on the Start-To-Close Timeout to force Activity retries.
+-}</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">newtype</span><span> </span><span id="StartToClose"><span class="annot"><a href="Temporal.Common.TimeoutType.html#StartToClose"><span class="hs-identifier hs-var">StartToClose</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="StartToClose"><span class="annot"><a href="Temporal.Common.TimeoutType.html#StartToClose"><span class="hs-identifier hs-var">StartToClose</span></a></span></span><span> </span><span class="annot"><a href="Temporal.Duration.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680159725"><span id="local-6989586621680159729"><span class="annot"><span class="annottext">StartToClose -&gt; StartToClose -&gt; Bool
+(StartToClose -&gt; StartToClose -&gt; Bool)
+-&gt; (StartToClose -&gt; StartToClose -&gt; Bool) -&gt; Eq StartToClose
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: StartToClose -&gt; StartToClose -&gt; Bool
+== :: StartToClose -&gt; StartToClose -&gt; Bool
+$c/= :: StartToClose -&gt; StartToClose -&gt; Bool
+/= :: StartToClose -&gt; StartToClose -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680159736"><span id="local-6989586621680159740"><span id="local-6989586621680159743"><span id="local-6989586621680159747"><span id="local-6989586621680159750"><span id="local-6989586621680159753"><span id="local-6989586621680159756"><span class="annot"><span class="annottext">Eq StartToClose
+Eq StartToClose =&gt;
+(StartToClose -&gt; StartToClose -&gt; Ordering)
+-&gt; (StartToClose -&gt; StartToClose -&gt; Bool)
+-&gt; (StartToClose -&gt; StartToClose -&gt; Bool)
+-&gt; (StartToClose -&gt; StartToClose -&gt; Bool)
+-&gt; (StartToClose -&gt; StartToClose -&gt; Bool)
+-&gt; (StartToClose -&gt; StartToClose -&gt; StartToClose)
+-&gt; (StartToClose -&gt; StartToClose -&gt; StartToClose)
+-&gt; Ord StartToClose
+StartToClose -&gt; StartToClose -&gt; Bool
+StartToClose -&gt; StartToClose -&gt; Ordering
+StartToClose -&gt; StartToClose -&gt; StartToClose
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: StartToClose -&gt; StartToClose -&gt; Ordering
+compare :: StartToClose -&gt; StartToClose -&gt; Ordering
+$c&lt; :: StartToClose -&gt; StartToClose -&gt; Bool
+&lt; :: StartToClose -&gt; StartToClose -&gt; Bool
+$c&lt;= :: StartToClose -&gt; StartToClose -&gt; Bool
+&lt;= :: StartToClose -&gt; StartToClose -&gt; Bool
+$c&gt; :: StartToClose -&gt; StartToClose -&gt; Bool
+&gt; :: StartToClose -&gt; StartToClose -&gt; Bool
+$c&gt;= :: StartToClose -&gt; StartToClose -&gt; Bool
+&gt;= :: StartToClose -&gt; StartToClose -&gt; Bool
+$cmax :: StartToClose -&gt; StartToClose -&gt; StartToClose
+max :: StartToClose -&gt; StartToClose -&gt; StartToClose
+$cmin :: StartToClose -&gt; StartToClose -&gt; StartToClose
+min :: StartToClose -&gt; StartToClose -&gt; StartToClose
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680159764"><span id="local-6989586621680159770"><span id="local-6989586621680159774"><span class="annot"><span class="annottext">Int -&gt; StartToClose -&gt; ShowS
+[StartToClose] -&gt; ShowS
+StartToClose -&gt; String
+(Int -&gt; StartToClose -&gt; ShowS)
+-&gt; (StartToClose -&gt; String)
+-&gt; ([StartToClose] -&gt; ShowS)
+-&gt; Show StartToClose
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; StartToClose -&gt; ShowS
+showsPrec :: Int -&gt; StartToClose -&gt; ShowS
+$cshow :: StartToClose -&gt; String
+show :: StartToClose -&gt; String
+$cshowList :: [StartToClose] -&gt; ShowS
+showList :: [StartToClose] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680159779"><span id="local-6989586621680159786"><span class="annot"><span class="annottext">(forall (m :: * -&gt; *). Quote m =&gt; StartToClose -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *).
+    Quote m =&gt;
+    StartToClose -&gt; Code m StartToClose)
+-&gt; Lift StartToClose
+forall t.
+(forall (m :: * -&gt; *). Quote m =&gt; t -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *). Quote m =&gt; t -&gt; Code m t) -&gt; Lift t
+forall (m :: * -&gt; *). Quote m =&gt; StartToClose -&gt; m Exp
+forall (m :: * -&gt; *).
+Quote m =&gt;
+StartToClose -&gt; Code m StartToClose
+$clift :: forall (m :: * -&gt; *). Quote m =&gt; StartToClose -&gt; m Exp
+lift :: forall (m :: * -&gt; *). Quote m =&gt; StartToClose -&gt; m Exp
+$cliftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+StartToClose -&gt; Code m StartToClose
+liftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+StartToClose -&gt; Code m StartToClose
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Lift</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680159796"><span id="local-6989586621680159800"><span id="local-6989586621680159803"><span id="local-6989586621680159805"><span id="local-6989586621680159807"><span id="local-6989586621680159813"><span id="local-6989586621680159818"><span id="local-6989586621680159821"><span id="local-6989586621680159824"><span id="local-6989586621680159827"><span id="local-6989586621680159830"><span id="local-6989586621680159833"><span id="local-6989586621680159838"><span id="local-6989586621680159843"><span class="annot"><span class="annottext">Typeable StartToClose
+Typeable StartToClose =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; StartToClose -&gt; c StartToClose)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c StartToClose)
+-&gt; (StartToClose -&gt; Constr)
+-&gt; (StartToClose -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c StartToClose))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e))
+    -&gt; Maybe (c StartToClose))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; StartToClose -&gt; StartToClose)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; StartToClose -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; StartToClose -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; StartToClose -&gt; [u])
+-&gt; (forall u.
+    Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; StartToClose -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; StartToClose -&gt; m StartToClose)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; StartToClose -&gt; m StartToClose)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; StartToClose -&gt; m StartToClose)
+-&gt; Data StartToClose
+StartToClose -&gt; Constr
+StartToClose -&gt; DataType
+(forall b. Data b =&gt; b -&gt; b) -&gt; StartToClose -&gt; StartToClose
+forall a.
+Typeable a =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; a -&gt; c a)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c a)
+-&gt; (a -&gt; Constr)
+-&gt; (a -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c a))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c a))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; a -&gt; a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; [u])
+-&gt; (forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; Data a
+forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; StartToClose -&gt; u
+forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; StartToClose -&gt; [u]
+forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; StartToClose -&gt; r
+forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; StartToClose -&gt; r
+forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; StartToClose -&gt; m StartToClose
+forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; StartToClose -&gt; m StartToClose
+forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c StartToClose
+forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; StartToClose -&gt; c StartToClose
+forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c StartToClose)
+forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c StartToClose)
+$cgfoldl :: forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; StartToClose -&gt; c StartToClose
+gfoldl :: forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; StartToClose -&gt; c StartToClose
+$cgunfold :: forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c StartToClose
+gunfold :: forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c StartToClose
+$ctoConstr :: StartToClose -&gt; Constr
+toConstr :: StartToClose -&gt; Constr
+$cdataTypeOf :: StartToClose -&gt; DataType
+dataTypeOf :: StartToClose -&gt; DataType
+$cdataCast1 :: forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c StartToClose)
+dataCast1 :: forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c StartToClose)
+$cdataCast2 :: forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c StartToClose)
+dataCast2 :: forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c StartToClose)
+$cgmapT :: (forall b. Data b =&gt; b -&gt; b) -&gt; StartToClose -&gt; StartToClose
+gmapT :: (forall b. Data b =&gt; b -&gt; b) -&gt; StartToClose -&gt; StartToClose
+$cgmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; StartToClose -&gt; r
+gmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; StartToClose -&gt; r
+$cgmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; StartToClose -&gt; r
+gmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; StartToClose -&gt; r
+$cgmapQ :: forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; StartToClose -&gt; [u]
+gmapQ :: forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; StartToClose -&gt; [u]
+$cgmapQi :: forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; StartToClose -&gt; u
+gmapQi :: forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; StartToClose -&gt; u
+$cgmapM :: forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; StartToClose -&gt; m StartToClose
+gmapM :: forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; StartToClose -&gt; m StartToClose
+$cgmapMp :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; StartToClose -&gt; m StartToClose
+gmapMp :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; StartToClose -&gt; m StartToClose
+$cgmapMo :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; StartToClose -&gt; m StartToClose
+gmapMo :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; StartToClose -&gt; m StartToClose
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="annot"><span class="hs-comment">{- | A Schedule-To-Close Timeout is the maximum amount of time allowed for the overall Activity Execution, from when the first Activity Task is scheduled to when the last Activity
+Task, in the chain of Activity Tasks that make up the Activity Execution, reaches a Closed status.
+
+An Activity Execution must have either this timeout (Schedule-To-Close) or Start-To-Close set. By default, an Activity Execution Retry Policy dictates that retries occur for up to 10 years.
+This timeout can be used to control the overall duration of an Activity Execution in the face of failures (repeated Activity Task Executions), without altering the Maximum Attempts field of the Retry Policy.
+-}</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">newtype</span><span> </span><span id="ScheduleToClose"><span class="annot"><a href="Temporal.Common.TimeoutType.html#ScheduleToClose"><span class="hs-identifier hs-var">ScheduleToClose</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ScheduleToClose"><span class="annot"><a href="Temporal.Common.TimeoutType.html#ScheduleToClose"><span class="hs-identifier hs-var">ScheduleToClose</span></a></span></span><span> </span><span class="annot"><a href="Temporal.Duration.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680159854"><span id="local-6989586621680159857"><span class="annot"><span class="annottext">ScheduleToClose -&gt; ScheduleToClose -&gt; Bool
+(ScheduleToClose -&gt; ScheduleToClose -&gt; Bool)
+-&gt; (ScheduleToClose -&gt; ScheduleToClose -&gt; Bool)
+-&gt; Eq ScheduleToClose
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: ScheduleToClose -&gt; ScheduleToClose -&gt; Bool
+== :: ScheduleToClose -&gt; ScheduleToClose -&gt; Bool
+$c/= :: ScheduleToClose -&gt; ScheduleToClose -&gt; Bool
+/= :: ScheduleToClose -&gt; ScheduleToClose -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680159863"><span id="local-6989586621680159866"><span id="local-6989586621680159869"><span id="local-6989586621680159873"><span id="local-6989586621680159876"><span id="local-6989586621680159879"><span id="local-6989586621680159882"><span class="annot"><span class="annottext">Eq ScheduleToClose
+Eq ScheduleToClose =&gt;
+(ScheduleToClose -&gt; ScheduleToClose -&gt; Ordering)
+-&gt; (ScheduleToClose -&gt; ScheduleToClose -&gt; Bool)
+-&gt; (ScheduleToClose -&gt; ScheduleToClose -&gt; Bool)
+-&gt; (ScheduleToClose -&gt; ScheduleToClose -&gt; Bool)
+-&gt; (ScheduleToClose -&gt; ScheduleToClose -&gt; Bool)
+-&gt; (ScheduleToClose -&gt; ScheduleToClose -&gt; ScheduleToClose)
+-&gt; (ScheduleToClose -&gt; ScheduleToClose -&gt; ScheduleToClose)
+-&gt; Ord ScheduleToClose
+ScheduleToClose -&gt; ScheduleToClose -&gt; Bool
+ScheduleToClose -&gt; ScheduleToClose -&gt; Ordering
+ScheduleToClose -&gt; ScheduleToClose -&gt; ScheduleToClose
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: ScheduleToClose -&gt; ScheduleToClose -&gt; Ordering
+compare :: ScheduleToClose -&gt; ScheduleToClose -&gt; Ordering
+$c&lt; :: ScheduleToClose -&gt; ScheduleToClose -&gt; Bool
+&lt; :: ScheduleToClose -&gt; ScheduleToClose -&gt; Bool
+$c&lt;= :: ScheduleToClose -&gt; ScheduleToClose -&gt; Bool
+&lt;= :: ScheduleToClose -&gt; ScheduleToClose -&gt; Bool
+$c&gt; :: ScheduleToClose -&gt; ScheduleToClose -&gt; Bool
+&gt; :: ScheduleToClose -&gt; ScheduleToClose -&gt; Bool
+$c&gt;= :: ScheduleToClose -&gt; ScheduleToClose -&gt; Bool
+&gt;= :: ScheduleToClose -&gt; ScheduleToClose -&gt; Bool
+$cmax :: ScheduleToClose -&gt; ScheduleToClose -&gt; ScheduleToClose
+max :: ScheduleToClose -&gt; ScheduleToClose -&gt; ScheduleToClose
+$cmin :: ScheduleToClose -&gt; ScheduleToClose -&gt; ScheduleToClose
+min :: ScheduleToClose -&gt; ScheduleToClose -&gt; ScheduleToClose
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680159885"><span id="local-6989586621680159889"><span id="local-6989586621680159893"><span class="annot"><span class="annottext">Int -&gt; ScheduleToClose -&gt; ShowS
+[ScheduleToClose] -&gt; ShowS
+ScheduleToClose -&gt; String
+(Int -&gt; ScheduleToClose -&gt; ShowS)
+-&gt; (ScheduleToClose -&gt; String)
+-&gt; ([ScheduleToClose] -&gt; ShowS)
+-&gt; Show ScheduleToClose
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; ScheduleToClose -&gt; ShowS
+showsPrec :: Int -&gt; ScheduleToClose -&gt; ShowS
+$cshow :: ScheduleToClose -&gt; String
+show :: ScheduleToClose -&gt; String
+$cshowList :: [ScheduleToClose] -&gt; ShowS
+showList :: [ScheduleToClose] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680159896"><span id="local-6989586621680159902"><span class="annot"><span class="annottext">(forall (m :: * -&gt; *). Quote m =&gt; ScheduleToClose -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *).
+    Quote m =&gt;
+    ScheduleToClose -&gt; Code m ScheduleToClose)
+-&gt; Lift ScheduleToClose
+forall t.
+(forall (m :: * -&gt; *). Quote m =&gt; t -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *). Quote m =&gt; t -&gt; Code m t) -&gt; Lift t
+forall (m :: * -&gt; *). Quote m =&gt; ScheduleToClose -&gt; m Exp
+forall (m :: * -&gt; *).
+Quote m =&gt;
+ScheduleToClose -&gt; Code m ScheduleToClose
+$clift :: forall (m :: * -&gt; *). Quote m =&gt; ScheduleToClose -&gt; m Exp
+lift :: forall (m :: * -&gt; *). Quote m =&gt; ScheduleToClose -&gt; m Exp
+$cliftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+ScheduleToClose -&gt; Code m ScheduleToClose
+liftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+ScheduleToClose -&gt; Code m ScheduleToClose
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Lift</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680159911"><span id="local-6989586621680159914"><span id="local-6989586621680159917"><span id="local-6989586621680159919"><span id="local-6989586621680159921"><span id="local-6989586621680159927"><span id="local-6989586621680159932"><span id="local-6989586621680159935"><span id="local-6989586621680159938"><span id="local-6989586621680159941"><span id="local-6989586621680159944"><span id="local-6989586621680159947"><span id="local-6989586621680159952"><span id="local-6989586621680159957"><span class="annot"><span class="annottext">Typeable ScheduleToClose
+Typeable ScheduleToClose =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; ScheduleToClose -&gt; c ScheduleToClose)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c ScheduleToClose)
+-&gt; (ScheduleToClose -&gt; Constr)
+-&gt; (ScheduleToClose -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c ScheduleToClose))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e))
+    -&gt; Maybe (c ScheduleToClose))
+-&gt; ((forall b. Data b =&gt; b -&gt; b)
+    -&gt; ScheduleToClose -&gt; ScheduleToClose)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ScheduleToClose -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ScheduleToClose -&gt; r)
+-&gt; (forall u.
+    (forall d. Data d =&gt; d -&gt; u) -&gt; ScheduleToClose -&gt; [u])
+-&gt; (forall u.
+    Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; ScheduleToClose -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; ScheduleToClose -&gt; m ScheduleToClose)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; ScheduleToClose -&gt; m ScheduleToClose)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d)
+    -&gt; ScheduleToClose -&gt; m ScheduleToClose)
+-&gt; Data ScheduleToClose
+ScheduleToClose -&gt; Constr
+ScheduleToClose -&gt; DataType
+(forall b. Data b =&gt; b -&gt; b) -&gt; ScheduleToClose -&gt; ScheduleToClose
+forall a.
+Typeable a =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; a -&gt; c a)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c a)
+-&gt; (a -&gt; Constr)
+-&gt; (a -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c a))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c a))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; a -&gt; a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; [u])
+-&gt; (forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; Data a
+forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; ScheduleToClose -&gt; u
+forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; ScheduleToClose -&gt; [u]
+forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ScheduleToClose -&gt; r
+forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ScheduleToClose -&gt; r
+forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ScheduleToClose -&gt; m ScheduleToClose
+forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ScheduleToClose -&gt; m ScheduleToClose
+forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c ScheduleToClose
+forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; ScheduleToClose -&gt; c ScheduleToClose
+forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c ScheduleToClose)
+forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c ScheduleToClose)
+$cgfoldl :: forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; ScheduleToClose -&gt; c ScheduleToClose
+gfoldl :: forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; ScheduleToClose -&gt; c ScheduleToClose
+$cgunfold :: forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c ScheduleToClose
+gunfold :: forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c ScheduleToClose
+$ctoConstr :: ScheduleToClose -&gt; Constr
+toConstr :: ScheduleToClose -&gt; Constr
+$cdataTypeOf :: ScheduleToClose -&gt; DataType
+dataTypeOf :: ScheduleToClose -&gt; DataType
+$cdataCast1 :: forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c ScheduleToClose)
+dataCast1 :: forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c ScheduleToClose)
+$cdataCast2 :: forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c ScheduleToClose)
+dataCast2 :: forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c ScheduleToClose)
+$cgmapT :: (forall b. Data b =&gt; b -&gt; b) -&gt; ScheduleToClose -&gt; ScheduleToClose
+gmapT :: (forall b. Data b =&gt; b -&gt; b) -&gt; ScheduleToClose -&gt; ScheduleToClose
+$cgmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ScheduleToClose -&gt; r
+gmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ScheduleToClose -&gt; r
+$cgmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ScheduleToClose -&gt; r
+gmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; ScheduleToClose -&gt; r
+$cgmapQ :: forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; ScheduleToClose -&gt; [u]
+gmapQ :: forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; ScheduleToClose -&gt; [u]
+$cgmapQi :: forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; ScheduleToClose -&gt; u
+gmapQi :: forall u.
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; ScheduleToClose -&gt; u
+$cgmapM :: forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ScheduleToClose -&gt; m ScheduleToClose
+gmapM :: forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ScheduleToClose -&gt; m ScheduleToClose
+$cgmapMp :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ScheduleToClose -&gt; m ScheduleToClose
+gmapMp :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ScheduleToClose -&gt; m ScheduleToClose
+$cgmapMo :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ScheduleToClose -&gt; m ScheduleToClose
+gmapMo :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d)
+-&gt; ScheduleToClose -&gt; m ScheduleToClose
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span></pre></body></html>

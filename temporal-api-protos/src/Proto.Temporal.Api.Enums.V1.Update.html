@@ -1,0 +1,922 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{- This file was auto-generated from temporal/api/enums/v1/update.proto by the proto-lens-protoc program. -}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-unused-imports#-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-duplicate-exports#-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-dodgy-exports#-}</span><span>
+</span><span id="line-6"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html"><span class="hs-identifier">Proto.Temporal.Api.Enums.V1.Update</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-7"></span><span>        </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateAdmittedEventOrigin"><span class="hs-identifier">UpdateAdmittedEventOrigin</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateAdmittedEventOrigin"><span class="hs-identifier">UpdateAdmittedEventOrigin</span></a></span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-8"></span><span>        </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateAdmittedEventOrigin%27UnrecognizedValue"><span class="hs-identifier">UpdateAdmittedEventOrigin'UnrecognizedValue</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-9"></span><span>        </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateWorkflowExecutionLifecycleStage"><span class="hs-identifier">UpdateWorkflowExecutionLifecycleStage</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-10"></span><span>        </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateWorkflowExecutionLifecycleStage"><span class="hs-identifier">UpdateWorkflowExecutionLifecycleStage</span></a></span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-11"></span><span>        </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateWorkflowExecutionLifecycleStage%27UnrecognizedValue"><span class="hs-identifier">UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue</span></a></span><span>
+</span><span id="line-12"></span><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Control.DeepSeq</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Prism</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Prism</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Prelude</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Int</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Int</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Monoid</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Monoid</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Word</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Word</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Bytes</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Growing</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Parser.Unsafe</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Encoding.Wire</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Field</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Field</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Message.Enum</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Service.Types</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Lens.Family2</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Lens.Family2</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Lens.Family2.Unchecked</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Lens.Family2.Unchecked</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Map</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ByteString</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.ByteString.Char8</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString.Char8</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Text.Encoding</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text.Encoding</span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Vector</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Vector.Generic</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Generic</span></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Data.Vector.Unboxed</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector.Unboxed</span></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ProtoLens.Runtime.Text.Read</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Text.Read</span></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">newtype</span><span> </span><span id="UpdateAdmittedEventOrigin%27UnrecognizedValue"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateAdmittedEventOrigin%27UnrecognizedValue"><span class="hs-identifier hs-var">UpdateAdmittedEventOrigin'UnrecognizedValue</span></a></span></span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="UpdateAdmittedEventOrigin%27UnrecognizedValue"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateAdmittedEventOrigin%27UnrecognizedValue"><span class="hs-identifier hs-var">UpdateAdmittedEventOrigin'UnrecognizedValue</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Int.Int32</span></span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680268228"><span id="local-6989586621680268232"><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Bool
+(UpdateAdmittedEventOrigin'UnrecognizedValue
+ -&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Bool)
+-&gt; (UpdateAdmittedEventOrigin'UnrecognizedValue
+    -&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Bool)
+-&gt; Eq UpdateAdmittedEventOrigin'UnrecognizedValue
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Bool
+== :: UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Bool
+$c/= :: UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Bool
+/= :: UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680268239"><span id="local-6989586621680268243"><span id="local-6989586621680268246"><span id="local-6989586621680268250"><span id="local-6989586621680268253"><span id="local-6989586621680268256"><span id="local-6989586621680268259"><span class="annot"><span class="annottext">Eq UpdateAdmittedEventOrigin'UnrecognizedValue
+Eq UpdateAdmittedEventOrigin'UnrecognizedValue =&gt;
+(UpdateAdmittedEventOrigin'UnrecognizedValue
+ -&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Ordering)
+-&gt; (UpdateAdmittedEventOrigin'UnrecognizedValue
+    -&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Bool)
+-&gt; (UpdateAdmittedEventOrigin'UnrecognizedValue
+    -&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Bool)
+-&gt; (UpdateAdmittedEventOrigin'UnrecognizedValue
+    -&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Bool)
+-&gt; (UpdateAdmittedEventOrigin'UnrecognizedValue
+    -&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Bool)
+-&gt; (UpdateAdmittedEventOrigin'UnrecognizedValue
+    -&gt; UpdateAdmittedEventOrigin'UnrecognizedValue
+    -&gt; UpdateAdmittedEventOrigin'UnrecognizedValue)
+-&gt; (UpdateAdmittedEventOrigin'UnrecognizedValue
+    -&gt; UpdateAdmittedEventOrigin'UnrecognizedValue
+    -&gt; UpdateAdmittedEventOrigin'UnrecognizedValue)
+-&gt; Ord UpdateAdmittedEventOrigin'UnrecognizedValue
+UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Bool
+UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Ordering
+UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Ordering
+compare :: UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Ordering
+$c&lt; :: UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Bool
+&lt; :: UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Bool
+$c&lt;= :: UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Bool
+&lt;= :: UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Bool
+$c&gt; :: UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Bool
+&gt; :: UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Bool
+$c&gt;= :: UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Bool
+&gt;= :: UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; Bool
+$cmax :: UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue
+max :: UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue
+$cmin :: UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue
+min :: UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin'UnrecognizedValue
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680268267"><span id="local-6989586621680268273"><span id="local-6989586621680268277"><span class="annot"><span class="annottext">Int -&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; ShowS
+[UpdateAdmittedEventOrigin'UnrecognizedValue] -&gt; ShowS
+UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; String
+(Int -&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; ShowS)
+-&gt; (UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; String)
+-&gt; ([UpdateAdmittedEventOrigin'UnrecognizedValue] -&gt; ShowS)
+-&gt; Show UpdateAdmittedEventOrigin'UnrecognizedValue
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; ShowS
+showsPrec :: Int -&gt; UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; ShowS
+$cshow :: UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; String
+show :: UpdateAdmittedEventOrigin'UnrecognizedValue -&gt; String
+$cshowList :: [UpdateAdmittedEventOrigin'UnrecognizedValue] -&gt; ShowS
+showList :: [UpdateAdmittedEventOrigin'UnrecognizedValue] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span class="hs-keyword">data</span><span> </span><span id="UpdateAdmittedEventOrigin"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateAdmittedEventOrigin"><span class="hs-identifier hs-var">UpdateAdmittedEventOrigin</span></a></span></span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED"><span class="hs-identifier hs-var">UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-43"></span><span>    </span><span id="UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY"><span class="hs-identifier hs-var">UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-44"></span><span>    </span><span id="UpdateAdmittedEventOrigin%27Unrecognized"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateAdmittedEventOrigin%27Unrecognized"><span class="hs-identifier hs-var">UpdateAdmittedEventOrigin'Unrecognized</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateAdmittedEventOrigin%27UnrecognizedValue"><span class="hs-identifier hs-type">UpdateAdmittedEventOrigin'UnrecognizedValue</span></a></span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680268285"><span id="local-6989586621680268289"><span id="local-6989586621680268293"><span class="annot"><span class="annottext">Int -&gt; UpdateAdmittedEventOrigin -&gt; ShowS
+[UpdateAdmittedEventOrigin] -&gt; ShowS
+UpdateAdmittedEventOrigin -&gt; String
+(Int -&gt; UpdateAdmittedEventOrigin -&gt; ShowS)
+-&gt; (UpdateAdmittedEventOrigin -&gt; String)
+-&gt; ([UpdateAdmittedEventOrigin] -&gt; ShowS)
+-&gt; Show UpdateAdmittedEventOrigin
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; UpdateAdmittedEventOrigin -&gt; ShowS
+showsPrec :: Int -&gt; UpdateAdmittedEventOrigin -&gt; ShowS
+$cshow :: UpdateAdmittedEventOrigin -&gt; String
+show :: UpdateAdmittedEventOrigin -&gt; String
+$cshowList :: [UpdateAdmittedEventOrigin] -&gt; ShowS
+showList :: [UpdateAdmittedEventOrigin] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680268296"><span id="local-6989586621680268302"><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Bool
+(UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Bool)
+-&gt; (UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Bool)
+-&gt; Eq UpdateAdmittedEventOrigin
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Bool
+== :: UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Bool
+$c/= :: UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Bool
+/= :: UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680268308"><span id="local-6989586621680268311"><span id="local-6989586621680268314"><span id="local-6989586621680268318"><span id="local-6989586621680268321"><span id="local-6989586621680268324"><span id="local-6989586621680268327"><span class="annot"><span class="annottext">Eq UpdateAdmittedEventOrigin
+Eq UpdateAdmittedEventOrigin =&gt;
+(UpdateAdmittedEventOrigin
+ -&gt; UpdateAdmittedEventOrigin -&gt; Ordering)
+-&gt; (UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Bool)
+-&gt; (UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Bool)
+-&gt; (UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Bool)
+-&gt; (UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Bool)
+-&gt; (UpdateAdmittedEventOrigin
+    -&gt; UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin)
+-&gt; (UpdateAdmittedEventOrigin
+    -&gt; UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin)
+-&gt; Ord UpdateAdmittedEventOrigin
+UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Bool
+UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Ordering
+UpdateAdmittedEventOrigin
+-&gt; UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Ordering
+compare :: UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Ordering
+$c&lt; :: UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Bool
+&lt; :: UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Bool
+$c&lt;= :: UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Bool
+&lt;= :: UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Bool
+$c&gt; :: UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Bool
+&gt; :: UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Bool
+$c&gt;= :: UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Bool
+&gt;= :: UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin -&gt; Bool
+$cmax :: UpdateAdmittedEventOrigin
+-&gt; UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin
+max :: UpdateAdmittedEventOrigin
+-&gt; UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin
+$cmin :: UpdateAdmittedEventOrigin
+-&gt; UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin
+min :: UpdateAdmittedEventOrigin
+-&gt; UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.MessageEnum</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateAdmittedEventOrigin"><span class="hs-identifier hs-type">UpdateAdmittedEventOrigin</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-47"></span><span>  </span><span id="local-6989586621680268350"><span class="annot"><span class="annottext">maybeToEnum :: Int -&gt; Maybe UpdateAdmittedEventOrigin
+</span><a href="#local-6989586621680268350"><span class="hs-identifier hs-var hs-var hs-var">maybeToEnum</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-48"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin -&gt; Maybe UpdateAdmittedEventOrigin
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED"><span class="hs-identifier hs-var">UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED</span></a></span><span>
+</span><span id="line-49"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin -&gt; Maybe UpdateAdmittedEventOrigin
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY"><span class="hs-identifier hs-var">UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY</span></a></span><span>
+</span><span id="line-50"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span id="local-6989586621680268352"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680268352"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><span id="line-51"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin -&gt; Maybe UpdateAdmittedEventOrigin
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span>
+</span><span id="line-52"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin'UnrecognizedValue
+-&gt; UpdateAdmittedEventOrigin
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateAdmittedEventOrigin%27Unrecognized"><span class="hs-identifier hs-var">UpdateAdmittedEventOrigin'Unrecognized</span></a></span><span>
+</span><span id="line-53"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int32 -&gt; UpdateAdmittedEventOrigin'UnrecognizedValue
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateAdmittedEventOrigin%27UnrecognizedValue"><span class="hs-identifier hs-var">UpdateAdmittedEventOrigin'UnrecognizedValue</span></a></span><span>
+</span><span id="line-54"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int32
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680268352"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>  </span><span id="local-6989586621680268354"><span class="annot"><span class="annottext">showEnum :: UpdateAdmittedEventOrigin -&gt; String
+</span><a href="#local-6989586621680268354"><span class="hs-identifier hs-var hs-var hs-var">showEnum</span></a></span></span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED"><span class="hs-identifier hs-var">UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED</span></a></span><span>
+</span><span id="line-56"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED&quot;</span></span><span>
+</span><span id="line-57"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY"><span class="hs-identifier hs-var">UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY</span></a></span><span>
+</span><span id="line-58"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY&quot;</span></span><span>
+</span><span id="line-59"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span>
+</span><span id="line-60"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateAdmittedEventOrigin%27Unrecognized"><span class="hs-identifier hs-type">UpdateAdmittedEventOrigin'Unrecognized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateAdmittedEventOrigin%27UnrecognizedValue"><span class="hs-identifier hs-type">UpdateAdmittedEventOrigin'UnrecognizedValue</span></a></span><span> </span><span id="local-6989586621680268356"><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680268356"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-61"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int32 -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">Prelude.show</span></span><span> </span><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680268356"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-62"></span><span>  </span><span id="local-6989586621680268372"><span class="annot"><span class="annottext">readEnum :: String -&gt; Maybe UpdateAdmittedEventOrigin
+</span><a href="#local-6989586621680268372"><span class="hs-identifier hs-var hs-var hs-var">readEnum</span></a></span></span><span> </span><span id="local-6989586621680268374"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680268374"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><span id="line-63"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680268374"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED&quot;</span></span><span>
+</span><span id="line-64"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin -&gt; Maybe UpdateAdmittedEventOrigin
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED"><span class="hs-identifier hs-var">UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED</span></a></span><span>
+</span><span id="line-65"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680268374"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY&quot;</span></span><span>
+</span><span id="line-66"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin -&gt; Maybe UpdateAdmittedEventOrigin
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY"><span class="hs-identifier hs-var">UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY</span></a></span><span>
+</span><span id="line-67"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">Prelude.otherwise</span></span><span>
+</span><span id="line-68"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Int
+-&gt; (Int -&gt; Maybe UpdateAdmittedEventOrigin)
+-&gt; Maybe UpdateAdmittedEventOrigin
+forall a b. Maybe a -&gt; (a -&gt; Maybe b) -&gt; Maybe b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">(Prelude.&gt;&gt;=)</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Maybe Int
+forall a. Read a =&gt; String -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Text.Read.readMaybe</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680268374"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Maybe UpdateAdmittedEventOrigin
+forall a. MessageEnum a =&gt; Int -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeToEnum</span></span><span>
+</span><span id="line-69"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prelude.Bounded</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateAdmittedEventOrigin"><span class="hs-identifier hs-type">UpdateAdmittedEventOrigin</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-70"></span><span>  </span><span id="local-6989586621680268379"><span class="annot"><span class="annottext">minBound :: UpdateAdmittedEventOrigin
+</span><a href="#local-6989586621680268379"><span class="hs-identifier hs-var hs-var hs-var">minBound</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED"><span class="hs-identifier hs-var">UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED</span></a></span><span>
+</span><span id="line-71"></span><span>  </span><span id="local-6989586621680268381"><span class="annot"><span class="annottext">maxBound :: UpdateAdmittedEventOrigin
+</span><a href="#local-6989586621680268381"><span class="hs-identifier hs-var hs-var hs-var">maxBound</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY"><span class="hs-identifier hs-var">UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY</span></a></span><span>
+</span><span id="line-72"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prelude.Enum</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateAdmittedEventOrigin"><span class="hs-identifier hs-type">UpdateAdmittedEventOrigin</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-73"></span><span>  </span><span id="local-6989586621680268399"><span class="annot"><span class="annottext">toEnum :: Int -&gt; UpdateAdmittedEventOrigin
+</span><a href="#local-6989586621680268399"><span class="hs-identifier hs-var hs-var hs-var">toEnum</span></a></span></span><span> </span><span id="local-6989586621680268401"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680268401"><span class="hs-identifier hs-var">k__</span></a></span></span><span>
+</span><span id="line-74"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+-&gt; (UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin)
+-&gt; Maybe UpdateAdmittedEventOrigin
+-&gt; UpdateAdmittedEventOrigin
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.maybe</span></span><span>
+</span><span id="line-75"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; UpdateAdmittedEventOrigin
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-76"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">(Prelude.++)</span></span><span>
+</span><span id="line-77"></span><span>              </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;toEnum: unknown value for enum UpdateAdmittedEventOrigin: &quot;</span></span><span>
+</span><span id="line-78"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">Prelude.show</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680268401"><span class="hs-identifier hs-var">k__</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-79"></span><span>        </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.id</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Maybe UpdateAdmittedEventOrigin
+forall a. MessageEnum a =&gt; Int -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680268401"><span class="hs-identifier hs-var">k__</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-80"></span><span>  </span><span id="local-6989586621680268408"><span class="annot"><span class="annottext">fromEnum :: UpdateAdmittedEventOrigin -&gt; Int
+</span><a href="#local-6989586621680268408"><span class="hs-identifier hs-var hs-var hs-var">fromEnum</span></a></span></span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED"><span class="hs-identifier hs-var">UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-81"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY"><span class="hs-identifier hs-var">UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-82"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span>
+</span><span id="line-83"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateAdmittedEventOrigin%27Unrecognized"><span class="hs-identifier hs-type">UpdateAdmittedEventOrigin'Unrecognized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateAdmittedEventOrigin%27UnrecognizedValue"><span class="hs-identifier hs-type">UpdateAdmittedEventOrigin'UnrecognizedValue</span></a></span><span> </span><span id="local-6989586621680268410"><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680268410"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-84"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int32 -&gt; Int
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680268410"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-85"></span><span>  </span><span id="local-6989586621680268415"><span class="annot"><span class="annottext">succ :: UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin
+</span><a href="#local-6989586621680268415"><span class="hs-identifier hs-var hs-var hs-var">succ</span></a></span></span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY"><span class="hs-identifier hs-var">UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY</span></a></span><span>
+</span><span id="line-86"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; UpdateAdmittedEventOrigin
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-87"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UpdateAdmittedEventOrigin.succ: bad argument UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY. This value would be out of bounds.&quot;</span></span><span>
+</span><span id="line-88"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED"><span class="hs-identifier hs-var">UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED</span></a></span><span>
+</span><span id="line-89"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY"><span class="hs-identifier hs-var">UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY</span></a></span><span>
+</span><span id="line-90"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateAdmittedEventOrigin%27Unrecognized"><span class="hs-identifier hs-type">UpdateAdmittedEventOrigin'Unrecognized</span></a></span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin'UnrecognizedValue
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-91"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; UpdateAdmittedEventOrigin
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-92"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UpdateAdmittedEventOrigin.succ: bad argument: unrecognized value&quot;</span></span><span>
+</span><span id="line-93"></span><span>  </span><span id="local-6989586621680268421"><span class="annot"><span class="annottext">pred :: UpdateAdmittedEventOrigin -&gt; UpdateAdmittedEventOrigin
+</span><a href="#local-6989586621680268421"><span class="hs-identifier hs-var hs-var hs-var">pred</span></a></span></span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED"><span class="hs-identifier hs-var">UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED</span></a></span><span>
+</span><span id="line-94"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; UpdateAdmittedEventOrigin
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-95"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UpdateAdmittedEventOrigin.pred: bad argument UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED. This value would be out of bounds.&quot;</span></span><span>
+</span><span id="line-96"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY"><span class="hs-identifier hs-var">UPDATE_ADMITTED_EVENT_ORIGIN_REAPPLY</span></a></span><span>
+</span><span id="line-97"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED"><span class="hs-identifier hs-var">UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED</span></a></span><span>
+</span><span id="line-98"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateAdmittedEventOrigin%27Unrecognized"><span class="hs-identifier hs-type">UpdateAdmittedEventOrigin'Unrecognized</span></a></span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin'UnrecognizedValue
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-99"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; UpdateAdmittedEventOrigin
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-100"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UpdateAdmittedEventOrigin.pred: bad argument: unrecognized value&quot;</span></span><span>
+</span><span id="line-101"></span><span>  </span><span id="local-6989586621680268425"><span class="annot"><span class="annottext">enumFrom :: UpdateAdmittedEventOrigin -&gt; [UpdateAdmittedEventOrigin]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFrom</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin -&gt; [UpdateAdmittedEventOrigin]
+forall a. (Enum a, Bounded a) =&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFrom</span></span><span>
+</span><span id="line-102"></span><span>  </span><span id="local-6989586621680268428"><span class="annot"><span class="annottext">enumFromTo :: UpdateAdmittedEventOrigin
+-&gt; UpdateAdmittedEventOrigin -&gt; [UpdateAdmittedEventOrigin]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromTo</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+-&gt; UpdateAdmittedEventOrigin -&gt; [UpdateAdmittedEventOrigin]
+forall a. Enum a =&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromTo</span></span><span>
+</span><span id="line-103"></span><span>  </span><span id="local-6989586621680268432"><span class="annot"><span class="annottext">enumFromThen :: UpdateAdmittedEventOrigin
+-&gt; UpdateAdmittedEventOrigin -&gt; [UpdateAdmittedEventOrigin]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromThen</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+-&gt; UpdateAdmittedEventOrigin -&gt; [UpdateAdmittedEventOrigin]
+forall a. (Enum a, Bounded a) =&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromThen</span></span><span>
+</span><span id="line-104"></span><span>  </span><span id="local-6989586621680268435"><span class="annot"><span class="annottext">enumFromThenTo :: UpdateAdmittedEventOrigin
+-&gt; UpdateAdmittedEventOrigin
+-&gt; UpdateAdmittedEventOrigin
+-&gt; [UpdateAdmittedEventOrigin]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromThenTo</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+-&gt; UpdateAdmittedEventOrigin
+-&gt; UpdateAdmittedEventOrigin
+-&gt; [UpdateAdmittedEventOrigin]
+forall a. Enum a =&gt; a -&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromThenTo</span></span><span>
+</span><span id="line-105"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldDefault</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateAdmittedEventOrigin"><span class="hs-identifier hs-type">UpdateAdmittedEventOrigin</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-106"></span><span>  </span><span id="local-6989586621680268440"><span class="annot"><span class="annottext">fieldDefault :: UpdateAdmittedEventOrigin
+</span><a href="#local-6989586621680268440"><span class="hs-identifier hs-var hs-var hs-var">fieldDefault</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED"><span class="hs-identifier hs-var">UPDATE_ADMITTED_EVENT_ORIGIN_UNSPECIFIED</span></a></span><span>
+</span><span id="line-107"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Control.DeepSeq.NFData</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateAdmittedEventOrigin"><span class="hs-identifier hs-type">UpdateAdmittedEventOrigin</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-108"></span><span>  </span><span id="local-6989586621680268445"><span class="annot"><span class="annottext">rnf :: UpdateAdmittedEventOrigin -&gt; ()
+</span><a href="#local-6989586621680268445"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span id="local-6989586621680268447"><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+</span><a href="#local-6989586621680268447"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin -&gt; () -&gt; ()
+forall a b. a -&gt; b -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.seq</span></span><span> </span><span class="annot"><span class="annottext">UpdateAdmittedEventOrigin
+</span><a href="#local-6989586621680268447"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-109"></span><span class="hs-keyword">newtype</span><span> </span><span id="UpdateWorkflowExecutionLifecycleStage%27UnrecognizedValue"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateWorkflowExecutionLifecycleStage%27UnrecognizedValue"><span class="hs-identifier hs-var">UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue</span></a></span></span><span>
+</span><span id="line-110"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="UpdateWorkflowExecutionLifecycleStage%27UnrecognizedValue"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateWorkflowExecutionLifecycleStage%27UnrecognizedValue"><span class="hs-identifier hs-var">UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.Int.Int32</span></span><span>
+</span><span id="line-111"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680268450"><span id="local-6989586621680268453"><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; Bool
+(UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+ -&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; Bool)
+-&gt; (UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+    -&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; Bool)
+-&gt; Eq UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; Bool
+== :: UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; Bool
+$c/= :: UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; Bool
+/= :: UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680268459"><span id="local-6989586621680268462"><span id="local-6989586621680268465"><span id="local-6989586621680268469"><span id="local-6989586621680268472"><span id="local-6989586621680268475"><span id="local-6989586621680268478"><span class="annot"><span class="annottext">Eq UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+Eq UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue =&gt;
+(UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+ -&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+ -&gt; Ordering)
+-&gt; (UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+    -&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; Bool)
+-&gt; (UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+    -&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; Bool)
+-&gt; (UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+    -&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; Bool)
+-&gt; (UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+    -&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; Bool)
+-&gt; (UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+    -&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+    -&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue)
+-&gt; (UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+    -&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+    -&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue)
+-&gt; Ord UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; Bool
+UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; Ordering
+UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; Ordering
+compare :: UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; Ordering
+$c&lt; :: UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; Bool
+&lt; :: UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; Bool
+$c&lt;= :: UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; Bool
+&lt;= :: UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; Bool
+$c&gt; :: UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; Bool
+&gt; :: UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; Bool
+$c&gt;= :: UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; Bool
+&gt;= :: UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; Bool
+$cmax :: UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+max :: UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+$cmin :: UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+min :: UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680268481"><span id="local-6989586621680268485"><span id="local-6989586621680268489"><span class="annot"><span class="annottext">Int
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; ShowS
+[UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue] -&gt; ShowS
+UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; String
+(Int
+ -&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+ -&gt; ShowS)
+-&gt; (UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+    -&gt; String)
+-&gt; ([UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue]
+    -&gt; ShowS)
+-&gt; Show UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; ShowS
+showsPrec :: Int
+-&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; ShowS
+$cshow :: UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; String
+show :: UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue -&gt; String
+$cshowList :: [UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue] -&gt; ShowS
+showList :: [UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-112"></span><span class="hs-keyword">data</span><span> </span><span id="UpdateWorkflowExecutionLifecycleStage"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateWorkflowExecutionLifecycleStage"><span class="hs-identifier hs-var">UpdateWorkflowExecutionLifecycleStage</span></a></span></span><span>
+</span><span id="line-113"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-114"></span><span>    </span><span id="UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-115"></span><span>    </span><span id="UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-116"></span><span>    </span><span id="UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED</span></a></span></span><span> </span><span class="hs-glyph">|</span><span>
+</span><span id="line-117"></span><span>    </span><span id="UpdateWorkflowExecutionLifecycleStage%27Unrecognized"><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateWorkflowExecutionLifecycleStage%27Unrecognized"><span class="hs-identifier hs-var">UpdateWorkflowExecutionLifecycleStage'Unrecognized</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateWorkflowExecutionLifecycleStage%27UnrecognizedValue"><span class="hs-identifier hs-type">UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue</span></a></span><span>
+</span><span id="line-118"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621680268497"><span id="local-6989586621680268501"><span id="local-6989586621680268505"><span class="annot"><span class="annottext">Int -&gt; UpdateWorkflowExecutionLifecycleStage -&gt; ShowS
+[UpdateWorkflowExecutionLifecycleStage] -&gt; ShowS
+UpdateWorkflowExecutionLifecycleStage -&gt; String
+(Int -&gt; UpdateWorkflowExecutionLifecycleStage -&gt; ShowS)
+-&gt; (UpdateWorkflowExecutionLifecycleStage -&gt; String)
+-&gt; ([UpdateWorkflowExecutionLifecycleStage] -&gt; ShowS)
+-&gt; Show UpdateWorkflowExecutionLifecycleStage
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; UpdateWorkflowExecutionLifecycleStage -&gt; ShowS
+showsPrec :: Int -&gt; UpdateWorkflowExecutionLifecycleStage -&gt; ShowS
+$cshow :: UpdateWorkflowExecutionLifecycleStage -&gt; String
+show :: UpdateWorkflowExecutionLifecycleStage -&gt; String
+$cshowList :: [UpdateWorkflowExecutionLifecycleStage] -&gt; ShowS
+showList :: [UpdateWorkflowExecutionLifecycleStage] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680268508"><span id="local-6989586621680268513"><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Bool
+(UpdateWorkflowExecutionLifecycleStage
+ -&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Bool)
+-&gt; (UpdateWorkflowExecutionLifecycleStage
+    -&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Bool)
+-&gt; Eq UpdateWorkflowExecutionLifecycleStage
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Bool
+== :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Bool
+$c/= :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Bool
+/= :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621680268519"><span id="local-6989586621680268524"><span id="local-6989586621680268528"><span id="local-6989586621680268531"><span id="local-6989586621680268534"><span id="local-6989586621680268537"><span id="local-6989586621680268540"><span class="annot"><span class="annottext">Eq UpdateWorkflowExecutionLifecycleStage
+Eq UpdateWorkflowExecutionLifecycleStage =&gt;
+(UpdateWorkflowExecutionLifecycleStage
+ -&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Ordering)
+-&gt; (UpdateWorkflowExecutionLifecycleStage
+    -&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Bool)
+-&gt; (UpdateWorkflowExecutionLifecycleStage
+    -&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Bool)
+-&gt; (UpdateWorkflowExecutionLifecycleStage
+    -&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Bool)
+-&gt; (UpdateWorkflowExecutionLifecycleStage
+    -&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Bool)
+-&gt; (UpdateWorkflowExecutionLifecycleStage
+    -&gt; UpdateWorkflowExecutionLifecycleStage
+    -&gt; UpdateWorkflowExecutionLifecycleStage)
+-&gt; (UpdateWorkflowExecutionLifecycleStage
+    -&gt; UpdateWorkflowExecutionLifecycleStage
+    -&gt; UpdateWorkflowExecutionLifecycleStage)
+-&gt; Ord UpdateWorkflowExecutionLifecycleStage
+UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Bool
+UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Ordering
+UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Ordering
+compare :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Ordering
+$c&lt; :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Bool
+&lt; :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Bool
+$c&lt;= :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Bool
+&lt;= :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Bool
+$c&gt; :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Bool
+&gt; :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Bool
+$c&gt;= :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Bool
+&gt;= :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage -&gt; Bool
+$cmax :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+max :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+$cmin :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+min :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Prelude.Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-119"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.MessageEnum</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateWorkflowExecutionLifecycleStage"><span class="hs-identifier hs-type">UpdateWorkflowExecutionLifecycleStage</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-120"></span><span>  </span><span id="local-6989586621680268562"><span class="annot"><span class="annottext">maybeToEnum :: Int -&gt; Maybe UpdateWorkflowExecutionLifecycleStage
+</span><span class="hs-identifier hs-var hs-var hs-var">maybeToEnum</span></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-121"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+-&gt; Maybe UpdateWorkflowExecutionLifecycleStage
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span>
+</span><span id="line-122"></span><span>        </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-123"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-124"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+-&gt; Maybe UpdateWorkflowExecutionLifecycleStage
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED</span></a></span><span>
+</span><span id="line-125"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span>
+</span><span id="line-126"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+-&gt; Maybe UpdateWorkflowExecutionLifecycleStage
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED</span></a></span><span>
+</span><span id="line-127"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">3</span></span><span>
+</span><span id="line-128"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+-&gt; Maybe UpdateWorkflowExecutionLifecycleStage
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED</span></a></span><span>
+</span><span id="line-129"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">maybeToEnum</span></span><span> </span><span id="local-6989586621680268563"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680268563"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><span id="line-130"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+-&gt; Maybe UpdateWorkflowExecutionLifecycleStage
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span>
+</span><span id="line-131"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+-&gt; UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateWorkflowExecutionLifecycleStage%27Unrecognized"><span class="hs-identifier hs-var">UpdateWorkflowExecutionLifecycleStage'Unrecognized</span></a></span><span>
+</span><span id="line-132"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int32 -&gt; UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateWorkflowExecutionLifecycleStage%27UnrecognizedValue"><span class="hs-identifier hs-var">UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue</span></a></span><span>
+</span><span id="line-133"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int32
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680268563"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-134"></span><span>  </span><span id="local-6989586621680268565"><span class="annot"><span class="annottext">showEnum :: UpdateWorkflowExecutionLifecycleStage -&gt; String
+</span><span class="hs-identifier hs-var hs-var hs-var">showEnum</span></span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-135"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED&quot;</span></span><span>
+</span><span id="line-136"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED</span></a></span><span>
+</span><span id="line-137"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED&quot;</span></span><span>
+</span><span id="line-138"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED</span></a></span><span>
+</span><span id="line-139"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED&quot;</span></span><span>
+</span><span id="line-140"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED</span></a></span><span>
+</span><span id="line-141"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED&quot;</span></span><span>
+</span><span id="line-142"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">showEnum</span></span><span>
+</span><span id="line-143"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateWorkflowExecutionLifecycleStage%27Unrecognized"><span class="hs-identifier hs-type">UpdateWorkflowExecutionLifecycleStage'Unrecognized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateWorkflowExecutionLifecycleStage%27UnrecognizedValue"><span class="hs-identifier hs-type">UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue</span></a></span><span> </span><span id="local-6989586621680268566"><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680268566"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-144"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int32 -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">Prelude.show</span></span><span> </span><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680268566"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-145"></span><span>  </span><span id="local-6989586621680268580"><span class="annot"><span class="annottext">readEnum :: String -&gt; Maybe UpdateWorkflowExecutionLifecycleStage
+</span><span class="hs-identifier hs-var hs-var hs-var">readEnum</span></span></span><span> </span><span id="local-6989586621680268581"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680268581"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><span id="line-146"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span>
+</span><span id="line-147"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680268581"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED&quot;</span></span><span>
+</span><span id="line-148"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+-&gt; Maybe UpdateWorkflowExecutionLifecycleStage
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span>
+</span><span id="line-149"></span><span>        </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-150"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span>
+</span><span id="line-151"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680268581"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED&quot;</span></span><span>
+</span><span id="line-152"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+-&gt; Maybe UpdateWorkflowExecutionLifecycleStage
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED</span></a></span><span>
+</span><span id="line-153"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span>
+</span><span id="line-154"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680268581"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED&quot;</span></span><span>
+</span><span id="line-155"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+-&gt; Maybe UpdateWorkflowExecutionLifecycleStage
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED</span></a></span><span>
+</span><span id="line-156"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">(Prelude.==)</span></span><span>
+</span><span id="line-157"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680268581"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED&quot;</span></span><span>
+</span><span id="line-158"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+-&gt; Maybe UpdateWorkflowExecutionLifecycleStage
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Prelude.Just</span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED</span></a></span><span>
+</span><span id="line-159"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">Prelude.otherwise</span></span><span>
+</span><span id="line-160"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Int
+-&gt; (Int -&gt; Maybe UpdateWorkflowExecutionLifecycleStage)
+-&gt; Maybe UpdateWorkflowExecutionLifecycleStage
+forall a b. Maybe a -&gt; (a -&gt; Maybe b) -&gt; Maybe b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">(Prelude.&gt;&gt;=)</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Maybe Int
+forall a. Read a =&gt; String -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Text.Read.readMaybe</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680268581"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Maybe UpdateWorkflowExecutionLifecycleStage
+forall a. MessageEnum a =&gt; Int -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeToEnum</span></span><span>
+</span><span id="line-161"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prelude.Bounded</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateWorkflowExecutionLifecycleStage"><span class="hs-identifier hs-type">UpdateWorkflowExecutionLifecycleStage</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-162"></span><span>  </span><span id="local-6989586621680268584"><span class="annot"><span class="annottext">minBound :: UpdateWorkflowExecutionLifecycleStage
+</span><span class="hs-identifier hs-var hs-var hs-var">minBound</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-163"></span><span>  </span><span id="local-6989586621680268585"><span class="annot"><span class="annottext">maxBound :: UpdateWorkflowExecutionLifecycleStage
+</span><span class="hs-identifier hs-var hs-var hs-var">maxBound</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED</span></a></span><span>
+</span><span id="line-164"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Prelude.Enum</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateWorkflowExecutionLifecycleStage"><span class="hs-identifier hs-type">UpdateWorkflowExecutionLifecycleStage</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-165"></span><span>  </span><span id="local-6989586621680268600"><span class="annot"><span class="annottext">toEnum :: Int -&gt; UpdateWorkflowExecutionLifecycleStage
+</span><span class="hs-identifier hs-var hs-var hs-var">toEnum</span></span></span><span> </span><span id="local-6989586621680268601"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680268601"><span class="hs-identifier hs-var">k__</span></a></span></span><span>
+</span><span id="line-166"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+-&gt; (UpdateWorkflowExecutionLifecycleStage
+    -&gt; UpdateWorkflowExecutionLifecycleStage)
+-&gt; Maybe UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.maybe</span></span><span>
+</span><span id="line-167"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; UpdateWorkflowExecutionLifecycleStage
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-168"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">(Prelude.++)</span></span><span>
+</span><span id="line-169"></span><span>              </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;toEnum: unknown value for enum UpdateWorkflowExecutionLifecycleStage: &quot;</span></span><span>
+</span><span id="line-170"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">Prelude.show</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680268601"><span class="hs-identifier hs-var">k__</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-171"></span><span>        </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.id</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Maybe UpdateWorkflowExecutionLifecycleStage
+forall a. MessageEnum a =&gt; Int -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Data.ProtoLens.maybeToEnum</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621680268601"><span class="hs-identifier hs-var">k__</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-172"></span><span>  </span><span id="local-6989586621680268604"><span class="annot"><span class="annottext">fromEnum :: UpdateWorkflowExecutionLifecycleStage -&gt; Int
+</span><span class="hs-identifier hs-var hs-var hs-var">fromEnum</span></span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-173"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-174"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span>
+</span><span id="line-175"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">3</span></span><span>
+</span><span id="line-176"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">fromEnum</span></span><span>
+</span><span id="line-177"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateWorkflowExecutionLifecycleStage%27Unrecognized"><span class="hs-identifier hs-type">UpdateWorkflowExecutionLifecycleStage'Unrecognized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateWorkflowExecutionLifecycleStage%27UnrecognizedValue"><span class="hs-identifier hs-type">UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue</span></a></span><span> </span><span id="local-6989586621680268605"><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680268605"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-178"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int32 -&gt; Int
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int32
+</span><a href="#local-6989586621680268605"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-179"></span><span>  </span><span id="local-6989586621680268610"><span class="annot"><span class="annottext">succ :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+</span><span class="hs-identifier hs-var hs-var hs-var">succ</span></span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED</span></a></span><span>
+</span><span id="line-180"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; UpdateWorkflowExecutionLifecycleStage
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-181"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UpdateWorkflowExecutionLifecycleStage.succ: bad argument UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED. This value would be out of bounds.&quot;</span></span><span>
+</span><span id="line-182"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-183"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED</span></a></span><span>
+</span><span id="line-184"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED</span></a></span><span>
+</span><span id="line-185"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED</span></a></span><span>
+</span><span id="line-186"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED</span></a></span><span>
+</span><span id="line-187"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED</span></a></span><span>
+</span><span id="line-188"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateWorkflowExecutionLifecycleStage%27Unrecognized"><span class="hs-identifier hs-type">UpdateWorkflowExecutionLifecycleStage'Unrecognized</span></a></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-189"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; UpdateWorkflowExecutionLifecycleStage
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-190"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UpdateWorkflowExecutionLifecycleStage.succ: bad argument: unrecognized value&quot;</span></span><span>
+</span><span id="line-191"></span><span>  </span><span id="local-6989586621680268615"><span class="annot"><span class="annottext">pred :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+</span><span class="hs-identifier hs-var hs-var hs-var">pred</span></span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-192"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; UpdateWorkflowExecutionLifecycleStage
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-193"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UpdateWorkflowExecutionLifecycleStage.pred: bad argument UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED. This value would be out of bounds.&quot;</span></span><span>
+</span><span id="line-194"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED</span></a></span><span>
+</span><span id="line-195"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-196"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED</span></a></span><span>
+</span><span id="line-197"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED</span></a></span><span>
+</span><span id="line-198"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED</span></a></span><span>
+</span><span id="line-199"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED</span></a></span><span>
+</span><span id="line-200"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateWorkflowExecutionLifecycleStage%27Unrecognized"><span class="hs-identifier hs-type">UpdateWorkflowExecutionLifecycleStage'Unrecognized</span></a></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage'UnrecognizedValue
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-201"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; UpdateWorkflowExecutionLifecycleStage
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">Prelude.error</span></span><span>
+</span><span id="line-202"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;UpdateWorkflowExecutionLifecycleStage.pred: bad argument: unrecognized value&quot;</span></span><span>
+</span><span id="line-203"></span><span>  </span><span id="local-6989586621680268618"><span class="annot"><span class="annottext">enumFrom :: UpdateWorkflowExecutionLifecycleStage
+-&gt; [UpdateWorkflowExecutionLifecycleStage]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFrom</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+-&gt; [UpdateWorkflowExecutionLifecycleStage]
+forall a. (Enum a, Bounded a) =&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFrom</span></span><span>
+</span><span id="line-204"></span><span>  </span><span id="local-6989586621680268620"><span class="annot"><span class="annottext">enumFromTo :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+-&gt; [UpdateWorkflowExecutionLifecycleStage]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromTo</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+-&gt; [UpdateWorkflowExecutionLifecycleStage]
+forall a. Enum a =&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromTo</span></span><span>
+</span><span id="line-205"></span><span>  </span><span id="local-6989586621680268623"><span class="annot"><span class="annottext">enumFromThen :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+-&gt; [UpdateWorkflowExecutionLifecycleStage]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromThen</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+-&gt; [UpdateWorkflowExecutionLifecycleStage]
+forall a. (Enum a, Bounded a) =&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromThen</span></span><span>
+</span><span id="line-206"></span><span>  </span><span id="local-6989586621680268625"><span class="annot"><span class="annottext">enumFromThenTo :: UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+-&gt; [UpdateWorkflowExecutionLifecycleStage]
+</span><span class="hs-identifier hs-var hs-var hs-var">enumFromThenTo</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+-&gt; UpdateWorkflowExecutionLifecycleStage
+-&gt; [UpdateWorkflowExecutionLifecycleStage]
+forall a. Enum a =&gt; a -&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">Data.ProtoLens.Message.Enum.messageEnumFromThenTo</span></span><span>
+</span><span id="line-207"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Data.ProtoLens.FieldDefault</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateWorkflowExecutionLifecycleStage"><span class="hs-identifier hs-type">UpdateWorkflowExecutionLifecycleStage</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-208"></span><span>  </span><span id="local-6989586621680268628"><span class="annot"><span class="annottext">fieldDefault :: UpdateWorkflowExecutionLifecycleStage
+</span><span class="hs-identifier hs-var hs-var hs-var">fieldDefault</span></span></span><span>
+</span><span id="line-209"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="Proto.Temporal.Api.Enums.V1.Update.html#UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED"><span class="hs-identifier hs-var">UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED</span></a></span><span>
+</span><span id="line-210"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Control.DeepSeq.NFData</span></span><span> </span><span class="annot"><a href="Proto.Temporal.Api.Enums.V1.Update.html#UpdateWorkflowExecutionLifecycleStage"><span class="hs-identifier hs-type">UpdateWorkflowExecutionLifecycleStage</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-211"></span><span>  </span><span id="local-6989586621680268631"><span class="annot"><span class="annottext">rnf :: UpdateWorkflowExecutionLifecycleStage -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var">rnf</span></span></span><span> </span><span id="local-6989586621680268632"><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="#local-6989586621680268632"><span class="hs-identifier hs-var">x__</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage -&gt; () -&gt; ()
+forall a b. a -&gt; b -&gt; b
+</span><span class="hs-identifier hs-var">Prelude.seq</span></span><span> </span><span class="annot"><span class="annottext">UpdateWorkflowExecutionLifecycleStage
+</span><a href="#local-6989586621680268632"><span class="hs-identifier hs-var">x__</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-212"></span></pre></body></html>

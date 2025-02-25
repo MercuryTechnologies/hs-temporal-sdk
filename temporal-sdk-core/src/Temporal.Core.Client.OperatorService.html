@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE TypeApplications #-}</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Core.Client.OperatorService.html"><span class="hs-identifier">Temporal.Core.Client.OperatorService</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Api.Operatorservice.V1.RequestResponse</span></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Proto.Temporal.Api.Operatorservice.V1.Service</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html"><span class="hs-identifier">Temporal.Core.Client</span></a></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Temporal.Internal.FFI.html"><span class="hs-identifier">Temporal.Internal.FFI</span></a></span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_add_or_update_remote_cluster&quot;</span></span><span> </span><span id="hs_add_or_update_remote_cluster"><span class="annot"><a href="Temporal.Core.Client.OperatorService.html#hs_add_or_update_remote_cluster"><span class="hs-identifier hs-var">hs_add_or_update_remote_cluster</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="annot"><a href="Temporal.Core.Client.OperatorService.html#addOrUpdateRemoteCluster"><span class="hs-identifier hs-type">addOrUpdateRemoteCluster</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AddOrUpdateRemoteClusterRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AddOrUpdateRemoteClusterResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span id="addOrUpdateRemoteCluster"><span class="annot"><span class="annottext">addOrUpdateRemoteCluster :: Client
+-&gt; AddOrUpdateRemoteClusterRequest
+-&gt; IO (Either RpcError AddOrUpdateRemoteClusterResponse)
+</span><a href="Temporal.Core.Client.OperatorService.html#addOrUpdateRemoteCluster"><span class="hs-identifier hs-var hs-var">addOrUpdateRemoteCluster</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">OperatorService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;addOrUpdateRemoteCluster&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.OperatorService.html#hs_add_or_update_remote_cluster"><span class="hs-identifier hs-var">hs_add_or_update_remote_cluster</span></a></span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_add_search_attributes&quot;</span></span><span> </span><span id="hs_add_search_attributes"><span class="annot"><a href="Temporal.Core.Client.OperatorService.html#hs_add_search_attributes"><span class="hs-identifier hs-var">hs_add_search_attributes</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="annot"><a href="Temporal.Core.Client.OperatorService.html#addSearchAttributes"><span class="hs-identifier hs-type">addSearchAttributes</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AddSearchAttributesRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AddSearchAttributesResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span id="addSearchAttributes"><span class="annot"><span class="annottext">addSearchAttributes :: Client
+-&gt; AddSearchAttributesRequest
+-&gt; IO (Either RpcError AddSearchAttributesResponse)
+</span><a href="Temporal.Core.Client.OperatorService.html#addSearchAttributes"><span class="hs-identifier hs-var hs-var">addSearchAttributes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">OperatorService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;addSearchAttributes&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.OperatorService.html#hs_add_search_attributes"><span class="hs-identifier hs-var">hs_add_search_attributes</span></a></span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_delete_namespace&quot;</span></span><span> </span><span id="hs_delete_namespace"><span class="annot"><a href="Temporal.Core.Client.OperatorService.html#hs_delete_namespace"><span class="hs-identifier hs-var">hs_delete_namespace</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="annot"><a href="Temporal.Core.Client.OperatorService.html#deleteNamespace"><span class="hs-identifier hs-type">deleteNamespace</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DeleteNamespaceRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DeleteNamespaceResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span id="deleteNamespace"><span class="annot"><span class="annottext">deleteNamespace :: Client
+-&gt; DeleteNamespaceRequest
+-&gt; IO (Either RpcError DeleteNamespaceResponse)
+</span><a href="Temporal.Core.Client.OperatorService.html#deleteNamespace"><span class="hs-identifier hs-var hs-var">deleteNamespace</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">OperatorService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;deleteNamespace&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.OperatorService.html#hs_delete_namespace"><span class="hs-identifier hs-var">hs_delete_namespace</span></a></span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_list_clusters&quot;</span></span><span> </span><span id="hs_list_clusters"><span class="annot"><a href="Temporal.Core.Client.OperatorService.html#hs_list_clusters"><span class="hs-identifier hs-var">hs_list_clusters</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="annot"><a href="Temporal.Core.Client.OperatorService.html#listClusters"><span class="hs-identifier hs-type">listClusters</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ListClustersRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ListClustersResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span id="listClusters"><span class="annot"><span class="annottext">listClusters :: Client
+-&gt; ListClustersRequest -&gt; IO (Either RpcError ListClustersResponse)
+</span><a href="Temporal.Core.Client.OperatorService.html#listClusters"><span class="hs-identifier hs-var hs-var">listClusters</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">OperatorService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;listClusters&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.OperatorService.html#hs_list_clusters"><span class="hs-identifier hs-var">hs_list_clusters</span></a></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_list_search_attributes&quot;</span></span><span> </span><span id="hs_list_search_attributes"><span class="annot"><a href="Temporal.Core.Client.OperatorService.html#hs_list_search_attributes"><span class="hs-identifier hs-var">hs_list_search_attributes</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="annot"><a href="Temporal.Core.Client.OperatorService.html#listSearchAttributes"><span class="hs-identifier hs-type">listSearchAttributes</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ListSearchAttributesRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ListSearchAttributesResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span id="listSearchAttributes"><span class="annot"><span class="annottext">listSearchAttributes :: Client
+-&gt; ListSearchAttributesRequest
+-&gt; IO (Either RpcError ListSearchAttributesResponse)
+</span><a href="Temporal.Core.Client.OperatorService.html#listSearchAttributes"><span class="hs-identifier hs-var hs-var">listSearchAttributes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">OperatorService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;listSearchAttributes&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.OperatorService.html#hs_list_search_attributes"><span class="hs-identifier hs-var">hs_list_search_attributes</span></a></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_remove_remote_cluster&quot;</span></span><span> </span><span id="hs_remove_remote_cluster"><span class="annot"><a href="Temporal.Core.Client.OperatorService.html#hs_remove_remote_cluster"><span class="hs-identifier hs-var">hs_remove_remote_cluster</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span class="annot"><a href="Temporal.Core.Client.OperatorService.html#removeRemoteCluster"><span class="hs-identifier hs-type">removeRemoteCluster</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RemoveRemoteClusterRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">RemoveRemoteClusterResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-51"></span><span id="removeRemoteCluster"><span class="annot"><span class="annottext">removeRemoteCluster :: Client
+-&gt; RemoveRemoteClusterRequest
+-&gt; IO (Either RpcError RemoveRemoteClusterResponse)
+</span><a href="Temporal.Core.Client.OperatorService.html#removeRemoteCluster"><span class="hs-identifier hs-var hs-var">removeRemoteCluster</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">OperatorService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;removeRemoteCluster&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.OperatorService.html#hs_remove_remote_cluster"><span class="hs-identifier hs-var">hs_remove_remote_cluster</span></a></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="hs-keyword">foreign</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-keyword">ccall</span></span><span> </span><span class="annot"><span class="hs-string">&quot;hs_remove_search_attributes&quot;</span></span><span> </span><span id="hs_remove_search_attributes"><span class="annot"><a href="Temporal.Core.Client.OperatorService.html#hs_remove_search_attributes"><span class="hs-identifier hs-var">hs_remove_search_attributes</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#PrimRpcCall"><span class="hs-identifier hs-type">PrimRpcCall</span></a></span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span class="annot"><a href="Temporal.Core.Client.OperatorService.html#removeSearchAttributes"><span class="hs-identifier hs-type">removeSearchAttributes</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Core.Client.html#Client"><span class="hs-identifier hs-type">Client</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RemoveSearchAttributesRequest</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Temporal.Core.CTypes.html#RpcError"><span class="hs-identifier hs-type">RpcError</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">RemoveSearchAttributesResponse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-58"></span><span id="removeSearchAttributes"><span class="annot"><span class="annottext">removeSearchAttributes :: Client
+-&gt; RemoveSearchAttributesRequest
+-&gt; IO (Either RpcError RemoveSearchAttributesResponse)
+</span><a href="Temporal.Core.Client.OperatorService.html#removeSearchAttributes"><span class="hs-identifier hs-var hs-var">removeSearchAttributes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall svc (t :: Symbol).
+HasMethodImpl svc t =&gt;
+PrimRpcCall
+-&gt; Client
+-&gt; MethodInput svc t
+-&gt; IO (Either RpcError (MethodOutput svc t))
+</span><a href="Temporal.Core.Client.html#call"><span class="hs-identifier hs-var">call</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">OperatorService</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;removeSearchAttributes&quot;</span></span><span> </span><span class="annot"><span class="annottext">PrimRpcCall
+</span><a href="Temporal.Core.Client.OperatorService.html#hs_remove_search_attributes"><span class="hs-identifier hs-var">hs_remove_search_attributes</span></a></span><span>
+</span><span id="line-59"></span></pre></body></html>

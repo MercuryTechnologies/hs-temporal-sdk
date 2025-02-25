@@ -1,0 +1,526 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Coroutine.html"><span class="hs-identifier">Temporal.Coroutine</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Catch</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Catch</span></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Trans</span></span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">newtype</span><span> </span><span id="Await"><span class="annot"><a href="Temporal.Coroutine.html#Await"><span class="hs-identifier hs-var">Await</span></a></span></span><span> </span><span id="local-6989586621680158546"><span class="annot"><a href="#local-6989586621680158546"><span class="hs-identifier hs-type">x</span></a></span></span><span> </span><span id="local-6989586621680158547"><span class="annot"><a href="#local-6989586621680158547"><span class="hs-identifier hs-type">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Await"><span class="annot"><a href="Temporal.Coroutine.html#Await"><span class="hs-identifier hs-var">Await</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680158546"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680158547"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680158543"><span id="local-6989586621680158712"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Coroutine.html#Await"><span class="hs-identifier hs-type">Await</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158543"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-12"></span><span>  </span><span id="local-6989586621680158716"><span class="annot"><span class="annottext">fmap :: forall a b. (a -&gt; b) -&gt; Await x a -&gt; Await x b
+</span><span class="hs-identifier hs-var hs-var hs-var">fmap</span></span></span><span> </span><span id="local-6989586621680158717"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680158717"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Coroutine.html#Await"><span class="hs-identifier hs-type">Await</span></a></span><span> </span><span id="local-6989586621680158718"><span class="annot"><span class="annottext">x -&gt; a
+</span><a href="#local-6989586621680158718"><span class="hs-identifier hs-var">g</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(x -&gt; b) -&gt; Await x b
+forall x y. (x -&gt; y) -&gt; Await x y
+</span><a href="Temporal.Coroutine.html#Await"><span class="hs-identifier hs-var">Await</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680158717"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; (x -&gt; a) -&gt; x -&gt; b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">x -&gt; a
+</span><a href="#local-6989586621680158718"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="annot"><span class="hs-comment">-- | Suspending, resumable monadic computations.</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">newtype</span><span> </span><span id="Coroutine"><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-var">Coroutine</span></a></span></span><span> </span><span id="local-6989586621680158551"><span class="annot"><a href="#local-6989586621680158551"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621680158552"><span class="annot"><a href="#local-6989586621680158552"><span class="hs-identifier hs-type">m</span></a></span></span><span> </span><span id="local-6989586621680158553"><span class="annot"><a href="#local-6989586621680158553"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Coroutine"><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-var">Coroutine</span></a></span></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="resume"><span class="annot"><span class="annottext">forall (s :: * -&gt; *) (m :: * -&gt; *) r.
+Coroutine s m r -&gt; m (Either (s (Coroutine s m r)) r)
+</span><a href="Temporal.Coroutine.html#resume"><span class="hs-identifier hs-var hs-var">resume</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621680158552"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680158551"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158551"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158552"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158553"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680158553"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-comment">-- ^ Run the next step of a `Coroutine` computation. The result of the step execution will be either a suspension or</span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-comment">-- the final coroutine result.</span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680158560"><span id="local-6989586621680158561"><span id="local-6989586621680158726"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621680158560"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621680158561"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158560"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158561"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-24"></span><span>  </span><span id="local-6989586621680158732"><span class="annot"><span class="annottext">fmap :: forall a b. (a -&gt; b) -&gt; Coroutine s m a -&gt; Coroutine s m b
+</span><span class="hs-identifier hs-var hs-var hs-var">fmap</span></span></span><span> </span><span id="local-6989586621680158733"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680158733"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621680158734"><span class="annot"><span class="annottext">Coroutine s m a
+</span><a href="#local-6989586621680158734"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m (Either (s (Coroutine s m b)) b) -&gt; Coroutine s m b
+forall (s :: * -&gt; *) (m :: * -&gt; *) r.
+m (Either (s (Coroutine s m r)) r) -&gt; Coroutine s m r
+</span><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-var">Coroutine</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Either (s (Coroutine s m a)) a -&gt; Either (s (Coroutine s m b)) b)
+-&gt; m (Either (s (Coroutine s m a)) a)
+-&gt; m (Either (s (Coroutine s m b)) b)
+forall a b. (a -&gt; b) -&gt; m a -&gt; m b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; b)
+-&gt; Either (s (Coroutine s m a)) a -&gt; Either (s (Coroutine s m b)) b
+forall {f :: * -&gt; *} {f :: * -&gt; *} {a} {b}.
+(Functor f, Functor f) =&gt;
+(a -&gt; b) -&gt; Either (f (f a)) a -&gt; Either (f (f b)) b
+</span><a href="#local-6989586621680158735"><span class="hs-identifier hs-var">apply</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680158733"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Coroutine s m a -&gt; m (Either (s (Coroutine s m a)) a)
+forall (s :: * -&gt; *) (m :: * -&gt; *) r.
+Coroutine s m r -&gt; m (Either (s (Coroutine s m r)) r)
+</span><a href="Temporal.Coroutine.html#resume"><span class="hs-identifier hs-var">resume</span></a></span><span> </span><span class="annot"><span class="annottext">Coroutine s m a
+</span><a href="#local-6989586621680158734"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-26"></span><span>      </span><span id="local-6989586621680158735"><span class="annot"><span class="annottext">apply :: (a -&gt; b) -&gt; Either (f (f a)) a -&gt; Either (f (f b)) b
+</span><a href="#local-6989586621680158735"><span class="hs-identifier hs-var hs-var">apply</span></a></span></span><span> </span><span id="local-6989586621680158740"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680158740"><span class="hs-identifier hs-var">fc</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621680158741"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680158741"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; Either (f (f b)) b
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680158740"><span class="hs-identifier hs-var">fc</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680158741"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span>      </span><span class="annot"><a href="#local-6989586621680158735"><span class="hs-identifier hs-var">apply</span></a></span><span> </span><span id="local-6989586621680158742"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680158742"><span class="hs-identifier hs-var">fc</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621680158743"><span class="annot"><span class="annottext">f (f a)
+</span><a href="#local-6989586621680158743"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">f (f b) -&gt; Either (f (f b)) b
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(f a -&gt; f b) -&gt; f (f a) -&gt; f (f b)
+forall a b. (a -&gt; b) -&gt; f a -&gt; f b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; f a -&gt; f b
+forall a b. (a -&gt; b) -&gt; f a -&gt; f b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621680158742"><span class="hs-identifier hs-var">fc</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">f (f a)
+</span><a href="#local-6989586621680158743"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680158583"><span id="local-6989586621680158584"><span id="local-6989586621680158752"><span id="local-6989586621680158757"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621680158583"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621680158584"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621680158584"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Applicative</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158583"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158584"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-31"></span><span>  </span><span id="local-6989586621680158761"><span class="annot"><span class="annottext">pure :: forall a. a -&gt; Coroutine s m a
+</span><span class="hs-identifier hs-var hs-var hs-var">pure</span></span></span><span> </span><span id="local-6989586621680158762"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680158762"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m (Either (s (Coroutine s m a)) a) -&gt; Coroutine s m a
+forall (s :: * -&gt; *) (m :: * -&gt; *) r.
+m (Either (s (Coroutine s m r)) r) -&gt; Coroutine s m r
+</span><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-var">Coroutine</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Either (s (Coroutine s m a)) a
+-&gt; m (Either (s (Coroutine s m a)) a)
+forall a. a -&gt; m a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Either (s (Coroutine s m a)) a
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680158762"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span>  </span><span id="local-6989586621680158765"><span class="annot"><span class="annottext">&lt;*&gt; :: forall a b.
+Coroutine s m (a -&gt; b) -&gt; Coroutine s m a -&gt; Coroutine s m b
+</span><span class="hs-operator hs-var hs-var hs-var">(&lt;*&gt;)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Coroutine s m (a -&gt; b) -&gt; Coroutine s m a -&gt; Coroutine s m b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m (a -&gt; b) -&gt; m a -&gt; m b
+</span><span class="hs-identifier hs-var">ap</span></span><span>
+</span><span id="line-33"></span><span>  </span><span id="local-6989586621680158770"><span class="annot"><span class="annottext">Coroutine s m a
+</span><a href="#local-6989586621680158770"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621680158771"><span class="annot"><span class="annottext">*&gt; :: forall a b. Coroutine s m a -&gt; Coroutine s m b -&gt; Coroutine s m b
+</span><span class="hs-operator hs-var hs-var hs-var">*&gt;</span></span></span><span> </span><span id="local-6989586621680158772"><span class="annot"><span class="annottext">Coroutine s m b
+</span><a href="#local-6989586621680158772"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m (Either (s (Coroutine s m b)) b) -&gt; Coroutine s m b
+forall (s :: * -&gt; *) (m :: * -&gt; *) r.
+m (Either (s (Coroutine s m r)) r) -&gt; Coroutine s m r
+</span><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-var">Coroutine</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Coroutine s m a -&gt; m (Either (s (Coroutine s m a)) a)
+forall (s :: * -&gt; *) (m :: * -&gt; *) r.
+Coroutine s m r -&gt; m (Either (s (Coroutine s m r)) r)
+</span><a href="Temporal.Coroutine.html#resume"><span class="hs-identifier hs-var">resume</span></a></span><span> </span><span class="annot"><span class="annottext">Coroutine s m a
+</span><a href="#local-6989586621680158770"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">m (Either (s (Coroutine s m a)) a)
+-&gt; (Either (s (Coroutine s m a)) a
+    -&gt; m (Either (s (Coroutine s m b)) b))
+-&gt; m (Either (s (Coroutine s m b)) b)
+forall a b. m a -&gt; (a -&gt; m b) -&gt; m b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="annottext">Coroutine s m b
+-&gt; Either (s (Coroutine s m a)) a
+-&gt; m (Either (s (Coroutine s m b)) b)
+forall {m :: * -&gt; *} {s :: * -&gt; *} {r} {a} {b}.
+(Monad m, Functor s) =&gt;
+Coroutine s m r
+-&gt; Either (s (Coroutine s m a)) b
+-&gt; m (Either (s (Coroutine s m r)) r)
+</span><a href="#local-6989586621680158773"><span class="hs-identifier hs-var">apply</span></a></span><span> </span><span class="annot"><span class="annottext">Coroutine s m b
+</span><a href="#local-6989586621680158772"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-35"></span><span>      </span><span id="local-6989586621680158773"><span class="annot"><span class="annottext">apply :: Coroutine s m r
+-&gt; Either (s (Coroutine s m a)) b
+-&gt; m (Either (s (Coroutine s m r)) r)
+</span><a href="#local-6989586621680158773"><span class="hs-identifier hs-var hs-var">apply</span></a></span></span><span> </span><span id="local-6989586621680158785"><span class="annot"><span class="annottext">Coroutine s m r
+</span><a href="#local-6989586621680158785"><span class="hs-identifier hs-var">fc</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span class="annot"><span class="annottext">b
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Coroutine s m r -&gt; m (Either (s (Coroutine s m r)) r)
+forall (s :: * -&gt; *) (m :: * -&gt; *) r.
+Coroutine s m r -&gt; m (Either (s (Coroutine s m r)) r)
+</span><a href="Temporal.Coroutine.html#resume"><span class="hs-identifier hs-var">resume</span></a></span><span> </span><span class="annot"><span class="annottext">Coroutine s m r
+</span><a href="#local-6989586621680158785"><span class="hs-identifier hs-var">fc</span></a></span><span>
+</span><span id="line-36"></span><span>      </span><span class="annot"><a href="#local-6989586621680158773"><span class="hs-identifier hs-var">apply</span></a></span><span> </span><span id="local-6989586621680158786"><span class="annot"><span class="annottext">Coroutine s m r
+</span><a href="#local-6989586621680158786"><span class="hs-identifier hs-var">fc</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621680158787"><span class="annot"><span class="annottext">s (Coroutine s m a)
+</span><a href="#local-6989586621680158787"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Either (s (Coroutine s m r)) r
+-&gt; m (Either (s (Coroutine s m r)) r)
+forall a. a -&gt; m a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s (Coroutine s m r) -&gt; Either (s (Coroutine s m r)) r
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Coroutine s m a -&gt; Coroutine s m r)
+-&gt; s (Coroutine s m a) -&gt; s (Coroutine s m r)
+forall a b. (a -&gt; b) -&gt; s a -&gt; s b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Coroutine s m a -&gt; Coroutine s m r -&gt; Coroutine s m r
+forall a b. Coroutine s m a -&gt; Coroutine s m b -&gt; Coroutine s m b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; m b -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Coroutine s m r
+</span><a href="#local-6989586621680158786"><span class="hs-identifier hs-var">fc</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">s (Coroutine s m a)
+</span><a href="#local-6989586621680158787"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680158588"><span id="local-6989586621680158589"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621680158588"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621680158589"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158588"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158589"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-40"></span><span>  </span><span id="local-6989586621680158799"><span class="annot"><span class="annottext">return :: forall a. a -&gt; Coroutine s m a
+</span><span class="hs-identifier hs-var hs-var hs-var">return</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Coroutine s m a
+forall a. a -&gt; Coroutine s m a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span>
+</span><span id="line-41"></span><span>  </span><span id="local-6989586621680158803"><span class="annot"><span class="annottext">Coroutine s m a
+</span><a href="#local-6989586621680158803"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621680158804"><span class="annot"><span class="annottext">&gt;&gt;= :: forall a b.
+Coroutine s m a -&gt; (a -&gt; Coroutine s m b) -&gt; Coroutine s m b
+</span><span class="hs-operator hs-var hs-var hs-var">&gt;&gt;=</span></span></span><span> </span><span id="local-6989586621680158805"><span class="annot"><span class="annottext">a -&gt; Coroutine s m b
+</span><a href="#local-6989586621680158805"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m (Either (s (Coroutine s m b)) b) -&gt; Coroutine s m b
+forall (s :: * -&gt; *) (m :: * -&gt; *) r.
+m (Either (s (Coroutine s m r)) r) -&gt; Coroutine s m r
+</span><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-var">Coroutine</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Coroutine s m a -&gt; m (Either (s (Coroutine s m a)) a)
+forall (s :: * -&gt; *) (m :: * -&gt; *) r.
+Coroutine s m r -&gt; m (Either (s (Coroutine s m r)) r)
+</span><a href="Temporal.Coroutine.html#resume"><span class="hs-identifier hs-var">resume</span></a></span><span> </span><span class="annot"><span class="annottext">Coroutine s m a
+</span><a href="#local-6989586621680158803"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">m (Either (s (Coroutine s m a)) a)
+-&gt; (Either (s (Coroutine s m a)) a
+    -&gt; m (Either (s (Coroutine s m b)) b))
+-&gt; m (Either (s (Coroutine s m b)) b)
+forall a b. m a -&gt; (a -&gt; m b) -&gt; m b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Coroutine s m b)
+-&gt; Either (s (Coroutine s m a)) a
+-&gt; m (Either (s (Coroutine s m b)) b)
+forall {m :: * -&gt; *} {s :: * -&gt; *} {a} {r}.
+(Monad m, Functor s) =&gt;
+(a -&gt; Coroutine s m r)
+-&gt; Either (s (Coroutine s m a)) a
+-&gt; m (Either (s (Coroutine s m r)) r)
+</span><a href="#local-6989586621680158806"><span class="hs-identifier hs-var">apply</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; Coroutine s m b
+</span><a href="#local-6989586621680158805"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-43"></span><span>      </span><span id="local-6989586621680158806"><span class="annot"><span class="annottext">apply :: (a -&gt; Coroutine s m r)
+-&gt; Either (s (Coroutine s m a)) a
+-&gt; m (Either (s (Coroutine s m r)) r)
+</span><a href="#local-6989586621680158806"><span class="hs-identifier hs-var hs-var">apply</span></a></span></span><span> </span><span id="local-6989586621680158816"><span class="annot"><span class="annottext">a -&gt; Coroutine s m r
+</span><a href="#local-6989586621680158816"><span class="hs-identifier hs-var">fc</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621680158817"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680158817"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Coroutine s m r -&gt; m (Either (s (Coroutine s m r)) r)
+forall (s :: * -&gt; *) (m :: * -&gt; *) r.
+Coroutine s m r -&gt; m (Either (s (Coroutine s m r)) r)
+</span><a href="Temporal.Coroutine.html#resume"><span class="hs-identifier hs-var">resume</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Coroutine s m r
+</span><a href="#local-6989586621680158816"><span class="hs-identifier hs-var">fc</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680158817"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>      </span><span class="annot"><a href="#local-6989586621680158806"><span class="hs-identifier hs-var">apply</span></a></span><span> </span><span id="local-6989586621680158818"><span class="annot"><span class="annottext">a -&gt; Coroutine s m r
+</span><a href="#local-6989586621680158818"><span class="hs-identifier hs-var">fc</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621680158819"><span class="annot"><span class="annottext">s (Coroutine s m a)
+</span><a href="#local-6989586621680158819"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Either (s (Coroutine s m r)) r
+-&gt; m (Either (s (Coroutine s m r)) r)
+forall a. a -&gt; m a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s (Coroutine s m r) -&gt; Either (s (Coroutine s m r)) r
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Coroutine s m a -&gt; Coroutine s m r)
+-&gt; s (Coroutine s m a) -&gt; s (Coroutine s m r)
+forall a b. (a -&gt; b) -&gt; s a -&gt; s b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Coroutine s m a -&gt; (a -&gt; Coroutine s m r) -&gt; Coroutine s m r
+forall a b.
+Coroutine s m a -&gt; (a -&gt; Coroutine s m b) -&gt; Coroutine s m b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Coroutine s m r
+</span><a href="#local-6989586621680158818"><span class="hs-identifier hs-var">fc</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">s (Coroutine s m a)
+</span><a href="#local-6989586621680158819"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>  </span><span id="local-6989586621680158821"><span class="annot"><span class="annottext">&gt;&gt; :: forall a b. Coroutine s m a -&gt; Coroutine s m b -&gt; Coroutine s m b
+</span><span class="hs-operator hs-var hs-var hs-var">(&gt;&gt;)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Coroutine s m a -&gt; Coroutine s m b -&gt; Coroutine s m b
+forall a b. Coroutine s m a -&gt; Coroutine s m b -&gt; Coroutine s m b
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
+</span><span class="hs-operator hs-var">(*&gt;)</span></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680158621"><span id="local-6989586621680158622"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621680158621"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadFail</span></span><span> </span><span class="annot"><a href="#local-6989586621680158622"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadFail</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158621"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158622"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-49"></span><span>  </span><span id="local-6989586621680158835"><span class="annot"><span class="annottext">fail :: forall a. String -&gt; Coroutine s m a
+</span><span class="hs-identifier hs-var hs-var hs-var">fail</span></span></span><span> </span><span id="local-6989586621680158836"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680158836"><span class="hs-identifier hs-var">msg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m (Either (s (Coroutine s m a)) a) -&gt; Coroutine s m a
+forall (s :: * -&gt; *) (m :: * -&gt; *) r.
+m (Either (s (Coroutine s m r)) r) -&gt; Coroutine s m r
+</span><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-var">Coroutine</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Either (s (Coroutine s m a)) a
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Either (s (Coroutine s m a)) a)
+-&gt; m a -&gt; m (Either (s (Coroutine s m a)) a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; m a
+forall a. String -&gt; m a
+forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
+</span><span class="hs-identifier hs-var">fail</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621680158836"><span class="hs-identifier hs-var">msg</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680158633"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621680158633"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadTrans</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158633"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-53"></span><span>  </span><span id="local-6989586621680158848"><span class="annot"><span class="annottext">lift :: forall (m :: * -&gt; *) a. Monad m =&gt; m a -&gt; Coroutine s m a
+</span><a href="#local-6989586621680158848"><span class="hs-identifier hs-var hs-var hs-var">lift</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m (Either (s (Coroutine s m a)) a) -&gt; Coroutine s m a
+forall (s :: * -&gt; *) (m :: * -&gt; *) r.
+m (Either (s (Coroutine s m r)) r) -&gt; Coroutine s m r
+</span><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-var">Coroutine</span></a></span><span> </span><span class="annot"><span class="annottext">(m (Either (s (Coroutine s m a)) a) -&gt; Coroutine s m a)
+-&gt; (m a -&gt; m (Either (s (Coroutine s m a)) a))
+-&gt; m a
+-&gt; Coroutine s m a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Either (s (Coroutine s m a)) a)
+-&gt; m a -&gt; m (Either (s (Coroutine s m a)) a)
+forall a b. (a -&gt; b) -&gt; m a -&gt; m b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Either (s (Coroutine s m a)) a
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680158641"><span id="local-6989586621680158642"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621680158641"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621680158642"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158641"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158642"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-57"></span><span>  </span><span id="local-6989586621680158862"><span class="annot"><span class="annottext">liftIO :: forall a. IO a -&gt; Coroutine s m a
+</span><a href="#local-6989586621680158862"><span class="hs-identifier hs-var hs-var hs-var">liftIO</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m a -&gt; Coroutine s m a
+forall (m :: * -&gt; *) a. Monad m =&gt; m a -&gt; Coroutine s m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="annot"><span class="annottext">(m a -&gt; Coroutine s m a)
+-&gt; (IO a -&gt; m a) -&gt; IO a -&gt; Coroutine s m a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">IO a -&gt; m a
+forall a. IO a -&gt; m a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><span class="hs-identifier hs-var">liftIO</span></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680158652"><span id="local-6989586621680158653"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621680158652"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Catch.MonadThrow</span></span><span> </span><span class="annot"><a href="#local-6989586621680158653"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Catch.MonadThrow</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158652"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158653"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-61"></span><span>  </span><span id="local-6989586621680158881"><span class="annot"><span class="annottext">throwM :: forall e a. (HasCallStack, Exception e) =&gt; e -&gt; Coroutine s m a
+</span><a href="#local-6989586621680158881"><span class="hs-identifier hs-var hs-var hs-var">throwM</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m a -&gt; Coroutine s m a
+forall (m :: * -&gt; *) a. Monad m =&gt; m a -&gt; Coroutine s m a
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="annot"><span class="annottext">(m a -&gt; Coroutine s m a) -&gt; (e -&gt; m a) -&gt; e -&gt; Coroutine s m a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">e -&gt; m a
+forall e a. (HasCallStack, Exception e) =&gt; e -&gt; m a
+forall (m :: * -&gt; *) e a.
+(MonadThrow m, HasCallStack, Exception e) =&gt;
+e -&gt; m a
+</span><span class="hs-identifier hs-var">Catch.throwM</span></span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621680158662"><span id="local-6989586621680158663"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621680158662"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Catch.MonadCatch</span></span><span> </span><span class="annot"><a href="#local-6989586621680158663"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Catch.MonadCatch</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158662"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158663"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-65"></span><span>  </span><span id="local-6989586621680158907"><span class="annot"><span class="annottext">catch :: forall e a.
+(HasCallStack, Exception e) =&gt;
+Coroutine s m a -&gt; (e -&gt; Coroutine s m a) -&gt; Coroutine s m a
+</span><a href="#local-6989586621680158907"><span class="hs-identifier hs-var hs-var hs-var">catch</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span id="local-6989586621680158909"><span class="annot"><span class="annottext">m (Either (s (Coroutine s m a)) a)
+</span><a href="#local-6989586621680158909"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621680158910"><span class="annot"><span class="annottext">e -&gt; Coroutine s m a
+</span><a href="#local-6989586621680158910"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m (Either (s (Coroutine s m a)) a) -&gt; Coroutine s m a
+forall (s :: * -&gt; *) (m :: * -&gt; *) r.
+m (Either (s (Coroutine s m r)) r) -&gt; Coroutine s m r
+</span><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-var">Coroutine</span></a></span><span> </span><span class="annot"><span class="annottext">(m (Either (s (Coroutine s m a)) a) -&gt; Coroutine s m a)
+-&gt; m (Either (s (Coroutine s m a)) a) -&gt; Coroutine s m a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-66"></span><span>    </span><span id="local-6989586621680158911"><span class="annot"><a href="#local-6989586621680158911"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m (Either (s (Coroutine s m a)) a)
+-&gt; (e -&gt; m (Either (s (Coroutine s m a)) a))
+-&gt; m (Either (s (Coroutine s m a)) a)
+forall e a. (HasCallStack, Exception e) =&gt; m a -&gt; (e -&gt; m a) -&gt; m a
+forall (m :: * -&gt; *) e a.
+(MonadCatch m, HasCallStack, Exception e) =&gt;
+m a -&gt; (e -&gt; m a) -&gt; m a
+</span><span class="hs-identifier hs-var">Catch.catch</span></span><span> </span><span class="annot"><span class="annottext">m (Either (s (Coroutine s m a)) a)
+</span><a href="#local-6989586621680158909"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Coroutine s m a -&gt; m (Either (s (Coroutine s m a)) a)
+forall (s :: * -&gt; *) (m :: * -&gt; *) r.
+Coroutine s m r -&gt; m (Either (s (Coroutine s m r)) r)
+</span><a href="Temporal.Coroutine.html#resume"><span class="hs-identifier hs-var">resume</span></a></span><span> </span><span class="annot"><span class="annottext">(Coroutine s m a -&gt; m (Either (s (Coroutine s m a)) a))
+-&gt; (e -&gt; Coroutine s m a)
+-&gt; e
+-&gt; m (Either (s (Coroutine s m a)) a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">e -&gt; Coroutine s m a
+</span><a href="#local-6989586621680158910"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-67"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621680158911"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-68"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621680158912"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680158912"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Either (s (Coroutine s m a)) a
+-&gt; m (Either (s (Coroutine s m a)) a)
+forall a. a -&gt; m a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Either (s (Coroutine s m a)) a
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680158912"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-69"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621680158913"><span class="annot"><span class="annottext">s (Coroutine s m a)
+</span><a href="#local-6989586621680158913"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Either (s (Coroutine s m a)) a
+-&gt; m (Either (s (Coroutine s m a)) a)
+forall a. a -&gt; m a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s (Coroutine s m a) -&gt; Either (s (Coroutine s m a)) a
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Coroutine s m a -&gt; Coroutine s m a)
+-&gt; s (Coroutine s m a) -&gt; s (Coroutine s m a)
+forall a b. (a -&gt; b) -&gt; s a -&gt; s b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Coroutine s m a -&gt; (e -&gt; Coroutine s m a) -&gt; Coroutine s m a
+forall e a.
+(HasCallStack, Exception e) =&gt;
+Coroutine s m a -&gt; (e -&gt; Coroutine s m a) -&gt; Coroutine s m a
+forall (m :: * -&gt; *) e a.
+(MonadCatch m, HasCallStack, Exception e) =&gt;
+m a -&gt; (e -&gt; m a) -&gt; m a
+</span><span class="hs-operator hs-var">`Catch.catch`</span></span><span> </span><span class="annot"><span class="annottext">e -&gt; Coroutine s m a
+</span><a href="#local-6989586621680158910"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">s (Coroutine s m a)
+</span><a href="#local-6989586621680158913"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span>
+</span><span id="line-72"></span><span id="local-6989586621680158670"><span id="local-6989586621680158671"><span id="local-6989586621680158672"><span class="annot"><a href="Temporal.Coroutine.html#suspend"><span class="hs-identifier hs-type">suspend</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621680158670"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680158671"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158671"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158670"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158672"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158671"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158670"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158672"><span class="hs-identifier hs-type">x</span></a></span></span></span></span><span>
+</span><span id="line-73"></span><span id="suspend"><span class="annot"><span class="annottext">suspend :: forall (m :: * -&gt; *) (s :: * -&gt; *) x.
+Monad m =&gt;
+s (Coroutine s m x) -&gt; Coroutine s m x
+</span><a href="Temporal.Coroutine.html#suspend"><span class="hs-identifier hs-var hs-var">suspend</span></a></span></span><span> </span><span id="local-6989586621680158917"><span class="annot"><span class="annottext">s (Coroutine s m x)
+</span><a href="#local-6989586621680158917"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m (Either (s (Coroutine s m x)) x) -&gt; Coroutine s m x
+forall (s :: * -&gt; *) (m :: * -&gt; *) r.
+m (Either (s (Coroutine s m r)) r) -&gt; Coroutine s m r
+</span><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-var">Coroutine</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Either (s (Coroutine s m x)) x
+-&gt; m (Either (s (Coroutine s m x)) x)
+forall a. a -&gt; m a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s (Coroutine s m x) -&gt; Either (s (Coroutine s m x)) x
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">s (Coroutine s m x)
+</span><a href="#local-6989586621680158917"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-74"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Temporal.Coroutine.html#suspend"><span class="hs-pragma hs-type">suspend</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span class="annot"><span class="hs-comment">-- | Suspend the current coroutine until a value is provided.</span></span><span>
+</span><span id="line-78"></span><span id="local-6989586621680158676"><span id="local-6989586621680158677"><span class="annot"><a href="Temporal.Coroutine.html#await"><span class="hs-identifier hs-type">await</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621680158676"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Coroutine.html#Await"><span class="hs-identifier hs-type">Await</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158677"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621680158676"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158677"><span class="hs-identifier hs-type">x</span></a></span></span></span><span>
+</span><span id="line-79"></span><span id="await"><span class="annot"><span class="annottext">await :: forall (m :: * -&gt; *) x. Monad m =&gt; Coroutine (Await x) m x
+</span><a href="Temporal.Coroutine.html#await"><span class="hs-identifier hs-var hs-var">await</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Await x (Coroutine (Await x) m x) -&gt; Coroutine (Await x) m x
+forall (m :: * -&gt; *) (s :: * -&gt; *) x.
+Monad m =&gt;
+s (Coroutine s m x) -&gt; Coroutine s m x
+</span><a href="Temporal.Coroutine.html#suspend"><span class="hs-identifier hs-var">suspend</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(x -&gt; Coroutine (Await x) m x) -&gt; Await x (Coroutine (Await x) m x)
+forall x y. (x -&gt; y) -&gt; Await x y
+</span><a href="Temporal.Coroutine.html#Await"><span class="hs-identifier hs-var">Await</span></a></span><span> </span><span class="annot"><span class="annottext">x -&gt; Coroutine (Await x) m x
+forall a. a -&gt; Coroutine (Await x) m a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span class="hs-special">)</span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span>
+</span><span id="line-82"></span><span id="local-6989586621680158680"><span id="local-6989586621680158681"><span id="local-6989586621680158682"><span class="annot"><a href="Temporal.Coroutine.html#supply"><span class="hs-identifier hs-type">supply</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621680158680"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680158681"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158681"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158680"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158682"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158681"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158680"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158682"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158681"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158680"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158682"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680158680"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158682"><span class="hs-identifier hs-type">x</span></a></span></span></span></span><span>
+</span><span id="line-83"></span><span id="supply"><span class="annot"><span class="annottext">supply :: forall (m :: * -&gt; *) (s :: * -&gt; *) x.
+Monad m =&gt;
+(s (Coroutine s m x) -&gt; Coroutine s m x) -&gt; Coroutine s m x -&gt; m x
+</span><a href="Temporal.Coroutine.html#supply"><span class="hs-identifier hs-var hs-var">supply</span></a></span></span><span> </span><span id="local-6989586621680158928"><span class="annot"><span class="annottext">s (Coroutine s m x) -&gt; Coroutine s m x
+</span><a href="#local-6989586621680158928"><span class="hs-identifier hs-var">runStep</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Coroutine s m x -&gt; m x
+</span><a href="#local-6989586621680158929"><span class="hs-identifier hs-var">loop</span></a></span><span>
+</span><span id="line-84"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-85"></span><span>    </span><span id="local-6989586621680158929"><span class="annot"><span class="annottext">loop :: Coroutine s m x -&gt; m x
+</span><a href="#local-6989586621680158929"><span class="hs-identifier hs-var hs-var">loop</span></a></span></span><span> </span><span id="local-6989586621680158930"><span class="annot"><span class="annottext">Coroutine s m x
+</span><a href="#local-6989586621680158930"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Coroutine s m x -&gt; m (Either (s (Coroutine s m x)) x)
+forall (s :: * -&gt; *) (m :: * -&gt; *) r.
+Coroutine s m r -&gt; m (Either (s (Coroutine s m r)) r)
+</span><a href="Temporal.Coroutine.html#resume"><span class="hs-identifier hs-var">resume</span></a></span><span> </span><span class="annot"><span class="annottext">Coroutine s m x
+</span><a href="#local-6989586621680158930"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">m (Either (s (Coroutine s m x)) x)
+-&gt; (Either (s (Coroutine s m x)) x -&gt; m x) -&gt; m x
+forall a b. m a -&gt; (a -&gt; m b) -&gt; m b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="annottext">(s (Coroutine s m x) -&gt; m x)
+-&gt; (x -&gt; m x) -&gt; Either (s (Coroutine s m x)) x -&gt; m x
+forall a c b. (a -&gt; c) -&gt; (b -&gt; c) -&gt; Either a b -&gt; c
+</span><span class="hs-identifier hs-var">either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Coroutine s m x -&gt; m x
+</span><a href="#local-6989586621680158929"><span class="hs-identifier hs-var">loop</span></a></span><span> </span><span class="annot"><span class="annottext">(Coroutine s m x -&gt; m x)
+-&gt; (s (Coroutine s m x) -&gt; Coroutine s m x)
+-&gt; s (Coroutine s m x)
+-&gt; m x
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">s (Coroutine s m x) -&gt; Coroutine s m x
+</span><a href="#local-6989586621680158928"><span class="hs-identifier hs-var">runStep</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">x -&gt; m x
+forall a. a -&gt; m a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span class="annot"><span class="hs-comment">-- | Runs a suspendable 'Coroutine' to its completion with a monadic action.</span></span><span>
+</span><span id="line-89"></span><span id="local-6989586621680158689"><span id="local-6989586621680158690"><span id="local-6989586621680158691"><span class="annot"><a href="Temporal.Coroutine.html#supplyM"><span class="hs-identifier hs-type">supplyM</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621680158689"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621680158690"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158690"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158689"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158691"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680158689"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158690"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158689"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158691"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158690"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158689"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158691"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680158689"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158691"><span class="hs-identifier hs-type">x</span></a></span></span></span></span><span>
+</span><span id="line-90"></span><span id="supplyM"><span class="annot"><span class="annottext">supplyM :: forall (m :: * -&gt; *) (s :: * -&gt; *) x.
+Monad m =&gt;
+(s (Coroutine s m x) -&gt; m (Coroutine s m x))
+-&gt; Coroutine s m x -&gt; m x
+</span><a href="Temporal.Coroutine.html#supplyM"><span class="hs-identifier hs-var hs-var">supplyM</span></a></span></span><span> </span><span id="local-6989586621680158938"><span class="annot"><span class="annottext">s (Coroutine s m x) -&gt; m (Coroutine s m x)
+</span><a href="#local-6989586621680158938"><span class="hs-identifier hs-var">runStep</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Coroutine s m x -&gt; m x
+</span><a href="#local-6989586621680158939"><span class="hs-identifier hs-var">loop</span></a></span><span>
+</span><span id="line-91"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-92"></span><span>    </span><span id="local-6989586621680158939"><span class="annot"><span class="annottext">loop :: Coroutine s m x -&gt; m x
+</span><a href="#local-6989586621680158939"><span class="hs-identifier hs-var hs-var">loop</span></a></span></span><span> </span><span id="local-6989586621680158940"><span class="annot"><span class="annottext">Coroutine s m x
+</span><a href="#local-6989586621680158940"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Coroutine s m x -&gt; m (Either (s (Coroutine s m x)) x)
+forall (s :: * -&gt; *) (m :: * -&gt; *) r.
+Coroutine s m r -&gt; m (Either (s (Coroutine s m r)) r)
+</span><a href="Temporal.Coroutine.html#resume"><span class="hs-identifier hs-var">resume</span></a></span><span> </span><span class="annot"><span class="annottext">Coroutine s m x
+</span><a href="#local-6989586621680158940"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">m (Either (s (Coroutine s m x)) x)
+-&gt; (Either (s (Coroutine s m x)) x -&gt; m x) -&gt; m x
+forall a b. m a -&gt; (a -&gt; m b) -&gt; m b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="annottext">(s (Coroutine s m x) -&gt; m x)
+-&gt; (x -&gt; m x) -&gt; Either (s (Coroutine s m x)) x -&gt; m x
+forall a c b. (a -&gt; c) -&gt; (b -&gt; c) -&gt; Either a b -&gt; c
+</span><span class="hs-identifier hs-var">either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s (Coroutine s m x) -&gt; m (Coroutine s m x)
+</span><a href="#local-6989586621680158938"><span class="hs-identifier hs-var">runStep</span></a></span><span> </span><span class="annot"><span class="annottext">(s (Coroutine s m x) -&gt; m (Coroutine s m x))
+-&gt; (Coroutine s m x -&gt; m x) -&gt; s (Coroutine s m x) -&gt; m x
+forall (m :: * -&gt; *) a b c.
+Monad m =&gt;
+(a -&gt; m b) -&gt; (b -&gt; m c) -&gt; a -&gt; m c
+</span><span class="hs-operator hs-var">&gt;=&gt;</span></span><span> </span><span class="annot"><span class="annottext">Coroutine s m x -&gt; m x
+</span><a href="#local-6989586621680158939"><span class="hs-identifier hs-var">loop</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">x -&gt; m x
+forall a. a -&gt; m a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span>
+</span><span id="line-93"></span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span class="annot"><a href="Temporal.Coroutine.html#coroutineHoist"><span class="hs-identifier hs-type">coroutineHoist</span></a></span><span>
+</span><span id="line-96"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621680158699"><span class="annot"><a href="#local-6989586621680158699"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621680158700"><span class="annot"><a href="#local-6989586621680158700"><span class="hs-identifier hs-type">m</span></a></span></span><span> </span><span id="local-6989586621680158701"><span class="annot"><a href="#local-6989586621680158701"><span class="hs-identifier hs-type">n</span></a></span></span><span> </span><span id="local-6989586621680158703"><span class="annot"><a href="#local-6989586621680158703"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-97"></span><span>   </span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621680158699"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621680158700"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621680158701"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-98"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621680158702"><span class="annot"><a href="#local-6989586621680158702"><span class="hs-identifier hs-type">b</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="#local-6989586621680158700"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158702"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621680158701"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158702"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-99"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158699"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158700"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158703"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-100"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158699"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158701"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621680158703"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-101"></span><span id="coroutineHoist"><span class="annot"><span class="annottext">coroutineHoist :: forall (f :: * -&gt; *) (m :: * -&gt; *) (n :: * -&gt; *) a.
+(Functor f, Monad m, Monad n) =&gt;
+(forall b. m b -&gt; n b) -&gt; Coroutine f m a -&gt; Coroutine f n a
+</span><a href="Temporal.Coroutine.html#coroutineHoist"><span class="hs-identifier hs-var hs-var">coroutineHoist</span></a></span></span><span> </span><span id="local-6989586621680158953"><span class="annot"><span class="annottext">forall b. m b -&gt; n b
+</span><a href="#local-6989586621680158953"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621680158954"><span class="annot"><span class="annottext">Coroutine f m a
+</span><a href="#local-6989586621680158954"><span class="hs-identifier hs-var">routine</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-102"></span><span>  </span><span class="annot"><a href="Temporal.Coroutine.html#Coroutine"><span class="hs-identifier hs-type">Coroutine</span></a></span><span>
+</span><span id="line-103"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">resume :: n (Either (f (Coroutine f n a)) a)
+</span><a href="Temporal.Coroutine.html#resume"><span class="hs-identifier hs-var">resume</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Either (f (Coroutine f m a)) a -&gt; Either (f (Coroutine f n a)) a)
+-&gt; n (Either (f (Coroutine f m a)) a)
+-&gt; n (Either (f (Coroutine f n a)) a)
+forall a b. (a -&gt; b) -&gt; n a -&gt; n b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">Either (f (Coroutine f m a)) a -&gt; Either (f (Coroutine f n a)) a
+</span><a href="#local-6989586621680158955"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">(n (Either (f (Coroutine f m a)) a)
+ -&gt; n (Either (f (Coroutine f n a)) a))
+-&gt; n (Either (f (Coroutine f m a)) a)
+-&gt; n (Either (f (Coroutine f n a)) a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">m (Either (f (Coroutine f m a)) a)
+-&gt; n (Either (f (Coroutine f m a)) a)
+forall b. m b -&gt; n b
+</span><a href="#local-6989586621680158953"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(m (Either (f (Coroutine f m a)) a)
+ -&gt; n (Either (f (Coroutine f m a)) a))
+-&gt; m (Either (f (Coroutine f m a)) a)
+-&gt; n (Either (f (Coroutine f m a)) a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Coroutine f m a -&gt; m (Either (f (Coroutine f m a)) a)
+forall (s :: * -&gt; *) (m :: * -&gt; *) r.
+Coroutine s m r -&gt; m (Either (s (Coroutine s m r)) r)
+</span><a href="Temporal.Coroutine.html#resume"><span class="hs-identifier hs-var">resume</span></a></span><span> </span><span class="annot"><span class="annottext">Coroutine f m a
+</span><a href="#local-6989586621680158954"><span class="hs-identifier hs-var">routine</span></a></span><span>
+</span><span id="line-104"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-105"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-106"></span><span>    </span><span id="local-6989586621680158955"><span class="annot"><span class="annottext">go :: Either (f (Coroutine f m a)) a -&gt; Either (f (Coroutine f n a)) a
+</span><a href="#local-6989586621680158955"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621680158956"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680158956"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Either (f (Coroutine f n a)) a
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621680158956"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-107"></span><span>    </span><span class="annot"><a href="#local-6989586621680158955"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621680158957"><span class="annot"><span class="annottext">f (Coroutine f m a)
+</span><a href="#local-6989586621680158957"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">f (Coroutine f n a) -&gt; Either (f (Coroutine f n a)) a
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(forall b. m b -&gt; n b) -&gt; Coroutine f m a -&gt; Coroutine f n a
+forall (f :: * -&gt; *) (m :: * -&gt; *) (n :: * -&gt; *) a.
+(Functor f, Monad m, Monad n) =&gt;
+(forall b. m b -&gt; n b) -&gt; Coroutine f m a -&gt; Coroutine f n a
+</span><a href="Temporal.Coroutine.html#coroutineHoist"><span class="hs-identifier hs-var">coroutineHoist</span></a></span><span> </span><span class="annot"><span class="annottext">m b -&gt; n b
+forall b. m b -&gt; n b
+</span><a href="#local-6989586621680158953"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(Coroutine f m a -&gt; Coroutine f n a)
+-&gt; f (Coroutine f m a) -&gt; f (Coroutine f n a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">f (Coroutine f m a)
+</span><a href="#local-6989586621680158957"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-108"></span></pre></body></html>

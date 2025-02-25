@@ -1,0 +1,452 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Temporal.Codec.Server.html"><span class="hs-identifier">Temporal.Codec.Server</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-2"></span><span>  </span><span class="annot"><a href="Temporal.Codec.Server.html#codecServerMiddleware"><span class="hs-identifier">codecServerMiddleware</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-3"></span><span>  </span><span class="annot"><a href="Temporal.Codec.Server.html#CodecServerConfig"><span class="hs-identifier">CodecServerConfig</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-4"></span><span>  </span><span class="annot"><span class="hs-identifier">CorsResourcePolicy</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-5"></span><span>  </span><span class="annot"><a href="Temporal.Codec.Server.html#ErrorResponse"><span class="hs-identifier">ErrorResponse</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-6"></span><span>  </span><span class="annot"><a href="Temporal.Codec.Server.html#AuthorizationHeaderValue"><span class="hs-identifier">AuthorizationHeaderValue</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-7"></span><span>  </span><span class="annot"><span class="hs-identifier">Payload</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-8"></span><span>  </span><span class="annot"><a href="Temporal.Codec.Server.html#temporalCloudCorsPolicy"><span class="hs-identifier">temporalCloudCorsPolicy</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-9"></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Trans.Except</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bifunctor</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">BS</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text.Encoding</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Text</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Vector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Vector</span></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Network.HTTP.Types</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Network.Wai</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Network.Wai.Middleware.Cors</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Temporal.Payload</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Temporal.Workflow</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Namespace</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">data</span><span> </span><span id="Body"><span class="annot"><a href="Temporal.Codec.Server.html#Body"><span class="hs-identifier hs-var">Body</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Body"><span class="annot"><a href="Temporal.Codec.Server.html#Body"><span class="hs-identifier hs-var">Body</span></a></span></span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="payloads"><span class="annot"><span class="annottext">Body -&gt; Vector Payload
+</span><a href="Temporal.Codec.Server.html#payloads"><span class="hs-identifier hs-var hs-var">payloads</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Payload</span></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679162820"><span id="local-6989586621679162823"><span id="local-6989586621679162826"><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="Temporal.Codec.Server.html#Body"><span class="hs-identifier hs-type">Body</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-31"></span><span>  </span><span id="local-6989586621679162835"><span class="annot"><span class="annottext">toJSON :: Body -&gt; Value
+</span><a href="#local-6989586621679162835"><span class="hs-identifier hs-var hs-var hs-var">toJSON</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Codec.Server.html#Body"><span class="hs-identifier hs-type">Body</span></a></span><span> </span><span id="local-6989586621679162837"><span class="annot"><span class="annottext">Vector Payload
+</span><a href="#local-6989586621679162837"><span class="hs-identifier hs-var">payloads</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;payloads&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Vector Payload -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Vector Payload
+</span><a href="#local-6989586621679162837"><span class="hs-identifier hs-var">payloads</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-32"></span><span>  </span><span id="local-6989586621679162845"><span class="annot"><span class="annottext">toEncoding :: Body -&gt; Encoding
+</span><a href="#local-6989586621679162845"><span class="hs-identifier hs-var hs-var hs-var">toEncoding</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Temporal.Codec.Server.html#Body"><span class="hs-identifier hs-type">Body</span></a></span><span> </span><span id="local-6989586621679162847"><span class="annot"><span class="annottext">Vector Payload
+</span><a href="#local-6989586621679162847"><span class="hs-identifier hs-var">payloads</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Series -&gt; Encoding
+</span><span class="hs-identifier hs-var">pairs</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;payloads&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Vector Payload -&gt; Series
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Series
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Vector Payload
+</span><a href="#local-6989586621679162847"><span class="hs-identifier hs-var">payloads</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679162851"><span id="local-6989586621679162854"><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="Temporal.Codec.Server.html#Body"><span class="hs-identifier hs-type">Body</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-36"></span><span>  </span><span id="local-6989586621679162864"><span class="annot"><span class="annottext">parseJSON :: Value -&gt; Parser Body
+</span><a href="#local-6989586621679162864"><span class="hs-identifier hs-var hs-var hs-var">parseJSON</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; (Object -&gt; Parser Body) -&gt; Value -&gt; Parser Body
+forall a. String -&gt; (Object -&gt; Parser a) -&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">withObject</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Body&quot;</span></span><span> </span><span class="annot"><span class="annottext">((Object -&gt; Parser Body) -&gt; Value -&gt; Parser Body)
+-&gt; (Object -&gt; Parser Body) -&gt; Value -&gt; Parser Body
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679162867"><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679162867"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Vector Payload -&gt; Body
+</span><a href="Temporal.Codec.Server.html#Body"><span class="hs-identifier hs-var">Body</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector Payload -&gt; Body) -&gt; Parser (Vector Payload) -&gt; Parser Body
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679162867"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser (Vector Payload)
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;payloads&quot;</span></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">type</span><span> </span><span id="AuthorizationHeaderValue"><span class="annot"><a href="Temporal.Codec.Server.html#AuthorizationHeaderValue"><span class="hs-identifier hs-var">AuthorizationHeaderValue</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">BS.ByteString</span></span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">data</span><span> </span><span id="ErrorResponse"><span class="annot"><a href="Temporal.Codec.Server.html#ErrorResponse"><span class="hs-identifier hs-var">ErrorResponse</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ErrorResponse"><span class="annot"><a href="Temporal.Codec.Server.html#ErrorResponse"><span class="hs-identifier hs-var">ErrorResponse</span></a></span></span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="errorStatus"><span class="annot"><span class="annottext">ErrorResponse -&gt; Status
+</span><a href="Temporal.Codec.Server.html#errorStatus"><span class="hs-identifier hs-var hs-var">errorStatus</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Status</span></span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="errorMessage"><span class="annot"><span class="annottext">ErrorResponse -&gt; String
+</span><a href="Temporal.Codec.Server.html#errorMessage"><span class="hs-identifier hs-var hs-var">errorMessage</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-keyword">data</span><span> </span><span id="CodecServerConfig"><span class="annot"><a href="Temporal.Codec.Server.html#CodecServerConfig"><span class="hs-identifier hs-var">CodecServerConfig</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="CodecServerConfig"><span class="annot"><a href="Temporal.Codec.Server.html#CodecServerConfig"><span class="hs-identifier hs-var">CodecServerConfig</span></a></span></span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="codecServerDecoder"><span class="annot"><span class="annottext">CodecServerConfig
+-&gt; Namespace
+-&gt; Maybe ByteString
+-&gt; Payload
+-&gt; ExceptT ErrorResponse IO Payload
+</span><a href="Temporal.Codec.Server.html#codecServerDecoder"><span class="hs-identifier hs-var hs-var">codecServerDecoder</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Namespace</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Codec.Server.html#AuthorizationHeaderValue"><span class="hs-identifier hs-type">AuthorizationHeaderValue</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Payload</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ExceptT</span></span><span> </span><span class="annot"><a href="Temporal.Codec.Server.html#ErrorResponse"><span class="hs-identifier hs-type">ErrorResponse</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Payload</span></span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="codecServerEncoder"><span class="annot"><span class="annottext">CodecServerConfig
+-&gt; Namespace
+-&gt; Maybe ByteString
+-&gt; Payload
+-&gt; ExceptT ErrorResponse IO Payload
+</span><a href="Temporal.Codec.Server.html#codecServerEncoder"><span class="hs-identifier hs-var hs-var">codecServerEncoder</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Namespace</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Temporal.Codec.Server.html#AuthorizationHeaderValue"><span class="hs-identifier hs-type">AuthorizationHeaderValue</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Payload</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ExceptT</span></span><span> </span><span class="annot"><a href="Temporal.Codec.Server.html#ErrorResponse"><span class="hs-identifier hs-type">ErrorResponse</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Payload</span></span><span class="hs-special">)</span><span>
+</span><span id="line-51"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="endpointBase"><span class="annot"><span class="annottext">CodecServerConfig -&gt; [Text]
+</span><a href="Temporal.Codec.Server.html#endpointBase"><span class="hs-identifier hs-var hs-var">endpointBase</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span class="hs-special">]</span><span>
+</span><span id="line-52"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ Path segments</span></span><span>
+</span><span id="line-53"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="corsPolicy"><span class="annot"><span class="annottext">CodecServerConfig -&gt; CorsResourcePolicy
+</span><a href="Temporal.Codec.Server.html#corsPolicy"><span class="hs-identifier hs-var hs-var">corsPolicy</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CorsResourcePolicy</span></span><span>
+</span><span id="line-54"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span class="annot"><a href="Temporal.Codec.Server.html#errorResponse"><span class="hs-identifier hs-type">errorResponse</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Codec.Server.html#ErrorResponse"><span class="hs-identifier hs-type">ErrorResponse</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Response</span></span><span>
+</span><span id="line-58"></span><span id="errorResponse"><span class="annot"><span class="annottext">errorResponse :: ErrorResponse -&gt; Response
+</span><a href="Temporal.Codec.Server.html#errorResponse"><span class="hs-identifier hs-var hs-var">errorResponse</span></a></span></span><span> </span><span id="local-6989586621679162879"><span class="annot"><span class="annottext">ErrorResponse
+</span><a href="#local-6989586621679162879"><span class="hs-identifier hs-var">err</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Status -&gt; ResponseHeaders -&gt; ByteString -&gt; Response
+</span><span class="hs-identifier hs-var">responseLBS</span></span><span> </span><span class="annot"><span class="annottext">ErrorResponse
+</span><a href="#local-6989586621679162879"><span class="hs-identifier hs-var">err</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">errorStatus</span><span> </span><span class="annot"><span class="annottext">ResponseHeaders
+</span><a href="Temporal.Codec.Server.html#respHeaders"><span class="hs-identifier hs-var">respHeaders</span></a></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; Response) -&gt; ByteString -&gt; Response
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Value -&gt; ByteString
+forall a. ToJSON a =&gt; a -&gt; ByteString
+</span><span class="hs-identifier hs-var">Data.Aeson.encode</span></span><span> </span><span class="annot"><span class="annottext">(Value -&gt; ByteString) -&gt; Value -&gt; ByteString
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;error&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; String -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">ErrorResponse
+</span><a href="#local-6989586621679162879"><span class="hs-identifier hs-var">err</span></a></span><span class="hs-operator">.</span><span class="hs-identifier">errorMessage</span><span class="hs-special">]</span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="annot"><a href="Temporal.Codec.Server.html#namespaceHeader"><span class="hs-identifier hs-type">namespaceHeader</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HeaderName</span></span><span>
+</span><span id="line-62"></span><span id="namespaceHeader"><span class="annot"><span class="annottext">namespaceHeader :: HeaderName
+</span><a href="Temporal.Codec.Server.html#namespaceHeader"><span class="hs-identifier hs-var hs-var">namespaceHeader</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HeaderName
+</span><span class="hs-string">&quot;x-namespace&quot;</span></span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="annot"><a href="Temporal.Codec.Server.html#streamingDecode"><span class="hs-identifier hs-type">streamingDecode</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Request</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ExceptT</span></span><span> </span><span class="annot"><a href="Temporal.Codec.Server.html#ErrorResponse"><span class="hs-identifier hs-type">ErrorResponse</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="Temporal.Codec.Server.html#Body"><span class="hs-identifier hs-type">Body</span></a></span><span>
+</span><span id="line-66"></span><span id="streamingDecode"><span class="annot"><span class="annottext">streamingDecode :: Request -&gt; ExceptT ErrorResponse IO Body
+</span><a href="Temporal.Codec.Server.html#streamingDecode"><span class="hs-identifier hs-var hs-var">streamingDecode</span></a></span></span><span> </span><span id="local-6989586621679162885"><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162885"><span class="hs-identifier hs-var">req</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO (Either ErrorResponse Body) -&gt; ExceptT ErrorResponse IO Body
+forall e (m :: * -&gt; *) a. m (Either e a) -&gt; ExceptT e m a
+</span><span class="hs-identifier hs-var">ExceptT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(String -&gt; ErrorResponse)
+-&gt; Either String Body -&gt; Either ErrorResponse Body
+forall a b c. (a -&gt; b) -&gt; Either a c -&gt; Either b c
+forall (p :: * -&gt; * -&gt; *) a b c.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; p a c -&gt; p b c
+</span><span class="hs-identifier hs-var">first</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Status -&gt; String -&gt; ErrorResponse
+</span><a href="Temporal.Codec.Server.html#ErrorResponse"><span class="hs-identifier hs-var">ErrorResponse</span></a></span><span> </span><span class="annot"><span class="annottext">Status
+</span><span class="hs-identifier hs-var">status500</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Either String Body -&gt; Either ErrorResponse Body)
+-&gt; (ByteString -&gt; Either String Body)
+-&gt; ByteString
+-&gt; Either ErrorResponse Body
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Either String Body
+forall a. FromJSON a =&gt; ByteString -&gt; Either String a
+</span><span class="hs-identifier hs-var">eitherDecode'</span></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; Either ErrorResponse Body)
+-&gt; IO ByteString -&gt; IO (Either ErrorResponse Body)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Request -&gt; IO ByteString
+</span><span class="hs-identifier hs-var">consumeRequestBodyLazy</span></span><span> </span><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162885"><span class="hs-identifier hs-var">req</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span class="annot"><a href="Temporal.Codec.Server.html#respHeaders"><span class="hs-identifier hs-type">respHeaders</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ResponseHeaders</span></span><span>
+</span><span id="line-70"></span><span id="respHeaders"><span class="annot"><span class="annottext">respHeaders :: ResponseHeaders
+</span><a href="Temporal.Codec.Server.html#respHeaders"><span class="hs-identifier hs-var hs-var">respHeaders</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-71"></span><span>  </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HeaderName
+</span><span class="hs-identifier hs-var">hContentType</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;application/json; charset=utf-8&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>  </span><span class="hs-special">]</span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span class="annot"><a href="Temporal.Codec.Server.html#requireNamespaceHeader"><span class="hs-identifier hs-type">requireNamespaceHeader</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Request</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ExceptT</span></span><span> </span><span class="annot"><a href="Temporal.Codec.Server.html#ErrorResponse"><span class="hs-identifier hs-type">ErrorResponse</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Namespace</span></span><span>
+</span><span id="line-76"></span><span id="requireNamespaceHeader"><span class="annot"><span class="annottext">requireNamespaceHeader :: Request -&gt; ExceptT ErrorResponse IO Namespace
+</span><a href="Temporal.Codec.Server.html#requireNamespaceHeader"><span class="hs-identifier hs-var hs-var">requireNamespaceHeader</span></a></span></span><span> </span><span id="local-6989586621679162894"><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162894"><span class="hs-identifier hs-var">req</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">HeaderName -&gt; ResponseHeaders -&gt; Maybe ByteString
+forall a b. Eq a =&gt; a -&gt; [(a, b)] -&gt; Maybe b
+</span><span class="hs-identifier hs-var">lookup</span></span><span> </span><span class="annot"><span class="annottext">HeaderName
+</span><a href="Temporal.Codec.Server.html#namespaceHeader"><span class="hs-identifier hs-var">namespaceHeader</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Request -&gt; ResponseHeaders
+</span><span class="hs-identifier hs-var">requestHeaders</span></span><span> </span><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162894"><span class="hs-identifier hs-var">req</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-77"></span><span>  </span><span class="annot"><span class="annottext">Maybe ByteString
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IO (Either ErrorResponse Namespace)
+-&gt; ExceptT ErrorResponse IO Namespace
+forall e (m :: * -&gt; *) a. m (Either e a) -&gt; ExceptT e m a
+</span><span class="hs-identifier hs-var">ExceptT</span></span><span> </span><span class="annot"><span class="annottext">(IO (Either ErrorResponse Namespace)
+ -&gt; ExceptT ErrorResponse IO Namespace)
+-&gt; IO (Either ErrorResponse Namespace)
+-&gt; ExceptT ErrorResponse IO Namespace
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Either ErrorResponse Namespace
+-&gt; IO (Either ErrorResponse Namespace)
+forall a. a -&gt; IO a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(Either ErrorResponse Namespace
+ -&gt; IO (Either ErrorResponse Namespace))
+-&gt; Either ErrorResponse Namespace
+-&gt; IO (Either ErrorResponse Namespace)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ErrorResponse -&gt; Either ErrorResponse Namespace
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">(ErrorResponse -&gt; Either ErrorResponse Namespace)
+-&gt; ErrorResponse -&gt; Either ErrorResponse Namespace
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Status -&gt; String -&gt; ErrorResponse
+</span><a href="Temporal.Codec.Server.html#ErrorResponse"><span class="hs-identifier hs-var">ErrorResponse</span></a></span><span> </span><span class="annot"><span class="annottext">Status
+</span><span class="hs-identifier hs-var">status500</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Missing required x-namespace header&quot;</span></span><span>
+</span><span id="line-78"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679162897"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679162897"><span class="hs-identifier hs-var">ns</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Namespace -&gt; ExceptT ErrorResponse IO Namespace
+forall a. a -&gt; ExceptT ErrorResponse IO a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(Namespace -&gt; ExceptT ErrorResponse IO Namespace)
+-&gt; Namespace -&gt; ExceptT ErrorResponse IO Namespace
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Namespace
+</span><span class="hs-identifier hs-var">Namespace</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; Namespace) -&gt; Text -&gt; Namespace
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Text
+</span><span class="hs-identifier hs-var">Text.decodeUtf8</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679162897"><span class="hs-identifier hs-var">ns</span></a></span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span class="annot"><a href="Temporal.Codec.Server.html#temporalCloudCorsPolicy"><span class="hs-identifier hs-type">temporalCloudCorsPolicy</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CorsResourcePolicy</span></span><span>
+</span><span id="line-82"></span><span id="temporalCloudCorsPolicy"><span class="annot"><span class="annottext">temporalCloudCorsPolicy :: CorsResourcePolicy
+</span><a href="Temporal.Codec.Server.html#temporalCloudCorsPolicy"><span class="hs-identifier hs-var hs-var">temporalCloudCorsPolicy</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-83"></span><span>  </span><span class="annot"><span class="annottext">CorsResourcePolicy
+</span><span class="hs-identifier hs-var">simpleCorsResourcePolicy</span></span><span>
+</span><span id="line-84"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="hs-identifier hs-var">corsOrigins</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><span class="hs-string">&quot;https://cloud.temporal.io&quot;</span></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span class="hs-special">)</span><span>
+</span><span id="line-85"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-var">corsMethods</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">methodGet</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">methodPost</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">methodOptions</span></span><span class="hs-special">]</span><span>
+</span><span id="line-86"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-var">corsRequestHeaders</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Temporal.Codec.Server.html#namespaceHeader"><span class="hs-identifier hs-type">namespaceHeader</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">hContentType</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">hAuthorization</span></span><span class="hs-special">]</span><span>
+</span><span id="line-87"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-var">corsRequireOrigin</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span>
+</span><span id="line-88"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-var">corsIgnoreFailures</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span>
+</span><span id="line-89"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-90"></span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span class="annot"><a href="Temporal.Codec.Server.html#codecServerMiddleware"><span class="hs-identifier hs-type">codecServerMiddleware</span></a></span><span>
+</span><span id="line-93"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Temporal.Codec.Server.html#CodecServerConfig"><span class="hs-identifier hs-type">CodecServerConfig</span></a></span><span>
+</span><span id="line-94"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Middleware</span></span><span>
+</span><span id="line-95"></span><span id="codecServerMiddleware"><span class="annot"><span class="annottext">codecServerMiddleware :: CodecServerConfig -&gt; Middleware
+</span><a href="Temporal.Codec.Server.html#codecServerMiddleware"><span class="hs-identifier hs-var hs-var">codecServerMiddleware</span></a></span></span><span> </span><span class="annot"><a href="Temporal.Codec.Server.html#CodecServerConfig"><span class="hs-identifier hs-type">CodecServerConfig</span></a></span><span> </span><span class="hs-special">{</span><span id="local-6989586621679162910"><span id="local-6989586621679162911"><span id="local-6989586621679162912"><span id="local-6989586621679162913"><span class="annot"><span class="annottext">[Text]
+CorsResourcePolicy
+Namespace
+-&gt; Maybe ByteString -&gt; Payload -&gt; ExceptT ErrorResponse IO Payload
+codecServerDecoder :: CodecServerConfig
+-&gt; Namespace
+-&gt; Maybe ByteString
+-&gt; Payload
+-&gt; ExceptT ErrorResponse IO Payload
+codecServerEncoder :: CodecServerConfig
+-&gt; Namespace
+-&gt; Maybe ByteString
+-&gt; Payload
+-&gt; ExceptT ErrorResponse IO Payload
+endpointBase :: CodecServerConfig -&gt; [Text]
+corsPolicy :: CodecServerConfig -&gt; CorsResourcePolicy
+codecServerDecoder :: Namespace
+-&gt; Maybe ByteString -&gt; Payload -&gt; ExceptT ErrorResponse IO Payload
+codecServerEncoder :: Namespace
+-&gt; Maybe ByteString -&gt; Payload -&gt; ExceptT ErrorResponse IO Payload
+endpointBase :: [Text]
+corsPolicy :: CorsResourcePolicy
+</span><a href="Temporal.Codec.Server.html#codecServerDecoder"><span class="hs-glyph hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">..</span></a></span></span></span></span></span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-96"></span><span>  </span><span class="annot"><span class="annottext">(Request -&gt; Maybe CorsResourcePolicy) -&gt; Middleware
+</span><span class="hs-identifier hs-var">cors</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679162915"><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162915"><span class="hs-identifier hs-var">req</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Request -&gt; Bool
+</span><a href="#local-6989586621679162916"><span class="hs-identifier hs-var">isCodecServerEndpoint</span></a></span><span> </span><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162915"><span class="hs-identifier hs-var">req</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">CorsResourcePolicy -&gt; Maybe CorsResourcePolicy
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">CorsResourcePolicy
+</span><a href="#local-6989586621679162913"><span class="hs-identifier hs-var">corsPolicy</span></a></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Maybe CorsResourcePolicy
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">)</span><span>
+</span><span id="line-97"></span><span>    </span><span class="annot"><span class="annottext">Middleware -&gt; Middleware -&gt; Middleware
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Middleware
+</span><a href="#local-6989586621679162917"><span class="hs-identifier hs-var">baseMiddleware</span></a></span><span>
+</span><span id="line-98"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-99"></span><span>    </span><span id="local-6989586621679162917"><span class="annot"><span class="annottext">baseMiddleware :: Middleware
+</span><a href="#local-6989586621679162917"><span class="hs-identifier hs-var hs-var">baseMiddleware</span></a></span></span><span> </span><span id="local-6989586621679162918"><span class="annot"><span class="annottext">Request -&gt; (Response -&gt; IO ResponseReceived) -&gt; IO ResponseReceived
+</span><a href="#local-6989586621679162918"><span class="hs-identifier hs-var">app</span></a></span></span><span> </span><span id="local-6989586621679162919"><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162919"><span class="hs-identifier hs-var">req</span></a></span></span><span> </span><span id="local-6989586621679162920"><span class="annot"><span class="annottext">Response -&gt; IO ResponseReceived
+</span><a href="#local-6989586621679162920"><span class="hs-identifier hs-var">respond</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-100"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679162921"><span class="annot"><span class="annottext">dispatch :: IO ResponseReceived
+</span><a href="#local-6989586621679162921"><span class="hs-identifier hs-var hs-var">dispatch</span></a></span></span><span>
+</span><span id="line-101"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Request -&gt; [Text]
+</span><span class="hs-identifier hs-var">pathInfo</span></span><span> </span><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162919"><span class="hs-identifier hs-var">req</span></a></span><span> </span><span class="annot"><span class="annottext">[Text] -&gt; [Text] -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">[Text]
+</span><a href="#local-6989586621679162923"><span class="hs-identifier hs-var">codecServerEncodeEndpoint</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Request -&gt; (Response -&gt; IO ResponseReceived) -&gt; IO ResponseReceived
+</span><a href="#local-6989586621679162924"><span class="hs-identifier hs-var">runEncode</span></a></span><span> </span><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162919"><span class="hs-identifier hs-var">req</span></a></span><span> </span><span class="annot"><span class="annottext">Response -&gt; IO ResponseReceived
+</span><a href="#local-6989586621679162920"><span class="hs-identifier hs-var">respond</span></a></span><span>
+</span><span id="line-102"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Request -&gt; [Text]
+</span><span class="hs-identifier hs-var">pathInfo</span></span><span> </span><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162919"><span class="hs-identifier hs-var">req</span></a></span><span> </span><span class="annot"><span class="annottext">[Text] -&gt; [Text] -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">[Text]
+</span><a href="#local-6989586621679162925"><span class="hs-identifier hs-var">codecServerDecodeEndpoint</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Request -&gt; (Response -&gt; IO ResponseReceived) -&gt; IO ResponseReceived
+</span><a href="#local-6989586621679162926"><span class="hs-identifier hs-var">runDecode</span></a></span><span> </span><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162919"><span class="hs-identifier hs-var">req</span></a></span><span> </span><span class="annot"><span class="annottext">Response -&gt; IO ResponseReceived
+</span><a href="#local-6989586621679162920"><span class="hs-identifier hs-var">respond</span></a></span><span>
+</span><span id="line-103"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Request -&gt; (Response -&gt; IO ResponseReceived) -&gt; IO ResponseReceived
+</span><a href="#local-6989586621679162918"><span class="hs-identifier hs-var">app</span></a></span><span> </span><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162919"><span class="hs-identifier hs-var">req</span></a></span><span> </span><span class="annot"><span class="annottext">Response -&gt; IO ResponseReceived
+</span><a href="#local-6989586621679162920"><span class="hs-identifier hs-var">respond</span></a></span><span>
+</span><span id="line-104"></span><span>      </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">IO ResponseReceived
+</span><a href="#local-6989586621679162921"><span class="hs-identifier hs-var">dispatch</span></a></span><span>
+</span><span id="line-105"></span><span>
+</span><span id="line-106"></span><span>    </span><span id="local-6989586621679162923"><span class="annot"><span class="annottext">codecServerEncodeEndpoint :: [Text]
+</span><a href="#local-6989586621679162923"><span class="hs-identifier hs-var hs-var">codecServerEncodeEndpoint</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Text]
+</span><a href="#local-6989586621679162912"><span class="hs-identifier hs-var">endpointBase</span></a></span><span> </span><span class="annot"><span class="annottext">[Text] -&gt; [Text] -&gt; [Text]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;encode&quot;</span></span><span class="hs-special">]</span><span>
+</span><span id="line-107"></span><span>    </span><span id="local-6989586621679162925"><span class="annot"><span class="annottext">codecServerDecodeEndpoint :: [Text]
+</span><a href="#local-6989586621679162925"><span class="hs-identifier hs-var hs-var">codecServerDecodeEndpoint</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Text]
+</span><a href="#local-6989586621679162912"><span class="hs-identifier hs-var">endpointBase</span></a></span><span> </span><span class="annot"><span class="annottext">[Text] -&gt; [Text] -&gt; [Text]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;decode&quot;</span></span><span class="hs-special">]</span><span>
+</span><span id="line-108"></span><span>    </span><span id="local-6989586621679162916"><span class="annot"><span class="annottext">isCodecServerEndpoint :: Request -&gt; Bool
+</span><a href="#local-6989586621679162916"><span class="hs-identifier hs-var hs-var">isCodecServerEndpoint</span></a></span></span><span> </span><span id="local-6989586621679162927"><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162927"><span class="hs-identifier hs-var">req</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Request -&gt; [Text]
+</span><span class="hs-identifier hs-var">pathInfo</span></span><span> </span><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162927"><span class="hs-identifier hs-var">req</span></a></span><span> </span><span class="annot"><span class="annottext">[Text] -&gt; [[Text]] -&gt; Bool
+forall a. Eq a =&gt; a -&gt; [a] -&gt; Bool
+forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
+</span><span class="hs-operator hs-var">`elem`</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">[Text]
+</span><a href="#local-6989586621679162923"><span class="hs-identifier hs-var">codecServerEncodeEndpoint</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Text]
+</span><a href="#local-6989586621679162925"><span class="hs-identifier hs-var">codecServerDecodeEndpoint</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span>    </span><span id="local-6989586621679162924"><span class="annot"><span class="annottext">runEncode :: Request -&gt; (Response -&gt; IO ResponseReceived) -&gt; IO ResponseReceived
+</span><a href="#local-6989586621679162924"><span class="hs-identifier hs-var hs-var">runEncode</span></a></span></span><span> </span><span id="local-6989586621679162929"><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162929"><span class="hs-identifier hs-var">req</span></a></span></span><span> </span><span id="local-6989586621679162930"><span class="annot"><span class="annottext">Response -&gt; IO ResponseReceived
+</span><a href="#local-6989586621679162930"><span class="hs-identifier hs-var">respond</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-111"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679162931"><span class="annot"><span class="annottext">authHeader :: Maybe ByteString
+</span><a href="#local-6989586621679162931"><span class="hs-identifier hs-var hs-var">authHeader</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HeaderName -&gt; ResponseHeaders -&gt; Maybe ByteString
+forall a b. Eq a =&gt; a -&gt; [(a, b)] -&gt; Maybe b
+</span><span class="hs-identifier hs-var">lookup</span></span><span> </span><span class="annot"><span class="annottext">HeaderName
+</span><span class="hs-identifier hs-var">hAuthorization</span></span><span> </span><span class="annot"><span class="annottext">(ResponseHeaders -&gt; Maybe ByteString)
+-&gt; ResponseHeaders -&gt; Maybe ByteString
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Request -&gt; ResponseHeaders
+</span><span class="hs-identifier hs-var">requestHeaders</span></span><span> </span><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162929"><span class="hs-identifier hs-var">req</span></a></span><span>
+</span><span id="line-112"></span><span>      </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Request -&gt; ByteString
+</span><span class="hs-identifier hs-var">requestMethod</span></span><span> </span><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162929"><span class="hs-identifier hs-var">req</span></a></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; ByteString -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-identifier hs-var">methodPost</span></span><span>
+</span><span id="line-113"></span><span>        </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Response -&gt; IO ResponseReceived
+</span><a href="#local-6989586621679162930"><span class="hs-identifier hs-var">respond</span></a></span><span> </span><span class="annot"><span class="annottext">(Response -&gt; IO ResponseReceived)
+-&gt; Response -&gt; IO ResponseReceived
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Status -&gt; ResponseHeaders -&gt; ByteString -&gt; Response
+</span><span class="hs-identifier hs-var">responseLBS</span></span><span> </span><span class="annot"><span class="annottext">Status
+</span><span class="hs-identifier hs-var">status200</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;{}&quot;</span></span><span>
+</span><span id="line-114"></span><span>        </span><span class="hs-keyword">else</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-115"></span><span>          </span><span id="local-6989586621679162935"><span class="annot"><a href="#local-6989586621679162935"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ExceptT ErrorResponse IO (Vector Payload)
+-&gt; IO (Either ErrorResponse (Vector Payload))
+forall e (m :: * -&gt; *) a. ExceptT e m a -&gt; m (Either e a)
+</span><span class="hs-identifier hs-var">runExceptT</span></span><span> </span><span class="annot"><span class="annottext">(ExceptT ErrorResponse IO (Vector Payload)
+ -&gt; IO (Either ErrorResponse (Vector Payload)))
+-&gt; ExceptT ErrorResponse IO (Vector Payload)
+-&gt; IO (Either ErrorResponse (Vector Payload))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-116"></span><span>            </span><span id="local-6989586621679162937"><span class="annot"><a href="#local-6989586621679162937"><span class="hs-identifier hs-var">ns</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Request -&gt; ExceptT ErrorResponse IO Namespace
+</span><a href="Temporal.Codec.Server.html#requireNamespaceHeader"><span class="hs-identifier hs-var">requireNamespaceHeader</span></a></span><span> </span><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162929"><span class="hs-identifier hs-var">req</span></a></span><span>
+</span><span id="line-117"></span><span>            </span><span id="local-6989586621679162938"><span class="annot"><a href="#local-6989586621679162938"><span class="hs-identifier hs-var">body</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Temporal.Codec.Server.html#streamingDecode"><span class="hs-identifier hs-type">streamingDecode</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679162929"><span class="hs-identifier hs-type">req</span></a></span><span>
+</span><span id="line-118"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">traverse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679162911"><span class="hs-identifier hs-type">codecServerEncoder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679162937"><span class="hs-identifier hs-type">ns</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679162931"><span class="hs-identifier hs-type">authHeader</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="Temporal.Codec.Server.html#payloads"><span class="hs-identifier hs-var">payloads</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679162938"><span class="hs-identifier hs-type">body</span></a></span><span>
+</span><span id="line-119"></span><span>          </span><span class="annot"><a href="#local-6989586621679162930"><span class="hs-identifier hs-type">respond</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621679162935"><span class="hs-identifier hs-type">res</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-120"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621679162940"><span class="annot"><span class="annottext">ErrorResponse
+</span><a href="#local-6989586621679162940"><span class="hs-identifier hs-var">err</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ErrorResponse -&gt; Response
+</span><a href="Temporal.Codec.Server.html#errorResponse"><span class="hs-identifier hs-var">errorResponse</span></a></span><span> </span><span class="annot"><span class="annottext">ErrorResponse
+</span><a href="#local-6989586621679162940"><span class="hs-identifier hs-var">err</span></a></span><span>
+</span><span id="line-121"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679162941"><span class="annot"><span class="annottext">Vector Payload
+</span><a href="#local-6989586621679162941"><span class="hs-identifier hs-var">ok</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Status -&gt; ResponseHeaders -&gt; ByteString -&gt; Response
+</span><span class="hs-identifier hs-var">responseLBS</span></span><span> </span><span class="annot"><span class="annottext">Status
+</span><span class="hs-identifier hs-var">status200</span></span><span> </span><span class="annot"><span class="annottext">ResponseHeaders
+</span><a href="Temporal.Codec.Server.html#respHeaders"><span class="hs-identifier hs-var">respHeaders</span></a></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; Response) -&gt; ByteString -&gt; Response
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Body -&gt; ByteString
+forall a. ToJSON a =&gt; a -&gt; ByteString
+</span><span class="hs-identifier hs-var">Data.Aeson.encode</span></span><span> </span><span class="annot"><span class="annottext">(Body -&gt; ByteString) -&gt; Body -&gt; ByteString
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Vector Payload -&gt; Body
+</span><a href="Temporal.Codec.Server.html#Body"><span class="hs-identifier hs-var">Body</span></a></span><span> </span><span class="annot"><span class="annottext">Vector Payload
+</span><a href="#local-6989586621679162941"><span class="hs-identifier hs-var">ok</span></a></span><span>
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span><span>    </span><span id="local-6989586621679162926"><span class="annot"><span class="annottext">runDecode :: Request -&gt; (Response -&gt; IO ResponseReceived) -&gt; IO ResponseReceived
+</span><a href="#local-6989586621679162926"><span class="hs-identifier hs-var hs-var">runDecode</span></a></span></span><span> </span><span id="local-6989586621679162942"><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162942"><span class="hs-identifier hs-var">req</span></a></span></span><span> </span><span id="local-6989586621679162943"><span class="annot"><span class="annottext">Response -&gt; IO ResponseReceived
+</span><a href="#local-6989586621679162943"><span class="hs-identifier hs-var">respond</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-124"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679162944"><span class="annot"><span class="annottext">authHeader :: Maybe ByteString
+</span><a href="#local-6989586621679162944"><span class="hs-identifier hs-var hs-var">authHeader</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HeaderName -&gt; ResponseHeaders -&gt; Maybe ByteString
+forall a b. Eq a =&gt; a -&gt; [(a, b)] -&gt; Maybe b
+</span><span class="hs-identifier hs-var">lookup</span></span><span> </span><span class="annot"><span class="annottext">HeaderName
+</span><span class="hs-identifier hs-var">hAuthorization</span></span><span> </span><span class="annot"><span class="annottext">(ResponseHeaders -&gt; Maybe ByteString)
+-&gt; ResponseHeaders -&gt; Maybe ByteString
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Request -&gt; ResponseHeaders
+</span><span class="hs-identifier hs-var">requestHeaders</span></span><span> </span><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162942"><span class="hs-identifier hs-var">req</span></a></span><span>
+</span><span id="line-125"></span><span>      </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Request -&gt; ByteString
+</span><span class="hs-identifier hs-var">requestMethod</span></span><span> </span><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162942"><span class="hs-identifier hs-var">req</span></a></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; ByteString -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-identifier hs-var">methodPost</span></span><span>
+</span><span id="line-126"></span><span>        </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Response -&gt; IO ResponseReceived
+</span><a href="#local-6989586621679162943"><span class="hs-identifier hs-var">respond</span></a></span><span> </span><span class="annot"><span class="annottext">(Response -&gt; IO ResponseReceived)
+-&gt; Response -&gt; IO ResponseReceived
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Status -&gt; ResponseHeaders -&gt; ByteString -&gt; Response
+</span><span class="hs-identifier hs-var">responseLBS</span></span><span> </span><span class="annot"><span class="annottext">Status
+</span><span class="hs-identifier hs-var">status200</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;{}&quot;</span></span><span>
+</span><span id="line-127"></span><span>        </span><span class="hs-keyword">else</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-128"></span><span>          </span><span id="local-6989586621679162945"><span class="annot"><a href="#local-6989586621679162945"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ExceptT ErrorResponse IO (Vector Payload)
+-&gt; IO (Either ErrorResponse (Vector Payload))
+forall e (m :: * -&gt; *) a. ExceptT e m a -&gt; m (Either e a)
+</span><span class="hs-identifier hs-var">runExceptT</span></span><span> </span><span class="annot"><span class="annottext">(ExceptT ErrorResponse IO (Vector Payload)
+ -&gt; IO (Either ErrorResponse (Vector Payload)))
+-&gt; ExceptT ErrorResponse IO (Vector Payload)
+-&gt; IO (Either ErrorResponse (Vector Payload))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-129"></span><span>            </span><span id="local-6989586621679162946"><span class="annot"><a href="#local-6989586621679162946"><span class="hs-identifier hs-var">ns</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Request -&gt; ExceptT ErrorResponse IO Namespace
+</span><a href="Temporal.Codec.Server.html#requireNamespaceHeader"><span class="hs-identifier hs-var">requireNamespaceHeader</span></a></span><span> </span><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679162942"><span class="hs-identifier hs-var">req</span></a></span><span>
+</span><span id="line-130"></span><span>            </span><span id="local-6989586621679162947"><span class="annot"><a href="#local-6989586621679162947"><span class="hs-identifier hs-var">body</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Temporal.Codec.Server.html#streamingDecode"><span class="hs-identifier hs-type">streamingDecode</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679162942"><span class="hs-identifier hs-type">req</span></a></span><span>
+</span><span id="line-131"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">traverse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679162910"><span class="hs-identifier hs-type">codecServerDecoder</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679162946"><span class="hs-identifier hs-type">ns</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679162944"><span class="hs-identifier hs-type">authHeader</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="Temporal.Codec.Server.html#payloads"><span class="hs-identifier hs-var">payloads</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679162947"><span class="hs-identifier hs-type">body</span></a></span><span>
+</span><span id="line-132"></span><span>          </span><span class="annot"><a href="#local-6989586621679162943"><span class="hs-identifier hs-type">respond</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621679162945"><span class="hs-identifier hs-type">res</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-133"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621679162948"><span class="annot"><span class="annottext">ErrorResponse
+</span><a href="#local-6989586621679162948"><span class="hs-identifier hs-var">err</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ErrorResponse -&gt; Response
+</span><a href="Temporal.Codec.Server.html#errorResponse"><span class="hs-identifier hs-var">errorResponse</span></a></span><span> </span><span class="annot"><span class="annottext">ErrorResponse
+</span><a href="#local-6989586621679162948"><span class="hs-identifier hs-var">err</span></a></span><span>
+</span><span id="line-134"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679162949"><span class="annot"><span class="annottext">Vector Payload
+</span><a href="#local-6989586621679162949"><span class="hs-identifier hs-var">ok</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Status -&gt; ResponseHeaders -&gt; ByteString -&gt; Response
+</span><span class="hs-identifier hs-var">responseLBS</span></span><span> </span><span class="annot"><span class="annottext">Status
+</span><span class="hs-identifier hs-var">status200</span></span><span> </span><span class="annot"><span class="annottext">ResponseHeaders
+</span><a href="Temporal.Codec.Server.html#respHeaders"><span class="hs-identifier hs-var">respHeaders</span></a></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; Response) -&gt; ByteString -&gt; Response
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Body -&gt; ByteString
+forall a. ToJSON a =&gt; a -&gt; ByteString
+</span><span class="hs-identifier hs-var">Data.Aeson.encode</span></span><span> </span><span class="annot"><span class="annottext">(Body -&gt; ByteString) -&gt; Body -&gt; ByteString
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Vector Payload -&gt; Body
+</span><a href="Temporal.Codec.Server.html#Body"><span class="hs-identifier hs-var">Body</span></a></span><span> </span><span class="annot"><span class="annottext">Vector Payload
+</span><a href="#local-6989586621679162949"><span class="hs-identifier hs-var">ok</span></a></span><span>
+</span><span id="line-135"></span></pre></body></html>
