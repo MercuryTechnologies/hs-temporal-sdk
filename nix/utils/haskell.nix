@@ -1,7 +1,13 @@
-{ lib, haskell, ... }:
+{
+  lib,
+  haskell,
+  buildEnv,
+  ...
+}:
 let
   inherit (import ./matrix.nix) ghcVersions;
-in rec {
+in
+rec {
   pluckLocalPackages = hpkgs: {
     inherit (hpkgs)
       temporal-sdk
@@ -10,35 +16,41 @@ in rec {
       temporal-codec-encryption
       temporal-sdk-optimal-codec
       temporal-api-protos
-    ;
+      ;
   };
 
   localPackageMatrix = builtins.listToAttrs (
-    lib.concatMap (
-      ghcVersion: let
+    lib.map (
+      ghcVersion:
+      let
         localPackages = pluckLocalPackages haskell.packages.${ghcVersion};
+        name = "hs-temporal-suite-${ghcVersion}";
       in
-        builtins.map (localPackage: {
-          name = "${localPackage}-${ghcVersion}";
-          value = localPackages.${localPackage};
-        })
-        (builtins.attrNames localPackages)
-    )
-    ghcVersions
+      {
+        inherit name;
+        value = buildEnv {
+          inherit name;
+          paths = lib.attrValues localPackages;
+        };
+      }
+    ) ghcVersions
   );
 
-  localDevPackageDeps = hsPackageSet:
-    lib.concatMapAttrs (_: v:
+  localDevPackageDeps =
+    hsPackageSet:
+    lib.concatMapAttrs (
+      _: v:
       builtins.listToAttrs (
         builtins.map (p: {
           name = p.pname;
           value = p;
-        })
-        v.getBuildInputs.haskellBuildInputs
-      ))
-    (pluckLocalPackages hsPackageSet);
+        }) v.getBuildInputs.haskellBuildInputs
+      )
+    ) (pluckLocalPackages hsPackageSet);
 
-  localDevPackageDepsAttrSet = hsPackageSet:
-    lib.filterAttrs (k: _: !builtins.hasAttr k (pluckLocalPackages hsPackageSet))
-    (localDevPackageDeps hsPackageSet);
+  localDevPackageDepsAttrSet =
+    hsPackageSet:
+    lib.filterAttrs (k: _: !builtins.hasAttr k (pluckLocalPackages hsPackageSet)) (
+      localDevPackageDeps hsPackageSet
+    );
 }
