@@ -1,12 +1,11 @@
-verbatim:
-  cabal-version: 3.0
+verbatim: { cabal-version: 3.0 }
 
 name:         temporal-api-protos
 version:      "1.0.0.0"
-# license-file: LICENSE
-# license:      BSD-3-Clause
+license-file: LICENSE
+license:      BSD-3-Clause
 build-type:   Simple
-language: Haskell2010
+language:     Haskell2010
 
 library:
   source-dirs: src

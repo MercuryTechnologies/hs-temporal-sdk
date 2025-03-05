@@ -24,6 +24,7 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Text as T
 import Data.Version (showVersion)
 import Data.Word (Word32)
+import OpenTelemetry.Attributes (emptyAttributes)
 import qualified OpenTelemetry.Context as Ctxt
 import OpenTelemetry.Context.ThreadLocal (attachContext, getContext)
 import OpenTelemetry.Propagator

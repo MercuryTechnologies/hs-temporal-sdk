@@ -1,15 +1,9 @@
 builds:
   - include:
-    - 'checks.x86_64-linux.*'
-    - 'packages.x86_64-linux.*'
-    - 'packages.*.temporal-bridge'
+      - 'packages.*.*'
     exclude:
-    - 'packages.*.default'
-    - 'packages.*.devenv-up'
-    # Unable to build because devenv is impure
-    - 'devShells.*.*'
-  - include:
-    - 'packages.aarch64-darwin.*'
-    - 'packages.aarch64-linux.*'
-    exclude: []
-    branch: main
+      # `x86_64-darwin` isn't a supported architecture.
+      - 'packages.x86_64-darwin.*'
+      # Unable to build because devenv is impure.
+      - 'devShells.*.*'
+      - 'packages.*.devenv-up'

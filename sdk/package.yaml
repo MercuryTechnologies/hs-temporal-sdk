@@ -1,11 +1,11 @@
-verbatim:
-  cabal-version: 3.0
+verbatim: { cabal-version: 3.0 }
 
-name:    temporal-sdk
-version: "0.0.1.0"
+name:         temporal-sdk
+version:      "0.0.1.0"
 license-file: LICENSE
-license: BSD-3-Clause
-build-type: Simple
+license:      BSD-3-Clause
+build-type:   Simple
+language:     Haskell2010
 
 dependencies:
 - base

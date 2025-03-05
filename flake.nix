@@ -2,112 +2,105 @@
   description = "Haskell bindings to the Temporal Core library as well as an SDK built on top of it.";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
     devenv.url = "github:cachix/devenv/v1.0.5";
     fenix = {
       url = "github:nix-community/fenix";
-      inputs = {nixpkgs.follows = "nixpkgs";};
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = inputs @ {
-    self,
-    nixpkgs,
-    devenv,
-    flake-utils,
-    ...
-  }: let
-    inherit (nixpkgs) lib;
-    inherit
-      (import ./nix/matrix.nix)
-      supportedSystems
-      ;
-  in
+  outputs =
+    inputs@{ self, ... }:
+    let
+      flakeUtils = import ./nix/utils/flake.nix inputs;
+    in
     {
-      lib = {
-        haskellOverlay = import ./nix/overlays/temporal-sdk.nix;
-      };
-    }
-    // flake-utils.lib.eachSystem supportedSystems (system: let
-      pkgs = import nixpkgs {inherit system;};
-      temporalBridgeAndFriends = import ./nix/temporal-bridge.nix {
-        inherit
-          pkgs
-          ;
-      };
-      temporal-bridge = temporalBridgeAndFriends.temporal-bridge;
-      haskellPackageUtils = import ./nix/haskell-packages.nix {
-        inherit
-          lib
-          pkgs
-          temporal-bridge
-          ;
-      };
-      inherit (haskellPackageUtils) extendedPackageSetByGHCVersions;
-
-      mkShellForGHC = ghcVersion: let
-        myHaskellPackages = extendedPackageSetByGHCVersions.${ghcVersion};
-      in
-        devenv.lib.mkShell {
-          inherit inputs pkgs;
-          modules = [
-            ({...}: {
-              packages = with pkgs; [
-                ghciwatch
+      devShells = flakeUtils.forAllSystems (
+        { pkgs, ... }:
+        let
+          inherit (import ./nix/utils/matrix.nix) ghcVersions;
+          mkShell =
+            ghcVersion:
+            inputs.devenv.lib.mkShell {
+              inherit inputs pkgs;
+              modules = [
+                ./nix/devenv/temporal-bridge.nix
+                ./nix/devenv/temporal-dev-server.nix
+                (import ./nix/devenv/haskell.nix ghcVersion)
               ];
-              env.LIBRARY_PATH = "${temporal-bridge.lib}/lib";
-              env.TEMPORAL_BRIDGE_LIB_DIR = "${temporal-bridge.lib}/lib";
+            };
+          shells = inputs.nixpkgs.lib.genAttrs ghcVersions (version: mkShell version);
+        in
+        shells // { default = shells.ghc910; }
+      );
 
-              languages.haskell = {
-                enable = true;
-                package = myHaskellPackages.ghc.withHoogle (
-                  hpkgs:
-                    lib.attrVals (builtins.attrNames (haskellPackageUtils.localDevPackageDepsAsAttrSet myHaskellPackages)) hpkgs
-                );
-              };
-            })
-            (import ./nix/devenv/temporal-dev-server.nix)
-            (import ./nix/devenv/temporal-bridge.nix {
-              proto-lens-protoc = extendedPackageSetByGHCVersions.${ghcVersion}.proto-lens-protoc;
-              temporal-sdk-core = temporalBridgeAndFriends.temporal-sdk-core-src;
-            })
-            (import ./nix/devenv/repo-wide-checks.nix)
-          ];
-        };
-    in {
-      packages =
-        {
-          inherit temporal-bridge;
-          devenv-up = self.devShells.${system}.default.config.procfileScript;
+      packages = flakeUtils.forAllSystems (
+        { pkgs, ... }:
+        let
+          haskellUtils = import ./nix/utils/haskell.nix pkgs;
+        in
+        haskellUtils.localPackageMatrix
+        // {
+          temporal-bridge = pkgs.temporal_bridge;
         }
-        // haskellPackageUtils.localPackageMatrix;
+      );
 
-      devShells = rec {
-        default = ghc96;
-        ghc96 = mkShellForGHC "ghc96";
-        ghc98 = mkShellForGHC "ghc98";
+      haskellOverlays = {
+        hs-temporal-sdk = import ./nix/overlays/haskell/hs-temporal-sdk.nix;
+        dependencies = {
+          default = import ./nix/overlays/haskell/deps.nix;
+          ghc910 = import ./nix/overlays/haskell/ghc910-deps.nix;
+        };
       };
 
-      checks = {
-        # pre-commit-check = devenv.inputs.pre-commit-hooks.lib.${system}.run {
-        #   src = ./.;
-        #   hooks = pre-commit-hooks;
-        # };
+      overlays = {
+        temporal-bridge = import ./nix/overlays/temporal-bridge/overlay.nix;
+        # A top-level nixpkgs overlay that extends supported GHC package sets with
+        # `hs-temporal-sdk` packages & any dependency modifications required for
+        # development.
+        #
+        # NOTE: This is _not_ intendedd for downstream consumption, and is
+        # primarily exposed to support our development & CI environments.
+        haskell-development = final: prev: {
+          haskell = (prev.haskell or { }) // {
+            packages = (prev.haskell.packages or { }) // {
+              ghc96 = prev.haskell.packages.ghc96.extend (
+                prev.lib.composeManyExtensions [
+                  (self.haskellOverlays.dependencies.default final)
+                  (self.haskellOverlays.hs-temporal-sdk final)
+                ]
+              );
+              ghc98 = prev.haskell.packages.ghc98.extend (
+                prev.lib.composeManyExtensions [
+                  (self.haskellOverlays.dependencies.default final)
+                  (self.haskellOverlays.hs-temporal-sdk final)
+                ]
+              );
+              ghc910 = prev.haskell.packages.ghc910.extend (
+                prev.lib.composeManyExtensions [
+                  (self.haskellOverlays.dependencies.default final)
+                  (self.haskellOverlays.dependencies.ghc910 final)
+                  (self.haskellOverlays.hs-temporal-sdk final)
+                ]
+              );
+            };
+          };
+        };
       };
-    });
+    };
 
-  # --- Flake Local Nix Configuration ----------------------------
+  # --- Flake Local Nix Configuration -----------------------------------------
   nixConfig = {
-    # This sets the flake to use the IOG nix cache.
-    # Nix should ask for permission before using it,
-    # but remove it here if you do not want it to.
+    # This sets the flake to use several upstream substituters that have cached
+    # artifacts for some of our dependencies.
+    #
+    # Nix should ask for permission before using it, but remove it here if you
+    # do not want it to.
     extra-substituters = [
-      "https://cache.iog.io"
       "https://cache.garnix.io"
       "https://devenv.cachix.org"
     ];
     extra-trusted-public-keys = [
-      "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
       "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
       "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
     ];

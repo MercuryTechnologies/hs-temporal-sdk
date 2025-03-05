@@ -109,6 +109,7 @@ import qualified Data.UUID as UUID
 import Data.UUID.V4 (nextRandom)
 import Data.Word
 import Lens.Family2
+import OpenTelemetry.Attributes (emptyAttributes)
 import OpenTelemetry.Trace.Core hiding (inSpan)
 import qualified OpenTelemetry.Trace.Core as OT
 import OpenTelemetry.Trace.Monad
