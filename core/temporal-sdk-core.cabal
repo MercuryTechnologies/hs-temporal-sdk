@@ -6,7 +6,7 @@ version:            0.1.0.0
 license:            BSD-3-Clause
 license-file:       LICENSE
 author:             Ian Duncan
-maintainer:         ian@iankduncan.com
+maintainer:         temporal@mercury.com
 -- copyright:
 category:           Concurrency
 build-type:         Custom
