@@ -6,6 +6,10 @@ cabal-version: 3.0
 
 name:           temporal-codec-encryption
 version:        0.0.1.0
+author:         Ian Duncan
+maintainer:     temporal@mercury.com
+license:        BSD-3-Clause
+license-file:   LICENSE
 build-type:     Simple
 
 library
