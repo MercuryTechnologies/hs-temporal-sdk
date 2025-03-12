@@ -87,6 +87,7 @@ data ClientConfig = ClientConfig
   , identity :: Text
   , tlsConfig :: Maybe ClientTlsConfig
   , retryConfig :: Maybe ClientRetryConfig
+  , apiKey :: Maybe Text
   }
 
 
@@ -208,6 +209,7 @@ defaultClientConfig =
     , identity = ""
     , tlsConfig = Nothing
     , retryConfig = Nothing
+    , apiKey = Nothing
     }
 
 
