@@ -87,7 +87,7 @@ data ClientConfig = ClientConfig
   , identity :: Text
   , tlsConfig :: Maybe ClientTlsConfig
   , retryConfig :: Maybe ClientRetryConfig
-  , apiKey :: Maybe Text
+  , apiKey :: Maybe APIKey
   }
 
 
@@ -107,6 +107,17 @@ data ClientRetryConfig = ClientRetryConfig
   , maxElapsedTimeMillis :: Maybe Word64
   , maxRetries :: Word64
   }
+
+
+newtype APIKey = APIKey {unAPIKey :: Text}
+
+
+instance ToJSON APIKey where
+  toJSON (APIKey text) = toJSON text
+
+
+instance FromJSON APIKey where
+  parseJSON = fmap APIKey . parseJSON
 
 
 {- | A client connection to the Temporal server.
