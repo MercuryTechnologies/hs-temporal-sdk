@@ -23,6 +23,7 @@ pub struct ClientConfig {
     identity: String,
     tls_config: Option<ClientTlsConfig>,
     retry_config: Option<ClientRetryConfig>,
+    api_key: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -81,6 +82,10 @@ fn client_config_to_options(
                 .map(Duration::from_millis),
             max_retries: retry_config.max_retries,
         });
+    }
+
+    if client_config.api_key.is_some() {
+        options_builder = options_builder.api_key(client_config.api_key)
     }
 
     options_builder.build()
