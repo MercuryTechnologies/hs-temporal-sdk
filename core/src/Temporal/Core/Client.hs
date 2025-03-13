@@ -21,6 +21,7 @@ module Temporal.Core.Client (
   ClientTlsConfig (..),
   ByteVector (..),
   ClientRetryConfig (..),
+  APIKey (..),
 
   -- * Making calls to the server
 
