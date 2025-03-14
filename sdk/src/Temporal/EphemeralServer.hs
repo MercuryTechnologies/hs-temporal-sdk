@@ -98,7 +98,7 @@ launchTestServer rt extraArgs = do
   where
     hackyConfig port =
       TestServerConfig
-        { exe = CachedDownload (Default $ SDKDefault "community-haskell" "0.1.0.0") Nothing
+        { exe = CachedDownload (Default $ SDKDefault "community-haskell" "0.1.0.0") Nothing Nothing
         , port = Just $ fromIntegral port
         , extraArgs
         }

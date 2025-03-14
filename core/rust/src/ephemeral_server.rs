@@ -3,6 +3,7 @@ use crate::worker::{CUnit, Unit};
 use ffi_convert::*;
 use serde::Deserialize;
 use std::ffi::{c_char, CStr};
+use std::time::Duration;
 use temporal_sdk_core::ephemeral_server::*;
 
 pub struct EphemeralServerRef {
@@ -45,6 +46,7 @@ pub enum EphemeralExeDef {
         version: EphemeralExeVersion,
         /// Destination directory or the user temp directory if none set.
         dest_dir: Option<String>,
+        ttl: Option<Duration>
     },
 }
 

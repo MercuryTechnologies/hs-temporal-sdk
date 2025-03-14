@@ -52,7 +52,7 @@ data EphemeralExe
   = -- | Existing path on the filesystem for the executable.
     ExistingPath FilePath
   | -- | Download the executable if not already there.
-    CachedDownload EphemeralExeVersion (Maybe FilePath)
+    CachedDownload EphemeralExeVersion (Maybe FilePath) (Maybe Word64)
 
 
 instance ToJSON EphemeralExe where
@@ -61,7 +61,7 @@ instance ToJSON EphemeralExe where
       [ "type" .= String "ExistingPath"
       , "contents" .= path
       ]
-  toJSON (CachedDownload version destDir) =
+  toJSON (CachedDownload version destDir ttl) =
     object
       [ "type" .= String "CachedDownload"
       , "contents"
@@ -69,6 +69,7 @@ instance ToJSON EphemeralExe where
             [ "version" .= version
             , "dest_dir" .= destDir
             ]
+      , "ttl" .= ttl
       ]
 
 
@@ -91,7 +92,7 @@ deriveToJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''TemporalDevS
 defaultTemporalDevServerConfig :: TemporalDevServerConfig
 defaultTemporalDevServerConfig =
   TemporalDevServerConfig
-    { exe = CachedDownload (Default $ SDKDefault "community-haskell" "0.1.0.0") Nothing
+    { exe = CachedDownload (Default $ SDKDefault "community-haskell" "0.1.0.0") Nothing Nothing
     , namespace = "default"
     , ip = "127.0.0.1"
     , port = Nothing
