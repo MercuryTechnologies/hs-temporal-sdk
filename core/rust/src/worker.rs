@@ -5,9 +5,8 @@ use std::collections::{HashMap, HashSet};
 use std::str;
 use std::sync::Arc;
 use std::time::Duration;
-use temporal_sdk_core::api::errors::{PollActivityError, PollWfError};
 use temporal_sdk_core::replay::{HistoryForReplay, ReplayWorkerInput};
-use temporal_sdk_core_api::errors::WorkflowErrorType;
+use temporal_sdk_core_api::errors::{PollError, WorkflowErrorType};
 use temporal_sdk_core_api::Worker;
 use temporal_sdk_core_protos::coresdk::workflow_completion::WorkflowActivationCompletion;
 use temporal_sdk_core_protos::coresdk::{ActivityHeartbeat, ActivityTaskCompletion};
@@ -355,7 +354,7 @@ impl WorkerRef {
         self.runtime.future_result_into_hs(hs, async move {
             let bytes = match worker.poll_workflow_activation().await {
                 Ok(act) => Ok(act.encode_to_vec()),
-                Err(PollWfError::ShutDown) => Err(WorkerError {
+                Err(PollError::ShutDown) => Err(WorkerError {
                     code: WorkerErrorCode::PollShutdownError,
                     message: "Poll shutdown error".to_string(),
                 }),
@@ -376,7 +375,7 @@ impl WorkerRef {
         self.runtime.future_result_into_hs(hs, async move {
             let bytes = (match worker.poll_activity_task().await {
                 Ok(task) => Ok(task.encode_to_vec()),
-                Err(PollActivityError::ShutDown) => Err(WorkerError {
+                Err(PollError::ShutDown) => Err(WorkerError {
                     code: WorkerErrorCode::PollShutdownError,
                     message: "Poll shutdown error".to_string(),
                 }),
