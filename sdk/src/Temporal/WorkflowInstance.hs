@@ -239,6 +239,7 @@ activate act suspension = do
     in (info', info')
   let completionBase = defMessage & Completion.runId .~ rawRunId info.runId
   writeIORef inst.workflowTime (act ^. Activation.timestamp . to timespecFromTimestamp)
+  writeIORef inst.workflowIsReplaying (act ^. Activation.isReplaying)
   eResult <- case inst.workflowDeadlockTimeout of
     Nothing -> applyJobs (act ^. Activation.vec'jobs) suspension
     Just timeoutDuration -> do
