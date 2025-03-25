@@ -16,7 +16,7 @@ temporal-sdk-core-protos = { git = "https://github.com/temporalio/sdk-core", rev
 rustfsm = { git = "https://github.com/temporalio/sdk-core", rev = "6e601115daa3b9ccaa9d0d383f926aaa5953ea3d" }
 tokio = "1.37"
 tokio-stream = "0.1"
-tonic = "0.12"
+tonic = "0.13"
 tracing = "0.1"
 # tower = "0.5.1"
 url = "2.2"
