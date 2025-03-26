@@ -220,6 +220,48 @@ makeOpenTelemetryInterceptor = do
                   Just _ ->
                     inSpan'' tracer ("HandleQuery:" <> input.handleQueryInputType) spanArgs $ \_ -> do
                       next input
+            , handleUpdate = \input next -> do
+                -- Only trace this if there is a header, and make that span the parent.
+                -- We do not put anything that happens in an update handler on the workflow
+                -- span.
+                --
+                -- However, we do _link_ the query span to the workflow span if we have the
+                -- context for it.
+                let spanArgs =
+                      defaultSpanArguments
+                        { kind = Server
+                        , attributes = mempty
+                        -- HashMap.fromList
+                        --   [ ("temporal.workflow_id", toAttribute $ rawWorkflowId $ input.handleQueryInputInfo.workflowId)
+                        --   , ("temporal.run_id", toAttribute $ rawRunId $ input.handleQueryInputInfo.runId)
+                        --   , ("temporal.workflow_type", toAttribute $ input.handleQueryInputType)
+                        --   ]
+                        }
+                ctxt <- extract headersPropagator input.handleUpdateInputHeaders Ctxt.empty
+                _ <- attachContext ctxt
+                case Ctxt.lookupSpan ctxt of
+                  Nothing -> next input
+                  Just _ ->
+                    inSpan'' tracer ("HandleUpdate:" <> input.handleUpdateInputType) spanArgs $ \_ -> do
+                      next input
+            , validateUpdate = \input next -> do
+                let spanArgs =
+                      defaultSpanArguments
+                        { kind = Server
+                        , attributes = mempty
+                        -- HashMap.fromList
+                        --   [ ("temporal.workflow_id", toAttribute $ rawWorkflowId $ input.handleQueryInputInfo.workflowId)
+                        --   , ("temporal.run_id", toAttribute $ rawRunId $ input.handleQueryInputInfo.runId)
+                        --   , ("temporal.workflow_type", toAttribute $ input.handleQueryInputType)
+                        --   ]
+                        }
+                ctxt <- extract headersPropagator input.handleUpdateInputHeaders Ctxt.empty
+                _ <- attachContext ctxt
+                case Ctxt.lookupSpan ctxt of
+                  Nothing -> next input
+                  Just _ ->
+                    inSpan'' tracer ("ValidateUpdate:" <> input.handleUpdateInputType) spanArgs $ \_ -> do
+                      next input
             }
       , workflowOutboundInterceptors =
           WorkflowOutboundInterceptor

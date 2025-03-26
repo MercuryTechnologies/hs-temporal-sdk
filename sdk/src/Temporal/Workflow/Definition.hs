@@ -19,6 +19,7 @@ module Temporal.Workflow.Definition (
   WorkflowRef (..),
   WorkflowDefinition (..),
   KnownWorkflow (..),
+  KnownUpdate (..),
   SignalRef (..),
   WorkflowSignalDefinition (..),
   -- , StartChildWorkflow(..)
@@ -81,6 +82,18 @@ data KnownWorkflow (args :: [Type]) (result :: Type) = forall codec.
   KnownWorkflow
   { knownWorkflowCodec :: codec
   , knownWorkflowName :: Text
+  }
+
+
+{- | A 'KnownUpdate' is a handle that contains all the information needed to start a
+Update either as a child workflow or as a top-level workflow via a 'Client'.
+-}
+data KnownUpdate (args :: [Type]) (result :: Type) = forall codec.
+  ( FunctionSupportsCodec codec args result
+  ) =>
+  KnownUpdate
+  { knownUpdateCodec :: codec
+  , knownUpdateName :: Text
   }
 
 
