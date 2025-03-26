@@ -819,6 +819,14 @@ data HandleQueryInput = HandleQueryInput
   }
 
 
+data HandleUpdateInput = HandleUpdateInput
+  { handleUpdateId :: Text
+  , handleUpdateInputType :: Text
+  , handleUpdateInputArgs :: Vector Payload
+  , handleUpdateInputHeaders :: Map Text Payload
+  }
+
+
 data WorkflowInboundInterceptor = WorkflowInboundInterceptor
   { executeWorkflow
       :: ExecuteWorkflowInput
@@ -828,6 +836,14 @@ data WorkflowInboundInterceptor = WorkflowInboundInterceptor
       :: HandleQueryInput
       -> (HandleQueryInput -> IO (Either SomeException Payload))
       -> IO (Either SomeException Payload)
+  , handleUpdate
+      :: HandleUpdateInput
+      -> (HandleUpdateInput -> IO (Either SomeException Payload))
+      -> IO (Either SomeException Payload)
+  , validateUpdate
+      :: HandleUpdateInput
+      -> (HandleUpdateInput -> IO Bool)
+      -> IO Bool
   }
 
 
@@ -836,6 +852,8 @@ instance Semigroup WorkflowInboundInterceptor where
     WorkflowInboundInterceptor
       { executeWorkflow = \input cont -> a.executeWorkflow input $ \input' -> b.executeWorkflow input' cont
       , handleQuery = \input cont -> a.handleQuery input $ \input' -> b.handleQuery input' cont
+      , handleUpdate = \input cont -> a.handleUpdate input $ \input' -> b.handleUpdate input' cont
+      , validateUpdate = \input cont -> a.validateUpdate input $ \input' -> b.validateUpdate input' cont
       }
 
 
@@ -844,6 +862,8 @@ instance Monoid WorkflowInboundInterceptor where
     WorkflowInboundInterceptor
       { executeWorkflow = \input cont -> cont input
       , handleQuery = \input cont -> cont input
+      , handleUpdate = \input cont -> cont input
+      , validateUpdate = \input cont -> cont input
       }
 
 
