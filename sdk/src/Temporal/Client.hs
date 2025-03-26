@@ -104,11 +104,15 @@ import Proto.Temporal.Api.History.V1.Message (History, HistoryEvent, HistoryEven
 import qualified Proto.Temporal.Api.History.V1.Message_Fields as History
 import qualified Proto.Temporal.Api.Query.V1.Message_Fields as Query
 import qualified Proto.Temporal.Api.Taskqueue.V1.Message_Fields as TQ
+import qualified Proto.Temporal.Api.Update.V1.Message as Update
+import qualified Proto.Temporal.Api.Update.V1.Message_Fields as Update
 import Proto.Temporal.Api.Workflowservice.V1.RequestResponse (
   GetWorkflowExecutionHistoryRequest,
   GetWorkflowExecutionHistoryResponse,
   QueryWorkflowRequest,
   QueryWorkflowResponse,
+  UpdateWorkflowExecutionRequest,
+  UpdateWorkflowExecutionResponse,
  )
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as RR
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as WF
@@ -866,6 +870,7 @@ waitResult wfId mrId (Namespace ns) = do
           & RR.skipArchival .~ True
   connect (streamEvents FollowRuns startingReq) lastC
 
+
 -- listOpenWorkflowExecutions
 --   :: (MonadIO m, HasWorkflowClient m)
 --   => ListOpenWorkflowExecutionsRequest
@@ -885,3 +890,146 @@ waitResult wfId mrId (Namespace ns) = do
 --   :: (MonadIO m, HasWorkflowClient m)
 --   => CountWorkflowExecutionsRequest
 --   -> m Int64
+
+data UpdateLifecycleStage
+  = UpdateLifecycleStageUnspecified
+  | UpdateLifecycleStageAdmitted
+  | UpdateLifecycleStageAccepted
+  | UpdateLifecycleStageCompleted
+  deriving stock (Eq, Show)
+
+
+data UpdateOptions = UpdateOptions
+  { updateId :: UpdateId
+  , updateHeaders :: Map Text Payload
+  , waitPolicy :: UpdateLifecycleStage
+  }
+
+
+update
+  :: forall m args result a
+   . (MonadIO m, HasWorkflowClient m)
+  => WorkflowHandle a
+  -> KnownUpdate args result
+  -> UpdateOptions
+  -> args
+    :->: m result
+update h@(WorkflowHandle _ _ c _ _) (KnownUpdate updateCodec updateName) opts = withArgs @args @(m result) updateCodec $ \inputs -> liftIO $ do
+  inputs' <- sequence inputs
+  let processor = h.workflowHandleClient.clientConfig.payloadProcessor
+      baseInput =
+        UpdateWorkflowInput
+          { updateWorkflowType = updateName
+          , updateWorkflowRunId = h.workflowHandleRunId
+          , updateWorkflowWorkflowId = h.workflowHandleWorkflowId
+          , updateWorkflowHeaders = opts.updateHeaders
+          , updateWorkflowArgs = inputs'
+          }
+  -- TODO: client interceptor
+  let input = baseInput
+  eRes {- h.workflowHandleClient.clientConfig.interceptors.updateWorkflow baseInput $ \input -> -} <- do
+    updateArgs <- processorEncodePayloads processor input.updateWorkflowArgs
+    headerPayloads <- processorEncodePayloads processor input.updateWorkflowHeaders
+    let msg :: UpdateWorkflowExecutionRequest
+        msg =
+          defMessage
+            & WF.namespace .~ rawNamespace h.workflowHandleClient.clientConfig.namespace
+            & WF.workflowExecution
+              .~ ( defMessage
+                    & Common.workflowId .~ rawWorkflowId input.updateWorkflowWorkflowId
+                    & Common.runId .~ maybe "" rawRunId input.updateWorkflowRunId
+                 )
+            & WF.firstExecutionRunId .~ "" -- TODO: get this
+            & WF.waitPolicy .~ defMessage -- TODO
+            & WF.request
+              .~ ( defMessage
+                    & Update.meta
+                      .~ ( defMessage
+                            & Update.updateId .~ rawUpdateId opts.updateId
+                            & Update.identity .~ Core.identity (Core.clientConfig c.clientCore)
+                         )
+                    & Update.input
+                      .~ ( defMessage
+                            & Update.header .~ headerToProto (fmap convertToProtoPayload headerPayloads)
+                            & Update.name .~ input.updateWorkflowType
+                            & Update.args .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload updateArgs)
+                         )
+                 )
+
+    (res :: UpdateWorkflowExecutionResponse) <- either throwIO pure =<< Temporal.Core.Client.WorkflowService.updateWorkflowExecution h.workflowHandleClient.clientCore msg
+    case res ^. Update.maybe'outcome of
+      Nothing -> throwIO $ ValueError "No return value payloads provided by update response"
+      Just outcome -> do
+        case outcome ^. Update.maybe'value of
+          Just (Update.Outcome'Success payloads) -> case (payloads ^. Common.vec'payloads) V.!? 0 of
+            Nothing -> throwIO $ ValueError "No return value payloads provided by update response"
+            Just p -> pure $ convertFromProtoPayload p
+          -- TODO: convert this failure thing to a nice Haskell version
+          Just (Update.Outcome'Failure failure) -> throwIO $ ValueError "No return value payloads provided by update response"
+          Nothing -> throwIO $ ValueError "No return value payloads provided by update response"
+  payloadProcessorDecode processor eRes >>= either (throwIO . ValueError) pure >>= decode updateCodec >>= either (throwIO . ValueError) pure
+
+-- query
+--   :: forall m query a
+--    . (MonadIO m, QueryRef query)
+--   => WorkflowHandle a
+--   -> query
+--   -> QueryOptions
+--   -> (QueryArgs query :->: m (Either QueryRejected (QueryResult query)))
+-- query h (queryRef -> KnownQuery qn codec) opts = withArgs @(QueryArgs query) @(m (Either QueryRejected (QueryResult query))) codec $ \inputs -> liftIO $ do
+--   inputs' <- sequence inputs
+--   let processor = h.workflowHandleClient.clientConfig.payloadProcessor
+--       baseInput =
+--         QueryWorkflowInput
+--           { queryWorkflowType = qn
+--           , queryWorkflowRunId = h.workflowHandleRunId
+--           , queryWorkflowRejectCondition = opts.queryRejectCondition
+--           , queryWorkflowWorkflowId = h.workflowHandleWorkflowId
+--           , queryWorkflowHeaders = opts.queryHeaders
+--           , queryWorkflowArgs = inputs'
+--           }
+--   eRes <- h.workflowHandleClient.clientConfig.interceptors.queryWorkflow baseInput $ \input -> do
+--     queryArgs <- processorEncodePayloads processor input.queryWorkflowArgs
+--     headerPayloads <- processorEncodePayloads processor input.queryWorkflowHeaders
+--     let msg :: QueryWorkflowRequest
+--         msg =
+--           defMessage
+--             & WF.namespace .~ rawNamespace h.workflowHandleClient.clientConfig.namespace
+--             & WF.execution
+--               .~ ( defMessage
+--                     & Common.workflowId .~ rawWorkflowId input.queryWorkflowWorkflowId
+--                     & Common.runId .~ maybe "" rawRunId input.queryWorkflowRunId
+--                  )
+--             & WF.query
+--               .~ ( defMessage
+--                     & Query.queryType .~ input.queryWorkflowType
+--                     & Query.queryArgs
+--                       .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload queryArgs)
+--                     & Query.header .~ headerToProto (fmap convertToProtoPayload headerPayloads)
+--                  )
+--             & WF.queryRejectCondition .~ case opts.queryRejectCondition of
+--               QueryRejectConditionRejectNone -> Query.QUERY_REJECT_CONDITION_NONE
+--               QueryRejectConditionNotOpen -> Query.QUERY_REJECT_CONDITION_NOT_OPEN
+--               QueryRejectConditionNotCompletedCleanly -> Query.QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY
+
+--     (res :: QueryWorkflowResponse) <- either throwIO pure =<< Temporal.Core.Client.WorkflowService.queryWorkflow h.workflowHandleClient.clientCore msg
+--     case res ^. WF.maybe'queryRejected of
+--       Just rejection -> do
+--         let status = queryRejectionStatusFromProto (rejection ^. Query.status)
+--         pure $ Left $ QueryRejected {..}
+--       Nothing -> case (res ^. WF.queryResult . Common.vec'payloads) V.!? 0 of
+--         Nothing -> throwIO $ ValueError "No return value payloads provided by query response"
+--         Just p -> pure $ Right $ convertFromProtoPayload p
+--   forM eRes $ \p ->
+--     payloadProcessorDecode processor p >>= either (throwIO . ValueError) pure >>= decode codec >>= either (throwIO . ValueError) pure
+--   where
+--     queryRejectionStatusFromProto = \case
+--       WORKFLOW_EXECUTION_STATUS_UNSPECIFIED -> UnknownStatus
+--       WORKFLOW_EXECUTION_STATUS_RUNNING -> Running
+--       WORKFLOW_EXECUTION_STATUS_COMPLETED -> Completed
+--       WORKFLOW_EXECUTION_STATUS_FAILED -> Failed
+--       WORKFLOW_EXECUTION_STATUS_CANCELED -> Canceled
+--       WORKFLOW_EXECUTION_STATUS_TERMINATED -> Terminated
+--       WORKFLOW_EXECUTION_STATUS_CONTINUED_AS_NEW -> ContinuedAsNew
+--       WORKFLOW_EXECUTION_STATUS_TIMED_OUT -> TimedOut
+--       WorkflowExecutionStatus'Unrecognized _ -> UnknownStatus
