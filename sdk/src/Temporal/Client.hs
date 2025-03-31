@@ -33,6 +33,7 @@ module Temporal.Client (
   startWorkflowOptions,
   Temporal.Client.start,
   startFromPayloads,
+  signalWithStartFromPayloads,
   WorkflowHandle,
   execute,
   waitWorkflowResult,
@@ -567,6 +568,97 @@ startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
           workflowHandleReadResult wfH a >>= \b -> do
             result <- decode codec =<< either (throwIO . ValueError) pure =<< payloadProcessorDecode c.clientConfig.payloadProcessor b
             either (throwIO . ValueError) pure result
+      }
+
+{- | Signal with start from unchecked lists of payloads. This is useful if you are forwarding
+signals and workflow executions from another source, but no checking to make sure that the input
+types are correct is performed.
+-}
+signalWithStartFromPayloads ::
+  (MonadIO m, HasWorkflowClient m) =>
+  KnownWorkflow args result ->
+  WorkflowId ->
+  StartWorkflowOptions ->
+  KnownSignal sargs ->
+  V.Vector UnencodedPayload -> 
+  -- ^ Workflow arguments
+  V.Vector UnencodedPayload -> 
+  -- ^ Signal arguments
+  m (WorkflowHandle result)
+signalWithStartFromPayloads k@(KnownWorkflow codec _) wfId opts (KnownSignal n _) workflowArgs signalArgs = do
+  c <- askWorkflowClient
+  
+  wfArgs' <- liftIO $ sequence workflowArgs
+  sigArgs' <- liftIO $ sequence signalArgs
+  
+  let interceptorOpts =
+        SignalWithStartWorkflowInput
+          { signalWithStartWorkflowType = WorkflowType $ knownWorkflowName k
+          , signalWithStartSignalName = n
+          , signalWithStartSignalArgs = sigArgs'
+          , signalWithStartArgs = wfArgs'
+          , signalWithStartOptions = opts
+          , signalWithStartWorkflowId = wfId
+          }
+  
+  wfH <- liftIO $ Temporal.Client.Types.signalWithStart c.clientConfig.interceptors interceptorOpts $ \opts' -> do
+    reqId <- UUID.nextRandom
+    searchAttrs <- searchAttributesToProto opts'.signalWithStartOptions.searchAttributes
+    signalArgs' <- processorEncodePayloads c.clientConfig.payloadProcessor opts'.signalWithStartSignalArgs
+    wfArgs' <- processorEncodePayloads c.clientConfig.payloadProcessor opts'.signalWithStartArgs
+    hdrs <- processorEncodePayloads c.clientConfig.payloadProcessor opts'.signalWithStartOptions.headers
+    let tq = rawTaskQueue opts'.signalWithStartOptions.taskQueue
+        req =
+          defMessage
+            & RR.namespace .~ rawNamespace c.clientConfig.namespace
+            & RR.workflowId .~ rawWorkflowId opts'.signalWithStartWorkflowId
+            & RR.workflowType
+              .~ ( defMessage & Common.name .~ rawWorkflowType opts'.signalWithStartWorkflowType
+                 )
+            & WF.requestId .~ UUID.toText reqId
+            & RR.searchAttributes .~ (defMessage & Common.indexedFields .~ searchAttrs)
+            & RR.taskQueue
+              .~ ( defMessage
+                    & Common.name .~ tq
+                    & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
+                 )
+            & RR.input
+              .~ ( defMessage & Common.vec'payloads .~ fmap convertToProtoPayload wfArgs'
+                 )
+            & RR.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts'.signalWithStartOptions.timeouts.executionTimeout)
+            & RR.maybe'workflowRunTimeout .~ (durationToProto <$> opts'.signalWithStartOptions.timeouts.runTimeout)
+            & RR.maybe'workflowTaskTimeout .~ (durationToProto <$> opts'.signalWithStartOptions.timeouts.taskTimeout)
+            & RR.identity .~ Core.identity (Core.clientConfig c.clientCore)
+            & RR.requestId .~ UUID.toText reqId
+            & RR.workflowIdReusePolicy .~ workflowIdReusePolicyToProto
+              (fromMaybe WorkflowIdReusePolicyAllowDuplicateFailedOnly opts'.signalWithStartOptions.workflowIdReusePolicy)
+            & RR.signalName .~ n
+            & RR.signalInput .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload signalArgs')
+            & RR.maybe'retryPolicy .~ (retryPolicyToProto <$> opts'.signalWithStartOptions.retryPolicy)
+            & RR.cronSchedule .~ fromMaybe "" opts'.signalWithStartOptions.cronSchedule
+            & RR.memo .~ convertToProtoMemo opts'.signalWithStartOptions.memo
+            & RR.header .~ headerToProto (fmap convertToProtoPayload hdrs)
+            
+    res <- signalWithStartWorkflowExecution c.clientCore req
+    case res of
+      Left err -> throwIO err
+      Right swer ->
+        pure $
+          WorkflowHandle
+            { workflowHandleReadResult = \_ -> error "workflowHandleReadResult not yet implemented"
+            , workflowHandleType = WorkflowType $ knownWorkflowName k
+            , workflowHandleClient = c
+            , workflowHandleWorkflowId = opts'.signalWithStartWorkflowId
+            , workflowHandleRunId = Just (RunId $ swer ^. WF.runId)
+            }
+  
+  -- Now return the handle with the proper read result function
+  pure $
+    wfH
+      { workflowHandleReadResult = \a -> do
+          decodedPayload <- either (throwIO . ValueError) pure =<< payloadProcessorDecode c.clientConfig.payloadProcessor a
+          result <- decode codec decodedPayload
+          either (throwIO . ValueError) pure result
       }
 
 
