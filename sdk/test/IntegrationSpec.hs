@@ -1478,20 +1478,9 @@ needsClient = do
                 testRefs.basicActivity
                 (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
             W.sleep $ milliseconds 10
-          modifiedWorkflow :: W.ProvidedWorkflow (W.Workflow ())
-          modifiedWorkflow = W.provideWorkflow JSON "replay-workflow" $ provideCallStack $ do
-            W.sleep $ milliseconds 10
-            _ <-
-              W.executeActivity
-                testRefs.basicActivity
-                (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
-            _ <-
-              W.executeActivity
-                testRefs.basicActivity
-                (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
-            W.sleep $ milliseconds 10
-      let conf = provideCallStack $ configure () (testConf <> toDefinitions originalWorkflow) $ do
+          conf = provideCallStack $ configure () (testConf <> toDefinitions originalWorkflow) $ do
             baseConf
+
       history <- withWorker conf $ do
         uuid <- uuidText
         let opts =
@@ -1503,17 +1492,32 @@ needsClient = do
           wfHandle <- C.start originalWorkflow (WorkflowId uuid) opts
           C.waitWorkflowResult wfHandle
           C.fetchHistory wfHandle
-      let conf' = configure () (testConf <> toDefinitions modifiedWorkflow) $ do
-            baseConf
-      replayResult <- runReplayHistory globalRuntime conf' history
-      replayResult `shouldSatisfy` \case
-        Right () -> False
-        Left _e -> True
 
-      replayResult' <- runReplayHistory globalRuntime conf history
-      replayResult' `shouldSatisfy` \case
+      replayResult <- runReplayHistory globalRuntime conf history
+      replayResult `shouldSatisfy` \case
         Right () -> True
         Left _e -> False
+
+      let modifiedWorkflow :: W.ProvidedWorkflow (W.Workflow ())
+          modifiedWorkflow = W.provideWorkflow JSON "replay-workflow" $ provideCallStack $ do
+            W.sleep $ milliseconds 10
+            _ <-
+              W.executeActivity
+                testRefs.basicActivity
+                (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
+            _ <-
+              W.executeActivity
+                testRefs.basicActivity
+                (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
+            W.sleep $ milliseconds 10
+
+          conf' = configure () (testConf <> toDefinitions modifiedWorkflow) $ do
+            baseConf
+
+      replayResult' <- runReplayHistory globalRuntime conf' history
+      replayResult' `shouldSatisfy` \case
+        Right () -> False
+        Left _e -> True
 
 -- describe "WorkflowClient" $ do
 --   specify "WorkflowExecutionAlreadyStartedError" pending
