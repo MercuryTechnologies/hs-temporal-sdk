@@ -310,9 +310,9 @@ rec {
       };
       "async-trait" = rec {
         crateName = "async-trait";
-        version = "0.1.87";
+        version = "0.1.88";
         edition = "2021";
-        sha256 = "15swwmyl4nx7w03rq6ibb4x2c8rzbx9fpiag1kn4fhapb49yqmnm";
+        sha256 = "1dgxvz7g75cmz6vqqz0mri4xazc6a8xfj1db6r9fxz29lzyd6fg5";
         procMacro = true;
         libName = "async_trait";
         authors = [
@@ -1919,9 +1919,9 @@ rec {
       };
       "foldhash" = rec {
         crateName = "foldhash";
-        version = "0.1.4";
+        version = "0.1.5";
         edition = "2021";
-        sha256 = "0vsxw2iwpgs7yy6l7pndm7b8nllaq5vdxwnmjn1qpm5kyzhzvlm0";
+        sha256 = "1wisr1xlc2bj7hk4rgkcjkz3j2x4dhd1h9lwk7mj8p71qpdgbi6r";
         authors = [
           "Orson Peters <orsonpeters@gmail.com>"
         ];
@@ -2381,6 +2381,13 @@ rec {
             packageId = "cfg-if";
           }
           {
+            name = "js-sys";
+            packageId = "js-sys";
+            optional = true;
+            usesDefaultFeatures = false;
+            target = { target, features }: (("wasm32" == target."arch" or null) && (("unknown" == target."os" or null) || ("none" == target."os" or null)) && (builtins.elem "atomics" targetFeatures));
+          }
+          {
             name = "libc";
             packageId = "libc";
             usesDefaultFeatures = false;
@@ -2435,6 +2442,13 @@ rec {
             target = { target, features }: (("wasm32" == target."arch" or null) && ("wasi" == target."os" or null) && ("p2" == target."env" or null));
           }
           {
+            name = "wasm-bindgen";
+            packageId = "wasm-bindgen";
+            optional = true;
+            usesDefaultFeatures = false;
+            target = { target, features }: (("wasm32" == target."arch" or null) && (("unknown" == target."os" or null) || ("none" == target."os" or null)));
+          }
+          {
             name = "windows-targets";
             packageId = "windows-targets 0.52.6";
             target = { target, features }: ((target."windows" or false) && (!("win7" == target."vendor" or null)));
@@ -2444,6 +2458,7 @@ rec {
           "rustc-dep-of-std" = [ "dep:compiler_builtins" "dep:core" ];
           "wasm_js" = [ "dep:wasm-bindgen" "dep:js-sys" ];
         };
+        resolvedDefaultFeatures = [ "std" "wasm_js" ];
       };
       "gimli" = rec {
         crateName = "gimli";
@@ -4119,7 +4134,36 @@ rec {
           "env_logger" = [ "dep:env_logger" ];
           "log" = [ "dep:log" ];
         };
-        resolvedDefaultFeatures = [ "raw_decoder" "stream" ];
+        resolvedDefaultFeatures = [ "stream" ];
+      };
+      "lzma-sys" = rec {
+        crateName = "lzma-sys";
+        version = "0.1.20";
+        edition = "2018";
+        links = "lzma";
+        sha256 = "09sxp20waxyglgn3cjz8qjkspb3ryz2fwx4rigkwvrk46ymh9njz";
+        libName = "lzma_sys";
+        authors = [
+          "Alex Crichton <alex@alexcrichton.com>"
+        ];
+        dependencies = [
+          {
+            name = "libc";
+            packageId = "libc";
+          }
+        ];
+        buildDependencies = [
+          {
+            name = "cc";
+            packageId = "cc";
+          }
+          {
+            name = "pkg-config";
+            packageId = "pkg-config";
+          }
+        ];
+        features = {
+        };
       };
       "matchers" = rec {
         crateName = "matchers";
@@ -6962,9 +7006,9 @@ rec {
       };
       "rustls" = rec {
         crateName = "rustls";
-        version = "0.23.23";
+        version = "0.23.25";
         edition = "2021";
-        sha256 = "15gk2bmry78cps3ya38a7cn4jxc36xv1r7gndr0fbz40qjc6qya7";
+        sha256 = "0g5idwxm04i71k3n66ml30zyfbgv6p85a7jky2i09v64i8cfjbl2";
         dependencies = [
           {
             name = "log";
@@ -7013,10 +7057,10 @@ rec {
         ];
         features = {
           "aws-lc-rs" = [ "aws_lc_rs" ];
-          "aws_lc_rs" = [ "dep:aws-lc-rs" "webpki/aws_lc_rs" ];
+          "aws_lc_rs" = [ "dep:aws-lc-rs" "webpki/aws-lc-rs" "aws-lc-rs/aws-lc-sys" "aws-lc-rs/prebuilt-nasm" ];
           "brotli" = [ "dep:brotli" "dep:brotli-decompressor" "std" ];
           "default" = [ "aws_lc_rs" "logging" "std" "tls12" ];
-          "fips" = [ "aws_lc_rs" "aws-lc-rs?/fips" ];
+          "fips" = [ "aws_lc_rs" "aws-lc-rs?/fips" "webpki/aws-lc-rs-fips" ];
           "hashbrown" = [ "dep:hashbrown" ];
           "log" = [ "dep:log" ];
           "logging" = [ "log" ];
@@ -7103,9 +7147,9 @@ rec {
       };
       "rustls-webpki" = rec {
         crateName = "rustls-webpki";
-        version = "0.102.8";
+        version = "0.103.0";
         edition = "2021";
-        sha256 = "1sdy8ks86b7jpabpnb2px2s7f1sq8v0nqf6fnlvwzm4vfk41pjk4";
+        sha256 = "0brvz1j2q8qcbrs5555wgrdzpibiz6ryk9ypx4izzzw84nnfx90a";
         libName = "webpki";
         dependencies = [
           {
@@ -7127,8 +7171,9 @@ rec {
         ];
         features = {
           "alloc" = [ "ring?/alloc" "pki-types/alloc" ];
-          "aws_lc_rs" = [ "dep:aws-lc-rs" ];
-          "default" = [ "std" "ring" ];
+          "aws-lc-rs" = [ "dep:aws-lc-rs" "aws-lc-rs/aws-lc-sys" "aws-lc-rs/prebuilt-nasm" ];
+          "aws-lc-rs-fips" = [ "dep:aws-lc-rs" "aws-lc-rs/fips" ];
+          "default" = [ "std" ];
           "ring" = [ "dep:ring" ];
           "std" = [ "alloc" "pki-types/std" ];
         };
@@ -12598,6 +12643,27 @@ rec {
         };
         resolvedDefaultFeatures = [ "default" "unsupported" ];
       };
+      "xz2" = rec {
+        crateName = "xz2";
+        version = "0.1.7";
+        edition = "2018";
+        sha256 = "1qk7nzpblizvayyq4xzi4b0zacmmbqr6vb9fc0v1avyp17f4931q";
+        authors = [
+          "Alex Crichton <alex@alexcrichton.com>"
+        ];
+        dependencies = [
+          {
+            name = "lzma-sys";
+            packageId = "lzma-sys";
+          }
+        ];
+        features = {
+          "futures" = [ "dep:futures" ];
+          "static" = [ "lzma-sys/static" ];
+          "tokio" = [ "tokio-io" "futures" ];
+          "tokio-io" = [ "dep:tokio-io" ];
+        };
+      };
       "yoke" = rec {
         crateName = "yoke";
         version = "0.7.5";
@@ -12910,9 +12976,9 @@ rec {
       };
       "zip" = rec {
         crateName = "zip";
-        version = "2.2.3";
+        version = "2.3.0";
         edition = "2021";
-        sha256 = "0flg2gpiab13xwysbr1dddya1ryvizgzgfsqyvzyax2f8m64i05j";
+        sha256 = "1mxih4f2vcrcp0y549cpx7bb80dyszwaljklkdmj6m2blmragsc4";
         build = "src/build.rs";
         authors = [
           "Mathijs van de Nes <git@mathijs.vd-nes.nl>"
@@ -12968,6 +13034,12 @@ rec {
             usesDefaultFeatures = false;
           }
           {
+            name = "getrandom";
+            packageId = "getrandom 0.3.1";
+            optional = true;
+            features = [ "wasm_js" "std" ];
+          }
+          {
             name = "hmac";
             packageId = "hmac";
             optional = true;
@@ -12993,11 +13065,6 @@ rec {
             optional = true;
           }
           {
-            name = "rand";
-            packageId = "rand";
-            optional = true;
-          }
-          {
             name = "sha1";
             packageId = "sha1";
             optional = true;
@@ -13012,6 +13079,11 @@ rec {
             optional = true;
             usesDefaultFeatures = false;
             features = [ "std" ];
+          }
+          {
+            name = "xz2";
+            packageId = "xz2";
+            optional = true;
           }
           {
             name = "zeroize";
@@ -13033,6 +13105,11 @@ rec {
         ];
         devDependencies = [
           {
+            name = "getrandom";
+            packageId = "getrandom 0.3.1";
+            features = [ "wasm_js" "std" ];
+          }
+          {
             name = "time";
             packageId = "time";
             usesDefaultFeatures = false;
@@ -13041,7 +13118,7 @@ rec {
         ];
         features = {
           "aes" = [ "dep:aes" ];
-          "aes-crypto" = [ "aes" "constant_time_eq" "hmac" "pbkdf2" "sha1" "rand" "zeroize" ];
+          "aes-crypto" = [ "aes" "constant_time_eq" "hmac" "pbkdf2" "sha1" "getrandom" "zeroize" ];
           "bzip2" = [ "dep:bzip2" ];
           "chrono" = [ "chrono/default" ];
           "constant_time_eq" = [ "dep:constant_time_eq" ];
@@ -13054,19 +13131,20 @@ rec {
           "deflate-zopfli" = [ "zopfli" "_deflate-any" ];
           "deflate64" = [ "dep:deflate64" ];
           "flate2" = [ "dep:flate2" ];
+          "getrandom" = [ "dep:getrandom" ];
           "hmac" = [ "dep:hmac" ];
           "lzma" = [ "lzma-rs/stream" ];
           "lzma-rs" = [ "dep:lzma-rs" ];
+          "nt-time" = [ "dep:nt-time" ];
           "pbkdf2" = [ "dep:pbkdf2" ];
-          "rand" = [ "dep:rand" ];
           "sha1" = [ "dep:sha1" ];
           "time" = [ "dep:time" ];
-          "xz" = [ "lzma-rs/raw_decoder" ];
+          "xz" = [ "dep:xz2" ];
           "zeroize" = [ "dep:zeroize" ];
           "zopfli" = [ "dep:zopfli" ];
           "zstd" = [ "dep:zstd" ];
         };
-        resolvedDefaultFeatures = [ "_deflate-any" "aes" "aes-crypto" "bzip2" "constant_time_eq" "default" "deflate" "deflate-flate2" "deflate-zopfli" "deflate64" "flate2" "hmac" "lzma" "lzma-rs" "pbkdf2" "rand" "sha1" "time" "xz" "zeroize" "zopfli" "zstd" ];
+        resolvedDefaultFeatures = [ "_deflate-any" "aes" "aes-crypto" "bzip2" "constant_time_eq" "default" "deflate" "deflate-flate2" "deflate-zopfli" "deflate64" "flate2" "getrandom" "hmac" "lzma" "lzma-rs" "pbkdf2" "sha1" "time" "xz" "zeroize" "zopfli" "zstd" ];
       };
       "zopfli" = rec {
         crateName = "zopfli";
