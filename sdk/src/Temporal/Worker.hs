@@ -54,7 +54,7 @@ module Temporal.Worker (
   subscribeToEvictionsSTM,
   Workflow.EvictionWithRunID (..),
   evictionMessage,
-  evictionWasFatal,
+  evictionWasNonRecoverable,
   -- startReplayWorker,
   -- Core.HistoryPusher,
   -- Core.pushHistory,
@@ -539,7 +539,7 @@ runReplayHistory rt conf history = runWorkerContext conf $ UnliftIO.bracket (sta
     Left e -> pure $ Left $ ReplayHistoryFailure {message = e.message}
     Right () -> do
       res <- atomically $ readTChan evictions
-      if evictionWasFatal res
+      if evictionWasNonRecoverable res
         then pure $ Left $ ReplayHistoryFailure {message = evictionMessage res}
         else pure $ Right ()
 
@@ -731,9 +731,10 @@ evictionMessage :: Workflow.EvictionWithRunID -> Text
 evictionMessage Workflow.EvictionWithRunID {eviction} = eviction ^. Activation.message
 
 
-evictionWasFatal :: Workflow.EvictionWithRunID -> Bool
-evictionWasFatal Workflow.EvictionWithRunID {eviction} = case eviction ^. Activation.reason of
+evictionWasNonRecoverable :: Workflow.EvictionWithRunID -> Bool
+evictionWasNonRecoverable Workflow.EvictionWithRunID {eviction} = case eviction ^. Activation.reason of
   RemoveFromCache'FATAL -> True
+  RemoveFromCache'NONDETERMINISM -> True
   _ -> False
 
 
