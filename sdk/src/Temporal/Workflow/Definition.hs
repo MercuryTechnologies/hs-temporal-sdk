@@ -39,6 +39,7 @@ import Temporal.Payload
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Signal
 import Temporal.Workflow.Types (StartChildWorkflowOptions)
+import Temporal.Workflow.Update
 
 
 {- | This is a Workflow function that can be called from the outside world.
@@ -85,18 +86,6 @@ data KnownWorkflow (args :: [Type]) (result :: Type) = forall codec.
   }
 
 
-{- | A 'KnownUpdate' is a handle that contains all the information needed to start a
-Update either as a child workflow or as a top-level workflow via a 'Client'.
--}
-data KnownUpdate (args :: [Type]) (result :: Type) = forall codec.
-  ( FunctionSupportsCodec codec args result
-  ) =>
-  KnownUpdate
-  { knownUpdateCodec :: codec
-  , knownUpdateName :: Text
-  }
-
-
 -- gatherStartChildWorkflowArgs
 --   :: forall args result codec. GatherArgs codec args
 --   => codec
@@ -108,6 +97,19 @@ data ProvidedWorkflow f = ProvidedWorkflow
   { definition :: WorkflowDefinition
   , reference :: KnownWorkflow (ArgsOf f) (ResultOf Workflow f)
   }
+
+
+data ProvidedUpdate f = ProvidedUpdate
+  { updateDefinition :: WorkflowUpdateDefinition
+  , updateReference :: KnownUpdate (ArgsOf f) (ResultOf Workflow f)
+  }
+
+
+instance VarArgs (ArgsOf f) => UpdateRef (ProvidedUpdate f) where
+  type UpdateArgs (ProvidedUpdate f) = ArgsOf f
+  type UpdateResult (ProvidedUpdate f) = ResultOf Update f
+  updateRef :: ProvidedUpdate f -> KnownUpdate (UpdateArgs (ProvidedUpdate f)) (UpdateResult (ProvidedUpdate f))
+  updateRef = updateReference
 
 
 instance WorkflowDef (ProvidedWorkflow f) where
@@ -195,6 +197,17 @@ data WorkflowSignalDefinition
       f
       (f -> Vector Payload -> IO (Either String (Workflow ())))
 
+
 -- { workflowSignalName :: Text
 -- , workflowSignalHandler :: [Payload] -> IO ()
 -- }
+
+data WorkflowUpdateDefinition = forall codec f.
+  (FunctionSupportsCodec codec (ArgsOf f) (ResultOf Workflow f)) =>
+  WorkflowUpdateDefinition
+  { updateName :: Text -- name
+  , updateCodec :: codec
+  , updateFunction :: f
+  , updateValidator :: Maybe (ArgsOf f :->: Condition Bool)
+  , updateRunner :: f -> Vector Payload -> IO (Either String (Workflow (ResultOf Workflow f)))
+  }

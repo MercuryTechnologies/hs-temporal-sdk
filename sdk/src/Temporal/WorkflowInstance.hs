@@ -116,6 +116,7 @@ create workflowCompleteActivation workflowFn workflowDeadlockTimeout errorConver
   workflowSignalHandlers <- newIORef mempty
   workflowCallStack <- newIORef emptyCallStack
   workflowQueryHandlers <- newIORef mempty
+  workflowUpdateHandlers <- newIORef mempty
   workflowInstanceInfo <- newIORef info
   workflowInstanceContinuationEnv <- ContinuationEnv <$> newIORef JobNil
   workflowCancellationVar <- newIVar
