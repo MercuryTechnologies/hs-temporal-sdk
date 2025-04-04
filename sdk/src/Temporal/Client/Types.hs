@@ -171,6 +171,15 @@ data QueryWorkflowInput = QueryWorkflowInput
   }
 
 
+data UpdateWorkflowInput = UpdateWorkflowInput
+  { updateWorkflowWorkflowId :: WorkflowId
+  , updateWorkflowHeaders :: Map Text Payload
+  , updateWorkflowType :: Text
+  , updateWorkflowRunId :: Maybe RunId
+  , updateWorkflowArgs :: Vector Payload
+  }
+
+
 data WorkflowExecutionStatus
   = Running
   | Completed

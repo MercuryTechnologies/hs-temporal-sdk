@@ -663,6 +663,12 @@ updateCallStackW = Workflow $ \_ -> do
   pure $ Done ()
 
 
+data WorkflowUpdateImplementation = WorkflowUpdateImplementation
+  { updateImplementation :: {-# UNPACK #-} !(UpdateId -> Vector Payload -> Map Text Payload -> Workflow (Either SomeException Payload))
+  , updateValidationImplementation :: {-# UNPACK #-} !(Maybe (UpdateId -> Vector Payload -> Map Text Payload -> IO (Either SomeException Bool)))
+  }
+
+
 data WorkflowInstance = WorkflowInstance
   { workflowInstanceInfo :: {-# UNPACK #-} !(IORef Info)
   , workflowInstanceLogger :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
@@ -676,6 +682,7 @@ data WorkflowInstance = WorkflowInstance
   , workflowSequenceMaps :: {-# UNPACK #-} !(TVar SequenceMaps)
   , workflowSignalHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (Vector Payload -> Workflow ())))
   , workflowQueryHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (QueryId -> Vector Payload -> Map Text Payload -> IO (Either SomeException Payload))))
+  , workflowUpdateHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) WorkflowUpdateImplementation))
   , workflowCallStack :: {-# UNPACK #-} !(IORef CallStack)
   , workflowCompleteActivation :: !(Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
   , workflowInstanceContinuationEnv :: {-# UNPACK #-} !ContinuationEnv
@@ -819,6 +826,14 @@ data HandleQueryInput = HandleQueryInput
   }
 
 
+data HandleUpdateInput = HandleUpdateInput
+  { handleUpdateId :: Text
+  , handleUpdateInputType :: Text
+  , handleUpdateInputArgs :: Vector Payload
+  , handleUpdateInputHeaders :: Map Text Payload
+  }
+
+
 data WorkflowInboundInterceptor = WorkflowInboundInterceptor
   { executeWorkflow
       :: ExecuteWorkflowInput
@@ -828,6 +843,14 @@ data WorkflowInboundInterceptor = WorkflowInboundInterceptor
       :: HandleQueryInput
       -> (HandleQueryInput -> IO (Either SomeException Payload))
       -> IO (Either SomeException Payload)
+  , handleUpdate
+      :: HandleUpdateInput
+      -> (HandleUpdateInput -> IO (Either SomeException Payload))
+      -> IO (Either SomeException Payload)
+  , validateUpdate
+      :: HandleUpdateInput
+      -> (HandleUpdateInput -> IO Bool)
+      -> IO Bool
   }
 
 
@@ -836,6 +859,8 @@ instance Semigroup WorkflowInboundInterceptor where
     WorkflowInboundInterceptor
       { executeWorkflow = \input cont -> a.executeWorkflow input $ \input' -> b.executeWorkflow input' cont
       , handleQuery = \input cont -> a.handleQuery input $ \input' -> b.handleQuery input' cont
+      , handleUpdate = \input cont -> a.handleUpdate input $ \input' -> b.handleUpdate input' cont
+      , validateUpdate = \input cont -> a.validateUpdate input $ \input' -> b.validateUpdate input' cont
       }
 
 
@@ -844,6 +869,8 @@ instance Monoid WorkflowInboundInterceptor where
     WorkflowInboundInterceptor
       { executeWorkflow = \input cont -> cont input
       , handleQuery = \input cont -> cont input
+      , handleUpdate = \input cont -> cont input
+      , validateUpdate = \input cont -> cont input
       }
 
 
