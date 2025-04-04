@@ -303,6 +303,7 @@ import Temporal.Workflow.Query
 import Temporal.Workflow.Signal
 import Temporal.Workflow.Types
 import Temporal.Workflow.Unsafe.Handle
+import Temporal.Workflow.Update
 import Temporal.Workflow.WorkflowInstance
 import Temporal.WorkflowInstance
 import UnliftIO
@@ -1132,6 +1133,49 @@ setQueryHandler (queryRef -> KnownQuery n codec) f = ilift $ do
           case eResult of
             Left err -> pure $ Left err
             Right result -> liftIO $ UnliftIO.try $ encode codec result
+
+
+{- | Register an update handler, optionally with a validator.
+
+The validator will be called when an update with the given name is received. If it returns true,
+the update handler will be called, and its result returned to the client.
+-}
+setUpdateHandler
+  :: forall update f validator
+   . ( UpdateRef update
+     , f ~ (UpdateArgs update :->: Workflow (UpdateResult update))
+     , validator ~ (UpdateArgs update :->: Condition Bool)
+     , RequireCallStack
+     )
+  => update
+  -> f
+  -> Maybe validator
+  -> Workflow ()
+setUpdateHandler (updateRef -> KnownUpdate codec n) f mValidator = ilift $ do
+  updateCallStack
+  inst <- ask
+  let updateImplementation =
+        WorkflowUpdateImplementation
+          { updateImplementation = updateHandler
+          , updateValidationImplementation = Nothing
+          }
+  liftIO $ modifyIORef' inst.workflowUpdateHandlers $ \handles ->
+    HashMap.insert (Just n) updateImplementation handles
+  where
+    updateHandler :: UpdateId -> Vector Payload -> Map Text Payload -> Workflow (Either SomeException Payload)
+    updateHandler updateId vec hdrs = do
+      eWorkflow <- Workflow $ \_env ->
+        liftIO $
+          Done
+            <$> applyPayloads
+              codec
+              (Proxy @(UpdateArgs update))
+              (Proxy @(Workflow (UpdateResult update)))
+              f
+              vec
+      case eWorkflow of
+        Left err -> pure $ Left $ toException $ ValueError err
+        Right w -> w >>= \result -> ilift (liftIO $ Right <$> encode codec result)
 
 
 type ValidSignalHandler f =
