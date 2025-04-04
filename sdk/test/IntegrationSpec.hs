@@ -22,13 +22,14 @@ import Control.Concurrent
 import Control.Exception
 import Control.Exception.Annotated
 import qualified Control.Exception.Annotated as Annotated
-import Control.Monad (replicateM)
+import Control.Monad (replicateM, when)
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Aeson (FromJSON, ToJSON, Value)
 import qualified Data.ByteString as BS
 import System.Environment (lookupEnv)
+import Data.Either (isLeft, isRight)
 import Data.Foldable (traverse_)
 import Data.Functor
 import Data.Int
@@ -1468,6 +1469,7 @@ needsClient = do
                 }
           )
           `shouldReturn` ()
+
   describe "Workflow replay" $ do
     specify "works" $ \TestEnv {..} -> do
       let originalWorkflow :: W.ProvidedWorkflow (W.Workflow ())
@@ -1478,10 +1480,9 @@ needsClient = do
                 testRefs.basicActivity
                 (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
             W.sleep $ milliseconds 10
-          conf = provideCallStack $ configure () (testConf <> toDefinitions originalWorkflow) $ do
-            baseConf
+          originalConf = provideCallStack $ configure () (testConf <> toDefinitions originalWorkflow) baseConf
 
-      history <- withWorker conf $ do
+      history <- withWorker originalConf $ do
         uuid <- uuidText
         let opts =
               (C.startWorkflowOptions taskQueue)
@@ -1493,13 +1494,30 @@ needsClient = do
           C.waitWorkflowResult wfHandle
           C.fetchHistory wfHandle
 
-      replayResult <- runReplayHistory globalRuntime conf history
-      replayResult `shouldSatisfy` \case
-        Right () -> True
-        Left _e -> False
+      replayResult <- runReplayHistory globalRuntime originalConf history
+      replayResult `shouldSatisfy` isRight
 
-      let modifiedWorkflow :: W.ProvidedWorkflow (W.Workflow ())
-          modifiedWorkflow = W.provideWorkflow JSON "replay-workflow" $ provideCallStack $ do
+      let patchedWorkflow :: W.ProvidedWorkflow (W.Workflow ())
+          patchedWorkflow = W.provideWorkflow JSON "replay-workflow" $ provideCallStack $ do
+            W.sleep $ milliseconds 10
+            _ <-
+              W.executeActivity
+                testRefs.basicActivity
+                (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
+            hasPatch <- W.patched "wibble"
+            when hasPatch $ void $
+              W.executeActivity
+                testRefs.basicActivity
+                (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
+            W.sleep $ milliseconds 10
+
+          patchedConf = configure () (testConf <> toDefinitions patchedWorkflow) baseConf
+
+      patchedReplayResult <- runReplayHistory globalRuntime patchedConf history
+      patchedReplayResult `shouldSatisfy` isRight
+
+      let incompatibleWorkflow :: W.ProvidedWorkflow (W.Workflow ())
+          incompatibleWorkflow = W.provideWorkflow JSON "replay-workflow" $ provideCallStack $ do
             W.sleep $ milliseconds 10
             _ <-
               W.executeActivity
@@ -1511,13 +1529,11 @@ needsClient = do
                 (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
             W.sleep $ milliseconds 10
 
-          conf' = configure () (testConf <> toDefinitions modifiedWorkflow) $ do
-            baseConf
+          incompatibleConf = configure () (testConf <> toDefinitions incompatibleWorkflow) baseConf
 
-      replayResult' <- runReplayHistory globalRuntime conf' history
-      replayResult' `shouldSatisfy` \case
-        Right () -> False
-        Left _e -> True
+      incompatibleReplayResult <- runReplayHistory globalRuntime incompatibleConf history
+      incompatibleReplayResult `shouldSatisfy` isLeft
+
 
 -- describe "WorkflowClient" $ do
 --   specify "WorkflowExecutionAlreadyStartedError" pending
