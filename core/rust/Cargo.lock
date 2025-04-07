@@ -599,20 +599,20 @@ checksum = "37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be"
 
 [[package]]
 name = "ffi-convert"
-version = "0.6.1"
+version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83979d1b24808a399d1506a7213c3f3c512fa1d8701a27e80141e47ff09aac93"
+checksum = "88d96fa39640e119d4bc9898672ab63d9c575810dbad8806683a993fa8de0a8b"
 dependencies = [
  "ffi-convert-derive",
  "libc",
- "thiserror 1.0.69",
+ "thiserror 2.0.12",
 ]
 
 [[package]]
 name = "ffi-convert-derive"
-version = "0.6.1"
+version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe9ea801ee0e90ec33e6483df59c4644b89c49be7cd0e50b2a762773e552afba"
+checksum = "480d55e4c9442832b168701bcc7f2e3282608f841791224ea1ed6ae35d450175"
 dependencies = [
  "proc-macro2",
  "quote",
