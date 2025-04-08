@@ -907,10 +907,10 @@ data UpdateOptions = UpdateOptions
 
 
 update
-  :: forall m args result a
+  :: forall m args result a error
    . (MonadIO m, HasWorkflowClient m)
   => WorkflowHandle a
-  -> KnownUpdate args result
+  -> KnownUpdate args result error
   -> UpdateOptions
   -> args
     :->: m result

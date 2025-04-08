@@ -1141,13 +1141,13 @@ The validator will be called when an update with the given name is received. If 
 the update handler will be called, and its result returned to the client.
 -}
 setUpdateHandler
-  :: forall update f validator
+  :: forall update f validator e
    . ( UpdateRef update
      , f ~ (UpdateArgs update :->: Workflow (UpdateResult update))
-     , validator ~ (UpdateArgs update :->: Condition Bool)
+     , validator ~ (UpdateArgs update :->: Condition (Either e ()))
      , RequireCallStack
      )
-  => update
+  => update e
   -> f
   -> Maybe validator
   -> Workflow ()
@@ -1162,20 +1162,20 @@ setUpdateHandler (updateRef -> KnownUpdate codec n) f mValidator = ilift $ do
   liftIO $ modifyIORef' inst.workflowUpdateHandlers $ \handles ->
     HashMap.insert (Just n) updateImplementation handles
   where
-    updateHandler :: UpdateId -> Vector Payload -> Map Text Payload -> Workflow (Either SomeException Payload)
+    updateHandler :: UpdateId -> Vector Payload -> Map Text Payload -> Workflow Payload
     updateHandler updateId vec hdrs = do
-      eWorkflow <- Workflow $ \_env ->
-        liftIO $
-          Done
-            <$> applyPayloads
+      ePayloads <-
+        ilift $
+          liftIO $
+            applyPayloads
               codec
               (Proxy @(UpdateArgs update))
               (Proxy @(Workflow (UpdateResult update)))
               f
               vec
-      case eWorkflow of
-        Left err -> pure $ Left $ toException $ ValueError err
-        Right w -> w >>= \result -> ilift (liftIO $ Right <$> encode codec result)
+      case ePayloads of
+        Left err -> Workflow $ \_env -> pure $ Throw $ toException $ ValueError err
+        Right w -> w >>= \result -> ilift (liftIO $ encode codec result)
 
 
 type ValidSignalHandler f =

@@ -664,8 +664,8 @@ updateCallStackW = Workflow $ \_ -> do
 
 
 data WorkflowUpdateImplementation = WorkflowUpdateImplementation
-  { updateImplementation :: {-# UNPACK #-} !(UpdateId -> Vector Payload -> Map Text Payload -> Workflow (Either SomeException Payload))
-  , updateValidationImplementation :: {-# UNPACK #-} !(Maybe (UpdateId -> Vector Payload -> Map Text Payload -> IO (Either SomeException Bool)))
+  { updateImplementation :: {-# UNPACK #-} !(UpdateId -> Vector Payload -> Map Text Payload -> Workflow Payload)
+  , updateValidationImplementation :: {-# UNPACK #-} !(Maybe (UpdateId -> Vector Payload -> Map Text Payload -> IO (Either SomeException ())))
   }
 
 

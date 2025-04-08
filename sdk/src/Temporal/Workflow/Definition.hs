@@ -99,16 +99,16 @@ data ProvidedWorkflow f = ProvidedWorkflow
   }
 
 
-data ProvidedUpdate f = ProvidedUpdate
+data ProvidedUpdate f error = ProvidedUpdate
   { updateDefinition :: WorkflowUpdateDefinition
-  , updateReference :: KnownUpdate (ArgsOf f) (ResultOf Workflow f)
+  , updateReference :: KnownUpdate (ArgsOf f) (ResultOf Workflow f) error
   }
 
 
 instance VarArgs (ArgsOf f) => UpdateRef (ProvidedUpdate f) where
   type UpdateArgs (ProvidedUpdate f) = ArgsOf f
-  type UpdateResult (ProvidedUpdate f) = ResultOf Update f
-  updateRef :: ProvidedUpdate f -> KnownUpdate (UpdateArgs (ProvidedUpdate f)) (UpdateResult (ProvidedUpdate f))
+  type UpdateResult (ProvidedUpdate f) = ResultOf Workflow f
+  updateRef :: ProvidedUpdate f error -> KnownUpdate (UpdateArgs (ProvidedUpdate f)) (UpdateResult (ProvidedUpdate f)) error
   updateRef = updateReference
 
 
