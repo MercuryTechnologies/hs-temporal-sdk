@@ -46,9 +46,11 @@ import GHC.Generics
 import GHC.Stack (SrcLoc (..), callStack, fromCallSiteList)
 import IntegrationSpec.HangingWorkflow
 import IntegrationSpec.TimeoutsInWorkflows
+import IntegrationSpec.Updates
 import OpenTelemetry.Trace
 import RequireCallStack
 import System.Directory
+import System.Environment (lookupEnv)
 import System.IO
 import Temporal.Activity
 import Temporal.Bundle
@@ -1534,6 +1536,30 @@ needsClient = do
       incompatibleReplayResult <- runReplayHistory globalRuntime incompatibleConf history
       incompatibleReplayResult `shouldSatisfy` isLeft
 
+  describe "Update" $ do
+    describe "Happy path" $ do
+      specify "it works with no validator" $ \TestEnv {..} -> do
+        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+              baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                  }
+          let updateOptions =
+                C.UpdateOptions
+                  { updateId = "update-happy-path-no-validator-update"
+                  , updateHeaders = mempty
+                  , waitPolicy = C.UpdateLifecycleStageCompleted
+                  }
+          (updateResult, workflowResult) <- useClient do
+            h <- C.start UpdateHappyPathNoValidator "update-happy-path-no-validator" opts
+            updateResult <- C.update h testUpdate updateOpts 12
+            workflowResult <- C.wait h
+            pure (updateResult, workflowResult)
+          updateResult `shouldBe` 12
+          workflowResult `shouldBe` 12
 
 -- describe "WorkflowClient" $ do
 --   specify "WorkflowExecutionAlreadyStartedError" pending

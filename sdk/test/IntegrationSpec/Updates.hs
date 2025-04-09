@@ -12,8 +12,10 @@ module IntegrationSpec.Updates where
 import Temporal.Activity
 import Temporal.Client
 import Temporal.Duration
+import Temporal.Payload
 import Temporal.TH
 import Temporal.Workflow
+import Temporal.Workflow.Update
 
 
 -- - Happy path update:
@@ -38,3 +40,23 @@ import Temporal.Workflow
 --
 -- - Ideas:
 --   - Start vs execute semantics for update
+
+testUpdate :: KnownUpdate '[Int] Int SomeException
+testUpdate =
+  KnownUpdate
+    { updateCodec = JSON
+    , updateName = "test-update"
+    }
+
+
+updateHappyPathNoValidator :: Workflow Int
+updateHappyPathNoValidator = provideCallStack do
+  stateVar <- newStateVar (0 :: Int)
+  setUpdateHandler testUpdate (\x -> modifyStateVar stateVar (+ x)) Nothing
+  waitCondition do
+    x <- readStateVar stateVar
+    pure $ x > 0
+  readStateVar stateVar
+
+
+registerWorkflow 'updateHappyPathNoValidator
