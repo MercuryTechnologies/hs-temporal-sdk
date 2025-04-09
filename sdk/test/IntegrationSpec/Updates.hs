@@ -9,6 +9,10 @@
 
 module IntegrationSpec.Updates where
 
+import Control.Exception
+import Control.Monad.Logger
+import qualified Data.Text as T
+import RequireCallStack (provideCallStack)
 import Temporal.Activity
 import Temporal.Client
 import Temporal.Duration
@@ -44,15 +48,21 @@ import Temporal.Workflow.Update
 testUpdate :: KnownUpdate '[Int] Int SomeException
 testUpdate =
   KnownUpdate
-    { updateCodec = JSON
-    , updateName = "test-update"
+    { knownUpdateCodec = JSON
+    , knownUpdateName = "test-update"
     }
 
 
 updateHappyPathNoValidator :: Workflow Int
 updateHappyPathNoValidator = provideCallStack do
   stateVar <- newStateVar (0 :: Int)
-  setUpdateHandler testUpdate (\x -> modifyStateVar stateVar (+ x)) Nothing
+  let handleUpdate arg = do
+        modifyStateVar stateVar (+ arg)
+        stateAfter <- readStateVar stateVar
+        $(logWarn) ("Called handleUpdate, new state is " <> T.pack (show stateAfter))
+        pure stateAfter
+  setUpdateHandler testUpdate handleUpdate Nothing
+  sleep $ seconds 1
   waitCondition do
     x <- readStateVar stateVar
     pure $ x > 0

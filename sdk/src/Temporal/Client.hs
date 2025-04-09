@@ -56,6 +56,11 @@ module Temporal.Client (
   defaultSignalOptions,
   Temporal.Client.signalWithStart,
 
+  -- * Sending Updates to Workflows
+  UpdateOptions (..),
+  UpdateLifecycleStage (..),
+  update,
+
   -- * Producing handles for existing workflows
   getHandle,
 
@@ -957,6 +962,7 @@ update h@(WorkflowHandle _ _ c _ _) (KnownUpdate updateCodec updateName) opts = 
                  )
 
     (res :: UpdateWorkflowExecutionResponse) <- either throwIO pure =<< Temporal.Core.Client.WorkflowService.updateWorkflowExecution h.workflowHandleClient.clientCore msg
+    liftIO $ print res
     case res ^. Update.maybe'outcome of
       Nothing -> throwIO $ ValueError "No return value payloads provided by update response"
       Just outcome -> do

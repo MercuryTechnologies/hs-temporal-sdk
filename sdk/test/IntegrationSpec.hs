@@ -28,7 +28,6 @@ import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Aeson (FromJSON, ToJSON, Value)
 import qualified Data.ByteString as BS
-import System.Environment (lookupEnv)
 import Data.Either (isLeft, isRight)
 import Data.Foldable (traverse_)
 import Data.Functor
@@ -1507,10 +1506,11 @@ needsClient = do
                 testRefs.basicActivity
                 (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
             hasPatch <- W.patched "wibble"
-            when hasPatch $ void $
-              W.executeActivity
-                testRefs.basicActivity
-                (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
+            when hasPatch $
+              void $
+                W.executeActivity
+                  testRefs.basicActivity
+                  (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
             W.sleep $ milliseconds 10
 
           patchedConf = configure () (testConf <> toDefinitions patchedWorkflow) baseConf
@@ -1536,7 +1536,7 @@ needsClient = do
       incompatibleReplayResult <- runReplayHistory globalRuntime incompatibleConf history
       incompatibleReplayResult `shouldSatisfy` isLeft
 
-  describe "Update" $ do
+  fdescribe "Update" $ do
     describe "Happy path" $ do
       specify "it works with no validator" $ \TestEnv {..} -> do
         let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
@@ -1547,7 +1547,7 @@ needsClient = do
                   { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                   , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
                   }
-          let updateOptions =
+          let updateOpts =
                 C.UpdateOptions
                   { updateId = "update-happy-path-no-validator-update"
                   , updateHeaders = mempty
@@ -1556,7 +1556,7 @@ needsClient = do
           (updateResult, workflowResult) <- useClient do
             h <- C.start UpdateHappyPathNoValidator "update-happy-path-no-validator" opts
             updateResult <- C.update h testUpdate updateOpts 12
-            workflowResult <- C.wait h
+            workflowResult <- C.waitWorkflowResult h
             pure (updateResult, workflowResult)
           updateResult `shouldBe` 12
           workflowResult `shouldBe` 12

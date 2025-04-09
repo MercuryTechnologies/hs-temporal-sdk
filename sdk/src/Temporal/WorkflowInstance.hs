@@ -407,19 +407,23 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
         addCommand cmd
         pure (pure False, error "This should never happen")
       Just WorkflowUpdateImplementation {..} -> do
+        updateArgs <- UnliftIO.try $ processorDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (doUpdate ^. Activation.vec'input))
         let runValidator = doUpdate ^. Activation.runValidator
             updateId = UpdateId $ doUpdate ^. Activation.id
-            -- TODO: add payload processor handling
+            -- TODO: add payload processor handling for headers?
             updateHeaders = fmap convertFromProtoPayload (doUpdate ^. Activation.headers)
-            updateArgs = fmap convertFromProtoPayload (doUpdate ^. Activation.vec'input)
-            runUpdate = updateImplementation updateId updateArgs updateHeaders
+            runUpdate = case updateArgs of
+              Left err -> Workflow $ \_env -> pure $ Throw err
+              Right args -> updateImplementation updateId args updateHeaders
         pure $
           if runValidator
             then
               ( ilift do
                   eValidatorResult <- case updateValidationImplementation of
                     Nothing -> pure $ Right ()
-                    Just f -> liftIO $ f updateId updateArgs updateHeaders
+                    Just f -> case updateArgs of
+                      Left err -> pure $ Left err
+                      Right args -> liftIO $ f updateId args updateHeaders
                   case eValidatorResult of
                     Left err -> do
                       addCommand $
@@ -469,12 +473,13 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
                    )
           pure $ Throw err
         Right payload -> do
+          payload' <- liftIO $ payloadProcessorEncode inst.payloadProcessor payload
           addCommand $
             defMessage
               & Command.updateResponse
                 .~ ( defMessage
                       & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
-                      & Command.completed .~ convertToProtoPayload payload
+                      & Command.completed .~ convertToProtoPayload payload'
                    )
           pure $ Done ()
 
@@ -531,13 +536,13 @@ applyJobs jobs fAwait = UnliftIO.try $ do
         -- the SDK core's state machine.
 
         case activations of
-          [] -> case signalWorkflows of
+          [] -> case updateWorkflows ++ signalWorkflows of
             [] -> suspend (Await wf)
-            sigs -> do
-              lift (mapM_ injectWorkflowSignalOrUpdate sigs) *> wf []
-          _ -> case signalWorkflows of
+            jobs -> do
+              lift (mapM_ injectWorkflowSignalOrUpdate jobs) *> wf []
+          _ -> case updateWorkflows ++ signalWorkflows of
             [] -> wf activations
-            sigs -> lift (mapM_ injectWorkflowSignalOrUpdate sigs) *> wf activations
+            jobs -> lift (mapM_ injectWorkflowSignalOrUpdate jobs) *> wf activations
             {- TODO: we need to run the signal workflows without messing up ContinuationEnv: runWorkflow signalWorkflows -}
     )
       <$> fAwait

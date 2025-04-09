@@ -193,6 +193,10 @@ module Temporal.Workflow (
   Condition,
   waitCondition,
 
+  -- ** Updates
+  -- $updates
+  setUpdateHandler,
+
   -- * Other utilities
   unsafeAsyncEffectSink,
 

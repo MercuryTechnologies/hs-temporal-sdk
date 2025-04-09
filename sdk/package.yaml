@@ -156,6 +156,7 @@ tests:
       - hedgehog
       - hspec
       - hspec-api
+      - hspec-discover
       - hspec-hedgehog
       - text
       - uuid
