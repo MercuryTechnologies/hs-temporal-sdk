@@ -111,6 +111,7 @@ library
     , monad-logger
     , mtl
     , network
+    , profunctors
     , proto-lens
     , proto-lens-protobuf-types
     , random
@@ -202,6 +203,7 @@ test-suite temporal-sdk-tests
     , monad-logger
     , mtl
     , network
+    , profunctors
     , proto-lens
     , proto-lens-protobuf-types
     , random

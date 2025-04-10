@@ -266,6 +266,7 @@ import Data.Int (Int64)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe
+import Data.Profunctor
 import Data.ProtoLens
 import Data.Proxy
 import qualified Data.Set as Set
@@ -1148,7 +1149,8 @@ setUpdateHandler
   :: forall update f validator e
    . ( UpdateRef update
      , f ~ (UpdateArgs update :->: Workflow (UpdateResult update))
-     , validator ~ (UpdateArgs update :->: Condition (Either e ()))
+     , Exception e
+     , validator ~ (UpdateArgs update :->: Validation (Either e ()))
      , RequireCallStack
      )
   => update e
@@ -1161,7 +1163,7 @@ setUpdateHandler (updateRef -> KnownUpdate codec n) f mValidator = ilift $ do
   let updateImplementation =
         WorkflowUpdateImplementation
           { updateImplementation = updateHandler
-          , updateValidationImplementation = Nothing
+          , updateValidationImplementation = fmap updateValidatorHandler mValidator
           }
   liftIO $ modifyIORef' inst.workflowUpdateHandlers $ \handles ->
     HashMap.insert (Just n) updateImplementation handles
@@ -1178,8 +1180,27 @@ setUpdateHandler (updateRef -> KnownUpdate codec n) f mValidator = ilift $ do
               f
               vec
       case ePayloads of
-        Left err -> Workflow $ \_env -> pure $ Throw $ toException $ ValueError err
+        Left err -> Workflow $ \_env -> do
+          $(logDebug) "Hit a decoding error"
+          pure $ Throw $ toException $ ValueError err
         Right w -> w >>= \result -> ilift (liftIO $ encode codec result)
+    updateValidatorHandler :: validator -> UpdateId -> Vector Payload -> Map Text Payload -> Validation (Either SomeException ())
+    updateValidatorHandler v updateId vec hdrs = do
+      eResult <-
+        Validation $
+          applyPayloads
+            codec
+            (Proxy @(UpdateArgs update))
+            (Proxy @(Validation (Either e ())))
+            v
+            vec
+      case eResult of
+        Left err -> pure $ Left $ toException $ ValueError err
+        Right result -> do
+          x <- result
+          case x of
+            Left err' -> pure $ Left $ toException err'
+            Right result' -> pure $ Right result'
 
 
 type ValidSignalHandler f =

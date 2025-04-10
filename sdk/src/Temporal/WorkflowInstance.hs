@@ -423,7 +423,7 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
                     Nothing -> pure $ Right ()
                     Just f -> case updateArgs of
                       Left err -> pure $ Left err
-                      Right args -> liftIO $ f updateId args updateHeaders
+                      Right args -> liftIO $ unValidation $ f updateId args updateHeaders
                   case eValidatorResult of
                     Left err -> do
                       addCommand $
@@ -460,10 +460,12 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
   runAction <- validator
   when runAction $ do
     ePayload <- Temporal.Workflow.Internal.Monad.try updateAction
+    $(logDebug) "we executed the update!"
     Workflow $ \_env -> do
       inst <- ask
       case ePayload of
         Left err -> do
+          $(logDebug) "gonna send an update rejected message!"
           addCommand $
             defMessage
               & Command.updateResponse
@@ -473,6 +475,7 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
                    )
           pure $ Throw err
         Right payload -> do
+          $(logDebug) "gonna send an update completed message!"
           payload' <- liftIO $ payloadProcessorEncode inst.payloadProcessor payload
           addCommand $
             defMessage

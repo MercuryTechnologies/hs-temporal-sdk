@@ -51,6 +51,7 @@ dependencies:
 - these
 - first-class-families
 - validation-selective
+- profunctors
 
 default-extensions:
 - BangPatterns

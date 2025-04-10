@@ -4,7 +4,6 @@ module Temporal.Workflow.Internal.Monad where
 
 import Control.Applicative
 import Control.Concurrent.Async
--- import Debug.Trace
 import Control.Monad
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
@@ -19,6 +18,7 @@ import Data.Text (Text)
 import Data.Time.Clock.System (SystemTime)
 import Data.Vector (Vector)
 import Data.Word (Word32)
+import Debug.Trace
 import GHC.Stack
 import GHC.TypeLits
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
@@ -92,10 +92,9 @@ addCommand command = do
 debugging core.
 -}
 trace_ :: String -> a -> a
-trace_ _ = id
+-- trace_ _ = id
+trace_ = Debug.Trace.trace
 
-
--- trace_ = Debug.Trace.trace
 
 data ContinuationEnv = ContinuationEnv
   { runQueueRef :: {-# UNPACK #-} !(IORef JobList)
@@ -528,6 +527,11 @@ newtype Condition a = Condition
   deriving newtype (Functor, Applicative, Monad)
 
 
+newtype Validation a = Validation
+  {unValidation :: IO a}
+  deriving newtype (Functor, Applicative, Monad, Catch.MonadThrow, Catch.MonadCatch)
+
+
 {- | 'StateVar' values are mutable variables scoped to a Workflow run.
 
 'Workflow's are deterministic, so you may not use normal IORefs, since the IORef
@@ -599,6 +603,10 @@ instance MonadReadStateVar Condition where
     readIORef var.stateVarRef
 
 
+instance MonadReadStateVar Validation where
+  readStateVar var = Validation $ readIORef var.stateVarRef
+
+
 instance MonadReadStateVar Workflow where
   readStateVar var = Workflow $ \_ -> Done <$> readIORef var.stateVarRef
 
@@ -665,7 +673,7 @@ updateCallStackW = Workflow $ \_ -> do
 
 data WorkflowUpdateImplementation = WorkflowUpdateImplementation
   { updateImplementation :: {-# UNPACK #-} !(UpdateId -> Vector Payload -> Map Text Payload -> Workflow Payload)
-  , updateValidationImplementation :: {-# UNPACK #-} !(Maybe (UpdateId -> Vector Payload -> Map Text Payload -> IO (Either SomeException ())))
+  , updateValidationImplementation :: {-# UNPACK #-} !(Maybe (UpdateId -> Vector Payload -> Map Text Payload -> Validation (Either SomeException ())))
   }
 
 

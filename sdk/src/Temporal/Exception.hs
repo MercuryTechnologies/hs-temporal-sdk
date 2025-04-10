@@ -169,6 +169,15 @@ instance Exception UpdateNotFound where
   fromException = workerExceptionFromException
 
 
+-- TODO: Convert this into something more user-friendly where we're
+-- not exposing the protobuf thing to users
+data UpdateFailure = UpdateFailure F.Failure
+  deriving stock (Show)
+
+
+instance Exception UpdateFailure
+
+
 ---------------------------------------------------------------------
 -- Workflow exceptions
 

@@ -971,8 +971,8 @@ update h@(WorkflowHandle _ _ c _ _) (KnownUpdate updateCodec updateName) opts = 
             Nothing -> throwIO $ ValueError "No return value payloads provided by update response"
             Just p -> pure $ convertFromProtoPayload p
           -- TODO: convert this failure thing to a nice Haskell version
-          Just (Update.Outcome'Failure failure) -> throwIO $ ValueError "No return value payloads provided by update response"
-          Nothing -> throwIO $ ValueError "No return value payloads provided by update response"
+          Just (Update.Outcome'Failure failure) -> throwIO $ UpdateFailure failure
+          Nothing -> error "Unsupported update result"
   payloadProcessorDecode processor eRes >>= either (throwIO . ValueError) pure >>= decode updateCodec >>= either (throwIO . ValueError) pure
 
 -- query
