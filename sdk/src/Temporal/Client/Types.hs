@@ -81,10 +81,11 @@ data StartWorkflowOptions = StartWorkflowOptions
 
 {- | Smart constructor for 'StartWorkflowOptions'.
 
-At a minimum, a 'Workflow' execution requires a 'WorkflowId' and a 'TaskQueue'.
+At a minimum, a 'Workflow' execution requires a 'TaskQueue' (taken as an argument here) and a 'WorkflowId' (provided
+as an argument to the workflow execution function).
 
-It is recommend to specify 'WorkflowId' in most cases, as it is used to uniquely identify a 'Workflow' execution,
-but if one is not specified then a random UUID will be generated.
+'WorkflowId's will be used to uniquely identify a 'Workflow' execution, and as such should incorporate a pseudo-
+random component (e.g. a UUID).
 -}
 startWorkflowOptions :: TaskQueue -> StartWorkflowOptions
 startWorkflowOptions tq =
