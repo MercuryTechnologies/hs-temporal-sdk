@@ -47,6 +47,11 @@ newtype WorkflowId = WorkflowId {rawWorkflowId :: Text}
   deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 
+newtype UpdateId = UpdateId {rawUpdateId :: Text}
+  deriving stock (Lift)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
+
+
 -- | A Namespace is a unit of isolation within the Temporal Platform
 newtype Namespace = Namespace {rawNamespace :: Text}
   deriving stock (Lift)
