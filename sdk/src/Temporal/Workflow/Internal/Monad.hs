@@ -345,10 +345,6 @@ addJob env !wf !resultIVar IVar {ivarRef = !ref} =
     full -> (full, modifyIORef' env.runQueueRef (JobCons env wf resultIVar))
 
 
-addJobPanic :: forall a. a
-addJobPanic = error "addJob: not empty"
-
-
 -- -----------------------------------------------------------------------------
 -- Cont
 
