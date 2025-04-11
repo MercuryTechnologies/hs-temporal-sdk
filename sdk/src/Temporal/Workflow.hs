@@ -206,6 +206,8 @@ module Temporal.Workflow (
   now,
   time,
   sleep,
+  sleepUntilSystemTime,
+  sleepUntilUTCTime,
   Timer,
   createTimer,
   scheduledTime,
@@ -269,7 +271,7 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.These (These (..))
 import Data.Time.Clock (UTCTime)
-import Data.Time.Clock.System (SystemTime (..), systemToUTCTime)
+import Data.Time.Clock.System (SystemTime (..), systemToUTCTime, utcToSystemTime)
 import Data.Time.Format
 import Data.UUID (UUID)
 import qualified Data.UUID as UUID
@@ -292,7 +294,7 @@ import System.Random.Stateful
 import Temporal.Activity.Definition (ActivityRef (..), KnownActivity (..))
 import Temporal.Common
 import Temporal.Common.TimeoutType
-import Temporal.Duration (Duration (..), durationFromProto, durationToProto, nanoseconds, seconds)
+import Temporal.Duration (Duration (..), diffSystemTime, durationFromProto, durationToProto, nanoseconds, seconds)
 import Temporal.Exception
 import Temporal.Payload
 import Temporal.SearchAttributes
@@ -1226,11 +1228,49 @@ createTimer ts = provideCallStack $ ilift $ do
       pure $ Just $ Timer {timerSequence = s, timerHandle = res}
 
 
+{- | Suspends the workflow execution for the specified duration.
+
+The timer is not guaranteed to fire immediately after the duration expires,
+but it is intended to fire as close to the expiration as possible.
+
+Note that the timer is started when the command is received by the Temporal Platform,
+not when the timer is created. The command is sent as soon as the workflow is suspended
+by any operation, such as 'sleep', 'awaitCondition', 'awaitActivity', 'awaitWorkflow', etc.
+
+This function suspends the workflow itself, allowing other workflows to execute. It does not
+block the workflow thread in a busy-wait.
+
+If the duration is less than or equal to zero, the function will return immediately.
+-}
 sleep :: RequireCallStack => Duration -> Workflow ()
 sleep ts = do
   updateCallStackW
   t <- createTimer ts
   mapM_ Temporal.Workflow.Unsafe.Handle.wait t
+
+
+{- | Suspends the workflow execution until the specified system time.
+
+If the target time is in the past, the function will return immediately.
+
+See 'sleep' for details about timer behavior and workflow suspension.
+-}
+sleepUntilSystemTime :: RequireCallStack => SystemTime -> Workflow ()
+sleepUntilSystemTime t = do
+  updateCallStackW
+  currentTime <- time
+  t <- createTimer (diffSystemTime currentTime t)
+  mapM_ Temporal.Workflow.Unsafe.Handle.wait t
+
+
+{- | Suspends the workflow execution until the specified UTC time.
+
+If the target time is in the past, the function will return immediately.
+
+See 'sleep' for details about timer behavior and workflow suspension.
+-}
+sleepUntilUTCTime :: RequireCallStack => UTCTime -> Workflow ()
+sleepUntilUTCTime = sleepUntilSystemTime . utcToSystemTime
 
 
 instance Wait Timer where
