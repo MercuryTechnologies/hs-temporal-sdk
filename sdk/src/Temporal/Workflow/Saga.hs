@@ -71,8 +71,8 @@ for the compensation actions you are running.
 
 For more information on the saga pattern, see the following resources:
 
-- [Saga Pattern Made Easy](https://temporal.io/blog/saga-pattern-made-easy-with-temporal/)
 - [The Saga Pattern in Distributed Systems](https://www.cs.cornell.edu/andru/cs711/2002fa/reading/sagas.pdf)
+- [Saga Pattern Made Easy](https://web.archive.org/web/20241206041739/https://temporal.io/blog/saga-pattern-made-easy)
 -}
 newtype SagaT m a = SagaT {unSagaT :: StateT [m ()] m a}
   deriving newtype (Functor, Applicative, Monad, MonadIO)
