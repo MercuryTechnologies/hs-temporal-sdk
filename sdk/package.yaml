@@ -182,5 +182,6 @@ tests:
       IntegrationSpec,
       IntegrationSpec.HangingWorkflow,
       IntegrationSpec.TimeoutsInWorkflows,
+      IntegrationSpec.Updates,
       Common,
       THCompiles

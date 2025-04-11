@@ -1536,7 +1536,7 @@ needsClient = do
       incompatibleReplayResult <- runReplayHistory globalRuntime incompatibleConf history
       incompatibleReplayResult `shouldSatisfy` isLeft
 
-  fdescribe "Update" $ do
+  describe "Update" $ do
     describe "Happy path" $ do
       specify "it works with no validator" $ \TestEnv {..} -> do
         let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
@@ -1560,7 +1560,7 @@ needsClient = do
             pure (updateResult, workflowResult)
           updateResult `shouldBe` 12
           workflowResult `shouldBe` 12
-      specify "it works with a validator" $ \TestEnv {..} -> do
+      it "works with a validator" $ \TestEnv {..} -> do
         let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
               baseConf
         withWorker conf $ do
@@ -1582,7 +1582,7 @@ needsClient = do
             pure (updateResult, workflowResult)
           updateResult `shouldBe` 12
           workflowResult `shouldBe` 12
-      specify "it propogates validation failures" $ \TestEnv {..} -> do
+      it "propagates validation failures" $ \TestEnv {..} -> do
         let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
               baseConf
         withWorker conf $ do
@@ -1604,7 +1604,7 @@ needsClient = do
             `shouldThrow` \case
               UpdateFailure _ -> True
               _ -> False
-      specify "it propogates validation exceptions if the validator throws" $ \TestEnv {..} -> do
+      it "propagates validation exceptions if the validator throws" $ \TestEnv {..} -> do
         let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
               baseConf
         withWorker conf $ do
@@ -1626,7 +1626,7 @@ needsClient = do
             `shouldThrow` \case
               UpdateFailure _ -> True
               _ -> False
-      fspecify "it propogates update exceptions if the update throws" $ \TestEnv {..} -> do
+      it "propogates update exceptions if the update throws" $ \TestEnv {..} -> do
         let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
               baseConf
         withWorker conf $ do

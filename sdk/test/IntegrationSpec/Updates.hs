@@ -103,7 +103,6 @@ updateThatThrows = provideCallStack do
   stateVar <- newStateVar (0 :: Int)
   let handleUpdate _ = do
         $(logDebug) "we're about to throw!"
-        -- throw $ ErrorCall "we're blowing up"
         error "we're blowing up"
   setUpdateHandler testUpdate handleUpdate Nothing
   sleep $ seconds 1

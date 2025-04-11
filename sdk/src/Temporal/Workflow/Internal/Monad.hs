@@ -18,7 +18,7 @@ import Data.Text (Text)
 import Data.Time.Clock.System (SystemTime)
 import Data.Vector (Vector)
 import Data.Word (Word32)
-import Debug.Trace
+-- import Debug.Trace
 import GHC.Stack
 import GHC.TypeLits
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
@@ -92,9 +92,10 @@ addCommand command = do
 debugging core.
 -}
 trace_ :: String -> a -> a
--- trace_ _ = id
-trace_ = Debug.Trace.trace
+trace_ _ = id
 
+
+-- trace_ = Debug.Trace.trace
 
 data ContinuationEnv = ContinuationEnv
   { runQueueRef :: {-# UNPACK #-} !(IORef JobList)
@@ -261,13 +262,15 @@ raise env e = raiseImpl env (toException e)
 -- | Catch an exception in the Workflow monad
 catch :: Exception e => Workflow a -> (e -> Workflow a) -> Workflow a
 catch (Workflow m) h = Workflow $ \env -> do
-  r <- m env
+  r <- UnliftIO.try $ m env
   case r of
-    Done a -> pure $ Done a
-    Throw e
-      | Just e' <- fromException e -> unWorkflow (h e') env
-      | otherwise -> liftIO $ raise env e
-    Blocked ivar k -> return $ Blocked ivar $ Cont $ Temporal.Workflow.Internal.Monad.catch (toWf k) h
+    Left e -> unWorkflow (h e) env
+    Right r' -> case r' of
+      Done a -> pure $ Done a
+      Throw e
+        | Just e' <- fromException e -> unWorkflow (h e') env
+        | otherwise -> liftIO $ raise env e
+      Blocked ivar k -> return $ Blocked ivar $ Cont $ Temporal.Workflow.Internal.Monad.catch (toWf k) h
 
 
 -- | Catch exceptions that satisfy a predicate
