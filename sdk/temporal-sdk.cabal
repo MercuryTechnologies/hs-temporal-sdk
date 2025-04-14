@@ -197,7 +197,6 @@ test-suite temporal-sdk-tests
     , hs-opentelemetry-sdk
     , hspec
     , hspec-api
-    , hspec-discover
     , hspec-hedgehog
     , lens-family
     , monad-logger
