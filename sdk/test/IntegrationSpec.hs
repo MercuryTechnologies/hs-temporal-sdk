@@ -1536,118 +1536,161 @@ needsClient = do
       incompatibleReplayResult <- runReplayHistory globalRuntime incompatibleConf history
       incompatibleReplayResult `shouldSatisfy` isLeft
 
-  describe "Update" $ do
-    describe "Happy path" $ do
-      specify "it works with no validator" $ \TestEnv {..} -> do
-        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
-              baseConf
-        withWorker conf $ do
-          let opts =
-                (C.startWorkflowOptions taskQueue)
-                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
-                  , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
-                  }
-          let updateOpts =
-                C.UpdateOptions
-                  { updateId = "update-happy-path-no-validator-update"
-                  , updateHeaders = mempty
-                  , waitPolicy = C.UpdateLifecycleStageCompleted
-                  }
-          (updateResult, workflowResult) <- useClient do
-            h <- C.start UpdateHappyPathNoValidator "update-happy-path-no-validator" opts
-            updateResult <- C.update h testUpdate updateOpts 12
-            workflowResult <- C.waitWorkflowResult h
-            pure (updateResult, workflowResult)
-          updateResult `shouldBe` 12
-          workflowResult `shouldBe` 12
-      it "works with a validator" $ \TestEnv {..} -> do
-        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
-              baseConf
-        withWorker conf $ do
-          let opts =
-                (C.startWorkflowOptions taskQueue)
-                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
-                  , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
-                  }
-          let updateOpts =
-                C.UpdateOptions
-                  { updateId = "update-happy-path-with-validator-update"
-                  , updateHeaders = mempty
-                  , waitPolicy = C.UpdateLifecycleStageCompleted
-                  }
-          (updateResult, workflowResult) <- useClient do
+  fdescribe "Update" $ do
+    it "works with no validator" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                }
+        let updateOpts =
+              C.UpdateOptions
+                { updateId = "update-happy-path-no-validator-update"
+                , updateHeaders = mempty
+                , waitPolicy = C.UpdateLifecycleStageCompleted
+                }
+        (updateResult, workflowResult) <- useClient do
+          h <- C.start UpdateHappyPathNoValidator "update-happy-path-no-validator" opts
+          updateResult <- C.update h testUpdate updateOpts 12
+          workflowResult <- C.waitWorkflowResult h
+          pure (updateResult, workflowResult)
+        updateResult `shouldBe` 12
+        workflowResult `shouldBe` 12
+    it "works with a validator" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                }
+        let updateOpts =
+              C.UpdateOptions
+                { updateId = "update-happy-path-with-validator-update"
+                , updateHeaders = mempty
+                , waitPolicy = C.UpdateLifecycleStageCompleted
+                }
+        (updateResult, workflowResult) <- useClient do
+          h <- C.start UpdateHappyPathWithValidator "update-happy-path-with-validator" opts
+          updateResult <- C.update h testUpdate updateOpts 12
+          workflowResult <- C.waitWorkflowResult h
+          pure (updateResult, workflowResult)
+        updateResult `shouldBe` 12
+        workflowResult `shouldBe` 12
+    it "propagates validation failures" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                }
+        let updateOpts =
+              C.UpdateOptions
+                { updateId = "update-happy-path-with-validator-update"
+                , updateHeaders = mempty
+                , waitPolicy = C.UpdateLifecycleStageCompleted
+                }
+        ( useClient do
             h <- C.start UpdateHappyPathWithValidator "update-happy-path-with-validator" opts
-            updateResult <- C.update h testUpdate updateOpts 12
-            workflowResult <- C.waitWorkflowResult h
-            pure (updateResult, workflowResult)
-          updateResult `shouldBe` 12
-          workflowResult `shouldBe` 12
-      it "propagates validation failures" $ \TestEnv {..} -> do
-        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
-              baseConf
-        withWorker conf $ do
-          let opts =
-                (C.startWorkflowOptions taskQueue)
-                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
-                  , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
-                  }
-          let updateOpts =
-                C.UpdateOptions
-                  { updateId = "update-happy-path-with-validator-update"
-                  , updateHeaders = mempty
-                  , waitPolicy = C.UpdateLifecycleStageCompleted
-                  }
-          ( useClient do
-              h <- C.start UpdateHappyPathWithValidator "update-happy-path-with-validator" opts
-              C.update h testUpdate updateOpts (-12)
-            )
-            `shouldThrow` \case
-              UpdateFailure _ -> True
-              _ -> False
-      it "propagates validation exceptions if the validator throws" $ \TestEnv {..} -> do
-        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
-              baseConf
-        withWorker conf $ do
-          let opts =
-                (C.startWorkflowOptions taskQueue)
-                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
-                  , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
-                  }
-          let updateOpts =
-                C.UpdateOptions
-                  { updateId = "update-happy-path-with-validator-exception-update"
-                  , updateHeaders = mempty
-                  , waitPolicy = C.UpdateLifecycleStageCompleted
-                  }
-          ( useClient do
-              h <- C.start UpdateHappyPathWithValidator "update-happy-path-with-validator-exception" opts
-              C.update h testUpdate updateOpts 5
-            )
-            `shouldThrow` \case
-              UpdateFailure _ -> True
-              _ -> False
-      it "propogates update exceptions if the update throws" $ \TestEnv {..} -> do
-        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
-              baseConf
-        withWorker conf $ do
-          let opts =
-                (C.startWorkflowOptions taskQueue)
-                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
-                  , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
-                  }
-          let updateOpts =
-                C.UpdateOptions
-                  { updateId = "update-happy-path-with-update-exception-update"
-                  , updateHeaders = mempty
-                  , waitPolicy = C.UpdateLifecycleStageCompleted
-                  }
-          ( useClient do
-              h <- C.start UpdateThatThrows "update-happy-path-with-update-exception" opts
-              C.update h testUpdate updateOpts 5
-            )
-            `shouldThrow` \case
-              UpdateFailure _ -> True
-              _ -> False
+            C.update h testUpdate updateOpts (-12)
+          )
+          `shouldThrow` \case
+            UpdateFailure _ -> True
+            _ -> False
+    it "propagates validation exceptions if the validator throws" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                }
+        let updateOpts =
+              C.UpdateOptions
+                { updateId = "update-happy-path-with-validator-exception-update"
+                , updateHeaders = mempty
+                , waitPolicy = C.UpdateLifecycleStageCompleted
+                }
+        ( useClient do
+            h <- C.start UpdateHappyPathWithValidator "update-happy-path-with-validator-exception" opts
+            C.update h testUpdate updateOpts 5
+          )
+          `shouldThrow` \case
+            UpdateFailure _ -> True
+            _ -> False
+    it "propogates update exceptions if the update throws" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                }
+        let updateOpts =
+              C.UpdateOptions
+                { updateId = "update-happy-path-with-update-exception-update"
+                , updateHeaders = mempty
+                , waitPolicy = C.UpdateLifecycleStageCompleted
+                }
+        ( useClient do
+            h <- C.start UpdateThatThrows "update-happy-path-with-update-exception" opts
+            C.update h testUpdate updateOpts 5
+          )
+          `shouldThrow` \case
+            UpdateFailure _ -> True
+            _ -> False
+    it "propogates update exceptions if the validator throws" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                }
+        let updateOpts =
+              C.UpdateOptions
+                { updateId = "update-validator-throws"
+                , updateHeaders = mempty
+                , waitPolicy = C.UpdateLifecycleStageCompleted
+                }
+        ( useClient do
+            h <- C.start UpdateValidatorThatThrows "update-validator-throws" opts
+            C.update h testUpdate updateOpts 5
+          )
+          `shouldThrow` \case
+            UpdateFailure _ -> True
+            _ -> False
+    it "works with an update that causes the workflow to suspend" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                }
+        let updateOpts =
+              C.UpdateOptions
+                { updateId = "sleepy-update-happy-path-no-validator-update"
+                , updateHeaders = mempty
+                , waitPolicy = C.UpdateLifecycleStageCompleted
+                }
+        (updateResult, workflowResult) <- useClient do
+          h <- C.start SleepyUpdateHappyPathNoValidator "sleepy-update-happy-path-no-validator" opts
+          updateResult <- C.update h testUpdate updateOpts 12
+          workflowResult <- C.waitWorkflowResult h
+          pure (updateResult, workflowResult)
+        updateResult `shouldBe` 12
+        workflowResult `shouldBe` 12
 
 -- describe "WorkflowClient" $ do
 --   specify "WorkflowExecutionAlreadyStartedError" pending
