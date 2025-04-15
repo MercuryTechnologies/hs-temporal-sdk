@@ -17,6 +17,7 @@ the interceptor to your Temporal client and worker configuration.
 -}
 module Temporal.Contrib.OpenTelemetry where
 
+import Control.Monad.Catch
 import Control.Monad.IO.Class
 import qualified Data.HashMap.Strict as HashMap
 import Data.Int
@@ -43,6 +44,7 @@ import Temporal.Interceptor
 import Temporal.Payload (Payload (..))
 import Temporal.Workflow ()
 import Temporal.Workflow.Types
+import Temporal.Workflow.Unsafe
 import Prelude hiding (span)
 
 
@@ -237,13 +239,18 @@ makeOpenTelemetryInterceptor = do
                         --   , ("temporal.workflow_type", toAttribute $ input.handleQueryInputType)
                         --   ]
                         }
-                ctxt <- extract headersPropagator input.handleUpdateInputHeaders Ctxt.empty
-                _ <- attachContext ctxt
+                ctxt <- performUnsafeNonDeterministicIO $ extract headersPropagator input.handleUpdateInputHeaders Ctxt.empty
+                _ <- performUnsafeNonDeterministicIO $ attachContext ctxt
                 case Ctxt.lookupSpan ctxt of
                   Nothing -> next input
-                  Just _ ->
-                    inSpan'' tracer ("HandleUpdate:" <> input.handleUpdateInputType) spanArgs $ \_ -> do
-                      next input
+                  Just _ -> do
+                    span <- performUnsafeNonDeterministicIO $ createSpan tracer ctxt ("HandleUpdate:" <> input.handleUpdateInputType) spanArgs
+                    result <- try $ next input
+                    -- TODO: Record the exception
+                    performUnsafeNonDeterministicIO $ endSpan span Nothing
+                    case result of
+                      Left err -> throwM (err :: SomeException)
+                      Right res -> pure res
             , validateUpdate = \input next -> do
                 let spanArgs =
                       defaultSpanArguments
