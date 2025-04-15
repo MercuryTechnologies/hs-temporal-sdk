@@ -1558,12 +1558,12 @@ needsClient = do
                 }
         let updateOpts =
               C.UpdateOptions
-                { updateId = "update-happy-path-no-validator-update"
+                { updateId = "update-with-no-validator"
                 , updateHeaders = mempty
                 , waitPolicy = C.UpdateLifecycleStageCompleted
                 }
         (updateResult, workflowResult) <- useClient do
-          h <- C.start UpdateHappyPathNoValidator "update-happy-path-no-validator" opts
+          h <- C.start UpdateWithoutValidator "update-with-no-validator" opts
           updateResult <- C.update h testUpdate updateOpts 12
           workflowResult <- C.waitWorkflowResult h
           pure (updateResult, workflowResult)
@@ -1580,12 +1580,12 @@ needsClient = do
                 }
         let updateOpts =
               C.UpdateOptions
-                { updateId = "update-happy-path-with-validator-update"
+                { updateId = "update-with-a-validator"
                 , updateHeaders = mempty
                 , waitPolicy = C.UpdateLifecycleStageCompleted
                 }
         (updateResult, workflowResult) <- useClient do
-          h <- C.start UpdateHappyPathWithValidator "update-happy-path-with-validator" opts
+          h <- C.start UpdateWithValidator "update-with-a-validator" opts
           updateResult <- C.update h testUpdate updateOpts 12
           workflowResult <- C.waitWorkflowResult h
           pure (updateResult, workflowResult)
@@ -1602,12 +1602,12 @@ needsClient = do
                 }
         let updateOpts =
               C.UpdateOptions
-                { updateId = "update-happy-path-with-validator-update"
+                { updateId = "update-with-a-validator-that-rejects"
                 , updateHeaders = mempty
                 , waitPolicy = C.UpdateLifecycleStageCompleted
                 }
         ( useClient do
-            h <- C.start UpdateHappyPathWithValidator "update-happy-path-with-validator" opts
+            h <- C.start UpdateWithValidator "update-with-a-validator-that-rejects" opts
             C.update h testUpdate updateOpts (-12)
           )
           `shouldThrow` \case
@@ -1624,12 +1624,12 @@ needsClient = do
                 }
         let updateOpts =
               C.UpdateOptions
-                { updateId = "update-happy-path-with-validator-exception-update"
+                { updateId = "update-with-a-validator-that-throws"
                 , updateHeaders = mempty
                 , waitPolicy = C.UpdateLifecycleStageCompleted
                 }
         ( useClient do
-            h <- C.start UpdateHappyPathWithValidator "update-happy-path-with-validator-exception" opts
+            h <- C.start UpdateWithValidator "update-with-a-validator-that-throws" opts
             C.update h testUpdate updateOpts 5
           )
           `shouldThrow` \case
@@ -1646,34 +1646,12 @@ needsClient = do
                 }
         let updateOpts =
               C.UpdateOptions
-                { updateId = "update-happy-path-with-update-exception-update"
+                { updateId = "update-that-throws"
                 , updateHeaders = mempty
                 , waitPolicy = C.UpdateLifecycleStageCompleted
                 }
         ( useClient do
-            h <- C.start UpdateThatThrows "update-happy-path-with-update-exception" opts
-            C.update h testUpdate updateOpts 5
-          )
-          `shouldThrow` \case
-            UpdateFailure _ -> True
-            _ -> False
-    it "propogates update exceptions if the validator throws" $ \TestEnv {..} -> do
-      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
-            baseConf
-      withWorker conf $ do
-        let opts =
-              (C.startWorkflowOptions taskQueue)
-                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
-                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
-                }
-        let updateOpts =
-              C.UpdateOptions
-                { updateId = "update-validator-throws"
-                , updateHeaders = mempty
-                , waitPolicy = C.UpdateLifecycleStageCompleted
-                }
-        ( useClient do
-            h <- C.start UpdateValidatorThatThrows "update-validator-throws" opts
+            h <- C.start UpdateThatThrows "update-that-throws" opts
             C.update h testUpdate updateOpts 5
           )
           `shouldThrow` \case
@@ -1690,12 +1668,12 @@ needsClient = do
                 }
         let updateOpts =
               C.UpdateOptions
-                { updateId = "sleepy-update-happy-path-no-validator-update"
+                { updateId = "update-that-suspends"
                 , updateHeaders = mempty
                 , waitPolicy = C.UpdateLifecycleStageCompleted
                 }
         (updateResult, workflowResult) <- useClient do
-          h <- C.start SleepyUpdateHappyPathNoValidator "sleepy-update-happy-path-no-validator" opts
+          h <- C.start UpdateWithValidatorThatSleeps "update-that-suspends" opts
           updateResult <- C.update h testUpdate updateOpts 12
           workflowResult <- C.waitWorkflowResult h
           pure (updateResult, workflowResult)
@@ -1744,7 +1722,7 @@ updatesWithInterceptors = do
                   , waitPolicy = C.UpdateLifecycleStageCompleted
                   }
           (updateResult, workflowResult) <- useClient do
-            h <- C.start UpdateHappyPathWithValidator "update-interceptors-are-called" opts
+            h <- C.start UpdateWithValidator "update-interceptors-are-called" opts
             updateResult <- C.update h testUpdate updateOpts 12
             workflowResult <- C.waitWorkflowResult h
             pure (updateResult, workflowResult)
@@ -1786,7 +1764,7 @@ updatesWithInterceptors = do
                   , waitPolicy = C.UpdateLifecycleStageCompleted
                   }
           (updateResult, workflowResult) <- useClient do
-            h <- C.start UpdateHappyPathWithValidator "update-interceptors-get-expected-args" opts
+            h <- C.start UpdateWithValidator "update-interceptors-get-expected-args" opts
             updateResult <- C.update h testUpdate updateOpts 12
             workflowResult <- C.waitWorkflowResult h
             pure (updateResult, workflowResult)
@@ -1841,12 +1819,12 @@ updatesWithInterceptors = do
                   }
           let updateOpts =
                 C.UpdateOptions
-                  { updateId = "update-interceptors-are-called"
+                  { updateId = "update-interceptors-are-called-in-expected-order"
                   , updateHeaders = mempty
                   , waitPolicy = C.UpdateLifecycleStageCompleted
                   }
           (updateResult, workflowResult) <- useClient do
-            h <- C.start UpdateHappyPathWithValidator "update-interceptors-are-called" opts
+            h <- C.start UpdateWithValidator "update-interceptors-are-called-in-expected-order" opts
             updateResult <- C.update h testUpdate updateOpts 12
             workflowResult <- C.waitWorkflowResult h
             pure (updateResult, workflowResult)
@@ -1888,7 +1866,7 @@ updatesWithInterceptors = do
                   , waitPolicy = C.UpdateLifecycleStageCompleted
                   }
           (updateResult, workflowResult) <- useClient do
-            h <- C.start UpdateHappyPathWithValidator "update-interceptors-can-modify-args" opts
+            h <- C.start UpdateWithValidator "update-interceptors-can-modify-args" opts
             updateResult <- C.update h testUpdate updateOpts 12
             workflowResult <- C.waitWorkflowResult h
             pure (updateResult, workflowResult)

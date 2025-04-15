@@ -47,14 +47,13 @@ testUpdate =
     }
 
 
-updateHappyPathNoValidator :: Workflow Int
-updateHappyPathNoValidator = provideCallStack do
+updateWithoutValidator :: Workflow Int
+updateWithoutValidator = provideCallStack do
   stateVar <- newStateVar (0 :: Int)
   let handleUpdate arg = do
         modifyStateVar stateVar (+ arg)
-        stateAfter <- readStateVar stateVar
-        $(logWarn) ("Called handleUpdate, new state is " <> T.pack (show stateAfter))
-        pure stateAfter
+        readStateVar stateVar
+        stateAfter
   setUpdateHandler testUpdate handleUpdate Nothing
   waitCondition do
     x <- readStateVar stateVar
@@ -62,17 +61,15 @@ updateHappyPathNoValidator = provideCallStack do
   readStateVar stateVar
 
 
-registerWorkflow 'updateHappyPathNoValidator
+registerWorkflow 'updateWithoutValidator
 
 
-updateHappyPathWithValidator :: Workflow Int
-updateHappyPathWithValidator = provideCallStack do
+updateWithValidator :: Workflow Int
+updateWithValidator = provideCallStack do
   stateVar <- newStateVar (0 :: Int)
   let handleUpdate arg = do
         modifyStateVar stateVar (+ arg)
-        stateAfter <- readStateVar stateVar
-        $(logWarn) ("Called handleUpdate, new state is " <> T.pack (show stateAfter))
-        pure stateAfter
+        readStateVar stateVar
   let validateUpdate arg = do
         val <- readStateVar stateVar
         when
@@ -88,7 +85,7 @@ updateHappyPathWithValidator = provideCallStack do
   readStateVar stateVar
 
 
-registerWorkflow 'updateHappyPathWithValidator
+registerWorkflow 'updateWithValidator
 
 
 updateThatThrows :: Workflow Int
@@ -107,8 +104,8 @@ updateThatThrows = provideCallStack do
 registerWorkflow 'updateThatThrows
 
 
-updateValidatorThatThrows :: Workflow Int
-updateValidatorThatThrows = provideCallStack do
+updateWithValidatorThatThrows :: Workflow Int
+updateWithValidatorThatThrows = provideCallStack do
   stateVar <- newStateVar (0 :: Int)
   let handleUpdate arg = do
         modifyStateVar stateVar (+ arg)
@@ -123,11 +120,11 @@ updateValidatorThatThrows = provideCallStack do
   readStateVar stateVar
 
 
-registerWorkflow 'updateValidatorThatThrows
+registerWorkflow 'updateWithValidatorThatThrows
 
 
-sleepyUpdateHappyPathNoValidator :: Workflow Int
-sleepyUpdateHappyPathNoValidator = provideCallStack do
+updateWithValidatorThatSleeps :: Workflow Int
+updateWithValidatorThatSleeps = provideCallStack do
   stateVar <- newStateVar (0 :: Int)
   let handleUpdate arg = do
         sleep $ seconds 1
@@ -142,4 +139,4 @@ sleepyUpdateHappyPathNoValidator = provideCallStack do
   readStateVar stateVar
 
 
-registerWorkflow 'sleepyUpdateHappyPathNoValidator
+registerWorkflow 'updateWithValidatorThatSleeps
