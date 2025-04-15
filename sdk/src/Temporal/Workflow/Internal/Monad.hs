@@ -830,7 +830,7 @@ data WorkflowExitVariant a
 
 
 data HandleQueryInput = HandleQueryInput
-  { handleQueryId :: Text
+  { handleQueryId :: Text -- TODO: QueryID newtype?
   , handleQueryInputType :: Text
   , handleQueryInputArgs :: Vector Payload
   , handleQueryInputHeaders :: Map Text Payload
@@ -838,7 +838,7 @@ data HandleQueryInput = HandleQueryInput
 
 
 data HandleUpdateInput = HandleUpdateInput
-  { handleUpdateId :: Text
+  { handleUpdateId :: UpdateId
   , handleUpdateInputType :: Text
   , handleUpdateInputArgs :: Vector Payload
   , handleUpdateInputHeaders :: Map Text Payload
@@ -856,8 +856,8 @@ data WorkflowInboundInterceptor = WorkflowInboundInterceptor
       -> IO (Either SomeException Payload)
   , handleUpdate
       :: HandleUpdateInput
-      -> (HandleUpdateInput -> IO (Either SomeException Payload))
-      -> IO (Either SomeException Payload)
+      -> (HandleUpdateInput -> Workflow Payload)
+      -> Workflow Payload
   , validateUpdate
       :: HandleUpdateInput
       -> (HandleUpdateInput -> IO Bool)

@@ -414,7 +414,16 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
             updateHeaders = fmap convertFromProtoPayload (doUpdate ^. Activation.headers)
             runUpdate = case updateArgs of
               Left err -> Workflow $ \_env -> pure $ Throw err
-              Right args -> updateImplementation updateId args updateHeaders
+              Right args -> do
+                let baseInput =
+                      HandleUpdateInput
+                        { handleUpdateId = updateId
+                        , handleUpdateInputType = doUpdate ^. Activation.name
+                        , handleUpdateInputArgs = args
+                        , handleUpdateInputHeaders = updateHeaders
+                        }
+                inst.inboundInterceptor.handleUpdate baseInput $ \input ->
+                  updateImplementation input.handleUpdateId input.handleUpdateInputArgs input.handleUpdateInputHeaders
         pure $
           if runValidator
             then

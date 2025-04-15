@@ -31,6 +31,7 @@ import qualified Data.ByteString as BS
 import Data.Either (isLeft, isRight)
 import Data.Foldable (traverse_)
 import Data.Functor
+import Data.IORef
 import Data.Int
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
@@ -222,6 +223,50 @@ instance ToJSON TemporalWorkflowJobPayload
 instance FromJSON TemporalWorkflowJobPayload
 
 
+withServer :: (PortNumber -> IO a) -> IO a
+withServer f = do
+  lookupEnv "HS_TEMPORAL_SDK_LOCAL_TEST_SERVER" >>= \case
+    Just _ -> f 7233
+    _ -> do
+      fp <- getFreePort
+      mTemporalPath <- findExecutable "temporal"
+      conf <- case mTemporalPath of
+        Nothing -> error "Could not find the 'temporal' executable in PATH"
+        Just temporalPath -> do
+          let serverConfig =
+                defaultTemporalDevServerConfig
+                  { port = Just $ fromIntegral fp
+                  , exe = ExistingPath temporalPath
+                  }
+          pure serverConfig
+      withDevServer globalRuntime conf $ \_ -> do
+        f fp
+
+
+setup :: Interceptors () -> PortNumber -> (TestEnv -> IO ()) -> IO ()
+setup additionalInterceptors fp go = do
+  otelInterceptors <- makeOpenTelemetryInterceptor
+  let interceptors = otelInterceptors <> additionalInterceptors
+  (client, coreClient) <- makeClient fp interceptors
+
+  SearchAttributes {customAttributes} <- either throwIO pure =<< listSearchAttributes coreClient (W.Namespace "default")
+  let allTestAttributes =
+        Map.fromList
+          [ ("attr1", Temporal.Operator.Bool)
+          , ("attr2", Temporal.Operator.Int)
+          ]
+  _ <- addSearchAttributes coreClient (W.Namespace "default") (allTestAttributes `Map.difference` customAttributes)
+
+  (conf, taskQueue) <- mkBaseConf interceptors
+  go
+    TestEnv
+      { useClient = flip runReaderT client
+      , withWorker = mkWithWorker fp
+      , baseConf = conf
+      , taskQueue
+      }
+
+
 spec :: Spec
 spec = do
   describe "Exception converters" $ do
@@ -316,48 +361,9 @@ spec = do
               appFailure.stack
               (Just $ seconds 2)
 
-  aroundAll setup needsClient
-  where
-    setup :: (TestEnv -> IO ()) -> IO ()
-    setup go = do
-      let withServer f = do
-            lookupEnv "HS_TEMPORAL_SDK_LOCAL_TEST_SERVER" >>= \case
-              Just _ -> f 7233
-              _ -> do
-                fp <- getFreePort
-                mTemporalPath <- findExecutable "temporal"
-                conf <- case mTemporalPath of
-                  Nothing -> error "Could not find the 'temporal' executable in PATH"
-                  Just temporalPath -> do
-                    let serverConfig =
-                          defaultTemporalDevServerConfig
-                            { port = Just $ fromIntegral fp
-                            , exe = ExistingPath temporalPath
-                            }
-                    pure serverConfig
-                withDevServer globalRuntime conf $ \_ -> do
-                  f fp
-
-      withServer $ \fp -> do
-        interceptors <- makeOpenTelemetryInterceptor
-        (client, coreClient) <- makeClient fp interceptors
-
-        SearchAttributes {customAttributes} <- either throwIO pure =<< listSearchAttributes coreClient (W.Namespace "default")
-        let allTestAttributes =
-              Map.fromList
-                [ ("attr1", Temporal.Operator.Bool)
-                , ("attr2", Temporal.Operator.Int)
-                ]
-        _ <- addSearchAttributes coreClient (W.Namespace "default") (allTestAttributes `Map.difference` customAttributes)
-
-        (conf, taskQueue) <- mkBaseConf interceptors
-        go
-          TestEnv
-            { useClient = flip runReaderT client
-            , withWorker = mkWithWorker fp
-            , baseConf = conf
-            , taskQueue
-            }
+  aroundAll withServer $ do
+    aroundAllWith (flip $ setup mempty) needsClient
+    updatesWithInterceptors
 
 
 type MyWorkflow a = W.RequireCallStack => W.Workflow a
@@ -1536,7 +1542,7 @@ needsClient = do
       incompatibleReplayResult <- runReplayHistory globalRuntime incompatibleConf history
       incompatibleReplayResult `shouldSatisfy` isLeft
 
-  fdescribe "Update" $ do
+  describe "Update" $ do
     it "works with no validator" $ \TestEnv {..} -> do
       let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
             baseConf
@@ -1691,6 +1697,62 @@ needsClient = do
           pure (updateResult, workflowResult)
         updateResult `shouldBe` 12
         workflowResult `shouldBe` 12
+
+
+updatesWithInterceptors :: SpecWith PortNumber
+updatesWithInterceptors = do
+  handleUpdateWasCalled <- runIO $ newIORef False
+  validateUpdateWasCalled <- runIO $ newIORef False
+  let
+    interceptors :: Interceptors ()
+    interceptors =
+      mempty
+        { workflowInboundInterceptors =
+            mempty
+              { handleUpdate = \input next -> do
+                  writeIORef handleUpdateWasCalled True
+                  next input
+              , validateUpdate = \input next -> do
+                  writeIORef validateUpdateWasCalled True
+                  next input
+              }
+        , clientInterceptors = mempty
+        }
+  withInterceptors interceptors do
+    -- invoked at all
+    -- args are as expected
+    -- ordering: invoked from leftmost to rightmost
+    -- can alter/replace arguments (what ts-sdk tests)
+    fdescribe "Update interceptors" $ do
+      it "should support interceptors for handleUpdate" $ \TestEnv {..} -> do
+        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+              baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                  }
+          let updateOpts =
+                C.UpdateOptions
+                  { updateId = "update-interceptors-are-called"
+                  , updateHeaders = mempty
+                  , waitPolicy = C.UpdateLifecycleStageCompleted
+                  }
+          (updateResult, workflowResult) <- useClient do
+            h <- C.start UpdateHappyPathWithValidator "update-interceptors-are-called" opts
+            updateResult <- C.update h testUpdate updateOpts 12
+            workflowResult <- C.waitWorkflowResult h
+            pure (updateResult, workflowResult)
+          updateResult `shouldBe` 12
+          workflowResult `shouldBe` 12
+
+          readIORef handleUpdateWasCalled `shouldReturn` True
+          readIORef validateUpdateWasCalled `shouldReturn` True
+
+
+withInterceptors :: Interceptors () -> SpecWith TestEnv -> SpecWith PortNumber
+withInterceptors interceptors = aroundAllWith $ flip $ setup interceptors
 
 -- describe "WorkflowClient" $ do
 --   specify "WorkflowExecutionAlreadyStartedError" pending
