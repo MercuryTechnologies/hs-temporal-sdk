@@ -39,6 +39,8 @@ module Temporal.Duration (
   durationFromProto,
   durationToProto,
   durationToMilliseconds,
+  addDurationToSystemTime,
+  diffSystemTime,
 ) where
 
 import Data.Aeson
@@ -49,6 +51,7 @@ import Data.Int (Int32, Int64)
 import Data.ProtoLens (defMessage)
 import qualified Data.Text as T
 import Data.Time.Clock
+import Data.Time.Clock.System (SystemTime (..))
 import Language.Haskell.TH.Syntax (Lift)
 import Lens.Family2 ((&), (.~), (^.))
 import qualified Proto.Google.Protobuf.Duration as Duration
@@ -217,3 +220,36 @@ human-readable values emitted by logs, metrics, traces, etc.
 -}
 durationToMilliseconds :: Duration -> Double
 durationToMilliseconds (Duration secs ns) = fromIntegral secs * 1_000 + fromIntegral ns / 1_000_000
+
+
+{- | Add a 'Duration' to a 'SystemTime'. This function handles nanosecond overflow
+and maintains the precision of both input types. The result can be negative
+through the seconds field, while nanoseconds remain non-negative.
+-}
+addDurationToSystemTime :: Duration -> SystemTime -> SystemTime
+addDurationToSystemTime (Duration durSecs durNanos) (MkSystemTime sysSecs sysNanos) =
+  let
+    -- Convert Word32 to Int64 for safe addition
+    totalNanos = fromIntegral sysNanos + fromIntegral durNanos
+    -- Normalize the result to handle nanosecond overflow/underflow
+    (# overflowSecs, finalNanos #) = normalize 0 totalNanos
+    -- Add all seconds together
+    finalSecs = sysSecs + durSecs + overflowSecs
+  in
+    MkSystemTime finalSecs (fromIntegral finalNanos)
+
+
+{- | Calculate the duration between two 'SystemTime' values. Returns a 'Duration'
+where a negative value indicates that the second time is before the first time.
+-}
+diffSystemTime :: SystemTime -> SystemTime -> Duration
+diffSystemTime (MkSystemTime s1 ns1) (MkSystemTime s2 ns2) =
+  let
+    -- Calculate total nanoseconds difference
+    totalNanos = fromIntegral ns2 - fromIntegral ns1
+    -- Calculate seconds difference
+    secsDiff = s2 - s1
+    -- Normalize the result to handle nanosecond overflow/underflow
+    (# finalSecs, finalNanos #) = normalize secsDiff totalNanos
+  in
+    Duration finalSecs finalNanos

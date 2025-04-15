@@ -35,6 +35,7 @@ library
       Temporal.Worker
       Temporal.Workflow
       Temporal.Workflow.Saga
+      Temporal.Workflow.Unsafe
       Temporal.Workflow.Update
   other-modules:
       Temporal.Activity.Definition
