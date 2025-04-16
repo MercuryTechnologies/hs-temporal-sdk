@@ -53,7 +53,6 @@ updateWithoutValidator = provideCallStack do
   let handleUpdate arg = do
         modifyStateVar stateVar (+ arg)
         readStateVar stateVar
-        stateAfter
   setUpdateHandler testUpdate handleUpdate Nothing
   waitCondition do
     x <- readStateVar stateVar
