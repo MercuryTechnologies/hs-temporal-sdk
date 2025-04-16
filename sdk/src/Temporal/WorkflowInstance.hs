@@ -42,6 +42,7 @@ import Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow (
  )
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation (
   CancelWorkflow,
+  DoUpdate,
   FireTimer,
   NotifyHasPatch,
   QueryWorkflow,
@@ -63,6 +64,7 @@ import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands as Co
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Completion
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
+import RequireCallStack (provideCallStack)
 import System.Random (mkStdGen)
 import Temporal.Common
 import qualified Temporal.Core.Worker as Core
@@ -72,7 +74,7 @@ import Temporal.Exception
 import qualified Temporal.Exception as Err
 import Temporal.Payload
 import Temporal.SearchAttributes.Internal
-import Temporal.Workflow.Eval (ActivationResult (..), SuspendableWorkflowExecution, injectWorkflowSignal, runWorkflow)
+import Temporal.Workflow.Eval (ActivationResult (..), SuspendableWorkflowExecution, injectWorkflowSignalOrUpdate, runWorkflow)
 import Temporal.Workflow.Internal.Instance
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
@@ -116,6 +118,7 @@ create workflowCompleteActivation workflowFn workflowDeadlockTimeout errorConver
   workflowSignalHandlers <- newIORef mempty
   workflowCallStack <- newIORef emptyCallStack
   workflowQueryHandlers <- newIORef mempty
+  workflowUpdateHandlers <- newIORef mempty
   workflowInstanceInfo <- newIORef info
   workflowInstanceContinuationEnv <- ContinuationEnv <$> newIORef JobNil
   workflowCancellationVar <- newIVar
@@ -380,6 +383,139 @@ applySignalWorkflow signalWorkflow = join $ do
             handler args
 
 
+applyDoUpdateWorkflow :: DoUpdate -> Workflow ()
+applyDoUpdateWorkflow doUpdate = provideCallStack do
+  (validator, updateAction) <- ilift do
+    inst <- ask
+    handlers <- readIORef inst.workflowUpdateHandlers
+    let handlerAndValidatorOrDefault =
+          HashMap.lookup (Just (doUpdate ^. Activation.name)) handlers
+            <|> HashMap.lookup Nothing handlers
+    case handlerAndValidatorOrDefault of
+      Nothing -> do
+        let errMessage = Text.pack ("No update handler found for update: " <> show (doUpdate ^. Activation.name))
+        let err = mkApplicationFailure (toException $ UpdateNotFound errMessage) inst.errorConverters
+        $(logWarn) errMessage
+        let cmd =
+              defMessage
+                & Command.updateResponse
+                  .~ ( defMessage
+                        & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
+                        & Command.rejected .~ applicationFailureToFailureProto err
+                     )
+        addCommand cmd
+        pure (pure False, error "This should never happen")
+      Just WorkflowUpdateImplementation {..} -> do
+        updateArgs <- UnliftIO.try $ processorDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (doUpdate ^. Activation.vec'input))
+        let runValidator = doUpdate ^. Activation.runValidator
+            updateId = UpdateId $ doUpdate ^. Activation.id
+            -- TODO: add payload processor handling for headers?
+            updateHeaders = fmap convertFromProtoPayload (doUpdate ^. Activation.headers)
+        case updateArgs of
+          Left err ->
+            pure
+              ( do
+                  addCommand $
+                    defMessage
+                      & Command.updateResponse
+                        .~ ( defMessage
+                              & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
+                              & Command.rejected .~ applicationFailureToFailureProto (mkApplicationFailure err inst.errorConverters)
+                           )
+                  pure False
+              , error "Error processing update args"
+              )
+          Right args -> do
+            let baseInput =
+                  HandleUpdateInput
+                    { handleUpdateId = updateId
+                    , handleUpdateInputType = doUpdate ^. Activation.name
+                    , handleUpdateInputArgs = args
+                    , handleUpdateInputHeaders = updateHeaders
+                    }
+            let runUpdate = inst.inboundInterceptor.handleUpdate baseInput $ \input ->
+                  updateImplementation input.handleUpdateId input.handleUpdateInputArgs input.handleUpdateInputHeaders
+            pure $
+              if runValidator
+                then
+                  ( do
+                      eValidatorResult <- case updateValidationImplementation of
+                        Nothing -> pure $ Right ()
+                        Just f -> do
+                          eResult <- UnliftIO.try $
+                            liftIO $
+                              unValidation $
+                                inst.inboundInterceptor.validateUpdate baseInput $ \input ->
+                                  f input.handleUpdateId input.handleUpdateInputArgs input.handleUpdateInputHeaders
+                          -- pure $ either (\(e1, _) -> Left e1) id eResult
+                          case eResult of
+                            Left err -> pure $ Left err
+                            Right res -> case res of
+                              Left err' -> pure $ Left err'
+                              Right res' -> pure $ Right res'
+                      case eValidatorResult of
+                        Left err -> do
+                          addCommand $
+                            defMessage
+                              & Command.updateResponse
+                                .~ ( defMessage
+                                      & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
+                                      & Command.rejected .~ applicationFailureToFailureProto (mkApplicationFailure err inst.errorConverters)
+                                   )
+                          pure False
+                        Right () -> do
+                          addCommand $
+                            defMessage
+                              & Command.updateResponse
+                                .~ ( defMessage
+                                      & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
+                                      & Command.accepted .~ defMessage
+                                   )
+                          pure True
+                  , runUpdate
+                  )
+                else
+                  ( do
+                      addCommand $
+                        defMessage
+                          & Command.updateResponse
+                            .~ ( defMessage
+                                  & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
+                                  & Command.accepted .~ defMessage
+                               )
+                      pure True
+                  , runUpdate
+                  )
+  runAction <- ilift validator
+  when runAction $ do
+    ePayload <- Temporal.Workflow.Internal.Monad.try updateAction
+    $(logDebug) "we executed the update!"
+    Workflow $ \_env -> do
+      inst <- ask
+      case ePayload of
+        Left err -> do
+          $(logDebug) "gonna send an update rejected message!"
+          addCommand $
+            defMessage
+              & Command.updateResponse
+                .~ ( defMessage
+                      & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
+                      & Command.rejected .~ applicationFailureToFailureProto (mkApplicationFailure err inst.errorConverters)
+                   )
+          pure $ Throw err
+        Right payload -> do
+          $(logDebug) "gonna send an update completed message!"
+          payload' <- liftIO $ payloadProcessorEncode inst.payloadProcessor payload
+          addCommand $
+            defMessage
+              & Command.updateResponse
+                .~ ( defMessage
+                      & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
+                      & Command.completed .~ convertToProtoPayload payload'
+                   )
+          pure $ Done ()
+
+
 applyNotifyHasPatch :: NotifyHasPatch -> InstanceM ()
 applyNotifyHasPatch notifyHasPatch = do
   inst <- ask
@@ -398,6 +534,16 @@ data PendingJob
   | PendingWorkflowCancellation CancelWorkflow
 
 
+data JobGroups = JobGroups
+  { patchNotifications :: InstanceM ()
+  , updateWorkflows :: [Workflow ()]
+  , signalWorkflows :: [Workflow ()]
+  , queryWorkflows :: InstanceM ()
+  , resolutions :: [PendingJob]
+  , otherJobs :: InstanceM ()
+  }
+
+
 applyJobs
   :: Functor f
   => Vector WorkflowActivationJob
@@ -408,7 +554,7 @@ applyJobs
   -> InstanceM (Either SomeException (f (SuspendableWorkflowExecution Payload)))
 applyJobs jobs fAwait = UnliftIO.try $ do
   $logDebug $ Text.pack ("Applying jobs: " <> show jobs)
-  let (patchNotifications, signalWorkflows, queryWorkflows, resolutions, otherJobs) = jobGroups
+  let JobGroups {..} = jobGroups
   patchNotifications
   queryWorkflows
   otherJobs
@@ -422,42 +568,49 @@ applyJobs jobs fAwait = UnliftIO.try $ do
         -- the SDK core's state machine.
 
         case activations of
-          [] -> case signalWorkflows of
+          [] -> case updateWorkflows ++ signalWorkflows of
             [] -> suspend (Await wf)
-            sigs -> do
-              lift $ $logDebug "We get signal"
-              lift (mapM_ injectWorkflowSignal sigs) *> wf []
-          _ -> case signalWorkflows of
+            jobs -> do
+              lift (mapM_ injectWorkflowSignalOrUpdate jobs) *> wf []
+          _ -> case updateWorkflows ++ signalWorkflows of
             [] -> wf activations
-            sigs -> lift (mapM_ injectWorkflowSignal sigs) *> wf activations
+            jobs -> lift (mapM_ injectWorkflowSignalOrUpdate jobs) *> wf activations
             {- TODO: we need to run the signal workflows without messing up ContinuationEnv: runWorkflow signalWorkflows -}
     )
       <$> fAwait
   where
     jobGroups =
       V.foldr
-        ( \job tup@(!patchNotifications, !signalWorkflows, !queryWorkflows, !resolutions, !otherJobs) -> case job ^. Activation.maybe'variant of
-            Just (WorkflowActivationJob'NotifyHasPatch n) -> (applyNotifyHasPatch n *> patchNotifications, signalWorkflows, queryWorkflows, resolutions, otherJobs)
-            Just (WorkflowActivationJob'SignalWorkflow sig) -> (patchNotifications, applySignalWorkflow sig : signalWorkflows, queryWorkflows, resolutions, otherJobs)
-            Just (WorkflowActivationJob'QueryWorkflow q) -> (patchNotifications, signalWorkflows, applyQueryWorkflow q *> queryWorkflows, resolutions, otherJobs)
+        ( \job jobGroups -> case job ^. Activation.maybe'variant of
+            Just (WorkflowActivationJob'NotifyHasPatch n) -> jobGroups {patchNotifications = applyNotifyHasPatch n *> jobGroups.patchNotifications}
+            Just (WorkflowActivationJob'SignalWorkflow sig) -> jobGroups {signalWorkflows = applySignalWorkflow sig : jobGroups.signalWorkflows}
+            Just (WorkflowActivationJob'QueryWorkflow q) -> jobGroups {queryWorkflows = applyQueryWorkflow q *> jobGroups.queryWorkflows}
             -- We collect these in bulk and resolve them in one go by pushing them into the completed queue. This reactivates the suspended workflow
             -- and it tries to execute further.
-            Just (WorkflowActivationJob'FireTimer r) -> (patchNotifications, signalWorkflows, queryWorkflows, PendingJobFireTimer r : resolutions, otherJobs)
-            Just (WorkflowActivationJob'ResolveActivity r) -> (patchNotifications, signalWorkflows, queryWorkflows, PendingJobResolveActivity r : resolutions, otherJobs)
-            Just (WorkflowActivationJob'ResolveChildWorkflowExecutionStart r) -> (patchNotifications, signalWorkflows, queryWorkflows, PendingJobResolveChildWorkflowExecutionStart r : resolutions, otherJobs)
-            Just (WorkflowActivationJob'ResolveChildWorkflowExecution r) -> (patchNotifications, signalWorkflows, queryWorkflows, PendingJobResolveChildWorkflowExecution r : resolutions, otherJobs)
-            Just (WorkflowActivationJob'ResolveSignalExternalWorkflow r) -> (patchNotifications, signalWorkflows, queryWorkflows, PendingJobResolveSignalExternalWorkflow r : resolutions, otherJobs)
-            Just (WorkflowActivationJob'ResolveRequestCancelExternalWorkflow r) -> (patchNotifications, signalWorkflows, queryWorkflows, PendingJobResolveRequestCancelExternalWorkflow r : resolutions, otherJobs)
-            Just (WorkflowActivationJob'UpdateRandomSeed updateRandomSeed) -> (patchNotifications, signalWorkflows, queryWorkflows, resolutions, otherJobs *> applyUpdateRandomSeed updateRandomSeed)
-            Just (WorkflowActivationJob'CancelWorkflow cancelWorkflow) -> (patchNotifications, signalWorkflows, queryWorkflows, PendingWorkflowCancellation cancelWorkflow : resolutions, otherJobs)
+            Just (WorkflowActivationJob'FireTimer r) -> jobGroups {resolutions = PendingJobFireTimer r : jobGroups.resolutions}
+            Just (WorkflowActivationJob'ResolveActivity r) -> jobGroups {resolutions = PendingJobResolveActivity r : jobGroups.resolutions}
+            Just (WorkflowActivationJob'ResolveChildWorkflowExecutionStart r) -> jobGroups {resolutions = PendingJobResolveChildWorkflowExecutionStart r : jobGroups.resolutions}
+            Just (WorkflowActivationJob'ResolveChildWorkflowExecution r) -> jobGroups {resolutions = PendingJobResolveChildWorkflowExecution r : jobGroups.resolutions}
+            Just (WorkflowActivationJob'ResolveSignalExternalWorkflow r) -> jobGroups {resolutions = PendingJobResolveSignalExternalWorkflow r : jobGroups.resolutions}
+            Just (WorkflowActivationJob'ResolveRequestCancelExternalWorkflow r) -> jobGroups {resolutions = PendingJobResolveRequestCancelExternalWorkflow r : jobGroups.resolutions}
+            Just (WorkflowActivationJob'UpdateRandomSeed updateRandomSeed) -> jobGroups {otherJobs = jobGroups.otherJobs *> applyUpdateRandomSeed updateRandomSeed}
+            Just (WorkflowActivationJob'CancelWorkflow cancelWorkflow) -> jobGroups {resolutions = PendingWorkflowCancellation cancelWorkflow : jobGroups.resolutions}
             -- By the time we get here, the workflow should already be running.
-            Just (WorkflowActivationJob'StartWorkflow _startWorkflow) -> tup
+            Just (WorkflowActivationJob'StartWorkflow _startWorkflow) -> jobGroups
             -- Handled in the worker.
-            Just (WorkflowActivationJob'RemoveFromCache _removeFromCache) -> tup
-            Just (WorkflowActivationJob'DoUpdate _) -> error "DoUpdate not yet implemented"
+            Just (WorkflowActivationJob'RemoveFromCache _removeFromCache) -> jobGroups
+            Just (WorkflowActivationJob'DoUpdate u) -> jobGroups {updateWorkflows = applyDoUpdateWorkflow u : jobGroups.updateWorkflows}
             Nothing -> E.throw $ RuntimeError "Uncrecognized workflow activation job variant"
         )
-        (pure (), [], pure (), [], pure ())
+        ( JobGroups
+            { patchNotifications = pure ()
+            , updateWorkflows = []
+            , signalWorkflows = []
+            , queryWorkflows = pure ()
+            , resolutions = []
+            , otherJobs = pure ()
+            }
+        )
         jobs
 
 

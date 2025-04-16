@@ -56,6 +56,11 @@ module Temporal.Client (
   defaultSignalOptions,
   Temporal.Client.signalWithStart,
 
+  -- * Sending Updates to Workflows
+  UpdateOptions (..),
+  UpdateLifecycleStage (..),
+  update,
+
   -- * Producing handles for existing workflows
   getHandle,
 
@@ -104,11 +109,15 @@ import Proto.Temporal.Api.History.V1.Message (History, HistoryEvent, HistoryEven
 import qualified Proto.Temporal.Api.History.V1.Message_Fields as History
 import qualified Proto.Temporal.Api.Query.V1.Message_Fields as Query
 import qualified Proto.Temporal.Api.Taskqueue.V1.Message_Fields as TQ
+import qualified Proto.Temporal.Api.Update.V1.Message as Update
+import qualified Proto.Temporal.Api.Update.V1.Message_Fields as Update
 import Proto.Temporal.Api.Workflowservice.V1.RequestResponse (
   GetWorkflowExecutionHistoryRequest,
   GetWorkflowExecutionHistoryResponse,
   QueryWorkflowRequest,
   QueryWorkflowResponse,
+  UpdateWorkflowExecutionRequest,
+  UpdateWorkflowExecutionResponse,
  )
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as RR
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as WF
@@ -866,6 +875,7 @@ waitResult wfId mrId (Namespace ns) = do
           & RR.skipArchival .~ True
   connect (streamEvents FollowRuns startingReq) lastC
 
+
 -- listOpenWorkflowExecutions
 --   :: (MonadIO m, HasWorkflowClient m)
 --   => ListOpenWorkflowExecutionsRequest
@@ -885,3 +895,82 @@ waitResult wfId mrId (Namespace ns) = do
 --   :: (MonadIO m, HasWorkflowClient m)
 --   => CountWorkflowExecutionsRequest
 --   -> m Int64
+
+data UpdateLifecycleStage
+  = UpdateLifecycleStageUnspecified
+  | UpdateLifecycleStageAdmitted
+  | UpdateLifecycleStageAccepted
+  | UpdateLifecycleStageCompleted
+  deriving stock (Eq, Show)
+
+
+data UpdateOptions = UpdateOptions
+  { updateId :: UpdateId
+  , updateHeaders :: Map Text Payload
+  , waitPolicy :: UpdateLifecycleStage
+  }
+
+
+update
+  :: forall m args result a error
+   . (MonadIO m, HasWorkflowClient m)
+  => WorkflowHandle a
+  -> KnownUpdate args result error
+  -> UpdateOptions
+  -> args
+    :->: m result
+update h@(WorkflowHandle _ _ c _ _) (KnownUpdate updateCodec updateName) opts = withArgs @args @(m result) updateCodec $ \inputs -> liftIO $ do
+  inputs' <- sequence inputs
+  let processor = h.workflowHandleClient.clientConfig.payloadProcessor
+      baseInput =
+        UpdateWorkflowInput
+          { updateWorkflowType = updateName
+          , updateWorkflowRunId = h.workflowHandleRunId
+          , updateWorkflowWorkflowId = h.workflowHandleWorkflowId
+          , updateWorkflowHeaders = opts.updateHeaders
+          , updateWorkflowArgs = inputs'
+          }
+  -- TODO: client interceptor
+  let input = baseInput
+  eRes {- h.workflowHandleClient.clientConfig.interceptors.updateWorkflow baseInput $ \input -> -} <- do
+    updateArgs <- processorEncodePayloads processor input.updateWorkflowArgs
+    headerPayloads <- processorEncodePayloads processor input.updateWorkflowHeaders
+    let msg :: UpdateWorkflowExecutionRequest
+        msg =
+          defMessage
+            & WF.namespace .~ rawNamespace h.workflowHandleClient.clientConfig.namespace
+            & WF.workflowExecution
+              .~ ( defMessage
+                    & Common.workflowId .~ rawWorkflowId input.updateWorkflowWorkflowId
+                    & Common.runId .~ maybe "" rawRunId input.updateWorkflowRunId
+                 )
+            & WF.firstExecutionRunId .~ "" -- TODO: get this
+            & WF.waitPolicy .~ defMessage -- TODO
+            & WF.request
+              .~ ( defMessage
+                    & Update.meta
+                      .~ ( defMessage
+                            & Update.updateId .~ rawUpdateId opts.updateId
+                            & Update.identity .~ Core.identity (Core.clientConfig c.clientCore)
+                         )
+                    & Update.input
+                      .~ ( defMessage
+                            & Update.header .~ headerToProto (fmap convertToProtoPayload headerPayloads)
+                            & Update.name .~ input.updateWorkflowType
+                            & Update.args .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload updateArgs)
+                         )
+                 )
+
+    (res :: UpdateWorkflowExecutionResponse) <- either throwIO pure =<< Temporal.Core.Client.WorkflowService.updateWorkflowExecution h.workflowHandleClient.clientCore msg
+    liftIO $ print res
+    case res ^. Update.maybe'outcome of
+      Nothing -> throwIO $ ValueError "No return value payloads provided by update response"
+      Just outcome -> do
+        case outcome ^. Update.maybe'value of
+          Just (Update.Outcome'Success payloads) -> case (payloads ^. Common.vec'payloads) V.!? 0 of
+            Nothing -> throwIO $ ValueError "No return value payloads provided by update response"
+            Just p -> pure $ convertFromProtoPayload p
+          -- TODO: convert this failure thing to a nice Haskell version
+          Just (Update.Outcome'Failure failure) -> throwIO $ UpdateFailure failure
+          Nothing -> error "Unsupported update result"
+  payloadProcessorDecode processor eRes >>= either (throwIO . ValueError) pure >>= decode updateCodec >>= either (throwIO . ValueError) pure
