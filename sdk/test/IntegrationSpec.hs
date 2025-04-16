@@ -1683,10 +1683,6 @@ needsClient = do
 
 updatesWithInterceptors :: SpecWith PortNumber
 updatesWithInterceptors = do
-  -- invoked at all
-  -- args are as expected
-  -- ordering: invoked from leftmost to rightmost
-  -- can alter/replace arguments (what ts-sdk tests)
   describe "Update interceptors" do
     handleUpdateWasCalled <- runIO $ newIORef False
     validateUpdateWasCalled <- runIO $ newIORef False
@@ -1700,7 +1696,7 @@ updatesWithInterceptors = do
                     performUnsafeNonDeterministicIO $ writeIORef handleUpdateWasCalled True
                     next input
                 , validateUpdate = \input next -> do
-                    writeIORef validateUpdateWasCalled True
+                    liftIO $ writeIORef validateUpdateWasCalled True
                     next input
                 }
           , clientInterceptors = mempty
@@ -1729,7 +1725,7 @@ updatesWithInterceptors = do
           updateResult `shouldBe` 12
           workflowResult `shouldBe` 12
           readIORef handleUpdateWasCalled `shouldReturn` True
-    -- TODO: validator
+          readIORef validateUpdateWasCalled `shouldReturn` True
     handleUpdateArgs <- runIO $ newIORef (Nothing :: Maybe (Vector Payload))
     validateUpdateArgs <- runIO $ newIORef (Nothing :: Maybe (Vector Payload))
     let
@@ -1742,7 +1738,7 @@ updatesWithInterceptors = do
                     performUnsafeNonDeterministicIO $ writeIORef handleUpdateArgs $ Just input.handleUpdateInputArgs
                     next input
                 , validateUpdate = \input next -> do
-                    writeIORef validateUpdateArgs $ Just input.handleUpdateInputArgs
+                    liftIO $ writeIORef validateUpdateArgs $ Just input.handleUpdateInputArgs
                     next input
                 }
           , clientInterceptors = mempty
@@ -1773,7 +1769,9 @@ updatesWithInterceptors = do
           updateArgsPayload <- readIORef handleUpdateArgs
           let updateArg = payloadData $ V.head $ fromJust updateArgsPayload
           updateArg `shouldBe` "12"
-    -- TODO: validator
+          validatorArgsPayload <- readIORef validateUpdateArgs
+          let validatorArg = payloadData $ V.head $ fromJust validatorArgsPayload
+          validatorArg `shouldBe` "12"
     handleUpdateOrdering <- runIO $ newIORef ([] :: [Text])
     validateUpdateOrdering <- runIO $ newIORef ([] :: [Text])
     let
@@ -1786,7 +1784,7 @@ updatesWithInterceptors = do
                     performUnsafeNonDeterministicIO $ modifyIORef handleUpdateOrdering (++ ["a"])
                     next input
                 , validateUpdate = \input next -> do
-                    modifyIORef validateUpdateOrdering (++ ["a"])
+                    liftIO $ modifyIORef validateUpdateOrdering (++ ["a"])
                     next input
                 }
           , clientInterceptors = mempty
@@ -1800,7 +1798,7 @@ updatesWithInterceptors = do
                     performUnsafeNonDeterministicIO $ modifyIORef handleUpdateOrdering (++ ["b"])
                     next input
                 , validateUpdate = \input next -> do
-                    modifyIORef validateUpdateOrdering (++ ["b"])
+                    liftIO $ modifyIORef validateUpdateOrdering (++ ["b"])
                     next input
                 }
           , clientInterceptors = mempty
@@ -1831,7 +1829,7 @@ updatesWithInterceptors = do
           updateResult `shouldBe` 12
           workflowResult `shouldBe` 12
           readIORef handleUpdateOrdering `shouldReturn` ["a", "b"]
-    -- TODO: validator
+          readIORef validateUpdateOrdering `shouldReturn` ["a", "b"]
     handleModifiedUpdateArgs <- runIO $ newIORef (Nothing :: Maybe (Vector Payload))
     validateModifiedUpdateArgs <- runIO $ newIORef (Nothing :: Maybe (Vector Payload))
     let

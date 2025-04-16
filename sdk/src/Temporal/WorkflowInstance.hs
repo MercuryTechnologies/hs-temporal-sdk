@@ -395,7 +395,6 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
       Nothing -> do
         let errMessage = Text.pack ("No update handler found for update: " <> show (doUpdate ^. Activation.name))
         let err = mkApplicationFailure (toException $ UpdateNotFound errMessage) inst.errorConverters
-        -- TODO: should probably treat this as if the validator rejected it (because it's an unknown update)
         $(logWarn) errMessage
         let cmd =
               defMessage
@@ -412,38 +411,71 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
             updateId = UpdateId $ doUpdate ^. Activation.id
             -- TODO: add payload processor handling for headers?
             updateHeaders = fmap convertFromProtoPayload (doUpdate ^. Activation.headers)
-            runUpdate = case updateArgs of
-              Left err -> Workflow $ \_env -> pure $ Throw err
-              Right args -> do
-                let baseInput =
-                      HandleUpdateInput
-                        { handleUpdateId = updateId
-                        , handleUpdateInputType = doUpdate ^. Activation.name
-                        , handleUpdateInputArgs = args
-                        , handleUpdateInputHeaders = updateHeaders
-                        }
-                inst.inboundInterceptor.handleUpdate baseInput $ \input ->
+        case updateArgs of
+          Left err ->
+            pure
+              ( do
+                  addCommand $
+                    defMessage
+                      & Command.updateResponse
+                        .~ ( defMessage
+                              & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
+                              & Command.rejected .~ applicationFailureToFailureProto (mkApplicationFailure err inst.errorConverters)
+                           )
+                  pure False
+              , error "Error processing update args"
+              )
+          Right args -> do
+            let baseInput =
+                  HandleUpdateInput
+                    { handleUpdateId = updateId
+                    , handleUpdateInputType = doUpdate ^. Activation.name
+                    , handleUpdateInputArgs = args
+                    , handleUpdateInputHeaders = updateHeaders
+                    }
+            let runUpdate = inst.inboundInterceptor.handleUpdate baseInput $ \input ->
                   updateImplementation input.handleUpdateId input.handleUpdateInputArgs input.handleUpdateInputHeaders
-        pure $
-          if runValidator
-            then
-              ( ilift do
-                  eValidatorResult <- case updateValidationImplementation of
-                    Nothing -> pure $ Right ()
-                    Just f -> case updateArgs of
-                      Left err -> pure $ Left err
-                      Right args -> liftIO $ unValidation $ f updateId args updateHeaders
-                  case eValidatorResult of
-                    Left err -> do
-                      addCommand $
-                        defMessage
-                          & Command.updateResponse
-                            .~ ( defMessage
-                                  & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
-                                  & Command.rejected .~ applicationFailureToFailureProto (mkApplicationFailure err inst.errorConverters)
-                               )
-                      pure False
-                    Right () -> do
+            pure $
+              if runValidator
+                then
+                  ( do
+                      eValidatorResult <- case updateValidationImplementation of
+                        Nothing -> pure $ Right ()
+                        Just f -> do
+                          eResult <- UnliftIO.try $
+                            liftIO $
+                              unValidation $
+                                inst.inboundInterceptor.validateUpdate baseInput $ \input ->
+                                  f input.handleUpdateId input.handleUpdateInputArgs input.handleUpdateInputHeaders
+                          -- pure $ either (\(e1, _) -> Left e1) id eResult
+                          case eResult of
+                            Left err -> pure $ Left err
+                            Right res -> case res of
+                              Left err' -> pure $ Left err'
+                              Right res' -> pure $ Right res'
+                      case eValidatorResult of
+                        Left err -> do
+                          addCommand $
+                            defMessage
+                              & Command.updateResponse
+                                .~ ( defMessage
+                                      & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
+                                      & Command.rejected .~ applicationFailureToFailureProto (mkApplicationFailure err inst.errorConverters)
+                                   )
+                          pure False
+                        Right () -> do
+                          addCommand $
+                            defMessage
+                              & Command.updateResponse
+                                .~ ( defMessage
+                                      & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
+                                      & Command.accepted .~ defMessage
+                                   )
+                          pure True
+                  , runUpdate
+                  )
+                else
+                  ( do
                       addCommand $
                         defMessage
                           & Command.updateResponse
@@ -452,21 +484,9 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
                                   & Command.accepted .~ defMessage
                                )
                       pure True
-              , runUpdate
-              )
-            else
-              ( ilift do
-                  addCommand $
-                    defMessage
-                      & Command.updateResponse
-                        .~ ( defMessage
-                              & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
-                              & Command.accepted .~ defMessage
-                           )
-                  pure True
-              , runUpdate
-              )
-  runAction <- validator
+                  , runUpdate
+                  )
+  runAction <- ilift validator
   when runAction $ do
     ePayload <- Temporal.Workflow.Internal.Monad.try updateAction
     $(logDebug) "we executed the update!"
