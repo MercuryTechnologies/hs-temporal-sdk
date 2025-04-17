@@ -11,6 +11,7 @@ import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
+import Data.Vault.Strict
 import Data.Kind
 import Data.Map.Strict (Map)
 import Data.Set (Set)
@@ -677,6 +678,7 @@ data WorkflowInstance = WorkflowInstance
   , workflowInstanceContinuationEnv :: {-# UNPACK #-} !ContinuationEnv
   , workflowCancellationVar :: {-# UNPACK #-} !(IVar ())
   , workflowDeadlockTimeout :: Maybe Int
+  , workflowVault :: {-# UNPACK #-} !Vault
   , -- These are how the instance gets its work done
     activationChannel :: {-# UNPACK #-} !(TQueue Core.WorkflowActivation)
   , executionThread :: {-# UNPACK #-} !(IORef (Async ()))
@@ -695,13 +697,13 @@ type SequenceMap a = HashMap Sequence a
 
 
 data Sequences = Sequences
-  { externalCancel :: !Word32
-  , childWorkflow :: !Word32
-  , externalSignal :: !Word32
-  , timer :: !Word32
-  , activity :: !Word32
-  , condition :: !Word32
-  , varId :: !Word32
+  { externalCancel :: {-# UNPACK #-} !Word32
+  , childWorkflow :: {-# UNPACK #-} !Word32
+  , externalSignal :: {-# UNPACK #-} !Word32
+  , timer :: {-# UNPACK #-} !Word32
+  , activity :: {-# UNPACK #-} !Word32
+  , condition :: {-# UNPACK #-} !Word32
+  , varId :: {-# UNPACK #-} !Word32
   }
 
 

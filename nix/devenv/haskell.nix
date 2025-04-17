@@ -5,6 +5,7 @@ in {
     (pkgs.callPackage ../packages/protogen.nix {
       inherit (pkgs.haskell.packages.${ghcVersion}) proto-lens-protoc;
     })
+    pkgs.ghciwatch
   ];
   languages.haskell = {
     languageServer = pkgs.haskell.packages.${ghcVersion}.haskell-language-server;
