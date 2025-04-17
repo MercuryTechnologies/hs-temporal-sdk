@@ -77,6 +77,7 @@ import Temporal.Workflow.Internal.Instance
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
 import UnliftIO
+import Data.Vault.Strict (Vault)
 
 
 create
@@ -88,11 +89,23 @@ create
   -> [ApplicationFailureHandler]
   -> WorkflowInboundInterceptor
   -> WorkflowOutboundInterceptor
+  -> Vault
   -> PayloadProcessor
   -> Info
   -> StartWorkflow
   -> m WorkflowInstance
-create workflowCompleteActivation workflowFn workflowDeadlockTimeout errorConverters inboundInterceptor outboundInterceptor payloadProcessor info start = do
+create
+  workflowCompleteActivation
+  workflowFn
+  workflowDeadlockTimeout
+  errorConverters
+  inboundInterceptor
+  outboundInterceptor
+  workflowVault
+  payloadProcessor
+  info
+  start = do
+
   $logDebug "Instantiating workflow instance"
   workflowInstanceLogger <- askLoggerIO
   workflowRandomnessSeed <- WorkflowGenM <$> newIORef (mkStdGen 0)

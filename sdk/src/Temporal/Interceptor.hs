@@ -69,6 +69,7 @@ import Temporal.Client.Types
 import Temporal.Payload
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
+import Data.Vault.Strict
 
 
 data ActivityInboundInterceptor env = ActivityInboundInterceptor
@@ -102,21 +103,22 @@ instance Monoid (ActivityOutboundInterceptor env) where
 
 
 data Interceptors env = Interceptors
-  { workflowInboundInterceptors :: WorkflowInboundInterceptor
-  , workflowOutboundInterceptors :: WorkflowOutboundInterceptor
-  , activityInboundInterceptors :: ActivityInboundInterceptor env
-  , activityOutboundInterceptors :: ActivityOutboundInterceptor env
-  , clientInterceptors :: ClientInterceptors
-  , scheduleClientInterceptors :: ScheduleClientInterceptors
+  { workflowInboundInterceptors :: {-# UNPACK #-} !WorkflowInboundInterceptor
+  , workflowOutboundInterceptors :: {-# UNPACK #-} !WorkflowOutboundInterceptor
+  , activityInboundInterceptors :: !(ActivityInboundInterceptor env)
+  , activityOutboundInterceptors :: !(ActivityOutboundInterceptor env)
+  , clientInterceptors :: {-# UNPACK #-} !ClientInterceptors
+  , scheduleClientInterceptors :: {-# UNPACK #-} !ScheduleClientInterceptors
+  , interceptorVault :: {-# UNPACK #-} !Vault
   }
 
 
 instance Semigroup (Interceptors env) where
-  Interceptors a b c d e f <> Interceptors a' b' c' d' e' f' = Interceptors (a <> a') (b <> b') (c <> c') (d <> d') (e <> e') (f <> f')
+  Interceptors a b c d e f g <> Interceptors a' b' c' d' e' f' g' = Interceptors (a <> a') (b <> b') (c <> c') (d <> d') (e <> e') (f <> f') (g <> g')
 
 
 instance Monoid (Interceptors env) where
-  mempty = Interceptors mempty mempty mempty mempty mempty mempty
+  mempty = Interceptors mempty mempty mempty mempty mempty mempty mempty
 
 
 data ScheduleClientInterceptors = ScheduleClientInterceptors

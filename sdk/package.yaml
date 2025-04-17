@@ -51,6 +51,7 @@ dependencies:
 - these
 - first-class-families
 - validation-selective
+- vault
 
 default-extensions:
 - BangPatterns

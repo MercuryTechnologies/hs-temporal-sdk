@@ -39,6 +39,7 @@ import Temporal.Workflow.Definition
 import Temporal.Workflow.Internal.Monad hiding (try)
 import Temporal.WorkflowInstance
 import UnliftIO
+import Data.Vault.Strict (Vault)
 
 
 data EvictionWithRunID = EvictionWithRunID
@@ -61,7 +62,8 @@ data WorkflowWorker = forall ty.
   , workerTaskQueue :: TaskQueue
   , workerErrorConverters :: [Err.ApplicationFailureHandler]
   , processor :: {-# UNPACK #-} !PayloadProcessor
-  , workerEvictionEmitter :: TChan EvictionWithRunID
+  , workerEvictionEmitter :: {-# UNPACK #-} !(TChan EvictionWithRunID)
+  , workerVault :: {-# UNPACK #-} !Vault
   }
 
 
@@ -295,6 +297,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                         worker.workerErrorConverters
                         worker.workerInboundInterceptors
                         worker.workerOutboundInterceptors
+                        worker.workerVault
                         worker.processor
                         workflowInfo
                         startWorkflow
