@@ -18,7 +18,10 @@ library
   hs-source-dirs:
       src
   default-extensions:
+      BangPatterns
+      BlockArguments
       DataKinds
+      DerivingStrategies
       FlexibleContexts
       FlexibleInstances
       GADTs
@@ -27,6 +30,7 @@ library
       LambdaCase
       MultiParamTypeClasses
       NamedFieldPuns
+      NumericUnderscores
       RankNTypes
       OverloadedRecordDot
       OverloadedStrings
@@ -35,8 +39,9 @@ library
       StandaloneDeriving
       TypeApplications
       TypeFamilies
-      UndecidableInstances
       TypeOperators
+      UndecidableInstances
+      ViewPatterns
   ghc-options: -Weverything -Wno-missing-exported-signatures -Wno-missing-export-lists -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -Wno-unused-packages -Wno-operator-whitespace -fdiagnostics-color=always -Wno-missing-kind-signatures -Wno-implicit-lift -Wno-implicit-prelude -fwarn-tabs +RTS -A128m -n2m -RTS -fdefer-diagnostics
   build-depends:
       base
@@ -60,7 +65,10 @@ test-suite encryption-tests
   hs-source-dirs:
       test
   default-extensions:
+      BangPatterns
+      BlockArguments
       DataKinds
+      DerivingStrategies
       FlexibleContexts
       FlexibleInstances
       GADTs
@@ -69,6 +77,7 @@ test-suite encryption-tests
       LambdaCase
       MultiParamTypeClasses
       NamedFieldPuns
+      NumericUnderscores
       RankNTypes
       OverloadedRecordDot
       OverloadedStrings
@@ -77,8 +86,9 @@ test-suite encryption-tests
       StandaloneDeriving
       TypeApplications
       TypeFamilies
-      UndecidableInstances
       TypeOperators
+      UndecidableInstances
+      ViewPatterns
   ghc-options: -Weverything -Wno-missing-exported-signatures -Wno-missing-export-lists -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -Wno-unused-packages -Wno-operator-whitespace -fdiagnostics-color=always -Wno-missing-kind-signatures -Wno-implicit-lift -Wno-implicit-prelude -fwarn-tabs +RTS -A128m -n2m -RTS -fdefer-diagnostics -g -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base
