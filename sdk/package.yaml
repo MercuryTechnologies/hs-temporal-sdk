@@ -1,3 +1,6 @@
+defaults:
+  local: ../hpack-common/defaults.yaml
+
 verbatim: { cabal-version: 3.0 }
 
 name:         temporal-sdk
@@ -52,32 +55,6 @@ dependencies:
 - first-class-families
 - validation-selective
 - vault
-
-default-extensions:
-- BangPatterns
-- BlockArguments
-- DataKinds
-- DerivingStrategies
-- FlexibleContexts
-- FlexibleInstances
-- GADTs
-- GeneralizedNewtypeDeriving
-- InstanceSigs
-- LambdaCase
-- MultiParamTypeClasses
-- NamedFieldPuns
-- NumericUnderscores
-- RankNTypes
-- OverloadedRecordDot
-- OverloadedStrings
-- RecordWildCards
-- ScopedTypeVariables
-- StandaloneDeriving
-- TypeApplications
-- TypeFamilies
-- TypeOperators
-- UndecidableInstances
-- ViewPatterns
 
 ghc-options:
 - -g
