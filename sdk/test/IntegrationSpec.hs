@@ -2033,7 +2033,88 @@ updatesWithInterceptors = do
             pure (updateResult, workflowResult)
           updateResult `shouldBe` 24
           workflowResult `shouldBe` 24
+    handleUpdateWasNotCalledAfterException <- runIO $ newIORef False
+    validateUpdateWasNotCalledAfterException <- runIO $ newIORef False
+    let
+      captureIfCalledAfterExceptionInterceptors :: Interceptors ()
+      captureIfCalledAfterExceptionInterceptors =
+        mempty
+          { workflowInboundInterceptors =
+              mempty
+                { handleUpdate = \input next -> do
+                    performUnsafeNonDeterministicIO $ writeIORef handleUpdateWasNotCalledAfterException True
+                    next input
+                , validateUpdate = \input next -> do
+                    liftIO $ writeIORef validateUpdateWasNotCalledAfterException True
+                    next input
+                }
+          }
+    withInterceptors captureIfCalledAfterExceptionInterceptors do
+      it "should not call update if the workflow throws first" $ \TestEnv {..} -> do
+        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+              baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                  }
+          let updateOpts =
+                C.UpdateOptions
+                  { updateId = "update-interceptors-are-not-called-after-exception"
+                  , updateHeaders = mempty
+                  , waitPolicy = C.UpdateLifecycleStageCompleted
+                  }
+          eRes <- Catch.try $ useClient do
+            h <- C.start WorkflowThatThrowsBeforeTheUpdate "update-interceptors-are-not-called-after-exception" opts
+            updateResult <- C.update h testUpdate updateOpts 12
+            workflowResult <- C.waitWorkflowResult h
+            pure (updateResult, workflowResult)
+          let _ = eRes :: Either SomeException (Int, Int)
+          readIORef handleUpdateWasNotCalledAfterException `shouldReturn` False
+          readIORef validateUpdateWasNotCalledAfterException `shouldReturn` False
 
+
+-- handleUpdateWasCalledBeforeException <- runIO $ newIORef False
+-- validateUpdateWasCalledBeforeException <- runIO $ newIORef False
+-- let
+--   captureIfCalledBeforeExceptionInterceptors :: Interceptors ()
+--   captureIfCalledBeforeExceptionInterceptors =
+--     mempty
+--       { workflowInboundInterceptors =
+--           mempty
+--             { handleUpdate = \input next -> do
+--                 performUnsafeNonDeterministicIO $ writeIORef handleUpdateWasCalledBeforeException True
+--                 next input
+--             , validateUpdate = \input next -> do
+--                 liftIO $ writeIORef validateUpdateWasCalledBeforeException True
+--                 next input
+--             }
+--       }
+-- withInterceptors captureIfCalledAfterExceptionInterceptors do
+--   it "should call update if the workflow throws later" $ \TestEnv {..} -> do
+--     let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+--           baseConf
+--     withWorker conf $ do
+--       let opts =
+--             (C.startWorkflowOptions taskQueue)
+--               { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+--               , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+--               }
+--       let updateOpts =
+--             C.UpdateOptions
+--               { updateId = "update-interceptors-are-called-before-exception"
+--               , updateHeaders = mempty
+--               , waitPolicy = C.UpdateLifecycleStageCompleted
+--               }
+--       eRes <- Catch.try $ useClient do
+--         h <- C.start WorkflowThatThrowsAfterTheUpdate "update-interceptors-are-called-before-exception" opts
+--         updateResult <- C.update h testUpdate updateOpts 12
+--         workflowResult <- C.waitWorkflowResult h
+--         pure (updateResult, workflowResult)
+--       let _ = eRes :: Either SomeException (Int, Int)
+--       readIORef handleUpdateWasCalledBeforeException `shouldReturn` True
+--       readIORef validateUpdateWasCalledBeforeException `shouldReturn` True
 
 withInterceptors :: Interceptors () -> SpecWith TestEnv -> SpecWith PortNumber
 withInterceptors interceptors = aroundAllWith $ flip $ setup interceptors
