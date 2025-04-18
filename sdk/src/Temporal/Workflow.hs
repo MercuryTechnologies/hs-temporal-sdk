@@ -196,6 +196,9 @@ module Temporal.Workflow (
   -- ** Updates
   -- $updates
   setUpdateHandler,
+  provideUpdate,
+  ProvidedUpdate (..),
+  KnownUpdate (..),
 
   -- * Other utilities
   unsafeAsyncEffectSink,

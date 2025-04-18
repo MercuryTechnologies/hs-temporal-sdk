@@ -212,6 +212,7 @@ data ClientInterceptors = ClientInterceptors
   { start :: WorkflowType -> WorkflowId -> StartWorkflowOptions -> Vector Payload -> (WorkflowType -> WorkflowId -> StartWorkflowOptions -> Vector Payload -> IO (WorkflowHandle Payload)) -> IO (WorkflowHandle Payload)
   , queryWorkflow :: QueryWorkflowInput -> (QueryWorkflowInput -> IO (Either QueryRejected Payload)) -> IO (Either QueryRejected Payload)
   , signalWithStart :: SignalWithStartWorkflowInput -> (SignalWithStartWorkflowInput -> IO (WorkflowHandle Payload)) -> IO (WorkflowHandle Payload)
+  , updateWorkflow :: UpdateWorkflowInput -> (UpdateWorkflowInput -> IO Payload) -> IO Payload
   -- TODO
   -- signal
   -- terminate
@@ -226,6 +227,7 @@ instance Semigroup ClientInterceptors where
       { start = \t wfId o ps next -> a.start t wfId o ps $ \t' wfId' o' ps' -> b.start t' wfId' o' ps' next
       , queryWorkflow = \i next -> a.queryWorkflow i $ \i' -> b.queryWorkflow i' next
       , signalWithStart = \i next -> a.signalWithStart i $ \i' -> b.signalWithStart i' next
+      , updateWorkflow = \i next -> a.updateWorkflow i $ \i' -> b.updateWorkflow i' next
       }
 
 
@@ -233,6 +235,7 @@ instance Monoid ClientInterceptors where
   mempty =
     ClientInterceptors
       (\t wf o ps next -> next t wf o ps)
+      (\i next -> next i)
       (\i next -> next i)
       (\i next -> next i)
 

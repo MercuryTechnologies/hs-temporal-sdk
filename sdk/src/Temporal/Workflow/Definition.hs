@@ -25,6 +25,8 @@ module Temporal.Workflow.Definition (
   -- , StartChildWorkflow(..)
   provideWorkflow,
   ProvidedWorkflow (..),
+  provideUpdate,
+  ProvidedUpdate (..),
   GatherArgs,
 ) where
 
@@ -171,6 +173,43 @@ provideWorkflow codec name f =
       }
 
 
+-- TODO: Support a validator
+provideUpdate
+  :: forall codec f error
+   . ( f ~ (ArgsOf f :->: Workflow (ResultOf Workflow f))
+     , FunctionSupportsCodec codec (ArgsOf f) (ResultOf Workflow f)
+     )
+  => codec
+  -> Text
+  -> f
+  -> ProvidedUpdate f error
+provideUpdate codec name f =
+  provideCallStack $
+    ProvidedUpdate
+      { updateDefinition =
+          WorkflowUpdateDefinition
+            { updateName = name
+            , updateCodec = codec
+            , updateFunction = f
+            , updateValidator = Nothing
+            , updateRunner = \f' payloads -> do
+                eRes <-
+                  applyPayloads
+                    codec
+                    (Proxy @(ArgsOf f))
+                    (Proxy @(Workflow (ResultOf Workflow f)))
+                    f'
+                    payloads
+                pure $ fmap (\wf -> wf >>= \result -> ilift (liftIO $ encode codec result)) eRes
+            }
+      , updateReference =
+          KnownUpdate
+            { knownUpdateCodec = codec
+            , knownUpdateName = name
+            }
+      }
+
+
 {- |
 A Signal is an asynchronous request to a Workflow Execution.
 
@@ -209,5 +248,5 @@ data WorkflowUpdateDefinition = forall codec f.
   , updateCodec :: codec
   , updateFunction :: f
   , updateValidator :: Maybe (ArgsOf f :->: Condition Bool)
-  , updateRunner :: f -> Vector Payload -> IO (Either String (Workflow (ResultOf Workflow f)))
+  , updateRunner :: f -> Vector Payload -> IO (Either String (Workflow Payload))
   }

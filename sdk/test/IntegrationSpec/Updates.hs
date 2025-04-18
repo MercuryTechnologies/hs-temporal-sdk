@@ -25,16 +25,19 @@ import Temporal.Workflow
 import Temporal.Workflow.Update
 
 
--- - Happy path update:
 -- - Workflow that throws an exception
--- - Malformed inputs/payloads
--- - Workflow canceled while running update (see ts-sdk's handling)
--- - Workflow exits while running update (see ts-sdk's handling)
--- - Interceptors
+--   - If it throws before the update, the update shouldn't run
+--   - If it throws after, the update shouldn't be effected (it already ran)
+-- - Punting a little bit:
+--   - Workflow canceled while running update (see ts-sdk's handling)
+--   - Workflow exits while running update (see ts-sdk's handling)
+--   - We'll want to use the resource management work that Ian has in progress
 --
--- - Client:
---   - Making sure we throw the right exceptions
---   - Interceptors are being run on the client
+-- - Client interceptors:
+--   - Are run
+--   - Expected args
+--   - Right order
+--   - Propogate whatever exc an interceptor throws
 --
 -- - Ideas:
 --   - Start vs execute semantics for update
@@ -90,9 +93,7 @@ registerWorkflow 'updateWithValidator
 updateThatThrows :: Workflow Int
 updateThatThrows = provideCallStack do
   stateVar <- newStateVar (0 :: Int)
-  let handleUpdate _ = do
-        $(logDebug) "we're about to throw!"
-        error "we're blowing up"
+  let handleUpdate _ = error "we're blowing up"
   setUpdateHandler testUpdate handleUpdate Nothing
   waitCondition do
     x <- readStateVar stateVar
@@ -108,9 +109,7 @@ updateWithValidatorThatThrows = provideCallStack do
   stateVar <- newStateVar (0 :: Int)
   let handleUpdate arg = do
         modifyStateVar stateVar (+ arg)
-        stateAfter <- readStateVar stateVar
-        $(logWarn) ("Called handleUpdate, new state is " <> T.pack (show stateAfter))
-        pure stateAfter
+        readStateVar stateVar
   let validateUpdate _ = error "validator blowing up!"
   setUpdateHandler testUpdate handleUpdate $ Just validateUpdate
   waitCondition do
@@ -128,9 +127,7 @@ updateWithValidatorThatSleeps = provideCallStack do
   let handleUpdate arg = do
         sleep $ seconds 1
         modifyStateVar stateVar (+ arg)
-        stateAfter <- readStateVar stateVar
-        $(logWarn) ("Called handleUpdate, new state is " <> T.pack (show stateAfter))
-        pure stateAfter
+        readStateVar stateVar
   setUpdateHandler testUpdate handleUpdate Nothing
   waitCondition do
     x <- readStateVar stateVar
@@ -139,3 +136,39 @@ updateWithValidatorThatSleeps = provideCallStack do
 
 
 registerWorkflow 'updateWithValidatorThatSleeps
+
+
+workflowThatThrowsBeforeTheUpdate :: Workflow Int
+workflowThatThrowsBeforeTheUpdate = provideCallStack do
+  stateVar <- newStateVar (0 :: Int)
+  let handleUpdate arg = do
+        modifyStateVar stateVar (+ arg)
+        readStateVar stateVar
+  setUpdateHandler testUpdate handleUpdate Nothing
+  x <- readStateVar stateVar
+  error ("Current state var: " <> show x)
+  waitCondition do
+    x <- readStateVar stateVar
+    pure $ x > 0
+  readStateVar stateVar
+
+
+registerWorkflow 'workflowThatThrowsBeforeTheUpdate
+
+
+workflowThatThrowsAfterTheUpdate :: Workflow Int
+workflowThatThrowsAfterTheUpdate = provideCallStack do
+  stateVar <- newStateVar (0 :: Int)
+  let handleUpdate arg = do
+        modifyStateVar stateVar (+ arg)
+        readStateVar stateVar
+  setUpdateHandler testUpdate handleUpdate Nothing
+  waitCondition do
+    x <- readStateVar stateVar
+    pure $ x > 0
+  x <- readStateVar stateVar
+  error ("Current state var: " <> show x)
+  readStateVar stateVar
+
+
+registerWorkflow 'workflowThatThrowsAfterTheUpdate

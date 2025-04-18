@@ -930,9 +930,7 @@ update h@(WorkflowHandle _ _ c _ _) (KnownUpdate updateCodec updateName) opts = 
           , updateWorkflowHeaders = opts.updateHeaders
           , updateWorkflowArgs = inputs'
           }
-  -- TODO: client interceptor
-  let input = baseInput
-  eRes {- h.workflowHandleClient.clientConfig.interceptors.updateWorkflow baseInput $ \input -> -} <- do
+  eRes <- h.workflowHandleClient.clientConfig.interceptors.updateWorkflow baseInput $ \input -> do
     updateArgs <- processorEncodePayloads processor input.updateWorkflowArgs
     headerPayloads <- processorEncodePayloads processor input.updateWorkflowHeaders
     let msg :: UpdateWorkflowExecutionRequest
@@ -970,7 +968,6 @@ update h@(WorkflowHandle _ _ c _ _) (KnownUpdate updateCodec updateName) opts = 
           Just (Update.Outcome'Success payloads) -> case (payloads ^. Common.vec'payloads) V.!? 0 of
             Nothing -> throwIO $ ValueError "No return value payloads provided by update response"
             Just p -> pure $ convertFromProtoPayload p
-          -- TODO: convert this failure thing to a nice Haskell version
           Just (Update.Outcome'Failure failure) -> throwIO $ UpdateFailure failure
           Nothing -> error "Unsupported update result"
   payloadProcessorDecode processor eRes >>= either (throwIO . ValueError) pure >>= decode updateCodec >>= either (throwIO . ValueError) pure

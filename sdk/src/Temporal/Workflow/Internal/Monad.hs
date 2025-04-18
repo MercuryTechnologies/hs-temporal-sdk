@@ -531,15 +531,6 @@ newtype Validation a = Validation
   deriving newtype (Functor, Applicative, Monad, Catch.MonadThrow, Catch.MonadCatch)
 
 
-instance MonadIO Validation where
-  liftIO = Validation
-
-
-instance MonadUnliftIO Validation where
-  withRunInIO inner = Validation $ withRunInIO $ \runInIO ->
-    inner (runInIO . unValidation)
-
-
 {- | 'StateVar' values are mutable variables scoped to a Workflow run.
 
 'Workflow's are deterministic, so you may not use normal IORefs, since the IORef
@@ -865,8 +856,8 @@ data WorkflowInboundInterceptor = WorkflowInboundInterceptor
       -> Workflow Payload
   , validateUpdate
       :: HandleUpdateInput
-      -> (HandleUpdateInput -> Validation (Either SomeException ()))
-      -> Validation (Either SomeException ())
+      -> (HandleUpdateInput -> IO (Either SomeException ()))
+      -> IO (Either SomeException ())
   }
 
 

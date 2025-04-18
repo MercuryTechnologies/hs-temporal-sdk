@@ -25,7 +25,6 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Text as T
 import Data.Version (showVersion)
 import Data.Word (Word32)
-import OpenTelemetry.Attributes (emptyAttributes)
 import qualified OpenTelemetry.Context as Ctxt
 import OpenTelemetry.Context.ThreadLocal (attachContext, getContext)
 import OpenTelemetry.Propagator
@@ -34,10 +33,6 @@ import OpenTelemetry.Trace.Core
 import Paths_temporal_sdk
 import Temporal.Activity.Types
 -- TODO rework WorkflowExitVariant to not expose internals
-
-import Temporal.Client.Types (
-  StartWorkflowOptions (..),
- )
 import Temporal.Common
 import Temporal.Duration
 import Temporal.Interceptor
@@ -356,7 +351,16 @@ makeOpenTelemetryInterceptor = do
                 inSpan'' tracer ("SignalWithStartWorkflow:" <> rawWorkflowType (signalWithStartWorkflowType input)) spanArgs $ \_ -> do
                   ctxt <- getContext
                   hdrs <- inject headersPropagator ctxt input.signalWithStartOptions.headers
-                  next (input {signalWithStartOptions = (signalWithStartOptions input) {Temporal.Client.Types.headers = hdrs}})
+                  next (input {signalWithStartOptions = (signalWithStartOptions input) {headers = hdrs}})
+            , updateWorkflow = \input next -> do
+                let spanArgs =
+                      defaultSpanArguments
+                        { kind = Client
+                        }
+                inSpan'' tracer ("UpdateWorkflow:" <> updateWorkflowType input) spanArgs $ \_ -> do
+                  ctxt <- getContext
+                  hdrs <- inject headersPropagator ctxt input.updateWorkflowHeaders
+                  next (input {updateWorkflowHeaders = hdrs})
             }
       , -- Not really anything to do here since new cron jobs should be in their own context
         scheduleClientInterceptors = mempty

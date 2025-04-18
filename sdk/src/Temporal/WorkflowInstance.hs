@@ -444,15 +444,9 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
                         Just f -> do
                           eResult <- UnliftIO.try $
                             liftIO $
-                              unValidation $
-                                inst.inboundInterceptor.validateUpdate baseInput $ \input ->
-                                  f input.handleUpdateId input.handleUpdateInputArgs input.handleUpdateInputHeaders
-                          -- pure $ either (\(e1, _) -> Left e1) id eResult
-                          case eResult of
-                            Left err -> pure $ Left err
-                            Right res -> case res of
-                              Left err' -> pure $ Left err'
-                              Right res' -> pure $ Right res'
+                              inst.inboundInterceptor.validateUpdate baseInput $ \input ->
+                                unValidation $ f input.handleUpdateId input.handleUpdateInputArgs input.handleUpdateInputHeaders
+                          pure $ join eResult
                       case eValidatorResult of
                         Left err -> do
                           addCommand $
