@@ -11,18 +11,11 @@ module IntegrationSpec.Updates where
 
 import Control.Exception
 import Control.Monad
-import Control.Monad.Catch
-import Control.Monad.Logger
-import qualified Data.Text as T
 import RequireCallStack (provideCallStack)
-import System.IO.Unsafe (unsafePerformIO)
-import Temporal.Activity
-import Temporal.Client
 import Temporal.Duration
 import Temporal.Payload
 import Temporal.TH
 import Temporal.Workflow
-import Temporal.Workflow.Update
 
 
 -- - Workflow that throws an exception
@@ -144,12 +137,13 @@ workflowThatThrowsBeforeTheUpdate = provideCallStack do
   let handleUpdate arg = do
         modifyStateVar stateVar (+ arg)
         readStateVar stateVar
-  setUpdateHandler testUpdate handleUpdate Nothing
+      validateUpdate _ = pure $ Right ()
+  setUpdateHandler testUpdate handleUpdate (Just validateUpdate)
   x <- readStateVar stateVar
-  error ("Current state var: " <> show x)
+  void $ error $ "Current state var: " <> show x
   waitCondition do
-    x <- readStateVar stateVar
-    pure $ x > 0
+    x' <- readStateVar stateVar
+    pure $ x' > 0
   readStateVar stateVar
 
 
@@ -162,12 +156,13 @@ workflowThatThrowsAfterTheUpdate = provideCallStack do
   let handleUpdate arg = do
         modifyStateVar stateVar (+ arg)
         readStateVar stateVar
-  setUpdateHandler testUpdate handleUpdate Nothing
+      validateUpdate _ = pure $ Right ()
+  setUpdateHandler testUpdate handleUpdate (Just validateUpdate)
   waitCondition do
     x <- readStateVar stateVar
     pure $ x > 0
   x <- readStateVar stateVar
-  error ("Current state var: " <> show x)
+  void $ error $ "Current state var: " <> show x
   readStateVar stateVar
 
 

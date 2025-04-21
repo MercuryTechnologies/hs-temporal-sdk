@@ -1797,7 +1797,7 @@ updatesWithInterceptors = do
                     performUnsafeNonDeterministicIO $ writeIORef handleUpdateWasCalled True
                     next input
                 , validateUpdate = \input next -> do
-                    liftIO $ writeIORef validateUpdateWasCalled True
+                    writeIORef validateUpdateWasCalled True
                     next input
                 }
           , clientInterceptors =
@@ -1846,7 +1846,7 @@ updatesWithInterceptors = do
                     performUnsafeNonDeterministicIO $ writeIORef handleUpdateArgs $ Just input.handleUpdateInputArgs
                     next input
                 , validateUpdate = \input next -> do
-                    liftIO $ writeIORef validateUpdateArgs $ Just input.handleUpdateInputArgs
+                    writeIORef validateUpdateArgs $ Just input.handleUpdateInputArgs
                     next input
                 }
           , clientInterceptors =
@@ -1901,7 +1901,7 @@ updatesWithInterceptors = do
                     performUnsafeNonDeterministicIO $ modifyIORef handleUpdateOrdering (++ ["a"])
                     next input
                 , validateUpdate = \input next -> do
-                    liftIO $ modifyIORef validateUpdateOrdering (++ ["a"])
+                    modifyIORef validateUpdateOrdering (++ ["a"])
                     next input
                 }
           , clientInterceptors =
@@ -1920,7 +1920,7 @@ updatesWithInterceptors = do
                     performUnsafeNonDeterministicIO $ modifyIORef handleUpdateOrdering (++ ["b"])
                     next input
                 , validateUpdate = \input next -> do
-                    liftIO $ modifyIORef validateUpdateOrdering (++ ["b"])
+                    modifyIORef validateUpdateOrdering (++ ["b"])
                     next input
                 }
           , clientInterceptors =
@@ -1958,8 +1958,6 @@ updatesWithInterceptors = do
           readIORef handleUpdateOrdering `shouldReturn` ["a", "b"]
           readIORef validateUpdateOrdering `shouldReturn` ["a", "b"]
           readIORef updateWorkflowOrdering `shouldReturn` ["a", "b"]
-    handleModifiedUpdateArgs <- runIO $ newIORef (Nothing :: Maybe (Vector Payload))
-    validateModifiedUpdateArgs <- runIO $ newIORef (Nothing :: Maybe (Vector Payload))
     let
       modifyArgsInterceptors :: Interceptors ()
       modifyArgsInterceptors =
@@ -1969,9 +1967,6 @@ updatesWithInterceptors = do
                 { handleUpdate = \input next -> do
                     let metadata = payloadMetadata $ V.head input.handleUpdateInputArgs
                     next $ input {handleUpdateInputArgs = V.singleton Payload {payloadData = "24", payloadMetadata = metadata}}
-                    -- , validateUpdate = \input next -> do
-                    --     writeIORef validateUpdateArgs $ Just input.handleUpdateInputArgs
-                    --     next input
                 }
           , clientInterceptors = mempty
           }
@@ -1998,10 +1993,9 @@ updatesWithInterceptors = do
             pure (updateResult, workflowResult)
           updateResult `shouldBe` 24
           workflowResult `shouldBe` 24
-    updateWorkflowArgs <- runIO $ newIORef (Nothing :: Maybe (Vector Payload))
     let
-      modifyArgsInterceptors :: Interceptors ()
-      modifyArgsInterceptors =
+      modifyArgsOnClientInterceptors :: Interceptors ()
+      modifyArgsOnClientInterceptors =
         mempty
           { clientInterceptors =
               mempty
@@ -2010,7 +2004,7 @@ updatesWithInterceptors = do
                     next $ input {updateWorkflowArgs = V.singleton Payload {payloadData = "24", payloadMetadata = metadata}}
                 }
           }
-    withInterceptors modifyArgsInterceptors do
+    withInterceptors modifyArgsOnClientInterceptors do
       it "supports modifying the args passed to update client-side" $ \TestEnv {..} -> do
         let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
               baseConf
@@ -2045,7 +2039,7 @@ updatesWithInterceptors = do
                     performUnsafeNonDeterministicIO $ writeIORef handleUpdateWasNotCalledAfterException True
                     next input
                 , validateUpdate = \input next -> do
-                    liftIO $ writeIORef validateUpdateWasNotCalledAfterException True
+                    writeIORef validateUpdateWasNotCalledAfterException True
                     next input
                 }
           }
@@ -2073,48 +2067,48 @@ updatesWithInterceptors = do
           let _ = eRes :: Either SomeException (Int, Int)
           readIORef handleUpdateWasNotCalledAfterException `shouldReturn` False
           readIORef validateUpdateWasNotCalledAfterException `shouldReturn` False
+    handleUpdateWasCalledBeforeException <- runIO $ newIORef False
+    validateUpdateWasCalledBeforeException <- runIO $ newIORef False
+    let
+      captureIfCalledBeforeExceptionInterceptors :: Interceptors ()
+      captureIfCalledBeforeExceptionInterceptors =
+        mempty
+          { workflowInboundInterceptors =
+              mempty
+                { handleUpdate = \input next -> do
+                    performUnsafeNonDeterministicIO $ writeIORef handleUpdateWasCalledBeforeException True
+                    next input
+                , validateUpdate = \input next -> do
+                    putStrLn "XXXX: in the validator!!!!"
+                    writeIORef validateUpdateWasCalledBeforeException True
+                    next input
+                }
+          }
+    withInterceptors captureIfCalledBeforeExceptionInterceptors do
+      it "should call update if the workflow throws later" $ \TestEnv {..} -> do
+        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+              baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                  }
+          let updateOpts =
+                C.UpdateOptions
+                  { updateId = "update-interceptors-are-called-before-exception"
+                  , updateHeaders = mempty
+                  , waitPolicy = C.UpdateLifecycleStageCompleted
+                  }
+          eRes <- Catch.try $ useClient do
+            h <- C.start WorkflowThatThrowsAfterTheUpdate "update-interceptors-are-called-before-exception" opts
+            updateResult <- C.update h testUpdate updateOpts 12
+            workflowResult <- C.waitWorkflowResult h
+            pure (updateResult, workflowResult)
+          let _ = eRes :: Either SomeException (Int, Int)
+          readIORef handleUpdateWasCalledBeforeException `shouldReturn` True
+          readIORef validateUpdateWasCalledBeforeException `shouldReturn` True
 
-
--- handleUpdateWasCalledBeforeException <- runIO $ newIORef False
--- validateUpdateWasCalledBeforeException <- runIO $ newIORef False
--- let
---   captureIfCalledBeforeExceptionInterceptors :: Interceptors ()
---   captureIfCalledBeforeExceptionInterceptors =
---     mempty
---       { workflowInboundInterceptors =
---           mempty
---             { handleUpdate = \input next -> do
---                 performUnsafeNonDeterministicIO $ writeIORef handleUpdateWasCalledBeforeException True
---                 next input
---             , validateUpdate = \input next -> do
---                 liftIO $ writeIORef validateUpdateWasCalledBeforeException True
---                 next input
---             }
---       }
--- withInterceptors captureIfCalledAfterExceptionInterceptors do
---   it "should call update if the workflow throws later" $ \TestEnv {..} -> do
---     let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
---           baseConf
---     withWorker conf $ do
---       let opts =
---             (C.startWorkflowOptions taskQueue)
---               { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
---               , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
---               }
---       let updateOpts =
---             C.UpdateOptions
---               { updateId = "update-interceptors-are-called-before-exception"
---               , updateHeaders = mempty
---               , waitPolicy = C.UpdateLifecycleStageCompleted
---               }
---       eRes <- Catch.try $ useClient do
---         h <- C.start WorkflowThatThrowsAfterTheUpdate "update-interceptors-are-called-before-exception" opts
---         updateResult <- C.update h testUpdate updateOpts 12
---         workflowResult <- C.waitWorkflowResult h
---         pure (updateResult, workflowResult)
---       let _ = eRes :: Either SomeException (Int, Int)
---       readIORef handleUpdateWasCalledBeforeException `shouldReturn` True
---       readIORef validateUpdateWasCalledBeforeException `shouldReturn` True
 
 withInterceptors :: Interceptors () -> SpecWith TestEnv -> SpecWith PortNumber
 withInterceptors interceptors = aroundAllWith $ flip $ setup interceptors
