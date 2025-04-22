@@ -1,7 +1,4 @@
-defaults:
-  local: ../hpack-common/defaults.yaml
-
-verbatim: { cabal-version: 3.0 }
+defaults: { local: ../hpack-defaults.yaml }
 
 name:         temporal-codec-encryption
 version:      "0.0.1.0"

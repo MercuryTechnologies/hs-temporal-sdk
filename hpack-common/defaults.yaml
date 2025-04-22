@@ -1,2 +1,0 @@
-_default-extensions: !include "default-extensions.yaml"
-default-extensions: *common-default-extensions
