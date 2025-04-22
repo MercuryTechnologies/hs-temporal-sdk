@@ -31,9 +31,11 @@ import qualified Proto.Google.Protobuf.Duration
 import qualified Proto.Google.Protobuf.Empty
 import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Temporal.Api.Common.V1.Message
+import qualified Proto.Temporal.Api.Deployment.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.Common
 import qualified Proto.Temporal.Api.Enums.V1.Workflow
 import qualified Proto.Temporal.Api.Failure.V1.Message
+import qualified Proto.Temporal.Api.Sdk.V1.UserMetadata
 import qualified Proto.Temporal.Api.Taskqueue.V1.Message
 activityId ::
   forall f s a.
@@ -53,6 +55,25 @@ assignedBuildId ::
    Data.ProtoLens.Field.HasField s "assignedBuildId" a) =>
   Lens.Family2.LensLike' f s a
 assignedBuildId = Data.ProtoLens.Field.field @"assignedBuildId"
+attachCompletionCallbacks ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "attachCompletionCallbacks" a) =>
+  Lens.Family2.LensLike' f s a
+attachCompletionCallbacks
+  = Data.ProtoLens.Field.field @"attachCompletionCallbacks"
+attachLinks ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "attachLinks" a) =>
+  Lens.Family2.LensLike' f s a
+attachLinks = Data.ProtoLens.Field.field @"attachLinks"
+attachRequestId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "attachRequestId" a) =>
+  Lens.Family2.LensLike' f s a
+attachRequestId = Data.ProtoLens.Field.field @"attachRequestId"
 attempt ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "attempt" a) =>
@@ -64,12 +85,24 @@ autoResetPoints ::
    Data.ProtoLens.Field.HasField s "autoResetPoints" a) =>
   Lens.Family2.LensLike' f s a
 autoResetPoints = Data.ProtoLens.Field.field @"autoResetPoints"
+behavior ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "behavior" a) =>
+  Lens.Family2.LensLike' f s a
+behavior = Data.ProtoLens.Field.field @"behavior"
 binaryChecksum ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "binaryChecksum" a) =>
   Lens.Family2.LensLike' f s a
 binaryChecksum = Data.ProtoLens.Field.field @"binaryChecksum"
+blockedReason ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "blockedReason" a) =>
+  Lens.Family2.LensLike' f s a
+blockedReason = Data.ProtoLens.Field.field @"blockedReason"
 buildId ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "buildId" a) =>
@@ -81,6 +114,12 @@ callback ::
    Data.ProtoLens.Field.HasField s "callback" a) =>
   Lens.Family2.LensLike' f s a
 callback = Data.ProtoLens.Field.field @"callback"
+cancelRequested ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "cancelRequested" a) =>
+  Lens.Family2.LensLike' f s a
+cancelRequested = Data.ProtoLens.Field.field @"cancelRequested"
 cancellationInfo ::
   forall f s a.
   (Prelude.Functor f,
@@ -105,6 +144,13 @@ cronSchedule ::
    Data.ProtoLens.Field.HasField s "cronSchedule" a) =>
   Lens.Family2.LensLike' f s a
 cronSchedule = Data.ProtoLens.Field.field @"cronSchedule"
+currentRetryInterval ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "currentRetryInterval" a) =>
+  Lens.Family2.LensLike' f s a
+currentRetryInterval
+  = Data.ProtoLens.Field.field @"currentRetryInterval"
 defaultWorkflowTaskTimeout ::
   forall f s a.
   (Prelude.Functor f,
@@ -112,6 +158,19 @@ defaultWorkflowTaskTimeout ::
   Lens.Family2.LensLike' f s a
 defaultWorkflowTaskTimeout
   = Data.ProtoLens.Field.field @"defaultWorkflowTaskTimeout"
+deployment ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "deployment" a) =>
+  Lens.Family2.LensLike' f s a
+deployment = Data.ProtoLens.Field.field @"deployment"
+deploymentTransition ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "deploymentTransition" a) =>
+  Lens.Family2.LensLike' f s a
+deploymentTransition
+  = Data.ProtoLens.Field.field @"deploymentTransition"
 endpoint ::
   forall f s a.
   (Prelude.Functor f,
@@ -130,6 +189,13 @@ executionDuration ::
    Data.ProtoLens.Field.HasField s "executionDuration" a) =>
   Lens.Family2.LensLike' f s a
 executionDuration = Data.ProtoLens.Field.field @"executionDuration"
+executionExpirationTime ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "executionExpirationTime" a) =>
+  Lens.Family2.LensLike' f s a
+executionExpirationTime
+  = Data.ProtoLens.Field.field @"executionExpirationTime"
 executionTime ::
   forall f s a.
   (Prelude.Functor f,
@@ -148,6 +214,12 @@ expireTime ::
    Data.ProtoLens.Field.HasField s "expireTime" a) =>
   Lens.Family2.LensLike' f s a
 expireTime = Data.ProtoLens.Field.field @"expireTime"
+firstRunId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "firstRunId" a) =>
+  Lens.Family2.LensLike' f s a
+firstRunId = Data.ProtoLens.Field.field @"firstRunId"
 firstWorkflowTaskCompletedId ::
   forall f s a.
   (Prelude.Functor f,
@@ -178,6 +250,12 @@ historySizeBytes ::
    Data.ProtoLens.Field.HasField s "historySizeBytes" a) =>
   Lens.Family2.LensLike' f s a
 historySizeBytes = Data.ProtoLens.Field.field @"historySizeBytes"
+identity ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "identity" a) =>
+  Lens.Family2.LensLike' f s a
+identity = Data.ProtoLens.Field.field @"identity"
 inheritedBuildId ::
   forall f s a.
   (Prelude.Functor f,
@@ -209,6 +287,12 @@ lastAttemptFailure ::
   Lens.Family2.LensLike' f s a
 lastAttemptFailure
   = Data.ProtoLens.Field.field @"lastAttemptFailure"
+lastDeployment ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "lastDeployment" a) =>
+  Lens.Family2.LensLike' f s a
+lastDeployment = Data.ProtoLens.Field.field @"lastDeployment"
 lastFailure ::
   forall f s a.
   (Prelude.Functor f,
@@ -228,12 +312,25 @@ lastIndependentlyAssignedBuildId ::
   Lens.Family2.LensLike' f s a
 lastIndependentlyAssignedBuildId
   = Data.ProtoLens.Field.field @"lastIndependentlyAssignedBuildId"
+lastResetTime ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "lastResetTime" a) =>
+  Lens.Family2.LensLike' f s a
+lastResetTime = Data.ProtoLens.Field.field @"lastResetTime"
 lastStartedTime ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "lastStartedTime" a) =>
   Lens.Family2.LensLike' f s a
 lastStartedTime = Data.ProtoLens.Field.field @"lastStartedTime"
+lastWorkerDeploymentVersion ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "lastWorkerDeploymentVersion" a) =>
+  Lens.Family2.LensLike' f s a
+lastWorkerDeploymentVersion
+  = Data.ProtoLens.Field.field @"lastWorkerDeploymentVersion"
 lastWorkerIdentity ::
   forall f s a.
   (Prelude.Functor f,
@@ -248,6 +345,11 @@ lastWorkerVersionStamp ::
   Lens.Family2.LensLike' f s a
 lastWorkerVersionStamp
   = Data.ProtoLens.Field.field @"lastWorkerVersionStamp"
+manual ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "manual" a) =>
+  Lens.Family2.LensLike' f s a
+manual = Data.ProtoLens.Field.field @"manual"
 maximumAttempts ::
   forall f s a.
   (Prelude.Functor f,
@@ -300,6 +402,13 @@ maybe'createTime ::
    Data.ProtoLens.Field.HasField s "maybe'createTime" a) =>
   Lens.Family2.LensLike' f s a
 maybe'createTime = Data.ProtoLens.Field.field @"maybe'createTime"
+maybe'currentRetryInterval ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'currentRetryInterval" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'currentRetryInterval
+  = Data.ProtoLens.Field.field @"maybe'currentRetryInterval"
 maybe'defaultWorkflowTaskTimeout ::
   forall f s a.
   (Prelude.Functor f,
@@ -307,6 +416,19 @@ maybe'defaultWorkflowTaskTimeout ::
   Lens.Family2.LensLike' f s a
 maybe'defaultWorkflowTaskTimeout
   = Data.ProtoLens.Field.field @"maybe'defaultWorkflowTaskTimeout"
+maybe'deployment ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'deployment" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'deployment = Data.ProtoLens.Field.field @"maybe'deployment"
+maybe'deploymentTransition ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'deploymentTransition" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'deploymentTransition
+  = Data.ProtoLens.Field.field @"maybe'deploymentTransition"
 maybe'execution ::
   forall f s a.
   (Prelude.Functor f,
@@ -320,6 +442,13 @@ maybe'executionDuration ::
   Lens.Family2.LensLike' f s a
 maybe'executionDuration
   = Data.ProtoLens.Field.field @"maybe'executionDuration"
+maybe'executionExpirationTime ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'executionExpirationTime" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'executionExpirationTime
+  = Data.ProtoLens.Field.field @"maybe'executionExpirationTime"
 maybe'executionTime ::
   forall f s a.
   (Prelude.Functor f,
@@ -373,6 +502,13 @@ maybe'lastAttemptFailure ::
   Lens.Family2.LensLike' f s a
 maybe'lastAttemptFailure
   = Data.ProtoLens.Field.field @"maybe'lastAttemptFailure"
+maybe'lastDeployment ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'lastDeployment" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'lastDeployment
+  = Data.ProtoLens.Field.field @"maybe'lastDeployment"
 maybe'lastFailure ::
   forall f s a.
   (Prelude.Functor f,
@@ -394,6 +530,13 @@ maybe'lastIndependentlyAssignedBuildId ::
 maybe'lastIndependentlyAssignedBuildId
   = Data.ProtoLens.Field.field
       @"maybe'lastIndependentlyAssignedBuildId"
+maybe'lastResetTime ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'lastResetTime" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'lastResetTime
+  = Data.ProtoLens.Field.field @"maybe'lastResetTime"
 maybe'lastStartedTime ::
   forall f s a.
   (Prelude.Functor f,
@@ -408,6 +551,12 @@ maybe'lastWorkerVersionStamp ::
   Lens.Family2.LensLike' f s a
 maybe'lastWorkerVersionStamp
   = Data.ProtoLens.Field.field @"maybe'lastWorkerVersionStamp"
+maybe'manual ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'manual" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'manual = Data.ProtoLens.Field.field @"maybe'manual"
 maybe'memo ::
   forall f s a.
   (Prelude.Functor f,
@@ -435,6 +584,13 @@ maybe'originalScheduledTime ::
   Lens.Family2.LensLike' f s a
 maybe'originalScheduledTime
   = Data.ProtoLens.Field.field @"maybe'originalScheduledTime"
+maybe'originalStartTime ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'originalStartTime" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'originalStartTime
+  = Data.ProtoLens.Field.field @"maybe'originalStartTime"
 maybe'parentExecution ::
   forall f s a.
   (Prelude.Functor f,
@@ -442,6 +598,30 @@ maybe'parentExecution ::
   Lens.Family2.LensLike' f s a
 maybe'parentExecution
   = Data.ProtoLens.Field.field @"maybe'parentExecution"
+maybe'pauseInfo ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'pauseInfo" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'pauseInfo = Data.ProtoLens.Field.field @"maybe'pauseInfo"
+maybe'pauseTime ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'pauseTime" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'pauseTime = Data.ProtoLens.Field.field @"maybe'pauseTime"
+maybe'pausedBy ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'pausedBy" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'pausedBy = Data.ProtoLens.Field.field @"maybe'pausedBy"
+maybe'priority ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'priority" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'priority = Data.ProtoLens.Field.field @"maybe'priority"
 maybe'registrationTime ::
   forall f s a.
   (Prelude.Functor f,
@@ -469,6 +649,19 @@ maybe'rootExecution ::
   Lens.Family2.LensLike' f s a
 maybe'rootExecution
   = Data.ProtoLens.Field.field @"maybe'rootExecution"
+maybe'ruleId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'ruleId" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'ruleId = Data.ProtoLens.Field.field @"maybe'ruleId"
+maybe'runExpirationTime ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'runExpirationTime" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'runExpirationTime
+  = Data.ProtoLens.Field.field @"maybe'runExpirationTime"
 maybe'scheduleToCloseTimeout ::
   forall f s a.
   (Prelude.Functor f,
@@ -527,12 +720,40 @@ maybe'useWorkflowBuildId ::
   Lens.Family2.LensLike' f s a
 maybe'useWorkflowBuildId
   = Data.ProtoLens.Field.field @"maybe'useWorkflowBuildId"
+maybe'userMetadata ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'userMetadata" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'userMetadata
+  = Data.ProtoLens.Field.field @"maybe'userMetadata"
 maybe'variant ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "maybe'variant" a) =>
   Lens.Family2.LensLike' f s a
 maybe'variant = Data.ProtoLens.Field.field @"maybe'variant"
+maybe'versionTransition ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'versionTransition" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'versionTransition
+  = Data.ProtoLens.Field.field @"maybe'versionTransition"
+maybe'versioningInfo ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'versioningInfo" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'versioningInfo
+  = Data.ProtoLens.Field.field @"maybe'versioningInfo"
+maybe'versioningOverride ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'versioningOverride" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'versioningOverride
+  = Data.ProtoLens.Field.field @"maybe'versioningOverride"
 maybe'workflowClosed ::
   forall f s a.
   (Prelude.Functor f,
@@ -599,6 +820,12 @@ operationId ::
    Data.ProtoLens.Field.HasField s "operationId" a) =>
   Lens.Family2.LensLike' f s a
 operationId = Data.ProtoLens.Field.field @"operationId"
+operationToken ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "operationToken" a) =>
+  Lens.Family2.LensLike' f s a
+operationToken = Data.ProtoLens.Field.field @"operationToken"
 originalScheduledTime ::
   forall f s a.
   (Prelude.Functor f,
@@ -606,6 +833,12 @@ originalScheduledTime ::
   Lens.Family2.LensLike' f s a
 originalScheduledTime
   = Data.ProtoLens.Field.field @"originalScheduledTime"
+originalStartTime ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "originalStartTime" a) =>
+  Lens.Family2.LensLike' f s a
+originalStartTime = Data.ProtoLens.Field.field @"originalStartTime"
 parentClosePolicy ::
   forall f s a.
   (Prelude.Functor f,
@@ -624,11 +857,45 @@ parentNamespaceId ::
    Data.ProtoLens.Field.HasField s "parentNamespaceId" a) =>
   Lens.Family2.LensLike' f s a
 parentNamespaceId = Data.ProtoLens.Field.field @"parentNamespaceId"
+pauseInfo ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "pauseInfo" a) =>
+  Lens.Family2.LensLike' f s a
+pauseInfo = Data.ProtoLens.Field.field @"pauseInfo"
+pauseTime ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "pauseTime" a) =>
+  Lens.Family2.LensLike' f s a
+pauseTime = Data.ProtoLens.Field.field @"pauseTime"
+paused ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "paused" a) =>
+  Lens.Family2.LensLike' f s a
+paused = Data.ProtoLens.Field.field @"paused"
+pinnedVersion ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "pinnedVersion" a) =>
+  Lens.Family2.LensLike' f s a
+pinnedVersion = Data.ProtoLens.Field.field @"pinnedVersion"
 points ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "points" a) =>
   Lens.Family2.LensLike' f s a
 points = Data.ProtoLens.Field.field @"points"
+priority ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "priority" a) =>
+  Lens.Family2.LensLike' f s a
+priority = Data.ProtoLens.Field.field @"priority"
+reason ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "reason" a) =>
+  Lens.Family2.LensLike' f s a
+reason = Data.ProtoLens.Field.field @"reason"
 registrationTime ::
   forall f s a.
   (Prelude.Functor f,
@@ -641,6 +908,12 @@ requestedTime ::
    Data.ProtoLens.Field.HasField s "requestedTime" a) =>
   Lens.Family2.LensLike' f s a
 requestedTime = Data.ProtoLens.Field.field @"requestedTime"
+resetRunId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "resetRunId" a) =>
+  Lens.Family2.LensLike' f s a
+resetRunId = Data.ProtoLens.Field.field @"resetRunId"
 resettable ::
   forall f s a.
   (Prelude.Functor f,
@@ -659,6 +932,17 @@ rootExecution ::
    Data.ProtoLens.Field.HasField s "rootExecution" a) =>
   Lens.Family2.LensLike' f s a
 rootExecution = Data.ProtoLens.Field.field @"rootExecution"
+ruleId ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "ruleId" a) =>
+  Lens.Family2.LensLike' f s a
+ruleId = Data.ProtoLens.Field.field @"ruleId"
+runExpirationTime ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "runExpirationTime" a) =>
+  Lens.Family2.LensLike' f s a
+runExpirationTime = Data.ProtoLens.Field.field @"runExpirationTime"
 runId ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "runId" a) =>
@@ -671,6 +955,12 @@ scheduleToCloseTimeout ::
   Lens.Family2.LensLike' f s a
 scheduleToCloseTimeout
   = Data.ProtoLens.Field.field @"scheduleToCloseTimeout"
+scheduledEventId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "scheduledEventId" a) =>
+  Lens.Family2.LensLike' f s a
+scheduledEventId = Data.ProtoLens.Field.field @"scheduledEventId"
 scheduledTime ::
   forall f s a.
   (Prelude.Functor f,
@@ -740,12 +1030,49 @@ useWorkflowBuildId ::
   Lens.Family2.LensLike' f s a
 useWorkflowBuildId
   = Data.ProtoLens.Field.field @"useWorkflowBuildId"
+userMetadata ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "userMetadata" a) =>
+  Lens.Family2.LensLike' f s a
+userMetadata = Data.ProtoLens.Field.field @"userMetadata"
 vec'points ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "vec'points" a) =>
   Lens.Family2.LensLike' f s a
 vec'points = Data.ProtoLens.Field.field @"vec'points"
+version ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "version" a) =>
+  Lens.Family2.LensLike' f s a
+version = Data.ProtoLens.Field.field @"version"
+versionTransition ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "versionTransition" a) =>
+  Lens.Family2.LensLike' f s a
+versionTransition = Data.ProtoLens.Field.field @"versionTransition"
+versioningInfo ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "versioningInfo" a) =>
+  Lens.Family2.LensLike' f s a
+versioningInfo = Data.ProtoLens.Field.field @"versioningInfo"
+versioningOverride ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "versioningOverride" a) =>
+  Lens.Family2.LensLike' f s a
+versioningOverride
+  = Data.ProtoLens.Field.field @"versioningOverride"
+workerDeploymentName ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "workerDeploymentName" a) =>
+  Lens.Family2.LensLike' f s a
+workerDeploymentName
+  = Data.ProtoLens.Field.field @"workerDeploymentName"
 workflowClosed ::
   forall f s a.
   (Prelude.Functor f,

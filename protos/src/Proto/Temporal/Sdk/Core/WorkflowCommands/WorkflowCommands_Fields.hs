@@ -33,6 +33,7 @@ import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Temporal.Api.Common.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.Workflow
 import qualified Proto.Temporal.Api.Failure.V1.Message
+import qualified Proto.Temporal.Api.Sdk.V1.UserMetadata
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow
 import qualified Proto.Temporal.Sdk.Core.Common.Common
 accepted ::
@@ -153,6 +154,12 @@ doNotEagerlyExecute ::
   Lens.Family2.LensLike' f s a
 doNotEagerlyExecute
   = Data.ProtoLens.Field.field @"doNotEagerlyExecute"
+endpoint ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "endpoint" a) =>
+  Lens.Family2.LensLike' f s a
+endpoint = Data.ProtoLens.Field.field @"endpoint"
 failWorkflowExecution ::
   forall f s a.
   (Prelude.Functor f,
@@ -285,6 +292,12 @@ maybe'heartbeatTimeout ::
   Lens.Family2.LensLike' f s a
 maybe'heartbeatTimeout
   = Data.ProtoLens.Field.field @"maybe'heartbeatTimeout"
+maybe'input ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'input" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'input = Data.ProtoLens.Field.field @"maybe'input"
 maybe'localRetryThreshold ::
   forall f s a.
   (Prelude.Functor f,
@@ -306,6 +319,12 @@ maybe'originalScheduleTime ::
   Lens.Family2.LensLike' f s a
 maybe'originalScheduleTime
   = Data.ProtoLens.Field.field @"maybe'originalScheduleTime"
+maybe'priority ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'priority" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'priority = Data.ProtoLens.Field.field @"maybe'priority"
 maybe'rejected ::
   forall f s a.
   (Prelude.Functor f,
@@ -334,6 +353,13 @@ maybe'requestCancelLocalActivity ::
   Lens.Family2.LensLike' f s a
 maybe'requestCancelLocalActivity
   = Data.ProtoLens.Field.field @"maybe'requestCancelLocalActivity"
+maybe'requestCancelNexusOperation ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'requestCancelNexusOperation" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'requestCancelNexusOperation
+  = Data.ProtoLens.Field.field @"maybe'requestCancelNexusOperation"
 maybe'respondToQuery ::
   forall f s a.
   (Prelude.Functor f,
@@ -373,6 +399,13 @@ maybe'scheduleLocalActivity ::
   Lens.Family2.LensLike' f s a
 maybe'scheduleLocalActivity
   = Data.ProtoLens.Field.field @"maybe'scheduleLocalActivity"
+maybe'scheduleNexusOperation ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'scheduleNexusOperation" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'scheduleNexusOperation
+  = Data.ProtoLens.Field.field @"maybe'scheduleNexusOperation"
 maybe'scheduleToCloseTimeout ::
   forall f s a.
   (Prelude.Functor f,
@@ -463,6 +496,13 @@ maybe'upsertedMemo ::
   Lens.Family2.LensLike' f s a
 maybe'upsertedMemo
   = Data.ProtoLens.Field.field @"maybe'upsertedMemo"
+maybe'userMetadata ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'userMetadata" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'userMetadata
+  = Data.ProtoLens.Field.field @"maybe'userMetadata"
 maybe'value ::
   forall f s a.
   (Prelude.Functor f,
@@ -521,6 +561,18 @@ namespace ::
    Data.ProtoLens.Field.HasField s "namespace" a) =>
   Lens.Family2.LensLike' f s a
 namespace = Data.ProtoLens.Field.field @"namespace"
+nexusHeader ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "nexusHeader" a) =>
+  Lens.Family2.LensLike' f s a
+nexusHeader = Data.ProtoLens.Field.field @"nexusHeader"
+operation ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "operation" a) =>
+  Lens.Family2.LensLike' f s a
+operation = Data.ProtoLens.Field.field @"operation"
 originalScheduleTime ::
   forall f s a.
   (Prelude.Functor f,
@@ -539,6 +591,12 @@ patchId ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "patchId" a) =>
   Lens.Family2.LensLike' f s a
 patchId = Data.ProtoLens.Field.field @"patchId"
+priority ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "priority" a) =>
+  Lens.Family2.LensLike' f s a
+priority = Data.ProtoLens.Field.field @"priority"
 protocolInstanceId ::
   forall f s a.
   (Prelude.Functor f,
@@ -551,6 +609,11 @@ queryId ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "queryId" a) =>
   Lens.Family2.LensLike' f s a
 queryId = Data.ProtoLens.Field.field @"queryId"
+reason ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "reason" a) =>
+  Lens.Family2.LensLike' f s a
+reason = Data.ProtoLens.Field.field @"reason"
 rejected ::
   forall f s a.
   (Prelude.Functor f,
@@ -579,6 +642,13 @@ requestCancelLocalActivity ::
   Lens.Family2.LensLike' f s a
 requestCancelLocalActivity
   = Data.ProtoLens.Field.field @"requestCancelLocalActivity"
+requestCancelNexusOperation ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "requestCancelNexusOperation" a) =>
+  Lens.Family2.LensLike' f s a
+requestCancelNexusOperation
+  = Data.ProtoLens.Field.field @"requestCancelNexusOperation"
 respondToQuery ::
   forall f s a.
   (Prelude.Functor f,
@@ -615,6 +685,13 @@ scheduleLocalActivity ::
   Lens.Family2.LensLike' f s a
 scheduleLocalActivity
   = Data.ProtoLens.Field.field @"scheduleLocalActivity"
+scheduleNexusOperation ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "scheduleNexusOperation" a) =>
+  Lens.Family2.LensLike' f s a
+scheduleNexusOperation
+  = Data.ProtoLens.Field.field @"scheduleNexusOperation"
 scheduleToCloseTimeout ::
   forall f s a.
   (Prelude.Functor f,
@@ -640,6 +717,11 @@ seq ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "seq" a) =>
   Lens.Family2.LensLike' f s a
 seq = Data.ProtoLens.Field.field @"seq"
+service ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "service" a) =>
+  Lens.Family2.LensLike' f s a
+service = Data.ProtoLens.Field.field @"service"
 setPatchMarker ::
   forall f s a.
   (Prelude.Functor f,
@@ -717,6 +799,12 @@ upsertedMemo ::
    Data.ProtoLens.Field.HasField s "upsertedMemo" a) =>
   Lens.Family2.LensLike' f s a
 upsertedMemo = Data.ProtoLens.Field.field @"upsertedMemo"
+userMetadata ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "userMetadata" a) =>
+  Lens.Family2.LensLike' f s a
+userMetadata = Data.ProtoLens.Field.field @"userMetadata"
 value ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "value" a) =>

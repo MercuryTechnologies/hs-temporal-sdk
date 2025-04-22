@@ -31,6 +31,7 @@ import qualified Proto.Google.Protobuf.Duration
 import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Temporal.Api.Common.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.Schedule
+import qualified Proto.Temporal.Api.Enums.V1.Workflow
 import qualified Proto.Temporal.Api.Workflow.V1.Message
 action ::
   forall f s a.
@@ -447,6 +448,13 @@ startWorkflowResult ::
   Lens.Family2.LensLike' f s a
 startWorkflowResult
   = Data.ProtoLens.Field.field @"startWorkflowResult"
+startWorkflowStatus ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "startWorkflowStatus" a) =>
+  Lens.Family2.LensLike' f s a
+startWorkflowStatus
+  = Data.ProtoLens.Field.field @"startWorkflowStatus"
 state ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "state" a) =>

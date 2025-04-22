@@ -38,22 +38,45 @@ import qualified Proto.Temporal.Sdk.Core.ExternalData.ExternalData
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion
+activityType ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "activityType" a) =>
+  Lens.Family2.LensLike' f s a
+activityType = Data.ProtoLens.Field.field @"activityType"
 details ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "details" a) =>
   Lens.Family2.LensLike' f s a
 details = Data.ProtoLens.Field.field @"details"
+isSticky ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "isSticky" a) =>
+  Lens.Family2.LensLike' f s a
+isSticky = Data.ProtoLens.Field.field @"isSticky"
 maybe'result ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "maybe'result" a) =>
   Lens.Family2.LensLike' f s a
 maybe'result = Data.ProtoLens.Field.field @"maybe'result"
+operation ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "operation" a) =>
+  Lens.Family2.LensLike' f s a
+operation = Data.ProtoLens.Field.field @"operation"
 result ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "result" a) =>
   Lens.Family2.LensLike' f s a
 result = Data.ProtoLens.Field.field @"result"
+service ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "service" a) =>
+  Lens.Family2.LensLike' f s a
+service = Data.ProtoLens.Field.field @"service"
 taskToken ::
   forall f s a.
   (Prelude.Functor f,
@@ -66,3 +89,9 @@ vec'details ::
    Data.ProtoLens.Field.HasField s "vec'details" a) =>
   Lens.Family2.LensLike' f s a
 vec'details = Data.ProtoLens.Field.field @"vec'details"
+workflowType ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "workflowType" a) =>
+  Lens.Family2.LensLike' f s a
+workflowType = Data.ProtoLens.Field.field @"workflowType"

@@ -30,6 +30,7 @@ import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
 import qualified Proto.Google.Protobuf.Duration
 import qualified Proto.Google.Protobuf.Empty
 import qualified Proto.Temporal.Api.Enums.V1.Common
+import qualified Proto.Temporal.Api.Enums.V1.EventType
 import qualified Proto.Temporal.Api.Enums.V1.Reset
 backoffCoefficient ::
   forall f s a.
@@ -38,6 +39,12 @@ backoffCoefficient ::
   Lens.Family2.LensLike' f s a
 backoffCoefficient
   = Data.ProtoLens.Field.field @"backoffCoefficient"
+batchJob ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "batchJob" a) =>
+  Lens.Family2.LensLike' f s a
+batchJob = Data.ProtoLens.Field.field @"batchJob"
 buildId ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "buildId" a) =>
@@ -54,12 +61,36 @@ data' ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "data'" a) =>
   Lens.Family2.LensLike' f s a
 data' = Data.ProtoLens.Field.field @"data'"
+deploymentSeriesName ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "deploymentSeriesName" a) =>
+  Lens.Family2.LensLike' f s a
+deploymentSeriesName
+  = Data.ProtoLens.Field.field @"deploymentSeriesName"
 encodingType ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "encodingType" a) =>
   Lens.Family2.LensLike' f s a
 encodingType = Data.ProtoLens.Field.field @"encodingType"
+eventId ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "eventId" a) =>
+  Lens.Family2.LensLike' f s a
+eventId = Data.ProtoLens.Field.field @"eventId"
+eventRef ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "eventRef" a) =>
+  Lens.Family2.LensLike' f s a
+eventRef = Data.ProtoLens.Field.field @"eventRef"
+eventType ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "eventType" a) =>
+  Lens.Family2.LensLike' f s a
+eventType = Data.ProtoLens.Field.field @"eventType"
 fields ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "fields" a) =>
@@ -88,6 +119,17 @@ initialInterval ::
    Data.ProtoLens.Field.HasField s "initialInterval" a) =>
   Lens.Family2.LensLike' f s a
 initialInterval = Data.ProtoLens.Field.field @"initialInterval"
+internal ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "internal" a) =>
+  Lens.Family2.LensLike' f s a
+internal = Data.ProtoLens.Field.field @"internal"
+jobId ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "jobId" a) =>
+  Lens.Family2.LensLike' f s a
+jobId = Data.ProtoLens.Field.field @"jobId"
 key ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "key" a) =>
@@ -111,12 +153,24 @@ maximumInterval ::
    Data.ProtoLens.Field.HasField s "maximumInterval" a) =>
   Lens.Family2.LensLike' f s a
 maximumInterval = Data.ProtoLens.Field.field @"maximumInterval"
+maybe'batchJob ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'batchJob" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'batchJob = Data.ProtoLens.Field.field @"maybe'batchJob"
 maybe'buildId ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "maybe'buildId" a) =>
   Lens.Family2.LensLike' f s a
 maybe'buildId = Data.ProtoLens.Field.field @"maybe'buildId"
+maybe'eventRef ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'eventRef" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'eventRef = Data.ProtoLens.Field.field @"maybe'eventRef"
 maybe'firstWorkflowTask ::
   forall f s a.
   (Prelude.Functor f,
@@ -131,6 +185,12 @@ maybe'initialInterval ::
   Lens.Family2.LensLike' f s a
 maybe'initialInterval
   = Data.ProtoLens.Field.field @"maybe'initialInterval"
+maybe'internal ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'internal" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'internal = Data.ProtoLens.Field.field @"maybe'internal"
 maybe'lastWorkflowTask ::
   forall f s a.
   (Prelude.Functor f,
@@ -151,6 +211,12 @@ maybe'nexus ::
    Data.ProtoLens.Field.HasField s "maybe'nexus" a) =>
   Lens.Family2.LensLike' f s a
 maybe'nexus = Data.ProtoLens.Field.field @"maybe'nexus"
+maybe'reference ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'reference" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'reference = Data.ProtoLens.Field.field @"maybe'reference"
 maybe'target ::
   forall f s a.
   (Prelude.Functor f,
@@ -169,6 +235,13 @@ maybe'variant ::
    Data.ProtoLens.Field.HasField s "maybe'variant" a) =>
   Lens.Family2.LensLike' f s a
 maybe'variant = Data.ProtoLens.Field.field @"maybe'variant"
+maybe'workflowEvent ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'workflowEvent" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'workflowEvent
+  = Data.ProtoLens.Field.field @"maybe'workflowEvent"
 maybe'workflowTaskId ::
   forall f s a.
   (Prelude.Functor f,
@@ -187,6 +260,12 @@ name ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "name" a) =>
   Lens.Family2.LensLike' f s a
 name = Data.ProtoLens.Field.field @"name"
+namespace ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "namespace" a) =>
+  Lens.Family2.LensLike' f s a
+namespace = Data.ProtoLens.Field.field @"namespace"
 nexus ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "nexus" a) =>
@@ -213,6 +292,12 @@ payloads ::
    Data.ProtoLens.Field.HasField s "payloads" a) =>
   Lens.Family2.LensLike' f s a
 payloads = Data.ProtoLens.Field.field @"payloads"
+priorityKey ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "priorityKey" a) =>
+  Lens.Family2.LensLike' f s a
+priorityKey = Data.ProtoLens.Field.field @"priorityKey"
 resetReapplyExcludeTypes ::
   forall f s a.
   (Prelude.Functor f,
@@ -267,6 +352,12 @@ vec'resetReapplyExcludeTypes ::
   Lens.Family2.LensLike' f s a
 vec'resetReapplyExcludeTypes
   = Data.ProtoLens.Field.field @"vec'resetReapplyExcludeTypes"
+workflowEvent ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "workflowEvent" a) =>
+  Lens.Family2.LensLike' f s a
+workflowEvent = Data.ProtoLens.Field.field @"workflowEvent"
 workflowId ::
   forall f s a.
   (Prelude.Functor f,

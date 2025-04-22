@@ -29,6 +29,7 @@ import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unbox
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
 import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Temporal.Api.Common.V1.Message
+import qualified Proto.Temporal.Api.Enums.V1.Nexus
 asyncSuccess ::
   forall f s a.
   (Prelude.Functor f,
@@ -108,6 +109,11 @@ lastModifiedTime ::
    Data.ProtoLens.Field.HasField s "lastModifiedTime" a) =>
   Lens.Family2.LensLike' f s a
 lastModifiedTime = Data.ProtoLens.Field.field @"lastModifiedTime"
+links ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "links" a) =>
+  Lens.Family2.LensLike' f s a
+links = Data.ProtoLens.Field.field @"links"
 maybe'asyncSuccess ::
   forall f s a.
   (Prelude.Functor f,
@@ -256,6 +262,12 @@ operationState ::
    Data.ProtoLens.Field.HasField s "operationState" a) =>
   Lens.Family2.LensLike' f s a
 operationState = Data.ProtoLens.Field.field @"operationState"
+operationToken ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "operationToken" a) =>
+  Lens.Family2.LensLike' f s a
+operationToken = Data.ProtoLens.Field.field @"operationToken"
 payload ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "payload" a) =>
@@ -267,6 +279,12 @@ requestId ::
    Data.ProtoLens.Field.HasField s "requestId" a) =>
   Lens.Family2.LensLike' f s a
 requestId = Data.ProtoLens.Field.field @"requestId"
+retryBehavior ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "retryBehavior" a) =>
+  Lens.Family2.LensLike' f s a
+retryBehavior = Data.ProtoLens.Field.field @"retryBehavior"
 scheduledTime ::
   forall f s a.
   (Prelude.Functor f,
@@ -306,6 +324,11 @@ taskQueue ::
    Data.ProtoLens.Field.HasField s "taskQueue" a) =>
   Lens.Family2.LensLike' f s a
 taskQueue = Data.ProtoLens.Field.field @"taskQueue"
+type' ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "type'" a) =>
+  Lens.Family2.LensLike' f s a
+type' = Data.ProtoLens.Field.field @"type'"
 url ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "url" a) =>
@@ -322,6 +345,12 @@ value ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "value" a) =>
   Lens.Family2.LensLike' f s a
 value = Data.ProtoLens.Field.field @"value"
+vec'links ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'links" a) =>
+  Lens.Family2.LensLike' f s a
+vec'links = Data.ProtoLens.Field.field @"vec'links"
 version ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "version" a) =>

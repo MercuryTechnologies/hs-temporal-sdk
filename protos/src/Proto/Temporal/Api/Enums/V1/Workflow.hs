@@ -15,7 +15,9 @@ module Proto.Temporal.Api.Enums.V1.Workflow (
         PendingWorkflowTaskState'UnrecognizedValue, RetryState(..),
         RetryState(), RetryState'UnrecognizedValue, TimeoutType(..),
         TimeoutType(), TimeoutType'UnrecognizedValue,
-        WorkflowExecutionStatus(..), WorkflowExecutionStatus(),
+        VersioningBehavior(..), VersioningBehavior(),
+        VersioningBehavior'UnrecognizedValue, WorkflowExecutionStatus(..),
+        WorkflowExecutionStatus(),
         WorkflowExecutionStatus'UnrecognizedValue,
         WorkflowIdConflictPolicy(..), WorkflowIdConflictPolicy(),
         WorkflowIdConflictPolicy'UnrecognizedValue,
@@ -318,6 +320,8 @@ data PendingActivityState
     PENDING_ACTIVITY_STATE_SCHEDULED |
     PENDING_ACTIVITY_STATE_STARTED |
     PENDING_ACTIVITY_STATE_CANCEL_REQUESTED |
+    PENDING_ACTIVITY_STATE_PAUSED |
+    PENDING_ACTIVITY_STATE_PAUSE_REQUESTED |
     PendingActivityState'Unrecognized !PendingActivityState'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum PendingActivityState where
@@ -326,6 +330,8 @@ instance Data.ProtoLens.MessageEnum PendingActivityState where
   maybeToEnum 2 = Prelude.Just PENDING_ACTIVITY_STATE_STARTED
   maybeToEnum 3
     = Prelude.Just PENDING_ACTIVITY_STATE_CANCEL_REQUESTED
+  maybeToEnum 4 = Prelude.Just PENDING_ACTIVITY_STATE_PAUSED
+  maybeToEnum 5 = Prelude.Just PENDING_ACTIVITY_STATE_PAUSE_REQUESTED
   maybeToEnum k
     = Prelude.Just
         (PendingActivityState'Unrecognized
@@ -338,6 +344,10 @@ instance Data.ProtoLens.MessageEnum PendingActivityState where
     = "PENDING_ACTIVITY_STATE_STARTED"
   showEnum PENDING_ACTIVITY_STATE_CANCEL_REQUESTED
     = "PENDING_ACTIVITY_STATE_CANCEL_REQUESTED"
+  showEnum PENDING_ACTIVITY_STATE_PAUSED
+    = "PENDING_ACTIVITY_STATE_PAUSED"
+  showEnum PENDING_ACTIVITY_STATE_PAUSE_REQUESTED
+    = "PENDING_ACTIVITY_STATE_PAUSE_REQUESTED"
   showEnum
     (PendingActivityState'Unrecognized (PendingActivityState'UnrecognizedValue k))
     = Prelude.show k
@@ -350,11 +360,15 @@ instance Data.ProtoLens.MessageEnum PendingActivityState where
     = Prelude.Just PENDING_ACTIVITY_STATE_STARTED
     | (Prelude.==) k "PENDING_ACTIVITY_STATE_CANCEL_REQUESTED"
     = Prelude.Just PENDING_ACTIVITY_STATE_CANCEL_REQUESTED
+    | (Prelude.==) k "PENDING_ACTIVITY_STATE_PAUSED"
+    = Prelude.Just PENDING_ACTIVITY_STATE_PAUSED
+    | (Prelude.==) k "PENDING_ACTIVITY_STATE_PAUSE_REQUESTED"
+    = Prelude.Just PENDING_ACTIVITY_STATE_PAUSE_REQUESTED
     | Prelude.otherwise
     = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
 instance Prelude.Bounded PendingActivityState where
   minBound = PENDING_ACTIVITY_STATE_UNSPECIFIED
-  maxBound = PENDING_ACTIVITY_STATE_CANCEL_REQUESTED
+  maxBound = PENDING_ACTIVITY_STATE_PAUSE_REQUESTED
 instance Prelude.Enum PendingActivityState where
   toEnum k__
     = Prelude.maybe
@@ -367,18 +381,24 @@ instance Prelude.Enum PendingActivityState where
   fromEnum PENDING_ACTIVITY_STATE_SCHEDULED = 1
   fromEnum PENDING_ACTIVITY_STATE_STARTED = 2
   fromEnum PENDING_ACTIVITY_STATE_CANCEL_REQUESTED = 3
+  fromEnum PENDING_ACTIVITY_STATE_PAUSED = 4
+  fromEnum PENDING_ACTIVITY_STATE_PAUSE_REQUESTED = 5
   fromEnum
     (PendingActivityState'Unrecognized (PendingActivityState'UnrecognizedValue k))
     = Prelude.fromIntegral k
-  succ PENDING_ACTIVITY_STATE_CANCEL_REQUESTED
+  succ PENDING_ACTIVITY_STATE_PAUSE_REQUESTED
     = Prelude.error
-        "PendingActivityState.succ: bad argument PENDING_ACTIVITY_STATE_CANCEL_REQUESTED. This value would be out of bounds."
+        "PendingActivityState.succ: bad argument PENDING_ACTIVITY_STATE_PAUSE_REQUESTED. This value would be out of bounds."
   succ PENDING_ACTIVITY_STATE_UNSPECIFIED
     = PENDING_ACTIVITY_STATE_SCHEDULED
   succ PENDING_ACTIVITY_STATE_SCHEDULED
     = PENDING_ACTIVITY_STATE_STARTED
   succ PENDING_ACTIVITY_STATE_STARTED
     = PENDING_ACTIVITY_STATE_CANCEL_REQUESTED
+  succ PENDING_ACTIVITY_STATE_CANCEL_REQUESTED
+    = PENDING_ACTIVITY_STATE_PAUSED
+  succ PENDING_ACTIVITY_STATE_PAUSED
+    = PENDING_ACTIVITY_STATE_PAUSE_REQUESTED
   succ (PendingActivityState'Unrecognized _)
     = Prelude.error
         "PendingActivityState.succ: bad argument: unrecognized value"
@@ -391,6 +411,10 @@ instance Prelude.Enum PendingActivityState where
     = PENDING_ACTIVITY_STATE_SCHEDULED
   pred PENDING_ACTIVITY_STATE_CANCEL_REQUESTED
     = PENDING_ACTIVITY_STATE_STARTED
+  pred PENDING_ACTIVITY_STATE_PAUSED
+    = PENDING_ACTIVITY_STATE_CANCEL_REQUESTED
+  pred PENDING_ACTIVITY_STATE_PAUSE_REQUESTED
+    = PENDING_ACTIVITY_STATE_PAUSED
   pred (PendingActivityState'Unrecognized _)
     = Prelude.error
         "PendingActivityState.pred: bad argument: unrecognized value"
@@ -695,6 +719,81 @@ instance Prelude.Enum TimeoutType where
 instance Data.ProtoLens.FieldDefault TimeoutType where
   fieldDefault = TIMEOUT_TYPE_UNSPECIFIED
 instance Control.DeepSeq.NFData TimeoutType where
+  rnf x__ = Prelude.seq x__ ()
+newtype VersioningBehavior'UnrecognizedValue
+  = VersioningBehavior'UnrecognizedValue Data.Int.Int32
+  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+data VersioningBehavior
+  = VERSIONING_BEHAVIOR_UNSPECIFIED |
+    VERSIONING_BEHAVIOR_PINNED |
+    VERSIONING_BEHAVIOR_AUTO_UPGRADE |
+    VersioningBehavior'Unrecognized !VersioningBehavior'UnrecognizedValue
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.MessageEnum VersioningBehavior where
+  maybeToEnum 0 = Prelude.Just VERSIONING_BEHAVIOR_UNSPECIFIED
+  maybeToEnum 1 = Prelude.Just VERSIONING_BEHAVIOR_PINNED
+  maybeToEnum 2 = Prelude.Just VERSIONING_BEHAVIOR_AUTO_UPGRADE
+  maybeToEnum k
+    = Prelude.Just
+        (VersioningBehavior'Unrecognized
+           (VersioningBehavior'UnrecognizedValue (Prelude.fromIntegral k)))
+  showEnum VERSIONING_BEHAVIOR_UNSPECIFIED
+    = "VERSIONING_BEHAVIOR_UNSPECIFIED"
+  showEnum VERSIONING_BEHAVIOR_PINNED = "VERSIONING_BEHAVIOR_PINNED"
+  showEnum VERSIONING_BEHAVIOR_AUTO_UPGRADE
+    = "VERSIONING_BEHAVIOR_AUTO_UPGRADE"
+  showEnum
+    (VersioningBehavior'Unrecognized (VersioningBehavior'UnrecognizedValue k))
+    = Prelude.show k
+  readEnum k
+    | (Prelude.==) k "VERSIONING_BEHAVIOR_UNSPECIFIED"
+    = Prelude.Just VERSIONING_BEHAVIOR_UNSPECIFIED
+    | (Prelude.==) k "VERSIONING_BEHAVIOR_PINNED"
+    = Prelude.Just VERSIONING_BEHAVIOR_PINNED
+    | (Prelude.==) k "VERSIONING_BEHAVIOR_AUTO_UPGRADE"
+    = Prelude.Just VERSIONING_BEHAVIOR_AUTO_UPGRADE
+    | Prelude.otherwise
+    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
+instance Prelude.Bounded VersioningBehavior where
+  minBound = VERSIONING_BEHAVIOR_UNSPECIFIED
+  maxBound = VERSIONING_BEHAVIOR_AUTO_UPGRADE
+instance Prelude.Enum VersioningBehavior where
+  toEnum k__
+    = Prelude.maybe
+        (Prelude.error
+           ((Prelude.++)
+              "toEnum: unknown value for enum VersioningBehavior: "
+              (Prelude.show k__)))
+        Prelude.id (Data.ProtoLens.maybeToEnum k__)
+  fromEnum VERSIONING_BEHAVIOR_UNSPECIFIED = 0
+  fromEnum VERSIONING_BEHAVIOR_PINNED = 1
+  fromEnum VERSIONING_BEHAVIOR_AUTO_UPGRADE = 2
+  fromEnum
+    (VersioningBehavior'Unrecognized (VersioningBehavior'UnrecognizedValue k))
+    = Prelude.fromIntegral k
+  succ VERSIONING_BEHAVIOR_AUTO_UPGRADE
+    = Prelude.error
+        "VersioningBehavior.succ: bad argument VERSIONING_BEHAVIOR_AUTO_UPGRADE. This value would be out of bounds."
+  succ VERSIONING_BEHAVIOR_UNSPECIFIED = VERSIONING_BEHAVIOR_PINNED
+  succ VERSIONING_BEHAVIOR_PINNED = VERSIONING_BEHAVIOR_AUTO_UPGRADE
+  succ (VersioningBehavior'Unrecognized _)
+    = Prelude.error
+        "VersioningBehavior.succ: bad argument: unrecognized value"
+  pred VERSIONING_BEHAVIOR_UNSPECIFIED
+    = Prelude.error
+        "VersioningBehavior.pred: bad argument VERSIONING_BEHAVIOR_UNSPECIFIED. This value would be out of bounds."
+  pred VERSIONING_BEHAVIOR_PINNED = VERSIONING_BEHAVIOR_UNSPECIFIED
+  pred VERSIONING_BEHAVIOR_AUTO_UPGRADE = VERSIONING_BEHAVIOR_PINNED
+  pred (VersioningBehavior'Unrecognized _)
+    = Prelude.error
+        "VersioningBehavior.pred: bad argument: unrecognized value"
+  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
+  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
+  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
+  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
+instance Data.ProtoLens.FieldDefault VersioningBehavior where
+  fieldDefault = VERSIONING_BEHAVIOR_UNSPECIFIED
+instance Control.DeepSeq.NFData VersioningBehavior where
   rnf x__ = Prelude.seq x__ ()
 newtype WorkflowExecutionStatus'UnrecognizedValue
   = WorkflowExecutionStatus'UnrecognizedValue Data.Int.Int32

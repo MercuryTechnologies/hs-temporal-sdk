@@ -28,6 +28,17 @@ import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Gener
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
 import qualified Proto.Google.Protobuf.Duration
+buildId ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "buildId" a) =>
+  Lens.Family2.LensLike' f s a
+buildId = Data.ProtoLens.Field.field @"buildId"
+deploymentName ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "deploymentName" a) =>
+  Lens.Family2.LensLike' f s a
+deploymentName = Data.ProtoLens.Field.field @"deploymentName"
 namespace ::
   forall f s a.
   (Prelude.Functor f,

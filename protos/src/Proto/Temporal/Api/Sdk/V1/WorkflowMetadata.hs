@@ -35,7 +35,6 @@ import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
 {- | Fields :
      
          * 'Proto.Temporal.Api.Sdk.V1.WorkflowMetadata_Fields.type'' @:: Lens' WorkflowDefinition Data.Text.Text@
-         * 'Proto.Temporal.Api.Sdk.V1.WorkflowMetadata_Fields.description' @:: Lens' WorkflowDefinition Data.Text.Text@
          * 'Proto.Temporal.Api.Sdk.V1.WorkflowMetadata_Fields.queryDefinitions' @:: Lens' WorkflowDefinition [WorkflowInteractionDefinition]@
          * 'Proto.Temporal.Api.Sdk.V1.WorkflowMetadata_Fields.vec'queryDefinitions' @:: Lens' WorkflowDefinition (Data.Vector.Vector WorkflowInteractionDefinition)@
          * 'Proto.Temporal.Api.Sdk.V1.WorkflowMetadata_Fields.signalDefinitions' @:: Lens' WorkflowDefinition [WorkflowInteractionDefinition]@
@@ -44,7 +43,6 @@ import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
          * 'Proto.Temporal.Api.Sdk.V1.WorkflowMetadata_Fields.vec'updateDefinitions' @:: Lens' WorkflowDefinition (Data.Vector.Vector WorkflowInteractionDefinition)@ -}
 data WorkflowDefinition
   = WorkflowDefinition'_constructor {_WorkflowDefinition'type' :: !Data.Text.Text,
-                                     _WorkflowDefinition'description :: !Data.Text.Text,
                                      _WorkflowDefinition'queryDefinitions :: !(Data.Vector.Vector WorkflowInteractionDefinition),
                                      _WorkflowDefinition'signalDefinitions :: !(Data.Vector.Vector WorkflowInteractionDefinition),
                                      _WorkflowDefinition'updateDefinitions :: !(Data.Vector.Vector WorkflowInteractionDefinition),
@@ -62,13 +60,6 @@ instance Data.ProtoLens.Field.HasField WorkflowDefinition "type'" Data.Text.Text
         (Lens.Family2.Unchecked.lens
            _WorkflowDefinition'type'
            (\ x__ y__ -> x__ {_WorkflowDefinition'type' = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkflowDefinition "description" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowDefinition'description
-           (\ x__ y__ -> x__ {_WorkflowDefinition'description = y__}))
         Prelude.id
 instance Data.ProtoLens.Field.HasField WorkflowDefinition "queryDefinitions" [WorkflowInteractionDefinition] where
   fieldOf _
@@ -124,11 +115,10 @@ instance Data.ProtoLens.Message WorkflowDefinition where
   packedMessageDescriptor _
     = "\n\
       \\DC2WorkflowDefinition\DC2\DC2\n\
-      \\EOTtype\CAN\SOH \SOH(\tR\EOTtype\DC2 \n\
-      \\vdescription\CAN\STX \SOH(\tR\vdescription\DC2_\n\
-      \\DC1query_definitions\CAN\ETX \ETX(\v22.temporal.api.sdk.v1.WorkflowInteractionDefinitionR\DLEqueryDefinitions\DC2a\n\
-      \\DC2signal_definitions\CAN\EOT \ETX(\v22.temporal.api.sdk.v1.WorkflowInteractionDefinitionR\DC1signalDefinitions\DC2a\n\
-      \\DC2update_definitions\CAN\ENQ \ETX(\v22.temporal.api.sdk.v1.WorkflowInteractionDefinitionR\DC1updateDefinitions"
+      \\EOTtype\CAN\SOH \SOH(\tR\EOTtype\DC2_\n\
+      \\DC1query_definitions\CAN\STX \ETX(\v22.temporal.api.sdk.v1.WorkflowInteractionDefinitionR\DLEqueryDefinitions\DC2a\n\
+      \\DC2signal_definitions\CAN\ETX \ETX(\v22.temporal.api.sdk.v1.WorkflowInteractionDefinitionR\DC1signalDefinitions\DC2a\n\
+      \\DC2update_definitions\CAN\EOT \ETX(\v22.temporal.api.sdk.v1.WorkflowInteractionDefinitionR\DC1updateDefinitions"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -139,15 +129,6 @@ instance Data.ProtoLens.Message WorkflowDefinition where
                  Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
               (Data.ProtoLens.PlainField
                  Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"type'")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowDefinition
-        description__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "description"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"description")) ::
               Data.ProtoLens.FieldDescriptor WorkflowDefinition
         queryDefinitions__field_descriptor
           = Data.ProtoLens.FieldDescriptor
@@ -179,10 +160,9 @@ instance Data.ProtoLens.Message WorkflowDefinition where
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, type'__field_descriptor),
-           (Data.ProtoLens.Tag 2, description__field_descriptor),
-           (Data.ProtoLens.Tag 3, queryDefinitions__field_descriptor),
-           (Data.ProtoLens.Tag 4, signalDefinitions__field_descriptor),
-           (Data.ProtoLens.Tag 5, updateDefinitions__field_descriptor)]
+           (Data.ProtoLens.Tag 2, queryDefinitions__field_descriptor),
+           (Data.ProtoLens.Tag 3, signalDefinitions__field_descriptor),
+           (Data.ProtoLens.Tag 4, updateDefinitions__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _WorkflowDefinition'_unknownFields
@@ -190,7 +170,6 @@ instance Data.ProtoLens.Message WorkflowDefinition where
   defMessage
     = WorkflowDefinition'_constructor
         {_WorkflowDefinition'type' = Data.ProtoLens.fieldDefault,
-         _WorkflowDefinition'description = Data.ProtoLens.fieldDefault,
          _WorkflowDefinition'queryDefinitions = Data.Vector.Generic.empty,
          _WorkflowDefinition'signalDefinitions = Data.Vector.Generic.empty,
          _WorkflowDefinition'updateDefinitions = Data.Vector.Generic.empty,
@@ -254,16 +233,6 @@ instance Data.ProtoLens.Message WorkflowDefinition where
                                   mutable'queryDefinitions mutable'signalDefinitions
                                   mutable'updateDefinitions
                         18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "description"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"description") y x)
-                                  mutable'queryDefinitions mutable'signalDefinitions
-                                  mutable'updateDefinitions
-                        26
                           -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                         (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
                                             Data.ProtoLens.Encoding.Bytes.isolate
@@ -274,7 +243,7 @@ instance Data.ProtoLens.Message WorkflowDefinition where
                                        (Data.ProtoLens.Encoding.Growing.append
                                           mutable'queryDefinitions y)
                                 loop x v mutable'signalDefinitions mutable'updateDefinitions
-                        34
+                        26
                           -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                         (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
                                             Data.ProtoLens.Encoding.Bytes.isolate
@@ -285,7 +254,7 @@ instance Data.ProtoLens.Message WorkflowDefinition where
                                        (Data.ProtoLens.Encoding.Growing.append
                                           mutable'signalDefinitions y)
                                 loop x mutable'queryDefinitions v mutable'updateDefinitions
-                        42
+                        34
                           -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                         (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
                                             Data.ProtoLens.Encoding.Bytes.isolate
@@ -335,22 +304,19 @@ instance Data.ProtoLens.Message WorkflowDefinition where
                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                          Data.Text.Encoding.encodeUtf8 _v))
              ((Data.Monoid.<>)
-                (let
-                   _v
-                     = Lens.Family2.view (Data.ProtoLens.Field.field @"description") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
+                (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                   (\ _v
+                      -> (Data.Monoid.<>)
+                           (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                           ((Prelude..)
+                              (\ bs
+                                 -> (Data.Monoid.<>)
+                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                              Data.ProtoLens.encodeMessage _v))
+                   (Lens.Family2.view
+                      (Data.ProtoLens.Field.field @"vec'queryDefinitions") _x))
                 ((Data.Monoid.<>)
                    (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
                       (\ _v
@@ -364,7 +330,7 @@ instance Data.ProtoLens.Message WorkflowDefinition where
                                          (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                                  Data.ProtoLens.encodeMessage _v))
                       (Lens.Family2.view
-                         (Data.ProtoLens.Field.field @"vec'queryDefinitions") _x))
+                         (Data.ProtoLens.Field.field @"vec'signalDefinitions") _x))
                    ((Data.Monoid.<>)
                       (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
                          (\ _v
@@ -378,24 +344,9 @@ instance Data.ProtoLens.Message WorkflowDefinition where
                                             (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                                     Data.ProtoLens.encodeMessage _v))
                          (Lens.Family2.view
-                            (Data.ProtoLens.Field.field @"vec'signalDefinitions") _x))
-                      ((Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                            (\ _v
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
-                                    ((Prelude..)
-                                       (\ bs
-                                          -> (Data.Monoid.<>)
-                                               (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                  (Prelude.fromIntegral
-                                                     (Data.ByteString.length bs)))
-                                               (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                       Data.ProtoLens.encodeMessage _v))
-                            (Lens.Family2.view
-                               (Data.ProtoLens.Field.field @"vec'updateDefinitions") _x))
-                         (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                            (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))
+                            (Data.ProtoLens.Field.field @"vec'updateDefinitions") _x))
+                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
 instance Control.DeepSeq.NFData WorkflowDefinition where
   rnf
     = \ x__
@@ -404,13 +355,11 @@ instance Control.DeepSeq.NFData WorkflowDefinition where
              (Control.DeepSeq.deepseq
                 (_WorkflowDefinition'type' x__)
                 (Control.DeepSeq.deepseq
-                   (_WorkflowDefinition'description x__)
+                   (_WorkflowDefinition'queryDefinitions x__)
                    (Control.DeepSeq.deepseq
-                      (_WorkflowDefinition'queryDefinitions x__)
+                      (_WorkflowDefinition'signalDefinitions x__)
                       (Control.DeepSeq.deepseq
-                         (_WorkflowDefinition'signalDefinitions x__)
-                         (Control.DeepSeq.deepseq
-                            (_WorkflowDefinition'updateDefinitions x__) ())))))
+                         (_WorkflowDefinition'updateDefinitions x__) ()))))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Sdk.V1.WorkflowMetadata_Fields.name' @:: Lens' WorkflowInteractionDefinition Data.Text.Text@
@@ -579,9 +528,11 @@ instance Control.DeepSeq.NFData WorkflowInteractionDefinition where
 {- | Fields :
      
          * 'Proto.Temporal.Api.Sdk.V1.WorkflowMetadata_Fields.definition' @:: Lens' WorkflowMetadata WorkflowDefinition@
-         * 'Proto.Temporal.Api.Sdk.V1.WorkflowMetadata_Fields.maybe'definition' @:: Lens' WorkflowMetadata (Prelude.Maybe WorkflowDefinition)@ -}
+         * 'Proto.Temporal.Api.Sdk.V1.WorkflowMetadata_Fields.maybe'definition' @:: Lens' WorkflowMetadata (Prelude.Maybe WorkflowDefinition)@
+         * 'Proto.Temporal.Api.Sdk.V1.WorkflowMetadata_Fields.currentDetails' @:: Lens' WorkflowMetadata Data.Text.Text@ -}
 data WorkflowMetadata
   = WorkflowMetadata'_constructor {_WorkflowMetadata'definition :: !(Prelude.Maybe WorkflowDefinition),
+                                   _WorkflowMetadata'currentDetails :: !Data.Text.Text,
                                    _WorkflowMetadata'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show WorkflowMetadata where
@@ -604,6 +555,13 @@ instance Data.ProtoLens.Field.HasField WorkflowMetadata "maybe'definition" (Prel
            _WorkflowMetadata'definition
            (\ x__ y__ -> x__ {_WorkflowMetadata'definition = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField WorkflowMetadata "currentDetails" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowMetadata'currentDetails
+           (\ x__ y__ -> x__ {_WorkflowMetadata'currentDetails = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message WorkflowMetadata where
   messageName _
     = Data.Text.pack "temporal.api.sdk.v1.WorkflowMetadata"
@@ -612,7 +570,8 @@ instance Data.ProtoLens.Message WorkflowMetadata where
       \\DLEWorkflowMetadata\DC2G\n\
       \\n\
       \definition\CAN\SOH \SOH(\v2'.temporal.api.sdk.v1.WorkflowDefinitionR\n\
-      \definition"
+      \definition\DC2'\n\
+      \\SIcurrent_details\CAN\STX \SOH(\tR\SOcurrentDetails"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -624,9 +583,19 @@ instance Data.ProtoLens.Message WorkflowMetadata where
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'definition")) ::
               Data.ProtoLens.FieldDescriptor WorkflowMetadata
+        currentDetails__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "current_details"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"currentDetails")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowMetadata
       in
         Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, definition__field_descriptor)]
+          [(Data.ProtoLens.Tag 1, definition__field_descriptor),
+           (Data.ProtoLens.Tag 2, currentDetails__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _WorkflowMetadata'_unknownFields
@@ -634,6 +603,7 @@ instance Data.ProtoLens.Message WorkflowMetadata where
   defMessage
     = WorkflowMetadata'_constructor
         {_WorkflowMetadata'definition = Prelude.Nothing,
+         _WorkflowMetadata'currentDetails = Data.ProtoLens.fieldDefault,
          _WorkflowMetadata'_unknownFields = []}
   parseMessage
     = let
@@ -666,6 +636,15 @@ instance Data.ProtoLens.Message WorkflowMetadata where
                                        "definition"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"definition") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "current_details"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"currentDetails") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -693,33 +672,54 @@ instance Data.ProtoLens.Message WorkflowMetadata where
                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                           Data.ProtoLens.encodeMessage _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+             ((Data.Monoid.<>)
+                (let
+                   _v
+                     = Lens.Family2.view
+                         (Data.ProtoLens.Field.field @"currentDetails") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                         ((Prelude..)
+                            (\ bs
+                               -> (Data.Monoid.<>)
+                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                            Data.Text.Encoding.encodeUtf8 _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
 instance Control.DeepSeq.NFData WorkflowMetadata where
   rnf
     = \ x__
         -> Control.DeepSeq.deepseq
              (_WorkflowMetadata'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_WorkflowMetadata'definition x__) ())
+             (Control.DeepSeq.deepseq
+                (_WorkflowMetadata'definition x__)
+                (Control.DeepSeq.deepseq
+                   (_WorkflowMetadata'currentDetails x__) ()))
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \+temporal/api/sdk/v1/workflow_metadata.proto\DC2\DC3temporal.api.sdk.v1\"[\n\
+    \+temporal/api/sdk/v1/workflow_metadata.proto\DC2\DC3temporal.api.sdk.v1\"\132\SOH\n\
     \\DLEWorkflowMetadata\DC2G\n\
     \\n\
     \definition\CAN\SOH \SOH(\v2'.temporal.api.sdk.v1.WorkflowDefinitionR\n\
-    \definition\"\241\STX\n\
+    \definition\DC2'\n\
+    \\SIcurrent_details\CAN\STX \SOH(\tR\SOcurrentDetails\"\207\STX\n\
     \\DC2WorkflowDefinition\DC2\DC2\n\
-    \\EOTtype\CAN\SOH \SOH(\tR\EOTtype\DC2 \n\
-    \\vdescription\CAN\STX \SOH(\tR\vdescription\DC2_\n\
-    \\DC1query_definitions\CAN\ETX \ETX(\v22.temporal.api.sdk.v1.WorkflowInteractionDefinitionR\DLEqueryDefinitions\DC2a\n\
-    \\DC2signal_definitions\CAN\EOT \ETX(\v22.temporal.api.sdk.v1.WorkflowInteractionDefinitionR\DC1signalDefinitions\DC2a\n\
-    \\DC2update_definitions\CAN\ENQ \ETX(\v22.temporal.api.sdk.v1.WorkflowInteractionDefinitionR\DC1updateDefinitions\"U\n\
+    \\EOTtype\CAN\SOH \SOH(\tR\EOTtype\DC2_\n\
+    \\DC1query_definitions\CAN\STX \ETX(\v22.temporal.api.sdk.v1.WorkflowInteractionDefinitionR\DLEqueryDefinitions\DC2a\n\
+    \\DC2signal_definitions\CAN\ETX \ETX(\v22.temporal.api.sdk.v1.WorkflowInteractionDefinitionR\DC1signalDefinitions\DC2a\n\
+    \\DC2update_definitions\CAN\EOT \ETX(\v22.temporal.api.sdk.v1.WorkflowInteractionDefinitionR\DC1updateDefinitions\"U\n\
     \\GSWorkflowInteractionDefinition\DC2\DC2\n\
     \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC2 \n\
     \\vdescription\CAN\STX \SOH(\tR\vdescriptionB\131\SOH\n\
-    \\SYNio.temporal.api.sdk.v1B\NAKWorkflowMetadataProtoP\SOHZ\GSgo.temporal.io/api/sdk/v1;sdk\170\STX\NAKTemporalio.Api.Sdk.V1\234\STX\CANTemporalio::Api::Sdk::V1J\249\SYN\n\
-    \\ACK\DC2\EOT\SYN\NULA\SOH\n\
+    \\SYNio.temporal.api.sdk.v1B\NAKWorkflowMetadataProtoP\SOHZ\GSgo.temporal.io/api/sdk/v1;sdk\170\STX\NAKTemporalio.Api.Sdk.V1\234\STX\CANTemporalio::Api::Sdk::V1J\206\ETB\n\
+    \\ACK\DC2\EOT\SYN\NULF\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -771,7 +771,7 @@ packedFileDescriptor
     \\t\n\
     \\STX\b%\DC2\ETX\US\NUL2\n\
     \c\n\
-    \\STX\EOT\NUL\DC2\EOT\"\NUL%\SOH\SUBW The name of the query to retrieve this information is `__temporal_workflow_metadata`.\n\
+    \\STX\EOT\NUL\DC2\EOT\"\NUL(\SOH\SUBW The name of the query to retrieve this information is `__temporal_workflow_metadata`.\n\
     \\n\
     \\n\
     \\n\
@@ -785,93 +785,95 @@ packedFileDescriptor
     \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX$\NAK\US\n\
     \\f\n\
     \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX$\"#\n\
+    \\173\SOH\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX'\STX\GS\SUB\159\SOH Current long-form details of the workflow's state. This is used by user interfaces to show\n\
+    \ long-form text. This text may be formatted by the user interface.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX'\STX\b\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX'\t\CAN\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX'\ESC\FS\n\
     \?\n\
-    \\STX\EOT\SOH\DC2\EOT(\NUL3\SOH\SUB3 (-- api-linter: core::0203::optional=disabled --)\n\
+    \\STX\EOT\SOH\DC2\EOT+\NUL8\SOH\SUB3 (-- api-linter: core::0203::optional=disabled --)\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX(\b\SUB\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX+\b\SUB\n\
     \\135\SOH\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX+\STX\DC2\SUBz A name scoped by the task queue that maps to this workflow definition.\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX.\STX\DC2\SUBz A name scoped by the task queue that maps to this workflow definition.\n\
     \ If missing, this workflow is a dynamic workflow.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX+\STX\b\n\
+    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX.\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX+\t\r\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX.\t\r\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX+\DLE\DC1\n\
-    \\204\SOH\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX/\STX\EM\SUB\190\SOH An optional workflow description provided by the application.\n\
-    \ By convention, external tools may interpret its first part,\n\
-    \ i.e., ending with a line break, as a summary of the description.\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX.\DLE\DC1\n\
+    \1\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX1\STX?\SUB$ Query definitions, sorted by name.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ENQ\DC2\ETX/\STX\b\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX/\t\DC4\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX/\ETB\CAN\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETX0\STX?\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\EOT\DC2\ETX0\STX\n\
+    \\ENQ\EOT\SOH\STX\SOH\EOT\DC2\ETX1\STX\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX0\v(\n\
+    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX1\v(\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX0):\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX1):\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX0=>\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\ETX\DC2\ETX1\STX@\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\EOT\DC2\ETX1\STX\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX1=>\n\
+    \2\n\
+    \\EOT\EOT\SOH\STX\STX\DC2\ETX4\STX@\SUB% Signal definitions, sorted by name.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ACK\DC2\ETX1\v(\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETX1);\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETX1>?\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\EOT\DC2\ETX2\STX@\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\EOT\DC2\ETX2\STX\n\
+    \\ENQ\EOT\SOH\STX\STX\EOT\DC2\ETX4\STX\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\ACK\DC2\ETX2\v(\n\
+    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX4\v(\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\SOH\DC2\ETX2);\n\
+    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX4);\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\ETX\DC2\ETX2>?\n\
+    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX4>?\n\
+    \2\n\
+    \\EOT\EOT\SOH\STX\ETX\DC2\ETX7\STX@\SUB% Update definitions, sorted by name.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\ETX\EOT\DC2\ETX7\STX\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\ETX\ACK\DC2\ETX7\v(\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETX7);\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETX7>?\n\
     \\184\SOH\n\
-    \\STX\EOT\STX\DC2\EOT8\NULA\SOH\SUB\171\SOH (-- api-linter: core::0123::resource-annotation=disabled\n\
+    \\STX\EOT\STX\DC2\EOT=\NULF\SOH\SUB\171\SOH (-- api-linter: core::0123::resource-annotation=disabled\n\
     \     aip.dev/not-precedent: The `name` field is optional. --)\n\
     \ (-- api-linter: core::0203::optional=disabled --)\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX8\b%\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX=\b%\n\
     \\222\SOH\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX<\STX\DC2\SUB\208\SOH An optional name for the handler. If missing, it represents\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETXA\STX\DC2\SUB\208\SOH An optional name for the handler. If missing, it represents\n\
     \ a dynamic handler that processes any interactions not handled by others.\n\
     \ There is at most one dynamic handler per workflow and interaction kind.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX<\STX\b\n\
+    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETXA\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX<\t\r\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXA\t\r\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX<\DLE\DC1\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXA\DLE\DC1\n\
     \\207\SOH\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX@\STX\EM\SUB\193\SOH An optional interaction description provided by the application.\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETXE\STX\EM\SUB\193\SOH An optional interaction description provided by the application.\n\
     \ By convention, external tools may interpret its first part,\n\
     \ i.e., ending with a line break, as a summary of the description.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX@\STX\b\n\
+    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETXE\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX@\t\DC4\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETXE\t\DC4\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX@\ETB\CANb\ACKproto3"
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETXE\ETB\CANb\ACKproto3"

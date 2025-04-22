@@ -31,6 +31,7 @@ import qualified Proto.Google.Protobuf.Any
 import qualified Proto.Temporal.Api.Common.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.FailedCause
 import qualified Proto.Temporal.Api.Enums.V1.Namespace
+import qualified Proto.Temporal.Api.Failure.V1.Message
 activeCluster ::
   forall f s a.
   (Prelude.Functor f,
@@ -89,6 +90,17 @@ details ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "details" a) =>
   Lens.Family2.LensLike' f s a
 details = Data.ProtoLens.Field.field @"details"
+failure ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "failure" a) =>
+  Lens.Family2.LensLike' f s a
+failure = Data.ProtoLens.Field.field @"failure"
+maybe'failure ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'failure" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'failure = Data.ProtoLens.Field.field @"maybe'failure"
 maybe'workflowExecution ::
   forall f s a.
   (Prelude.Functor f,

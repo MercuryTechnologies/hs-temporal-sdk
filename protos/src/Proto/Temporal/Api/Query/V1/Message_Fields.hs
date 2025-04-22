@@ -30,6 +30,7 @@ import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
 import qualified Proto.Temporal.Api.Common.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.Query
 import qualified Proto.Temporal.Api.Enums.V1.Workflow
+import qualified Proto.Temporal.Api.Failure.V1.Message
 answer ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "answer" a) =>
@@ -41,6 +42,11 @@ errorMessage ::
    Data.ProtoLens.Field.HasField s "errorMessage" a) =>
   Lens.Family2.LensLike' f s a
 errorMessage = Data.ProtoLens.Field.field @"errorMessage"
+failure ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "failure" a) =>
+  Lens.Family2.LensLike' f s a
+failure = Data.ProtoLens.Field.field @"failure"
 header ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "header" a) =>
@@ -52,6 +58,12 @@ maybe'answer ::
    Data.ProtoLens.Field.HasField s "maybe'answer" a) =>
   Lens.Family2.LensLike' f s a
 maybe'answer = Data.ProtoLens.Field.field @"maybe'answer"
+maybe'failure ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'failure" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'failure = Data.ProtoLens.Field.field @"maybe'failure"
 maybe'header ::
   forall f s a.
   (Prelude.Functor f,

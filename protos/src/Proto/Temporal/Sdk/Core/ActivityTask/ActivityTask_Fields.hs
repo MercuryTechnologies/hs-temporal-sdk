@@ -113,6 +113,12 @@ maybe'heartbeatTimeout ::
   Lens.Family2.LensLike' f s a
 maybe'heartbeatTimeout
   = Data.ProtoLens.Field.field @"maybe'heartbeatTimeout"
+maybe'priority ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'priority" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'priority = Data.ProtoLens.Field.field @"maybe'priority"
 maybe'retryPolicy ::
   forall f s a.
   (Prelude.Functor f,
@@ -171,6 +177,12 @@ maybe'workflowExecution ::
   Lens.Family2.LensLike' f s a
 maybe'workflowExecution
   = Data.ProtoLens.Field.field @"maybe'workflowExecution"
+priority ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "priority" a) =>
+  Lens.Family2.LensLike' f s a
+priority = Data.ProtoLens.Field.field @"priority"
 reason ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "reason" a) =>

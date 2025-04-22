@@ -20,24 +20,32 @@ library
       Proto.Health.V1.Health_Fields
       Proto.Rpc.Status
       Proto.Rpc.Status_Fields
+      Proto.Temporal.Api.Activity.V1.Message
+      Proto.Temporal.Api.Activity.V1.Message_Fields
       Proto.Temporal.Api.Batch.V1.Message
       Proto.Temporal.Api.Batch.V1.Message_Fields
       Proto.Temporal.Api.Command.V1.Message
       Proto.Temporal.Api.Command.V1.Message_Fields
       Proto.Temporal.Api.Common.V1.Message
       Proto.Temporal.Api.Common.V1.Message_Fields
+      Proto.Temporal.Api.Deployment.V1.Message
+      Proto.Temporal.Api.Deployment.V1.Message_Fields
       Proto.Temporal.Api.Enums.V1.BatchOperation
       Proto.Temporal.Api.Enums.V1.BatchOperation_Fields
       Proto.Temporal.Api.Enums.V1.CommandType
       Proto.Temporal.Api.Enums.V1.CommandType_Fields
       Proto.Temporal.Api.Enums.V1.Common
       Proto.Temporal.Api.Enums.V1.Common_Fields
+      Proto.Temporal.Api.Enums.V1.Deployment
+      Proto.Temporal.Api.Enums.V1.Deployment_Fields
       Proto.Temporal.Api.Enums.V1.EventType
       Proto.Temporal.Api.Enums.V1.EventType_Fields
       Proto.Temporal.Api.Enums.V1.FailedCause
       Proto.Temporal.Api.Enums.V1.FailedCause_Fields
       Proto.Temporal.Api.Enums.V1.Namespace
       Proto.Temporal.Api.Enums.V1.Namespace_Fields
+      Proto.Temporal.Api.Enums.V1.Nexus
+      Proto.Temporal.Api.Enums.V1.Nexus_Fields
       Proto.Temporal.Api.Enums.V1.Query
       Proto.Temporal.Api.Enums.V1.Query_Fields
       Proto.Temporal.Api.Enums.V1.Reset
@@ -74,10 +82,16 @@ library
       Proto.Temporal.Api.Query.V1.Message_Fields
       Proto.Temporal.Api.Replication.V1.Message
       Proto.Temporal.Api.Replication.V1.Message_Fields
+      Proto.Temporal.Api.Rules.V1.Message
+      Proto.Temporal.Api.Rules.V1.Message_Fields
       Proto.Temporal.Api.Schedule.V1.Message
       Proto.Temporal.Api.Schedule.V1.Message_Fields
+      Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace
+      Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace_Fields
       Proto.Temporal.Api.Sdk.V1.TaskCompleteMetadata
       Proto.Temporal.Api.Sdk.V1.TaskCompleteMetadata_Fields
+      Proto.Temporal.Api.Sdk.V1.UserMetadata
+      Proto.Temporal.Api.Sdk.V1.UserMetadata_Fields
       Proto.Temporal.Api.Sdk.V1.WorkflowMetadata
       Proto.Temporal.Api.Sdk.V1.WorkflowMetadata_Fields
       Proto.Temporal.Api.Taskqueue.V1.Message
@@ -108,6 +122,8 @@ library
       Proto.Temporal.Sdk.Core.CoreInterface_Fields
       Proto.Temporal.Sdk.Core.ExternalData.ExternalData
       Proto.Temporal.Sdk.Core.ExternalData.ExternalData_Fields
+      Proto.Temporal.Sdk.Core.Nexus.Nexus
+      Proto.Temporal.Sdk.Core.Nexus.Nexus_Fields
       Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
       Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields
       Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands
