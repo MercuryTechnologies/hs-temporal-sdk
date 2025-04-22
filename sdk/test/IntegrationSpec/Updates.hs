@@ -26,12 +26,6 @@ import Temporal.Workflow
 --   - Workflow exits while running update (see ts-sdk's handling)
 --   - We'll want to use the resource management work that Ian has in progress
 --
--- - Client interceptors:
---   - Are run
---   - Expected args
---   - Right order
---   - Propogate whatever exc an interceptor throws
---
 -- - Ideas:
 --   - Start vs execute semantics for update
 
