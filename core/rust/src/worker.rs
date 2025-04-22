@@ -51,18 +51,20 @@ impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
     type Error = WorkerError;
 
     fn try_from(conf: WorkerConfig) -> Result<Self, WorkerError> {
+        let versioning_strategy =
+            temporal_sdk_core_api::worker::WorkerVersioningStrategy::LegacyBuildIdBased {
+                build_id: conf.build_id,
+            };
         temporal_sdk_core::WorkerConfigBuilder::default()
             .namespace(conf.namespace)
             .task_queue(conf.task_queue)
-            .worker_build_id(conf.build_id)
+            .versioning_strategy(versioning_strategy)
             .client_identity_override(conf.identity_override)
             .max_cached_workflows(conf.max_cached_workflows)
             .max_outstanding_workflow_tasks(conf.max_outstanding_workflow_tasks)
             .max_outstanding_activities(conf.max_outstanding_activities)
             .max_outstanding_local_activities(conf.max_outstanding_local_activities)
-            .max_concurrent_wft_polls(conf.max_concurrent_workflow_task_polls)
             .nonsticky_to_sticky_poll_ratio(conf.nonsticky_to_sticky_poll_ratio)
-            .max_concurrent_at_polls(conf.max_concurrent_activity_task_polls)
             .no_remote_activities(conf.no_remote_activities)
             .sticky_queue_schedule_to_start_timeout(Duration::from_millis(
                 conf.sticky_queue_schedule_to_start_timeout_millis,
@@ -389,11 +391,7 @@ impl WorkerRef {
         })
     }
 
-    fn complete_workflow_activation(
-        &self,
-        hs: HsCallback<CUnit, CWorkerError>,
-        proto: &[u8],
-    ) {
+    fn complete_workflow_activation(&self, hs: HsCallback<CUnit, CWorkerError>, proto: &[u8]) {
         let worker = self.worker.as_ref().unwrap().clone();
         let completion = WorkflowActivationCompletion::decode(proto);
         self.runtime.future_result_into_hs(hs, async move {
@@ -751,7 +749,8 @@ impl HistoryPusher {
                 .map_err(|_| {
                     CWorkerError::c_repr_of(WorkerError {
                         code: WorkerErrorCode::SDKError,
-                        message: "Channel for history replay was dropped, this is an SDK bug.".to_string(),
+                        message: "Channel for history replay was dropped, this is an SDK bug."
+                            .to_string(),
                     })
                     .unwrap()
                 })?;
