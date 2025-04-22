@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
@@ -22,6 +23,9 @@ import qualified Control.Exception as E
 import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.Reader
+#if __GLASGOW_HASKELL__ < 910
+import Data.Foldable (foldl')
+#endif
 import Data.Functor.Identity
 import qualified Data.HashMap.Strict as HashMap
 import Data.ProtoLens
@@ -77,7 +81,6 @@ import Temporal.Workflow.Internal.Instance
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
 import UnliftIO
-
 
 create
   :: (HasCallStack, MonadLoggerIO m)
