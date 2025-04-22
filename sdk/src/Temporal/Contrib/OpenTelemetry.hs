@@ -241,11 +241,16 @@ makeOpenTelemetryInterceptor = do
                   Just _ -> do
                     span <- performUnsafeNonDeterministicIO $ createSpan tracer ctxt ("HandleUpdate:" <> input.handleUpdateInputType) spanArgs
                     result <- try $ next input
-                    -- TODO: Record the exception
-                    performUnsafeNonDeterministicIO $ endSpan span Nothing
                     case result of
-                      Left err -> throwM (err :: SomeException)
-                      Right res -> pure res
+                      Left err -> do
+                        performUnsafeNonDeterministicIO do
+                          setStatus span (Error $ T.pack $ show err)
+                          recordException span mempty Nothing err
+                          endSpan span Nothing
+                        throwM (err :: SomeException)
+                      Right res -> do
+                        performUnsafeNonDeterministicIO $ endSpan span Nothing
+                        pure res
             , validateUpdate = \input next -> do
                 let spanArgs =
                       defaultSpanArguments
