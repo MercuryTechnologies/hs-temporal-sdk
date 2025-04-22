@@ -104,6 +104,7 @@ import Lens.Family2
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Common
 import qualified Proto.Temporal.Api.Enums.V1.Query as Query
 import Proto.Temporal.Api.Enums.V1.TaskQueue (TaskQueueKind (..))
+import qualified Proto.Temporal.Api.Enums.V1.Update as Update
 import Proto.Temporal.Api.Enums.V1.Workflow (HistoryEventFilterType (..), WorkflowExecutionStatus (..))
 import Proto.Temporal.Api.History.V1.Message (History, HistoryEvent, HistoryEvent'Attributes (..))
 import qualified Proto.Temporal.Api.History.V1.Message_Fields as History
@@ -943,7 +944,14 @@ update h@(WorkflowHandle _ _ c _ _) (KnownUpdate updateCodec updateName) opts = 
                     & Common.runId .~ maybe "" rawRunId input.updateWorkflowRunId
                  )
             & WF.firstExecutionRunId .~ "" -- TODO: get this
-            & WF.waitPolicy .~ defMessage -- TODO
+            & WF.waitPolicy
+              .~ ( defMessage
+                    & Update.lifecycleStage .~ case opts.waitPolicy of
+                      UpdateLifecycleStageUnspecified -> Update.UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED
+                      UpdateLifecycleStageAdmitted -> Update.UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED
+                      UpdateLifecycleStageAccepted -> Update.UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED
+                      UpdateLifecycleStageCompleted -> Update.UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED
+                 )
             & WF.request
               .~ ( defMessage
                     & Update.meta
