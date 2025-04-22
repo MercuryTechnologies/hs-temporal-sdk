@@ -1,4 +1,4 @@
-module Temporal.Client.HealthService where
+module Temporal.Core.Client.HealthService where
 
 import Proto.Health.V1.Health
 import Temporal.Core.Client
