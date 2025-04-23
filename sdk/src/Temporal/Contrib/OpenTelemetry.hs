@@ -36,6 +36,7 @@ import OpenTelemetry.Propagator.W3CTraceContext
 import OpenTelemetry.Trace.Core
 import Paths_temporal_sdk
 import Temporal.Activity.Types
+import qualified Temporal.Client.Types as C
 import Temporal.Common
 import Temporal.Duration
 import Temporal.Interceptor
@@ -364,7 +365,7 @@ makeOpenTelemetryInterceptor = do
                 inSpan'' tracer ("SignalWithStartWorkflow:" <> rawWorkflowType (signalWithStartWorkflowType input)) spanArgs $ \_ -> do
                   ctxt <- getContext
                   hdrs <- inject headersPropagator ctxt input.signalWithStartOptions.headers
-                  next (input {signalWithStartOptions = (signalWithStartOptions input) {headers = hdrs}})
+                  next (input {signalWithStartOptions = (signalWithStartOptions input) {C.headers = hdrs}})
             , updateWorkflow = \input next -> do
                 let spanArgs =
                       defaultSpanArguments
