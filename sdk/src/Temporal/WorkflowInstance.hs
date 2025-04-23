@@ -419,7 +419,6 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
         updateArgs <- UnliftIO.try $ processorDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (doUpdate ^. Activation.vec'input))
         let runValidator = doUpdate ^. Activation.runValidator
             updateId = UpdateId $ doUpdate ^. Activation.id
-            -- TODO: add payload processor handling for headers?
             updateHeaders = fmap convertFromProtoPayload (doUpdate ^. Activation.headers)
         case updateArgs of
           Left err ->
