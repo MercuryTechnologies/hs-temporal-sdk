@@ -5,7 +5,8 @@
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
 module Proto.Temporal.Sdk.Core.Common.Common (
         NamespacedWorkflowExecution(), VersioningIntent(..),
-        VersioningIntent(), VersioningIntent'UnrecognizedValue
+        VersioningIntent(), VersioningIntent'UnrecognizedValue,
+        WorkerDeploymentVersion()
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -315,6 +316,171 @@ instance Data.ProtoLens.FieldDefault VersioningIntent where
   fieldDefault = UNSPECIFIED
 instance Control.DeepSeq.NFData VersioningIntent where
   rnf x__ = Prelude.seq x__ ()
+{- | Fields :
+     
+         * 'Proto.Temporal.Sdk.Core.Common.Common_Fields.deploymentName' @:: Lens' WorkerDeploymentVersion Data.Text.Text@
+         * 'Proto.Temporal.Sdk.Core.Common.Common_Fields.buildId' @:: Lens' WorkerDeploymentVersion Data.Text.Text@ -}
+data WorkerDeploymentVersion
+  = WorkerDeploymentVersion'_constructor {_WorkerDeploymentVersion'deploymentName :: !Data.Text.Text,
+                                          _WorkerDeploymentVersion'buildId :: !Data.Text.Text,
+                                          _WorkerDeploymentVersion'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show WorkerDeploymentVersion where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField WorkerDeploymentVersion "deploymentName" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkerDeploymentVersion'deploymentName
+           (\ x__ y__ -> x__ {_WorkerDeploymentVersion'deploymentName = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField WorkerDeploymentVersion "buildId" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkerDeploymentVersion'buildId
+           (\ x__ y__ -> x__ {_WorkerDeploymentVersion'buildId = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message WorkerDeploymentVersion where
+  messageName _
+    = Data.Text.pack "coresdk.common.WorkerDeploymentVersion"
+  packedMessageDescriptor _
+    = "\n\
+      \\ETBWorkerDeploymentVersion\DC2'\n\
+      \\SIdeployment_name\CAN\SOH \SOH(\tR\SOdeploymentName\DC2\EM\n\
+      \\bbuild_id\CAN\STX \SOH(\tR\abuildId"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        deploymentName__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "deployment_name"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"deploymentName")) ::
+              Data.ProtoLens.FieldDescriptor WorkerDeploymentVersion
+        buildId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "build_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"buildId")) ::
+              Data.ProtoLens.FieldDescriptor WorkerDeploymentVersion
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, deploymentName__field_descriptor),
+           (Data.ProtoLens.Tag 2, buildId__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _WorkerDeploymentVersion'_unknownFields
+        (\ x__ y__ -> x__ {_WorkerDeploymentVersion'_unknownFields = y__})
+  defMessage
+    = WorkerDeploymentVersion'_constructor
+        {_WorkerDeploymentVersion'deploymentName = Data.ProtoLens.fieldDefault,
+         _WorkerDeploymentVersion'buildId = Data.ProtoLens.fieldDefault,
+         _WorkerDeploymentVersion'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          WorkerDeploymentVersion
+          -> Data.ProtoLens.Encoding.Bytes.Parser WorkerDeploymentVersion
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "deployment_name"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"deploymentName") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "build_id"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"buildId") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "WorkerDeploymentVersion"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view
+                      (Data.ProtoLens.Field.field @"deploymentName") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             ((Data.Monoid.<>)
+                (let
+                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"buildId") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                         ((Prelude..)
+                            (\ bs
+                               -> (Data.Monoid.<>)
+                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                            Data.Text.Encoding.encodeUtf8 _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData WorkerDeploymentVersion where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_WorkerDeploymentVersion'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_WorkerDeploymentVersion'deploymentName x__)
+                (Control.DeepSeq.deepseq
+                   (_WorkerDeploymentVersion'buildId x__) ()))
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
@@ -323,21 +489,25 @@ packedFileDescriptor
     \\tnamespace\CAN\SOH \SOH(\tR\tnamespace\DC2\US\n\
     \\vworkflow_id\CAN\STX \SOH(\tR\n\
     \workflowId\DC2\NAK\n\
-    \\ACKrun_id\CAN\ETX \SOH(\tR\ENQrunId*@\n\
+    \\ACKrun_id\CAN\ETX \SOH(\tR\ENQrunId\"]\n\
+    \\ETBWorkerDeploymentVersion\DC2'\n\
+    \\SIdeployment_name\CAN\SOH \SOH(\tR\SOdeploymentName\DC2\EM\n\
+    \\bbuild_id\CAN\STX \SOH(\tR\abuildId*@\n\
     \\DLEVersioningIntent\DC2\SI\n\
     \\vUNSPECIFIED\DLE\NUL\DC2\SO\n\
     \\n\
     \COMPATIBLE\DLE\SOH\DC2\v\n\
-    \\aDEFAULT\DLE\STXB\"\234\STX\USTemporalio::Bridge::Api::CommonJ\236\t\n\
-    \\ACK\DC2\EOT\NUL\NUL\US\SOH\n\
+    \\aDEFAULT\DLE\STXB,\234\STX)Temporalio::Internal::Bridge::Api::CommonJ\242\n\
+    \\n\
+    \\ACK\DC2\EOT\NUL\NUL$\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
     \\SOH\STX\DC2\ETX\STX\NUL\ETB\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ETX\NUL8\n\
+    \\SOH\b\DC2\ETX\ETX\NULB\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\ETX\NUL8\n\
+    \\STX\b-\DC2\ETX\ETX\NULB\n\
     \\t\n\
     \\STX\ETX\NUL\DC2\ETX\ENQ\NUL(\n\
     \`\n\
@@ -412,4 +582,28 @@ packedFileDescriptor
     \\f\n\
     \\ENQ\ENQ\NUL\STX\STX\SOH\DC2\ETX\RS\EOT\v\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\STX\STX\DC2\ETX\RS\SO\SIb\ACKproto3"
+    \\ENQ\ENQ\NUL\STX\STX\STX\DC2\ETX\RS\SO\SI\n\
+    \\n\
+    \\n\
+    \\STX\EOT\SOH\DC2\EOT!\NUL$\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX!\b\US\n\
+    \\v\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\"\EOT\US\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX\"\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\"\v\SUB\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\"\GS\RS\n\
+    \\v\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX#\EOT\CAN\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\SOH\ENQ\DC2\ETX#\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX#\v\DC3\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX#\SYN\ETBb\ACKproto3"

@@ -517,6 +517,8 @@ instance Control.DeepSeq.NFData Cancel where
          * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.maybe'heartbeatTimeout' @:: Lens' Start (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
          * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.retryPolicy' @:: Lens' Start Proto.Temporal.Api.Common.V1.Message.RetryPolicy@
          * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.maybe'retryPolicy' @:: Lens' Start (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.RetryPolicy)@
+         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.priority' @:: Lens' Start Proto.Temporal.Api.Common.V1.Message.Priority@
+         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.maybe'priority' @:: Lens' Start (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Priority)@
          * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.isLocal' @:: Lens' Start Prelude.Bool@ -}
 data Start
   = Start'_constructor {_Start'workflowNamespace :: !Data.Text.Text,
@@ -535,6 +537,7 @@ data Start
                         _Start'startToCloseTimeout :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
                         _Start'heartbeatTimeout :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
                         _Start'retryPolicy :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.RetryPolicy),
+                        _Start'priority :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Priority),
                         _Start'isLocal :: !Prelude.Bool,
                         _Start'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
@@ -719,6 +722,18 @@ instance Data.ProtoLens.Field.HasField Start "maybe'retryPolicy" (Prelude.Maybe 
         (Lens.Family2.Unchecked.lens
            _Start'retryPolicy (\ x__ y__ -> x__ {_Start'retryPolicy = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField Start "priority" Proto.Temporal.Api.Common.V1.Message.Priority where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Start'priority (\ x__ y__ -> x__ {_Start'priority = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField Start "maybe'priority" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Priority) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Start'priority (\ x__ y__ -> x__ {_Start'priority = y__}))
+        Prelude.id
 instance Data.ProtoLens.Field.HasField Start "isLocal" Prelude.Bool where
   fieldOf _
     = (Prelude..)
@@ -747,7 +762,8 @@ instance Data.ProtoLens.Message Start where
       \\EMschedule_to_close_timeout\CAN\r \SOH(\v2\EM.google.protobuf.DurationR\SYNscheduleToCloseTimeout\DC2N\n\
       \\SYNstart_to_close_timeout\CAN\SO \SOH(\v2\EM.google.protobuf.DurationR\DC3startToCloseTimeout\DC2F\n\
       \\DC1heartbeat_timeout\CAN\SI \SOH(\v2\EM.google.protobuf.DurationR\DLEheartbeatTimeout\DC2F\n\
-      \\fretry_policy\CAN\DLE \SOH(\v2#.temporal.api.common.v1.RetryPolicyR\vretryPolicy\DC2\EM\n\
+      \\fretry_policy\CAN\DLE \SOH(\v2#.temporal.api.common.v1.RetryPolicyR\vretryPolicy\DC2<\n\
+      \\bpriority\CAN\DC2 \SOH(\v2 .temporal.api.common.v1.PriorityR\bpriority\DC2\EM\n\
       \\bis_local\CAN\DC1 \SOH(\bR\aisLocal\SUB`\n\
       \\DC1HeaderFieldsEntry\DC2\DLE\n\
       \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
@@ -891,6 +907,14 @@ instance Data.ProtoLens.Message Start where
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'retryPolicy")) ::
               Data.ProtoLens.FieldDescriptor Start
+        priority__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "priority"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Priority)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'priority")) ::
+              Data.ProtoLens.FieldDescriptor Start
         isLocal__field_descriptor
           = Data.ProtoLens.FieldDescriptor
               "is_local"
@@ -918,6 +942,7 @@ instance Data.ProtoLens.Message Start where
            (Data.ProtoLens.Tag 14, startToCloseTimeout__field_descriptor),
            (Data.ProtoLens.Tag 15, heartbeatTimeout__field_descriptor),
            (Data.ProtoLens.Tag 16, retryPolicy__field_descriptor),
+           (Data.ProtoLens.Tag 18, priority__field_descriptor),
            (Data.ProtoLens.Tag 17, isLocal__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
@@ -941,6 +966,7 @@ instance Data.ProtoLens.Message Start where
          _Start'startToCloseTimeout = Prelude.Nothing,
          _Start'heartbeatTimeout = Prelude.Nothing,
          _Start'retryPolicy = Prelude.Nothing,
+         _Start'priority = Prelude.Nothing,
          _Start'isLocal = Data.ProtoLens.fieldDefault,
          _Start'_unknownFields = []}
   parseMessage
@@ -1143,6 +1169,15 @@ instance Data.ProtoLens.Message Start where
                                        "retry_policy"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"retryPolicy") y x)
+                                  mutable'heartbeatDetails mutable'input
+                        146
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "priority"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"priority") y x)
                                   mutable'heartbeatDetails mutable'input
                         136
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
@@ -1470,29 +1505,57 @@ instance Data.ProtoLens.Message Start where
                                                                        Data.ProtoLens.encodeMessage
                                                                        _v))
                                                           ((Data.Monoid.<>)
-                                                             (let
-                                                                _v
-                                                                  = Lens.Family2.view
-                                                                      (Data.ProtoLens.Field.field
-                                                                         @"isLocal")
-                                                                      _x
-                                                              in
-                                                                if (Prelude.==)
-                                                                     _v
-                                                                     Data.ProtoLens.fieldDefault then
-                                                                    Data.Monoid.mempty
-                                                                else
-                                                                    (Data.Monoid.<>)
-                                                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                         136)
-                                                                      ((Prelude..)
-                                                                         Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                         (\ b -> if b then 1 else 0)
-                                                                         _v))
-                                                             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                                                                (Lens.Family2.view
-                                                                   Data.ProtoLens.unknownFields
-                                                                   _x))))))))))))))))))
+                                                             (case
+                                                                  Lens.Family2.view
+                                                                    (Data.ProtoLens.Field.field
+                                                                       @"maybe'priority")
+                                                                    _x
+                                                              of
+                                                                Prelude.Nothing
+                                                                  -> Data.Monoid.mempty
+                                                                (Prelude.Just _v)
+                                                                  -> (Data.Monoid.<>)
+                                                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                          146)
+                                                                       ((Prelude..)
+                                                                          (\ bs
+                                                                             -> (Data.Monoid.<>)
+                                                                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                     (Prelude.fromIntegral
+                                                                                        (Data.ByteString.length
+                                                                                           bs)))
+                                                                                  (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                     bs))
+                                                                          Data.ProtoLens.encodeMessage
+                                                                          _v))
+                                                             ((Data.Monoid.<>)
+                                                                (let
+                                                                   _v
+                                                                     = Lens.Family2.view
+                                                                         (Data.ProtoLens.Field.field
+                                                                            @"isLocal")
+                                                                         _x
+                                                                 in
+                                                                   if (Prelude.==)
+                                                                        _v
+                                                                        Data.ProtoLens.fieldDefault then
+                                                                       Data.Monoid.mempty
+                                                                   else
+                                                                       (Data.Monoid.<>)
+                                                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                            136)
+                                                                         ((Prelude..)
+                                                                            Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                            (\ b
+                                                                               -> if b then
+                                                                                      1
+                                                                                  else
+                                                                                      0)
+                                                                            _v))
+                                                                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                                                                   (Lens.Family2.view
+                                                                      Data.ProtoLens.unknownFields
+                                                                      _x)))))))))))))))))))
 instance Control.DeepSeq.NFData Start where
   rnf
     = \ x__
@@ -1531,8 +1594,10 @@ instance Control.DeepSeq.NFData Start where
                                                           (Control.DeepSeq.deepseq
                                                              (_Start'retryPolicy x__)
                                                              (Control.DeepSeq.deepseq
-                                                                (_Start'isLocal x__)
-                                                                ())))))))))))))))))
+                                                                (_Start'priority x__)
+                                                                (Control.DeepSeq.deepseq
+                                                                   (_Start'isLocal x__)
+                                                                   ()))))))))))))))))))
 {- | Fields :
      
          * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.key' @:: Lens' Start'HeaderFieldsEntry Data.Text.Text@
@@ -1707,7 +1772,7 @@ packedFileDescriptor
     \task_token\CAN\SOH \SOH(\fR\ttaskToken\DC24\n\
     \\ENQstart\CAN\ETX \SOH(\v2\FS.coresdk.activity_task.StartH\NULR\ENQstart\DC27\n\
     \\ACKcancel\CAN\EOT \SOH(\v2\GS.coresdk.activity_task.CancelH\NULR\ACKcancelB\t\n\
-    \\avariant\"\133\t\n\
+    \\avariant\"\195\t\n\
     \\ENQStart\DC2-\n\
     \\DC2workflow_namespace\CAN\SOH \SOH(\tR\DC1workflowNamespace\DC2#\n\
     \\rworkflow_type\CAN\STX \SOH(\tR\fworkflowType\DC2X\n\
@@ -1726,7 +1791,8 @@ packedFileDescriptor
     \\EMschedule_to_close_timeout\CAN\r \SOH(\v2\EM.google.protobuf.DurationR\SYNscheduleToCloseTimeout\DC2N\n\
     \\SYNstart_to_close_timeout\CAN\SO \SOH(\v2\EM.google.protobuf.DurationR\DC3startToCloseTimeout\DC2F\n\
     \\DC1heartbeat_timeout\CAN\SI \SOH(\v2\EM.google.protobuf.DurationR\DLEheartbeatTimeout\DC2F\n\
-    \\fretry_policy\CAN\DLE \SOH(\v2#.temporal.api.common.v1.RetryPolicyR\vretryPolicy\DC2\EM\n\
+    \\fretry_policy\CAN\DLE \SOH(\v2#.temporal.api.common.v1.RetryPolicyR\vretryPolicy\DC2<\n\
+    \\bpriority\CAN\DC2 \SOH(\v2 .temporal.api.common.v1.PriorityR\bpriority\DC2\EM\n\
     \\bis_local\CAN\DC1 \SOH(\bR\aisLocal\SUB`\n\
     \\DC1HeaderFieldsEntry\DC2\DLE\n\
     \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
@@ -1737,8 +1803,8 @@ packedFileDescriptor
     \\tNOT_FOUND\DLE\NUL\DC2\r\n\
     \\tCANCELLED\DLE\SOH\DC2\r\n\
     \\tTIMED_OUT\DLE\STX\DC2\DC3\n\
-    \\SIWORKER_SHUTDOWN\DLE\ETXB(\234\STX%Temporalio::Bridge::Api::ActivityTaskJ\254\ETB\n\
-    \\ACK\DC2\EOT\NUL\NULO\SOH\n\
+    \\SIWORKER_SHUTDOWN\DLE\ETXB2\234\STX/Temporalio::Internal::Bridge::Api::ActivityTaskJ\148\EM\n\
+    \\ACK\DC2\EOT\NUL\NULQ\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \a\n\
@@ -1746,9 +1812,9 @@ packedFileDescriptor
     \ Definitions of the different activity tasks returned from [crate::Core::poll_task].\n\
     \\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ACK\NUL>\n\
+    \\SOH\b\DC2\ETX\ACK\NULH\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\ACK\NUL>\n\
+    \\STX\b-\DC2\ETX\ACK\NULH\n\
     \\t\n\
     \\STX\ETX\NUL\DC2\ETX\b\NUL(\n\
     \\t\n\
@@ -1798,7 +1864,7 @@ packedFileDescriptor
     \\f\n\
     \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\DC4\CAN\EM\n\
     \)\n\
-    \\STX\EOT\SOH\DC2\EOT\EM\NUL?\SOH\SUB\GS Begin executing an activity\n\
+    \\STX\EOT\SOH\DC2\EOT\EM\NULA\SOH\SUB\GS Begin executing an activity\n\
     \\n\
     \\n\
     \\n\
@@ -1960,61 +2026,70 @@ packedFileDescriptor
     \\ENQ\EOT\SOH\STX\SI\SOH\DC2\ETX:'3\n\
     \\f\n\
     \\ENQ\EOT\SOH\STX\SI\ETX\DC2\ETX:68\n\
+    \j\n\
+    \\EOT\EOT\SOH\STX\DLE\DC2\ETX<\EOT2\SUB] Priority of this activity. Local activities will always have this field set to the default.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\DLE\ACK\DC2\ETX<\EOT#\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\DLE\SOH\DC2\ETX<$,\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\DLE\ETX\DC2\ETX</1\n\
     \s\n\
-    \\EOT\EOT\SOH\STX\DLE\DC2\ETX>\EOT\ETB\SUBf Set to true if this is a local activity. Note that heartbeating does not apply to local\n\
+    \\EOT\EOT\SOH\STX\DC1\DC2\ETX@\EOT\ETB\SUBf Set to true if this is a local activity. Note that heartbeating does not apply to local\n\
     \ activities.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\DLE\ENQ\DC2\ETX>\EOT\b\n\
+    \\ENQ\EOT\SOH\STX\DC1\ENQ\DC2\ETX@\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\DLE\SOH\DC2\ETX>\t\DC1\n\
+    \\ENQ\EOT\SOH\STX\DC1\SOH\DC2\ETX@\t\DC1\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\DLE\ETX\DC2\ETX>\DC4\SYN\n\
+    \\ENQ\EOT\SOH\STX\DC1\ETX\DC2\ETX@\DC4\SYN\n\
     \2\n\
-    \\STX\EOT\STX\DC2\EOTB\NULD\SOH\SUB& Attempt to cancel a running activity\n\
+    \\STX\EOT\STX\DC2\EOTD\NULF\SOH\SUB& Attempt to cancel a running activity\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETXB\b\SO\n\
+    \\ETX\EOT\STX\SOH\DC2\ETXD\b\SO\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETXC\EOT$\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETXE\EOT$\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETXC\EOT\CAN\n\
+    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETXE\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXC\EM\US\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXE\EM\US\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXC\"#\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXE\"#\n\
     \\n\
     \\n\
-    \\STX\ENQ\NUL\DC2\EOTF\NULO\SOH\n\
+    \\STX\ENQ\NUL\DC2\EOTH\NULQ\SOH\n\
     \\n\
     \\n\
-    \\ETX\ENQ\NUL\SOH\DC2\ETXF\ENQ\EM\n\
+    \\ETX\ENQ\NUL\SOH\DC2\ETXH\ENQ\EM\n\
     \[\n\
-    \\EOT\ENQ\NUL\STX\NUL\DC2\ETXH\EOT\DC2\SUBN The activity no longer exists according to server (may be already completed)\n\
+    \\EOT\ENQ\NUL\STX\NUL\DC2\ETXJ\EOT\DC2\SUBN The activity no longer exists according to server (may be already completed)\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\NUL\SOH\DC2\ETXH\EOT\r\n\
+    \\ENQ\ENQ\NUL\STX\NUL\SOH\DC2\ETXJ\EOT\r\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\NUL\STX\DC2\ETXH\DLE\DC1\n\
+    \\ENQ\ENQ\NUL\STX\NUL\STX\DC2\ETXJ\DLE\DC1\n\
     \0\n\
-    \\EOT\ENQ\NUL\STX\SOH\DC2\ETXJ\EOT\DC2\SUB# Activity was explicitly cancelled\n\
+    \\EOT\ENQ\NUL\STX\SOH\DC2\ETXL\EOT\DC2\SUB# Activity was explicitly cancelled\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\SOH\SOH\DC2\ETXJ\EOT\r\n\
+    \\ENQ\ENQ\NUL\STX\SOH\SOH\DC2\ETXL\EOT\r\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\SOH\STX\DC2\ETXJ\DLE\DC1\n\
+    \\ENQ\ENQ\NUL\STX\SOH\STX\DC2\ETXL\DLE\DC1\n\
     \!\n\
-    \\EOT\ENQ\NUL\STX\STX\DC2\ETXL\EOT\DC2\SUB\DC4 Activity timed out\n\
+    \\EOT\ENQ\NUL\STX\STX\DC2\ETXN\EOT\DC2\SUB\DC4 Activity timed out\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\STX\SOH\DC2\ETXL\EOT\r\n\
+    \\ENQ\ENQ\NUL\STX\STX\SOH\DC2\ETXN\EOT\r\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\STX\STX\DC2\ETXL\DLE\DC1\n\
+    \\ENQ\ENQ\NUL\STX\STX\STX\DC2\ETXN\DLE\DC1\n\
     \I\n\
-    \\EOT\ENQ\NUL\STX\ETX\DC2\ETXN\EOT\CAN\SUB< Core is shutting down and the graceful timeout has elapsed\n\
+    \\EOT\ENQ\NUL\STX\ETX\DC2\ETXP\EOT\CAN\SUB< Core is shutting down and the graceful timeout has elapsed\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\ETX\SOH\DC2\ETXN\EOT\DC3\n\
+    \\ENQ\ENQ\NUL\STX\ETX\SOH\DC2\ETXP\EOT\DC3\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\ETX\STX\DC2\ETXN\SYN\ETBb\ACKproto3"
+    \\ENQ\ENQ\NUL\STX\ETX\STX\DC2\ETXP\SYN\ETBb\ACKproto3"

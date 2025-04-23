@@ -35,6 +35,7 @@ import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Gener
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
 import qualified Proto.Temporal.Api.Enums.V1.FailedCause
+import qualified Proto.Temporal.Api.Enums.V1.Workflow
 import qualified Proto.Temporal.Api.Failure.V1.Message
 import qualified Proto.Temporal.Sdk.Core.Common.Common
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands
@@ -207,10 +208,12 @@ instance Control.DeepSeq.NFData Failure where
          * 'Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields.commands' @:: Lens' Success [Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands.WorkflowCommand]@
          * 'Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields.vec'commands' @:: Lens' Success (Data.Vector.Vector Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands.WorkflowCommand)@
          * 'Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields.usedInternalFlags' @:: Lens' Success [Data.Word.Word32]@
-         * 'Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields.vec'usedInternalFlags' @:: Lens' Success (Data.Vector.Unboxed.Vector Data.Word.Word32)@ -}
+         * 'Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields.vec'usedInternalFlags' @:: Lens' Success (Data.Vector.Unboxed.Vector Data.Word.Word32)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields.versioningBehavior' @:: Lens' Success Proto.Temporal.Api.Enums.V1.Workflow.VersioningBehavior@ -}
 data Success
   = Success'_constructor {_Success'commands :: !(Data.Vector.Vector Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands.WorkflowCommand),
                           _Success'usedInternalFlags :: !(Data.Vector.Unboxed.Vector Data.Word.Word32),
+                          _Success'versioningBehavior :: !Proto.Temporal.Api.Enums.V1.Workflow.VersioningBehavior,
                           _Success'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show Success where
@@ -249,6 +252,13 @@ instance Data.ProtoLens.Field.HasField Success "vec'usedInternalFlags" (Data.Vec
            _Success'usedInternalFlags
            (\ x__ y__ -> x__ {_Success'usedInternalFlags = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField Success "versioningBehavior" Proto.Temporal.Api.Enums.V1.Workflow.VersioningBehavior where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Success'versioningBehavior
+           (\ x__ y__ -> x__ {_Success'versioningBehavior = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message Success where
   messageName _
     = Data.Text.pack "coresdk.workflow_completion.Success"
@@ -256,7 +266,8 @@ instance Data.ProtoLens.Message Success where
     = "\n\
       \\aSuccess\DC2F\n\
       \\bcommands\CAN\SOH \ETX(\v2*.coresdk.workflow_commands.WorkflowCommandR\bcommands\DC2.\n\
-      \\DC3used_internal_flags\CAN\ACK \ETX(\rR\DC1usedInternalFlags"
+      \\DC3used_internal_flags\CAN\ACK \ETX(\rR\DC1usedInternalFlags\DC2Z\n\
+      \\DC3versioning_behavior\CAN\a \SOH(\SO2).temporal.api.enums.v1.VersioningBehaviorR\DC2versioningBehavior"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -278,10 +289,20 @@ instance Data.ProtoLens.Message Success where
                  Data.ProtoLens.Packed
                  (Data.ProtoLens.Field.field @"usedInternalFlags")) ::
               Data.ProtoLens.FieldDescriptor Success
+        versioningBehavior__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "versioning_behavior"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Workflow.VersioningBehavior)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"versioningBehavior")) ::
+              Data.ProtoLens.FieldDescriptor Success
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, commands__field_descriptor),
-           (Data.ProtoLens.Tag 6, usedInternalFlags__field_descriptor)]
+           (Data.ProtoLens.Tag 6, usedInternalFlags__field_descriptor),
+           (Data.ProtoLens.Tag 7, versioningBehavior__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _Success'_unknownFields
@@ -290,6 +311,7 @@ instance Data.ProtoLens.Message Success where
     = Success'_constructor
         {_Success'commands = Data.Vector.Generic.empty,
          _Success'usedInternalFlags = Data.Vector.Generic.empty,
+         _Success'versioningBehavior = Data.ProtoLens.fieldDefault,
          _Success'_unknownFields = []}
   parseMessage
     = let
@@ -369,6 +391,18 @@ instance Data.ProtoLens.Message Success where
                                             in ploop)
                                              mutable'usedInternalFlags)
                                 loop x mutable'commands y
+                        56
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.toEnum
+                                          (Prelude.fmap
+                                             Prelude.fromIntegral
+                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
+                                       "versioning_behavior"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"versioningBehavior") y x)
+                                  mutable'commands mutable'usedInternalFlags
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -422,8 +456,23 @@ instance Data.ProtoLens.Message Success where
                                   ((Prelude..)
                                      Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
                                   p))))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+                ((Data.Monoid.<>)
+                   (let
+                      _v
+                        = Lens.Family2.view
+                            (Data.ProtoLens.Field.field @"versioningBehavior") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 56)
+                            ((Prelude..)
+                               ((Prelude..)
+                                  Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
+                               Prelude.fromEnum _v))
+                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
 instance Control.DeepSeq.NFData Success where
   rnf
     = \ x__
@@ -431,7 +480,9 @@ instance Control.DeepSeq.NFData Success where
              (_Success'_unknownFields x__)
              (Control.DeepSeq.deepseq
                 (_Success'commands x__)
-                (Control.DeepSeq.deepseq (_Success'usedInternalFlags x__) ()))
+                (Control.DeepSeq.deepseq
+                   (_Success'usedInternalFlags x__)
+                   (Control.DeepSeq.deepseq (_Success'versioningBehavior x__) ())))
 {- | Fields :
      
          * 'Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields.runId' @:: Lens' WorkflowActivationCompletion Data.Text.Text@
@@ -717,123 +768,135 @@ _WorkflowActivationCompletion'Failed
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \?temporal/sdk/core/workflow_completion/workflow_completion.proto\DC2\ESCcoresdk.workflow_completion\SUB%temporal/api/failure/v1/message.proto\SUB(temporal/api/enums/v1/failed_cause.proto\SUB%temporal/sdk/core/common/common.proto\SUB;temporal/sdk/core/workflow_commands/workflow_commands.proto\"\199\SOH\n\
+    \?temporal/sdk/core/workflow_completion/workflow_completion.proto\DC2\ESCcoresdk.workflow_completion\SUB%temporal/api/failure/v1/message.proto\SUB(temporal/api/enums/v1/failed_cause.proto\SUB$temporal/api/enums/v1/workflow.proto\SUB%temporal/sdk/core/common/common.proto\SUB;temporal/sdk/core/workflow_commands/workflow_commands.proto\"\199\SOH\n\
     \\FSWorkflowActivationCompletion\DC2\NAK\n\
     \\ACKrun_id\CAN\SOH \SOH(\tR\ENQrunId\DC2F\n\
     \\n\
     \successful\CAN\STX \SOH(\v2$.coresdk.workflow_completion.SuccessH\NULR\n\
     \successful\DC2>\n\
     \\ACKfailed\CAN\ETX \SOH(\v2$.coresdk.workflow_completion.FailureH\NULR\ACKfailedB\b\n\
-    \\ACKstatus\"\129\SOH\n\
+    \\ACKstatus\"\221\SOH\n\
     \\aSuccess\DC2F\n\
     \\bcommands\CAN\SOH \ETX(\v2*.coresdk.workflow_commands.WorkflowCommandR\bcommands\DC2.\n\
-    \\DC3used_internal_flags\CAN\ACK \ETX(\rR\DC1usedInternalFlags\"\150\SOH\n\
+    \\DC3used_internal_flags\CAN\ACK \ETX(\rR\DC1usedInternalFlags\DC2Z\n\
+    \\DC3versioning_behavior\CAN\a \SOH(\SO2).temporal.api.enums.v1.VersioningBehaviorR\DC2versioningBehavior\"\150\SOH\n\
     \\aFailure\DC2:\n\
     \\afailure\CAN\SOH \SOH(\v2 .temporal.api.failure.v1.FailureR\afailure\DC2O\n\
     \\vforce_cause\CAN\STX \SOH(\SO2..temporal.api.enums.v1.WorkflowTaskFailedCauseR\n\
-    \forceCauseB.\234\STX+Temporalio::Bridge::Api::WorkflowCompletionJ\165\b\n\
-    \\ACK\DC2\EOT\NUL\NUL!\SOH\n\
+    \forceCauseB8\234\STX5Temporalio::Internal::Bridge::Api::WorkflowCompletionJ\163\t\n\
+    \\ACK\DC2\EOT\NUL\NUL$\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
     \\SOH\STX\DC2\ETX\STX\NUL$\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ETX\NULD\n\
+    \\SOH\b\DC2\ETX\ETX\NULN\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\ETX\NULD\n\
+    \\STX\b-\DC2\ETX\ETX\NULN\n\
     \\t\n\
     \\STX\ETX\NUL\DC2\ETX\ENQ\NUL/\n\
     \\t\n\
     \\STX\ETX\SOH\DC2\ETX\ACK\NUL2\n\
     \\t\n\
-    \\STX\ETX\STX\DC2\ETX\a\NUL/\n\
+    \\STX\ETX\STX\DC2\ETX\a\NUL.\n\
     \\t\n\
-    \\STX\ETX\ETX\DC2\ETX\b\NULE\n\
+    \\STX\ETX\ETX\DC2\ETX\b\NUL/\n\
+    \\t\n\
+    \\STX\ETX\EOT\DC2\ETX\t\NULE\n\
     \P\n\
-    \\STX\EOT\NUL\DC2\EOT\v\NUL\DC2\SOH\SUBD Result of a single workflow activation, reported from lang to core\n\
+    \\STX\EOT\NUL\DC2\EOT\f\NUL\DC3\SOH\SUBD Result of a single workflow activation, reported from lang to core\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX\v\b$\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\f\b$\n\
     \I\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\r\EOT\SYN\SUB< The run id from the workflow activation you are completing\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\SO\EOT\SYN\SUB< The run id from the workflow activation you are completing\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\r\EOT\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\SO\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\r\v\DC1\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\SO\v\DC1\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\r\DC4\NAK\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\SO\DC4\NAK\n\
     \\f\n\
-    \\EOT\EOT\NUL\b\NUL\DC2\EOT\SO\EOT\DC1\ENQ\n\
+    \\EOT\EOT\NUL\b\NUL\DC2\EOT\SI\EOT\DC2\ENQ\n\
     \\f\n\
-    \\ENQ\EOT\NUL\b\NUL\SOH\DC2\ETX\SO\n\
+    \\ENQ\EOT\NUL\b\NUL\SOH\DC2\ETX\SI\n\
     \\DLE\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\SI\b\US\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\DLE\b\US\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\SI\b\SI\n\
+    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\DLE\b\SI\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\SI\DLE\SUB\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\DLE\DLE\SUB\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\SI\GS\RS\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\DLE\GS\RS\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX\DLE\b\ESC\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX\DC1\b\ESC\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX\DLE\b\SI\n\
+    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX\DC1\b\SI\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\DLE\DLE\SYN\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\DC1\DLE\SYN\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\DLE\EM\SUB\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\DC1\EM\SUB\n\
     \h\n\
-    \\STX\EOT\SOH\DC2\EOT\NAK\NUL\SUB\SOH\SUB\\ Successful workflow activation with a list of commands generated by the workflow execution\n\
+    \\STX\EOT\SOH\DC2\EOT\SYN\NUL\GS\SOH\SUB\\ Successful workflow activation with a list of commands generated by the workflow execution\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX\NAK\b\SI\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX\SYN\b\SI\n\
     \E\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\ETB\EOT<\SUB8 A list of commands to send back to the temporal server\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\CAN\EOT<\SUB8 A list of commands to send back to the temporal server\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\EOT\DC2\ETX\ETB\EOT\f\n\
+    \\ENQ\EOT\SOH\STX\NUL\EOT\DC2\ETX\CAN\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX\ETB\r.\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX\CAN\r.\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\ETB/7\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\CAN/7\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\ETB:;\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\CAN:;\n\
     \^\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\EM\EOT,\SUBQ Any internal flags which the lang SDK used in the processing of this activation\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\SUB\EOT,\SUBQ Any internal flags which the lang SDK used in the processing of this activation\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\EOT\DC2\ETX\EM\EOT\f\n\
+    \\ENQ\EOT\SOH\STX\SOH\EOT\DC2\ETX\SUB\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ENQ\DC2\ETX\EM\r\DC3\n\
+    \\ENQ\EOT\SOH\STX\SOH\ENQ\DC2\ETX\SUB\r\DC3\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\EM\DC4'\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\SUB\DC4'\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\EM*+\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\SUB*+\n\
+    \G\n\
+    \\EOT\EOT\SOH\STX\STX\DC2\ETX\FS\EOTE\SUB: The versioning behavior this workflow is currently using\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX\FS\EOT,\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX\FS-@\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX\FSCD\n\
     \7\n\
-    \\STX\EOT\STX\DC2\EOT\GS\NUL!\SOH\SUB+ Failure to activate or execute a workflow\n\
+    \\STX\EOT\STX\DC2\EOT \NUL$\SOH\SUB+ Failure to activate or execute a workflow\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX\GS\b\SI\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX \b\SI\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX\RS\EOT0\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX!\EOT0\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX\RS\EOT#\n\
+    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX!\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX\RS$+\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX!$+\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX\RS./\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX!./\n\
     \6\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX \EOTB\SUB) Forces overriding the WFT failure cause\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX#\EOTB\SUB) Forces overriding the WFT failure cause\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETX \EOT1\n\
+    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETX#\EOT1\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX 2=\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX#2=\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX @Ab\ACKproto3"
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX#@Ab\ACKproto3"

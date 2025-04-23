@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
@@ -22,7 +23,9 @@ import qualified Control.Exception as E
 import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.Reader
-import Data.Foldable
+#if __GLASGOW_HASKELL__ < 910
+import Data.Foldable (foldl')
+#endif
 import Data.Functor.Identity
 import qualified Data.HashMap.Strict as HashMap
 import Data.ProtoLens
@@ -53,7 +56,7 @@ import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation (
   ResolveRequestCancelExternalWorkflow,
   ResolveSignalExternalWorkflow,
   SignalWorkflow,
-  StartWorkflow,
+  InitializeWorkflow,
   UpdateRandomSeed,
   WorkflowActivation,
   WorkflowActivationJob,
@@ -79,7 +82,6 @@ import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
 import UnliftIO
 
-
 create
   :: (HasCallStack, MonadLoggerIO m)
   => (Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
@@ -92,7 +94,7 @@ create
   -> Vault
   -> PayloadProcessor
   -> Info
-  -> StartWorkflow
+  -> InitializeWorkflow
   -> m WorkflowInstance
 create
   workflowCompleteActivation
@@ -282,19 +284,19 @@ activate act suspension = do
 
 
 -- | This gives us the basic state for a workflow instance prior to initial evaluation.
-setUpWorkflowExecution :: StartWorkflow -> InstanceM ExecuteWorkflowInput
-setUpWorkflowExecution startWorkflow = do
+setUpWorkflowExecution :: InitializeWorkflow -> InstanceM ExecuteWorkflowInput
+setUpWorkflowExecution initializeWorkflow = do
   inst <- ask
   let (WorkflowGenM genRef) = inst.workflowRandomnessSeed
-  writeIORef genRef (mkStdGen $ fromIntegral $ startWorkflow ^. Activation.randomnessSeed)
-  writeIORef inst.workflowTime (startWorkflow ^. Activation.startTime . to timespecFromTimestamp)
+  writeIORef genRef (mkStdGen $ fromIntegral $ initializeWorkflow ^. Activation.randomnessSeed)
+  writeIORef inst.workflowTime (initializeWorkflow ^. Activation.startTime . to timespecFromTimestamp)
   info <- readIORef inst.workflowInstanceInfo
 
   pure $
     ExecuteWorkflowInput
-      { executeWorkflowInputType = startWorkflow ^. Activation.workflowType
-      , executeWorkflowInputArgs = fmap convertFromProtoPayload (startWorkflow ^. Command.vec'arguments)
-      , executeWorkflowInputHeaders = fmap convertFromProtoPayload (startWorkflow ^. Activation.headers)
+      { executeWorkflowInputType = initializeWorkflow ^. Activation.workflowType
+      , executeWorkflowInputArgs = fmap convertFromProtoPayload (initializeWorkflow ^. Command.vec'arguments)
+      , executeWorkflowInputHeaders = fmap convertFromProtoPayload (initializeWorkflow ^. Activation.headers)
       , executeWorkflowInputInfo = info
       }
 
@@ -462,10 +464,12 @@ applyJobs jobs fAwait = UnliftIO.try $ do
             Just (WorkflowActivationJob'UpdateRandomSeed updateRandomSeed) -> (patchNotifications, signalWorkflows, queryWorkflows, resolutions, otherJobs *> applyUpdateRandomSeed updateRandomSeed)
             Just (WorkflowActivationJob'CancelWorkflow cancelWorkflow) -> (patchNotifications, signalWorkflows, queryWorkflows, PendingWorkflowCancellation cancelWorkflow : resolutions, otherJobs)
             -- By the time we get here, the workflow should already be running.
-            Just (WorkflowActivationJob'StartWorkflow _startWorkflow) -> tup
+            Just (WorkflowActivationJob'InitializeWorkflow _initializeWorkflow) -> tup
             -- Handled in the worker.
             Just (WorkflowActivationJob'RemoveFromCache _removeFromCache) -> tup
             Just (WorkflowActivationJob'DoUpdate _) -> error "DoUpdate not yet implemented"
+            Just (WorkflowActivationJob'ResolveNexusOperation _) -> error "ResolveNexusOperation not yet implemented"
+            Just (WorkflowActivationJob'ResolveNexusOperationStart _) -> error "ResolveNexusOperationStart not yet implemented"
             Nothing -> E.throw $ RuntimeError "Uncrecognized workflow activation job variant"
         )
         (pure (), [], pure (), [], pure ())

@@ -7,14 +7,22 @@ module Proto.Temporal.Api.Workflow.V1.Message (
         CallbackInfo(), CallbackInfo'Trigger(),
         CallbackInfo'Trigger'Variant(..),
         _CallbackInfo'Trigger'WorkflowClosed,
-        CallbackInfo'WorkflowClosed(), NewWorkflowExecutionInfo(),
-        NexusOperationCancellationInfo(), PendingActivityInfo(),
-        PendingActivityInfo'AssignedBuildId(..),
+        CallbackInfo'WorkflowClosed(), DeploymentTransition(),
+        DeploymentVersionTransition(), NewWorkflowExecutionInfo(),
+        NexusOperationCancellationInfo(), OnConflictOptions(),
+        PendingActivityInfo(), PendingActivityInfo'AssignedBuildId(..),
         _PendingActivityInfo'UseWorkflowBuildId,
         _PendingActivityInfo'LastIndependentlyAssignedBuildId,
+        PendingActivityInfo'PauseInfo(),
+        PendingActivityInfo'PauseInfo'PausedBy(..),
+        _PendingActivityInfo'PauseInfo'Manual',
+        _PendingActivityInfo'PauseInfo'RuleId,
+        PendingActivityInfo'PauseInfo'Manual(),
         PendingChildExecutionInfo(), PendingNexusOperationInfo(),
         PendingWorkflowTaskInfo(), ResetPointInfo(), ResetPoints(),
-        WorkflowExecutionConfig(), WorkflowExecutionInfo()
+        VersioningOverride(), WorkflowExecutionConfig(),
+        WorkflowExecutionExtendedInfo(), WorkflowExecutionInfo(),
+        WorkflowExecutionOptions(), WorkflowExecutionVersioningInfo()
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -45,9 +53,11 @@ import qualified Proto.Google.Protobuf.Duration
 import qualified Proto.Google.Protobuf.Empty
 import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Temporal.Api.Common.V1.Message
+import qualified Proto.Temporal.Api.Deployment.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.Common
 import qualified Proto.Temporal.Api.Enums.V1.Workflow
 import qualified Proto.Temporal.Api.Failure.V1.Message
+import qualified Proto.Temporal.Api.Sdk.V1.UserMetadata
 import qualified Proto.Temporal.Api.Taskqueue.V1.Message
 {- | Fields :
      
@@ -64,7 +74,8 @@ import qualified Proto.Temporal.Api.Taskqueue.V1.Message
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.lastAttemptFailure' @:: Lens' CallbackInfo Proto.Temporal.Api.Failure.V1.Message.Failure@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'lastAttemptFailure' @:: Lens' CallbackInfo (Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure)@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.nextAttemptScheduleTime' @:: Lens' CallbackInfo Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'nextAttemptScheduleTime' @:: Lens' CallbackInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@ -}
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'nextAttemptScheduleTime' @:: Lens' CallbackInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.blockedReason' @:: Lens' CallbackInfo Data.Text.Text@ -}
 data CallbackInfo
   = CallbackInfo'_constructor {_CallbackInfo'callback :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Callback),
                                _CallbackInfo'trigger :: !(Prelude.Maybe CallbackInfo'Trigger),
@@ -74,6 +85,7 @@ data CallbackInfo
                                _CallbackInfo'lastAttemptCompleteTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
                                _CallbackInfo'lastAttemptFailure :: !(Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure),
                                _CallbackInfo'nextAttemptScheduleTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                               _CallbackInfo'blockedReason :: !Data.Text.Text,
                                _CallbackInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show CallbackInfo where
@@ -179,6 +191,13 @@ instance Data.ProtoLens.Field.HasField CallbackInfo "maybe'nextAttemptScheduleTi
            _CallbackInfo'nextAttemptScheduleTime
            (\ x__ y__ -> x__ {_CallbackInfo'nextAttemptScheduleTime = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField CallbackInfo "blockedReason" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _CallbackInfo'blockedReason
+           (\ x__ y__ -> x__ {_CallbackInfo'blockedReason = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message CallbackInfo where
   messageName _
     = Data.Text.pack "temporal.api.workflow.v1.CallbackInfo"
@@ -192,7 +211,8 @@ instance Data.ProtoLens.Message CallbackInfo where
       \\aattempt\CAN\ENQ \SOH(\ENQR\aattempt\DC2W\n\
       \\SUBlast_attempt_complete_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR\ETBlastAttemptCompleteTime\DC2R\n\
       \\DC4last_attempt_failure\CAN\a \SOH(\v2 .temporal.api.failure.v1.FailureR\DC2lastAttemptFailure\DC2W\n\
-      \\SUBnext_attempt_schedule_time\CAN\b \SOH(\v2\SUB.google.protobuf.TimestampR\ETBnextAttemptScheduleTime\SUB\DLE\n\
+      \\SUBnext_attempt_schedule_time\CAN\b \SOH(\v2\SUB.google.protobuf.TimestampR\ETBnextAttemptScheduleTime\DC2%\n\
+      \\SOblocked_reason\CAN\t \SOH(\tR\rblockedReason\SUB\DLE\n\
       \\SOWorkflowClosed\SUBv\n\
       \\aTrigger\DC2`\n\
       \\SIworkflow_closed\CAN\SOH \SOH(\v25.temporal.api.workflow.v1.CallbackInfo.WorkflowClosedH\NULR\SOworkflowClosedB\t\n\
@@ -264,6 +284,15 @@ instance Data.ProtoLens.Message CallbackInfo where
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'nextAttemptScheduleTime")) ::
               Data.ProtoLens.FieldDescriptor CallbackInfo
+        blockedReason__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "blocked_reason"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"blockedReason")) ::
+              Data.ProtoLens.FieldDescriptor CallbackInfo
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, callback__field_descriptor),
@@ -273,7 +302,8 @@ instance Data.ProtoLens.Message CallbackInfo where
            (Data.ProtoLens.Tag 5, attempt__field_descriptor),
            (Data.ProtoLens.Tag 6, lastAttemptCompleteTime__field_descriptor),
            (Data.ProtoLens.Tag 7, lastAttemptFailure__field_descriptor),
-           (Data.ProtoLens.Tag 8, nextAttemptScheduleTime__field_descriptor)]
+           (Data.ProtoLens.Tag 8, nextAttemptScheduleTime__field_descriptor),
+           (Data.ProtoLens.Tag 9, blockedReason__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _CallbackInfo'_unknownFields
@@ -288,6 +318,7 @@ instance Data.ProtoLens.Message CallbackInfo where
          _CallbackInfo'lastAttemptCompleteTime = Prelude.Nothing,
          _CallbackInfo'lastAttemptFailure = Prelude.Nothing,
          _CallbackInfo'nextAttemptScheduleTime = Prelude.Nothing,
+         _CallbackInfo'blockedReason = Data.ProtoLens.fieldDefault,
          _CallbackInfo'_unknownFields = []}
   parseMessage
     = let
@@ -378,6 +409,15 @@ instance Data.ProtoLens.Message CallbackInfo where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"nextAttemptScheduleTime") y x)
+                        74
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "blocked_reason"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"blockedReason") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -513,8 +553,28 @@ instance Data.ProtoLens.Message CallbackInfo where
                                                              (Data.ByteString.length bs)))
                                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                                                Data.ProtoLens.encodeMessage _v))
-                                  (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                                     (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))))))
+                                  ((Data.Monoid.<>)
+                                     (let
+                                        _v
+                                          = Lens.Family2.view
+                                              (Data.ProtoLens.Field.field @"blockedReason") _x
+                                      in
+                                        if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                            Data.Monoid.mempty
+                                        else
+                                            (Data.Monoid.<>)
+                                              (Data.ProtoLens.Encoding.Bytes.putVarInt 74)
+                                              ((Prelude..)
+                                                 (\ bs
+                                                    -> (Data.Monoid.<>)
+                                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                            (Prelude.fromIntegral
+                                                               (Data.ByteString.length bs)))
+                                                         (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                            bs))
+                                                 Data.Text.Encoding.encodeUtf8 _v))
+                                     (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                                        (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))))))
 instance Control.DeepSeq.NFData CallbackInfo where
   rnf
     = \ x__
@@ -535,7 +595,9 @@ instance Control.DeepSeq.NFData CallbackInfo where
                                (Control.DeepSeq.deepseq
                                   (_CallbackInfo'lastAttemptFailure x__)
                                   (Control.DeepSeq.deepseq
-                                     (_CallbackInfo'nextAttemptScheduleTime x__) ()))))))))
+                                     (_CallbackInfo'nextAttemptScheduleTime x__)
+                                     (Control.DeepSeq.deepseq
+                                        (_CallbackInfo'blockedReason x__) ())))))))))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'variant' @:: Lens' CallbackInfo'Trigger (Prelude.Maybe CallbackInfo'Trigger'Variant)@
@@ -768,6 +830,248 @@ instance Control.DeepSeq.NFData CallbackInfo'WorkflowClosed where
              (_CallbackInfo'WorkflowClosed'_unknownFields x__) ()
 {- | Fields :
      
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.deployment' @:: Lens' DeploymentTransition Proto.Temporal.Api.Deployment.V1.Message.Deployment@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'deployment' @:: Lens' DeploymentTransition (Prelude.Maybe Proto.Temporal.Api.Deployment.V1.Message.Deployment)@ -}
+data DeploymentTransition
+  = DeploymentTransition'_constructor {_DeploymentTransition'deployment :: !(Prelude.Maybe Proto.Temporal.Api.Deployment.V1.Message.Deployment),
+                                       _DeploymentTransition'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show DeploymentTransition where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField DeploymentTransition "deployment" Proto.Temporal.Api.Deployment.V1.Message.Deployment where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _DeploymentTransition'deployment
+           (\ x__ y__ -> x__ {_DeploymentTransition'deployment = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField DeploymentTransition "maybe'deployment" (Prelude.Maybe Proto.Temporal.Api.Deployment.V1.Message.Deployment) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _DeploymentTransition'deployment
+           (\ x__ y__ -> x__ {_DeploymentTransition'deployment = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message DeploymentTransition where
+  messageName _
+    = Data.Text.pack "temporal.api.workflow.v1.DeploymentTransition"
+  packedMessageDescriptor _
+    = "\n\
+      \\DC4DeploymentTransition\DC2F\n\
+      \\n\
+      \deployment\CAN\SOH \SOH(\v2&.temporal.api.deployment.v1.DeploymentR\n\
+      \deployment"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        deployment__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "deployment"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Deployment.V1.Message.Deployment)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'deployment")) ::
+              Data.ProtoLens.FieldDescriptor DeploymentTransition
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, deployment__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _DeploymentTransition'_unknownFields
+        (\ x__ y__ -> x__ {_DeploymentTransition'_unknownFields = y__})
+  defMessage
+    = DeploymentTransition'_constructor
+        {_DeploymentTransition'deployment = Prelude.Nothing,
+         _DeploymentTransition'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          DeploymentTransition
+          -> Data.ProtoLens.Encoding.Bytes.Parser DeploymentTransition
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "deployment"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"deployment") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "DeploymentTransition"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view
+                    (Data.ProtoLens.Field.field @"maybe'deployment") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData DeploymentTransition where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_DeploymentTransition'_unknownFields x__)
+             (Control.DeepSeq.deepseq (_DeploymentTransition'deployment x__) ())
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.version' @:: Lens' DeploymentVersionTransition Data.Text.Text@ -}
+data DeploymentVersionTransition
+  = DeploymentVersionTransition'_constructor {_DeploymentVersionTransition'version :: !Data.Text.Text,
+                                              _DeploymentVersionTransition'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show DeploymentVersionTransition where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField DeploymentVersionTransition "version" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _DeploymentVersionTransition'version
+           (\ x__ y__ -> x__ {_DeploymentVersionTransition'version = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message DeploymentVersionTransition where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.workflow.v1.DeploymentVersionTransition"
+  packedMessageDescriptor _
+    = "\n\
+      \\ESCDeploymentVersionTransition\DC2\CAN\n\
+      \\aversion\CAN\SOH \SOH(\tR\aversion"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        version__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "version"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"version")) ::
+              Data.ProtoLens.FieldDescriptor DeploymentVersionTransition
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, version__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _DeploymentVersionTransition'_unknownFields
+        (\ x__ y__
+           -> x__ {_DeploymentVersionTransition'_unknownFields = y__})
+  defMessage
+    = DeploymentVersionTransition'_constructor
+        {_DeploymentVersionTransition'version = Data.ProtoLens.fieldDefault,
+         _DeploymentVersionTransition'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          DeploymentVersionTransition
+          -> Data.ProtoLens.Encoding.Bytes.Parser DeploymentVersionTransition
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "version"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"version") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "DeploymentVersionTransition"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"version") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData DeploymentVersionTransition where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_DeploymentVersionTransition'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_DeploymentVersionTransition'version x__) ())
+{- | Fields :
+     
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.workflowId' @:: Lens' NewWorkflowExecutionInfo Data.Text.Text@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.workflowType' @:: Lens' NewWorkflowExecutionInfo Proto.Temporal.Api.Common.V1.Message.WorkflowType@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'workflowType' @:: Lens' NewWorkflowExecutionInfo (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkflowType)@
@@ -790,7 +1094,13 @@ instance Control.DeepSeq.NFData CallbackInfo'WorkflowClosed where
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.searchAttributes' @:: Lens' NewWorkflowExecutionInfo Proto.Temporal.Api.Common.V1.Message.SearchAttributes@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'searchAttributes' @:: Lens' NewWorkflowExecutionInfo (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.SearchAttributes)@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.header' @:: Lens' NewWorkflowExecutionInfo Proto.Temporal.Api.Common.V1.Message.Header@
-         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'header' @:: Lens' NewWorkflowExecutionInfo (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Header)@ -}
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'header' @:: Lens' NewWorkflowExecutionInfo (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Header)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.userMetadata' @:: Lens' NewWorkflowExecutionInfo Proto.Temporal.Api.Sdk.V1.UserMetadata.UserMetadata@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'userMetadata' @:: Lens' NewWorkflowExecutionInfo (Prelude.Maybe Proto.Temporal.Api.Sdk.V1.UserMetadata.UserMetadata)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.versioningOverride' @:: Lens' NewWorkflowExecutionInfo VersioningOverride@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'versioningOverride' @:: Lens' NewWorkflowExecutionInfo (Prelude.Maybe VersioningOverride)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.priority' @:: Lens' NewWorkflowExecutionInfo Proto.Temporal.Api.Common.V1.Message.Priority@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'priority' @:: Lens' NewWorkflowExecutionInfo (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Priority)@ -}
 data NewWorkflowExecutionInfo
   = NewWorkflowExecutionInfo'_constructor {_NewWorkflowExecutionInfo'workflowId :: !Data.Text.Text,
                                            _NewWorkflowExecutionInfo'workflowType :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkflowType),
@@ -805,6 +1115,9 @@ data NewWorkflowExecutionInfo
                                            _NewWorkflowExecutionInfo'memo :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Memo),
                                            _NewWorkflowExecutionInfo'searchAttributes :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.SearchAttributes),
                                            _NewWorkflowExecutionInfo'header :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Header),
+                                           _NewWorkflowExecutionInfo'userMetadata :: !(Prelude.Maybe Proto.Temporal.Api.Sdk.V1.UserMetadata.UserMetadata),
+                                           _NewWorkflowExecutionInfo'versioningOverride :: !(Prelude.Maybe VersioningOverride),
+                                           _NewWorkflowExecutionInfo'priority :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Priority),
                                            _NewWorkflowExecutionInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show NewWorkflowExecutionInfo where
@@ -983,6 +1296,50 @@ instance Data.ProtoLens.Field.HasField NewWorkflowExecutionInfo "maybe'header" (
            _NewWorkflowExecutionInfo'header
            (\ x__ y__ -> x__ {_NewWorkflowExecutionInfo'header = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField NewWorkflowExecutionInfo "userMetadata" Proto.Temporal.Api.Sdk.V1.UserMetadata.UserMetadata where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _NewWorkflowExecutionInfo'userMetadata
+           (\ x__ y__ -> x__ {_NewWorkflowExecutionInfo'userMetadata = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField NewWorkflowExecutionInfo "maybe'userMetadata" (Prelude.Maybe Proto.Temporal.Api.Sdk.V1.UserMetadata.UserMetadata) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _NewWorkflowExecutionInfo'userMetadata
+           (\ x__ y__ -> x__ {_NewWorkflowExecutionInfo'userMetadata = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField NewWorkflowExecutionInfo "versioningOverride" VersioningOverride where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _NewWorkflowExecutionInfo'versioningOverride
+           (\ x__ y__
+              -> x__ {_NewWorkflowExecutionInfo'versioningOverride = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField NewWorkflowExecutionInfo "maybe'versioningOverride" (Prelude.Maybe VersioningOverride) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _NewWorkflowExecutionInfo'versioningOverride
+           (\ x__ y__
+              -> x__ {_NewWorkflowExecutionInfo'versioningOverride = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField NewWorkflowExecutionInfo "priority" Proto.Temporal.Api.Common.V1.Message.Priority where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _NewWorkflowExecutionInfo'priority
+           (\ x__ y__ -> x__ {_NewWorkflowExecutionInfo'priority = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField NewWorkflowExecutionInfo "maybe'priority" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Priority) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _NewWorkflowExecutionInfo'priority
+           (\ x__ y__ -> x__ {_NewWorkflowExecutionInfo'priority = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message NewWorkflowExecutionInfo where
   messageName _
     = Data.Text.pack
@@ -1005,7 +1362,10 @@ instance Data.ProtoLens.Message NewWorkflowExecutionInfo where
       \ \SOH(\tR\fcronSchedule\DC20\n\
       \\EOTmemo\CAN\v \SOH(\v2\FS.temporal.api.common.v1.MemoR\EOTmemo\DC2U\n\
       \\DC1search_attributes\CAN\f \SOH(\v2(.temporal.api.common.v1.SearchAttributesR\DLEsearchAttributes\DC26\n\
-      \\ACKheader\CAN\r \SOH(\v2\RS.temporal.api.common.v1.HeaderR\ACKheader"
+      \\ACKheader\CAN\r \SOH(\v2\RS.temporal.api.common.v1.HeaderR\ACKheader\DC2F\n\
+      \\ruser_metadata\CAN\SO \SOH(\v2!.temporal.api.sdk.v1.UserMetadataR\fuserMetadata\DC2]\n\
+      \\DC3versioning_override\CAN\SI \SOH(\v2,.temporal.api.workflow.v1.VersioningOverrideR\DC2versioningOverride\DC2<\n\
+      \\bpriority\CAN\DLE \SOH(\v2 .temporal.api.common.v1.PriorityR\bpriority"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -1116,6 +1476,30 @@ instance Data.ProtoLens.Message NewWorkflowExecutionInfo where
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'header")) ::
               Data.ProtoLens.FieldDescriptor NewWorkflowExecutionInfo
+        userMetadata__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "user_metadata"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Sdk.V1.UserMetadata.UserMetadata)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'userMetadata")) ::
+              Data.ProtoLens.FieldDescriptor NewWorkflowExecutionInfo
+        versioningOverride__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "versioning_override"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor VersioningOverride)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'versioningOverride")) ::
+              Data.ProtoLens.FieldDescriptor NewWorkflowExecutionInfo
+        priority__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "priority"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Priority)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'priority")) ::
+              Data.ProtoLens.FieldDescriptor NewWorkflowExecutionInfo
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, workflowId__field_descriptor),
@@ -1130,7 +1514,10 @@ instance Data.ProtoLens.Message NewWorkflowExecutionInfo where
            (Data.ProtoLens.Tag 10, cronSchedule__field_descriptor),
            (Data.ProtoLens.Tag 11, memo__field_descriptor),
            (Data.ProtoLens.Tag 12, searchAttributes__field_descriptor),
-           (Data.ProtoLens.Tag 13, header__field_descriptor)]
+           (Data.ProtoLens.Tag 13, header__field_descriptor),
+           (Data.ProtoLens.Tag 14, userMetadata__field_descriptor),
+           (Data.ProtoLens.Tag 15, versioningOverride__field_descriptor),
+           (Data.ProtoLens.Tag 16, priority__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _NewWorkflowExecutionInfo'_unknownFields
@@ -1150,6 +1537,9 @@ instance Data.ProtoLens.Message NewWorkflowExecutionInfo where
          _NewWorkflowExecutionInfo'memo = Prelude.Nothing,
          _NewWorkflowExecutionInfo'searchAttributes = Prelude.Nothing,
          _NewWorkflowExecutionInfo'header = Prelude.Nothing,
+         _NewWorkflowExecutionInfo'userMetadata = Prelude.Nothing,
+         _NewWorkflowExecutionInfo'versioningOverride = Prelude.Nothing,
+         _NewWorkflowExecutionInfo'priority = Prelude.Nothing,
          _NewWorkflowExecutionInfo'_unknownFields = []}
   parseMessage
     = let
@@ -1284,6 +1674,32 @@ instance Data.ProtoLens.Message NewWorkflowExecutionInfo where
                                              (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
                                        "header"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"header") y x)
+                        114
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "user_metadata"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"userMetadata") y x)
+                        122
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "versioning_override"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"versioningOverride") y x)
+                        130
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "priority"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"priority") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -1523,9 +1939,78 @@ instance Data.ProtoLens.Message NewWorkflowExecutionInfo where
                                                                       (Data.ProtoLens.Encoding.Bytes.putBytes
                                                                          bs))
                                                               Data.ProtoLens.encodeMessage _v))
-                                                 (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                                                    (Lens.Family2.view
-                                                       Data.ProtoLens.unknownFields _x))))))))))))))
+                                                 ((Data.Monoid.<>)
+                                                    (case
+                                                         Lens.Family2.view
+                                                           (Data.ProtoLens.Field.field
+                                                              @"maybe'userMetadata")
+                                                           _x
+                                                     of
+                                                       Prelude.Nothing -> Data.Monoid.mempty
+                                                       (Prelude.Just _v)
+                                                         -> (Data.Monoid.<>)
+                                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                 114)
+                                                              ((Prelude..)
+                                                                 (\ bs
+                                                                    -> (Data.Monoid.<>)
+                                                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                            (Prelude.fromIntegral
+                                                                               (Data.ByteString.length
+                                                                                  bs)))
+                                                                         (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                            bs))
+                                                                 Data.ProtoLens.encodeMessage _v))
+                                                    ((Data.Monoid.<>)
+                                                       (case
+                                                            Lens.Family2.view
+                                                              (Data.ProtoLens.Field.field
+                                                                 @"maybe'versioningOverride")
+                                                              _x
+                                                        of
+                                                          Prelude.Nothing -> Data.Monoid.mempty
+                                                          (Prelude.Just _v)
+                                                            -> (Data.Monoid.<>)
+                                                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                    122)
+                                                                 ((Prelude..)
+                                                                    (\ bs
+                                                                       -> (Data.Monoid.<>)
+                                                                            (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                               (Prelude.fromIntegral
+                                                                                  (Data.ByteString.length
+                                                                                     bs)))
+                                                                            (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                               bs))
+                                                                    Data.ProtoLens.encodeMessage
+                                                                    _v))
+                                                       ((Data.Monoid.<>)
+                                                          (case
+                                                               Lens.Family2.view
+                                                                 (Data.ProtoLens.Field.field
+                                                                    @"maybe'priority")
+                                                                 _x
+                                                           of
+                                                             Prelude.Nothing -> Data.Monoid.mempty
+                                                             (Prelude.Just _v)
+                                                               -> (Data.Monoid.<>)
+                                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                       130)
+                                                                    ((Prelude..)
+                                                                       (\ bs
+                                                                          -> (Data.Monoid.<>)
+                                                                               (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                  (Prelude.fromIntegral
+                                                                                     (Data.ByteString.length
+                                                                                        bs)))
+                                                                               (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                  bs))
+                                                                       Data.ProtoLens.encodeMessage
+                                                                       _v))
+                                                          (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                                                             (Lens.Family2.view
+                                                                Data.ProtoLens.unknownFields
+                                                                _x)))))))))))))))))
 instance Control.DeepSeq.NFData NewWorkflowExecutionInfo where
   rnf
     = \ x__
@@ -1557,7 +2042,15 @@ instance Control.DeepSeq.NFData NewWorkflowExecutionInfo where
                                                  (_NewWorkflowExecutionInfo'searchAttributes x__)
                                                  (Control.DeepSeq.deepseq
                                                     (_NewWorkflowExecutionInfo'header x__)
-                                                    ())))))))))))))
+                                                    (Control.DeepSeq.deepseq
+                                                       (_NewWorkflowExecutionInfo'userMetadata x__)
+                                                       (Control.DeepSeq.deepseq
+                                                          (_NewWorkflowExecutionInfo'versioningOverride
+                                                             x__)
+                                                          (Control.DeepSeq.deepseq
+                                                             (_NewWorkflowExecutionInfo'priority
+                                                                x__)
+                                                             ()))))))))))))))))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.requestedTime' @:: Lens' NexusOperationCancellationInfo Proto.Google.Protobuf.Timestamp.Timestamp@
@@ -1569,7 +2062,8 @@ instance Control.DeepSeq.NFData NewWorkflowExecutionInfo where
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.lastAttemptFailure' @:: Lens' NexusOperationCancellationInfo Proto.Temporal.Api.Failure.V1.Message.Failure@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'lastAttemptFailure' @:: Lens' NexusOperationCancellationInfo (Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure)@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.nextAttemptScheduleTime' @:: Lens' NexusOperationCancellationInfo Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'nextAttemptScheduleTime' @:: Lens' NexusOperationCancellationInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@ -}
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'nextAttemptScheduleTime' @:: Lens' NexusOperationCancellationInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.blockedReason' @:: Lens' NexusOperationCancellationInfo Data.Text.Text@ -}
 data NexusOperationCancellationInfo
   = NexusOperationCancellationInfo'_constructor {_NexusOperationCancellationInfo'requestedTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
                                                  _NexusOperationCancellationInfo'state :: !Proto.Temporal.Api.Enums.V1.Common.NexusOperationCancellationState,
@@ -1577,6 +2071,7 @@ data NexusOperationCancellationInfo
                                                  _NexusOperationCancellationInfo'lastAttemptCompleteTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
                                                  _NexusOperationCancellationInfo'lastAttemptFailure :: !(Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure),
                                                  _NexusOperationCancellationInfo'nextAttemptScheduleTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                                                 _NexusOperationCancellationInfo'blockedReason :: !Data.Text.Text,
                                                  _NexusOperationCancellationInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show NexusOperationCancellationInfo where
@@ -1667,6 +2162,14 @@ instance Data.ProtoLens.Field.HasField NexusOperationCancellationInfo "maybe'nex
               -> x__
                    {_NexusOperationCancellationInfo'nextAttemptScheduleTime = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField NexusOperationCancellationInfo "blockedReason" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _NexusOperationCancellationInfo'blockedReason
+           (\ x__ y__
+              -> x__ {_NexusOperationCancellationInfo'blockedReason = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message NexusOperationCancellationInfo where
   messageName _
     = Data.Text.pack
@@ -1679,7 +2182,8 @@ instance Data.ProtoLens.Message NexusOperationCancellationInfo where
       \\aattempt\CAN\ETX \SOH(\ENQR\aattempt\DC2W\n\
       \\SUBlast_attempt_complete_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\ETBlastAttemptCompleteTime\DC2R\n\
       \\DC4last_attempt_failure\CAN\ENQ \SOH(\v2 .temporal.api.failure.v1.FailureR\DC2lastAttemptFailure\DC2W\n\
-      \\SUBnext_attempt_schedule_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR\ETBnextAttemptScheduleTime"
+      \\SUBnext_attempt_schedule_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR\ETBnextAttemptScheduleTime\DC2%\n\
+      \\SOblocked_reason\CAN\a \SOH(\tR\rblockedReason"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -1731,6 +2235,15 @@ instance Data.ProtoLens.Message NexusOperationCancellationInfo where
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'nextAttemptScheduleTime")) ::
               Data.ProtoLens.FieldDescriptor NexusOperationCancellationInfo
+        blockedReason__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "blocked_reason"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"blockedReason")) ::
+              Data.ProtoLens.FieldDescriptor NexusOperationCancellationInfo
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, requestedTime__field_descriptor),
@@ -1738,7 +2251,8 @@ instance Data.ProtoLens.Message NexusOperationCancellationInfo where
            (Data.ProtoLens.Tag 3, attempt__field_descriptor),
            (Data.ProtoLens.Tag 4, lastAttemptCompleteTime__field_descriptor),
            (Data.ProtoLens.Tag 5, lastAttemptFailure__field_descriptor),
-           (Data.ProtoLens.Tag 6, nextAttemptScheduleTime__field_descriptor)]
+           (Data.ProtoLens.Tag 6, nextAttemptScheduleTime__field_descriptor),
+           (Data.ProtoLens.Tag 7, blockedReason__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _NexusOperationCancellationInfo'_unknownFields
@@ -1752,6 +2266,7 @@ instance Data.ProtoLens.Message NexusOperationCancellationInfo where
          _NexusOperationCancellationInfo'lastAttemptCompleteTime = Prelude.Nothing,
          _NexusOperationCancellationInfo'lastAttemptFailure = Prelude.Nothing,
          _NexusOperationCancellationInfo'nextAttemptScheduleTime = Prelude.Nothing,
+         _NexusOperationCancellationInfo'blockedReason = Data.ProtoLens.fieldDefault,
          _NexusOperationCancellationInfo'_unknownFields = []}
   parseMessage
     = let
@@ -1828,6 +2343,15 @@ instance Data.ProtoLens.Message NexusOperationCancellationInfo where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"nextAttemptScheduleTime") y x)
+                        58
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "blocked_reason"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"blockedReason") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -1929,8 +2453,27 @@ instance Data.ProtoLens.Message NexusOperationCancellationInfo where
                                                        (Data.ByteString.length bs)))
                                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                                          Data.ProtoLens.encodeMessage _v))
-                            (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                               (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))))
+                            ((Data.Monoid.<>)
+                               (let
+                                  _v
+                                    = Lens.Family2.view
+                                        (Data.ProtoLens.Field.field @"blockedReason") _x
+                                in
+                                  if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                      Data.Monoid.mempty
+                                  else
+                                      (Data.Monoid.<>)
+                                        (Data.ProtoLens.Encoding.Bytes.putVarInt 58)
+                                        ((Prelude..)
+                                           (\ bs
+                                              -> (Data.Monoid.<>)
+                                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                      (Prelude.fromIntegral
+                                                         (Data.ByteString.length bs)))
+                                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                           Data.Text.Encoding.encodeUtf8 _v))
+                               (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                                  (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))))
 instance Control.DeepSeq.NFData NexusOperationCancellationInfo where
   rnf
     = \ x__
@@ -1948,7 +2491,211 @@ instance Control.DeepSeq.NFData NexusOperationCancellationInfo where
                             (_NexusOperationCancellationInfo'lastAttemptFailure x__)
                             (Control.DeepSeq.deepseq
                                (_NexusOperationCancellationInfo'nextAttemptScheduleTime x__)
-                               ()))))))
+                               (Control.DeepSeq.deepseq
+                                  (_NexusOperationCancellationInfo'blockedReason x__) ())))))))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.attachRequestId' @:: Lens' OnConflictOptions Prelude.Bool@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.attachCompletionCallbacks' @:: Lens' OnConflictOptions Prelude.Bool@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.attachLinks' @:: Lens' OnConflictOptions Prelude.Bool@ -}
+data OnConflictOptions
+  = OnConflictOptions'_constructor {_OnConflictOptions'attachRequestId :: !Prelude.Bool,
+                                    _OnConflictOptions'attachCompletionCallbacks :: !Prelude.Bool,
+                                    _OnConflictOptions'attachLinks :: !Prelude.Bool,
+                                    _OnConflictOptions'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show OnConflictOptions where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField OnConflictOptions "attachRequestId" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _OnConflictOptions'attachRequestId
+           (\ x__ y__ -> x__ {_OnConflictOptions'attachRequestId = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField OnConflictOptions "attachCompletionCallbacks" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _OnConflictOptions'attachCompletionCallbacks
+           (\ x__ y__
+              -> x__ {_OnConflictOptions'attachCompletionCallbacks = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField OnConflictOptions "attachLinks" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _OnConflictOptions'attachLinks
+           (\ x__ y__ -> x__ {_OnConflictOptions'attachLinks = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message OnConflictOptions where
+  messageName _
+    = Data.Text.pack "temporal.api.workflow.v1.OnConflictOptions"
+  packedMessageDescriptor _
+    = "\n\
+      \\DC1OnConflictOptions\DC2*\n\
+      \\DC1attach_request_id\CAN\SOH \SOH(\bR\SIattachRequestId\DC2>\n\
+      \\ESCattach_completion_callbacks\CAN\STX \SOH(\bR\EMattachCompletionCallbacks\DC2!\n\
+      \\fattach_links\CAN\ETX \SOH(\bR\vattachLinks"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        attachRequestId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "attach_request_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"attachRequestId")) ::
+              Data.ProtoLens.FieldDescriptor OnConflictOptions
+        attachCompletionCallbacks__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "attach_completion_callbacks"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"attachCompletionCallbacks")) ::
+              Data.ProtoLens.FieldDescriptor OnConflictOptions
+        attachLinks__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "attach_links"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"attachLinks")) ::
+              Data.ProtoLens.FieldDescriptor OnConflictOptions
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, attachRequestId__field_descriptor),
+           (Data.ProtoLens.Tag 2, 
+            attachCompletionCallbacks__field_descriptor),
+           (Data.ProtoLens.Tag 3, attachLinks__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _OnConflictOptions'_unknownFields
+        (\ x__ y__ -> x__ {_OnConflictOptions'_unknownFields = y__})
+  defMessage
+    = OnConflictOptions'_constructor
+        {_OnConflictOptions'attachRequestId = Data.ProtoLens.fieldDefault,
+         _OnConflictOptions'attachCompletionCallbacks = Data.ProtoLens.fieldDefault,
+         _OnConflictOptions'attachLinks = Data.ProtoLens.fieldDefault,
+         _OnConflictOptions'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          OnConflictOptions
+          -> Data.ProtoLens.Encoding.Bytes.Parser OnConflictOptions
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "attach_request_id"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"attachRequestId") y x)
+                        16
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "attach_completion_callbacks"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"attachCompletionCallbacks") y x)
+                        24
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "attach_links"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"attachLinks") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "OnConflictOptions"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view
+                      (Data.ProtoLens.Field.field @"attachRequestId") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
+                      ((Prelude..)
+                         Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
+                         _v))
+             ((Data.Monoid.<>)
+                (let
+                   _v
+                     = Lens.Family2.view
+                         (Data.ProtoLens.Field.field @"attachCompletionCallbacks") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
+                         ((Prelude..)
+                            Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
+                            _v))
+                ((Data.Monoid.<>)
+                   (let
+                      _v
+                        = Lens.Family2.view (Data.ProtoLens.Field.field @"attachLinks") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
+                            ((Prelude..)
+                               Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
+                               _v))
+                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
+instance Control.DeepSeq.NFData OnConflictOptions where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_OnConflictOptions'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_OnConflictOptions'attachRequestId x__)
+                (Control.DeepSeq.deepseq
+                   (_OnConflictOptions'attachCompletionCallbacks x__)
+                   (Control.DeepSeq.deepseq (_OnConflictOptions'attachLinks x__) ())))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.activityId' @:: Lens' PendingActivityInfo Data.Text.Text@
@@ -1972,6 +2719,20 @@ instance Control.DeepSeq.NFData NexusOperationCancellationInfo where
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.lastWorkerIdentity' @:: Lens' PendingActivityInfo Data.Text.Text@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.lastWorkerVersionStamp' @:: Lens' PendingActivityInfo Proto.Temporal.Api.Common.V1.Message.WorkerVersionStamp@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'lastWorkerVersionStamp' @:: Lens' PendingActivityInfo (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkerVersionStamp)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.currentRetryInterval' @:: Lens' PendingActivityInfo Proto.Google.Protobuf.Duration.Duration@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'currentRetryInterval' @:: Lens' PendingActivityInfo (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.lastAttemptCompleteTime' @:: Lens' PendingActivityInfo Proto.Google.Protobuf.Timestamp.Timestamp@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'lastAttemptCompleteTime' @:: Lens' PendingActivityInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.nextAttemptScheduleTime' @:: Lens' PendingActivityInfo Proto.Google.Protobuf.Timestamp.Timestamp@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'nextAttemptScheduleTime' @:: Lens' PendingActivityInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.paused' @:: Lens' PendingActivityInfo Prelude.Bool@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.lastDeployment' @:: Lens' PendingActivityInfo Proto.Temporal.Api.Deployment.V1.Message.Deployment@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'lastDeployment' @:: Lens' PendingActivityInfo (Prelude.Maybe Proto.Temporal.Api.Deployment.V1.Message.Deployment)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.lastWorkerDeploymentVersion' @:: Lens' PendingActivityInfo Data.Text.Text@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.priority' @:: Lens' PendingActivityInfo Proto.Temporal.Api.Common.V1.Message.Priority@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'priority' @:: Lens' PendingActivityInfo (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Priority)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.pauseInfo' @:: Lens' PendingActivityInfo PendingActivityInfo'PauseInfo@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'pauseInfo' @:: Lens' PendingActivityInfo (Prelude.Maybe PendingActivityInfo'PauseInfo)@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'assignedBuildId' @:: Lens' PendingActivityInfo (Prelude.Maybe PendingActivityInfo'AssignedBuildId)@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'useWorkflowBuildId' @:: Lens' PendingActivityInfo (Prelude.Maybe Proto.Google.Protobuf.Empty.Empty)@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.useWorkflowBuildId' @:: Lens' PendingActivityInfo Proto.Google.Protobuf.Empty.Empty@
@@ -1991,6 +2752,14 @@ data PendingActivityInfo
                                       _PendingActivityInfo'lastFailure :: !(Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure),
                                       _PendingActivityInfo'lastWorkerIdentity :: !Data.Text.Text,
                                       _PendingActivityInfo'lastWorkerVersionStamp :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkerVersionStamp),
+                                      _PendingActivityInfo'currentRetryInterval :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
+                                      _PendingActivityInfo'lastAttemptCompleteTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                                      _PendingActivityInfo'nextAttemptScheduleTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                                      _PendingActivityInfo'paused :: !Prelude.Bool,
+                                      _PendingActivityInfo'lastDeployment :: !(Prelude.Maybe Proto.Temporal.Api.Deployment.V1.Message.Deployment),
+                                      _PendingActivityInfo'lastWorkerDeploymentVersion :: !Data.Text.Text,
+                                      _PendingActivityInfo'priority :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Priority),
+                                      _PendingActivityInfo'pauseInfo :: !(Prelude.Maybe PendingActivityInfo'PauseInfo),
                                       _PendingActivityInfo'assignedBuildId :: !(Prelude.Maybe PendingActivityInfo'AssignedBuildId),
                                       _PendingActivityInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
@@ -2153,6 +2922,111 @@ instance Data.ProtoLens.Field.HasField PendingActivityInfo "maybe'lastWorkerVers
            (\ x__ y__
               -> x__ {_PendingActivityInfo'lastWorkerVersionStamp = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField PendingActivityInfo "currentRetryInterval" Proto.Google.Protobuf.Duration.Duration where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'currentRetryInterval
+           (\ x__ y__
+              -> x__ {_PendingActivityInfo'currentRetryInterval = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField PendingActivityInfo "maybe'currentRetryInterval" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'currentRetryInterval
+           (\ x__ y__
+              -> x__ {_PendingActivityInfo'currentRetryInterval = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField PendingActivityInfo "lastAttemptCompleteTime" Proto.Google.Protobuf.Timestamp.Timestamp where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'lastAttemptCompleteTime
+           (\ x__ y__
+              -> x__ {_PendingActivityInfo'lastAttemptCompleteTime = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField PendingActivityInfo "maybe'lastAttemptCompleteTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'lastAttemptCompleteTime
+           (\ x__ y__
+              -> x__ {_PendingActivityInfo'lastAttemptCompleteTime = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField PendingActivityInfo "nextAttemptScheduleTime" Proto.Google.Protobuf.Timestamp.Timestamp where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'nextAttemptScheduleTime
+           (\ x__ y__
+              -> x__ {_PendingActivityInfo'nextAttemptScheduleTime = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField PendingActivityInfo "maybe'nextAttemptScheduleTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'nextAttemptScheduleTime
+           (\ x__ y__
+              -> x__ {_PendingActivityInfo'nextAttemptScheduleTime = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField PendingActivityInfo "paused" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'paused
+           (\ x__ y__ -> x__ {_PendingActivityInfo'paused = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField PendingActivityInfo "lastDeployment" Proto.Temporal.Api.Deployment.V1.Message.Deployment where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'lastDeployment
+           (\ x__ y__ -> x__ {_PendingActivityInfo'lastDeployment = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField PendingActivityInfo "maybe'lastDeployment" (Prelude.Maybe Proto.Temporal.Api.Deployment.V1.Message.Deployment) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'lastDeployment
+           (\ x__ y__ -> x__ {_PendingActivityInfo'lastDeployment = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField PendingActivityInfo "lastWorkerDeploymentVersion" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'lastWorkerDeploymentVersion
+           (\ x__ y__
+              -> x__ {_PendingActivityInfo'lastWorkerDeploymentVersion = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField PendingActivityInfo "priority" Proto.Temporal.Api.Common.V1.Message.Priority where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'priority
+           (\ x__ y__ -> x__ {_PendingActivityInfo'priority = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField PendingActivityInfo "maybe'priority" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Priority) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'priority
+           (\ x__ y__ -> x__ {_PendingActivityInfo'priority = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField PendingActivityInfo "pauseInfo" PendingActivityInfo'PauseInfo where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'pauseInfo
+           (\ x__ y__ -> x__ {_PendingActivityInfo'pauseInfo = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField PendingActivityInfo "maybe'pauseInfo" (Prelude.Maybe PendingActivityInfo'PauseInfo) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'pauseInfo
+           (\ x__ y__ -> x__ {_PendingActivityInfo'pauseInfo = y__}))
+        Prelude.id
 instance Data.ProtoLens.Field.HasField PendingActivityInfo "maybe'assignedBuildId" (Prelude.Maybe PendingActivityInfo'AssignedBuildId) where
   fieldOf _
     = (Prelude..)
@@ -2244,7 +3118,25 @@ instance Data.ProtoLens.Message PendingActivityInfo where
       \\DC4last_worker_identity\CAN\f \SOH(\tR\DC2lastWorkerIdentity\DC2K\n\
       \\NAKuse_workflow_build_id\CAN\r \SOH(\v2\SYN.google.protobuf.EmptyH\NULR\DC2useWorkflowBuildId\DC2P\n\
       \$last_independently_assigned_build_id\CAN\SO \SOH(\tH\NULR lastIndependentlyAssignedBuildId\DC2e\n\
-      \\EMlast_worker_version_stamp\CAN\SI \SOH(\v2*.temporal.api.common.v1.WorkerVersionStampR\SYNlastWorkerVersionStampB\DC3\n\
+      \\EMlast_worker_version_stamp\CAN\SI \SOH(\v2*.temporal.api.common.v1.WorkerVersionStampR\SYNlastWorkerVersionStamp\DC2O\n\
+      \\SYNcurrent_retry_interval\CAN\DLE \SOH(\v2\EM.google.protobuf.DurationR\DC4currentRetryInterval\DC2W\n\
+      \\SUBlast_attempt_complete_time\CAN\DC1 \SOH(\v2\SUB.google.protobuf.TimestampR\ETBlastAttemptCompleteTime\DC2W\n\
+      \\SUBnext_attempt_schedule_time\CAN\DC2 \SOH(\v2\SUB.google.protobuf.TimestampR\ETBnextAttemptScheduleTime\DC2\SYN\n\
+      \\ACKpaused\CAN\DC3 \SOH(\bR\ACKpaused\DC2S\n\
+      \\SIlast_deployment\CAN\DC4 \SOH(\v2&.temporal.api.deployment.v1.DeploymentR\SOlastDeploymentB\STX\CAN\SOH\DC2C\n\
+      \\RSlast_worker_deployment_version\CAN\NAK \SOH(\tR\ESClastWorkerDeploymentVersion\DC2<\n\
+      \\bpriority\CAN\SYN \SOH(\v2 .temporal.api.common.v1.PriorityR\bpriority\DC2V\n\
+      \\n\
+      \pause_info\CAN\ETB \SOH(\v27.temporal.api.workflow.v1.PendingActivityInfo.PauseInfoR\tpauseInfo\SUB\134\STX\n\
+      \\tPauseInfo\DC29\n\
+      \\n\
+      \pause_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\tpauseTime\DC2X\n\
+      \\ACKmanual\CAN\STX \SOH(\v2>.temporal.api.workflow.v1.PendingActivityInfo.PauseInfo.ManualH\NULR\ACKmanual\DC2\EM\n\
+      \\arule_id\CAN\ETX \SOH(\tH\NULR\ACKruleId\SUB<\n\
+      \\ACKManual\DC2\SUB\n\
+      \\bidentity\CAN\SOH \SOH(\tR\bidentity\DC2\SYN\n\
+      \\ACKreason\CAN\STX \SOH(\tR\ACKreasonB\v\n\
+      \\tpaused_byB\DC3\n\
       \\DC1assigned_build_id"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
@@ -2356,6 +3248,71 @@ instance Data.ProtoLens.Message PendingActivityInfo where
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'lastWorkerVersionStamp")) ::
               Data.ProtoLens.FieldDescriptor PendingActivityInfo
+        currentRetryInterval__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "current_retry_interval"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'currentRetryInterval")) ::
+              Data.ProtoLens.FieldDescriptor PendingActivityInfo
+        lastAttemptCompleteTime__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "last_attempt_complete_time"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'lastAttemptCompleteTime")) ::
+              Data.ProtoLens.FieldDescriptor PendingActivityInfo
+        nextAttemptScheduleTime__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "next_attempt_schedule_time"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'nextAttemptScheduleTime")) ::
+              Data.ProtoLens.FieldDescriptor PendingActivityInfo
+        paused__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "paused"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"paused")) ::
+              Data.ProtoLens.FieldDescriptor PendingActivityInfo
+        lastDeployment__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "last_deployment"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Deployment.V1.Message.Deployment)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'lastDeployment")) ::
+              Data.ProtoLens.FieldDescriptor PendingActivityInfo
+        lastWorkerDeploymentVersion__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "last_worker_deployment_version"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"lastWorkerDeploymentVersion")) ::
+              Data.ProtoLens.FieldDescriptor PendingActivityInfo
+        priority__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "priority"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Priority)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'priority")) ::
+              Data.ProtoLens.FieldDescriptor PendingActivityInfo
+        pauseInfo__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "pause_info"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor PendingActivityInfo'PauseInfo)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'pauseInfo")) ::
+              Data.ProtoLens.FieldDescriptor PendingActivityInfo
         useWorkflowBuildId__field_descriptor
           = Data.ProtoLens.FieldDescriptor
               "use_workflow_build_id"
@@ -2388,6 +3345,15 @@ instance Data.ProtoLens.Message PendingActivityInfo where
            (Data.ProtoLens.Tag 11, lastFailure__field_descriptor),
            (Data.ProtoLens.Tag 12, lastWorkerIdentity__field_descriptor),
            (Data.ProtoLens.Tag 15, lastWorkerVersionStamp__field_descriptor),
+           (Data.ProtoLens.Tag 16, currentRetryInterval__field_descriptor),
+           (Data.ProtoLens.Tag 17, lastAttemptCompleteTime__field_descriptor),
+           (Data.ProtoLens.Tag 18, nextAttemptScheduleTime__field_descriptor),
+           (Data.ProtoLens.Tag 19, paused__field_descriptor),
+           (Data.ProtoLens.Tag 20, lastDeployment__field_descriptor),
+           (Data.ProtoLens.Tag 21, 
+            lastWorkerDeploymentVersion__field_descriptor),
+           (Data.ProtoLens.Tag 22, priority__field_descriptor),
+           (Data.ProtoLens.Tag 23, pauseInfo__field_descriptor),
            (Data.ProtoLens.Tag 13, useWorkflowBuildId__field_descriptor),
            (Data.ProtoLens.Tag 14, 
             lastIndependentlyAssignedBuildId__field_descriptor)]
@@ -2410,6 +3376,14 @@ instance Data.ProtoLens.Message PendingActivityInfo where
          _PendingActivityInfo'lastFailure = Prelude.Nothing,
          _PendingActivityInfo'lastWorkerIdentity = Data.ProtoLens.fieldDefault,
          _PendingActivityInfo'lastWorkerVersionStamp = Prelude.Nothing,
+         _PendingActivityInfo'currentRetryInterval = Prelude.Nothing,
+         _PendingActivityInfo'lastAttemptCompleteTime = Prelude.Nothing,
+         _PendingActivityInfo'nextAttemptScheduleTime = Prelude.Nothing,
+         _PendingActivityInfo'paused = Data.ProtoLens.fieldDefault,
+         _PendingActivityInfo'lastDeployment = Prelude.Nothing,
+         _PendingActivityInfo'lastWorkerDeploymentVersion = Data.ProtoLens.fieldDefault,
+         _PendingActivityInfo'priority = Prelude.Nothing,
+         _PendingActivityInfo'pauseInfo = Prelude.Nothing,
          _PendingActivityInfo'assignedBuildId = Prelude.Nothing,
          _PendingActivityInfo'_unknownFields = []}
   parseMessage
@@ -2548,6 +3522,74 @@ instance Data.ProtoLens.Message PendingActivityInfo where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"lastWorkerVersionStamp") y x)
+                        130
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "current_retry_interval"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"currentRetryInterval") y x)
+                        138
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "last_attempt_complete_time"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"lastAttemptCompleteTime") y x)
+                        146
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "next_attempt_schedule_time"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"nextAttemptScheduleTime") y x)
+                        152
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "paused"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"paused") y x)
+                        162
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "last_deployment"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"lastDeployment") y x)
+                        170
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "last_worker_deployment_version"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"lastWorkerDeploymentVersion") y
+                                     x)
+                        178
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "priority"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"priority") y x)
+                        186
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "pause_info"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"pauseInfo") y x)
                         106
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -2805,14 +3847,14 @@ instance Data.ProtoLens.Message PendingActivityInfo where
                                                     (case
                                                          Lens.Family2.view
                                                            (Data.ProtoLens.Field.field
-                                                              @"maybe'assignedBuildId")
+                                                              @"maybe'currentRetryInterval")
                                                            _x
                                                      of
                                                        Prelude.Nothing -> Data.Monoid.mempty
-                                                       (Prelude.Just (PendingActivityInfo'UseWorkflowBuildId v))
+                                                       (Prelude.Just _v)
                                                          -> (Data.Monoid.<>)
                                                               (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                 106)
+                                                                 130)
                                                               ((Prelude..)
                                                                  (\ bs
                                                                     -> (Data.Monoid.<>)
@@ -2822,25 +3864,215 @@ instance Data.ProtoLens.Message PendingActivityInfo where
                                                                                   bs)))
                                                                          (Data.ProtoLens.Encoding.Bytes.putBytes
                                                                             bs))
-                                                                 Data.ProtoLens.encodeMessage v)
-                                                       (Prelude.Just (PendingActivityInfo'LastIndependentlyAssignedBuildId v))
-                                                         -> (Data.Monoid.<>)
-                                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                 114)
-                                                              ((Prelude..)
-                                                                 (\ bs
-                                                                    -> (Data.Monoid.<>)
-                                                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                            (Prelude.fromIntegral
-                                                                               (Data.ByteString.length
-                                                                                  bs)))
-                                                                         (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                            bs))
-                                                                 Data.Text.Encoding.encodeUtf8 v))
-                                                    (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                                                       (Lens.Family2.view
-                                                          Data.ProtoLens.unknownFields
-                                                          _x)))))))))))))))
+                                                                 Data.ProtoLens.encodeMessage _v))
+                                                    ((Data.Monoid.<>)
+                                                       (case
+                                                            Lens.Family2.view
+                                                              (Data.ProtoLens.Field.field
+                                                                 @"maybe'lastAttemptCompleteTime")
+                                                              _x
+                                                        of
+                                                          Prelude.Nothing -> Data.Monoid.mempty
+                                                          (Prelude.Just _v)
+                                                            -> (Data.Monoid.<>)
+                                                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                    138)
+                                                                 ((Prelude..)
+                                                                    (\ bs
+                                                                       -> (Data.Monoid.<>)
+                                                                            (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                               (Prelude.fromIntegral
+                                                                                  (Data.ByteString.length
+                                                                                     bs)))
+                                                                            (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                               bs))
+                                                                    Data.ProtoLens.encodeMessage
+                                                                    _v))
+                                                       ((Data.Monoid.<>)
+                                                          (case
+                                                               Lens.Family2.view
+                                                                 (Data.ProtoLens.Field.field
+                                                                    @"maybe'nextAttemptScheduleTime")
+                                                                 _x
+                                                           of
+                                                             Prelude.Nothing -> Data.Monoid.mempty
+                                                             (Prelude.Just _v)
+                                                               -> (Data.Monoid.<>)
+                                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                       146)
+                                                                    ((Prelude..)
+                                                                       (\ bs
+                                                                          -> (Data.Monoid.<>)
+                                                                               (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                  (Prelude.fromIntegral
+                                                                                     (Data.ByteString.length
+                                                                                        bs)))
+                                                                               (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                  bs))
+                                                                       Data.ProtoLens.encodeMessage
+                                                                       _v))
+                                                          ((Data.Monoid.<>)
+                                                             (let
+                                                                _v
+                                                                  = Lens.Family2.view
+                                                                      (Data.ProtoLens.Field.field
+                                                                         @"paused")
+                                                                      _x
+                                                              in
+                                                                if (Prelude.==)
+                                                                     _v
+                                                                     Data.ProtoLens.fieldDefault then
+                                                                    Data.Monoid.mempty
+                                                                else
+                                                                    (Data.Monoid.<>)
+                                                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                         152)
+                                                                      ((Prelude..)
+                                                                         Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                         (\ b -> if b then 1 else 0)
+                                                                         _v))
+                                                             ((Data.Monoid.<>)
+                                                                (case
+                                                                     Lens.Family2.view
+                                                                       (Data.ProtoLens.Field.field
+                                                                          @"maybe'lastDeployment")
+                                                                       _x
+                                                                 of
+                                                                   Prelude.Nothing
+                                                                     -> Data.Monoid.mempty
+                                                                   (Prelude.Just _v)
+                                                                     -> (Data.Monoid.<>)
+                                                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                             162)
+                                                                          ((Prelude..)
+                                                                             (\ bs
+                                                                                -> (Data.Monoid.<>)
+                                                                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                        (Prelude.fromIntegral
+                                                                                           (Data.ByteString.length
+                                                                                              bs)))
+                                                                                     (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                        bs))
+                                                                             Data.ProtoLens.encodeMessage
+                                                                             _v))
+                                                                ((Data.Monoid.<>)
+                                                                   (let
+                                                                      _v
+                                                                        = Lens.Family2.view
+                                                                            (Data.ProtoLens.Field.field
+                                                                               @"lastWorkerDeploymentVersion")
+                                                                            _x
+                                                                    in
+                                                                      if (Prelude.==)
+                                                                           _v
+                                                                           Data.ProtoLens.fieldDefault then
+                                                                          Data.Monoid.mempty
+                                                                      else
+                                                                          (Data.Monoid.<>)
+                                                                            (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                               170)
+                                                                            ((Prelude..)
+                                                                               (\ bs
+                                                                                  -> (Data.Monoid.<>)
+                                                                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                          (Prelude.fromIntegral
+                                                                                             (Data.ByteString.length
+                                                                                                bs)))
+                                                                                       (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                          bs))
+                                                                               Data.Text.Encoding.encodeUtf8
+                                                                               _v))
+                                                                   ((Data.Monoid.<>)
+                                                                      (case
+                                                                           Lens.Family2.view
+                                                                             (Data.ProtoLens.Field.field
+                                                                                @"maybe'priority")
+                                                                             _x
+                                                                       of
+                                                                         Prelude.Nothing
+                                                                           -> Data.Monoid.mempty
+                                                                         (Prelude.Just _v)
+                                                                           -> (Data.Monoid.<>)
+                                                                                (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                   178)
+                                                                                ((Prelude..)
+                                                                                   (\ bs
+                                                                                      -> (Data.Monoid.<>)
+                                                                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                              (Prelude.fromIntegral
+                                                                                                 (Data.ByteString.length
+                                                                                                    bs)))
+                                                                                           (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                              bs))
+                                                                                   Data.ProtoLens.encodeMessage
+                                                                                   _v))
+                                                                      ((Data.Monoid.<>)
+                                                                         (case
+                                                                              Lens.Family2.view
+                                                                                (Data.ProtoLens.Field.field
+                                                                                   @"maybe'pauseInfo")
+                                                                                _x
+                                                                          of
+                                                                            Prelude.Nothing
+                                                                              -> Data.Monoid.mempty
+                                                                            (Prelude.Just _v)
+                                                                              -> (Data.Monoid.<>)
+                                                                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                      186)
+                                                                                   ((Prelude..)
+                                                                                      (\ bs
+                                                                                         -> (Data.Monoid.<>)
+                                                                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                                 (Prelude.fromIntegral
+                                                                                                    (Data.ByteString.length
+                                                                                                       bs)))
+                                                                                              (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                                 bs))
+                                                                                      Data.ProtoLens.encodeMessage
+                                                                                      _v))
+                                                                         ((Data.Monoid.<>)
+                                                                            (case
+                                                                                 Lens.Family2.view
+                                                                                   (Data.ProtoLens.Field.field
+                                                                                      @"maybe'assignedBuildId")
+                                                                                   _x
+                                                                             of
+                                                                               Prelude.Nothing
+                                                                                 -> Data.Monoid.mempty
+                                                                               (Prelude.Just (PendingActivityInfo'UseWorkflowBuildId v))
+                                                                                 -> (Data.Monoid.<>)
+                                                                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                         106)
+                                                                                      ((Prelude..)
+                                                                                         (\ bs
+                                                                                            -> (Data.Monoid.<>)
+                                                                                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                                    (Prelude.fromIntegral
+                                                                                                       (Data.ByteString.length
+                                                                                                          bs)))
+                                                                                                 (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                                    bs))
+                                                                                         Data.ProtoLens.encodeMessage
+                                                                                         v)
+                                                                               (Prelude.Just (PendingActivityInfo'LastIndependentlyAssignedBuildId v))
+                                                                                 -> (Data.Monoid.<>)
+                                                                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                         114)
+                                                                                      ((Prelude..)
+                                                                                         (\ bs
+                                                                                            -> (Data.Monoid.<>)
+                                                                                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                                    (Prelude.fromIntegral
+                                                                                                       (Data.ByteString.length
+                                                                                                          bs)))
+                                                                                                 (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                                    bs))
+                                                                                         Data.Text.Encoding.encodeUtf8
+                                                                                         v))
+                                                                            (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                                                                               (Lens.Family2.view
+                                                                                  Data.ProtoLens.unknownFields
+                                                                                  _x)))))))))))))))))))))))
 instance Control.DeepSeq.NFData PendingActivityInfo where
   rnf
     = \ x__
@@ -2874,8 +4106,32 @@ instance Control.DeepSeq.NFData PendingActivityInfo where
                                                     (_PendingActivityInfo'lastWorkerVersionStamp
                                                        x__)
                                                     (Control.DeepSeq.deepseq
-                                                       (_PendingActivityInfo'assignedBuildId x__)
-                                                       ()))))))))))))))
+                                                       (_PendingActivityInfo'currentRetryInterval
+                                                          x__)
+                                                       (Control.DeepSeq.deepseq
+                                                          (_PendingActivityInfo'lastAttemptCompleteTime
+                                                             x__)
+                                                          (Control.DeepSeq.deepseq
+                                                             (_PendingActivityInfo'nextAttemptScheduleTime
+                                                                x__)
+                                                             (Control.DeepSeq.deepseq
+                                                                (_PendingActivityInfo'paused x__)
+                                                                (Control.DeepSeq.deepseq
+                                                                   (_PendingActivityInfo'lastDeployment
+                                                                      x__)
+                                                                   (Control.DeepSeq.deepseq
+                                                                      (_PendingActivityInfo'lastWorkerDeploymentVersion
+                                                                         x__)
+                                                                      (Control.DeepSeq.deepseq
+                                                                         (_PendingActivityInfo'priority
+                                                                            x__)
+                                                                         (Control.DeepSeq.deepseq
+                                                                            (_PendingActivityInfo'pauseInfo
+                                                                               x__)
+                                                                            (Control.DeepSeq.deepseq
+                                                                               (_PendingActivityInfo'assignedBuildId
+                                                                                  x__)
+                                                                               ()))))))))))))))))))))))
 instance Control.DeepSeq.NFData PendingActivityInfo'AssignedBuildId where
   rnf (PendingActivityInfo'UseWorkflowBuildId x__)
     = Control.DeepSeq.rnf x__
@@ -2901,6 +4157,468 @@ _PendingActivityInfo'LastIndependentlyAssignedBuildId
               (PendingActivityInfo'LastIndependentlyAssignedBuildId p__val)
                 -> Prelude.Just p__val
               _otherwise -> Prelude.Nothing)
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.pauseTime' @:: Lens' PendingActivityInfo'PauseInfo Proto.Google.Protobuf.Timestamp.Timestamp@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'pauseTime' @:: Lens' PendingActivityInfo'PauseInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'pausedBy' @:: Lens' PendingActivityInfo'PauseInfo (Prelude.Maybe PendingActivityInfo'PauseInfo'PausedBy)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'manual' @:: Lens' PendingActivityInfo'PauseInfo (Prelude.Maybe PendingActivityInfo'PauseInfo'Manual)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.manual' @:: Lens' PendingActivityInfo'PauseInfo PendingActivityInfo'PauseInfo'Manual@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'ruleId' @:: Lens' PendingActivityInfo'PauseInfo (Prelude.Maybe Data.Text.Text)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.ruleId' @:: Lens' PendingActivityInfo'PauseInfo Data.Text.Text@ -}
+data PendingActivityInfo'PauseInfo
+  = PendingActivityInfo'PauseInfo'_constructor {_PendingActivityInfo'PauseInfo'pauseTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                                                _PendingActivityInfo'PauseInfo'pausedBy :: !(Prelude.Maybe PendingActivityInfo'PauseInfo'PausedBy),
+                                                _PendingActivityInfo'PauseInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show PendingActivityInfo'PauseInfo where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+data PendingActivityInfo'PauseInfo'PausedBy
+  = PendingActivityInfo'PauseInfo'Manual' !PendingActivityInfo'PauseInfo'Manual |
+    PendingActivityInfo'PauseInfo'RuleId !Data.Text.Text
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.Field.HasField PendingActivityInfo'PauseInfo "pauseTime" Proto.Google.Protobuf.Timestamp.Timestamp where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'PauseInfo'pauseTime
+           (\ x__ y__
+              -> x__ {_PendingActivityInfo'PauseInfo'pauseTime = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField PendingActivityInfo'PauseInfo "maybe'pauseTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'PauseInfo'pauseTime
+           (\ x__ y__
+              -> x__ {_PendingActivityInfo'PauseInfo'pauseTime = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField PendingActivityInfo'PauseInfo "maybe'pausedBy" (Prelude.Maybe PendingActivityInfo'PauseInfo'PausedBy) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'PauseInfo'pausedBy
+           (\ x__ y__ -> x__ {_PendingActivityInfo'PauseInfo'pausedBy = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField PendingActivityInfo'PauseInfo "maybe'manual" (Prelude.Maybe PendingActivityInfo'PauseInfo'Manual) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'PauseInfo'pausedBy
+           (\ x__ y__ -> x__ {_PendingActivityInfo'PauseInfo'pausedBy = y__}))
+        (Lens.Family2.Unchecked.lens
+           (\ x__
+              -> case x__ of
+                   (Prelude.Just (PendingActivityInfo'PauseInfo'Manual' x__val))
+                     -> Prelude.Just x__val
+                   _otherwise -> Prelude.Nothing)
+           (\ _ y__
+              -> Prelude.fmap PendingActivityInfo'PauseInfo'Manual' y__))
+instance Data.ProtoLens.Field.HasField PendingActivityInfo'PauseInfo "manual" PendingActivityInfo'PauseInfo'Manual where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'PauseInfo'pausedBy
+           (\ x__ y__ -> x__ {_PendingActivityInfo'PauseInfo'pausedBy = y__}))
+        ((Prelude..)
+           (Lens.Family2.Unchecked.lens
+              (\ x__
+                 -> case x__ of
+                      (Prelude.Just (PendingActivityInfo'PauseInfo'Manual' x__val))
+                        -> Prelude.Just x__val
+                      _otherwise -> Prelude.Nothing)
+              (\ _ y__
+                 -> Prelude.fmap PendingActivityInfo'PauseInfo'Manual' y__))
+           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
+instance Data.ProtoLens.Field.HasField PendingActivityInfo'PauseInfo "maybe'ruleId" (Prelude.Maybe Data.Text.Text) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'PauseInfo'pausedBy
+           (\ x__ y__ -> x__ {_PendingActivityInfo'PauseInfo'pausedBy = y__}))
+        (Lens.Family2.Unchecked.lens
+           (\ x__
+              -> case x__ of
+                   (Prelude.Just (PendingActivityInfo'PauseInfo'RuleId x__val))
+                     -> Prelude.Just x__val
+                   _otherwise -> Prelude.Nothing)
+           (\ _ y__ -> Prelude.fmap PendingActivityInfo'PauseInfo'RuleId y__))
+instance Data.ProtoLens.Field.HasField PendingActivityInfo'PauseInfo "ruleId" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'PauseInfo'pausedBy
+           (\ x__ y__ -> x__ {_PendingActivityInfo'PauseInfo'pausedBy = y__}))
+        ((Prelude..)
+           (Lens.Family2.Unchecked.lens
+              (\ x__
+                 -> case x__ of
+                      (Prelude.Just (PendingActivityInfo'PauseInfo'RuleId x__val))
+                        -> Prelude.Just x__val
+                      _otherwise -> Prelude.Nothing)
+              (\ _ y__ -> Prelude.fmap PendingActivityInfo'PauseInfo'RuleId y__))
+           (Data.ProtoLens.maybeLens Data.ProtoLens.fieldDefault))
+instance Data.ProtoLens.Message PendingActivityInfo'PauseInfo where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.workflow.v1.PendingActivityInfo.PauseInfo"
+  packedMessageDescriptor _
+    = "\n\
+      \\tPauseInfo\DC29\n\
+      \\n\
+      \pause_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\tpauseTime\DC2X\n\
+      \\ACKmanual\CAN\STX \SOH(\v2>.temporal.api.workflow.v1.PendingActivityInfo.PauseInfo.ManualH\NULR\ACKmanual\DC2\EM\n\
+      \\arule_id\CAN\ETX \SOH(\tH\NULR\ACKruleId\SUB<\n\
+      \\ACKManual\DC2\SUB\n\
+      \\bidentity\CAN\SOH \SOH(\tR\bidentity\DC2\SYN\n\
+      \\ACKreason\CAN\STX \SOH(\tR\ACKreasonB\v\n\
+      \\tpaused_by"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        pauseTime__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "pause_time"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'pauseTime")) ::
+              Data.ProtoLens.FieldDescriptor PendingActivityInfo'PauseInfo
+        manual__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "manual"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor PendingActivityInfo'PauseInfo'Manual)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'manual")) ::
+              Data.ProtoLens.FieldDescriptor PendingActivityInfo'PauseInfo
+        ruleId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "rule_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'ruleId")) ::
+              Data.ProtoLens.FieldDescriptor PendingActivityInfo'PauseInfo
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, pauseTime__field_descriptor),
+           (Data.ProtoLens.Tag 2, manual__field_descriptor),
+           (Data.ProtoLens.Tag 3, ruleId__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _PendingActivityInfo'PauseInfo'_unknownFields
+        (\ x__ y__
+           -> x__ {_PendingActivityInfo'PauseInfo'_unknownFields = y__})
+  defMessage
+    = PendingActivityInfo'PauseInfo'_constructor
+        {_PendingActivityInfo'PauseInfo'pauseTime = Prelude.Nothing,
+         _PendingActivityInfo'PauseInfo'pausedBy = Prelude.Nothing,
+         _PendingActivityInfo'PauseInfo'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          PendingActivityInfo'PauseInfo
+          -> Data.ProtoLens.Encoding.Bytes.Parser PendingActivityInfo'PauseInfo
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "pause_time"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"pauseTime") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "manual"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"manual") y x)
+                        26
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "rule_id"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"ruleId") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "PauseInfo"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view
+                    (Data.ProtoLens.Field.field @"maybe'pauseTime") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'pausedBy") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just (PendingActivityInfo'PauseInfo'Manual' v))
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage v)
+                   (Prelude.Just (PendingActivityInfo'PauseInfo'RuleId v))
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.Text.Encoding.encodeUtf8 v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData PendingActivityInfo'PauseInfo where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_PendingActivityInfo'PauseInfo'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_PendingActivityInfo'PauseInfo'pauseTime x__)
+                (Control.DeepSeq.deepseq
+                   (_PendingActivityInfo'PauseInfo'pausedBy x__) ()))
+instance Control.DeepSeq.NFData PendingActivityInfo'PauseInfo'PausedBy where
+  rnf (PendingActivityInfo'PauseInfo'Manual' x__)
+    = Control.DeepSeq.rnf x__
+  rnf (PendingActivityInfo'PauseInfo'RuleId x__)
+    = Control.DeepSeq.rnf x__
+_PendingActivityInfo'PauseInfo'Manual' ::
+  Data.ProtoLens.Prism.Prism' PendingActivityInfo'PauseInfo'PausedBy PendingActivityInfo'PauseInfo'Manual
+_PendingActivityInfo'PauseInfo'Manual'
+  = Data.ProtoLens.Prism.prism'
+      PendingActivityInfo'PauseInfo'Manual'
+      (\ p__
+         -> case p__ of
+              (PendingActivityInfo'PauseInfo'Manual' p__val)
+                -> Prelude.Just p__val
+              _otherwise -> Prelude.Nothing)
+_PendingActivityInfo'PauseInfo'RuleId ::
+  Data.ProtoLens.Prism.Prism' PendingActivityInfo'PauseInfo'PausedBy Data.Text.Text
+_PendingActivityInfo'PauseInfo'RuleId
+  = Data.ProtoLens.Prism.prism'
+      PendingActivityInfo'PauseInfo'RuleId
+      (\ p__
+         -> case p__ of
+              (PendingActivityInfo'PauseInfo'RuleId p__val)
+                -> Prelude.Just p__val
+              _otherwise -> Prelude.Nothing)
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.identity' @:: Lens' PendingActivityInfo'PauseInfo'Manual Data.Text.Text@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.reason' @:: Lens' PendingActivityInfo'PauseInfo'Manual Data.Text.Text@ -}
+data PendingActivityInfo'PauseInfo'Manual
+  = PendingActivityInfo'PauseInfo'Manual'_constructor {_PendingActivityInfo'PauseInfo'Manual'identity :: !Data.Text.Text,
+                                                       _PendingActivityInfo'PauseInfo'Manual'reason :: !Data.Text.Text,
+                                                       _PendingActivityInfo'PauseInfo'Manual'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show PendingActivityInfo'PauseInfo'Manual where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField PendingActivityInfo'PauseInfo'Manual "identity" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'PauseInfo'Manual'identity
+           (\ x__ y__
+              -> x__ {_PendingActivityInfo'PauseInfo'Manual'identity = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField PendingActivityInfo'PauseInfo'Manual "reason" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingActivityInfo'PauseInfo'Manual'reason
+           (\ x__ y__
+              -> x__ {_PendingActivityInfo'PauseInfo'Manual'reason = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message PendingActivityInfo'PauseInfo'Manual where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.workflow.v1.PendingActivityInfo.PauseInfo.Manual"
+  packedMessageDescriptor _
+    = "\n\
+      \\ACKManual\DC2\SUB\n\
+      \\bidentity\CAN\SOH \SOH(\tR\bidentity\DC2\SYN\n\
+      \\ACKreason\CAN\STX \SOH(\tR\ACKreason"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        identity__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "identity"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"identity")) ::
+              Data.ProtoLens.FieldDescriptor PendingActivityInfo'PauseInfo'Manual
+        reason__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "reason"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"reason")) ::
+              Data.ProtoLens.FieldDescriptor PendingActivityInfo'PauseInfo'Manual
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, identity__field_descriptor),
+           (Data.ProtoLens.Tag 2, reason__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _PendingActivityInfo'PauseInfo'Manual'_unknownFields
+        (\ x__ y__
+           -> x__
+                {_PendingActivityInfo'PauseInfo'Manual'_unknownFields = y__})
+  defMessage
+    = PendingActivityInfo'PauseInfo'Manual'_constructor
+        {_PendingActivityInfo'PauseInfo'Manual'identity = Data.ProtoLens.fieldDefault,
+         _PendingActivityInfo'PauseInfo'Manual'reason = Data.ProtoLens.fieldDefault,
+         _PendingActivityInfo'PauseInfo'Manual'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          PendingActivityInfo'PauseInfo'Manual
+          -> Data.ProtoLens.Encoding.Bytes.Parser PendingActivityInfo'PauseInfo'Manual
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "identity"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"identity") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "reason"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"reason") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "Manual"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"identity") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             ((Data.Monoid.<>)
+                (let
+                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"reason") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                         ((Prelude..)
+                            (\ bs
+                               -> (Data.Monoid.<>)
+                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                            Data.Text.Encoding.encodeUtf8 _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData PendingActivityInfo'PauseInfo'Manual where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_PendingActivityInfo'PauseInfo'Manual'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_PendingActivityInfo'PauseInfo'Manual'identity x__)
+                (Control.DeepSeq.deepseq
+                   (_PendingActivityInfo'PauseInfo'Manual'reason x__) ()))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.workflowId' @:: Lens' PendingChildExecutionInfo Data.Text.Text@
@@ -3231,7 +4949,10 @@ instance Control.DeepSeq.NFData PendingChildExecutionInfo where
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.nextAttemptScheduleTime' @:: Lens' PendingNexusOperationInfo Proto.Google.Protobuf.Timestamp.Timestamp@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'nextAttemptScheduleTime' @:: Lens' PendingNexusOperationInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.cancellationInfo' @:: Lens' PendingNexusOperationInfo NexusOperationCancellationInfo@
-         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'cancellationInfo' @:: Lens' PendingNexusOperationInfo (Prelude.Maybe NexusOperationCancellationInfo)@ -}
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'cancellationInfo' @:: Lens' PendingNexusOperationInfo (Prelude.Maybe NexusOperationCancellationInfo)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.scheduledEventId' @:: Lens' PendingNexusOperationInfo Data.Int.Int64@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.blockedReason' @:: Lens' PendingNexusOperationInfo Data.Text.Text@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.operationToken' @:: Lens' PendingNexusOperationInfo Data.Text.Text@ -}
 data PendingNexusOperationInfo
   = PendingNexusOperationInfo'_constructor {_PendingNexusOperationInfo'endpoint :: !Data.Text.Text,
                                             _PendingNexusOperationInfo'service :: !Data.Text.Text,
@@ -3245,6 +4966,9 @@ data PendingNexusOperationInfo
                                             _PendingNexusOperationInfo'lastAttemptFailure :: !(Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure),
                                             _PendingNexusOperationInfo'nextAttemptScheduleTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
                                             _PendingNexusOperationInfo'cancellationInfo :: !(Prelude.Maybe NexusOperationCancellationInfo),
+                                            _PendingNexusOperationInfo'scheduledEventId :: !Data.Int.Int64,
+                                            _PendingNexusOperationInfo'blockedReason :: !Data.Text.Text,
+                                            _PendingNexusOperationInfo'operationToken :: !Data.Text.Text,
                                             _PendingNexusOperationInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show PendingNexusOperationInfo where
@@ -3391,6 +5115,30 @@ instance Data.ProtoLens.Field.HasField PendingNexusOperationInfo "maybe'cancella
            (\ x__ y__
               -> x__ {_PendingNexusOperationInfo'cancellationInfo = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField PendingNexusOperationInfo "scheduledEventId" Data.Int.Int64 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingNexusOperationInfo'scheduledEventId
+           (\ x__ y__
+              -> x__ {_PendingNexusOperationInfo'scheduledEventId = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField PendingNexusOperationInfo "blockedReason" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingNexusOperationInfo'blockedReason
+           (\ x__ y__
+              -> x__ {_PendingNexusOperationInfo'blockedReason = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField PendingNexusOperationInfo "operationToken" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PendingNexusOperationInfo'operationToken
+           (\ x__ y__
+              -> x__ {_PendingNexusOperationInfo'operationToken = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message PendingNexusOperationInfo where
   messageName _
     = Data.Text.pack
@@ -3410,7 +5158,10 @@ instance Data.ProtoLens.Message PendingNexusOperationInfo where
       \\DC4last_attempt_failure\CAN\n\
       \ \SOH(\v2 .temporal.api.failure.v1.FailureR\DC2lastAttemptFailure\DC2W\n\
       \\SUBnext_attempt_schedule_time\CAN\v \SOH(\v2\SUB.google.protobuf.TimestampR\ETBnextAttemptScheduleTime\DC2e\n\
-      \\DC1cancellation_info\CAN\f \SOH(\v28.temporal.api.workflow.v1.NexusOperationCancellationInfoR\DLEcancellationInfo"
+      \\DC1cancellation_info\CAN\f \SOH(\v28.temporal.api.workflow.v1.NexusOperationCancellationInfoR\DLEcancellationInfo\DC2,\n\
+      \\DC2scheduled_event_id\CAN\r \SOH(\ETXR\DLEscheduledEventId\DC2%\n\
+      \\SOblocked_reason\CAN\SO \SOH(\tR\rblockedReason\DC2'\n\
+      \\SIoperation_token\CAN\SI \SOH(\tR\SOoperationToken"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -3513,6 +5264,33 @@ instance Data.ProtoLens.Message PendingNexusOperationInfo where
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'cancellationInfo")) ::
               Data.ProtoLens.FieldDescriptor PendingNexusOperationInfo
+        scheduledEventId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "scheduled_event_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.Int64Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int64)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"scheduledEventId")) ::
+              Data.ProtoLens.FieldDescriptor PendingNexusOperationInfo
+        blockedReason__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "blocked_reason"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"blockedReason")) ::
+              Data.ProtoLens.FieldDescriptor PendingNexusOperationInfo
+        operationToken__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "operation_token"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"operationToken")) ::
+              Data.ProtoLens.FieldDescriptor PendingNexusOperationInfo
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, endpoint__field_descriptor),
@@ -3526,7 +5304,10 @@ instance Data.ProtoLens.Message PendingNexusOperationInfo where
            (Data.ProtoLens.Tag 9, lastAttemptCompleteTime__field_descriptor),
            (Data.ProtoLens.Tag 10, lastAttemptFailure__field_descriptor),
            (Data.ProtoLens.Tag 11, nextAttemptScheduleTime__field_descriptor),
-           (Data.ProtoLens.Tag 12, cancellationInfo__field_descriptor)]
+           (Data.ProtoLens.Tag 12, cancellationInfo__field_descriptor),
+           (Data.ProtoLens.Tag 13, scheduledEventId__field_descriptor),
+           (Data.ProtoLens.Tag 14, blockedReason__field_descriptor),
+           (Data.ProtoLens.Tag 15, operationToken__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _PendingNexusOperationInfo'_unknownFields
@@ -3546,6 +5327,9 @@ instance Data.ProtoLens.Message PendingNexusOperationInfo where
          _PendingNexusOperationInfo'lastAttemptFailure = Prelude.Nothing,
          _PendingNexusOperationInfo'nextAttemptScheduleTime = Prelude.Nothing,
          _PendingNexusOperationInfo'cancellationInfo = Prelude.Nothing,
+         _PendingNexusOperationInfo'scheduledEventId = Data.ProtoLens.fieldDefault,
+         _PendingNexusOperationInfo'blockedReason = Data.ProtoLens.fieldDefault,
+         _PendingNexusOperationInfo'operationToken = Data.ProtoLens.fieldDefault,
          _PendingNexusOperationInfo'_unknownFields = []}
   parseMessage
     = let
@@ -3671,6 +5455,33 @@ instance Data.ProtoLens.Message PendingNexusOperationInfo where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"cancellationInfo") y x)
+                        104
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "scheduled_event_id"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"scheduledEventId") y x)
+                        114
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "blocked_reason"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"blockedReason") y x)
+                        122
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "operation_token"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"operationToken") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -3889,9 +5700,79 @@ instance Data.ProtoLens.Message PendingNexusOperationInfo where
                                                                    (Data.ProtoLens.Encoding.Bytes.putBytes
                                                                       bs))
                                                            Data.ProtoLens.encodeMessage _v))
-                                              (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                                                 (Lens.Family2.view
-                                                    Data.ProtoLens.unknownFields _x)))))))))))))
+                                              ((Data.Monoid.<>)
+                                                 (let
+                                                    _v
+                                                      = Lens.Family2.view
+                                                          (Data.ProtoLens.Field.field
+                                                             @"scheduledEventId")
+                                                          _x
+                                                  in
+                                                    if (Prelude.==)
+                                                         _v Data.ProtoLens.fieldDefault then
+                                                        Data.Monoid.mempty
+                                                    else
+                                                        (Data.Monoid.<>)
+                                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                             104)
+                                                          ((Prelude..)
+                                                             Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                             Prelude.fromIntegral _v))
+                                                 ((Data.Monoid.<>)
+                                                    (let
+                                                       _v
+                                                         = Lens.Family2.view
+                                                             (Data.ProtoLens.Field.field
+                                                                @"blockedReason")
+                                                             _x
+                                                     in
+                                                       if (Prelude.==)
+                                                            _v Data.ProtoLens.fieldDefault then
+                                                           Data.Monoid.mempty
+                                                       else
+                                                           (Data.Monoid.<>)
+                                                             (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                114)
+                                                             ((Prelude..)
+                                                                (\ bs
+                                                                   -> (Data.Monoid.<>)
+                                                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                           (Prelude.fromIntegral
+                                                                              (Data.ByteString.length
+                                                                                 bs)))
+                                                                        (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                           bs))
+                                                                Data.Text.Encoding.encodeUtf8 _v))
+                                                    ((Data.Monoid.<>)
+                                                       (let
+                                                          _v
+                                                            = Lens.Family2.view
+                                                                (Data.ProtoLens.Field.field
+                                                                   @"operationToken")
+                                                                _x
+                                                        in
+                                                          if (Prelude.==)
+                                                               _v Data.ProtoLens.fieldDefault then
+                                                              Data.Monoid.mempty
+                                                          else
+                                                              (Data.Monoid.<>)
+                                                                (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                   122)
+                                                                ((Prelude..)
+                                                                   (\ bs
+                                                                      -> (Data.Monoid.<>)
+                                                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                              (Prelude.fromIntegral
+                                                                                 (Data.ByteString.length
+                                                                                    bs)))
+                                                                           (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                              bs))
+                                                                   Data.Text.Encoding.encodeUtf8
+                                                                   _v))
+                                                       (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                                                          (Lens.Family2.view
+                                                             Data.ProtoLens.unknownFields
+                                                             _x))))))))))))))))
 instance Control.DeepSeq.NFData PendingNexusOperationInfo where
   rnf
     = \ x__
@@ -3922,7 +5803,16 @@ instance Control.DeepSeq.NFData PendingNexusOperationInfo where
                                                  x__)
                                               (Control.DeepSeq.deepseq
                                                  (_PendingNexusOperationInfo'cancellationInfo x__)
-                                                 ()))))))))))))
+                                                 (Control.DeepSeq.deepseq
+                                                    (_PendingNexusOperationInfo'scheduledEventId
+                                                       x__)
+                                                    (Control.DeepSeq.deepseq
+                                                       (_PendingNexusOperationInfo'blockedReason
+                                                          x__)
+                                                       (Control.DeepSeq.deepseq
+                                                          (_PendingNexusOperationInfo'operationToken
+                                                             x__)
+                                                          ())))))))))))))))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.state' @:: Lens' PendingWorkflowTaskInfo Proto.Temporal.Api.Enums.V1.Workflow.PendingWorkflowTaskState@
@@ -4791,6 +6681,227 @@ instance Control.DeepSeq.NFData ResetPoints where
              (Control.DeepSeq.deepseq (_ResetPoints'points x__) ())
 {- | Fields :
      
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.behavior' @:: Lens' VersioningOverride Proto.Temporal.Api.Enums.V1.Workflow.VersioningBehavior@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.deployment' @:: Lens' VersioningOverride Proto.Temporal.Api.Deployment.V1.Message.Deployment@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'deployment' @:: Lens' VersioningOverride (Prelude.Maybe Proto.Temporal.Api.Deployment.V1.Message.Deployment)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.pinnedVersion' @:: Lens' VersioningOverride Data.Text.Text@ -}
+data VersioningOverride
+  = VersioningOverride'_constructor {_VersioningOverride'behavior :: !Proto.Temporal.Api.Enums.V1.Workflow.VersioningBehavior,
+                                     _VersioningOverride'deployment :: !(Prelude.Maybe Proto.Temporal.Api.Deployment.V1.Message.Deployment),
+                                     _VersioningOverride'pinnedVersion :: !Data.Text.Text,
+                                     _VersioningOverride'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show VersioningOverride where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField VersioningOverride "behavior" Proto.Temporal.Api.Enums.V1.Workflow.VersioningBehavior where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _VersioningOverride'behavior
+           (\ x__ y__ -> x__ {_VersioningOverride'behavior = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField VersioningOverride "deployment" Proto.Temporal.Api.Deployment.V1.Message.Deployment where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _VersioningOverride'deployment
+           (\ x__ y__ -> x__ {_VersioningOverride'deployment = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField VersioningOverride "maybe'deployment" (Prelude.Maybe Proto.Temporal.Api.Deployment.V1.Message.Deployment) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _VersioningOverride'deployment
+           (\ x__ y__ -> x__ {_VersioningOverride'deployment = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField VersioningOverride "pinnedVersion" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _VersioningOverride'pinnedVersion
+           (\ x__ y__ -> x__ {_VersioningOverride'pinnedVersion = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message VersioningOverride where
+  messageName _
+    = Data.Text.pack "temporal.api.workflow.v1.VersioningOverride"
+  packedMessageDescriptor _
+    = "\n\
+      \\DC2VersioningOverride\DC2E\n\
+      \\bbehavior\CAN\SOH \SOH(\SO2).temporal.api.enums.v1.VersioningBehaviorR\bbehavior\DC2J\n\
+      \\n\
+      \deployment\CAN\STX \SOH(\v2&.temporal.api.deployment.v1.DeploymentR\n\
+      \deploymentB\STX\CAN\SOH\DC2%\n\
+      \\SOpinned_version\CAN\t \SOH(\tR\rpinnedVersion"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        behavior__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "behavior"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Workflow.VersioningBehavior)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"behavior")) ::
+              Data.ProtoLens.FieldDescriptor VersioningOverride
+        deployment__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "deployment"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Deployment.V1.Message.Deployment)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'deployment")) ::
+              Data.ProtoLens.FieldDescriptor VersioningOverride
+        pinnedVersion__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "pinned_version"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"pinnedVersion")) ::
+              Data.ProtoLens.FieldDescriptor VersioningOverride
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, behavior__field_descriptor),
+           (Data.ProtoLens.Tag 2, deployment__field_descriptor),
+           (Data.ProtoLens.Tag 9, pinnedVersion__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _VersioningOverride'_unknownFields
+        (\ x__ y__ -> x__ {_VersioningOverride'_unknownFields = y__})
+  defMessage
+    = VersioningOverride'_constructor
+        {_VersioningOverride'behavior = Data.ProtoLens.fieldDefault,
+         _VersioningOverride'deployment = Prelude.Nothing,
+         _VersioningOverride'pinnedVersion = Data.ProtoLens.fieldDefault,
+         _VersioningOverride'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          VersioningOverride
+          -> Data.ProtoLens.Encoding.Bytes.Parser VersioningOverride
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.toEnum
+                                          (Prelude.fmap
+                                             Prelude.fromIntegral
+                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
+                                       "behavior"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"behavior") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "deployment"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"deployment") y x)
+                        74
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "pinned_version"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"pinnedVersion") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "VersioningOverride"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"behavior") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
+                      ((Prelude..)
+                         ((Prelude..)
+                            Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
+                         Prelude.fromEnum _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view
+                       (Data.ProtoLens.Field.field @"maybe'deployment") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just _v)
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage _v))
+                ((Data.Monoid.<>)
+                   (let
+                      _v
+                        = Lens.Family2.view
+                            (Data.ProtoLens.Field.field @"pinnedVersion") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 74)
+                            ((Prelude..)
+                               (\ bs
+                                  -> (Data.Monoid.<>)
+                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                               Data.Text.Encoding.encodeUtf8 _v))
+                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
+instance Control.DeepSeq.NFData VersioningOverride where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_VersioningOverride'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_VersioningOverride'behavior x__)
+                (Control.DeepSeq.deepseq
+                   (_VersioningOverride'deployment x__)
+                   (Control.DeepSeq.deepseq
+                      (_VersioningOverride'pinnedVersion x__) ())))
+{- | Fields :
+     
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.taskQueue' @:: Lens' WorkflowExecutionConfig Proto.Temporal.Api.Taskqueue.V1.Message.TaskQueue@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'taskQueue' @:: Lens' WorkflowExecutionConfig (Prelude.Maybe Proto.Temporal.Api.Taskqueue.V1.Message.TaskQueue)@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.workflowExecutionTimeout' @:: Lens' WorkflowExecutionConfig Proto.Google.Protobuf.Duration.Duration@
@@ -4798,12 +6909,15 @@ instance Control.DeepSeq.NFData ResetPoints where
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.workflowRunTimeout' @:: Lens' WorkflowExecutionConfig Proto.Google.Protobuf.Duration.Duration@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'workflowRunTimeout' @:: Lens' WorkflowExecutionConfig (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.defaultWorkflowTaskTimeout' @:: Lens' WorkflowExecutionConfig Proto.Google.Protobuf.Duration.Duration@
-         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'defaultWorkflowTaskTimeout' @:: Lens' WorkflowExecutionConfig (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@ -}
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'defaultWorkflowTaskTimeout' @:: Lens' WorkflowExecutionConfig (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.userMetadata' @:: Lens' WorkflowExecutionConfig Proto.Temporal.Api.Sdk.V1.UserMetadata.UserMetadata@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'userMetadata' @:: Lens' WorkflowExecutionConfig (Prelude.Maybe Proto.Temporal.Api.Sdk.V1.UserMetadata.UserMetadata)@ -}
 data WorkflowExecutionConfig
   = WorkflowExecutionConfig'_constructor {_WorkflowExecutionConfig'taskQueue :: !(Prelude.Maybe Proto.Temporal.Api.Taskqueue.V1.Message.TaskQueue),
                                           _WorkflowExecutionConfig'workflowExecutionTimeout :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
                                           _WorkflowExecutionConfig'workflowRunTimeout :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
                                           _WorkflowExecutionConfig'defaultWorkflowTaskTimeout :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
+                                          _WorkflowExecutionConfig'userMetadata :: !(Prelude.Maybe Proto.Temporal.Api.Sdk.V1.UserMetadata.UserMetadata),
                                           _WorkflowExecutionConfig'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show WorkflowExecutionConfig where
@@ -4876,6 +6990,20 @@ instance Data.ProtoLens.Field.HasField WorkflowExecutionConfig "maybe'defaultWor
               -> x__
                    {_WorkflowExecutionConfig'defaultWorkflowTaskTimeout = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField WorkflowExecutionConfig "userMetadata" Proto.Temporal.Api.Sdk.V1.UserMetadata.UserMetadata where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionConfig'userMetadata
+           (\ x__ y__ -> x__ {_WorkflowExecutionConfig'userMetadata = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField WorkflowExecutionConfig "maybe'userMetadata" (Prelude.Maybe Proto.Temporal.Api.Sdk.V1.UserMetadata.UserMetadata) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionConfig'userMetadata
+           (\ x__ y__ -> x__ {_WorkflowExecutionConfig'userMetadata = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message WorkflowExecutionConfig where
   messageName _
     = Data.Text.pack "temporal.api.workflow.v1.WorkflowExecutionConfig"
@@ -4886,7 +7014,8 @@ instance Data.ProtoLens.Message WorkflowExecutionConfig where
       \task_queue\CAN\SOH \SOH(\v2$.temporal.api.taskqueue.v1.TaskQueueR\ttaskQueue\DC2W\n\
       \\SUBworkflow_execution_timeout\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\CANworkflowExecutionTimeout\DC2K\n\
       \\DC4workflow_run_timeout\CAN\ETX \SOH(\v2\EM.google.protobuf.DurationR\DC2workflowRunTimeout\DC2\\\n\
-      \\GSdefault_workflow_task_timeout\CAN\EOT \SOH(\v2\EM.google.protobuf.DurationR\SUBdefaultWorkflowTaskTimeout"
+      \\GSdefault_workflow_task_timeout\CAN\EOT \SOH(\v2\EM.google.protobuf.DurationR\SUBdefaultWorkflowTaskTimeout\DC2F\n\
+      \\ruser_metadata\CAN\ENQ \SOH(\v2!.temporal.api.sdk.v1.UserMetadataR\fuserMetadata"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -4923,13 +7052,22 @@ instance Data.ProtoLens.Message WorkflowExecutionConfig where
                  (Data.ProtoLens.Field.field
                     @"maybe'defaultWorkflowTaskTimeout")) ::
               Data.ProtoLens.FieldDescriptor WorkflowExecutionConfig
+        userMetadata__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "user_metadata"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Sdk.V1.UserMetadata.UserMetadata)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'userMetadata")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowExecutionConfig
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, taskQueue__field_descriptor),
            (Data.ProtoLens.Tag 2, workflowExecutionTimeout__field_descriptor),
            (Data.ProtoLens.Tag 3, workflowRunTimeout__field_descriptor),
            (Data.ProtoLens.Tag 4, 
-            defaultWorkflowTaskTimeout__field_descriptor)]
+            defaultWorkflowTaskTimeout__field_descriptor),
+           (Data.ProtoLens.Tag 5, userMetadata__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _WorkflowExecutionConfig'_unknownFields
@@ -4940,6 +7078,7 @@ instance Data.ProtoLens.Message WorkflowExecutionConfig where
          _WorkflowExecutionConfig'workflowExecutionTimeout = Prelude.Nothing,
          _WorkflowExecutionConfig'workflowRunTimeout = Prelude.Nothing,
          _WorkflowExecutionConfig'defaultWorkflowTaskTimeout = Prelude.Nothing,
+         _WorkflowExecutionConfig'userMetadata = Prelude.Nothing,
          _WorkflowExecutionConfig'_unknownFields = []}
   parseMessage
     = let
@@ -4999,6 +7138,15 @@ instance Data.ProtoLens.Message WorkflowExecutionConfig where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"defaultWorkflowTaskTimeout") y x)
+                        42
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "user_metadata"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"userMetadata") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -5074,8 +7222,24 @@ instance Data.ProtoLens.Message WorkflowExecutionConfig where
                                               (Prelude.fromIntegral (Data.ByteString.length bs)))
                                            (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                                    Data.ProtoLens.encodeMessage _v))
-                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
+                      ((Data.Monoid.<>)
+                         (case
+                              Lens.Family2.view
+                                (Data.ProtoLens.Field.field @"maybe'userMetadata") _x
+                          of
+                            Prelude.Nothing -> Data.Monoid.mempty
+                            (Prelude.Just _v)
+                              -> (Data.Monoid.<>)
+                                   (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
+                                   ((Prelude..)
+                                      (\ bs
+                                         -> (Data.Monoid.<>)
+                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                 (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                              (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                      Data.ProtoLens.encodeMessage _v))
+                         (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                            (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))
 instance Control.DeepSeq.NFData WorkflowExecutionConfig where
   rnf
     = \ x__
@@ -5088,7 +7252,408 @@ instance Control.DeepSeq.NFData WorkflowExecutionConfig where
                    (Control.DeepSeq.deepseq
                       (_WorkflowExecutionConfig'workflowRunTimeout x__)
                       (Control.DeepSeq.deepseq
-                         (_WorkflowExecutionConfig'defaultWorkflowTaskTimeout x__) ()))))
+                         (_WorkflowExecutionConfig'defaultWorkflowTaskTimeout x__)
+                         (Control.DeepSeq.deepseq
+                            (_WorkflowExecutionConfig'userMetadata x__) ())))))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.executionExpirationTime' @:: Lens' WorkflowExecutionExtendedInfo Proto.Google.Protobuf.Timestamp.Timestamp@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'executionExpirationTime' @:: Lens' WorkflowExecutionExtendedInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.runExpirationTime' @:: Lens' WorkflowExecutionExtendedInfo Proto.Google.Protobuf.Timestamp.Timestamp@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'runExpirationTime' @:: Lens' WorkflowExecutionExtendedInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.cancelRequested' @:: Lens' WorkflowExecutionExtendedInfo Prelude.Bool@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.lastResetTime' @:: Lens' WorkflowExecutionExtendedInfo Proto.Google.Protobuf.Timestamp.Timestamp@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'lastResetTime' @:: Lens' WorkflowExecutionExtendedInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.originalStartTime' @:: Lens' WorkflowExecutionExtendedInfo Proto.Google.Protobuf.Timestamp.Timestamp@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'originalStartTime' @:: Lens' WorkflowExecutionExtendedInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.resetRunId' @:: Lens' WorkflowExecutionExtendedInfo Data.Text.Text@ -}
+data WorkflowExecutionExtendedInfo
+  = WorkflowExecutionExtendedInfo'_constructor {_WorkflowExecutionExtendedInfo'executionExpirationTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                                                _WorkflowExecutionExtendedInfo'runExpirationTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                                                _WorkflowExecutionExtendedInfo'cancelRequested :: !Prelude.Bool,
+                                                _WorkflowExecutionExtendedInfo'lastResetTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                                                _WorkflowExecutionExtendedInfo'originalStartTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                                                _WorkflowExecutionExtendedInfo'resetRunId :: !Data.Text.Text,
+                                                _WorkflowExecutionExtendedInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show WorkflowExecutionExtendedInfo where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField WorkflowExecutionExtendedInfo "executionExpirationTime" Proto.Google.Protobuf.Timestamp.Timestamp where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionExtendedInfo'executionExpirationTime
+           (\ x__ y__
+              -> x__
+                   {_WorkflowExecutionExtendedInfo'executionExpirationTime = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField WorkflowExecutionExtendedInfo "maybe'executionExpirationTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionExtendedInfo'executionExpirationTime
+           (\ x__ y__
+              -> x__
+                   {_WorkflowExecutionExtendedInfo'executionExpirationTime = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField WorkflowExecutionExtendedInfo "runExpirationTime" Proto.Google.Protobuf.Timestamp.Timestamp where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionExtendedInfo'runExpirationTime
+           (\ x__ y__
+              -> x__ {_WorkflowExecutionExtendedInfo'runExpirationTime = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField WorkflowExecutionExtendedInfo "maybe'runExpirationTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionExtendedInfo'runExpirationTime
+           (\ x__ y__
+              -> x__ {_WorkflowExecutionExtendedInfo'runExpirationTime = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField WorkflowExecutionExtendedInfo "cancelRequested" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionExtendedInfo'cancelRequested
+           (\ x__ y__
+              -> x__ {_WorkflowExecutionExtendedInfo'cancelRequested = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField WorkflowExecutionExtendedInfo "lastResetTime" Proto.Google.Protobuf.Timestamp.Timestamp where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionExtendedInfo'lastResetTime
+           (\ x__ y__
+              -> x__ {_WorkflowExecutionExtendedInfo'lastResetTime = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField WorkflowExecutionExtendedInfo "maybe'lastResetTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionExtendedInfo'lastResetTime
+           (\ x__ y__
+              -> x__ {_WorkflowExecutionExtendedInfo'lastResetTime = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField WorkflowExecutionExtendedInfo "originalStartTime" Proto.Google.Protobuf.Timestamp.Timestamp where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionExtendedInfo'originalStartTime
+           (\ x__ y__
+              -> x__ {_WorkflowExecutionExtendedInfo'originalStartTime = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField WorkflowExecutionExtendedInfo "maybe'originalStartTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionExtendedInfo'originalStartTime
+           (\ x__ y__
+              -> x__ {_WorkflowExecutionExtendedInfo'originalStartTime = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField WorkflowExecutionExtendedInfo "resetRunId" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionExtendedInfo'resetRunId
+           (\ x__ y__
+              -> x__ {_WorkflowExecutionExtendedInfo'resetRunId = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message WorkflowExecutionExtendedInfo where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.workflow.v1.WorkflowExecutionExtendedInfo"
+  packedMessageDescriptor _
+    = "\n\
+      \\GSWorkflowExecutionExtendedInfo\DC2V\n\
+      \\EMexecution_expiration_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\ETBexecutionExpirationTime\DC2J\n\
+      \\DC3run_expiration_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\DC1runExpirationTime\DC2)\n\
+      \\DLEcancel_requested\CAN\ETX \SOH(\bR\SIcancelRequested\DC2B\n\
+      \\SIlast_reset_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\rlastResetTime\DC2J\n\
+      \\DC3original_start_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\DC1originalStartTime\DC2 \n\
+      \\freset_run_id\CAN\ACK \SOH(\tR\n\
+      \resetRunId"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        executionExpirationTime__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "execution_expiration_time"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'executionExpirationTime")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowExecutionExtendedInfo
+        runExpirationTime__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "run_expiration_time"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'runExpirationTime")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowExecutionExtendedInfo
+        cancelRequested__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "cancel_requested"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"cancelRequested")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowExecutionExtendedInfo
+        lastResetTime__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "last_reset_time"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'lastResetTime")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowExecutionExtendedInfo
+        originalStartTime__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "original_start_time"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'originalStartTime")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowExecutionExtendedInfo
+        resetRunId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "reset_run_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"resetRunId")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowExecutionExtendedInfo
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, executionExpirationTime__field_descriptor),
+           (Data.ProtoLens.Tag 2, runExpirationTime__field_descriptor),
+           (Data.ProtoLens.Tag 3, cancelRequested__field_descriptor),
+           (Data.ProtoLens.Tag 4, lastResetTime__field_descriptor),
+           (Data.ProtoLens.Tag 5, originalStartTime__field_descriptor),
+           (Data.ProtoLens.Tag 6, resetRunId__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _WorkflowExecutionExtendedInfo'_unknownFields
+        (\ x__ y__
+           -> x__ {_WorkflowExecutionExtendedInfo'_unknownFields = y__})
+  defMessage
+    = WorkflowExecutionExtendedInfo'_constructor
+        {_WorkflowExecutionExtendedInfo'executionExpirationTime = Prelude.Nothing,
+         _WorkflowExecutionExtendedInfo'runExpirationTime = Prelude.Nothing,
+         _WorkflowExecutionExtendedInfo'cancelRequested = Data.ProtoLens.fieldDefault,
+         _WorkflowExecutionExtendedInfo'lastResetTime = Prelude.Nothing,
+         _WorkflowExecutionExtendedInfo'originalStartTime = Prelude.Nothing,
+         _WorkflowExecutionExtendedInfo'resetRunId = Data.ProtoLens.fieldDefault,
+         _WorkflowExecutionExtendedInfo'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          WorkflowExecutionExtendedInfo
+          -> Data.ProtoLens.Encoding.Bytes.Parser WorkflowExecutionExtendedInfo
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "execution_expiration_time"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"executionExpirationTime") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "run_expiration_time"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"runExpirationTime") y x)
+                        24
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "cancel_requested"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"cancelRequested") y x)
+                        34
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "last_reset_time"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"lastResetTime") y x)
+                        42
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "original_start_time"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"originalStartTime") y x)
+                        50
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "reset_run_id"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"resetRunId") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "WorkflowExecutionExtendedInfo"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view
+                    (Data.ProtoLens.Field.field @"maybe'executionExpirationTime") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view
+                       (Data.ProtoLens.Field.field @"maybe'runExpirationTime") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just _v)
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage _v))
+                ((Data.Monoid.<>)
+                   (let
+                      _v
+                        = Lens.Family2.view
+                            (Data.ProtoLens.Field.field @"cancelRequested") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
+                            ((Prelude..)
+                               Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
+                               _v))
+                   ((Data.Monoid.<>)
+                      (case
+                           Lens.Family2.view
+                             (Data.ProtoLens.Field.field @"maybe'lastResetTime") _x
+                       of
+                         Prelude.Nothing -> Data.Monoid.mempty
+                         (Prelude.Just _v)
+                           -> (Data.Monoid.<>)
+                                (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
+                                ((Prelude..)
+                                   (\ bs
+                                      -> (Data.Monoid.<>)
+                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                              (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                           (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                   Data.ProtoLens.encodeMessage _v))
+                      ((Data.Monoid.<>)
+                         (case
+                              Lens.Family2.view
+                                (Data.ProtoLens.Field.field @"maybe'originalStartTime") _x
+                          of
+                            Prelude.Nothing -> Data.Monoid.mempty
+                            (Prelude.Just _v)
+                              -> (Data.Monoid.<>)
+                                   (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
+                                   ((Prelude..)
+                                      (\ bs
+                                         -> (Data.Monoid.<>)
+                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                 (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                              (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                      Data.ProtoLens.encodeMessage _v))
+                         ((Data.Monoid.<>)
+                            (let
+                               _v
+                                 = Lens.Family2.view (Data.ProtoLens.Field.field @"resetRunId") _x
+                             in
+                               if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                   Data.Monoid.mempty
+                               else
+                                   (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
+                                     ((Prelude..)
+                                        (\ bs
+                                           -> (Data.Monoid.<>)
+                                                (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                   (Prelude.fromIntegral
+                                                      (Data.ByteString.length bs)))
+                                                (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                        Data.Text.Encoding.encodeUtf8 _v))
+                            (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                               (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))))
+instance Control.DeepSeq.NFData WorkflowExecutionExtendedInfo where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_WorkflowExecutionExtendedInfo'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_WorkflowExecutionExtendedInfo'executionExpirationTime x__)
+                (Control.DeepSeq.deepseq
+                   (_WorkflowExecutionExtendedInfo'runExpirationTime x__)
+                   (Control.DeepSeq.deepseq
+                      (_WorkflowExecutionExtendedInfo'cancelRequested x__)
+                      (Control.DeepSeq.deepseq
+                         (_WorkflowExecutionExtendedInfo'lastResetTime x__)
+                         (Control.DeepSeq.deepseq
+                            (_WorkflowExecutionExtendedInfo'originalStartTime x__)
+                            (Control.DeepSeq.deepseq
+                               (_WorkflowExecutionExtendedInfo'resetRunId x__) ()))))))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.execution' @:: Lens' WorkflowExecutionInfo Proto.Temporal.Api.Common.V1.Message.WorkflowExecution@
@@ -5122,7 +7687,13 @@ instance Control.DeepSeq.NFData WorkflowExecutionConfig where
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.rootExecution' @:: Lens' WorkflowExecutionInfo Proto.Temporal.Api.Common.V1.Message.WorkflowExecution@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'rootExecution' @:: Lens' WorkflowExecutionInfo (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkflowExecution)@
          * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.assignedBuildId' @:: Lens' WorkflowExecutionInfo Data.Text.Text@
-         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.inheritedBuildId' @:: Lens' WorkflowExecutionInfo Data.Text.Text@ -}
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.inheritedBuildId' @:: Lens' WorkflowExecutionInfo Data.Text.Text@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.firstRunId' @:: Lens' WorkflowExecutionInfo Data.Text.Text@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.versioningInfo' @:: Lens' WorkflowExecutionInfo WorkflowExecutionVersioningInfo@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'versioningInfo' @:: Lens' WorkflowExecutionInfo (Prelude.Maybe WorkflowExecutionVersioningInfo)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.workerDeploymentName' @:: Lens' WorkflowExecutionInfo Data.Text.Text@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.priority' @:: Lens' WorkflowExecutionInfo Proto.Temporal.Api.Common.V1.Message.Priority@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'priority' @:: Lens' WorkflowExecutionInfo (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Priority)@ -}
 data WorkflowExecutionInfo
   = WorkflowExecutionInfo'_constructor {_WorkflowExecutionInfo'execution :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkflowExecution),
                                         _WorkflowExecutionInfo'type' :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkflowType),
@@ -5144,6 +7715,10 @@ data WorkflowExecutionInfo
                                         _WorkflowExecutionInfo'rootExecution :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkflowExecution),
                                         _WorkflowExecutionInfo'assignedBuildId :: !Data.Text.Text,
                                         _WorkflowExecutionInfo'inheritedBuildId :: !Data.Text.Text,
+                                        _WorkflowExecutionInfo'firstRunId :: !Data.Text.Text,
+                                        _WorkflowExecutionInfo'versioningInfo :: !(Prelude.Maybe WorkflowExecutionVersioningInfo),
+                                        _WorkflowExecutionInfo'workerDeploymentName :: !Data.Text.Text,
+                                        _WorkflowExecutionInfo'priority :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Priority),
                                         _WorkflowExecutionInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show WorkflowExecutionInfo where
@@ -5384,6 +7959,49 @@ instance Data.ProtoLens.Field.HasField WorkflowExecutionInfo "inheritedBuildId" 
            _WorkflowExecutionInfo'inheritedBuildId
            (\ x__ y__ -> x__ {_WorkflowExecutionInfo'inheritedBuildId = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField WorkflowExecutionInfo "firstRunId" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionInfo'firstRunId
+           (\ x__ y__ -> x__ {_WorkflowExecutionInfo'firstRunId = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField WorkflowExecutionInfo "versioningInfo" WorkflowExecutionVersioningInfo where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionInfo'versioningInfo
+           (\ x__ y__ -> x__ {_WorkflowExecutionInfo'versioningInfo = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField WorkflowExecutionInfo "maybe'versioningInfo" (Prelude.Maybe WorkflowExecutionVersioningInfo) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionInfo'versioningInfo
+           (\ x__ y__ -> x__ {_WorkflowExecutionInfo'versioningInfo = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField WorkflowExecutionInfo "workerDeploymentName" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionInfo'workerDeploymentName
+           (\ x__ y__
+              -> x__ {_WorkflowExecutionInfo'workerDeploymentName = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField WorkflowExecutionInfo "priority" Proto.Temporal.Api.Common.V1.Message.Priority where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionInfo'priority
+           (\ x__ y__ -> x__ {_WorkflowExecutionInfo'priority = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField WorkflowExecutionInfo "maybe'priority" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Priority) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionInfo'priority
+           (\ x__ y__ -> x__ {_WorkflowExecutionInfo'priority = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message WorkflowExecutionInfo where
   messageName _
     = Data.Text.pack "temporal.api.workflow.v1.WorkflowExecutionInfo"
@@ -5413,7 +8031,12 @@ instance Data.ProtoLens.Message WorkflowExecutionInfo where
       \\DC2execution_duration\CAN\DC1 \SOH(\v2\EM.google.protobuf.DurationR\DC1executionDuration\DC2P\n\
       \\SOroot_execution\CAN\DC2 \SOH(\v2).temporal.api.common.v1.WorkflowExecutionR\rrootExecution\DC2*\n\
       \\DC1assigned_build_id\CAN\DC3 \SOH(\tR\SIassignedBuildId\DC2,\n\
-      \\DC2inherited_build_id\CAN\DC4 \SOH(\tR\DLEinheritedBuildId"
+      \\DC2inherited_build_id\CAN\DC4 \SOH(\tR\DLEinheritedBuildId\DC2 \n\
+      \\ffirst_run_id\CAN\NAK \SOH(\tR\n\
+      \firstRunId\DC2b\n\
+      \\SIversioning_info\CAN\SYN \SOH(\v29.temporal.api.workflow.v1.WorkflowExecutionVersioningInfoR\SOversioningInfo\DC24\n\
+      \\SYNworker_deployment_name\CAN\ETB \SOH(\tR\DC4workerDeploymentName\DC2<\n\
+      \\bpriority\CAN\CAN \SOH(\v2 .temporal.api.common.v1.PriorityR\bpriority"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -5585,6 +8208,40 @@ instance Data.ProtoLens.Message WorkflowExecutionInfo where
                  Data.ProtoLens.Optional
                  (Data.ProtoLens.Field.field @"inheritedBuildId")) ::
               Data.ProtoLens.FieldDescriptor WorkflowExecutionInfo
+        firstRunId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "first_run_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"firstRunId")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowExecutionInfo
+        versioningInfo__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "versioning_info"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor WorkflowExecutionVersioningInfo)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'versioningInfo")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowExecutionInfo
+        workerDeploymentName__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "worker_deployment_name"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"workerDeploymentName")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowExecutionInfo
+        priority__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "priority"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Priority)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'priority")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowExecutionInfo
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, execution__field_descriptor),
@@ -5607,7 +8264,11 @@ instance Data.ProtoLens.Message WorkflowExecutionInfo where
            (Data.ProtoLens.Tag 17, executionDuration__field_descriptor),
            (Data.ProtoLens.Tag 18, rootExecution__field_descriptor),
            (Data.ProtoLens.Tag 19, assignedBuildId__field_descriptor),
-           (Data.ProtoLens.Tag 20, inheritedBuildId__field_descriptor)]
+           (Data.ProtoLens.Tag 20, inheritedBuildId__field_descriptor),
+           (Data.ProtoLens.Tag 21, firstRunId__field_descriptor),
+           (Data.ProtoLens.Tag 22, versioningInfo__field_descriptor),
+           (Data.ProtoLens.Tag 23, workerDeploymentName__field_descriptor),
+           (Data.ProtoLens.Tag 24, priority__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _WorkflowExecutionInfo'_unknownFields
@@ -5634,6 +8295,10 @@ instance Data.ProtoLens.Message WorkflowExecutionInfo where
          _WorkflowExecutionInfo'rootExecution = Prelude.Nothing,
          _WorkflowExecutionInfo'assignedBuildId = Data.ProtoLens.fieldDefault,
          _WorkflowExecutionInfo'inheritedBuildId = Data.ProtoLens.fieldDefault,
+         _WorkflowExecutionInfo'firstRunId = Data.ProtoLens.fieldDefault,
+         _WorkflowExecutionInfo'versioningInfo = Prelude.Nothing,
+         _WorkflowExecutionInfo'workerDeploymentName = Data.ProtoLens.fieldDefault,
+         _WorkflowExecutionInfo'priority = Prelude.Nothing,
          _WorkflowExecutionInfo'_unknownFields = []}
   parseMessage
     = let
@@ -5831,6 +8496,40 @@ instance Data.ProtoLens.Message WorkflowExecutionInfo where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"inheritedBuildId") y x)
+                        170
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "first_run_id"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"firstRunId") y x)
+                        178
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "versioning_info"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"versioningInfo") y x)
+                        186
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "worker_deployment_name"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"workerDeploymentName") y x)
+                        194
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "priority"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"priority") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -6231,10 +8930,112 @@ instance Data.ProtoLens.Message WorkflowExecutionInfo where
                                                                                              bs))
                                                                                   Data.Text.Encoding.encodeUtf8
                                                                                   _v))
-                                                                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                                                                         (Lens.Family2.view
-                                                                            Data.ProtoLens.unknownFields
-                                                                            _x)))))))))))))))))))))
+                                                                      ((Data.Monoid.<>)
+                                                                         (let
+                                                                            _v
+                                                                              = Lens.Family2.view
+                                                                                  (Data.ProtoLens.Field.field
+                                                                                     @"firstRunId")
+                                                                                  _x
+                                                                          in
+                                                                            if (Prelude.==)
+                                                                                 _v
+                                                                                 Data.ProtoLens.fieldDefault then
+                                                                                Data.Monoid.mempty
+                                                                            else
+                                                                                (Data.Monoid.<>)
+                                                                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                     170)
+                                                                                  ((Prelude..)
+                                                                                     (\ bs
+                                                                                        -> (Data.Monoid.<>)
+                                                                                             (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                                (Prelude.fromIntegral
+                                                                                                   (Data.ByteString.length
+                                                                                                      bs)))
+                                                                                             (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                                bs))
+                                                                                     Data.Text.Encoding.encodeUtf8
+                                                                                     _v))
+                                                                         ((Data.Monoid.<>)
+                                                                            (case
+                                                                                 Lens.Family2.view
+                                                                                   (Data.ProtoLens.Field.field
+                                                                                      @"maybe'versioningInfo")
+                                                                                   _x
+                                                                             of
+                                                                               Prelude.Nothing
+                                                                                 -> Data.Monoid.mempty
+                                                                               (Prelude.Just _v)
+                                                                                 -> (Data.Monoid.<>)
+                                                                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                         178)
+                                                                                      ((Prelude..)
+                                                                                         (\ bs
+                                                                                            -> (Data.Monoid.<>)
+                                                                                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                                    (Prelude.fromIntegral
+                                                                                                       (Data.ByteString.length
+                                                                                                          bs)))
+                                                                                                 (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                                    bs))
+                                                                                         Data.ProtoLens.encodeMessage
+                                                                                         _v))
+                                                                            ((Data.Monoid.<>)
+                                                                               (let
+                                                                                  _v
+                                                                                    = Lens.Family2.view
+                                                                                        (Data.ProtoLens.Field.field
+                                                                                           @"workerDeploymentName")
+                                                                                        _x
+                                                                                in
+                                                                                  if (Prelude.==)
+                                                                                       _v
+                                                                                       Data.ProtoLens.fieldDefault then
+                                                                                      Data.Monoid.mempty
+                                                                                  else
+                                                                                      (Data.Monoid.<>)
+                                                                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                           186)
+                                                                                        ((Prelude..)
+                                                                                           (\ bs
+                                                                                              -> (Data.Monoid.<>)
+                                                                                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                                      (Prelude.fromIntegral
+                                                                                                         (Data.ByteString.length
+                                                                                                            bs)))
+                                                                                                   (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                                      bs))
+                                                                                           Data.Text.Encoding.encodeUtf8
+                                                                                           _v))
+                                                                               ((Data.Monoid.<>)
+                                                                                  (case
+                                                                                       Lens.Family2.view
+                                                                                         (Data.ProtoLens.Field.field
+                                                                                            @"maybe'priority")
+                                                                                         _x
+                                                                                   of
+                                                                                     Prelude.Nothing
+                                                                                       -> Data.Monoid.mempty
+                                                                                     (Prelude.Just _v)
+                                                                                       -> (Data.Monoid.<>)
+                                                                                            (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                               194)
+                                                                                            ((Prelude..)
+                                                                                               (\ bs
+                                                                                                  -> (Data.Monoid.<>)
+                                                                                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                                          (Prelude.fromIntegral
+                                                                                                             (Data.ByteString.length
+                                                                                                                bs)))
+                                                                                                       (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                                          bs))
+                                                                                               Data.ProtoLens.encodeMessage
+                                                                                               _v))
+                                                                                  (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                                                                                     (Lens.Family2.view
+                                                                                        Data.ProtoLens.unknownFields
+                                                                                        _x)))))))))))))))))))))))))
 instance Control.DeepSeq.NFData WorkflowExecutionInfo where
   rnf
     = \ x__
@@ -6287,12 +9088,550 @@ instance Control.DeepSeq.NFData WorkflowExecutionInfo where
                                                                       (Control.DeepSeq.deepseq
                                                                          (_WorkflowExecutionInfo'inheritedBuildId
                                                                             x__)
-                                                                         ()))))))))))))))))))))
+                                                                         (Control.DeepSeq.deepseq
+                                                                            (_WorkflowExecutionInfo'firstRunId
+                                                                               x__)
+                                                                            (Control.DeepSeq.deepseq
+                                                                               (_WorkflowExecutionInfo'versioningInfo
+                                                                                  x__)
+                                                                               (Control.DeepSeq.deepseq
+                                                                                  (_WorkflowExecutionInfo'workerDeploymentName
+                                                                                     x__)
+                                                                                  (Control.DeepSeq.deepseq
+                                                                                     (_WorkflowExecutionInfo'priority
+                                                                                        x__)
+                                                                                     ()))))))))))))))))))))))))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.versioningOverride' @:: Lens' WorkflowExecutionOptions VersioningOverride@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'versioningOverride' @:: Lens' WorkflowExecutionOptions (Prelude.Maybe VersioningOverride)@ -}
+data WorkflowExecutionOptions
+  = WorkflowExecutionOptions'_constructor {_WorkflowExecutionOptions'versioningOverride :: !(Prelude.Maybe VersioningOverride),
+                                           _WorkflowExecutionOptions'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show WorkflowExecutionOptions where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField WorkflowExecutionOptions "versioningOverride" VersioningOverride where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionOptions'versioningOverride
+           (\ x__ y__
+              -> x__ {_WorkflowExecutionOptions'versioningOverride = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField WorkflowExecutionOptions "maybe'versioningOverride" (Prelude.Maybe VersioningOverride) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionOptions'versioningOverride
+           (\ x__ y__
+              -> x__ {_WorkflowExecutionOptions'versioningOverride = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message WorkflowExecutionOptions where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.workflow.v1.WorkflowExecutionOptions"
+  packedMessageDescriptor _
+    = "\n\
+      \\CANWorkflowExecutionOptions\DC2]\n\
+      \\DC3versioning_override\CAN\SOH \SOH(\v2,.temporal.api.workflow.v1.VersioningOverrideR\DC2versioningOverride"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        versioningOverride__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "versioning_override"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor VersioningOverride)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'versioningOverride")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowExecutionOptions
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, versioningOverride__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _WorkflowExecutionOptions'_unknownFields
+        (\ x__ y__ -> x__ {_WorkflowExecutionOptions'_unknownFields = y__})
+  defMessage
+    = WorkflowExecutionOptions'_constructor
+        {_WorkflowExecutionOptions'versioningOverride = Prelude.Nothing,
+         _WorkflowExecutionOptions'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          WorkflowExecutionOptions
+          -> Data.ProtoLens.Encoding.Bytes.Parser WorkflowExecutionOptions
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "versioning_override"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"versioningOverride") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "WorkflowExecutionOptions"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view
+                    (Data.ProtoLens.Field.field @"maybe'versioningOverride") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData WorkflowExecutionOptions where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_WorkflowExecutionOptions'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_WorkflowExecutionOptions'versioningOverride x__) ())
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.behavior' @:: Lens' WorkflowExecutionVersioningInfo Proto.Temporal.Api.Enums.V1.Workflow.VersioningBehavior@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.deployment' @:: Lens' WorkflowExecutionVersioningInfo Proto.Temporal.Api.Deployment.V1.Message.Deployment@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'deployment' @:: Lens' WorkflowExecutionVersioningInfo (Prelude.Maybe Proto.Temporal.Api.Deployment.V1.Message.Deployment)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.version' @:: Lens' WorkflowExecutionVersioningInfo Data.Text.Text@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.versioningOverride' @:: Lens' WorkflowExecutionVersioningInfo VersioningOverride@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'versioningOverride' @:: Lens' WorkflowExecutionVersioningInfo (Prelude.Maybe VersioningOverride)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.deploymentTransition' @:: Lens' WorkflowExecutionVersioningInfo DeploymentTransition@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'deploymentTransition' @:: Lens' WorkflowExecutionVersioningInfo (Prelude.Maybe DeploymentTransition)@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.versionTransition' @:: Lens' WorkflowExecutionVersioningInfo DeploymentVersionTransition@
+         * 'Proto.Temporal.Api.Workflow.V1.Message_Fields.maybe'versionTransition' @:: Lens' WorkflowExecutionVersioningInfo (Prelude.Maybe DeploymentVersionTransition)@ -}
+data WorkflowExecutionVersioningInfo
+  = WorkflowExecutionVersioningInfo'_constructor {_WorkflowExecutionVersioningInfo'behavior :: !Proto.Temporal.Api.Enums.V1.Workflow.VersioningBehavior,
+                                                  _WorkflowExecutionVersioningInfo'deployment :: !(Prelude.Maybe Proto.Temporal.Api.Deployment.V1.Message.Deployment),
+                                                  _WorkflowExecutionVersioningInfo'version :: !Data.Text.Text,
+                                                  _WorkflowExecutionVersioningInfo'versioningOverride :: !(Prelude.Maybe VersioningOverride),
+                                                  _WorkflowExecutionVersioningInfo'deploymentTransition :: !(Prelude.Maybe DeploymentTransition),
+                                                  _WorkflowExecutionVersioningInfo'versionTransition :: !(Prelude.Maybe DeploymentVersionTransition),
+                                                  _WorkflowExecutionVersioningInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show WorkflowExecutionVersioningInfo where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField WorkflowExecutionVersioningInfo "behavior" Proto.Temporal.Api.Enums.V1.Workflow.VersioningBehavior where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionVersioningInfo'behavior
+           (\ x__ y__
+              -> x__ {_WorkflowExecutionVersioningInfo'behavior = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField WorkflowExecutionVersioningInfo "deployment" Proto.Temporal.Api.Deployment.V1.Message.Deployment where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionVersioningInfo'deployment
+           (\ x__ y__
+              -> x__ {_WorkflowExecutionVersioningInfo'deployment = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField WorkflowExecutionVersioningInfo "maybe'deployment" (Prelude.Maybe Proto.Temporal.Api.Deployment.V1.Message.Deployment) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionVersioningInfo'deployment
+           (\ x__ y__
+              -> x__ {_WorkflowExecutionVersioningInfo'deployment = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField WorkflowExecutionVersioningInfo "version" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionVersioningInfo'version
+           (\ x__ y__
+              -> x__ {_WorkflowExecutionVersioningInfo'version = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField WorkflowExecutionVersioningInfo "versioningOverride" VersioningOverride where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionVersioningInfo'versioningOverride
+           (\ x__ y__
+              -> x__
+                   {_WorkflowExecutionVersioningInfo'versioningOverride = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField WorkflowExecutionVersioningInfo "maybe'versioningOverride" (Prelude.Maybe VersioningOverride) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionVersioningInfo'versioningOverride
+           (\ x__ y__
+              -> x__
+                   {_WorkflowExecutionVersioningInfo'versioningOverride = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField WorkflowExecutionVersioningInfo "deploymentTransition" DeploymentTransition where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionVersioningInfo'deploymentTransition
+           (\ x__ y__
+              -> x__
+                   {_WorkflowExecutionVersioningInfo'deploymentTransition = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField WorkflowExecutionVersioningInfo "maybe'deploymentTransition" (Prelude.Maybe DeploymentTransition) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionVersioningInfo'deploymentTransition
+           (\ x__ y__
+              -> x__
+                   {_WorkflowExecutionVersioningInfo'deploymentTransition = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField WorkflowExecutionVersioningInfo "versionTransition" DeploymentVersionTransition where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionVersioningInfo'versionTransition
+           (\ x__ y__
+              -> x__ {_WorkflowExecutionVersioningInfo'versionTransition = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField WorkflowExecutionVersioningInfo "maybe'versionTransition" (Prelude.Maybe DeploymentVersionTransition) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowExecutionVersioningInfo'versionTransition
+           (\ x__ y__
+              -> x__ {_WorkflowExecutionVersioningInfo'versionTransition = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message WorkflowExecutionVersioningInfo where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.workflow.v1.WorkflowExecutionVersioningInfo"
+  packedMessageDescriptor _
+    = "\n\
+      \\USWorkflowExecutionVersioningInfo\DC2E\n\
+      \\bbehavior\CAN\SOH \SOH(\SO2).temporal.api.enums.v1.VersioningBehaviorR\bbehavior\DC2J\n\
+      \\n\
+      \deployment\CAN\STX \SOH(\v2&.temporal.api.deployment.v1.DeploymentR\n\
+      \deploymentB\STX\CAN\SOH\DC2\CAN\n\
+      \\aversion\CAN\ENQ \SOH(\tR\aversion\DC2]\n\
+      \\DC3versioning_override\CAN\ETX \SOH(\v2,.temporal.api.workflow.v1.VersioningOverrideR\DC2versioningOverride\DC2g\n\
+      \\NAKdeployment_transition\CAN\EOT \SOH(\v2..temporal.api.workflow.v1.DeploymentTransitionR\DC4deploymentTransitionB\STX\CAN\SOH\DC2d\n\
+      \\DC2version_transition\CAN\ACK \SOH(\v25.temporal.api.workflow.v1.DeploymentVersionTransitionR\DC1versionTransition"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        behavior__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "behavior"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Workflow.VersioningBehavior)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"behavior")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowExecutionVersioningInfo
+        deployment__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "deployment"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Deployment.V1.Message.Deployment)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'deployment")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowExecutionVersioningInfo
+        version__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "version"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"version")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowExecutionVersioningInfo
+        versioningOverride__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "versioning_override"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor VersioningOverride)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'versioningOverride")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowExecutionVersioningInfo
+        deploymentTransition__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "deployment_transition"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor DeploymentTransition)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'deploymentTransition")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowExecutionVersioningInfo
+        versionTransition__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "version_transition"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor DeploymentVersionTransition)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'versionTransition")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowExecutionVersioningInfo
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, behavior__field_descriptor),
+           (Data.ProtoLens.Tag 2, deployment__field_descriptor),
+           (Data.ProtoLens.Tag 5, version__field_descriptor),
+           (Data.ProtoLens.Tag 3, versioningOverride__field_descriptor),
+           (Data.ProtoLens.Tag 4, deploymentTransition__field_descriptor),
+           (Data.ProtoLens.Tag 6, versionTransition__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _WorkflowExecutionVersioningInfo'_unknownFields
+        (\ x__ y__
+           -> x__ {_WorkflowExecutionVersioningInfo'_unknownFields = y__})
+  defMessage
+    = WorkflowExecutionVersioningInfo'_constructor
+        {_WorkflowExecutionVersioningInfo'behavior = Data.ProtoLens.fieldDefault,
+         _WorkflowExecutionVersioningInfo'deployment = Prelude.Nothing,
+         _WorkflowExecutionVersioningInfo'version = Data.ProtoLens.fieldDefault,
+         _WorkflowExecutionVersioningInfo'versioningOverride = Prelude.Nothing,
+         _WorkflowExecutionVersioningInfo'deploymentTransition = Prelude.Nothing,
+         _WorkflowExecutionVersioningInfo'versionTransition = Prelude.Nothing,
+         _WorkflowExecutionVersioningInfo'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          WorkflowExecutionVersioningInfo
+          -> Data.ProtoLens.Encoding.Bytes.Parser WorkflowExecutionVersioningInfo
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.toEnum
+                                          (Prelude.fmap
+                                             Prelude.fromIntegral
+                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
+                                       "behavior"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"behavior") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "deployment"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"deployment") y x)
+                        42
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "version"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"version") y x)
+                        26
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "versioning_override"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"versioningOverride") y x)
+                        34
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "deployment_transition"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"deploymentTransition") y x)
+                        50
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "version_transition"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"versionTransition") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage)
+          "WorkflowExecutionVersioningInfo"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"behavior") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
+                      ((Prelude..)
+                         ((Prelude..)
+                            Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
+                         Prelude.fromEnum _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view
+                       (Data.ProtoLens.Field.field @"maybe'deployment") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just _v)
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage _v))
+                ((Data.Monoid.<>)
+                   (let
+                      _v = Lens.Family2.view (Data.ProtoLens.Field.field @"version") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
+                            ((Prelude..)
+                               (\ bs
+                                  -> (Data.Monoid.<>)
+                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                               Data.Text.Encoding.encodeUtf8 _v))
+                   ((Data.Monoid.<>)
+                      (case
+                           Lens.Family2.view
+                             (Data.ProtoLens.Field.field @"maybe'versioningOverride") _x
+                       of
+                         Prelude.Nothing -> Data.Monoid.mempty
+                         (Prelude.Just _v)
+                           -> (Data.Monoid.<>)
+                                (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                                ((Prelude..)
+                                   (\ bs
+                                      -> (Data.Monoid.<>)
+                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                              (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                           (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                   Data.ProtoLens.encodeMessage _v))
+                      ((Data.Monoid.<>)
+                         (case
+                              Lens.Family2.view
+                                (Data.ProtoLens.Field.field @"maybe'deploymentTransition") _x
+                          of
+                            Prelude.Nothing -> Data.Monoid.mempty
+                            (Prelude.Just _v)
+                              -> (Data.Monoid.<>)
+                                   (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
+                                   ((Prelude..)
+                                      (\ bs
+                                         -> (Data.Monoid.<>)
+                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                 (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                              (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                      Data.ProtoLens.encodeMessage _v))
+                         ((Data.Monoid.<>)
+                            (case
+                                 Lens.Family2.view
+                                   (Data.ProtoLens.Field.field @"maybe'versionTransition") _x
+                             of
+                               Prelude.Nothing -> Data.Monoid.mempty
+                               (Prelude.Just _v)
+                                 -> (Data.Monoid.<>)
+                                      (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
+                                      ((Prelude..)
+                                         (\ bs
+                                            -> (Data.Monoid.<>)
+                                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                    (Prelude.fromIntegral
+                                                       (Data.ByteString.length bs)))
+                                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                         Data.ProtoLens.encodeMessage _v))
+                            (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                               (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))))
+instance Control.DeepSeq.NFData WorkflowExecutionVersioningInfo where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_WorkflowExecutionVersioningInfo'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_WorkflowExecutionVersioningInfo'behavior x__)
+                (Control.DeepSeq.deepseq
+                   (_WorkflowExecutionVersioningInfo'deployment x__)
+                   (Control.DeepSeq.deepseq
+                      (_WorkflowExecutionVersioningInfo'version x__)
+                      (Control.DeepSeq.deepseq
+                         (_WorkflowExecutionVersioningInfo'versioningOverride x__)
+                         (Control.DeepSeq.deepseq
+                            (_WorkflowExecutionVersioningInfo'deploymentTransition x__)
+                            (Control.DeepSeq.deepseq
+                               (_WorkflowExecutionVersioningInfo'versionTransition x__) ()))))))
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \&temporal/api/workflow/v1/message.proto\DC2\CANtemporal.api.workflow.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\ESCgoogle/protobuf/empty.proto\SUB\USgoogle/protobuf/timestamp.proto\SUB\"temporal/api/enums/v1/common.proto\SUB$temporal/api/enums/v1/workflow.proto\SUB$temporal/api/common/v1/message.proto\SUB%temporal/api/failure/v1/message.proto\SUB'temporal/api/taskqueue/v1/message.proto\"\145\n\
-    \\n\
+    \&temporal/api/workflow/v1/message.proto\DC2\CANtemporal.api.workflow.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\ESCgoogle/protobuf/empty.proto\SUB\USgoogle/protobuf/timestamp.proto\SUB\"temporal/api/enums/v1/common.proto\SUB$temporal/api/enums/v1/workflow.proto\SUB$temporal/api/common/v1/message.proto\SUB(temporal/api/deployment/v1/message.proto\SUB%temporal/api/failure/v1/message.proto\SUB'temporal/api/taskqueue/v1/message.proto\SUB'temporal/api/sdk/v1/user_metadata.proto\"\139\f\n\
     \\NAKWorkflowExecutionInfo\DC2G\n\
     \\texecution\CAN\SOH \SOH(\v2).temporal.api.common.v1.WorkflowExecutionR\texecution\DC28\n\
     \\EOTtype\CAN\STX \SOH(\v2$.temporal.api.common.v1.WorkflowTypeR\EOTtype\DC29\n\
@@ -6317,13 +9656,42 @@ packedFileDescriptor
     \\DC2execution_duration\CAN\DC1 \SOH(\v2\EM.google.protobuf.DurationR\DC1executionDuration\DC2P\n\
     \\SOroot_execution\CAN\DC2 \SOH(\v2).temporal.api.common.v1.WorkflowExecutionR\rrootExecution\DC2*\n\
     \\DC1assigned_build_id\CAN\DC3 \SOH(\tR\SIassignedBuildId\DC2,\n\
-    \\DC2inherited_build_id\CAN\DC4 \SOH(\tR\DLEinheritedBuildId\"\226\STX\n\
+    \\DC2inherited_build_id\CAN\DC4 \SOH(\tR\DLEinheritedBuildId\DC2 \n\
+    \\ffirst_run_id\CAN\NAK \SOH(\tR\n\
+    \firstRunId\DC2b\n\
+    \\SIversioning_info\CAN\SYN \SOH(\v29.temporal.api.workflow.v1.WorkflowExecutionVersioningInfoR\SOversioningInfo\DC24\n\
+    \\SYNworker_deployment_name\CAN\ETB \SOH(\tR\DC4workerDeploymentName\DC2<\n\
+    \\bpriority\CAN\CAN \SOH(\v2 .temporal.api.common.v1.PriorityR\bpriority\"\160\ETX\n\
+    \\GSWorkflowExecutionExtendedInfo\DC2V\n\
+    \\EMexecution_expiration_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\ETBexecutionExpirationTime\DC2J\n\
+    \\DC3run_expiration_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\DC1runExpirationTime\DC2)\n\
+    \\DLEcancel_requested\CAN\ETX \SOH(\bR\SIcancelRequested\DC2B\n\
+    \\SIlast_reset_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\rlastResetTime\DC2J\n\
+    \\DC3original_start_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\DC1originalStartTime\DC2 \n\
+    \\freset_run_id\CAN\ACK \SOH(\tR\n\
+    \resetRunId\"\252\ETX\n\
+    \\USWorkflowExecutionVersioningInfo\DC2E\n\
+    \\bbehavior\CAN\SOH \SOH(\SO2).temporal.api.enums.v1.VersioningBehaviorR\bbehavior\DC2J\n\
+    \\n\
+    \deployment\CAN\STX \SOH(\v2&.temporal.api.deployment.v1.DeploymentR\n\
+    \deploymentB\STX\CAN\SOH\DC2\CAN\n\
+    \\aversion\CAN\ENQ \SOH(\tR\aversion\DC2]\n\
+    \\DC3versioning_override\CAN\ETX \SOH(\v2,.temporal.api.workflow.v1.VersioningOverrideR\DC2versioningOverride\DC2g\n\
+    \\NAKdeployment_transition\CAN\EOT \SOH(\v2..temporal.api.workflow.v1.DeploymentTransitionR\DC4deploymentTransitionB\STX\CAN\SOH\DC2d\n\
+    \\DC2version_transition\CAN\ACK \SOH(\v25.temporal.api.workflow.v1.DeploymentVersionTransitionR\DC1versionTransition\"^\n\
+    \\DC4DeploymentTransition\DC2F\n\
+    \\n\
+    \deployment\CAN\SOH \SOH(\v2&.temporal.api.deployment.v1.DeploymentR\n\
+    \deployment\"7\n\
+    \\ESCDeploymentVersionTransition\DC2\CAN\n\
+    \\aversion\CAN\SOH \SOH(\tR\aversion\"\170\ETX\n\
     \\ETBWorkflowExecutionConfig\DC2C\n\
     \\n\
     \task_queue\CAN\SOH \SOH(\v2$.temporal.api.taskqueue.v1.TaskQueueR\ttaskQueue\DC2W\n\
     \\SUBworkflow_execution_timeout\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\CANworkflowExecutionTimeout\DC2K\n\
     \\DC4workflow_run_timeout\CAN\ETX \SOH(\v2\EM.google.protobuf.DurationR\DC2workflowRunTimeout\DC2\\\n\
-    \\GSdefault_workflow_task_timeout\CAN\EOT \SOH(\v2\EM.google.protobuf.DurationR\SUBdefaultWorkflowTaskTimeout\"\134\b\n\
+    \\GSdefault_workflow_task_timeout\CAN\EOT \SOH(\v2\EM.google.protobuf.DurationR\SUBdefaultWorkflowTaskTimeout\DC2F\n\
+    \\ruser_metadata\CAN\ENQ \SOH(\v2!.temporal.api.sdk.v1.UserMetadataR\fuserMetadata\"\218\SO\n\
     \\DC3PendingActivityInfo\DC2\US\n\
     \\vactivity_id\CAN\SOH \SOH(\tR\n\
     \activityId\DC2I\n\
@@ -6341,7 +9709,25 @@ packedFileDescriptor
     \\DC4last_worker_identity\CAN\f \SOH(\tR\DC2lastWorkerIdentity\DC2K\n\
     \\NAKuse_workflow_build_id\CAN\r \SOH(\v2\SYN.google.protobuf.EmptyH\NULR\DC2useWorkflowBuildId\DC2P\n\
     \$last_independently_assigned_build_id\CAN\SO \SOH(\tH\NULR lastIndependentlyAssignedBuildId\DC2e\n\
-    \\EMlast_worker_version_stamp\CAN\SI \SOH(\v2*.temporal.api.common.v1.WorkerVersionStampR\SYNlastWorkerVersionStampB\DC3\n\
+    \\EMlast_worker_version_stamp\CAN\SI \SOH(\v2*.temporal.api.common.v1.WorkerVersionStampR\SYNlastWorkerVersionStamp\DC2O\n\
+    \\SYNcurrent_retry_interval\CAN\DLE \SOH(\v2\EM.google.protobuf.DurationR\DC4currentRetryInterval\DC2W\n\
+    \\SUBlast_attempt_complete_time\CAN\DC1 \SOH(\v2\SUB.google.protobuf.TimestampR\ETBlastAttemptCompleteTime\DC2W\n\
+    \\SUBnext_attempt_schedule_time\CAN\DC2 \SOH(\v2\SUB.google.protobuf.TimestampR\ETBnextAttemptScheduleTime\DC2\SYN\n\
+    \\ACKpaused\CAN\DC3 \SOH(\bR\ACKpaused\DC2S\n\
+    \\SIlast_deployment\CAN\DC4 \SOH(\v2&.temporal.api.deployment.v1.DeploymentR\SOlastDeploymentB\STX\CAN\SOH\DC2C\n\
+    \\RSlast_worker_deployment_version\CAN\NAK \SOH(\tR\ESClastWorkerDeploymentVersion\DC2<\n\
+    \\bpriority\CAN\SYN \SOH(\v2 .temporal.api.common.v1.PriorityR\bpriority\DC2V\n\
+    \\n\
+    \pause_info\CAN\ETB \SOH(\v27.temporal.api.workflow.v1.PendingActivityInfo.PauseInfoR\tpauseInfo\SUB\134\STX\n\
+    \\tPauseInfo\DC29\n\
+    \\n\
+    \pause_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\tpauseTime\DC2X\n\
+    \\ACKmanual\CAN\STX \SOH(\v2>.temporal.api.workflow.v1.PendingActivityInfo.PauseInfo.ManualH\NULR\ACKmanual\DC2\EM\n\
+    \\arule_id\CAN\ETX \SOH(\tH\NULR\ACKruleId\SUB<\n\
+    \\ACKManual\DC2\SUB\n\
+    \\bidentity\CAN\SOH \SOH(\tR\bidentity\DC2\SYN\n\
+    \\ACKreason\CAN\STX \SOH(\tR\ACKreasonB\v\n\
+    \\tpaused_byB\DC3\n\
     \\DC1assigned_build_id\"\254\SOH\n\
     \\EMPendingChildExecutionInfo\DC2\US\n\
     \\vworkflow_id\CAN\SOH \SOH(\tR\n\
@@ -6369,7 +9755,7 @@ packedFileDescriptor
     \expireTime\DC2\RS\n\
     \\n\
     \resettable\CAN\ACK \SOH(\bR\n\
-    \resettable\"\141\a\n\
+    \resettable\"\242\b\n\
     \\CANNewWorkflowExecutionInfo\DC2\US\n\
     \\vworkflow_id\CAN\SOH \SOH(\tR\n\
     \workflowId\DC2I\n\
@@ -6386,7 +9772,10 @@ packedFileDescriptor
     \ \SOH(\tR\fcronSchedule\DC20\n\
     \\EOTmemo\CAN\v \SOH(\v2\FS.temporal.api.common.v1.MemoR\EOTmemo\DC2U\n\
     \\DC1search_attributes\CAN\f \SOH(\v2(.temporal.api.common.v1.SearchAttributesR\DLEsearchAttributes\DC26\n\
-    \\ACKheader\CAN\r \SOH(\v2\RS.temporal.api.common.v1.HeaderR\ACKheader\"\197\ENQ\n\
+    \\ACKheader\CAN\r \SOH(\v2\RS.temporal.api.common.v1.HeaderR\ACKheader\DC2F\n\
+    \\ruser_metadata\CAN\SO \SOH(\v2!.temporal.api.sdk.v1.UserMetadataR\fuserMetadata\DC2]\n\
+    \\DC3versioning_override\CAN\SI \SOH(\v2,.temporal.api.workflow.v1.VersioningOverrideR\DC2versioningOverride\DC2<\n\
+    \\bpriority\CAN\DLE \SOH(\v2 .temporal.api.common.v1.PriorityR\bpriority\"\236\ENQ\n\
     \\fCallbackInfo\DC2<\n\
     \\bcallback\CAN\SOH \SOH(\v2 .temporal.api.common.v1.CallbackR\bcallback\DC2H\n\
     \\atrigger\CAN\STX \SOH(\v2..temporal.api.workflow.v1.CallbackInfo.TriggerR\atrigger\DC2G\n\
@@ -6395,11 +9784,12 @@ packedFileDescriptor
     \\aattempt\CAN\ENQ \SOH(\ENQR\aattempt\DC2W\n\
     \\SUBlast_attempt_complete_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR\ETBlastAttemptCompleteTime\DC2R\n\
     \\DC4last_attempt_failure\CAN\a \SOH(\v2 .temporal.api.failure.v1.FailureR\DC2lastAttemptFailure\DC2W\n\
-    \\SUBnext_attempt_schedule_time\CAN\b \SOH(\v2\SUB.google.protobuf.TimestampR\ETBnextAttemptScheduleTime\SUB\DLE\n\
+    \\SUBnext_attempt_schedule_time\CAN\b \SOH(\v2\SUB.google.protobuf.TimestampR\ETBnextAttemptScheduleTime\DC2%\n\
+    \\SOblocked_reason\CAN\t \SOH(\tR\rblockedReason\SUB\DLE\n\
     \\SOWorkflowClosed\SUBv\n\
     \\aTrigger\DC2`\n\
     \\SIworkflow_closed\CAN\SOH \SOH(\v25.temporal.api.workflow.v1.CallbackInfo.WorkflowClosedH\NULR\SOworkflowClosedB\t\n\
-    \\avariant\"\251\ENQ\n\
+    \\avariant\"\249\ACK\n\
     \\EMPendingNexusOperationInfo\DC2\SUB\n\
     \\bendpoint\CAN\SOH \SOH(\tR\bendpoint\DC2\CAN\n\
     \\aservice\CAN\STX \SOH(\tR\aservice\DC2\FS\n\
@@ -6413,16 +9803,32 @@ packedFileDescriptor
     \\DC4last_attempt_failure\CAN\n\
     \ \SOH(\v2 .temporal.api.failure.v1.FailureR\DC2lastAttemptFailure\DC2W\n\
     \\SUBnext_attempt_schedule_time\CAN\v \SOH(\v2\SUB.google.protobuf.TimestampR\ETBnextAttemptScheduleTime\DC2e\n\
-    \\DC1cancellation_info\CAN\f \SOH(\v28.temporal.api.workflow.v1.NexusOperationCancellationInfoR\DLEcancellationInfo\"\209\ETX\n\
+    \\DC1cancellation_info\CAN\f \SOH(\v28.temporal.api.workflow.v1.NexusOperationCancellationInfoR\DLEcancellationInfo\DC2,\n\
+    \\DC2scheduled_event_id\CAN\r \SOH(\ETXR\DLEscheduledEventId\DC2%\n\
+    \\SOblocked_reason\CAN\SO \SOH(\tR\rblockedReason\DC2'\n\
+    \\SIoperation_token\CAN\SI \SOH(\tR\SOoperationToken\"\248\ETX\n\
     \\RSNexusOperationCancellationInfo\DC2A\n\
     \\SOrequested_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\rrequestedTime\DC2L\n\
     \\ENQstate\CAN\STX \SOH(\SO26.temporal.api.enums.v1.NexusOperationCancellationStateR\ENQstate\DC2\CAN\n\
     \\aattempt\CAN\ETX \SOH(\ENQR\aattempt\DC2W\n\
     \\SUBlast_attempt_complete_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\ETBlastAttemptCompleteTime\DC2R\n\
     \\DC4last_attempt_failure\CAN\ENQ \SOH(\v2 .temporal.api.failure.v1.FailureR\DC2lastAttemptFailure\DC2W\n\
-    \\SUBnext_attempt_schedule_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR\ETBnextAttemptScheduleTimeB\147\SOH\n\
-    \\ESCio.temporal.api.workflow.v1B\fMessageProtoP\SOHZ'go.temporal.io/api/workflow/v1;workflow\170\STX\SUBTemporalio.Api.Workflow.V1\234\STX\GSTemporalio::Api::Workflow::V1J\144k\n\
-    \\a\DC2\ENQ\SYN\NUL\159\STX\SOH\n\
+    \\SUBnext_attempt_schedule_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR\ETBnextAttemptScheduleTime\DC2%\n\
+    \\SOblocked_reason\CAN\a \SOH(\tR\rblockedReason\"y\n\
+    \\CANWorkflowExecutionOptions\DC2]\n\
+    \\DC3versioning_override\CAN\SOH \SOH(\v2,.temporal.api.workflow.v1.VersioningOverrideR\DC2versioningOverride\"\206\SOH\n\
+    \\DC2VersioningOverride\DC2E\n\
+    \\bbehavior\CAN\SOH \SOH(\SO2).temporal.api.enums.v1.VersioningBehaviorR\bbehavior\DC2J\n\
+    \\n\
+    \deployment\CAN\STX \SOH(\v2&.temporal.api.deployment.v1.DeploymentR\n\
+    \deploymentB\STX\CAN\SOH\DC2%\n\
+    \\SOpinned_version\CAN\t \SOH(\tR\rpinnedVersion\"\162\SOH\n\
+    \\DC1OnConflictOptions\DC2*\n\
+    \\DC1attach_request_id\CAN\SOH \SOH(\bR\SIattachRequestId\DC2>\n\
+    \\ESCattach_completion_callbacks\CAN\STX \SOH(\bR\EMattachCompletionCallbacks\DC2!\n\
+    \\fattach_links\CAN\ETX \SOH(\bR\vattachLinksB\147\SOH\n\
+    \\ESCio.temporal.api.workflow.v1B\fMessageProtoP\SOHZ'go.temporal.io/api/workflow/v1;workflow\170\STX\SUBTemporalio.Api.Workflow.V1\234\STX\GSTemporalio::Api::Workflow::V1J\134\223\SOH\n\
+    \\a\DC2\ENQ\SYN\NUL\167\EOT\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -6486,165 +9892,171 @@ packedFileDescriptor
     \\t\n\
     \\STX\ETX\ENQ\DC2\ETX'\NUL.\n\
     \\t\n\
-    \\STX\ETX\ACK\DC2\ETX(\NUL/\n\
+    \\STX\ETX\ACK\DC2\ETX(\NUL2\n\
     \\t\n\
-    \\STX\ETX\a\DC2\ETX)\NUL1\n\
+    \\STX\ETX\a\DC2\ETX)\NUL/\n\
+    \\t\n\
+    \\STX\ETX\b\DC2\ETX*\NUL1\n\
+    \\t\n\
+    \\STX\ETX\t\DC2\ETX+\NUL1\n\
+    \\156\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT0\NULw\SOH\SUB\143\SOH Hold basic information about a workflow execution.\n\
+    \ This structure is a part of visibility, and thus contain a limited subset of information.\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT+\NUL\\\SOH\n\
     \\n\
-    \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX+\b\GS\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX0\b\GS\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX,\EOT;\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX1\EOT;\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX,\EOT,\n\
+    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX1\EOT,\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX,-6\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX1-6\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX,9:\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX19:\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX-\EOT1\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX2\EOT1\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX-\EOT'\n\
+    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX2\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX-(,\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX2(,\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX-/0\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX2/0\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX.\EOT-\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX3\EOT-\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX.\EOT\GS\n\
+    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX3\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX.\RS(\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX3\RS(\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX.+,\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX3+,\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\ETX\DC2\ETX/\EOT-\n\
+    \\EOT\EOT\NUL\STX\ETX\DC2\ETX4\EOT-\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ACK\DC2\ETX/\EOT\GS\n\
+    \\ENQ\EOT\NUL\STX\ETX\ACK\DC2\ETX4\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX/\RS(\n\
+    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX4\RS(\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX/+,\n\
+    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX4+,\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\EOT\DC2\ETX0\EOT=\n\
+    \\EOT\EOT\NUL\STX\EOT\DC2\ETX5\EOT=\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ACK\DC2\ETX0\EOT1\n\
+    \\ENQ\EOT\NUL\STX\EOT\ACK\DC2\ETX5\EOT1\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETX028\n\
+    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETX528\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETX0;<\n\
+    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETX5;<\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\ENQ\DC2\ETX1\EOT\GS\n\
+    \\EOT\EOT\NUL\STX\ENQ\DC2\ETX6\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\ENQ\DC2\ETX1\EOT\t\n\
+    \\ENQ\EOT\NUL\STX\ENQ\ENQ\DC2\ETX6\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\SOH\DC2\ETX1\n\
+    \\ENQ\EOT\NUL\STX\ENQ\SOH\DC2\ETX6\n\
     \\CAN\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\ETX\DC2\ETX1\ESC\FS\n\
+    \\ENQ\EOT\NUL\STX\ENQ\ETX\DC2\ETX6\ESC\FS\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\ACK\DC2\ETX2\EOT#\n\
+    \\EOT\EOT\NUL\STX\ACK\DC2\ETX7\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\ENQ\DC2\ETX2\EOT\n\
+    \\ENQ\EOT\NUL\STX\ACK\ENQ\DC2\ETX7\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\SOH\DC2\ETX2\v\RS\n\
+    \\ENQ\EOT\NUL\STX\ACK\SOH\DC2\ETX7\v\RS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\ETX\DC2\ETX2!\"\n\
+    \\ENQ\EOT\NUL\STX\ACK\ETX\DC2\ETX7!\"\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\a\DC2\ETX3\EOTB\n\
+    \\EOT\EOT\NUL\STX\a\DC2\ETX8\EOTB\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\a\ACK\DC2\ETX3\EOT,\n\
+    \\ENQ\EOT\NUL\STX\a\ACK\DC2\ETX8\EOT,\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\a\SOH\DC2\ETX3-=\n\
+    \\ENQ\EOT\NUL\STX\a\SOH\DC2\ETX8-=\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\a\ETX\DC2\ETX3@A\n\
+    \\ENQ\EOT\NUL\STX\a\ETX\DC2\ETX8@A\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\b\DC2\ETX4\EOT1\n\
+    \\EOT\EOT\NUL\STX\b\DC2\ETX9\EOT1\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\b\ACK\DC2\ETX4\EOT\GS\n\
+    \\ENQ\EOT\NUL\STX\b\ACK\DC2\ETX9\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\b\SOH\DC2\ETX4\RS,\n\
+    \\ENQ\EOT\NUL\STX\b\SOH\DC2\ETX9\RS,\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\b\ETX\DC2\ETX4/0\n\
+    \\ENQ\EOT\NUL\STX\b\ETX\DC2\ETX9/0\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\t\DC2\ETX5\EOT*\n\
+    \\EOT\EOT\NUL\STX\t\DC2\ETX:\EOT*\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\t\ACK\DC2\ETX5\EOT\US\n\
+    \\ENQ\EOT\NUL\STX\t\ACK\DC2\ETX:\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\t\SOH\DC2\ETX5 $\n\
+    \\ENQ\EOT\NUL\STX\t\SOH\DC2\ETX: $\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\t\ETX\DC2\ETX5')\n\
+    \\ENQ\EOT\NUL\STX\t\ETX\DC2\ETX:')\n\
     \\v\n\
     \\EOT\EOT\NUL\STX\n\
-    \\DC2\ETX6\EOTC\n\
+    \\DC2\ETX;\EOTC\n\
     \\f\n\
     \\ENQ\EOT\NUL\STX\n\
-    \\ACK\DC2\ETX6\EOT+\n\
+    \\ACK\DC2\ETX;\EOT+\n\
     \\f\n\
     \\ENQ\EOT\NUL\STX\n\
-    \\SOH\DC2\ETX6,=\n\
+    \\SOH\DC2\ETX;,=\n\
     \\f\n\
     \\ENQ\EOT\NUL\STX\n\
-    \\ETX\DC2\ETX6@B\n\
+    \\ETX\DC2\ETX;@B\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\v\DC2\ETX7\EOT'\n\
+    \\EOT\EOT\NUL\STX\v\DC2\ETX<\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\v\ACK\DC2\ETX7\EOT\SI\n\
+    \\ENQ\EOT\NUL\STX\v\ACK\DC2\ETX<\EOT\SI\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\v\SOH\DC2\ETX7\DLE!\n\
+    \\ENQ\EOT\NUL\STX\v\SOH\DC2\ETX<\DLE!\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\v\ETX\DC2\ETX7$&\n\
+    \\ENQ\EOT\NUL\STX\v\ETX\DC2\ETX<$&\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\f\DC2\ETX8\EOT\ESC\n\
+    \\EOT\EOT\NUL\STX\f\DC2\ETX=\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\f\ENQ\DC2\ETX8\EOT\n\
+    \\ENQ\EOT\NUL\STX\f\ENQ\DC2\ETX=\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\f\SOH\DC2\ETX8\v\NAK\n\
+    \\ENQ\EOT\NUL\STX\f\SOH\DC2\ETX=\v\NAK\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\f\ETX\DC2\ETX8\CAN\SUB\n\
+    \\ENQ\EOT\NUL\STX\f\ETX\DC2\ETX=\CAN\SUB\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\r\DC2\ETX9\EOT&\n\
+    \\EOT\EOT\NUL\STX\r\DC2\ETX>\EOT&\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\r\ENQ\DC2\ETX9\EOT\t\n\
+    \\ENQ\EOT\NUL\STX\r\ENQ\DC2\ETX>\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\r\SOH\DC2\ETX9\n\
+    \\ENQ\EOT\NUL\STX\r\SOH\DC2\ETX>\n\
     \ \n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\r\ETX\DC2\ETX9#%\n\
+    \\ENQ\EOT\NUL\STX\r\ETX\DC2\ETX>#%\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\SO\DC2\ETX:\EOT\"\n\
+    \\EOT\EOT\NUL\STX\SO\DC2\ETX?\EOT\"\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SO\ENQ\DC2\ETX:\EOT\t\n\
+    \\ENQ\EOT\NUL\STX\SO\ENQ\DC2\ETX?\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SO\SOH\DC2\ETX:\n\
+    \\ENQ\EOT\NUL\STX\SO\SOH\DC2\ETX?\n\
     \\FS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SO\ETX\DC2\ETX:\US!\n\
-    \g\n\
-    \\EOT\EOT\NUL\STX\SI\DC2\ETX<\EOTT\SUBZ If set, the most recent worker version stamp that appeared in a workflow task completion\n\
+    \\ENQ\EOT\NUL\STX\SO\ETX\DC2\ETX?\US!\n\
+    \\209\SOH\n\
+    \\EOT\EOT\NUL\STX\SI\DC2\ETXB\EOTT\SUB\195\SOH If set, the most recent worker version stamp that appeared in a workflow task completion\n\
+    \ Deprecated. This field should be cleaned up when versioning-2 API is removed. [cleanup-experimental-wv]\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SI\ACK\DC2\ETX<\EOT-\n\
+    \\ENQ\EOT\NUL\STX\SI\ACK\DC2\ETXB\EOT-\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SI\SOH\DC2\ETX<.N\n\
+    \\ENQ\EOT\NUL\STX\SI\SOH\DC2\ETXB.N\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SI\ETX\DC2\ETX<QS\n\
+    \\ENQ\EOT\NUL\STX\SI\ETX\DC2\ETXBQS\n\
     \\164\SOH\n\
-    \\EOT\EOT\NUL\STX\DLE\DC2\ETX?\EOT5\SUB\150\SOH Workflow execution duration is defined as difference between close time and execution time.\n\
+    \\EOT\EOT\NUL\STX\DLE\DC2\ETXE\EOT5\SUB\150\SOH Workflow execution duration is defined as difference between close time and execution time.\n\
     \ This field is only populated if the workflow is closed.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\DLE\ACK\DC2\ETX?\EOT\FS\n\
+    \\ENQ\EOT\NUL\STX\DLE\ACK\DC2\ETXE\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\DLE\SOH\DC2\ETX?\GS/\n\
+    \\ENQ\EOT\NUL\STX\DLE\SOH\DC2\ETXE\GS/\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\DLE\ETX\DC2\ETX?24\n\
+    \\ENQ\EOT\NUL\STX\DLE\ETX\DC2\ETXE24\n\
     \\153\b\n\
-    \\EOT\EOT\NUL\STX\DC1\DC2\ETXQ\EOTA\SUB\139\b Contains information about the root workflow execution.\n\
+    \\EOT\EOT\NUL\STX\DC1\DC2\ETXW\EOTA\SUB\139\b Contains information about the root workflow execution.\n\
     \ The root workflow execution is defined as follows:\n\
     \ 1. A workflow without parent workflow is its own root workflow.\n\
     \ 2. A workflow that has a parent workflow has the same root workflow as its parent workflow.\n\
@@ -6663,839 +10075,1442 @@ packedFileDescriptor
     \     - The root workflow of W1 is W1 and the root workflow of W2 is W2.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\DC1\ACK\DC2\ETXQ\EOT,\n\
+    \\ENQ\EOT\NUL\STX\DC1\ACK\DC2\ETXW\EOT,\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\DC1\SOH\DC2\ETXQ-;\n\
+    \\ENQ\EOT\NUL\STX\DC1\SOH\DC2\ETXW-;\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\DC1\ETX\DC2\ETXQ>@\n\
-    \\152\EOT\n\
-    \\EOT\EOT\NUL\STX\DC2\DC2\ETXX\EOT\"\SUB\138\EOT The currently assigned build ID for this execution. Presence of this value means worker versioning is used\n\
+    \\ENQ\EOT\NUL\STX\DC1\ETX\DC2\ETXW>@\n\
+    \\129\ENQ\n\
+    \\EOT\EOT\NUL\STX\DC2\DC2\ETX_\EOT\"\SUB\243\EOT The currently assigned build ID for this execution. Presence of this value means worker versioning is used\n\
     \ for this execution. Assigned build ID is selected based on Worker Versioning Assignment Rules\n\
     \ when the first workflow task of the execution is scheduled. If the first workflow task fails and is scheduled\n\
     \ again, the assigned build ID may change according to the latest versioning rules.\n\
     \ Assigned build ID can also change in the middle of a execution if Compatible Redirect Rules are applied to\n\
     \ this execution.\n\
+    \ Deprecated. This field should be cleaned up when versioning-2 API is removed. [cleanup-experimental-wv]\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\DC2\ENQ\DC2\ETXX\EOT\n\
+    \\ENQ\EOT\NUL\STX\DC2\ENQ\DC2\ETX_\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\DC2\SOH\DC2\ETXX\v\FS\n\
+    \\ENQ\EOT\NUL\STX\DC2\SOH\DC2\ETX_\v\FS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\DC2\ETX\DC2\ETXX\US!\n\
-    \\159\SOH\n\
-    \\EOT\EOT\NUL\STX\DC3\DC2\ETX[\EOT#\SUB\145\SOH Build ID inherited from a previous/parent execution. If present, assigned_build_id will be set to this, instead\n\
+    \\ENQ\EOT\NUL\STX\DC2\ETX\DC2\ETX_\US!\n\
+    \\136\STX\n\
+    \\EOT\EOT\NUL\STX\DC3\DC2\ETXc\EOT#\SUB\250\SOH Build ID inherited from a previous/parent execution. If present, assigned_build_id will be set to this, instead\n\
     \ of using the assignment rules.\n\
+    \ Deprecated. This field should be cleaned up when versioning-2 API is removed. [cleanup-experimental-wv]\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\DC3\ENQ\DC2\ETX[\EOT\n\
+    \\ENQ\EOT\NUL\STX\DC3\ENQ\DC2\ETXc\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\DC3\SOH\DC2\ETX[\v\GS\n\
+    \\ENQ\EOT\NUL\STX\DC3\SOH\DC2\ETXc\v\GS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\DC3\ETX\DC2\ETX[ \"\n\
-    \\n\
-    \\n\
-    \\STX\EOT\SOH\DC2\EOT^\NULc\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX^\b\US\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX_\EOT7\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX_\EOT'\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX_(2\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX_56\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX`\EOT<\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX`\EOT\FS\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX`\GS7\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX`:;\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETXa\EOT6\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETXa\EOT\FS\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETXa\GS1\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETXa45\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\ETX\DC2\ETXb\EOT?\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ACK\DC2\ETXb\EOT\FS\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETXb\GS:\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETXb=>\n\
-    \\v\n\
-    \\STX\EOT\STX\DC2\ENQe\NUL\128\SOH\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETXe\b\ESC\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETXf\EOT\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETXf\EOT\n\
+    \\ENQ\EOT\NUL\STX\DC3\ETX\DC2\ETXc \"\n\
+    \\214\SOH\n\
+    \\EOT\EOT\NUL\STX\DC4\DC2\ETXj\EOT\GS\SUB\200\SOH The first run ID in the execution chain.\n\
+    \ Executions created via the following operations are considered to be in the same chain\n\
+    \ - ContinueAsNew\n\
+    \ - Workflow Retry\n\
+    \ - Workflow Reset\n\
+    \ - Cron Schedule\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXf\v\SYN\n\
+    \\ENQ\EOT\NUL\STX\DC4\ENQ\DC2\ETXj\EOT\n\
+    \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXf\EM\SUB\n\
+    \\ENQ\EOT\NUL\STX\DC4\SOH\DC2\ETXj\v\ETB\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\DC4\ETX\DC2\ETXj\SUB\FS\n\
+    \\173\STX\n\
+    \\EOT\EOT\NUL\STX\NAK\DC2\ETXo\EOT9\SUB\159\STX Absent value means the workflow execution is not versioned. When present, the execution might\n\
+    \ be versioned or unversioned, depending on `versioning_info.behavior` and `versioning_info.versioning_override`.\n\
+    \ Experimental. Versioning info is experimental and might change in the future.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\NAK\ACK\DC2\ETXo\EOT#\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\NAK\SOH\DC2\ETXo$3\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\NAK\ETX\DC2\ETXo68\n\
+    \\174\SOH\n\
+    \\EOT\EOT\NUL\STX\SYN\DC2\ETXs\EOT'\SUB\160\SOH The name of Worker Deployment that completed the most recent workflow task.\n\
+    \ Experimental. Worker Deployments are experimental and might change in the future.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\SYN\ENQ\DC2\ETXs\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\SYN\SOH\DC2\ETXs\v!\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\SYN\ETX\DC2\ETXs$&\n\
+    \ \n\
+    \\EOT\EOT\NUL\STX\ETB\DC2\ETXv\EOT2\SUB\DC3 Priority metadata\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\ETB\ACK\DC2\ETXv\EOT#\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\ETB\SOH\DC2\ETXv$,\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\ETB\ETX\DC2\ETXv/1\n\
+    \g\n\
+    \\STX\EOT\SOH\DC2\ENQz\NUL\141\SOH\SOH\SUBZ Holds all the extra information about workflow execution that is not part of Visibility.\n\
+    \\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETXz\b%\n\
+    \\163\SOH\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX}\EOT<\SUB\149\SOH Workflow execution expiration time is defined as workflow start time plus expiration timeout.\n\
+    \ Workflow start time may change after workflow reset.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX}\EOT\GS\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX}\RS7\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX}:;\n\
+    \u\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\EOT\128\SOH\EOT6\SUBg Workflow run expiration time is defined as current workflow run start time plus workflow run timeout.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\EOT\128\SOH\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\EOT\128\SOH\RS1\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\EOT\128\SOH45\n\
+    \C\n\
+    \\EOT\EOT\SOH\STX\STX\DC2\EOT\131\SOH\EOT\RS\SUB5 indicates if the workflow received a cancel request\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\STX\ENQ\DC2\EOT\131\SOH\EOT\b\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\EOT\131\SOH\t\EM\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\EOT\131\SOH\FS\GS\n\
+    \N\n\
+    \\EOT\EOT\SOH\STX\ETX\DC2\EOT\134\SOH\EOT2\SUB@ Last workflow reset time. Nil if the workflow was never reset.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\ETX\ACK\DC2\EOT\134\SOH\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\EOT\134\SOH\RS-\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\EOT\134\SOH01\n\
+    \-\n\
+    \\EOT\EOT\SOH\STX\EOT\DC2\EOT\137\SOH\EOT6\SUB\US Original workflow start time.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\EOT\ACK\DC2\EOT\137\SOH\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\EOT\SOH\DC2\EOT\137\SOH\RS1\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\EOT\ETX\DC2\EOT\137\SOH45\n\
+    \\152\SOH\n\
+    \\EOT\EOT\SOH\STX\ENQ\DC2\EOT\140\SOH\EOT\FS\SUB\137\SOH Reset Run ID points to the new run when this execution is reset. If the execution is reset multiple times, it points to the latest run.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\ENQ\ENQ\DC2\EOT\140\SOH\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\ENQ\SOH\DC2\EOT\140\SOH\v\ETB\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\ENQ\ETX\DC2\EOT\140\SOH\SUB\ESC\n\
+    \\182\SOH\n\
+    \\STX\EOT\STX\DC2\ACK\145\SOH\NUL\219\SOH\SOH\SUB\167\SOH Holds all the information about worker versioning for a particular workflow execution.\n\
+    \ Experimental. Versioning info is experimental and might change in the future.\n\
+    \\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETXg\EOT:\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETXg\EOT'\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETXg(5\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETXg89\n\
+    \\ETX\EOT\STX\SOH\DC2\EOT\145\SOH\b'\n\
+    \\148\a\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\EOT\157\SOH\EOT:\SUB\133\a Versioning behavior determines how the server should treat this execution when workers are\n\
+    \ upgraded. When present it means this workflow execution is versioned; UNSPECIFIED means\n\
+    \ unversioned. See the comments in `VersioningBehavior` enum for more info about different\n\
+    \ behaviors.\n\
+    \ This field is first set after an execution completes its first workflow task on a versioned\n\
+    \ worker, and set again on completion of every subsequent workflow task.\n\
+    \ For child workflows of Pinned parents, this will be set to Pinned (along with `version`) when\n\
+    \ the the child starts so that child's first workflow task goes to the same Version as the\n\
+    \ parent. After the first workflow task, it depends on the child workflow itself if it wants\n\
+    \ to stay pinned or become unpinned (according to Versioning Behavior set in the worker).\n\
+    \ Note that `behavior` is overridden by `versioning_override` if the latter is present.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\EOT\157\SOH\EOT,\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\EOT\157\SOH-5\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\EOT\157\SOH89\n\
+    \\196\EOT\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\EOT\165\SOH\EOTM\SUB\181\EOT The worker deployment that completed the last workflow task of this workflow execution. Must\n\
+    \ be present if `behavior` is set. Absent value means no workflow task is completed, or the\n\
+    \ last workflow task was completed by an unversioned worker. Unversioned workers may still send\n\
+    \ a deployment value which will be stored here, so the right way to check if an execution is\n\
+    \ versioned if an execution is versioned or not is via the `behavior` field.\n\
+    \ Note that `deployment` is overridden by `versioning_override` if the latter is present.\n\
+    \ Deprecated. Use `version`.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\EOT\165\SOH\EOT)\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\EOT\165\SOH*4\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\EOT\165\SOH78\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\SOH\b\DC2\EOT\165\SOH9L\n\
+    \\SO\n\
+    \\ACK\EOT\STX\STX\SOH\b\ETX\DC2\EOT\165\SOH:K\n\
+    \\221\EOT\n\
+    \\EOT\EOT\STX\STX\STX\DC2\EOT\174\SOH\EOT\ETB\SUB\206\EOT The Worker Deployment Version that completed the last workflow task of this workflow\n\
+    \ execution, in the form \"<deployment_name>.<build_id>\".\n\
+    \ Must be present if and only if `behavior` is set. An absent value means no workflow task is\n\
+    \ completed, or the workflow is unversioned.\n\
+    \ For child workflows of Pinned parents, this will be set to parent's Pinned Version when the\n\
+    \ the child starts so that child's first workflow task goes to the same Version as the parent.\n\
+    \ Note that if `versioning_override.behavior` is PINNED then `versioning_override.pinned_version`\n\
+    \ will override this value.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\EOT\174\SOH\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\STX\SOH\DC2\EOT\174\SOH\v\DC2\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\STX\ETX\DC2\EOT\174\SOH\NAK\SYN\n\
+    \\250\STX\n\
+    \\EOT\EOT\STX\STX\ETX\DC2\EOT\180\SOH\EOT/\SUB\235\STX Present if user has set an execution-specific versioning override. This override takes\n\
+    \ precedence over SDK-sent `behavior` (and `version` when override is PINNED). An\n\
+    \ override can be set when starting a new execution, as well as afterwards by calling the\n\
+    \ `UpdateWorkflowExecutionOptions` API.\n\
+    \ Pinned overrides are automatically inherited by child workflows.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\ETX\ACK\DC2\EOT\180\SOH\EOT\SYN\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\EOT\180\SOH\ETB*\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\EOT\180\SOH-.\n\
+    \\244\n\
+    \\n\
+    \\EOT\EOT\STX\STX\EOT\DC2\EOT\199\SOH\EOTG\SUB\229\n\
+    \ When present, indicates the workflow is transitioning to a different deployment. Can\n\
+    \ indicate one of the following transitions: unversioned -> versioned, versioned -> versioned\n\
+    \ on a different deployment, or versioned -> unversioned.\n\
+    \ Not applicable to workflows with PINNED behavior.\n\
+    \ When a workflow with AUTO_UPGRADE behavior creates a new workflow task, it will automatically\n\
+    \ start a transition to the task queue's current deployment if the task queue's current\n\
+    \ deployment is different from the workflow's deployment.\n\
+    \ If the AUTO_UPGRADE workflow is stuck due to backlogged activity or workflow tasks, those\n\
+    \ tasks will be redirected to the task queue's current deployment. As soon as a poller from\n\
+    \ that deployment is available to receive the task, the workflow will automatically start a\n\
+    \ transition to that deployment and continue execution there.\n\
+    \ A deployment transition can only exist while there is a pending or started workflow task.\n\
+    \ Once the pending workflow task completes on the transition's target deployment, the\n\
+    \ transition completes and the workflow's `deployment` and `behavior` fields are updated per\n\
+    \ the worker's task completion response.\n\
+    \ Pending activities will not start new attempts during a transition. Once the transition is\n\
+    \ completed, pending activities will start their next attempt on the new deployment.\n\
+    \ Deprecated. Use version_transition.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\EOT\ACK\DC2\EOT\199\SOH\EOT\CAN\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\EOT\SOH\DC2\EOT\199\SOH\EM.\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\EOT\ETX\DC2\EOT\199\SOH12\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\EOT\b\DC2\EOT\199\SOH3F\n\
+    \\SO\n\
+    \\ACK\EOT\STX\STX\EOT\b\ETX\DC2\EOT\199\SOH4E\n\
+    \\155\v\n\
+    \\EOT\EOT\STX\STX\ENQ\DC2\EOT\218\SOH\EOT7\SUB\140\v When present, indicates the workflow is transitioning to a different deployment version\n\
+    \ (which may belong to the same deployment name or another). Can indicate one of the following\n\
+    \ transitions: unversioned -> versioned, versioned -> versioned\n\
+    \ on a different deployment version, or versioned -> unversioned.\n\
+    \ Not applicable to workflows with PINNED behavior.\n\
+    \ When a workflow with AUTO_UPGRADE behavior creates a new workflow task, it will automatically\n\
+    \ start a transition to the task queue's current version if the task queue's current version is\n\
+    \ different from the workflow's current deployment version.\n\
+    \ If the AUTO_UPGRADE workflow is stuck due to backlogged activity or workflow tasks, those\n\
+    \ tasks will be redirected to the task queue's current version. As soon as a poller from\n\
+    \ that deployment version is available to receive the task, the workflow will automatically\n\
+    \ start a transition to that version and continue execution there.\n\
+    \ A version transition can only exist while there is a pending or started workflow task.\n\
+    \ Once the pending workflow task completes on the transition's target version, the\n\
+    \ transition completes and the workflow's `behavior`, and `version` fields are updated per the\n\
+    \ worker's task completion response.\n\
+    \ Pending activities will not start new attempts during a transition. Once the transition is\n\
+    \ completed, pending activities will start their next attempt on the new version.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\ENQ\ACK\DC2\EOT\218\SOH\EOT\US\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\ENQ\SOH\DC2\EOT\218\SOH 2\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\ENQ\ETX\DC2\EOT\218\SOH56\n\
+    \\161\SOH\n\
+    \\STX\EOT\ETX\DC2\ACK\223\SOH\NUL\229\SOH\SOH\SUB\146\SOH Holds information about ongoing transition of a workflow execution from one deployment to another.\n\
+    \ Deprecated. Use DeploymentVersionTransition.\n\
+    \\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\STX\DC2\ETXh\EOT9\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ACK\DC2\ETXh\EOT.\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETXh/4\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETXh78\n\
+    \\ETX\EOT\ETX\SOH\DC2\EOT\223\SOH\b\FS\n\
+    \\137\SOH\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\EOT\226\SOH\EOT9\SUB{ The target deployment of the transition. Null means a so-far-versioned workflow is\n\
+    \ transitioning to unversioned workers.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ETX\STX\NUL\ACK\DC2\EOT\226\SOH\EOT)\n\
+    \\r\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\EOT\226\SOH*4\n\
+    \\r\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\EOT\226\SOH78\n\
+    \\174\SOH\n\
+    \\STX\EOT\EOT\DC2\ACK\234\SOH\NUL\240\SOH\SOH\SUB\159\SOH Holds information about ongoing transition of a workflow execution from one worker\n\
+    \ deployment version to another.\n\
+    \ Experimental. Might change in the future.\n\
+    \\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\ETX\DC2\ETXi\EOT:\n\
+    \\ETX\EOT\EOT\SOH\DC2\EOT\234\SOH\b#\n\
+    \\171\SOH\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\EOT\237\SOH\EOT\ETB\SUB\156\SOH Required. The target Version of the transition. May be `__unversioned__` which means a\n\
+    \ so-far-versioned workflow is transitioning to unversioned workers.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\EOT\237\SOH\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\EOT\237\SOH\v\DC2\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\EOT\237\SOH\NAK\SYN\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ACK\DC2\ETXi\EOT#\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETXi$5\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETXi89\n\
+    \\STX\EOT\ENQ\DC2\ACK\242\SOH\NUL\249\SOH\SOH\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\EOT\DC2\ETXj\EOT6\n\
+    \\ETX\EOT\ENQ\SOH\DC2\EOT\242\SOH\b\US\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ACK\DC2\ETXj\EOT\GS\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\EOT\243\SOH\EOT7\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\EOT\243\SOH\EOT'\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\EOT\243\SOH(2\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\EOT\243\SOH56\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\SOH\DC2\ETXj\RS1\n\
+    \\EOT\EOT\ENQ\STX\SOH\DC2\EOT\244\SOH\EOT<\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ACK\DC2\EOT\244\SOH\EOT\FS\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\EOT\244\SOH\GS7\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\EOT\244\SOH:;\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ETX\DC2\ETXj45\n\
+    \\EOT\EOT\ENQ\STX\STX\DC2\EOT\245\SOH\EOT6\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\STX\ACK\DC2\EOT\245\SOH\EOT\FS\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\EOT\245\SOH\GS1\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\EOT\245\SOH45\n\
+    \\f\n\
+    \\EOT\EOT\ENQ\STX\ETX\DC2\EOT\246\SOH\EOT?\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\ETX\ACK\DC2\EOT\246\SOH\EOT\FS\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\ETX\SOH\DC2\EOT\246\SOH\GS:\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\ETX\ETX\DC2\EOT\246\SOH=>\n\
+    \9\n\
+    \\EOT\EOT\ENQ\STX\EOT\DC2\EOT\248\SOH\EOT7\SUB+ User metadata provided on start workflow.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\EOT\ACK\DC2\EOT\248\SOH\EOT$\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\EOT\SOH\DC2\EOT\248\SOH%2\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\EOT\ETX\DC2\EOT\248\SOH56\n\
+    \\f\n\
+    \\STX\EOT\ACK\DC2\ACK\251\SOH\NUL\199\STX\SOH\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\ENQ\DC2\ETXk\EOT4\n\
+    \\ETX\EOT\ACK\SOH\DC2\EOT\251\SOH\b\ESC\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ENQ\ACK\DC2\ETXk\EOT\GS\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\EOT\252\SOH\EOT\ESC\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\EOT\252\SOH\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\EOT\252\SOH\v\SYN\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\EOT\252\SOH\EM\SUB\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ENQ\SOH\DC2\ETXk\RS/\n\
+    \\EOT\EOT\ACK\STX\SOH\DC2\EOT\253\SOH\EOT:\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\SOH\ACK\DC2\EOT\253\SOH\EOT'\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\EOT\253\SOH(5\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\EOT\253\SOH89\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ENQ\ETX\DC2\ETXk23\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\ACK\DC2\ETXl\EOT\SYN\n\
+    \\EOT\EOT\ACK\STX\STX\DC2\EOT\254\SOH\EOT9\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\STX\ACK\DC2\EOT\254\SOH\EOT.\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\EOT\254\SOH/4\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\EOT\254\SOH78\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ACK\ENQ\DC2\ETXl\EOT\t\n\
+    \\EOT\EOT\ACK\STX\ETX\DC2\EOT\255\SOH\EOT:\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\ETX\ACK\DC2\EOT\255\SOH\EOT#\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\ETX\SOH\DC2\EOT\255\SOH$5\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\ETX\ETX\DC2\EOT\255\SOH89\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ACK\SOH\DC2\ETXl\n\
+    \\EOT\EOT\ACK\STX\EOT\DC2\EOT\128\STX\EOT6\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\EOT\ACK\DC2\EOT\128\STX\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\EOT\SOH\DC2\EOT\128\STX\RS1\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\EOT\ETX\DC2\EOT\128\STX45\n\
+    \\f\n\
+    \\EOT\EOT\ACK\STX\ENQ\DC2\EOT\129\STX\EOT4\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\ENQ\ACK\DC2\EOT\129\STX\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\ENQ\SOH\DC2\EOT\129\STX\RS/\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\ENQ\ETX\DC2\EOT\129\STX23\n\
+    \\f\n\
+    \\EOT\EOT\ACK\STX\ACK\DC2\EOT\130\STX\EOT\SYN\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\ACK\ENQ\DC2\EOT\130\STX\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\ACK\SOH\DC2\EOT\130\STX\n\
     \\DC1\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\ACK\ETX\DC2\EOT\130\STX\DC4\NAK\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ACK\ETX\DC2\ETXl\DC4\NAK\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\a\DC2\ETXm\EOT\US\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\a\ENQ\DC2\ETXm\EOT\t\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\a\SOH\DC2\ETXm\n\
+    \\EOT\EOT\ACK\STX\a\DC2\EOT\131\STX\EOT\US\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\a\ENQ\DC2\EOT\131\STX\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\a\SOH\DC2\EOT\131\STX\n\
     \\SUB\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\a\ETX\DC2\EOT\131\STX\GS\RS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\a\ETX\DC2\ETXm\GS\RS\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\b\DC2\ETXn\EOT1\n\
+    \\EOT\EOT\ACK\STX\b\DC2\EOT\132\STX\EOT1\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\b\ACK\DC2\EOT\132\STX\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\b\SOH\DC2\EOT\132\STX\RS,\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\b\ETX\DC2\EOT\132\STX/0\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\b\ACK\DC2\ETXn\EOT\GS\n\
+    \\EOT\EOT\ACK\STX\t\DC2\EOT\133\STX\EOT3\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\t\ACK\DC2\EOT\133\STX\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\t\SOH\DC2\EOT\133\STX\RS-\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\t\ETX\DC2\EOT\133\STX02\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\b\SOH\DC2\ETXn\RS,\n\
+    \\EOT\EOT\ACK\STX\n\
+    \\DC2\EOT\134\STX\EOT6\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\n\
+    \\ACK\DC2\EOT\134\STX\EOT#\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\n\
+    \\SOH\DC2\EOT\134\STX$0\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\n\
+    \\ETX\DC2\EOT\134\STX35\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\b\ETX\DC2\ETXn/0\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\t\DC2\ETXo\EOT3\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\t\ACK\DC2\ETXo\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\t\SOH\DC2\ETXo\RS-\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\t\ETX\DC2\ETXo02\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\n\
-    \\DC2\ETXp\EOT6\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\n\
-    \\ACK\DC2\ETXp\EOT#\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\n\
-    \\SOH\DC2\ETXp$0\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\n\
-    \\ETX\DC2\ETXp35\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\v\DC2\ETXq\EOT%\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\v\ENQ\DC2\ETXq\EOT\n\
+    \\EOT\EOT\ACK\STX\v\DC2\EOT\135\STX\EOT%\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\v\ENQ\DC2\EOT\135\STX\EOT\n\
     \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\v\SOH\DC2\ETXq\v\US\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\v\ETX\DC2\ETXq\"$\n\
-    \\189\STX\n\
-    \\EOT\EOT\STX\b\NUL\DC2\EOTu\EOT}\ENQ\SUB\174\STX Absence of `assigned_build_id` generally means this task is on an \"unversioned\" task queue.\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\v\SOH\DC2\EOT\135\STX\v\US\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\v\ETX\DC2\EOT\135\STX\"$\n\
+    \\168\ETX\n\
+    \\EOT\EOT\ACK\b\NUL\DC2\ACK\140\STX\EOT\148\STX\ENQ\SUB\151\ETX Absence of `assigned_build_id` generally means this task is on an \"unversioned\" task queue.\n\
     \ In rare cases, it can also mean that the task queue is versioned but we failed to write activity's\n\
     \ independently-assigned build ID to the database. This case heals automatically once the task is dispatched.\n\
+    \ Deprecated. This field should be cleaned up when versioning-2 API is removed. [cleanup-experimental-wv]\n\
     \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\b\NUL\SOH\DC2\ETXu\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\b\NUL\SOH\DC2\EOT\140\STX\n\
     \\ESC\n\
-    \`\n\
-    \\EOT\EOT\STX\STX\f\DC2\ETXw\b9\SUBS When present, it means this activity is assigned to the build ID of its workflow.\n\
+    \a\n\
+    \\EOT\EOT\ACK\STX\f\DC2\EOT\142\STX\b9\SUBS When present, it means this activity is assigned to the build ID of its workflow.\n\
     \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\f\ACK\DC2\ETXw\b\GS\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\f\SOH\DC2\ETXw\RS3\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\f\ETX\DC2\ETXw68\n\
-    \\163\STX\n\
-    \\EOT\EOT\STX\STX\r\DC2\ETX|\b9\SUB\149\STX This means the activity is independently versioned and not bound to the build ID of its workflow.\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\f\ACK\DC2\EOT\142\STX\b\GS\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\f\SOH\DC2\EOT\142\STX\RS3\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\f\ETX\DC2\EOT\142\STX68\n\
+    \\164\STX\n\
+    \\EOT\EOT\ACK\STX\r\DC2\EOT\147\STX\b9\SUB\149\STX This means the activity is independently versioned and not bound to the build ID of its workflow.\n\
     \ The activity will use the build id in this field instead.\n\
     \ If the task fails and is scheduled again, the assigned build ID may change according to the latest versioning\n\
     \ rules.\n\
     \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\r\ENQ\DC2\ETX|\b\SO\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\r\SOH\DC2\ETX|\SI3\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\r\ETX\DC2\ETX|68\n\
-    \a\n\
-    \\EOT\EOT\STX\STX\SO\DC2\ETX\DEL\EOTM\SUBT The version stamp of the worker to whom this activity was most recently dispatched\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\r\ENQ\DC2\EOT\147\STX\b\SO\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\r\SOH\DC2\EOT\147\STX\SI3\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\r\ETX\DC2\EOT\147\STX68\n\
+    \\204\SOH\n\
+    \\EOT\EOT\ACK\STX\SO\DC2\EOT\151\STX\EOTM\SUB\189\SOH The version stamp of the worker to whom this activity was most recently dispatched\n\
+    \ Deprecated. This field should be cleaned up when versioning-2 API is removed. [cleanup-experimental-wv]\n\
     \\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\SO\ACK\DC2\EOT\151\STX\EOT-\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\SO\SOH\DC2\EOT\151\STX.G\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\SO\ETX\DC2\EOT\151\STXJL\n\
+    \\136\STX\n\
+    \\EOT\EOT\ACK\STX\SI\DC2\EOT\157\STX\EOT9\SUB\249\SOH The time activity will wait until the next retry.\n\
+    \ If activity is currently running it will be next retry interval if activity failed.\n\
+    \ If activity is currently waiting it will be current retry interval.\n\
+    \ If there will be no retry it will be null.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\SI\ACK\DC2\EOT\157\STX\EOT\FS\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\SI\SOH\DC2\EOT\157\STX\GS3\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\SI\ETX\DC2\EOT\157\STX68\n\
+    \\131\SOH\n\
+    \\EOT\EOT\ACK\STX\DLE\DC2\EOT\160\STX\EOT>\SUBu The time when the last activity attempt was completed. If activity has not been completed yet then it will be null.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\DLE\ACK\DC2\EOT\160\STX\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\DLE\SOH\DC2\EOT\160\STX\RS8\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\DLE\ETX\DC2\EOT\160\STX;=\n\
+    \z\n\
+    \\EOT\EOT\ACK\STX\DC1\DC2\EOT\164\STX\EOT>\SUBl Next time when activity will be scheduled.\n\
+    \ If activity is currently scheduled or started it will be null.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\DC1\ACK\DC2\EOT\164\STX\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\DC1\SOH\DC2\EOT\164\STX\RS8\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\DC1\ETX\DC2\EOT\164\STX;=\n\
+    \0\n\
+    \\EOT\EOT\ACK\STX\DC2\DC2\EOT\167\STX\EOT\NAK\SUB\" Indicates if activity is paused.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\DC2\ENQ\DC2\EOT\167\STX\EOT\b\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\DC2\SOH\DC2\EOT\167\STX\t\SI\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\DC2\ETX\DC2\EOT\167\STX\DC2\DC4\n\
+    \\197\SOH\n\
+    \\EOT\EOT\ACK\STX\DC3\DC2\EOT\172\STX\EOTS\SUB\182\SOH The deployment this activity was dispatched to most recently. Present only if the activity\n\
+    \ was dispatched to a versioned worker.\n\
+    \ Deprecated. Use `last_worker_deployment_version`.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\DC3\ACK\DC2\EOT\172\STX\EOT)\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\DC3\SOH\DC2\EOT\172\STX*9\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\DC3\ETX\DC2\EOT\172\STX<>\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\DC3\b\DC2\EOT\172\STX?R\n\
+    \\SO\n\
+    \\ACK\EOT\ACK\STX\DC3\b\ETX\DC2\EOT\172\STX@Q\n\
+    \\\\n\
+    \\EOT\EOT\ACK\STX\DC4\DC2\EOT\174\STX\EOT/\SUBN The Worker Deployment Version this activity was dispatched to most recently.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\DC4\ENQ\DC2\EOT\174\STX\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\DC4\SOH\DC2\EOT\174\STX\v)\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\DC4\ETX\DC2\EOT\174\STX,.\n\
+    \!\n\
+    \\EOT\EOT\ACK\STX\NAK\DC2\EOT\177\STX\EOT2\SUB\DC3 Priority metadata\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\NAK\ACK\DC2\EOT\177\STX\EOT#\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\NAK\SOH\DC2\EOT\177\STX$,\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\NAK\ETX\DC2\EOT\177\STX/1\n\
+    \\SO\n\
+    \\EOT\EOT\ACK\ETX\NUL\DC2\ACK\179\STX\EOT\196\STX\ENQ\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\ETX\NUL\SOH\DC2\EOT\179\STX\f\NAK\n\
+    \8\n\
+    \\ACK\EOT\ACK\ETX\NUL\STX\NUL\DC2\EOT\181\STX\b1\SUB( The time when the activity was paused.\n\
+    \\n\
+    \\SI\n\
+    \\a\EOT\ACK\ETX\NUL\STX\NUL\ACK\DC2\EOT\181\STX\b!\n\
+    \\SI\n\
+    \\a\EOT\ACK\ETX\NUL\STX\NUL\SOH\DC2\EOT\181\STX\",\n\
+    \\SI\n\
+    \\a\EOT\ACK\ETX\NUL\STX\NUL\ETX\DC2\EOT\181\STX/0\n\
+    \\DLE\n\
+    \\ACK\EOT\ACK\ETX\NUL\ETX\NUL\DC2\ACK\183\STX\b\188\STX\t\n\
+    \\SI\n\
+    \\a\EOT\ACK\ETX\NUL\ETX\NUL\SOH\DC2\EOT\183\STX\DLE\SYN\n\
+    \G\n\
+    \\b\EOT\ACK\ETX\NUL\ETX\NUL\STX\NUL\DC2\EOT\185\STX\f \SUB5 The identity of the actor that paused the activity.\n\
+    \\n\
+    \\DC1\n\
+    \\t\EOT\ACK\ETX\NUL\ETX\NUL\STX\NUL\ENQ\DC2\EOT\185\STX\f\DC2\n\
+    \\DC1\n\
+    \\t\EOT\ACK\ETX\NUL\ETX\NUL\STX\NUL\SOH\DC2\EOT\185\STX\DC3\ESC\n\
+    \\DC1\n\
+    \\t\EOT\ACK\ETX\NUL\ETX\NUL\STX\NUL\ETX\DC2\EOT\185\STX\RS\US\n\
+    \4\n\
+    \\b\EOT\ACK\ETX\NUL\ETX\NUL\STX\SOH\DC2\EOT\187\STX\f\RS\SUB\" Reason for pausing the activity.\n\
+    \\n\
+    \\DC1\n\
+    \\t\EOT\ACK\ETX\NUL\ETX\NUL\STX\SOH\ENQ\DC2\EOT\187\STX\f\DC2\n\
+    \\DC1\n\
+    \\t\EOT\ACK\ETX\NUL\ETX\NUL\STX\SOH\SOH\DC2\EOT\187\STX\DC3\EM\n\
+    \\DC1\n\
+    \\t\EOT\ACK\ETX\NUL\ETX\NUL\STX\SOH\ETX\DC2\EOT\187\STX\FS\GS\n\
+    \\DLE\n\
+    \\ACK\EOT\ACK\ETX\NUL\b\NUL\DC2\ACK\189\STX\b\195\STX\t\n\
+    \\SI\n\
+    \\a\EOT\ACK\ETX\NUL\b\NUL\SOH\DC2\EOT\189\STX\SO\ETB\n\
+    \@\n\
+    \\ACK\EOT\ACK\ETX\NUL\STX\SOH\DC2\EOT\191\STX\f\RS\SUB0 activity was paused by the manual intervention\n\
+    \\n\
+    \\SI\n\
+    \\a\EOT\ACK\ETX\NUL\STX\SOH\ACK\DC2\EOT\191\STX\f\DC2\n\
+    \\SI\n\
+    \\a\EOT\ACK\ETX\NUL\STX\SOH\SOH\DC2\EOT\191\STX\DC3\EM\n\
+    \\SI\n\
+    \\a\EOT\ACK\ETX\NUL\STX\SOH\ETX\DC2\EOT\191\STX\FS\GS\n\
+    \:\n\
+    \\ACK\EOT\ACK\ETX\NUL\STX\STX\DC2\EOT\194\STX\f\US\SUB* Id of the rule that paused the activity.\n\
+    \\n\
+    \\SI\n\
+    \\a\EOT\ACK\ETX\NUL\STX\STX\ENQ\DC2\EOT\194\STX\f\DC2\n\
+    \\SI\n\
+    \\a\EOT\ACK\ETX\NUL\STX\STX\SOH\DC2\EOT\194\STX\DC3\SUB\n\
+    \\SI\n\
+    \\a\EOT\ACK\ETX\NUL\STX\STX\ETX\DC2\EOT\194\STX\GS\RS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SO\ACK\DC2\ETX\DEL\EOT-\n\
+    \\EOT\EOT\ACK\STX\SYN\DC2\EOT\198\STX\EOT\RS\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\SYN\ACK\DC2\EOT\198\STX\EOT\r\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\SYN\SOH\DC2\EOT\198\STX\SO\CAN\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\SYN\ETX\DC2\EOT\198\STX\ESC\GS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SO\SOH\DC2\ETX\DEL.G\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SO\ETX\DC2\ETX\DELJL\n\
-    \\f\n\
-    \\STX\EOT\ETX\DC2\ACK\130\SOH\NUL\137\SOH\SOH\n\
+    \\STX\EOT\a\DC2\ACK\201\STX\NUL\208\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\ETX\SOH\DC2\EOT\130\SOH\b!\n\
+    \\ETX\EOT\a\SOH\DC2\EOT\201\STX\b!\n\
     \\f\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\EOT\131\SOH\EOT\ESC\n\
+    \\EOT\EOT\a\STX\NUL\DC2\EOT\202\STX\EOT\ESC\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\EOT\131\SOH\EOT\n\
+    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\EOT\202\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\EOT\131\SOH\v\SYN\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\EOT\202\STX\v\SYN\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\EOT\131\SOH\EM\SUB\n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\EOT\202\STX\EM\SUB\n\
     \\f\n\
-    \\EOT\EOT\ETX\STX\SOH\DC2\EOT\132\SOH\EOT\SYN\n\
+    \\EOT\EOT\a\STX\SOH\DC2\EOT\203\STX\EOT\SYN\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\EOT\132\SOH\EOT\n\
+    \\ENQ\EOT\a\STX\SOH\ENQ\DC2\EOT\203\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\EOT\132\SOH\v\DC1\n\
+    \\ENQ\EOT\a\STX\SOH\SOH\DC2\EOT\203\STX\v\DC1\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\EOT\132\SOH\DC4\NAK\n\
+    \\ENQ\EOT\a\STX\SOH\ETX\DC2\EOT\203\STX\DC4\NAK\n\
     \\f\n\
-    \\EOT\EOT\ETX\STX\STX\DC2\EOT\133\SOH\EOT\"\n\
+    \\EOT\EOT\a\STX\STX\DC2\EOT\204\STX\EOT\"\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\STX\ENQ\DC2\EOT\133\SOH\EOT\n\
+    \\ENQ\EOT\a\STX\STX\ENQ\DC2\EOT\204\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\STX\SOH\DC2\EOT\133\SOH\v\GS\n\
+    \\ENQ\EOT\a\STX\STX\SOH\DC2\EOT\204\STX\v\GS\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\STX\ETX\DC2\EOT\133\SOH !\n\
+    \\ENQ\EOT\a\STX\STX\ETX\DC2\EOT\204\STX !\n\
     \\f\n\
-    \\EOT\EOT\ETX\STX\ETX\DC2\EOT\134\SOH\EOT\ESC\n\
+    \\EOT\EOT\a\STX\ETX\DC2\EOT\205\STX\EOT\ESC\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\ETX\ENQ\DC2\EOT\134\SOH\EOT\t\n\
+    \\ENQ\EOT\a\STX\ETX\ENQ\DC2\EOT\205\STX\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\ETX\SOH\DC2\EOT\134\SOH\n\
+    \\ENQ\EOT\a\STX\ETX\SOH\DC2\EOT\205\STX\n\
     \\SYN\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\ETX\ETX\DC2\EOT\134\SOH\EM\SUB\n\
+    \\ENQ\EOT\a\STX\ETX\ETX\DC2\EOT\205\STX\EM\SUB\n\
     \7\n\
-    \\EOT\EOT\ETX\STX\EOT\DC2\EOT\136\SOH\EOTD\SUB) Default: PARENT_CLOSE_POLICY_TERMINATE.\n\
+    \\EOT\EOT\a\STX\EOT\DC2\EOT\207\STX\EOTD\SUB) Default: PARENT_CLOSE_POLICY_TERMINATE.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\EOT\ACK\DC2\EOT\136\SOH\EOT+\n\
+    \\ENQ\EOT\a\STX\EOT\ACK\DC2\EOT\207\STX\EOT+\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\EOT\SOH\DC2\EOT\136\SOH,?\n\
+    \\ENQ\EOT\a\STX\EOT\SOH\DC2\EOT\207\STX,?\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\EOT\ETX\DC2\EOT\136\SOHBC\n\
+    \\ENQ\EOT\a\STX\EOT\ETX\DC2\EOT\207\STXBC\n\
     \\f\n\
-    \\STX\EOT\EOT\DC2\ACK\139\SOH\NUL\149\SOH\SOH\n\
+    \\STX\EOT\b\DC2\ACK\210\STX\NUL\220\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\EOT\SOH\DC2\EOT\139\SOH\b\US\n\
+    \\ETX\EOT\b\SOH\DC2\EOT\210\STX\b\US\n\
     \\f\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\EOT\140\SOH\EOT=\n\
+    \\EOT\EOT\b\STX\NUL\DC2\EOT\211\STX\EOT=\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\EOT\140\SOH\EOT2\n\
+    \\ENQ\EOT\b\STX\NUL\ACK\DC2\EOT\211\STX\EOT2\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\EOT\140\SOH38\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\EOT\211\STX38\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\EOT\140\SOH;<\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\EOT\211\STX;<\n\
     \\f\n\
-    \\EOT\EOT\EOT\STX\SOH\DC2\EOT\141\SOH\EOT1\n\
+    \\EOT\EOT\b\STX\SOH\DC2\EOT\212\STX\EOT1\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\SOH\ACK\DC2\EOT\141\SOH\EOT\GS\n\
+    \\ENQ\EOT\b\STX\SOH\ACK\DC2\EOT\212\STX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\EOT\141\SOH\RS,\n\
+    \\ENQ\EOT\b\STX\SOH\SOH\DC2\EOT\212\STX\RS,\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\EOT\141\SOH/0\n\
+    \\ENQ\EOT\b\STX\SOH\ETX\DC2\EOT\212\STX/0\n\
     \\151\ETX\n\
-    \\EOT\EOT\EOT\STX\STX\DC2\EOT\146\SOH\EOT:\SUB\136\ETX original_scheduled_time is the scheduled time of the first workflow task during workflow task heartbeat.\n\
+    \\EOT\EOT\b\STX\STX\DC2\EOT\217\STX\EOT:\SUB\136\ETX original_scheduled_time is the scheduled time of the first workflow task during workflow task heartbeat.\n\
     \ Heartbeat workflow task is done by RespondWorkflowTaskComplete with ForceCreateNewWorkflowTask == true and no command\n\
     \ In this case, OriginalScheduledTime won't change. Then when current time - original_scheduled_time exceeds\n\
     \ some threshold, the workflow task will be forced timeout.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\STX\ACK\DC2\EOT\146\SOH\EOT\GS\n\
+    \\ENQ\EOT\b\STX\STX\ACK\DC2\EOT\217\STX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\STX\SOH\DC2\EOT\146\SOH\RS5\n\
+    \\ENQ\EOT\b\STX\STX\SOH\DC2\EOT\217\STX\RS5\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\STX\ETX\DC2\EOT\146\SOH89\n\
+    \\ENQ\EOT\b\STX\STX\ETX\DC2\EOT\217\STX89\n\
     \\f\n\
-    \\EOT\EOT\EOT\STX\ETX\DC2\EOT\147\SOH\EOT/\n\
+    \\EOT\EOT\b\STX\ETX\DC2\EOT\218\STX\EOT/\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\ETX\ACK\DC2\EOT\147\SOH\EOT\GS\n\
+    \\ENQ\EOT\b\STX\ETX\ACK\DC2\EOT\218\STX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\ETX\SOH\DC2\EOT\147\SOH\RS*\n\
+    \\ENQ\EOT\b\STX\ETX\SOH\DC2\EOT\218\STX\RS*\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\ETX\ETX\DC2\EOT\147\SOH-.\n\
+    \\ENQ\EOT\b\STX\ETX\ETX\DC2\EOT\218\STX-.\n\
     \\f\n\
-    \\EOT\EOT\EOT\STX\EOT\DC2\EOT\148\SOH\EOT\SYN\n\
+    \\EOT\EOT\b\STX\EOT\DC2\EOT\219\STX\EOT\SYN\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\EOT\ENQ\DC2\EOT\148\SOH\EOT\t\n\
+    \\ENQ\EOT\b\STX\EOT\ENQ\DC2\EOT\219\STX\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\EOT\SOH\DC2\EOT\148\SOH\n\
+    \\ENQ\EOT\b\STX\EOT\SOH\DC2\EOT\219\STX\n\
     \\DC1\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\EOT\ETX\DC2\EOT\148\SOH\DC4\NAK\n\
+    \\ENQ\EOT\b\STX\EOT\ETX\DC2\EOT\219\STX\DC4\NAK\n\
     \\f\n\
-    \\STX\EOT\ENQ\DC2\ACK\151\SOH\NUL\153\SOH\SOH\n\
+    \\STX\EOT\t\DC2\ACK\222\STX\NUL\224\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\ENQ\SOH\DC2\EOT\151\SOH\b\DC3\n\
+    \\ETX\EOT\t\SOH\DC2\EOT\222\STX\b\DC3\n\
     \\f\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\EOT\152\SOH\EOT'\n\
+    \\EOT\EOT\t\STX\NUL\DC2\EOT\223\STX\EOT'\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\NUL\EOT\DC2\EOT\152\SOH\EOT\f\n\
+    \\ENQ\EOT\t\STX\NUL\EOT\DC2\EOT\223\STX\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\EOT\152\SOH\r\ESC\n\
+    \\ENQ\EOT\t\STX\NUL\ACK\DC2\EOT\223\STX\r\ESC\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\EOT\152\SOH\FS\"\n\
+    \\ENQ\EOT\t\STX\NUL\SOH\DC2\EOT\223\STX\FS\"\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\EOT\152\SOH%&\n\
+    \\ENQ\EOT\t\STX\NUL\ETX\DC2\EOT\223\STX%&\n\
     \\155\STX\n\
-    \\STX\EOT\ACK\DC2\ACK\158\SOH\NUL\174\SOH\SOH\SUB\140\STX ResetPointInfo records the workflow event id that is the first one processed by a given\n\
+    \\STX\EOT\n\
+    \\DC2\ACK\229\STX\NUL\245\STX\SOH\SUB\140\STX ResetPointInfo records the workflow event id that is the first one processed by a given\n\
     \ build id or binary checksum. A new reset point will be created if either build id or binary\n\
     \ checksum changes (although in general only one or the other will be used at a time).\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\ACK\SOH\DC2\EOT\158\SOH\b\SYN\n\
+    \\ETX\EOT\n\
+    \\SOH\DC2\EOT\229\STX\b\SYN\n\
     \ \n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\EOT\160\SOH\EOT\CAN\SUB\DC2 Worker build id.\n\
+    \\EOT\EOT\n\
+    \\STX\NUL\DC2\EOT\231\STX\EOT\CAN\SUB\DC2 Worker build id.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\EOT\160\SOH\EOT\n\
+    \\ENQ\EOT\n\
+    \\STX\NUL\ENQ\DC2\EOT\231\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\EOT\160\SOH\v\DC3\n\
+    \\ENQ\EOT\n\
+    \\STX\NUL\SOH\DC2\EOT\231\STX\v\DC3\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\EOT\160\SOH\SYN\ETB\n\
+    \\ENQ\EOT\n\
+    \\STX\NUL\ETX\DC2\EOT\231\STX\SYN\ETB\n\
     \@\n\
-    \\EOT\EOT\ACK\STX\SOH\DC2\EOT\162\SOH\EOT\US\SUB2 A worker binary version identifier (deprecated).\n\
+    \\EOT\EOT\n\
+    \\STX\SOH\DC2\EOT\233\STX\EOT\US\SUB2 A worker binary version identifier (deprecated).\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\SOH\ENQ\DC2\EOT\162\SOH\EOT\n\
+    \\ENQ\EOT\n\
+    \\STX\SOH\ENQ\DC2\EOT\233\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\EOT\162\SOH\v\SUB\n\
+    \\ENQ\EOT\n\
+    \\STX\SOH\SOH\DC2\EOT\233\STX\v\SUB\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\EOT\162\SOH\GS\RS\n\
+    \\ENQ\EOT\n\
+    \\STX\SOH\ETX\DC2\EOT\233\STX\GS\RS\n\
     \^\n\
-    \\EOT\EOT\ACK\STX\STX\DC2\EOT\164\SOH\EOT\SYN\SUBP The first run ID in the execution chain that was touched by this worker build.\n\
+    \\EOT\EOT\n\
+    \\STX\STX\DC2\EOT\235\STX\EOT\SYN\SUBP The first run ID in the execution chain that was touched by this worker build.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\STX\ENQ\DC2\EOT\164\SOH\EOT\n\
+    \\ENQ\EOT\n\
+    \\STX\STX\ENQ\DC2\EOT\235\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\EOT\164\SOH\v\DC1\n\
+    \\ENQ\EOT\n\
+    \\STX\STX\SOH\DC2\EOT\235\STX\v\DC1\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\EOT\164\SOH\DC4\NAK\n\
+    \\ENQ\EOT\n\
+    \\STX\STX\ETX\DC2\EOT\235\STX\DC4\NAK\n\
     \a\n\
-    \\EOT\EOT\ACK\STX\ETX\DC2\EOT\166\SOH\EOT/\SUBS Event ID of the first WorkflowTaskCompleted event processed by this worker build.\n\
+    \\EOT\EOT\n\
+    \\STX\ETX\DC2\EOT\237\STX\EOT/\SUBS Event ID of the first WorkflowTaskCompleted event processed by this worker build.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\ETX\ENQ\DC2\EOT\166\SOH\EOT\t\n\
+    \\ENQ\EOT\n\
+    \\STX\ETX\ENQ\DC2\EOT\237\STX\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\ETX\SOH\DC2\EOT\166\SOH\n\
+    \\ENQ\EOT\n\
+    \\STX\ETX\SOH\DC2\EOT\237\STX\n\
     \*\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\ETX\ETX\DC2\EOT\166\SOH-.\n\
+    \\ENQ\EOT\n\
+    \\STX\ETX\ETX\DC2\EOT\237\STX-.\n\
     \\f\n\
-    \\EOT\EOT\ACK\STX\EOT\DC2\EOT\167\SOH\EOT.\n\
+    \\EOT\EOT\n\
+    \\STX\EOT\DC2\EOT\238\STX\EOT.\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\EOT\ACK\DC2\EOT\167\SOH\EOT\GS\n\
+    \\ENQ\EOT\n\
+    \\STX\EOT\ACK\DC2\EOT\238\STX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\EOT\SOH\DC2\EOT\167\SOH\RS)\n\
+    \\ENQ\EOT\n\
+    \\STX\EOT\SOH\DC2\EOT\238\STX\RS)\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\EOT\ETX\DC2\EOT\167\SOH,-\n\
+    \\ENQ\EOT\n\
+    \\STX\EOT\ETX\DC2\EOT\238\STX,-\n\
     \\192\SOH\n\
-    \\EOT\EOT\ACK\STX\ENQ\DC2\EOT\171\SOH\EOT.\SUB\177\SOH (-- api-linter: core::0214::resource-expiry=disabled\n\
+    \\EOT\EOT\n\
+    \\STX\ENQ\DC2\EOT\242\STX\EOT.\SUB\177\SOH (-- api-linter: core::0214::resource-expiry=disabled\n\
     \     aip.dev/not-precedent: TTL is not defined for ResetPointInfo. --)\n\
     \ The time that the run is deleted due to retention.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\ENQ\ACK\DC2\EOT\171\SOH\EOT\GS\n\
+    \\ENQ\EOT\n\
+    \\STX\ENQ\ACK\DC2\EOT\242\STX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\ENQ\SOH\DC2\EOT\171\SOH\RS)\n\
+    \\ENQ\EOT\n\
+    \\STX\ENQ\SOH\DC2\EOT\242\STX\RS)\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\ENQ\ETX\DC2\EOT\171\SOH,-\n\
+    \\ENQ\EOT\n\
+    \\STX\ENQ\ETX\DC2\EOT\242\STX,-\n\
     \Y\n\
-    \\EOT\EOT\ACK\STX\ACK\DC2\EOT\173\SOH\EOT\CAN\SUBK false if the reset point has pending childWFs/reqCancels/signalExternals.\n\
+    \\EOT\EOT\n\
+    \\STX\ACK\DC2\EOT\244\STX\EOT\CAN\SUBK false if the reset point has pending childWFs/reqCancels/signalExternals.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\ACK\ENQ\DC2\EOT\173\SOH\EOT\b\n\
+    \\ENQ\EOT\n\
+    \\STX\ACK\ENQ\DC2\EOT\244\STX\EOT\b\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\ACK\SOH\DC2\EOT\173\SOH\t\DC3\n\
+    \\ENQ\EOT\n\
+    \\STX\ACK\SOH\DC2\EOT\244\STX\t\DC3\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\ACK\ETX\DC2\EOT\173\SOH\SYN\ETB\n\
+    \\ENQ\EOT\n\
+    \\STX\ACK\ETX\DC2\EOT\244\STX\SYN\ETB\n\
     \\153\SOH\n\
-    \\STX\EOT\a\DC2\ACK\178\SOH\NUL\199\SOH\SOH\SUB\138\SOH NewWorkflowExecutionInfo is a shared message that encapsulates all the\n\
+    \\STX\EOT\v\DC2\ACK\249\STX\NUL\151\ETX\SOH\SUB\138\SOH NewWorkflowExecutionInfo is a shared message that encapsulates all the\n\
     \ required arguments to starting a workflow in different contexts.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\a\SOH\DC2\EOT\178\SOH\b \n\
+    \\ETX\EOT\v\SOH\DC2\EOT\249\STX\b \n\
     \\f\n\
-    \\EOT\EOT\a\STX\NUL\DC2\EOT\179\SOH\EOT\ESC\n\
+    \\EOT\EOT\v\STX\NUL\DC2\EOT\250\STX\EOT\ESC\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\EOT\179\SOH\EOT\n\
+    \\ENQ\EOT\v\STX\NUL\ENQ\DC2\EOT\250\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\EOT\179\SOH\v\SYN\n\
+    \\ENQ\EOT\v\STX\NUL\SOH\DC2\EOT\250\STX\v\SYN\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\EOT\179\SOH\EM\SUB\n\
+    \\ENQ\EOT\v\STX\NUL\ETX\DC2\EOT\250\STX\EM\SUB\n\
     \\f\n\
-    \\EOT\EOT\a\STX\SOH\DC2\EOT\180\SOH\EOT:\n\
+    \\EOT\EOT\v\STX\SOH\DC2\EOT\251\STX\EOT:\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\SOH\ACK\DC2\EOT\180\SOH\EOT'\n\
+    \\ENQ\EOT\v\STX\SOH\ACK\DC2\EOT\251\STX\EOT'\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\SOH\SOH\DC2\EOT\180\SOH(5\n\
+    \\ENQ\EOT\v\STX\SOH\SOH\DC2\EOT\251\STX(5\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\SOH\ETX\DC2\EOT\180\SOH89\n\
+    \\ENQ\EOT\v\STX\SOH\ETX\DC2\EOT\251\STX89\n\
     \\f\n\
-    \\EOT\EOT\a\STX\STX\DC2\EOT\181\SOH\EOT7\n\
+    \\EOT\EOT\v\STX\STX\DC2\EOT\252\STX\EOT7\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\STX\ACK\DC2\EOT\181\SOH\EOT'\n\
+    \\ENQ\EOT\v\STX\STX\ACK\DC2\EOT\252\STX\EOT'\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\STX\SOH\DC2\EOT\181\SOH(2\n\
+    \\ENQ\EOT\v\STX\STX\SOH\DC2\EOT\252\STX(2\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\STX\ETX\DC2\EOT\181\SOH56\n\
+    \\ENQ\EOT\v\STX\STX\ETX\DC2\EOT\252\STX56\n\
     \5\n\
-    \\EOT\EOT\a\STX\ETX\DC2\EOT\183\SOH\EOT.\SUB' Serialized arguments to the workflow.\n\
+    \\EOT\EOT\v\STX\ETX\DC2\EOT\254\STX\EOT.\SUB' Serialized arguments to the workflow.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\ETX\ACK\DC2\EOT\183\SOH\EOT#\n\
+    \\ENQ\EOT\v\STX\ETX\ACK\DC2\EOT\254\STX\EOT#\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\ETX\SOH\DC2\EOT\183\SOH$)\n\
+    \\ENQ\EOT\v\STX\ETX\SOH\DC2\EOT\254\STX$)\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\ETX\ETX\DC2\EOT\183\SOH,-\n\
+    \\ENQ\EOT\v\STX\ETX\ETX\DC2\EOT\254\STX,-\n\
     \W\n\
-    \\EOT\EOT\a\STX\EOT\DC2\EOT\185\SOH\EOT<\SUBI Total workflow execution timeout including retries and continue as new.\n\
+    \\EOT\EOT\v\STX\EOT\DC2\EOT\128\ETX\EOT<\SUBI Total workflow execution timeout including retries and continue as new.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\EOT\ACK\DC2\EOT\185\SOH\EOT\FS\n\
+    \\ENQ\EOT\v\STX\EOT\ACK\DC2\EOT\128\ETX\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\EOT\SOH\DC2\EOT\185\SOH\GS7\n\
+    \\ENQ\EOT\v\STX\EOT\SOH\DC2\EOT\128\ETX\GS7\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\EOT\ETX\DC2\EOT\185\SOH:;\n\
+    \\ENQ\EOT\v\STX\EOT\ETX\DC2\EOT\128\ETX:;\n\
     \1\n\
-    \\EOT\EOT\a\STX\ENQ\DC2\EOT\187\SOH\EOT6\SUB# Timeout of a single workflow run.\n\
+    \\EOT\EOT\v\STX\ENQ\DC2\EOT\130\ETX\EOT6\SUB# Timeout of a single workflow run.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\ENQ\ACK\DC2\EOT\187\SOH\EOT\FS\n\
+    \\ENQ\EOT\v\STX\ENQ\ACK\DC2\EOT\130\ETX\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\ENQ\SOH\DC2\EOT\187\SOH\GS1\n\
+    \\ENQ\EOT\v\STX\ENQ\SOH\DC2\EOT\130\ETX\GS1\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\ENQ\ETX\DC2\EOT\187\SOH45\n\
+    \\ENQ\EOT\v\STX\ENQ\ETX\DC2\EOT\130\ETX45\n\
     \2\n\
-    \\EOT\EOT\a\STX\ACK\DC2\EOT\189\SOH\EOT7\SUB$ Timeout of a single workflow task.\n\
+    \\EOT\EOT\v\STX\ACK\DC2\EOT\132\ETX\EOT7\SUB$ Timeout of a single workflow task.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\ACK\ACK\DC2\EOT\189\SOH\EOT\FS\n\
+    \\ENQ\EOT\v\STX\ACK\ACK\DC2\EOT\132\ETX\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\ACK\SOH\DC2\EOT\189\SOH\GS2\n\
+    \\ENQ\EOT\v\STX\ACK\SOH\DC2\EOT\132\ETX\GS2\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\ACK\ETX\DC2\EOT\189\SOH56\n\
+    \\ENQ\EOT\v\STX\ACK\ETX\DC2\EOT\132\ETX56\n\
     \B\n\
-    \\EOT\EOT\a\STX\a\DC2\EOT\191\SOH\EOTM\SUB4 Default: WORKFLOW_ID_REUSE_POLICY_ALLOW_DUPLICATE.\n\
+    \\EOT\EOT\v\STX\a\DC2\EOT\134\ETX\EOTM\SUB4 Default: WORKFLOW_ID_REUSE_POLICY_ALLOW_DUPLICATE.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\a\ACK\DC2\EOT\191\SOH\EOT/\n\
+    \\ENQ\EOT\v\STX\a\ACK\DC2\EOT\134\ETX\EOT/\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\a\SOH\DC2\EOT\191\SOH0H\n\
+    \\ENQ\EOT\v\STX\a\SOH\DC2\EOT\134\ETX0H\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\a\ETX\DC2\EOT\191\SOHKL\n\
+    \\ENQ\EOT\v\STX\a\ETX\DC2\EOT\134\ETXKL\n\
     \b\n\
-    \\EOT\EOT\a\STX\b\DC2\EOT\193\SOH\EOT8\SUBT The retry policy for the workflow. Will never exceed `workflow_execution_timeout`.\n\
+    \\EOT\EOT\v\STX\b\DC2\EOT\136\ETX\EOT8\SUBT The retry policy for the workflow. Will never exceed `workflow_execution_timeout`.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\b\ACK\DC2\EOT\193\SOH\EOT&\n\
+    \\ENQ\EOT\v\STX\b\ACK\DC2\EOT\136\ETX\EOT&\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\b\SOH\DC2\EOT\193\SOH'3\n\
+    \\ENQ\EOT\v\STX\b\SOH\DC2\EOT\136\ETX'3\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\b\ETX\DC2\EOT\193\SOH67\n\
+    \\ENQ\EOT\v\STX\b\ETX\DC2\EOT\136\ETX67\n\
     \V\n\
-    \\EOT\EOT\a\STX\t\DC2\EOT\195\SOH\EOT\RS\SUBH See https://docs.temporal.io/docs/content/what-is-a-temporal-cron-job/\n\
+    \\EOT\EOT\v\STX\t\DC2\EOT\138\ETX\EOT\RS\SUBH See https://docs.temporal.io/docs/content/what-is-a-temporal-cron-job/\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\t\ENQ\DC2\EOT\195\SOH\EOT\n\
+    \\ENQ\EOT\v\STX\t\ENQ\DC2\EOT\138\ETX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\t\SOH\DC2\EOT\195\SOH\v\CAN\n\
+    \\ENQ\EOT\v\STX\t\SOH\DC2\EOT\138\ETX\v\CAN\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\t\ETX\DC2\EOT\195\SOH\ESC\GS\n\
+    \\ENQ\EOT\v\STX\t\ETX\DC2\EOT\138\ETX\ESC\GS\n\
     \\f\n\
-    \\EOT\EOT\a\STX\n\
-    \\DC2\EOT\196\SOH\EOT*\n\
+    \\EOT\EOT\v\STX\n\
+    \\DC2\EOT\139\ETX\EOT*\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\n\
-    \\ACK\DC2\EOT\196\SOH\EOT\US\n\
+    \\ENQ\EOT\v\STX\n\
+    \\ACK\DC2\EOT\139\ETX\EOT\US\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\n\
-    \\SOH\DC2\EOT\196\SOH $\n\
+    \\ENQ\EOT\v\STX\n\
+    \\SOH\DC2\EOT\139\ETX $\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\n\
-    \\ETX\DC2\EOT\196\SOH')\n\
+    \\ENQ\EOT\v\STX\n\
+    \\ETX\DC2\EOT\139\ETX')\n\
     \\f\n\
-    \\EOT\EOT\a\STX\v\DC2\EOT\197\SOH\EOTC\n\
+    \\EOT\EOT\v\STX\v\DC2\EOT\140\ETX\EOTC\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\v\ACK\DC2\EOT\197\SOH\EOT+\n\
+    \\ENQ\EOT\v\STX\v\ACK\DC2\EOT\140\ETX\EOT+\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\v\SOH\DC2\EOT\197\SOH,=\n\
+    \\ENQ\EOT\v\STX\v\SOH\DC2\EOT\140\ETX,=\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\v\ETX\DC2\EOT\197\SOH@B\n\
+    \\ENQ\EOT\v\STX\v\ETX\DC2\EOT\140\ETX@B\n\
     \\f\n\
-    \\EOT\EOT\a\STX\f\DC2\EOT\198\SOH\EOT.\n\
+    \\EOT\EOT\v\STX\f\DC2\EOT\141\ETX\EOT.\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\f\ACK\DC2\EOT\198\SOH\EOT!\n\
+    \\ENQ\EOT\v\STX\f\ACK\DC2\EOT\141\ETX\EOT!\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\f\SOH\DC2\EOT\198\SOH\"(\n\
+    \\ENQ\EOT\v\STX\f\SOH\DC2\EOT\141\ETX\"(\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\f\ETX\DC2\EOT\198\SOH+-\n\
+    \\ENQ\EOT\v\STX\f\ETX\DC2\EOT\141\ETX+-\n\
+    \\210\SOH\n\
+    \\EOT\EOT\v\STX\r\DC2\EOT\145\ETX\EOT8\SUB\195\SOH Metadata on the workflow if it is started. This is carried over to the WorkflowExecutionConfig\n\
+    \ for use by user interfaces to display the fixed as-of-start summary and details of the\n\
+    \ workflow.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\r\ACK\DC2\EOT\145\ETX\EOT$\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\r\SOH\DC2\EOT\145\ETX%2\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\r\ETX\DC2\EOT\145\ETX57\n\
+    \\205\SOH\n\
+    \\EOT\EOT\v\STX\SO\DC2\EOT\148\ETX\EOT0\SUB\190\SOH If set, takes precedence over the Versioning Behavior sent by the SDK on Workflow Task completion.\n\
+    \ To unset the override after the workflow is running, use UpdateWorkflowExecutionOptions.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\SO\ACK\DC2\EOT\148\ETX\EOT\SYN\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\SO\SOH\DC2\EOT\148\ETX\ETB*\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\SO\ETX\DC2\EOT\148\ETX-/\n\
+    \!\n\
+    \\EOT\EOT\v\STX\SI\DC2\EOT\150\ETX\EOT2\SUB\DC3 Priority metadata\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\SI\ACK\DC2\EOT\150\ETX\EOT#\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\SI\SOH\DC2\EOT\150\ETX$,\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\SI\ETX\DC2\EOT\150\ETX/1\n\
     \Q\n\
-    \\STX\EOT\b\DC2\ACK\202\SOH\NUL\230\SOH\SOH\SUBC CallbackInfo contains the state of an attached workflow callback.\n\
+    \\STX\EOT\f\DC2\ACK\154\ETX\NUL\185\ETX\SOH\SUBC CallbackInfo contains the state of an attached workflow callback.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\b\SOH\DC2\EOT\202\SOH\b\DC4\n\
+    \\ETX\EOT\f\SOH\DC2\EOT\154\ETX\b\DC4\n\
     \8\n\
-    \\EOT\EOT\b\ETX\NUL\DC2\EOT\204\SOH\EOT\GS\SUB* Trigger for when the workflow is closed.\n\
+    \\EOT\EOT\f\ETX\NUL\DC2\EOT\156\ETX\EOT\GS\SUB* Trigger for when the workflow is closed.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\ETX\NUL\SOH\DC2\EOT\204\SOH\f\SUB\n\
+    \\ENQ\EOT\f\ETX\NUL\SOH\DC2\EOT\156\ETX\f\SUB\n\
     \\SO\n\
-    \\EOT\EOT\b\ETX\SOH\DC2\ACK\206\SOH\EOT\210\SOH\ENQ\n\
+    \\EOT\EOT\f\ETX\SOH\DC2\ACK\158\ETX\EOT\162\ETX\ENQ\n\
     \\r\n\
-    \\ENQ\EOT\b\ETX\SOH\SOH\DC2\EOT\206\SOH\f\DC3\n\
+    \\ENQ\EOT\f\ETX\SOH\SOH\DC2\EOT\158\ETX\f\DC3\n\
     \\DLE\n\
-    \\ACK\EOT\b\ETX\SOH\b\NUL\DC2\ACK\207\SOH\b\209\SOH\t\n\
+    \\ACK\EOT\f\ETX\SOH\b\NUL\DC2\ACK\159\ETX\b\161\ETX\t\n\
     \\SI\n\
-    \\a\EOT\b\ETX\SOH\b\NUL\SOH\DC2\EOT\207\SOH\SO\NAK\n\
+    \\a\EOT\f\ETX\SOH\b\NUL\SOH\DC2\EOT\159\ETX\SO\NAK\n\
     \\SO\n\
-    \\ACK\EOT\b\ETX\SOH\STX\NUL\DC2\EOT\208\SOH\f/\n\
+    \\ACK\EOT\f\ETX\SOH\STX\NUL\DC2\EOT\160\ETX\f/\n\
     \\SI\n\
-    \\a\EOT\b\ETX\SOH\STX\NUL\ACK\DC2\EOT\208\SOH\f\SUB\n\
+    \\a\EOT\f\ETX\SOH\STX\NUL\ACK\DC2\EOT\160\ETX\f\SUB\n\
     \\SI\n\
-    \\a\EOT\b\ETX\SOH\STX\NUL\SOH\DC2\EOT\208\SOH\ESC*\n\
+    \\a\EOT\f\ETX\SOH\STX\NUL\SOH\DC2\EOT\160\ETX\ESC*\n\
     \\SI\n\
-    \\a\EOT\b\ETX\SOH\STX\NUL\ETX\DC2\EOT\208\SOH-.\n\
+    \\a\EOT\f\ETX\SOH\STX\NUL\ETX\DC2\EOT\160\ETX-.\n\
     \[\n\
-    \\EOT\EOT\b\STX\NUL\DC2\EOT\213\SOH\EOT1\SUBM Information on how this callback should be invoked (e.g. its URL and type).\n\
+    \\EOT\EOT\f\STX\NUL\DC2\EOT\165\ETX\EOT1\SUBM Information on how this callback should be invoked (e.g. its URL and type).\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\NUL\ACK\DC2\EOT\213\SOH\EOT#\n\
+    \\ENQ\EOT\f\STX\NUL\ACK\DC2\EOT\165\ETX\EOT#\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\EOT\213\SOH$,\n\
+    \\ENQ\EOT\f\STX\NUL\SOH\DC2\EOT\165\ETX$,\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\EOT\213\SOH/0\n\
+    \\ENQ\EOT\f\STX\NUL\ETX\DC2\EOT\165\ETX/0\n\
     \*\n\
-    \\EOT\EOT\b\STX\SOH\DC2\EOT\215\SOH\EOT\CAN\SUB\FS Trigger for this callback.\n\
+    \\EOT\EOT\f\STX\SOH\DC2\EOT\167\ETX\EOT\CAN\SUB\FS Trigger for this callback.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\SOH\ACK\DC2\EOT\215\SOH\EOT\v\n\
+    \\ENQ\EOT\f\STX\SOH\ACK\DC2\EOT\167\ETX\EOT\v\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\SOH\SOH\DC2\EOT\215\SOH\f\DC3\n\
+    \\ENQ\EOT\f\STX\SOH\SOH\DC2\EOT\167\ETX\f\DC3\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\SOH\ETX\DC2\EOT\215\SOH\SYN\ETB\n\
+    \\ENQ\EOT\f\STX\SOH\ETX\DC2\EOT\167\ETX\SYN\ETB\n\
     \:\n\
-    \\EOT\EOT\b\STX\STX\DC2\EOT\217\SOH\EOT4\SUB, The time when the callback was registered.\n\
+    \\EOT\EOT\f\STX\STX\DC2\EOT\169\ETX\EOT4\SUB, The time when the callback was registered.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\STX\ACK\DC2\EOT\217\SOH\EOT\GS\n\
+    \\ENQ\EOT\f\STX\STX\ACK\DC2\EOT\169\ETX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\STX\SOH\DC2\EOT\217\SOH\RS/\n\
+    \\ENQ\EOT\f\STX\STX\SOH\DC2\EOT\169\ETX\RS/\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\STX\ETX\DC2\EOT\217\SOH23\n\
+    \\ENQ\EOT\f\STX\STX\ETX\DC2\EOT\169\ETX23\n\
     \\f\n\
-    \\EOT\EOT\b\STX\ETX\DC2\EOT\219\SOH\EOT2\n\
+    \\EOT\EOT\f\STX\ETX\DC2\EOT\171\ETX\EOT2\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\ETX\ACK\DC2\EOT\219\SOH\EOT'\n\
+    \\ENQ\EOT\f\STX\ETX\ACK\DC2\EOT\171\ETX\EOT'\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\ETX\SOH\DC2\EOT\219\SOH(-\n\
+    \\ENQ\EOT\f\STX\ETX\SOH\DC2\EOT\171\ETX(-\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\ETX\ETX\DC2\EOT\219\SOH01\n\
+    \\ENQ\EOT\f\STX\ETX\ETX\DC2\EOT\171\ETX01\n\
     \\180\SOH\n\
-    \\EOT\EOT\b\STX\EOT\DC2\EOT\222\SOH\EOT\SYN\SUB\165\SOH The number of attempts made to deliver the callback.\n\
+    \\EOT\EOT\f\STX\EOT\DC2\EOT\174\ETX\EOT\SYN\SUB\165\SOH The number of attempts made to deliver the callback.\n\
     \ This number represents a minimum bound since the attempt is incremented after the callback request completes.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\EOT\ENQ\DC2\EOT\222\SOH\EOT\t\n\
+    \\ENQ\EOT\f\STX\EOT\ENQ\DC2\EOT\174\ETX\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\EOT\SOH\DC2\EOT\222\SOH\n\
+    \\ENQ\EOT\f\STX\EOT\SOH\DC2\EOT\174\ETX\n\
     \\DC1\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\EOT\ETX\DC2\EOT\222\SOH\DC4\NAK\n\
+    \\ENQ\EOT\f\STX\EOT\ETX\DC2\EOT\174\ETX\DC4\NAK\n\
     \9\n\
-    \\EOT\EOT\b\STX\ENQ\DC2\EOT\225\SOH\EOT=\SUB+ The time when the last attempt completed.\n\
+    \\EOT\EOT\f\STX\ENQ\DC2\EOT\177\ETX\EOT=\SUB+ The time when the last attempt completed.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\ENQ\ACK\DC2\EOT\225\SOH\EOT\GS\n\
+    \\ENQ\EOT\f\STX\ENQ\ACK\DC2\EOT\177\ETX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\ENQ\SOH\DC2\EOT\225\SOH\RS8\n\
+    \\ENQ\EOT\f\STX\ENQ\SOH\DC2\EOT\177\ETX\RS8\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\ENQ\ETX\DC2\EOT\225\SOH;<\n\
+    \\ENQ\EOT\f\STX\ENQ\ETX\DC2\EOT\177\ETX;<\n\
     \3\n\
-    \\EOT\EOT\b\STX\ACK\DC2\EOT\227\SOH\EOT=\SUB% The last attempt's failure, if any.\n\
+    \\EOT\EOT\f\STX\ACK\DC2\EOT\179\ETX\EOT=\SUB% The last attempt's failure, if any.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\ACK\ACK\DC2\EOT\227\SOH\EOT#\n\
+    \\ENQ\EOT\f\STX\ACK\ACK\DC2\EOT\179\ETX\EOT#\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\ACK\SOH\DC2\EOT\227\SOH$8\n\
+    \\ENQ\EOT\f\STX\ACK\SOH\DC2\EOT\179\ETX$8\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\ACK\ETX\DC2\EOT\227\SOH;<\n\
+    \\ENQ\EOT\f\STX\ACK\ETX\DC2\EOT\179\ETX;<\n\
     \<\n\
-    \\EOT\EOT\b\STX\a\DC2\EOT\229\SOH\EOT=\SUB. The time when the next attempt is scheduled.\n\
+    \\EOT\EOT\f\STX\a\DC2\EOT\181\ETX\EOT=\SUB. The time when the next attempt is scheduled.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\a\ACK\DC2\EOT\229\SOH\EOT\GS\n\
+    \\ENQ\EOT\f\STX\a\ACK\DC2\EOT\181\ETX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\a\SOH\DC2\EOT\229\SOH\RS8\n\
+    \\ENQ\EOT\f\STX\a\SOH\DC2\EOT\181\ETX\RS8\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\a\ETX\DC2\EOT\229\SOH;<\n\
+    \\ENQ\EOT\f\STX\a\ETX\DC2\EOT\181\ETX;<\n\
+    \X\n\
+    \\EOT\EOT\f\STX\b\DC2\EOT\184\ETX\EOT\RS\SUBJ If the state is BLOCKED, blocked reason provides additional information.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\b\ENQ\DC2\EOT\184\ETX\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\b\SOH\DC2\EOT\184\ETX\v\EM\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\b\ETX\DC2\EOT\184\ETX\FS\GS\n\
     \Z\n\
-    \\STX\EOT\t\DC2\ACK\233\SOH\NUL\140\STX\SOH\SUBL PendingNexusOperationInfo contains the state of a pending Nexus operation.\n\
+    \\STX\EOT\r\DC2\ACK\188\ETX\NUL\235\ETX\SOH\SUBL PendingNexusOperationInfo contains the state of a pending Nexus operation.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\t\SOH\DC2\EOT\233\SOH\b!\n\
+    \\ETX\EOT\r\SOH\DC2\EOT\188\ETX\b!\n\
     \V\n\
-    \\EOT\EOT\t\STX\NUL\DC2\EOT\236\SOH\EOT\CAN\SUBH Endpoint name.\n\
+    \\EOT\EOT\r\STX\NUL\DC2\EOT\191\ETX\EOT\CAN\SUBH Endpoint name.\n\
     \ Resolved to a URL via the cluster's endpoint registry.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\NUL\ENQ\DC2\EOT\236\SOH\EOT\n\
+    \\ENQ\EOT\r\STX\NUL\ENQ\DC2\EOT\191\ETX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\NUL\SOH\DC2\EOT\236\SOH\v\DC3\n\
+    \\ENQ\EOT\r\STX\NUL\SOH\DC2\EOT\191\ETX\v\DC3\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\NUL\ETX\DC2\EOT\236\SOH\SYN\ETB\n\
+    \\ENQ\EOT\r\STX\NUL\ETX\DC2\EOT\191\ETX\SYN\ETB\n\
     \\GS\n\
-    \\EOT\EOT\t\STX\SOH\DC2\EOT\238\SOH\EOT\ETB\SUB\SI Service name.\n\
+    \\EOT\EOT\r\STX\SOH\DC2\EOT\193\ETX\EOT\ETB\SUB\SI Service name.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\SOH\ENQ\DC2\EOT\238\SOH\EOT\n\
+    \\ENQ\EOT\r\STX\SOH\ENQ\DC2\EOT\193\ETX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\SOH\SOH\DC2\EOT\238\SOH\v\DC2\n\
+    \\ENQ\EOT\r\STX\SOH\SOH\DC2\EOT\193\ETX\v\DC2\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\SOH\ETX\DC2\EOT\238\SOH\NAK\SYN\n\
+    \\ENQ\EOT\r\STX\SOH\ETX\DC2\EOT\193\ETX\NAK\SYN\n\
     \\US\n\
-    \\EOT\EOT\t\STX\STX\DC2\EOT\240\SOH\EOT\EM\SUB\DC1 Operation name.\n\
+    \\EOT\EOT\r\STX\STX\DC2\EOT\195\ETX\EOT\EM\SUB\DC1 Operation name.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\STX\ENQ\DC2\EOT\240\SOH\EOT\n\
+    \\ENQ\EOT\r\STX\STX\ENQ\DC2\EOT\195\ETX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\STX\SOH\DC2\EOT\240\SOH\v\DC4\n\
+    \\ENQ\EOT\r\STX\STX\SOH\DC2\EOT\195\ETX\v\DC4\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\STX\ETX\DC2\EOT\240\SOH\ETB\CAN\n\
-    \j\n\
-    \\EOT\EOT\t\STX\ETX\DC2\EOT\243\SOH\EOT\FS\SUB\\ Operation ID. Only set for asynchronous operations after a successful StartOperation call.\n\
+    \\ENQ\EOT\r\STX\STX\ETX\DC2\EOT\195\ETX\ETB\CAN\n\
+    \\149\SOH\n\
+    \\EOT\EOT\r\STX\ETX\DC2\EOT\200\ETX\EOT\FS\SUB\134\SOH Operation ID. Only set for asynchronous operations after a successful StartOperation call.\n\
+    \\n\
+    \ Deprecated: Renamed to operation_token.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\ETX\ENQ\DC2\EOT\243\SOH\EOT\n\
+    \\ENQ\EOT\r\STX\ETX\ENQ\DC2\EOT\200\ETX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\ETX\SOH\DC2\EOT\243\SOH\v\ETB\n\
+    \\ENQ\EOT\r\STX\ETX\SOH\DC2\EOT\200\ETX\v\ETB\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\ETX\ETX\DC2\EOT\243\SOH\SUB\ESC\n\
+    \\ENQ\EOT\r\STX\ETX\ETX\DC2\EOT\200\ETX\SUB\ESC\n\
     \\230\SOH\n\
-    \\EOT\EOT\t\STX\EOT\DC2\EOT\249\SOH\EOT;\SUB\215\SOH Schedule-to-close timeout for this operation.\n\
+    \\EOT\EOT\r\STX\EOT\DC2\EOT\206\ETX\EOT;\SUB\215\SOH Schedule-to-close timeout for this operation.\n\
     \ This is the only timeout settable by a workflow.\n\
     \ (-- api-linter: core::0140::prepositions=disabled\n\
     \     aip.dev/not-precedent: \"to\" is used to indicate interval. --)\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\EOT\ACK\DC2\EOT\249\SOH\EOT\FS\n\
+    \\ENQ\EOT\r\STX\EOT\ACK\DC2\EOT\206\ETX\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\EOT\SOH\DC2\EOT\249\SOH\GS6\n\
+    \\ENQ\EOT\r\STX\EOT\SOH\DC2\EOT\206\ETX\GS6\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\EOT\ETX\DC2\EOT\249\SOH9:\n\
+    \\ENQ\EOT\r\STX\EOT\ETX\DC2\EOT\206\ETX9:\n\
     \:\n\
-    \\EOT\EOT\t\STX\ENQ\DC2\EOT\252\SOH\EOT1\SUB, The time when the operation was scheduled.\n\
+    \\EOT\EOT\r\STX\ENQ\DC2\EOT\209\ETX\EOT1\SUB, The time when the operation was scheduled.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\ENQ\ACK\DC2\EOT\252\SOH\EOT\GS\n\
+    \\ENQ\EOT\r\STX\ENQ\ACK\DC2\EOT\209\ETX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\ENQ\SOH\DC2\EOT\252\SOH\RS,\n\
+    \\ENQ\EOT\r\STX\ENQ\SOH\DC2\EOT\209\ETX\RS,\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\ENQ\ETX\DC2\EOT\252\SOH/0\n\
+    \\ENQ\EOT\r\STX\ENQ\ETX\DC2\EOT\209\ETX/0\n\
     \\f\n\
-    \\EOT\EOT\t\STX\ACK\DC2\EOT\254\SOH\EOT?\n\
+    \\EOT\EOT\r\STX\ACK\DC2\EOT\211\ETX\EOT?\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\ACK\ACK\DC2\EOT\254\SOH\EOT4\n\
+    \\ENQ\EOT\r\STX\ACK\ACK\DC2\EOT\211\ETX\EOT4\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\ACK\SOH\DC2\EOT\254\SOH5:\n\
+    \\ENQ\EOT\r\STX\ACK\SOH\DC2\EOT\211\ETX5:\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\ACK\ETX\DC2\EOT\254\SOH=>\n\
+    \\ENQ\EOT\r\STX\ACK\ETX\DC2\EOT\211\ETX=>\n\
     \\186\SOH\n\
-    \\EOT\EOT\t\STX\a\DC2\EOT\130\STX\EOT\SYN\SUB\171\SOH The number of attempts made to deliver the start operation request.\n\
+    \\EOT\EOT\r\STX\a\DC2\EOT\215\ETX\EOT\SYN\SUB\171\SOH The number of attempts made to deliver the start operation request.\n\
     \ This number represents a minimum bound since the attempt is incremented after the request completes.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\a\ENQ\DC2\EOT\130\STX\EOT\t\n\
+    \\ENQ\EOT\r\STX\a\ENQ\DC2\EOT\215\ETX\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\a\SOH\DC2\EOT\130\STX\n\
+    \\ENQ\EOT\r\STX\a\SOH\DC2\EOT\215\ETX\n\
     \\DC1\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\a\ETX\DC2\EOT\130\STX\DC4\NAK\n\
+    \\ENQ\EOT\r\STX\a\ETX\DC2\EOT\215\ETX\DC4\NAK\n\
     \9\n\
-    \\EOT\EOT\t\STX\b\DC2\EOT\133\STX\EOT=\SUB+ The time when the last attempt completed.\n\
+    \\EOT\EOT\r\STX\b\DC2\EOT\218\ETX\EOT=\SUB+ The time when the last attempt completed.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\b\ACK\DC2\EOT\133\STX\EOT\GS\n\
+    \\ENQ\EOT\r\STX\b\ACK\DC2\EOT\218\ETX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\b\SOH\DC2\EOT\133\STX\RS8\n\
+    \\ENQ\EOT\r\STX\b\SOH\DC2\EOT\218\ETX\RS8\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\b\ETX\DC2\EOT\133\STX;<\n\
+    \\ENQ\EOT\r\STX\b\ETX\DC2\EOT\218\ETX;<\n\
     \3\n\
-    \\EOT\EOT\t\STX\t\DC2\EOT\135\STX\EOT>\SUB% The last attempt's failure, if any.\n\
+    \\EOT\EOT\r\STX\t\DC2\EOT\220\ETX\EOT>\SUB% The last attempt's failure, if any.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\t\ACK\DC2\EOT\135\STX\EOT#\n\
+    \\ENQ\EOT\r\STX\t\ACK\DC2\EOT\220\ETX\EOT#\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\t\SOH\DC2\EOT\135\STX$8\n\
+    \\ENQ\EOT\r\STX\t\SOH\DC2\EOT\220\ETX$8\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\t\ETX\DC2\EOT\135\STX;=\n\
+    \\ENQ\EOT\r\STX\t\ETX\DC2\EOT\220\ETX;=\n\
     \<\n\
-    \\EOT\EOT\t\STX\n\
-    \\DC2\EOT\137\STX\EOT>\SUB. The time when the next attempt is scheduled.\n\
+    \\EOT\EOT\r\STX\n\
+    \\DC2\EOT\222\ETX\EOT>\SUB. The time when the next attempt is scheduled.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\n\
-    \\ACK\DC2\EOT\137\STX\EOT\GS\n\
+    \\ENQ\EOT\r\STX\n\
+    \\ACK\DC2\EOT\222\ETX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\n\
-    \\SOH\DC2\EOT\137\STX\RS8\n\
+    \\ENQ\EOT\r\STX\n\
+    \\SOH\DC2\EOT\222\ETX\RS8\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\n\
-    \\ETX\DC2\EOT\137\STX;=\n\
+    \\ENQ\EOT\r\STX\n\
+    \\ETX\DC2\EOT\222\ETX;=\n\
     \\f\n\
-    \\EOT\EOT\t\STX\v\DC2\EOT\139\STX\EOT:\n\
+    \\EOT\EOT\r\STX\v\DC2\EOT\224\ETX\EOT:\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\v\ACK\DC2\EOT\139\STX\EOT\"\n\
+    \\ENQ\EOT\r\STX\v\ACK\DC2\EOT\224\ETX\EOT\"\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\v\SOH\DC2\EOT\139\STX#4\n\
+    \\ENQ\EOT\r\STX\v\SOH\DC2\EOT\224\ETX#4\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\v\ETX\DC2\EOT\139\STX79\n\
+    \\ENQ\EOT\r\STX\v\ETX\DC2\EOT\224\ETX79\n\
+    \\171\SOH\n\
+    \\EOT\EOT\r\STX\f\DC2\EOT\228\ETX\EOT\"\SUB\156\SOH The event ID of the NexusOperationScheduled event. Can be used to correlate an operation in the\n\
+    \ DescribeWorkflowExecution response with workflow history.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\f\ENQ\DC2\EOT\228\ETX\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\f\SOH\DC2\EOT\228\ETX\n\
+    \\FS\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\f\ETX\DC2\EOT\228\ETX\US!\n\
+    \X\n\
+    \\EOT\EOT\r\STX\r\DC2\EOT\231\ETX\EOT\US\SUBJ If the state is BLOCKED, blocked reason provides additional information.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\r\ENQ\DC2\EOT\231\ETX\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\r\SOH\DC2\EOT\231\ETX\v\EM\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\r\ETX\DC2\EOT\231\ETX\FS\RS\n\
+    \m\n\
+    \\EOT\EOT\r\STX\SO\DC2\EOT\234\ETX\EOT \SUB_ Operation token. Only set for asynchronous operations after a successful StartOperation call.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\SO\ENQ\DC2\EOT\234\ETX\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\SO\SOH\DC2\EOT\234\ETX\v\SUB\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\SO\ETX\DC2\EOT\234\ETX\GS\US\n\
     \d\n\
-    \\STX\EOT\n\
-    \\DC2\ACK\143\STX\NUL\159\STX\SOH\SUBV NexusOperationCancellationInfo contains the state of a nexus operation cancellation.\n\
+    \\STX\EOT\SO\DC2\ACK\238\ETX\NUL\129\EOT\SOH\SUBV NexusOperationCancellationInfo contains the state of a nexus operation cancellation.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\n\
-    \\SOH\DC2\EOT\143\STX\b&\n\
+    \\ETX\EOT\SO\SOH\DC2\EOT\238\ETX\b&\n\
     \9\n\
-    \\EOT\EOT\n\
-    \\STX\NUL\DC2\EOT\145\STX\EOT1\SUB+ The time when cancellation was requested.\n\
+    \\EOT\EOT\SO\STX\NUL\DC2\EOT\240\ETX\EOT1\SUB+ The time when cancellation was requested.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\NUL\ACK\DC2\EOT\145\STX\EOT\GS\n\
+    \\ENQ\EOT\SO\STX\NUL\ACK\DC2\EOT\240\ETX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\NUL\SOH\DC2\EOT\145\STX\RS,\n\
+    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\EOT\240\ETX\RS,\n\
     \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\NUL\ETX\DC2\EOT\145\STX/0\n\
+    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\EOT\240\ETX/0\n\
     \\f\n\
-    \\EOT\EOT\n\
-    \\STX\SOH\DC2\EOT\147\STX\EOTD\n\
+    \\EOT\EOT\SO\STX\SOH\DC2\EOT\242\ETX\EOTD\n\
     \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\SOH\ACK\DC2\EOT\147\STX\EOT9\n\
+    \\ENQ\EOT\SO\STX\SOH\ACK\DC2\EOT\242\ETX\EOT9\n\
     \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\SOH\SOH\DC2\EOT\147\STX:?\n\
+    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\EOT\242\ETX:?\n\
     \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\SOH\ETX\DC2\EOT\147\STXBC\n\
+    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\EOT\242\ETXBC\n\
     \\187\SOH\n\
-    \\EOT\EOT\n\
-    \\STX\STX\DC2\EOT\151\STX\EOT\SYN\SUB\172\SOH The number of attempts made to deliver the cancel operation request.\n\
+    \\EOT\EOT\SO\STX\STX\DC2\EOT\246\ETX\EOT\SYN\SUB\172\SOH The number of attempts made to deliver the cancel operation request.\n\
     \ This number represents a minimum bound since the attempt is incremented after the request completes.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\STX\ENQ\DC2\EOT\151\STX\EOT\t\n\
+    \\ENQ\EOT\SO\STX\STX\ENQ\DC2\EOT\246\ETX\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\STX\SOH\DC2\EOT\151\STX\n\
+    \\ENQ\EOT\SO\STX\STX\SOH\DC2\EOT\246\ETX\n\
     \\DC1\n\
     \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\STX\ETX\DC2\EOT\151\STX\DC4\NAK\n\
+    \\ENQ\EOT\SO\STX\STX\ETX\DC2\EOT\246\ETX\DC4\NAK\n\
     \9\n\
-    \\EOT\EOT\n\
-    \\STX\ETX\DC2\EOT\154\STX\EOT=\SUB+ The time when the last attempt completed.\n\
+    \\EOT\EOT\SO\STX\ETX\DC2\EOT\249\ETX\EOT=\SUB+ The time when the last attempt completed.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ETX\ACK\DC2\EOT\154\STX\EOT\GS\n\
+    \\ENQ\EOT\SO\STX\ETX\ACK\DC2\EOT\249\ETX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ETX\SOH\DC2\EOT\154\STX\RS8\n\
+    \\ENQ\EOT\SO\STX\ETX\SOH\DC2\EOT\249\ETX\RS8\n\
     \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ETX\ETX\DC2\EOT\154\STX;<\n\
+    \\ENQ\EOT\SO\STX\ETX\ETX\DC2\EOT\249\ETX;<\n\
     \3\n\
-    \\EOT\EOT\n\
-    \\STX\EOT\DC2\EOT\156\STX\EOT=\SUB% The last attempt's failure, if any.\n\
+    \\EOT\EOT\SO\STX\EOT\DC2\EOT\251\ETX\EOT=\SUB% The last attempt's failure, if any.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\EOT\ACK\DC2\EOT\156\STX\EOT#\n\
+    \\ENQ\EOT\SO\STX\EOT\ACK\DC2\EOT\251\ETX\EOT#\n\
     \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\EOT\SOH\DC2\EOT\156\STX$8\n\
+    \\ENQ\EOT\SO\STX\EOT\SOH\DC2\EOT\251\ETX$8\n\
     \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\EOT\ETX\DC2\EOT\156\STX;<\n\
+    \\ENQ\EOT\SO\STX\EOT\ETX\DC2\EOT\251\ETX;<\n\
     \<\n\
-    \\EOT\EOT\n\
-    \\STX\ENQ\DC2\EOT\158\STX\EOT=\SUB. The time when the next attempt is scheduled.\n\
+    \\EOT\EOT\SO\STX\ENQ\DC2\EOT\253\ETX\EOT=\SUB. The time when the next attempt is scheduled.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ENQ\ACK\DC2\EOT\158\STX\EOT\GS\n\
+    \\ENQ\EOT\SO\STX\ENQ\ACK\DC2\EOT\253\ETX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ENQ\SOH\DC2\EOT\158\STX\RS8\n\
+    \\ENQ\EOT\SO\STX\ENQ\SOH\DC2\EOT\253\ETX\RS8\n\
     \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ENQ\ETX\DC2\EOT\158\STX;<b\ACKproto3"
+    \\ENQ\EOT\SO\STX\ENQ\ETX\DC2\EOT\253\ETX;<\n\
+    \X\n\
+    \\EOT\EOT\SO\STX\ACK\DC2\EOT\128\EOT\EOT\RS\SUBJ If the state is BLOCKED, blocked reason provides additional information.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\ACK\ENQ\DC2\EOT\128\EOT\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\ACK\SOH\DC2\EOT\128\EOT\v\EM\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\ACK\ETX\DC2\EOT\128\EOT\FS\GS\n\
+    \\f\n\
+    \\STX\EOT\SI\DC2\ACK\131\EOT\NUL\134\EOT\SOH\n\
+    \\v\n\
+    \\ETX\EOT\SI\SOH\DC2\EOT\131\EOT\b \n\
+    \r\n\
+    \\EOT\EOT\SI\STX\NUL\DC2\EOT\133\EOT\EOT/\SUBd If set, takes precedence over the Versioning Behavior sent by the SDK on Workflow Task completion.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\NUL\ACK\DC2\EOT\133\EOT\EOT\SYN\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\EOT\133\EOT\ETB*\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\EOT\133\EOT-.\n\
+    \\166\ETX\n\
+    \\STX\EOT\DLE\DC2\ACK\141\EOT\NUL\154\EOT\SOH\SUB\151\ETX Used to override the versioning behavior (and pinned deployment version, if applicable) of a\n\
+    \ specific workflow execution. If set, takes precedence over the worker-sent values. See\n\
+    \ `WorkflowExecutionInfo.VersioningInfo` for more information. To remove the override, call\n\
+    \ `UpdateWorkflowExecutionOptions` with a null `VersioningOverride`, and use the `update_mask`\n\
+    \ to indicate that it should be mutated.\n\
+    \\n\
+    \\v\n\
+    \\ETX\EOT\DLE\SOH\DC2\EOT\141\EOT\b\SUB\n\
+    \\EM\n\
+    \\EOT\EOT\DLE\STX\NUL\DC2\EOT\143\EOT\EOT:\SUB\v Required.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\NUL\ACK\DC2\EOT\143\EOT\EOT,\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\NUL\SOH\DC2\EOT\143\EOT-5\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\NUL\ETX\DC2\EOT\143\EOT89\n\
+    \\187\SOH\n\
+    \\EOT\EOT\DLE\STX\SOH\DC2\EOT\148\EOT\EOTM\SUB\172\SOH Required if behavior is `PINNED`. Must be null if behavior is `AUTO_UPGRADE`.\n\
+    \ Identifies the worker deployment to pin the workflow to.\n\
+    \ Deprecated. Use `pinned_version`.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\SOH\ACK\DC2\EOT\148\EOT\EOT)\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\SOH\SOH\DC2\EOT\148\EOT*4\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\SOH\ETX\DC2\EOT\148\EOT78\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\SOH\b\DC2\EOT\148\EOT9L\n\
+    \\SO\n\
+    \\ACK\EOT\DLE\STX\SOH\b\ETX\DC2\EOT\148\EOT:K\n\
+    \\207\SOH\n\
+    \\EOT\EOT\DLE\STX\STX\DC2\EOT\153\EOT\EOT\RS\SUB\192\SOH Required if behavior is `PINNED`. Must be absent if behavior is not `PINNED`.\n\
+    \ Identifies the worker deployment version to pin the workflow to, in the format\n\
+    \ \"<deployment_name>.<build_id>\".\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\STX\ENQ\DC2\EOT\153\EOT\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\STX\SOH\DC2\EOT\153\EOT\v\EM\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\STX\ETX\DC2\EOT\153\EOT\FS\GS\n\
+    \\137\ETX\n\
+    \\STX\EOT\DC1\DC2\ACK\160\EOT\NUL\167\EOT\SOH\SUB\250\STX When StartWorkflowExecution uses the conflict policy WORKFLOW_ID_CONFLICT_POLICY_USE_EXISTING and\n\
+    \ there is already an existing running workflow, OnConflictOptions defines actions to be taken on\n\
+    \ the existing running workflow. In this case, it will create a WorkflowExecutionOptionsUpdatedEvent\n\
+    \ history event in the running workflow with the changes requested in this object.\n\
+    \\n\
+    \\v\n\
+    \\ETX\EOT\DC1\SOH\DC2\EOT\160\EOT\b\EM\n\
+    \@\n\
+    \\EOT\EOT\DC1\STX\NUL\DC2\EOT\162\EOT\EOT\US\SUB2 Attaches the request ID to the running workflow.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\NUL\ENQ\DC2\EOT\162\EOT\EOT\b\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\NUL\SOH\DC2\EOT\162\EOT\t\SUB\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\NUL\ETX\DC2\EOT\162\EOT\GS\RS\n\
+    \J\n\
+    \\EOT\EOT\DC1\STX\SOH\DC2\EOT\164\EOT\EOT)\SUB< Attaches the completion callbacks to the running workflow.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\SOH\ENQ\DC2\EOT\164\EOT\EOT\b\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\SOH\SOH\DC2\EOT\164\EOT\t$\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\SOH\ETX\DC2\EOT\164\EOT'(\n\
+    \]\n\
+    \\EOT\EOT\DC1\STX\STX\DC2\EOT\166\EOT\EOT\SUB\SUBO Attaches the links to the WorkflowExecutionOptionsUpdatedEvent history event.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\STX\ENQ\DC2\EOT\166\EOT\EOT\b\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\STX\SOH\DC2\EOT\166\EOT\t\NAK\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\STX\ETX\DC2\EOT\166\EOT\CAN\EMb\ACKproto3"

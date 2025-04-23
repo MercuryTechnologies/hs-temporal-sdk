@@ -39,16 +39,26 @@ instance Data.ProtoLens.Service.Types.Service WorkflowService where
   type ServicePackage WorkflowService = "temporal.api.workflowservice.v1"
   type ServiceMethods WorkflowService = '["countWorkflowExecutions",
                                           "createSchedule",
+                                          "createWorkflowRule",
                                           "deleteSchedule",
+                                          "deleteWorkerDeployment",
+                                          "deleteWorkerDeploymentVersion",
                                           "deleteWorkflowExecution",
+                                          "deleteWorkflowRule",
                                           "deprecateNamespace",
                                           "describeBatchOperation",
+                                          "describeDeployment",
                                           "describeNamespace",
                                           "describeSchedule",
                                           "describeTaskQueue",
+                                          "describeWorkerDeployment",
+                                          "describeWorkerDeploymentVersion",
                                           "describeWorkflowExecution",
+                                          "describeWorkflowRule",
                                           "executeMultiOperation",
                                           "getClusterInfo",
+                                          "getCurrentDeployment",
+                                          "getDeploymentReachability",
                                           "getSearchAttributes",
                                           "getSystemInfo",
                                           "getWorkerBuildIdCompatibility",
@@ -59,13 +69,17 @@ instance Data.ProtoLens.Service.Types.Service WorkflowService where
                                           "listArchivedWorkflowExecutions",
                                           "listBatchOperations",
                                           "listClosedWorkflowExecutions",
+                                          "listDeployments",
                                           "listNamespaces",
                                           "listOpenWorkflowExecutions",
                                           "listScheduleMatchingTimes",
                                           "listSchedules",
                                           "listTaskQueuePartitions",
+                                          "listWorkerDeployments",
                                           "listWorkflowExecutions",
+                                          "listWorkflowRules",
                                           "patchSchedule",
+                                          "pauseActivity",
                                           "pollActivityTaskQueue",
                                           "pollNexusTaskQueue",
                                           "pollWorkflowExecutionUpdate",
@@ -75,6 +89,7 @@ instance Data.ProtoLens.Service.Types.Service WorkflowService where
                                           "recordActivityTaskHeartbeatById",
                                           "registerNamespace",
                                           "requestCancelWorkflowExecution",
+                                          "resetActivity",
                                           "resetStickyTaskQueue",
                                           "resetWorkflowExecution",
                                           "respondActivityTaskCanceled",
@@ -89,83 +104,116 @@ instance Data.ProtoLens.Service.Types.Service WorkflowService where
                                           "respondWorkflowTaskCompleted",
                                           "respondWorkflowTaskFailed",
                                           "scanWorkflowExecutions",
+                                          "setCurrentDeployment",
+                                          "setWorkerDeploymentCurrentVersion",
+                                          "setWorkerDeploymentRampingVersion",
+                                          "shutdownWorker",
                                           "signalWithStartWorkflowExecution",
                                           "signalWorkflowExecution",
                                           "startBatchOperation",
                                           "startWorkflowExecution",
                                           "stopBatchOperation",
                                           "terminateWorkflowExecution",
+                                          "triggerWorkflowRule",
+                                          "unpauseActivity",
+                                          "updateActivityOptions",
                                           "updateNamespace",
                                           "updateSchedule",
                                           "updateWorkerBuildIdCompatibility",
+                                          "updateWorkerDeploymentVersionMetadata",
                                           "updateWorkerVersioningRules",
-                                          "updateWorkflowExecution"]
+                                          "updateWorkflowExecution",
+                                          "updateWorkflowExecutionOptions"]
   packedServiceDescriptor _
     = "\n\
-      \\SIWorkflowService\DC2\169\SOH\n\
-      \\DC1RegisterNamespace\DC29.temporal.api.workflowservice.v1.RegisterNamespaceRequest\SUB:.temporal.api.workflowservice.v1.RegisterNamespaceResponse\"\GS\130\211\228\147\STX\ETB\"\DC2/api/v1/namespaces:\SOH*\DC2\178\SOH\n\
-      \\DC1DescribeNamespace\DC29.temporal.api.workflowservice.v1.DescribeNamespaceRequest\SUB:.temporal.api.workflowservice.v1.DescribeNamespaceResponse\"&\130\211\228\147\STX \DC2\RS/api/v1/namespaces/{namespace}\DC2\157\SOH\n\
-      \\SOListNamespaces\DC26.temporal.api.workflowservice.v1.ListNamespacesRequest\SUB7.temporal.api.workflowservice.v1.ListNamespacesResponse\"\SUB\130\211\228\147\STX\DC4\DC2\DC2/api/v1/namespaces\DC2\182\SOH\n\
-      \\SIUpdateNamespace\DC27.temporal.api.workflowservice.v1.UpdateNamespaceRequest\SUB8.temporal.api.workflowservice.v1.UpdateNamespaceResponse\"0\130\211\228\147\STX*\"%/api/v1/namespaces/{namespace}/update:\SOH*\DC2\143\SOH\n\
-      \\DC2DeprecateNamespace\DC2:.temporal.api.workflowservice.v1.DeprecateNamespaceRequest\SUB;.temporal.api.workflowservice.v1.DeprecateNamespaceResponse\"\NUL\DC2\220\SOH\n\
-      \\SYNStartWorkflowExecution\DC2>.temporal.api.workflowservice.v1.StartWorkflowExecutionRequest\SUB?.temporal.api.workflowservice.v1.StartWorkflowExecutionResponse\"A\130\211\228\147\STX;\"6/api/v1/namespaces/{namespace}/workflows/{workflow_id}:\SOH*\DC2\227\SOH\n\
-      \\NAKExecuteMultiOperation\DC2=.temporal.api.workflowservice.v1.ExecuteMultiOperationRequest\SUB>.temporal.api.workflowservice.v1.ExecuteMultiOperationResponse\"K\130\211\228\147\STXE\"@/api/v1/namespaces/{namespace}/workflows/execute-multi-operation:\SOH*\DC2\250\SOH\n\
-      \\ESCGetWorkflowExecutionHistory\DC2C.temporal.api.workflowservice.v1.GetWorkflowExecutionHistoryRequest\SUBD.temporal.api.workflowservice.v1.GetWorkflowExecutionHistoryResponse\"P\130\211\228\147\STXJ\DC2H/api/v1/namespaces/{namespace}/workflows/{execution.workflow_id}/history\DC2\151\STX\n\
-      \\"GetWorkflowExecutionHistoryReverse\DC2J.temporal.api.workflowservice.v1.GetWorkflowExecutionHistoryReverseRequest\SUBK.temporal.api.workflowservice.v1.GetWorkflowExecutionHistoryReverseResponse\"X\130\211\228\147\STXR\DC2P/api/v1/namespaces/{namespace}/workflows/{execution.workflow_id}/history-reverse\DC2\152\SOH\n\
+      \\SIWorkflowService\DC2\195\SOH\n\
+      \\DC1RegisterNamespace\DC29.temporal.api.workflowservice.v1.RegisterNamespaceRequest\SUB:.temporal.api.workflowservice.v1.RegisterNamespaceResponse\"7\130\211\228\147\STX1\"\DC3/cluster/namespaces:\SOH*Z\ETB\"\DC2/api/v1/namespaces:\SOH*\DC2\213\SOH\n\
+      \\DC1DescribeNamespace\DC29.temporal.api.workflowservice.v1.DescribeNamespaceRequest\SUB:.temporal.api.workflowservice.v1.DescribeNamespaceResponse\"I\130\211\228\147\STXC\DC2\US/cluster/namespaces/{namespace}Z \DC2\RS/api/v1/namespaces/{namespace}\DC2\180\SOH\n\
+      \\SOListNamespaces\DC26.temporal.api.workflowservice.v1.ListNamespacesRequest\SUB7.temporal.api.workflowservice.v1.ListNamespacesResponse\"1\130\211\228\147\STX+\DC2\DC3/cluster/namespacesZ\DC4\DC2\DC2/api/v1/namespaces\DC2\227\SOH\n\
+      \\SIUpdateNamespace\DC27.temporal.api.workflowservice.v1.UpdateNamespaceRequest\SUB8.temporal.api.workflowservice.v1.UpdateNamespaceResponse\"]\130\211\228\147\STXW\"&/cluster/namespaces/{namespace}/update:\SOH*Z*\"%/api/v1/namespaces/{namespace}/update:\SOH*\DC2\143\SOH\n\
+      \\DC2DeprecateNamespace\DC2:.temporal.api.workflowservice.v1.DeprecateNamespaceRequest\SUB;.temporal.api.workflowservice.v1.DeprecateNamespaceResponse\"\NUL\DC2\146\STX\n\
+      \\SYNStartWorkflowExecution\DC2>.temporal.api.workflowservice.v1.StartWorkflowExecutionRequest\SUB?.temporal.api.workflowservice.v1.StartWorkflowExecutionResponse\"w\130\211\228\147\STXq\"//namespaces/{namespace}/workflows/{workflow_id}:\SOH*Z;\"6/api/v1/namespaces/{namespace}/workflows/{workflow_id}:\SOH*\DC2\165\STX\n\
+      \\NAKExecuteMultiOperation\DC2=.temporal.api.workflowservice.v1.ExecuteMultiOperationRequest\SUB>.temporal.api.workflowservice.v1.ExecuteMultiOperationResponse\"\140\SOH\130\211\228\147\STX\133\SOH\"9/namespaces/{namespace}/workflows/execute-multi-operation:\SOH*ZE\"@/api/v1/namespaces/{namespace}/workflows/execute-multi-operation:\SOH*\DC2\193\STX\n\
+      \\ESCGetWorkflowExecutionHistory\DC2C.temporal.api.workflowservice.v1.GetWorkflowExecutionHistoryRequest\SUBD.temporal.api.workflowservice.v1.GetWorkflowExecutionHistoryResponse\"\150\SOH\130\211\228\147\STX\143\SOH\DC2A/namespaces/{namespace}/workflows/{execution.workflow_id}/historyZJ\DC2H/api/v1/namespaces/{namespace}/workflows/{execution.workflow_id}/history\DC2\230\STX\n\
+      \\"GetWorkflowExecutionHistoryReverse\DC2J.temporal.api.workflowservice.v1.GetWorkflowExecutionHistoryReverseRequest\SUBK.temporal.api.workflowservice.v1.GetWorkflowExecutionHistoryReverseResponse\"\166\SOH\130\211\228\147\STX\159\SOH\DC2I/namespaces/{namespace}/workflows/{execution.workflow_id}/history-reverseZR\DC2P/api/v1/namespaces/{namespace}/workflows/{execution.workflow_id}/history-reverse\DC2\152\SOH\n\
       \\NAKPollWorkflowTaskQueue\DC2=.temporal.api.workflowservice.v1.PollWorkflowTaskQueueRequest\SUB>.temporal.api.workflowservice.v1.PollWorkflowTaskQueueResponse\"\NUL\DC2\173\SOH\n\
       \\FSRespondWorkflowTaskCompleted\DC2D.temporal.api.workflowservice.v1.RespondWorkflowTaskCompletedRequest\SUBE.temporal.api.workflowservice.v1.RespondWorkflowTaskCompletedResponse\"\NUL\DC2\164\SOH\n\
       \\EMRespondWorkflowTaskFailed\DC2A.temporal.api.workflowservice.v1.RespondWorkflowTaskFailedRequest\SUBB.temporal.api.workflowservice.v1.RespondWorkflowTaskFailedResponse\"\NUL\DC2\152\SOH\n\
-      \\NAKPollActivityTaskQueue\DC2=.temporal.api.workflowservice.v1.PollActivityTaskQueueRequest\SUB>.temporal.api.workflowservice.v1.PollActivityTaskQueueResponse\"\NUL\DC2\232\SOH\n\
-      \\ESCRecordActivityTaskHeartbeat\DC2C.temporal.api.workflowservice.v1.RecordActivityTaskHeartbeatRequest\SUBD.temporal.api.workflowservice.v1.RecordActivityTaskHeartbeatResponse\">\130\211\228\147\STX8\"3/api/v1/namespaces/{namespace}/activities/heartbeat:\SOH*\DC2\250\SOH\n\
-      \\USRecordActivityTaskHeartbeatById\DC2G.temporal.api.workflowservice.v1.RecordActivityTaskHeartbeatByIdRequest\SUBH.temporal.api.workflowservice.v1.RecordActivityTaskHeartbeatByIdResponse\"D\130\211\228\147\STX>\"9/api/v1/namespaces/{namespace}/activities/heartbeat-by-id:\SOH*\DC2\234\SOH\n\
-      \\FSRespondActivityTaskCompleted\DC2D.temporal.api.workflowservice.v1.RespondActivityTaskCompletedRequest\SUBE.temporal.api.workflowservice.v1.RespondActivityTaskCompletedResponse\"=\130\211\228\147\STX7\"2/api/v1/namespaces/{namespace}/activities/complete:\SOH*\DC2\252\SOH\n\
-      \ RespondActivityTaskCompletedById\DC2H.temporal.api.workflowservice.v1.RespondActivityTaskCompletedByIdRequest\SUBI.temporal.api.workflowservice.v1.RespondActivityTaskCompletedByIdResponse\"C\130\211\228\147\STX=\"8/api/v1/namespaces/{namespace}/activities/complete-by-id:\SOH*\DC2\221\SOH\n\
-      \\EMRespondActivityTaskFailed\DC2A.temporal.api.workflowservice.v1.RespondActivityTaskFailedRequest\SUBB.temporal.api.workflowservice.v1.RespondActivityTaskFailedResponse\"9\130\211\228\147\STX3\"./api/v1/namespaces/{namespace}/activities/fail:\SOH*\DC2\239\SOH\n\
-      \\GSRespondActivityTaskFailedById\DC2E.temporal.api.workflowservice.v1.RespondActivityTaskFailedByIdRequest\SUBF.temporal.api.workflowservice.v1.RespondActivityTaskFailedByIdResponse\"?\130\211\228\147\STX9\"4/api/v1/namespaces/{namespace}/activities/fail-by-id:\SOH*\DC2\229\SOH\n\
-      \\ESCRespondActivityTaskCanceled\DC2C.temporal.api.workflowservice.v1.RespondActivityTaskCanceledRequest\SUBD.temporal.api.workflowservice.v1.RespondActivityTaskCanceledResponse\";\130\211\228\147\STX5\"0/api/v1/namespaces/{namespace}/activities/cancel:\SOH*\DC2\247\SOH\n\
-      \\USRespondActivityTaskCanceledById\DC2G.temporal.api.workflowservice.v1.RespondActivityTaskCanceledByIdRequest\SUBH.temporal.api.workflowservice.v1.RespondActivityTaskCanceledByIdResponse\"A\130\211\228\147\STX;\"6/api/v1/namespaces/{namespace}/activities/cancel-by-id:\SOH*\DC2\142\STX\n\
-      \\RSRequestCancelWorkflowExecution\DC2F.temporal.api.workflowservice.v1.RequestCancelWorkflowExecutionRequest\SUBG.temporal.api.workflowservice.v1.RequestCancelWorkflowExecutionResponse\"[\130\211\228\147\STXU\"P/api/v1/namespaces/{namespace}/workflows/{workflow_execution.workflow_id}/cancel:\SOH*\DC2\135\STX\n\
-      \\ETBSignalWorkflowExecution\DC2?.temporal.api.workflowservice.v1.SignalWorkflowExecutionRequest\SUB@.temporal.api.workflowservice.v1.SignalWorkflowExecutionResponse\"i\130\211\228\147\STXc\"^/api/v1/namespaces/{namespace}/workflows/{workflow_execution.workflow_id}/signal/{signal_name}:\SOH*\DC2\154\STX\n\
-      \ SignalWithStartWorkflowExecution\DC2H.temporal.api.workflowservice.v1.SignalWithStartWorkflowExecutionRequest\SUBI.temporal.api.workflowservice.v1.SignalWithStartWorkflowExecutionResponse\"a\130\211\228\147\STX[\"V/api/v1/namespaces/{namespace}/workflows/{workflow_id}/signal-with-start/{signal_name}:\SOH*\DC2\245\SOH\n\
-      \\SYNResetWorkflowExecution\DC2>.temporal.api.workflowservice.v1.ResetWorkflowExecutionRequest\SUB?.temporal.api.workflowservice.v1.ResetWorkflowExecutionResponse\"Z\130\211\228\147\STXT\"O/api/v1/namespaces/{namespace}/workflows/{workflow_execution.workflow_id}/reset:\SOH*\DC2\133\STX\n\
-      \\SUBTerminateWorkflowExecution\DC2B.temporal.api.workflowservice.v1.TerminateWorkflowExecutionRequest\SUBC.temporal.api.workflowservice.v1.TerminateWorkflowExecutionResponse\"^\130\211\228\147\STXX\"S/api/v1/namespaces/{namespace}/workflows/{workflow_execution.workflow_id}/terminate:\SOH*\DC2\158\SOH\n\
+      \\NAKPollActivityTaskQueue\DC2=.temporal.api.workflowservice.v1.PollActivityTaskQueueRequest\SUB>.temporal.api.workflowservice.v1.PollActivityTaskQueueResponse\"\NUL\DC2\155\STX\n\
+      \\ESCRecordActivityTaskHeartbeat\DC2C.temporal.api.workflowservice.v1.RecordActivityTaskHeartbeatRequest\SUBD.temporal.api.workflowservice.v1.RecordActivityTaskHeartbeatResponse\"q\130\211\228\147\STXk\",/namespaces/{namespace}/activities/heartbeat:\SOH*Z8\"3/api/v1/namespaces/{namespace}/activities/heartbeat:\SOH*\DC2\179\STX\n\
+      \\USRecordActivityTaskHeartbeatById\DC2G.temporal.api.workflowservice.v1.RecordActivityTaskHeartbeatByIdRequest\SUBH.temporal.api.workflowservice.v1.RecordActivityTaskHeartbeatByIdResponse\"}\130\211\228\147\STXw\"2/namespaces/{namespace}/activities/heartbeat-by-id:\SOH*Z>\"9/api/v1/namespaces/{namespace}/activities/heartbeat-by-id:\SOH*\DC2\156\STX\n\
+      \\FSRespondActivityTaskCompleted\DC2D.temporal.api.workflowservice.v1.RespondActivityTaskCompletedRequest\SUBE.temporal.api.workflowservice.v1.RespondActivityTaskCompletedResponse\"o\130\211\228\147\STXi\"+/namespaces/{namespace}/activities/complete:\SOH*Z7\"2/api/v1/namespaces/{namespace}/activities/complete:\SOH*\DC2\180\STX\n\
+      \ RespondActivityTaskCompletedById\DC2H.temporal.api.workflowservice.v1.RespondActivityTaskCompletedByIdRequest\SUBI.temporal.api.workflowservice.v1.RespondActivityTaskCompletedByIdResponse\"{\130\211\228\147\STXu\"1/namespaces/{namespace}/activities/complete-by-id:\SOH*Z=\"8/api/v1/namespaces/{namespace}/activities/complete-by-id:\SOH*\DC2\139\STX\n\
+      \\EMRespondActivityTaskFailed\DC2A.temporal.api.workflowservice.v1.RespondActivityTaskFailedRequest\SUBB.temporal.api.workflowservice.v1.RespondActivityTaskFailedResponse\"g\130\211\228\147\STXa\"'/namespaces/{namespace}/activities/fail:\SOH*Z3\"./api/v1/namespaces/{namespace}/activities/fail:\SOH*\DC2\163\STX\n\
+      \\GSRespondActivityTaskFailedById\DC2E.temporal.api.workflowservice.v1.RespondActivityTaskFailedByIdRequest\SUBF.temporal.api.workflowservice.v1.RespondActivityTaskFailedByIdResponse\"s\130\211\228\147\STXm\"-/namespaces/{namespace}/activities/fail-by-id:\SOH*Z9\"4/api/v1/namespaces/{namespace}/activities/fail-by-id:\SOH*\DC2\149\STX\n\
+      \\ESCRespondActivityTaskCanceled\DC2C.temporal.api.workflowservice.v1.RespondActivityTaskCanceledRequest\SUBD.temporal.api.workflowservice.v1.RespondActivityTaskCanceledResponse\"k\130\211\228\147\STXe\")/namespaces/{namespace}/activities/cancel:\SOH*Z5\"0/api/v1/namespaces/{namespace}/activities/cancel:\SOH*\DC2\173\STX\n\
+      \\USRespondActivityTaskCanceledById\DC2G.temporal.api.workflowservice.v1.RespondActivityTaskCanceledByIdRequest\SUBH.temporal.api.workflowservice.v1.RespondActivityTaskCanceledByIdResponse\"w\130\211\228\147\STXq\"//namespaces/{namespace}/activities/cancel-by-id:\SOH*Z;\"6/api/v1/namespaces/{namespace}/activities/cancel-by-id:\SOH*\DC2\224\STX\n\
+      \\RSRequestCancelWorkflowExecution\DC2F.temporal.api.workflowservice.v1.RequestCancelWorkflowExecutionRequest\SUBG.temporal.api.workflowservice.v1.RequestCancelWorkflowExecutionResponse\"\172\SOH\130\211\228\147\STX\165\SOH\"I/namespaces/{namespace}/workflows/{workflow_execution.workflow_id}/cancel:\SOH*ZU\"P/api/v1/namespaces/{namespace}/workflows/{workflow_execution.workflow_id}/cancel:\SOH*\DC2\231\STX\n\
+      \\ETBSignalWorkflowExecution\DC2?.temporal.api.workflowservice.v1.SignalWorkflowExecutionRequest\SUB@.temporal.api.workflowservice.v1.SignalWorkflowExecutionResponse\"\200\SOH\130\211\228\147\STX\193\SOH\"W/namespaces/{namespace}/workflows/{workflow_execution.workflow_id}/signal/{signal_name}:\SOH*Zc\"^/api/v1/namespaces/{namespace}/workflows/{workflow_execution.workflow_id}/signal/{signal_name}:\SOH*\DC2\242\STX\n\
+      \ SignalWithStartWorkflowExecution\DC2H.temporal.api.workflowservice.v1.SignalWithStartWorkflowExecutionRequest\SUBI.temporal.api.workflowservice.v1.SignalWithStartWorkflowExecutionResponse\"\184\SOH\130\211\228\147\STX\177\SOH\"O/namespaces/{namespace}/workflows/{workflow_id}/signal-with-start/{signal_name}:\SOH*Z[\"V/api/v1/namespaces/{namespace}/workflows/{workflow_id}/signal-with-start/{signal_name}:\SOH*\DC2\198\STX\n\
+      \\SYNResetWorkflowExecution\DC2>.temporal.api.workflowservice.v1.ResetWorkflowExecutionRequest\SUB?.temporal.api.workflowservice.v1.ResetWorkflowExecutionResponse\"\170\SOH\130\211\228\147\STX\163\SOH\"H/namespaces/{namespace}/workflows/{workflow_execution.workflow_id}/reset:\SOH*ZT\"O/api/v1/namespaces/{namespace}/workflows/{workflow_execution.workflow_id}/reset:\SOH*\DC2\218\STX\n\
+      \\SUBTerminateWorkflowExecution\DC2B.temporal.api.workflowservice.v1.TerminateWorkflowExecutionRequest\SUBC.temporal.api.workflowservice.v1.TerminateWorkflowExecutionResponse\"\178\SOH\130\211\228\147\STX\171\SOH\"L/namespaces/{namespace}/workflows/{workflow_execution.workflow_id}/terminate:\SOH*ZX\"S/api/v1/namespaces/{namespace}/workflows/{workflow_execution.workflow_id}/terminate:\SOH*\DC2\158\SOH\n\
       \\ETBDeleteWorkflowExecution\DC2?.temporal.api.workflowservice.v1.DeleteWorkflowExecutionRequest\SUB@.temporal.api.workflowservice.v1.DeleteWorkflowExecutionResponse\"\NUL\DC2\167\SOH\n\
       \\SUBListOpenWorkflowExecutions\DC2B.temporal.api.workflowservice.v1.ListOpenWorkflowExecutionsRequest\SUBC.temporal.api.workflowservice.v1.ListOpenWorkflowExecutionsResponse\"\NUL\DC2\173\SOH\n\
-      \\FSListClosedWorkflowExecutions\DC2D.temporal.api.workflowservice.v1.ListClosedWorkflowExecutionsRequest\SUBE.temporal.api.workflowservice.v1.ListClosedWorkflowExecutionsResponse\"\NUL\DC2\203\SOH\n\
-      \\SYNListWorkflowExecutions\DC2>.temporal.api.workflowservice.v1.ListWorkflowExecutionsRequest\SUB?.temporal.api.workflowservice.v1.ListWorkflowExecutionsResponse\"0\130\211\228\147\STX*\DC2(/api/v1/namespaces/{namespace}/workflows\DC2\236\SOH\n\
-      \\RSListArchivedWorkflowExecutions\DC2F.temporal.api.workflowservice.v1.ListArchivedWorkflowExecutionsRequest\SUBG.temporal.api.workflowservice.v1.ListArchivedWorkflowExecutionsResponse\"9\130\211\228\147\STX3\DC21/api/v1/namespaces/{namespace}/archived-workflows\DC2\155\SOH\n\
-      \\SYNScanWorkflowExecutions\DC2>.temporal.api.workflowservice.v1.ScanWorkflowExecutionsRequest\SUB?.temporal.api.workflowservice.v1.ScanWorkflowExecutionsResponse\"\NUL\DC2\211\SOH\n\
-      \\ETBCountWorkflowExecutions\DC2?.temporal.api.workflowservice.v1.CountWorkflowExecutionsRequest\SUB@.temporal.api.workflowservice.v1.CountWorkflowExecutionsResponse\"5\130\211\228\147\STX/\DC2-/api/v1/namespaces/{namespace}/workflow-count\DC2\146\SOH\n\
+      \\FSListClosedWorkflowExecutions\DC2D.temporal.api.workflowservice.v1.ListClosedWorkflowExecutionsRequest\SUBE.temporal.api.workflowservice.v1.ListClosedWorkflowExecutionsResponse\"\NUL\DC2\240\SOH\n\
+      \\SYNListWorkflowExecutions\DC2>.temporal.api.workflowservice.v1.ListWorkflowExecutionsRequest\SUB?.temporal.api.workflowservice.v1.ListWorkflowExecutionsResponse\"U\130\211\228\147\STXO\DC2!/namespaces/{namespace}/workflowsZ*\DC2(/api/v1/namespaces/{namespace}/workflows\DC2\154\STX\n\
+      \\RSListArchivedWorkflowExecutions\DC2F.temporal.api.workflowservice.v1.ListArchivedWorkflowExecutionsRequest\SUBG.temporal.api.workflowservice.v1.ListArchivedWorkflowExecutionsResponse\"g\130\211\228\147\STXa\DC2*/namespaces/{namespace}/archived-workflowsZ3\DC21/api/v1/namespaces/{namespace}/archived-workflows\DC2\155\SOH\n\
+      \\SYNScanWorkflowExecutions\DC2>.temporal.api.workflowservice.v1.ScanWorkflowExecutionsRequest\SUB?.temporal.api.workflowservice.v1.ScanWorkflowExecutionsResponse\"\NUL\DC2\253\SOH\n\
+      \\ETBCountWorkflowExecutions\DC2?.temporal.api.workflowservice.v1.CountWorkflowExecutionsRequest\SUB@.temporal.api.workflowservice.v1.CountWorkflowExecutionsResponse\"_\130\211\228\147\STXY\DC2&/namespaces/{namespace}/workflow-countZ/\DC2-/api/v1/namespaces/{namespace}/workflow-count\DC2\146\SOH\n\
       \\DC3GetSearchAttributes\DC2;.temporal.api.workflowservice.v1.GetSearchAttributesRequest\SUB<.temporal.api.workflowservice.v1.GetSearchAttributesResponse\"\NUL\DC2\164\SOH\n\
       \\EMRespondQueryTaskCompleted\DC2A.temporal.api.workflowservice.v1.RespondQueryTaskCompletedRequest\SUBB.temporal.api.workflowservice.v1.RespondQueryTaskCompletedResponse\"\NUL\DC2\149\SOH\n\
-      \\DC4ResetStickyTaskQueue\DC2<.temporal.api.workflowservice.v1.ResetStickyTaskQueueRequest\SUB=.temporal.api.workflowservice.v1.ResetStickyTaskQueueResponse\"\NUL\DC2\228\SOH\n\
-      \\rQueryWorkflow\DC25.temporal.api.workflowservice.v1.QueryWorkflowRequest\SUB6.temporal.api.workflowservice.v1.QueryWorkflowResponse\"d\130\211\228\147\STX^\"Y/api/v1/namespaces/{namespace}/workflows/{execution.workflow_id}/query/{query.query_type}:\SOH*\DC2\236\SOH\n\
-      \\EMDescribeWorkflowExecution\DC2A.temporal.api.workflowservice.v1.DescribeWorkflowExecutionRequest\SUBB.temporal.api.workflowservice.v1.DescribeWorkflowExecutionResponse\"H\130\211\228\147\STXB\DC2@/api/v1/namespaces/{namespace}/workflows/{execution.workflow_id}\DC2\208\SOH\n\
-      \\DC1DescribeTaskQueue\DC29.temporal.api.workflowservice.v1.DescribeTaskQueueRequest\SUB:.temporal.api.workflowservice.v1.DescribeTaskQueueResponse\"D\130\211\228\147\STX>\DC2</api/v1/namespaces/{namespace}/task-queues/{task_queue.name}\DC2\159\SOH\n\
-      \\SOGetClusterInfo\DC26.temporal.api.workflowservice.v1.GetClusterInfoRequest\SUB7.temporal.api.workflowservice.v1.GetClusterInfoResponse\"\FS\130\211\228\147\STX\SYN\DC2\DC4/api/v1/cluster-info\DC2\155\SOH\n\
-      \\rGetSystemInfo\DC25.temporal.api.workflowservice.v1.GetSystemInfoRequest\SUB6.temporal.api.workflowservice.v1.GetSystemInfoResponse\"\ESC\130\211\228\147\STX\NAK\DC2\DC3/api/v1/system-info\DC2\158\SOH\n\
-      \\ETBListTaskQueuePartitions\DC2?.temporal.api.workflowservice.v1.ListTaskQueuePartitionsRequest\SUB@.temporal.api.workflowservice.v1.ListTaskQueuePartitionsResponse\"\NUL\DC2\196\SOH\n\
-      \\SOCreateSchedule\DC26.temporal.api.workflowservice.v1.CreateScheduleRequest\SUB7.temporal.api.workflowservice.v1.CreateScheduleResponse\"A\130\211\228\147\STX;\"6/api/v1/namespaces/{namespace}/schedules/{schedule_id}:\SOH*\DC2\199\SOH\n\
-      \\DLEDescribeSchedule\DC28.temporal.api.workflowservice.v1.DescribeScheduleRequest\SUB9.temporal.api.workflowservice.v1.DescribeScheduleResponse\">\130\211\228\147\STX8\DC26/api/v1/namespaces/{namespace}/schedules/{schedule_id}\DC2\203\SOH\n\
-      \\SOUpdateSchedule\DC26.temporal.api.workflowservice.v1.UpdateScheduleRequest\SUB7.temporal.api.workflowservice.v1.UpdateScheduleResponse\"H\130\211\228\147\STXB\"=/api/v1/namespaces/{namespace}/schedules/{schedule_id}/update:\SOH*\DC2\199\SOH\n\
-      \\rPatchSchedule\DC25.temporal.api.workflowservice.v1.PatchScheduleRequest\SUB6.temporal.api.workflowservice.v1.PatchScheduleResponse\"G\130\211\228\147\STXA\"</api/v1/namespaces/{namespace}/schedules/{schedule_id}/patch:\SOH*\DC2\241\SOH\n\
-      \\EMListScheduleMatchingTimes\DC2A.temporal.api.workflowservice.v1.ListScheduleMatchingTimesRequest\SUBB.temporal.api.workflowservice.v1.ListScheduleMatchingTimesResponse\"M\130\211\228\147\STXG\DC2E/api/v1/namespaces/{namespace}/schedules/{schedule_id}/matching-times\DC2\193\SOH\n\
-      \\SODeleteSchedule\DC26.temporal.api.workflowservice.v1.DeleteScheduleRequest\SUB7.temporal.api.workflowservice.v1.DeleteScheduleResponse\">\130\211\228\147\STX8*6/api/v1/namespaces/{namespace}/schedules/{schedule_id}\DC2\176\SOH\n\
-      \\rListSchedules\DC25.temporal.api.workflowservice.v1.ListSchedulesRequest\SUB6.temporal.api.workflowservice.v1.ListSchedulesResponse\"0\130\211\228\147\STX*\DC2(/api/v1/namespaces/{namespace}/schedules\DC2\185\SOH\n\
-      \ UpdateWorkerBuildIdCompatibility\DC2H.temporal.api.workflowservice.v1.UpdateWorkerBuildIdCompatibilityRequest\SUBI.temporal.api.workflowservice.v1.UpdateWorkerBuildIdCompatibilityResponse\"\NUL\DC2\141\STX\n\
-      \\GSGetWorkerBuildIdCompatibility\DC2E.temporal.api.workflowservice.v1.GetWorkerBuildIdCompatibilityRequest\SUBF.temporal.api.workflowservice.v1.GetWorkerBuildIdCompatibilityResponse\"]\130\211\228\147\STXW\DC2U/api/v1/namespaces/{namespace}/task-queues/{task_queue}/worker-build-id-compatibility\DC2\170\SOH\n\
-      \\ESCUpdateWorkerVersioningRules\DC2C.temporal.api.workflowservice.v1.UpdateWorkerVersioningRulesRequest\SUBD.temporal.api.workflowservice.v1.UpdateWorkerVersioningRulesResponse\"\NUL\DC2\248\SOH\n\
-      \\CANGetWorkerVersioningRules\DC2@.temporal.api.workflowservice.v1.GetWorkerVersioningRulesRequest\SUBA.temporal.api.workflowservice.v1.GetWorkerVersioningRulesResponse\"W\130\211\228\147\STXQ\DC2O/api/v1/namespaces/{namespace}/task-queues/{task_queue}/worker-versioning-rules\DC2\227\SOH\n\
-      \\EMGetWorkerTaskReachability\DC2A.temporal.api.workflowservice.v1.GetWorkerTaskReachabilityRequest\SUBB.temporal.api.workflowservice.v1.GetWorkerTaskReachabilityResponse\"?\130\211\228\147\STX9\DC27/api/v1/namespaces/{namespace}/worker-task-reachability\DC2\142\STX\n\
-      \\ETBUpdateWorkflowExecution\DC2?.temporal.api.workflowservice.v1.UpdateWorkflowExecutionRequest\SUB@.temporal.api.workflowservice.v1.UpdateWorkflowExecutionResponse\"p\130\211\228\147\STXj\"e/api/v1/namespaces/{namespace}/workflows/{workflow_execution.workflow_id}/update/{request.input.name}:\SOH*\DC2\170\SOH\n\
-      \\ESCPollWorkflowExecutionUpdate\DC2C.temporal.api.workflowservice.v1.PollWorkflowExecutionUpdateRequest\SUBD.temporal.api.workflowservice.v1.PollWorkflowExecutionUpdateResponse\"\NUL\DC2\213\SOH\n\
-      \\DC3StartBatchOperation\DC2;.temporal.api.workflowservice.v1.StartBatchOperationRequest\SUB<.temporal.api.workflowservice.v1.StartBatchOperationResponse\"C\130\211\228\147\STX=\"8/api/v1/namespaces/{namespace}/batch-operations/{job_id}:\SOH*\DC2\215\SOH\n\
-      \\DC2StopBatchOperation\DC2:.temporal.api.workflowservice.v1.StopBatchOperationRequest\SUB;.temporal.api.workflowservice.v1.StopBatchOperationResponse\"H\130\211\228\147\STXB\"=/api/v1/namespaces/{namespace}/batch-operations/{job_id}/stop:\SOH*\DC2\219\SOH\n\
-      \\SYNDescribeBatchOperation\DC2>.temporal.api.workflowservice.v1.DescribeBatchOperationRequest\SUB?.temporal.api.workflowservice.v1.DescribeBatchOperationResponse\"@\130\211\228\147\STX:\DC28/api/v1/namespaces/{namespace}/batch-operations/{job_id}\DC2\201\SOH\n\
-      \\DC3ListBatchOperations\DC2;.temporal.api.workflowservice.v1.ListBatchOperationsRequest\SUB<.temporal.api.workflowservice.v1.ListBatchOperationsResponse\"7\130\211\228\147\STX1\DC2//api/v1/namespaces/{namespace}/batch-operations\DC2\143\SOH\n\
+      \\DC4ResetStickyTaskQueue\DC2<.temporal.api.workflowservice.v1.ResetStickyTaskQueueRequest\SUB=.temporal.api.workflowservice.v1.ResetStickyTaskQueueResponse\"\NUL\DC2\131\SOH\n\
+      \\SOShutdownWorker\DC26.temporal.api.workflowservice.v1.ShutdownWorkerRequest\SUB7.temporal.api.workflowservice.v1.ShutdownWorkerResponse\"\NUL\DC2\191\STX\n\
+      \\rQueryWorkflow\DC25.temporal.api.workflowservice.v1.QueryWorkflowRequest\SUB6.temporal.api.workflowservice.v1.QueryWorkflowResponse\"\190\SOH\130\211\228\147\STX\183\SOH\"R/namespaces/{namespace}/workflows/{execution.workflow_id}/query/{query.query_type}:\SOH*Z^\"Y/api/v1/namespaces/{namespace}/workflows/{execution.workflow_id}/query/{query.query_type}:\SOH*\DC2\170\STX\n\
+      \\EMDescribeWorkflowExecution\DC2A.temporal.api.workflowservice.v1.DescribeWorkflowExecutionRequest\SUBB.temporal.api.workflowservice.v1.DescribeWorkflowExecutionResponse\"\133\SOH\130\211\228\147\STX\DEL\DC29/namespaces/{namespace}/workflows/{execution.workflow_id}ZB\DC2@/api/v1/namespaces/{namespace}/workflows/{execution.workflow_id}\DC2\137\STX\n\
+      \\DC1DescribeTaskQueue\DC29.temporal.api.workflowservice.v1.DescribeTaskQueueRequest\SUB:.temporal.api.workflowservice.v1.DescribeTaskQueueResponse\"}\130\211\228\147\STXw\DC25/namespaces/{namespace}/task-queues/{task_queue.name}Z>\DC2</api/v1/namespaces/{namespace}/task-queues/{task_queue.name}\DC2\171\SOH\n\
+      \\SOGetClusterInfo\DC26.temporal.api.workflowservice.v1.GetClusterInfoRequest\SUB7.temporal.api.workflowservice.v1.GetClusterInfoResponse\"(\130\211\228\147\STX\"\DC2\b/clusterZ\SYN\DC2\DC4/api/v1/cluster-info\DC2\171\SOH\n\
+      \\rGetSystemInfo\DC25.temporal.api.workflowservice.v1.GetSystemInfoRequest\SUB6.temporal.api.workflowservice.v1.GetSystemInfoResponse\"+\130\211\228\147\STX%\DC2\f/system-infoZ\NAK\DC2\DC3/api/v1/system-info\DC2\158\SOH\n\
+      \\ETBListTaskQueuePartitions\DC2?.temporal.api.workflowservice.v1.ListTaskQueuePartitionsRequest\SUB@.temporal.api.workflowservice.v1.ListTaskQueuePartitionsResponse\"\NUL\DC2\250\SOH\n\
+      \\SOCreateSchedule\DC26.temporal.api.workflowservice.v1.CreateScheduleRequest\SUB7.temporal.api.workflowservice.v1.CreateScheduleResponse\"w\130\211\228\147\STXq\"//namespaces/{namespace}/schedules/{schedule_id}:\SOH*Z;\"6/api/v1/namespaces/{namespace}/schedules/{schedule_id}:\SOH*\DC2\250\SOH\n\
+      \\DLEDescribeSchedule\DC28.temporal.api.workflowservice.v1.DescribeScheduleRequest\SUB9.temporal.api.workflowservice.v1.DescribeScheduleResponse\"q\130\211\228\147\STXk\DC2//namespaces/{namespace}/schedules/{schedule_id}Z8\DC26/api/v1/namespaces/{namespace}/schedules/{schedule_id}\DC2\137\STX\n\
+      \\SOUpdateSchedule\DC26.temporal.api.workflowservice.v1.UpdateScheduleRequest\SUB7.temporal.api.workflowservice.v1.UpdateScheduleResponse\"\133\SOH\130\211\228\147\STX\DEL\"6/namespaces/{namespace}/schedules/{schedule_id}/update:\SOH*ZB\"=/api/v1/namespaces/{namespace}/schedules/{schedule_id}/update:\SOH*\DC2\132\STX\n\
+      \\rPatchSchedule\DC25.temporal.api.workflowservice.v1.PatchScheduleRequest\SUB6.temporal.api.workflowservice.v1.PatchScheduleResponse\"\131\SOH\130\211\228\147\STX}\"5/namespaces/{namespace}/schedules/{schedule_id}/patch:\SOH*ZA\"</api/v1/namespaces/{namespace}/schedules/{schedule_id}/patch:\SOH*\DC2\181\STX\n\
+      \\EMListScheduleMatchingTimes\DC2A.temporal.api.workflowservice.v1.ListScheduleMatchingTimesRequest\SUBB.temporal.api.workflowservice.v1.ListScheduleMatchingTimesResponse\"\144\SOH\130\211\228\147\STX\137\SOH\DC2>/namespaces/{namespace}/schedules/{schedule_id}/matching-timesZG\DC2E/api/v1/namespaces/{namespace}/schedules/{schedule_id}/matching-times\DC2\244\SOH\n\
+      \\SODeleteSchedule\DC26.temporal.api.workflowservice.v1.DeleteScheduleRequest\SUB7.temporal.api.workflowservice.v1.DeleteScheduleResponse\"q\130\211\228\147\STXk*//namespaces/{namespace}/schedules/{schedule_id}Z8*6/api/v1/namespaces/{namespace}/schedules/{schedule_id}\DC2\213\SOH\n\
+      \\rListSchedules\DC25.temporal.api.workflowservice.v1.ListSchedulesRequest\SUB6.temporal.api.workflowservice.v1.ListSchedulesResponse\"U\130\211\228\147\STXO\DC2!/namespaces/{namespace}/schedulesZ*\DC2(/api/v1/namespaces/{namespace}/schedules\DC2\185\SOH\n\
+      \ UpdateWorkerBuildIdCompatibility\DC2H.temporal.api.workflowservice.v1.UpdateWorkerBuildIdCompatibilityRequest\SUBI.temporal.api.workflowservice.v1.UpdateWorkerBuildIdCompatibilityResponse\"\NUL\DC2\225\STX\n\
+      \\GSGetWorkerBuildIdCompatibility\DC2E.temporal.api.workflowservice.v1.GetWorkerBuildIdCompatibilityRequest\SUBF.temporal.api.workflowservice.v1.GetWorkerBuildIdCompatibilityResponse\"\176\SOH\130\211\228\147\STX\169\SOH\DC2N/namespaces/{namespace}/task-queues/{task_queue}/worker-build-id-compatibilityZW\DC2U/api/v1/namespaces/{namespace}/task-queues/{task_queue}/worker-build-id-compatibility\DC2\170\SOH\n\
+      \\ESCUpdateWorkerVersioningRules\DC2C.temporal.api.workflowservice.v1.UpdateWorkerVersioningRulesRequest\SUBD.temporal.api.workflowservice.v1.UpdateWorkerVersioningRulesResponse\"\NUL\DC2\198\STX\n\
+      \\CANGetWorkerVersioningRules\DC2@.temporal.api.workflowservice.v1.GetWorkerVersioningRulesRequest\SUBA.temporal.api.workflowservice.v1.GetWorkerVersioningRulesResponse\"\164\SOH\130\211\228\147\STX\157\SOH\DC2H/namespaces/{namespace}/task-queues/{task_queue}/worker-versioning-rulesZQ\DC2O/api/v1/namespaces/{namespace}/task-queues/{task_queue}/worker-versioning-rules\DC2\151\STX\n\
+      \\EMGetWorkerTaskReachability\DC2A.temporal.api.workflowservice.v1.GetWorkerTaskReachabilityRequest\SUBB.temporal.api.workflowservice.v1.GetWorkerTaskReachabilityResponse\"s\130\211\228\147\STXm\DC20/namespaces/{namespace}/worker-task-reachabilityZ9\DC27/api/v1/namespaces/{namespace}/worker-task-reachability\DC2\200\STX\n\
+      \\DC2DescribeDeployment\DC2:.temporal.api.workflowservice.v1.DescribeDeploymentRequest\SUB;.temporal.api.workflowservice.v1.DescribeDeploymentResponse\"\184\SOH\130\211\228\147\STX\177\SOH\DC2R/namespaces/{namespace}/deployments/{deployment.series_name}/{deployment.build_id}Z[\DC2Y/api/v1/namespaces/{namespace}/deployments/{deployment.series_name}/{deployment.build_id}\DC2\195\STX\n\
+      \\USDescribeWorkerDeploymentVersion\DC2G.temporal.api.workflowservice.v1.DescribeWorkerDeploymentVersionRequest\SUBH.temporal.api.workflowservice.v1.DescribeWorkerDeploymentVersionResponse\"\140\SOH\130\211\228\147\STX\133\SOH\DC2</namespaces/{namespace}/worker-deployment-versions/{version}ZE\DC2C/api/v1/namespaces/{namespace}/worker-deployment-versions/{version}\DC2\223\SOH\n\
+      \\SIListDeployments\DC27.temporal.api.workflowservice.v1.ListDeploymentsRequest\SUB8.temporal.api.workflowservice.v1.ListDeploymentsResponse\"Y\130\211\228\147\STXS\DC2#/namespaces/{namespace}/deploymentsZ,\DC2*/api/v1/namespaces/{namespace}/deployments\DC2\247\STX\n\
+      \\EMGetDeploymentReachability\DC2A.temporal.api.workflowservice.v1.GetDeploymentReachabilityRequest\SUBB.temporal.api.workflowservice.v1.GetDeploymentReachabilityResponse\"\210\SOH\130\211\228\147\STX\203\SOH\DC2_/namespaces/{namespace}/deployments/{deployment.series_name}/{deployment.build_id}/reachabilityZh\DC2f/api/v1/namespaces/{namespace}/deployments/{deployment.series_name}/{deployment.build_id}/reachability\DC2\153\STX\n\
+      \\DC4GetCurrentDeployment\DC2<.temporal.api.workflowservice.v1.GetCurrentDeploymentRequest\SUB=.temporal.api.workflowservice.v1.GetCurrentDeploymentResponse\"\131\SOH\130\211\228\147\STX}\DC28/namespaces/{namespace}/current-deployment/{series_name}ZA\DC2?/api/v1/namespaces/{namespace}/current-deployment/{series_name}\DC2\182\STX\n\
+      \\DC4SetCurrentDeployment\DC2<.temporal.api.workflowservice.v1.SetCurrentDeploymentRequest\SUB=.temporal.api.workflowservice.v1.SetCurrentDeploymentResponse\"\160\SOH\130\211\228\147\STX\153\SOH\"C/namespaces/{namespace}/current-deployment/{deployment.series_name}:\SOH*ZO\"J/api/v1/namespaces/{namespace}/current-deployment/{deployment.series_name}:\SOH*\DC2\247\STX\n\
+      \!SetWorkerDeploymentCurrentVersion\DC2I.temporal.api.workflowservice.v1.SetWorkerDeploymentCurrentVersionRequest\SUBJ.temporal.api.workflowservice.v1.SetWorkerDeploymentCurrentVersionResponse\"\186\SOH\130\211\228\147\STX\179\SOH\"P/namespaces/{namespace}/worker-deployments/{deployment_name}/set-current-version:\SOH*Z\\\"W/api/v1/namespaces/{namespace}/worker-deployments/{deployment_name}/set-current-version:\SOH*\DC2\174\STX\n\
+      \\CANDescribeWorkerDeployment\DC2@.temporal.api.workflowservice.v1.DescribeWorkerDeploymentRequest\SUBA.temporal.api.workflowservice.v1.DescribeWorkerDeploymentResponse\"\140\SOH\130\211\228\147\STX\133\SOH\DC2</namespaces/{namespace}/worker-deployments/{deployment_name}ZE\DC2C/api/v1/namespaces/{namespace}/worker-deployments/{deployment_name}\DC2\168\STX\n\
+      \\SYNDeleteWorkerDeployment\DC2>.temporal.api.workflowservice.v1.DeleteWorkerDeploymentRequest\SUB?.temporal.api.workflowservice.v1.DeleteWorkerDeploymentResponse\"\140\SOH\130\211\228\147\STX\133\SOH*</namespaces/{namespace}/worker-deployments/{deployment_name}ZE*C/api/v1/namespaces/{namespace}/worker-deployments/{deployment_name}\DC2\189\STX\n\
+      \\GSDeleteWorkerDeploymentVersion\DC2E.temporal.api.workflowservice.v1.DeleteWorkerDeploymentVersionRequest\SUBF.temporal.api.workflowservice.v1.DeleteWorkerDeploymentVersionResponse\"\140\SOH\130\211\228\147\STX\133\SOH*</namespaces/{namespace}/worker-deployment-versions/{version}ZE*C/api/v1/namespaces/{namespace}/worker-deployment-versions/{version}\DC2\247\STX\n\
+      \!SetWorkerDeploymentRampingVersion\DC2I.temporal.api.workflowservice.v1.SetWorkerDeploymentRampingVersionRequest\SUBJ.temporal.api.workflowservice.v1.SetWorkerDeploymentRampingVersionResponse\"\186\SOH\130\211\228\147\STX\179\SOH\"P/namespaces/{namespace}/worker-deployments/{deployment_name}/set-ramping-version:\SOH*Z\\\"W/api/v1/namespaces/{namespace}/worker-deployments/{deployment_name}/set-ramping-version:\SOH*\DC2\255\SOH\n\
+      \\NAKListWorkerDeployments\DC2=.temporal.api.workflowservice.v1.ListWorkerDeploymentsRequest\SUB>.temporal.api.workflowservice.v1.ListWorkerDeploymentsResponse\"g\130\211\228\147\STXa\DC2*/namespaces/{namespace}/worker-deploymentsZ3\DC21/api/v1/namespaces/{namespace}/worker-deployments\DC2\251\STX\n\
+      \%UpdateWorkerDeploymentVersionMetadata\DC2M.temporal.api.workflowservice.v1.UpdateWorkerDeploymentVersionMetadataRequest\SUBN.temporal.api.workflowservice.v1.UpdateWorkerDeploymentVersionMetadataResponse\"\178\SOH\130\211\228\147\STX\171\SOH\"L/namespaces/{namespace}/worker-deployment-versions/{version}/update-metadata:\SOH*ZX\"S/api/v1/namespaces/{namespace}/worker-deployment-versions/{version}/update-metadata:\SOH*\DC2\245\STX\n\
+      \\ETBUpdateWorkflowExecution\DC2?.temporal.api.workflowservice.v1.UpdateWorkflowExecutionRequest\SUB@.temporal.api.workflowservice.v1.UpdateWorkflowExecutionResponse\"\214\SOH\130\211\228\147\STX\207\SOH\"^/namespaces/{namespace}/workflows/{workflow_execution.workflow_id}/update/{request.input.name}:\SOH*Zj\"e/api/v1/namespaces/{namespace}/workflows/{workflow_execution.workflow_id}/update/{request.input.name}:\SOH*\DC2\170\SOH\n\
+      \\ESCPollWorkflowExecutionUpdate\DC2C.temporal.api.workflowservice.v1.PollWorkflowExecutionUpdateRequest\SUBD.temporal.api.workflowservice.v1.PollWorkflowExecutionUpdateResponse\"\NUL\DC2\141\STX\n\
+      \\DC3StartBatchOperation\DC2;.temporal.api.workflowservice.v1.StartBatchOperationRequest\SUB<.temporal.api.workflowservice.v1.StartBatchOperationResponse\"{\130\211\228\147\STXu\"1/namespaces/{namespace}/batch-operations/{job_id}:\SOH*Z=\"8/api/v1/namespaces/{namespace}/batch-operations/{job_id}:\SOH*\DC2\149\STX\n\
+      \\DC2StopBatchOperation\DC2:.temporal.api.workflowservice.v1.StopBatchOperationRequest\SUB;.temporal.api.workflowservice.v1.StopBatchOperationResponse\"\133\SOH\130\211\228\147\STX\DEL\"6/namespaces/{namespace}/batch-operations/{job_id}/stop:\SOH*ZB\"=/api/v1/namespaces/{namespace}/batch-operations/{job_id}/stop:\SOH*\DC2\144\STX\n\
+      \\SYNDescribeBatchOperation\DC2>.temporal.api.workflowservice.v1.DescribeBatchOperationRequest\SUB?.temporal.api.workflowservice.v1.DescribeBatchOperationResponse\"u\130\211\228\147\STXo\DC21/namespaces/{namespace}/batch-operations/{job_id}Z:\DC28/api/v1/namespaces/{namespace}/batch-operations/{job_id}\DC2\245\SOH\n\
+      \\DC3ListBatchOperations\DC2;.temporal.api.workflowservice.v1.ListBatchOperationsRequest\SUB<.temporal.api.workflowservice.v1.ListBatchOperationsResponse\"c\130\211\228\147\STX]\DC2(/namespaces/{namespace}/batch-operationsZ1\DC2//api/v1/namespaces/{namespace}/batch-operations\DC2\143\SOH\n\
       \\DC2PollNexusTaskQueue\DC2:.temporal.api.workflowservice.v1.PollNexusTaskQueueRequest\SUB;.temporal.api.workflowservice.v1.PollNexusTaskQueueResponse\"\NUL\DC2\164\SOH\n\
       \\EMRespondNexusTaskCompleted\DC2A.temporal.api.workflowservice.v1.RespondNexusTaskCompletedRequest\SUBB.temporal.api.workflowservice.v1.RespondNexusTaskCompletedResponse\"\NUL\DC2\155\SOH\n\
-      \\SYNRespondNexusTaskFailed\DC2>.temporal.api.workflowservice.v1.RespondNexusTaskFailedRequest\SUB?.temporal.api.workflowservice.v1.RespondNexusTaskFailedResponse\"\NUL"
+      \\SYNRespondNexusTaskFailed\DC2>.temporal.api.workflowservice.v1.RespondNexusTaskFailedRequest\SUB?.temporal.api.workflowservice.v1.RespondNexusTaskFailedResponse\"\NUL\DC2\147\STX\n\
+      \\NAKUpdateActivityOptions\DC2=.temporal.api.workflowservice.v1.UpdateActivityOptionsRequest\SUB>.temporal.api.workflowservice.v1.UpdateActivityOptionsResponse\"{\130\211\228\147\STXu\"1/namespaces/{namespace}/activities/update-options:\SOH*Z=\"8/api/v1/namespaces/{namespace}/activities/update-options:\SOH*\DC2\240\STX\n\
+      \\RSUpdateWorkflowExecutionOptions\DC2F.temporal.api.workflowservice.v1.UpdateWorkflowExecutionOptionsRequest\SUBG.temporal.api.workflowservice.v1.UpdateWorkflowExecutionOptionsResponse\"\188\SOH\130\211\228\147\STX\181\SOH\"Q/namespaces/{namespace}/workflows/{workflow_execution.workflow_id}/update-options:\SOH*Z]\"X/api/v1/namespaces/{namespace}/workflows/{workflow_execution.workflow_id}/update-options:\SOH*\DC2\233\SOH\n\
+      \\rPauseActivity\DC25.temporal.api.workflowservice.v1.PauseActivityRequest\SUB6.temporal.api.workflowservice.v1.PauseActivityResponse\"i\130\211\228\147\STXc\"(/namespaces/{namespace}/activities/pause:\SOH*Z4\"//api/v1/namespaces/{namespace}/activities/pause:\SOH*\DC2\243\SOH\n\
+      \\SIUnpauseActivity\DC27.temporal.api.workflowservice.v1.UnpauseActivityRequest\SUB8.temporal.api.workflowservice.v1.UnpauseActivityResponse\"m\130\211\228\147\STXg\"*/namespaces/{namespace}/activities/unpause:\SOH*Z6\"1/api/v1/namespaces/{namespace}/activities/unpause:\SOH*\DC2\233\SOH\n\
+      \\rResetActivity\DC25.temporal.api.workflowservice.v1.ResetActivityRequest\SUB6.temporal.api.workflowservice.v1.ResetActivityResponse\"i\130\211\228\147\STXc\"(/namespaces/{namespace}/activities/reset:\SOH*Z4\"//api/v1/namespaces/{namespace}/activities/reset:\SOH*\DC2\244\SOH\n\
+      \\DC2CreateWorkflowRule\DC2:.temporal.api.workflowservice.v1.CreateWorkflowRuleRequest\SUB;.temporal.api.workflowservice.v1.CreateWorkflowRuleResponse\"e\130\211\228\147\STX_\"&/namespaces/{namespace}/workflow-rules:\SOH*Z2\"-/api/v1/namespaces/{namespace}/workflow-rules:\SOH*\DC2\136\STX\n\
+      \\DC4DescribeWorkflowRule\DC2<.temporal.api.workflowservice.v1.DescribeWorkflowRuleRequest\SUB=.temporal.api.workflowservice.v1.DescribeWorkflowRuleResponse\"s\130\211\228\147\STXm\DC20/namespaces/{namespace}/workflow-rules/{rule_id}Z9\DC27/api/v1/namespaces/{namespace}/workflow-rules/{rule_id}\DC2\130\STX\n\
+      \\DC2DeleteWorkflowRule\DC2:.temporal.api.workflowservice.v1.DeleteWorkflowRuleRequest\SUB;.temporal.api.workflowservice.v1.DeleteWorkflowRuleResponse\"s\130\211\228\147\STXm*0/namespaces/{namespace}/workflow-rules/{rule_id}Z9*7/api/v1/namespaces/{namespace}/workflow-rules/{rule_id}\DC2\235\SOH\n\
+      \\DC1ListWorkflowRules\DC29.temporal.api.workflowservice.v1.ListWorkflowRulesRequest\SUB:.temporal.api.workflowservice.v1.ListWorkflowRulesResponse\"_\130\211\228\147\STXY\DC2&/namespaces/{namespace}/workflow-rulesZ/\DC2-/api/v1/namespaces/{namespace}/workflow-rules\DC2\185\STX\n\
+      \\DC3TriggerWorkflowRule\DC2;.temporal.api.workflowservice.v1.TriggerWorkflowRuleRequest\SUB<.temporal.api.workflowservice.v1.TriggerWorkflowRuleResponse\"\166\SOH\130\211\228\147\STX\159\SOH\"F/namespaces/{namespace}/workflows/{execution.workflow_id}/trigger-rule:\SOH*ZR\"M/api/v1/namespaces/{namespace}/workflows/{execution.workflow_id}/trigger-rule:\SOH*"
 instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "registerNamespace" where
   type MethodName WorkflowService "registerNamespace" = "RegisterNamespace"
   type MethodInput WorkflowService "registerNamespace" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.RegisterNamespaceRequest
@@ -346,6 +394,11 @@ instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "resetSticky
   type MethodInput WorkflowService "resetStickyTaskQueue" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.ResetStickyTaskQueueRequest
   type MethodOutput WorkflowService "resetStickyTaskQueue" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.ResetStickyTaskQueueResponse
   type MethodStreamingType WorkflowService "resetStickyTaskQueue" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "shutdownWorker" where
+  type MethodName WorkflowService "shutdownWorker" = "ShutdownWorker"
+  type MethodInput WorkflowService "shutdownWorker" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.ShutdownWorkerRequest
+  type MethodOutput WorkflowService "shutdownWorker" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.ShutdownWorkerResponse
+  type MethodStreamingType WorkflowService "shutdownWorker" = 'Data.ProtoLens.Service.Types.NonStreaming
 instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "queryWorkflow" where
   type MethodName WorkflowService "queryWorkflow" = "QueryWorkflow"
   type MethodInput WorkflowService "queryWorkflow" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.QueryWorkflowRequest
@@ -436,6 +489,71 @@ instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "getWorkerTa
   type MethodInput WorkflowService "getWorkerTaskReachability" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.GetWorkerTaskReachabilityRequest
   type MethodOutput WorkflowService "getWorkerTaskReachability" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.GetWorkerTaskReachabilityResponse
   type MethodStreamingType WorkflowService "getWorkerTaskReachability" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "describeDeployment" where
+  type MethodName WorkflowService "describeDeployment" = "DescribeDeployment"
+  type MethodInput WorkflowService "describeDeployment" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.DescribeDeploymentRequest
+  type MethodOutput WorkflowService "describeDeployment" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.DescribeDeploymentResponse
+  type MethodStreamingType WorkflowService "describeDeployment" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "describeWorkerDeploymentVersion" where
+  type MethodName WorkflowService "describeWorkerDeploymentVersion" = "DescribeWorkerDeploymentVersion"
+  type MethodInput WorkflowService "describeWorkerDeploymentVersion" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.DescribeWorkerDeploymentVersionRequest
+  type MethodOutput WorkflowService "describeWorkerDeploymentVersion" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.DescribeWorkerDeploymentVersionResponse
+  type MethodStreamingType WorkflowService "describeWorkerDeploymentVersion" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "listDeployments" where
+  type MethodName WorkflowService "listDeployments" = "ListDeployments"
+  type MethodInput WorkflowService "listDeployments" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.ListDeploymentsRequest
+  type MethodOutput WorkflowService "listDeployments" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.ListDeploymentsResponse
+  type MethodStreamingType WorkflowService "listDeployments" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "getDeploymentReachability" where
+  type MethodName WorkflowService "getDeploymentReachability" = "GetDeploymentReachability"
+  type MethodInput WorkflowService "getDeploymentReachability" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.GetDeploymentReachabilityRequest
+  type MethodOutput WorkflowService "getDeploymentReachability" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.GetDeploymentReachabilityResponse
+  type MethodStreamingType WorkflowService "getDeploymentReachability" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "getCurrentDeployment" where
+  type MethodName WorkflowService "getCurrentDeployment" = "GetCurrentDeployment"
+  type MethodInput WorkflowService "getCurrentDeployment" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.GetCurrentDeploymentRequest
+  type MethodOutput WorkflowService "getCurrentDeployment" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.GetCurrentDeploymentResponse
+  type MethodStreamingType WorkflowService "getCurrentDeployment" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "setCurrentDeployment" where
+  type MethodName WorkflowService "setCurrentDeployment" = "SetCurrentDeployment"
+  type MethodInput WorkflowService "setCurrentDeployment" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.SetCurrentDeploymentRequest
+  type MethodOutput WorkflowService "setCurrentDeployment" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.SetCurrentDeploymentResponse
+  type MethodStreamingType WorkflowService "setCurrentDeployment" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "setWorkerDeploymentCurrentVersion" where
+  type MethodName WorkflowService "setWorkerDeploymentCurrentVersion" = "SetWorkerDeploymentCurrentVersion"
+  type MethodInput WorkflowService "setWorkerDeploymentCurrentVersion" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.SetWorkerDeploymentCurrentVersionRequest
+  type MethodOutput WorkflowService "setWorkerDeploymentCurrentVersion" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.SetWorkerDeploymentCurrentVersionResponse
+  type MethodStreamingType WorkflowService "setWorkerDeploymentCurrentVersion" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "describeWorkerDeployment" where
+  type MethodName WorkflowService "describeWorkerDeployment" = "DescribeWorkerDeployment"
+  type MethodInput WorkflowService "describeWorkerDeployment" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.DescribeWorkerDeploymentRequest
+  type MethodOutput WorkflowService "describeWorkerDeployment" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.DescribeWorkerDeploymentResponse
+  type MethodStreamingType WorkflowService "describeWorkerDeployment" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "deleteWorkerDeployment" where
+  type MethodName WorkflowService "deleteWorkerDeployment" = "DeleteWorkerDeployment"
+  type MethodInput WorkflowService "deleteWorkerDeployment" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.DeleteWorkerDeploymentRequest
+  type MethodOutput WorkflowService "deleteWorkerDeployment" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.DeleteWorkerDeploymentResponse
+  type MethodStreamingType WorkflowService "deleteWorkerDeployment" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "deleteWorkerDeploymentVersion" where
+  type MethodName WorkflowService "deleteWorkerDeploymentVersion" = "DeleteWorkerDeploymentVersion"
+  type MethodInput WorkflowService "deleteWorkerDeploymentVersion" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.DeleteWorkerDeploymentVersionRequest
+  type MethodOutput WorkflowService "deleteWorkerDeploymentVersion" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.DeleteWorkerDeploymentVersionResponse
+  type MethodStreamingType WorkflowService "deleteWorkerDeploymentVersion" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "setWorkerDeploymentRampingVersion" where
+  type MethodName WorkflowService "setWorkerDeploymentRampingVersion" = "SetWorkerDeploymentRampingVersion"
+  type MethodInput WorkflowService "setWorkerDeploymentRampingVersion" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.SetWorkerDeploymentRampingVersionRequest
+  type MethodOutput WorkflowService "setWorkerDeploymentRampingVersion" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.SetWorkerDeploymentRampingVersionResponse
+  type MethodStreamingType WorkflowService "setWorkerDeploymentRampingVersion" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "listWorkerDeployments" where
+  type MethodName WorkflowService "listWorkerDeployments" = "ListWorkerDeployments"
+  type MethodInput WorkflowService "listWorkerDeployments" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.ListWorkerDeploymentsRequest
+  type MethodOutput WorkflowService "listWorkerDeployments" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.ListWorkerDeploymentsResponse
+  type MethodStreamingType WorkflowService "listWorkerDeployments" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "updateWorkerDeploymentVersionMetadata" where
+  type MethodName WorkflowService "updateWorkerDeploymentVersionMetadata" = "UpdateWorkerDeploymentVersionMetadata"
+  type MethodInput WorkflowService "updateWorkerDeploymentVersionMetadata" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.UpdateWorkerDeploymentVersionMetadataRequest
+  type MethodOutput WorkflowService "updateWorkerDeploymentVersionMetadata" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.UpdateWorkerDeploymentVersionMetadataResponse
+  type MethodStreamingType WorkflowService "updateWorkerDeploymentVersionMetadata" = 'Data.ProtoLens.Service.Types.NonStreaming
 instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "updateWorkflowExecution" where
   type MethodName WorkflowService "updateWorkflowExecution" = "UpdateWorkflowExecution"
   type MethodInput WorkflowService "updateWorkflowExecution" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.UpdateWorkflowExecutionRequest
@@ -481,3 +599,53 @@ instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "respondNexu
   type MethodInput WorkflowService "respondNexusTaskFailed" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.RespondNexusTaskFailedRequest
   type MethodOutput WorkflowService "respondNexusTaskFailed" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.RespondNexusTaskFailedResponse
   type MethodStreamingType WorkflowService "respondNexusTaskFailed" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "updateActivityOptions" where
+  type MethodName WorkflowService "updateActivityOptions" = "UpdateActivityOptions"
+  type MethodInput WorkflowService "updateActivityOptions" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.UpdateActivityOptionsRequest
+  type MethodOutput WorkflowService "updateActivityOptions" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.UpdateActivityOptionsResponse
+  type MethodStreamingType WorkflowService "updateActivityOptions" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "updateWorkflowExecutionOptions" where
+  type MethodName WorkflowService "updateWorkflowExecutionOptions" = "UpdateWorkflowExecutionOptions"
+  type MethodInput WorkflowService "updateWorkflowExecutionOptions" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.UpdateWorkflowExecutionOptionsRequest
+  type MethodOutput WorkflowService "updateWorkflowExecutionOptions" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.UpdateWorkflowExecutionOptionsResponse
+  type MethodStreamingType WorkflowService "updateWorkflowExecutionOptions" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "pauseActivity" where
+  type MethodName WorkflowService "pauseActivity" = "PauseActivity"
+  type MethodInput WorkflowService "pauseActivity" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.PauseActivityRequest
+  type MethodOutput WorkflowService "pauseActivity" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.PauseActivityResponse
+  type MethodStreamingType WorkflowService "pauseActivity" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "unpauseActivity" where
+  type MethodName WorkflowService "unpauseActivity" = "UnpauseActivity"
+  type MethodInput WorkflowService "unpauseActivity" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.UnpauseActivityRequest
+  type MethodOutput WorkflowService "unpauseActivity" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.UnpauseActivityResponse
+  type MethodStreamingType WorkflowService "unpauseActivity" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "resetActivity" where
+  type MethodName WorkflowService "resetActivity" = "ResetActivity"
+  type MethodInput WorkflowService "resetActivity" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.ResetActivityRequest
+  type MethodOutput WorkflowService "resetActivity" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.ResetActivityResponse
+  type MethodStreamingType WorkflowService "resetActivity" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "createWorkflowRule" where
+  type MethodName WorkflowService "createWorkflowRule" = "CreateWorkflowRule"
+  type MethodInput WorkflowService "createWorkflowRule" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.CreateWorkflowRuleRequest
+  type MethodOutput WorkflowService "createWorkflowRule" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.CreateWorkflowRuleResponse
+  type MethodStreamingType WorkflowService "createWorkflowRule" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "describeWorkflowRule" where
+  type MethodName WorkflowService "describeWorkflowRule" = "DescribeWorkflowRule"
+  type MethodInput WorkflowService "describeWorkflowRule" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.DescribeWorkflowRuleRequest
+  type MethodOutput WorkflowService "describeWorkflowRule" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.DescribeWorkflowRuleResponse
+  type MethodStreamingType WorkflowService "describeWorkflowRule" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "deleteWorkflowRule" where
+  type MethodName WorkflowService "deleteWorkflowRule" = "DeleteWorkflowRule"
+  type MethodInput WorkflowService "deleteWorkflowRule" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.DeleteWorkflowRuleRequest
+  type MethodOutput WorkflowService "deleteWorkflowRule" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.DeleteWorkflowRuleResponse
+  type MethodStreamingType WorkflowService "deleteWorkflowRule" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "listWorkflowRules" where
+  type MethodName WorkflowService "listWorkflowRules" = "ListWorkflowRules"
+  type MethodInput WorkflowService "listWorkflowRules" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.ListWorkflowRulesRequest
+  type MethodOutput WorkflowService "listWorkflowRules" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.ListWorkflowRulesResponse
+  type MethodStreamingType WorkflowService "listWorkflowRules" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "triggerWorkflowRule" where
+  type MethodName WorkflowService "triggerWorkflowRule" = "TriggerWorkflowRule"
+  type MethodInput WorkflowService "triggerWorkflowRule" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.TriggerWorkflowRuleRequest
+  type MethodOutput WorkflowService "triggerWorkflowRule" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.TriggerWorkflowRuleResponse
+  type MethodStreamingType WorkflowService "triggerWorkflowRule" = 'Data.ProtoLens.Service.Types.NonStreaming

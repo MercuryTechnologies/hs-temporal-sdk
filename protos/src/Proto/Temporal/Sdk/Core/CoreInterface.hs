@@ -4,7 +4,8 @@
 {-# OPTIONS_GHC -Wno-duplicate-exports#-}
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
 module Proto.Temporal.Sdk.Core.CoreInterface (
-        ActivityHeartbeat(), ActivityTaskCompletion()
+        ActivityHeartbeat(), ActivitySlotInfo(), ActivityTaskCompletion(),
+        LocalActivitySlotInfo(), NexusSlotInfo(), WorkflowSlotInfo()
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -225,6 +226,123 @@ instance Control.DeepSeq.NFData ActivityHeartbeat where
                 (Control.DeepSeq.deepseq (_ActivityHeartbeat'details x__) ()))
 {- | Fields :
      
+         * 'Proto.Temporal.Sdk.Core.CoreInterface_Fields.activityType' @:: Lens' ActivitySlotInfo Data.Text.Text@ -}
+data ActivitySlotInfo
+  = ActivitySlotInfo'_constructor {_ActivitySlotInfo'activityType :: !Data.Text.Text,
+                                   _ActivitySlotInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show ActivitySlotInfo where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField ActivitySlotInfo "activityType" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ActivitySlotInfo'activityType
+           (\ x__ y__ -> x__ {_ActivitySlotInfo'activityType = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message ActivitySlotInfo where
+  messageName _ = Data.Text.pack "coresdk.ActivitySlotInfo"
+  packedMessageDescriptor _
+    = "\n\
+      \\DLEActivitySlotInfo\DC2#\n\
+      \\ractivity_type\CAN\SOH \SOH(\tR\factivityType"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        activityType__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "activity_type"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"activityType")) ::
+              Data.ProtoLens.FieldDescriptor ActivitySlotInfo
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, activityType__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _ActivitySlotInfo'_unknownFields
+        (\ x__ y__ -> x__ {_ActivitySlotInfo'_unknownFields = y__})
+  defMessage
+    = ActivitySlotInfo'_constructor
+        {_ActivitySlotInfo'activityType = Data.ProtoLens.fieldDefault,
+         _ActivitySlotInfo'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          ActivitySlotInfo
+          -> Data.ProtoLens.Encoding.Bytes.Parser ActivitySlotInfo
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "activity_type"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"activityType") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "ActivitySlotInfo"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view (Data.ProtoLens.Field.field @"activityType") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData ActivitySlotInfo where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_ActivitySlotInfo'_unknownFields x__)
+             (Control.DeepSeq.deepseq (_ActivitySlotInfo'activityType x__) ())
+{- | Fields :
+     
          * 'Proto.Temporal.Sdk.Core.CoreInterface_Fields.taskToken' @:: Lens' ActivityTaskCompletion Data.ByteString.ByteString@
          * 'Proto.Temporal.Sdk.Core.CoreInterface_Fields.result' @:: Lens' ActivityTaskCompletion Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult.ActivityExecutionResult@
          * 'Proto.Temporal.Sdk.Core.CoreInterface_Fields.maybe'result' @:: Lens' ActivityTaskCompletion (Prelude.Maybe Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult.ActivityExecutionResult)@ -}
@@ -390,6 +508,442 @@ instance Control.DeepSeq.NFData ActivityTaskCompletion where
              (Control.DeepSeq.deepseq
                 (_ActivityTaskCompletion'taskToken x__)
                 (Control.DeepSeq.deepseq (_ActivityTaskCompletion'result x__) ()))
+{- | Fields :
+     
+         * 'Proto.Temporal.Sdk.Core.CoreInterface_Fields.activityType' @:: Lens' LocalActivitySlotInfo Data.Text.Text@ -}
+data LocalActivitySlotInfo
+  = LocalActivitySlotInfo'_constructor {_LocalActivitySlotInfo'activityType :: !Data.Text.Text,
+                                        _LocalActivitySlotInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show LocalActivitySlotInfo where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField LocalActivitySlotInfo "activityType" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _LocalActivitySlotInfo'activityType
+           (\ x__ y__ -> x__ {_LocalActivitySlotInfo'activityType = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message LocalActivitySlotInfo where
+  messageName _ = Data.Text.pack "coresdk.LocalActivitySlotInfo"
+  packedMessageDescriptor _
+    = "\n\
+      \\NAKLocalActivitySlotInfo\DC2#\n\
+      \\ractivity_type\CAN\SOH \SOH(\tR\factivityType"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        activityType__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "activity_type"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"activityType")) ::
+              Data.ProtoLens.FieldDescriptor LocalActivitySlotInfo
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, activityType__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _LocalActivitySlotInfo'_unknownFields
+        (\ x__ y__ -> x__ {_LocalActivitySlotInfo'_unknownFields = y__})
+  defMessage
+    = LocalActivitySlotInfo'_constructor
+        {_LocalActivitySlotInfo'activityType = Data.ProtoLens.fieldDefault,
+         _LocalActivitySlotInfo'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          LocalActivitySlotInfo
+          -> Data.ProtoLens.Encoding.Bytes.Parser LocalActivitySlotInfo
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "activity_type"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"activityType") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "LocalActivitySlotInfo"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view (Data.ProtoLens.Field.field @"activityType") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData LocalActivitySlotInfo where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_LocalActivitySlotInfo'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_LocalActivitySlotInfo'activityType x__) ())
+{- | Fields :
+     
+         * 'Proto.Temporal.Sdk.Core.CoreInterface_Fields.service' @:: Lens' NexusSlotInfo Data.Text.Text@
+         * 'Proto.Temporal.Sdk.Core.CoreInterface_Fields.operation' @:: Lens' NexusSlotInfo Data.Text.Text@ -}
+data NexusSlotInfo
+  = NexusSlotInfo'_constructor {_NexusSlotInfo'service :: !Data.Text.Text,
+                                _NexusSlotInfo'operation :: !Data.Text.Text,
+                                _NexusSlotInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show NexusSlotInfo where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField NexusSlotInfo "service" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _NexusSlotInfo'service
+           (\ x__ y__ -> x__ {_NexusSlotInfo'service = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField NexusSlotInfo "operation" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _NexusSlotInfo'operation
+           (\ x__ y__ -> x__ {_NexusSlotInfo'operation = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message NexusSlotInfo where
+  messageName _ = Data.Text.pack "coresdk.NexusSlotInfo"
+  packedMessageDescriptor _
+    = "\n\
+      \\rNexusSlotInfo\DC2\CAN\n\
+      \\aservice\CAN\SOH \SOH(\tR\aservice\DC2\FS\n\
+      \\toperation\CAN\STX \SOH(\tR\toperation"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        service__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "service"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"service")) ::
+              Data.ProtoLens.FieldDescriptor NexusSlotInfo
+        operation__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "operation"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"operation")) ::
+              Data.ProtoLens.FieldDescriptor NexusSlotInfo
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, service__field_descriptor),
+           (Data.ProtoLens.Tag 2, operation__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _NexusSlotInfo'_unknownFields
+        (\ x__ y__ -> x__ {_NexusSlotInfo'_unknownFields = y__})
+  defMessage
+    = NexusSlotInfo'_constructor
+        {_NexusSlotInfo'service = Data.ProtoLens.fieldDefault,
+         _NexusSlotInfo'operation = Data.ProtoLens.fieldDefault,
+         _NexusSlotInfo'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          NexusSlotInfo -> Data.ProtoLens.Encoding.Bytes.Parser NexusSlotInfo
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "service"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"service") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "operation"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"operation") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "NexusSlotInfo"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"service") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             ((Data.Monoid.<>)
+                (let
+                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"operation") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                         ((Prelude..)
+                            (\ bs
+                               -> (Data.Monoid.<>)
+                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                            Data.Text.Encoding.encodeUtf8 _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData NexusSlotInfo where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_NexusSlotInfo'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_NexusSlotInfo'service x__)
+                (Control.DeepSeq.deepseq (_NexusSlotInfo'operation x__) ()))
+{- | Fields :
+     
+         * 'Proto.Temporal.Sdk.Core.CoreInterface_Fields.workflowType' @:: Lens' WorkflowSlotInfo Data.Text.Text@
+         * 'Proto.Temporal.Sdk.Core.CoreInterface_Fields.isSticky' @:: Lens' WorkflowSlotInfo Prelude.Bool@ -}
+data WorkflowSlotInfo
+  = WorkflowSlotInfo'_constructor {_WorkflowSlotInfo'workflowType :: !Data.Text.Text,
+                                   _WorkflowSlotInfo'isSticky :: !Prelude.Bool,
+                                   _WorkflowSlotInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show WorkflowSlotInfo where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField WorkflowSlotInfo "workflowType" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowSlotInfo'workflowType
+           (\ x__ y__ -> x__ {_WorkflowSlotInfo'workflowType = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField WorkflowSlotInfo "isSticky" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowSlotInfo'isSticky
+           (\ x__ y__ -> x__ {_WorkflowSlotInfo'isSticky = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message WorkflowSlotInfo where
+  messageName _ = Data.Text.pack "coresdk.WorkflowSlotInfo"
+  packedMessageDescriptor _
+    = "\n\
+      \\DLEWorkflowSlotInfo\DC2#\n\
+      \\rworkflow_type\CAN\SOH \SOH(\tR\fworkflowType\DC2\ESC\n\
+      \\tis_sticky\CAN\STX \SOH(\bR\bisSticky"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        workflowType__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "workflow_type"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"workflowType")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowSlotInfo
+        isSticky__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "is_sticky"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"isSticky")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowSlotInfo
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, workflowType__field_descriptor),
+           (Data.ProtoLens.Tag 2, isSticky__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _WorkflowSlotInfo'_unknownFields
+        (\ x__ y__ -> x__ {_WorkflowSlotInfo'_unknownFields = y__})
+  defMessage
+    = WorkflowSlotInfo'_constructor
+        {_WorkflowSlotInfo'workflowType = Data.ProtoLens.fieldDefault,
+         _WorkflowSlotInfo'isSticky = Data.ProtoLens.fieldDefault,
+         _WorkflowSlotInfo'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          WorkflowSlotInfo
+          -> Data.ProtoLens.Encoding.Bytes.Parser WorkflowSlotInfo
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "workflow_type"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"workflowType") y x)
+                        16
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "is_sticky"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"isSticky") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "WorkflowSlotInfo"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view (Data.ProtoLens.Field.field @"workflowType") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             ((Data.Monoid.<>)
+                (let
+                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"isSticky") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
+                         ((Prelude..)
+                            Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
+                            _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData WorkflowSlotInfo where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_WorkflowSlotInfo'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_WorkflowSlotInfo'workflowType x__)
+                (Control.DeepSeq.deepseq (_WorkflowSlotInfo'isSticky x__) ()))
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
@@ -401,16 +955,27 @@ packedFileDescriptor
     \\SYNActivityTaskCompletion\DC2\GS\n\
     \\n\
     \task_token\CAN\SOH \SOH(\fR\ttaskToken\DC2H\n\
-    \\ACKresult\CAN\STX \SOH(\v20.coresdk.activity_result.ActivityExecutionResultR\ACKresultB)\234\STX&Temporalio::Bridge::Api::CoreInterfaceJ\165\ACK\n\
-    \\ACK\DC2\EOT\NUL\NUL\RS\SOH\n\
+    \\ACKresult\CAN\STX \SOH(\v20.coresdk.activity_result.ActivityExecutionResultR\ACKresult\"T\n\
+    \\DLEWorkflowSlotInfo\DC2#\n\
+    \\rworkflow_type\CAN\SOH \SOH(\tR\fworkflowType\DC2\ESC\n\
+    \\tis_sticky\CAN\STX \SOH(\bR\bisSticky\"7\n\
+    \\DLEActivitySlotInfo\DC2#\n\
+    \\ractivity_type\CAN\SOH \SOH(\tR\factivityType\"<\n\
+    \\NAKLocalActivitySlotInfo\DC2#\n\
+    \\ractivity_type\CAN\SOH \SOH(\tR\factivityType\"G\n\
+    \\rNexusSlotInfo\DC2\CAN\n\
+    \\aservice\CAN\SOH \SOH(\tR\aservice\DC2\FS\n\
+    \\toperation\CAN\STX \SOH(\tR\toperationB3\234\STX0Temporalio::Internal::Bridge::Api::CoreInterfaceJ\233\n\
+    \\n\
+    \\ACK\DC2\EOT\NUL\NUL4\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
     \\SOH\STX\DC2\ETX\STX\NUL\DLE\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ETX\NUL?\n\
+    \\SOH\b\DC2\ETX\ETX\NULI\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\ETX\NUL?\n\
+    \\STX\b-\DC2\ETX\ETX\NULI\n\
     \\130\STX\n\
     \\STX\ETX\NUL\DC2\ETX\b\NUL(\SUB\246\SOH Note: Intellij will think the Google imports don't work because of the slightly odd nature of\n\
     \ the include paths. You can make it work by going to the \"Protobuf Support\" settings section\n\
@@ -485,4 +1050,81 @@ packedFileDescriptor
     \\f\n\
     \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\GS,2\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\GS56b\ACKproto3"
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\GS56\n\
+    \1\n\
+    \\STX\EOT\STX\DC2\EOT!\NUL$\SOH\SUB% Info about workflow task slot usage\n\
+    \\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX!\b\CAN\n\
+    \\v\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX\"\EOT\GS\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX\"\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX\"\v\CAN\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX\"\ESC\FS\n\
+    \\v\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX#\EOT\ETB\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX#\EOT\b\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX#\t\DC2\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX#\NAK\SYN\n\
+    \1\n\
+    \\STX\EOT\ETX\DC2\EOT'\NUL)\SOH\SUB% Info about activity task slot usage\n\
+    \\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX'\b\CAN\n\
+    \\v\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETX(\EOT\GS\n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX(\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX(\v\CAN\n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX(\ESC\FS\n\
+    \2\n\
+    \\STX\EOT\EOT\DC2\EOT,\NUL.\SOH\SUB& Info about local activity slot usage\n\
+    \\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETX,\b\GS\n\
+    \\v\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETX-\EOT\GS\n\
+    \\f\n\
+    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETX-\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX-\v\CAN\n\
+    \\f\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX-\ESC\FS\n\
+    \.\n\
+    \\STX\EOT\ENQ\DC2\EOT1\NUL4\SOH\SUB\" Info about nexus task slot usage\n\
+    \\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETX1\b\NAK\n\
+    \\v\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX2\EOT\ETB\n\
+    \\f\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETX2\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX2\v\DC2\n\
+    \\f\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX2\NAK\SYN\n\
+    \\v\n\
+    \\EOT\EOT\ENQ\STX\SOH\DC2\ETX3\EOT\EM\n\
+    \\f\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ENQ\DC2\ETX3\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETX3\v\DC4\n\
+    \\f\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETX3\ETB\CANb\ACKproto3"

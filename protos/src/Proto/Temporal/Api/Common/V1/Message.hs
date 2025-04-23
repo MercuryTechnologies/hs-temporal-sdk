@@ -5,15 +5,19 @@
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
 module Proto.Temporal.Api.Common.V1.Message (
         ActivityType(), Callback(), Callback'Variant(..), _Callback'Nexus',
-        Callback'Nexus(), Callback'Nexus'HeaderEntry(), DataBlob(),
-        Header(), Header'FieldsEntry(), Memo(), Memo'FieldsEntry(),
-        MeteringMetadata(), Payload(), Payload'MetadataEntry(), Payloads(),
-        ResetOptions(), ResetOptions'Target(..),
-        _ResetOptions'FirstWorkflowTask, _ResetOptions'LastWorkflowTask,
-        _ResetOptions'WorkflowTaskId, _ResetOptions'BuildId, RetryPolicy(),
-        SearchAttributes(), SearchAttributes'IndexedFieldsEntry(),
-        WorkerVersionCapabilities(), WorkerVersionStamp(),
-        WorkflowExecution(), WorkflowType()
+        _Callback'Internal', Callback'Internal(), Callback'Nexus(),
+        Callback'Nexus'HeaderEntry(), DataBlob(), Header(),
+        Header'FieldsEntry(), Link(), Link'Variant(..),
+        _Link'WorkflowEvent', _Link'BatchJob', Link'BatchJob(),
+        Link'WorkflowEvent(), Link'WorkflowEvent'Reference(..),
+        _Link'WorkflowEvent'EventRef, Link'WorkflowEvent'EventReference(),
+        Memo(), Memo'FieldsEntry(), MeteringMetadata(), Payload(),
+        Payload'MetadataEntry(), Payloads(), Priority(), ResetOptions(),
+        ResetOptions'Target(..), _ResetOptions'FirstWorkflowTask,
+        _ResetOptions'LastWorkflowTask, _ResetOptions'WorkflowTaskId,
+        _ResetOptions'BuildId, RetryPolicy(), SearchAttributes(),
+        SearchAttributes'IndexedFieldsEntry(), WorkerVersionCapabilities(),
+        WorkerVersionStamp(), WorkflowExecution(), WorkflowType()
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -43,6 +47,7 @@ import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
 import qualified Proto.Google.Protobuf.Duration
 import qualified Proto.Google.Protobuf.Empty
 import qualified Proto.Temporal.Api.Enums.V1.Common
+import qualified Proto.Temporal.Api.Enums.V1.EventType
 import qualified Proto.Temporal.Api.Enums.V1.Reset
 {- | Fields :
      
@@ -158,7 +163,9 @@ instance Control.DeepSeq.NFData ActivityType where
      
          * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'variant' @:: Lens' Callback (Prelude.Maybe Callback'Variant)@
          * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'nexus' @:: Lens' Callback (Prelude.Maybe Callback'Nexus)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.nexus' @:: Lens' Callback Callback'Nexus@ -}
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.nexus' @:: Lens' Callback Callback'Nexus@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'internal' @:: Lens' Callback (Prelude.Maybe Callback'Internal)@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.internal' @:: Lens' Callback Callback'Internal@ -}
 data Callback
   = Callback'_constructor {_Callback'variant :: !(Prelude.Maybe Callback'Variant),
                            _Callback'_unknownFields :: !Data.ProtoLens.FieldSet}
@@ -170,7 +177,8 @@ instance Prelude.Show Callback where
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
 data Callback'Variant
-  = Callback'Nexus' !Callback'Nexus
+  = Callback'Nexus' !Callback'Nexus |
+    Callback'Internal' !Callback'Internal
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.Field.HasField Callback "maybe'variant" (Prelude.Maybe Callback'Variant) where
   fieldOf _
@@ -202,18 +210,45 @@ instance Data.ProtoLens.Field.HasField Callback "nexus" Callback'Nexus where
                       _otherwise -> Prelude.Nothing)
               (\ _ y__ -> Prelude.fmap Callback'Nexus' y__))
            (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
+instance Data.ProtoLens.Field.HasField Callback "maybe'internal" (Prelude.Maybe Callback'Internal) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Callback'variant (\ x__ y__ -> x__ {_Callback'variant = y__}))
+        (Lens.Family2.Unchecked.lens
+           (\ x__
+              -> case x__ of
+                   (Prelude.Just (Callback'Internal' x__val)) -> Prelude.Just x__val
+                   _otherwise -> Prelude.Nothing)
+           (\ _ y__ -> Prelude.fmap Callback'Internal' y__))
+instance Data.ProtoLens.Field.HasField Callback "internal" Callback'Internal where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Callback'variant (\ x__ y__ -> x__ {_Callback'variant = y__}))
+        ((Prelude..)
+           (Lens.Family2.Unchecked.lens
+              (\ x__
+                 -> case x__ of
+                      (Prelude.Just (Callback'Internal' x__val)) -> Prelude.Just x__val
+                      _otherwise -> Prelude.Nothing)
+              (\ _ y__ -> Prelude.fmap Callback'Internal' y__))
+           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
 instance Data.ProtoLens.Message Callback where
   messageName _ = Data.Text.pack "temporal.api.common.v1.Callback"
   packedMessageDescriptor _
     = "\n\
       \\bCallback\DC2>\n\
-      \\ENQnexus\CAN\STX \SOH(\v2&.temporal.api.common.v1.Callback.NexusH\NULR\ENQnexus\SUB\160\SOH\n\
+      \\ENQnexus\CAN\STX \SOH(\v2&.temporal.api.common.v1.Callback.NexusH\NULR\ENQnexus\DC2G\n\
+      \\binternal\CAN\ETX \SOH(\v2).temporal.api.common.v1.Callback.InternalH\NULR\binternal\SUB\160\SOH\n\
       \\ENQNexus\DC2\DLE\n\
       \\ETXurl\CAN\SOH \SOH(\tR\ETXurl\DC2J\n\
       \\ACKheader\CAN\STX \ETX(\v22.temporal.api.common.v1.Callback.Nexus.HeaderEntryR\ACKheader\SUB9\n\
       \\vHeaderEntry\DC2\DLE\n\
       \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-      \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOHB\t\n\
+      \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH\SUB\RS\n\
+      \\bInternal\DC2\DC2\n\
+      \\EOTdata\CAN\SOH \SOH(\fR\EOTdataB\t\n\
       \\avariantJ\EOT\b\SOH\DLE\STX"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
@@ -226,8 +261,18 @@ instance Data.ProtoLens.Message Callback where
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'nexus")) ::
               Data.ProtoLens.FieldDescriptor Callback
+        internal__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "internal"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Callback'Internal)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'internal")) ::
+              Data.ProtoLens.FieldDescriptor Callback
       in
-        Data.Map.fromList [(Data.ProtoLens.Tag 2, nexus__field_descriptor)]
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 2, nexus__field_descriptor),
+           (Data.ProtoLens.Tag 3, internal__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _Callback'_unknownFields
@@ -264,6 +309,14 @@ instance Data.ProtoLens.Message Callback where
                                              (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
                                        "nexus"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"nexus") y x)
+                        26
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "internal"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"internal") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -289,6 +342,16 @@ instance Data.ProtoLens.Message Callback where
                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage v)
+                (Prelude.Just (Callback'Internal' v))
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                           Data.ProtoLens.encodeMessage v))
              (Data.ProtoLens.Encoding.Wire.buildFieldSet
                 (Lens.Family2.view Data.ProtoLens.unknownFields _x))
@@ -300,13 +363,137 @@ instance Control.DeepSeq.NFData Callback where
              (Control.DeepSeq.deepseq (_Callback'variant x__) ())
 instance Control.DeepSeq.NFData Callback'Variant where
   rnf (Callback'Nexus' x__) = Control.DeepSeq.rnf x__
+  rnf (Callback'Internal' x__) = Control.DeepSeq.rnf x__
 _Callback'Nexus' ::
   Data.ProtoLens.Prism.Prism' Callback'Variant Callback'Nexus
 _Callback'Nexus'
   = Data.ProtoLens.Prism.prism'
       Callback'Nexus'
       (\ p__
-         -> case p__ of (Callback'Nexus' p__val) -> Prelude.Just p__val)
+         -> case p__ of
+              (Callback'Nexus' p__val) -> Prelude.Just p__val
+              _otherwise -> Prelude.Nothing)
+_Callback'Internal' ::
+  Data.ProtoLens.Prism.Prism' Callback'Variant Callback'Internal
+_Callback'Internal'
+  = Data.ProtoLens.Prism.prism'
+      Callback'Internal'
+      (\ p__
+         -> case p__ of
+              (Callback'Internal' p__val) -> Prelude.Just p__val
+              _otherwise -> Prelude.Nothing)
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.data'' @:: Lens' Callback'Internal Data.ByteString.ByteString@ -}
+data Callback'Internal
+  = Callback'Internal'_constructor {_Callback'Internal'data' :: !Data.ByteString.ByteString,
+                                    _Callback'Internal'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show Callback'Internal where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField Callback'Internal "data'" Data.ByteString.ByteString where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Callback'Internal'data'
+           (\ x__ y__ -> x__ {_Callback'Internal'data' = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message Callback'Internal where
+  messageName _
+    = Data.Text.pack "temporal.api.common.v1.Callback.Internal"
+  packedMessageDescriptor _
+    = "\n\
+      \\bInternal\DC2\DC2\n\
+      \\EOTdata\CAN\SOH \SOH(\fR\EOTdata"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        data'__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "data"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BytesField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.ByteString.ByteString)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"data'")) ::
+              Data.ProtoLens.FieldDescriptor Callback'Internal
+      in
+        Data.Map.fromList [(Data.ProtoLens.Tag 1, data'__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _Callback'Internal'_unknownFields
+        (\ x__ y__ -> x__ {_Callback'Internal'_unknownFields = y__})
+  defMessage
+    = Callback'Internal'_constructor
+        {_Callback'Internal'data' = Data.ProtoLens.fieldDefault,
+         _Callback'Internal'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          Callback'Internal
+          -> Data.ProtoLens.Encoding.Bytes.Parser Callback'Internal
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getBytes
+                                             (Prelude.fromIntegral len))
+                                       "data"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"data'") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "Internal"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"data'") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((\ bs
+                          -> (Data.Monoid.<>)
+                               (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                  (Prelude.fromIntegral (Data.ByteString.length bs)))
+                               (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData Callback'Internal where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_Callback'Internal'_unknownFields x__)
+             (Control.DeepSeq.deepseq (_Callback'Internal'data' x__) ())
 {- | Fields :
      
          * 'Proto.Temporal.Api.Common.V1.Message_Fields.url' @:: Lens' Callback'Nexus Data.Text.Text@
@@ -1092,6 +1279,811 @@ instance Control.DeepSeq.NFData Header'FieldsEntry where
              (Control.DeepSeq.deepseq
                 (_Header'FieldsEntry'key x__)
                 (Control.DeepSeq.deepseq (_Header'FieldsEntry'value x__) ()))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'variant' @:: Lens' Link (Prelude.Maybe Link'Variant)@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'workflowEvent' @:: Lens' Link (Prelude.Maybe Link'WorkflowEvent)@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.workflowEvent' @:: Lens' Link Link'WorkflowEvent@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'batchJob' @:: Lens' Link (Prelude.Maybe Link'BatchJob)@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.batchJob' @:: Lens' Link Link'BatchJob@ -}
+data Link
+  = Link'_constructor {_Link'variant :: !(Prelude.Maybe Link'Variant),
+                       _Link'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show Link where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+data Link'Variant
+  = Link'WorkflowEvent' !Link'WorkflowEvent |
+    Link'BatchJob' !Link'BatchJob
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.Field.HasField Link "maybe'variant" (Prelude.Maybe Link'Variant) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Link'variant (\ x__ y__ -> x__ {_Link'variant = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField Link "maybe'workflowEvent" (Prelude.Maybe Link'WorkflowEvent) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Link'variant (\ x__ y__ -> x__ {_Link'variant = y__}))
+        (Lens.Family2.Unchecked.lens
+           (\ x__
+              -> case x__ of
+                   (Prelude.Just (Link'WorkflowEvent' x__val)) -> Prelude.Just x__val
+                   _otherwise -> Prelude.Nothing)
+           (\ _ y__ -> Prelude.fmap Link'WorkflowEvent' y__))
+instance Data.ProtoLens.Field.HasField Link "workflowEvent" Link'WorkflowEvent where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Link'variant (\ x__ y__ -> x__ {_Link'variant = y__}))
+        ((Prelude..)
+           (Lens.Family2.Unchecked.lens
+              (\ x__
+                 -> case x__ of
+                      (Prelude.Just (Link'WorkflowEvent' x__val)) -> Prelude.Just x__val
+                      _otherwise -> Prelude.Nothing)
+              (\ _ y__ -> Prelude.fmap Link'WorkflowEvent' y__))
+           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
+instance Data.ProtoLens.Field.HasField Link "maybe'batchJob" (Prelude.Maybe Link'BatchJob) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Link'variant (\ x__ y__ -> x__ {_Link'variant = y__}))
+        (Lens.Family2.Unchecked.lens
+           (\ x__
+              -> case x__ of
+                   (Prelude.Just (Link'BatchJob' x__val)) -> Prelude.Just x__val
+                   _otherwise -> Prelude.Nothing)
+           (\ _ y__ -> Prelude.fmap Link'BatchJob' y__))
+instance Data.ProtoLens.Field.HasField Link "batchJob" Link'BatchJob where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Link'variant (\ x__ y__ -> x__ {_Link'variant = y__}))
+        ((Prelude..)
+           (Lens.Family2.Unchecked.lens
+              (\ x__
+                 -> case x__ of
+                      (Prelude.Just (Link'BatchJob' x__val)) -> Prelude.Just x__val
+                      _otherwise -> Prelude.Nothing)
+              (\ _ y__ -> Prelude.fmap Link'BatchJob' y__))
+           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
+instance Data.ProtoLens.Message Link where
+  messageName _ = Data.Text.pack "temporal.api.common.v1.Link"
+  packedMessageDescriptor _
+    = "\n\
+      \\EOTLink\DC2S\n\
+      \\SOworkflow_event\CAN\SOH \SOH(\v2*.temporal.api.common.v1.Link.WorkflowEventH\NULR\rworkflowEvent\DC2D\n\
+      \\tbatch_job\CAN\STX \SOH(\v2%.temporal.api.common.v1.Link.BatchJobH\NULR\bbatchJob\SUB\186\STX\n\
+      \\rWorkflowEvent\DC2\FS\n\
+      \\tnamespace\CAN\SOH \SOH(\tR\tnamespace\DC2\US\n\
+      \\vworkflow_id\CAN\STX \SOH(\tR\n\
+      \workflowId\DC2\NAK\n\
+      \\ACKrun_id\CAN\ETX \SOH(\tR\ENQrunId\DC2X\n\
+      \\tevent_ref\CANd \SOH(\v29.temporal.api.common.v1.Link.WorkflowEvent.EventReferenceH\NULR\beventRef\SUBl\n\
+      \\SOEventReference\DC2\EM\n\
+      \\bevent_id\CAN\SOH \SOH(\ETXR\aeventId\DC2?\n\
+      \\n\
+      \event_type\CAN\STX \SOH(\SO2 .temporal.api.enums.v1.EventTypeR\teventTypeB\v\n\
+      \\treference\SUB!\n\
+      \\bBatchJob\DC2\NAK\n\
+      \\ACKjob_id\CAN\SOH \SOH(\tR\ENQjobIdB\t\n\
+      \\avariant"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        workflowEvent__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "workflow_event"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Link'WorkflowEvent)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'workflowEvent")) ::
+              Data.ProtoLens.FieldDescriptor Link
+        batchJob__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "batch_job"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Link'BatchJob)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'batchJob")) ::
+              Data.ProtoLens.FieldDescriptor Link
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, workflowEvent__field_descriptor),
+           (Data.ProtoLens.Tag 2, batchJob__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _Link'_unknownFields
+        (\ x__ y__ -> x__ {_Link'_unknownFields = y__})
+  defMessage
+    = Link'_constructor
+        {_Link'variant = Prelude.Nothing, _Link'_unknownFields = []}
+  parseMessage
+    = let
+        loop :: Link -> Data.ProtoLens.Encoding.Bytes.Parser Link
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "workflow_event"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"workflowEvent") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "batch_job"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"batchJob") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "Link"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'variant") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just (Link'WorkflowEvent' v))
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage v)
+                (Prelude.Just (Link'BatchJob' v))
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData Link where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_Link'_unknownFields x__)
+             (Control.DeepSeq.deepseq (_Link'variant x__) ())
+instance Control.DeepSeq.NFData Link'Variant where
+  rnf (Link'WorkflowEvent' x__) = Control.DeepSeq.rnf x__
+  rnf (Link'BatchJob' x__) = Control.DeepSeq.rnf x__
+_Link'WorkflowEvent' ::
+  Data.ProtoLens.Prism.Prism' Link'Variant Link'WorkflowEvent
+_Link'WorkflowEvent'
+  = Data.ProtoLens.Prism.prism'
+      Link'WorkflowEvent'
+      (\ p__
+         -> case p__ of
+              (Link'WorkflowEvent' p__val) -> Prelude.Just p__val
+              _otherwise -> Prelude.Nothing)
+_Link'BatchJob' ::
+  Data.ProtoLens.Prism.Prism' Link'Variant Link'BatchJob
+_Link'BatchJob'
+  = Data.ProtoLens.Prism.prism'
+      Link'BatchJob'
+      (\ p__
+         -> case p__ of
+              (Link'BatchJob' p__val) -> Prelude.Just p__val
+              _otherwise -> Prelude.Nothing)
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.jobId' @:: Lens' Link'BatchJob Data.Text.Text@ -}
+data Link'BatchJob
+  = Link'BatchJob'_constructor {_Link'BatchJob'jobId :: !Data.Text.Text,
+                                _Link'BatchJob'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show Link'BatchJob where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField Link'BatchJob "jobId" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Link'BatchJob'jobId
+           (\ x__ y__ -> x__ {_Link'BatchJob'jobId = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message Link'BatchJob where
+  messageName _
+    = Data.Text.pack "temporal.api.common.v1.Link.BatchJob"
+  packedMessageDescriptor _
+    = "\n\
+      \\bBatchJob\DC2\NAK\n\
+      \\ACKjob_id\CAN\SOH \SOH(\tR\ENQjobId"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        jobId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "job_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"jobId")) ::
+              Data.ProtoLens.FieldDescriptor Link'BatchJob
+      in
+        Data.Map.fromList [(Data.ProtoLens.Tag 1, jobId__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _Link'BatchJob'_unknownFields
+        (\ x__ y__ -> x__ {_Link'BatchJob'_unknownFields = y__})
+  defMessage
+    = Link'BatchJob'_constructor
+        {_Link'BatchJob'jobId = Data.ProtoLens.fieldDefault,
+         _Link'BatchJob'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          Link'BatchJob -> Data.ProtoLens.Encoding.Bytes.Parser Link'BatchJob
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "job_id"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"jobId") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "BatchJob"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"jobId") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData Link'BatchJob where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_Link'BatchJob'_unknownFields x__)
+             (Control.DeepSeq.deepseq (_Link'BatchJob'jobId x__) ())
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.namespace' @:: Lens' Link'WorkflowEvent Data.Text.Text@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.workflowId' @:: Lens' Link'WorkflowEvent Data.Text.Text@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.runId' @:: Lens' Link'WorkflowEvent Data.Text.Text@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'reference' @:: Lens' Link'WorkflowEvent (Prelude.Maybe Link'WorkflowEvent'Reference)@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'eventRef' @:: Lens' Link'WorkflowEvent (Prelude.Maybe Link'WorkflowEvent'EventReference)@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.eventRef' @:: Lens' Link'WorkflowEvent Link'WorkflowEvent'EventReference@ -}
+data Link'WorkflowEvent
+  = Link'WorkflowEvent'_constructor {_Link'WorkflowEvent'namespace :: !Data.Text.Text,
+                                     _Link'WorkflowEvent'workflowId :: !Data.Text.Text,
+                                     _Link'WorkflowEvent'runId :: !Data.Text.Text,
+                                     _Link'WorkflowEvent'reference :: !(Prelude.Maybe Link'WorkflowEvent'Reference),
+                                     _Link'WorkflowEvent'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show Link'WorkflowEvent where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+data Link'WorkflowEvent'Reference
+  = Link'WorkflowEvent'EventRef !Link'WorkflowEvent'EventReference
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.Field.HasField Link'WorkflowEvent "namespace" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Link'WorkflowEvent'namespace
+           (\ x__ y__ -> x__ {_Link'WorkflowEvent'namespace = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField Link'WorkflowEvent "workflowId" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Link'WorkflowEvent'workflowId
+           (\ x__ y__ -> x__ {_Link'WorkflowEvent'workflowId = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField Link'WorkflowEvent "runId" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Link'WorkflowEvent'runId
+           (\ x__ y__ -> x__ {_Link'WorkflowEvent'runId = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField Link'WorkflowEvent "maybe'reference" (Prelude.Maybe Link'WorkflowEvent'Reference) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Link'WorkflowEvent'reference
+           (\ x__ y__ -> x__ {_Link'WorkflowEvent'reference = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField Link'WorkflowEvent "maybe'eventRef" (Prelude.Maybe Link'WorkflowEvent'EventReference) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Link'WorkflowEvent'reference
+           (\ x__ y__ -> x__ {_Link'WorkflowEvent'reference = y__}))
+        (Lens.Family2.Unchecked.lens
+           (\ x__
+              -> case x__ of
+                   (Prelude.Just (Link'WorkflowEvent'EventRef x__val))
+                     -> Prelude.Just x__val
+                   _otherwise -> Prelude.Nothing)
+           (\ _ y__ -> Prelude.fmap Link'WorkflowEvent'EventRef y__))
+instance Data.ProtoLens.Field.HasField Link'WorkflowEvent "eventRef" Link'WorkflowEvent'EventReference where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Link'WorkflowEvent'reference
+           (\ x__ y__ -> x__ {_Link'WorkflowEvent'reference = y__}))
+        ((Prelude..)
+           (Lens.Family2.Unchecked.lens
+              (\ x__
+                 -> case x__ of
+                      (Prelude.Just (Link'WorkflowEvent'EventRef x__val))
+                        -> Prelude.Just x__val
+                      _otherwise -> Prelude.Nothing)
+              (\ _ y__ -> Prelude.fmap Link'WorkflowEvent'EventRef y__))
+           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
+instance Data.ProtoLens.Message Link'WorkflowEvent where
+  messageName _
+    = Data.Text.pack "temporal.api.common.v1.Link.WorkflowEvent"
+  packedMessageDescriptor _
+    = "\n\
+      \\rWorkflowEvent\DC2\FS\n\
+      \\tnamespace\CAN\SOH \SOH(\tR\tnamespace\DC2\US\n\
+      \\vworkflow_id\CAN\STX \SOH(\tR\n\
+      \workflowId\DC2\NAK\n\
+      \\ACKrun_id\CAN\ETX \SOH(\tR\ENQrunId\DC2X\n\
+      \\tevent_ref\CANd \SOH(\v29.temporal.api.common.v1.Link.WorkflowEvent.EventReferenceH\NULR\beventRef\SUBl\n\
+      \\SOEventReference\DC2\EM\n\
+      \\bevent_id\CAN\SOH \SOH(\ETXR\aeventId\DC2?\n\
+      \\n\
+      \event_type\CAN\STX \SOH(\SO2 .temporal.api.enums.v1.EventTypeR\teventTypeB\v\n\
+      \\treference"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        namespace__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "namespace"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"namespace")) ::
+              Data.ProtoLens.FieldDescriptor Link'WorkflowEvent
+        workflowId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "workflow_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"workflowId")) ::
+              Data.ProtoLens.FieldDescriptor Link'WorkflowEvent
+        runId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "run_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"runId")) ::
+              Data.ProtoLens.FieldDescriptor Link'WorkflowEvent
+        eventRef__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "event_ref"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Link'WorkflowEvent'EventReference)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'eventRef")) ::
+              Data.ProtoLens.FieldDescriptor Link'WorkflowEvent
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, namespace__field_descriptor),
+           (Data.ProtoLens.Tag 2, workflowId__field_descriptor),
+           (Data.ProtoLens.Tag 3, runId__field_descriptor),
+           (Data.ProtoLens.Tag 100, eventRef__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _Link'WorkflowEvent'_unknownFields
+        (\ x__ y__ -> x__ {_Link'WorkflowEvent'_unknownFields = y__})
+  defMessage
+    = Link'WorkflowEvent'_constructor
+        {_Link'WorkflowEvent'namespace = Data.ProtoLens.fieldDefault,
+         _Link'WorkflowEvent'workflowId = Data.ProtoLens.fieldDefault,
+         _Link'WorkflowEvent'runId = Data.ProtoLens.fieldDefault,
+         _Link'WorkflowEvent'reference = Prelude.Nothing,
+         _Link'WorkflowEvent'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          Link'WorkflowEvent
+          -> Data.ProtoLens.Encoding.Bytes.Parser Link'WorkflowEvent
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "namespace"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"namespace") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "workflow_id"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"workflowId") y x)
+                        26
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "run_id"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"runId") y x)
+                        802
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "event_ref"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"eventRef") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "WorkflowEvent"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"namespace") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             ((Data.Monoid.<>)
+                (let
+                   _v
+                     = Lens.Family2.view (Data.ProtoLens.Field.field @"workflowId") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                         ((Prelude..)
+                            (\ bs
+                               -> (Data.Monoid.<>)
+                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                            Data.Text.Encoding.encodeUtf8 _v))
+                ((Data.Monoid.<>)
+                   (let
+                      _v = Lens.Family2.view (Data.ProtoLens.Field.field @"runId") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                            ((Prelude..)
+                               (\ bs
+                                  -> (Data.Monoid.<>)
+                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                               Data.Text.Encoding.encodeUtf8 _v))
+                   ((Data.Monoid.<>)
+                      (case
+                           Lens.Family2.view
+                             (Data.ProtoLens.Field.field @"maybe'reference") _x
+                       of
+                         Prelude.Nothing -> Data.Monoid.mempty
+                         (Prelude.Just (Link'WorkflowEvent'EventRef v))
+                           -> (Data.Monoid.<>)
+                                (Data.ProtoLens.Encoding.Bytes.putVarInt 802)
+                                ((Prelude..)
+                                   (\ bs
+                                      -> (Data.Monoid.<>)
+                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                              (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                           (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                   Data.ProtoLens.encodeMessage v))
+                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
+instance Control.DeepSeq.NFData Link'WorkflowEvent where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_Link'WorkflowEvent'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_Link'WorkflowEvent'namespace x__)
+                (Control.DeepSeq.deepseq
+                   (_Link'WorkflowEvent'workflowId x__)
+                   (Control.DeepSeq.deepseq
+                      (_Link'WorkflowEvent'runId x__)
+                      (Control.DeepSeq.deepseq (_Link'WorkflowEvent'reference x__) ()))))
+instance Control.DeepSeq.NFData Link'WorkflowEvent'Reference where
+  rnf (Link'WorkflowEvent'EventRef x__) = Control.DeepSeq.rnf x__
+_Link'WorkflowEvent'EventRef ::
+  Data.ProtoLens.Prism.Prism' Link'WorkflowEvent'Reference Link'WorkflowEvent'EventReference
+_Link'WorkflowEvent'EventRef
+  = Data.ProtoLens.Prism.prism'
+      Link'WorkflowEvent'EventRef
+      (\ p__
+         -> case p__ of
+              (Link'WorkflowEvent'EventRef p__val) -> Prelude.Just p__val)
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.eventId' @:: Lens' Link'WorkflowEvent'EventReference Data.Int.Int64@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.eventType' @:: Lens' Link'WorkflowEvent'EventReference Proto.Temporal.Api.Enums.V1.EventType.EventType@ -}
+data Link'WorkflowEvent'EventReference
+  = Link'WorkflowEvent'EventReference'_constructor {_Link'WorkflowEvent'EventReference'eventId :: !Data.Int.Int64,
+                                                    _Link'WorkflowEvent'EventReference'eventType :: !Proto.Temporal.Api.Enums.V1.EventType.EventType,
+                                                    _Link'WorkflowEvent'EventReference'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show Link'WorkflowEvent'EventReference where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField Link'WorkflowEvent'EventReference "eventId" Data.Int.Int64 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Link'WorkflowEvent'EventReference'eventId
+           (\ x__ y__
+              -> x__ {_Link'WorkflowEvent'EventReference'eventId = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField Link'WorkflowEvent'EventReference "eventType" Proto.Temporal.Api.Enums.V1.EventType.EventType where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Link'WorkflowEvent'EventReference'eventType
+           (\ x__ y__
+              -> x__ {_Link'WorkflowEvent'EventReference'eventType = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message Link'WorkflowEvent'EventReference where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.common.v1.Link.WorkflowEvent.EventReference"
+  packedMessageDescriptor _
+    = "\n\
+      \\SOEventReference\DC2\EM\n\
+      \\bevent_id\CAN\SOH \SOH(\ETXR\aeventId\DC2?\n\
+      \\n\
+      \event_type\CAN\STX \SOH(\SO2 .temporal.api.enums.v1.EventTypeR\teventType"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        eventId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "event_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.Int64Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int64)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"eventId")) ::
+              Data.ProtoLens.FieldDescriptor Link'WorkflowEvent'EventReference
+        eventType__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "event_type"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.EventType.EventType)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"eventType")) ::
+              Data.ProtoLens.FieldDescriptor Link'WorkflowEvent'EventReference
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, eventId__field_descriptor),
+           (Data.ProtoLens.Tag 2, eventType__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _Link'WorkflowEvent'EventReference'_unknownFields
+        (\ x__ y__
+           -> x__ {_Link'WorkflowEvent'EventReference'_unknownFields = y__})
+  defMessage
+    = Link'WorkflowEvent'EventReference'_constructor
+        {_Link'WorkflowEvent'EventReference'eventId = Data.ProtoLens.fieldDefault,
+         _Link'WorkflowEvent'EventReference'eventType = Data.ProtoLens.fieldDefault,
+         _Link'WorkflowEvent'EventReference'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          Link'WorkflowEvent'EventReference
+          -> Data.ProtoLens.Encoding.Bytes.Parser Link'WorkflowEvent'EventReference
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "event_id"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"eventId") y x)
+                        16
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.toEnum
+                                          (Prelude.fmap
+                                             Prelude.fromIntegral
+                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
+                                       "event_type"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"eventType") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "EventReference"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"eventId") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
+                      ((Prelude..)
+                         Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
+             ((Data.Monoid.<>)
+                (let
+                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"eventType") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
+                         ((Prelude..)
+                            ((Prelude..)
+                               Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
+                            Prelude.fromEnum _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData Link'WorkflowEvent'EventReference where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_Link'WorkflowEvent'EventReference'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_Link'WorkflowEvent'EventReference'eventId x__)
+                (Control.DeepSeq.deepseq
+                   (_Link'WorkflowEvent'EventReference'eventType x__) ()))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Common.V1.Message_Fields.fields' @:: Lens' Memo (Data.Map.Map Data.Text.Text Payload)@ -}
@@ -1969,6 +2961,114 @@ instance Control.DeepSeq.NFData Payloads where
         -> Control.DeepSeq.deepseq
              (_Payloads'_unknownFields x__)
              (Control.DeepSeq.deepseq (_Payloads'payloads x__) ())
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.priorityKey' @:: Lens' Priority Data.Int.Int32@ -}
+data Priority
+  = Priority'_constructor {_Priority'priorityKey :: !Data.Int.Int32,
+                           _Priority'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show Priority where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField Priority "priorityKey" Data.Int.Int32 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Priority'priorityKey
+           (\ x__ y__ -> x__ {_Priority'priorityKey = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message Priority where
+  messageName _ = Data.Text.pack "temporal.api.common.v1.Priority"
+  packedMessageDescriptor _
+    = "\n\
+      \\bPriority\DC2!\n\
+      \\fpriority_key\CAN\SOH \SOH(\ENQR\vpriorityKey"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        priorityKey__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "priority_key"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.Int32Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int32)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"priorityKey")) ::
+              Data.ProtoLens.FieldDescriptor Priority
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, priorityKey__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _Priority'_unknownFields
+        (\ x__ y__ -> x__ {_Priority'_unknownFields = y__})
+  defMessage
+    = Priority'_constructor
+        {_Priority'priorityKey = Data.ProtoLens.fieldDefault,
+         _Priority'_unknownFields = []}
+  parseMessage
+    = let
+        loop :: Priority -> Data.ProtoLens.Encoding.Bytes.Parser Priority
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "priority_key"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"priorityKey") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "Priority"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view (Data.ProtoLens.Field.field @"priorityKey") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
+                      ((Prelude..)
+                         Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData Priority where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_Priority'_unknownFields x__)
+             (Control.DeepSeq.deepseq (_Priority'priorityKey x__) ())
 {- | Fields :
      
          * 'Proto.Temporal.Api.Common.V1.Message_Fields.resetReapplyType' @:: Lens' ResetOptions Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyType@
@@ -3188,10 +4288,12 @@ instance Control.DeepSeq.NFData SearchAttributes'IndexedFieldsEntry where
 {- | Fields :
      
          * 'Proto.Temporal.Api.Common.V1.Message_Fields.buildId' @:: Lens' WorkerVersionCapabilities Data.Text.Text@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.useVersioning' @:: Lens' WorkerVersionCapabilities Prelude.Bool@ -}
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.useVersioning' @:: Lens' WorkerVersionCapabilities Prelude.Bool@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.deploymentSeriesName' @:: Lens' WorkerVersionCapabilities Data.Text.Text@ -}
 data WorkerVersionCapabilities
   = WorkerVersionCapabilities'_constructor {_WorkerVersionCapabilities'buildId :: !Data.Text.Text,
                                             _WorkerVersionCapabilities'useVersioning :: !Prelude.Bool,
+                                            _WorkerVersionCapabilities'deploymentSeriesName :: !Data.Text.Text,
                                             _WorkerVersionCapabilities'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show WorkerVersionCapabilities where
@@ -3215,6 +4317,14 @@ instance Data.ProtoLens.Field.HasField WorkerVersionCapabilities "useVersioning"
            (\ x__ y__
               -> x__ {_WorkerVersionCapabilities'useVersioning = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField WorkerVersionCapabilities "deploymentSeriesName" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkerVersionCapabilities'deploymentSeriesName
+           (\ x__ y__
+              -> x__ {_WorkerVersionCapabilities'deploymentSeriesName = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message WorkerVersionCapabilities where
   messageName _
     = Data.Text.pack "temporal.api.common.v1.WorkerVersionCapabilities"
@@ -3222,7 +4332,8 @@ instance Data.ProtoLens.Message WorkerVersionCapabilities where
     = "\n\
       \\EMWorkerVersionCapabilities\DC2\EM\n\
       \\bbuild_id\CAN\SOH \SOH(\tR\abuildId\DC2%\n\
-      \\SOuse_versioning\CAN\STX \SOH(\bR\ruseVersioning"
+      \\SOuse_versioning\CAN\STX \SOH(\bR\ruseVersioning\DC24\n\
+      \\SYNdeployment_series_name\CAN\EOT \SOH(\tR\DC4deploymentSeriesName"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -3243,10 +4354,20 @@ instance Data.ProtoLens.Message WorkerVersionCapabilities where
                  Data.ProtoLens.Optional
                  (Data.ProtoLens.Field.field @"useVersioning")) ::
               Data.ProtoLens.FieldDescriptor WorkerVersionCapabilities
+        deploymentSeriesName__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "deployment_series_name"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"deploymentSeriesName")) ::
+              Data.ProtoLens.FieldDescriptor WorkerVersionCapabilities
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, buildId__field_descriptor),
-           (Data.ProtoLens.Tag 2, useVersioning__field_descriptor)]
+           (Data.ProtoLens.Tag 2, useVersioning__field_descriptor),
+           (Data.ProtoLens.Tag 4, deploymentSeriesName__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _WorkerVersionCapabilities'_unknownFields
@@ -3256,6 +4377,7 @@ instance Data.ProtoLens.Message WorkerVersionCapabilities where
     = WorkerVersionCapabilities'_constructor
         {_WorkerVersionCapabilities'buildId = Data.ProtoLens.fieldDefault,
          _WorkerVersionCapabilities'useVersioning = Data.ProtoLens.fieldDefault,
+         _WorkerVersionCapabilities'deploymentSeriesName = Data.ProtoLens.fieldDefault,
          _WorkerVersionCapabilities'_unknownFields = []}
   parseMessage
     = let
@@ -3295,6 +4417,15 @@ instance Data.ProtoLens.Message WorkerVersionCapabilities where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"useVersioning") y x)
+                        34
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "deployment_series_name"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"deploymentSeriesName") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -3336,8 +4467,26 @@ instance Data.ProtoLens.Message WorkerVersionCapabilities where
                          ((Prelude..)
                             Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
                             _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+                ((Data.Monoid.<>)
+                   (let
+                      _v
+                        = Lens.Family2.view
+                            (Data.ProtoLens.Field.field @"deploymentSeriesName") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
+                            ((Prelude..)
+                               (\ bs
+                                  -> (Data.Monoid.<>)
+                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                               Data.Text.Encoding.encodeUtf8 _v))
+                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
 instance Control.DeepSeq.NFData WorkerVersionCapabilities where
   rnf
     = \ x__
@@ -3346,7 +4495,9 @@ instance Control.DeepSeq.NFData WorkerVersionCapabilities where
              (Control.DeepSeq.deepseq
                 (_WorkerVersionCapabilities'buildId x__)
                 (Control.DeepSeq.deepseq
-                   (_WorkerVersionCapabilities'useVersioning x__) ()))
+                   (_WorkerVersionCapabilities'useVersioning x__)
+                   (Control.DeepSeq.deepseq
+                      (_WorkerVersionCapabilities'deploymentSeriesName x__) ())))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Common.V1.Message_Fields.buildId' @:: Lens' WorkerVersionStamp Data.Text.Text@
@@ -3783,7 +4934,7 @@ instance Control.DeepSeq.NFData WorkflowType where
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \$temporal/api/common/v1/message.proto\DC2\SYNtemporal.api.common.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\ESCgoogle/protobuf/empty.proto\SUB\"temporal/api/enums/v1/common.proto\SUB!temporal/api/enums/v1/reset.proto\"h\n\
+    \$temporal/api/common/v1/message.proto\DC2\SYNtemporal.api.common.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\ESCgoogle/protobuf/empty.proto\SUB\"temporal/api/enums/v1/common.proto\SUB&temporal/api/enums/v1/event_type.proto\SUB!temporal/api/enums/v1/reset.proto\"h\n\
     \\bDataBlob\DC2H\n\
     \\rencoding_type\CAN\SOH \SOH(\SO2#.temporal.api.enums.v1.EncodingTypeR\fencodingType\DC2\DC2\n\
     \\EOTdata\CAN\STX \SOH(\fR\EOTdata\"G\n\
@@ -3828,10 +4979,11 @@ packedFileDescriptor
     \*nonfirst_local_activity_execution_attempts\CAN\r \SOH(\rR&nonfirstLocalActivityExecutionAttempts\"V\n\
     \\DC2WorkerVersionStamp\DC2\EM\n\
     \\bbuild_id\CAN\SOH \SOH(\tR\abuildId\DC2%\n\
-    \\SOuse_versioning\CAN\ETX \SOH(\bR\ruseVersioning\"]\n\
+    \\SOuse_versioning\CAN\ETX \SOH(\bR\ruseVersioning\"\147\SOH\n\
     \\EMWorkerVersionCapabilities\DC2\EM\n\
     \\bbuild_id\CAN\SOH \SOH(\tR\abuildId\DC2%\n\
-    \\SOuse_versioning\CAN\STX \SOH(\bR\ruseVersioning\"\227\ETX\n\
+    \\SOuse_versioning\CAN\STX \SOH(\bR\ruseVersioning\DC24\n\
+    \\SYNdeployment_series_name\CAN\EOT \SOH(\tR\DC4deploymentSeriesName\"\227\ETX\n\
     \\fResetOptions\DC2H\n\
     \\DC3first_workflow_task\CAN\SOH \SOH(\v2\SYN.google.protobuf.EmptyH\NULR\DC1firstWorkflowTask\DC2F\n\
     \\DC2last_workflow_task\CAN\STX \SOH(\v2\SYN.google.protobuf.EmptyH\NULR\DLElastWorkflowTask\DC2*\n\
@@ -3841,18 +4993,40 @@ packedFileDescriptor
     \ \SOH(\SO2'.temporal.api.enums.v1.ResetReapplyTypeR\DLEresetReapplyType\DC2(\n\
     \\DLEcurrent_run_only\CAN\v \SOH(\bR\SOcurrentRunOnly\DC2m\n\
     \\ESCreset_reapply_exclude_types\CAN\f \ETX(\SO2..temporal.api.enums.v1.ResetReapplyExcludeTypeR\CANresetReapplyExcludeTypesB\b\n\
-    \\ACKtarget\"\254\SOH\n\
+    \\ACKtarget\"\231\STX\n\
     \\bCallback\DC2>\n\
-    \\ENQnexus\CAN\STX \SOH(\v2&.temporal.api.common.v1.Callback.NexusH\NULR\ENQnexus\SUB\160\SOH\n\
+    \\ENQnexus\CAN\STX \SOH(\v2&.temporal.api.common.v1.Callback.NexusH\NULR\ENQnexus\DC2G\n\
+    \\binternal\CAN\ETX \SOH(\v2).temporal.api.common.v1.Callback.InternalH\NULR\binternal\SUB\160\SOH\n\
     \\ENQNexus\DC2\DLE\n\
     \\ETXurl\CAN\SOH \SOH(\tR\ETXurl\DC2J\n\
     \\ACKheader\CAN\STX \ETX(\v22.temporal.api.common.v1.Callback.Nexus.HeaderEntryR\ACKheader\SUB9\n\
     \\vHeaderEntry\DC2\DLE\n\
     \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-    \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOHB\t\n\
-    \\avariantJ\EOT\b\SOH\DLE\STXB\137\SOH\n\
-    \\EMio.temporal.api.common.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/common/v1;common\170\STX\CANTemporalio.Api.Common.V1\234\STX\ESCTemporalio::Api::Common::V1J\209@\n\
-    \\a\DC2\ENQ\SYN\NUL\197\SOH\SOH\n\
+    \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH\SUB\RS\n\
+    \\bInternal\DC2\DC2\n\
+    \\EOTdata\CAN\SOH \SOH(\fR\EOTdataB\t\n\
+    \\avariantJ\EOT\b\SOH\DLE\STX\"\140\EOT\n\
+    \\EOTLink\DC2S\n\
+    \\SOworkflow_event\CAN\SOH \SOH(\v2*.temporal.api.common.v1.Link.WorkflowEventH\NULR\rworkflowEvent\DC2D\n\
+    \\tbatch_job\CAN\STX \SOH(\v2%.temporal.api.common.v1.Link.BatchJobH\NULR\bbatchJob\SUB\186\STX\n\
+    \\rWorkflowEvent\DC2\FS\n\
+    \\tnamespace\CAN\SOH \SOH(\tR\tnamespace\DC2\US\n\
+    \\vworkflow_id\CAN\STX \SOH(\tR\n\
+    \workflowId\DC2\NAK\n\
+    \\ACKrun_id\CAN\ETX \SOH(\tR\ENQrunId\DC2X\n\
+    \\tevent_ref\CANd \SOH(\v29.temporal.api.common.v1.Link.WorkflowEvent.EventReferenceH\NULR\beventRef\SUBl\n\
+    \\SOEventReference\DC2\EM\n\
+    \\bevent_id\CAN\SOH \SOH(\ETXR\aeventId\DC2?\n\
+    \\n\
+    \event_type\CAN\STX \SOH(\SO2 .temporal.api.enums.v1.EventTypeR\teventTypeB\v\n\
+    \\treference\SUB!\n\
+    \\bBatchJob\DC2\NAK\n\
+    \\ACKjob_id\CAN\SOH \SOH(\tR\ENQjobIdB\t\n\
+    \\avariant\"-\n\
+    \\bPriority\DC2!\n\
+    \\fpriority_key\CAN\SOH \SOH(\ENQR\vpriorityKeyB\137\SOH\n\
+    \\EMio.temporal.api.common.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/common/v1;common\170\STX\CANTemporalio.Api.Common.V1\234\STX\ESCTemporalio::Api::Common::V1J\248^\n\
+    \\a\DC2\ENQ\SYN\NUL\153\STX\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -3910,244 +5084,246 @@ packedFileDescriptor
     \\t\n\
     \\STX\ETX\STX\DC2\ETX$\NUL,\n\
     \\t\n\
-    \\STX\ETX\ETX\DC2\ETX%\NUL+\n\
+    \\STX\ETX\ETX\DC2\ETX%\NUL0\n\
+    \\t\n\
+    \\STX\ETX\EOT\DC2\ETX&\NUL+\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT'\NUL*\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT(\NUL+\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX'\b\DLE\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX(\b\DLE\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX(\EOT9\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX)\EOT9\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX(\EOT&\n\
+    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX)\EOT&\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX('4\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX)'4\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX(78\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX)78\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX)\EOT\DC3\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX*\EOT\DC3\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX)\EOT\t\n\
+    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX*\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX)\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX*\n\
     \\SO\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX)\DC1\DC2\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX*\DC1\DC2\n\
     \\ESC\n\
-    \\STX\EOT\SOH\DC2\EOT-\NUL/\SOH\SUB\SI See `Payload`\n\
+    \\STX\EOT\SOH\DC2\EOT.\NUL0\SOH\SUB\SI See `Payload`\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX-\b\DLE\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX.\b\DLE\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX.\EOT\"\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX/\EOT\"\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\EOT\DC2\ETX.\EOT\f\n\
+    \\ENQ\EOT\SOH\STX\NUL\EOT\DC2\ETX/\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX.\r\DC4\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX/\r\DC4\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX.\NAK\GS\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX/\NAK\GS\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX. !\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX/ !\n\
     \\239\SOH\n\
-    \\STX\EOT\STX\DC2\EOT4\NUL7\SOH\SUB\226\SOH Represents some binary (byte array) data (ex: activity input parameters or workflow result) with\n\
+    \\STX\EOT\STX\DC2\EOT5\NUL8\SOH\SUB\226\SOH Represents some binary (byte array) data (ex: activity input parameters or workflow result) with\n\
     \ metadata which describes this binary data (format, encoding, encryption, etc). Serialization\n\
     \ of the data may be user-defined.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX4\b\SI\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX5\b\SI\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX5\EOT#\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX6\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX5\EOT\NAK\n\
+    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX6\EOT\NAK\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX5\SYN\RS\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX6\SYN\RS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX5!\"\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX6!\"\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX6\EOT\DC3\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX7\EOT\DC3\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX6\EOT\t\n\
+    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX7\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX6\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX7\n\
     \\SO\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX6\DC1\DC2\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX7\DC1\DC2\n\
     \\163\SOH\n\
-    \\STX\EOT\ETX\DC2\EOT;\NUL=\SOH\SUB\150\SOH A user-defined set of *indexed* fields that are used/exposed when listing/searching workflows.\n\
+    \\STX\EOT\ETX\DC2\EOT<\NUL>\SOH\SUB\150\SOH A user-defined set of *indexed* fields that are used/exposed when listing/searching workflows.\n\
     \ The payload is not serialized in a user-defined way.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX;\b\CAN\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX<\b\CAN\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETX<\EOT,\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETX=\EOT,\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ACK\DC2\ETX<\EOT\CAN\n\
+    \\ENQ\EOT\ETX\STX\NUL\ACK\DC2\ETX=\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX<\EM'\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX=\EM'\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX<*+\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX=*+\n\
     \h\n\
-    \\STX\EOT\EOT\DC2\EOT@\NULB\SOH\SUB\\ A user-defined set of *unindexed* fields that are exposed when listing/searching workflows\n\
+    \\STX\EOT\EOT\DC2\EOTA\NULC\SOH\SUB\\ A user-defined set of *unindexed* fields that are exposed when listing/searching workflows\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETX@\b\f\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETXA\b\f\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETXA\EOT$\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETXB\EOT$\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETXA\EOT\CAN\n\
+    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETXB\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXA\EM\US\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXB\EM\US\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXA\"#\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXB\"#\n\
     \\176\SOH\n\
-    \\STX\EOT\ENQ\DC2\EOTF\NULH\SOH\SUB\163\SOH Contains metadata that can be attached to a variety of requests, like starting a workflow, and\n\
+    \\STX\EOT\ENQ\DC2\EOTG\NULI\SOH\SUB\163\SOH Contains metadata that can be attached to a variety of requests, like starting a workflow, and\n\
     \ can be propagated between, for example, workflows and activities.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETXF\b\SO\n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETXG\b\SO\n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXG\EOT$\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXH\EOT$\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETXG\EOT\CAN\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETXH\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXG\EM\US\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXH\EM\US\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXG\"#\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXH\"#\n\
     \\145\STX\n\
-    \\STX\EOT\ACK\DC2\EOTM\NULP\SOH\SUB\132\STX Identifies a specific workflow within a namespace. Practically speaking, because run_id is a\n\
+    \\STX\EOT\ACK\DC2\EOTN\NULQ\SOH\SUB\132\STX Identifies a specific workflow within a namespace. Practically speaking, because run_id is a\n\
     \ uuid, a workflow execution is globally unique. Note that many commands allow specifying an empty\n\
     \ run id as a way of saying \"target the latest run of the workflow\".\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETXM\b\EM\n\
+    \\ETX\EOT\ACK\SOH\DC2\ETXN\b\EM\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\ETXN\EOT\ESC\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\ETXO\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETXN\EOT\n\
+    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETXO\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXN\v\SYN\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXO\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXN\EM\SUB\n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXO\EM\SUB\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\SOH\DC2\ETXO\EOT\SYN\n\
+    \\EOT\EOT\ACK\STX\SOH\DC2\ETXP\EOT\SYN\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ENQ\DC2\ETXO\EOT\n\
+    \\ENQ\EOT\ACK\STX\SOH\ENQ\DC2\ETXP\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXO\v\DC1\n\
+    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXP\v\DC1\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXO\DC4\NAK\n\
+    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXP\DC4\NAK\n\
     \\181\SOH\n\
-    \\STX\EOT\a\DC2\EOTT\NULV\SOH\SUB\168\SOH Represents the identifier used by a workflow author to define the workflow. Typically, the\n\
+    \\STX\EOT\a\DC2\EOTU\NULW\SOH\SUB\168\SOH Represents the identifier used by a workflow author to define the workflow. Typically, the\n\
     \ name of a function. This is sometimes referred to as the workflow's \"name\"\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\a\SOH\DC2\ETXT\b\DC4\n\
+    \\ETX\EOT\a\SOH\DC2\ETXU\b\DC4\n\
     \\v\n\
-    \\EOT\EOT\a\STX\NUL\DC2\ETXU\EOT\DC4\n\
+    \\EOT\EOT\a\STX\NUL\DC2\ETXV\EOT\DC4\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETXU\EOT\n\
+    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETXV\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETXU\v\SI\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETXV\v\SI\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETXU\DC2\DC3\n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETXV\DC2\DC3\n\
     \\181\SOH\n\
-    \\STX\EOT\b\DC2\EOTZ\NUL\\\SOH\SUB\168\SOH Represents the identifier used by a activity author to define the activity. Typically, the\n\
+    \\STX\EOT\b\DC2\EOT[\NUL]\SOH\SUB\168\SOH Represents the identifier used by a activity author to define the activity. Typically, the\n\
     \ name of a function. This is sometimes referred to as the activity's \"name\"\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\b\SOH\DC2\ETXZ\b\DC4\n\
+    \\ETX\EOT\b\SOH\DC2\ETX[\b\DC4\n\
     \\v\n\
-    \\EOT\EOT\b\STX\NUL\DC2\ETX[\EOT\DC4\n\
+    \\EOT\EOT\b\STX\NUL\DC2\ETX\\\EOT\DC4\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\ETX[\EOT\n\
+    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\ETX\\\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETX[\v\SI\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETX\\\v\SI\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETX[\DC2\DC3\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETX\\\DC2\DC3\n\
     \V\n\
-    \\STX\EOT\t\DC2\EOT_\NULo\SOH\SUBJ How retries ought to be handled, usable by both workflows and activities\n\
+    \\STX\EOT\t\DC2\EOT`\NULp\SOH\SUBJ How retries ought to be handled, usable by both workflows and activities\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\t\SOH\DC2\ETX_\b\DC3\n\
+    \\ETX\EOT\t\SOH\DC2\ETX`\b\DC3\n\
     \n\n\
-    \\EOT\EOT\t\STX\NUL\DC2\ETXa\EOT2\SUBa Interval of the first retry. If retryBackoffCoefficient is 1.0 then it is used for all retries.\n\
+    \\EOT\EOT\t\STX\NUL\DC2\ETXb\EOT2\SUBa Interval of the first retry. If retryBackoffCoefficient is 1.0 then it is used for all retries.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\NUL\ACK\DC2\ETXa\EOT\FS\n\
+    \\ENQ\EOT\t\STX\NUL\ACK\DC2\ETXb\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\NUL\SOH\DC2\ETXa\GS-\n\
+    \\ENQ\EOT\t\STX\NUL\SOH\DC2\ETXb\GS-\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\NUL\ETX\DC2\ETXa01\n\
+    \\ENQ\EOT\t\STX\NUL\ETX\DC2\ETXb01\n\
     \\169\SOH\n\
-    \\EOT\EOT\t\STX\SOH\DC2\ETXe\EOT#\SUB\155\SOH Coefficient used to calculate the next retry interval.\n\
+    \\EOT\EOT\t\STX\SOH\DC2\ETXf\EOT#\SUB\155\SOH Coefficient used to calculate the next retry interval.\n\
     \ The next retry interval is previous interval multiplied by the coefficient.\n\
     \ Must be 1 or larger.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\SOH\ENQ\DC2\ETXe\EOT\n\
+    \\ENQ\EOT\t\STX\SOH\ENQ\DC2\ETXf\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\SOH\SOH\DC2\ETXe\v\RS\n\
+    \\ENQ\EOT\t\STX\SOH\SOH\DC2\ETXf\v\RS\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\SOH\ETX\DC2\ETXe!\"\n\
+    \\ENQ\EOT\t\STX\SOH\ETX\DC2\ETXf!\"\n\
     \\178\SOH\n\
-    \\EOT\EOT\t\STX\STX\DC2\ETXh\EOT2\SUB\164\SOH Maximum interval between retries. Exponential backoff leads to interval increase.\n\
+    \\EOT\EOT\t\STX\STX\DC2\ETXi\EOT2\SUB\164\SOH Maximum interval between retries. Exponential backoff leads to interval increase.\n\
     \ This value is the cap of the increase. Default is 100x of the initial interval.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\STX\ACK\DC2\ETXh\EOT\FS\n\
+    \\ENQ\EOT\t\STX\STX\ACK\DC2\ETXi\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\STX\SOH\DC2\ETXh\GS-\n\
+    \\ENQ\EOT\t\STX\STX\SOH\DC2\ETXi\GS-\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\STX\ETX\DC2\ETXh01\n\
+    \\ENQ\EOT\t\STX\STX\ETX\DC2\ETXi01\n\
     \\159\SOH\n\
-    \\EOT\EOT\t\STX\ETX\DC2\ETXk\EOT\US\SUB\145\SOH Maximum number of attempts. When exceeded the retries stop even if not expired yet.\n\
+    \\EOT\EOT\t\STX\ETX\DC2\ETXl\EOT\US\SUB\145\SOH Maximum number of attempts. When exceeded the retries stop even if not expired yet.\n\
     \ 1 disables retries. 0 means unlimited (up to the timeouts)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\ETX\ENQ\DC2\ETXk\EOT\t\n\
+    \\ENQ\EOT\t\STX\ETX\ENQ\DC2\ETXl\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\ETX\SOH\DC2\ETXk\n\
+    \\ENQ\EOT\t\STX\ETX\SOH\DC2\ETXl\n\
     \\SUB\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\ETX\ETX\DC2\ETXk\GS\RS\n\
+    \\ENQ\EOT\t\STX\ETX\ETX\DC2\ETXl\GS\RS\n\
     \\192\SOH\n\
-    \\EOT\EOT\t\STX\EOT\DC2\ETXn\EOT2\SUB\178\SOH Non-Retryable errors types. Will stop retrying if the error type matches this list. Note that\n\
+    \\EOT\EOT\t\STX\EOT\DC2\ETXo\EOT2\SUB\178\SOH Non-Retryable errors types. Will stop retrying if the error type matches this list. Note that\n\
     \ this is not a substring match, the error *type* (not message) must match exactly.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\EOT\EOT\DC2\ETXn\EOT\f\n\
+    \\ENQ\EOT\t\STX\EOT\EOT\DC2\ETXo\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\EOT\ENQ\DC2\ETXn\r\DC3\n\
+    \\ENQ\EOT\t\STX\EOT\ENQ\DC2\ETXo\r\DC3\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\EOT\SOH\DC2\ETXn\DC4-\n\
+    \\ENQ\EOT\t\STX\EOT\SOH\DC2\ETXo\DC4-\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\EOT\ETX\DC2\ETXn01\n\
+    \\ENQ\EOT\t\STX\EOT\ETX\DC2\ETXo01\n\
     \5\n\
     \\STX\EOT\n\
-    \\DC2\EOTr\NULz\SOH\SUB) Metadata relevant for metering purposes\n\
+    \\DC2\EOTs\NUL{\SOH\SUB) Metadata relevant for metering purposes\n\
     \\n\
     \\n\
     \\n\
     \\ETX\EOT\n\
-    \\SOH\DC2\ETXr\b\CAN\n\
+    \\SOH\DC2\ETXs\b\CAN\n\
     \\239\STX\n\
     \\EOT\EOT\n\
-    \\STX\NUL\DC2\ETXy\EOT;\SUB\225\STX Count of local activities which have begun an execution attempt during this workflow task,\n\
+    \\STX\NUL\DC2\ETXz\EOT;\SUB\225\STX Count of local activities which have begun an execution attempt during this workflow task,\n\
     \ and whose first attempt occurred in some previous task. This is used for metering\n\
     \ purposes, and does not affect workflow state.\n\
     \\n\
@@ -4156,199 +5332,384 @@ packedFileDescriptor
     \\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ENQ\DC2\ETXy\EOT\n\
+    \\STX\NUL\ENQ\DC2\ETXz\EOT\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\SOH\DC2\ETXy\v5\n\
+    \\STX\NUL\SOH\DC2\ETXz\v5\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ETX\DC2\ETXy8:\n\
-    \J\n\
-    \\STX\EOT\v\DC2\ENQ}\NUL\135\SOH\SOH\SUB= Identifies the version(s) of a worker that processed a task\n\
+    \\STX\NUL\ETX\DC2\ETXz8:\n\
+    \\157\SOH\n\
+    \\STX\EOT\v\DC2\ENQ\DEL\NUL\137\SOH\SOH\SUB\143\SOH Deprecated. This message is replaced with `Deployment` and `VersioningBehavior`.\n\
+    \ Identifies the version(s) of a worker that processed a task\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\v\SOH\DC2\ETX}\b\SUB\n\
+    \\ETX\EOT\v\SOH\DC2\ETX\DEL\b\SUB\n\
     \\170\SOH\n\
-    \\EOT\EOT\v\STX\NUL\DC2\EOT\128\SOH\EOT\CAN\SUB\155\SOH An opaque whole-worker identifier. Replaces the deprecated `binary_checksum` field when this\n\
+    \\EOT\EOT\v\STX\NUL\DC2\EOT\130\SOH\EOT\CAN\SUB\155\SOH An opaque whole-worker identifier. Replaces the deprecated `binary_checksum` field when this\n\
     \ message is included in requests which previously used that.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\NUL\ENQ\DC2\EOT\128\SOH\EOT\n\
+    \\ENQ\EOT\v\STX\NUL\ENQ\DC2\EOT\130\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\NUL\SOH\DC2\EOT\128\SOH\v\DC3\n\
+    \\ENQ\EOT\v\STX\NUL\SOH\DC2\EOT\130\SOH\v\DC3\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\NUL\ETX\DC2\EOT\128\SOH\SYN\ETB\n\
+    \\ENQ\EOT\v\STX\NUL\ETX\DC2\EOT\130\SOH\SYN\ETB\n\
     \\173\SOH\n\
-    \\EOT\EOT\v\STX\SOH\DC2\EOT\132\SOH\EOT\FS\SUB\158\SOH If set, the worker is opting in to worker versioning. Otherwise, this is used only as a\n\
+    \\EOT\EOT\v\STX\SOH\DC2\EOT\134\SOH\EOT\FS\SUB\158\SOH If set, the worker is opting in to worker versioning. Otherwise, this is used only as a\n\
     \ marker for workflow reset points and the BuildIDs search attribute.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\ENQ\DC2\EOT\132\SOH\EOT\b\n\
+    \\ENQ\EOT\v\STX\SOH\ENQ\DC2\EOT\134\SOH\EOT\b\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\SOH\DC2\EOT\132\SOH\t\ETB\n\
+    \\ENQ\EOT\v\STX\SOH\SOH\DC2\EOT\134\SOH\t\ETB\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\ETX\DC2\EOT\132\SOH\SUB\ESC\n\
-    \\151\STX\n\
-    \\STX\EOT\f\DC2\ACK\140\SOH\NUL\149\SOH\SOH\SUB\136\STX Identifies the version(s) that a worker is compatible with when polling or identifying itself,\n\
+    \\ENQ\EOT\v\STX\SOH\ETX\DC2\EOT\134\SOH\SUB\ESC\n\
+    \\198\STX\n\
+    \\STX\EOT\f\DC2\ACK\143\SOH\NUL\155\SOH\SOH\SUB\183\STX Identifies the version that a worker is compatible with when polling or identifying itself,\n\
     \ and whether or not this worker is opting into the build-id based versioning feature. This is\n\
     \ used by matching to determine which workers ought to receive what tasks.\n\
+    \ Deprecated. Use WorkerDeploymentOptions instead.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\f\SOH\DC2\EOT\140\SOH\b!\n\
+    \\ETX\EOT\f\SOH\DC2\EOT\143\SOH\b!\n\
     \1\n\
-    \\EOT\EOT\f\STX\NUL\DC2\EOT\142\SOH\EOT\CAN\SUB# An opaque whole-worker identifier\n\
+    \\EOT\EOT\f\STX\NUL\DC2\EOT\145\SOH\EOT\CAN\SUB# An opaque whole-worker identifier\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\EOT\142\SOH\EOT\n\
+    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\EOT\145\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\SOH\DC2\EOT\142\SOH\v\DC3\n\
+    \\ENQ\EOT\f\STX\NUL\SOH\DC2\EOT\145\SOH\v\DC3\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\ETX\DC2\EOT\142\SOH\SYN\ETB\n\
+    \\ENQ\EOT\f\STX\NUL\ETX\DC2\EOT\145\SOH\SYN\ETB\n\
     \t\n\
-    \\EOT\EOT\f\STX\SOH\DC2\EOT\146\SOH\EOT\FS\SUBf If set, the worker is opting in to worker versioning, and wishes to only receive appropriate\n\
+    \\EOT\EOT\f\STX\SOH\DC2\EOT\149\SOH\EOT\FS\SUBf If set, the worker is opting in to worker versioning, and wishes to only receive appropriate\n\
     \ tasks.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SOH\ENQ\DC2\EOT\146\SOH\EOT\b\n\
+    \\ENQ\EOT\f\STX\SOH\ENQ\DC2\EOT\149\SOH\EOT\b\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SOH\SOH\DC2\EOT\146\SOH\t\ETB\n\
+    \\ENQ\EOT\f\STX\SOH\SOH\DC2\EOT\149\SOH\t\ETB\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SOH\ETX\DC2\EOT\146\SOH\SUB\ESC\n\
+    \\ENQ\EOT\f\STX\SOH\ETX\DC2\EOT\149\SOH\SUB\ESC\n\
+    \U\n\
+    \\EOT\EOT\f\STX\STX\DC2\EOT\152\SOH\EOT&\SUBG Must be sent if user has set a deployment series name (versioning-3).\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\STX\ENQ\DC2\EOT\152\SOH\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\STX\SOH\DC2\EOT\152\SOH\v!\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\STX\ETX\DC2\EOT\152\SOH$%\n\
     \\141\SOH\n\
-    \\STX\EOT\r\DC2\ACK\153\SOH\NUL\182\SOH\SOH\SUB\DEL Describes where and how to reset a workflow, used for batch reset currently\n\
+    \\STX\EOT\r\DC2\ACK\159\SOH\NUL\188\SOH\SOH\SUB\DEL Describes where and how to reset a workflow, used for batch reset currently\n\
     \ and may be used for single-workflow reset later.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\r\SOH\DC2\EOT\153\SOH\b\DC4\n\
+    \\ETX\EOT\r\SOH\DC2\EOT\159\SOH\b\DC4\n\
     \2\n\
-    \\EOT\EOT\r\b\NUL\DC2\ACK\155\SOH\EOT\170\SOH\ENQ\SUB\" Which workflow task to reset to.\n\
+    \\EOT\EOT\r\b\NUL\DC2\ACK\161\SOH\EOT\176\SOH\ENQ\SUB\" Which workflow task to reset to.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\b\NUL\SOH\DC2\EOT\155\SOH\n\
+    \\ENQ\EOT\r\b\NUL\SOH\DC2\EOT\161\SOH\n\
     \\DLE\n\
     \M\n\
-    \\EOT\EOT\r\STX\NUL\DC2\EOT\157\SOH\b6\SUB? Resets to the first workflow task completed or started event.\n\
+    \\EOT\EOT\r\STX\NUL\DC2\EOT\163\SOH\b6\SUB? Resets to the first workflow task completed or started event.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\NUL\ACK\DC2\EOT\157\SOH\b\GS\n\
+    \\ENQ\EOT\r\STX\NUL\ACK\DC2\EOT\163\SOH\b\GS\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\NUL\SOH\DC2\EOT\157\SOH\RS1\n\
+    \\ENQ\EOT\r\STX\NUL\SOH\DC2\EOT\163\SOH\RS1\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\NUL\ETX\DC2\EOT\157\SOH45\n\
+    \\ENQ\EOT\r\STX\NUL\ETX\DC2\EOT\163\SOH45\n\
     \L\n\
-    \\EOT\EOT\r\STX\SOH\DC2\EOT\159\SOH\b5\SUB> Resets to the last workflow task completed or started event.\n\
+    \\EOT\EOT\r\STX\SOH\DC2\EOT\165\SOH\b5\SUB> Resets to the last workflow task completed or started event.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SOH\ACK\DC2\EOT\159\SOH\b\GS\n\
+    \\ENQ\EOT\r\STX\SOH\ACK\DC2\EOT\165\SOH\b\GS\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SOH\SOH\DC2\EOT\159\SOH\RS0\n\
+    \\ENQ\EOT\r\STX\SOH\SOH\DC2\EOT\165\SOH\RS0\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SOH\ETX\DC2\EOT\159\SOH34\n\
+    \\ENQ\EOT\r\STX\SOH\ETX\DC2\EOT\165\SOH34\n\
     \\241\SOH\n\
-    \\EOT\EOT\r\STX\STX\DC2\EOT\163\SOH\b#\SUB\226\SOH The id of a specific `WORKFLOW_TASK_COMPLETED`,`WORKFLOW_TASK_TIMED_OUT`, `WORKFLOW_TASK_FAILED`, or\n\
+    \\EOT\EOT\r\STX\STX\DC2\EOT\169\SOH\b#\SUB\226\SOH The id of a specific `WORKFLOW_TASK_COMPLETED`,`WORKFLOW_TASK_TIMED_OUT`, `WORKFLOW_TASK_FAILED`, or\n\
     \ `WORKFLOW_TASK_STARTED` event to reset to.\n\
     \ Note that this option doesn't make sense when used as part of a batch request.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\STX\ENQ\DC2\EOT\163\SOH\b\r\n\
+    \\ENQ\EOT\r\STX\STX\ENQ\DC2\EOT\169\SOH\b\r\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\STX\SOH\DC2\EOT\163\SOH\SO\RS\n\
+    \\ENQ\EOT\r\STX\STX\SOH\DC2\EOT\169\SOH\SO\RS\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\STX\ETX\DC2\EOT\163\SOH!\"\n\
+    \\ENQ\EOT\r\STX\STX\ETX\DC2\EOT\169\SOH!\"\n\
     \\171\STX\n\
-    \\EOT\EOT\r\STX\ETX\DC2\EOT\169\SOH\b\FS\SUB\156\STX Resets to the first workflow task processed by this build id.\n\
+    \\EOT\EOT\r\STX\ETX\DC2\EOT\175\SOH\b\FS\SUB\156\STX Resets to the first workflow task processed by this build id.\n\
     \ If the workflow was not processed by the build id, or the workflow task can't be\n\
     \ determined, no reset will be performed.\n\
     \ Note that by default, this reset is allowed to be to a prior run in a chain of\n\
     \ continue-as-new.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ETX\ENQ\DC2\EOT\169\SOH\b\SO\n\
+    \\ENQ\EOT\r\STX\ETX\ENQ\DC2\EOT\175\SOH\b\SO\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ETX\SOH\DC2\EOT\169\SOH\SI\ETB\n\
+    \\ENQ\EOT\r\STX\ETX\SOH\DC2\EOT\175\SOH\SI\ETB\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ETX\ETX\DC2\EOT\169\SOH\SUB\ESC\n\
+    \\ENQ\EOT\r\STX\ETX\ETX\DC2\EOT\175\SOH\SUB\ESC\n\
     \\\\n\
-    \\EOT\EOT\r\STX\EOT\DC2\EOT\174\SOH\EOTC\SUBN Event types to be reapplied (deprecated)\n\
+    \\EOT\EOT\r\STX\EOT\DC2\EOT\180\SOH\EOTC\SUBN Event types to be reapplied (deprecated)\n\
     \ Default: RESET_REAPPLY_TYPE_SIGNAL\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\EOT\ACK\DC2\EOT\174\SOH\EOT*\n\
+    \\ENQ\EOT\r\STX\EOT\ACK\DC2\EOT\180\SOH\EOT*\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\EOT\SOH\DC2\EOT\174\SOH+=\n\
+    \\ENQ\EOT\r\STX\EOT\SOH\DC2\EOT\180\SOH+=\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\EOT\ETX\DC2\EOT\174\SOH@B\n\
+    \\ENQ\EOT\r\STX\EOT\ETX\DC2\EOT\180\SOH@B\n\
     \\138\SOH\n\
-    \\EOT\EOT\r\STX\ENQ\DC2\EOT\178\SOH\EOT\US\SUB| If true, limit the reset to only within the current run. (Applies to build_id targets and\n\
+    \\EOT\EOT\r\STX\ENQ\DC2\EOT\184\SOH\EOT\US\SUB| If true, limit the reset to only within the current run. (Applies to build_id targets and\n\
     \ possibly others in the future.)\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ENQ\ENQ\DC2\EOT\178\SOH\EOT\b\n\
+    \\ENQ\EOT\r\STX\ENQ\ENQ\DC2\EOT\184\SOH\EOT\b\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ENQ\SOH\DC2\EOT\178\SOH\t\EM\n\
+    \\ENQ\EOT\r\STX\ENQ\SOH\DC2\EOT\184\SOH\t\EM\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ENQ\ETX\DC2\EOT\178\SOH\FS\RS\n\
+    \\ENQ\EOT\r\STX\ENQ\ETX\DC2\EOT\184\SOH\FS\RS\n\
     \/\n\
-    \\EOT\EOT\r\STX\ACK\DC2\EOT\181\SOH\EOT\\\SUB! Event types not to be reapplied\n\
+    \\EOT\EOT\r\STX\ACK\DC2\EOT\187\SOH\EOT\\\SUB! Event types not to be reapplied\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ACK\EOT\DC2\EOT\181\SOH\EOT\f\n\
+    \\ENQ\EOT\r\STX\ACK\EOT\DC2\EOT\187\SOH\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ACK\ACK\DC2\EOT\181\SOH\r:\n\
+    \\ENQ\EOT\r\STX\ACK\ACK\DC2\EOT\187\SOH\r:\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ACK\SOH\DC2\EOT\181\SOH;V\n\
+    \\ENQ\EOT\r\STX\ACK\SOH\DC2\EOT\187\SOH;V\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ACK\ETX\DC2\EOT\181\SOHY[\n\
+    \\ENQ\EOT\r\STX\ACK\ETX\DC2\EOT\187\SOHY[\n\
     \a\n\
-    \\STX\EOT\SO\DC2\ACK\185\SOH\NUL\197\SOH\SOH\SUBS Callback to attach to various events in the system, e.g. workflow run completion.\n\
+    \\STX\EOT\SO\DC2\ACK\191\SOH\NUL\213\SOH\SOH\SUBS Callback to attach to various events in the system, e.g. workflow run completion.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\SO\SOH\DC2\EOT\185\SOH\b\DLE\n\
+    \\ETX\EOT\SO\SOH\DC2\EOT\191\SOH\b\DLE\n\
     \\SO\n\
-    \\EOT\EOT\SO\ETX\NUL\DC2\ACK\186\SOH\EOT\191\SOH\ENQ\n\
+    \\EOT\EOT\SO\ETX\NUL\DC2\ACK\192\SOH\EOT\197\SOH\ENQ\n\
     \\r\n\
-    \\ENQ\EOT\SO\ETX\NUL\SOH\DC2\EOT\186\SOH\f\DC1\n\
+    \\ENQ\EOT\SO\ETX\NUL\SOH\DC2\EOT\192\SOH\f\DC1\n\
     \\US\n\
-    \\ACK\EOT\SO\ETX\NUL\STX\NUL\DC2\EOT\188\SOH\b\ETB\SUB\SI Callback URL.\n\
+    \\ACK\EOT\SO\ETX\NUL\STX\NUL\DC2\EOT\194\SOH\b\ETB\SUB\SI Callback URL.\n\
     \\n\
     \\SI\n\
-    \\a\EOT\SO\ETX\NUL\STX\NUL\ENQ\DC2\EOT\188\SOH\b\SO\n\
+    \\a\EOT\SO\ETX\NUL\STX\NUL\ENQ\DC2\EOT\194\SOH\b\SO\n\
     \\SI\n\
-    \\a\EOT\SO\ETX\NUL\STX\NUL\SOH\DC2\EOT\188\SOH\SI\DC2\n\
+    \\a\EOT\SO\ETX\NUL\STX\NUL\SOH\DC2\EOT\194\SOH\SI\DC2\n\
     \\SI\n\
-    \\a\EOT\SO\ETX\NUL\STX\NUL\ETX\DC2\EOT\188\SOH\NAK\SYN\n\
+    \\a\EOT\SO\ETX\NUL\STX\NUL\ETX\DC2\EOT\194\SOH\NAK\SYN\n\
     \7\n\
-    \\ACK\EOT\SO\ETX\NUL\STX\SOH\DC2\EOT\190\SOH\b'\SUB' Header to attach to callback request.\n\
+    \\ACK\EOT\SO\ETX\NUL\STX\SOH\DC2\EOT\196\SOH\b'\SUB' Header to attach to callback request.\n\
     \\n\
     \\SI\n\
-    \\a\EOT\SO\ETX\NUL\STX\SOH\ACK\DC2\EOT\190\SOH\b\ESC\n\
+    \\a\EOT\SO\ETX\NUL\STX\SOH\ACK\DC2\EOT\196\SOH\b\ESC\n\
     \\SI\n\
-    \\a\EOT\SO\ETX\NUL\STX\SOH\SOH\DC2\EOT\190\SOH\FS\"\n\
+    \\a\EOT\SO\ETX\NUL\STX\SOH\SOH\DC2\EOT\196\SOH\FS\"\n\
     \\SI\n\
-    \\a\EOT\SO\ETX\NUL\STX\SOH\ETX\DC2\EOT\190\SOH%&\n\
+    \\a\EOT\SO\ETX\NUL\STX\SOH\ETX\DC2\EOT\196\SOH%&\n\
+    \\222\STX\n\
+    \\EOT\EOT\SO\ETX\SOH\DC2\ACK\203\SOH\EOT\206\SOH\ENQ\SUB\205\STX Callbacks to be delivered internally within the system.\n\
+    \ This variant is not settable in the API and will be rejected by the service with an INVALID_ARGUMENT error.\n\
+    \ The only reason that this is exposed is because callbacks are replicated across clusters via the\n\
+    \ WorkflowExecutionStarted event, which is defined in the public API.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SO\ETX\SOH\SOH\DC2\EOT\203\SOH\f\DC4\n\
+    \'\n\
+    \\ACK\EOT\SO\ETX\SOH\STX\NUL\DC2\EOT\205\SOH\b\ETB\SUB\ETB Opaque internal data.\n\
+    \\n\
+    \\SI\n\
+    \\a\EOT\SO\ETX\SOH\STX\NUL\ENQ\DC2\EOT\205\SOH\b\r\n\
+    \\SI\n\
+    \\a\EOT\SO\ETX\SOH\STX\NUL\SOH\DC2\EOT\205\SOH\SO\DC2\n\
+    \\SI\n\
+    \\a\EOT\SO\ETX\SOH\STX\NUL\ETX\DC2\EOT\205\SOH\NAK\SYN\n\
     \B\n\
-    \\ETX\EOT\SO\t\DC2\EOT\193\SOH\EOT\SI\"5 For a generic callback mechanism to be added later.\n\
+    \\ETX\EOT\SO\t\DC2\EOT\208\SOH\EOT\SI\"5 For a generic callback mechanism to be added later.\n\
     \\n\
     \\f\n\
-    \\EOT\EOT\SO\t\NUL\DC2\EOT\193\SOH\r\SO\n\
+    \\EOT\EOT\SO\t\NUL\DC2\EOT\208\SOH\r\SO\n\
     \\r\n\
-    \\ENQ\EOT\SO\t\NUL\SOH\DC2\EOT\193\SOH\r\SO\n\
+    \\ENQ\EOT\SO\t\NUL\SOH\DC2\EOT\208\SOH\r\SO\n\
     \\r\n\
-    \\ENQ\EOT\SO\t\NUL\STX\DC2\EOT\193\SOH\r\SO\n\
+    \\ENQ\EOT\SO\t\NUL\STX\DC2\EOT\208\SOH\r\SO\n\
     \\SO\n\
-    \\EOT\EOT\SO\b\NUL\DC2\ACK\194\SOH\EOT\196\SOH\ENQ\n\
+    \\EOT\EOT\SO\b\NUL\DC2\ACK\209\SOH\EOT\212\SOH\ENQ\n\
     \\r\n\
-    \\ENQ\EOT\SO\b\NUL\SOH\DC2\EOT\194\SOH\n\
+    \\ENQ\EOT\SO\b\NUL\SOH\DC2\EOT\209\SOH\n\
     \\DC1\n\
     \\f\n\
-    \\EOT\EOT\SO\STX\NUL\DC2\EOT\195\SOH\b\CAN\n\
+    \\EOT\EOT\SO\STX\NUL\DC2\EOT\210\SOH\b\CAN\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\ACK\DC2\EOT\195\SOH\b\r\n\
+    \\ENQ\EOT\SO\STX\NUL\ACK\DC2\EOT\210\SOH\b\r\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\EOT\195\SOH\SO\DC3\n\
+    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\EOT\210\SOH\SO\DC3\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\EOT\195\SOH\SYN\ETBb\ACKproto3"
+    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\EOT\210\SOH\SYN\ETB\n\
+    \\f\n\
+    \\EOT\EOT\SO\STX\SOH\DC2\EOT\211\SOH\b\RS\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\SOH\ACK\DC2\EOT\211\SOH\b\DLE\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\EOT\211\SOH\DC1\EM\n\
+    \\r\n\
+    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\EOT\211\SOH\FS\GS\n\
+    \\212\STX\n\
+    \\STX\EOT\SI\DC2\ACK\219\SOH\NUL\248\SOH\SOH\SUB\197\STX Link can be associated with history events. It might contain information about an external entity\n\
+    \ related to the history event. For example, workflow A makes a Nexus call that starts workflow B:\n\
+    \ in this case, a history event in workflow A could contain a Link to the workflow started event in\n\
+    \ workflow B, and vice-versa.\n\
+    \\n\
+    \\v\n\
+    \\ETX\EOT\SI\SOH\DC2\EOT\219\SOH\b\f\n\
+    \\SO\n\
+    \\EOT\EOT\SI\ETX\NUL\DC2\ACK\220\SOH\EOT\235\SOH\ENQ\n\
+    \\r\n\
+    \\ENQ\EOT\SI\ETX\NUL\SOH\DC2\EOT\220\SOH\f\EM\n\
+    \\DLE\n\
+    \\ACK\EOT\SI\ETX\NUL\ETX\NUL\DC2\ACK\221\SOH\b\224\SOH\t\n\
+    \\SI\n\
+    \\a\EOT\SI\ETX\NUL\ETX\NUL\SOH\DC2\EOT\221\SOH\DLE\RS\n\
+    \\DLE\n\
+    \\b\EOT\SI\ETX\NUL\ETX\NUL\STX\NUL\DC2\EOT\222\SOH\f\US\n\
+    \\DC1\n\
+    \\t\EOT\SI\ETX\NUL\ETX\NUL\STX\NUL\ENQ\DC2\EOT\222\SOH\f\DC1\n\
+    \\DC1\n\
+    \\t\EOT\SI\ETX\NUL\ETX\NUL\STX\NUL\SOH\DC2\EOT\222\SOH\DC2\SUB\n\
+    \\DC1\n\
+    \\t\EOT\SI\ETX\NUL\ETX\NUL\STX\NUL\ETX\DC2\EOT\222\SOH\GS\RS\n\
+    \\DLE\n\
+    \\b\EOT\SI\ETX\NUL\ETX\NUL\STX\SOH\DC2\EOT\223\SOH\f;\n\
+    \\DC1\n\
+    \\t\EOT\SI\ETX\NUL\ETX\NUL\STX\SOH\ACK\DC2\EOT\223\SOH\f+\n\
+    \\DC1\n\
+    \\t\EOT\SI\ETX\NUL\ETX\NUL\STX\SOH\SOH\DC2\EOT\223\SOH,6\n\
+    \\DC1\n\
+    \\t\EOT\SI\ETX\NUL\ETX\NUL\STX\SOH\ETX\DC2\EOT\223\SOH9:\n\
+    \\SO\n\
+    \\ACK\EOT\SI\ETX\NUL\STX\NUL\DC2\EOT\226\SOH\b\GS\n\
+    \\SI\n\
+    \\a\EOT\SI\ETX\NUL\STX\NUL\ENQ\DC2\EOT\226\SOH\b\SO\n\
+    \\SI\n\
+    \\a\EOT\SI\ETX\NUL\STX\NUL\SOH\DC2\EOT\226\SOH\SI\CAN\n\
+    \\SI\n\
+    \\a\EOT\SI\ETX\NUL\STX\NUL\ETX\DC2\EOT\226\SOH\ESC\FS\n\
+    \\SO\n\
+    \\ACK\EOT\SI\ETX\NUL\STX\SOH\DC2\EOT\227\SOH\b\US\n\
+    \\SI\n\
+    \\a\EOT\SI\ETX\NUL\STX\SOH\ENQ\DC2\EOT\227\SOH\b\SO\n\
+    \\SI\n\
+    \\a\EOT\SI\ETX\NUL\STX\SOH\SOH\DC2\EOT\227\SOH\SI\SUB\n\
+    \\SI\n\
+    \\a\EOT\SI\ETX\NUL\STX\SOH\ETX\DC2\EOT\227\SOH\GS\RS\n\
+    \\SO\n\
+    \\ACK\EOT\SI\ETX\NUL\STX\STX\DC2\EOT\228\SOH\b\SUB\n\
+    \\SI\n\
+    \\a\EOT\SI\ETX\NUL\STX\STX\ENQ\DC2\EOT\228\SOH\b\SO\n\
+    \\SI\n\
+    \\a\EOT\SI\ETX\NUL\STX\STX\SOH\DC2\EOT\228\SOH\SI\NAK\n\
+    \\SI\n\
+    \\a\EOT\SI\ETX\NUL\STX\STX\ETX\DC2\EOT\228\SOH\CAN\EM\n\
+    \\155\SOH\n\
+    \\ACK\EOT\SI\ETX\NUL\b\NUL\DC2\ACK\232\SOH\b\234\SOH\t\SUB\136\SOH Additional information about the workflow event.\n\
+    \ Eg: the caller workflow can send the history event details that made the Nexus call.\n\
+    \\n\
+    \\SI\n\
+    \\a\EOT\SI\ETX\NUL\b\NUL\SOH\DC2\EOT\232\SOH\SO\ETB\n\
+    \\SO\n\
+    \\ACK\EOT\SI\ETX\NUL\STX\ETX\DC2\EOT\233\SOH\f+\n\
+    \\SI\n\
+    \\a\EOT\SI\ETX\NUL\STX\ETX\ACK\DC2\EOT\233\SOH\f\SUB\n\
+    \\SI\n\
+    \\a\EOT\SI\ETX\NUL\STX\ETX\SOH\DC2\EOT\233\SOH\ESC$\n\
+    \\SI\n\
+    \\a\EOT\SI\ETX\NUL\STX\ETX\ETX\DC2\EOT\233\SOH'*\n\
+    \\249\SOH\n\
+    \\EOT\EOT\SI\ETX\SOH\DC2\ACK\240\SOH\EOT\242\SOH\ENQ\SUB\232\SOH A link to a built-in batch job.\n\
+    \ Batch jobs can be used to perform operations on a set of workflows (e.g. terminate, signal, cancel, etc).\n\
+    \ This link can be put on workflow history events generated by actions taken by a batch job.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SI\ETX\SOH\SOH\DC2\EOT\240\SOH\f\DC4\n\
+    \\SO\n\
+    \\ACK\EOT\SI\ETX\SOH\STX\NUL\DC2\EOT\241\SOH\b\SUB\n\
+    \\SI\n\
+    \\a\EOT\SI\ETX\SOH\STX\NUL\ENQ\DC2\EOT\241\SOH\b\SO\n\
+    \\SI\n\
+    \\a\EOT\SI\ETX\SOH\STX\NUL\SOH\DC2\EOT\241\SOH\SI\NAK\n\
+    \\SI\n\
+    \\a\EOT\SI\ETX\SOH\STX\NUL\ETX\DC2\EOT\241\SOH\CAN\EM\n\
+    \\SO\n\
+    \\EOT\EOT\SI\b\NUL\DC2\ACK\244\SOH\EOT\247\SOH\ENQ\n\
+    \\r\n\
+    \\ENQ\EOT\SI\b\NUL\SOH\DC2\EOT\244\SOH\n\
+    \\DC1\n\
+    \\f\n\
+    \\EOT\EOT\SI\STX\NUL\DC2\EOT\245\SOH\b)\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\NUL\ACK\DC2\EOT\245\SOH\b\NAK\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\EOT\245\SOH\SYN$\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\EOT\245\SOH'(\n\
+    \\f\n\
+    \\EOT\EOT\SI\STX\SOH\DC2\EOT\246\SOH\b\US\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\SOH\ACK\DC2\EOT\246\SOH\b\DLE\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\SOH\SOH\DC2\EOT\246\SOH\DC1\SUB\n\
+    \\r\n\
+    \\ENQ\EOT\SI\STX\SOH\ETX\DC2\EOT\246\SOH\GS\RS\n\
+    \\161\b\n\
+    \\STX\EOT\DLE\DC2\ACK\141\STX\NUL\153\STX\SOH\SUB\146\b Priority contains metadata that controls relative ordering of task processing\n\
+    \ when tasks are backlogged in a queue. Initially, Priority will be used in\n\
+    \ activity and workflow task queues, which are typically where backlogs exist.\n\
+    \ Other queues in the server (such as transfer and timer queues) and rate\n\
+    \ limiting decisions do not use Priority, but may in the future.\n\
+    \\n\
+    \ Priority is attached to workflows and activities. Activities and child\n\
+    \ workflows inherit Priority from the workflow that created them, but may\n\
+    \ override fields when they are started or modified. For each field of a\n\
+    \ Priority on an activity/workflow, not present or equal to zero/empty string\n\
+    \ means to inherit the value from the calling workflow, or if there is no\n\
+    \ calling workflow, then use the default (documented below).\n\
+    \\n\
+    \ Despite being named \"Priority\", this message will also contains fields that\n\
+    \ control \"fairness\" mechanisms.\n\
+    \\n\
+    \ The overall semantics of Priority are:\n\
+    \ 1. First, consider \"priority_key\": lower number goes first.\n\
+    \ (more will be added here later)\n\
+    \\n\
+    \\v\n\
+    \\ETX\EOT\DLE\SOH\DC2\EOT\141\STX\b\DLE\n\
+    \\211\ETX\n\
+    \\EOT\EOT\DLE\STX\NUL\DC2\EOT\152\STX\EOT\ESC\SUB\196\ETX Priority key is a positive integer from 1 to n, where smaller integers\n\
+    \ correspond to higher priorities (tasks run sooner). In general, tasks in\n\
+    \ a queue should be processed in close to priority order, although small\n\
+    \ deviations are possible.\n\
+    \\n\
+    \ The maximum priority value (minimum priority) is determined by server\n\
+    \ configuration, and defaults to 5.\n\
+    \\n\
+    \ The default priority is (min+max)/2. With the default max of 5 and min of\n\
+    \ 1, that comes out to 3.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\NUL\ENQ\DC2\EOT\152\STX\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\NUL\SOH\DC2\EOT\152\STX\n\
+    \\SYN\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\NUL\ETX\DC2\EOT\152\STX\EM\SUBb\ACKproto3"

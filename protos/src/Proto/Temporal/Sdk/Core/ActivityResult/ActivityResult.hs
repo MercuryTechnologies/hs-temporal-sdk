@@ -1437,16 +1437,16 @@ packedFileDescriptor
     \\tDoBackoff\DC2\CAN\n\
     \\aattempt\CAN\SOH \SOH(\rR\aattempt\DC2D\n\
     \\DLEbackoff_duration\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\SIbackoffDuration\DC2P\n\
-    \\SYNoriginal_schedule_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\DC4originalScheduleTimeB*\234\STX'Temporalio::Bridge::Api::ActivityResultJ\230\DC4\n\
+    \\SYNoriginal_schedule_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\DC4originalScheduleTimeB4\234\STX1Temporalio::Internal::Bridge::Api::ActivityResultJ\230\DC4\n\
     \\ACK\DC2\EOT\NUL\NULK\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
     \\SOH\STX\DC2\ETX\STX\NUL \n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ETX\NUL@\n\
+    \\SOH\b\DC2\ETX\ETX\NULJ\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\ETX\NUL@\n\
+    \\STX\b-\DC2\ETX\ETX\NULJ\n\
     \\t\n\
     \\STX\ETX\NUL\DC2\ETX\ENQ\NUL(\n\
     \\t\n\

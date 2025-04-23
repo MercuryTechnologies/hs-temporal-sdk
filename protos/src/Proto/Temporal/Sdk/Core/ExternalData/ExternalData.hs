@@ -620,16 +620,16 @@ packedFileDescriptor
     \\STXid\CAN\SOH \SOH(\tR\STXid\DC2\RS\n\
     \\n\
     \deprecated\CAN\STX \SOH(\bR\n\
-    \deprecatedB(\234\STX%Temporalio::Bridge::Api::ExternalDataJ\231\r\n\
+    \deprecatedB2\234\STX/Temporalio::Internal::Bridge::Api::ExternalDataJ\231\r\n\
     \\ACK\DC2\EOT\NUL\NUL%\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
     \\SOH\STX\DC2\ETX\STX\NUL\RS\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ETX\NUL>\n\
+    \\SOH\b\DC2\ETX\ETX\NULH\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\ETX\NUL>\n\
+    \\STX\b-\DC2\ETX\ETX\NULH\n\
     \\t\n\
     \\STX\ETX\NUL\DC2\ETX\ENQ\NUL(\n\
     \\t\n\

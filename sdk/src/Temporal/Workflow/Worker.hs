@@ -155,7 +155,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
     then do
       mInst <- createOrFetchWorkflowInstance
       forM_ mInst $ \inst -> do
-        let withoutStart = filter (\job -> isNothing (job ^. Activation.maybe'startWorkflow)) (activation ^. Activation.jobs)
+        let withoutStart = filter (\job -> isNothing (job ^. Activation.maybe'initializeWorkflow)) (activation ^. Activation.jobs)
         case withoutStart of
           [] -> pure ()
           otherJobs -> atomically $ writeTQueue inst.activationChannel (activation & Activation.jobs .~ otherJobs)
@@ -176,12 +176,12 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
         removeFromCacheJob = V.any (\j -> isJust (j ^. Activation.maybe'removeFromCache)) jobs
         moreThanOneJob = V.length jobs > 1
 
-    activationStartWorkflowJobs :: V.Vector (WorkflowActivationJob, StartWorkflow)
-    activationStartWorkflowJobs =
+    activationInitializeWorkflowJobs :: V.Vector (WorkflowActivationJob, InitializeWorkflow)
+    activationInitializeWorkflowJobs =
       V.mapMaybe
         ( \rawJob ->
             case rawJob ^. Activation.maybe'variant of
-              Just (WorkflowActivationJob'StartWorkflow startWorkflow) -> Just (rawJob, startWorkflow)
+              Just (WorkflowActivationJob'InitializeWorkflow initializeWorkflow) -> Just (rawJob, initializeWorkflow)
               _ -> Nothing
         )
         (activation ^. Activation.vec'jobs)
@@ -196,14 +196,14 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
           pure $ Just inst
         Nothing -> do
           addAttribute s "temporal.workflow.worker.instance_state" ("new" :: Text)
-          vExistingInstance <- forM activationStartWorkflowJobs $ \(_job, startWorkflow) -> do
-            addAttribute s "temporal.workflow.type" (startWorkflow ^. Activation.workflowType)
+          vExistingInstance <- forM activationInitializeWorkflowJobs $ \(_job, initializeWorkflow) -> do
+            addAttribute s "temporal.workflow.type" (initializeWorkflow ^. Activation.workflowType)
             ePayloads <- Ann.try $ do
               searchAttrs <- liftIO $ do
-                decodedAttrs <- startWorkflow ^. Activation.searchAttributes . Message.indexedFields . to searchAttributesFromProto
+                decodedAttrs <- initializeWorkflow ^. Activation.searchAttributes . Message.indexedFields . to searchAttributesFromProto
                 either (throwIO . ValueError) pure decodedAttrs
-              hdrs <- processorDecodePayloads worker.processor (startWorkflow ^. Activation.headers . to (fmap convertFromProtoPayload))
-              memo <- processorDecodePayloads worker.processor (startWorkflow ^. Activation.memo . Message.fields . to (fmap convertFromProtoPayload))
+              hdrs <- processorDecodePayloads worker.processor (initializeWorkflow ^. Activation.headers . to (fmap convertFromProtoPayload))
+              memo <- processorDecodePayloads worker.processor (initializeWorkflow ^. Activation.memo . Message.fields . to (fmap convertFromProtoPayload))
               pure (searchAttrs, hdrs, memo)
             case ePayloads of
               Left err -> do
@@ -229,7 +229,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                 pure Nothing
               Right (searchAttrs, hdrs, memo) -> do
                 let runId_ = RunId $ activation ^. CommonProto.runId
-                    parentProto = startWorkflow ^. Activation.maybe'parentWorkflowInfo
+                    parentProto = initializeWorkflow ^. Activation.maybe'parentWorkflowInfo
                     parentInfo = case parentProto of
                       Nothing -> Nothing
                       Just parent ->
@@ -242,30 +242,30 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                     workflowInfo =
                       Temporal.WorkflowInstance.Info
                         { historyLength = activation ^. Activation.historyLength
-                        , attempt = fromIntegral $ startWorkflow ^. Activation.attempt
+                        , attempt = fromIntegral $ initializeWorkflow ^. Activation.attempt
                         , taskQueue = worker.workerTaskQueue
-                        , workflowId = WorkflowId $ startWorkflow ^. Activation.workflowId
-                        , workflowType = startWorkflow ^. Activation.workflowType . to WorkflowType
-                        , continuedRunId = fmap RunId $ startWorkflow ^. Activation.continuedFromExecutionRunId . to nonEmptyString
-                        , cronSchedule = startWorkflow ^. Activation.cronSchedule . to nonEmptyString
-                        , taskTimeout = startWorkflow ^. Activation.workflowTaskTimeout . to durationFromProto
-                        , executionTimeout = fmap durationFromProto $ startWorkflow ^. Activation.maybe'workflowExecutionTimeout
+                        , workflowId = WorkflowId $ initializeWorkflow ^. Activation.workflowId
+                        , workflowType = initializeWorkflow ^. Activation.workflowType . to WorkflowType
+                        , continuedRunId = fmap RunId $ initializeWorkflow  ^. Activation.continuedFromExecutionRunId . to nonEmptyString
+                        , cronSchedule = initializeWorkflow ^. Activation.cronSchedule . to nonEmptyString
+                        , taskTimeout = initializeWorkflow ^. Activation.workflowTaskTimeout . to durationFromProto
+                        , executionTimeout = fmap durationFromProto $ initializeWorkflow ^. Activation.maybe'workflowExecutionTimeout
                         , namespace = Namespace $ Core.namespace $ Core.getWorkerConfig workerCore
                         , parent = parentInfo
                         , headers = hdrs
                         , rawMemo = memo
                         , searchAttributes = searchAttrs
-                        , retryPolicy = retryPolicyFromProto <$> startWorkflow ^. Activation.maybe'retryPolicy
+                        , retryPolicy = retryPolicyFromProto <$> initializeWorkflow ^. Activation.maybe'retryPolicy
                         , runId = RunId $ activation ^. CommonProto.runId
-                        , runTimeout = fmap durationFromProto $ startWorkflow ^. Activation.maybe'workflowRunTimeout
+                        , runTimeout = fmap durationFromProto $ initializeWorkflow ^. Activation.maybe'workflowRunTimeout
                         , startTime =
                             timespecFromTimestamp $
                               fromMaybe
                                 (activation ^. Activation.timestamp)
-                                (startWorkflow ^. Activation.maybe'startTime)
+                                (initializeWorkflow ^. Activation.maybe'startTime)
                         , continueAsNewSuggested = False
                         }
-                case HashMap.lookup (startWorkflow ^. Activation.workflowType) worker.workerWorkflowFunctions of
+                case HashMap.lookup (initializeWorkflow ^. Activation.workflowType) worker.workerWorkflowFunctions of
                   Nothing -> do
                     setStatus s (Error "No workflow definition found")
                     $logInfo "No workflow definition found"
@@ -300,7 +300,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                         worker.workerVault
                         worker.processor
                         workflowInfo
-                        startWorkflow
+                        initializeWorkflow
                     liftIO $ addStackTraceHandler inst
                     Just <$> upsertWorkflowInstance runId_ inst
           pure $ join (vExistingInstance V.!? 0)
