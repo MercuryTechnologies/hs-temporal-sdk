@@ -11,13 +11,13 @@ import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
-import Data.Vault.Strict
 import Data.Kind
 import Data.Map.Strict (Map)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Text (Text)
 import Data.Time.Clock.System (SystemTime)
+import Data.Vault.Strict
 import Data.Vector (Vector)
 import Data.Word (Word32)
 import GHC.Stack
@@ -810,7 +810,7 @@ data WorkflowExitVariant a
 
 
 data HandleQueryInput = HandleQueryInput
-  { handleQueryId :: Text
+  { handleQueryId :: QueryId
   , handleQueryInputType :: Text
   , handleQueryInputArgs :: Vector Payload
   , handleQueryInputHeaders :: Map Text Payload

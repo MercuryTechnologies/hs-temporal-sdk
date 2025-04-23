@@ -39,7 +39,6 @@ flag external_lib
 library
   exposed-modules:
       Temporal.Core.Client
-      Temporal.Core.Client.HealthService
       Temporal.Core.Client.OperatorService
       Temporal.Core.Client.TestService
       Temporal.Core.Client.WorkflowService
@@ -48,6 +47,7 @@ library
       Temporal.Runtime
   other-modules:
       Temporal.Core.CTypes
+      Temporal.Core.Client.HealthService
       Temporal.Internal.FFI
   hs-source-dirs:
       src
