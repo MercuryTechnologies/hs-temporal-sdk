@@ -1,4 +1,4 @@
-verbatim: { cabal-version: 3.0 }
+defaults: { local: ../hpack-defaults.yaml }
 
 name:         temporal-sdk-optimal-codec
 version:      "0.0.1.0"
@@ -14,27 +14,6 @@ dependencies:
 - temporal-sdk
 - if-instance >= 0.5
 - containers
-
-default-extensions:
-- DataKinds
-- FlexibleContexts
-- FlexibleInstances
-- GADTs
-- GeneralizedNewtypeDeriving
-- InstanceSigs
-- LambdaCase
-- MultiParamTypeClasses
-- NamedFieldPuns
-- RankNTypes
-- OverloadedRecordDot
-- OverloadedStrings
-- RecordWildCards
-- ScopedTypeVariables
-- StandaloneDeriving
-- TypeApplications
-- TypeFamilies
-- UndecidableInstances
-- TypeOperators
 
 ghc-options:
 # For details on warnings: https://downloads.haskell.org/~ghc/master/users-guide/using-warnings.html

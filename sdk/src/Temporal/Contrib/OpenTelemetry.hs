@@ -23,8 +23,12 @@ import qualified Data.HashMap.Strict as HashMap
 import Data.Int
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as T
+-- TODO rework WorkflowExitVariant to not expose internals
+
+import qualified Data.Vault.Strict as Vault
 import Data.Version (showVersion)
 import Data.Word (Word32)
+import GHC.IO (unsafePerformIO)
 import qualified OpenTelemetry.Context as Ctxt
 import OpenTelemetry.Context.ThreadLocal (attachContext, getContext)
 import OpenTelemetry.Propagator
@@ -32,7 +36,6 @@ import OpenTelemetry.Propagator.W3CTraceContext
 import OpenTelemetry.Trace.Core
 import Paths_temporal_sdk
 import Temporal.Activity.Types
--- TODO rework WorkflowExitVariant to not expose internals
 import Temporal.Common
 import Temporal.Duration
 import Temporal.Interceptor
@@ -83,6 +86,11 @@ headersPropagator =
     }
 
 
+tracerKey :: Vault.Key Tracer
+tracerKey = unsafePerformIO Vault.newKey
+{-# NOINLINE tracerKey #-}
+
+
 --    * Workflow is scheduled by a client
 --    */
 --   WORKFLOW_START = 'StartWorkflow',
@@ -122,7 +130,7 @@ makeOpenTelemetryInterceptor = do
           tracerProvider
           (InstrumentationLibrary "temporal-sdk" (T.pack $ showVersion Paths_temporal_sdk.version))
           (TracerOptions Nothing)
-  return $
+  pure $
     Interceptors
       { workflowInboundInterceptors =
           WorkflowInboundInterceptor
@@ -369,4 +377,5 @@ makeOpenTelemetryInterceptor = do
             }
       , -- Not really anything to do here since new cron jobs should be in their own context
         scheduleClientInterceptors = mempty
+      , interceptorVault = Vault.insert tracerKey tracer mempty
       }

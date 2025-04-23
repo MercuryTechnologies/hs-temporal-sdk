@@ -31,6 +31,7 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
 import Data.Time.Clock.System (SystemTime (..))
+import Data.Vault.Strict (Vault)
 import Data.Vector (Vector)
 import qualified Data.Vector as V
 import GHC.Stack (HasCallStack, emptyCallStack)
@@ -90,63 +91,72 @@ create
   -> [ApplicationFailureHandler]
   -> WorkflowInboundInterceptor
   -> WorkflowOutboundInterceptor
+  -> Vault
   -> PayloadProcessor
   -> Info
   -> StartWorkflow
   -> m WorkflowInstance
-create workflowCompleteActivation workflowFn workflowDeadlockTimeout errorConverters inboundInterceptor outboundInterceptor payloadProcessor info start = do
-  $logDebug "Instantiating workflow instance"
-  workflowInstanceLogger <- askLoggerIO
-  workflowRandomnessSeed <- WorkflowGenM <$> newIORef (mkStdGen 0)
-  workflowNotifiedPatches <- newIORef mempty
-  workflowMemoizedPatches <- newIORef mempty
-  workflowSequences <-
-    newIORef
-      Sequences
-        { externalCancel = 1
-        , childWorkflow = 1
-        , externalSignal = 1
-        , timer = 1
-        , activity = 1
-        , condition = 1
-        , varId = 1
-        }
-  workflowTime <- newIORef $ MkSystemTime 0 0
-  workflowIsReplaying <- newIORef False
-  workflowSequenceMaps <- newTVarIO $ SequenceMaps mempty mempty mempty mempty mempty mempty
-  workflowCommands <- newTVarIO $ Reversed []
-  workflowSignalHandlers <- newIORef mempty
-  workflowCallStack <- newIORef emptyCallStack
-  workflowQueryHandlers <- newIORef mempty
-  workflowUpdateHandlers <- newIORef mempty
-  workflowInstanceInfo <- newIORef info
-  workflowInstanceContinuationEnv <- ContinuationEnv <$> newIORef JobNil
-  workflowCancellationVar <- newIVar
-  activationChannel <- newTQueueIO
-  executionThread <- newIORef (error "Workflow thread not yet started")
-  -- The execution thread is funny because it needs access to the instance, but the instance
-  -- needs access to the execution thread. It's a bit of a circular dependency, but
-  -- pretty innocuous since writing to the executionThread var happens before anything else
-  -- is allowed to interact with the instance.
-  let inst = WorkflowInstance {..}
-  workerThread <- liftIO $ async $ runInstanceM inst $ do
-    $logDebug "Start workflow execution thread"
-    exec <- setUpWorkflowExecution start
-    res <- liftIO $ inboundInterceptor.executeWorkflow exec $ \exec' -> runInstanceM inst $ runTopLevel $ do
-      $logDebug "Executing workflow"
-      wf <- applyStartWorkflow exec' workflowFn
-      runWorkflowToCompletion wf
-    $logDebug "Workflow execution completed"
-    addCommand =<< convertExitVariantToCommand res
-    flushCommands
-    $logDebug "Handling leftover queries"
-    handleQueriesAfterCompletion
-
-  -- If we have an exception crash the workflow thread, then we need to throw to the worker too,
-  -- otherwise it will just hang forever.
-  link workerThread
-  writeIORef executionThread workerThread
-  pure inst
+create
+  workflowCompleteActivation
+  workflowFn
+  workflowDeadlockTimeout
+  errorConverters
+  inboundInterceptor
+  outboundInterceptor
+  workflowVault
+  payloadProcessor
+  info
+  start = do
+    $logDebug "Instantiating workflow instance"
+    workflowInstanceLogger <- askLoggerIO
+    workflowRandomnessSeed <- WorkflowGenM <$> newIORef (mkStdGen 0)
+    workflowNotifiedPatches <- newIORef mempty
+    workflowMemoizedPatches <- newIORef mempty
+    workflowSequences <-
+      newIORef
+        Sequences
+          { externalCancel = 1
+          , childWorkflow = 1
+          , externalSignal = 1
+          , timer = 1
+          , activity = 1
+          , condition = 1
+          , varId = 1
+          }
+    workflowTime <- newIORef $ MkSystemTime 0 0
+    workflowIsReplaying <- newIORef False
+    workflowSequenceMaps <- newTVarIO $ SequenceMaps mempty mempty mempty mempty mempty mempty
+    workflowCommands <- newTVarIO $ Reversed []
+    workflowSignalHandlers <- newIORef mempty
+    workflowCallStack <- newIORef emptyCallStack
+    workflowQueryHandlers <- newIORef mempty
+    workflowInstanceInfo <- newIORef info
+    workflowInstanceContinuationEnv <- ContinuationEnv <$> newIORef JobNil
+    workflowCancellationVar <- newIVar
+    activationChannel <- newTQueueIO
+    executionThread <- newIORef (error "Workflow thread not yet started")
+    -- The execution thread is funny because it needs access to the instance, but the instance
+    -- needs access to the execution thread. It's a bit of a circular dependency, but
+    -- pretty innocuous since writing to the executionThread var happens before anything else
+    -- is allowed to interact with the instance.
+    let inst = WorkflowInstance {..}
+    workerThread <- liftIO $ async $ runInstanceM inst $ do
+      $logDebug "Start workflow execution thread"
+      exec <- setUpWorkflowExecution start
+      res <- liftIO $ inboundInterceptor.executeWorkflow exec $ \exec' -> runInstanceM inst $ runTopLevel $ do
+        $logDebug "Executing workflow"
+        wf <- applyStartWorkflow exec' workflowFn
+        runWorkflowToCompletion wf
+      $logDebug "Workflow execution completed"
+      addCommand =<< convertExitVariantToCommand res
+      flushCommands
+      $logDebug "Handling leftover queries"
+      handleQueriesAfterCompletion
+    -- If we have an exception crash the workflow thread, then we need to throw to the worker too,
+    -- otherwise it will just hang forever.
+    link workerThread
+    writeIORef executionThread workerThread
+    pure inst
 
 
 runWorkflowToCompletion :: HasCallStack => SuspendableWorkflowExecution Payload -> InstanceM Payload
@@ -320,13 +330,12 @@ applyQueryWorkflow queryWorkflow = do
   $logDebug $ Text.pack ("Applying query: " <> show (queryWorkflow ^. Activation.queryType))
   let processor = inst.payloadProcessor
   args <- processorDecodePayloads processor (fmap convertFromProtoPayload (queryWorkflow ^. Command.vec'arguments))
-  hdrs <- processorDecodePayloads processor (fmap convertFromProtoPayload (queryWorkflow ^. Activation.headers))
   let baseInput =
         HandleQueryInput
-          { handleQueryId = queryWorkflow ^. Activation.queryId
+          { handleQueryId = QueryId (queryWorkflow ^. Activation.queryId)
           , handleQueryInputType = queryWorkflow ^. Activation.queryType
           , handleQueryInputArgs = args
-          , handleQueryInputHeaders = hdrs
+          , handleQueryInputHeaders = fmap convertFromProtoPayload (queryWorkflow ^. Activation.headers)
           }
   res <- liftIO $ inst.inboundInterceptor.handleQuery baseInput $ \input -> do
     let handlerOrDefault =
@@ -338,7 +347,7 @@ applyQueryWorkflow queryWorkflow = do
       Just h ->
         liftIO $
           h
-            (QueryId input.handleQueryId)
+            input.handleQueryId
             input.handleQueryInputArgs
             input.handleQueryInputHeaders
   cmd <- case res of
@@ -354,7 +363,7 @@ applyQueryWorkflow queryWorkflow = do
       res' <- liftIO $ payloadProcessorEncode processor ok
       pure $
         defMessage
-          & Command.queryId .~ baseInput.handleQueryId
+          & Command.queryId .~ rawQueryId baseInput.handleQueryId
           & Command.succeeded
             .~ ( defMessage
                   & Command.response .~ convertToProtoPayload res'
