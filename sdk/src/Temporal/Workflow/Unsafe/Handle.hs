@@ -1,6 +1,7 @@
 -- | The internals of Workflow handles. They are exposed here primarily for interceptor implementations.
 module Temporal.Workflow.Unsafe.Handle where
 
+import Control.Monad.Catch
 import Control.Monad.Reader
 import qualified Data.HashMap.Strict as HashMap
 import Data.Kind
@@ -15,8 +16,18 @@ import RequireCallStack
 import Temporal.Common
 import Temporal.Exception
 import Temporal.Payload
+import Temporal.Workflow.Instance
 import Temporal.Workflow.Internal.Instance
 import Temporal.Workflow.Internal.Monad
+  ( ExternalWorkflowHandle(..)
+  , addCommand
+  , updateCallStack
+  , updateCallStackW
+  )
+import Temporal.Workflow.ChildWorkflowHandle (ChildWorkflowHandle(..))
+import Temporal.Workflow.IVar
+import Temporal.Workflow.Task (Task(..))
+import Temporal.Workflow.Internal.MonadV2
 import UnliftIO
 
 
@@ -46,16 +57,16 @@ class Cancel h where
 
 instance Wait (Task a) where
   type WaitResult (Task a) = Workflow a
-  wait t = do
-    updateCallStackW
-    t.waitAction
+  wait t = Workflow do
+    updateCallStack
+    liftIO t.waitAction
 
 
 instance Cancel (Task a) where
   type CancelResult (Task a) = Workflow ()
-  cancel t = do
-    updateCallStackW
-    t.cancelAction
+  cancel t = Workflow do
+    updateCallStack
+    liftIO t.cancelAction
 
 
 {- | Returns an action that can be used to await cancellation of an external workflow.
@@ -66,12 +77,13 @@ instance Cancel (ExternalWorkflowHandle a) where
   type CancelResult (ExternalWorkflowHandle a) = Workflow (Workflow ())
 
 
-  cancel h = ilift $ do
-    inst <- ask
-    s@(Sequence sVal) <- nextExternalSignalSequence
+  cancel h = Workflow do
+    runtime <- ask
+    s@(Sequence sVal) <- nextExternalCancelSequence
     res <- newIVar
-    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-      seqMaps {externalSignals = HashMap.insert s res (externalSignals seqMaps)}
+    atomically $ modifyTVar'
+      runtime.workflowRuntimeSequenceMaps.externalCancels
+      (HashMap.insert s res)
     addCommand
       ( defMessage
           & Command.requestCancelExternalWorkflowExecution
@@ -84,11 +96,11 @@ instance Cancel (ExternalWorkflowHandle a) where
                        )
                )
       )
-    pure $ do
-      res' <- getIVar res
+    pure $ Workflow do
+      res' <- waitIVar res
       case res' ^. Activation.maybe'failure of
         Nothing -> pure ()
-        Just f -> throw $ CancelExternalWorkflowFailed f
+        Just f -> throwM $ CancelExternalWorkflowFailed f
 
 
 instance Wait (ChildWorkflowHandle a) where
@@ -97,26 +109,27 @@ instance Wait (ChildWorkflowHandle a) where
 
 
 waitChildWorkflowStart :: RequireCallStack => ChildWorkflowHandle result -> Workflow ()
-waitChildWorkflowStart wfHandle = do
-  updateCallStackW
-  getIVar wfHandle.startHandle
+waitChildWorkflowStart wfHandle = Workflow do
+  updateCallStack
+  waitIVar wfHandle.startHandle
 
 
 waitChildWorkflowResult :: RequireCallStack => ChildWorkflowHandle result -> Workflow result
-waitChildWorkflowResult wfHandle@(ChildWorkflowHandle {childWorkflowResultConverter}) =
-  waitChildWorkflowStart wfHandle >> do
-    updateCallStackW
-    res <- getIVar wfHandle.resultHandle
+waitChildWorkflowResult wfHandle@(ChildWorkflowHandle {childWorkflowResultConverter}) = do
+  waitChildWorkflowStart wfHandle
+  Workflow do
+    updateCallStack
+    res <- waitIVar wfHandle.resultHandle
     case res ^. Activation.result . ChildWorkflow.maybe'status of
-      Nothing -> ilift $ throwIO $ RuntimeError "Unrecognized child workflow result status"
+      Nothing -> throwM $ RuntimeError "Unrecognized child workflow result status"
       Just s -> case s of
         ChildWorkflow.ChildWorkflowResult'Completed res' -> do
-          eVal <- ilift $ liftIO $ UnliftIO.try $ childWorkflowResultConverter $ convertFromProtoPayload $ res' ^. ChildWorkflow.result
+          eVal <- liftIO $ UnliftIO.try $ childWorkflowResultConverter $ convertFromProtoPayload $ res' ^. ChildWorkflow.result
           case eVal of
-            Left err -> throw (err :: SomeException)
+            Left err -> throwM (err :: SomeException)
             Right ok -> pure ok
-        ChildWorkflow.ChildWorkflowResult'Failed res' -> throw $ ChildWorkflowFailed $ res' ^. ChildWorkflow.failure
-        ChildWorkflow.ChildWorkflowResult'Cancelled _ -> throw ChildWorkflowCancelled
+        ChildWorkflow.ChildWorkflowResult'Failed res' -> throwM $ ChildWorkflowFailed $ res' ^. ChildWorkflow.failure
+        ChildWorkflow.ChildWorkflowResult'Cancelled _ -> throwM ChildWorkflowCancelled
 
 
 instance Cancel (ChildWorkflowHandle a) where
@@ -127,7 +140,7 @@ instance Cancel (ChildWorkflowHandle a) where
 
 
 cancelChildWorkflowExecution :: RequireCallStack => ChildWorkflowHandle result -> Workflow ()
-cancelChildWorkflowExecution ChildWorkflowHandle {childWorkflowSequence} = ilift $ do
+cancelChildWorkflowExecution ChildWorkflowHandle {childWorkflowSequence} = Workflow do
   updateCallStack
   -- I don't see a way to block on this? I guess Temporal wants us to rely on the orchestrator
   -- managing the cancellation. Compare with ResolveRequestCancelExternalWorkflow. I think

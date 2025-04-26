@@ -40,10 +40,14 @@ import Temporal.Common
 import Temporal.Duration
 import Temporal.Interceptor
 import Temporal.Payload (Payload (..))
-import Temporal.Workflow ()
+import Temporal.Workflow (Workflow)
 import Temporal.Workflow.Types
 import Temporal.Workflow.Unsafe
 import Prelude hiding (span)
+import Temporal.Workflow.Unsafe (performUnsafeNonDeterministicIO)
+import OpenTelemetry.Trace.Core (createSpanWithoutCallStack)
+import qualified Data.Vault.Strict as Vault
+import GHC.IO (unsafePerformIO)
 
 
 -- | "_tracer-data"
@@ -369,3 +373,31 @@ makeOpenTelemetryInterceptor = do
         scheduleClientInterceptors = mempty
       , interceptorVault = Vault.insert tracerKey tracer mempty
       }
+
+-- inSpan :: T.Text -> SpanArguments -> Workflow a -> Workflow a
+-- inSpan = undefined
+
+
+-- inSpan' :: T.Text -> SpanArguments -> Workflow a -> Workflow a
+-- inSpan' = undefined
+
+-- inSpan'' :: HasCallStack => T.Text -> SpanArguments -> (Span -> Workflow a) -> Workflow a
+-- inSpan'' n args f = do
+--   (k, s) <- performUnsafeNonDeterministicResourceT $ allocate
+--     (do
+--       ctx <- getContext
+--       s <- createSpanWithoutCallStack t ctx n args
+--     )
+--     (\s -> endSpan s Nothing)
+--   try $ f s
+--   case eRes of
+--     Left e -> do
+--       performUnsafeNonDeterministicResourceT $ do
+--         setStatus s $ Error $ T.pack $ displayException inner
+--         recordException s [("exception.escaped", toAttribute True)] Nothing inner
+--         endSpan s Nothing
+--         unprotect k
+--       throwM e
+--     Right x -> do
+--       endSpan s Nothing
+--       pure x

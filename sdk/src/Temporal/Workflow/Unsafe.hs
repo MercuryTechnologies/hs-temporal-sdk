@@ -21,8 +21,10 @@ module Temporal.Workflow.Unsafe (
 ) where
 
 import Control.Monad.IO.Class
+import Control.Monad.Reader (ask)
 import Temporal.Workflow
-import Temporal.Workflow.Internal.Monad
+import Temporal.Workflow.Internal.MonadV2
+import Control.Monad.Trans.Resource (ResourceT, runInternalState)
 
 
 {- | Perform an arbitrary IO action in the Workflow monad.
@@ -55,5 +57,5 @@ Temporal SDK:
 * For side effects, use 'Workflow.sideEffect'
 -}
 performUnsafeNonDeterministicIO :: IO a -> Workflow a
-performUnsafeNonDeterministicIO m = Workflow (\_ -> Done <$> liftIO m)
+performUnsafeNonDeterministicIO = Workflow . liftIO
 {-# INLINE performUnsafeNonDeterministicIO #-}

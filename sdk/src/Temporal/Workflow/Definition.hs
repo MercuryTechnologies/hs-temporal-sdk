@@ -30,6 +30,7 @@ module Temporal.Workflow.Definition (
   GatherArgs,
 ) where
 
+import Control.Monad.Catch
 import Control.Monad.IO.Class
 import Data.Kind
 import Data.Text (Text)
@@ -38,7 +39,7 @@ import Data.Vector (Vector)
 import RequireCallStack
 import Temporal.Client.Types
 import Temporal.Payload
-import Temporal.Workflow.Internal.Monad
+import Temporal.Workflow.Internal.MonadV2
 import Temporal.Workflow.Signal
 import Temporal.Workflow.Types (StartChildWorkflowOptions)
 import Temporal.Workflow.Update
@@ -52,7 +53,7 @@ To make a worker use this definition, you must add it to the 'WorkerConfig' via 
 -}
 data WorkflowDefinition = WorkflowDefinition
   { workflowName :: Text
-  , workflowRun :: Vector Payload -> IO (Either String (Workflow Payload))
+  , workflowRun :: Vector Payload -> Workflow Payload
   }
 
 
@@ -86,14 +87,6 @@ data KnownWorkflow (args :: [Type]) (result :: Type) = forall codec.
   { knownWorkflowCodec :: codec
   , knownWorkflowName :: Text
   }
-
-
--- gatherStartChildWorkflowArgs
---   :: forall args result codec. GatherArgs codec args
---   => codec
---   -> ([IO Payload] -> Workflow (ChildWorkflowHandle result))
---   -> (args :->: Workflow (ChildWorkflowHandle result))
--- gatherStartChildWorkflowArgs c f = gatherArgs (Proxy @args) c id f
 
 data ProvidedWorkflow f = ProvidedWorkflow
   { definition :: WorkflowDefinition
@@ -155,15 +148,18 @@ provideWorkflow codec name f =
       { definition =
           WorkflowDefinition
             { workflowName = name
-            , workflowRun = \payloads -> do
+            , workflowRun = \payloads -> Workflow do
                 eWf <-
-                  applyPayloads
+                  liftIO $ applyPayloads
                     codec
                     (Proxy @(ArgsOf f))
                     (Proxy @(Workflow (ResultOf Workflow f)))
                     f
                     payloads
-                pure $ fmap (\wf -> wf >>= \result -> ilift (liftIO $ encode codec result)) eWf
+                either
+                  (throwM . ValueError)
+                  (\wf -> unWorkflow wf >>= \result -> liftIO $ encode codec result)
+                  eWf
             }
       , reference =
           KnownWorkflow
@@ -234,7 +230,7 @@ data WorkflowSignalDefinition
       Text -- name
       codec
       f
-      (f -> Vector Payload -> IO (Either String (Workflow ())))
+      (f -> Vector Payload -> Workflow ())
 
 
 -- { workflowSignalName :: Text

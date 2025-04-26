@@ -45,6 +45,7 @@ dependencies:
 - these
 - first-class-families
 - validation-selective
+- resourcet
 - vault
 
 ghc-options:
@@ -91,10 +92,11 @@ library:
   - Temporal.Workflow.Definition
   - Temporal.WorkflowInstance
   - Temporal.Workflow.Worker
-  - Temporal.Workflow.Eval
   - Temporal.Workflow.WorkflowInstance
   - Temporal.Worker.Types
   - Temporal.Activity.Types
+  - Temporal.Workflow.ChildWorkflowHandle
+  - Temporal.Workflow.CommandQueue
   - Temporal.Workflow.Unsafe.Handle
   - Temporal.Workflow.Internal.Instance
   - Temporal.Workflow.Internal.Monad
@@ -151,5 +153,6 @@ tests:
       IntegrationSpec.NoOpWorkflow,
       IntegrationSpec.TimeoutsInWorkflows,
       IntegrationSpec.Updates,
+      Temporal.Workflow.IVarSpec,
       Common,
       THCompiles

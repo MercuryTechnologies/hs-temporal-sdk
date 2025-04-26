@@ -182,7 +182,7 @@ import Temporal.Core.Client
 import Temporal.Payload
 import Temporal.Worker
 import Temporal.Workflow
-import Temporal.Workflow.Internal.Monad
+import Temporal.Workflow.Internal.MonadV2
 import Temporal.Workflow.Types
 import UnliftIO
 import Unsafe.Coerce
@@ -273,15 +273,19 @@ instance
   )
   => DefFromFunction' codec env (Workflow result) original
   where
-  defFromFunction _ codec name f = WorkflowDefinition (Text.pack name) $ \payloads -> do
+  defFromFunction _ codec name f = WorkflowDefinition (Text.pack name) $ \payloads -> Workflow do
     eWf <-
-      applyPayloads
+      liftIO $ applyPayloads
         codec
         (Proxy @(ArgsOf original))
         (Proxy @(Workflow (ResultOf Workflow original)))
         f
         payloads
-    pure $ fmap (\wf -> wf >>= \result -> ilift (liftIO $ encode codec result)) eWf
+    case eWf of
+      Left msg -> throwM $ ValueError msg
+      Right wf -> do
+        x <- unWorkflow wf
+        liftIO $ encode codec x
 
 
 instance

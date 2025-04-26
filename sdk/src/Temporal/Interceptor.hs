@@ -68,10 +68,17 @@ module Temporal.Interceptor (
   interceptorConvertChildWorkflowHandle,
 ) where
 
+import Control.Exception (SomeException)
+import Data.Map (Map)
+import Data.Text (Text)
 import Data.Vault.Strict
+import Data.Vector (Vector)
+import Temporal.Common
 import Temporal.Client.Types
+import Temporal.Exception
 import Temporal.Payload
-import Temporal.Workflow.Internal.Monad
+import Temporal.Workflow.ChildWorkflowHandle
+import Temporal.Workflow.Task
 import Temporal.Workflow.Types
 
 
@@ -144,3 +151,97 @@ instance Monoid ScheduleClientInterceptors where
     ScheduleClientInterceptors
       { scheduleWorkflowAction = \opts _ -> return opts
       }
+
+data ExecuteWorkflowInput = ExecuteWorkflowInput
+  { executeWorkflowInputType :: Text
+  , executeWorkflowInputArgs :: Vector Payload
+  , executeWorkflowInputHeaders :: Map Text Payload
+  , executeWorkflowInputInfo :: Info
+  }
+
+data WorkflowInboundInterceptor = WorkflowInboundInterceptor
+  { executeWorkflow
+      :: ExecuteWorkflowInput
+      -> (ExecuteWorkflowInput -> IO (WorkflowExitVariant Payload))
+      -> IO (WorkflowExitVariant Payload)
+  , handleQuery
+      :: HandleQueryInput
+      -> (HandleQueryInput -> IO (Either SomeException Payload))
+      -> IO (Either SomeException Payload)
+  , handleUpdate
+      :: HandleUpdateInput
+      -> (HandleUpdateInput -> Workflow Payload)
+      -> Workflow Payload
+  , validateUpdate
+      :: HandleUpdateInput
+      -> (HandleUpdateInput -> IO (Either SomeException ()))
+      -> IO (Either SomeException ())
+  }
+
+
+instance Semigroup WorkflowInboundInterceptor where
+  a <> b =
+    WorkflowInboundInterceptor
+      { executeWorkflow = \input cont -> a.executeWorkflow input $ \input' -> b.executeWorkflow input' cont
+      , handleQuery = \input cont -> a.handleQuery input $ \input' -> b.handleQuery input' cont
+      , handleUpdate = \input cont -> a.handleUpdate input $ \input' -> b.handleUpdate input' cont
+      , validateUpdate = \input cont -> a.validateUpdate input $ \input' -> b.validateUpdate input' cont
+      }
+
+
+instance Monoid WorkflowInboundInterceptor where
+  mempty =
+    WorkflowInboundInterceptor
+      { executeWorkflow = \input cont -> cont input
+      , handleQuery = \input cont -> cont input
+      , handleUpdate = \input cont -> cont input
+      , validateUpdate = \input cont -> cont input
+      }
+
+
+data ActivityInput = ActivityInput
+  { activityType :: Text
+  , args :: Vector Payload
+  , options :: StartActivityOptions
+  , seq :: Sequence
+  }
+
+
+data WorkflowOutboundInterceptor = WorkflowOutboundInterceptor
+  { scheduleActivity :: ActivityInput -> (ActivityInput -> IO (Task Payload)) -> IO (Task Payload)
+  , startChildWorkflowExecution :: Text -> StartChildWorkflowOptions -> (Text -> StartChildWorkflowOptions -> IO (ChildWorkflowHandle Payload)) -> IO (ChildWorkflowHandle Payload)
+  , continueAsNew :: forall a. Text -> ContinueAsNewOptions -> (Text -> ContinueAsNewOptions -> IO a) -> IO a
+  }
+
+
+instance Semigroup WorkflowOutboundInterceptor where
+  l <> r =
+    WorkflowOutboundInterceptor
+      { scheduleActivity = \input cont -> scheduleActivity l input $ \input' -> scheduleActivity r input' cont
+      , startChildWorkflowExecution = \t input cont -> startChildWorkflowExecution l t input $ \t' input' -> startChildWorkflowExecution r t' input' cont
+      , continueAsNew = \n input cont -> continueAsNew l n input $ \n' input' -> continueAsNew r n' input' cont
+      }
+
+
+instance Monoid WorkflowOutboundInterceptor where
+  mempty =
+    WorkflowOutboundInterceptor
+      { scheduleActivity = \input cont -> cont input
+      , startChildWorkflowExecution = \t input cont -> cont t input
+      , continueAsNew = \n input cont -> cont n input
+      }
+
+
+data WorkflowExitVariant a
+  = WorkflowExitContinuedAsNew ContinueAsNewException
+  | WorkflowExitCancelled WorkflowCancelRequested
+  | WorkflowExitFailed SomeException
+  | WorkflowExitSuccess a
+
+
+data HandleQueryInput = HandleQueryInput
+  { handleQueryId :: Text
+  , handleQueryInputType :: Text
+  , handleQueryInputArgs :: Vector Payload
+  , handleQueryInputHeaders :: Map Text Payload
+  }

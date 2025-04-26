@@ -35,7 +35,11 @@ library
       Temporal.TH
       Temporal.Worker
       Temporal.Workflow
+      Temporal.Workflow.Instance
+      Temporal.Workflow.Internal.MonadV2
+      Temporal.Workflow.IVar
       Temporal.Workflow.Saga
+      Temporal.Workflow.Task
       Temporal.Workflow.Unsafe
       Temporal.Workflow.Update
   other-modules:
@@ -51,10 +55,11 @@ library
       Temporal.Workflow.Definition
       Temporal.WorkflowInstance
       Temporal.Workflow.Worker
-      Temporal.Workflow.Eval
       Temporal.Workflow.WorkflowInstance
       Temporal.Worker.Types
       Temporal.Activity.Types
+      Temporal.Workflow.ChildWorkflowHandle
+      Temporal.Workflow.CommandQueue
       Temporal.Workflow.Unsafe.Handle
       Temporal.Workflow.Internal.Instance
       Temporal.Workflow.Internal.Monad
@@ -117,6 +122,7 @@ library
     , proto-lens-protobuf-types
     , random
     , require-callstack
+    , resourcet
     , scientific
     , split
     , stm
@@ -147,7 +153,7 @@ test-suite temporal-sdk-tests
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
-      Spec, ConcurrentAccessSpec, AsyncCompletionSpec, DurationSpec, IntegrationSpec, IntegrationSpec.HangingWorkflow, IntegrationSpec.NoOpWorkflow, IntegrationSpec.TimeoutsInWorkflows, IntegrationSpec.Updates, Common, THCompiles
+      Spec, ConcurrentAccessSpec, AsyncCompletionSpec, DurationSpec, IntegrationSpec, IntegrationSpec.HangingWorkflow, IntegrationSpec.NoOpWorkflow, IntegrationSpec.TimeoutsInWorkflows, IntegrationSpec.Updates, Temporal.Workflow.IVarSpec, Common, THCompiles
   hs-source-dirs:
       test
   default-extensions:

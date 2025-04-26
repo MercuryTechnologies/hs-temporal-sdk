@@ -358,7 +358,7 @@ signal (WorkflowHandle _ _t c wf r _) (signalRef -> (KnownSignal sName sCodec)) 
   -- FIXME: Can we just ignore this now that it's no longer present?
   -- & WF.skipGenerateWorkflowTask .~ opts.skipGenerateWorkflowTask
   case result of
-    Left err -> throwIO err
+    Left err -> throwM err
     Right _ -> pure ()
 
 
