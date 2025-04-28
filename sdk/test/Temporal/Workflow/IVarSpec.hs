@@ -6,15 +6,11 @@ import Control.Monad
 import Test.Hspec
 import UnliftIO
 import UnliftIO.Concurrent
-import Control.Concurrent.STM.TQueue
-import Data.Function ((&))
 import qualified Data.HashMap.Strict as HashMap
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Temporal.Workflow.IVar
 import Control.Concurrent.STM (retry, check)
-import Data.List (sort)
-import Control.Applicative ((<|>))
 
 -- Mock environment for testing
 data TestRuntime = TestRuntime

@@ -5,6 +5,7 @@ module Temporal.Workflow.Internal.MonadV2 where
 import Control.Applicative
 import Control.Concurrent.STM (retry, newTQueue, flushTQueue)
 import Control.Monad
+import Control.Monad.Catch (throwM)
 import Control.Monad.Logger
 import Control.Monad.Reader
 import qualified Control.Monad.Catch as Catch
@@ -171,25 +172,27 @@ suspending indefinitely if the condition is never met.
 (e.g. if there is no signal handler that changes the state appropriately)
 -}
 waitCondition :: Condition Bool -> Workflow ()
-waitCondition (Condition c) = Workflow do
-  result <- atomically c
-  if result
-    then return ()
-    else do
-      tid <- myThreadId
-      runtime <- ask
-      atomically do
-        threads <- readTVar $ threadManager $ getThreadManager runtime
-        case HashMap.lookup tid threads of
-          Just thread -> do
-            writeTVar (workflowThreadBlocked thread) True
-          Nothing ->
-            -- This theoretically can happen if a child thread gets created via 'asyncWorkflow'
-            -- and the main thread hasn't updated the threads map yet, so we just retry and
-            -- wait for this child thread to get added to the map.
-            retry
-      unWorkflow $ waitCondition (Condition c)
-
+waitCondition m@(Condition c) = Workflow do
+  runtime <- ask
+  tid <- myThreadId
+  (result, thread) <- atomically do
+    result <- c
+    threads <- readTVar $ threadManager $ getThreadManager runtime
+    thread <- case HashMap.lookup tid threads of
+      Just thread -> do
+        writeTVar (workflowThreadBlocked thread) (not result)
+        pure thread
+      Nothing ->
+        -- This theoretically can happen if a child thread gets created via 'asyncWorkflow'
+        -- and the main thread hasn't updated the threads map yet, so we just retry and
+        -- wait for this child thread to get added to the map.
+        retry
+    pure (result, thread)
+  unless result $ atomically do
+    -- In this case, we're waiting for the condition to become true.
+    -- Nothing else on the thread can be done, so we just block.
+    guard =<< c
+    writeTVar (workflowThreadBlocked thread) False
 
 newtype Query a = Query (STM a)
   deriving newtype (Functor, Applicative, Monad)
@@ -245,7 +248,31 @@ asyncWorkflow (Workflow m) = do
       atomically do
         workflowThreadBlocked <- newTVar False
         modifyTVar' (threadManager $ getThreadManager wf) $ HashMap.insert tid $ WorkflowThread workflowThreadBlocked
-      restore' m `finally` atomically (modifyTVar' (threadManager $ getThreadManager wf) $ HashMap.delete tid)
+      restore' m
+
+-- `finally` atomically (modifyTVar' (threadManager $ getThreadManager wf) $ HashMap.delete tid)
+
+waitAsyncWorkflow :: Async a -> Workflow a
+waitAsyncWorkflow a = Workflow do
+  runtime <- ask
+  let deregisterThread = modifyTVar'
+            (threadManager $ getThreadManager runtime)
+            (HashMap.delete $ asyncThreadId a)
+      waitForResultAndRethrow = do
+        markBlockedState runtime False
+        deregisterThread
+        res <- waitCatchSTM a
+        pure $ either throwM pure res
+  join $ atomically do
+    mRes <- pollSTM a
+    case mRes of
+      Nothing -> do
+        markBlockedState runtime True
+        pure $ join $ atomically waitForResultAndRethrow
+      Just res -> do
+        deregisterThread
+        pure $ either throwM pure res
+
 
 parallelAp :: Workflow (a -> b) -> Workflow a -> Workflow b
 parallelAp ff aa = Workflow do
@@ -327,13 +354,13 @@ runWorkflow inst m = liftIO do
     eval :: InstanceM (WorkflowExitVariant Payload)
     eval = mask $ \restore -> do
       tid <- myThreadId
-      let threadWrapper _restore = id
+      let tidText = Text.pack (show tid)
+          threadWrapper _restore = id
           runner = do
             atomically do
               isBlocked <- newTVar False
               modifyTVar' (threadManager $ getThreadManager runtime) $ HashMap.insert tid $ WorkflowThread isBlocked
               writeTVar mainThreadStarted True
-            let tidText = Text.pack (show tid)
             $(logDebug) $ "Thread " <> tidText <> ": running main thread!"
             result <- restore (runTopLevel m)
             $(logDebug) $ "Thread " <> tidText <> ": ran main thread!"
@@ -345,6 +372,7 @@ runWorkflow inst m = liftIO do
             $(logDebug) $ "Thread " <> tidText <> ": done!"
             pure result
       result <- threadWrapper restore runner `finally` shutdownThreads tid
+      $(logDebug) $ "Thread " <> tidText <> ": exiting"
       pure result
 
     -- If the workflow is blocked, then we necessarily have to signal the temporal-core
@@ -397,8 +425,8 @@ runWorkflow inst m = liftIO do
 
 
   runInstanceM runtime do
-    s <- async schedule
-    f <- async flush
+    s <- async (schedule `finally` $(logDebug) "Schedule thread exiting")
+    f <- async (flush `finally` $(logDebug) "Flush thread exiting")
     e <- async do
       link s
       link f
@@ -602,13 +630,15 @@ handleResolveChildWorkflowExecutionStart runtime msg = do
                   { workflowAlreadyStartedWorkflowId = WorkflowId (failed ^. Activation.workflowId)
                   , workflowAlreadyStartedWorkflowType = WorkflowType (failed ^. Activation.workflowType)
                   }
-                _ -> E.throw $ RuntimeError ("Unhandled child workflow start failure: " <> show (failed ^. Activation.cause))
+                _ -> Left $ toException $ RuntimeError ("Unhandled child workflow start failure: " <> show (failed ^. Activation.cause))
               ResolveChildWorkflowExecutionStart'Cancelled _cancelled -> Left $ toException ChildWorkflowCancelled
         case eResult of
           Left err -> do
+            traceM ("Child workflow start failed: " <> show err)
             unregisterOnFailure
             putIVar existing.startHandle (E.throw err)
             putIVar existing.firstExecutionRunId (E.throw err)
+            putIVar existing.resultHandle (E.throw err)
           Right runId -> do
             putIVar existing.startHandle ()
             putIVar existing.firstExecutionRunId runId

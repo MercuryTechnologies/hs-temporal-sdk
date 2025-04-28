@@ -1444,7 +1444,14 @@ race l r = Workflow do
   lh <- asyncWorkflow l
   rh <- asyncWorkflow r
   atomically $ markBlockedState runtime True
-  waitEither lh rh `UnliftIO.finally` atomically (markBlockedState runtime False)
+  waitEither lh rh `UnliftIO.finally` atomically do
+    markBlockedState runtime False
+    let deregisterThread :: forall x. Async x -> STM ()
+        deregisterThread t = modifyTVar'
+          (threadManager $ getThreadManager runtime)
+          (HashMap.delete $ asyncThreadId t)
+    deregisterThread lh
+    deregisterThread rh
 
 {- | Run two Workflow actions concurrently, and return the first to finish.
 

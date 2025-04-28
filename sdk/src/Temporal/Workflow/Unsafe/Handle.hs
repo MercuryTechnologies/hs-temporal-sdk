@@ -1,12 +1,15 @@
+{-# LANGUAGE TemplateHaskell #-}
 -- | The internals of Workflow handles. They are exposed here primarily for interceptor implementations.
 module Temporal.Workflow.Unsafe.Handle where
 
 import Control.Monad.Catch
+import Control.Monad.Logger
 import Control.Monad.Reader
 import qualified Data.HashMap.Strict as HashMap
 import Data.Kind
 import Data.ProtoLens
 import Lens.Family2
+import qualified Data.Text as Text
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow as ChildWorkflow
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow_Fields as ChildWorkflow
 import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as Common
@@ -111,7 +114,10 @@ instance Wait (ChildWorkflowHandle a) where
 waitChildWorkflowStart :: RequireCallStack => ChildWorkflowHandle result -> Workflow ()
 waitChildWorkflowStart wfHandle = Workflow do
   updateCallStack
-  waitIVar wfHandle.startHandle
+  -- Load-bearing destructure– we pass 'throw' values back through to the caller,
+  -- so we force the value to be evaluated.
+  !_x <- waitIVar wfHandle.startHandle
+  pure ()
 
 
 waitChildWorkflowResult :: RequireCallStack => ChildWorkflowHandle result -> Workflow result
@@ -121,10 +127,7 @@ waitChildWorkflowResult wfHandle@(ChildWorkflowHandle {childWorkflowResultConver
     runtime <- ask
     updateCallStack
     res <- waitIVar wfHandle.resultHandle
-    atomically do
-      modifyTVar'
-        runtime.workflowRuntimeSequenceMaps.childWorkflows
-        (HashMap.delete wfHandle.childWorkflowSequence)
+    $(logDebug) $ "Child workflow result: " <> Text.pack (show res)
 
     case res ^. Activation.result . ChildWorkflow.maybe'status of
       Nothing -> throwM $ RuntimeError "Unrecognized child workflow result status"
