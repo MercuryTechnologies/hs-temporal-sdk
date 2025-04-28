@@ -179,7 +179,7 @@ waitCondition (Condition c) = Workflow do
       tid <- myThreadId
       runtime <- ask
       atomically do
-        threads <- readTVar (workflowRuntimeThreads runtime)
+        threads <- readTVar $ threadManager $ getThreadManager runtime
         case HashMap.lookup tid threads of
           Just thread -> do
             writeTVar (workflowThreadBlocked thread) True
@@ -244,20 +244,22 @@ asyncWorkflow (Workflow m) = do
       tid <- myThreadId
       atomically do
         workflowThreadBlocked <- newTVar False
-        modifyTVar' wf.workflowRuntimeThreads $ HashMap.insert tid $ WorkflowThread workflowThreadBlocked
-      restore' m `finally` atomically (modifyTVar' wf.workflowRuntimeThreads $ HashMap.delete tid)
+        modifyTVar' (threadManager $ getThreadManager wf) $ HashMap.insert tid $ WorkflowThread workflowThreadBlocked
+      restore' m `finally` atomically (modifyTVar' (threadManager $ getThreadManager wf) $ HashMap.delete tid)
 
 parallelAp :: Workflow (a -> b) -> Workflow a -> Workflow b
 parallelAp ff aa = Workflow do
+  runtime <- ask
   fh <- asyncWorkflow ff
   ah <- asyncWorkflow aa
-  (f, a) <- waitBoth fh ah
+  atomically $ markBlockedState runtime True
+  (f, a) <- waitBoth fh ah `finally` atomically (markBlockedState runtime False)
   pure $ f a
 
 initializeRuntime :: WorkflowInstance -> STM WorkflowRuntime
 initializeRuntime inst = do
   q <- newCommandQueue
-  threads <- newTVar mempty
+  threads <- ThreadManager <$> newTVar mempty
   readyToFlush <- newTVar False
   cancelRequested <- newTVar False
   sequenceMaps <-
@@ -293,12 +295,25 @@ shutdownRunningWorkflow rw = do
   cancel rw.runningWorkflowFlusher
   cancel rw.runningWorkflowMainThread
 
+data ThreadState = NotRunning | Running | Completed
+
 runWorkflow :: (MonadIO m, HasCallStack) => WorkflowInstance -> Workflow Payload -> m RunningWorkflow
 runWorkflow inst m = liftIO do
   (runtime, mainThreadStarted) <- atomically do
     (,) <$> initializeRuntime inst <*> newTVar False
 
   let
+    {-
+
+    High level overview:
+
+    The main thread runs the core workflow implementation.
+    It is responsible for launching other worker threads, adding commands to the command queue.
+
+    There is a scheduler thread that waits for all threads to block, then signals that we should flush.
+    When we get an activation, we apply the jobs, then
+
+    -}
     runTopLevel :: Workflow Payload -> InstanceM (WorkflowExitVariant Payload)
     runTopLevel (Workflow ma) = do
       (WorkflowExitSuccess <$> ma)
@@ -311,27 +326,26 @@ runWorkflow inst m = liftIO do
 
     eval :: InstanceM (WorkflowExitVariant Payload)
     eval = mask $ \restore -> do
+      tid <- myThreadId
       let threadWrapper _restore = id
-      threadWrapper restore $ do
-        tid <- myThreadId
-        atomically do
-          isBlocked <- newTVar False
-          modifyTVar' runtime.workflowRuntimeThreads $ HashMap.insert tid $ WorkflowThread isBlocked
-          writeTVar mainThreadStarted True
-
-        $(logDebug) "running main thread!"
-        result <- restore (runTopLevel m) `finally` do
-          atomically $ modifyTVar' runtime.workflowRuntimeThreads $ HashMap.delete tid
-          shutdownThreads
-        $(logDebug) "ran main thread!"
-        cmd <- convertExitVariantToCommand result
-        $(logDebug) "shutting down"
-        atomically do
-          addCommand runtime cmd
-          writeTVar runtime.workflowRuntimeReadyToFlush True
-
-        $(logDebug) "done!"
-        pure result
+          runner = do
+            atomically do
+              isBlocked <- newTVar False
+              modifyTVar' (threadManager $ getThreadManager runtime) $ HashMap.insert tid $ WorkflowThread isBlocked
+              writeTVar mainThreadStarted True
+            let tidText = Text.pack (show tid)
+            $(logDebug) $ "Thread " <> tidText <> ": running main thread!"
+            result <- restore (runTopLevel m)
+            $(logDebug) $ "Thread " <> tidText <> ": ran main thread!"
+            cmd <- convertExitVariantToCommand result
+            $(logDebug) $ "Thread " <> tidText <> ": shutting down"
+            atomically do
+              addCommand runtime cmd
+              writeTVar runtime.workflowRuntimeReadyToFlush True
+            $(logDebug) $ "Thread " <> tidText <> ": done!"
+            pure result
+      result <- threadWrapper restore runner `finally` shutdownThreads tid
+      pure result
 
     -- If the workflow is blocked, then we necessarily have to signal the temporal-core
     -- that we are stuck. Once we get unstuck (e.g. something is in the activation channel)
@@ -344,51 +358,56 @@ runWorkflow inst m = liftIO do
     -- Once we're blocked in that way, then we should flush the commands and wait for
     -- the next activation(s?).
     schedule = do
+      tid <- myThreadId
       atomically (guard =<< readTVar mainThreadStarted)
       forever do
         -- It's important that 'activate' fully consumes the activation from the channel
         -- before we block again. Otherwise, we might end up in a situation where
         -- we say we're ready to flush, but we haven't processed the previous activation.
         -- This could cause a deadlock.
-        atomically do
+        liftIO $ join $ atomically do
           waitAllBlocked runtime
-          writeTVar runtime.workflowRuntimeReadyToFlush True
+          traceM $ "waiting for activation on thread " <> show tid
+          activation <- readTQueue runtime.workflowRuntimeInstance.activationChannel
+          traceM $ "got an activation on thread " <> show tid
+          activate runtime activation tid
+
         -- This has to be done in a separate atomically block, because the change to
         -- workflowRuntimeReadyToFlush has to be committed before we read from the
         -- activation channel.
-        liftIO $ join $ atomically do
-          activation <- readTQueue runtime.workflowRuntimeInstance.activationChannel
-          traceM "got an activation"
-          activate runtime activation
+        atomically do
+          waitAllBlocked runtime
+          writeTVar runtime.workflowRuntimeReadyToFlush True
 
     flush = forever $ do
+      tid <- myThreadId
       atomically do
         ready <- readTVar runtime.workflowRuntimeReadyToFlush
-        traceM "waiting for flush"
+        traceM $ "waiting for flush on thread " <> show tid
         guard ready
         writeTVar runtime.workflowRuntimeReadyToFlush False
-        traceM "flushing"
+        traceM $ "flushing on thread " <> show tid
       flushCommands runtime
 
-    shutdownThreads = do
+    shutdownThreads myTid = do
       -- Theoretically, you could have threads created after taking all of these,
       -- but that shouldn't happen in practice.
-      ts <- atomically do
-        threads <- readTVar runtime.workflowRuntimeThreads
-        writeTVar runtime.workflowRuntimeThreads mempty
-        pure threads
-      mapM_ cancelWorkflowThreadNoWait $ HashMap.keys ts
+      ts <- readTVarIO $ threadManager $ getThreadManager runtime
+      mapM_ cancelWorkflowThreadNoWait $ HashMap.keys $ HashMap.delete myTid ts
 
 
   runInstanceM runtime do
-    RunningWorkflow
-      <$> async schedule
-      <*> async flush
-      <*> async eval
-      <*> pure runtime
+    s <- async schedule
+    f <- async flush
+    e <- async do
+      link s
+      link f
+      eval
+    pure $ RunningWorkflow s f e runtime
 
 flushCommands :: (HasCallStack, MonadIO m) => WorkflowRuntime -> m ()
 flushCommands runtime = do
+  tid <- myThreadId
   (info, cmds) <- atomically do
     info <- readTVar runtime.workflowRuntimeInstance.workflowInstanceInfo
     cmds <- getCommands runtime.workflowRuntimeCommandQueue
@@ -400,15 +419,15 @@ flushCommands runtime = do
         defMessage
           & Completion.runId .~ rawRunId info.runId
           & Completion.successful .~ completionSuccessful
-  traceShowM completionMessage
+  traceM $ "Thread flush " <> show tid <> ": " <> show completionMessage
   res <- liftIO $ runtime.workflowRuntimeInstance.workflowCompleteActivation completionMessage
   case res of
-    Left err -> throwIO err
-    Right () -> pure ()
+    Left err -> traceM ("Thread " <> show tid <> ": complete activation failed") >> throwIO err
+    Right () -> traceM ("Thread " <> show tid <> ": complete activation succeeded")
 
-activate :: WorkflowRuntime -> WorkflowActivation -> STM (IO ())
-activate runtime act = do
-  traceM "activating"
+activate :: WorkflowRuntime -> WorkflowActivation -> ThreadId -> STM (IO ())
+activate runtime act tid = do
+  traceM $ "activating on thread " <> show tid
   let inst = runtime.workflowRuntimeInstance
   info <- do
     info <- readTVar inst.workflowInstanceInfo
@@ -423,12 +442,11 @@ activate runtime act = do
   writeTVar inst.workflowTime (act ^. Activation.timestamp . to timespecFromTimestamp)
   writeTVar inst.workflowIsReplaying (act ^. Activation.isReplaying)
   pure do
-    traceM "applying jobs"
-    let apply = do
+    traceM $ "Thread " <> show tid <> ": applying jobs"
+    let apply = try do
           runReaderT
             (unInstanceM $ unWorkflow $ applyJobs (act ^. Activation.vec'jobs))
             runtime
-          pure (Right ())
     eResult <- case inst.workflowDeadlockTimeout of
       Nothing -> apply
       Just timeoutDuration -> do
@@ -437,10 +455,11 @@ activate runtime act = do
           Nothing -> do
             pure $ Left $ toException $ LogicBug WorkflowActivationDeadlock
           Just res' -> pure res'
-    traceM "applied jobs"
+    tid' <- myThreadId
+    traceM $ "Thread " <> show tid' <> ": applied jobs"
     case eResult of
       Left err -> do
-        traceM "applied jobs (failed)"
+        traceM $ "Thread " <> show tid' <> ": applied jobs (failed)"
         -- TODO, failures should have source / stack trace info
         -- TODO, convert failure type using a supplied payload converter
         let failure =
@@ -453,7 +472,7 @@ activate runtime act = do
         -- I think it's morally okay to crash the worker thread here.
         throwIO err
       Right f -> do
-        traceM "applied jobs (succeeded)"
+        traceM $ "Thread " <> show tid' <> ": applied jobs (succeeded)"
         pure f
 
 applyJobs :: Vector WorkflowActivationJob -> Workflow ()
@@ -515,8 +534,13 @@ handleQueryWorkflow runtime q = do
           <|> HashMap.lookup Nothing handlers
     case handlerOrDefault of
       Nothing -> do
-        -- TODO, I think we need to fail the query here
-        pure ()
+        let cmd = defMessage
+              & Command.respondToQuery .~
+                ( defMessage
+                  & Command.queryId .~ q ^. Activation.queryId
+                  & Command.failed .~ (defMessage & Failure.message .~ "Query not found")
+                )
+        atomically $ addCommand runtime cmd
       Just handler -> do
         args <- processorDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (q ^. Command.vec'arguments))
         let baseInput =
@@ -527,14 +551,7 @@ handleQueryWorkflow runtime q = do
                 , handleQueryInputHeaders = fmap convertFromProtoPayload (q ^. Activation.headers)
                 }
         res <- inst.inboundInterceptor.handleQuery baseInput $ \input -> do
-          let handlerOrDefault =
-                HashMap.lookup (Just input.handleQueryInputType) handlers
-                  <|> HashMap.lookup Nothing handlers
-          case handlerOrDefault of
-            Nothing -> do
-              Catch.throwM $ QueryNotFound $ Text.unpack input.handleQueryInputType
-            Just h -> do
-              h (QueryId input.handleQueryId) input.handleQueryInputArgs input.handleQueryInputHeaders
+          handler (QueryId input.handleQueryId) input.handleQueryInputArgs input.handleQueryInputHeaders
         cmd <- case res of
           Left err -> do
             -- TODO, more useful error message
@@ -567,14 +584,15 @@ handleResolveActivity runtime msg = do
 
 handleResolveChildWorkflowExecutionStart :: WorkflowRuntime -> ResolveChildWorkflowExecutionStart -> STM (IO ())
 handleResolveChildWorkflowExecutionStart runtime msg = do
-  mHandle <- resolveSequence
-    runtime.workflowRuntimeSequenceMaps.childWorkflows
-    (msg ^. Activation.seq . to Sequence)
+  wfs <- readTVar runtime.workflowRuntimeSequenceMaps.childWorkflows
+  let mHandle = HashMap.lookup (msg ^. Activation.seq . to Sequence) wfs
+      unregisterOnFailure =
+        modifyTVar' runtime.workflowRuntimeSequenceMaps.childWorkflows $ HashMap.delete (msg ^. Activation.seq . to Sequence)
   case mHandle of
-    Nothing ->
-      Catch.throwM $ RuntimeError "Child workflow not found"
+    Nothing -> Catch.throwM $ RuntimeError "Child workflow not found"
     Just existing -> case msg ^. Activation.maybe'status of
-      Nothing ->
+      Nothing -> do
+        unregisterOnFailure
         Catch.throwM $ RuntimeError "Child workflow start did not have a known status"
       Just status -> do
         let eResult = case status of
@@ -588,6 +606,7 @@ handleResolveChildWorkflowExecutionStart runtime msg = do
               ResolveChildWorkflowExecutionStart'Cancelled _cancelled -> Left $ toException ChildWorkflowCancelled
         case eResult of
           Left err -> do
+            unregisterOnFailure
             putIVar existing.startHandle (E.throw err)
             putIVar existing.firstExecutionRunId (E.throw err)
           Right runId -> do

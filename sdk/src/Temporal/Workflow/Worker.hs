@@ -150,9 +150,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
       mInst <- createOrFetchRunningWorkflow
       forM_ mInst $ \wf -> do
         let withoutStart = filter (\job -> isNothing (job ^. Activation.maybe'startWorkflow)) (activation ^. Activation.jobs)
-        case withoutStart of
-          [] -> pure ()
-          otherJobs -> atomically $ writeTQueue wf.runningWorkflowRuntime.workflowRuntimeInstance.activationChannel (activation & Activation.jobs .~ otherJobs)
+        atomically $ writeTQueue wf.runningWorkflowRuntime.workflowRuntimeInstance.activationChannel (activation & Activation.jobs .~ withoutStart)
     else do
       $(logDebug) "Workflow does not need to run."
       let completionMessage =
@@ -290,7 +288,6 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                         worker.workerVault
                         worker.processor
                         workflowInfo
-                        startWorkflow
 
                     liftIO $ addStackTraceHandler inst
 

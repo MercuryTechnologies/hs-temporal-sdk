@@ -92,7 +92,6 @@ create
   -> Vault
   -> PayloadProcessor
   -> Info
-  -> InitializeWorkflow
   -> m WorkflowInstance
 create
   workflowCompleteActivation
@@ -102,8 +101,8 @@ create
   outboundInterceptor
   workflowVault
   payloadProcessor
-  info
-  start = do
+  info = do
+
   $logDebug "Instantiating workflow instance"
   workflowInstanceLogger <- askLoggerIO
   workflowRandomnessSeed <- WorkflowGenM <$> newIORef (mkStdGen 0)
@@ -116,8 +115,6 @@ create
   workflowCallStack <- newIORef emptyCallStack
   workflowInstanceInfo <- newTVarIO info
   activationChannel <- newTQueueIO
-  executionThread <- newIORef (error "Workflow thread not yet started")
-  workflowResource <- createInternalState
   -- The execution thread is funny because it needs access to the instance, but the instance
   -- needs access to the execution thread. It's a bit of a circular dependency, but
   -- pretty innocuous since writing to the executionThread var happens before anything else
@@ -154,30 +151,29 @@ addStackTraceHandler inst = do
   atomically $ modifyTVar' inst.workflowQueryHandlers (HashMap.insert (Just "__stack_trace") specialHandler)
 
 
--- | This gives us the basic state for a workflow instance prior to initial evaluation.
-setUpWorkflowExecution :: StartWorkflow -> InstanceM ExecuteWorkflowInput
-setUpWorkflowExecution startWorkflow = do
-  runtime <- ask
-  let inst = runtime.workflowRuntimeInstance
-  let (WorkflowGenM genRef) = inst.workflowRandomnessSeed
-  writeIORef genRef (mkStdGen $ fromIntegral $ startWorkflow ^. Activation.randomnessSeed)
-  atomically $ writeTVar inst.workflowTime (startWorkflow ^. Activation.startTime . to timespecFromTimestamp)
-  info <- readTVarIO inst.workflowInstanceInfo
+-- -- | This gives us the basic state for a workflow instance prior to initial evaluation.
+-- setUpWorkflowExecution :: StartWorkflow -> InstanceM ExecuteWorkflowInput
+-- setUpWorkflowExecution startWorkflow = do
+--   runtime <- ask
+--   let inst = runtime.workflowRuntimeInstance
+--   let (WorkflowGenM genRef) = inst.workflowRandomnessSeed
+--   writeIORef genRef (mkStdGen $ fromIntegral $ startWorkflow ^. Activation.randomnessSeed)
+--   atomically $ writeTVar inst.workflowTime (startWorkflow ^. Activation.startTime . to timespecFromTimestamp)
+--   info <- readTVarIO inst.workflowInstanceInfo
+--   pure $
+--     ExecuteWorkflowInput
+--       { executeWorkflowInputType = startWorkflow ^. Activation.workflowType
+--       , executeWorkflowInputArgs = fmap convertFromProtoPayload (startWorkflow ^. Command.vec'arguments)
+--       , executeWorkflowInputHeaders = fmap convertFromProtoPayload (startWorkflow ^. Activation.headers)
+--       , executeWorkflowInputInfo = info
+--       }
 
-  pure $
-    ExecuteWorkflowInput
-      { executeWorkflowInputType = initializeWorkflow ^. Activation.workflowType
-      , executeWorkflowInputArgs = fmap convertFromProtoPayload (initializeWorkflow ^. Command.vec'arguments)
-      , executeWorkflowInputHeaders = fmap convertFromProtoPayload (initializeWorkflow ^. Activation.headers)
-      , executeWorkflowInputInfo = info
-      }
 
-
-applyStartWorkflow :: ExecuteWorkflowInput -> (Vector Payload -> Workflow Payload) -> Workflow Payload
-applyStartWorkflow input workflowFn = Workflow do
-  runtime <- ask
-  let inst = runtime.workflowRuntimeInstance
-  ps <- processorDecodePayloads inst.payloadProcessor input.executeWorkflowInputArgs
-  unWorkflow $ workflowFn ps
+-- applyStartWorkflow :: ExecuteWorkflowInput -> (Vector Payload -> Workflow Payload) -> Workflow Payload
+-- applyStartWorkflow input workflowFn = Workflow do
+--   runtime <- ask
+--   let inst = runtime.workflowRuntimeInstance
+--   ps <- processorDecodePayloads inst.payloadProcessor input.executeWorkflowInputArgs
+--   unWorkflow $ workflowFn ps
 
 

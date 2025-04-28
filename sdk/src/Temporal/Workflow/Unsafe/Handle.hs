@@ -80,7 +80,7 @@ instance Cancel (ExternalWorkflowHandle a) where
   cancel h = Workflow do
     runtime <- ask
     s@(Sequence sVal) <- nextExternalCancelSequence
-    res <- newIVar
+    res <- newIVar $ getThreadManager runtime
     atomically $ modifyTVar'
       runtime.workflowRuntimeSequenceMaps.externalCancels
       (HashMap.insert s res)
@@ -118,8 +118,14 @@ waitChildWorkflowResult :: RequireCallStack => ChildWorkflowHandle result -> Wor
 waitChildWorkflowResult wfHandle@(ChildWorkflowHandle {childWorkflowResultConverter}) = do
   waitChildWorkflowStart wfHandle
   Workflow do
+    runtime <- ask
     updateCallStack
     res <- waitIVar wfHandle.resultHandle
+    atomically do
+      modifyTVar'
+        runtime.workflowRuntimeSequenceMaps.childWorkflows
+        (HashMap.delete wfHandle.childWorkflowSequence)
+
     case res ^. Activation.result . ChildWorkflow.maybe'status of
       Nothing -> throwM $ RuntimeError "Unrecognized child workflow result status"
       Just s -> case s of

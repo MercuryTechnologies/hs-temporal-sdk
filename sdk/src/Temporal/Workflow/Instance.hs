@@ -68,7 +68,7 @@ data WorkflowInstance = WorkflowInstance
 data WorkflowRuntime = WorkflowRuntime
   { workflowRuntimeInstance :: {-# UNPACK #-} !WorkflowInstance
   -- , workflowRuntimeImpl :: !(Vector Payload -> InstanceM Payload)
-  , workflowRuntimeThreads :: {-# UNPACK #-} !(TVar (HashMap.HashMap ThreadId WorkflowThread))
+  , workflowRuntimeThreads :: {-# UNPACK #-} !ThreadManager
   , workflowRuntimeCommandQueue :: {-# UNPACK #-} !CommandQueue
   , workflowRuntimeReadyToFlush :: {-# UNPACK #-} !(TVar Bool)
   , workflowRuntimeCancelRequested :: {-# UNPACK #-} !(TVar Bool)
@@ -76,7 +76,7 @@ data WorkflowRuntime = WorkflowRuntime
   }
 
 instance HasThreadManager WorkflowRuntime where
-  threadManager = workflowRuntimeThreads
+  getThreadManager = workflowRuntimeThreads
 
 instance HasCommandQueue WorkflowRuntime where
   getCommandQueue = workflowRuntimeCommandQueue

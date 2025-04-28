@@ -3,12 +3,16 @@ module Temporal.Workflow.IVar where
 import Control.Concurrent.STM (retry)
 import Control.Monad
 import Control.Monad.Reader.Class
+import Data.Foldable
 import Debug.Trace
 import qualified Data.Text as Text
 import qualified Data.HashMap.Strict as HashMap
 import UnliftIO
 import UnliftIO.Concurrent
 import Control.Monad.Logger
+import Data.Typeable
+import GHC.Conc (unsafeIOToSTM)
+
 
 data WorkflowThread = WorkflowThread
   { workflowThreadBlocked :: {-# UNPACK #-} !(TVar Bool)
@@ -19,31 +23,41 @@ cancelWorkflowThreadNoWait thread = do
   throwTo thread AsyncCancelled
 
 class HasThreadManager a where
-  threadManager :: a -> TVar (HashMap.HashMap ThreadId WorkflowThread)
+  getThreadManager :: a -> ThreadManager
+
+newtype ThreadManager = ThreadManager
+  { threadManager :: TVar (HashMap.HashMap ThreadId WorkflowThread)
+  }
 
 data IVar a = IVar
   { ivar :: {-# UNPACK #-} !(TMVar a)
---  , name :: {-# UNPACK #-} !Text
+  , blocks :: {-# UNPACK #-} !(TVar (HashMap.HashMap ThreadId WorkflowThread))
+  , manager :: {-# UNPACK #-} !ThreadManager
+  -- ^ Shared manager
   }
 
--- instance Show (IVar a) where
---   show IVar{name} = "IVar<" <> show name <> ">"
+instance Typeable a => Show (IVar a) where
+  show _ = "IVar<" <> show (typeRep (Proxy :: Proxy a)) <> ">"
 
-newIVar :: MonadIO m => m (IVar a)
-newIVar = IVar <$> newEmptyTMVarIO
+newIVar :: MonadIO m => ThreadManager -> m (IVar a)
+newIVar m = IVar <$> newEmptyTMVarIO <*> newTVarIO mempty <*> pure m
 
 putIVar :: IVar a -> a -> STM ()
-putIVar IVar{ivar} x = void $ tryPutTMVar ivar x
+putIVar IVar{ivar, blocks} x = void do
+  _ <- tryPutTMVar ivar x
+  currentlyBlocked <- readTVar blocks
+  for_ currentlyBlocked (\blocked -> writeTVar blocked.workflowThreadBlocked False)
+  writeTVar blocks mempty
 
-waitIVar :: (MonadLogger m, MonadIO m, MonadReader r m, HasThreadManager r) => IVar a -> m a
-waitIVar IVar{ivar} = do
-  inst <- ask
+waitIVar :: (MonadLogger m, MonadIO m, Typeable a) => IVar a -> m a
+waitIVar i@IVar{..} = do
   tid <- myThreadId
   let tidText = Text.pack (show tid)
+      ivarTypeText = Text.pack (show i)
   join $ do
-    $(logDebug) "trying to read ivar"
+    $(logDebug) $ "trying to read ivar: " <> ivarTypeText <> " on thread " <> tidText
     atomically do
-      threads <- readTVar $ threadManager inst
+      threads <- readTVar $ threadManager manager
       let threadState = case HashMap.lookup tid threads of
             Just thread -> thread
             Nothing -> error ("waitIVar: Thread in map should exist " <> show tid)
@@ -51,22 +65,29 @@ waitIVar IVar{ivar} = do
       case mval of
         Nothing -> do
           writeTVar threadState.workflowThreadBlocked True
+          modifyTVar' blocks $ HashMap.insert tid threadState
           pure $ do
-            $(logDebug) ("wait for ivar " <> tidText)
-            x <- atomically $ do
-              writeTVar threadState.workflowThreadBlocked False
-              readTMVar ivar
-            $(logDebug) ("read ivar with blocking " <> tidText)
+            $(logDebug) $ "wait for ivar: " <> ivarTypeText <> " on thread " <> tidText
+            x <- atomically $ readTMVar ivar
+            $(logDebug) $ "read ivar with blocking: " <> ivarTypeText <> " on thread " <> tidText
             pure x
         Just val -> pure do
-          $(logDebug) ("read ivar without blocking " <> tidText)
+          $(logDebug) $ "read ivar without blocking: " <> ivarTypeText <> " on thread " <> tidText
           pure val
 
 -- | Use this to determine when we want to flush things to the server.
 waitAllBlocked :: HasThreadManager r => r -> STM ()
 waitAllBlocked runtime = do
-  threads <- readTVar $ threadManager runtime
-  traceM "waiting for all blocked"
+  threads <- readTVar $ threadManager $ getThreadManager runtime
+  traceM $ "waiting for all blocked, thread count: " <> show (HashMap.size threads)
   allBlocked <- and <$> mapM (readTVar . workflowThreadBlocked) threads
   guard allBlocked
   traceM "all blocked"
+
+markBlockedState :: HasThreadManager r => r -> Bool -> STM ()
+markBlockedState runtime blockedOrNot = do
+  tid <- unsafeIOToSTM myThreadId
+  threads <- readTVar $ threadManager $ getThreadManager runtime
+  case HashMap.lookup tid threads of
+    Just thread -> writeTVar thread.workflowThreadBlocked blockedOrNot
+    Nothing -> error ("markBlockedState: " <> show tid <> " not found")

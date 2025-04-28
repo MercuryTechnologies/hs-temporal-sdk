@@ -254,7 +254,7 @@ module Temporal.Workflow (
 ) where
 
 import Control.Applicative (Alternative (..))
-import Control.Concurrent (forkIO)
+import Control.Concurrent (forkIO, myThreadId)
 import Control.Exception.Annotated (throwWithCallStack)
 import Control.Monad
 import Control.Monad.Catch
@@ -370,7 +370,7 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = Workfl
       intercept = inst.outboundInterceptor.scheduleActivity
   s@(Sequence actSeq) <- nextActivitySequence
   rawTask <- liftIO $ intercept (ActivityInput name typedPayloads opts s) $ \activityInput -> runInIO $ do
-    resultSlot <- newIVar
+    resultSlot <- newIVar $ getThreadManager runtime
     atomically $ modifyTVar'
       runtime.workflowRuntimeSequenceMaps.activities
       (HashMap.insert s resultSlot)
@@ -518,8 +518,8 @@ signalWorkflow
   -> (SignalArgs ref :->: Workflow (Task ()))
 signalWorkflow _ f (signalRef -> KnownSignal signalName signalCodec) = withWorkflowArgs @(SignalArgs ref) @(Task ()) signalCodec $ \ps -> Workflow do
   updateCallStack
-  resVar <- newIVar
   runtime <- ask
+  resVar <- newIVar $ getThreadManager runtime
   let inst = runtime.workflowRuntimeInstance
   runInIO <- askRunInIO
   s <- nextExternalSignalSequence
@@ -581,14 +581,16 @@ startChildWorkflowFromPayloads (workflowRef -> k@(KnownWorkflow codec _)) opts p
       runInIO <- askRunInIO
       wfHandle <- liftIO $ inst.outboundInterceptor.startChildWorkflowExecution (knownWorkflowName k) opts $ \wfName opts' -> runInIO $ do
         args <- processorEncodePayloads inst.payloadProcessor typedPayloads
-        let convertedPayloads = fmap convertToProtoPayload args
-        hdrs <- processorEncodePayloads inst.payloadProcessor opts'.headers
         memo <- processorEncodePayloads inst.payloadProcessor opts'.initialMemo
 
+        let convertedPayloads = fmap convertToProtoPayload args
+            hdrs = opts'.headers
+
         s@(Sequence wfSeq) <- nextChildWorkflowSequence
-        startSlot <- newIVar
-        resultSlot <- newIVar
-        firstExecutionRunId <- newIVar
+        let tm = getThreadManager runtime
+        startSlot <- newIVar tm
+        resultSlot <- newIVar tm
+        firstExecutionRunId <- newIVar tm
         i <- readTVarIO inst.workflowInstanceInfo
         searchAttrs <- liftIO $ searchAttributesToProto opts'.searchAttributes
         let childWorkflowOptions =
@@ -1275,7 +1277,7 @@ createTimer ts = provideCallStack $ ilift $ do
                       & Command.startToFireTimeout .~ durationToProto ts'
                    )
       $(logDebug) "Add command: sleep"
-      res <- newIVar
+      res <- newIVar $ getThreadManager runtime
       atomically $ modifyTVar' runtime.workflowRuntimeSequenceMaps.timers $ \seqMaps ->
         HashMap.insert s res seqMaps
       addCommand cmd
@@ -1438,9 +1440,11 @@ race
   -> Workflow b
   -> Workflow (Either a b)
 race l r = Workflow do
+  runtime <- ask
   lh <- asyncWorkflow l
   rh <- asyncWorkflow r
-  waitEither lh rh
+  atomically $ markBlockedState runtime True
+  waitEither lh rh `UnliftIO.finally` atomically (markBlockedState runtime False)
 
 {- | Run two Workflow actions concurrently, and return the first to finish.
 
