@@ -104,6 +104,7 @@ execute worker@WorkflowWorker {workerCore} = flip runReaderT worker $ do
   where
     c = Core.getWorkerConfig workerCore
     go = inSpan' "Workflow activation step" defaultSpanArguments $ \s -> do
+      $(logDebug) "Polling for workflow activation"
       -- logs <- liftIO $ fetchLogs globalRuntime
       -- forM_ logs $ \l -> case l.level of
       --   Trace -> $(logDebug) l.message
@@ -128,11 +129,12 @@ execute worker@WorkflowWorker {workerCore} = flip runReaderT worker $ do
           -- We want to handle activations as fast as possible, so we don't want to block
           -- on dispatching jobs. We link the activator thread to the run-loop so that any
           -- unhandled exceptions in that logic aren't ignored.
-          activationCtxt <- getContext
-          activator <- asyncLabelled (Text.unpack $ Text.concat ["temporal/worker/workflow/activate", Core.namespace c, "/", Core.taskQueue c]) $ do
-            _ <- attachContext activationCtxt
-            handleActivation activation
-          link activator
+          -- activationCtxt <- getContext
+          -- activator <- asyncLabelled (Text.unpack $ Text.concat ["temporal/worker/workflow/activate", Core.namespace c, "/", Core.taskQueue c]) $ do
+          --   _ <- attachContext activationCtxt
+          --   $(logDebug) "Activator async finished"
+          -- link activator
+          handleActivation activation
           pure True
 
 
@@ -323,4 +325,5 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                   pure $ do
                     $(logDebug) $ Text.pack ("Evicting workflow instance with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
                     shutdownRunningWorkflow wf
-        _ -> pure ()
+                    $(logDebug) ("Evicted workflow instance with run ID " <> Text.pack (show runId_))
+        _ -> $(logDebug) "Nothing to evict this time"

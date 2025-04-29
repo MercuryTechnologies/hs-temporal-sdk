@@ -104,6 +104,7 @@ import Data.ProtoLens (encodeMessage)
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
+import Debug.Trace
 import Data.UUID (UUID)
 import qualified Data.UUID as UUID
 import Data.UUID.V4 (nextRandom)
@@ -698,21 +699,27 @@ in-flight tasks to complete before finalizing the shutdown.
 -}
 shutdown :: (MonadUnliftIO m) => Temporal.Worker.Worker actEnv -> m ()
 shutdown worker@Temporal.Worker.Worker {workerCore, workerTracer, workerType, workerActivityWorker} = OT.inSpan workerTracer "shutdown" defaultSpanArguments $ UnliftIO.mask $ \restore -> do
+  traceM "shutdown worker"
   OT.inSpan workerTracer "initiateShutdown" defaultSpanArguments $ liftIO $ Core.initiateShutdown workerCore
+  liftIO yield
 
   -- Worker shutdown will wait on all activities to complete, so if a long-running activity does not respect cancellation,
   -- the shutdown may never complete. However, we do issue a shutdown notification to the activities in the form of an
   -- async exception, so they would have to be actively ignoring the shutdown notification to prevent the shutdown from completing.
   () <- case workerType of
-    Core.SReal -> Activity.notifyShutdown workerActivityWorker
+    Core.SReal -> traceM "notifying shutdown" >> Activity.notifyShutdown workerActivityWorker >> traceM "activity worker notified"
     Core.SReplay -> pure ()
 
+  traceM "waiting for worker to exit"
   OT.inSpan workerTracer "waitWorker" defaultSpanArguments $ restore $ waitWorker worker
+  traceM "seems to be done"
 
+  traceM "finalize shutdown"
   err' <- OT.inSpan workerTracer "finalizeShutdown" defaultSpanArguments $ liftIO $ Core.finalizeShutdown workerCore
+  traceM "finalized shutdown"
   case err' of
-    Left err -> throwIO err
-    Right () -> pure ()
+    Left err -> traceM "finalizeShutdown error" >> throwIO err
+    Right () -> traceM "finalizeShutdown success" >> pure ()
 
 
 -- logs <- liftIO $ fetchLogs globalRuntime

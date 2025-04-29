@@ -99,6 +99,7 @@ import Data.Typeable
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
 import qualified Data.Vector as V
+import Debug.Trace
 import Lens.Family2
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Common
 import qualified Proto.Temporal.Api.Enums.V1.Query as Query
@@ -266,8 +267,10 @@ This function will block until the workflow completes, and will return the resul
 or throw a 'WorkflowExecutionClosed' exception if the workflow was closed without returning a result.
 -}
 waitWorkflowResult :: (Typeable a, MonadIO m) => WorkflowHandle a -> m a
-waitWorkflowResult h@(WorkflowHandle readResult _ c wf r _) = do
+waitWorkflowResult h@(WorkflowHandle readResult _ c wf r) = do
+  traceM "waitWorkflowResult"
   mev <- runReaderT (waitResult wf r c.clientConfig.namespace) c
+  traceM "got a result"
   case mev of
     Nothing -> error "Unexpected empty history"
     Just ev -> case ev ^. History.maybe'attributes of
@@ -275,15 +278,9 @@ waitWorkflowResult h@(WorkflowHandle readResult _ c wf r _) = do
       Just attrType -> case attrType of
         HistoryEvent'WorkflowExecutionCompletedEventAttributes attrs -> do
           let payloads = convertFromProtoPayload <$> (attrs ^. History.result . Common.payloads)
-          -- LMAO this is such a comical coercion
-          --
-          -- We just need to ignore payloads if the result type is unit to allow workflows to evolve
-          -- such that they can return something else in the future.
-          if typeRep h == typeOf ()
-            then pure $ unsafeCoerce ()
-            else case payloads of
-              (a : _) -> liftIO $ readResult a
-              _ -> error "Missing result payload"
+          case payloads of
+            (a : _) -> liftIO $ readResult a
+            _ -> error "Missing result payload"
         HistoryEvent'WorkflowExecutionFailedEventAttributes attrs ->
           throwIO $ WorkflowExecutionFailed attrs
         HistoryEvent'WorkflowExecutionTimedOutEventAttributes _attrs -> throwIO WorkflowExecutionTimedOut
@@ -524,7 +521,7 @@ startFromPayloads
 startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
   c <- askWorkflowClient
   ps <- liftIO $ sequence payloads
-  wfH <- liftIO $ Temporal.Client.Types.start c.clientConfig.interceptors (WorkflowType $ knownWorkflowName k) wfId opts ps $ \wfName wfId' opts' payloads' -> do
+  liftIO $ Temporal.Client.Types.start c.clientConfig.interceptors (WorkflowType $ knownWorkflowName k) wfId opts ps $ \wfName wfId' opts' payloads' -> do
     reqId <- UUID.nextRandom
     searchAttrs <- searchAttributesToProto opts'.searchAttributes
     payloads'' <- processorEncodePayloads c.clientConfig.payloadProcessor payloads'
@@ -573,24 +570,7 @@ startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
     res <- startWorkflowExecution c.clientCore req
     case res of
       Left err -> throwIO err
-      Right swer ->
-        let runId = RunId $ swer ^. WF.runId
-        in pure $
-            WorkflowHandle
-              { workflowHandleReadResult = pure
-              , workflowHandleType = WorkflowType $ knownWorkflowName k
-              , workflowHandleClient = c
-              , workflowHandleWorkflowId = wfId'
-              , workflowHandleRunId = Just runId
-              , workflowHandleFirstExecutionRunId = Just runId
-              }
-  pure $
-    wfH
-      { workflowHandleReadResult = \a ->
-          workflowHandleReadResult wfH a >>= \b -> do
-            result <- decode codec =<< either (throwIO . ValueError) pure =<< payloadProcessorDecode c.clientConfig.payloadProcessor b
-            either (throwIO . ValueError) pure result
-      }
+      Right swer -> runReaderT (getHandle k wfId' (Just (RunId $ swer ^. WF.runId))) c
 
 
 {- | Begin a new Workflow Execution.
@@ -654,14 +634,14 @@ signalWithStart (workflowRef -> k@(KnownWorkflow codec _)) wfId opts (signalRef 
               , signalWithStartOptions = opts
               , signalWithStartWorkflowId = wfId
               }
-      wfH <- liftIO $ Temporal.Client.Types.signalWithStart c.clientConfig.interceptors interceptorOpts $ \opts' -> do
+      liftIO $ Temporal.Client.Types.signalWithStart c.clientConfig.interceptors interceptorOpts $ \opts' -> do
         reqId <- UUID.nextRandom
         searchAttrs <- searchAttributesToProto opts'.signalWithStartOptions.searchAttributes
         signalArgs' <- processorEncodePayloads processor opts'.signalWithStartSignalArgs
         wfArgs' <- processorEncodePayloads processor opts'.signalWithStartArgs
-        hdrs <- processorEncodePayloads processor opts'.signalWithStartOptions.headers
         memo' <- processorEncodePayloads processor opts'.signalWithStartOptions.memo
-        let tq = rawTaskQueue opts'.signalWithStartOptions.taskQueue
+        let hdrs = opts'.signalWithStartOptions.headers
+            tq = rawTaskQueue opts'.signalWithStartOptions.taskQueue
             msg =
               defMessage
                 & RR.namespace .~ rawNamespace c.clientConfig.namespace
@@ -703,25 +683,7 @@ signalWithStart (workflowRef -> k@(KnownWorkflow codec _)) wfId opts (signalRef 
             msg
         case res of
           Left err -> throwIO err
-          Right swer ->
-            pure $
-              WorkflowHandle
-                { workflowHandleReadResult = pure
-                , workflowHandleType = WorkflowType $ knownWorkflowName k
-                , workflowHandleClient = c
-                , workflowHandleWorkflowId = opts'.signalWithStartWorkflowId
-                , workflowHandleRunId = Just (RunId $ swer ^. WF.runId)
-                , -- We don't know if this handle represents a new workflow or an already-running one, so we don't
-                  -- know if the current run ID is for its first execution or not
-                  workflowHandleFirstExecutionRunId = Nothing
-                }
-      pure $
-        wfH
-          { workflowHandleReadResult = \a ->
-              workflowHandleReadResult wfH a >>= \b -> do
-                result <- decode codec b
-                either (throwIO . ValueError) pure result
-          }
+          Right swer -> runReaderT (getHandle k opts'.signalWithStartWorkflowId (Just (RunId $ swer ^. WF.runId))) c
 
 
 data TerminationOptions = TerminationOptions
@@ -831,23 +793,23 @@ streamEvents followOpt baseReq = askWorkflowClient >>= \c -> go c baseReq
           yieldMany (x ^. RR.history . History.events)
           for_ (decideLoop baseReq x) (go c)
     decideLoop :: GetWorkflowExecutionHistoryRequest -> GetWorkflowExecutionHistoryResponse -> Maybe GetWorkflowExecutionHistoryRequest
-    decideLoop req res =
+    decideLoop req res = do
       if V.null (res ^. RR.history . History.vec'events)
-        then nextPage
+        then traceM "no events" >> nextPage
         else case V.last (res ^. RR.history . History.vec'events) ^. History.maybe'attributes of
-          Nothing -> nextPage
+          Nothing -> traceM "no attributes" >> nextPage
           Just attrType ->
             case attrType of
-              HistoryEvent'WorkflowExecutionCompletedEventAttributes attrs -> case followOpt of
+              HistoryEvent'WorkflowExecutionCompletedEventAttributes attrs -> traceM "completed" >> case followOpt of
                 FollowRuns -> applyNewExecutionRunId attrs req nextPage
                 ThisRunOnly -> nextPage
-              HistoryEvent'WorkflowExecutionFailedEventAttributes attrs -> case followOpt of
+              HistoryEvent'WorkflowExecutionFailedEventAttributes attrs -> traceM "failed" >> case followOpt of
                 FollowRuns -> applyNewExecutionRunId attrs req nextPage
                 ThisRunOnly -> nextPage
-              HistoryEvent'WorkflowExecutionTimedOutEventAttributes attrs -> case followOpt of
+              HistoryEvent'WorkflowExecutionTimedOutEventAttributes attrs -> traceM "timed out" >> case followOpt of
                 FollowRuns -> applyNewExecutionRunId attrs req nextPage
                 ThisRunOnly -> nextPage
-              HistoryEvent'WorkflowExecutionContinuedAsNewEventAttributes attrs -> case followOpt of
+              HistoryEvent'WorkflowExecutionContinuedAsNewEventAttributes attrs -> traceM "continued as new" >> case followOpt of
                 FollowRuns ->
                   if attrs ^. History.newExecutionRunId == ""
                     then error "Expected newExecutionRunId in WorkflowExecutionContinuedAsNewEventAttributes"
@@ -857,7 +819,7 @@ streamEvents followOpt baseReq = askWorkflowClient >>= \c -> go c baseReq
                           & RR.nextPageToken .~ ""
                           & RR.execution %~ (RR.runId .~ (attrs ^. History.newExecutionRunId))
                 ThisRunOnly -> Nothing
-              _ -> Nothing
+              _ -> traceM "don't know what to do" >> Nothing
       where
         nextPage =
           if res ^. RR.nextPageToken == ""

@@ -210,9 +210,9 @@ data SignalWithStartWorkflowInput = SignalWithStartWorkflowInput
 
 
 data ClientInterceptors = ClientInterceptors
-  { start :: WorkflowType -> WorkflowId -> StartWorkflowOptions -> Vector Payload -> (WorkflowType -> WorkflowId -> StartWorkflowOptions -> Vector Payload -> IO (WorkflowHandle Payload)) -> IO (WorkflowHandle Payload)
+  { start :: forall a. WorkflowType -> WorkflowId -> StartWorkflowOptions -> Vector Payload -> (WorkflowType -> WorkflowId -> StartWorkflowOptions -> Vector Payload -> IO (WorkflowHandle a)) -> IO (WorkflowHandle a)
   , queryWorkflow :: QueryWorkflowInput -> (QueryWorkflowInput -> IO (Either QueryRejected Payload)) -> IO (Either QueryRejected Payload)
-  , signalWithStart :: SignalWithStartWorkflowInput -> (SignalWithStartWorkflowInput -> IO (WorkflowHandle Payload)) -> IO (WorkflowHandle Payload)
+  , signalWithStart :: forall a. SignalWithStartWorkflowInput -> (SignalWithStartWorkflowInput -> IO (WorkflowHandle a)) -> IO (WorkflowHandle a)
   , updateWorkflow :: UpdateWorkflowInput -> (UpdateWorkflowInput -> IO Payload) -> IO Payload
   -- TODO
   -- signal
@@ -225,10 +225,10 @@ data ClientInterceptors = ClientInterceptors
 instance Semigroup ClientInterceptors where
   a <> b =
     ClientInterceptors
-      { start = \t wfId o ps next -> a.start t wfId o ps $ \t' wfId' o' ps' -> b.start t' wfId' o' ps' next
-      , queryWorkflow = \i next -> a.queryWorkflow i $ \i' -> b.queryWorkflow i' next
-      , signalWithStart = \i next -> a.signalWithStart i $ \i' -> b.signalWithStart i' next
-      , updateWorkflow = \i next -> a.updateWorkflow i $ \i' -> b.updateWorkflow i' next
+      { start = \t wfId o ps next -> start a t wfId o ps $ \t' wfId' o' ps' -> start b t' wfId' o' ps' next
+      , queryWorkflow = \i next -> queryWorkflow a i $ \i' -> queryWorkflow b i' next
+      , signalWithStart = \i next -> signalWithStart a i $ \i' -> signalWithStart b i' next
+      , updateWorkflow = \i next -> updateWorkflow a i $ \i' -> updateWorkflow b i' next
       }
 
 
