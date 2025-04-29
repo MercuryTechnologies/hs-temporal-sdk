@@ -122,8 +122,8 @@ pub unsafe extern "C" fn hs_temporal_init_runtime(
         serde_json::from_slice(telemetry_opts.as_slice()).expect("Failed to parse");
 
     let early_options = TelemetryOptionsBuilder::default()
-        .logging(Logger::Forward {
-            filter: construct_filter_string(Level::INFO, Level::ERROR),
+        .logging(Logger::Console {
+            filter: construct_filter_string(Level::DEBUG, Level::DEBUG),
         })
         .attach_service_name(true)
         // .metrics(core_meter)

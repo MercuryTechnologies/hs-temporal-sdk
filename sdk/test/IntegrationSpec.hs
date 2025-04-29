@@ -844,7 +844,7 @@ needsClient = do
     --   --   specify "ApplicationFailure exception" pending
     --   --   specify "ActivityFailure exception" pending
     --   --   specify "Non-wrapped exception" pending
-    xdescribe "Child workflows" $ do
+    fdescribe "Child workflows" $ do
       specify "failing children" $ \TestEnv {..} -> do
         let conf = configure () testConf $ do
               baseConf
