@@ -99,7 +99,6 @@ import Data.Typeable
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
 import qualified Data.Vector as V
-import Debug.Trace
 import Lens.Family2
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Common
 import qualified Proto.Temporal.Api.Enums.V1.Query as Query
@@ -133,8 +132,6 @@ import Temporal.SearchAttributes.Internal
 import Temporal.Workflow (KnownQuery (..), KnownSignal (..), QueryRef (..))
 import Temporal.Workflow.Definition
 import UnliftIO
-import Unsafe.Coerce
-
 
 ---------------------------------------------------------------------------------
 -- WorkflowClient stuff
@@ -268,9 +265,7 @@ or throw a 'WorkflowExecutionClosed' exception if the workflow was closed withou
 -}
 waitWorkflowResult :: (Typeable a, MonadIO m) => WorkflowHandle a -> m a
 waitWorkflowResult h@(WorkflowHandle readResult _ c wf r) = do
-  traceM "waitWorkflowResult"
   mev <- runReaderT (waitResult wf r c.clientConfig.namespace) c
-  traceM "got a result"
   case mev of
     Nothing -> error "Unexpected empty history"
     Just ev -> case ev ^. History.maybe'attributes of
@@ -518,7 +513,7 @@ startFromPayloads
   -> StartWorkflowOptions
   -> V.Vector UnencodedPayload
   -> m (WorkflowHandle result)
-startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
+startFromPayloads k wfId opts payloads = do
   c <- askWorkflowClient
   ps <- liftIO $ sequence payloads
   liftIO $ Temporal.Client.Types.start c.clientConfig.interceptors (WorkflowType $ knownWorkflowName k) wfId opts ps $ \wfName wfId' opts' payloads' -> do
@@ -795,21 +790,21 @@ streamEvents followOpt baseReq = askWorkflowClient >>= \c -> go c baseReq
     decideLoop :: GetWorkflowExecutionHistoryRequest -> GetWorkflowExecutionHistoryResponse -> Maybe GetWorkflowExecutionHistoryRequest
     decideLoop req res = do
       if V.null (res ^. RR.history . History.vec'events)
-        then traceM "no events" >> nextPage
+        then nextPage
         else case V.last (res ^. RR.history . History.vec'events) ^. History.maybe'attributes of
-          Nothing -> traceM "no attributes" >> nextPage
+          Nothing -> nextPage
           Just attrType ->
             case attrType of
-              HistoryEvent'WorkflowExecutionCompletedEventAttributes attrs -> traceM "completed" >> case followOpt of
+              HistoryEvent'WorkflowExecutionCompletedEventAttributes attrs -> case followOpt of
                 FollowRuns -> applyNewExecutionRunId attrs req nextPage
                 ThisRunOnly -> nextPage
-              HistoryEvent'WorkflowExecutionFailedEventAttributes attrs -> traceM "failed" >> case followOpt of
+              HistoryEvent'WorkflowExecutionFailedEventAttributes attrs -> case followOpt of
                 FollowRuns -> applyNewExecutionRunId attrs req nextPage
                 ThisRunOnly -> nextPage
-              HistoryEvent'WorkflowExecutionTimedOutEventAttributes attrs -> traceM "timed out" >> case followOpt of
+              HistoryEvent'WorkflowExecutionTimedOutEventAttributes attrs -> case followOpt of
                 FollowRuns -> applyNewExecutionRunId attrs req nextPage
                 ThisRunOnly -> nextPage
-              HistoryEvent'WorkflowExecutionContinuedAsNewEventAttributes attrs -> traceM "continued as new" >> case followOpt of
+              HistoryEvent'WorkflowExecutionContinuedAsNewEventAttributes attrs -> case followOpt of
                 FollowRuns ->
                   if attrs ^. History.newExecutionRunId == ""
                     then error "Expected newExecutionRunId in WorkflowExecutionContinuedAsNewEventAttributes"
@@ -819,7 +814,7 @@ streamEvents followOpt baseReq = askWorkflowClient >>= \c -> go c baseReq
                           & RR.nextPageToken .~ ""
                           & RR.execution %~ (RR.runId .~ (attrs ^. History.newExecutionRunId))
                 ThisRunOnly -> Nothing
-              _ -> traceM "don't know what to do" >> Nothing
+              _ -> Nothing
       where
         nextPage =
           if res ^. RR.nextPageToken == ""

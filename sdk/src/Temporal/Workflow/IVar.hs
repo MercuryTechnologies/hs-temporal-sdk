@@ -4,7 +4,6 @@ import Control.Concurrent.STM (retry)
 import Control.Monad
 import Control.Monad.Reader.Class
 import Data.Foldable
-import Debug.Trace
 import qualified Data.Text as Text
 import qualified Data.HashMap.Strict as HashMap
 import UnliftIO
@@ -50,12 +49,9 @@ putIVar IVar{ivar, blocks} x = void do
   writeTVar blocks mempty
 
 waitIVar :: (MonadLogger m, MonadIO m, Typeable a) => IVar a -> m a
-waitIVar i@IVar{..} = do
+waitIVar IVar{..} = do
   tid <- myThreadId
-  let tidText = Text.pack (show tid)
-      ivarTypeText = Text.pack (show i)
   join $ do
-    $(logDebug) $ "trying to read ivar: " <> ivarTypeText <> " on thread " <> tidText
     atomically do
       threads <- readTVar $ threadManager manager
       let threadState = case HashMap.lookup tid threads of
@@ -67,22 +63,17 @@ waitIVar i@IVar{..} = do
           writeTVar threadState.workflowThreadBlocked True
           modifyTVar' blocks $ HashMap.insert tid threadState
           pure $ do
-            $(logDebug) $ "wait for ivar: " <> ivarTypeText <> " on thread " <> tidText
             x <- atomically $ readTMVar ivar
-            $(logDebug) $ "read ivar with blocking: " <> ivarTypeText <> " on thread " <> tidText
             pure x
         Just val -> pure do
-          $(logDebug) $ "read ivar without blocking: " <> ivarTypeText <> " on thread " <> tidText
           pure val
 
 -- | Use this to determine when we want to flush things to the server.
 waitAllBlocked :: HasThreadManager r => r -> STM ()
 waitAllBlocked runtime = do
   threads <- readTVar $ threadManager $ getThreadManager runtime
-  traceM $ "waiting for all blocked, thread count: " <> show (HashMap.size threads)
   allBlocked <- and <$> mapM (readTVar . workflowThreadBlocked) threads
   guard allBlocked
-  traceM "all blocked"
 
 markBlockedState :: HasThreadManager r => r -> Bool -> STM ()
 markBlockedState runtime blockedOrNot = do

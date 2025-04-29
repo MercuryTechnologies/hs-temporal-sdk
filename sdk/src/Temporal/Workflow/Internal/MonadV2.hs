@@ -10,7 +10,6 @@ import Control.Monad.Logger
 import Control.Monad.Reader
 import qualified Control.Monad.Catch as Catch
 import qualified Control.Exception as E
-import Debug.Trace
 import Data.Dynamic
 import Data.Foldable
 import Data.Traversable
@@ -395,9 +394,7 @@ runWorkflow inst m = liftIO do
         -- This could cause a deadlock.
         liftIO $ join $ atomically do
           waitAllBlocked runtime
-          traceM $ "waiting for activation on thread " <> show tid
           activation <- readTQueue runtime.workflowRuntimeInstance.activationChannel
-          traceM $ "got an activation on thread " <> show tid
           activate runtime activation tid
 
         -- This has to be done in a separate atomically block, because the change to
@@ -408,13 +405,10 @@ runWorkflow inst m = liftIO do
           writeTVar runtime.workflowRuntimeReadyToFlush True
 
     flush = forever $ do
-      tid <- myThreadId
       atomically do
         ready <- readTVar runtime.workflowRuntimeReadyToFlush
-        traceM $ "waiting for flush on thread " <> show tid
         guard ready
         writeTVar runtime.workflowRuntimeReadyToFlush False
-        traceM $ "flushing on thread " <> show tid
       flushCommands runtime
 
     shutdownThreads myTid = do
@@ -447,15 +441,13 @@ flushCommands runtime = do
         defMessage
           & Completion.runId .~ rawRunId info.runId
           & Completion.successful .~ completionSuccessful
-  traceM $ "Thread flush " <> show tid <> ": " <> show completionMessage
   res <- liftIO $ runtime.workflowRuntimeInstance.workflowCompleteActivation completionMessage
   case res of
-    Left err -> traceM ("Thread " <> show tid <> ": complete activation failed") >> throwIO err
-    Right () -> traceM ("Thread " <> show tid <> ": complete activation succeeded")
+    Left err -> throwIO err
+    Right () -> pure ()
 
 activate :: WorkflowRuntime -> WorkflowActivation -> ThreadId -> STM (IO ())
 activate runtime act tid = do
-  traceM $ "activating on thread " <> show tid
   let inst = runtime.workflowRuntimeInstance
   info <- do
     info <- readTVar inst.workflowInstanceInfo
@@ -470,7 +462,6 @@ activate runtime act tid = do
   writeTVar inst.workflowTime (act ^. Activation.timestamp . to timespecFromTimestamp)
   writeTVar inst.workflowIsReplaying (act ^. Activation.isReplaying)
   pure do
-    traceM $ "Thread " <> show tid <> ": applying jobs"
     let apply = try do
           runReaderT
             (unInstanceM $ unWorkflow $ applyJobs (act ^. Activation.vec'jobs))
@@ -484,10 +475,8 @@ activate runtime act tid = do
             pure $ Left $ toException $ LogicBug WorkflowActivationDeadlock
           Just res' -> pure res'
     tid' <- myThreadId
-    traceM $ "Thread " <> show tid' <> ": applied jobs"
     case eResult of
       Left err -> do
-        traceM $ "Thread " <> show tid' <> ": applied jobs (failed)"
         -- TODO, failures should have source / stack trace info
         -- TODO, convert failure type using a supplied payload converter
         let failure =
@@ -500,7 +489,6 @@ activate runtime act tid = do
         -- I think it's morally okay to crash the worker thread here.
         throwIO err
       Right f -> do
-        traceM $ "Thread " <> show tid' <> ": applied jobs (succeeded)"
         pure f
 
 applyJobs :: Vector WorkflowActivationJob -> Workflow ()
@@ -613,7 +601,6 @@ handleFireTimer runtime msg = do
 
 handleResolveActivity :: WorkflowRuntime -> ResolveActivity -> STM (IO ())
 handleResolveActivity runtime msg = do
-  traceM "resolving activity"
   let a = msg ^. Activation.seq . to Sequence
   mvar <- resolveSequence runtime.workflowRuntimeSequenceMaps.activities a
   case mvar of
@@ -646,7 +633,6 @@ handleResolveChildWorkflowExecutionStart runtime msg = do
               ResolveChildWorkflowExecutionStart'Cancelled _cancelled -> Left $ toException ChildWorkflowCancelled
         case eResult of
           Left err -> do
-            traceM ("Child workflow start failed: " <> show err)
             unregisterOnFailure
             putIVar existing.startHandle (E.throw err)
             putIVar existing.firstExecutionRunId (E.throw err)

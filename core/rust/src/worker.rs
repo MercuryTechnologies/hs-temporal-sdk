@@ -259,7 +259,6 @@ pub unsafe extern "C" fn hs_temporal_new_worker(
                     unsafe { *result_slot = Box::into_raw(Box::new(worker_ref)) };
                 }
                 Err(worker_error) => {
-                    eprintln!("Error: {:?}", worker_error);
                     unsafe {
                         *error_slot = CWorkerError::c_repr_of(worker_error)
                             .unwrap()
@@ -269,7 +268,6 @@ pub unsafe extern "C" fn hs_temporal_new_worker(
             }
         }
         Err(worker_error) => {
-            eprintln!("Error: {:?}", worker_error);
             unsafe {
                 *error_slot = CWorkerError::c_repr_of(worker_error)
                     .unwrap()
@@ -678,9 +676,7 @@ pub unsafe extern "C" fn hs_temporal_worker_request_workflow_eviction(
 #[no_mangle]
 pub unsafe extern "C" fn hs_temporal_worker_initiate_shutdown(worker: *mut WorkerRef) {
     let worker = unsafe { &*worker };
-    println!("initiate_shutdown");
     worker.initiate_shutdown();
-    println!("initiate_shutdown done");
 }
 
 // TODO: [publish-crate]
@@ -702,9 +698,7 @@ pub unsafe extern "C" fn hs_temporal_worker_finalize_shutdown(
         error_slot,
         result_slot,
     };
-    println!("finalize_shutdown");
     worker.finalize_shutdown(hs);
-    println!("finalize_shutdown done");
 }
 
 pub struct HistoryPusher {
