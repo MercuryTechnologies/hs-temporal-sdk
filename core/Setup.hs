@@ -79,7 +79,7 @@ execCargo verbosity command args = do
 
 
 rsMake :: Verbosity -> IO ()
-rsMake verbosity = execCargo verbosity "build" ["--release", "--lib"]
+rsMake verbosity = execCargo verbosity "build" ["--lib"]
 
 
 rsAddLibraryInfo :: ConfigFlags -> LocalBuildInfo -> IO LocalBuildInfo
@@ -144,7 +144,7 @@ copyLib fl libPref shared = do
           _ -> "so"
         else "a"
     getLibraryPath =
-      pure ("rust/target/release/libtemporal_bridge." ++ ext)
+      pure ("rust/target/debug/libtemporal_bridge." ++ ext)
 
 
 copyTemporalBridge :: LocalBuildInfo -> FilePath -> IO ()

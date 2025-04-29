@@ -26,6 +26,9 @@ prost = "~0.13"
 prost-types = "~0.13"
 libc = "0.2.172"
 
+[profile.dev]
+split-debuginfo = "packed"
+
 [profile.release]
 opt-level = 3
 debug = false

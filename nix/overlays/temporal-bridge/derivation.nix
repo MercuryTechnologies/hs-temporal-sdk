@@ -17,6 +17,10 @@ let
           PROTOC_INCLUDE = "${pkgs.protobuf}/include";
         };
         temporal_bridge = attrs: {
+          # XXX: Only produces a separate output on Linux; on macOS the `dSYM`
+          # directory is bundled in `/lib` along with the library files.
+          separateDebugInfo = true;
+          extraRustcOpts = ["-g"];
           buildInputs = pkgs.lib.optionals pkgs.stdenv.isDarwin (
             with pkgs.darwin.apple_sdk.frameworks;
             [
@@ -47,6 +51,6 @@ let
   };
 in
 {
-  temporal_bridge = cargoNix.rootCrate.build.lib;
+  temporal_bridge = cargoNix.rootCrate.build;
   temporal-sdk-core-src = cargoNix.internal.crates.temporal-sdk-core.src;
 }
