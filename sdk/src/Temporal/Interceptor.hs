@@ -73,8 +73,8 @@ import Data.Map (Map)
 import Data.Text (Text)
 import Data.Vault.Strict
 import Data.Vector (Vector)
-import Temporal.Common
 import Temporal.Client.Types
+import Temporal.Common
 import Temporal.Exception
 import Temporal.Payload
 import Temporal.Workflow.ChildWorkflowHandle
@@ -152,12 +152,14 @@ instance Monoid ScheduleClientInterceptors where
       { scheduleWorkflowAction = \opts _ -> return opts
       }
 
+
 data ExecuteWorkflowInput = ExecuteWorkflowInput
   { executeWorkflowInputType :: Text
   , executeWorkflowInputArgs :: Vector Payload
   , executeWorkflowInputHeaders :: Map Text Payload
   , executeWorkflowInputInfo :: Info
   }
+
 
 data WorkflowInboundInterceptor = WorkflowInboundInterceptor
   { executeWorkflow

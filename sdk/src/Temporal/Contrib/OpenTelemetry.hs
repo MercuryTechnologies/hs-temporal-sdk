@@ -17,16 +17,18 @@ the interceptor to your Temporal client and worker configuration.
 -}
 module Temporal.Contrib.OpenTelemetry where
 
-import Control.Monad.Catch
 import Control.Monad.IO.Class
 import qualified Data.HashMap.Strict as HashMap
 import Data.Int
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as T
+-- TODO rework WorkflowExitVariant to not expose internals
+
 import qualified Data.Vault.Strict as Vault
 import Data.Version (showVersion)
 import Data.Word (Word32)
 import GHC.IO (unsafePerformIO)
+import OpenTelemetry.Attributes (emptyAttributes)
 import qualified OpenTelemetry.Context as Ctxt
 import OpenTelemetry.Context.ThreadLocal (attachContext, getContext)
 import OpenTelemetry.Propagator
@@ -34,20 +36,17 @@ import OpenTelemetry.Propagator.W3CTraceContext
 import OpenTelemetry.Trace.Core
 import Paths_temporal_sdk
 import Temporal.Activity.Types
--- TODO rework WorkflowExitVariant to not expose internals
-import qualified Temporal.Client.Types as C
+import Temporal.Client.Types (
+  StartWorkflowOptions (..),
+ )
 import Temporal.Common
 import Temporal.Duration
 import Temporal.Interceptor
 import Temporal.Payload (Payload (..))
 import Temporal.Workflow (Workflow)
 import Temporal.Workflow.Types
-import Temporal.Workflow.Unsafe
-import Prelude hiding (span)
 import Temporal.Workflow.Unsafe (performUnsafeNonDeterministicIO)
-import OpenTelemetry.Trace.Core (createSpanWithoutCallStack)
-import qualified Data.Vault.Strict as Vault
-import GHC.IO (unsafePerformIO)
+import Prelude hiding (span)
 
 
 -- | "_tracer-data"
@@ -376,7 +375,6 @@ makeOpenTelemetryInterceptor = do
 
 -- inSpan :: T.Text -> SpanArguments -> Workflow a -> Workflow a
 -- inSpan = undefined
-
 
 -- inSpan' :: T.Text -> SpanArguments -> Workflow a -> Workflow a
 -- inSpan' = undefined

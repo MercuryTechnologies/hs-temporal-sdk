@@ -1,5 +1,6 @@
 module Temporal.Workflow.Task where
 
+
 -- | An async action handle that can be awaited or cancelled.
 data Task a = Task
   { waitAction :: IO a
@@ -14,4 +15,3 @@ instance Functor Task where
 instance Applicative Task where
   pure a = Task (pure a) (pure ())
   Task waitL cancelL <*> Task waitR cancelR = Task (waitL <*> waitR) (cancelL *> cancelR)
-

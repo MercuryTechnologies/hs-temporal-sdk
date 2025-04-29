@@ -1,30 +1,36 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE TemplateHaskell #-}
-module Temporal.Workflow.Internal.MonadV2 where
+
+module Temporal.Workflow.Monad where
 
 import Control.Applicative
-import Control.Concurrent.STM (retry, newTQueue, flushTQueue)
+import Control.Concurrent.STM (flushTQueue, newTQueue, retry)
+import qualified Control.Exception as E
 import Control.Monad
 import Control.Monad.Catch (throwM)
+import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
-import qualified Control.Monad.Catch as Catch
-import qualified Control.Exception as E
 import Data.Dynamic
 import Data.Foldable
-import Data.Traversable
 import Data.Function hiding ((&))
-import Data.Hashable
-import Data.HashSet (HashSet)
-import qualified Data.Set as Set
 import qualified Data.HashMap.Strict as HashMap
+import Data.HashSet (HashSet)
+import Data.Hashable
+import Data.Kind
 import qualified Data.Map.Strict as Map
+import Data.Maybe
 import Data.ProtoLens
+import qualified Data.Set as Set
 import qualified Data.Text as Text
+import Data.Traversable
+import Data.Vector (Vector)
 import GHC.Exts (Any)
-import GHC.TypeLits
 import GHC.Stack
+import GHC.TypeLits
 import Lens.Family2
+import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as Failure
+import Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow (StartChildWorkflowExecutionFailedCause (..))
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
 import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands (WorkflowCommand)
@@ -32,11 +38,8 @@ import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands as Co
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Core
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
-import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as Failure
-import UnliftIO
-import UnliftIO.Concurrent
+import RequireCallStack
 import System.Random (
-  mkStdGen,
   genShortByteString,
   genWord16,
   genWord32,
@@ -44,6 +47,7 @@ import System.Random (
   genWord64,
   genWord64R,
   genWord8,
+  mkStdGen,
  )
 import System.Random.Stateful (FrozenGen (..), RandomGenM (..), StatefulGen (..), StdGen)
 import Temporal.Common
@@ -53,19 +57,18 @@ import Temporal.Interceptor
 import Temporal.Payload
 import Temporal.SearchAttributes.Internal
 import Temporal.Workflow.ChildWorkflowHandle
-import Temporal.Workflow.CommandQueue
-import Temporal.Workflow.Instance
+import qualified Temporal.Workflow.CommandQueue as CommandQueue
 import Temporal.Workflow.IVar
+import Temporal.Workflow.Instance
 import Temporal.Workflow.Types
+import UnliftIO
+import UnliftIO.Concurrent
 import Unsafe.Coerce (unsafeCoerce)
-import Data.Vector (Vector)
-import Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow (StartChildWorkflowExecutionFailedCause(..))
-import Data.Maybe
-
 
 
 ilift :: InstanceM a -> Workflow a
 ilift = Workflow
+
 
 {- | The Workflow monad is a constrained execution environment that helps
 developers write code that can be executed deterministically and reliably.
@@ -95,28 +98,39 @@ that is, making sure that the same Commands are emitted in the same sequence,
 whenever a corresponding Workflow Function Execution (instance of the Function Definition) is re-executed.
 -}
 newtype Workflow a = Workflow
-  { unWorkflow :: InstanceM a }
+  {unWorkflow :: InstanceM a}
   deriving newtype
-    ( Functor, Applicative, Monad, Alternative
-    , Catch.MonadThrow, Catch.MonadCatch, Catch.MonadMask
+    ( Functor
+    , Applicative
+    , Monad
+    , Alternative
+    , Catch.MonadThrow
+    , Catch.MonadCatch
+    , Catch.MonadMask
     )
+
 
 instance TypeError ('Text "A workflow definition cannot directly perform IO. Use executeActivity or executeLocalActivity instead.") => MonadIO Workflow where
   liftIO = error "Unreachable"
 
+
 instance TypeError ('Text "A workflow definition cannot directly perform IO. Use executeActivity or executeLocalActivity instead.") => MonadUnliftIO Workflow where
   withRunInIO _ = error "Unreachable"
+
 
 instance Semigroup a => Semigroup (Workflow a) where
   (<>) = liftA2 (<>)
 
+
 instance Monoid a => Monoid (Workflow a) where
   mempty = pure mempty
+
 
 instance {-# OVERLAPPABLE #-} MonadLogger Workflow where
   monadLoggerLog loc src lvl msg = Workflow do
     inst <- asks workflowRuntimeInstance
     liftIO $ inst.workflowInstanceLogger loc src lvl (toLogStr msg)
+
 
 instance StatefulGen WorkflowGenM Workflow where
   uniformWord32R r = applyWorkflowGen (genWord32R r)
@@ -156,8 +170,10 @@ instance FrozenGen StdGen Workflow where
   freezeGen g = Workflow $ readIORef (unWorkflowGenM g)
   thawGen = newWorkflowGenM
 
+
 newtype Condition a = Condition (STM a)
   deriving newtype (Functor, Applicative, Monad)
+
 
 {- | Wait on a condition to become true before continuing.
 
@@ -193,48 +209,64 @@ waitCondition m@(Condition c) = Workflow do
     guard =<< c
     writeTVar (workflowThreadBlocked thread) False
 
+
 newtype Query a = Query (STM a)
   deriving newtype (Functor, Applicative, Monad)
 
+
 newtype StateVar a = StateVar
   { stateVarRef :: TVar a
-  } deriving newtype (Eq)
+  }
+  deriving newtype (Eq)
+
 
 newStateVar :: a -> Workflow (StateVar a)
 newStateVar = Workflow . fmap StateVar . newTVarIO
 
+
 askInstance :: Workflow WorkflowInstance
 askInstance = Workflow $ asks workflowRuntimeInstance
+
 
 class MonadReadStateVar m where
   readStateVar :: StateVar a -> m a
 
+
 instance MonadReadStateVar Workflow where
   readStateVar = Workflow . readStateVar
+
 
 instance MonadReadStateVar InstanceM where
   readStateVar = readTVarIO . stateVarRef
 
+
 instance MonadReadStateVar Query where
   readStateVar = Query . readTVar . stateVarRef
+
 
 instance MonadReadStateVar Condition where
   readStateVar = Condition . readTVar . stateVarRef
 
+
 class MonadWriteStateVar m where
   writeStateVar :: StateVar a -> a -> m ()
+
 
 instance MonadWriteStateVar Workflow where
   writeStateVar ref = Workflow . writeStateVar ref
 
+
 instance MonadWriteStateVar InstanceM where
   writeStateVar ref = atomically . writeTVar (stateVarRef ref)
+
 
 instance MonadWriteStateVar Query where
   writeStateVar ref = Query . writeTVar (stateVarRef ref)
 
+
 instance MonadWriteStateVar Condition where
   writeStateVar ref = Condition . writeTVar (stateVarRef ref)
+
 
 asyncWorkflow :: Workflow a -> InstanceM (Async a)
 asyncWorkflow (Workflow m) = do
@@ -249,14 +281,16 @@ asyncWorkflow (Workflow m) = do
         modifyTVar' (threadManager $ getThreadManager wf) $ HashMap.insert tid $ WorkflowThread workflowThreadBlocked
       restore' m
 
+
 -- `finally` atomically (modifyTVar' (threadManager $ getThreadManager wf) $ HashMap.delete tid)
 
 waitAsyncWorkflow :: Async a -> Workflow a
 waitAsyncWorkflow a = Workflow do
   runtime <- ask
-  let deregisterThread = modifyTVar'
-            (threadManager $ getThreadManager runtime)
-            (HashMap.delete $ asyncThreadId a)
+  let deregisterThread =
+        modifyTVar'
+          (threadManager $ getThreadManager runtime)
+          (HashMap.delete $ asyncThreadId a)
       waitForResultAndRethrow = do
         markBlockedState runtime False
         deregisterThread
@@ -282,9 +316,10 @@ parallelAp ff aa = Workflow do
   (f, a) <- waitBoth fh ah `finally` atomically (markBlockedState runtime False)
   pure $ f a
 
+
 initializeRuntime :: WorkflowInstance -> STM WorkflowRuntime
 initializeRuntime inst = do
-  q <- newCommandQueue
+  q <- CommandQueue.newCommandQueue
   threads <- ThreadManager <$> newTVar mempty
   readyToFlush <- newTVar False
   cancelRequested <- newTVar False
@@ -299,14 +334,16 @@ initializeRuntime inst = do
       -- in protobuf-land.
       <*> (Sequences <$> newTVar 1 <*> newTVar 1 <*> newTVar 1 <*> newTVar 1 <*> newTVar 1)
 
-  pure WorkflowRuntime
-        { workflowRuntimeInstance = inst
-        , workflowRuntimeThreads = threads
-        , workflowRuntimeCommandQueue = q
-        , workflowRuntimeReadyToFlush = readyToFlush
-        , workflowRuntimeCancelRequested = cancelRequested
-        , workflowRuntimeSequenceMaps = sequenceMaps
-        }
+  pure
+    WorkflowRuntime
+      { workflowRuntimeInstance = inst
+      , workflowRuntimeThreads = threads
+      , workflowRuntimeCommandQueue = q
+      , workflowRuntimeReadyToFlush = readyToFlush
+      , workflowRuntimeCancelRequested = cancelRequested
+      , workflowRuntimeSequenceMaps = sequenceMaps
+      }
+
 
 data RunningWorkflow = RunningWorkflow
   { runningWorkflowScheduler :: {-# UNPACK #-} !(Async ())
@@ -315,13 +352,16 @@ data RunningWorkflow = RunningWorkflow
   , runningWorkflowRuntime :: {-# UNPACK #-} !WorkflowRuntime
   }
 
+
 shutdownRunningWorkflow :: MonadIO m => RunningWorkflow -> m ()
 shutdownRunningWorkflow rw = do
   cancel rw.runningWorkflowScheduler
   cancel rw.runningWorkflowFlusher
   cancel rw.runningWorkflowMainThread
 
+
 data ThreadState = NotRunning | Running | Completed
+
 
 runWorkflow :: (MonadIO m, HasCallStack) => WorkflowInstance -> Workflow Payload -> m RunningWorkflow
 runWorkflow inst m = liftIO do
@@ -366,7 +406,7 @@ runWorkflow inst m = liftIO do
             cmd <- convertExitVariantToCommand result
             $(logDebug) $ "Thread " <> tidText <> ": shutting down"
             atomically do
-              addCommand runtime cmd
+              CommandQueue.addCommand runtime cmd
               writeTVar runtime.workflowRuntimeReadyToFlush True
             $(logDebug) $ "Thread " <> tidText <> ": done!"
             pure result
@@ -417,7 +457,6 @@ runWorkflow inst m = liftIO do
       ts <- readTVarIO $ threadManager $ getThreadManager runtime
       mapM_ cancelWorkflowThreadNoWait $ HashMap.keys $ HashMap.delete myTid ts
 
-
   runInstanceM runtime do
     s <- async (schedule `finally` $(logDebug) "Schedule thread exiting")
     f <- async (flush `finally` $(logDebug) "Flush thread exiting")
@@ -427,12 +466,13 @@ runWorkflow inst m = liftIO do
       eval
     pure $ RunningWorkflow s f e runtime
 
+
 flushCommands :: (HasCallStack, MonadIO m) => WorkflowRuntime -> m ()
 flushCommands runtime = do
   tid <- myThreadId
   (info, cmds) <- atomically do
     info <- readTVar runtime.workflowRuntimeInstance.workflowInstanceInfo
-    cmds <- getCommands runtime.workflowRuntimeCommandQueue
+    cmds <- CommandQueue.getCommands runtime.workflowRuntimeCommandQueue
     pure (info, cmds)
   let completionSuccessful :: Core.Success
       completionSuccessful = defMessage & Completion.commands .~ cmds
@@ -445,6 +485,7 @@ flushCommands runtime = do
   case res of
     Left err -> throwIO err
     Right () -> pure ()
+
 
 activate :: WorkflowRuntime -> WorkflowActivation -> ThreadId -> STM (IO ())
 activate runtime act tid = do
@@ -491,6 +532,7 @@ activate runtime act tid = do
       Right f -> do
         pure f
 
+
 applyJobs :: Vector WorkflowActivationJob -> Workflow ()
 applyJobs jobs = Workflow $ do
   runtime <- ask
@@ -515,12 +557,14 @@ applyJobs jobs = Workflow $ do
 
   liftIO $ sequence_ jobActions
 
+
 handleNotifyHasPatch :: WorkflowRuntime -> NotifyHasPatch -> STM (IO ())
 handleNotifyHasPatch runtime n = do
   let inst = runtime.workflowRuntimeInstance
   modifyTVar' inst.workflowNotifiedPatches $ \patchSet ->
     Set.insert (n ^. Activation.patchId . to PatchId) patchSet
   pure $ pure ()
+
 
 handleSignalWorkflow :: WorkflowRuntime -> SignalWorkflow -> STM (IO ())
 handleSignalWorkflow runtime sig = do
@@ -540,9 +584,10 @@ handleSignalWorkflow runtime sig = do
         void $ runInstanceM runtime $ do
           h <- asyncWithUnmask $ \restore -> do
             tid <- myThreadId
-            args <- processorDecodePayloads
-              inst.payloadProcessor
-              (fmap convertFromProtoPayload (sig ^. Command.vec'input))
+            args <-
+              processorDecodePayloads
+                inst.payloadProcessor
+                (fmap convertFromProtoPayload (sig ^. Command.vec'input))
             atomically do
               workflowThreadBlocked <- newTVar False
               modifyTVar'
@@ -552,6 +597,7 @@ handleSignalWorkflow runtime sig = do
 
           link h
 
+
 handleQueryWorkflow :: WorkflowRuntime -> QueryWorkflow -> STM (IO ())
 handleQueryWorkflow runtime q = do
   let inst = runtime.workflowRuntimeInstance
@@ -559,16 +605,17 @@ handleQueryWorkflow runtime q = do
   pure do
     let handlerOrDefault =
           HashMap.lookup (Just (q ^. Activation.queryType)) handlers
-          <|> HashMap.lookup Nothing handlers
+            <|> HashMap.lookup Nothing handlers
     case handlerOrDefault of
       Nothing -> do
-        let cmd = defMessage
-              & Command.respondToQuery .~
-                ( defMessage
-                  & Command.queryId .~ q ^. Activation.queryId
-                  & Command.failed .~ (defMessage & Failure.message .~ "Query not found")
-                )
-        atomically $ addCommand runtime cmd
+        let cmd =
+              defMessage
+                & Command.respondToQuery
+                  .~ ( defMessage
+                        & Command.queryId .~ q ^. Activation.queryId
+                        & Command.failed .~ (defMessage & Failure.message .~ "Query not found")
+                     )
+        atomically $ CommandQueue.addCommand runtime cmd
       Just handler -> do
         args <- processorDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (q ^. Command.vec'arguments))
         let baseInput =
@@ -587,7 +634,8 @@ handleQueryWorkflow runtime q = do
           Right ok -> do
             res' <- liftIO $ payloadProcessorEncode inst.payloadProcessor ok
             pure $ defMessage & Command.queryId .~ baseInput.handleQueryId & Command.succeeded .~ (defMessage & Command.response .~ convertToProtoPayload res')
-        atomically $ addCommand runtime $ defMessage & Command.respondToQuery .~ cmd
+        atomically $ CommandQueue.addCommand runtime $ defMessage & Command.respondToQuery .~ cmd
+
 
 handleFireTimer :: WorkflowRuntime -> FireTimer -> STM (IO ())
 handleFireTimer runtime msg = do
@@ -599,6 +647,7 @@ handleFireTimer runtime msg = do
       putIVar ivar' ()
       pure $ pure ()
 
+
 handleResolveActivity :: WorkflowRuntime -> ResolveActivity -> STM (IO ())
 handleResolveActivity runtime msg = do
   let a = msg ^. Activation.seq . to Sequence
@@ -608,6 +657,7 @@ handleResolveActivity runtime msg = do
     Just existing -> do
       putIVar existing msg
       pure $ pure ()
+
 
 handleResolveChildWorkflowExecutionStart :: WorkflowRuntime -> ResolveChildWorkflowExecutionStart -> STM (IO ())
 handleResolveChildWorkflowExecutionStart runtime msg = do
@@ -625,10 +675,13 @@ handleResolveChildWorkflowExecutionStart runtime msg = do
         let eResult = case status of
               ResolveChildWorkflowExecutionStart'Succeeded succeeded -> Right (succeeded ^. Activation.runId . to RunId)
               ResolveChildWorkflowExecutionStart'Failed failed -> case failed ^. Activation.cause of
-                START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS -> Left $ toException $ WorkflowAlreadyStarted
-                  { workflowAlreadyStartedWorkflowId = WorkflowId (failed ^. Activation.workflowId)
-                  , workflowAlreadyStartedWorkflowType = WorkflowType (failed ^. Activation.workflowType)
-                  }
+                START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS ->
+                  Left $
+                    toException $
+                      WorkflowAlreadyStarted
+                        { workflowAlreadyStartedWorkflowId = WorkflowId (failed ^. Activation.workflowId)
+                        , workflowAlreadyStartedWorkflowType = WorkflowType (failed ^. Activation.workflowType)
+                        }
                 _ -> Left $ toException $ RuntimeError ("Unhandled child workflow start failure: " <> show (failed ^. Activation.cause))
               ResolveChildWorkflowExecutionStart'Cancelled _cancelled -> Left $ toException ChildWorkflowCancelled
         case eResult of
@@ -642,6 +695,7 @@ handleResolveChildWorkflowExecutionStart runtime msg = do
             putIVar existing.firstExecutionRunId runId
   pure $ pure ()
 
+
 handleResolveChildWorkflowExecution :: WorkflowRuntime -> ResolveChildWorkflowExecution -> STM (IO ())
 handleResolveChildWorkflowExecution runtime msg = do
   let r = msg ^. Activation.seq . to Sequence
@@ -652,6 +706,7 @@ handleResolveChildWorkflowExecution runtime msg = do
     Just existing -> putIVar existing.resultHandle msg
   pure $ pure ()
 
+
 handleResolveSignalExternalWorkflow :: WorkflowRuntime -> ResolveSignalExternalWorkflow -> STM (IO ())
 handleResolveSignalExternalWorkflow runtime msg = do
   let r = msg ^. Activation.seq . to Sequence
@@ -660,6 +715,7 @@ handleResolveSignalExternalWorkflow runtime msg = do
     Nothing -> Catch.throwM $ RuntimeError "External signal handle not found"
     Just ivar -> putIVar ivar msg
   pure $ pure ()
+
 
 handleResolveRequestCancelExternalWorkflow :: WorkflowRuntime -> ResolveRequestCancelExternalWorkflow -> STM (IO ())
 handleResolveRequestCancelExternalWorkflow runtime msg = do
@@ -670,6 +726,7 @@ handleResolveRequestCancelExternalWorkflow runtime msg = do
     Just ivar -> putIVar ivar msg
   pure $ pure ()
 
+
 handleUpdateRandomSeed :: WorkflowRuntime -> UpdateRandomSeed -> STM (IO ())
 handleUpdateRandomSeed runtime r = pure do
   let inst = runtime.workflowRuntimeInstance
@@ -677,10 +734,12 @@ handleUpdateRandomSeed runtime r = pure do
     (unWorkflowGenM inst.workflowRandomnessSeed)
     (mkStdGen $ fromIntegral $ r ^. Activation.randomnessSeed)
 
+
 handleCancelWorkflow :: WorkflowRuntime -> CancelWorkflow -> STM (IO ())
 handleCancelWorkflow runtime _ = do
   writeTVar runtime.workflowRuntimeCancelRequested True
   pure $ pure ()
+
 
 handleStartWorkflow
   :: WorkflowRuntime
@@ -688,11 +747,14 @@ handleStartWorkflow
   -> STM (IO ())
 handleStartWorkflow runtime _ = error "Should have been handled by the WorkflowWorker code"
 
+
 handleRemoveFromCache :: WorkflowRuntime -> RemoveFromCache -> STM (IO ())
 handleRemoveFromCache runtime _ = pure $ pure () -- Implementation provided elsewhere
 
+
 handleDoUpdate :: WorkflowRuntime -> DoUpdate -> STM (IO ())
 handleDoUpdate runtime _ = pure $ pure () -- Not implemented yet
+
 
 convertExitVariantToCommand :: WorkflowExitVariant Payload -> InstanceM Command.WorkflowCommand
 convertExitVariantToCommand variant = do
@@ -894,3 +956,33 @@ convertExitVariantToCommand variant = do
 --                       & Command.completed .~ convertToProtoPayload payload'
 --                    )
 --           pure $ Done ()
+
+addCommand :: WorkflowCommand -> InstanceM ()
+addCommand command = do
+  inst <- ask
+  atomically $ CommandQueue.addCommand inst command
+
+
+-- Bit of a hack. This needs to be called for each workflow activity in the official SDK
+updateCallStack :: RequireCallStack => InstanceM ()
+updateCallStack = do
+  inst <- asks workflowRuntimeInstance
+  writeIORef inst.workflowCallStack $ popCallStack callStack
+
+
+updateCallStackW :: RequireCallStack => Workflow ()
+updateCallStackW = Workflow do
+  inst <- asks workflowRuntimeInstance
+  writeIORef inst.workflowCallStack $ popCallStack callStack
+
+
+{- | Handle representing an external Workflow Execution.
+
+This handle can only be cancelled and signalled.
+
+To call other methods, like query and result, use a WorkflowClient.getHandle inside an Activity.
+-}
+data ExternalWorkflowHandle (result :: Type) = ExternalWorkflowHandle
+  { externalWorkflowWorkflowId :: WorkflowId
+  , externalWorkflowRunId :: Maybe RunId
+  }

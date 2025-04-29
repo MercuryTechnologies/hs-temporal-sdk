@@ -4,23 +4,20 @@
   fetchpatch,
   protobuf,
   ...
-}:
-hfinal: hprev:
-let
-  inherit (haskell.lib.compose)
+}: _hfinal: hprev: let
+  inherit
+    (haskell.lib.compose)
     addSetupDepends
     appendPatch
     doJailbreak
-    markUnbroken
     ;
-in
-{
+in {
   uuid = doJailbreak hprev.uuid;
   proto-lens = doJailbreak hprev.proto-lens;
   proto-lens-setup = doJailbreak hprev.proto-lens-setup;
   proto-lens-protobuf-types = lib.pipe hprev.proto-lens-protobuf-types [
     doJailbreak
-    (addSetupDepends [ protobuf ])
+    (addSetupDepends [protobuf])
   ];
   proto-lens-runtime = doJailbreak hprev.proto-lens-runtime;
   proto-lens-protoc = lib.pipe hprev.proto-lens-protoc [

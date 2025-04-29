@@ -1,41 +1,49 @@
 {-# LANGUAGE OverloadedRecordDot #-}
-{-# LANGUAGE NamedFieldPuns #-}
+
 module Temporal.Workflow.IVarSpec where
 
+import Control.Concurrent.STM (check, retry)
 import Control.Monad
+import Control.Monad.Logger
+import Control.Monad.Reader
+import qualified Data.HashMap.Strict as HashMap
+import Temporal.Workflow.IVar
 import Test.Hspec
 import UnliftIO
 import UnliftIO.Concurrent
-import qualified Data.HashMap.Strict as HashMap
-import Control.Monad.Logger
-import Control.Monad.Reader
-import Temporal.Workflow.IVar
-import Control.Concurrent.STM (retry, check)
+
 
 -- Mock environment for testing
 data TestRuntime = TestRuntime
   { testThreadManager :: TVar (HashMap.HashMap ThreadId WorkflowThread)
   }
 
+
 instance HasThreadManager TestRuntime where
   getThreadManager = ThreadManager . testThreadManager
 
-newtype TestMonad a = TestMonad { unTestMonad :: ReaderT TestRuntime IO a }
+
+newtype TestMonad a = TestMonad {unTestMonad :: ReaderT TestRuntime IO a}
   deriving newtype (Functor, Applicative, Monad, MonadReader TestRuntime, MonadIO, MonadUnliftIO)
+
 
 runTestMonad :: TestRuntime -> TestMonad a -> IO a
 runTestMonad runtime testMonad = runReaderT (unTestMonad testMonad) runtime
 
+
 instance MonadLogger TestMonad where
   monadLoggerLog loc src lvl msg = liftIO $ defaultOutput stdout loc src lvl (toLogStr msg)
+
 
 -- | Create a new test runtime
 newTestRuntime :: IO TestRuntime
 newTestRuntime = do
   threadManagerVar <- newTVarIO HashMap.empty
-  pure TestRuntime
-    { testThreadManager = threadManagerVar
-    }
+  pure
+    TestRuntime
+      { testThreadManager = threadManagerVar
+      }
+
 
 -- -- | Creates a new thread in the test runtime
 forkTestThread :: TestRuntime -> TestMonad a -> IO (Async a)
@@ -49,6 +57,7 @@ forkTestThread runtime action = do
     runTestMonad runtime action
       `finally` atomically (modifyTVar' runtime.testThreadManager $ HashMap.delete tid)
 
+
 -- -- | Check if a thread is blocked in the runtime
 isThreadBlocked :: TestRuntime -> ThreadId -> IO Bool
 isThreadBlocked runtime tid = atomically $ do
@@ -56,6 +65,7 @@ isThreadBlocked runtime tid = atomically $ do
   case HashMap.lookup tid threads of
     Just thread -> readTVar thread.workflowThreadBlocked
     Nothing -> pure False
+
 
 waitThreadBlocked :: TestRuntime -> ThreadId -> IO ()
 waitThreadBlocked runtime tid = atomically $ do
@@ -66,6 +76,7 @@ waitThreadBlocked runtime tid = atomically $ do
       unless isBlocked retry
     Nothing -> retry
 
+
 waitThreadUnblocked :: TestRuntime -> ThreadId -> IO ()
 waitThreadUnblocked runtime tid = atomically $ do
   thread <- readTVar runtime.testThreadManager
@@ -74,6 +85,7 @@ waitThreadUnblocked runtime tid = atomically $ do
       isBlocked <- readTVar thread.workflowThreadBlocked
       when isBlocked retry
     Nothing -> pure ()
+
 
 spec :: Spec
 spec = do

@@ -75,8 +75,7 @@ import Temporal.Interceptor
 import Temporal.Payload
 import Temporal.SearchAttributes.Internal
 import Temporal.Workflow.Instance
-import Temporal.Workflow.Internal.Instance
-import Temporal.Workflow.Internal.MonadV2
+import Temporal.Workflow.Monad
 import Temporal.Workflow.Types
 import UnliftIO
 
@@ -102,40 +101,39 @@ create
   workflowVault
   payloadProcessor
   info = do
+    $logDebug "Instantiating workflow instance"
+    workflowInstanceLogger <- askLoggerIO
+    workflowRandomnessSeed <- WorkflowGenM <$> newIORef (mkStdGen 0)
+    workflowNotifiedPatches <- newTVarIO mempty
+    workflowMemoizedPatches <- newTVarIO mempty
+    workflowTime <- newTVarIO $ MkSystemTime 0 0
+    workflowIsReplaying <- newTVarIO False
+    workflowSignalHandlers <- newTVarIO mempty
+    workflowQueryHandlers <- newTVarIO mempty
+    workflowCallStack <- newIORef emptyCallStack
+    workflowInstanceInfo <- newTVarIO info
+    activationChannel <- newTQueueIO
+    -- The execution thread is funny because it needs access to the instance, but the instance
+    -- needs access to the execution thread. It's a bit of a circular dependency, but
+    -- pretty innocuous since writing to the executionThread var happens before anything else
+    -- is allowed to interact with the instance.
+    let inst = WorkflowInstance {..}
+    -- workerThread <- liftIO $ async $ runInstanceM inst $ do
+    --   $logDebug "Start workflow execution thread"
+    --   exec <- setUpWorkflowExecution start
+    --   res <- liftIO $ inboundInterceptor.executeWorkflow exec $ \exec' -> runInstanceM inst $ runTopLevel $ do
+    --     $logDebug "Executing workflow"
+    --     wf <- applyStartWorkflow exec' workflowFn
+    --     runWorkflowToCompletion wf
+    --   $logDebug "Workflow execution completed"
+    --   addCommand =<< convertExitVariantToCommand res
+    --   flushCommands
+    --   $logDebug "Handling leftover queries"
+    --   handleQueriesAfterCompletion
 
-  $logDebug "Instantiating workflow instance"
-  workflowInstanceLogger <- askLoggerIO
-  workflowRandomnessSeed <- WorkflowGenM <$> newIORef (mkStdGen 0)
-  workflowNotifiedPatches <- newTVarIO mempty
-  workflowMemoizedPatches <- newTVarIO mempty
-  workflowTime <- newTVarIO $ MkSystemTime 0 0
-  workflowIsReplaying <- newTVarIO False
-  workflowSignalHandlers <- newTVarIO mempty
-  workflowQueryHandlers <- newTVarIO mempty
-  workflowCallStack <- newIORef emptyCallStack
-  workflowInstanceInfo <- newTVarIO info
-  activationChannel <- newTQueueIO
-  -- The execution thread is funny because it needs access to the instance, but the instance
-  -- needs access to the execution thread. It's a bit of a circular dependency, but
-  -- pretty innocuous since writing to the executionThread var happens before anything else
-  -- is allowed to interact with the instance.
-  let inst = WorkflowInstance {..}
-  -- workerThread <- liftIO $ async $ runInstanceM inst $ do
-  --   $logDebug "Start workflow execution thread"
-  --   exec <- setUpWorkflowExecution start
-  --   res <- liftIO $ inboundInterceptor.executeWorkflow exec $ \exec' -> runInstanceM inst $ runTopLevel $ do
-  --     $logDebug "Executing workflow"
-  --     wf <- applyStartWorkflow exec' workflowFn
-  --     runWorkflowToCompletion wf
-  --   $logDebug "Workflow execution completed"
-  --   addCommand =<< convertExitVariantToCommand res
-  --   flushCommands
-  --   $logDebug "Handling leftover queries"
-  --   handleQueriesAfterCompletion
-
-  -- If we have an exception crash the workflow thread, then we need to throw to the worker too,
-  -- otherwise it will just hang forever.
-  pure inst
+    -- If we have an exception crash the workflow thread, then we need to throw to the worker too,
+    -- otherwise it will just hang forever.
+    pure inst
 
 
 {- | This is a special query handler that is added to every workflow instance.
@@ -149,7 +147,6 @@ addStackTraceHandler inst = do
         cs <- readIORef inst.workflowCallStack
         Right <$> Temporal.Payload.encode JSON (Text.pack $ Temporal.Exception.prettyCallStack cs)
   atomically $ modifyTVar' inst.workflowQueryHandlers (HashMap.insert (Just "__stack_trace") specialHandler)
-
 
 -- -- | This gives us the basic state for a workflow instance prior to initial evaluation.
 -- setUpWorkflowExecution :: StartWorkflow -> InstanceM ExecuteWorkflowInput

@@ -57,4 +57,3 @@ library:
   when:
     - condition: os(darwin)
       frameworks: [Security, CoreFoundation, SystemConfiguration]
-

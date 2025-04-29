@@ -21,7 +21,7 @@ import Temporal.Exception (ApplicationFailureHandler)
 import Temporal.Interceptor
 import Temporal.Payload
 import Temporal.Workflow.Definition (WorkflowDefinition)
-import Temporal.Workflow.Internal.MonadV2
+import Temporal.Workflow.Monad
 import Temporal.Workflow.Worker (WorkflowWorker)
 import UnliftIO hiding (race)
 

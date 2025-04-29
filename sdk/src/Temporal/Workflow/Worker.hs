@@ -15,6 +15,7 @@ import Data.Maybe
 import Data.ProtoLens
 import Data.Text (Text)
 import qualified Data.Text as Text
+import Data.Vault.Strict (Vault)
 import qualified Data.Vector as V
 import Lens.Family2
 import OpenTelemetry.Context.ThreadLocal
@@ -39,11 +40,10 @@ import Temporal.Interceptor
 import Temporal.Payload
 import Temporal.SearchAttributes.Internal
 import Temporal.Workflow.Definition
-import Temporal.Workflow.Internal.MonadV2 hiding (try)
 import Temporal.Workflow.Instance
+import Temporal.Workflow.Monad hiding (try)
 import Temporal.WorkflowInstance
 import UnliftIO
-import Data.Vault.Strict (Vault)
 
 
 data EvictionWithRunID = EvictionWithRunID
@@ -81,6 +81,7 @@ registerRunningWorkflow :: (MonadLoggerIO m) => RunId -> RunningWorkflow -> Read
 registerRunningWorkflow r inst = do
   worker <- ask
   atomically $ modifyTVar' worker.runningWorkflows (HashMap.insert r inst)
+
 
 -- | Execute an action repeatedly as long as it returns True.
 whileM_ :: (Monad m) => m Bool -> m ()
@@ -225,13 +226,14 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                 pure Nothing
               Right (searchAttrs, hdrs, memo, payloads) -> do
                 let runId_ = RunId $ activation ^. CommonProto.runId
-                    parentProto = startWorkflow ^. Activation.maybe'parentWorkflowInfo
-                    parentInfo = parentProto <&> \parent ->
-                      ParentInfo
-                        { parentNamespace = Namespace $ parent ^. CommonProto.namespace
-                        , parentRunId = RunId $ parent ^. CommonProto.runId
-                        , parentWorkflowId = WorkflowId $ parent ^. CommonProto.workflowId
-                        }
+                    parentProto = initializeWorkflow ^. Activation.maybe'parentWorkflowInfo
+                    parentInfo =
+                      parentProto <&> \parent ->
+                        ParentInfo
+                          { parentNamespace = Namespace $ parent ^. CommonProto.namespace
+                          , parentRunId = RunId $ parent ^. CommonProto.runId
+                          , parentWorkflowId = WorkflowId $ parent ^. CommonProto.workflowId
+                          }
                     workflowInfo =
                       Temporal.WorkflowInstance.Info
                         { historyLength = activation ^. Activation.historyLength
@@ -239,7 +241,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                         , taskQueue = worker.workerTaskQueue
                         , workflowId = WorkflowId $ initializeWorkflow ^. Activation.workflowId
                         , workflowType = initializeWorkflow ^. Activation.workflowType . to WorkflowType
-                        , continuedRunId = fmap RunId $ initializeWorkflow  ^. Activation.continuedFromExecutionRunId . to nonEmptyString
+                        , continuedRunId = fmap RunId $ initializeWorkflow ^. Activation.continuedFromExecutionRunId . to nonEmptyString
                         , cronSchedule = initializeWorkflow ^. Activation.cronSchedule . to nonEmptyString
                         , taskTimeout = initializeWorkflow ^. Activation.workflowTaskTimeout . to durationFromProto
                         , executionTimeout = fmap durationFromProto $ initializeWorkflow ^. Activation.maybe'workflowExecutionTimeout

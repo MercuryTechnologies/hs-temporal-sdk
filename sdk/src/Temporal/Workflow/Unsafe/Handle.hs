@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+
 -- | The internals of Workflow handles. They are exposed here primarily for interceptor implementations.
 module Temporal.Workflow.Unsafe.Handle where
 
@@ -8,8 +9,8 @@ import Control.Monad.Reader
 import qualified Data.HashMap.Strict as HashMap
 import Data.Kind
 import Data.ProtoLens
-import Lens.Family2
 import qualified Data.Text as Text
+import Lens.Family2
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow as ChildWorkflow
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow_Fields as ChildWorkflow
 import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as Common
@@ -19,18 +20,17 @@ import RequireCallStack
 import Temporal.Common
 import Temporal.Exception
 import Temporal.Payload
-import Temporal.Workflow.Instance
-import Temporal.Workflow.Internal.Instance
-import Temporal.Workflow.Internal.Monad
-  ( ExternalWorkflowHandle(..)
-  , addCommand
-  , updateCallStack
-  , updateCallStackW
-  )
-import Temporal.Workflow.ChildWorkflowHandle (ChildWorkflowHandle(..))
+import Temporal.Workflow.ChildWorkflowHandle (ChildWorkflowHandle (..))
 import Temporal.Workflow.IVar
-import Temporal.Workflow.Task (Task(..))
-import Temporal.Workflow.Internal.MonadV2
+import Temporal.Workflow.Instance
+import Temporal.Workflow.Monad (
+  ExternalWorkflowHandle (..),
+  Workflow (..),
+  addCommand,
+  updateCallStack,
+  updateCallStackW,
+ )
+import Temporal.Workflow.Task (Task (..))
 import UnliftIO
 
 
@@ -84,9 +84,10 @@ instance Cancel (ExternalWorkflowHandle a) where
     runtime <- ask
     s@(Sequence sVal) <- nextExternalCancelSequence
     res <- newIVar $ getThreadManager runtime
-    atomically $ modifyTVar'
-      runtime.workflowRuntimeSequenceMaps.externalCancels
-      (HashMap.insert s res)
+    atomically $
+      modifyTVar'
+        runtime.workflowRuntimeSequenceMaps.externalCancels
+        (HashMap.insert s res)
     addCommand
       ( defMessage
           & Command.requestCancelExternalWorkflowExecution

@@ -30,6 +30,7 @@ module Temporal.Workflow.Definition (
   GatherArgs,
 ) where
 
+import Control.Monad
 import Control.Monad.Catch
 import Control.Monad.IO.Class
 import Data.Kind
@@ -39,7 +40,7 @@ import Data.Vector (Vector)
 import RequireCallStack
 import Temporal.Client.Types
 import Temporal.Payload
-import Temporal.Workflow.Internal.MonadV2
+import Temporal.Workflow.Monad
 import Temporal.Workflow.Signal
 import Temporal.Workflow.Types (StartChildWorkflowOptions)
 import Temporal.Workflow.Update
@@ -87,6 +88,7 @@ data KnownWorkflow (args :: [Type]) (result :: Type) = forall codec.
   { knownWorkflowCodec :: codec
   , knownWorkflowName :: Text
   }
+
 
 data ProvidedWorkflow f = ProvidedWorkflow
   { definition :: WorkflowDefinition
@@ -150,15 +152,16 @@ provideWorkflow codec name f =
             { workflowName = name
             , workflowRun = \payloads -> Workflow do
                 eWf <-
-                  liftIO $ applyPayloads
-                    codec
-                    (Proxy @(ArgsOf f))
-                    (Proxy @(Workflow (ResultOf Workflow f)))
-                    f
-                    payloads
+                  liftIO $
+                    applyPayloads
+                      codec
+                      (Proxy @(ArgsOf f))
+                      (Proxy @(Workflow (ResultOf Workflow f)))
+                      f
+                      payloads
                 either
                   (throwM . ValueError)
-                  (\wf -> unWorkflow wf >>= \result -> liftIO $ encode codec result)
+                  (unWorkflow >=> liftIO . encode codec)
                   eWf
             }
       , reference =

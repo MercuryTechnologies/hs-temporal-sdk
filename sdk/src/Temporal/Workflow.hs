@@ -308,10 +308,9 @@ import Temporal.SearchAttributes
 import Temporal.SearchAttributes.Internal
 import Temporal.Workflow.ChildWorkflowHandle
 import Temporal.Workflow.Definition
-import Temporal.Workflow.Instance
-import Temporal.Workflow.Internal.MonadV2
-import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.IVar
+import Temporal.Workflow.Instance
+import Temporal.Workflow.Monad
 import Temporal.Workflow.Query
 import Temporal.Workflow.Signal
 import Temporal.Workflow.Task
@@ -371,9 +370,10 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = Workfl
   s@(Sequence actSeq) <- nextActivitySequence
   rawTask <- liftIO $ intercept (ActivityInput name typedPayloads opts s) $ \activityInput -> runInIO $ do
     resultSlot <- newIVar $ getThreadManager runtime
-    atomically $ modifyTVar'
-      runtime.workflowRuntimeSequenceMaps.activities
-      (HashMap.insert s resultSlot)
+    atomically $
+      modifyTVar'
+        runtime.workflowRuntimeSequenceMaps.activities
+        (HashMap.insert s resultSlot)
 
     i <- readTVarIO inst.workflowInstanceInfo
     hdrs <- processorEncodePayloads inst.payloadProcessor activityInput.options.headers
@@ -417,27 +417,27 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = Workfl
               Just (ActivityResult.ActivityResolution'Failed failure_) ->
                 let failure = failure_ ^. ActivityResult.failure
                 in throwM
-                      ActivityFailure
-                        { message = failure ^. Failure.message
-                        , activityType = ActivityType activityInput.activityType
-                        , activityId = ActivityId actId
-                        , retryState = retryStateFromProto $ failure ^. Failure.activityFailureInfo . Failure.retryState
-                        , identity = failure ^. Failure.activityFailureInfo . Failure.identity
-                        , cause =
-                            let cause_ = failure ^. Failure.cause
-                            in ApplicationFailure
-                                { type' = cause_ ^. Failure.applicationFailureInfo . Failure.type'
-                                , message = cause_ ^. Failure.message
-                                , nonRetryable = cause_ ^. Failure.applicationFailureInfo . Failure.nonRetryable
-                                , details = cause_ ^. Failure.applicationFailureInfo . Failure.details . Payloads.payloads . to (fmap convertFromProtoPayload)
-                                , stack = cause_ ^. Failure.stackTrace
-                                , nextRetryDelay = fmap durationFromProto (cause_ ^. Failure.applicationFailureInfo . Failure.maybe'nextRetryDelay)
-                                }
-                        , scheduledEventId = failure ^. Failure.activityFailureInfo . Failure.scheduledEventId
-                        , startedEventId = failure ^. Failure.activityFailureInfo . Failure.startedEventId
-                        , original = failure ^. Failure.activityFailureInfo
-                        , stack = Text.pack $ Temporal.Exception.prettyCallStack callStack
-                        }
+                    ActivityFailure
+                      { message = failure ^. Failure.message
+                      , activityType = ActivityType activityInput.activityType
+                      , activityId = ActivityId actId
+                      , retryState = retryStateFromProto $ failure ^. Failure.activityFailureInfo . Failure.retryState
+                      , identity = failure ^. Failure.activityFailureInfo . Failure.identity
+                      , cause =
+                          let cause_ = failure ^. Failure.cause
+                          in ApplicationFailure
+                              { type' = cause_ ^. Failure.applicationFailureInfo . Failure.type'
+                              , message = cause_ ^. Failure.message
+                              , nonRetryable = cause_ ^. Failure.applicationFailureInfo . Failure.nonRetryable
+                              , details = cause_ ^. Failure.applicationFailureInfo . Failure.details . Payloads.payloads . to (fmap convertFromProtoPayload)
+                              , stack = cause_ ^. Failure.stackTrace
+                              , nextRetryDelay = fmap durationFromProto (cause_ ^. Failure.applicationFailureInfo . Failure.maybe'nextRetryDelay)
+                              }
+                      , scheduledEventId = failure ^. Failure.activityFailureInfo . Failure.scheduledEventId
+                      , startedEventId = failure ^. Failure.activityFailureInfo . Failure.startedEventId
+                      , original = failure ^. Failure.activityFailureInfo
+                      , stack = Text.pack $ Temporal.Exception.prettyCallStack callStack
+                      }
               Just (ActivityResult.ActivityResolution'Cancelled details) -> throwM $ toException $ ActivityCancelled (details ^. ActivityResult.failure)
               Just (ActivityResult.ActivityResolution'Backoff _doBackoff) -> error "not implemented"
         , cancelAction = runInIO do
@@ -446,17 +446,18 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = Workfl
                     & Command.requestCancelActivity
                       .~ ( defMessage
                             & Command.seq .~ actSeq
-                        )
+                         )
             addCommand cancelCmd
         }
-  pure rawTask
-    { waitAction = do
-      val <- rawTask.waitAction
-      result <- liftIO $ decode codec val
-      case result of
-        Left err -> throwM $ ValueError err
-        Right val -> pure val
-    }
+  pure
+    rawTask
+      { waitAction = do
+          val <- rawTask.waitAction
+          result <- liftIO $ decode codec val
+          case result of
+            Left err -> throwM $ ValueError err
+            Right val -> pure val
+      }
 
 
 startActivity
@@ -536,9 +537,10 @@ signalWorkflow _ f (signalRef -> KnownSignal signalName signalCodec) = withWorkf
                   -- & Command.headers .~ _
               )
   addCommand cmd
-  atomically $ modifyTVar'
-    runtime.workflowRuntimeSequenceMaps.externalSignals
-    (HashMap.insert s resVar)
+  atomically $
+    modifyTVar'
+      runtime.workflowRuntimeSequenceMaps.externalSignals
+      (HashMap.insert s resVar)
   pure $
     Task
       { waitAction = runInIO do
@@ -552,7 +554,7 @@ signalWorkflow _ f (signalRef -> KnownSignal signalName signalCodec) = withWorkf
                   & Command.cancelSignalWorkflow
                     .~ ( defMessage
                           & Command.seq .~ rawSequence s
-                        )
+                       )
           addCommand cancelCmd
       }
 
@@ -629,9 +631,10 @@ startChildWorkflowFromPayloads (workflowRef -> k@(KnownWorkflow codec _)) opts p
 
         let anyHandle :: forall h. ChildWorkflowHandle h -> ChildWorkflowHandle Any
             anyHandle = unsafeCoerce
-        atomically $ modifyTVar'
-          runtime.workflowRuntimeSequenceMaps.childWorkflows
-          (HashMap.insert s $ anyHandle wfHandle)
+        atomically $
+          modifyTVar'
+            runtime.workflowRuntimeSequenceMaps.childWorkflows
+            (HashMap.insert s $ anyHandle wfHandle)
 
         addCommand cmd
         pure wfHandle
@@ -819,7 +822,6 @@ defaultStartLocalActivityOptions =
 
 --   pure $
 
-
 {- $metadata
 
 Temporal provides a number of ways to access metadata about the current Workflow execution.
@@ -833,7 +835,7 @@ making decisions about how to proceed (like using 'info' to decide whether to co
 like historyLength and searchAttributes— and some may be changeable in the future— like taskQueue.
 -}
 info :: Workflow Info
-info = askInstance >>= (\m -> Workflow m) . readTVarIO . workflowInstanceInfo
+info = askInstance >>= Workflow . readTVarIO . workflowInstanceInfo
 
 
 -- (ask >>= readIORef) workflowInstanceInfo <$> askInstance
@@ -1388,13 +1390,12 @@ continueAsNew (workflowRef -> k@(KnownWorkflow codec _)) opts = withWorkflowArgs
   Workflow do
     inst <- asks workflowRuntimeInstance
     let continueAsNewInterceptor = Temporal.Interceptor.continueAsNew (outboundInterceptor inst)
-    res <- liftIO $ continueAsNewInterceptor (knownWorkflowName k) opts $ \wfName (opts' :: ContinueAsNewOptions) -> do
+    liftIO $ continueAsNewInterceptor (knownWorkflowName k) opts $ \wfName (opts' :: ContinueAsNewOptions) -> do
       -- searchAttrs <- searchAttributesToProto
       --     (if opts'.searchAttributes == mempty
       --       then i.searchAttributes
       --       else opts'.searchAttributes)
       throwM $ ContinueAsNewException (WorkflowType wfName) args opts'
-    pure res
 
 
 -- | Returns a client-side handle that can be used to signal and cancel an existing Workflow execution. It takes a Workflow ID and optional run ID.
@@ -1406,7 +1407,6 @@ getExternalWorkflowHandle wfId mrId = do
       { externalWorkflowWorkflowId = wfId
       , externalWorkflowRunId = mrId
       }
-
 
 
 {- | While workflows are deterministic, there are categories of operational concerns (metrics, logging, tracing, etc.) that require
@@ -1447,11 +1447,13 @@ race l r = Workflow do
   waitEither lh rh `UnliftIO.finally` atomically do
     markBlockedState runtime False
     let deregisterThread :: forall x. Async x -> STM ()
-        deregisterThread t = modifyTVar'
-          (threadManager $ getThreadManager runtime)
-          (HashMap.delete $ asyncThreadId t)
+        deregisterThread t =
+          modifyTVar'
+            (threadManager $ getThreadManager runtime)
+            (HashMap.delete $ asyncThreadId t)
     deregisterThread lh
     deregisterThread rh
+
 
 {- | Run two Workflow actions concurrently, and return the first to finish.
 
@@ -1559,6 +1561,7 @@ isCancelRequested = Workflow do
   updateCallStack
   runtime <- ask
   readTVarIO runtime.workflowRuntimeCancelRequested
+
 
 {- | Block the current workflow's main execution thread until the workflow is cancelled.
 

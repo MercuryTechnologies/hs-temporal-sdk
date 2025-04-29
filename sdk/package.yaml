@@ -98,8 +98,8 @@ library:
   - Temporal.Workflow.ChildWorkflowHandle
   - Temporal.Workflow.CommandQueue
   - Temporal.Workflow.Unsafe.Handle
-  - Temporal.Workflow.Internal.Instance
-  - Temporal.Workflow.Internal.Monad
+  - Temporal.Workflow.Instance
+  - Temporal.Workflow.Monad
   - Temporal.Workflow.Signal
   - Temporal.Workflow.Query
   - Temporal.Workflow.Types

@@ -17,14 +17,14 @@ As such, these functions are not exported from the Temporal module to discourage
 inadvisable use.
 -}
 module Temporal.Workflow.Unsafe (
-  performUnsafeNonDeterministicIO
+  performUnsafeNonDeterministicIO,
 ) where
 
 import Control.Monad.IO.Class
 import Control.Monad.Reader (ask)
-import Temporal.Workflow
-import Temporal.Workflow.Internal.MonadV2
 import Control.Monad.Trans.Resource (ResourceT, runInternalState)
+import Temporal.Workflow
+import Temporal.Workflow.Monad
 
 
 {- | Perform an arbitrary IO action in the Workflow monad.

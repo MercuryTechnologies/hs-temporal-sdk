@@ -35,8 +35,6 @@ library
       Temporal.TH
       Temporal.Worker
       Temporal.Workflow
-      Temporal.Workflow.Instance
-      Temporal.Workflow.Internal.MonadV2
       Temporal.Workflow.IVar
       Temporal.Workflow.Saga
       Temporal.Workflow.Task
@@ -61,8 +59,8 @@ library
       Temporal.Workflow.ChildWorkflowHandle
       Temporal.Workflow.CommandQueue
       Temporal.Workflow.Unsafe.Handle
-      Temporal.Workflow.Internal.Instance
-      Temporal.Workflow.Internal.Monad
+      Temporal.Workflow.Instance
+      Temporal.Workflow.Monad
       Temporal.Workflow.Signal
       Temporal.Workflow.Query
       Temporal.Workflow.Types
