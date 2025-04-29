@@ -545,12 +545,24 @@ handleSignalWorkflow runtime sig = do
     case handlerOrDefault of
       Nothing -> pure ()
       Just handler -> do
-        args <- processorDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (sig ^. Command.vec'input))
         -- signals can block (via sleep, or waiting on a condition), so we run them
         -- in a separate thread.
         --
-        -- TODO use link2 to connect the thrown exception to the main workflow thread
-        undefined
+        -- TODO use link(2) to connect the thrown exception to the main workflow thread
+        void $ runInstanceM runtime $ do
+          h <- asyncWithUnmask $ \restore -> do
+            tid <- myThreadId
+            args <- processorDecodePayloads
+              inst.payloadProcessor
+              (fmap convertFromProtoPayload (sig ^. Command.vec'input))
+            atomically do
+              workflowThreadBlocked <- newTVar False
+              modifyTVar'
+                (threadManager $ getThreadManager runtime)
+                (HashMap.insert tid $ WorkflowThread workflowThreadBlocked)
+            restore $ handler args
+
+          link h
 
 handleQueryWorkflow :: WorkflowRuntime -> QueryWorkflow -> STM (IO ())
 handleQueryWorkflow runtime q = do
