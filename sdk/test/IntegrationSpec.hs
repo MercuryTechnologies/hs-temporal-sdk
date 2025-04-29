@@ -28,13 +28,13 @@ import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Aeson (FromJSON, ToJSON, Value)
 import qualified Data.ByteString as BS
-import System.Environment (lookupEnv)
 import Data.Either (isLeft, isRight)
 import Data.Foldable (traverse_)
 import Data.Functor
 import Data.Int
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
+import qualified Data.Maybe as M
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Time (Day (ModifiedJulianDay))
@@ -45,10 +45,12 @@ import DiscoverInstances (discoverInstances)
 import GHC.Generics
 import GHC.Stack (SrcLoc (..), callStack, fromCallSiteList)
 import IntegrationSpec.HangingWorkflow
+import IntegrationSpec.NoOpWorkflow
 import IntegrationSpec.TimeoutsInWorkflows
 import OpenTelemetry.Trace
 import RequireCallStack
 import System.Directory
+import System.Environment (lookupEnv)
 import System.IO
 import Temporal.Activity
 import Temporal.Bundle
@@ -965,6 +967,163 @@ needsClient = do
           useClient (C.execute parentWf.reference (W.WorkflowId parentId) opts)
             `shouldReturn` "Left ChildWorkflowCancelled"
 
+    describe "Terminate" $ do
+      describe "when neither runId nor firstExecutionRunId is provided" $ do
+        it "returns" $ \TestEnv {..} -> do
+          let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+                baseConf
+          withWorker conf $ do
+            let opts =
+                  (C.startWorkflowOptions taskQueue)
+                    { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                    }
+            useClient $ do
+              C.start NoOpWorkflow "test-terminate-works-without-run-ids" opts
+              h <- C.getHandle (workflowRef NoOpWorkflow) "test-terminate-works-without-run-ids" Nothing Nothing
+              C.terminate
+                h {C.workflowHandleRunId = Nothing, C.workflowHandleFirstExecutionRunId = Nothing}
+                C.TerminationOptions {terminationReason = "testing", terminationDetails = []}
+      describe "when runId is provided without firstExecutionRunId" $ do
+        it "returns if runId matches a workflow" $ \TestEnv {..} -> do
+          let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+                baseConf
+          withWorker conf $ do
+            let opts =
+                  (C.startWorkflowOptions taskQueue)
+                    { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                    }
+            useClient $ do
+              h <- C.start NoOpWorkflow "test-terminate-works-with-good-run-id" opts
+              h' <- C.getHandle (workflowRef NoOpWorkflow) "test-terminate-works-with-good-run-id" h.workflowHandleRunId Nothing
+              C.terminate h' C.TerminationOptions {terminationReason = "testing", terminationDetails = []}
+        it "throws if runId does not match a workflow" $ \TestEnv {..} -> do
+          let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+                baseConf
+          withWorker conf $
+            do
+              let opts =
+                    (C.startWorkflowOptions taskQueue)
+                      { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                      }
+              ( useClient $ do
+                  h <- C.start NoOpWorkflow "test-terminate-throws-with-bad-run-id" opts
+                  h' <- C.getHandle (workflowRef NoOpWorkflow) "test-terminate-throws-with-bad-run-id" (Just "bad-run-id") Nothing
+                  C.terminate h' C.TerminationOptions {terminationReason = "testing", terminationDetails = []}
+                )
+              `shouldThrow` \case
+                RpcError {} -> True
+                _ -> False
+      describe "when firstExecutionRunId is provided without runId" $ do
+        it "returns if firstExecutionRunId matches a workflow" $ \TestEnv {..} -> do
+          let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+                baseConf
+          withWorker conf $ do
+            let opts =
+                  (C.startWorkflowOptions taskQueue)
+                    { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                    }
+            useClient $ do
+              h <- C.start NoOpWorkflow "test-terminate-works-with-good-first-execution-run-id" opts
+              h' <-
+                C.getHandle
+                  (workflowRef NoOpWorkflow)
+                  "test-terminate-works-with-good-first-execution-run-id"
+                  Nothing
+                  $ Just C.GetHandleOptions {C.firstExecutionRunId = Just $ M.fromJust h.workflowHandleFirstExecutionRunId}
+              C.terminate h' C.TerminationOptions {terminationReason = "testing", terminationDetails = []}
+        it "throws if firstExecutionRunId does not match a workflow" $ \TestEnv {..} -> do
+          let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+                baseConf
+          withWorker conf $
+            do
+              let opts =
+                    (C.startWorkflowOptions taskQueue)
+                      { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                      }
+              ( useClient $ do
+                  h <- C.start NoOpWorkflow "test-terminate-throws-with-bad-first-execution-run-id" opts
+                  h' <-
+                    C.getHandle
+                      (workflowRef NoOpWorkflow)
+                      "test-terminate-throws-with-bad-first-execution-run-id"
+                      Nothing
+                      $ Just C.GetHandleOptions {C.firstExecutionRunId = Just "bad-first-execution-run-id"}
+                  C.terminate h' C.TerminationOptions {terminationReason = "testing", terminationDetails = []}
+                )
+              `shouldThrow` \case
+                RpcError {} -> True
+                _ -> False
+      describe "when both runId and firstExecutionRunId are provided" $ do
+        it "returns if both runId and firstExecutionRunId match a workflow" $ \TestEnv {..} -> do
+          let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+                baseConf
+          withWorker conf $ do
+            let opts =
+                  (C.startWorkflowOptions taskQueue)
+                    { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                    }
+            useClient $ do
+              h <- C.start NoOpWorkflow "test-terminate-works-with-good-run-id-bad-first-execution-run-id" opts
+              h' <-
+                C.getHandle
+                  (workflowRef NoOpWorkflow)
+                  "test-terminate-works-with-good-run-id-bad-first-execution-run-id"
+                  h.workflowHandleRunId
+                  $ Just
+                    C.GetHandleOptions
+                      { C.firstExecutionRunId = Just $ M.fromJust h.workflowHandleFirstExecutionRunId
+                      }
+              C.terminate h' C.TerminationOptions {terminationReason = "testing", terminationDetails = []}
+        it "throws if runId does not match a workflow" $ \TestEnv {..} -> do
+          let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+                baseConf
+          withWorker conf $ do
+            let opts =
+                  (C.startWorkflowOptions taskQueue)
+                    { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                    }
+            useClient
+              ( do
+                  h <- C.start NoOpWorkflow "test-terminate-works-with-bad-run-id-good-first-execution-run-id" opts
+                  h' <-
+                    C.getHandle
+                      (workflowRef NoOpWorkflow)
+                      "test-terminate-works-with-bad-run-id-good-first-execution-run-id"
+                      (Just "bad-run-id")
+                      ( Just
+                          C.GetHandleOptions
+                            { C.firstExecutionRunId = Just $ M.fromJust h.workflowHandleFirstExecutionRunId
+                            }
+                      )
+                  C.terminate h' C.TerminationOptions {terminationReason = "testing", terminationDetails = []}
+              )
+              `shouldThrow` \case
+                RpcError {} -> True
+                _ -> False
+        it "throws if firstExecutionRunId does not match a workflow" $ \TestEnv {..} -> do
+          let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+                baseConf
+          withWorker conf $
+            do
+              let opts =
+                    (C.startWorkflowOptions taskQueue)
+                      { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                      }
+              useClient
+                ( do
+                    h <- C.start NoOpWorkflow "test-terminate-throws-good-run-id-bad-first-execution-run-id" opts
+                    h' <-
+                      C.getHandle
+                        (workflowRef NoOpWorkflow)
+                        "test-terminate-throws-with-good-run-id-bad-first-execution-run-id"
+                        (Just $ M.fromJust h.workflowHandleRunId)
+                        (Just C.GetHandleOptions {C.firstExecutionRunId = Just "bad-first-execution-run-id"})
+                    C.terminate h' C.TerminationOptions {terminationReason = "testing", terminationDetails = []}
+                )
+              `shouldThrow` \case
+                RpcError {} -> True
+                _ -> False
+
     describe "Signals" $ do
       specify "send" $ const pending
       specify "interrupt" $ const pending
@@ -1505,10 +1664,11 @@ needsClient = do
                 testRefs.basicActivity
                 (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
             hasPatch <- W.patched "wibble"
-            when hasPatch $ void $
-              W.executeActivity
-                testRefs.basicActivity
-                (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
+            when hasPatch $
+              void $
+                W.executeActivity
+                  testRefs.basicActivity
+                  (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
             W.sleep $ milliseconds 10
 
           patchedConf = configure () (testConf <> toDefinitions patchedWorkflow) baseConf
@@ -1533,7 +1693,6 @@ needsClient = do
 
       incompatibleReplayResult <- runReplayHistory globalRuntime incompatibleConf history
       incompatibleReplayResult `shouldSatisfy` isLeft
-
 
 -- describe "WorkflowClient" $ do
 --   specify "WorkflowExecutionAlreadyStartedError" pending

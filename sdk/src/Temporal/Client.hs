@@ -33,7 +33,7 @@ module Temporal.Client (
   startWorkflowOptions,
   Temporal.Client.start,
   startFromPayloads,
-  WorkflowHandle,
+  WorkflowHandle (..),
   execute,
   waitWorkflowResult,
 
@@ -58,6 +58,7 @@ module Temporal.Client (
 
   -- * Producing handles for existing workflows
   getHandle,
+  GetHandleOptions (..),
 
   -- * Workflow history utilities
   fetchHistory,
@@ -255,7 +256,7 @@ This function will block until the workflow completes, and will return the resul
 or throw a 'WorkflowExecutionClosed' exception if the workflow was closed without returning a result.
 -}
 waitWorkflowResult :: (Typeable a, MonadIO m) => WorkflowHandle a -> m a
-waitWorkflowResult h@(WorkflowHandle readResult _ c wf r) = do
+waitWorkflowResult h@(WorkflowHandle readResult _ c wf r _) = do
   mev <- runReaderT (waitResult wf r c.clientConfig.namespace) c
   case mev of
     Nothing -> error "Unexpected empty history"
@@ -324,7 +325,7 @@ signal
   -> sig
   -> SignalOptions
   -> (SignalArgs sig :->: m ())
-signal (WorkflowHandle _ _t c wf r) (signalRef -> (KnownSignal sName sCodec)) opts = withArgs @(SignalArgs sig) @(m ()) sCodec $ \inputs -> liftIO $ do
+signal (WorkflowHandle _ _t c wf r _) (signalRef -> (KnownSignal sName sCodec)) opts = withArgs @(SignalArgs sig) @(m ()) sCodec $ \inputs -> liftIO $ do
   inputs' <- processorEncodePayloads c.clientConfig.payloadProcessor =<< liftIO (sequence inputs)
   hdrs <- processorEncodePayloads c.clientConfig.payloadProcessor opts.headers
   result <-
@@ -344,8 +345,8 @@ signal (WorkflowHandle _ _t c wf r) (signalRef -> (KnownSignal sName sCodec)) op
         -- & WF.control .~ _
         -- TODO put other useful headers in here
         & WF.header .~ headerToProto (fmap convertToProtoPayload hdrs)
-        -- FIXME: Can we just ignore this now that it's no longer present?
-        -- & WF.skipGenerateWorkflowTask .~ opts.skipGenerateWorkflowTask
+  -- FIXME: Can we just ignore this now that it's no longer present?
+  -- & WF.skipGenerateWorkflowTask .~ opts.skipGenerateWorkflowTask
   case result of
     Left err -> throwIO err
     Right _ -> pure ()
@@ -447,6 +448,15 @@ query h (queryRef -> KnownQuery qn codec) opts = withArgs @(QueryArgs query) @(m
       WorkflowExecutionStatus'Unrecognized _ -> UnknownStatus
 
 
+data GetHandleOptions = GetHandleOptions
+  { firstExecutionRunId :: Maybe RunId
+  -- ^ If specified, later calls referencing the handle may error if the (most recent | specified workflow
+  -- run id) is not part of the same execution chain as this id. Only some operations (namely terminate)
+  -- respect firstExecutionRunId, while others (e.g. signal and query) ignore it.
+  }
+  deriving stock (Eq, Show)
+
+
 {- | Sometimes you know that a Workflow exists or existed, but you didn't create the workflow from
 the current process or code path. In this case, you can use 'getHandle' to get a handle to the
 workflow so that you can interact with it.
@@ -459,8 +469,9 @@ getHandle
   => KnownWorkflow args a
   -> WorkflowId
   -> Maybe RunId
+  -> Maybe GetHandleOptions
   -> m (WorkflowHandle a)
-getHandle (KnownWorkflow {knownWorkflowCodec, knownWorkflowName}) wfId runId = do
+getHandle (KnownWorkflow {knownWorkflowCodec, knownWorkflowName}) wfId runId opts = do
   c <- askWorkflowClient
   pure $
     WorkflowHandle
@@ -471,6 +482,7 @@ getHandle (KnownWorkflow {knownWorkflowCodec, knownWorkflowName}) wfId runId = d
       , workflowHandleWorkflowId = wfId
       , workflowHandleRunId = runId
       , workflowHandleType = WorkflowType knownWorkflowName
+      , workflowHandleFirstExecutionRunId = (.firstExecutionRunId) =<< opts
       }
 
 
@@ -552,14 +564,16 @@ startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
     case res of
       Left err -> throwIO err
       Right swer ->
-        pure $
-          WorkflowHandle
-            { workflowHandleReadResult = pure
-            , workflowHandleType = WorkflowType $ knownWorkflowName k
-            , workflowHandleClient = c
-            , workflowHandleWorkflowId = wfId'
-            , workflowHandleRunId = Just (RunId $ swer ^. WF.runId)
-            }
+        let runId = RunId $ swer ^. WF.runId
+        in pure $
+            WorkflowHandle
+              { workflowHandleReadResult = pure
+              , workflowHandleType = WorkflowType $ knownWorkflowName k
+              , workflowHandleClient = c
+              , workflowHandleWorkflowId = wfId'
+              , workflowHandleRunId = Just runId
+              , workflowHandleFirstExecutionRunId = Just runId
+              }
   pure $
     wfH
       { workflowHandleReadResult = \a ->
@@ -687,6 +701,9 @@ signalWithStart (workflowRef -> k@(KnownWorkflow codec _)) wfId opts (signalRef 
                 , workflowHandleClient = c
                 , workflowHandleWorkflowId = opts'.signalWithStartWorkflowId
                 , workflowHandleRunId = Just (RunId $ swer ^. WF.runId)
+                , -- We don't know if this handle represents a new workflow or an already-running one, so we don't
+                  -- know if the current run ID is for its first execution or not
+                  workflowHandleFirstExecutionRunId = Nothing
                 }
       pure $
         wfH
@@ -700,9 +717,6 @@ signalWithStart (workflowRef -> k@(KnownWorkflow codec _)) wfId opts (signalRef 
 data TerminationOptions = TerminationOptions
   { terminationReason :: Text
   , terminationDetails :: [Payload]
-  , firstExecutionRunId :: Maybe RunId
-  -- ^ If set, this call will error if the (most recent | specified workflow run id in the WorkflowHandle) is not part of the same
-  -- execution chain as this id.
   }
 
 
@@ -729,7 +743,7 @@ terminate h req =
         & RR.details
           .~ (defMessage & Common.payloads .~ fmap convertToProtoPayload req.terminationDetails)
         & RR.identity .~ Core.identity (Core.clientConfig h.workflowHandleClient.clientCore)
-        & RR.firstExecutionRunId .~ maybe "" rawRunId req.firstExecutionRunId
+        & RR.firstExecutionRunId .~ maybe "" rawRunId h.workflowHandleFirstExecutionRunId
 
 
 data FollowOption = FollowRuns | ThisRunOnly
