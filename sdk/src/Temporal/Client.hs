@@ -925,6 +925,21 @@ data UpdateOptions = UpdateOptions
   }
 
 
+{- | An Update is a synchronous message to a Workflow Execution, which waits until the message
+handling is complete, and returns a result or error response.
+
+The Update handler can do anything that normal Workflow code can do.
+
+Conceptually, an Update is similar to a combination of Signal (which can do anything normal
+Workflow code can do, but cannot return a result) and Query (which can return a result, but
+cannot affect the Workflow state or execution). By combining those capabilities it supports
+operations that neither Signal nor Query can.
+
+Update handlers can optionally include a validator, which can return a boolean indicating whether
+the update is valid and should be processed by the Workflow. If the validator returns true,
+the update handler is called. If it returns false (or throws an exception), an error is returned
+to the client.
+-}
 update
   :: forall m args result a error
    . (MonadIO m, HasWorkflowClient m)
