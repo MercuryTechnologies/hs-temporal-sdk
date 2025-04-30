@@ -996,7 +996,6 @@ update h@(WorkflowHandle _ _ c _ _ _) (KnownUpdate updateCodec updateName) opts 
                  )
 
     (res :: UpdateWorkflowExecutionResponse) <- either throwIO pure =<< Temporal.Core.Client.WorkflowService.updateWorkflowExecution h.workflowHandleClient.clientCore msg
-    liftIO $ print res
     case res ^. Update.maybe'outcome of
       Nothing -> throwIO $ ValueError "No return value payloads provided by update response"
       Just outcome -> do
