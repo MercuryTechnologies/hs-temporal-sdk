@@ -271,7 +271,6 @@ import Data.Int (Int64)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe
-import Data.Profunctor
 import Data.ProtoLens
 import Data.Proxy
 import qualified Data.Set as Set
