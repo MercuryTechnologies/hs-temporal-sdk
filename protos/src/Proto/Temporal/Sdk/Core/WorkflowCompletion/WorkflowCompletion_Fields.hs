@@ -28,6 +28,7 @@ import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Gener
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
 import qualified Proto.Temporal.Api.Enums.V1.FailedCause
+import qualified Proto.Temporal.Api.Enums.V1.Workflow
 import qualified Proto.Temporal.Api.Failure.V1.Message
 import qualified Proto.Temporal.Sdk.Core.Common.Common
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands
@@ -107,3 +108,10 @@ vec'usedInternalFlags ::
   Lens.Family2.LensLike' f s a
 vec'usedInternalFlags
   = Data.ProtoLens.Field.field @"vec'usedInternalFlags"
+versioningBehavior ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "versioningBehavior" a) =>
+  Lens.Family2.LensLike' f s a
+versioningBehavior
+  = Data.ProtoLens.Field.field @"versioningBehavior"

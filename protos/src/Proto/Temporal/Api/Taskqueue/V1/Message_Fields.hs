@@ -31,6 +31,7 @@ import qualified Proto.Google.Protobuf.Duration
 import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Google.Protobuf.Wrappers
 import qualified Proto.Temporal.Api.Common.V1.Message
+import qualified Proto.Temporal.Api.Deployment.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.TaskQueue
 ackLevel ::
   forall f s a.
@@ -44,6 +45,20 @@ allActive ::
    Data.ProtoLens.Field.HasField s "allActive" a) =>
   Lens.Family2.LensLike' f s a
 allActive = Data.ProtoLens.Field.field @"allActive"
+approximateBacklogAge ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "approximateBacklogAge" a) =>
+  Lens.Family2.LensLike' f s a
+approximateBacklogAge
+  = Data.ProtoLens.Field.field @"approximateBacklogAge"
+approximateBacklogCount ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "approximateBacklogCount" a) =>
+  Lens.Family2.LensLike' f s a
+approximateBacklogCount
+  = Data.ProtoLens.Field.field @"approximateBacklogCount"
 backlogCountHint ::
   forall f s a.
   (Prelude.Functor f,
@@ -67,6 +82,18 @@ createTime ::
    Data.ProtoLens.Field.HasField s "createTime" a) =>
   Lens.Family2.LensLike' f s a
 createTime = Data.ProtoLens.Field.field @"createTime"
+currentVersion ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "currentVersion" a) =>
+  Lens.Family2.LensLike' f s a
+currentVersion = Data.ProtoLens.Field.field @"currentVersion"
+deploymentOptions ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "deploymentOptions" a) =>
+  Lens.Family2.LensLike' f s a
+deploymentOptions = Data.ProtoLens.Field.field @"deploymentOptions"
 endId ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "endId" a) =>
@@ -100,12 +127,26 @@ maxTasksPerSecond ::
    Data.ProtoLens.Field.HasField s "maxTasksPerSecond" a) =>
   Lens.Family2.LensLike' f s a
 maxTasksPerSecond = Data.ProtoLens.Field.field @"maxTasksPerSecond"
+maybe'approximateBacklogAge ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'approximateBacklogAge" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'approximateBacklogAge
+  = Data.ProtoLens.Field.field @"maybe'approximateBacklogAge"
 maybe'createTime ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "maybe'createTime" a) =>
   Lens.Family2.LensLike' f s a
 maybe'createTime = Data.ProtoLens.Field.field @"maybe'createTime"
+maybe'deploymentOptions ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'deploymentOptions" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'deploymentOptions
+  = Data.ProtoLens.Field.field @"maybe'deploymentOptions"
 maybe'lastAccessTime ::
   forall f s a.
   (Prelude.Functor f,
@@ -146,12 +187,24 @@ maybe'scheduleToStartTimeout ::
   Lens.Family2.LensLike' f s a
 maybe'scheduleToStartTimeout
   = Data.ProtoLens.Field.field @"maybe'scheduleToStartTimeout"
+maybe'stats ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'stats" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'stats = Data.ProtoLens.Field.field @"maybe'stats"
 maybe'taskIdBlock ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "maybe'taskIdBlock" a) =>
   Lens.Family2.LensLike' f s a
 maybe'taskIdBlock = Data.ProtoLens.Field.field @"maybe'taskIdBlock"
+maybe'updateTime ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'updateTime" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'updateTime = Data.ProtoLens.Field.field @"maybe'updateTime"
 maybe'value ::
   forall f s a.
   (Prelude.Functor f,
@@ -195,6 +248,13 @@ percentageRamp ::
    Data.ProtoLens.Field.HasField s "percentageRamp" a) =>
   Lens.Family2.LensLike' f s a
 percentageRamp = Data.ProtoLens.Field.field @"percentageRamp"
+pollRequestDeltaSuggestion ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "pollRequestDeltaSuggestion" a) =>
+  Lens.Family2.LensLike' f s a
+pollRequestDeltaSuggestion
+  = Data.ProtoLens.Field.field @"pollRequestDeltaSuggestion"
 pollers ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "pollers" a) =>
@@ -206,6 +266,19 @@ rampPercentage ::
    Data.ProtoLens.Field.HasField s "rampPercentage" a) =>
   Lens.Family2.LensLike' f s a
 rampPercentage = Data.ProtoLens.Field.field @"rampPercentage"
+rampingVersion ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "rampingVersion" a) =>
+  Lens.Family2.LensLike' f s a
+rampingVersion = Data.ProtoLens.Field.field @"rampingVersion"
+rampingVersionPercentage ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "rampingVersionPercentage" a) =>
+  Lens.Family2.LensLike' f s a
+rampingVersionPercentage
+  = Data.ProtoLens.Field.field @"rampingVersionPercentage"
 ratePerSecond ::
   forall f s a.
   (Prelude.Functor f,
@@ -247,6 +320,11 @@ startId ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "startId" a) =>
   Lens.Family2.LensLike' f s a
 startId = Data.ProtoLens.Field.field @"startId"
+stats ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "stats" a) =>
+  Lens.Family2.LensLike' f s a
+stats = Data.ProtoLens.Field.field @"stats"
 targetBuildId ::
   forall f s a.
   (Prelude.Functor f,
@@ -278,6 +356,18 @@ taskReachability ::
    Data.ProtoLens.Field.HasField s "taskReachability" a) =>
   Lens.Family2.LensLike' f s a
 taskReachability = Data.ProtoLens.Field.field @"taskReachability"
+tasksAddRate ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "tasksAddRate" a) =>
+  Lens.Family2.LensLike' f s a
+tasksAddRate = Data.ProtoLens.Field.field @"tasksAddRate"
+tasksDispatchRate ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "tasksDispatchRate" a) =>
+  Lens.Family2.LensLike' f s a
+tasksDispatchRate = Data.ProtoLens.Field.field @"tasksDispatchRate"
 typesInfo ::
   forall f s a.
   (Prelude.Functor f,
@@ -290,6 +380,12 @@ unversioned ::
    Data.ProtoLens.Field.HasField s "unversioned" a) =>
   Lens.Family2.LensLike' f s a
 unversioned = Data.ProtoLens.Field.field @"unversioned"
+updateTime ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "updateTime" a) =>
+  Lens.Family2.LensLike' f s a
+updateTime = Data.ProtoLens.Field.field @"updateTime"
 value ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "value" a) =>

@@ -4,16 +4,20 @@
 {-# OPTIONS_GHC -Wno-duplicate-exports#-}
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
 module Proto.Temporal.Api.Enums.V1.Common (
-        CallbackState(..), CallbackState(),
-        CallbackState'UnrecognizedValue, EncodingType(..), EncodingType(),
-        EncodingType'UnrecognizedValue, IndexedValueType(..),
-        IndexedValueType(), IndexedValueType'UnrecognizedValue,
+        ApplicationErrorCategory(..), ApplicationErrorCategory(),
+        ApplicationErrorCategory'UnrecognizedValue, CallbackState(..),
+        CallbackState(), CallbackState'UnrecognizedValue, EncodingType(..),
+        EncodingType(), EncodingType'UnrecognizedValue,
+        IndexedValueType(..), IndexedValueType(),
+        IndexedValueType'UnrecognizedValue,
         NexusOperationCancellationState(..),
         NexusOperationCancellationState(),
         NexusOperationCancellationState'UnrecognizedValue,
         PendingNexusOperationState(..), PendingNexusOperationState(),
         PendingNexusOperationState'UnrecognizedValue, Severity(..),
-        Severity(), Severity'UnrecognizedValue
+        Severity(), Severity'UnrecognizedValue,
+        WorkflowRuleActionScope(..), WorkflowRuleActionScope(),
+        WorkflowRuleActionScope'UnrecognizedValue
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -40,6 +44,76 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
+newtype ApplicationErrorCategory'UnrecognizedValue
+  = ApplicationErrorCategory'UnrecognizedValue Data.Int.Int32
+  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+data ApplicationErrorCategory
+  = APPLICATION_ERROR_CATEGORY_UNSPECIFIED |
+    APPLICATION_ERROR_CATEGORY_BENIGN |
+    ApplicationErrorCategory'Unrecognized !ApplicationErrorCategory'UnrecognizedValue
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.MessageEnum ApplicationErrorCategory where
+  maybeToEnum 0 = Prelude.Just APPLICATION_ERROR_CATEGORY_UNSPECIFIED
+  maybeToEnum 1 = Prelude.Just APPLICATION_ERROR_CATEGORY_BENIGN
+  maybeToEnum k
+    = Prelude.Just
+        (ApplicationErrorCategory'Unrecognized
+           (ApplicationErrorCategory'UnrecognizedValue
+              (Prelude.fromIntegral k)))
+  showEnum APPLICATION_ERROR_CATEGORY_UNSPECIFIED
+    = "APPLICATION_ERROR_CATEGORY_UNSPECIFIED"
+  showEnum APPLICATION_ERROR_CATEGORY_BENIGN
+    = "APPLICATION_ERROR_CATEGORY_BENIGN"
+  showEnum
+    (ApplicationErrorCategory'Unrecognized (ApplicationErrorCategory'UnrecognizedValue k))
+    = Prelude.show k
+  readEnum k
+    | (Prelude.==) k "APPLICATION_ERROR_CATEGORY_UNSPECIFIED"
+    = Prelude.Just APPLICATION_ERROR_CATEGORY_UNSPECIFIED
+    | (Prelude.==) k "APPLICATION_ERROR_CATEGORY_BENIGN"
+    = Prelude.Just APPLICATION_ERROR_CATEGORY_BENIGN
+    | Prelude.otherwise
+    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
+instance Prelude.Bounded ApplicationErrorCategory where
+  minBound = APPLICATION_ERROR_CATEGORY_UNSPECIFIED
+  maxBound = APPLICATION_ERROR_CATEGORY_BENIGN
+instance Prelude.Enum ApplicationErrorCategory where
+  toEnum k__
+    = Prelude.maybe
+        (Prelude.error
+           ((Prelude.++)
+              "toEnum: unknown value for enum ApplicationErrorCategory: "
+              (Prelude.show k__)))
+        Prelude.id (Data.ProtoLens.maybeToEnum k__)
+  fromEnum APPLICATION_ERROR_CATEGORY_UNSPECIFIED = 0
+  fromEnum APPLICATION_ERROR_CATEGORY_BENIGN = 1
+  fromEnum
+    (ApplicationErrorCategory'Unrecognized (ApplicationErrorCategory'UnrecognizedValue k))
+    = Prelude.fromIntegral k
+  succ APPLICATION_ERROR_CATEGORY_BENIGN
+    = Prelude.error
+        "ApplicationErrorCategory.succ: bad argument APPLICATION_ERROR_CATEGORY_BENIGN. This value would be out of bounds."
+  succ APPLICATION_ERROR_CATEGORY_UNSPECIFIED
+    = APPLICATION_ERROR_CATEGORY_BENIGN
+  succ (ApplicationErrorCategory'Unrecognized _)
+    = Prelude.error
+        "ApplicationErrorCategory.succ: bad argument: unrecognized value"
+  pred APPLICATION_ERROR_CATEGORY_UNSPECIFIED
+    = Prelude.error
+        "ApplicationErrorCategory.pred: bad argument APPLICATION_ERROR_CATEGORY_UNSPECIFIED. This value would be out of bounds."
+  pred APPLICATION_ERROR_CATEGORY_BENIGN
+    = APPLICATION_ERROR_CATEGORY_UNSPECIFIED
+  pred (ApplicationErrorCategory'Unrecognized _)
+    = Prelude.error
+        "ApplicationErrorCategory.pred: bad argument: unrecognized value"
+  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
+  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
+  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
+  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
+instance Data.ProtoLens.FieldDefault ApplicationErrorCategory where
+  fieldDefault = APPLICATION_ERROR_CATEGORY_UNSPECIFIED
+instance Control.DeepSeq.NFData ApplicationErrorCategory where
+  rnf x__ = Prelude.seq x__ ()
 newtype CallbackState'UnrecognizedValue
   = CallbackState'UnrecognizedValue Data.Int.Int32
   deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
@@ -50,6 +124,7 @@ data CallbackState
     CALLBACK_STATE_BACKING_OFF |
     CALLBACK_STATE_FAILED |
     CALLBACK_STATE_SUCCEEDED |
+    CALLBACK_STATE_BLOCKED |
     CallbackState'Unrecognized !CallbackState'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum CallbackState where
@@ -59,6 +134,7 @@ instance Data.ProtoLens.MessageEnum CallbackState where
   maybeToEnum 3 = Prelude.Just CALLBACK_STATE_BACKING_OFF
   maybeToEnum 4 = Prelude.Just CALLBACK_STATE_FAILED
   maybeToEnum 5 = Prelude.Just CALLBACK_STATE_SUCCEEDED
+  maybeToEnum 6 = Prelude.Just CALLBACK_STATE_BLOCKED
   maybeToEnum k
     = Prelude.Just
         (CallbackState'Unrecognized
@@ -69,6 +145,7 @@ instance Data.ProtoLens.MessageEnum CallbackState where
   showEnum CALLBACK_STATE_BACKING_OFF = "CALLBACK_STATE_BACKING_OFF"
   showEnum CALLBACK_STATE_FAILED = "CALLBACK_STATE_FAILED"
   showEnum CALLBACK_STATE_SUCCEEDED = "CALLBACK_STATE_SUCCEEDED"
+  showEnum CALLBACK_STATE_BLOCKED = "CALLBACK_STATE_BLOCKED"
   showEnum
     (CallbackState'Unrecognized (CallbackState'UnrecognizedValue k))
     = Prelude.show k
@@ -85,11 +162,13 @@ instance Data.ProtoLens.MessageEnum CallbackState where
     = Prelude.Just CALLBACK_STATE_FAILED
     | (Prelude.==) k "CALLBACK_STATE_SUCCEEDED"
     = Prelude.Just CALLBACK_STATE_SUCCEEDED
+    | (Prelude.==) k "CALLBACK_STATE_BLOCKED"
+    = Prelude.Just CALLBACK_STATE_BLOCKED
     | Prelude.otherwise
     = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
 instance Prelude.Bounded CallbackState where
   minBound = CALLBACK_STATE_UNSPECIFIED
-  maxBound = CALLBACK_STATE_SUCCEEDED
+  maxBound = CALLBACK_STATE_BLOCKED
 instance Prelude.Enum CallbackState where
   toEnum k__
     = Prelude.maybe
@@ -104,17 +183,19 @@ instance Prelude.Enum CallbackState where
   fromEnum CALLBACK_STATE_BACKING_OFF = 3
   fromEnum CALLBACK_STATE_FAILED = 4
   fromEnum CALLBACK_STATE_SUCCEEDED = 5
+  fromEnum CALLBACK_STATE_BLOCKED = 6
   fromEnum
     (CallbackState'Unrecognized (CallbackState'UnrecognizedValue k))
     = Prelude.fromIntegral k
-  succ CALLBACK_STATE_SUCCEEDED
+  succ CALLBACK_STATE_BLOCKED
     = Prelude.error
-        "CallbackState.succ: bad argument CALLBACK_STATE_SUCCEEDED. This value would be out of bounds."
+        "CallbackState.succ: bad argument CALLBACK_STATE_BLOCKED. This value would be out of bounds."
   succ CALLBACK_STATE_UNSPECIFIED = CALLBACK_STATE_STANDBY
   succ CALLBACK_STATE_STANDBY = CALLBACK_STATE_SCHEDULED
   succ CALLBACK_STATE_SCHEDULED = CALLBACK_STATE_BACKING_OFF
   succ CALLBACK_STATE_BACKING_OFF = CALLBACK_STATE_FAILED
   succ CALLBACK_STATE_FAILED = CALLBACK_STATE_SUCCEEDED
+  succ CALLBACK_STATE_SUCCEEDED = CALLBACK_STATE_BLOCKED
   succ (CallbackState'Unrecognized _)
     = Prelude.error
         "CallbackState.succ: bad argument: unrecognized value"
@@ -126,6 +207,7 @@ instance Prelude.Enum CallbackState where
   pred CALLBACK_STATE_BACKING_OFF = CALLBACK_STATE_SCHEDULED
   pred CALLBACK_STATE_FAILED = CALLBACK_STATE_BACKING_OFF
   pred CALLBACK_STATE_SUCCEEDED = CALLBACK_STATE_FAILED
+  pred CALLBACK_STATE_BLOCKED = CALLBACK_STATE_SUCCEEDED
   pred (CallbackState'Unrecognized _)
     = Prelude.error
         "CallbackState.pred: bad argument: unrecognized value"
@@ -336,6 +418,7 @@ data NexusOperationCancellationState
     NEXUS_OPERATION_CANCELLATION_STATE_SUCCEEDED |
     NEXUS_OPERATION_CANCELLATION_STATE_FAILED |
     NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT |
+    NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED |
     NexusOperationCancellationState'Unrecognized !NexusOperationCancellationState'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum NexusOperationCancellationState where
@@ -351,6 +434,8 @@ instance Data.ProtoLens.MessageEnum NexusOperationCancellationState where
     = Prelude.Just NEXUS_OPERATION_CANCELLATION_STATE_FAILED
   maybeToEnum 5
     = Prelude.Just NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT
+  maybeToEnum 6
+    = Prelude.Just NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED
   maybeToEnum k
     = Prelude.Just
         (NexusOperationCancellationState'Unrecognized
@@ -368,6 +453,8 @@ instance Data.ProtoLens.MessageEnum NexusOperationCancellationState where
     = "NEXUS_OPERATION_CANCELLATION_STATE_FAILED"
   showEnum NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT
     = "NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT"
+  showEnum NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED
+    = "NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED"
   showEnum
     (NexusOperationCancellationState'Unrecognized (NexusOperationCancellationState'UnrecognizedValue k))
     = Prelude.show k
@@ -384,11 +471,13 @@ instance Data.ProtoLens.MessageEnum NexusOperationCancellationState where
     = Prelude.Just NEXUS_OPERATION_CANCELLATION_STATE_FAILED
     | (Prelude.==) k "NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT"
     = Prelude.Just NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT
+    | (Prelude.==) k "NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED"
+    = Prelude.Just NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED
     | Prelude.otherwise
     = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
 instance Prelude.Bounded NexusOperationCancellationState where
   minBound = NEXUS_OPERATION_CANCELLATION_STATE_UNSPECIFIED
-  maxBound = NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT
+  maxBound = NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED
 instance Prelude.Enum NexusOperationCancellationState where
   toEnum k__
     = Prelude.maybe
@@ -403,12 +492,13 @@ instance Prelude.Enum NexusOperationCancellationState where
   fromEnum NEXUS_OPERATION_CANCELLATION_STATE_SUCCEEDED = 3
   fromEnum NEXUS_OPERATION_CANCELLATION_STATE_FAILED = 4
   fromEnum NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT = 5
+  fromEnum NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED = 6
   fromEnum
     (NexusOperationCancellationState'Unrecognized (NexusOperationCancellationState'UnrecognizedValue k))
     = Prelude.fromIntegral k
-  succ NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT
+  succ NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED
     = Prelude.error
-        "NexusOperationCancellationState.succ: bad argument NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT. This value would be out of bounds."
+        "NexusOperationCancellationState.succ: bad argument NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED. This value would be out of bounds."
   succ NEXUS_OPERATION_CANCELLATION_STATE_UNSPECIFIED
     = NEXUS_OPERATION_CANCELLATION_STATE_SCHEDULED
   succ NEXUS_OPERATION_CANCELLATION_STATE_SCHEDULED
@@ -419,6 +509,8 @@ instance Prelude.Enum NexusOperationCancellationState where
     = NEXUS_OPERATION_CANCELLATION_STATE_FAILED
   succ NEXUS_OPERATION_CANCELLATION_STATE_FAILED
     = NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT
+  succ NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT
+    = NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED
   succ (NexusOperationCancellationState'Unrecognized _)
     = Prelude.error
         "NexusOperationCancellationState.succ: bad argument: unrecognized value"
@@ -435,6 +527,8 @@ instance Prelude.Enum NexusOperationCancellationState where
     = NEXUS_OPERATION_CANCELLATION_STATE_SUCCEEDED
   pred NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT
     = NEXUS_OPERATION_CANCELLATION_STATE_FAILED
+  pred NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED
+    = NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT
   pred (NexusOperationCancellationState'Unrecognized _)
     = Prelude.error
         "NexusOperationCancellationState.pred: bad argument: unrecognized value"
@@ -454,6 +548,7 @@ data PendingNexusOperationState
     PENDING_NEXUS_OPERATION_STATE_SCHEDULED |
     PENDING_NEXUS_OPERATION_STATE_BACKING_OFF |
     PENDING_NEXUS_OPERATION_STATE_STARTED |
+    PENDING_NEXUS_OPERATION_STATE_BLOCKED |
     PendingNexusOperationState'Unrecognized !PendingNexusOperationState'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum PendingNexusOperationState where
@@ -464,6 +559,7 @@ instance Data.ProtoLens.MessageEnum PendingNexusOperationState where
   maybeToEnum 2
     = Prelude.Just PENDING_NEXUS_OPERATION_STATE_BACKING_OFF
   maybeToEnum 3 = Prelude.Just PENDING_NEXUS_OPERATION_STATE_STARTED
+  maybeToEnum 4 = Prelude.Just PENDING_NEXUS_OPERATION_STATE_BLOCKED
   maybeToEnum k
     = Prelude.Just
         (PendingNexusOperationState'Unrecognized
@@ -477,6 +573,8 @@ instance Data.ProtoLens.MessageEnum PendingNexusOperationState where
     = "PENDING_NEXUS_OPERATION_STATE_BACKING_OFF"
   showEnum PENDING_NEXUS_OPERATION_STATE_STARTED
     = "PENDING_NEXUS_OPERATION_STATE_STARTED"
+  showEnum PENDING_NEXUS_OPERATION_STATE_BLOCKED
+    = "PENDING_NEXUS_OPERATION_STATE_BLOCKED"
   showEnum
     (PendingNexusOperationState'Unrecognized (PendingNexusOperationState'UnrecognizedValue k))
     = Prelude.show k
@@ -489,11 +587,13 @@ instance Data.ProtoLens.MessageEnum PendingNexusOperationState where
     = Prelude.Just PENDING_NEXUS_OPERATION_STATE_BACKING_OFF
     | (Prelude.==) k "PENDING_NEXUS_OPERATION_STATE_STARTED"
     = Prelude.Just PENDING_NEXUS_OPERATION_STATE_STARTED
+    | (Prelude.==) k "PENDING_NEXUS_OPERATION_STATE_BLOCKED"
+    = Prelude.Just PENDING_NEXUS_OPERATION_STATE_BLOCKED
     | Prelude.otherwise
     = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
 instance Prelude.Bounded PendingNexusOperationState where
   minBound = PENDING_NEXUS_OPERATION_STATE_UNSPECIFIED
-  maxBound = PENDING_NEXUS_OPERATION_STATE_STARTED
+  maxBound = PENDING_NEXUS_OPERATION_STATE_BLOCKED
 instance Prelude.Enum PendingNexusOperationState where
   toEnum k__
     = Prelude.maybe
@@ -506,18 +606,21 @@ instance Prelude.Enum PendingNexusOperationState where
   fromEnum PENDING_NEXUS_OPERATION_STATE_SCHEDULED = 1
   fromEnum PENDING_NEXUS_OPERATION_STATE_BACKING_OFF = 2
   fromEnum PENDING_NEXUS_OPERATION_STATE_STARTED = 3
+  fromEnum PENDING_NEXUS_OPERATION_STATE_BLOCKED = 4
   fromEnum
     (PendingNexusOperationState'Unrecognized (PendingNexusOperationState'UnrecognizedValue k))
     = Prelude.fromIntegral k
-  succ PENDING_NEXUS_OPERATION_STATE_STARTED
+  succ PENDING_NEXUS_OPERATION_STATE_BLOCKED
     = Prelude.error
-        "PendingNexusOperationState.succ: bad argument PENDING_NEXUS_OPERATION_STATE_STARTED. This value would be out of bounds."
+        "PendingNexusOperationState.succ: bad argument PENDING_NEXUS_OPERATION_STATE_BLOCKED. This value would be out of bounds."
   succ PENDING_NEXUS_OPERATION_STATE_UNSPECIFIED
     = PENDING_NEXUS_OPERATION_STATE_SCHEDULED
   succ PENDING_NEXUS_OPERATION_STATE_SCHEDULED
     = PENDING_NEXUS_OPERATION_STATE_BACKING_OFF
   succ PENDING_NEXUS_OPERATION_STATE_BACKING_OFF
     = PENDING_NEXUS_OPERATION_STATE_STARTED
+  succ PENDING_NEXUS_OPERATION_STATE_STARTED
+    = PENDING_NEXUS_OPERATION_STATE_BLOCKED
   succ (PendingNexusOperationState'Unrecognized _)
     = Prelude.error
         "PendingNexusOperationState.succ: bad argument: unrecognized value"
@@ -530,6 +633,8 @@ instance Prelude.Enum PendingNexusOperationState where
     = PENDING_NEXUS_OPERATION_STATE_SCHEDULED
   pred PENDING_NEXUS_OPERATION_STATE_STARTED
     = PENDING_NEXUS_OPERATION_STATE_BACKING_OFF
+  pred PENDING_NEXUS_OPERATION_STATE_BLOCKED
+    = PENDING_NEXUS_OPERATION_STATE_STARTED
   pred (PendingNexusOperationState'Unrecognized _)
     = Prelude.error
         "PendingNexusOperationState.pred: bad argument: unrecognized value"
@@ -613,4 +718,85 @@ instance Prelude.Enum Severity where
 instance Data.ProtoLens.FieldDefault Severity where
   fieldDefault = SEVERITY_UNSPECIFIED
 instance Control.DeepSeq.NFData Severity where
+  rnf x__ = Prelude.seq x__ ()
+newtype WorkflowRuleActionScope'UnrecognizedValue
+  = WorkflowRuleActionScope'UnrecognizedValue Data.Int.Int32
+  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+data WorkflowRuleActionScope
+  = WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED |
+    WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW |
+    WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY |
+    WorkflowRuleActionScope'Unrecognized !WorkflowRuleActionScope'UnrecognizedValue
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.MessageEnum WorkflowRuleActionScope where
+  maybeToEnum 0 = Prelude.Just WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED
+  maybeToEnum 1 = Prelude.Just WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW
+  maybeToEnum 2 = Prelude.Just WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY
+  maybeToEnum k
+    = Prelude.Just
+        (WorkflowRuleActionScope'Unrecognized
+           (WorkflowRuleActionScope'UnrecognizedValue
+              (Prelude.fromIntegral k)))
+  showEnum WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED
+    = "WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED"
+  showEnum WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW
+    = "WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW"
+  showEnum WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY
+    = "WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY"
+  showEnum
+    (WorkflowRuleActionScope'Unrecognized (WorkflowRuleActionScope'UnrecognizedValue k))
+    = Prelude.show k
+  readEnum k
+    | (Prelude.==) k "WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED"
+    = Prelude.Just WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED
+    | (Prelude.==) k "WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW"
+    = Prelude.Just WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW
+    | (Prelude.==) k "WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY"
+    = Prelude.Just WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY
+    | Prelude.otherwise
+    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
+instance Prelude.Bounded WorkflowRuleActionScope where
+  minBound = WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED
+  maxBound = WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY
+instance Prelude.Enum WorkflowRuleActionScope where
+  toEnum k__
+    = Prelude.maybe
+        (Prelude.error
+           ((Prelude.++)
+              "toEnum: unknown value for enum WorkflowRuleActionScope: "
+              (Prelude.show k__)))
+        Prelude.id (Data.ProtoLens.maybeToEnum k__)
+  fromEnum WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED = 0
+  fromEnum WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW = 1
+  fromEnum WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY = 2
+  fromEnum
+    (WorkflowRuleActionScope'Unrecognized (WorkflowRuleActionScope'UnrecognizedValue k))
+    = Prelude.fromIntegral k
+  succ WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY
+    = Prelude.error
+        "WorkflowRuleActionScope.succ: bad argument WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY. This value would be out of bounds."
+  succ WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED
+    = WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW
+  succ WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW
+    = WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY
+  succ (WorkflowRuleActionScope'Unrecognized _)
+    = Prelude.error
+        "WorkflowRuleActionScope.succ: bad argument: unrecognized value"
+  pred WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED
+    = Prelude.error
+        "WorkflowRuleActionScope.pred: bad argument WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED. This value would be out of bounds."
+  pred WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW
+    = WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED
+  pred WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY
+    = WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW
+  pred (WorkflowRuleActionScope'Unrecognized _)
+    = Prelude.error
+        "WorkflowRuleActionScope.pred: bad argument: unrecognized value"
+  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
+  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
+  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
+  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
+instance Data.ProtoLens.FieldDefault WorkflowRuleActionScope where
+  fieldDefault = WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED
+instance Control.DeepSeq.NFData WorkflowRuleActionScope where
   rnf x__ = Prelude.seq x__ ()

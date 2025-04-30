@@ -27,6 +27,12 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
+currentDetails ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "currentDetails" a) =>
+  Lens.Family2.LensLike' f s a
+currentDetails = Data.ProtoLens.Field.field @"currentDetails"
 definition ::
   forall f s a.
   (Prelude.Functor f,

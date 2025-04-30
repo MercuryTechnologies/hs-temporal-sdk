@@ -155,6 +155,7 @@ tests:
       DurationSpec,
       IntegrationSpec,
       IntegrationSpec.HangingWorkflow,
+      IntegrationSpec.NoOpWorkflow,
       IntegrationSpec.TimeoutsInWorkflows,
       IntegrationSpec.Updates,
       Common,

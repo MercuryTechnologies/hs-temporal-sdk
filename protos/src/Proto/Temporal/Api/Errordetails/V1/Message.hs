@@ -10,8 +10,8 @@ module Proto.Temporal.Api.Errordetails.V1.Message (
         MultiOperationExecutionFailure'OperationStatus(),
         NamespaceAlreadyExistsFailure(), NamespaceInvalidStateFailure(),
         NamespaceNotActiveFailure(), NamespaceNotFoundFailure(),
-        NewerBuildExistsFailure(), NotFoundFailure(),
-        PermissionDeniedFailure(), QueryFailedFailure(),
+        NamespaceUnavailableFailure(), NewerBuildExistsFailure(),
+        NotFoundFailure(), PermissionDeniedFailure(), QueryFailedFailure(),
         ResourceExhaustedFailure(), ServerVersionNotSupportedFailure(),
         SystemWorkflowFailure(), WorkflowExecutionAlreadyStartedFailure(),
         WorkflowNotReadyFailure()
@@ -45,6 +45,7 @@ import qualified Proto.Google.Protobuf.Any
 import qualified Proto.Temporal.Api.Common.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.FailedCause
 import qualified Proto.Temporal.Api.Enums.V1.Namespace
+import qualified Proto.Temporal.Api.Failure.V1.Message
 {- | Fields :
       -}
 data CancellationAlreadyRequestedFailure
@@ -1401,6 +1402,125 @@ instance Control.DeepSeq.NFData NamespaceNotFoundFailure where
                 (_NamespaceNotFoundFailure'namespace x__) ())
 {- | Fields :
      
+         * 'Proto.Temporal.Api.Errordetails.V1.Message_Fields.namespace' @:: Lens' NamespaceUnavailableFailure Data.Text.Text@ -}
+data NamespaceUnavailableFailure
+  = NamespaceUnavailableFailure'_constructor {_NamespaceUnavailableFailure'namespace :: !Data.Text.Text,
+                                              _NamespaceUnavailableFailure'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show NamespaceUnavailableFailure where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField NamespaceUnavailableFailure "namespace" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _NamespaceUnavailableFailure'namespace
+           (\ x__ y__ -> x__ {_NamespaceUnavailableFailure'namespace = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message NamespaceUnavailableFailure where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.errordetails.v1.NamespaceUnavailableFailure"
+  packedMessageDescriptor _
+    = "\n\
+      \\ESCNamespaceUnavailableFailure\DC2\FS\n\
+      \\tnamespace\CAN\SOH \SOH(\tR\tnamespace"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        namespace__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "namespace"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"namespace")) ::
+              Data.ProtoLens.FieldDescriptor NamespaceUnavailableFailure
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, namespace__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _NamespaceUnavailableFailure'_unknownFields
+        (\ x__ y__
+           -> x__ {_NamespaceUnavailableFailure'_unknownFields = y__})
+  defMessage
+    = NamespaceUnavailableFailure'_constructor
+        {_NamespaceUnavailableFailure'namespace = Data.ProtoLens.fieldDefault,
+         _NamespaceUnavailableFailure'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          NamespaceUnavailableFailure
+          -> Data.ProtoLens.Encoding.Bytes.Parser NamespaceUnavailableFailure
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "namespace"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"namespace") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "NamespaceUnavailableFailure"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"namespace") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData NamespaceUnavailableFailure where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_NamespaceUnavailableFailure'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_NamespaceUnavailableFailure'namespace x__) ())
+{- | Fields :
+     
          * 'Proto.Temporal.Api.Errordetails.V1.Message_Fields.defaultBuildId' @:: Lens' NewerBuildExistsFailure Data.Text.Text@ -}
 data NewerBuildExistsFailure
   = NewerBuildExistsFailure'_constructor {_NewerBuildExistsFailure'defaultBuildId :: !Data.Text.Text,
@@ -1805,9 +1925,12 @@ instance Control.DeepSeq.NFData PermissionDeniedFailure where
              (_PermissionDeniedFailure'_unknownFields x__)
              (Control.DeepSeq.deepseq (_PermissionDeniedFailure'reason x__) ())
 {- | Fields :
-      -}
+     
+         * 'Proto.Temporal.Api.Errordetails.V1.Message_Fields.failure' @:: Lens' QueryFailedFailure Proto.Temporal.Api.Failure.V1.Message.Failure@
+         * 'Proto.Temporal.Api.Errordetails.V1.Message_Fields.maybe'failure' @:: Lens' QueryFailedFailure (Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure)@ -}
 data QueryFailedFailure
-  = QueryFailedFailure'_constructor {_QueryFailedFailure'_unknownFields :: !Data.ProtoLens.FieldSet}
+  = QueryFailedFailure'_constructor {_QueryFailedFailure'failure :: !(Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure),
+                                     _QueryFailedFailure'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show QueryFailedFailure where
   showsPrec _ __x __s
@@ -1815,21 +1938,49 @@ instance Prelude.Show QueryFailedFailure where
         '{'
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField QueryFailedFailure "failure" Proto.Temporal.Api.Failure.V1.Message.Failure where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _QueryFailedFailure'failure
+           (\ x__ y__ -> x__ {_QueryFailedFailure'failure = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField QueryFailedFailure "maybe'failure" (Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _QueryFailedFailure'failure
+           (\ x__ y__ -> x__ {_QueryFailedFailure'failure = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message QueryFailedFailure where
   messageName _
     = Data.Text.pack "temporal.api.errordetails.v1.QueryFailedFailure"
   packedMessageDescriptor _
     = "\n\
-      \\DC2QueryFailedFailure"
+      \\DC2QueryFailedFailure\DC2:\n\
+      \\afailure\CAN\SOH \SOH(\v2 .temporal.api.failure.v1.FailureR\afailure"
   packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag = let in Data.Map.fromList []
+  fieldsByTag
+    = let
+        failure__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "failure"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Failure.V1.Message.Failure)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'failure")) ::
+              Data.ProtoLens.FieldDescriptor QueryFailedFailure
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, failure__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _QueryFailedFailure'_unknownFields
         (\ x__ y__ -> x__ {_QueryFailedFailure'_unknownFields = y__})
   defMessage
     = QueryFailedFailure'_constructor
-        {_QueryFailedFailure'_unknownFields = []}
+        {_QueryFailedFailure'failure = Prelude.Nothing,
+         _QueryFailedFailure'_unknownFields = []}
   parseMessage
     = let
         loop ::
@@ -1853,6 +2004,13 @@ instance Data.ProtoLens.Message QueryFailedFailure where
                else
                    do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
                       case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "failure"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"failure") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -1864,13 +2022,29 @@ instance Data.ProtoLens.Message QueryFailedFailure where
           (do loop Data.ProtoLens.defMessage) "QueryFailedFailure"
   buildMessage
     = \ _x
-        -> Data.ProtoLens.Encoding.Wire.buildFieldSet
-             (Lens.Family2.view Data.ProtoLens.unknownFields _x)
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'failure") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
 instance Control.DeepSeq.NFData QueryFailedFailure where
   rnf
     = \ x__
         -> Control.DeepSeq.deepseq
-             (_QueryFailedFailure'_unknownFields x__) ()
+             (_QueryFailedFailure'_unknownFields x__)
+             (Control.DeepSeq.deepseq (_QueryFailedFailure'failure x__) ())
 {- | Fields :
      
          * 'Proto.Temporal.Api.Errordetails.V1.Message_Fields.cause' @:: Lens' ResourceExhaustedFailure Proto.Temporal.Api.Enums.V1.FailedCause.ResourceExhaustedCause@
@@ -2629,7 +2803,7 @@ instance Control.DeepSeq.NFData WorkflowNotReadyFailure where
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \*temporal/api/errordetails/v1/message.proto\DC2\FStemporal.api.errordetails.v1\SUB\EMgoogle/protobuf/any.proto\SUB$temporal/api/common/v1/message.proto\SUB(temporal/api/enums/v1/failed_cause.proto\SUB%temporal/api/enums/v1/namespace.proto\"a\n\
+    \*temporal/api/errordetails/v1/message.proto\DC2\FStemporal.api.errordetails.v1\SUB\EMgoogle/protobuf/any.proto\SUB$temporal/api/common/v1/message.proto\SUB(temporal/api/enums/v1/failed_cause.proto\SUB%temporal/api/enums/v1/namespace.proto\SUB%temporal/api/failure/v1/message.proto\"a\n\
     \\SINotFoundFailure\DC2'\n\
     \\SIcurrent_cluster\CAN\SOH \SOH(\tR\SOcurrentCluster\DC2%\n\
     \\SOactive_cluster\CAN\STX \SOH(\tR\ractiveCluster\"i\n\
@@ -2639,7 +2813,9 @@ packedFileDescriptor
     \\EMNamespaceNotActiveFailure\DC2\FS\n\
     \\tnamespace\CAN\SOH \SOH(\tR\tnamespace\DC2'\n\
     \\SIcurrent_cluster\CAN\STX \SOH(\tR\SOcurrentCluster\DC2%\n\
-    \\SOactive_cluster\CAN\ETX \SOH(\tR\ractiveCluster\"\199\SOH\n\
+    \\SOactive_cluster\CAN\ETX \SOH(\tR\ractiveCluster\";\n\
+    \\ESCNamespaceUnavailableFailure\DC2\FS\n\
+    \\tnamespace\CAN\SOH \SOH(\tR\tnamespace\"\199\SOH\n\
     \\FSNamespaceInvalidStateFailure\DC2\FS\n\
     \\tnamespace\CAN\SOH \SOH(\tR\tnamespace\DC2;\n\
     \\ENQstate\CAN\STX \SOH(\SO2%.temporal.api.enums.v1.NamespaceStateR\ENQstate\DC2L\n\
@@ -2655,8 +2831,9 @@ packedFileDescriptor
     \ ServerVersionNotSupportedFailure\DC2%\n\
     \\SOserver_version\CAN\SOH \SOH(\tR\rserverVersion\DC2G\n\
     \ client_supported_server_versions\CAN\STX \SOH(\tR\GSclientSupportedServerVersions\"%\n\
-    \#CancellationAlreadyRequestedFailure\"\DC4\n\
-    \\DC2QueryFailedFailure\"1\n\
+    \#CancellationAlreadyRequestedFailure\"P\n\
+    \\DC2QueryFailedFailure\DC2:\n\
+    \\afailure\CAN\SOH \SOH(\v2 .temporal.api.failure.v1.FailureR\afailure\"1\n\
     \\ETBPermissionDeniedFailure\DC2\SYN\n\
     \\ACKreason\CAN\SOH \SOH(\tR\ACKreason\"\164\SOH\n\
     \\CANResourceExhaustedFailure\DC2C\n\
@@ -2674,8 +2851,8 @@ packedFileDescriptor
     \\EOTcode\CAN\SOH \SOH(\ENQR\EOTcode\DC2\CAN\n\
     \\amessage\CAN\STX \SOH(\tR\amessage\DC2.\n\
     \\adetails\CAN\ETX \ETX(\v2\DC4.google.protobuf.AnyR\adetailsB\167\SOH\n\
-    \\USio.temporal.api.errordetails.v1B\fMessageProtoP\SOHZ/go.temporal.io/api/errordetails/v1;errordetails\170\STX\RSTemporalio.Api.ErrorDetails.V1\234\STX!Temporalio::Api::ErrorDetails::V1J\181$\n\
-    \\a\DC2\ENQ\SYN\NUL\132\SOH\SOH\n\
+    \\USio.temporal.api.errordetails.v1B\fMessageProtoP\SOHZ/go.temporal.io/api/errordetails/v1;errordetails\170\STX\RSTemporalio.Api.ErrorDetails.V1\234\STX!Temporalio::Api::ErrorDetails::V1J\197)\n\
+    \\a\DC2\ENQ\SYN\NUL\144\SOH\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -2736,354 +2913,383 @@ packedFileDescriptor
     \\STX\ETX\STX\DC2\ETX'\NUL2\n\
     \\t\n\
     \\STX\ETX\ETX\DC2\ETX(\NUL/\n\
+    \\t\n\
+    \\STX\ETX\EOT\DC2\ETX)\NUL/\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT*\NUL-\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT+\NUL.\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX*\b\ETB\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX+\b\ETB\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX+\EOT\US\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX,\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX+\EOT\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX,\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX+\v\SUB\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX,\v\SUB\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX+\GS\RS\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX,\GS\RS\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX,\EOT\RS\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX-\EOT\RS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX,\EOT\n\
+    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX-\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX,\v\EM\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX-\v\EM\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX,\FS\GS\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX-\FS\GS\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT/\NUL2\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT0\NUL3\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX/\b.\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX0\b.\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX0\EOT \n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX1\EOT \n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX0\EOT\n\
+    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX1\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX0\v\ESC\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX1\v\ESC\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX0\RS\US\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX1\RS\US\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX1\EOT\SYN\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX2\EOT\SYN\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ENQ\DC2\ETX1\EOT\n\
+    \\ENQ\EOT\SOH\STX\SOH\ENQ\DC2\ETX2\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX1\v\DC1\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX2\v\DC1\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX1\DC4\NAK\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX2\DC4\NAK\n\
     \\n\
     \\n\
-    \\STX\EOT\STX\DC2\EOT4\NUL8\SOH\n\
+    \\STX\EOT\STX\DC2\EOT5\NUL9\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX4\b!\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX5\b!\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX5\EOT\EM\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX6\EOT\EM\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX5\EOT\n\
+    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX6\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX5\v\DC4\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX6\v\DC4\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX5\ETB\CAN\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX6\ETB\CAN\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX6\EOT\US\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX7\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX6\EOT\n\
+    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX7\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX6\v\SUB\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX7\v\SUB\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX6\GS\RS\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX7\GS\RS\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\STX\DC2\ETX7\EOT\RS\n\
+    \\EOT\EOT\STX\STX\STX\DC2\ETX8\EOT\RS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETX7\EOT\n\
+    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETX8\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX7\v\EM\n\
+    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX8\v\EM\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX7\FS\GS\n\
+    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX8\FS\GS\n\
+    \\158\STX\n\
+    \\STX\EOT\ETX\DC2\EOT>\NUL@\SOH\SUB\145\STX NamespaceUnavailableFailure is returned by the service when a request addresses a namespace that is unavailable. For\n\
+    \ example, when a namespace is in the process of failing over between clusters.\n\
+    \ This is a transient error that should be automatically retried by clients.\n\
     \\n\
     \\n\
-    \\STX\EOT\ETX\DC2\EOT:\NULA\SOH\n\
     \\n\
-    \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX:\b$\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX>\b#\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETX;\EOT\EM\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETX?\EOT\EM\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX;\EOT\n\
+    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX?\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX;\v\DC4\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX?\v\DC4\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX;\ETB\CAN\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX?\ETB\CAN\n\
+    \\n\
+    \\n\
+    \\STX\EOT\EOT\DC2\EOTB\NULI\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETXB\b$\n\
+    \\v\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETXC\EOT\EM\n\
+    \\f\n\
+    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETXC\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXC\v\DC4\n\
+    \\f\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXC\ETB\CAN\n\
     \8\n\
-    \\EOT\EOT\ETX\STX\SOH\DC2\ETX=\EOT3\SUB+ Current state of the requested namespace.\n\
+    \\EOT\EOT\EOT\STX\SOH\DC2\ETXE\EOT3\SUB+ Current state of the requested namespace.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ACK\DC2\ETX=\EOT(\n\
+    \\ENQ\EOT\EOT\STX\SOH\ACK\DC2\ETXE\EOT(\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETX=).\n\
+    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETXE).\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETX=12\n\
+    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETXE12\n\
     \\170\SOH\n\
-    \\EOT\EOT\ETX\STX\STX\DC2\ETX@\EOTE\SUB\156\SOH Allowed namespace states for requested operation.\n\
+    \\EOT\EOT\EOT\STX\STX\DC2\ETXH\EOTE\SUB\156\SOH Allowed namespace states for requested operation.\n\
     \ For example NAMESPACE_STATE_DELETED is forbidden for most operations but allowed for DescribeNamespace.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\EOT\DC2\ETX@\EOT\f\n\
+    \\ENQ\EOT\EOT\STX\STX\EOT\DC2\ETXH\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\ACK\DC2\ETX@\r1\n\
+    \\ENQ\EOT\EOT\STX\STX\ACK\DC2\ETXH\r1\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\SOH\DC2\ETX@2@\n\
+    \\ENQ\EOT\EOT\STX\STX\SOH\DC2\ETXH2@\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\ETX\DC2\ETX@CD\n\
+    \\ENQ\EOT\EOT\STX\STX\ETX\DC2\ETXHCD\n\
     \\n\
     \\n\
-    \\STX\EOT\EOT\DC2\EOTC\NULE\SOH\n\
+    \\STX\EOT\ENQ\DC2\EOTK\NULM\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETXC\b \n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETXK\b \n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETXD\EOT\EM\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXL\EOT\EM\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETXD\EOT\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETXL\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXD\v\DC4\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXL\v\DC4\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXD\ETB\CAN\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXL\ETB\CAN\n\
     \\n\
     \\n\
-    \\STX\EOT\ENQ\DC2\EOTG\NULH\SOH\n\
+    \\STX\EOT\ACK\DC2\EOTO\NULP\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETXG\b%\n\
+    \\ETX\EOT\ACK\SOH\DC2\ETXO\b%\n\
     \\n\
     \\n\
-    \\STX\EOT\ACK\DC2\EOTJ\NULN\SOH\n\
+    \\STX\EOT\a\DC2\EOTR\NULV\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETXJ\b(\n\
+    \\ETX\EOT\a\SOH\DC2\ETXR\b(\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\ETXK\EOT\RS\n\
+    \\EOT\EOT\a\STX\NUL\DC2\ETXS\EOT\RS\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETXK\EOT\n\
+    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETXS\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXK\v\EM\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETXS\v\EM\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXK\FS\GS\n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETXS\FS\GS\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\SOH\DC2\ETXL\EOT\ESC\n\
+    \\EOT\EOT\a\STX\SOH\DC2\ETXT\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ENQ\DC2\ETXL\EOT\n\
+    \\ENQ\EOT\a\STX\SOH\ENQ\DC2\ETXT\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXL\v\SYN\n\
+    \\ENQ\EOT\a\STX\SOH\SOH\DC2\ETXT\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXL\EM\SUB\n\
+    \\ENQ\EOT\a\STX\SOH\ETX\DC2\ETXT\EM\SUB\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\STX\DC2\ETXM\EOT\"\n\
+    \\EOT\EOT\a\STX\STX\DC2\ETXU\EOT\"\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\ENQ\DC2\ETXM\EOT\n\
+    \\ENQ\EOT\a\STX\STX\ENQ\DC2\ETXU\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\ETXM\v\GS\n\
+    \\ENQ\EOT\a\STX\STX\SOH\DC2\ETXU\v\GS\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\ETXM !\n\
+    \\ENQ\EOT\a\STX\STX\ETX\DC2\ETXU !\n\
     \\n\
     \\n\
-    \\STX\EOT\a\DC2\EOTP\NULS\SOH\n\
+    \\STX\EOT\b\DC2\EOTX\NUL[\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\a\SOH\DC2\ETXP\b(\n\
+    \\ETX\EOT\b\SOH\DC2\ETXX\b(\n\
     \\v\n\
-    \\EOT\EOT\a\STX\NUL\DC2\ETXQ\EOT\RS\n\
+    \\EOT\EOT\b\STX\NUL\DC2\ETXY\EOT\RS\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETXQ\EOT\n\
+    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\ETXY\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETXQ\v\EM\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETXY\v\EM\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETXQ\FS\GS\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETXY\FS\GS\n\
     \\v\n\
-    \\EOT\EOT\a\STX\SOH\DC2\ETXR\EOT0\n\
+    \\EOT\EOT\b\STX\SOH\DC2\ETXZ\EOT0\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\ENQ\DC2\ETXR\EOT\n\
+    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\ETXZ\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\SOH\DC2\ETXR\v+\n\
+    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETXZ\v+\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\ETX\DC2\ETXR./\n\
+    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETXZ./\n\
     \\n\
     \\n\
-    \\STX\EOT\b\DC2\EOTU\NULV\SOH\n\
+    \\STX\EOT\t\DC2\EOT]\NUL^\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\b\SOH\DC2\ETXU\b+\n\
-    \\n\
-    \\n\
-    \\STX\EOT\t\DC2\EOTX\NULY\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\t\SOH\DC2\ETXX\b\SUB\n\
+    \\ETX\EOT\t\SOH\DC2\ETX]\b+\n\
     \\n\
     \\n\
     \\STX\EOT\n\
-    \\DC2\EOT[\NUL]\SOH\n\
+    \\DC2\EOT`\NULe\SOH\n\
     \\n\
     \\n\
     \\ETX\EOT\n\
-    \\SOH\DC2\ETX[\b\US\n\
-    \\v\n\
+    \\SOH\DC2\ETX`\b\SUB\n\
+    \\235\SOH\n\
     \\EOT\EOT\n\
-    \\STX\NUL\DC2\ETX\\\EOT\SYN\n\
-    \\f\n\
-    \\ENQ\EOT\n\
-    \\STX\NUL\ENQ\DC2\ETX\\\EOT\n\
+    \\STX\NUL\DC2\ETXd\EOT0\SUB\221\SOH The full reason for this query failure. May not be available if the response is generated by an old\n\
+    \ SDK. This field can be encoded by the SDK's failure converter to support E2E encryption of messages and stack\n\
+    \ traces.\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\SOH\DC2\ETX\\\v\DC1\n\
+    \\STX\NUL\ACK\DC2\ETXd\EOT#\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ETX\DC2\ETX\\\DC4\NAK\n\
+    \\STX\NUL\SOH\DC2\ETXd$+\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\NUL\ETX\DC2\ETXd./\n\
     \\n\
     \\n\
-    \\STX\EOT\v\DC2\EOT_\NULb\SOH\n\
+    \\STX\EOT\v\DC2\EOTg\NULi\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\v\SOH\DC2\ETX_\b \n\
+    \\ETX\EOT\v\SOH\DC2\ETXg\b\US\n\
     \\v\n\
-    \\EOT\EOT\v\STX\NUL\DC2\ETX`\EOT;\n\
+    \\EOT\EOT\v\STX\NUL\DC2\ETXh\EOT\SYN\n\
     \\f\n\
-    \\ENQ\EOT\v\STX\NUL\ACK\DC2\ETX`\EOT0\n\
+    \\ENQ\EOT\v\STX\NUL\ENQ\DC2\ETXh\EOT\n\
+    \\n\
     \\f\n\
-    \\ENQ\EOT\v\STX\NUL\SOH\DC2\ETX`16\n\
+    \\ENQ\EOT\v\STX\NUL\SOH\DC2\ETXh\v\DC1\n\
     \\f\n\
-    \\ENQ\EOT\v\STX\NUL\ETX\DC2\ETX`9:\n\
+    \\ENQ\EOT\v\STX\NUL\ETX\DC2\ETXh\DC4\NAK\n\
+    \\n\
+    \\n\
+    \\STX\EOT\f\DC2\EOTk\NULn\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\f\SOH\DC2\ETXk\b \n\
     \\v\n\
-    \\EOT\EOT\v\STX\SOH\DC2\ETXa\EOT;\n\
+    \\EOT\EOT\f\STX\NUL\DC2\ETXl\EOT;\n\
     \\f\n\
-    \\ENQ\EOT\v\STX\SOH\ACK\DC2\ETXa\EOT0\n\
+    \\ENQ\EOT\f\STX\NUL\ACK\DC2\ETXl\EOT0\n\
     \\f\n\
-    \\ENQ\EOT\v\STX\SOH\SOH\DC2\ETXa16\n\
+    \\ENQ\EOT\f\STX\NUL\SOH\DC2\ETXl16\n\
     \\f\n\
-    \\ENQ\EOT\v\STX\SOH\ETX\DC2\ETXa9:\n\
+    \\ENQ\EOT\f\STX\NUL\ETX\DC2\ETXl9:\n\
+    \\v\n\
+    \\EOT\EOT\f\STX\SOH\DC2\ETXm\EOT;\n\
+    \\f\n\
+    \\ENQ\EOT\f\STX\SOH\ACK\DC2\ETXm\EOT0\n\
+    \\f\n\
+    \\ENQ\EOT\f\STX\SOH\SOH\DC2\ETXm16\n\
+    \\f\n\
+    \\ENQ\EOT\f\STX\SOH\ETX\DC2\ETXm9:\n\
     \\n\
     \\n\
-    \\STX\EOT\f\DC2\EOTd\NULj\SOH\n\
+    \\STX\EOT\r\DC2\EOTp\NULv\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\f\SOH\DC2\ETXd\b\GS\n\
+    \\ETX\EOT\r\SOH\DC2\ETXp\b\GS\n\
     \\202\SOH\n\
-    \\EOT\EOT\f\STX\NUL\DC2\ETXg\EOTD\SUB\188\SOH WorkflowId and RunId of the Temporal system workflow performing the underlying operation.\n\
+    \\EOT\EOT\r\STX\NUL\DC2\ETXs\EOTD\SUB\188\SOH WorkflowId and RunId of the Temporal system workflow performing the underlying operation.\n\
     \ Looking up the info of the system workflow run may help identify the issue causing the failure.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\NUL\ACK\DC2\ETXg\EOT,\n\
+    \\ENQ\EOT\r\STX\NUL\ACK\DC2\ETXs\EOT,\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\NUL\SOH\DC2\ETXg-?\n\
+    \\ENQ\EOT\r\STX\NUL\SOH\DC2\ETXs-?\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\NUL\ETX\DC2\ETXgBC\n\
+    \\ENQ\EOT\r\STX\NUL\ETX\DC2\ETXsBC\n\
     \d\n\
-    \\EOT\EOT\f\STX\SOH\DC2\ETXi\EOT\RS\SUBW Serialized error returned by the system workflow performing the underlying operation.\n\
+    \\EOT\EOT\r\STX\SOH\DC2\ETXu\EOT\RS\SUBW Serialized error returned by the system workflow performing the underlying operation.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\SOH\ENQ\DC2\ETXi\EOT\n\
+    \\ENQ\EOT\r\STX\SOH\ENQ\DC2\ETXu\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\SOH\SOH\DC2\ETXi\v\EM\n\
+    \\ENQ\EOT\r\STX\SOH\SOH\DC2\ETXu\v\EM\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\SOH\ETX\DC2\ETXi\FS\GS\n\
+    \\ENQ\EOT\r\STX\SOH\ETX\DC2\ETXu\FS\GS\n\
     \\n\
     \\n\
-    \\STX\EOT\r\DC2\EOTl\NULm\SOH\n\
+    \\STX\EOT\SO\DC2\EOTx\NULy\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\r\SOH\DC2\ETXl\b\US\n\
+    \\ETX\EOT\SO\SOH\DC2\ETXx\b\US\n\
     \\n\
     \\n\
-    \\STX\EOT\SO\DC2\EOTo\NULr\SOH\n\
+    \\STX\EOT\SI\DC2\EOT{\NUL~\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SO\SOH\DC2\ETXo\b\US\n\
+    \\ETX\EOT\SI\SOH\DC2\ETX{\b\US\n\
     \O\n\
-    \\EOT\EOT\SO\STX\NUL\DC2\ETXq\EOT \SUBB The current default compatible build ID which will receive tasks\n\
+    \\EOT\EOT\SI\STX\NUL\DC2\ETX}\EOT \SUBB The current default compatible build ID which will receive tasks\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\NUL\ENQ\DC2\ETXq\EOT\n\
+    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\ETX}\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\ETXq\v\ESC\n\
+    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\ETX}\v\ESC\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\ETXq\RS\US\n\
+    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\ETX}\RS\US\n\
+    \\f\n\
+    \\STX\EOT\DLE\DC2\ACK\128\SOH\NUL\144\SOH\SOH\n\
     \\v\n\
-    \\STX\EOT\SI\DC2\ENQt\NUL\132\SOH\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\SI\SOH\DC2\ETXt\b&\n\
-    \\167\STX\n\
-    \\EOT\EOT\SI\STX\NUL\DC2\ETXx\EOT*\SUB\153\STX One status for each requested operation from the failed MultiOperation. The failed\n\
+    \\ETX\EOT\DLE\SOH\DC2\EOT\128\SOH\b&\n\
+    \\168\STX\n\
+    \\EOT\EOT\DLE\STX\NUL\DC2\EOT\132\SOH\EOT*\SUB\153\STX One status for each requested operation from the failed MultiOperation. The failed\n\
     \ operation(s) have the same error details as if it was executed separately. All other operations have the\n\
     \ status code `Aborted` and `MultiOperationExecutionAborted` is added to the details field.\n\
     \\n\
-    \\f\n\
-    \\ENQ\EOT\SI\STX\NUL\EOT\DC2\ETXx\EOT\f\n\
-    \\f\n\
-    \\ENQ\EOT\SI\STX\NUL\ACK\DC2\ETXx\r\FS\n\
-    \\f\n\
-    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\ETXx\GS%\n\
-    \\f\n\
-    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\ETXx()\n\
-    \\154\STX\n\
-    \\EOT\EOT\SI\ETX\NUL\DC2\ENQ\DEL\EOT\131\SOH\ENQ\SUB\138\STX NOTE: `OperationStatus` is modelled after\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\NUL\EOT\DC2\EOT\132\SOH\EOT\f\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\NUL\ACK\DC2\EOT\132\SOH\r\FS\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\NUL\SOH\DC2\EOT\132\SOH\GS%\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\NUL\ETX\DC2\EOT\132\SOH()\n\
+    \\155\STX\n\
+    \\EOT\EOT\DLE\ETX\NUL\DC2\ACK\139\SOH\EOT\143\SOH\ENQ\SUB\138\STX NOTE: `OperationStatus` is modelled after\n\
     \ [`google.rpc.Status`](https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto).\n\
     \\n\
     \ (-- api-linter: core::0146::any=disabled\n\
     \     aip.dev/not-precedent: details are meant to hold arbitrary payloads. --)\n\
     \\n\
-    \\f\n\
-    \\ENQ\EOT\SI\ETX\NUL\SOH\DC2\ETX\DEL\f\ESC\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\ETX\NUL\SOH\DC2\EOT\139\SOH\f\ESC\n\
     \\SO\n\
-    \\ACK\EOT\SI\ETX\NUL\STX\NUL\DC2\EOT\128\SOH\b\ETB\n\
+    \\ACK\EOT\DLE\ETX\NUL\STX\NUL\DC2\EOT\140\SOH\b\ETB\n\
     \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\NUL\ENQ\DC2\EOT\128\SOH\b\r\n\
+    \\a\EOT\DLE\ETX\NUL\STX\NUL\ENQ\DC2\EOT\140\SOH\b\r\n\
     \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\NUL\SOH\DC2\EOT\128\SOH\SO\DC2\n\
+    \\a\EOT\DLE\ETX\NUL\STX\NUL\SOH\DC2\EOT\140\SOH\SO\DC2\n\
     \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\NUL\ETX\DC2\EOT\128\SOH\NAK\SYN\n\
+    \\a\EOT\DLE\ETX\NUL\STX\NUL\ETX\DC2\EOT\140\SOH\NAK\SYN\n\
     \\SO\n\
-    \\ACK\EOT\SI\ETX\NUL\STX\SOH\DC2\EOT\129\SOH\b\ESC\n\
+    \\ACK\EOT\DLE\ETX\NUL\STX\SOH\DC2\EOT\141\SOH\b\ESC\n\
     \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\SOH\ENQ\DC2\EOT\129\SOH\b\SO\n\
+    \\a\EOT\DLE\ETX\NUL\STX\SOH\ENQ\DC2\EOT\141\SOH\b\SO\n\
     \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\SOH\SOH\DC2\EOT\129\SOH\SI\SYN\n\
+    \\a\EOT\DLE\ETX\NUL\STX\SOH\SOH\DC2\EOT\141\SOH\SI\SYN\n\
     \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\SOH\ETX\DC2\EOT\129\SOH\EM\SUB\n\
+    \\a\EOT\DLE\ETX\NUL\STX\SOH\ETX\DC2\EOT\141\SOH\EM\SUB\n\
     \\SO\n\
-    \\ACK\EOT\SI\ETX\NUL\STX\STX\DC2\EOT\130\SOH\b1\n\
+    \\ACK\EOT\DLE\ETX\NUL\STX\STX\DC2\EOT\142\SOH\b1\n\
     \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\STX\EOT\DC2\EOT\130\SOH\b\DLE\n\
+    \\a\EOT\DLE\ETX\NUL\STX\STX\EOT\DC2\EOT\142\SOH\b\DLE\n\
     \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\STX\ACK\DC2\EOT\130\SOH\DC1$\n\
+    \\a\EOT\DLE\ETX\NUL\STX\STX\ACK\DC2\EOT\142\SOH\DC1$\n\
     \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\STX\SOH\DC2\EOT\130\SOH%,\n\
+    \\a\EOT\DLE\ETX\NUL\STX\STX\SOH\DC2\EOT\142\SOH%,\n\
     \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\STX\ETX\DC2\EOT\130\SOH/0b\ACKproto3"
+    \\a\EOT\DLE\ETX\NUL\STX\STX\ETX\DC2\EOT\142\SOH/0b\ACKproto3"

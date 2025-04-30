@@ -32,6 +32,7 @@ import qualified Proto.Temporal.Api.Common.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.CommandType
 import qualified Proto.Temporal.Api.Enums.V1.Workflow
 import qualified Proto.Temporal.Api.Failure.V1.Message
+import qualified Proto.Temporal.Api.Sdk.V1.UserMetadata
 import qualified Proto.Temporal.Api.Taskqueue.V1.Message
 activityId ::
   forall f s a.
@@ -299,6 +300,12 @@ maybe'modifyWorkflowPropertiesCommandAttributes ::
 maybe'modifyWorkflowPropertiesCommandAttributes
   = Data.ProtoLens.Field.field
       @"maybe'modifyWorkflowPropertiesCommandAttributes"
+maybe'priority ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'priority" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'priority = Data.ProtoLens.Field.field @"maybe'priority"
 maybe'protocolMessageCommandAttributes ::
   forall f s a.
   (Prelude.Functor f,
@@ -445,6 +452,13 @@ maybe'upsertedMemo ::
   Lens.Family2.LensLike' f s a
 maybe'upsertedMemo
   = Data.ProtoLens.Field.field @"maybe'upsertedMemo"
+maybe'userMetadata ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'userMetadata" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'userMetadata
+  = Data.ProtoLens.Field.field @"maybe'userMetadata"
 maybe'value ::
   forall f s a.
   (Prelude.Functor f,
@@ -522,6 +536,12 @@ parentClosePolicy ::
    Data.ProtoLens.Field.HasField s "parentClosePolicy" a) =>
   Lens.Family2.LensLike' f s a
 parentClosePolicy = Data.ProtoLens.Field.field @"parentClosePolicy"
+priority ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "priority" a) =>
+  Lens.Family2.LensLike' f s a
+priority = Data.ProtoLens.Field.field @"priority"
 protocolMessageCommandAttributes ::
   forall f s a.
   (Prelude.Functor f,
@@ -710,6 +730,12 @@ useWorkflowBuildId ::
   Lens.Family2.LensLike' f s a
 useWorkflowBuildId
   = Data.ProtoLens.Field.field @"useWorkflowBuildId"
+userMetadata ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "userMetadata" a) =>
+  Lens.Family2.LensLike' f s a
+userMetadata = Data.ProtoLens.Field.field @"userMetadata"
 value ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "value" a) =>

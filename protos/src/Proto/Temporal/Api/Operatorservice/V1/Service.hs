@@ -53,17 +53,17 @@ instance Data.ProtoLens.Service.Types.Service OperatorService where
     = "\n\
       \\SIOperatorService\DC2\146\SOH\n\
       \\DC3AddSearchAttributes\DC2;.temporal.api.operatorservice.v1.AddSearchAttributesRequest\SUB<.temporal.api.operatorservice.v1.AddSearchAttributesResponse\"\NUL\DC2\155\SOH\n\
-      \\SYNRemoveSearchAttributes\DC2>.temporal.api.operatorservice.v1.RemoveSearchAttributesRequest\SUB?.temporal.api.operatorservice.v1.RemoveSearchAttributesResponse\"\NUL\DC2\205\SOH\n\
-      \\DC4ListSearchAttributes\DC2<.temporal.api.operatorservice.v1.ListSearchAttributesRequest\SUB=.temporal.api.operatorservice.v1.ListSearchAttributesResponse\"8\130\211\228\147\STX2\DC20/api/v1/namespaces/{namespace}/search-attributes\DC2\134\SOH\n\
+      \\SYNRemoveSearchAttributes\DC2>.temporal.api.operatorservice.v1.RemoveSearchAttributesRequest\SUB?.temporal.api.operatorservice.v1.RemoveSearchAttributesResponse\"\NUL\DC2\130\STX\n\
+      \\DC4ListSearchAttributes\DC2<.temporal.api.operatorservice.v1.ListSearchAttributesRequest\SUB=.temporal.api.operatorservice.v1.ListSearchAttributesResponse\"m\130\211\228\147\STXg\DC21/cluster/namespaces/{namespace}/search-attributesZ2\DC20/api/v1/namespaces/{namespace}/search-attributes\DC2\134\SOH\n\
       \\SIDeleteNamespace\DC27.temporal.api.operatorservice.v1.DeleteNamespaceRequest\SUB8.temporal.api.operatorservice.v1.DeleteNamespaceResponse\"\NUL\DC2\161\SOH\n\
       \\CANAddOrUpdateRemoteCluster\DC2@.temporal.api.operatorservice.v1.AddOrUpdateRemoteClusterRequest\SUBA.temporal.api.operatorservice.v1.AddOrUpdateRemoteClusterResponse\"\NUL\DC2\146\SOH\n\
       \\DC3RemoveRemoteCluster\DC2;.temporal.api.operatorservice.v1.RemoveRemoteClusterRequest\SUB<.temporal.api.operatorservice.v1.RemoveRemoteClusterResponse\"\NUL\DC2}\n\
-      \\fListClusters\DC24.temporal.api.operatorservice.v1.ListClustersRequest\SUB5.temporal.api.operatorservice.v1.ListClustersResponse\"\NUL\DC2\173\SOH\n\
-      \\DLEGetNexusEndpoint\DC28.temporal.api.operatorservice.v1.GetNexusEndpointRequest\SUB9.temporal.api.operatorservice.v1.GetNexusEndpointResponse\"$\130\211\228\147\STX\RS\DC2\FS/api/v1/nexus/endpoints/{id}\DC2\180\SOH\n\
-      \\DC3CreateNexusEndpoint\DC2;.temporal.api.operatorservice.v1.CreateNexusEndpointRequest\SUB<.temporal.api.operatorservice.v1.CreateNexusEndpointResponse\"\"\130\211\228\147\STX\FS\"\ETB/api/v1/nexus/endpoints:\SOH*\DC2\192\SOH\n\
-      \\DC3UpdateNexusEndpoint\DC2;.temporal.api.operatorservice.v1.UpdateNexusEndpointRequest\SUB<.temporal.api.operatorservice.v1.UpdateNexusEndpointResponse\".\130\211\228\147\STX(\"#/api/v1/nexus/endpoints/{id}/update:\SOH*\DC2\182\SOH\n\
-      \\DC3DeleteNexusEndpoint\DC2;.temporal.api.operatorservice.v1.DeleteNexusEndpointRequest\SUB<.temporal.api.operatorservice.v1.DeleteNexusEndpointResponse\"$\130\211\228\147\STX\RS*\FS/api/v1/nexus/endpoints/{id}\DC2\174\SOH\n\
-      \\DC2ListNexusEndpoints\DC2:.temporal.api.operatorservice.v1.ListNexusEndpointsRequest\SUB;.temporal.api.operatorservice.v1.ListNexusEndpointsResponse\"\US\130\211\228\147\STX\EM\DC2\ETB/api/v1/nexus/endpoints"
+      \\fListClusters\DC24.temporal.api.operatorservice.v1.ListClustersRequest\SUB5.temporal.api.operatorservice.v1.ListClustersResponse\"\NUL\DC2\206\SOH\n\
+      \\DLEGetNexusEndpoint\DC28.temporal.api.operatorservice.v1.GetNexusEndpointRequest\SUB9.temporal.api.operatorservice.v1.GetNexusEndpointResponse\"E\130\211\228\147\STX?\DC2\GS/cluster/nexus/endpoints/{id}Z\RS\DC2\FS/api/v1/nexus/endpoints/{id}\DC2\211\SOH\n\
+      \\DC3CreateNexusEndpoint\DC2;.temporal.api.operatorservice.v1.CreateNexusEndpointRequest\SUB<.temporal.api.operatorservice.v1.CreateNexusEndpointResponse\"A\130\211\228\147\STX;\"\CAN/cluster/nexus/endpoints:\SOH*Z\FS\"\ETB/api/v1/nexus/endpoints:\SOH*\DC2\235\SOH\n\
+      \\DC3UpdateNexusEndpoint\DC2;.temporal.api.operatorservice.v1.UpdateNexusEndpointRequest\SUB<.temporal.api.operatorservice.v1.UpdateNexusEndpointResponse\"Y\130\211\228\147\STXS\"$/cluster/nexus/endpoints/{id}/update:\SOH*Z(\"#/api/v1/nexus/endpoints/{id}/update:\SOH*\DC2\215\SOH\n\
+      \\DC3DeleteNexusEndpoint\DC2;.temporal.api.operatorservice.v1.DeleteNexusEndpointRequest\SUB<.temporal.api.operatorservice.v1.DeleteNexusEndpointResponse\"E\130\211\228\147\STX?*\GS/cluster/nexus/endpoints/{id}Z\RS*\FS/api/v1/nexus/endpoints/{id}\DC2\202\SOH\n\
+      \\DC2ListNexusEndpoints\DC2:.temporal.api.operatorservice.v1.ListNexusEndpointsRequest\SUB;.temporal.api.operatorservice.v1.ListNexusEndpointsResponse\";\130\211\228\147\STX5\DC2\CAN/cluster/nexus/endpointsZ\EM\DC2\ETB/api/v1/nexus/endpoints"
 instance Data.ProtoLens.Service.Types.HasMethodImpl OperatorService "addSearchAttributes" where
   type MethodName OperatorService "addSearchAttributes" = "AddSearchAttributes"
   type MethodInput OperatorService "addSearchAttributes" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.AddSearchAttributesRequest

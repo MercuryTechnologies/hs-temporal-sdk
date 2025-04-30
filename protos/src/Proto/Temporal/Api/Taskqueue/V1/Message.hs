@@ -7,12 +7,13 @@ module Proto.Temporal.Api.Taskqueue.V1.Message (
         BuildIdAssignmentRule(), BuildIdAssignmentRule'Ramp(..),
         _BuildIdAssignmentRule'PercentageRamp, BuildIdReachability(),
         CompatibleBuildIdRedirectRule(), CompatibleVersionSet(),
-        PollerInfo(), RampByPercentage(), StickyExecutionAttributes(),
-        TaskIdBlock(), TaskQueue(), TaskQueueMetadata(),
-        TaskQueuePartitionMetadata(), TaskQueueReachability(),
-        TaskQueueStatus(), TaskQueueTypeInfo(), TaskQueueVersionInfo(),
+        PollerInfo(), PollerScalingDecision(), RampByPercentage(),
+        StickyExecutionAttributes(), TaskIdBlock(), TaskQueue(),
+        TaskQueueMetadata(), TaskQueuePartitionMetadata(),
+        TaskQueueReachability(), TaskQueueStats(), TaskQueueStatus(),
+        TaskQueueTypeInfo(), TaskQueueVersionInfo(),
         TaskQueueVersionInfo'TypesInfoEntry(), TaskQueueVersionSelection(),
-        TimestampedBuildIdAssignmentRule(),
+        TaskQueueVersioningInfo(), TimestampedBuildIdAssignmentRule(),
         TimestampedCompatibleBuildIdRedirectRule()
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
@@ -44,6 +45,7 @@ import qualified Proto.Google.Protobuf.Duration
 import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Google.Protobuf.Wrappers
 import qualified Proto.Temporal.Api.Common.V1.Message
+import qualified Proto.Temporal.Api.Deployment.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.TaskQueue
 {- | Fields :
      
@@ -760,12 +762,15 @@ instance Control.DeepSeq.NFData CompatibleVersionSet where
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.identity' @:: Lens' PollerInfo Data.Text.Text@
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.ratePerSecond' @:: Lens' PollerInfo Prelude.Double@
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.workerVersionCapabilities' @:: Lens' PollerInfo Proto.Temporal.Api.Common.V1.Message.WorkerVersionCapabilities@
-         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'workerVersionCapabilities' @:: Lens' PollerInfo (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkerVersionCapabilities)@ -}
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'workerVersionCapabilities' @:: Lens' PollerInfo (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkerVersionCapabilities)@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.deploymentOptions' @:: Lens' PollerInfo Proto.Temporal.Api.Deployment.V1.Message.WorkerDeploymentOptions@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'deploymentOptions' @:: Lens' PollerInfo (Prelude.Maybe Proto.Temporal.Api.Deployment.V1.Message.WorkerDeploymentOptions)@ -}
 data PollerInfo
   = PollerInfo'_constructor {_PollerInfo'lastAccessTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
                              _PollerInfo'identity :: !Data.Text.Text,
                              _PollerInfo'ratePerSecond :: !Prelude.Double,
                              _PollerInfo'workerVersionCapabilities :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkerVersionCapabilities),
+                             _PollerInfo'deploymentOptions :: !(Prelude.Maybe Proto.Temporal.Api.Deployment.V1.Message.WorkerDeploymentOptions),
                              _PollerInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show PollerInfo where
@@ -816,6 +821,20 @@ instance Data.ProtoLens.Field.HasField PollerInfo "maybe'workerVersionCapabiliti
            _PollerInfo'workerVersionCapabilities
            (\ x__ y__ -> x__ {_PollerInfo'workerVersionCapabilities = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField PollerInfo "deploymentOptions" Proto.Temporal.Api.Deployment.V1.Message.WorkerDeploymentOptions where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PollerInfo'deploymentOptions
+           (\ x__ y__ -> x__ {_PollerInfo'deploymentOptions = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField PollerInfo "maybe'deploymentOptions" (Prelude.Maybe Proto.Temporal.Api.Deployment.V1.Message.WorkerDeploymentOptions) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PollerInfo'deploymentOptions
+           (\ x__ y__ -> x__ {_PollerInfo'deploymentOptions = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message PollerInfo where
   messageName _
     = Data.Text.pack "temporal.api.taskqueue.v1.PollerInfo"
@@ -825,8 +844,9 @@ instance Data.ProtoLens.Message PollerInfo where
       \PollerInfo\DC2D\n\
       \\DLElast_access_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\SOlastAccessTime\DC2\SUB\n\
       \\bidentity\CAN\STX \SOH(\tR\bidentity\DC2&\n\
-      \\SIrate_per_second\CAN\ETX \SOH(\SOHR\rratePerSecond\DC2q\n\
-      \\ESCworker_version_capabilities\CAN\EOT \SOH(\v21.temporal.api.common.v1.WorkerVersionCapabilitiesR\EMworkerVersionCapabilities"
+      \\SIrate_per_second\CAN\ETX \SOH(\SOHR\rratePerSecond\DC2u\n\
+      \\ESCworker_version_capabilities\CAN\EOT \SOH(\v21.temporal.api.common.v1.WorkerVersionCapabilitiesR\EMworkerVersionCapabilitiesB\STX\CAN\SOH\DC2b\n\
+      \\DC2deployment_options\CAN\ENQ \SOH(\v23.temporal.api.deployment.v1.WorkerDeploymentOptionsR\DC1deploymentOptions"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -864,13 +884,22 @@ instance Data.ProtoLens.Message PollerInfo where
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'workerVersionCapabilities")) ::
               Data.ProtoLens.FieldDescriptor PollerInfo
+        deploymentOptions__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "deployment_options"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Deployment.V1.Message.WorkerDeploymentOptions)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'deploymentOptions")) ::
+              Data.ProtoLens.FieldDescriptor PollerInfo
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, lastAccessTime__field_descriptor),
            (Data.ProtoLens.Tag 2, identity__field_descriptor),
            (Data.ProtoLens.Tag 3, ratePerSecond__field_descriptor),
            (Data.ProtoLens.Tag 4, 
-            workerVersionCapabilities__field_descriptor)]
+            workerVersionCapabilities__field_descriptor),
+           (Data.ProtoLens.Tag 5, deploymentOptions__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _PollerInfo'_unknownFields
@@ -881,6 +910,7 @@ instance Data.ProtoLens.Message PollerInfo where
          _PollerInfo'identity = Data.ProtoLens.fieldDefault,
          _PollerInfo'ratePerSecond = Data.ProtoLens.fieldDefault,
          _PollerInfo'workerVersionCapabilities = Prelude.Nothing,
+         _PollerInfo'deploymentOptions = Prelude.Nothing,
          _PollerInfo'_unknownFields = []}
   parseMessage
     = let
@@ -939,6 +969,15 @@ instance Data.ProtoLens.Message PollerInfo where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"workerVersionCapabilities") y x)
+                        42
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "deployment_options"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"deploymentOptions") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -1012,8 +1051,24 @@ instance Data.ProtoLens.Message PollerInfo where
                                               (Prelude.fromIntegral (Data.ByteString.length bs)))
                                            (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                                    Data.ProtoLens.encodeMessage _v))
-                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
+                      ((Data.Monoid.<>)
+                         (case
+                              Lens.Family2.view
+                                (Data.ProtoLens.Field.field @"maybe'deploymentOptions") _x
+                          of
+                            Prelude.Nothing -> Data.Monoid.mempty
+                            (Prelude.Just _v)
+                              -> (Data.Monoid.<>)
+                                   (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
+                                   ((Prelude..)
+                                      (\ bs
+                                         -> (Data.Monoid.<>)
+                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                 (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                              (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                      Data.ProtoLens.encodeMessage _v))
+                         (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                            (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))
 instance Control.DeepSeq.NFData PollerInfo where
   rnf
     = \ x__
@@ -1026,7 +1081,125 @@ instance Control.DeepSeq.NFData PollerInfo where
                    (Control.DeepSeq.deepseq
                       (_PollerInfo'ratePerSecond x__)
                       (Control.DeepSeq.deepseq
-                         (_PollerInfo'workerVersionCapabilities x__) ()))))
+                         (_PollerInfo'workerVersionCapabilities x__)
+                         (Control.DeepSeq.deepseq
+                            (_PollerInfo'deploymentOptions x__) ())))))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.pollRequestDeltaSuggestion' @:: Lens' PollerScalingDecision Data.Int.Int32@ -}
+data PollerScalingDecision
+  = PollerScalingDecision'_constructor {_PollerScalingDecision'pollRequestDeltaSuggestion :: !Data.Int.Int32,
+                                        _PollerScalingDecision'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show PollerScalingDecision where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField PollerScalingDecision "pollRequestDeltaSuggestion" Data.Int.Int32 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PollerScalingDecision'pollRequestDeltaSuggestion
+           (\ x__ y__
+              -> x__ {_PollerScalingDecision'pollRequestDeltaSuggestion = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message PollerScalingDecision where
+  messageName _
+    = Data.Text.pack "temporal.api.taskqueue.v1.PollerScalingDecision"
+  packedMessageDescriptor _
+    = "\n\
+      \\NAKPollerScalingDecision\DC2A\n\
+      \\GSpoll_request_delta_suggestion\CAN\SOH \SOH(\ENQR\SUBpollRequestDeltaSuggestion"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        pollRequestDeltaSuggestion__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "poll_request_delta_suggestion"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.Int32Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int32)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"pollRequestDeltaSuggestion")) ::
+              Data.ProtoLens.FieldDescriptor PollerScalingDecision
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, 
+            pollRequestDeltaSuggestion__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _PollerScalingDecision'_unknownFields
+        (\ x__ y__ -> x__ {_PollerScalingDecision'_unknownFields = y__})
+  defMessage
+    = PollerScalingDecision'_constructor
+        {_PollerScalingDecision'pollRequestDeltaSuggestion = Data.ProtoLens.fieldDefault,
+         _PollerScalingDecision'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          PollerScalingDecision
+          -> Data.ProtoLens.Encoding.Bytes.Parser PollerScalingDecision
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "poll_request_delta_suggestion"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"pollRequestDeltaSuggestion") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "PollerScalingDecision"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view
+                      (Data.ProtoLens.Field.field @"pollRequestDeltaSuggestion") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
+                      ((Prelude..)
+                         Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData PollerScalingDecision where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_PollerScalingDecision'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_PollerScalingDecision'pollRequestDeltaSuggestion x__) ())
 {- | Fields :
      
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.rampPercentage' @:: Lens' RampByPercentage Prelude.Float@ -}
@@ -2191,6 +2364,266 @@ instance Control.DeepSeq.NFData TaskQueueReachability where
                    (_TaskQueueReachability'reachability x__) ()))
 {- | Fields :
      
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.approximateBacklogCount' @:: Lens' TaskQueueStats Data.Int.Int64@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.approximateBacklogAge' @:: Lens' TaskQueueStats Proto.Google.Protobuf.Duration.Duration@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'approximateBacklogAge' @:: Lens' TaskQueueStats (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.tasksAddRate' @:: Lens' TaskQueueStats Prelude.Float@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.tasksDispatchRate' @:: Lens' TaskQueueStats Prelude.Float@ -}
+data TaskQueueStats
+  = TaskQueueStats'_constructor {_TaskQueueStats'approximateBacklogCount :: !Data.Int.Int64,
+                                 _TaskQueueStats'approximateBacklogAge :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
+                                 _TaskQueueStats'tasksAddRate :: !Prelude.Float,
+                                 _TaskQueueStats'tasksDispatchRate :: !Prelude.Float,
+                                 _TaskQueueStats'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show TaskQueueStats where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField TaskQueueStats "approximateBacklogCount" Data.Int.Int64 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueStats'approximateBacklogCount
+           (\ x__ y__ -> x__ {_TaskQueueStats'approximateBacklogCount = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField TaskQueueStats "approximateBacklogAge" Proto.Google.Protobuf.Duration.Duration where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueStats'approximateBacklogAge
+           (\ x__ y__ -> x__ {_TaskQueueStats'approximateBacklogAge = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField TaskQueueStats "maybe'approximateBacklogAge" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueStats'approximateBacklogAge
+           (\ x__ y__ -> x__ {_TaskQueueStats'approximateBacklogAge = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField TaskQueueStats "tasksAddRate" Prelude.Float where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueStats'tasksAddRate
+           (\ x__ y__ -> x__ {_TaskQueueStats'tasksAddRate = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField TaskQueueStats "tasksDispatchRate" Prelude.Float where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueStats'tasksDispatchRate
+           (\ x__ y__ -> x__ {_TaskQueueStats'tasksDispatchRate = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message TaskQueueStats where
+  messageName _
+    = Data.Text.pack "temporal.api.taskqueue.v1.TaskQueueStats"
+  packedMessageDescriptor _
+    = "\n\
+      \\SOTaskQueueStats\DC2:\n\
+      \\EMapproximate_backlog_count\CAN\SOH \SOH(\ETXR\ETBapproximateBacklogCount\DC2Q\n\
+      \\ETBapproximate_backlog_age\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\NAKapproximateBacklogAge\DC2$\n\
+      \\SOtasks_add_rate\CAN\ETX \SOH(\STXR\ftasksAddRate\DC2.\n\
+      \\DC3tasks_dispatch_rate\CAN\EOT \SOH(\STXR\DC1tasksDispatchRate"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        approximateBacklogCount__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "approximate_backlog_count"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.Int64Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int64)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"approximateBacklogCount")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueStats
+        approximateBacklogAge__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "approximate_backlog_age"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'approximateBacklogAge")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueStats
+        tasksAddRate__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "tasks_add_rate"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.FloatField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Float)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"tasksAddRate")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueStats
+        tasksDispatchRate__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "tasks_dispatch_rate"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.FloatField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Float)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"tasksDispatchRate")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueStats
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, approximateBacklogCount__field_descriptor),
+           (Data.ProtoLens.Tag 2, approximateBacklogAge__field_descriptor),
+           (Data.ProtoLens.Tag 3, tasksAddRate__field_descriptor),
+           (Data.ProtoLens.Tag 4, tasksDispatchRate__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _TaskQueueStats'_unknownFields
+        (\ x__ y__ -> x__ {_TaskQueueStats'_unknownFields = y__})
+  defMessage
+    = TaskQueueStats'_constructor
+        {_TaskQueueStats'approximateBacklogCount = Data.ProtoLens.fieldDefault,
+         _TaskQueueStats'approximateBacklogAge = Prelude.Nothing,
+         _TaskQueueStats'tasksAddRate = Data.ProtoLens.fieldDefault,
+         _TaskQueueStats'tasksDispatchRate = Data.ProtoLens.fieldDefault,
+         _TaskQueueStats'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          TaskQueueStats
+          -> Data.ProtoLens.Encoding.Bytes.Parser TaskQueueStats
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "approximate_backlog_count"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"approximateBacklogCount") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "approximate_backlog_age"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"approximateBacklogAge") y x)
+                        29
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Data.ProtoLens.Encoding.Bytes.wordToFloat
+                                          Data.ProtoLens.Encoding.Bytes.getFixed32)
+                                       "tasks_add_rate"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"tasksAddRate") y x)
+                        37
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Data.ProtoLens.Encoding.Bytes.wordToFloat
+                                          Data.ProtoLens.Encoding.Bytes.getFixed32)
+                                       "tasks_dispatch_rate"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"tasksDispatchRate") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "TaskQueueStats"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view
+                      (Data.ProtoLens.Field.field @"approximateBacklogCount") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
+                      ((Prelude..)
+                         Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view
+                       (Data.ProtoLens.Field.field @"maybe'approximateBacklogAge") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just _v)
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage _v))
+                ((Data.Monoid.<>)
+                   (let
+                      _v
+                        = Lens.Family2.view (Data.ProtoLens.Field.field @"tasksAddRate") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 29)
+                            ((Prelude..)
+                               Data.ProtoLens.Encoding.Bytes.putFixed32
+                               Data.ProtoLens.Encoding.Bytes.floatToWord _v))
+                   ((Data.Monoid.<>)
+                      (let
+                         _v
+                           = Lens.Family2.view
+                               (Data.ProtoLens.Field.field @"tasksDispatchRate") _x
+                       in
+                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                             Data.Monoid.mempty
+                         else
+                             (Data.Monoid.<>)
+                               (Data.ProtoLens.Encoding.Bytes.putVarInt 37)
+                               ((Prelude..)
+                                  Data.ProtoLens.Encoding.Bytes.putFixed32
+                                  Data.ProtoLens.Encoding.Bytes.floatToWord _v))
+                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
+instance Control.DeepSeq.NFData TaskQueueStats where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_TaskQueueStats'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_TaskQueueStats'approximateBacklogCount x__)
+                (Control.DeepSeq.deepseq
+                   (_TaskQueueStats'approximateBacklogAge x__)
+                   (Control.DeepSeq.deepseq
+                      (_TaskQueueStats'tasksAddRate x__)
+                      (Control.DeepSeq.deepseq
+                         (_TaskQueueStats'tasksDispatchRate x__) ()))))
+{- | Fields :
+     
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.backlogCountHint' @:: Lens' TaskQueueStatus Data.Int.Int64@
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.readLevel' @:: Lens' TaskQueueStatus Data.Int.Int64@
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.ackLevel' @:: Lens' TaskQueueStatus Data.Int.Int64@
@@ -2490,9 +2923,12 @@ instance Control.DeepSeq.NFData TaskQueueStatus where
 {- | Fields :
      
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.pollers' @:: Lens' TaskQueueTypeInfo [PollerInfo]@
-         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.vec'pollers' @:: Lens' TaskQueueTypeInfo (Data.Vector.Vector PollerInfo)@ -}
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.vec'pollers' @:: Lens' TaskQueueTypeInfo (Data.Vector.Vector PollerInfo)@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.stats' @:: Lens' TaskQueueTypeInfo TaskQueueStats@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'stats' @:: Lens' TaskQueueTypeInfo (Prelude.Maybe TaskQueueStats)@ -}
 data TaskQueueTypeInfo
   = TaskQueueTypeInfo'_constructor {_TaskQueueTypeInfo'pollers :: !(Data.Vector.Vector PollerInfo),
+                                    _TaskQueueTypeInfo'stats :: !(Prelude.Maybe TaskQueueStats),
                                     _TaskQueueTypeInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show TaskQueueTypeInfo where
@@ -2517,13 +2953,28 @@ instance Data.ProtoLens.Field.HasField TaskQueueTypeInfo "vec'pollers" (Data.Vec
            _TaskQueueTypeInfo'pollers
            (\ x__ y__ -> x__ {_TaskQueueTypeInfo'pollers = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField TaskQueueTypeInfo "stats" TaskQueueStats where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueTypeInfo'stats
+           (\ x__ y__ -> x__ {_TaskQueueTypeInfo'stats = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField TaskQueueTypeInfo "maybe'stats" (Prelude.Maybe TaskQueueStats) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueTypeInfo'stats
+           (\ x__ y__ -> x__ {_TaskQueueTypeInfo'stats = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message TaskQueueTypeInfo where
   messageName _
     = Data.Text.pack "temporal.api.taskqueue.v1.TaskQueueTypeInfo"
   packedMessageDescriptor _
     = "\n\
       \\DC1TaskQueueTypeInfo\DC2?\n\
-      \\apollers\CAN\SOH \ETX(\v2%.temporal.api.taskqueue.v1.PollerInfoR\apollers"
+      \\apollers\CAN\SOH \ETX(\v2%.temporal.api.taskqueue.v1.PollerInfoR\apollers\DC2?\n\
+      \\ENQstats\CAN\STX \SOH(\v2).temporal.api.taskqueue.v1.TaskQueueStatsR\ENQstats"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -2535,9 +2986,18 @@ instance Data.ProtoLens.Message TaskQueueTypeInfo where
               (Data.ProtoLens.RepeatedField
                  Data.ProtoLens.Unpacked (Data.ProtoLens.Field.field @"pollers")) ::
               Data.ProtoLens.FieldDescriptor TaskQueueTypeInfo
+        stats__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "stats"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor TaskQueueStats)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'stats")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueTypeInfo
       in
         Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, pollers__field_descriptor)]
+          [(Data.ProtoLens.Tag 1, pollers__field_descriptor),
+           (Data.ProtoLens.Tag 2, stats__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _TaskQueueTypeInfo'_unknownFields
@@ -2545,6 +3005,7 @@ instance Data.ProtoLens.Message TaskQueueTypeInfo where
   defMessage
     = TaskQueueTypeInfo'_constructor
         {_TaskQueueTypeInfo'pollers = Data.Vector.Generic.empty,
+         _TaskQueueTypeInfo'stats = Prelude.Nothing,
          _TaskQueueTypeInfo'_unknownFields = []}
   parseMessage
     = let
@@ -2585,6 +3046,15 @@ instance Data.ProtoLens.Message TaskQueueTypeInfo where
                                 v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
                                        (Data.ProtoLens.Encoding.Growing.append mutable'pollers y)
                                 loop x v
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "stats"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"stats") y x)
+                                  mutable'pollers
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -2613,14 +3083,31 @@ instance Data.ProtoLens.Message TaskQueueTypeInfo where
                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                            Data.ProtoLens.encodeMessage _v))
                 (Lens.Family2.view (Data.ProtoLens.Field.field @"vec'pollers") _x))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'stats") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just _v)
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
 instance Control.DeepSeq.NFData TaskQueueTypeInfo where
   rnf
     = \ x__
         -> Control.DeepSeq.deepseq
              (_TaskQueueTypeInfo'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_TaskQueueTypeInfo'pollers x__) ())
+             (Control.DeepSeq.deepseq
+                (_TaskQueueTypeInfo'pollers x__)
+                (Control.DeepSeq.deepseq (_TaskQueueTypeInfo'stats x__) ()))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.typesInfo' @:: Lens' TaskQueueVersionInfo (Data.Map.Map Data.Int.Int32 TaskQueueTypeInfo)@
@@ -3199,6 +3686,279 @@ instance Control.DeepSeq.NFData TaskQueueVersionSelection where
                       (_TaskQueueVersionSelection'allActive x__) ())))
 {- | Fields :
      
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.currentVersion' @:: Lens' TaskQueueVersioningInfo Data.Text.Text@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.rampingVersion' @:: Lens' TaskQueueVersioningInfo Data.Text.Text@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.rampingVersionPercentage' @:: Lens' TaskQueueVersioningInfo Prelude.Float@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.updateTime' @:: Lens' TaskQueueVersioningInfo Proto.Google.Protobuf.Timestamp.Timestamp@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'updateTime' @:: Lens' TaskQueueVersioningInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@ -}
+data TaskQueueVersioningInfo
+  = TaskQueueVersioningInfo'_constructor {_TaskQueueVersioningInfo'currentVersion :: !Data.Text.Text,
+                                          _TaskQueueVersioningInfo'rampingVersion :: !Data.Text.Text,
+                                          _TaskQueueVersioningInfo'rampingVersionPercentage :: !Prelude.Float,
+                                          _TaskQueueVersioningInfo'updateTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                                          _TaskQueueVersioningInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show TaskQueueVersioningInfo where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField TaskQueueVersioningInfo "currentVersion" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueVersioningInfo'currentVersion
+           (\ x__ y__ -> x__ {_TaskQueueVersioningInfo'currentVersion = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField TaskQueueVersioningInfo "rampingVersion" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueVersioningInfo'rampingVersion
+           (\ x__ y__ -> x__ {_TaskQueueVersioningInfo'rampingVersion = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField TaskQueueVersioningInfo "rampingVersionPercentage" Prelude.Float where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueVersioningInfo'rampingVersionPercentage
+           (\ x__ y__
+              -> x__ {_TaskQueueVersioningInfo'rampingVersionPercentage = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField TaskQueueVersioningInfo "updateTime" Proto.Google.Protobuf.Timestamp.Timestamp where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueVersioningInfo'updateTime
+           (\ x__ y__ -> x__ {_TaskQueueVersioningInfo'updateTime = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField TaskQueueVersioningInfo "maybe'updateTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueVersioningInfo'updateTime
+           (\ x__ y__ -> x__ {_TaskQueueVersioningInfo'updateTime = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message TaskQueueVersioningInfo where
+  messageName _
+    = Data.Text.pack
+        "temporal.api.taskqueue.v1.TaskQueueVersioningInfo"
+  packedMessageDescriptor _
+    = "\n\
+      \\ETBTaskQueueVersioningInfo\DC2'\n\
+      \\SIcurrent_version\CAN\SOH \SOH(\tR\SOcurrentVersion\DC2'\n\
+      \\SIramping_version\CAN\STX \SOH(\tR\SOrampingVersion\DC2<\n\
+      \\SUBramping_version_percentage\CAN\ETX \SOH(\STXR\CANrampingVersionPercentage\DC2;\n\
+      \\vupdate_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\n\
+      \updateTime"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        currentVersion__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "current_version"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"currentVersion")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueVersioningInfo
+        rampingVersion__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "ramping_version"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"rampingVersion")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueVersioningInfo
+        rampingVersionPercentage__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "ramping_version_percentage"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.FloatField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Float)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"rampingVersionPercentage")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueVersioningInfo
+        updateTime__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "update_time"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'updateTime")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueVersioningInfo
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, currentVersion__field_descriptor),
+           (Data.ProtoLens.Tag 2, rampingVersion__field_descriptor),
+           (Data.ProtoLens.Tag 3, rampingVersionPercentage__field_descriptor),
+           (Data.ProtoLens.Tag 4, updateTime__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _TaskQueueVersioningInfo'_unknownFields
+        (\ x__ y__ -> x__ {_TaskQueueVersioningInfo'_unknownFields = y__})
+  defMessage
+    = TaskQueueVersioningInfo'_constructor
+        {_TaskQueueVersioningInfo'currentVersion = Data.ProtoLens.fieldDefault,
+         _TaskQueueVersioningInfo'rampingVersion = Data.ProtoLens.fieldDefault,
+         _TaskQueueVersioningInfo'rampingVersionPercentage = Data.ProtoLens.fieldDefault,
+         _TaskQueueVersioningInfo'updateTime = Prelude.Nothing,
+         _TaskQueueVersioningInfo'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          TaskQueueVersioningInfo
+          -> Data.ProtoLens.Encoding.Bytes.Parser TaskQueueVersioningInfo
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "current_version"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"currentVersion") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "ramping_version"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"rampingVersion") y x)
+                        29
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Data.ProtoLens.Encoding.Bytes.wordToFloat
+                                          Data.ProtoLens.Encoding.Bytes.getFixed32)
+                                       "ramping_version_percentage"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"rampingVersionPercentage") y x)
+                        34
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "update_time"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"updateTime") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "TaskQueueVersioningInfo"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view
+                      (Data.ProtoLens.Field.field @"currentVersion") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             ((Data.Monoid.<>)
+                (let
+                   _v
+                     = Lens.Family2.view
+                         (Data.ProtoLens.Field.field @"rampingVersion") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                         ((Prelude..)
+                            (\ bs
+                               -> (Data.Monoid.<>)
+                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                            Data.Text.Encoding.encodeUtf8 _v))
+                ((Data.Monoid.<>)
+                   (let
+                      _v
+                        = Lens.Family2.view
+                            (Data.ProtoLens.Field.field @"rampingVersionPercentage") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 29)
+                            ((Prelude..)
+                               Data.ProtoLens.Encoding.Bytes.putFixed32
+                               Data.ProtoLens.Encoding.Bytes.floatToWord _v))
+                   ((Data.Monoid.<>)
+                      (case
+                           Lens.Family2.view
+                             (Data.ProtoLens.Field.field @"maybe'updateTime") _x
+                       of
+                         Prelude.Nothing -> Data.Monoid.mempty
+                         (Prelude.Just _v)
+                           -> (Data.Monoid.<>)
+                                (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
+                                ((Prelude..)
+                                   (\ bs
+                                      -> (Data.Monoid.<>)
+                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                              (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                           (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                   Data.ProtoLens.encodeMessage _v))
+                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
+instance Control.DeepSeq.NFData TaskQueueVersioningInfo where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_TaskQueueVersioningInfo'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_TaskQueueVersioningInfo'currentVersion x__)
+                (Control.DeepSeq.deepseq
+                   (_TaskQueueVersioningInfo'rampingVersion x__)
+                   (Control.DeepSeq.deepseq
+                      (_TaskQueueVersioningInfo'rampingVersionPercentage x__)
+                      (Control.DeepSeq.deepseq
+                         (_TaskQueueVersioningInfo'updateTime x__) ()))))
+{- | Fields :
+     
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.rule' @:: Lens' TimestampedBuildIdAssignmentRule BuildIdAssignmentRule@
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'rule' @:: Lens' TimestampedBuildIdAssignmentRule (Prelude.Maybe BuildIdAssignmentRule)@
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.createTime' @:: Lens' TimestampedBuildIdAssignmentRule Proto.Google.Protobuf.Timestamp.Timestamp@
@@ -3569,14 +4329,20 @@ instance Control.DeepSeq.NFData TimestampedCompatibleBuildIdRedirectRule where
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \'temporal/api/taskqueue/v1/message.proto\DC2\EMtemporal.api.taskqueue.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\USgoogle/protobuf/timestamp.proto\SUB\RSgoogle/protobuf/wrappers.proto\SUB&temporal/api/enums/v1/task_queue.proto\SUB$temporal/api/common/v1/message.proto\"z\n\
+    \'temporal/api/taskqueue/v1/message.proto\DC2\EMtemporal.api.taskqueue.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\USgoogle/protobuf/timestamp.proto\SUB\RSgoogle/protobuf/wrappers.proto\SUB&temporal/api/enums/v1/task_queue.proto\SUB$temporal/api/common/v1/message.proto\SUB(temporal/api/deployment/v1/message.proto\"z\n\
     \\tTaskQueue\DC2\DC2\n\
     \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC28\n\
     \\EOTkind\CAN\STX \SOH(\SO2$.temporal.api.enums.v1.TaskQueueKindR\EOTkind\DC2\US\n\
     \\vnormal_name\CAN\ETX \SOH(\tR\n\
     \normalName\"b\n\
     \\DC1TaskQueueMetadata\DC2M\n\
-    \\DC4max_tasks_per_second\CAN\SOH \SOH(\v2\FS.google.protobuf.DoubleValueR\DC1maxTasksPerSecond\"y\n\
+    \\DC4max_tasks_per_second\CAN\SOH \SOH(\v2\FS.google.protobuf.DoubleValueR\DC1maxTasksPerSecond\"\230\SOH\n\
+    \\ETBTaskQueueVersioningInfo\DC2'\n\
+    \\SIcurrent_version\CAN\SOH \SOH(\tR\SOcurrentVersion\DC2'\n\
+    \\SIramping_version\CAN\STX \SOH(\tR\SOrampingVersion\DC2<\n\
+    \\SUBramping_version_percentage\CAN\ETX \SOH(\STXR\CANrampingVersionPercentage\DC2;\n\
+    \\vupdate_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\n\
+    \updateTime\"y\n\
     \\EMTaskQueueVersionSelection\DC2\ESC\n\
     \\tbuild_ids\CAN\SOH \ETX(\tR\bbuildIds\DC2 \n\
     \\vunversioned\CAN\STX \SOH(\bR\vunversioned\DC2\GS\n\
@@ -3588,9 +4354,15 @@ packedFileDescriptor
     \\DC1task_reachability\CAN\STX \SOH(\SO2..temporal.api.enums.v1.BuildIdTaskReachabilityR\DLEtaskReachability\SUBj\n\
     \\SOTypesInfoEntry\DC2\DLE\n\
     \\ETXkey\CAN\SOH \SOH(\ENQR\ETXkey\DC2B\n\
-    \\ENQvalue\CAN\STX \SOH(\v2,.temporal.api.taskqueue.v1.TaskQueueTypeInfoR\ENQvalue:\STX8\SOH\"T\n\
+    \\ENQvalue\CAN\STX \SOH(\v2,.temporal.api.taskqueue.v1.TaskQueueTypeInfoR\ENQvalue:\STX8\SOH\"\149\SOH\n\
     \\DC1TaskQueueTypeInfo\DC2?\n\
-    \\apollers\CAN\SOH \ETX(\v2%.temporal.api.taskqueue.v1.PollerInfoR\apollers\"\239\SOH\n\
+    \\apollers\CAN\SOH \ETX(\v2%.temporal.api.taskqueue.v1.PollerInfoR\apollers\DC2?\n\
+    \\ENQstats\CAN\STX \SOH(\v2).temporal.api.taskqueue.v1.TaskQueueStatsR\ENQstats\"\245\SOH\n\
+    \\SOTaskQueueStats\DC2:\n\
+    \\EMapproximate_backlog_count\CAN\SOH \SOH(\ETXR\ETBapproximateBacklogCount\DC2Q\n\
+    \\ETBapproximate_backlog_age\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\NAKapproximateBacklogAge\DC2$\n\
+    \\SOtasks_add_rate\CAN\ETX \SOH(\STXR\ftasksAddRate\DC2.\n\
+    \\DC3tasks_dispatch_rate\CAN\EOT \SOH(\STXR\DC1tasksDispatchRate\"\239\SOH\n\
     \\SITaskQueueStatus\DC2,\n\
     \\DC2backlog_count_hint\CAN\SOH \SOH(\ETXR\DLEbacklogCountHint\DC2\GS\n\
     \\n\
@@ -3603,13 +4375,14 @@ packedFileDescriptor
     \\ACKend_id\CAN\STX \SOH(\ETXR\ENQendId\"V\n\
     \\SUBTaskQueuePartitionMetadata\DC2\DLE\n\
     \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2&\n\
-    \\SIowner_host_name\CAN\STX \SOH(\tR\rownerHostName\"\137\STX\n\
+    \\SIowner_host_name\CAN\STX \SOH(\tR\rownerHostName\"\241\STX\n\
     \\n\
     \PollerInfo\DC2D\n\
     \\DLElast_access_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\SOlastAccessTime\DC2\SUB\n\
     \\bidentity\CAN\STX \SOH(\tR\bidentity\DC2&\n\
-    \\SIrate_per_second\CAN\ETX \SOH(\SOHR\rratePerSecond\DC2q\n\
-    \\ESCworker_version_capabilities\CAN\EOT \SOH(\v21.temporal.api.common.v1.WorkerVersionCapabilitiesR\EMworkerVersionCapabilities\"\195\SOH\n\
+    \\SIrate_per_second\CAN\ETX \SOH(\SOHR\rratePerSecond\DC2u\n\
+    \\ESCworker_version_capabilities\CAN\EOT \SOH(\v21.temporal.api.common.v1.WorkerVersionCapabilitiesR\EMworkerVersionCapabilitiesB\STX\CAN\SOH\DC2b\n\
+    \\DC2deployment_options\CAN\ENQ \SOH(\v23.temporal.api.deployment.v1.WorkerDeploymentOptionsR\DC1deploymentOptions\"\195\SOH\n\
     \\EMStickyExecutionAttributes\DC2P\n\
     \\DC1worker_task_queue\CAN\SOH \SOH(\v2$.temporal.api.taskqueue.v1.TaskQueueR\SIworkerTaskQueue\DC2T\n\
     \\EMschedule_to_start_timeout\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\SYNscheduleToStartTimeout\"3\n\
@@ -3638,9 +4411,11 @@ packedFileDescriptor
     \(TimestampedCompatibleBuildIdRedirectRule\DC2L\n\
     \\EOTrule\CAN\SOH \SOH(\v28.temporal.api.taskqueue.v1.CompatibleBuildIdRedirectRuleR\EOTrule\DC2;\n\
     \\vcreate_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-    \createTimeB\152\SOH\n\
-    \\FSio.temporal.api.taskqueue.v1B\fMessageProtoP\SOHZ)go.temporal.io/api/taskqueue/v1;taskqueue\170\STX\ESCTemporalio.Api.TaskQueue.V1\234\STX\RSTemporalio::Api::TaskQueue::V1J\237H\n\
-    \\a\DC2\ENQ\SYN\NUL\228\SOH\SOH\n\
+    \createTime\"Z\n\
+    \\NAKPollerScalingDecision\DC2A\n\
+    \\GSpoll_request_delta_suggestion\CAN\SOH \SOH(\ENQR\SUBpollRequestDeltaSuggestionB\152\SOH\n\
+    \\FSio.temporal.api.taskqueue.v1B\fMessageProtoP\SOHZ)go.temporal.io/api/taskqueue/v1;taskqueue\170\STX\ESCTemporalio.Api.TaskQueue.V1\234\STX\RSTemporalio::Api::TaskQueue::V1J\132\DEL\n\
+    \\a\DC2\ENQ\SYN\NUL\209\STX\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -3701,413 +4476,599 @@ packedFileDescriptor
     \\STX\ETX\ETX\DC2\ETX%\NUL0\n\
     \\t\n\
     \\STX\ETX\EOT\DC2\ETX&\NUL.\n\
+    \\t\n\
+    \\STX\ETX\ENQ\DC2\ETX'\NUL2\n\
     \E\n\
-    \\STX\EOT\NUL\DC2\EOT)\NUL0\SOH\SUB9 See https://docs.temporal.io/docs/concepts/task-queues/\n\
+    \\STX\EOT\NUL\DC2\EOT*\NUL1\SOH\SUB9 See https://docs.temporal.io/docs/concepts/task-queues/\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX)\b\DC1\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX*\b\DC1\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX*\EOT\DC4\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX+\EOT\DC4\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX*\EOT\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX+\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX*\v\SI\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX+\v\SI\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX*\DC2\DC3\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX+\DC2\DC3\n\
     \/\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX,\EOT1\SUB\" Default: TASK_QUEUE_KIND_NORMAL.\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX-\EOT1\SUB\" Default: TASK_QUEUE_KIND_NORMAL.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX,\EOT'\n\
+    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX-\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX,(,\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX-(,\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX,/0\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX-/0\n\
     \\149\SOH\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX/\EOT\ESC\SUB\135\SOH Iff kind == TASK_QUEUE_KIND_STICKY, then this field contains the name of\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX0\EOT\ESC\SUB\135\SOH Iff kind == TASK_QUEUE_KIND_STICKY, then this field contains the name of\n\
     \ the normal task queue that the sticky worker is running on.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX/\EOT\n\
+    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX0\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX/\v\SYN\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX0\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX/\EM\SUB\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX0\EM\SUB\n\
     \2\n\
-    \\STX\EOT\SOH\DC2\EOT3\NUL6\SOH\SUB& Only applies to activity task queues\n\
+    \\STX\EOT\SOH\DC2\EOT4\NUL7\SOH\SUB& Only applies to activity task queues\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX3\b\EM\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX4\b\EM\n\
     \B\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX5\EOT9\SUB5 Allows throttling dispatch of tasks from this queue\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX6\EOT9\SUB5 Allows throttling dispatch of tasks from this queue\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX5\EOT\US\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX6\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX5 4\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX6 4\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX578\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX678\n\
+    \m\n\
+    \\STX\EOT\STX\DC2\EOT:\NULS\SOH\SUBa Experimental. Worker Deployments are experimental and might significantly change in the future.\n\
+    \\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX:\b\US\n\
+    \\177\EOT\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETXC\EOT\US\SUB\163\EOT Always present. Specifies which Deployment Version should receive new workflow\n\
+    \ executions and tasks of existing unversioned or AutoUpgrade workflows.\n\
+    \ Can be one of the following:\n\
+    \ - A Deployment Version identifier in the form \"<deployment_name>.<build_id>\".\n\
+    \ - Or, the \"__unversioned__\" special value, to represent all the unversioned workers (those\n\
+    \   with `UNVERSIONED` (or unspecified) `WorkerVersioningMode`.)\n\
+    \ Note: Current Version is overridden by the Ramping Version for a portion of traffic when a ramp\n\
+    \ is set (see `ramping_version`.)\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETXC\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXC\v\SUB\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXC\GS\RS\n\
+    \\225\EOT\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETXL\EOT\US\SUB\211\EOT When present, it means the traffic is being shifted from the Current Version to the Ramping\n\
+    \ Version.\n\
+    \ Must always be different from `current_version`. Can be one of the following:\n\
+    \ - A Deployment Version identifier in the form \"<deployment_name>.<build_id>\".\n\
+    \ - Or, the \"__unversioned__\" special value, to represent all the unversioned workers (those\n\
+    \   with `UNVERSIONED` (or unspecified) `WorkerVersioningMode`.)\n\
+    \ Note that it is possible to ramp from one Version to another Version, or from unversioned\n\
+    \ workers to a particular Version, or from a particular Version to unversioned workers.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETXL\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETXL\v\SUB\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETXL\GS\RS\n\
+    \\153\STX\n\
+    \\EOT\EOT\STX\STX\STX\DC2\ETXP\EOT)\SUB\139\STX Percentage of tasks that are routed to the Ramping Version instead of the Current Version.\n\
+    \ Valid range: [0, 100]. A 100% value means the Ramping Version is receiving full traffic but\n\
+    \ not yet \"promoted\" to be the Current Version, likely due to pending validations.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETXP\EOT\t\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETXP\n\
+    \$\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETXP'(\n\
+    \K\n\
+    \\EOT\EOT\STX\STX\ETX\DC2\ETXR\EOT.\SUB> Last time versioning information of this Task Queue changed.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\ETX\ACK\DC2\ETXR\EOT\GS\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETXR\RS)\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETXR,-\n\
     \G\n\
-    \\STX\EOT\STX\DC2\EOT9\NULA\SOH\SUB; Used for specifying versions the caller is interested in.\n\
+    \\STX\EOT\ETX\DC2\EOTV\NUL^\SOH\SUB; Used for specifying versions the caller is interested in.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX9\b!\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETXV\b!\n\
     \*\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX;\EOT\"\SUB\GS Include specific Build IDs.\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETXX\EOT\"\SUB\GS Include specific Build IDs.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\EOT\DC2\ETX;\EOT\f\n\
+    \\ENQ\EOT\ETX\STX\NUL\EOT\DC2\ETXX\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX;\r\DC3\n\
+    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETXX\r\DC3\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX;\DC4\GS\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETXX\DC4\GS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX; !\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETXX !\n\
     \-\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX=\EOT\EM\SUB  Include the unversioned queue.\n\
+    \\EOT\EOT\ETX\STX\SOH\DC2\ETXZ\EOT\EM\SUB  Include the unversioned queue.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX=\EOT\b\n\
+    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETXZ\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX=\t\DC4\n\
+    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETXZ\t\DC4\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX=\ETB\CAN\n\
-    \v\n\
-    \\EOT\EOT\STX\STX\STX\DC2\ETX@\EOT\CAN\SUBi Include all active versions. A version is considered active if it has had new\n\
-    \ tasks or polls recently.\n\
+    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETXZ\ETB\CAN\n\
+    \\196\SOH\n\
+    \\EOT\EOT\ETX\STX\STX\DC2\ETX]\EOT\CAN\SUB\182\SOH Include all active versions. A version is considered active if, in the last few minutes,\n\
+    \ it has had new tasks or polls, or it has been the subject of certain task queue API calls.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETX@\EOT\b\n\
+    \\ENQ\EOT\ETX\STX\STX\ENQ\DC2\ETX]\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX@\t\DC3\n\
+    \\ENQ\EOT\ETX\STX\STX\SOH\DC2\ETX]\t\DC3\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX@\SYN\ETB\n\
+    \\ENQ\EOT\ETX\STX\STX\ETX\DC2\ETX]\SYN\ETB\n\
     \\n\
     \\n\
-    \\STX\EOT\ETX\DC2\EOTC\NULG\SOH\n\
+    \\STX\EOT\EOT\DC2\EOT`\NULn\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETXC\b\FS\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETX`\b\FS\n\
     \y\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETXE\EOT1\SUBl Task Queue info per Task Type. Key is the numerical value of the temporal.api.enums.v1.TaskQueueType enum.\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETXb\EOT1\SUBl Task Queue info per Task Type. Key is the numerical value of the temporal.api.enums.v1.TaskQueueType enum.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ACK\DC2\ETXE\EOT!\n\
+    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETXb\EOT!\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETXE\",\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXb\",\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETXE/0\n\
-    \\v\n\
-    \\EOT\EOT\ETX\STX\SOH\DC2\ETXF\EOTH\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXb/0\n\
+    \\235\ENQ\n\
+    \\EOT\EOT\EOT\STX\SOH\DC2\ETXm\EOTH\SUB\221\ENQ Task Reachability is eventually consistent; there may be a delay until it converges to the most\n\
+    \ accurate value but it is designed in a way to take the more conservative side until it converges.\n\
+    \ For example REACHABLE is more conservative than CLOSED_WORKFLOWS_ONLY.\n\
+    \\n\
+    \ Note: future activities who inherit their workflow's Build ID but not its Task Queue will not be\n\
+    \ accounted for reachability as server cannot know if they'll happen as they do not use\n\
+    \ assignment rules of their Task Queue. Same goes for Child Workflows or Continue-As-New Workflows\n\
+    \ who inherit the parent/previous workflow's Build ID but not its Task Queue. In those cases, make\n\
+    \ sure to query reachability for the parent/previous workflow's Task Queue as well.\n\
+    \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ACK\DC2\ETXF\EOT1\n\
+    \\ENQ\EOT\EOT\STX\SOH\ACK\DC2\ETXm\EOT1\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETXF2C\n\
+    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETXm2C\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETXFFG\n\
+    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETXmFG\n\
     \\n\
     \\n\
-    \\STX\EOT\EOT\DC2\EOTI\NULL\SOH\n\
+    \\STX\EOT\ENQ\DC2\EOTp\NULt\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETXI\b\EM\n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETXp\b\EM\n\
     \\DEL\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETXK\EOT$\SUBr Unversioned workers (with `useVersioning=false`) are reported in unversioned result even if they set a Build ID.\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXr\EOT$\SUBr Unversioned workers (with `useVersioning=false`) are reported in unversioned result even if they set a Build ID.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\EOT\DC2\ETXK\EOT\f\n\
+    \\ENQ\EOT\ENQ\STX\NUL\EOT\DC2\ETXr\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETXK\r\ETB\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETXr\r\ETB\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXK\CAN\US\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXr\CAN\US\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXK\"#\n\
-    \y\n\
-    \\STX\EOT\ENQ\DC2\EOTO\NULU\SOH\SUBm Deprecated. Use `InternalTaskQueueStatus`. This is kept until `DescribeTaskQueue` supports legacy behavior.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETXO\b\ETB\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXr\"#\n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXP\EOT!\n\
+    \\EOT\EOT\ENQ\STX\SOH\DC2\ETXs\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETXP\EOT\t\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ACK\DC2\ETXs\EOT\DC2\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXP\n\
+    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETXs\DC3\CAN\n\
+    \\f\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETXs\ESC\FS\n\
+    \\179\STX\n\
+    \\STX\EOT\ACK\DC2\ENQz\NUL\167\SOH\SOH\SUB\165\STX TaskQueueStats contains statistics about task queue backlog and activity.\n\
+    \\n\
+    \ For workflow task queue type, this result is partial because tasks sent to sticky queues are not included. Read\n\
+    \ comments above each metric to understand the impact of sticky queue exclusion on that metric accuracy.\n\
+    \\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\ACK\SOH\DC2\ETXz\b\SYN\n\
+    \\162\ETX\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\EOT\129\SOH\EOT(\SUB\147\ETX The approximate number of tasks backlogged in this task queue. May count expired tasks but eventually\n\
+    \ converges to the right value. Can be relied upon for scaling decisions.\n\
+    \\n\
+    \ Special note for workflow task queue type: this metric does not count sticky queue tasks. However, because\n\
+    \ those tasks only remain valid for a few seconds, the inaccuracy becomes less significant as the backlog size\n\
+    \ grows.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\EOT\129\SOH\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\EOT\129\SOH\n\
+    \#\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\EOT\129\SOH&'\n\
+    \\152\ETX\n\
+    \\EOT\EOT\ACK\STX\SOH\DC2\EOT\136\SOH\EOT9\SUB\137\ETX Approximate age of the oldest task in the backlog based on the creation time of the task at the head of\n\
+    \ the queue. Can be relied upon for scaling decisions.\n\
+    \\n\
+    \ Special note for workflow task queue type: this metric does not count sticky queue tasks. However, because\n\
+    \ those tasks only remain valid for a few seconds, they should not affect the result when backlog is older than\n\
+    \ few seconds.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\SOH\ACK\DC2\EOT\136\SOH\EOT\FS\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\EOT\136\SOH\GS4\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\EOT\136\SOH78\n\
+    \\188\a\n\
+    \\EOT\EOT\ACK\STX\STX\DC2\EOT\151\SOH\EOT\GS\SUB\173\a The approximate tasks per second added to the task queue, averaging the last 30 seconds. These includes tasks\n\
+    \ whether or not they were added to/dispatched from the backlog or they were dispatched immediately without going\n\
+    \ to the backlog (sync-matched).\n\
+    \\n\
+    \ The difference between `tasks_add_rate` and `tasks_dispatch_rate` is a reliable metric for the rate at which\n\
+    \ backlog grows/shrinks.\n\
+    \\n\
+    \ Note: the actual tasks delivered to the workers may significantly be higher than the numbers reported by\n\
+    \ tasks_add_rate, because:\n\
+    \ - Tasks can be sent to workers without going to the task queue. This is called Eager dispatch. Eager dispatch is\n\
+    \   enable for activities by default in the latest SDKs.\n\
+    \ - Tasks going to Sticky queue are not accounted for. Note that, typically, only the first workflow task of each\n\
+    \   workflow goes to a normal queue, and the rest workflow tasks go to the Sticky queue associated with a specific\n\
+    \   worker instance.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\STX\ENQ\DC2\EOT\151\SOH\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\EOT\151\SOH\n\
+    \\CAN\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\EOT\151\SOH\ESC\FS\n\
+    \\200\a\n\
+    \\EOT\EOT\ACK\STX\ETX\DC2\EOT\166\SOH\EOT\"\SUB\185\a The approximate tasks per second dispatched from the task queue, averaging the last 30 seconds. These includes\n\
+    \ tasks whether or not they were added to/dispatched from the backlog or they were dispatched immediately without\n\
+    \ going to the backlog (sync-matched).\n\
+    \\n\
+    \ The difference between `tasks_add_rate` and `tasks_dispatch_rate` is a reliable metric for the rate at which\n\
+    \ backlog grows/shrinks.\n\
+    \\n\
+    \ Note: the actual tasks delivered to the workers may significantly be higher than the numbers reported by\n\
+    \ tasks_dispatch_rate, because:\n\
+    \ - Tasks can be sent to workers without going to the task queue. This is called Eager dispatch. Eager dispatch is\n\
+    \   enable for activities by default in the latest SDKs.\n\
+    \ - Tasks going to Sticky queue are not accounted for. Note that, typically, only the first workflow task of each\n\
+    \   workflow goes to a normal queue, and the rest workflow tasks go to the Sticky queue associated with a specific\n\
+    \   worker instance.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\ETX\ENQ\DC2\EOT\166\SOH\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\ETX\SOH\DC2\EOT\166\SOH\n\
+    \\GS\n\
+    \\r\n\
+    \\ENQ\EOT\ACK\STX\ETX\ETX\DC2\EOT\166\SOH !\n\
+    \{\n\
+    \\STX\EOT\a\DC2\ACK\170\SOH\NUL\176\SOH\SOH\SUBm Deprecated. Use `InternalTaskQueueStatus`. This is kept until `DescribeTaskQueue` supports legacy behavior.\n\
+    \\n\
+    \\v\n\
+    \\ETX\EOT\a\SOH\DC2\EOT\170\SOH\b\ETB\n\
+    \\f\n\
+    \\EOT\EOT\a\STX\NUL\DC2\EOT\171\SOH\EOT!\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\EOT\171\SOH\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\EOT\171\SOH\n\
     \\FS\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\EOT\171\SOH\US \n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXP\US \n\
-    \\v\n\
-    \\EOT\EOT\ENQ\STX\SOH\DC2\ETXQ\EOT\EM\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ENQ\DC2\ETXQ\EOT\t\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETXQ\n\
+    \\EOT\EOT\a\STX\SOH\DC2\EOT\172\SOH\EOT\EM\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\SOH\ENQ\DC2\EOT\172\SOH\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\SOH\SOH\DC2\EOT\172\SOH\n\
     \\DC4\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\SOH\ETX\DC2\EOT\172\SOH\ETB\CAN\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETXQ\ETB\CAN\n\
-    \\v\n\
-    \\EOT\EOT\ENQ\STX\STX\DC2\ETXR\EOT\CAN\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\ENQ\DC2\ETXR\EOT\t\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\ETXR\n\
+    \\EOT\EOT\a\STX\STX\DC2\EOT\173\SOH\EOT\CAN\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\STX\ENQ\DC2\EOT\173\SOH\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\STX\SOH\DC2\EOT\173\SOH\n\
     \\DC3\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\STX\ETX\DC2\EOT\173\SOH\SYN\ETB\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\ETXR\SYN\ETB\n\
+    \\EOT\EOT\a\STX\ETX\DC2\EOT\174\SOH\EOT\US\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\ETX\ENQ\DC2\EOT\174\SOH\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\ETX\SOH\DC2\EOT\174\SOH\v\SUB\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\ETX\ETX\DC2\EOT\174\SOH\GS\RS\n\
+    \\f\n\
+    \\EOT\EOT\a\STX\EOT\DC2\EOT\175\SOH\EOT\"\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\EOT\ACK\DC2\EOT\175\SOH\EOT\SI\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\EOT\SOH\DC2\EOT\175\SOH\DLE\GS\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\EOT\ETX\DC2\EOT\175\SOH !\n\
+    \\f\n\
+    \\STX\EOT\b\DC2\ACK\178\SOH\NUL\181\SOH\SOH\n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\ETX\DC2\ETXS\EOT\US\n\
+    \\ETX\EOT\b\SOH\DC2\EOT\178\SOH\b\DC3\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\ENQ\DC2\ETXS\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\SOH\DC2\ETXS\v\SUB\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\ETX\DC2\ETXS\GS\RS\n\
-    \\v\n\
-    \\EOT\EOT\ENQ\STX\EOT\DC2\ETXT\EOT\"\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\EOT\ACK\DC2\ETXT\EOT\SI\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\EOT\SOH\DC2\ETXT\DLE\GS\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\EOT\ETX\DC2\ETXT !\n\
-    \\n\
-    \\n\
-    \\STX\EOT\ACK\DC2\EOTW\NULZ\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETXW\b\DC3\n\
-    \\v\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\ETXX\EOT\ETB\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETXX\EOT\t\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXX\n\
+    \\EOT\EOT\b\STX\NUL\DC2\EOT\179\SOH\EOT\ETB\n\
+    \\r\n\
+    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\EOT\179\SOH\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\EOT\179\SOH\n\
     \\DC2\n\
+    \\r\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\EOT\179\SOH\NAK\SYN\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXX\NAK\SYN\n\
-    \\v\n\
-    \\EOT\EOT\ACK\STX\SOH\DC2\ETXY\EOT\NAK\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ENQ\DC2\ETXY\EOT\t\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXY\n\
+    \\EOT\EOT\b\STX\SOH\DC2\EOT\180\SOH\EOT\NAK\n\
+    \\r\n\
+    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\EOT\180\SOH\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\b\STX\SOH\SOH\DC2\EOT\180\SOH\n\
     \\DLE\n\
+    \\r\n\
+    \\ENQ\EOT\b\STX\SOH\ETX\DC2\EOT\180\SOH\DC3\DC4\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXY\DC3\DC4\n\
-    \\n\
-    \\n\
-    \\STX\EOT\a\DC2\EOT\\\NUL_\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\a\SOH\DC2\ETX\\\b\"\n\
+    \\STX\EOT\t\DC2\ACK\183\SOH\NUL\186\SOH\SOH\n\
     \\v\n\
-    \\EOT\EOT\a\STX\NUL\DC2\ETX]\EOT\DC3\n\
+    \\ETX\EOT\t\SOH\DC2\EOT\183\SOH\b\"\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETX]\EOT\n\
+    \\EOT\EOT\t\STX\NUL\DC2\EOT\184\SOH\EOT\DC3\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\NUL\ENQ\DC2\EOT\184\SOH\EOT\n\
     \\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\NUL\SOH\DC2\EOT\184\SOH\v\SO\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\NUL\ETX\DC2\EOT\184\SOH\DC1\DC2\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETX]\v\SO\n\
+    \\EOT\EOT\t\STX\SOH\DC2\EOT\185\SOH\EOT\US\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\SOH\ENQ\DC2\EOT\185\SOH\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\SOH\SOH\DC2\EOT\185\SOH\v\SUB\n\
+    \\r\n\
+    \\ENQ\EOT\t\STX\SOH\ETX\DC2\EOT\185\SOH\GS\RS\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETX]\DC1\DC2\n\
+    \\STX\EOT\n\
+    \\DC2\ACK\188\SOH\NUL\198\SOH\SOH\n\
     \\v\n\
-    \\EOT\EOT\a\STX\SOH\DC2\ETX^\EOT\US\n\
+    \\ETX\EOT\n\
+    \\SOH\DC2\EOT\188\SOH\b\DC2\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\ENQ\DC2\ETX^\EOT\n\
+    \\EOT\EOT\n\
+    \\STX\NUL\DC2\EOT\189\SOH\EOT3\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\NUL\ACK\DC2\EOT\189\SOH\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\NUL\SOH\DC2\EOT\189\SOH\RS.\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\NUL\ETX\DC2\EOT\189\SOH12\n\
+    \\f\n\
+    \\EOT\EOT\n\
+    \\STX\SOH\DC2\EOT\190\SOH\EOT\CAN\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\SOH\ENQ\DC2\EOT\190\SOH\EOT\n\
     \\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\SOH\SOH\DC2\EOT\190\SOH\v\DC3\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\SOH\ETX\DC2\EOT\190\SOH\SYN\ETB\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\SOH\DC2\ETX^\v\SUB\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\SOH\ETX\DC2\ETX^\GS\RS\n\
+    \\EOT\EOT\n\
+    \\STX\STX\DC2\EOT\191\SOH\EOT\US\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\STX\ENQ\DC2\EOT\191\SOH\EOT\n\
     \\n\
-    \\n\
-    \\STX\EOT\b\DC2\EOTa\NULh\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\b\SOH\DC2\ETXa\b\DC2\n\
-    \\v\n\
-    \\EOT\EOT\b\STX\NUL\DC2\ETXb\EOT3\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ACK\DC2\ETXb\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETXb\RS.\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETXb12\n\
-    \\v\n\
-    \\EOT\EOT\b\STX\SOH\DC2\ETXc\EOT\CAN\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\ETXc\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETXc\v\DC3\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETXc\SYN\ETB\n\
-    \\v\n\
-    \\EOT\EOT\b\STX\STX\DC2\ETXd\EOT\US\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\STX\ENQ\DC2\ETXd\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\STX\SOH\DC2\ETXd\v\SUB\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\STX\ETX\DC2\ETXd\GS\RS\n\
-    \z\n\
-    \\EOT\EOT\b\STX\ETX\DC2\ETXg\EOTU\SUBm If a worker has opted into the worker versioning feature while polling, its capabilities will\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\STX\SOH\DC2\EOT\191\SOH\v\SUB\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\STX\ETX\DC2\EOT\191\SOH\GS\RS\n\
+    \\169\SOH\n\
+    \\EOT\EOT\n\
+    \\STX\ETX\DC2\EOT\195\SOH\EOTi\SUB\154\SOH If a worker has opted into the worker versioning feature while polling, its capabilities will\n\
     \ appear here.\n\
+    \ Deprecated. Replaced by deployment_options.\n\
     \\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\ETX\ACK\DC2\EOT\195\SOH\EOT4\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\ETX\SOH\DC2\EOT\195\SOH5P\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\ETX\ETX\DC2\EOT\195\SOHST\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\ETX\b\DC2\EOT\195\SOHUh\n\
+    \\SO\n\
+    \\ACK\EOT\n\
+    \\STX\ETX\b\ETX\DC2\EOT\195\SOHVg\n\
+    \B\n\
+    \\EOT\EOT\n\
+    \\STX\EOT\DC2\EOT\197\SOH\EOTN\SUB4 Worker deployment options that SDK sent to server.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\EOT\ACK\DC2\EOT\197\SOH\EOT6\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\EOT\SOH\DC2\EOT\197\SOH7I\n\
+    \\r\n\
+    \\ENQ\EOT\n\
+    \\STX\EOT\ETX\DC2\EOT\197\SOHLM\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\ETX\ACK\DC2\ETXg\EOT4\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\ETX\SOH\DC2\ETXg5P\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\ETX\ETX\DC2\ETXgST\n\
-    \\n\
-    \\n\
-    \\STX\EOT\t\DC2\EOTj\NULo\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\t\SOH\DC2\ETXj\b!\n\
+    \\STX\EOT\v\DC2\ACK\200\SOH\NUL\205\SOH\SOH\n\
     \\v\n\
-    \\EOT\EOT\t\STX\NUL\DC2\ETXk\EOT$\n\
+    \\ETX\EOT\v\SOH\DC2\EOT\200\SOH\b!\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\NUL\ACK\DC2\ETXk\EOT\r\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\NUL\SOH\DC2\ETXk\SO\US\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\NUL\ETX\DC2\ETXk\"#\n\
-    \\131\SOH\n\
-    \\EOT\EOT\t\STX\SOH\DC2\ETXn\EOT;\SUBv (-- api-linter: core::0140::prepositions=disabled\n\
+    \\EOT\EOT\v\STX\NUL\DC2\EOT\201\SOH\EOT$\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\NUL\ACK\DC2\EOT\201\SOH\EOT\r\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\NUL\SOH\DC2\EOT\201\SOH\SO\US\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\NUL\ETX\DC2\EOT\201\SOH\"#\n\
+    \\132\SOH\n\
+    \\EOT\EOT\v\STX\SOH\DC2\EOT\204\SOH\EOT;\SUBv (-- api-linter: core::0140::prepositions=disabled\n\
     \     aip.dev/not-precedent: \"to\" is used to indicate interval. --)\n\
     \\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\SOH\ACK\DC2\ETXn\EOT\FS\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\SOH\SOH\DC2\ETXn\GS6\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\SOH\ETX\DC2\ETXn9:\n\
-    \\210\SOH\n\
-    \\STX\EOT\n\
-    \\DC2\EOTs\NULv\SOH\SUB\197\SOH Used by the worker versioning APIs, represents an unordered set of one or more versions which are\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\SOH\ACK\DC2\EOT\204\SOH\EOT\FS\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\SOH\SOH\DC2\EOT\204\SOH\GS6\n\
+    \\r\n\
+    \\ENQ\EOT\v\STX\SOH\ETX\DC2\EOT\204\SOH9:\n\
+    \\212\SOH\n\
+    \\STX\EOT\f\DC2\ACK\209\SOH\NUL\212\SOH\SOH\SUB\197\SOH Used by the worker versioning APIs, represents an unordered set of one or more versions which are\n\
     \ considered to be compatible with each other. Currently the versions are always worker build IDs.\n\
     \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\n\
-    \\SOH\DC2\ETXs\b\FS\n\
-    \z\n\
-    \\EOT\EOT\n\
-    \\STX\NUL\DC2\ETXu\EOT\"\SUBm All the compatible versions, unordered, except for the last element, which is considered the set \"default\".\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\n\
-    \\STX\NUL\EOT\DC2\ETXu\EOT\f\n\
-    \\f\n\
-    \\ENQ\EOT\n\
-    \\STX\NUL\ENQ\DC2\ETXu\r\DC3\n\
-    \\f\n\
-    \\ENQ\EOT\n\
-    \\STX\NUL\SOH\DC2\ETXu\DC4\GS\n\
-    \\f\n\
-    \\ENQ\EOT\n\
-    \\STX\NUL\ETX\DC2\ETXu !\n\
-    \H\n\
-    \\STX\EOT\v\DC2\EOTy\NUL\DEL\SOH\SUB< Reachability of tasks for a worker on a single task queue.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\v\SOH\DC2\ETXy\b\GS\n\
     \\v\n\
-    \\EOT\EOT\v\STX\NUL\DC2\ETXz\EOT\SUB\n\
-    \\f\n\
-    \\ENQ\EOT\v\STX\NUL\ENQ\DC2\ETXz\EOT\n\
+    \\ETX\EOT\f\SOH\DC2\EOT\209\SOH\b\FS\n\
+    \{\n\
+    \\EOT\EOT\f\STX\NUL\DC2\EOT\211\SOH\EOT\"\SUBm All the compatible versions, unordered, except for the last element, which is considered the set \"default\".\n\
     \\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\NUL\EOT\DC2\EOT\211\SOH\EOT\f\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\EOT\211\SOH\r\DC3\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\NUL\SOH\DC2\EOT\211\SOH\DC4\GS\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\NUL\ETX\DC2\EOT\211\SOH !\n\
+    \J\n\
+    \\STX\EOT\r\DC2\ACK\215\SOH\NUL\221\SOH\SOH\SUB< Reachability of tasks for a worker on a single task queue.\n\
+    \\n\
+    \\v\n\
+    \\ETX\EOT\r\SOH\DC2\EOT\215\SOH\b\GS\n\
     \\f\n\
-    \\ENQ\EOT\v\STX\NUL\SOH\DC2\ETXz\v\NAK\n\
-    \\f\n\
-    \\ENQ\EOT\v\STX\NUL\ETX\DC2\ETXz\CAN\EM\n\
-    \\232\SOH\n\
-    \\EOT\EOT\v\STX\SOH\DC2\ETX~\EOTE\SUB\218\SOH Task reachability for a worker in a single task queue.\n\
+    \\EOT\EOT\r\STX\NUL\DC2\EOT\216\SOH\EOT\SUB\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\NUL\ENQ\DC2\EOT\216\SOH\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\NUL\SOH\DC2\EOT\216\SOH\v\NAK\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\NUL\ETX\DC2\EOT\216\SOH\CAN\EM\n\
+    \\233\SOH\n\
+    \\EOT\EOT\r\STX\SOH\DC2\EOT\220\SOH\EOTE\SUB\218\SOH Task reachability for a worker in a single task queue.\n\
     \ See the TaskReachability docstring for information about each enum variant.\n\
     \ If reachability is empty, this worker is considered unreachable in this task queue.\n\
     \\n\
-    \\f\n\
-    \\ENQ\EOT\v\STX\SOH\EOT\DC2\ETX~\EOT\f\n\
-    \\f\n\
-    \\ENQ\EOT\v\STX\SOH\ACK\DC2\ETX~\r3\n\
-    \\f\n\
-    \\ENQ\EOT\v\STX\SOH\SOH\DC2\ETX~4@\n\
-    \\f\n\
-    \\ENQ\EOT\v\STX\SOH\ETX\DC2\ETX~CD\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\SOH\EOT\DC2\EOT\220\SOH\EOT\f\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\SOH\ACK\DC2\EOT\220\SOH\r3\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\SOH\SOH\DC2\EOT\220\SOH4@\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\SOH\ETX\DC2\EOT\220\SOHCD\n\
     \[\n\
-    \\STX\EOT\f\DC2\ACK\130\SOH\NUL\135\SOH\SOH\SUBM Reachability of tasks for a worker by build id, in one or more task queues.\n\
+    \\STX\EOT\SO\DC2\ACK\224\SOH\NUL\229\SOH\SOH\SUBM Reachability of tasks for a worker by build id, in one or more task queues.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\f\SOH\DC2\EOT\130\SOH\b\ESC\n\
+    \\ETX\EOT\SO\SOH\DC2\EOT\224\SOH\b\ESC\n\
     \3\n\
-    \\EOT\EOT\f\STX\NUL\DC2\EOT\132\SOH\EOT\CAN\SUB% A build id or empty if unversioned.\n\
+    \\EOT\EOT\SO\STX\NUL\DC2\EOT\226\SOH\EOT\CAN\SUB% A build id or empty if unversioned.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\EOT\132\SOH\EOT\n\
+    \\ENQ\EOT\SO\STX\NUL\ENQ\DC2\EOT\226\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\SOH\DC2\EOT\132\SOH\v\DC3\n\
+    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\EOT\226\SOH\v\DC3\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\ETX\DC2\EOT\132\SOH\SYN\ETB\n\
+    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\EOT\226\SOH\SYN\ETB\n\
     \,\n\
-    \\EOT\EOT\f\STX\SOH\DC2\EOT\134\SOH\EOT?\SUB\RS Reachability per task queue.\n\
+    \\EOT\EOT\SO\STX\SOH\DC2\EOT\228\SOH\EOT?\SUB\RS Reachability per task queue.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SOH\EOT\DC2\EOT\134\SOH\EOT\f\n\
+    \\ENQ\EOT\SO\STX\SOH\EOT\DC2\EOT\228\SOH\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SOH\ACK\DC2\EOT\134\SOH\r\"\n\
+    \\ENQ\EOT\SO\STX\SOH\ACK\DC2\EOT\228\SOH\r\"\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SOH\SOH\DC2\EOT\134\SOH#:\n\
+    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\EOT\228\SOH#:\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SOH\ETX\DC2\EOT\134\SOH=>\n\
+    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\EOT\228\SOH=>\n\
     \\f\n\
-    \\STX\EOT\r\DC2\ACK\137\SOH\NUL\140\SOH\SOH\n\
+    \\STX\EOT\SI\DC2\ACK\231\SOH\NUL\234\SOH\SOH\n\
     \\v\n\
-    \\ETX\EOT\r\SOH\DC2\EOT\137\SOH\b\CAN\n\
+    \\ETX\EOT\SI\SOH\DC2\EOT\231\SOH\b\CAN\n\
     \,\n\
-    \\EOT\EOT\r\STX\NUL\DC2\EOT\139\SOH\EOT\RS\SUB\RS Acceptable range is [0,100).\n\
+    \\EOT\EOT\SI\STX\NUL\DC2\EOT\233\SOH\EOT\RS\SUB\RS Acceptable range is [0,100).\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\NUL\ENQ\DC2\EOT\139\SOH\EOT\t\n\
+    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\EOT\233\SOH\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\NUL\SOH\DC2\EOT\139\SOH\n\
+    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\EOT\233\SOH\n\
     \\EM\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\NUL\ETX\DC2\EOT\139\SOH\FS\GS\n\
-    \\216\SI\n\
-    \\STX\EOT\SO\DC2\ACK\179\SOH\NUL\192\SOH\SOH\SUB\201\SI These rules assign a Build ID to Unassigned Workflow Executions and\n\
-    \ Activities.\n\
+    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\EOT\233\SOH\FS\GS\n\
+    \\190\SI\n\
+    \\STX\EOT\DLE\DC2\ACK\145\STX\NUL\158\STX\SOH\SUB\175\SI Assignment rules are applied to *new* Workflow and Activity executions at\n\
+    \ schedule time to assign them to a Build ID.\n\
     \\n\
-    \ Specifically, assignment rules are applied to the following Executions or\n\
-    \ Activities when they are scheduled in a Task Queue:\n\
-    \    - Generally, any new Workflow Execution, except:\n\
-    \      - When A Child Workflow or a Continue-As-New Execution inherits the\n\
-    \        Build ID from its parent/previous execution by setting the\n\
-    \        `inherit_build_id` flag.\n\
-    \      - Workflow Executions started Eagerly are assigned to the Build ID of\n\
-    \        the Starter.\n\
-    \    - An Activity that is scheduled on a Task Queue different from the one\n\
-    \      their Workflow runs on, unless the `use_workflow_build_id` flag is set.\n\
+    \ Assignment rules will not be used in the following cases:\n\
+    \    - Child Workflows or Continue-As-New Executions who inherit their\n\
+    \      parent/previous Workflow's assigned Build ID (by setting the\n\
+    \      `inherit_build_id` flag - default behavior in SDKs when the same Task Queue\n\
+    \      is used.)\n\
+    \    - An Activity that inherits the assigned Build ID of its Workflow (by\n\
+    \      setting the `use_workflow_build_id` flag - default behavior in SDKs\n\
+    \      when the same Task Queue is used.)\n\
     \\n\
     \ In absence of (applicable) redirect rules (`CompatibleBuildIdRedirectRule`s)\n\
     \ the task will be dispatched to Workers of the Build ID determined by the\n\
-    \ assignment rules. Otherwise, the final Build ID will be determined by the\n\
-    \ redirect rules.\n\
+    \ assignment rules (or inherited). Otherwise, the final Build ID will be\n\
+    \ determined by the redirect rules.\n\
     \\n\
-    \ When using Worker Versioning, in the steady state, for a given Task Queue,\n\
-    \ there should typically be exactly one assignment rule to send all Unassigned\n\
-    \ tasks to the latest Build ID. Existence of at least one such \"unconditional\"\n\
-    \ rule at all times is enforce by the system, unless the `force` flag is used\n\
+    \ Once a Workflow completes its first Workflow Task in a particular Build ID it\n\
+    \ stays in that Build ID regardless of changes to assignment rules. Redirect\n\
+    \ rules can be used to move the workflow to another compatible Build ID.\n\
+    \\n\
+    \ When using Worker Versioning on a Task Queue, in the steady state,\n\
+    \ there should typically be a single assignment rule to send all new executions\n\
+    \ to the latest Build ID. Existence of at least one such \"unconditional\"\n\
+    \ rule at all times is enforces by the system, unless the `force` flag is used\n\
     \ by the user when replacing/deleting these rules (for exceptional cases).\n\
     \\n\
     \ During a deployment, one or more additional rules can be added to assign a\n\
@@ -4118,44 +5079,42 @@ packedFileDescriptor
     \ applied and the rest will be ignored.\n\
     \\n\
     \ In the event that no assignment rule is applicable on a task (or the Task\n\
-    \ Queue is simply not versioned), the tasks will be sent to unversioned\n\
-    \ workers, if available. Otherwise, they remain Unassigned, and will be\n\
-    \ retried for assignment, or dispatch to unversioned workers, at a later time\n\
-    \ depending on the availability of workers.\n\
+    \ Queue is simply not versioned), the tasks will be dispatched to an\n\
+    \ unversioned Worker.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\SO\SOH\DC2\EOT\179\SOH\b\GS\n\
+    \\ETX\EOT\DLE\SOH\DC2\EOT\145\STX\b\GS\n\
     \\f\n\
-    \\EOT\EOT\SO\STX\NUL\DC2\EOT\180\SOH\EOT\US\n\
+    \\EOT\EOT\DLE\STX\NUL\DC2\EOT\146\STX\EOT\US\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\ENQ\DC2\EOT\180\SOH\EOT\n\
+    \\ENQ\EOT\DLE\STX\NUL\ENQ\DC2\EOT\146\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\EOT\180\SOH\v\SUB\n\
+    \\ENQ\EOT\DLE\STX\NUL\SOH\DC2\EOT\146\STX\v\SUB\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\EOT\180\SOH\GS\RS\n\
+    \\ENQ\EOT\DLE\STX\NUL\ETX\DC2\EOT\146\STX\GS\RS\n\
     \\240\SOH\n\
-    \\EOT\EOT\SO\b\NUL\DC2\ACK\186\SOH\EOT\191\SOH\ENQ\SUB\223\SOH If a ramp is provided, this rule will be applied only to a sample of\n\
+    \\EOT\EOT\DLE\b\NUL\DC2\ACK\152\STX\EOT\157\STX\ENQ\SUB\223\SOH If a ramp is provided, this rule will be applied only to a sample of\n\
     \ tasks according to the provided percentage.\n\
     \ This option can be used only on \"terminal\" Build IDs (the ones not used\n\
     \ as source in any redirect rules).\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SO\b\NUL\SOH\DC2\EOT\186\SOH\n\
+    \\ENQ\EOT\DLE\b\NUL\SOH\DC2\EOT\152\STX\n\
     \\SO\n\
     \\167\SOH\n\
-    \\EOT\EOT\SO\STX\SOH\DC2\EOT\190\SOH\b-\SUB\152\SOH This ramp is useful for gradual Blue/Green deployments (and similar)\n\
+    \\EOT\EOT\DLE\STX\SOH\DC2\EOT\156\STX\b-\SUB\152\SOH This ramp is useful for gradual Blue/Green deployments (and similar)\n\
     \ where you want to send a certain portion of the traffic to the target\n\
     \ Build ID.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\SOH\ACK\DC2\EOT\190\SOH\b\CAN\n\
+    \\ENQ\EOT\DLE\STX\SOH\ACK\DC2\EOT\156\STX\b\CAN\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\EOT\190\SOH\EM(\n\
+    \\ENQ\EOT\DLE\STX\SOH\SOH\DC2\EOT\156\STX\EM(\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\EOT\190\SOH+,\n\
-    \\198\a\n\
-    \\STX\EOT\SI\DC2\ACK\215\SOH\NUL\218\SOH\SOH\SUB\183\a These rules apply to tasks assigned to a particular Build ID\n\
+    \\ENQ\EOT\DLE\STX\SOH\ETX\DC2\EOT\156\STX+,\n\
+    \\144\a\n\
+    \\STX\EOT\DC1\DC2\ACK\180\STX\NUL\187\STX\SOH\SUB\129\a These rules apply to tasks assigned to a particular Build ID\n\
     \ (`source_build_id`) to redirect them to another *compatible* Build ID\n\
     \ (`target_build_id`).\n\
     \\n\
@@ -4174,66 +5133,89 @@ packedFileDescriptor
     \  - To be able to Reset an old Execution so it can run on the current\n\
     \    (compatible) Build ID.\n\
     \\n\
-    \ Redirect rules can be chained, but only the last rule in the chain can have\n\
-    \ a ramp.\n\
+    \ Redirect rules can be chained.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\SI\SOH\DC2\EOT\215\SOH\b%\n\
+    \\ETX\EOT\DC1\SOH\DC2\EOT\180\STX\b%\n\
     \\f\n\
-    \\EOT\EOT\SI\STX\NUL\DC2\EOT\216\SOH\EOT\US\n\
+    \\EOT\EOT\DC1\STX\NUL\DC2\EOT\181\STX\EOT\US\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\EOT\216\SOH\EOT\n\
+    \\ENQ\EOT\DC1\STX\NUL\ENQ\DC2\EOT\181\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\EOT\216\SOH\v\SUB\n\
+    \\ENQ\EOT\DC1\STX\NUL\SOH\DC2\EOT\181\STX\v\SUB\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\EOT\216\SOH\GS\RS\n\
-    \\f\n\
-    \\EOT\EOT\SI\STX\SOH\DC2\EOT\217\SOH\EOT\US\n\
-    \\r\n\
-    \\ENQ\EOT\SI\STX\SOH\ENQ\DC2\EOT\217\SOH\EOT\n\
+    \\ENQ\EOT\DC1\STX\NUL\ETX\DC2\EOT\181\STX\GS\RS\n\
+    \\240\SOH\n\
+    \\EOT\EOT\DC1\STX\SOH\DC2\EOT\186\STX\EOT\US\SUB\225\SOH Target Build ID must be compatible with the Source Build ID; that is it\n\
+    \ must be able to process event histories made by the Source Build ID by\n\
+    \ using [Patching](https://docs.temporal.io/workflows#patching) or other\n\
+    \ means.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\SOH\SOH\DC2\EOT\217\SOH\v\SUB\n\
+    \\ENQ\EOT\DC1\STX\SOH\ENQ\DC2\EOT\186\STX\EOT\n\
+    \\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\SOH\ETX\DC2\EOT\217\SOH\GS\RS\n\
+    \\ENQ\EOT\DC1\STX\SOH\SOH\DC2\EOT\186\STX\v\SUB\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\SOH\ETX\DC2\EOT\186\STX\GS\RS\n\
     \\f\n\
-    \\STX\EOT\DLE\DC2\ACK\220\SOH\NUL\223\SOH\SOH\n\
+    \\STX\EOT\DC2\DC2\ACK\189\STX\NUL\192\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\DLE\SOH\DC2\EOT\220\SOH\b(\n\
+    \\ETX\EOT\DC2\SOH\DC2\EOT\189\STX\b(\n\
     \\f\n\
-    \\EOT\EOT\DLE\STX\NUL\DC2\EOT\221\SOH\EOT#\n\
+    \\EOT\EOT\DC2\STX\NUL\DC2\EOT\190\STX\EOT#\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\ACK\DC2\EOT\221\SOH\EOT\EM\n\
+    \\ENQ\EOT\DC2\STX\NUL\ACK\DC2\EOT\190\STX\EOT\EM\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\SOH\DC2\EOT\221\SOH\SUB\RS\n\
+    \\ENQ\EOT\DC2\STX\NUL\SOH\DC2\EOT\190\STX\SUB\RS\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\ETX\DC2\EOT\221\SOH!\"\n\
+    \\ENQ\EOT\DC2\STX\NUL\ETX\DC2\EOT\190\STX!\"\n\
     \\f\n\
-    \\EOT\EOT\DLE\STX\SOH\DC2\EOT\222\SOH\EOT.\n\
+    \\EOT\EOT\DC2\STX\SOH\DC2\EOT\191\STX\EOT.\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\SOH\ACK\DC2\EOT\222\SOH\EOT\GS\n\
+    \\ENQ\EOT\DC2\STX\SOH\ACK\DC2\EOT\191\STX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\SOH\SOH\DC2\EOT\222\SOH\RS)\n\
+    \\ENQ\EOT\DC2\STX\SOH\SOH\DC2\EOT\191\STX\RS)\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\SOH\ETX\DC2\EOT\222\SOH,-\n\
+    \\ENQ\EOT\DC2\STX\SOH\ETX\DC2\EOT\191\STX,-\n\
     \\f\n\
-    \\STX\EOT\DC1\DC2\ACK\225\SOH\NUL\228\SOH\SOH\n\
+    \\STX\EOT\DC3\DC2\ACK\194\STX\NUL\197\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\DC1\SOH\DC2\EOT\225\SOH\b0\n\
+    \\ETX\EOT\DC3\SOH\DC2\EOT\194\STX\b0\n\
     \\f\n\
-    \\EOT\EOT\DC1\STX\NUL\DC2\EOT\226\SOH\EOT+\n\
+    \\EOT\EOT\DC3\STX\NUL\DC2\EOT\195\STX\EOT+\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\NUL\ACK\DC2\EOT\226\SOH\EOT!\n\
+    \\ENQ\EOT\DC3\STX\NUL\ACK\DC2\EOT\195\STX\EOT!\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\NUL\SOH\DC2\EOT\226\SOH\"&\n\
+    \\ENQ\EOT\DC3\STX\NUL\SOH\DC2\EOT\195\STX\"&\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\NUL\ETX\DC2\EOT\226\SOH)*\n\
+    \\ENQ\EOT\DC3\STX\NUL\ETX\DC2\EOT\195\STX)*\n\
     \\f\n\
-    \\EOT\EOT\DC1\STX\SOH\DC2\EOT\227\SOH\EOT.\n\
+    \\EOT\EOT\DC3\STX\SOH\DC2\EOT\196\STX\EOT.\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\SOH\ACK\DC2\EOT\227\SOH\EOT\GS\n\
+    \\ENQ\EOT\DC3\STX\SOH\ACK\DC2\EOT\196\STX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\SOH\SOH\DC2\EOT\227\SOH\RS)\n\
+    \\ENQ\EOT\DC3\STX\SOH\SOH\DC2\EOT\196\STX\RS)\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\SOH\ETX\DC2\EOT\227\SOH,-b\ACKproto3"
+    \\ENQ\EOT\DC3\STX\SOH\ETX\DC2\EOT\196\STX,-\n\
+    \s\n\
+    \\STX\EOT\DC4\DC2\ACK\201\STX\NUL\209\STX\SOH\SUBe Attached to task responses to give hints to the SDK about how it may adjust its number of\n\
+    \ pollers.\n\
+    \\n\
+    \\v\n\
+    \\ETX\EOT\DC4\SOH\DC2\EOT\201\STX\b\GS\n\
+    \\220\STX\n\
+    \\EOT\EOT\DC4\STX\NUL\DC2\EOT\208\STX\STX*\SUB\205\STX How many poll requests to suggest should be added or removed, if any. As of now, server only\n\
+    \ scales up or down by 1. However, SDKs should allow for other values (while staying within\n\
+    \ defined min/max).\n\
+    \\n\
+    \ The SDK is free to ignore this suggestion, EX: making more polls would not make sense because\n\
+    \ all slots are already occupied.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DC4\STX\NUL\ENQ\DC2\EOT\208\STX\STX\a\n\
+    \\r\n\
+    \\ENQ\EOT\DC4\STX\NUL\SOH\DC2\EOT\208\STX\b%\n\
+    \\r\n\
+    \\ENQ\EOT\DC4\STX\NUL\ETX\DC2\EOT\208\STX()b\ACKproto3"

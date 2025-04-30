@@ -975,16 +975,16 @@ packedFileDescriptor
     \\n\
     \TRY_CANCEL\DLE\SOH\DC2\US\n\
     \\ESCWAIT_CANCELLATION_COMPLETED\DLE\STX\DC2\US\n\
-    \\ESCWAIT_CANCELLATION_REQUESTED\DLE\ETXB)\234\STX&Temporalio::Bridge::Api::ChildWorkflowJ\227\DLE\n\
+    \\ESCWAIT_CANCELLATION_REQUESTED\DLE\ETXB3\234\STX0Temporalio::Internal::Bridge::Api::ChildWorkflowJ\227\DLE\n\
     \\ACK\DC2\EOT\NUL\NUL@\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
     \\SOH\STX\DC2\ETX\STX\NUL\US\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ETX\NUL?\n\
+    \\SOH\b\DC2\ETX\ETX\NULI\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\ETX\NUL?\n\
+    \\STX\b-\DC2\ETX\ETX\NULI\n\
     \\t\n\
     \\STX\ETX\NUL\DC2\ETX\ENQ\NUL.\n\
     \\t\n\

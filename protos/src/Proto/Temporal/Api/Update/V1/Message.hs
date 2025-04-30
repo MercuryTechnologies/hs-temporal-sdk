@@ -1760,8 +1760,8 @@ packedFileDescriptor
     \\bResponse\DC20\n\
     \\EOTmeta\CAN\SOH \SOH(\v2\FS.temporal.api.update.v1.MetaR\EOTmeta\DC29\n\
     \\aoutcome\CAN\STX \SOH(\v2\US.temporal.api.update.v1.OutcomeR\aoutcomeB\137\SOH\n\
-    \\EMio.temporal.api.update.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/update/v1;update\170\STX\CANTemporalio.Api.Update.V1\234\STX\ESCTemporalio::Api::Update::V1J\220\RS\n\
-    \\ACK\DC2\EOT\SYN\NULn\SOH\n\
+    \\EMio.temporal.api.update.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/update/v1;update\170\STX\CANTemporalio.Api.Update.V1\234\STX\ESCTemporalio::Api::Update::V1J\184\US\n\
+    \\ACK\DC2\EOT\SYN\NULm\SOH\n\
     \\241\b\n\
     \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
     \\n\
@@ -1818,26 +1818,27 @@ packedFileDescriptor
     \\STX\ETX\SOH\DC2\ETX\"\NUL,\n\
     \\t\n\
     \\STX\ETX\STX\DC2\ETX#\NUL/\n\
-    \\149\SOH\n\
-    \\STX\EOT\NUL\DC2\EOT'\NUL,\SOH\SUB\136\SOH Specifies to the gRPC server how long the client wants the an update-related\n\
-    \ RPC call to wait before returning control to the caller.\n\
+    \C\n\
+    \\STX\EOT\NUL\DC2\EOT&\NUL-\SOH\SUB7 Specifies client's intent to wait for Update results.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX'\b\DC2\n\
-    \i\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX+\EOTT\SUB\\ Indicates the update lifecycle stage that the gRPC call should wait for\n\
-    \ before returning.\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX&\b\DC2\n\
+    \\211\STX\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX,\EOTT\SUB\197\STX Indicates the Update lifecycle stage that the Update must reach before\n\
+    \ API call is returned.\n\
+    \ NOTE: This field works together with API call timeout which is limited by\n\
+    \ server timeout (maximum wait time). If server timeout is expired before\n\
+    \ user specified timeout, API call returns even if specified stage is not reached.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX+\EOT?\n\
+    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX,\EOT?\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX+@O\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX,@O\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX+RS\n\
-    \n\n\
-    \\STX\EOT\SOH\DC2\EOT0\NUL3\SOH\SUBb The data needed by a client to refer to a previously invoked workflow\n\
-    \ execution update process.\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX,RS\n\
+    \[\n\
+    \\STX\EOT\SOH\DC2\EOT0\NUL3\SOH\SUBO The data needed by a client to refer to a previously invoked Workflow Update.\n\
     \\n\
     \\n\
     \\n\
@@ -1859,8 +1860,8 @@ packedFileDescriptor
     \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX2\v\DC4\n\
     \\f\n\
     \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX2\ETB\CAN\n\
-    \D\n\
-    \\STX\EOT\STX\DC2\EOT6\NUL;\SOH\SUB8 The outcome of a workflow update - success or failure.\n\
+    \C\n\
+    \\STX\EOT\STX\DC2\EOT6\NUL;\SOH\SUB7 The outcome of a Workflow Update: success or failure.\n\
     \\n\
     \\n\
     \\n\
@@ -1886,14 +1887,14 @@ packedFileDescriptor
     \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX9(/\n\
     \\f\n\
     \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX923\n\
-    \9\n\
-    \\STX\EOT\ETX\DC2\EOT>\NULD\SOH\SUB- Metadata about a workflow execution update.\n\
+    \/\n\
+    \\STX\EOT\ETX\DC2\EOT>\NULD\SOH\SUB# Metadata about a Workflow Update.\n\
     \\n\
     \\n\
     \\n\
     \\ETX\EOT\ETX\SOH\DC2\ETX>\b\f\n\
-    \D\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETX@\EOT\EM\SUB7 An ID with workflow-scoped uniqueness for this update\n\
+    \E\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETX@\EOT\EM\SUB8 An ID with workflow-scoped uniqueness for this Update.\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX@\EOT\n\
@@ -1903,7 +1904,7 @@ packedFileDescriptor
     \\f\n\
     \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX@\ETB\CAN\n\
     \I\n\
-    \\EOT\EOT\ETX\STX\SOH\DC2\ETXC\EOT\CAN\SUB< A string identifying the agent that requested this update.\n\
+    \\EOT\EOT\ETX\STX\SOH\DC2\ETXC\EOT\CAN\SUB< A string identifying the agent that requested this Update.\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETXC\EOT\n\
@@ -1919,7 +1920,7 @@ packedFileDescriptor
     \\n\
     \\ETX\EOT\EOT\SOH\DC2\ETXF\b\r\n\
     \\137\SOH\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETXI\EOT-\SUB| Headers that are passed with the update from the requesting entity.\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETXI\EOT-\SUB| Headers that are passed with the Update from the requesting entity.\n\
     \ These can include things like auth or tracing tokens.\n\
     \\n\
     \\f\n\
@@ -1928,8 +1929,8 @@ packedFileDescriptor
     \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXI\"(\n\
     \\f\n\
     \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXI+,\n\
-    \M\n\
-    \\EOT\EOT\EOT\STX\SOH\DC2\ETXL\EOT\DC4\SUB@ The name of the input handler to invoke on the target workflow\n\
+    \O\n\
+    \\EOT\EOT\EOT\STX\SOH\DC2\ETXL\EOT\DC4\SUBB The name of the Update handler to invoke on the target Workflow.\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\EOT\STX\SOH\ENQ\DC2\ETXL\EOT\n\
@@ -1938,8 +1939,8 @@ packedFileDescriptor
     \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETXL\v\SI\n\
     \\f\n\
     \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETXL\DC2\DC3\n\
-    \:\n\
-    \\EOT\EOT\EOT\STX\STX\DC2\ETXO\EOT-\SUB- The arguments to pass to the named handler.\n\
+    \A\n\
+    \\EOT\EOT\EOT\STX\STX\DC2\ETXO\EOT-\SUB4 The arguments to pass to the named Update handler.\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\EOT\STX\STX\ACK\DC2\ETXO\EOT#\n\
@@ -1947,8 +1948,8 @@ packedFileDescriptor
     \\ENQ\EOT\EOT\STX\STX\SOH\DC2\ETXO$(\n\
     \\f\n\
     \\ENQ\EOT\EOT\STX\STX\ETX\DC2\ETXO+,\n\
-    \J\n\
-    \\STX\EOT\ENQ\DC2\EOTS\NULV\SOH\SUB> The client request that triggers a workflow execution update\n\
+    \A\n\
+    \\STX\EOT\ENQ\DC2\EOTS\NULV\SOH\SUB5 The client request that triggers a Workflow Update.\n\
     \\n\
     \\n\
     \\n\
@@ -1970,100 +1971,99 @@ packedFileDescriptor
     \\SI\n\
     \\f\n\
     \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETXU\DC2\DC3\n\
-    \h\n\
-    \\STX\EOT\ACK\DC2\EOTZ\NUL_\SOH\SUB\\ An update protocol message indicating that a workflow execution update has\n\
-    \ been rejected.\n\
+    \]\n\
+    \\STX\EOT\ACK\DC2\EOTY\NUL^\SOH\SUBQ An Update protocol message indicating that a Workflow Update has been rejected.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETXZ\b\DC1\n\
+    \\ETX\EOT\ACK\SOH\DC2\ETXY\b\DC1\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\ETX[\EOT+\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\ETXZ\EOT+\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETX[\EOT\n\
+    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETXZ\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETX[\v&\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXZ\v&\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETX[)*\n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXZ)*\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\SOH\DC2\ETX\\\EOT3\n\
+    \\EOT\EOT\ACK\STX\SOH\DC2\ETX[\EOT3\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ENQ\DC2\ETX\\\EOT\t\n\
+    \\ENQ\EOT\ACK\STX\SOH\ENQ\DC2\ETX[\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETX\\\n\
+    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETX[\n\
     \.\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETX\\12\n\
+    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETX[12\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\STX\DC2\ETX]\EOT!\n\
+    \\EOT\EOT\ACK\STX\STX\DC2\ETX\\\EOT!\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\ACK\DC2\ETX]\EOT\v\n\
+    \\ENQ\EOT\ACK\STX\STX\ACK\DC2\ETX\\\EOT\v\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\ETX]\f\FS\n\
+    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\ETX\\\f\FS\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\ETX]\US \n\
+    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\ETX\\\US \n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\ETX\DC2\ETX^\EOT0\n\
+    \\EOT\EOT\ACK\STX\ETX\DC2\ETX]\EOT0\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ETX\ACK\DC2\ETX^\EOT#\n\
+    \\ENQ\EOT\ACK\STX\ETX\ACK\DC2\ETX]\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ETX\SOH\DC2\ETX^$+\n\
+    \\ENQ\EOT\ACK\STX\ETX\SOH\DC2\ETX]$+\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ETX\ETX\DC2\ETX^./\n\
-    \\152\SOH\n\
-    \\STX\EOT\a\DC2\EOTc\NULg\SOH\SUB\139\SOH An update protocol message indicating that a workflow execution update has\n\
+    \\ENQ\EOT\ACK\STX\ETX\ETX\DC2\ETX]./\n\
+    \\142\SOH\n\
+    \\STX\EOT\a\DC2\EOTb\NULf\SOH\SUB\129\SOH An Update protocol message indicating that a Workflow Update has\n\
     \ been accepted (i.e. passed the worker-side validation phase).\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\a\SOH\DC2\ETXc\b\DC2\n\
+    \\ETX\EOT\a\SOH\DC2\ETXb\b\DC2\n\
     \\v\n\
-    \\EOT\EOT\a\STX\NUL\DC2\ETXd\EOT+\n\
+    \\EOT\EOT\a\STX\NUL\DC2\ETXc\EOT+\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETXd\EOT\n\
+    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETXc\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETXd\v&\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETXc\v&\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETXd)*\n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETXc)*\n\
     \\v\n\
-    \\EOT\EOT\a\STX\SOH\DC2\ETXe\EOT3\n\
+    \\EOT\EOT\a\STX\SOH\DC2\ETXd\EOT3\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\ENQ\DC2\ETXe\EOT\t\n\
+    \\ENQ\EOT\a\STX\SOH\ENQ\DC2\ETXd\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\SOH\DC2\ETXe\n\
+    \\ENQ\EOT\a\STX\SOH\SOH\DC2\ETXd\n\
     \.\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\ETX\DC2\ETXe12\n\
+    \\ENQ\EOT\a\STX\SOH\ETX\DC2\ETXd12\n\
     \\v\n\
-    \\EOT\EOT\a\STX\STX\DC2\ETXf\EOT!\n\
+    \\EOT\EOT\a\STX\STX\DC2\ETXe\EOT!\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\STX\ACK\DC2\ETXf\EOT\v\n\
+    \\ENQ\EOT\a\STX\STX\ACK\DC2\ETXe\EOT\v\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\STX\SOH\DC2\ETXf\f\FS\n\
+    \\ENQ\EOT\a\STX\STX\SOH\DC2\ETXe\f\FS\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\STX\ETX\DC2\ETXf\US \n\
-    \\DEL\n\
-    \\STX\EOT\b\DC2\EOTk\NULn\SOH\SUBs An update protocol message indicating that a workflow execution update has\n\
+    \\ENQ\EOT\a\STX\STX\ETX\DC2\ETXe\US \n\
+    \u\n\
+    \\STX\EOT\b\DC2\EOTj\NULm\SOH\SUBi An Update protocol message indicating that a Workflow Update has\n\
     \ completed with the contained outcome.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\b\SOH\DC2\ETXk\b\DLE\n\
+    \\ETX\EOT\b\SOH\DC2\ETXj\b\DLE\n\
     \\v\n\
-    \\EOT\EOT\b\STX\NUL\DC2\ETXl\EOT\DC2\n\
+    \\EOT\EOT\b\STX\NUL\DC2\ETXk\EOT\DC2\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ACK\DC2\ETXl\EOT\b\n\
+    \\ENQ\EOT\b\STX\NUL\ACK\DC2\ETXk\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETXl\t\r\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETXk\t\r\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETXl\DLE\DC1\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETXk\DLE\DC1\n\
     \\v\n\
-    \\EOT\EOT\b\STX\SOH\DC2\ETXm\EOT\CAN\n\
+    \\EOT\EOT\b\STX\SOH\DC2\ETXl\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\ACK\DC2\ETXm\EOT\v\n\
+    \\ENQ\EOT\b\STX\SOH\ACK\DC2\ETXl\EOT\v\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETXm\f\DC3\n\
+    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETXl\f\DC3\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETXm\SYN\ETBb\ACKproto3"
+    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETXl\SYN\ETBb\ACKproto3"

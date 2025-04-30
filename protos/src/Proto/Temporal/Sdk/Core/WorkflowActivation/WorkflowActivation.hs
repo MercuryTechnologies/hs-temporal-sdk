@@ -5,6 +5,7 @@
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
 module Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation (
         CancelWorkflow(), DoUpdate(), DoUpdate'HeadersEntry(), FireTimer(),
+        InitializeWorkflow(), InitializeWorkflow'HeadersEntry(),
         NotifyHasPatch(), QueryWorkflow(), QueryWorkflow'HeadersEntry(),
         RemoveFromCache(), RemoveFromCache'EvictionReason(..),
         RemoveFromCache'EvictionReason(),
@@ -18,13 +19,17 @@ module Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation (
         ResolveChildWorkflowExecutionStartCancelled(),
         ResolveChildWorkflowExecutionStartFailure(),
         ResolveChildWorkflowExecutionStartSuccess(),
+        ResolveNexusOperation(), ResolveNexusOperationStart(),
+        ResolveNexusOperationStart'Status(..),
+        _ResolveNexusOperationStart'OperationId,
+        _ResolveNexusOperationStart'StartedSync,
+        _ResolveNexusOperationStart'CancelledBeforeStart,
         ResolveRequestCancelExternalWorkflow(),
         ResolveSignalExternalWorkflow(), SignalWorkflow(),
-        SignalWorkflow'HeadersEntry(), StartWorkflow(),
-        StartWorkflow'HeadersEntry(), UpdateRandomSeed(),
+        SignalWorkflow'HeadersEntry(), UpdateRandomSeed(),
         WorkflowActivation(), WorkflowActivationJob(),
         WorkflowActivationJob'Variant(..),
-        _WorkflowActivationJob'StartWorkflow,
+        _WorkflowActivationJob'InitializeWorkflow,
         _WorkflowActivationJob'FireTimer,
         _WorkflowActivationJob'UpdateRandomSeed,
         _WorkflowActivationJob'QueryWorkflow,
@@ -37,6 +42,8 @@ module Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation (
         _WorkflowActivationJob'ResolveSignalExternalWorkflow,
         _WorkflowActivationJob'ResolveRequestCancelExternalWorkflow,
         _WorkflowActivationJob'DoUpdate,
+        _WorkflowActivationJob'ResolveNexusOperationStart,
+        _WorkflowActivationJob'ResolveNexusOperation,
         _WorkflowActivationJob'RemoveFromCache
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
@@ -65,6 +72,7 @@ import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Gener
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
 import qualified Proto.Google.Protobuf.Duration
+import qualified Proto.Google.Protobuf.Empty
 import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Temporal.Api.Common.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.Workflow
@@ -73,12 +81,12 @@ import qualified Proto.Temporal.Api.Update.V1.Message
 import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow
 import qualified Proto.Temporal.Sdk.Core.Common.Common
+import qualified Proto.Temporal.Sdk.Core.Nexus.Nexus
 {- | Fields :
      
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.details' @:: Lens' CancelWorkflow [Proto.Temporal.Api.Common.V1.Message.Payload]@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.vec'details' @:: Lens' CancelWorkflow (Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.Payload)@ -}
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.reason' @:: Lens' CancelWorkflow Data.Text.Text@ -}
 data CancelWorkflow
-  = CancelWorkflow'_constructor {_CancelWorkflow'details :: !(Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.Payload),
+  = CancelWorkflow'_constructor {_CancelWorkflow'reason :: !Data.Text.Text,
                                  _CancelWorkflow'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show CancelWorkflow where
@@ -87,64 +95,51 @@ instance Prelude.Show CancelWorkflow where
         '{'
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField CancelWorkflow "details" [Proto.Temporal.Api.Common.V1.Message.Payload] where
+instance Data.ProtoLens.Field.HasField CancelWorkflow "reason" Data.Text.Text where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _CancelWorkflow'details
-           (\ x__ y__ -> x__ {_CancelWorkflow'details = y__}))
-        (Lens.Family2.Unchecked.lens
-           Data.Vector.Generic.toList
-           (\ _ y__ -> Data.Vector.Generic.fromList y__))
-instance Data.ProtoLens.Field.HasField CancelWorkflow "vec'details" (Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _CancelWorkflow'details
-           (\ x__ y__ -> x__ {_CancelWorkflow'details = y__}))
+           _CancelWorkflow'reason
+           (\ x__ y__ -> x__ {_CancelWorkflow'reason = y__}))
         Prelude.id
 instance Data.ProtoLens.Message CancelWorkflow where
   messageName _
     = Data.Text.pack "coresdk.workflow_activation.CancelWorkflow"
   packedMessageDescriptor _
     = "\n\
-      \\SOCancelWorkflow\DC29\n\
-      \\adetails\CAN\SOH \ETX(\v2\US.temporal.api.common.v1.PayloadR\adetails"
+      \\SOCancelWorkflow\DC2\SYN\n\
+      \\ACKreason\CAN\SOH \SOH(\tR\ACKreason"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
-        details__field_descriptor
+        reason__field_descriptor
           = Data.ProtoLens.FieldDescriptor
-              "details"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
-              (Data.ProtoLens.RepeatedField
-                 Data.ProtoLens.Unpacked (Data.ProtoLens.Field.field @"details")) ::
+              "reason"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"reason")) ::
               Data.ProtoLens.FieldDescriptor CancelWorkflow
       in
         Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, details__field_descriptor)]
+          [(Data.ProtoLens.Tag 1, reason__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _CancelWorkflow'_unknownFields
         (\ x__ y__ -> x__ {_CancelWorkflow'_unknownFields = y__})
   defMessage
     = CancelWorkflow'_constructor
-        {_CancelWorkflow'details = Data.Vector.Generic.empty,
+        {_CancelWorkflow'reason = Data.ProtoLens.fieldDefault,
          _CancelWorkflow'_unknownFields = []}
   parseMessage
     = let
         loop ::
           CancelWorkflow
-          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Proto.Temporal.Api.Common.V1.Message.Payload
-             -> Data.ProtoLens.Encoding.Bytes.Parser CancelWorkflow
-        loop x mutable'details
+          -> Data.ProtoLens.Encoding.Bytes.Parser CancelWorkflow
+        loop x
           = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
                if end then
-                   do frozen'details <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                          (Data.ProtoLens.Encoding.Growing.unsafeFreeze
-                                             mutable'details)
-                      (let missing = []
+                   do (let missing = []
                        in
                          if Prelude.null missing then
                              Prelude.return ()
@@ -155,50 +150,44 @@ instance Data.ProtoLens.Message CancelWorkflow where
                                   (Prelude.show (missing :: [Prelude.String]))))
                       Prelude.return
                         (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
-                           (Lens.Family2.set
-                              (Data.ProtoLens.Field.field @"vec'details") frozen'details x))
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
                else
                    do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
                       case tag of
                         10
-                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                            Data.ProtoLens.Encoding.Bytes.isolate
-                                              (Prelude.fromIntegral len)
-                                              Data.ProtoLens.parseMessage)
-                                        "details"
-                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                       (Data.ProtoLens.Encoding.Growing.append mutable'details y)
-                                loop x v
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "reason"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"reason") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
                                 loop
                                   (Lens.Family2.over
                                      Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-                                  mutable'details
       in
         (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do mutable'details <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                   Data.ProtoLens.Encoding.Growing.new
-              loop Data.ProtoLens.defMessage mutable'details)
-          "CancelWorkflow"
+          (do loop Data.ProtoLens.defMessage) "CancelWorkflow"
   buildMessage
     = \ _x
         -> (Data.Monoid.<>)
-             (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                (\ _v
-                   -> (Data.Monoid.<>)
-                        (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                        ((Prelude..)
-                           (\ bs
-                              -> (Data.Monoid.<>)
-                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                           Data.ProtoLens.encodeMessage _v))
-                (Lens.Family2.view (Data.ProtoLens.Field.field @"vec'details") _x))
+             (let
+                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"reason") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
              (Data.ProtoLens.Encoding.Wire.buildFieldSet
                 (Lens.Family2.view Data.ProtoLens.unknownFields _x))
 instance Control.DeepSeq.NFData CancelWorkflow where
@@ -206,7 +195,7 @@ instance Control.DeepSeq.NFData CancelWorkflow where
     = \ x__
         -> Control.DeepSeq.deepseq
              (_CancelWorkflow'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_CancelWorkflow'details x__) ())
+             (Control.DeepSeq.deepseq (_CancelWorkflow'reason x__) ())
 {- | Fields :
      
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.id' @:: Lens' DoUpdate Data.Text.Text@
@@ -916,6 +905,1747 @@ instance Control.DeepSeq.NFData FireTimer where
              (Control.DeepSeq.deepseq (_FireTimer'seq x__) ())
 {- | Fields :
      
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.workflowType' @:: Lens' InitializeWorkflow Data.Text.Text@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.workflowId' @:: Lens' InitializeWorkflow Data.Text.Text@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.arguments' @:: Lens' InitializeWorkflow [Proto.Temporal.Api.Common.V1.Message.Payload]@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.vec'arguments' @:: Lens' InitializeWorkflow (Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.Payload)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.randomnessSeed' @:: Lens' InitializeWorkflow Data.Word.Word64@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.headers' @:: Lens' InitializeWorkflow (Data.Map.Map Data.Text.Text Proto.Temporal.Api.Common.V1.Message.Payload)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.identity' @:: Lens' InitializeWorkflow Data.Text.Text@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.parentWorkflowInfo' @:: Lens' InitializeWorkflow Proto.Temporal.Sdk.Core.Common.Common.NamespacedWorkflowExecution@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'parentWorkflowInfo' @:: Lens' InitializeWorkflow (Prelude.Maybe Proto.Temporal.Sdk.Core.Common.Common.NamespacedWorkflowExecution)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.workflowExecutionTimeout' @:: Lens' InitializeWorkflow Proto.Google.Protobuf.Duration.Duration@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'workflowExecutionTimeout' @:: Lens' InitializeWorkflow (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.workflowRunTimeout' @:: Lens' InitializeWorkflow Proto.Google.Protobuf.Duration.Duration@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'workflowRunTimeout' @:: Lens' InitializeWorkflow (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.workflowTaskTimeout' @:: Lens' InitializeWorkflow Proto.Google.Protobuf.Duration.Duration@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'workflowTaskTimeout' @:: Lens' InitializeWorkflow (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.continuedFromExecutionRunId' @:: Lens' InitializeWorkflow Data.Text.Text@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.continuedInitiator' @:: Lens' InitializeWorkflow Proto.Temporal.Api.Enums.V1.Workflow.ContinueAsNewInitiator@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.continuedFailure' @:: Lens' InitializeWorkflow Proto.Temporal.Api.Failure.V1.Message.Failure@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'continuedFailure' @:: Lens' InitializeWorkflow (Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.lastCompletionResult' @:: Lens' InitializeWorkflow Proto.Temporal.Api.Common.V1.Message.Payloads@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'lastCompletionResult' @:: Lens' InitializeWorkflow (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payloads)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.firstExecutionRunId' @:: Lens' InitializeWorkflow Data.Text.Text@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.retryPolicy' @:: Lens' InitializeWorkflow Proto.Temporal.Api.Common.V1.Message.RetryPolicy@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'retryPolicy' @:: Lens' InitializeWorkflow (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.RetryPolicy)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.attempt' @:: Lens' InitializeWorkflow Data.Int.Int32@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.cronSchedule' @:: Lens' InitializeWorkflow Data.Text.Text@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.workflowExecutionExpirationTime' @:: Lens' InitializeWorkflow Proto.Google.Protobuf.Timestamp.Timestamp@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'workflowExecutionExpirationTime' @:: Lens' InitializeWorkflow (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.cronScheduleToScheduleInterval' @:: Lens' InitializeWorkflow Proto.Google.Protobuf.Duration.Duration@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'cronScheduleToScheduleInterval' @:: Lens' InitializeWorkflow (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.memo' @:: Lens' InitializeWorkflow Proto.Temporal.Api.Common.V1.Message.Memo@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'memo' @:: Lens' InitializeWorkflow (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Memo)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.searchAttributes' @:: Lens' InitializeWorkflow Proto.Temporal.Api.Common.V1.Message.SearchAttributes@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'searchAttributes' @:: Lens' InitializeWorkflow (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.SearchAttributes)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.startTime' @:: Lens' InitializeWorkflow Proto.Google.Protobuf.Timestamp.Timestamp@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'startTime' @:: Lens' InitializeWorkflow (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.rootWorkflow' @:: Lens' InitializeWorkflow Proto.Temporal.Api.Common.V1.Message.WorkflowExecution@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'rootWorkflow' @:: Lens' InitializeWorkflow (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkflowExecution)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.priority' @:: Lens' InitializeWorkflow Proto.Temporal.Api.Common.V1.Message.Priority@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'priority' @:: Lens' InitializeWorkflow (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Priority)@ -}
+data InitializeWorkflow
+  = InitializeWorkflow'_constructor {_InitializeWorkflow'workflowType :: !Data.Text.Text,
+                                     _InitializeWorkflow'workflowId :: !Data.Text.Text,
+                                     _InitializeWorkflow'arguments :: !(Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.Payload),
+                                     _InitializeWorkflow'randomnessSeed :: !Data.Word.Word64,
+                                     _InitializeWorkflow'headers :: !(Data.Map.Map Data.Text.Text Proto.Temporal.Api.Common.V1.Message.Payload),
+                                     _InitializeWorkflow'identity :: !Data.Text.Text,
+                                     _InitializeWorkflow'parentWorkflowInfo :: !(Prelude.Maybe Proto.Temporal.Sdk.Core.Common.Common.NamespacedWorkflowExecution),
+                                     _InitializeWorkflow'workflowExecutionTimeout :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
+                                     _InitializeWorkflow'workflowRunTimeout :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
+                                     _InitializeWorkflow'workflowTaskTimeout :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
+                                     _InitializeWorkflow'continuedFromExecutionRunId :: !Data.Text.Text,
+                                     _InitializeWorkflow'continuedInitiator :: !Proto.Temporal.Api.Enums.V1.Workflow.ContinueAsNewInitiator,
+                                     _InitializeWorkflow'continuedFailure :: !(Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure),
+                                     _InitializeWorkflow'lastCompletionResult :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payloads),
+                                     _InitializeWorkflow'firstExecutionRunId :: !Data.Text.Text,
+                                     _InitializeWorkflow'retryPolicy :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.RetryPolicy),
+                                     _InitializeWorkflow'attempt :: !Data.Int.Int32,
+                                     _InitializeWorkflow'cronSchedule :: !Data.Text.Text,
+                                     _InitializeWorkflow'workflowExecutionExpirationTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                                     _InitializeWorkflow'cronScheduleToScheduleInterval :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
+                                     _InitializeWorkflow'memo :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Memo),
+                                     _InitializeWorkflow'searchAttributes :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.SearchAttributes),
+                                     _InitializeWorkflow'startTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                                     _InitializeWorkflow'rootWorkflow :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkflowExecution),
+                                     _InitializeWorkflow'priority :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Priority),
+                                     _InitializeWorkflow'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show InitializeWorkflow where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "workflowType" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'workflowType
+           (\ x__ y__ -> x__ {_InitializeWorkflow'workflowType = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "workflowId" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'workflowId
+           (\ x__ y__ -> x__ {_InitializeWorkflow'workflowId = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "arguments" [Proto.Temporal.Api.Common.V1.Message.Payload] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'arguments
+           (\ x__ y__ -> x__ {_InitializeWorkflow'arguments = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "vec'arguments" (Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.Payload) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'arguments
+           (\ x__ y__ -> x__ {_InitializeWorkflow'arguments = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "randomnessSeed" Data.Word.Word64 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'randomnessSeed
+           (\ x__ y__ -> x__ {_InitializeWorkflow'randomnessSeed = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "headers" (Data.Map.Map Data.Text.Text Proto.Temporal.Api.Common.V1.Message.Payload) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'headers
+           (\ x__ y__ -> x__ {_InitializeWorkflow'headers = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "identity" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'identity
+           (\ x__ y__ -> x__ {_InitializeWorkflow'identity = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "parentWorkflowInfo" Proto.Temporal.Sdk.Core.Common.Common.NamespacedWorkflowExecution where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'parentWorkflowInfo
+           (\ x__ y__ -> x__ {_InitializeWorkflow'parentWorkflowInfo = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "maybe'parentWorkflowInfo" (Prelude.Maybe Proto.Temporal.Sdk.Core.Common.Common.NamespacedWorkflowExecution) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'parentWorkflowInfo
+           (\ x__ y__ -> x__ {_InitializeWorkflow'parentWorkflowInfo = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "workflowExecutionTimeout" Proto.Google.Protobuf.Duration.Duration where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'workflowExecutionTimeout
+           (\ x__ y__
+              -> x__ {_InitializeWorkflow'workflowExecutionTimeout = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "maybe'workflowExecutionTimeout" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'workflowExecutionTimeout
+           (\ x__ y__
+              -> x__ {_InitializeWorkflow'workflowExecutionTimeout = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "workflowRunTimeout" Proto.Google.Protobuf.Duration.Duration where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'workflowRunTimeout
+           (\ x__ y__ -> x__ {_InitializeWorkflow'workflowRunTimeout = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "maybe'workflowRunTimeout" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'workflowRunTimeout
+           (\ x__ y__ -> x__ {_InitializeWorkflow'workflowRunTimeout = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "workflowTaskTimeout" Proto.Google.Protobuf.Duration.Duration where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'workflowTaskTimeout
+           (\ x__ y__ -> x__ {_InitializeWorkflow'workflowTaskTimeout = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "maybe'workflowTaskTimeout" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'workflowTaskTimeout
+           (\ x__ y__ -> x__ {_InitializeWorkflow'workflowTaskTimeout = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "continuedFromExecutionRunId" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'continuedFromExecutionRunId
+           (\ x__ y__
+              -> x__ {_InitializeWorkflow'continuedFromExecutionRunId = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "continuedInitiator" Proto.Temporal.Api.Enums.V1.Workflow.ContinueAsNewInitiator where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'continuedInitiator
+           (\ x__ y__ -> x__ {_InitializeWorkflow'continuedInitiator = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "continuedFailure" Proto.Temporal.Api.Failure.V1.Message.Failure where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'continuedFailure
+           (\ x__ y__ -> x__ {_InitializeWorkflow'continuedFailure = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "maybe'continuedFailure" (Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'continuedFailure
+           (\ x__ y__ -> x__ {_InitializeWorkflow'continuedFailure = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "lastCompletionResult" Proto.Temporal.Api.Common.V1.Message.Payloads where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'lastCompletionResult
+           (\ x__ y__
+              -> x__ {_InitializeWorkflow'lastCompletionResult = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "maybe'lastCompletionResult" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payloads) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'lastCompletionResult
+           (\ x__ y__
+              -> x__ {_InitializeWorkflow'lastCompletionResult = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "firstExecutionRunId" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'firstExecutionRunId
+           (\ x__ y__ -> x__ {_InitializeWorkflow'firstExecutionRunId = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "retryPolicy" Proto.Temporal.Api.Common.V1.Message.RetryPolicy where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'retryPolicy
+           (\ x__ y__ -> x__ {_InitializeWorkflow'retryPolicy = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "maybe'retryPolicy" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.RetryPolicy) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'retryPolicy
+           (\ x__ y__ -> x__ {_InitializeWorkflow'retryPolicy = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "attempt" Data.Int.Int32 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'attempt
+           (\ x__ y__ -> x__ {_InitializeWorkflow'attempt = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "cronSchedule" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'cronSchedule
+           (\ x__ y__ -> x__ {_InitializeWorkflow'cronSchedule = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "workflowExecutionExpirationTime" Proto.Google.Protobuf.Timestamp.Timestamp where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'workflowExecutionExpirationTime
+           (\ x__ y__
+              -> x__
+                   {_InitializeWorkflow'workflowExecutionExpirationTime = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "maybe'workflowExecutionExpirationTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'workflowExecutionExpirationTime
+           (\ x__ y__
+              -> x__
+                   {_InitializeWorkflow'workflowExecutionExpirationTime = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "cronScheduleToScheduleInterval" Proto.Google.Protobuf.Duration.Duration where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'cronScheduleToScheduleInterval
+           (\ x__ y__
+              -> x__ {_InitializeWorkflow'cronScheduleToScheduleInterval = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "maybe'cronScheduleToScheduleInterval" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'cronScheduleToScheduleInterval
+           (\ x__ y__
+              -> x__ {_InitializeWorkflow'cronScheduleToScheduleInterval = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "memo" Proto.Temporal.Api.Common.V1.Message.Memo where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'memo
+           (\ x__ y__ -> x__ {_InitializeWorkflow'memo = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "maybe'memo" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Memo) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'memo
+           (\ x__ y__ -> x__ {_InitializeWorkflow'memo = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "searchAttributes" Proto.Temporal.Api.Common.V1.Message.SearchAttributes where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'searchAttributes
+           (\ x__ y__ -> x__ {_InitializeWorkflow'searchAttributes = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "maybe'searchAttributes" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.SearchAttributes) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'searchAttributes
+           (\ x__ y__ -> x__ {_InitializeWorkflow'searchAttributes = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "startTime" Proto.Google.Protobuf.Timestamp.Timestamp where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'startTime
+           (\ x__ y__ -> x__ {_InitializeWorkflow'startTime = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "maybe'startTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'startTime
+           (\ x__ y__ -> x__ {_InitializeWorkflow'startTime = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "rootWorkflow" Proto.Temporal.Api.Common.V1.Message.WorkflowExecution where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'rootWorkflow
+           (\ x__ y__ -> x__ {_InitializeWorkflow'rootWorkflow = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "maybe'rootWorkflow" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkflowExecution) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'rootWorkflow
+           (\ x__ y__ -> x__ {_InitializeWorkflow'rootWorkflow = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "priority" Proto.Temporal.Api.Common.V1.Message.Priority where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'priority
+           (\ x__ y__ -> x__ {_InitializeWorkflow'priority = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField InitializeWorkflow "maybe'priority" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Priority) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'priority
+           (\ x__ y__ -> x__ {_InitializeWorkflow'priority = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message InitializeWorkflow where
+  messageName _
+    = Data.Text.pack "coresdk.workflow_activation.InitializeWorkflow"
+  packedMessageDescriptor _
+    = "\n\
+      \\DC2InitializeWorkflow\DC2#\n\
+      \\rworkflow_type\CAN\SOH \SOH(\tR\fworkflowType\DC2\US\n\
+      \\vworkflow_id\CAN\STX \SOH(\tR\n\
+      \workflowId\DC2=\n\
+      \\targuments\CAN\ETX \ETX(\v2\US.temporal.api.common.v1.PayloadR\targuments\DC2'\n\
+      \\SIrandomness_seed\CAN\EOT \SOH(\EOTR\SOrandomnessSeed\DC2V\n\
+      \\aheaders\CAN\ENQ \ETX(\v2<.coresdk.workflow_activation.InitializeWorkflow.HeadersEntryR\aheaders\DC2\SUB\n\
+      \\bidentity\CAN\ACK \SOH(\tR\bidentity\DC2]\n\
+      \\DC4parent_workflow_info\CAN\a \SOH(\v2+.coresdk.common.NamespacedWorkflowExecutionR\DC2parentWorkflowInfo\DC2W\n\
+      \\SUBworkflow_execution_timeout\CAN\b \SOH(\v2\EM.google.protobuf.DurationR\CANworkflowExecutionTimeout\DC2K\n\
+      \\DC4workflow_run_timeout\CAN\t \SOH(\v2\EM.google.protobuf.DurationR\DC2workflowRunTimeout\DC2M\n\
+      \\NAKworkflow_task_timeout\CAN\n\
+      \ \SOH(\v2\EM.google.protobuf.DurationR\DC3workflowTaskTimeout\DC2D\n\
+      \\UScontinued_from_execution_run_id\CAN\v \SOH(\tR\ESCcontinuedFromExecutionRunId\DC2^\n\
+      \\DC3continued_initiator\CAN\f \SOH(\SO2-.temporal.api.enums.v1.ContinueAsNewInitiatorR\DC2continuedInitiator\DC2M\n\
+      \\DC1continued_failure\CAN\r \SOH(\v2 .temporal.api.failure.v1.FailureR\DLEcontinuedFailure\DC2V\n\
+      \\SYNlast_completion_result\CAN\SO \SOH(\v2 .temporal.api.common.v1.PayloadsR\DC4lastCompletionResult\DC23\n\
+      \\SYNfirst_execution_run_id\CAN\SI \SOH(\tR\DC3firstExecutionRunId\DC2F\n\
+      \\fretry_policy\CAN\DLE \SOH(\v2#.temporal.api.common.v1.RetryPolicyR\vretryPolicy\DC2\CAN\n\
+      \\aattempt\CAN\DC1 \SOH(\ENQR\aattempt\DC2#\n\
+      \\rcron_schedule\CAN\DC2 \SOH(\tR\fcronSchedule\DC2g\n\
+      \\"workflow_execution_expiration_time\CAN\DC3 \SOH(\v2\SUB.google.protobuf.TimestampR\USworkflowExecutionExpirationTime\DC2e\n\
+      \\"cron_schedule_to_schedule_interval\CAN\DC4 \SOH(\v2\EM.google.protobuf.DurationR\RScronScheduleToScheduleInterval\DC20\n\
+      \\EOTmemo\CAN\NAK \SOH(\v2\FS.temporal.api.common.v1.MemoR\EOTmemo\DC2U\n\
+      \\DC1search_attributes\CAN\SYN \SOH(\v2(.temporal.api.common.v1.SearchAttributesR\DLEsearchAttributes\DC29\n\
+      \\n\
+      \start_time\CAN\ETB \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTime\DC2N\n\
+      \\rroot_workflow\CAN\CAN \SOH(\v2).temporal.api.common.v1.WorkflowExecutionR\frootWorkflow\DC2<\n\
+      \\bpriority\CAN\EM \SOH(\v2 .temporal.api.common.v1.PriorityR\bpriority\SUB[\n\
+      \\fHeadersEntry\DC2\DLE\n\
+      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
+      \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        workflowType__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "workflow_type"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"workflowType")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        workflowId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "workflow_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"workflowId")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        arguments__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "arguments"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked
+                 (Data.ProtoLens.Field.field @"arguments")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        randomnessSeed__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "randomness_seed"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.UInt64Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Word.Word64)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"randomnessSeed")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        headers__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "headers"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor InitializeWorkflow'HeadersEntry)
+              (Data.ProtoLens.MapField
+                 (Data.ProtoLens.Field.field @"key")
+                 (Data.ProtoLens.Field.field @"value")
+                 (Data.ProtoLens.Field.field @"headers")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        identity__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "identity"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"identity")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        parentWorkflowInfo__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "parent_workflow_info"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Sdk.Core.Common.Common.NamespacedWorkflowExecution)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'parentWorkflowInfo")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        workflowExecutionTimeout__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "workflow_execution_timeout"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'workflowExecutionTimeout")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        workflowRunTimeout__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "workflow_run_timeout"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'workflowRunTimeout")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        workflowTaskTimeout__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "workflow_task_timeout"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'workflowTaskTimeout")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        continuedFromExecutionRunId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "continued_from_execution_run_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"continuedFromExecutionRunId")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        continuedInitiator__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "continued_initiator"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Workflow.ContinueAsNewInitiator)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"continuedInitiator")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        continuedFailure__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "continued_failure"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Failure.V1.Message.Failure)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'continuedFailure")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        lastCompletionResult__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "last_completion_result"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payloads)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'lastCompletionResult")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        firstExecutionRunId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "first_execution_run_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"firstExecutionRunId")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        retryPolicy__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "retry_policy"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.RetryPolicy)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'retryPolicy")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        attempt__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "attempt"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.Int32Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int32)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"attempt")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        cronSchedule__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "cron_schedule"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"cronSchedule")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        workflowExecutionExpirationTime__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "workflow_execution_expiration_time"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field
+                    @"maybe'workflowExecutionExpirationTime")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        cronScheduleToScheduleInterval__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "cron_schedule_to_schedule_interval"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field
+                    @"maybe'cronScheduleToScheduleInterval")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        memo__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "memo"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Memo)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'memo")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        searchAttributes__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "search_attributes"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.SearchAttributes)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'searchAttributes")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        startTime__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "start_time"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'startTime")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        rootWorkflow__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "root_workflow"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.WorkflowExecution)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'rootWorkflow")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+        priority__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "priority"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Priority)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'priority")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, workflowType__field_descriptor),
+           (Data.ProtoLens.Tag 2, workflowId__field_descriptor),
+           (Data.ProtoLens.Tag 3, arguments__field_descriptor),
+           (Data.ProtoLens.Tag 4, randomnessSeed__field_descriptor),
+           (Data.ProtoLens.Tag 5, headers__field_descriptor),
+           (Data.ProtoLens.Tag 6, identity__field_descriptor),
+           (Data.ProtoLens.Tag 7, parentWorkflowInfo__field_descriptor),
+           (Data.ProtoLens.Tag 8, workflowExecutionTimeout__field_descriptor),
+           (Data.ProtoLens.Tag 9, workflowRunTimeout__field_descriptor),
+           (Data.ProtoLens.Tag 10, workflowTaskTimeout__field_descriptor),
+           (Data.ProtoLens.Tag 11, 
+            continuedFromExecutionRunId__field_descriptor),
+           (Data.ProtoLens.Tag 12, continuedInitiator__field_descriptor),
+           (Data.ProtoLens.Tag 13, continuedFailure__field_descriptor),
+           (Data.ProtoLens.Tag 14, lastCompletionResult__field_descriptor),
+           (Data.ProtoLens.Tag 15, firstExecutionRunId__field_descriptor),
+           (Data.ProtoLens.Tag 16, retryPolicy__field_descriptor),
+           (Data.ProtoLens.Tag 17, attempt__field_descriptor),
+           (Data.ProtoLens.Tag 18, cronSchedule__field_descriptor),
+           (Data.ProtoLens.Tag 19, 
+            workflowExecutionExpirationTime__field_descriptor),
+           (Data.ProtoLens.Tag 20, 
+            cronScheduleToScheduleInterval__field_descriptor),
+           (Data.ProtoLens.Tag 21, memo__field_descriptor),
+           (Data.ProtoLens.Tag 22, searchAttributes__field_descriptor),
+           (Data.ProtoLens.Tag 23, startTime__field_descriptor),
+           (Data.ProtoLens.Tag 24, rootWorkflow__field_descriptor),
+           (Data.ProtoLens.Tag 25, priority__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _InitializeWorkflow'_unknownFields
+        (\ x__ y__ -> x__ {_InitializeWorkflow'_unknownFields = y__})
+  defMessage
+    = InitializeWorkflow'_constructor
+        {_InitializeWorkflow'workflowType = Data.ProtoLens.fieldDefault,
+         _InitializeWorkflow'workflowId = Data.ProtoLens.fieldDefault,
+         _InitializeWorkflow'arguments = Data.Vector.Generic.empty,
+         _InitializeWorkflow'randomnessSeed = Data.ProtoLens.fieldDefault,
+         _InitializeWorkflow'headers = Data.Map.empty,
+         _InitializeWorkflow'identity = Data.ProtoLens.fieldDefault,
+         _InitializeWorkflow'parentWorkflowInfo = Prelude.Nothing,
+         _InitializeWorkflow'workflowExecutionTimeout = Prelude.Nothing,
+         _InitializeWorkflow'workflowRunTimeout = Prelude.Nothing,
+         _InitializeWorkflow'workflowTaskTimeout = Prelude.Nothing,
+         _InitializeWorkflow'continuedFromExecutionRunId = Data.ProtoLens.fieldDefault,
+         _InitializeWorkflow'continuedInitiator = Data.ProtoLens.fieldDefault,
+         _InitializeWorkflow'continuedFailure = Prelude.Nothing,
+         _InitializeWorkflow'lastCompletionResult = Prelude.Nothing,
+         _InitializeWorkflow'firstExecutionRunId = Data.ProtoLens.fieldDefault,
+         _InitializeWorkflow'retryPolicy = Prelude.Nothing,
+         _InitializeWorkflow'attempt = Data.ProtoLens.fieldDefault,
+         _InitializeWorkflow'cronSchedule = Data.ProtoLens.fieldDefault,
+         _InitializeWorkflow'workflowExecutionExpirationTime = Prelude.Nothing,
+         _InitializeWorkflow'cronScheduleToScheduleInterval = Prelude.Nothing,
+         _InitializeWorkflow'memo = Prelude.Nothing,
+         _InitializeWorkflow'searchAttributes = Prelude.Nothing,
+         _InitializeWorkflow'startTime = Prelude.Nothing,
+         _InitializeWorkflow'rootWorkflow = Prelude.Nothing,
+         _InitializeWorkflow'priority = Prelude.Nothing,
+         _InitializeWorkflow'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          InitializeWorkflow
+          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Proto.Temporal.Api.Common.V1.Message.Payload
+             -> Data.ProtoLens.Encoding.Bytes.Parser InitializeWorkflow
+        loop x mutable'arguments
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do frozen'arguments <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                            (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                               mutable'arguments)
+                      (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
+                           (Lens.Family2.set
+                              (Data.ProtoLens.Field.field @"vec'arguments") frozen'arguments x))
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "workflow_type"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"workflowType") y x)
+                                  mutable'arguments
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "workflow_id"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"workflowId") y x)
+                                  mutable'arguments
+                        26
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "arguments"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append mutable'arguments y)
+                                loop x v
+                        32
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       Data.ProtoLens.Encoding.Bytes.getVarInt "randomness_seed"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"randomnessSeed") y x)
+                                  mutable'arguments
+                        42
+                          -> do !(entry :: InitializeWorkflow'HeadersEntry) <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                                                                 (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                                                     Data.ProtoLens.Encoding.Bytes.isolate
+                                                                                       (Prelude.fromIntegral
+                                                                                          len)
+                                                                                       Data.ProtoLens.parseMessage)
+                                                                                 "headers"
+                                (let
+                                   key = Lens.Family2.view (Data.ProtoLens.Field.field @"key") entry
+                                   value
+                                     = Lens.Family2.view (Data.ProtoLens.Field.field @"value") entry
+                                 in
+                                   loop
+                                     (Lens.Family2.over
+                                        (Data.ProtoLens.Field.field @"headers")
+                                        (\ !t -> Data.Map.insert key value t) x)
+                                     mutable'arguments)
+                        50
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "identity"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"identity") y x)
+                                  mutable'arguments
+                        58
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "parent_workflow_info"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"parentWorkflowInfo") y x)
+                                  mutable'arguments
+                        66
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "workflow_execution_timeout"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"workflowExecutionTimeout") y x)
+                                  mutable'arguments
+                        74
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "workflow_run_timeout"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"workflowRunTimeout") y x)
+                                  mutable'arguments
+                        82
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "workflow_task_timeout"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"workflowTaskTimeout") y x)
+                                  mutable'arguments
+                        90
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "continued_from_execution_run_id"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"continuedFromExecutionRunId") y
+                                     x)
+                                  mutable'arguments
+                        96
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.toEnum
+                                          (Prelude.fmap
+                                             Prelude.fromIntegral
+                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
+                                       "continued_initiator"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"continuedInitiator") y x)
+                                  mutable'arguments
+                        106
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "continued_failure"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"continuedFailure") y x)
+                                  mutable'arguments
+                        114
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "last_completion_result"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"lastCompletionResult") y x)
+                                  mutable'arguments
+                        122
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "first_execution_run_id"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"firstExecutionRunId") y x)
+                                  mutable'arguments
+                        130
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "retry_policy"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"retryPolicy") y x)
+                                  mutable'arguments
+                        136
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "attempt"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"attempt") y x)
+                                  mutable'arguments
+                        146
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "cron_schedule"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"cronSchedule") y x)
+                                  mutable'arguments
+                        154
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "workflow_execution_expiration_time"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"workflowExecutionExpirationTime")
+                                     y x)
+                                  mutable'arguments
+                        162
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "cron_schedule_to_schedule_interval"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"cronScheduleToScheduleInterval")
+                                     y x)
+                                  mutable'arguments
+                        170
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "memo"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"memo") y x)
+                                  mutable'arguments
+                        178
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "search_attributes"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"searchAttributes") y x)
+                                  mutable'arguments
+                        186
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "start_time"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"startTime") y x)
+                                  mutable'arguments
+                        194
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "root_workflow"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"rootWorkflow") y x)
+                                  mutable'arguments
+                        202
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "priority"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"priority") y x)
+                                  mutable'arguments
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+                                  mutable'arguments
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do mutable'arguments <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                     Data.ProtoLens.Encoding.Growing.new
+              loop Data.ProtoLens.defMessage mutable'arguments)
+          "InitializeWorkflow"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view (Data.ProtoLens.Field.field @"workflowType") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             ((Data.Monoid.<>)
+                (let
+                   _v
+                     = Lens.Family2.view (Data.ProtoLens.Field.field @"workflowId") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                         ((Prelude..)
+                            (\ bs
+                               -> (Data.Monoid.<>)
+                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                            Data.Text.Encoding.encodeUtf8 _v))
+                ((Data.Monoid.<>)
+                   (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                      (\ _v
+                         -> (Data.Monoid.<>)
+                              (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                              ((Prelude..)
+                                 (\ bs
+                                    -> (Data.Monoid.<>)
+                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                            (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                         (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                 Data.ProtoLens.encodeMessage _v))
+                      (Lens.Family2.view
+                         (Data.ProtoLens.Field.field @"vec'arguments") _x))
+                   ((Data.Monoid.<>)
+                      (let
+                         _v
+                           = Lens.Family2.view
+                               (Data.ProtoLens.Field.field @"randomnessSeed") _x
+                       in
+                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                             Data.Monoid.mempty
+                         else
+                             (Data.Monoid.<>)
+                               (Data.ProtoLens.Encoding.Bytes.putVarInt 32)
+                               (Data.ProtoLens.Encoding.Bytes.putVarInt _v))
+                      ((Data.Monoid.<>)
+                         (Data.Monoid.mconcat
+                            (Prelude.map
+                               (\ _v
+                                  -> (Data.Monoid.<>)
+                                       (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
+                                       ((Prelude..)
+                                          (\ bs
+                                             -> (Data.Monoid.<>)
+                                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                     (Prelude.fromIntegral
+                                                        (Data.ByteString.length bs)))
+                                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                          Data.ProtoLens.encodeMessage
+                                          (Lens.Family2.set
+                                             (Data.ProtoLens.Field.field @"key") (Prelude.fst _v)
+                                             (Lens.Family2.set
+                                                (Data.ProtoLens.Field.field @"value")
+                                                (Prelude.snd _v)
+                                                (Data.ProtoLens.defMessage ::
+                                                   InitializeWorkflow'HeadersEntry)))))
+                               (Data.Map.toList
+                                  (Lens.Family2.view (Data.ProtoLens.Field.field @"headers") _x))))
+                         ((Data.Monoid.<>)
+                            (let
+                               _v = Lens.Family2.view (Data.ProtoLens.Field.field @"identity") _x
+                             in
+                               if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                   Data.Monoid.mempty
+                               else
+                                   (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
+                                     ((Prelude..)
+                                        (\ bs
+                                           -> (Data.Monoid.<>)
+                                                (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                   (Prelude.fromIntegral
+                                                      (Data.ByteString.length bs)))
+                                                (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                        Data.Text.Encoding.encodeUtf8 _v))
+                            ((Data.Monoid.<>)
+                               (case
+                                    Lens.Family2.view
+                                      (Data.ProtoLens.Field.field @"maybe'parentWorkflowInfo") _x
+                                of
+                                  Prelude.Nothing -> Data.Monoid.mempty
+                                  (Prelude.Just _v)
+                                    -> (Data.Monoid.<>)
+                                         (Data.ProtoLens.Encoding.Bytes.putVarInt 58)
+                                         ((Prelude..)
+                                            (\ bs
+                                               -> (Data.Monoid.<>)
+                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                       (Prelude.fromIntegral
+                                                          (Data.ByteString.length bs)))
+                                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                            Data.ProtoLens.encodeMessage _v))
+                               ((Data.Monoid.<>)
+                                  (case
+                                       Lens.Family2.view
+                                         (Data.ProtoLens.Field.field
+                                            @"maybe'workflowExecutionTimeout")
+                                         _x
+                                   of
+                                     Prelude.Nothing -> Data.Monoid.mempty
+                                     (Prelude.Just _v)
+                                       -> (Data.Monoid.<>)
+                                            (Data.ProtoLens.Encoding.Bytes.putVarInt 66)
+                                            ((Prelude..)
+                                               (\ bs
+                                                  -> (Data.Monoid.<>)
+                                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                          (Prelude.fromIntegral
+                                                             (Data.ByteString.length bs)))
+                                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                               Data.ProtoLens.encodeMessage _v))
+                                  ((Data.Monoid.<>)
+                                     (case
+                                          Lens.Family2.view
+                                            (Data.ProtoLens.Field.field @"maybe'workflowRunTimeout")
+                                            _x
+                                      of
+                                        Prelude.Nothing -> Data.Monoid.mempty
+                                        (Prelude.Just _v)
+                                          -> (Data.Monoid.<>)
+                                               (Data.ProtoLens.Encoding.Bytes.putVarInt 74)
+                                               ((Prelude..)
+                                                  (\ bs
+                                                     -> (Data.Monoid.<>)
+                                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                             (Prelude.fromIntegral
+                                                                (Data.ByteString.length bs)))
+                                                          (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                             bs))
+                                                  Data.ProtoLens.encodeMessage _v))
+                                     ((Data.Monoid.<>)
+                                        (case
+                                             Lens.Family2.view
+                                               (Data.ProtoLens.Field.field
+                                                  @"maybe'workflowTaskTimeout")
+                                               _x
+                                         of
+                                           Prelude.Nothing -> Data.Monoid.mempty
+                                           (Prelude.Just _v)
+                                             -> (Data.Monoid.<>)
+                                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 82)
+                                                  ((Prelude..)
+                                                     (\ bs
+                                                        -> (Data.Monoid.<>)
+                                                             (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                (Prelude.fromIntegral
+                                                                   (Data.ByteString.length bs)))
+                                                             (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                bs))
+                                                     Data.ProtoLens.encodeMessage _v))
+                                        ((Data.Monoid.<>)
+                                           (let
+                                              _v
+                                                = Lens.Family2.view
+                                                    (Data.ProtoLens.Field.field
+                                                       @"continuedFromExecutionRunId")
+                                                    _x
+                                            in
+                                              if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                                  Data.Monoid.mempty
+                                              else
+                                                  (Data.Monoid.<>)
+                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt 90)
+                                                    ((Prelude..)
+                                                       (\ bs
+                                                          -> (Data.Monoid.<>)
+                                                               (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                  (Prelude.fromIntegral
+                                                                     (Data.ByteString.length bs)))
+                                                               (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                  bs))
+                                                       Data.Text.Encoding.encodeUtf8 _v))
+                                           ((Data.Monoid.<>)
+                                              (let
+                                                 _v
+                                                   = Lens.Family2.view
+                                                       (Data.ProtoLens.Field.field
+                                                          @"continuedInitiator")
+                                                       _x
+                                               in
+                                                 if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                                     Data.Monoid.mempty
+                                                 else
+                                                     (Data.Monoid.<>)
+                                                       (Data.ProtoLens.Encoding.Bytes.putVarInt 96)
+                                                       ((Prelude..)
+                                                          ((Prelude..)
+                                                             Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                             Prelude.fromIntegral)
+                                                          Prelude.fromEnum _v))
+                                              ((Data.Monoid.<>)
+                                                 (case
+                                                      Lens.Family2.view
+                                                        (Data.ProtoLens.Field.field
+                                                           @"maybe'continuedFailure")
+                                                        _x
+                                                  of
+                                                    Prelude.Nothing -> Data.Monoid.mempty
+                                                    (Prelude.Just _v)
+                                                      -> (Data.Monoid.<>)
+                                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                              106)
+                                                           ((Prelude..)
+                                                              (\ bs
+                                                                 -> (Data.Monoid.<>)
+                                                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                         (Prelude.fromIntegral
+                                                                            (Data.ByteString.length
+                                                                               bs)))
+                                                                      (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                         bs))
+                                                              Data.ProtoLens.encodeMessage _v))
+                                                 ((Data.Monoid.<>)
+                                                    (case
+                                                         Lens.Family2.view
+                                                           (Data.ProtoLens.Field.field
+                                                              @"maybe'lastCompletionResult")
+                                                           _x
+                                                     of
+                                                       Prelude.Nothing -> Data.Monoid.mempty
+                                                       (Prelude.Just _v)
+                                                         -> (Data.Monoid.<>)
+                                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                 114)
+                                                              ((Prelude..)
+                                                                 (\ bs
+                                                                    -> (Data.Monoid.<>)
+                                                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                            (Prelude.fromIntegral
+                                                                               (Data.ByteString.length
+                                                                                  bs)))
+                                                                         (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                            bs))
+                                                                 Data.ProtoLens.encodeMessage _v))
+                                                    ((Data.Monoid.<>)
+                                                       (let
+                                                          _v
+                                                            = Lens.Family2.view
+                                                                (Data.ProtoLens.Field.field
+                                                                   @"firstExecutionRunId")
+                                                                _x
+                                                        in
+                                                          if (Prelude.==)
+                                                               _v Data.ProtoLens.fieldDefault then
+                                                              Data.Monoid.mempty
+                                                          else
+                                                              (Data.Monoid.<>)
+                                                                (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                   122)
+                                                                ((Prelude..)
+                                                                   (\ bs
+                                                                      -> (Data.Monoid.<>)
+                                                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                              (Prelude.fromIntegral
+                                                                                 (Data.ByteString.length
+                                                                                    bs)))
+                                                                           (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                              bs))
+                                                                   Data.Text.Encoding.encodeUtf8
+                                                                   _v))
+                                                       ((Data.Monoid.<>)
+                                                          (case
+                                                               Lens.Family2.view
+                                                                 (Data.ProtoLens.Field.field
+                                                                    @"maybe'retryPolicy")
+                                                                 _x
+                                                           of
+                                                             Prelude.Nothing -> Data.Monoid.mempty
+                                                             (Prelude.Just _v)
+                                                               -> (Data.Monoid.<>)
+                                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                       130)
+                                                                    ((Prelude..)
+                                                                       (\ bs
+                                                                          -> (Data.Monoid.<>)
+                                                                               (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                  (Prelude.fromIntegral
+                                                                                     (Data.ByteString.length
+                                                                                        bs)))
+                                                                               (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                  bs))
+                                                                       Data.ProtoLens.encodeMessage
+                                                                       _v))
+                                                          ((Data.Monoid.<>)
+                                                             (let
+                                                                _v
+                                                                  = Lens.Family2.view
+                                                                      (Data.ProtoLens.Field.field
+                                                                         @"attempt")
+                                                                      _x
+                                                              in
+                                                                if (Prelude.==)
+                                                                     _v
+                                                                     Data.ProtoLens.fieldDefault then
+                                                                    Data.Monoid.mempty
+                                                                else
+                                                                    (Data.Monoid.<>)
+                                                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                         136)
+                                                                      ((Prelude..)
+                                                                         Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                         Prelude.fromIntegral _v))
+                                                             ((Data.Monoid.<>)
+                                                                (let
+                                                                   _v
+                                                                     = Lens.Family2.view
+                                                                         (Data.ProtoLens.Field.field
+                                                                            @"cronSchedule")
+                                                                         _x
+                                                                 in
+                                                                   if (Prelude.==)
+                                                                        _v
+                                                                        Data.ProtoLens.fieldDefault then
+                                                                       Data.Monoid.mempty
+                                                                   else
+                                                                       (Data.Monoid.<>)
+                                                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                            146)
+                                                                         ((Prelude..)
+                                                                            (\ bs
+                                                                               -> (Data.Monoid.<>)
+                                                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                       (Prelude.fromIntegral
+                                                                                          (Data.ByteString.length
+                                                                                             bs)))
+                                                                                    (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                       bs))
+                                                                            Data.Text.Encoding.encodeUtf8
+                                                                            _v))
+                                                                ((Data.Monoid.<>)
+                                                                   (case
+                                                                        Lens.Family2.view
+                                                                          (Data.ProtoLens.Field.field
+                                                                             @"maybe'workflowExecutionExpirationTime")
+                                                                          _x
+                                                                    of
+                                                                      Prelude.Nothing
+                                                                        -> Data.Monoid.mempty
+                                                                      (Prelude.Just _v)
+                                                                        -> (Data.Monoid.<>)
+                                                                             (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                154)
+                                                                             ((Prelude..)
+                                                                                (\ bs
+                                                                                   -> (Data.Monoid.<>)
+                                                                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                           (Prelude.fromIntegral
+                                                                                              (Data.ByteString.length
+                                                                                                 bs)))
+                                                                                        (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                           bs))
+                                                                                Data.ProtoLens.encodeMessage
+                                                                                _v))
+                                                                   ((Data.Monoid.<>)
+                                                                      (case
+                                                                           Lens.Family2.view
+                                                                             (Data.ProtoLens.Field.field
+                                                                                @"maybe'cronScheduleToScheduleInterval")
+                                                                             _x
+                                                                       of
+                                                                         Prelude.Nothing
+                                                                           -> Data.Monoid.mempty
+                                                                         (Prelude.Just _v)
+                                                                           -> (Data.Monoid.<>)
+                                                                                (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                   162)
+                                                                                ((Prelude..)
+                                                                                   (\ bs
+                                                                                      -> (Data.Monoid.<>)
+                                                                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                              (Prelude.fromIntegral
+                                                                                                 (Data.ByteString.length
+                                                                                                    bs)))
+                                                                                           (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                              bs))
+                                                                                   Data.ProtoLens.encodeMessage
+                                                                                   _v))
+                                                                      ((Data.Monoid.<>)
+                                                                         (case
+                                                                              Lens.Family2.view
+                                                                                (Data.ProtoLens.Field.field
+                                                                                   @"maybe'memo")
+                                                                                _x
+                                                                          of
+                                                                            Prelude.Nothing
+                                                                              -> Data.Monoid.mempty
+                                                                            (Prelude.Just _v)
+                                                                              -> (Data.Monoid.<>)
+                                                                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                      170)
+                                                                                   ((Prelude..)
+                                                                                      (\ bs
+                                                                                         -> (Data.Monoid.<>)
+                                                                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                                 (Prelude.fromIntegral
+                                                                                                    (Data.ByteString.length
+                                                                                                       bs)))
+                                                                                              (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                                 bs))
+                                                                                      Data.ProtoLens.encodeMessage
+                                                                                      _v))
+                                                                         ((Data.Monoid.<>)
+                                                                            (case
+                                                                                 Lens.Family2.view
+                                                                                   (Data.ProtoLens.Field.field
+                                                                                      @"maybe'searchAttributes")
+                                                                                   _x
+                                                                             of
+                                                                               Prelude.Nothing
+                                                                                 -> Data.Monoid.mempty
+                                                                               (Prelude.Just _v)
+                                                                                 -> (Data.Monoid.<>)
+                                                                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                         178)
+                                                                                      ((Prelude..)
+                                                                                         (\ bs
+                                                                                            -> (Data.Monoid.<>)
+                                                                                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                                    (Prelude.fromIntegral
+                                                                                                       (Data.ByteString.length
+                                                                                                          bs)))
+                                                                                                 (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                                    bs))
+                                                                                         Data.ProtoLens.encodeMessage
+                                                                                         _v))
+                                                                            ((Data.Monoid.<>)
+                                                                               (case
+                                                                                    Lens.Family2.view
+                                                                                      (Data.ProtoLens.Field.field
+                                                                                         @"maybe'startTime")
+                                                                                      _x
+                                                                                of
+                                                                                  Prelude.Nothing
+                                                                                    -> Data.Monoid.mempty
+                                                                                  (Prelude.Just _v)
+                                                                                    -> (Data.Monoid.<>)
+                                                                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                            186)
+                                                                                         ((Prelude..)
+                                                                                            (\ bs
+                                                                                               -> (Data.Monoid.<>)
+                                                                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                                       (Prelude.fromIntegral
+                                                                                                          (Data.ByteString.length
+                                                                                                             bs)))
+                                                                                                    (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                                       bs))
+                                                                                            Data.ProtoLens.encodeMessage
+                                                                                            _v))
+                                                                               ((Data.Monoid.<>)
+                                                                                  (case
+                                                                                       Lens.Family2.view
+                                                                                         (Data.ProtoLens.Field.field
+                                                                                            @"maybe'rootWorkflow")
+                                                                                         _x
+                                                                                   of
+                                                                                     Prelude.Nothing
+                                                                                       -> Data.Monoid.mempty
+                                                                                     (Prelude.Just _v)
+                                                                                       -> (Data.Monoid.<>)
+                                                                                            (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                               194)
+                                                                                            ((Prelude..)
+                                                                                               (\ bs
+                                                                                                  -> (Data.Monoid.<>)
+                                                                                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                                          (Prelude.fromIntegral
+                                                                                                             (Data.ByteString.length
+                                                                                                                bs)))
+                                                                                                       (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                                          bs))
+                                                                                               Data.ProtoLens.encodeMessage
+                                                                                               _v))
+                                                                                  ((Data.Monoid.<>)
+                                                                                     (case
+                                                                                          Lens.Family2.view
+                                                                                            (Data.ProtoLens.Field.field
+                                                                                               @"maybe'priority")
+                                                                                            _x
+                                                                                      of
+                                                                                        Prelude.Nothing
+                                                                                          -> Data.Monoid.mempty
+                                                                                        (Prelude.Just _v)
+                                                                                          -> (Data.Monoid.<>)
+                                                                                               (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                                  202)
+                                                                                               ((Prelude..)
+                                                                                                  (\ bs
+                                                                                                     -> (Data.Monoid.<>)
+                                                                                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                                             (Prelude.fromIntegral
+                                                                                                                (Data.ByteString.length
+                                                                                                                   bs)))
+                                                                                                          (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                                             bs))
+                                                                                                  Data.ProtoLens.encodeMessage
+                                                                                                  _v))
+                                                                                     (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                                                                                        (Lens.Family2.view
+                                                                                           Data.ProtoLens.unknownFields
+                                                                                           _x))))))))))))))))))))))))))
+instance Control.DeepSeq.NFData InitializeWorkflow where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_InitializeWorkflow'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_InitializeWorkflow'workflowType x__)
+                (Control.DeepSeq.deepseq
+                   (_InitializeWorkflow'workflowId x__)
+                   (Control.DeepSeq.deepseq
+                      (_InitializeWorkflow'arguments x__)
+                      (Control.DeepSeq.deepseq
+                         (_InitializeWorkflow'randomnessSeed x__)
+                         (Control.DeepSeq.deepseq
+                            (_InitializeWorkflow'headers x__)
+                            (Control.DeepSeq.deepseq
+                               (_InitializeWorkflow'identity x__)
+                               (Control.DeepSeq.deepseq
+                                  (_InitializeWorkflow'parentWorkflowInfo x__)
+                                  (Control.DeepSeq.deepseq
+                                     (_InitializeWorkflow'workflowExecutionTimeout x__)
+                                     (Control.DeepSeq.deepseq
+                                        (_InitializeWorkflow'workflowRunTimeout x__)
+                                        (Control.DeepSeq.deepseq
+                                           (_InitializeWorkflow'workflowTaskTimeout x__)
+                                           (Control.DeepSeq.deepseq
+                                              (_InitializeWorkflow'continuedFromExecutionRunId x__)
+                                              (Control.DeepSeq.deepseq
+                                                 (_InitializeWorkflow'continuedInitiator x__)
+                                                 (Control.DeepSeq.deepseq
+                                                    (_InitializeWorkflow'continuedFailure x__)
+                                                    (Control.DeepSeq.deepseq
+                                                       (_InitializeWorkflow'lastCompletionResult
+                                                          x__)
+                                                       (Control.DeepSeq.deepseq
+                                                          (_InitializeWorkflow'firstExecutionRunId
+                                                             x__)
+                                                          (Control.DeepSeq.deepseq
+                                                             (_InitializeWorkflow'retryPolicy x__)
+                                                             (Control.DeepSeq.deepseq
+                                                                (_InitializeWorkflow'attempt x__)
+                                                                (Control.DeepSeq.deepseq
+                                                                   (_InitializeWorkflow'cronSchedule
+                                                                      x__)
+                                                                   (Control.DeepSeq.deepseq
+                                                                      (_InitializeWorkflow'workflowExecutionExpirationTime
+                                                                         x__)
+                                                                      (Control.DeepSeq.deepseq
+                                                                         (_InitializeWorkflow'cronScheduleToScheduleInterval
+                                                                            x__)
+                                                                         (Control.DeepSeq.deepseq
+                                                                            (_InitializeWorkflow'memo
+                                                                               x__)
+                                                                            (Control.DeepSeq.deepseq
+                                                                               (_InitializeWorkflow'searchAttributes
+                                                                                  x__)
+                                                                               (Control.DeepSeq.deepseq
+                                                                                  (_InitializeWorkflow'startTime
+                                                                                     x__)
+                                                                                  (Control.DeepSeq.deepseq
+                                                                                     (_InitializeWorkflow'rootWorkflow
+                                                                                        x__)
+                                                                                     (Control.DeepSeq.deepseq
+                                                                                        (_InitializeWorkflow'priority
+                                                                                           x__)
+                                                                                        ())))))))))))))))))))))))))
+{- | Fields :
+     
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.key' @:: Lens' InitializeWorkflow'HeadersEntry Data.Text.Text@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.value' @:: Lens' InitializeWorkflow'HeadersEntry Proto.Temporal.Api.Common.V1.Message.Payload@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'value' @:: Lens' InitializeWorkflow'HeadersEntry (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payload)@ -}
+data InitializeWorkflow'HeadersEntry
+  = InitializeWorkflow'HeadersEntry'_constructor {_InitializeWorkflow'HeadersEntry'key :: !Data.Text.Text,
+                                                  _InitializeWorkflow'HeadersEntry'value :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payload),
+                                                  _InitializeWorkflow'HeadersEntry'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show InitializeWorkflow'HeadersEntry where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField InitializeWorkflow'HeadersEntry "key" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'HeadersEntry'key
+           (\ x__ y__ -> x__ {_InitializeWorkflow'HeadersEntry'key = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField InitializeWorkflow'HeadersEntry "value" Proto.Temporal.Api.Common.V1.Message.Payload where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'HeadersEntry'value
+           (\ x__ y__ -> x__ {_InitializeWorkflow'HeadersEntry'value = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField InitializeWorkflow'HeadersEntry "maybe'value" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payload) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InitializeWorkflow'HeadersEntry'value
+           (\ x__ y__ -> x__ {_InitializeWorkflow'HeadersEntry'value = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message InitializeWorkflow'HeadersEntry where
+  messageName _
+    = Data.Text.pack
+        "coresdk.workflow_activation.InitializeWorkflow.HeadersEntry"
+  packedMessageDescriptor _
+    = "\n\
+      \\fHeadersEntry\DC2\DLE\n\
+      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
+      \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        key__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "key"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"key")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow'HeadersEntry
+        value__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "value"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'value")) ::
+              Data.ProtoLens.FieldDescriptor InitializeWorkflow'HeadersEntry
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, key__field_descriptor),
+           (Data.ProtoLens.Tag 2, value__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _InitializeWorkflow'HeadersEntry'_unknownFields
+        (\ x__ y__
+           -> x__ {_InitializeWorkflow'HeadersEntry'_unknownFields = y__})
+  defMessage
+    = InitializeWorkflow'HeadersEntry'_constructor
+        {_InitializeWorkflow'HeadersEntry'key = Data.ProtoLens.fieldDefault,
+         _InitializeWorkflow'HeadersEntry'value = Prelude.Nothing,
+         _InitializeWorkflow'HeadersEntry'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          InitializeWorkflow'HeadersEntry
+          -> Data.ProtoLens.Encoding.Bytes.Parser InitializeWorkflow'HeadersEntry
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "key"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"key") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "value"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"value") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "HeadersEntry"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"key") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'value") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just _v)
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData InitializeWorkflow'HeadersEntry where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_InitializeWorkflow'HeadersEntry'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_InitializeWorkflow'HeadersEntry'key x__)
+                (Control.DeepSeq.deepseq
+                   (_InitializeWorkflow'HeadersEntry'value x__) ()))
+{- | Fields :
+     
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.patchId' @:: Lens' NotifyHasPatch Data.Text.Text@ -}
 data NotifyHasPatch
   = NotifyHasPatch'_constructor {_NotifyHasPatch'patchId :: !Data.Text.Text,
@@ -1531,7 +3261,7 @@ instance Data.ProtoLens.Message RemoveFromCache where
     = "\n\
       \\SIRemoveFromCache\DC2\CAN\n\
       \\amessage\CAN\SOH \SOH(\tR\amessage\DC2S\n\
-      \\ACKreason\CAN\STX \SOH(\SO2;.coresdk.workflow_activation.RemoveFromCache.EvictionReasonR\ACKreason\"\207\SOH\n\
+      \\ACKreason\CAN\STX \SOH(\SO2;.coresdk.workflow_activation.RemoveFromCache.EvictionReasonR\ACKreason\"\238\SOH\n\
       \\SOEvictionReason\DC2\SI\n\
       \\vUNSPECIFIED\DLE\NUL\DC2\SO\n\
       \\n\
@@ -1544,7 +3274,8 @@ instance Data.ProtoLens.Message RemoveFromCache where
       \\SOTASK_NOT_FOUND\DLE\ACK\DC2\NAK\n\
       \\DC1UNHANDLED_COMMAND\DLE\a\DC2\t\n\
       \\ENQFATAL\DLE\b\DC2\US\n\
-      \\ESCPAGINATION_OR_HISTORY_FETCH\DLE\t"
+      \\ESCPAGINATION_OR_HISTORY_FETCH\DLE\t\DC2\GS\n\
+      \\EMWORKFLOW_EXECUTION_ENDING\DLE\n"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -1680,6 +3411,7 @@ data RemoveFromCache'EvictionReason
     RemoveFromCache'UNHANDLED_COMMAND |
     RemoveFromCache'FATAL |
     RemoveFromCache'PAGINATION_OR_HISTORY_FETCH |
+    RemoveFromCache'WORKFLOW_EXECUTION_ENDING |
     RemoveFromCache'EvictionReason'Unrecognized !RemoveFromCache'EvictionReason'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum RemoveFromCache'EvictionReason where
@@ -1694,6 +3426,8 @@ instance Data.ProtoLens.MessageEnum RemoveFromCache'EvictionReason where
   maybeToEnum 8 = Prelude.Just RemoveFromCache'FATAL
   maybeToEnum 9
     = Prelude.Just RemoveFromCache'PAGINATION_OR_HISTORY_FETCH
+  maybeToEnum 10
+    = Prelude.Just RemoveFromCache'WORKFLOW_EXECUTION_ENDING
   maybeToEnum k
     = Prelude.Just
         (RemoveFromCache'EvictionReason'Unrecognized
@@ -1710,6 +3444,8 @@ instance Data.ProtoLens.MessageEnum RemoveFromCache'EvictionReason where
   showEnum RemoveFromCache'FATAL = "FATAL"
   showEnum RemoveFromCache'PAGINATION_OR_HISTORY_FETCH
     = "PAGINATION_OR_HISTORY_FETCH"
+  showEnum RemoveFromCache'WORKFLOW_EXECUTION_ENDING
+    = "WORKFLOW_EXECUTION_ENDING"
   showEnum
     (RemoveFromCache'EvictionReason'Unrecognized (RemoveFromCache'EvictionReason'UnrecognizedValue k))
     = Prelude.show k
@@ -1733,11 +3469,13 @@ instance Data.ProtoLens.MessageEnum RemoveFromCache'EvictionReason where
     | (Prelude.==) k "FATAL" = Prelude.Just RemoveFromCache'FATAL
     | (Prelude.==) k "PAGINATION_OR_HISTORY_FETCH"
     = Prelude.Just RemoveFromCache'PAGINATION_OR_HISTORY_FETCH
+    | (Prelude.==) k "WORKFLOW_EXECUTION_ENDING"
+    = Prelude.Just RemoveFromCache'WORKFLOW_EXECUTION_ENDING
     | Prelude.otherwise
     = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
 instance Prelude.Bounded RemoveFromCache'EvictionReason where
   minBound = RemoveFromCache'UNSPECIFIED
-  maxBound = RemoveFromCache'PAGINATION_OR_HISTORY_FETCH
+  maxBound = RemoveFromCache'WORKFLOW_EXECUTION_ENDING
 instance Prelude.Enum RemoveFromCache'EvictionReason where
   toEnum k__
     = Prelude.maybe
@@ -1756,12 +3494,13 @@ instance Prelude.Enum RemoveFromCache'EvictionReason where
   fromEnum RemoveFromCache'UNHANDLED_COMMAND = 7
   fromEnum RemoveFromCache'FATAL = 8
   fromEnum RemoveFromCache'PAGINATION_OR_HISTORY_FETCH = 9
+  fromEnum RemoveFromCache'WORKFLOW_EXECUTION_ENDING = 10
   fromEnum
     (RemoveFromCache'EvictionReason'Unrecognized (RemoveFromCache'EvictionReason'UnrecognizedValue k))
     = Prelude.fromIntegral k
-  succ RemoveFromCache'PAGINATION_OR_HISTORY_FETCH
+  succ RemoveFromCache'WORKFLOW_EXECUTION_ENDING
     = Prelude.error
-        "RemoveFromCache'EvictionReason.succ: bad argument RemoveFromCache'PAGINATION_OR_HISTORY_FETCH. This value would be out of bounds."
+        "RemoveFromCache'EvictionReason.succ: bad argument RemoveFromCache'WORKFLOW_EXECUTION_ENDING. This value would be out of bounds."
   succ RemoveFromCache'UNSPECIFIED = RemoveFromCache'CACHE_FULL
   succ RemoveFromCache'CACHE_FULL = RemoveFromCache'CACHE_MISS
   succ RemoveFromCache'CACHE_MISS = RemoveFromCache'NONDETERMINISM
@@ -1774,6 +3513,8 @@ instance Prelude.Enum RemoveFromCache'EvictionReason where
   succ RemoveFromCache'UNHANDLED_COMMAND = RemoveFromCache'FATAL
   succ RemoveFromCache'FATAL
     = RemoveFromCache'PAGINATION_OR_HISTORY_FETCH
+  succ RemoveFromCache'PAGINATION_OR_HISTORY_FETCH
+    = RemoveFromCache'WORKFLOW_EXECUTION_ENDING
   succ (RemoveFromCache'EvictionReason'Unrecognized _)
     = Prelude.error
         "RemoveFromCache'EvictionReason.succ: bad argument: unrecognized value"
@@ -1792,6 +3533,8 @@ instance Prelude.Enum RemoveFromCache'EvictionReason where
   pred RemoveFromCache'FATAL = RemoveFromCache'UNHANDLED_COMMAND
   pred RemoveFromCache'PAGINATION_OR_HISTORY_FETCH
     = RemoveFromCache'FATAL
+  pred RemoveFromCache'WORKFLOW_EXECUTION_ENDING
+    = RemoveFromCache'PAGINATION_OR_HISTORY_FETCH
   pred (RemoveFromCache'EvictionReason'Unrecognized _)
     = Prelude.error
         "RemoveFromCache'EvictionReason.pred: bad argument: unrecognized value"
@@ -1807,10 +3550,12 @@ instance Control.DeepSeq.NFData RemoveFromCache'EvictionReason where
      
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.seq' @:: Lens' ResolveActivity Data.Word.Word32@
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.result' @:: Lens' ResolveActivity Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult.ActivityResolution@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'result' @:: Lens' ResolveActivity (Prelude.Maybe Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult.ActivityResolution)@ -}
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'result' @:: Lens' ResolveActivity (Prelude.Maybe Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult.ActivityResolution)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.isLocal' @:: Lens' ResolveActivity Prelude.Bool@ -}
 data ResolveActivity
   = ResolveActivity'_constructor {_ResolveActivity'seq :: !Data.Word.Word32,
                                   _ResolveActivity'result :: !(Prelude.Maybe Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult.ActivityResolution),
+                                  _ResolveActivity'isLocal :: !Prelude.Bool,
                                   _ResolveActivity'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show ResolveActivity where
@@ -1840,6 +3585,13 @@ instance Data.ProtoLens.Field.HasField ResolveActivity "maybe'result" (Prelude.M
            _ResolveActivity'result
            (\ x__ y__ -> x__ {_ResolveActivity'result = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField ResolveActivity "isLocal" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResolveActivity'isLocal
+           (\ x__ y__ -> x__ {_ResolveActivity'isLocal = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message ResolveActivity where
   messageName _
     = Data.Text.pack "coresdk.workflow_activation.ResolveActivity"
@@ -1847,7 +3599,8 @@ instance Data.ProtoLens.Message ResolveActivity where
     = "\n\
       \\SIResolveActivity\DC2\DLE\n\
       \\ETXseq\CAN\SOH \SOH(\rR\ETXseq\DC2C\n\
-      \\ACKresult\CAN\STX \SOH(\v2+.coresdk.activity_result.ActivityResolutionR\ACKresult"
+      \\ACKresult\CAN\STX \SOH(\v2+.coresdk.activity_result.ActivityResolutionR\ACKresult\DC2\EM\n\
+      \\bis_local\CAN\ETX \SOH(\bR\aisLocal"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -1867,10 +3620,19 @@ instance Data.ProtoLens.Message ResolveActivity where
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'result")) ::
               Data.ProtoLens.FieldDescriptor ResolveActivity
+        isLocal__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "is_local"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"isLocal")) ::
+              Data.ProtoLens.FieldDescriptor ResolveActivity
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, seq__field_descriptor),
-           (Data.ProtoLens.Tag 2, result__field_descriptor)]
+           (Data.ProtoLens.Tag 2, result__field_descriptor),
+           (Data.ProtoLens.Tag 3, isLocal__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _ResolveActivity'_unknownFields
@@ -1879,6 +3641,7 @@ instance Data.ProtoLens.Message ResolveActivity where
     = ResolveActivity'_constructor
         {_ResolveActivity'seq = Data.ProtoLens.fieldDefault,
          _ResolveActivity'result = Prelude.Nothing,
+         _ResolveActivity'isLocal = Data.ProtoLens.fieldDefault,
          _ResolveActivity'_unknownFields = []}
   parseMessage
     = let
@@ -1916,6 +3679,12 @@ instance Data.ProtoLens.Message ResolveActivity where
                                              (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
                                        "result"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"result") y x)
+                        24
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "is_local"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"isLocal") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -1952,8 +3721,20 @@ instance Data.ProtoLens.Message ResolveActivity where
                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                              Data.ProtoLens.encodeMessage _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+                ((Data.Monoid.<>)
+                   (let
+                      _v = Lens.Family2.view (Data.ProtoLens.Field.field @"isLocal") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
+                            ((Prelude..)
+                               Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
+                               _v))
+                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
 instance Control.DeepSeq.NFData ResolveActivity where
   rnf
     = \ x__
@@ -1961,7 +3742,9 @@ instance Control.DeepSeq.NFData ResolveActivity where
              (_ResolveActivity'_unknownFields x__)
              (Control.DeepSeq.deepseq
                 (_ResolveActivity'seq x__)
-                (Control.DeepSeq.deepseq (_ResolveActivity'result x__) ()))
+                (Control.DeepSeq.deepseq
+                   (_ResolveActivity'result x__)
+                   (Control.DeepSeq.deepseq (_ResolveActivity'isLocal x__) ())))
 {- | Fields :
      
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.seq' @:: Lens' ResolveChildWorkflowExecution Data.Word.Word32@
@@ -2953,6 +4736,514 @@ instance Control.DeepSeq.NFData ResolveChildWorkflowExecutionStartSuccess where
                 (_ResolveChildWorkflowExecutionStartSuccess'runId x__) ())
 {- | Fields :
      
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.seq' @:: Lens' ResolveNexusOperation Data.Word.Word32@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.result' @:: Lens' ResolveNexusOperation Proto.Temporal.Sdk.Core.Nexus.Nexus.NexusOperationResult@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'result' @:: Lens' ResolveNexusOperation (Prelude.Maybe Proto.Temporal.Sdk.Core.Nexus.Nexus.NexusOperationResult)@ -}
+data ResolveNexusOperation
+  = ResolveNexusOperation'_constructor {_ResolveNexusOperation'seq :: !Data.Word.Word32,
+                                        _ResolveNexusOperation'result :: !(Prelude.Maybe Proto.Temporal.Sdk.Core.Nexus.Nexus.NexusOperationResult),
+                                        _ResolveNexusOperation'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show ResolveNexusOperation where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField ResolveNexusOperation "seq" Data.Word.Word32 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResolveNexusOperation'seq
+           (\ x__ y__ -> x__ {_ResolveNexusOperation'seq = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ResolveNexusOperation "result" Proto.Temporal.Sdk.Core.Nexus.Nexus.NexusOperationResult where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResolveNexusOperation'result
+           (\ x__ y__ -> x__ {_ResolveNexusOperation'result = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField ResolveNexusOperation "maybe'result" (Prelude.Maybe Proto.Temporal.Sdk.Core.Nexus.Nexus.NexusOperationResult) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResolveNexusOperation'result
+           (\ x__ y__ -> x__ {_ResolveNexusOperation'result = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message ResolveNexusOperation where
+  messageName _
+    = Data.Text.pack
+        "coresdk.workflow_activation.ResolveNexusOperation"
+  packedMessageDescriptor _
+    = "\n\
+      \\NAKResolveNexusOperation\DC2\DLE\n\
+      \\ETXseq\CAN\SOH \SOH(\rR\ETXseq\DC2;\n\
+      \\ACKresult\CAN\STX \SOH(\v2#.coresdk.nexus.NexusOperationResultR\ACKresult"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        seq__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "seq"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.UInt32Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Word.Word32)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"seq")) ::
+              Data.ProtoLens.FieldDescriptor ResolveNexusOperation
+        result__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "result"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Sdk.Core.Nexus.Nexus.NexusOperationResult)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'result")) ::
+              Data.ProtoLens.FieldDescriptor ResolveNexusOperation
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, seq__field_descriptor),
+           (Data.ProtoLens.Tag 2, result__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _ResolveNexusOperation'_unknownFields
+        (\ x__ y__ -> x__ {_ResolveNexusOperation'_unknownFields = y__})
+  defMessage
+    = ResolveNexusOperation'_constructor
+        {_ResolveNexusOperation'seq = Data.ProtoLens.fieldDefault,
+         _ResolveNexusOperation'result = Prelude.Nothing,
+         _ResolveNexusOperation'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          ResolveNexusOperation
+          -> Data.ProtoLens.Encoding.Bytes.Parser ResolveNexusOperation
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "seq"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"seq") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "result"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"result") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "ResolveNexusOperation"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"seq") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
+                      ((Prelude..)
+                         Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'result") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just _v)
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData ResolveNexusOperation where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_ResolveNexusOperation'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_ResolveNexusOperation'seq x__)
+                (Control.DeepSeq.deepseq (_ResolveNexusOperation'result x__) ()))
+{- | Fields :
+     
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.seq' @:: Lens' ResolveNexusOperationStart Data.Word.Word32@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'status' @:: Lens' ResolveNexusOperationStart (Prelude.Maybe ResolveNexusOperationStart'Status)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'operationId' @:: Lens' ResolveNexusOperationStart (Prelude.Maybe Data.Text.Text)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.operationId' @:: Lens' ResolveNexusOperationStart Data.Text.Text@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'startedSync' @:: Lens' ResolveNexusOperationStart (Prelude.Maybe Prelude.Bool)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.startedSync' @:: Lens' ResolveNexusOperationStart Prelude.Bool@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'cancelledBeforeStart' @:: Lens' ResolveNexusOperationStart (Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.cancelledBeforeStart' @:: Lens' ResolveNexusOperationStart Proto.Temporal.Api.Failure.V1.Message.Failure@ -}
+data ResolveNexusOperationStart
+  = ResolveNexusOperationStart'_constructor {_ResolveNexusOperationStart'seq :: !Data.Word.Word32,
+                                             _ResolveNexusOperationStart'status :: !(Prelude.Maybe ResolveNexusOperationStart'Status),
+                                             _ResolveNexusOperationStart'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show ResolveNexusOperationStart where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+data ResolveNexusOperationStart'Status
+  = ResolveNexusOperationStart'OperationId !Data.Text.Text |
+    ResolveNexusOperationStart'StartedSync !Prelude.Bool |
+    ResolveNexusOperationStart'CancelledBeforeStart !Proto.Temporal.Api.Failure.V1.Message.Failure
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.Field.HasField ResolveNexusOperationStart "seq" Data.Word.Word32 where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResolveNexusOperationStart'seq
+           (\ x__ y__ -> x__ {_ResolveNexusOperationStart'seq = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ResolveNexusOperationStart "maybe'status" (Prelude.Maybe ResolveNexusOperationStart'Status) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResolveNexusOperationStart'status
+           (\ x__ y__ -> x__ {_ResolveNexusOperationStart'status = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ResolveNexusOperationStart "maybe'operationId" (Prelude.Maybe Data.Text.Text) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResolveNexusOperationStart'status
+           (\ x__ y__ -> x__ {_ResolveNexusOperationStart'status = y__}))
+        (Lens.Family2.Unchecked.lens
+           (\ x__
+              -> case x__ of
+                   (Prelude.Just (ResolveNexusOperationStart'OperationId x__val))
+                     -> Prelude.Just x__val
+                   _otherwise -> Prelude.Nothing)
+           (\ _ y__
+              -> Prelude.fmap ResolveNexusOperationStart'OperationId y__))
+instance Data.ProtoLens.Field.HasField ResolveNexusOperationStart "operationId" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResolveNexusOperationStart'status
+           (\ x__ y__ -> x__ {_ResolveNexusOperationStart'status = y__}))
+        ((Prelude..)
+           (Lens.Family2.Unchecked.lens
+              (\ x__
+                 -> case x__ of
+                      (Prelude.Just (ResolveNexusOperationStart'OperationId x__val))
+                        -> Prelude.Just x__val
+                      _otherwise -> Prelude.Nothing)
+              (\ _ y__
+                 -> Prelude.fmap ResolveNexusOperationStart'OperationId y__))
+           (Data.ProtoLens.maybeLens Data.ProtoLens.fieldDefault))
+instance Data.ProtoLens.Field.HasField ResolveNexusOperationStart "maybe'startedSync" (Prelude.Maybe Prelude.Bool) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResolveNexusOperationStart'status
+           (\ x__ y__ -> x__ {_ResolveNexusOperationStart'status = y__}))
+        (Lens.Family2.Unchecked.lens
+           (\ x__
+              -> case x__ of
+                   (Prelude.Just (ResolveNexusOperationStart'StartedSync x__val))
+                     -> Prelude.Just x__val
+                   _otherwise -> Prelude.Nothing)
+           (\ _ y__
+              -> Prelude.fmap ResolveNexusOperationStart'StartedSync y__))
+instance Data.ProtoLens.Field.HasField ResolveNexusOperationStart "startedSync" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResolveNexusOperationStart'status
+           (\ x__ y__ -> x__ {_ResolveNexusOperationStart'status = y__}))
+        ((Prelude..)
+           (Lens.Family2.Unchecked.lens
+              (\ x__
+                 -> case x__ of
+                      (Prelude.Just (ResolveNexusOperationStart'StartedSync x__val))
+                        -> Prelude.Just x__val
+                      _otherwise -> Prelude.Nothing)
+              (\ _ y__
+                 -> Prelude.fmap ResolveNexusOperationStart'StartedSync y__))
+           (Data.ProtoLens.maybeLens Data.ProtoLens.fieldDefault))
+instance Data.ProtoLens.Field.HasField ResolveNexusOperationStart "maybe'cancelledBeforeStart" (Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResolveNexusOperationStart'status
+           (\ x__ y__ -> x__ {_ResolveNexusOperationStart'status = y__}))
+        (Lens.Family2.Unchecked.lens
+           (\ x__
+              -> case x__ of
+                   (Prelude.Just (ResolveNexusOperationStart'CancelledBeforeStart x__val))
+                     -> Prelude.Just x__val
+                   _otherwise -> Prelude.Nothing)
+           (\ _ y__
+              -> Prelude.fmap
+                   ResolveNexusOperationStart'CancelledBeforeStart y__))
+instance Data.ProtoLens.Field.HasField ResolveNexusOperationStart "cancelledBeforeStart" Proto.Temporal.Api.Failure.V1.Message.Failure where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ResolveNexusOperationStart'status
+           (\ x__ y__ -> x__ {_ResolveNexusOperationStart'status = y__}))
+        ((Prelude..)
+           (Lens.Family2.Unchecked.lens
+              (\ x__
+                 -> case x__ of
+                      (Prelude.Just (ResolveNexusOperationStart'CancelledBeforeStart x__val))
+                        -> Prelude.Just x__val
+                      _otherwise -> Prelude.Nothing)
+              (\ _ y__
+                 -> Prelude.fmap
+                      ResolveNexusOperationStart'CancelledBeforeStart y__))
+           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
+instance Data.ProtoLens.Message ResolveNexusOperationStart where
+  messageName _
+    = Data.Text.pack
+        "coresdk.workflow_activation.ResolveNexusOperationStart"
+  packedMessageDescriptor _
+    = "\n\
+      \\SUBResolveNexusOperationStart\DC2\DLE\n\
+      \\ETXseq\CAN\SOH \SOH(\rR\ETXseq\DC2#\n\
+      \\foperation_id\CAN\STX \SOH(\tH\NULR\voperationId\DC2#\n\
+      \\fstarted_sync\CAN\ETX \SOH(\bH\NULR\vstartedSync\DC2X\n\
+      \\SYNcancelled_before_start\CAN\EOT \SOH(\v2 .temporal.api.failure.v1.FailureH\NULR\DC4cancelledBeforeStartB\b\n\
+      \\ACKstatus"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        seq__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "seq"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.UInt32Field ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Word.Word32)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"seq")) ::
+              Data.ProtoLens.FieldDescriptor ResolveNexusOperationStart
+        operationId__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "operation_id"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'operationId")) ::
+              Data.ProtoLens.FieldDescriptor ResolveNexusOperationStart
+        startedSync__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "started_sync"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'startedSync")) ::
+              Data.ProtoLens.FieldDescriptor ResolveNexusOperationStart
+        cancelledBeforeStart__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "cancelled_before_start"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Failure.V1.Message.Failure)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'cancelledBeforeStart")) ::
+              Data.ProtoLens.FieldDescriptor ResolveNexusOperationStart
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, seq__field_descriptor),
+           (Data.ProtoLens.Tag 2, operationId__field_descriptor),
+           (Data.ProtoLens.Tag 3, startedSync__field_descriptor),
+           (Data.ProtoLens.Tag 4, cancelledBeforeStart__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _ResolveNexusOperationStart'_unknownFields
+        (\ x__ y__
+           -> x__ {_ResolveNexusOperationStart'_unknownFields = y__})
+  defMessage
+    = ResolveNexusOperationStart'_constructor
+        {_ResolveNexusOperationStart'seq = Data.ProtoLens.fieldDefault,
+         _ResolveNexusOperationStart'status = Prelude.Nothing,
+         _ResolveNexusOperationStart'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          ResolveNexusOperationStart
+          -> Data.ProtoLens.Encoding.Bytes.Parser ResolveNexusOperationStart
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.fromIntegral
+                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "seq"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"seq") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "operation_id"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"operationId") y x)
+                        24
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "started_sync"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"startedSync") y x)
+                        34
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "cancelled_before_start"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"cancelledBeforeStart") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "ResolveNexusOperationStart"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"seq") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
+                      ((Prelude..)
+                         Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'status") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just (ResolveNexusOperationStart'OperationId v))
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.Text.Encoding.encodeUtf8 v)
+                   (Prelude.Just (ResolveNexusOperationStart'StartedSync v))
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
+                          ((Prelude..)
+                             Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
+                             v)
+                   (Prelude.Just (ResolveNexusOperationStart'CancelledBeforeStart v))
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData ResolveNexusOperationStart where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_ResolveNexusOperationStart'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_ResolveNexusOperationStart'seq x__)
+                (Control.DeepSeq.deepseq
+                   (_ResolveNexusOperationStart'status x__) ()))
+instance Control.DeepSeq.NFData ResolveNexusOperationStart'Status where
+  rnf (ResolveNexusOperationStart'OperationId x__)
+    = Control.DeepSeq.rnf x__
+  rnf (ResolveNexusOperationStart'StartedSync x__)
+    = Control.DeepSeq.rnf x__
+  rnf (ResolveNexusOperationStart'CancelledBeforeStart x__)
+    = Control.DeepSeq.rnf x__
+_ResolveNexusOperationStart'OperationId ::
+  Data.ProtoLens.Prism.Prism' ResolveNexusOperationStart'Status Data.Text.Text
+_ResolveNexusOperationStart'OperationId
+  = Data.ProtoLens.Prism.prism'
+      ResolveNexusOperationStart'OperationId
+      (\ p__
+         -> case p__ of
+              (ResolveNexusOperationStart'OperationId p__val)
+                -> Prelude.Just p__val
+              _otherwise -> Prelude.Nothing)
+_ResolveNexusOperationStart'StartedSync ::
+  Data.ProtoLens.Prism.Prism' ResolveNexusOperationStart'Status Prelude.Bool
+_ResolveNexusOperationStart'StartedSync
+  = Data.ProtoLens.Prism.prism'
+      ResolveNexusOperationStart'StartedSync
+      (\ p__
+         -> case p__ of
+              (ResolveNexusOperationStart'StartedSync p__val)
+                -> Prelude.Just p__val
+              _otherwise -> Prelude.Nothing)
+_ResolveNexusOperationStart'CancelledBeforeStart ::
+  Data.ProtoLens.Prism.Prism' ResolveNexusOperationStart'Status Proto.Temporal.Api.Failure.V1.Message.Failure
+_ResolveNexusOperationStart'CancelledBeforeStart
+  = Data.ProtoLens.Prism.prism'
+      ResolveNexusOperationStart'CancelledBeforeStart
+      (\ p__
+         -> case p__ of
+              (ResolveNexusOperationStart'CancelledBeforeStart p__val)
+                -> Prelude.Just p__val
+              _otherwise -> Prelude.Nothing)
+{- | Fields :
+     
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.seq' @:: Lens' ResolveRequestCancelExternalWorkflow Data.Word.Word32@
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.failure' @:: Lens' ResolveRequestCancelExternalWorkflow Proto.Temporal.Api.Failure.V1.Message.Failure@
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'failure' @:: Lens' ResolveRequestCancelExternalWorkflow (Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure)@ -}
@@ -3748,1607 +6039,6 @@ instance Control.DeepSeq.NFData SignalWorkflow'HeadersEntry where
                    (_SignalWorkflow'HeadersEntry'value x__) ()))
 {- | Fields :
      
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.workflowType' @:: Lens' StartWorkflow Data.Text.Text@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.workflowId' @:: Lens' StartWorkflow Data.Text.Text@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.arguments' @:: Lens' StartWorkflow [Proto.Temporal.Api.Common.V1.Message.Payload]@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.vec'arguments' @:: Lens' StartWorkflow (Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.Payload)@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.randomnessSeed' @:: Lens' StartWorkflow Data.Word.Word64@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.headers' @:: Lens' StartWorkflow (Data.Map.Map Data.Text.Text Proto.Temporal.Api.Common.V1.Message.Payload)@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.identity' @:: Lens' StartWorkflow Data.Text.Text@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.parentWorkflowInfo' @:: Lens' StartWorkflow Proto.Temporal.Sdk.Core.Common.Common.NamespacedWorkflowExecution@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'parentWorkflowInfo' @:: Lens' StartWorkflow (Prelude.Maybe Proto.Temporal.Sdk.Core.Common.Common.NamespacedWorkflowExecution)@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.workflowExecutionTimeout' @:: Lens' StartWorkflow Proto.Google.Protobuf.Duration.Duration@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'workflowExecutionTimeout' @:: Lens' StartWorkflow (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.workflowRunTimeout' @:: Lens' StartWorkflow Proto.Google.Protobuf.Duration.Duration@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'workflowRunTimeout' @:: Lens' StartWorkflow (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.workflowTaskTimeout' @:: Lens' StartWorkflow Proto.Google.Protobuf.Duration.Duration@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'workflowTaskTimeout' @:: Lens' StartWorkflow (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.continuedFromExecutionRunId' @:: Lens' StartWorkflow Data.Text.Text@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.continuedInitiator' @:: Lens' StartWorkflow Proto.Temporal.Api.Enums.V1.Workflow.ContinueAsNewInitiator@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.continuedFailure' @:: Lens' StartWorkflow Proto.Temporal.Api.Failure.V1.Message.Failure@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'continuedFailure' @:: Lens' StartWorkflow (Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure)@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.lastCompletionResult' @:: Lens' StartWorkflow Proto.Temporal.Api.Common.V1.Message.Payloads@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'lastCompletionResult' @:: Lens' StartWorkflow (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payloads)@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.firstExecutionRunId' @:: Lens' StartWorkflow Data.Text.Text@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.retryPolicy' @:: Lens' StartWorkflow Proto.Temporal.Api.Common.V1.Message.RetryPolicy@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'retryPolicy' @:: Lens' StartWorkflow (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.RetryPolicy)@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.attempt' @:: Lens' StartWorkflow Data.Int.Int32@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.cronSchedule' @:: Lens' StartWorkflow Data.Text.Text@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.workflowExecutionExpirationTime' @:: Lens' StartWorkflow Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'workflowExecutionExpirationTime' @:: Lens' StartWorkflow (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.cronScheduleToScheduleInterval' @:: Lens' StartWorkflow Proto.Google.Protobuf.Duration.Duration@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'cronScheduleToScheduleInterval' @:: Lens' StartWorkflow (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.memo' @:: Lens' StartWorkflow Proto.Temporal.Api.Common.V1.Message.Memo@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'memo' @:: Lens' StartWorkflow (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Memo)@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.searchAttributes' @:: Lens' StartWorkflow Proto.Temporal.Api.Common.V1.Message.SearchAttributes@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'searchAttributes' @:: Lens' StartWorkflow (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.SearchAttributes)@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.startTime' @:: Lens' StartWorkflow Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'startTime' @:: Lens' StartWorkflow (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@ -}
-data StartWorkflow
-  = StartWorkflow'_constructor {_StartWorkflow'workflowType :: !Data.Text.Text,
-                                _StartWorkflow'workflowId :: !Data.Text.Text,
-                                _StartWorkflow'arguments :: !(Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.Payload),
-                                _StartWorkflow'randomnessSeed :: !Data.Word.Word64,
-                                _StartWorkflow'headers :: !(Data.Map.Map Data.Text.Text Proto.Temporal.Api.Common.V1.Message.Payload),
-                                _StartWorkflow'identity :: !Data.Text.Text,
-                                _StartWorkflow'parentWorkflowInfo :: !(Prelude.Maybe Proto.Temporal.Sdk.Core.Common.Common.NamespacedWorkflowExecution),
-                                _StartWorkflow'workflowExecutionTimeout :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
-                                _StartWorkflow'workflowRunTimeout :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
-                                _StartWorkflow'workflowTaskTimeout :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
-                                _StartWorkflow'continuedFromExecutionRunId :: !Data.Text.Text,
-                                _StartWorkflow'continuedInitiator :: !Proto.Temporal.Api.Enums.V1.Workflow.ContinueAsNewInitiator,
-                                _StartWorkflow'continuedFailure :: !(Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure),
-                                _StartWorkflow'lastCompletionResult :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payloads),
-                                _StartWorkflow'firstExecutionRunId :: !Data.Text.Text,
-                                _StartWorkflow'retryPolicy :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.RetryPolicy),
-                                _StartWorkflow'attempt :: !Data.Int.Int32,
-                                _StartWorkflow'cronSchedule :: !Data.Text.Text,
-                                _StartWorkflow'workflowExecutionExpirationTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                _StartWorkflow'cronScheduleToScheduleInterval :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
-                                _StartWorkflow'memo :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Memo),
-                                _StartWorkflow'searchAttributes :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.SearchAttributes),
-                                _StartWorkflow'startTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                _StartWorkflow'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show StartWorkflow where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField StartWorkflow "workflowType" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'workflowType
-           (\ x__ y__ -> x__ {_StartWorkflow'workflowType = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "workflowId" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'workflowId
-           (\ x__ y__ -> x__ {_StartWorkflow'workflowId = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "arguments" [Proto.Temporal.Api.Common.V1.Message.Payload] where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'arguments
-           (\ x__ y__ -> x__ {_StartWorkflow'arguments = y__}))
-        (Lens.Family2.Unchecked.lens
-           Data.Vector.Generic.toList
-           (\ _ y__ -> Data.Vector.Generic.fromList y__))
-instance Data.ProtoLens.Field.HasField StartWorkflow "vec'arguments" (Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'arguments
-           (\ x__ y__ -> x__ {_StartWorkflow'arguments = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "randomnessSeed" Data.Word.Word64 where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'randomnessSeed
-           (\ x__ y__ -> x__ {_StartWorkflow'randomnessSeed = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "headers" (Data.Map.Map Data.Text.Text Proto.Temporal.Api.Common.V1.Message.Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'headers
-           (\ x__ y__ -> x__ {_StartWorkflow'headers = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "identity" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'identity
-           (\ x__ y__ -> x__ {_StartWorkflow'identity = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "parentWorkflowInfo" Proto.Temporal.Sdk.Core.Common.Common.NamespacedWorkflowExecution where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'parentWorkflowInfo
-           (\ x__ y__ -> x__ {_StartWorkflow'parentWorkflowInfo = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField StartWorkflow "maybe'parentWorkflowInfo" (Prelude.Maybe Proto.Temporal.Sdk.Core.Common.Common.NamespacedWorkflowExecution) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'parentWorkflowInfo
-           (\ x__ y__ -> x__ {_StartWorkflow'parentWorkflowInfo = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "workflowExecutionTimeout" Proto.Google.Protobuf.Duration.Duration where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'workflowExecutionTimeout
-           (\ x__ y__ -> x__ {_StartWorkflow'workflowExecutionTimeout = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField StartWorkflow "maybe'workflowExecutionTimeout" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'workflowExecutionTimeout
-           (\ x__ y__ -> x__ {_StartWorkflow'workflowExecutionTimeout = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "workflowRunTimeout" Proto.Google.Protobuf.Duration.Duration where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'workflowRunTimeout
-           (\ x__ y__ -> x__ {_StartWorkflow'workflowRunTimeout = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField StartWorkflow "maybe'workflowRunTimeout" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'workflowRunTimeout
-           (\ x__ y__ -> x__ {_StartWorkflow'workflowRunTimeout = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "workflowTaskTimeout" Proto.Google.Protobuf.Duration.Duration where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'workflowTaskTimeout
-           (\ x__ y__ -> x__ {_StartWorkflow'workflowTaskTimeout = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField StartWorkflow "maybe'workflowTaskTimeout" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'workflowTaskTimeout
-           (\ x__ y__ -> x__ {_StartWorkflow'workflowTaskTimeout = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "continuedFromExecutionRunId" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'continuedFromExecutionRunId
-           (\ x__ y__
-              -> x__ {_StartWorkflow'continuedFromExecutionRunId = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "continuedInitiator" Proto.Temporal.Api.Enums.V1.Workflow.ContinueAsNewInitiator where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'continuedInitiator
-           (\ x__ y__ -> x__ {_StartWorkflow'continuedInitiator = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "continuedFailure" Proto.Temporal.Api.Failure.V1.Message.Failure where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'continuedFailure
-           (\ x__ y__ -> x__ {_StartWorkflow'continuedFailure = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField StartWorkflow "maybe'continuedFailure" (Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'continuedFailure
-           (\ x__ y__ -> x__ {_StartWorkflow'continuedFailure = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "lastCompletionResult" Proto.Temporal.Api.Common.V1.Message.Payloads where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'lastCompletionResult
-           (\ x__ y__ -> x__ {_StartWorkflow'lastCompletionResult = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField StartWorkflow "maybe'lastCompletionResult" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payloads) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'lastCompletionResult
-           (\ x__ y__ -> x__ {_StartWorkflow'lastCompletionResult = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "firstExecutionRunId" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'firstExecutionRunId
-           (\ x__ y__ -> x__ {_StartWorkflow'firstExecutionRunId = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "retryPolicy" Proto.Temporal.Api.Common.V1.Message.RetryPolicy where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'retryPolicy
-           (\ x__ y__ -> x__ {_StartWorkflow'retryPolicy = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField StartWorkflow "maybe'retryPolicy" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.RetryPolicy) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'retryPolicy
-           (\ x__ y__ -> x__ {_StartWorkflow'retryPolicy = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "attempt" Data.Int.Int32 where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'attempt
-           (\ x__ y__ -> x__ {_StartWorkflow'attempt = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "cronSchedule" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'cronSchedule
-           (\ x__ y__ -> x__ {_StartWorkflow'cronSchedule = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "workflowExecutionExpirationTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'workflowExecutionExpirationTime
-           (\ x__ y__
-              -> x__ {_StartWorkflow'workflowExecutionExpirationTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField StartWorkflow "maybe'workflowExecutionExpirationTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'workflowExecutionExpirationTime
-           (\ x__ y__
-              -> x__ {_StartWorkflow'workflowExecutionExpirationTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "cronScheduleToScheduleInterval" Proto.Google.Protobuf.Duration.Duration where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'cronScheduleToScheduleInterval
-           (\ x__ y__
-              -> x__ {_StartWorkflow'cronScheduleToScheduleInterval = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField StartWorkflow "maybe'cronScheduleToScheduleInterval" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'cronScheduleToScheduleInterval
-           (\ x__ y__
-              -> x__ {_StartWorkflow'cronScheduleToScheduleInterval = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "memo" Proto.Temporal.Api.Common.V1.Message.Memo where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'memo (\ x__ y__ -> x__ {_StartWorkflow'memo = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField StartWorkflow "maybe'memo" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Memo) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'memo (\ x__ y__ -> x__ {_StartWorkflow'memo = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "searchAttributes" Proto.Temporal.Api.Common.V1.Message.SearchAttributes where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'searchAttributes
-           (\ x__ y__ -> x__ {_StartWorkflow'searchAttributes = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField StartWorkflow "maybe'searchAttributes" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.SearchAttributes) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'searchAttributes
-           (\ x__ y__ -> x__ {_StartWorkflow'searchAttributes = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow "startTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'startTime
-           (\ x__ y__ -> x__ {_StartWorkflow'startTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField StartWorkflow "maybe'startTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'startTime
-           (\ x__ y__ -> x__ {_StartWorkflow'startTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message StartWorkflow where
-  messageName _
-    = Data.Text.pack "coresdk.workflow_activation.StartWorkflow"
-  packedMessageDescriptor _
-    = "\n\
-      \\rStartWorkflow\DC2#\n\
-      \\rworkflow_type\CAN\SOH \SOH(\tR\fworkflowType\DC2\US\n\
-      \\vworkflow_id\CAN\STX \SOH(\tR\n\
-      \workflowId\DC2=\n\
-      \\targuments\CAN\ETX \ETX(\v2\US.temporal.api.common.v1.PayloadR\targuments\DC2'\n\
-      \\SIrandomness_seed\CAN\EOT \SOH(\EOTR\SOrandomnessSeed\DC2Q\n\
-      \\aheaders\CAN\ENQ \ETX(\v27.coresdk.workflow_activation.StartWorkflow.HeadersEntryR\aheaders\DC2\SUB\n\
-      \\bidentity\CAN\ACK \SOH(\tR\bidentity\DC2]\n\
-      \\DC4parent_workflow_info\CAN\a \SOH(\v2+.coresdk.common.NamespacedWorkflowExecutionR\DC2parentWorkflowInfo\DC2W\n\
-      \\SUBworkflow_execution_timeout\CAN\b \SOH(\v2\EM.google.protobuf.DurationR\CANworkflowExecutionTimeout\DC2K\n\
-      \\DC4workflow_run_timeout\CAN\t \SOH(\v2\EM.google.protobuf.DurationR\DC2workflowRunTimeout\DC2M\n\
-      \\NAKworkflow_task_timeout\CAN\n\
-      \ \SOH(\v2\EM.google.protobuf.DurationR\DC3workflowTaskTimeout\DC2D\n\
-      \\UScontinued_from_execution_run_id\CAN\v \SOH(\tR\ESCcontinuedFromExecutionRunId\DC2^\n\
-      \\DC3continued_initiator\CAN\f \SOH(\SO2-.temporal.api.enums.v1.ContinueAsNewInitiatorR\DC2continuedInitiator\DC2M\n\
-      \\DC1continued_failure\CAN\r \SOH(\v2 .temporal.api.failure.v1.FailureR\DLEcontinuedFailure\DC2V\n\
-      \\SYNlast_completion_result\CAN\SO \SOH(\v2 .temporal.api.common.v1.PayloadsR\DC4lastCompletionResult\DC23\n\
-      \\SYNfirst_execution_run_id\CAN\SI \SOH(\tR\DC3firstExecutionRunId\DC2F\n\
-      \\fretry_policy\CAN\DLE \SOH(\v2#.temporal.api.common.v1.RetryPolicyR\vretryPolicy\DC2\CAN\n\
-      \\aattempt\CAN\DC1 \SOH(\ENQR\aattempt\DC2#\n\
-      \\rcron_schedule\CAN\DC2 \SOH(\tR\fcronSchedule\DC2g\n\
-      \\"workflow_execution_expiration_time\CAN\DC3 \SOH(\v2\SUB.google.protobuf.TimestampR\USworkflowExecutionExpirationTime\DC2e\n\
-      \\"cron_schedule_to_schedule_interval\CAN\DC4 \SOH(\v2\EM.google.protobuf.DurationR\RScronScheduleToScheduleInterval\DC20\n\
-      \\EOTmemo\CAN\NAK \SOH(\v2\FS.temporal.api.common.v1.MemoR\EOTmemo\DC2U\n\
-      \\DC1search_attributes\CAN\SYN \SOH(\v2(.temporal.api.common.v1.SearchAttributesR\DLEsearchAttributes\DC29\n\
-      \\n\
-      \start_time\CAN\ETB \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTime\SUB[\n\
-      \\fHeadersEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-      \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        workflowType__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "workflow_type"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"workflowType")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        workflowId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "workflow_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"workflowId")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        arguments__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "arguments"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
-              (Data.ProtoLens.RepeatedField
-                 Data.ProtoLens.Unpacked
-                 (Data.ProtoLens.Field.field @"arguments")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        randomnessSeed__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "randomness_seed"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.UInt64Field ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Word.Word64)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"randomnessSeed")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        headers__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "headers"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor StartWorkflow'HeadersEntry)
-              (Data.ProtoLens.MapField
-                 (Data.ProtoLens.Field.field @"key")
-                 (Data.ProtoLens.Field.field @"value")
-                 (Data.ProtoLens.Field.field @"headers")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        identity__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "identity"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"identity")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        parentWorkflowInfo__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "parent_workflow_info"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Sdk.Core.Common.Common.NamespacedWorkflowExecution)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'parentWorkflowInfo")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        workflowExecutionTimeout__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "workflow_execution_timeout"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'workflowExecutionTimeout")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        workflowRunTimeout__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "workflow_run_timeout"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'workflowRunTimeout")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        workflowTaskTimeout__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "workflow_task_timeout"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'workflowTaskTimeout")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        continuedFromExecutionRunId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "continued_from_execution_run_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"continuedFromExecutionRunId")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        continuedInitiator__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "continued_initiator"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Workflow.ContinueAsNewInitiator)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"continuedInitiator")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        continuedFailure__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "continued_failure"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Failure.V1.Message.Failure)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'continuedFailure")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        lastCompletionResult__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "last_completion_result"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payloads)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'lastCompletionResult")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        firstExecutionRunId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "first_execution_run_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"firstExecutionRunId")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        retryPolicy__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "retry_policy"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.RetryPolicy)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'retryPolicy")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        attempt__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "attempt"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.Int32Field ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int32)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"attempt")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        cronSchedule__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "cron_schedule"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"cronSchedule")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        workflowExecutionExpirationTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "workflow_execution_expiration_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field
-                    @"maybe'workflowExecutionExpirationTime")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        cronScheduleToScheduleInterval__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "cron_schedule_to_schedule_interval"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field
-                    @"maybe'cronScheduleToScheduleInterval")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        memo__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "memo"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Memo)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'memo")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        searchAttributes__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "search_attributes"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.SearchAttributes)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'searchAttributes")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-        startTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "start_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'startTime")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, workflowType__field_descriptor),
-           (Data.ProtoLens.Tag 2, workflowId__field_descriptor),
-           (Data.ProtoLens.Tag 3, arguments__field_descriptor),
-           (Data.ProtoLens.Tag 4, randomnessSeed__field_descriptor),
-           (Data.ProtoLens.Tag 5, headers__field_descriptor),
-           (Data.ProtoLens.Tag 6, identity__field_descriptor),
-           (Data.ProtoLens.Tag 7, parentWorkflowInfo__field_descriptor),
-           (Data.ProtoLens.Tag 8, workflowExecutionTimeout__field_descriptor),
-           (Data.ProtoLens.Tag 9, workflowRunTimeout__field_descriptor),
-           (Data.ProtoLens.Tag 10, workflowTaskTimeout__field_descriptor),
-           (Data.ProtoLens.Tag 11, 
-            continuedFromExecutionRunId__field_descriptor),
-           (Data.ProtoLens.Tag 12, continuedInitiator__field_descriptor),
-           (Data.ProtoLens.Tag 13, continuedFailure__field_descriptor),
-           (Data.ProtoLens.Tag 14, lastCompletionResult__field_descriptor),
-           (Data.ProtoLens.Tag 15, firstExecutionRunId__field_descriptor),
-           (Data.ProtoLens.Tag 16, retryPolicy__field_descriptor),
-           (Data.ProtoLens.Tag 17, attempt__field_descriptor),
-           (Data.ProtoLens.Tag 18, cronSchedule__field_descriptor),
-           (Data.ProtoLens.Tag 19, 
-            workflowExecutionExpirationTime__field_descriptor),
-           (Data.ProtoLens.Tag 20, 
-            cronScheduleToScheduleInterval__field_descriptor),
-           (Data.ProtoLens.Tag 21, memo__field_descriptor),
-           (Data.ProtoLens.Tag 22, searchAttributes__field_descriptor),
-           (Data.ProtoLens.Tag 23, startTime__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _StartWorkflow'_unknownFields
-        (\ x__ y__ -> x__ {_StartWorkflow'_unknownFields = y__})
-  defMessage
-    = StartWorkflow'_constructor
-        {_StartWorkflow'workflowType = Data.ProtoLens.fieldDefault,
-         _StartWorkflow'workflowId = Data.ProtoLens.fieldDefault,
-         _StartWorkflow'arguments = Data.Vector.Generic.empty,
-         _StartWorkflow'randomnessSeed = Data.ProtoLens.fieldDefault,
-         _StartWorkflow'headers = Data.Map.empty,
-         _StartWorkflow'identity = Data.ProtoLens.fieldDefault,
-         _StartWorkflow'parentWorkflowInfo = Prelude.Nothing,
-         _StartWorkflow'workflowExecutionTimeout = Prelude.Nothing,
-         _StartWorkflow'workflowRunTimeout = Prelude.Nothing,
-         _StartWorkflow'workflowTaskTimeout = Prelude.Nothing,
-         _StartWorkflow'continuedFromExecutionRunId = Data.ProtoLens.fieldDefault,
-         _StartWorkflow'continuedInitiator = Data.ProtoLens.fieldDefault,
-         _StartWorkflow'continuedFailure = Prelude.Nothing,
-         _StartWorkflow'lastCompletionResult = Prelude.Nothing,
-         _StartWorkflow'firstExecutionRunId = Data.ProtoLens.fieldDefault,
-         _StartWorkflow'retryPolicy = Prelude.Nothing,
-         _StartWorkflow'attempt = Data.ProtoLens.fieldDefault,
-         _StartWorkflow'cronSchedule = Data.ProtoLens.fieldDefault,
-         _StartWorkflow'workflowExecutionExpirationTime = Prelude.Nothing,
-         _StartWorkflow'cronScheduleToScheduleInterval = Prelude.Nothing,
-         _StartWorkflow'memo = Prelude.Nothing,
-         _StartWorkflow'searchAttributes = Prelude.Nothing,
-         _StartWorkflow'startTime = Prelude.Nothing,
-         _StartWorkflow'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          StartWorkflow
-          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Proto.Temporal.Api.Common.V1.Message.Payload
-             -> Data.ProtoLens.Encoding.Bytes.Parser StartWorkflow
-        loop x mutable'arguments
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do frozen'arguments <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                            (Data.ProtoLens.Encoding.Growing.unsafeFreeze
-                                               mutable'arguments)
-                      (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
-                           (Lens.Family2.set
-                              (Data.ProtoLens.Field.field @"vec'arguments") frozen'arguments x))
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "workflow_type"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"workflowType") y x)
-                                  mutable'arguments
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "workflow_id"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"workflowId") y x)
-                                  mutable'arguments
-                        26
-                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                            Data.ProtoLens.Encoding.Bytes.isolate
-                                              (Prelude.fromIntegral len)
-                                              Data.ProtoLens.parseMessage)
-                                        "arguments"
-                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                       (Data.ProtoLens.Encoding.Growing.append mutable'arguments y)
-                                loop x v
-                        32
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       Data.ProtoLens.Encoding.Bytes.getVarInt "randomness_seed"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"randomnessSeed") y x)
-                                  mutable'arguments
-                        42
-                          -> do !(entry :: StartWorkflow'HeadersEntry) <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                                                            (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                                                Data.ProtoLens.Encoding.Bytes.isolate
-                                                                                  (Prelude.fromIntegral
-                                                                                     len)
-                                                                                  Data.ProtoLens.parseMessage)
-                                                                            "headers"
-                                (let
-                                   key = Lens.Family2.view (Data.ProtoLens.Field.field @"key") entry
-                                   value
-                                     = Lens.Family2.view (Data.ProtoLens.Field.field @"value") entry
-                                 in
-                                   loop
-                                     (Lens.Family2.over
-                                        (Data.ProtoLens.Field.field @"headers")
-                                        (\ !t -> Data.Map.insert key value t) x)
-                                     mutable'arguments)
-                        50
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "identity"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"identity") y x)
-                                  mutable'arguments
-                        58
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "parent_workflow_info"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"parentWorkflowInfo") y x)
-                                  mutable'arguments
-                        66
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "workflow_execution_timeout"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"workflowExecutionTimeout") y x)
-                                  mutable'arguments
-                        74
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "workflow_run_timeout"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"workflowRunTimeout") y x)
-                                  mutable'arguments
-                        82
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "workflow_task_timeout"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"workflowTaskTimeout") y x)
-                                  mutable'arguments
-                        90
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "continued_from_execution_run_id"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"continuedFromExecutionRunId") y
-                                     x)
-                                  mutable'arguments
-                        96
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "continued_initiator"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"continuedInitiator") y x)
-                                  mutable'arguments
-                        106
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "continued_failure"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"continuedFailure") y x)
-                                  mutable'arguments
-                        114
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "last_completion_result"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"lastCompletionResult") y x)
-                                  mutable'arguments
-                        122
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "first_execution_run_id"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"firstExecutionRunId") y x)
-                                  mutable'arguments
-                        130
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "retry_policy"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"retryPolicy") y x)
-                                  mutable'arguments
-                        136
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.fromIntegral
-                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "attempt"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"attempt") y x)
-                                  mutable'arguments
-                        146
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "cron_schedule"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"cronSchedule") y x)
-                                  mutable'arguments
-                        154
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "workflow_execution_expiration_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"workflowExecutionExpirationTime")
-                                     y x)
-                                  mutable'arguments
-                        162
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "cron_schedule_to_schedule_interval"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"cronScheduleToScheduleInterval")
-                                     y x)
-                                  mutable'arguments
-                        170
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "memo"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"memo") y x)
-                                  mutable'arguments
-                        178
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "search_attributes"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"searchAttributes") y x)
-                                  mutable'arguments
-                        186
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "start_time"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"startTime") y x)
-                                  mutable'arguments
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-                                  mutable'arguments
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do mutable'arguments <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                     Data.ProtoLens.Encoding.Growing.new
-              loop Data.ProtoLens.defMessage mutable'arguments)
-          "StartWorkflow"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v
-                  = Lens.Family2.view (Data.ProtoLens.Field.field @"workflowType") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v
-                     = Lens.Family2.view (Data.ProtoLens.Field.field @"workflowId") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
-                ((Data.Monoid.<>)
-                   (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                      (\ _v
-                         -> (Data.Monoid.<>)
-                              (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                              ((Prelude..)
-                                 (\ bs
-                                    -> (Data.Monoid.<>)
-                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                            (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                         (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                 Data.ProtoLens.encodeMessage _v))
-                      (Lens.Family2.view
-                         (Data.ProtoLens.Field.field @"vec'arguments") _x))
-                   ((Data.Monoid.<>)
-                      (let
-                         _v
-                           = Lens.Family2.view
-                               (Data.ProtoLens.Field.field @"randomnessSeed") _x
-                       in
-                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                             Data.Monoid.mempty
-                         else
-                             (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt 32)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt _v))
-                      ((Data.Monoid.<>)
-                         (Data.Monoid.mconcat
-                            (Prelude.map
-                               (\ _v
-                                  -> (Data.Monoid.<>)
-                                       (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
-                                       ((Prelude..)
-                                          (\ bs
-                                             -> (Data.Monoid.<>)
-                                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                     (Prelude.fromIntegral
-                                                        (Data.ByteString.length bs)))
-                                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                          Data.ProtoLens.encodeMessage
-                                          (Lens.Family2.set
-                                             (Data.ProtoLens.Field.field @"key") (Prelude.fst _v)
-                                             (Lens.Family2.set
-                                                (Data.ProtoLens.Field.field @"value")
-                                                (Prelude.snd _v)
-                                                (Data.ProtoLens.defMessage ::
-                                                   StartWorkflow'HeadersEntry)))))
-                               (Data.Map.toList
-                                  (Lens.Family2.view (Data.ProtoLens.Field.field @"headers") _x))))
-                         ((Data.Monoid.<>)
-                            (let
-                               _v = Lens.Family2.view (Data.ProtoLens.Field.field @"identity") _x
-                             in
-                               if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                   Data.Monoid.mempty
-                               else
-                                   (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
-                                     ((Prelude..)
-                                        (\ bs
-                                           -> (Data.Monoid.<>)
-                                                (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                   (Prelude.fromIntegral
-                                                      (Data.ByteString.length bs)))
-                                                (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                        Data.Text.Encoding.encodeUtf8 _v))
-                            ((Data.Monoid.<>)
-                               (case
-                                    Lens.Family2.view
-                                      (Data.ProtoLens.Field.field @"maybe'parentWorkflowInfo") _x
-                                of
-                                  Prelude.Nothing -> Data.Monoid.mempty
-                                  (Prelude.Just _v)
-                                    -> (Data.Monoid.<>)
-                                         (Data.ProtoLens.Encoding.Bytes.putVarInt 58)
-                                         ((Prelude..)
-                                            (\ bs
-                                               -> (Data.Monoid.<>)
-                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                       (Prelude.fromIntegral
-                                                          (Data.ByteString.length bs)))
-                                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                            Data.ProtoLens.encodeMessage _v))
-                               ((Data.Monoid.<>)
-                                  (case
-                                       Lens.Family2.view
-                                         (Data.ProtoLens.Field.field
-                                            @"maybe'workflowExecutionTimeout")
-                                         _x
-                                   of
-                                     Prelude.Nothing -> Data.Monoid.mempty
-                                     (Prelude.Just _v)
-                                       -> (Data.Monoid.<>)
-                                            (Data.ProtoLens.Encoding.Bytes.putVarInt 66)
-                                            ((Prelude..)
-                                               (\ bs
-                                                  -> (Data.Monoid.<>)
-                                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                          (Prelude.fromIntegral
-                                                             (Data.ByteString.length bs)))
-                                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                               Data.ProtoLens.encodeMessage _v))
-                                  ((Data.Monoid.<>)
-                                     (case
-                                          Lens.Family2.view
-                                            (Data.ProtoLens.Field.field @"maybe'workflowRunTimeout")
-                                            _x
-                                      of
-                                        Prelude.Nothing -> Data.Monoid.mempty
-                                        (Prelude.Just _v)
-                                          -> (Data.Monoid.<>)
-                                               (Data.ProtoLens.Encoding.Bytes.putVarInt 74)
-                                               ((Prelude..)
-                                                  (\ bs
-                                                     -> (Data.Monoid.<>)
-                                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                             (Prelude.fromIntegral
-                                                                (Data.ByteString.length bs)))
-                                                          (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                             bs))
-                                                  Data.ProtoLens.encodeMessage _v))
-                                     ((Data.Monoid.<>)
-                                        (case
-                                             Lens.Family2.view
-                                               (Data.ProtoLens.Field.field
-                                                  @"maybe'workflowTaskTimeout")
-                                               _x
-                                         of
-                                           Prelude.Nothing -> Data.Monoid.mempty
-                                           (Prelude.Just _v)
-                                             -> (Data.Monoid.<>)
-                                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 82)
-                                                  ((Prelude..)
-                                                     (\ bs
-                                                        -> (Data.Monoid.<>)
-                                                             (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                (Prelude.fromIntegral
-                                                                   (Data.ByteString.length bs)))
-                                                             (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                bs))
-                                                     Data.ProtoLens.encodeMessage _v))
-                                        ((Data.Monoid.<>)
-                                           (let
-                                              _v
-                                                = Lens.Family2.view
-                                                    (Data.ProtoLens.Field.field
-                                                       @"continuedFromExecutionRunId")
-                                                    _x
-                                            in
-                                              if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                                  Data.Monoid.mempty
-                                              else
-                                                  (Data.Monoid.<>)
-                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt 90)
-                                                    ((Prelude..)
-                                                       (\ bs
-                                                          -> (Data.Monoid.<>)
-                                                               (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                  (Prelude.fromIntegral
-                                                                     (Data.ByteString.length bs)))
-                                                               (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                  bs))
-                                                       Data.Text.Encoding.encodeUtf8 _v))
-                                           ((Data.Monoid.<>)
-                                              (let
-                                                 _v
-                                                   = Lens.Family2.view
-                                                       (Data.ProtoLens.Field.field
-                                                          @"continuedInitiator")
-                                                       _x
-                                               in
-                                                 if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                                     Data.Monoid.mempty
-                                                 else
-                                                     (Data.Monoid.<>)
-                                                       (Data.ProtoLens.Encoding.Bytes.putVarInt 96)
-                                                       ((Prelude..)
-                                                          ((Prelude..)
-                                                             Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                             Prelude.fromIntegral)
-                                                          Prelude.fromEnum _v))
-                                              ((Data.Monoid.<>)
-                                                 (case
-                                                      Lens.Family2.view
-                                                        (Data.ProtoLens.Field.field
-                                                           @"maybe'continuedFailure")
-                                                        _x
-                                                  of
-                                                    Prelude.Nothing -> Data.Monoid.mempty
-                                                    (Prelude.Just _v)
-                                                      -> (Data.Monoid.<>)
-                                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                              106)
-                                                           ((Prelude..)
-                                                              (\ bs
-                                                                 -> (Data.Monoid.<>)
-                                                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                         (Prelude.fromIntegral
-                                                                            (Data.ByteString.length
-                                                                               bs)))
-                                                                      (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                         bs))
-                                                              Data.ProtoLens.encodeMessage _v))
-                                                 ((Data.Monoid.<>)
-                                                    (case
-                                                         Lens.Family2.view
-                                                           (Data.ProtoLens.Field.field
-                                                              @"maybe'lastCompletionResult")
-                                                           _x
-                                                     of
-                                                       Prelude.Nothing -> Data.Monoid.mempty
-                                                       (Prelude.Just _v)
-                                                         -> (Data.Monoid.<>)
-                                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                 114)
-                                                              ((Prelude..)
-                                                                 (\ bs
-                                                                    -> (Data.Monoid.<>)
-                                                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                            (Prelude.fromIntegral
-                                                                               (Data.ByteString.length
-                                                                                  bs)))
-                                                                         (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                            bs))
-                                                                 Data.ProtoLens.encodeMessage _v))
-                                                    ((Data.Monoid.<>)
-                                                       (let
-                                                          _v
-                                                            = Lens.Family2.view
-                                                                (Data.ProtoLens.Field.field
-                                                                   @"firstExecutionRunId")
-                                                                _x
-                                                        in
-                                                          if (Prelude.==)
-                                                               _v Data.ProtoLens.fieldDefault then
-                                                              Data.Monoid.mempty
-                                                          else
-                                                              (Data.Monoid.<>)
-                                                                (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                   122)
-                                                                ((Prelude..)
-                                                                   (\ bs
-                                                                      -> (Data.Monoid.<>)
-                                                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                              (Prelude.fromIntegral
-                                                                                 (Data.ByteString.length
-                                                                                    bs)))
-                                                                           (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                              bs))
-                                                                   Data.Text.Encoding.encodeUtf8
-                                                                   _v))
-                                                       ((Data.Monoid.<>)
-                                                          (case
-                                                               Lens.Family2.view
-                                                                 (Data.ProtoLens.Field.field
-                                                                    @"maybe'retryPolicy")
-                                                                 _x
-                                                           of
-                                                             Prelude.Nothing -> Data.Monoid.mempty
-                                                             (Prelude.Just _v)
-                                                               -> (Data.Monoid.<>)
-                                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                       130)
-                                                                    ((Prelude..)
-                                                                       (\ bs
-                                                                          -> (Data.Monoid.<>)
-                                                                               (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                                  (Prelude.fromIntegral
-                                                                                     (Data.ByteString.length
-                                                                                        bs)))
-                                                                               (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                                  bs))
-                                                                       Data.ProtoLens.encodeMessage
-                                                                       _v))
-                                                          ((Data.Monoid.<>)
-                                                             (let
-                                                                _v
-                                                                  = Lens.Family2.view
-                                                                      (Data.ProtoLens.Field.field
-                                                                         @"attempt")
-                                                                      _x
-                                                              in
-                                                                if (Prelude.==)
-                                                                     _v
-                                                                     Data.ProtoLens.fieldDefault then
-                                                                    Data.Monoid.mempty
-                                                                else
-                                                                    (Data.Monoid.<>)
-                                                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                         136)
-                                                                      ((Prelude..)
-                                                                         Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                         Prelude.fromIntegral _v))
-                                                             ((Data.Monoid.<>)
-                                                                (let
-                                                                   _v
-                                                                     = Lens.Family2.view
-                                                                         (Data.ProtoLens.Field.field
-                                                                            @"cronSchedule")
-                                                                         _x
-                                                                 in
-                                                                   if (Prelude.==)
-                                                                        _v
-                                                                        Data.ProtoLens.fieldDefault then
-                                                                       Data.Monoid.mempty
-                                                                   else
-                                                                       (Data.Monoid.<>)
-                                                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                            146)
-                                                                         ((Prelude..)
-                                                                            (\ bs
-                                                                               -> (Data.Monoid.<>)
-                                                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                                       (Prelude.fromIntegral
-                                                                                          (Data.ByteString.length
-                                                                                             bs)))
-                                                                                    (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                                       bs))
-                                                                            Data.Text.Encoding.encodeUtf8
-                                                                            _v))
-                                                                ((Data.Monoid.<>)
-                                                                   (case
-                                                                        Lens.Family2.view
-                                                                          (Data.ProtoLens.Field.field
-                                                                             @"maybe'workflowExecutionExpirationTime")
-                                                                          _x
-                                                                    of
-                                                                      Prelude.Nothing
-                                                                        -> Data.Monoid.mempty
-                                                                      (Prelude.Just _v)
-                                                                        -> (Data.Monoid.<>)
-                                                                             (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                                154)
-                                                                             ((Prelude..)
-                                                                                (\ bs
-                                                                                   -> (Data.Monoid.<>)
-                                                                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                                           (Prelude.fromIntegral
-                                                                                              (Data.ByteString.length
-                                                                                                 bs)))
-                                                                                        (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                                           bs))
-                                                                                Data.ProtoLens.encodeMessage
-                                                                                _v))
-                                                                   ((Data.Monoid.<>)
-                                                                      (case
-                                                                           Lens.Family2.view
-                                                                             (Data.ProtoLens.Field.field
-                                                                                @"maybe'cronScheduleToScheduleInterval")
-                                                                             _x
-                                                                       of
-                                                                         Prelude.Nothing
-                                                                           -> Data.Monoid.mempty
-                                                                         (Prelude.Just _v)
-                                                                           -> (Data.Monoid.<>)
-                                                                                (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                                   162)
-                                                                                ((Prelude..)
-                                                                                   (\ bs
-                                                                                      -> (Data.Monoid.<>)
-                                                                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                                              (Prelude.fromIntegral
-                                                                                                 (Data.ByteString.length
-                                                                                                    bs)))
-                                                                                           (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                                              bs))
-                                                                                   Data.ProtoLens.encodeMessage
-                                                                                   _v))
-                                                                      ((Data.Monoid.<>)
-                                                                         (case
-                                                                              Lens.Family2.view
-                                                                                (Data.ProtoLens.Field.field
-                                                                                   @"maybe'memo")
-                                                                                _x
-                                                                          of
-                                                                            Prelude.Nothing
-                                                                              -> Data.Monoid.mempty
-                                                                            (Prelude.Just _v)
-                                                                              -> (Data.Monoid.<>)
-                                                                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                                      170)
-                                                                                   ((Prelude..)
-                                                                                      (\ bs
-                                                                                         -> (Data.Monoid.<>)
-                                                                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                                                 (Prelude.fromIntegral
-                                                                                                    (Data.ByteString.length
-                                                                                                       bs)))
-                                                                                              (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                                                 bs))
-                                                                                      Data.ProtoLens.encodeMessage
-                                                                                      _v))
-                                                                         ((Data.Monoid.<>)
-                                                                            (case
-                                                                                 Lens.Family2.view
-                                                                                   (Data.ProtoLens.Field.field
-                                                                                      @"maybe'searchAttributes")
-                                                                                   _x
-                                                                             of
-                                                                               Prelude.Nothing
-                                                                                 -> Data.Monoid.mempty
-                                                                               (Prelude.Just _v)
-                                                                                 -> (Data.Monoid.<>)
-                                                                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                                         178)
-                                                                                      ((Prelude..)
-                                                                                         (\ bs
-                                                                                            -> (Data.Monoid.<>)
-                                                                                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                                                    (Prelude.fromIntegral
-                                                                                                       (Data.ByteString.length
-                                                                                                          bs)))
-                                                                                                 (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                                                    bs))
-                                                                                         Data.ProtoLens.encodeMessage
-                                                                                         _v))
-                                                                            ((Data.Monoid.<>)
-                                                                               (case
-                                                                                    Lens.Family2.view
-                                                                                      (Data.ProtoLens.Field.field
-                                                                                         @"maybe'startTime")
-                                                                                      _x
-                                                                                of
-                                                                                  Prelude.Nothing
-                                                                                    -> Data.Monoid.mempty
-                                                                                  (Prelude.Just _v)
-                                                                                    -> (Data.Monoid.<>)
-                                                                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                                            186)
-                                                                                         ((Prelude..)
-                                                                                            (\ bs
-                                                                                               -> (Data.Monoid.<>)
-                                                                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                                                       (Prelude.fromIntegral
-                                                                                                          (Data.ByteString.length
-                                                                                                             bs)))
-                                                                                                    (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                                                       bs))
-                                                                                            Data.ProtoLens.encodeMessage
-                                                                                            _v))
-                                                                               (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                                                                                  (Lens.Family2.view
-                                                                                     Data.ProtoLens.unknownFields
-                                                                                     _x))))))))))))))))))))))))
-instance Control.DeepSeq.NFData StartWorkflow where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_StartWorkflow'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_StartWorkflow'workflowType x__)
-                (Control.DeepSeq.deepseq
-                   (_StartWorkflow'workflowId x__)
-                   (Control.DeepSeq.deepseq
-                      (_StartWorkflow'arguments x__)
-                      (Control.DeepSeq.deepseq
-                         (_StartWorkflow'randomnessSeed x__)
-                         (Control.DeepSeq.deepseq
-                            (_StartWorkflow'headers x__)
-                            (Control.DeepSeq.deepseq
-                               (_StartWorkflow'identity x__)
-                               (Control.DeepSeq.deepseq
-                                  (_StartWorkflow'parentWorkflowInfo x__)
-                                  (Control.DeepSeq.deepseq
-                                     (_StartWorkflow'workflowExecutionTimeout x__)
-                                     (Control.DeepSeq.deepseq
-                                        (_StartWorkflow'workflowRunTimeout x__)
-                                        (Control.DeepSeq.deepseq
-                                           (_StartWorkflow'workflowTaskTimeout x__)
-                                           (Control.DeepSeq.deepseq
-                                              (_StartWorkflow'continuedFromExecutionRunId x__)
-                                              (Control.DeepSeq.deepseq
-                                                 (_StartWorkflow'continuedInitiator x__)
-                                                 (Control.DeepSeq.deepseq
-                                                    (_StartWorkflow'continuedFailure x__)
-                                                    (Control.DeepSeq.deepseq
-                                                       (_StartWorkflow'lastCompletionResult x__)
-                                                       (Control.DeepSeq.deepseq
-                                                          (_StartWorkflow'firstExecutionRunId x__)
-                                                          (Control.DeepSeq.deepseq
-                                                             (_StartWorkflow'retryPolicy x__)
-                                                             (Control.DeepSeq.deepseq
-                                                                (_StartWorkflow'attempt x__)
-                                                                (Control.DeepSeq.deepseq
-                                                                   (_StartWorkflow'cronSchedule x__)
-                                                                   (Control.DeepSeq.deepseq
-                                                                      (_StartWorkflow'workflowExecutionExpirationTime
-                                                                         x__)
-                                                                      (Control.DeepSeq.deepseq
-                                                                         (_StartWorkflow'cronScheduleToScheduleInterval
-                                                                            x__)
-                                                                         (Control.DeepSeq.deepseq
-                                                                            (_StartWorkflow'memo
-                                                                               x__)
-                                                                            (Control.DeepSeq.deepseq
-                                                                               (_StartWorkflow'searchAttributes
-                                                                                  x__)
-                                                                               (Control.DeepSeq.deepseq
-                                                                                  (_StartWorkflow'startTime
-                                                                                     x__)
-                                                                                  ())))))))))))))))))))))))
-{- | Fields :
-     
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.key' @:: Lens' StartWorkflow'HeadersEntry Data.Text.Text@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.value' @:: Lens' StartWorkflow'HeadersEntry Proto.Temporal.Api.Common.V1.Message.Payload@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'value' @:: Lens' StartWorkflow'HeadersEntry (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payload)@ -}
-data StartWorkflow'HeadersEntry
-  = StartWorkflow'HeadersEntry'_constructor {_StartWorkflow'HeadersEntry'key :: !Data.Text.Text,
-                                             _StartWorkflow'HeadersEntry'value :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payload),
-                                             _StartWorkflow'HeadersEntry'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show StartWorkflow'HeadersEntry where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField StartWorkflow'HeadersEntry "key" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'HeadersEntry'key
-           (\ x__ y__ -> x__ {_StartWorkflow'HeadersEntry'key = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StartWorkflow'HeadersEntry "value" Proto.Temporal.Api.Common.V1.Message.Payload where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'HeadersEntry'value
-           (\ x__ y__ -> x__ {_StartWorkflow'HeadersEntry'value = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField StartWorkflow'HeadersEntry "maybe'value" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StartWorkflow'HeadersEntry'value
-           (\ x__ y__ -> x__ {_StartWorkflow'HeadersEntry'value = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message StartWorkflow'HeadersEntry where
-  messageName _
-    = Data.Text.pack
-        "coresdk.workflow_activation.StartWorkflow.HeadersEntry"
-  packedMessageDescriptor _
-    = "\n\
-      \\fHeadersEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-      \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        key__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "key"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"key")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow'HeadersEntry
-        value__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "value"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'value")) ::
-              Data.ProtoLens.FieldDescriptor StartWorkflow'HeadersEntry
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, key__field_descriptor),
-           (Data.ProtoLens.Tag 2, value__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _StartWorkflow'HeadersEntry'_unknownFields
-        (\ x__ y__
-           -> x__ {_StartWorkflow'HeadersEntry'_unknownFields = y__})
-  defMessage
-    = StartWorkflow'HeadersEntry'_constructor
-        {_StartWorkflow'HeadersEntry'key = Data.ProtoLens.fieldDefault,
-         _StartWorkflow'HeadersEntry'value = Prelude.Nothing,
-         _StartWorkflow'HeadersEntry'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          StartWorkflow'HeadersEntry
-          -> Data.ProtoLens.Encoding.Bytes.Parser StartWorkflow'HeadersEntry
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "key"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"key") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "value"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"value") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "HeadersEntry"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"key") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'value") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData StartWorkflow'HeadersEntry where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_StartWorkflow'HeadersEntry'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_StartWorkflow'HeadersEntry'key x__)
-                (Control.DeepSeq.deepseq
-                   (_StartWorkflow'HeadersEntry'value x__) ()))
-{- | Fields :
-     
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.randomnessSeed' @:: Lens' UpdateRandomSeed Data.Word.Word64@ -}
 data UpdateRandomSeed
   = UpdateRandomSeed'_constructor {_UpdateRandomSeed'randomnessSeed :: !Data.Word.Word64,
@@ -5469,7 +6159,8 @@ instance Control.DeepSeq.NFData UpdateRandomSeed where
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.vec'availableInternalFlags' @:: Lens' WorkflowActivation (Data.Vector.Unboxed.Vector Data.Word.Word32)@
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.historySizeBytes' @:: Lens' WorkflowActivation Data.Word.Word64@
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.continueAsNewSuggested' @:: Lens' WorkflowActivation Prelude.Bool@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.buildIdForCurrentTask' @:: Lens' WorkflowActivation Data.Text.Text@ -}
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.deploymentVersionForCurrentTask' @:: Lens' WorkflowActivation Proto.Temporal.Sdk.Core.Common.Common.WorkerDeploymentVersion@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'deploymentVersionForCurrentTask' @:: Lens' WorkflowActivation (Prelude.Maybe Proto.Temporal.Sdk.Core.Common.Common.WorkerDeploymentVersion)@ -}
 data WorkflowActivation
   = WorkflowActivation'_constructor {_WorkflowActivation'runId :: !Data.Text.Text,
                                      _WorkflowActivation'timestamp :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
@@ -5479,7 +6170,7 @@ data WorkflowActivation
                                      _WorkflowActivation'availableInternalFlags :: !(Data.Vector.Unboxed.Vector Data.Word.Word32),
                                      _WorkflowActivation'historySizeBytes :: !Data.Word.Word64,
                                      _WorkflowActivation'continueAsNewSuggested :: !Prelude.Bool,
-                                     _WorkflowActivation'buildIdForCurrentTask :: !Data.Text.Text,
+                                     _WorkflowActivation'deploymentVersionForCurrentTask :: !(Prelude.Maybe Proto.Temporal.Sdk.Core.Common.Common.WorkerDeploymentVersion),
                                      _WorkflowActivation'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show WorkflowActivation where
@@ -5572,13 +6263,23 @@ instance Data.ProtoLens.Field.HasField WorkflowActivation "continueAsNewSuggeste
            (\ x__ y__
               -> x__ {_WorkflowActivation'continueAsNewSuggested = y__}))
         Prelude.id
-instance Data.ProtoLens.Field.HasField WorkflowActivation "buildIdForCurrentTask" Data.Text.Text where
+instance Data.ProtoLens.Field.HasField WorkflowActivation "deploymentVersionForCurrentTask" Proto.Temporal.Sdk.Core.Common.Common.WorkerDeploymentVersion where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _WorkflowActivation'buildIdForCurrentTask
+           _WorkflowActivation'deploymentVersionForCurrentTask
            (\ x__ y__
-              -> x__ {_WorkflowActivation'buildIdForCurrentTask = y__}))
+              -> x__
+                   {_WorkflowActivation'deploymentVersionForCurrentTask = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField WorkflowActivation "maybe'deploymentVersionForCurrentTask" (Prelude.Maybe Proto.Temporal.Sdk.Core.Common.Common.WorkerDeploymentVersion) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowActivation'deploymentVersionForCurrentTask
+           (\ x__ y__
+              -> x__
+                   {_WorkflowActivation'deploymentVersionForCurrentTask = y__}))
         Prelude.id
 instance Data.ProtoLens.Message WorkflowActivation where
   messageName _
@@ -5593,8 +6294,8 @@ instance Data.ProtoLens.Message WorkflowActivation where
       \\EOTjobs\CAN\ENQ \ETX(\v22.coresdk.workflow_activation.WorkflowActivationJobR\EOTjobs\DC28\n\
       \\CANavailable_internal_flags\CAN\ACK \ETX(\rR\SYNavailableInternalFlags\DC2,\n\
       \\DC2history_size_bytes\CAN\a \SOH(\EOTR\DLEhistorySizeBytes\DC29\n\
-      \\EMcontinue_as_new_suggested\CAN\b \SOH(\bR\SYNcontinueAsNewSuggested\DC28\n\
-      \\EMbuild_id_for_current_task\CAN\t \SOH(\tR\NAKbuildIdForCurrentTask"
+      \\EMcontinue_as_new_suggested\CAN\b \SOH(\bR\SYNcontinueAsNewSuggested\DC2u\n\
+      \#deployment_version_for_current_task\CAN\t \SOH(\v2'.coresdk.common.WorkerDeploymentVersionR\USdeploymentVersionForCurrentTask"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -5667,14 +6368,14 @@ instance Data.ProtoLens.Message WorkflowActivation where
                  Data.ProtoLens.Optional
                  (Data.ProtoLens.Field.field @"continueAsNewSuggested")) ::
               Data.ProtoLens.FieldDescriptor WorkflowActivation
-        buildIdForCurrentTask__field_descriptor
+        deploymentVersionForCurrentTask__field_descriptor
           = Data.ProtoLens.FieldDescriptor
-              "build_id_for_current_task"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"buildIdForCurrentTask")) ::
+              "deployment_version_for_current_task"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Sdk.Core.Common.Common.WorkerDeploymentVersion)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field
+                    @"maybe'deploymentVersionForCurrentTask")) ::
               Data.ProtoLens.FieldDescriptor WorkflowActivation
       in
         Data.Map.fromList
@@ -5686,7 +6387,8 @@ instance Data.ProtoLens.Message WorkflowActivation where
            (Data.ProtoLens.Tag 6, availableInternalFlags__field_descriptor),
            (Data.ProtoLens.Tag 7, historySizeBytes__field_descriptor),
            (Data.ProtoLens.Tag 8, continueAsNewSuggested__field_descriptor),
-           (Data.ProtoLens.Tag 9, buildIdForCurrentTask__field_descriptor)]
+           (Data.ProtoLens.Tag 9, 
+            deploymentVersionForCurrentTask__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _WorkflowActivation'_unknownFields
@@ -5701,7 +6403,7 @@ instance Data.ProtoLens.Message WorkflowActivation where
          _WorkflowActivation'availableInternalFlags = Data.Vector.Generic.empty,
          _WorkflowActivation'historySizeBytes = Data.ProtoLens.fieldDefault,
          _WorkflowActivation'continueAsNewSuggested = Data.ProtoLens.fieldDefault,
-         _WorkflowActivation'buildIdForCurrentTask = Data.ProtoLens.fieldDefault,
+         _WorkflowActivation'deploymentVersionForCurrentTask = Prelude.Nothing,
          _WorkflowActivation'_unknownFields = []}
   parseMessage
     = let
@@ -5835,12 +6537,13 @@ instance Data.ProtoLens.Message WorkflowActivation where
                         74
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "build_id_for_current_task"
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "deployment_version_for_current_task"
                                 loop
                                   (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"buildIdForCurrentTask") y x)
+                                     (Data.ProtoLens.Field.field @"deploymentVersionForCurrentTask")
+                                     y x)
                                   mutable'availableInternalFlags mutable'jobs
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
@@ -5981,26 +6684,25 @@ instance Data.ProtoLens.Message WorkflowActivation where
                                               Data.ProtoLens.Encoding.Bytes.putVarInt
                                               (\ b -> if b then 1 else 0) _v))
                                   ((Data.Monoid.<>)
-                                     (let
-                                        _v
-                                          = Lens.Family2.view
-                                              (Data.ProtoLens.Field.field @"buildIdForCurrentTask")
-                                              _x
-                                      in
-                                        if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                            Data.Monoid.mempty
-                                        else
-                                            (Data.Monoid.<>)
-                                              (Data.ProtoLens.Encoding.Bytes.putVarInt 74)
-                                              ((Prelude..)
-                                                 (\ bs
-                                                    -> (Data.Monoid.<>)
-                                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                            (Prelude.fromIntegral
-                                                               (Data.ByteString.length bs)))
-                                                         (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                            bs))
-                                                 Data.Text.Encoding.encodeUtf8 _v))
+                                     (case
+                                          Lens.Family2.view
+                                            (Data.ProtoLens.Field.field
+                                               @"maybe'deploymentVersionForCurrentTask")
+                                            _x
+                                      of
+                                        Prelude.Nothing -> Data.Monoid.mempty
+                                        (Prelude.Just _v)
+                                          -> (Data.Monoid.<>)
+                                               (Data.ProtoLens.Encoding.Bytes.putVarInt 74)
+                                               ((Prelude..)
+                                                  (\ bs
+                                                     -> (Data.Monoid.<>)
+                                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                             (Prelude.fromIntegral
+                                                                (Data.ByteString.length bs)))
+                                                          (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                             bs))
+                                                  Data.ProtoLens.encodeMessage _v))
                                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
                                         (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))))))
 instance Control.DeepSeq.NFData WorkflowActivation where
@@ -6025,12 +6727,13 @@ instance Control.DeepSeq.NFData WorkflowActivation where
                                   (Control.DeepSeq.deepseq
                                      (_WorkflowActivation'continueAsNewSuggested x__)
                                      (Control.DeepSeq.deepseq
-                                        (_WorkflowActivation'buildIdForCurrentTask x__) ())))))))))
+                                        (_WorkflowActivation'deploymentVersionForCurrentTask x__)
+                                        ())))))))))
 {- | Fields :
      
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'variant' @:: Lens' WorkflowActivationJob (Prelude.Maybe WorkflowActivationJob'Variant)@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'startWorkflow' @:: Lens' WorkflowActivationJob (Prelude.Maybe StartWorkflow)@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.startWorkflow' @:: Lens' WorkflowActivationJob StartWorkflow@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'initializeWorkflow' @:: Lens' WorkflowActivationJob (Prelude.Maybe InitializeWorkflow)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.initializeWorkflow' @:: Lens' WorkflowActivationJob InitializeWorkflow@
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'fireTimer' @:: Lens' WorkflowActivationJob (Prelude.Maybe FireTimer)@
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.fireTimer' @:: Lens' WorkflowActivationJob FireTimer@
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'updateRandomSeed' @:: Lens' WorkflowActivationJob (Prelude.Maybe UpdateRandomSeed)@
@@ -6055,6 +6758,10 @@ instance Control.DeepSeq.NFData WorkflowActivation where
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.resolveRequestCancelExternalWorkflow' @:: Lens' WorkflowActivationJob ResolveRequestCancelExternalWorkflow@
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'doUpdate' @:: Lens' WorkflowActivationJob (Prelude.Maybe DoUpdate)@
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.doUpdate' @:: Lens' WorkflowActivationJob DoUpdate@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'resolveNexusOperationStart' @:: Lens' WorkflowActivationJob (Prelude.Maybe ResolveNexusOperationStart)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.resolveNexusOperationStart' @:: Lens' WorkflowActivationJob ResolveNexusOperationStart@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'resolveNexusOperation' @:: Lens' WorkflowActivationJob (Prelude.Maybe ResolveNexusOperation)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.resolveNexusOperation' @:: Lens' WorkflowActivationJob ResolveNexusOperation@
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'removeFromCache' @:: Lens' WorkflowActivationJob (Prelude.Maybe RemoveFromCache)@
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.removeFromCache' @:: Lens' WorkflowActivationJob RemoveFromCache@ -}
 data WorkflowActivationJob
@@ -6068,7 +6775,7 @@ instance Prelude.Show WorkflowActivationJob where
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
 data WorkflowActivationJob'Variant
-  = WorkflowActivationJob'StartWorkflow !StartWorkflow |
+  = WorkflowActivationJob'InitializeWorkflow !InitializeWorkflow |
     WorkflowActivationJob'FireTimer !FireTimer |
     WorkflowActivationJob'UpdateRandomSeed !UpdateRandomSeed |
     WorkflowActivationJob'QueryWorkflow !QueryWorkflow |
@@ -6081,6 +6788,8 @@ data WorkflowActivationJob'Variant
     WorkflowActivationJob'ResolveSignalExternalWorkflow !ResolveSignalExternalWorkflow |
     WorkflowActivationJob'ResolveRequestCancelExternalWorkflow !ResolveRequestCancelExternalWorkflow |
     WorkflowActivationJob'DoUpdate !DoUpdate |
+    WorkflowActivationJob'ResolveNexusOperationStart !ResolveNexusOperationStart |
+    WorkflowActivationJob'ResolveNexusOperation !ResolveNexusOperation |
     WorkflowActivationJob'RemoveFromCache !RemoveFromCache
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.Field.HasField WorkflowActivationJob "maybe'variant" (Prelude.Maybe WorkflowActivationJob'Variant) where
@@ -6090,7 +6799,7 @@ instance Data.ProtoLens.Field.HasField WorkflowActivationJob "maybe'variant" (Pr
            _WorkflowActivationJob'variant
            (\ x__ y__ -> x__ {_WorkflowActivationJob'variant = y__}))
         Prelude.id
-instance Data.ProtoLens.Field.HasField WorkflowActivationJob "maybe'startWorkflow" (Prelude.Maybe StartWorkflow) where
+instance Data.ProtoLens.Field.HasField WorkflowActivationJob "maybe'initializeWorkflow" (Prelude.Maybe InitializeWorkflow) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
@@ -6099,11 +6808,12 @@ instance Data.ProtoLens.Field.HasField WorkflowActivationJob "maybe'startWorkflo
         (Lens.Family2.Unchecked.lens
            (\ x__
               -> case x__ of
-                   (Prelude.Just (WorkflowActivationJob'StartWorkflow x__val))
+                   (Prelude.Just (WorkflowActivationJob'InitializeWorkflow x__val))
                      -> Prelude.Just x__val
                    _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap WorkflowActivationJob'StartWorkflow y__))
-instance Data.ProtoLens.Field.HasField WorkflowActivationJob "startWorkflow" StartWorkflow where
+           (\ _ y__
+              -> Prelude.fmap WorkflowActivationJob'InitializeWorkflow y__))
+instance Data.ProtoLens.Field.HasField WorkflowActivationJob "initializeWorkflow" InitializeWorkflow where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
@@ -6113,10 +6823,11 @@ instance Data.ProtoLens.Field.HasField WorkflowActivationJob "startWorkflow" Sta
            (Lens.Family2.Unchecked.lens
               (\ x__
                  -> case x__ of
-                      (Prelude.Just (WorkflowActivationJob'StartWorkflow x__val))
+                      (Prelude.Just (WorkflowActivationJob'InitializeWorkflow x__val))
                         -> Prelude.Just x__val
                       _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap WorkflowActivationJob'StartWorkflow y__))
+              (\ _ y__
+                 -> Prelude.fmap WorkflowActivationJob'InitializeWorkflow y__))
            (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
 instance Data.ProtoLens.Field.HasField WorkflowActivationJob "maybe'fireTimer" (Prelude.Maybe FireTimer) where
   fieldOf _
@@ -6474,6 +7185,68 @@ instance Data.ProtoLens.Field.HasField WorkflowActivationJob "doUpdate" DoUpdate
                       _otherwise -> Prelude.Nothing)
               (\ _ y__ -> Prelude.fmap WorkflowActivationJob'DoUpdate y__))
            (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
+instance Data.ProtoLens.Field.HasField WorkflowActivationJob "maybe'resolveNexusOperationStart" (Prelude.Maybe ResolveNexusOperationStart) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowActivationJob'variant
+           (\ x__ y__ -> x__ {_WorkflowActivationJob'variant = y__}))
+        (Lens.Family2.Unchecked.lens
+           (\ x__
+              -> case x__ of
+                   (Prelude.Just (WorkflowActivationJob'ResolveNexusOperationStart x__val))
+                     -> Prelude.Just x__val
+                   _otherwise -> Prelude.Nothing)
+           (\ _ y__
+              -> Prelude.fmap
+                   WorkflowActivationJob'ResolveNexusOperationStart y__))
+instance Data.ProtoLens.Field.HasField WorkflowActivationJob "resolveNexusOperationStart" ResolveNexusOperationStart where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowActivationJob'variant
+           (\ x__ y__ -> x__ {_WorkflowActivationJob'variant = y__}))
+        ((Prelude..)
+           (Lens.Family2.Unchecked.lens
+              (\ x__
+                 -> case x__ of
+                      (Prelude.Just (WorkflowActivationJob'ResolveNexusOperationStart x__val))
+                        -> Prelude.Just x__val
+                      _otherwise -> Prelude.Nothing)
+              (\ _ y__
+                 -> Prelude.fmap
+                      WorkflowActivationJob'ResolveNexusOperationStart y__))
+           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
+instance Data.ProtoLens.Field.HasField WorkflowActivationJob "maybe'resolveNexusOperation" (Prelude.Maybe ResolveNexusOperation) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowActivationJob'variant
+           (\ x__ y__ -> x__ {_WorkflowActivationJob'variant = y__}))
+        (Lens.Family2.Unchecked.lens
+           (\ x__
+              -> case x__ of
+                   (Prelude.Just (WorkflowActivationJob'ResolveNexusOperation x__val))
+                     -> Prelude.Just x__val
+                   _otherwise -> Prelude.Nothing)
+           (\ _ y__
+              -> Prelude.fmap WorkflowActivationJob'ResolveNexusOperation y__))
+instance Data.ProtoLens.Field.HasField WorkflowActivationJob "resolveNexusOperation" ResolveNexusOperation where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowActivationJob'variant
+           (\ x__ y__ -> x__ {_WorkflowActivationJob'variant = y__}))
+        ((Prelude..)
+           (Lens.Family2.Unchecked.lens
+              (\ x__
+                 -> case x__ of
+                      (Prelude.Just (WorkflowActivationJob'ResolveNexusOperation x__val))
+                        -> Prelude.Just x__val
+                      _otherwise -> Prelude.Nothing)
+              (\ _ y__
+                 -> Prelude.fmap WorkflowActivationJob'ResolveNexusOperation y__))
+           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
 instance Data.ProtoLens.Field.HasField WorkflowActivationJob "maybe'removeFromCache" (Prelude.Maybe RemoveFromCache) where
   fieldOf _
     = (Prelude..)
@@ -6510,8 +7283,8 @@ instance Data.ProtoLens.Message WorkflowActivationJob where
         "coresdk.workflow_activation.WorkflowActivationJob"
   packedMessageDescriptor _
     = "\n\
-      \\NAKWorkflowActivationJob\DC2S\n\
-      \\SOstart_workflow\CAN\SOH \SOH(\v2*.coresdk.workflow_activation.StartWorkflowH\NULR\rstartWorkflow\DC2G\n\
+      \\NAKWorkflowActivationJob\DC2b\n\
+      \\DC3initialize_workflow\CAN\SOH \SOH(\v2/.coresdk.workflow_activation.InitializeWorkflowH\NULR\DC2initializeWorkflow\DC2G\n\
       \\n\
       \fire_timer\CAN\STX \SOH(\v2&.coresdk.workflow_activation.FireTimerH\NULR\tfireTimer\DC2]\n\
       \\DC2update_random_seed\CAN\EOT \SOH(\v2-.coresdk.workflow_activation.UpdateRandomSeedH\NULR\DLEupdateRandomSeed\DC2S\n\
@@ -6525,19 +7298,21 @@ instance Data.ProtoLens.Message WorkflowActivationJob where
       \ resolve_child_workflow_execution\CAN\v \SOH(\v2:.coresdk.workflow_activation.ResolveChildWorkflowExecutionH\NULR\GSresolveChildWorkflowExecution\DC2\133\SOH\n\
       \ resolve_signal_external_workflow\CAN\f \SOH(\v2:.coresdk.workflow_activation.ResolveSignalExternalWorkflowH\NULR\GSresolveSignalExternalWorkflow\DC2\155\SOH\n\
       \(resolve_request_cancel_external_workflow\CAN\r \SOH(\v2A.coresdk.workflow_activation.ResolveRequestCancelExternalWorkflowH\NULR$resolveRequestCancelExternalWorkflow\DC2D\n\
-      \\tdo_update\CAN\SO \SOH(\v2%.coresdk.workflow_activation.DoUpdateH\NULR\bdoUpdate\DC2Z\n\
+      \\tdo_update\CAN\SO \SOH(\v2%.coresdk.workflow_activation.DoUpdateH\NULR\bdoUpdate\DC2|\n\
+      \\GSresolve_nexus_operation_start\CAN\SI \SOH(\v27.coresdk.workflow_activation.ResolveNexusOperationStartH\NULR\SUBresolveNexusOperationStart\DC2l\n\
+      \\ETBresolve_nexus_operation\CAN\DLE \SOH(\v22.coresdk.workflow_activation.ResolveNexusOperationH\NULR\NAKresolveNexusOperation\DC2Z\n\
       \\DC1remove_from_cache\CAN2 \SOH(\v2,.coresdk.workflow_activation.RemoveFromCacheH\NULR\SIremoveFromCacheB\t\n\
       \\avariant"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
-        startWorkflow__field_descriptor
+        initializeWorkflow__field_descriptor
           = Data.ProtoLens.FieldDescriptor
-              "start_workflow"
+              "initialize_workflow"
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor StartWorkflow)
+                 Data.ProtoLens.FieldTypeDescriptor InitializeWorkflow)
               (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'startWorkflow")) ::
+                 (Data.ProtoLens.Field.field @"maybe'initializeWorkflow")) ::
               Data.ProtoLens.FieldDescriptor WorkflowActivationJob
         fireTimer__field_descriptor
           = Data.ProtoLens.FieldDescriptor
@@ -6639,6 +7414,23 @@ instance Data.ProtoLens.Message WorkflowActivationJob where
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'doUpdate")) ::
               Data.ProtoLens.FieldDescriptor WorkflowActivationJob
+        resolveNexusOperationStart__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "resolve_nexus_operation_start"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor ResolveNexusOperationStart)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field
+                    @"maybe'resolveNexusOperationStart")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowActivationJob
+        resolveNexusOperation__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "resolve_nexus_operation"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor ResolveNexusOperation)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'resolveNexusOperation")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowActivationJob
         removeFromCache__field_descriptor
           = Data.ProtoLens.FieldDescriptor
               "remove_from_cache"
@@ -6649,7 +7441,7 @@ instance Data.ProtoLens.Message WorkflowActivationJob where
               Data.ProtoLens.FieldDescriptor WorkflowActivationJob
       in
         Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, startWorkflow__field_descriptor),
+          [(Data.ProtoLens.Tag 1, initializeWorkflow__field_descriptor),
            (Data.ProtoLens.Tag 2, fireTimer__field_descriptor),
            (Data.ProtoLens.Tag 4, updateRandomSeed__field_descriptor),
            (Data.ProtoLens.Tag 5, queryWorkflow__field_descriptor),
@@ -6666,6 +7458,9 @@ instance Data.ProtoLens.Message WorkflowActivationJob where
            (Data.ProtoLens.Tag 13, 
             resolveRequestCancelExternalWorkflow__field_descriptor),
            (Data.ProtoLens.Tag 14, doUpdate__field_descriptor),
+           (Data.ProtoLens.Tag 15, 
+            resolveNexusOperationStart__field_descriptor),
+           (Data.ProtoLens.Tag 16, resolveNexusOperation__field_descriptor),
            (Data.ProtoLens.Tag 50, removeFromCache__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
@@ -6703,10 +7498,10 @@ instance Data.ProtoLens.Message WorkflowActivationJob where
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
                                            Data.ProtoLens.Encoding.Bytes.isolate
                                              (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "start_workflow"
+                                       "initialize_workflow"
                                 loop
                                   (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"startWorkflow") y x)
+                                     (Data.ProtoLens.Field.field @"initializeWorkflow") y x)
                         18
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -6819,6 +7614,24 @@ instance Data.ProtoLens.Message WorkflowActivationJob where
                                        "do_update"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"doUpdate") y x)
+                        122
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "resolve_nexus_operation_start"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"resolveNexusOperationStart") y x)
+                        130
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "resolve_nexus_operation"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"resolveNexusOperation") y x)
                         402
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -6844,7 +7657,7 @@ instance Data.ProtoLens.Message WorkflowActivationJob where
                   Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'variant") _x
               of
                 Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just (WorkflowActivationJob'StartWorkflow v))
+                (Prelude.Just (WorkflowActivationJob'InitializeWorkflow v))
                   -> (Data.Monoid.<>)
                        (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
                        ((Prelude..)
@@ -6974,6 +7787,26 @@ instance Data.ProtoLens.Message WorkflowActivationJob where
                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                           Data.ProtoLens.encodeMessage v)
+                (Prelude.Just (WorkflowActivationJob'ResolveNexusOperationStart v))
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 122)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage v)
+                (Prelude.Just (WorkflowActivationJob'ResolveNexusOperation v))
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 130)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage v)
                 (Prelude.Just (WorkflowActivationJob'RemoveFromCache v))
                   -> (Data.Monoid.<>)
                        (Data.ProtoLens.Encoding.Bytes.putVarInt 402)
@@ -6993,7 +7826,7 @@ instance Control.DeepSeq.NFData WorkflowActivationJob where
              (_WorkflowActivationJob'_unknownFields x__)
              (Control.DeepSeq.deepseq (_WorkflowActivationJob'variant x__) ())
 instance Control.DeepSeq.NFData WorkflowActivationJob'Variant where
-  rnf (WorkflowActivationJob'StartWorkflow x__)
+  rnf (WorkflowActivationJob'InitializeWorkflow x__)
     = Control.DeepSeq.rnf x__
   rnf (WorkflowActivationJob'FireTimer x__) = Control.DeepSeq.rnf x__
   rnf (WorkflowActivationJob'UpdateRandomSeed x__)
@@ -7018,16 +7851,21 @@ instance Control.DeepSeq.NFData WorkflowActivationJob'Variant where
     (WorkflowActivationJob'ResolveRequestCancelExternalWorkflow x__)
     = Control.DeepSeq.rnf x__
   rnf (WorkflowActivationJob'DoUpdate x__) = Control.DeepSeq.rnf x__
+  rnf (WorkflowActivationJob'ResolveNexusOperationStart x__)
+    = Control.DeepSeq.rnf x__
+  rnf (WorkflowActivationJob'ResolveNexusOperation x__)
+    = Control.DeepSeq.rnf x__
   rnf (WorkflowActivationJob'RemoveFromCache x__)
     = Control.DeepSeq.rnf x__
-_WorkflowActivationJob'StartWorkflow ::
-  Data.ProtoLens.Prism.Prism' WorkflowActivationJob'Variant StartWorkflow
-_WorkflowActivationJob'StartWorkflow
+_WorkflowActivationJob'InitializeWorkflow ::
+  Data.ProtoLens.Prism.Prism' WorkflowActivationJob'Variant InitializeWorkflow
+_WorkflowActivationJob'InitializeWorkflow
   = Data.ProtoLens.Prism.prism'
-      WorkflowActivationJob'StartWorkflow
+      WorkflowActivationJob'InitializeWorkflow
       (\ p__
          -> case p__ of
-              (WorkflowActivationJob'StartWorkflow p__val) -> Prelude.Just p__val
+              (WorkflowActivationJob'InitializeWorkflow p__val)
+                -> Prelude.Just p__val
               _otherwise -> Prelude.Nothing)
 _WorkflowActivationJob'FireTimer ::
   Data.ProtoLens.Prism.Prism' WorkflowActivationJob'Variant FireTimer
@@ -7146,6 +7984,26 @@ _WorkflowActivationJob'DoUpdate
          -> case p__ of
               (WorkflowActivationJob'DoUpdate p__val) -> Prelude.Just p__val
               _otherwise -> Prelude.Nothing)
+_WorkflowActivationJob'ResolveNexusOperationStart ::
+  Data.ProtoLens.Prism.Prism' WorkflowActivationJob'Variant ResolveNexusOperationStart
+_WorkflowActivationJob'ResolveNexusOperationStart
+  = Data.ProtoLens.Prism.prism'
+      WorkflowActivationJob'ResolveNexusOperationStart
+      (\ p__
+         -> case p__ of
+              (WorkflowActivationJob'ResolveNexusOperationStart p__val)
+                -> Prelude.Just p__val
+              _otherwise -> Prelude.Nothing)
+_WorkflowActivationJob'ResolveNexusOperation ::
+  Data.ProtoLens.Prism.Prism' WorkflowActivationJob'Variant ResolveNexusOperation
+_WorkflowActivationJob'ResolveNexusOperation
+  = Data.ProtoLens.Prism.prism'
+      WorkflowActivationJob'ResolveNexusOperation
+      (\ p__
+         -> case p__ of
+              (WorkflowActivationJob'ResolveNexusOperation p__val)
+                -> Prelude.Just p__val
+              _otherwise -> Prelude.Nothing)
 _WorkflowActivationJob'RemoveFromCache ::
   Data.ProtoLens.Prism.Prism' WorkflowActivationJob'Variant RemoveFromCache
 _WorkflowActivationJob'RemoveFromCache
@@ -7159,7 +8017,7 @@ _WorkflowActivationJob'RemoveFromCache
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \?temporal/sdk/core/workflow_activation/workflow_activation.proto\DC2\ESCcoresdk.workflow_activation\SUB\USgoogle/protobuf/timestamp.proto\SUB\RSgoogle/protobuf/duration.proto\SUB%temporal/api/failure/v1/message.proto\SUB$temporal/api/update/v1/message.proto\SUB$temporal/api/common/v1/message.proto\SUB$temporal/api/enums/v1/workflow.proto\SUB7temporal/sdk/core/activity_result/activity_result.proto\SUB5temporal/sdk/core/child_workflow/child_workflow.proto\SUB%temporal/sdk/core/common/common.proto\"\212\ETX\n\
+    \?temporal/sdk/core/workflow_activation/workflow_activation.proto\DC2\ESCcoresdk.workflow_activation\SUB\USgoogle/protobuf/timestamp.proto\SUB\RSgoogle/protobuf/duration.proto\SUB\ESCgoogle/protobuf/empty.proto\SUB%temporal/api/failure/v1/message.proto\SUB$temporal/api/update/v1/message.proto\SUB$temporal/api/common/v1/message.proto\SUB$temporal/api/enums/v1/workflow.proto\SUB7temporal/sdk/core/activity_result/activity_result.proto\SUB5temporal/sdk/core/child_workflow/child_workflow.proto\SUB%temporal/sdk/core/common/common.proto\SUB#temporal/sdk/core/nexus/nexus.proto\"\145\EOT\n\
     \\DC2WorkflowActivation\DC2\NAK\n\
     \\ACKrun_id\CAN\SOH \SOH(\tR\ENQrunId\DC28\n\
     \\ttimestamp\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\ttimestamp\DC2!\n\
@@ -7168,10 +8026,10 @@ packedFileDescriptor
     \\EOTjobs\CAN\ENQ \ETX(\v22.coresdk.workflow_activation.WorkflowActivationJobR\EOTjobs\DC28\n\
     \\CANavailable_internal_flags\CAN\ACK \ETX(\rR\SYNavailableInternalFlags\DC2,\n\
     \\DC2history_size_bytes\CAN\a \SOH(\EOTR\DLEhistorySizeBytes\DC29\n\
-    \\EMcontinue_as_new_suggested\CAN\b \SOH(\bR\SYNcontinueAsNewSuggested\DC28\n\
-    \\EMbuild_id_for_current_task\CAN\t \SOH(\tR\NAKbuildIdForCurrentTask\"\192\v\n\
-    \\NAKWorkflowActivationJob\DC2S\n\
-    \\SOstart_workflow\CAN\SOH \SOH(\v2*.coresdk.workflow_activation.StartWorkflowH\NULR\rstartWorkflow\DC2G\n\
+    \\EMcontinue_as_new_suggested\CAN\b \SOH(\bR\SYNcontinueAsNewSuggested\DC2u\n\
+    \#deployment_version_for_current_task\CAN\t \SOH(\v2'.coresdk.common.WorkerDeploymentVersionR\USdeploymentVersionForCurrentTask\"\187\r\n\
+    \\NAKWorkflowActivationJob\DC2b\n\
+    \\DC3initialize_workflow\CAN\SOH \SOH(\v2/.coresdk.workflow_activation.InitializeWorkflowH\NULR\DC2initializeWorkflow\DC2G\n\
     \\n\
     \fire_timer\CAN\STX \SOH(\v2&.coresdk.workflow_activation.FireTimerH\NULR\tfireTimer\DC2]\n\
     \\DC2update_random_seed\CAN\EOT \SOH(\v2-.coresdk.workflow_activation.UpdateRandomSeedH\NULR\DLEupdateRandomSeed\DC2S\n\
@@ -7185,16 +8043,18 @@ packedFileDescriptor
     \ resolve_child_workflow_execution\CAN\v \SOH(\v2:.coresdk.workflow_activation.ResolveChildWorkflowExecutionH\NULR\GSresolveChildWorkflowExecution\DC2\133\SOH\n\
     \ resolve_signal_external_workflow\CAN\f \SOH(\v2:.coresdk.workflow_activation.ResolveSignalExternalWorkflowH\NULR\GSresolveSignalExternalWorkflow\DC2\155\SOH\n\
     \(resolve_request_cancel_external_workflow\CAN\r \SOH(\v2A.coresdk.workflow_activation.ResolveRequestCancelExternalWorkflowH\NULR$resolveRequestCancelExternalWorkflow\DC2D\n\
-    \\tdo_update\CAN\SO \SOH(\v2%.coresdk.workflow_activation.DoUpdateH\NULR\bdoUpdate\DC2Z\n\
+    \\tdo_update\CAN\SO \SOH(\v2%.coresdk.workflow_activation.DoUpdateH\NULR\bdoUpdate\DC2|\n\
+    \\GSresolve_nexus_operation_start\CAN\SI \SOH(\v27.coresdk.workflow_activation.ResolveNexusOperationStartH\NULR\SUBresolveNexusOperationStart\DC2l\n\
+    \\ETBresolve_nexus_operation\CAN\DLE \SOH(\v22.coresdk.workflow_activation.ResolveNexusOperationH\NULR\NAKresolveNexusOperation\DC2Z\n\
     \\DC1remove_from_cache\CAN2 \SOH(\v2,.coresdk.workflow_activation.RemoveFromCacheH\NULR\SIremoveFromCacheB\t\n\
-    \\avariant\"\250\f\n\
-    \\rStartWorkflow\DC2#\n\
+    \\avariant\"\146\SO\n\
+    \\DC2InitializeWorkflow\DC2#\n\
     \\rworkflow_type\CAN\SOH \SOH(\tR\fworkflowType\DC2\US\n\
     \\vworkflow_id\CAN\STX \SOH(\tR\n\
     \workflowId\DC2=\n\
     \\targuments\CAN\ETX \ETX(\v2\US.temporal.api.common.v1.PayloadR\targuments\DC2'\n\
-    \\SIrandomness_seed\CAN\EOT \SOH(\EOTR\SOrandomnessSeed\DC2Q\n\
-    \\aheaders\CAN\ENQ \ETX(\v27.coresdk.workflow_activation.StartWorkflow.HeadersEntryR\aheaders\DC2\SUB\n\
+    \\SIrandomness_seed\CAN\EOT \SOH(\EOTR\SOrandomnessSeed\DC2V\n\
+    \\aheaders\CAN\ENQ \ETX(\v2<.coresdk.workflow_activation.InitializeWorkflow.HeadersEntryR\aheaders\DC2\SUB\n\
     \\bidentity\CAN\ACK \SOH(\tR\bidentity\DC2]\n\
     \\DC4parent_workflow_info\CAN\a \SOH(\v2+.coresdk.common.NamespacedWorkflowExecutionR\DC2parentWorkflowInfo\DC2W\n\
     \\SUBworkflow_execution_timeout\CAN\b \SOH(\v2\EM.google.protobuf.DurationR\CANworkflowExecutionTimeout\DC2K\n\
@@ -7214,15 +8074,18 @@ packedFileDescriptor
     \\EOTmemo\CAN\NAK \SOH(\v2\FS.temporal.api.common.v1.MemoR\EOTmemo\DC2U\n\
     \\DC1search_attributes\CAN\SYN \SOH(\v2(.temporal.api.common.v1.SearchAttributesR\DLEsearchAttributes\DC29\n\
     \\n\
-    \start_time\CAN\ETB \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTime\SUB[\n\
+    \start_time\CAN\ETB \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTime\DC2N\n\
+    \\rroot_workflow\CAN\CAN \SOH(\v2).temporal.api.common.v1.WorkflowExecutionR\frootWorkflow\DC2<\n\
+    \\bpriority\CAN\EM \SOH(\v2 .temporal.api.common.v1.PriorityR\bpriority\SUB[\n\
     \\fHeadersEntry\DC2\DLE\n\
     \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
     \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH\"\GS\n\
     \\tFireTimer\DC2\DLE\n\
-    \\ETXseq\CAN\SOH \SOH(\rR\ETXseq\"h\n\
+    \\ETXseq\CAN\SOH \SOH(\rR\ETXseq\"\131\SOH\n\
     \\SIResolveActivity\DC2\DLE\n\
     \\ETXseq\CAN\SOH \SOH(\rR\ETXseq\DC2C\n\
-    \\ACKresult\CAN\STX \SOH(\v2+.coresdk.activity_result.ActivityResolutionR\ACKresult\"\244\STX\n\
+    \\ACKresult\CAN\STX \SOH(\v2+.coresdk.activity_result.ActivityResolutionR\ACKresult\DC2\EM\n\
+    \\bis_local\CAN\ETX \SOH(\bR\aisLocal\"\244\STX\n\
     \\"ResolveChildWorkflowExecutionStart\DC2\DLE\n\
     \\ETXseq\CAN\SOH \SOH(\rR\ETXseq\DC2f\n\
     \\tsucceeded\CAN\STX \SOH(\v2F.coresdk.workflow_activation.ResolveChildWorkflowExecutionStartSuccessH\NULR\tsucceeded\DC2`\n\
@@ -7251,9 +8114,9 @@ packedFileDescriptor
     \\aheaders\CAN\ENQ \ETX(\v27.coresdk.workflow_activation.QueryWorkflow.HeadersEntryR\aheaders\SUB[\n\
     \\fHeadersEntry\DC2\DLE\n\
     \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-    \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH\"K\n\
-    \\SOCancelWorkflow\DC29\n\
-    \\adetails\CAN\SOH \ETX(\v2\US.temporal.api.common.v1.PayloadR\adetails\"\181\STX\n\
+    \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH\"(\n\
+    \\SOCancelWorkflow\DC2\SYN\n\
+    \\ACKreason\CAN\SOH \SOH(\tR\ACKreason\"\181\STX\n\
     \\SOSignalWorkflow\DC2\US\n\
     \\vsignal_name\CAN\SOH \SOH(\tR\n\
     \signalName\DC25\n\
@@ -7281,10 +8144,19 @@ packedFileDescriptor
     \\rrun_validator\CAN\a \SOH(\bR\frunValidator\SUB[\n\
     \\fHeadersEntry\DC2\DLE\n\
     \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-    \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH\"\210\STX\n\
+    \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH\"\220\SOH\n\
+    \\SUBResolveNexusOperationStart\DC2\DLE\n\
+    \\ETXseq\CAN\SOH \SOH(\rR\ETXseq\DC2#\n\
+    \\foperation_id\CAN\STX \SOH(\tH\NULR\voperationId\DC2#\n\
+    \\fstarted_sync\CAN\ETX \SOH(\bH\NULR\vstartedSync\DC2X\n\
+    \\SYNcancelled_before_start\CAN\EOT \SOH(\v2 .temporal.api.failure.v1.FailureH\NULR\DC4cancelledBeforeStartB\b\n\
+    \\ACKstatus\"f\n\
+    \\NAKResolveNexusOperation\DC2\DLE\n\
+    \\ETXseq\CAN\SOH \SOH(\rR\ETXseq\DC2;\n\
+    \\ACKresult\CAN\STX \SOH(\v2#.coresdk.nexus.NexusOperationResultR\ACKresult\"\241\STX\n\
     \\SIRemoveFromCache\DC2\CAN\n\
     \\amessage\CAN\SOH \SOH(\tR\amessage\DC2S\n\
-    \\ACKreason\CAN\STX \SOH(\SO2;.coresdk.workflow_activation.RemoveFromCache.EvictionReasonR\ACKreason\"\207\SOH\n\
+    \\ACKreason\CAN\STX \SOH(\SO2;.coresdk.workflow_activation.RemoveFromCache.EvictionReasonR\ACKreason\"\238\SOH\n\
     \\SOEvictionReason\DC2\SI\n\
     \\vUNSPECIFIED\DLE\NUL\DC2\SO\n\
     \\n\
@@ -7297,8 +8169,10 @@ packedFileDescriptor
     \\SOTASK_NOT_FOUND\DLE\ACK\DC2\NAK\n\
     \\DC1UNHANDLED_COMMAND\DLE\a\DC2\t\n\
     \\ENQFATAL\DLE\b\DC2\US\n\
-    \\ESCPAGINATION_OR_HISTORY_FETCH\DLE\tB.\234\STX+Temporalio::Bridge::Api::WorkflowActivationJ\186|\n\
-    \\a\DC2\ENQ\NUL\NUL\200\STX\SOH\n\
+    \\ESCPAGINATION_OR_HISTORY_FETCH\DLE\t\DC2\GS\n\
+    \\EMWORKFLOW_EXECUTION_ENDING\DLE\n\
+    \B8\234\STX5Temporalio::Internal::Bridge::Api::WorkflowActivationJ\247\151\SOH\n\
+    \\a\DC2\ENQ\NUL\NUL\141\ETX\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\172\SOH\n\
@@ -7307,51 +8181,72 @@ packedFileDescriptor
     \ lang SDK applies these activation jobs to drive workflows.\n\
     \\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\a\NULD\n\
+    \\SOH\b\DC2\ETX\a\NULN\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\a\NULD\n\
+    \\STX\b-\DC2\ETX\a\NULN\n\
     \\t\n\
     \\STX\ETX\NUL\DC2\ETX\t\NUL)\n\
     \\t\n\
     \\STX\ETX\SOH\DC2\ETX\n\
     \\NUL(\n\
     \\t\n\
-    \\STX\ETX\STX\DC2\ETX\v\NUL/\n\
+    \\STX\ETX\STX\DC2\ETX\v\NUL%\n\
     \\t\n\
-    \\STX\ETX\ETX\DC2\ETX\f\NUL.\n\
+    \\STX\ETX\ETX\DC2\ETX\f\NUL/\n\
     \\t\n\
     \\STX\ETX\EOT\DC2\ETX\r\NUL.\n\
     \\t\n\
     \\STX\ETX\ENQ\DC2\ETX\SO\NUL.\n\
     \\t\n\
-    \\STX\ETX\ACK\DC2\ETX\SI\NULA\n\
+    \\STX\ETX\ACK\DC2\ETX\SI\NUL.\n\
     \\t\n\
-    \\STX\ETX\a\DC2\ETX\DLE\NUL?\n\
+    \\STX\ETX\a\DC2\ETX\DLE\NULA\n\
     \\t\n\
-    \\STX\ETX\b\DC2\ETX\DC1\NUL/\n\
-    \\149\f\n\
-    \\STX\EOT\NUL\DC2\EOT/\NULH\SOH\SUB\136\f An instruction to the lang sdk to run some workflow code, whether for the first time or from\n\
+    \\STX\ETX\b\DC2\ETX\DC1\NUL?\n\
+    \\t\n\
+    \\STX\ETX\t\DC2\ETX\DC2\NUL/\n\
+    \\t\n\
+    \\STX\ETX\n\
+    \\DC2\ETX\DC3\NUL-\n\
+    \\204\DC2\n\
+    \\STX\EOT\NUL\DC2\EOTA\NUL^\SOH\SUB\191\DC2 An instruction to the lang sdk to run some workflow code, whether for the first time or from\n\
     \ a cached state.\n\
     \\n\
     \ ## Job ordering guarantees and semantics\n\
     \\n\
     \ Core will, by default, order jobs within the activation as follows:\n\
-    \ `patches -> signals/updates -> other -> queries -> evictions`\n\
+    \ 1. init workflow\n\
+    \ 2. patches\n\
+    \ 3. random-seed-updates\n\
+    \ 4. signals/updates\n\
+    \ 5. all others\n\
+    \ 6. local activity resolutions\n\
+    \ 7. queries\n\
+    \ 8. evictions\n\
     \\n\
     \ This is because:\n\
     \ * Patches are expected to apply to the entire activation\n\
     \ * Signal and update handlers should be invoked before workflow routines are iterated. That is to\n\
-    \   say before the users' main workflow function and anything spawned by it is allowed to continue.\n\
+    \  say before the users' main workflow function and anything spawned by it is allowed to continue.\n\
+    \ * Local activities resolutions go after other normal jobs because while *not* replaying, they\n\
+    \  will always take longer than anything else that produces an immediate job (which is\n\
+    \  effectively instant). When *replaying* we need to scan ahead for LA markers so that we can\n\
+    \  resolve them in the same activation that they completed in when not replaying. However, doing\n\
+    \  so would, by default, put those resolutions *before* any other immediate jobs that happened\n\
+    \  in that same activation (prime example: cancelling not-wait-for-cancel activities). So, we do\n\
+    \  this to ensure the LA resolution happens after that cancel (or whatever else it may be) as it\n\
+    \  normally would have when executing.\n\
     \ * Queries always go last (and, in fact, always come in their own activation)\n\
     \ * Evictions also always come in their own activation\n\
     \\n\
-    \ The downside of this reordering is that a signal or update handler may not observe that some\n\
-    \ other event had already happened (ex: an activity completed) when it is first invoked, though it\n\
-    \ will subsequently when workflow routines are driven. Core only does this reordering to make life\n\
-    \ easier for languages that cannot explicitly control when workflow routines are iterated.\n\
-    \ Languages that can explicitly control such iteration should prefer to apply all the jobs to state\n\
-    \ (by resolving promises/futures, invoking handlers, etc as they iterate over the jobs) and then\n\
-    \ only *after* that is done, drive the workflow routines.\n\
+    \ Core does this reordering to ensure that langs observe jobs in the same order during replay as\n\
+    \ they would have during execution. However, in principle, this ordering is not necessary\n\
+    \ (excepting queries/evictions, which definitely must come last) if lang layers apply all jobs to\n\
+    \ state *first* (by resolving promises/futures, marking handlers to be invoked, etc as they iterate\n\
+    \ over the jobs) and then only *after* that is done, drive coroutines/threads/whatever. If\n\
+    \ execution works this way, then determinism is only impacted by the order routines are driven in\n\
+    \ (which must be stable based on lang implementation or convention), rather than the order jobs are\n\
+    \ processed.\n\
     \\n\
     \ ## Evictions\n\
     \\n\
@@ -7361,1009 +8256,1148 @@ packedFileDescriptor
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX/\b\SUB\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETXA\b\SUB\n\
     \\187\SOH\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX2\EOT\SYN\SUB\173\SOH The id of the currently active run of the workflow. Also used as a cache key. There may\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETXD\EOT\SYN\SUB\173\SOH The id of the currently active run of the workflow. Also used as a cache key. There may\n\
     \ only ever be one active workflow task (and hence activation) of a run at one time.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX2\EOT\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETXD\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX2\v\DC1\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETXD\v\DC1\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX2\DC4\NAK\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETXD\DC4\NAK\n\
     \k\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX4\EOT,\SUB^ The current time as understood by the workflow, which is set by workflow task started events\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETXF\EOT,\SUB^ The current time as understood by the workflow, which is set by workflow task started events\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX4\EOT\GS\n\
+    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETXF\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX4\RS'\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETXF\RS'\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX4*+\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETXF*+\n\
     \E\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX6\EOT\SUB\SUB8 Whether or not the activation is replaying past events\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETXH\EOT\SUB\SUB8 Whether or not the activation is replaying past events\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX6\EOT\b\n\
+    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETXH\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX6\t\NAK\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETXH\t\NAK\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX6\CAN\EM\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETXH\CAN\EM\n\
     \\160\SOH\n\
-    \\EOT\EOT\NUL\STX\ETX\DC2\ETX9\EOT\RS\SUB\146\SOH Current history length as determined by the event id of the most recently processed event.\n\
+    \\EOT\EOT\NUL\STX\ETX\DC2\ETXK\EOT\RS\SUB\146\SOH Current history length as determined by the event id of the most recently processed event.\n\
     \ This ensures that the number is always deterministic\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ENQ\DC2\ETX9\EOT\n\
+    \\ENQ\EOT\NUL\STX\ETX\ENQ\DC2\ETXK\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX9\v\EM\n\
+    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETXK\v\EM\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX9\FS\GS\n\
+    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETXK\FS\GS\n\
     \<\n\
-    \\EOT\EOT\NUL\STX\EOT\DC2\ETX;\EOT,\SUB/ The things to do upon activating the workflow\n\
+    \\EOT\EOT\NUL\STX\EOT\DC2\ETXM\EOT,\SUB/ The things to do upon activating the workflow\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\EOT\DC2\ETX;\EOT\f\n\
+    \\ENQ\EOT\NUL\STX\EOT\EOT\DC2\ETXM\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ACK\DC2\ETX;\r\"\n\
+    \\ENQ\EOT\NUL\STX\EOT\ACK\DC2\ETXM\r\"\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETX;#'\n\
+    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETXM#'\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETX;*+\n\
+    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETXM*+\n\
     \\227\SOH\n\
-    \\EOT\EOT\NUL\STX\ENQ\DC2\ETX?\EOT1\SUB\213\SOH Internal flags which are available for use by lang. If `is_replaying` is false, all\n\
+    \\EOT\EOT\NUL\STX\ENQ\DC2\ETXQ\EOT1\SUB\213\SOH Internal flags which are available for use by lang. If `is_replaying` is false, all\n\
     \ internal flags may be used. This is not a delta - all previously used flags always\n\
     \ appear since this representation is cheap.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\EOT\DC2\ETX?\EOT\f\n\
+    \\ENQ\EOT\NUL\STX\ENQ\EOT\DC2\ETXQ\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\ENQ\DC2\ETX?\r\DC3\n\
+    \\ENQ\EOT\NUL\STX\ENQ\ENQ\DC2\ETXQ\r\DC3\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\SOH\DC2\ETX?\DC4,\n\
+    \\ENQ\EOT\NUL\STX\ENQ\SOH\DC2\ETXQ\DC4,\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\ETX\DC2\ETX?/0\n\
+    \\ENQ\EOT\NUL\STX\ENQ\ETX\DC2\ETXQ/0\n\
     \I\n\
-    \\EOT\EOT\NUL\STX\ACK\DC2\ETXA\EOT\"\SUB< The history size in bytes as of the last WFT started event\n\
+    \\EOT\EOT\NUL\STX\ACK\DC2\ETXS\EOT\"\SUB< The history size in bytes as of the last WFT started event\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\ENQ\DC2\ETXA\EOT\n\
+    \\ENQ\EOT\NUL\STX\ACK\ENQ\DC2\ETXS\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\SOH\DC2\ETXA\v\GS\n\
+    \\ENQ\EOT\NUL\STX\ACK\SOH\DC2\ETXS\v\GS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\ETX\DC2\ETXA !\n\
+    \\ENQ\EOT\NUL\STX\ACK\ETX\DC2\ETXS !\n\
     \P\n\
-    \\EOT\EOT\NUL\STX\a\DC2\ETXC\EOT'\SUBC Set true if the most recent WFT started event had this suggestion\n\
+    \\EOT\EOT\NUL\STX\a\DC2\ETXU\EOT'\SUBC Set true if the most recent WFT started event had this suggestion\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\a\ENQ\DC2\ETXC\EOT\b\n\
+    \\ENQ\EOT\NUL\STX\a\ENQ\DC2\ETXU\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\a\SOH\DC2\ETXC\t\"\n\
+    \\ENQ\EOT\NUL\STX\a\SOH\DC2\ETXU\t\"\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\a\ETX\DC2\ETXC%&\n\
-    \\167\STX\n\
-    \\EOT\EOT\NUL\STX\b\DC2\ETXG\EOT)\SUB\153\STX Set to the Build ID of the worker that processed this task, which may be empty. During replay\n\
-    \ this id may not equal the id of the replaying worker. If not replaying and this worker has\n\
-    \ a defined Build ID, it will equal that ID. It will also be empty for evict-only activations.\n\
+    \\ENQ\EOT\NUL\STX\a\ETX\DC2\ETXU%&\n\
+    \\192\ETX\n\
+    \\EOT\EOT\NUL\STX\b\DC2\ETX]\EOTK\SUB\178\ETX Set to the deployment version of the worker that processed this task,\n\
+    \ which may be empty. During replay this version may not equal the version\n\
+    \ of the replaying worker. If not replaying and this worker has a defined\n\
+    \ Deployment Version, it will equal that. It will also be empty for\n\
+    \ evict-only activations. The deployment name may be empty, but not the\n\
+    \ build id, if this worker was using the deprecated Build ID-only\n\
+    \ feature(s).\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\b\ENQ\DC2\ETXG\EOT\n\
-    \\n\
+    \\ENQ\EOT\NUL\STX\b\ACK\DC2\ETX]\EOT\"\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\b\SOH\DC2\ETXG\v$\n\
+    \\ENQ\EOT\NUL\STX\b\SOH\DC2\ETX]#F\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\b\ETX\DC2\ETXG'(\n\
+    \\ENQ\EOT\NUL\STX\b\ETX\DC2\ETX]IJ\n\
+    \\v\n\
+    \\STX\EOT\SOH\DC2\ENQ`\NUL\136\SOH\SOH\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOTJ\NULn\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETXJ\b\GS\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX`\b\GS\n\
+    \\r\n\
+    \\EOT\EOT\SOH\b\NUL\DC2\ENQa\EOT\135\SOH\ENQ\n\
     \\f\n\
-    \\EOT\EOT\SOH\b\NUL\DC2\EOTK\EOTm\ENQ\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\b\NUL\SOH\DC2\ETXK\n\
+    \\ENQ\EOT\SOH\b\NUL\SOH\DC2\ETXa\n\
     \\DC1\n\
-    \2\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETXM\b)\SUB% Begin a workflow for the first time\n\
+    \Y\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETXc\b3\SUBL A workflow is starting, record all of the information from its start event\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETXM\b\NAK\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETXc\b\SUB\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETXM\SYN$\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETXc\ESC.\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETXM'(\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETXc12\n\
     \^\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETXO\b!\SUBQ A timer has fired, allowing whatever was waiting on it (if anything) to proceed\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETXe\b!\SUBQ A timer has fired, allowing whatever was waiting on it (if anything) to proceed\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETXO\b\DC1\n\
+    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETXe\b\DC1\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETXO\DC2\FS\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETXe\DC2\FS\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETXO\US \n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETXe\US \n\
     \G\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETXQ\b0\SUB: Workflow was reset. The randomness seed must be updated.\n\
+    \\EOT\EOT\SOH\STX\STX\DC2\ETXg\b0\SUB: Workflow was reset. The randomness seed must be updated.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETXQ\b\CAN\n\
+    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETXg\b\CAN\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETXQ\EM+\n\
+    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETXg\EM+\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETXQ./\n\
+    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETXg./\n\
     \\169\SOH\n\
-    \\EOT\EOT\SOH\STX\ETX\DC2\ETXT\b)\SUB\155\SOH A request to query the workflow was received. It is guaranteed that queries (one or more)\n\
+    \\EOT\EOT\SOH\STX\ETX\DC2\ETXj\b)\SUB\155\SOH A request to query the workflow was received. It is guaranteed that queries (one or more)\n\
     \ always come in their own activation after other mutating jobs.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ACK\DC2\ETXT\b\NAK\n\
+    \\ENQ\EOT\SOH\STX\ETX\ACK\DC2\ETXj\b\NAK\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETXT\SYN$\n\
+    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETXj\SYN$\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETXT'(\n\
+    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETXj'(\n\
     \=\n\
-    \\EOT\EOT\SOH\STX\EOT\DC2\ETXV\b+\SUB0 A request to cancel the workflow was received.\n\
+    \\EOT\EOT\SOH\STX\EOT\DC2\ETXl\b+\SUB0 A request to cancel the workflow was received.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\ACK\DC2\ETXV\b\SYN\n\
+    \\ENQ\EOT\SOH\STX\EOT\ACK\DC2\ETXl\b\SYN\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\SOH\DC2\ETXV\ETB&\n\
+    \\ENQ\EOT\SOH\STX\EOT\SOH\DC2\ETXl\ETB&\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\ETX\DC2\ETXV)*\n\
+    \\ENQ\EOT\SOH\STX\EOT\ETX\DC2\ETXl)*\n\
     \=\n\
-    \\EOT\EOT\SOH\STX\ENQ\DC2\ETXX\b+\SUB0 A request to signal the workflow was received.\n\
+    \\EOT\EOT\SOH\STX\ENQ\DC2\ETXn\b+\SUB0 A request to signal the workflow was received.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ENQ\ACK\DC2\ETXX\b\SYN\n\
+    \\ENQ\EOT\SOH\STX\ENQ\ACK\DC2\ETXn\b\SYN\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ENQ\SOH\DC2\ETXX\ETB&\n\
+    \\ENQ\EOT\SOH\STX\ENQ\SOH\DC2\ETXn\ETB&\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ENQ\ETX\DC2\ETXX)*\n\
+    \\ENQ\EOT\SOH\STX\ENQ\ETX\DC2\ETXn)*\n\
     \W\n\
-    \\EOT\EOT\SOH\STX\ACK\DC2\ETXZ\b-\SUBJ An activity was resolved, result could be completed, failed or cancelled\n\
+    \\EOT\EOT\SOH\STX\ACK\DC2\ETXp\b-\SUBJ An activity was resolved, result could be completed, failed or cancelled\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ACK\ACK\DC2\ETXZ\b\ETB\n\
+    \\ENQ\EOT\SOH\STX\ACK\ACK\DC2\ETXp\b\ETB\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ACK\SOH\DC2\ETXZ\CAN(\n\
+    \\ENQ\EOT\SOH\STX\ACK\SOH\DC2\ETXp\CAN(\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ACK\ETX\DC2\ETXZ+,\n\
+    \\ENQ\EOT\SOH\STX\ACK\ETX\DC2\ETXp+,\n\
     \\206\SOH\n\
-    \\EOT\EOT\SOH\STX\a\DC2\ETX^\b,\SUB\192\SOH A patch marker has been detected and lang is being told that change exists. This\n\
+    \\EOT\EOT\SOH\STX\a\DC2\ETXt\b,\SUB\192\SOH A patch marker has been detected and lang is being told that change exists. This\n\
     \ job is strange in that it is sent pre-emptively to lang without any corresponding\n\
     \ command being sent first.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\a\ACK\DC2\ETX^\b\SYN\n\
+    \\ENQ\EOT\SOH\STX\a\ACK\DC2\ETXt\b\SYN\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\a\SOH\DC2\ETX^\ETB'\n\
+    \\ENQ\EOT\SOH\STX\a\SOH\DC2\ETXt\ETB'\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\a\ETX\DC2\ETX^*+\n\
+    \\ENQ\EOT\SOH\STX\a\ETX\DC2\ETXt*+\n\
     \H\n\
-    \\EOT\EOT\SOH\STX\b\DC2\ETX`\bW\SUB; A child workflow execution has started or failed to start\n\
+    \\EOT\EOT\SOH\STX\b\DC2\ETXv\bW\SUB; A child workflow execution has started or failed to start\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\b\ACK\DC2\ETX`\b*\n\
+    \\ENQ\EOT\SOH\STX\b\ACK\DC2\ETXv\b*\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\b\SOH\DC2\ETX`+Q\n\
+    \\ENQ\EOT\SOH\STX\b\SOH\DC2\ETXv+Q\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\b\ETX\DC2\ETX`TV\n\
+    \\ENQ\EOT\SOH\STX\b\ETX\DC2\ETXvTV\n\
     \Q\n\
-    \\EOT\EOT\SOH\STX\t\DC2\ETXb\bL\SUBD A child workflow was resolved, result could be completed or failed\n\
+    \\EOT\EOT\SOH\STX\t\DC2\ETXx\bL\SUBD A child workflow was resolved, result could be completed or failed\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\t\ACK\DC2\ETXb\b%\n\
+    \\ENQ\EOT\SOH\STX\t\ACK\DC2\ETXx\b%\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\t\SOH\DC2\ETXb&F\n\
+    \\ENQ\EOT\SOH\STX\t\SOH\DC2\ETXx&F\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\t\ETX\DC2\ETXbIK\n\
+    \\ENQ\EOT\SOH\STX\t\ETX\DC2\ETXxIK\n\
     \A\n\
     \\EOT\EOT\SOH\STX\n\
-    \\DC2\ETXd\bL\SUB4 An attempt to signal an external workflow resolved\n\
+    \\DC2\ETXz\bL\SUB4 An attempt to signal an external workflow resolved\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\SOH\STX\n\
-    \\ACK\DC2\ETXd\b%\n\
+    \\ACK\DC2\ETXz\b%\n\
     \\f\n\
     \\ENQ\EOT\SOH\STX\n\
-    \\SOH\DC2\ETXd&F\n\
+    \\SOH\DC2\ETXz&F\n\
     \\f\n\
     \\ENQ\EOT\SOH\STX\n\
-    \\ETX\DC2\ETXdIK\n\
+    \\ETX\DC2\ETXzIK\n\
     \A\n\
-    \\EOT\EOT\SOH\STX\v\DC2\ETXf\b[\SUB4 An attempt to cancel an external workflow resolved\n\
+    \\EOT\EOT\SOH\STX\v\DC2\ETX|\b[\SUB4 An attempt to cancel an external workflow resolved\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\v\ACK\DC2\ETXf\b,\n\
+    \\ENQ\EOT\SOH\STX\v\ACK\DC2\ETX|\b,\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\v\SOH\DC2\ETXf-U\n\
+    \\ENQ\EOT\SOH\STX\v\SOH\DC2\ETX|-U\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\v\ETX\DC2\ETXfXZ\n\
+    \\ENQ\EOT\SOH\STX\v\ETX\DC2\ETX|XZ\n\
     \5\n\
-    \\EOT\EOT\SOH\STX\f\DC2\ETXh\b \SUB( A request to handle a workflow update.\n\
+    \\EOT\EOT\SOH\STX\f\DC2\ETX~\b \SUB( A request to handle a workflow update.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\f\ACK\DC2\ETXh\b\DLE\n\
+    \\ENQ\EOT\SOH\STX\f\ACK\DC2\ETX~\b\DLE\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\f\SOH\DC2\ETXh\DC1\SUB\n\
+    \\ENQ\EOT\SOH\STX\f\SOH\DC2\ETX~\DC1\SUB\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\f\ETX\DC2\ETXh\GS\US\n\
-    \\222\SOH\n\
-    \\EOT\EOT\SOH\STX\r\DC2\ETXl\b/\SUB\208\SOH Remove the workflow identified by the [WorkflowActivation] containing this job from the\n\
+    \\ENQ\EOT\SOH\STX\f\ETX\DC2\ETX~\GS\US\n\
+    \*\n\
+    \\EOT\EOT\SOH\STX\r\DC2\EOT\128\SOH\bF\SUB\FS A nexus operation started.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\r\ACK\DC2\EOT\128\SOH\b\"\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\r\SOH\DC2\EOT\128\SOH#@\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\r\ETX\DC2\EOT\128\SOHCE\n\
+    \+\n\
+    \\EOT\EOT\SOH\STX\SO\DC2\EOT\130\SOH\b;\SUB\GS A nexus operation resolved.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\SO\ACK\DC2\EOT\130\SOH\b\GS\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\SO\SOH\DC2\EOT\130\SOH\RS5\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\SO\ETX\DC2\EOT\130\SOH8:\n\
+    \\223\SOH\n\
+    \\EOT\EOT\SOH\STX\SI\DC2\EOT\134\SOH\b/\SUB\208\SOH Remove the workflow identified by the [WorkflowActivation] containing this job from the\n\
     \ cache after performing the activation. It is guaranteed that this will be the only job\n\
     \ in the activation if present.\n\
     \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\r\ACK\DC2\ETXl\b\ETB\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\r\SOH\DC2\ETXl\CAN)\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\r\ETX\DC2\ETXl,.\n\
-    \#\n\
-    \\STX\EOT\STX\DC2\ENQq\NUL\164\SOH\SOH\SUB\SYN Start a new workflow\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\SI\ACK\DC2\EOT\134\SOH\b\ETB\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\SI\SOH\DC2\EOT\134\SOH\CAN)\n\
+    \\r\n\
+    \\ENQ\EOT\SOH\STX\SI\ETX\DC2\EOT\134\SOH,.\n\
+    \)\n\
+    \\STX\EOT\STX\DC2\ACK\139\SOH\NUL\203\SOH\SOH\SUB\ESC Initialize a new workflow\n\
     \\n\
+    \\v\n\
+    \\ETX\EOT\STX\SOH\DC2\EOT\139\SOH\b\SUB\n\
+    \R\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\EOT\141\SOH\EOT\GS\SUBD The identifier the lang-specific sdk uses to execute workflow code\n\
     \\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\EOT\141\SOH\EOT\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETXq\b\NAK\n\
-    \Q\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETXs\EOT\GS\SUBD The identifier the lang-specific sdk uses to execute workflow code\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\EOT\141\SOH\v\CAN\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\EOT\141\SOH\ESC\FS\n\
+    \;\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\EOT\143\SOH\EOT\ESC\SUB- The workflow id used on the temporal server\n\
     \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETXs\EOT\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\EOT\143\SOH\EOT\n\
     \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXs\v\CAN\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXs\ESC\FS\n\
-    \:\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETXu\EOT\ESC\SUB- The workflow id used on the temporal server\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\EOT\143\SOH\v\SYN\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\EOT\143\SOH\EM\SUB\n\
+    \+\n\
+    \\EOT\EOT\STX\STX\STX\DC2\EOT\145\SOH\EOT:\SUB\GS Inputs to the workflow code\n\
     \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETXu\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETXu\v\SYN\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETXu\EM\SUB\n\
-    \*\n\
-    \\EOT\EOT\STX\STX\STX\DC2\ETXw\EOT:\SUB\GS Inputs to the workflow code\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\STX\EOT\DC2\ETXw\EOT\f\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ACK\DC2\ETXw\r+\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETXw,5\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETXw89\n\
-    \\148\SOH\n\
-    \\EOT\EOT\STX\STX\ETX\DC2\ETXz\EOT\US\SUB\134\SOH The seed must be used to initialize the random generator used by SDK.\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\STX\EOT\DC2\EOT\145\SOH\EOT\f\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\STX\ACK\DC2\EOT\145\SOH\r+\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\STX\SOH\DC2\EOT\145\SOH,5\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\STX\ETX\DC2\EOT\145\SOH89\n\
+    \\149\SOH\n\
+    \\EOT\EOT\STX\STX\ETX\DC2\EOT\148\SOH\EOT\US\SUB\134\SOH The seed must be used to initialize the random generator used by SDK.\n\
     \ RandomSeedUpdatedAttributes are used to deliver seed updates.\n\
     \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ENQ\DC2\ETXz\EOT\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\ETX\ENQ\DC2\EOT\148\SOH\EOT\n\
     \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETXz\v\SUB\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETXz\GS\RS\n\
-    \o\n\
-    \\EOT\EOT\STX\STX\EOT\DC2\ETX|\EOT<\SUBb Used to add metadata e.g. for tracing and auth, meant to be read and written to by interceptors.\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\EOT\148\SOH\v\SUB\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\EOT\148\SOH\GS\RS\n\
+    \p\n\
+    \\EOT\EOT\STX\STX\EOT\DC2\EOT\150\SOH\EOT<\SUBb Used to add metadata e.g. for tracing and auth, meant to be read and written to by interceptors.\n\
     \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ACK\DC2\ETX|\EOT/\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\SOH\DC2\ETX|07\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ETX\DC2\ETX|:;\n\
-    \B\n\
-    \\EOT\EOT\STX\STX\ENQ\DC2\ETX~\EOT\CAN\SUB5 Identity of the client who requested this execution\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\EOT\ACK\DC2\EOT\150\SOH\EOT/\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\EOT\SOH\DC2\EOT\150\SOH07\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\EOT\ETX\DC2\EOT\150\SOH:;\n\
+    \C\n\
+    \\EOT\EOT\STX\STX\ENQ\DC2\EOT\152\SOH\EOT\CAN\SUB5 Identity of the client who requested this execution\n\
     \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ENQ\ENQ\DC2\ETX~\EOT\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\ENQ\ENQ\DC2\EOT\152\SOH\EOT\n\
     \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ENQ\SOH\DC2\ETX~\v\DC3\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ENQ\ETX\DC2\ETX~\SYN\ETB\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\ENQ\SOH\DC2\EOT\152\SOH\v\DC3\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\ENQ\ETX\DC2\EOT\152\SOH\SYN\ETB\n\
     \I\n\
-    \\EOT\EOT\STX\STX\ACK\DC2\EOT\128\SOH\EOT@\SUB; If this workflow is a child, information about the parent\n\
+    \\EOT\EOT\STX\STX\ACK\DC2\EOT\154\SOH\EOT@\SUB; If this workflow is a child, information about the parent\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\ACK\ACK\DC2\EOT\128\SOH\EOT&\n\
+    \\ENQ\EOT\STX\STX\ACK\ACK\DC2\EOT\154\SOH\EOT&\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\ACK\SOH\DC2\EOT\128\SOH';\n\
+    \\ENQ\EOT\STX\STX\ACK\SOH\DC2\EOT\154\SOH';\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\ACK\ETX\DC2\EOT\128\SOH>?\n\
+    \\ENQ\EOT\STX\STX\ACK\ETX\DC2\EOT\154\SOH>?\n\
     \W\n\
-    \\EOT\EOT\STX\STX\a\DC2\EOT\130\SOH\EOT<\SUBI Total workflow execution timeout including retries and continue as new.\n\
+    \\EOT\EOT\STX\STX\a\DC2\EOT\156\SOH\EOT<\SUBI Total workflow execution timeout including retries and continue as new.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\a\ACK\DC2\EOT\130\SOH\EOT\FS\n\
+    \\ENQ\EOT\STX\STX\a\ACK\DC2\EOT\156\SOH\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\a\SOH\DC2\EOT\130\SOH\GS7\n\
+    \\ENQ\EOT\STX\STX\a\SOH\DC2\EOT\156\SOH\GS7\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\a\ETX\DC2\EOT\130\SOH:;\n\
+    \\ENQ\EOT\STX\STX\a\ETX\DC2\EOT\156\SOH:;\n\
     \1\n\
-    \\EOT\EOT\STX\STX\b\DC2\EOT\132\SOH\EOT6\SUB# Timeout of a single workflow run.\n\
+    \\EOT\EOT\STX\STX\b\DC2\EOT\158\SOH\EOT6\SUB# Timeout of a single workflow run.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\b\ACK\DC2\EOT\132\SOH\EOT\FS\n\
+    \\ENQ\EOT\STX\STX\b\ACK\DC2\EOT\158\SOH\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\b\SOH\DC2\EOT\132\SOH\GS1\n\
+    \\ENQ\EOT\STX\STX\b\SOH\DC2\EOT\158\SOH\GS1\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\b\ETX\DC2\EOT\132\SOH45\n\
+    \\ENQ\EOT\STX\STX\b\ETX\DC2\EOT\158\SOH45\n\
     \2\n\
-    \\EOT\EOT\STX\STX\t\DC2\EOT\134\SOH\EOT8\SUB$ Timeout of a single workflow task.\n\
+    \\EOT\EOT\STX\STX\t\DC2\EOT\160\SOH\EOT8\SUB$ Timeout of a single workflow task.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\t\ACK\DC2\EOT\134\SOH\EOT\FS\n\
+    \\ENQ\EOT\STX\STX\t\ACK\DC2\EOT\160\SOH\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\t\SOH\DC2\EOT\134\SOH\GS2\n\
+    \\ENQ\EOT\STX\STX\t\SOH\DC2\EOT\160\SOH\GS2\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\t\ETX\DC2\EOT\134\SOH57\n\
+    \\ENQ\EOT\STX\STX\t\ETX\DC2\EOT\160\SOH57\n\
     \\DEL\n\
     \\EOT\EOT\STX\STX\n\
-    \\DC2\EOT\137\SOH\EOT0\SUBq Run id of the previous workflow which continued-as-new or retired or cron executed into this\n\
+    \\DC2\EOT\163\SOH\EOT0\SUBq Run id of the previous workflow which continued-as-new or retired or cron executed into this\n\
     \ workflow, if any.\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\STX\STX\n\
-    \\ENQ\DC2\EOT\137\SOH\EOT\n\
+    \\ENQ\DC2\EOT\163\SOH\EOT\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\STX\STX\n\
-    \\SOH\DC2\EOT\137\SOH\v*\n\
+    \\SOH\DC2\EOT\163\SOH\v*\n\
     \\r\n\
     \\ENQ\EOT\STX\STX\n\
-    \\ETX\DC2\EOT\137\SOH-/\n\
+    \\ETX\DC2\EOT\163\SOH-/\n\
     \X\n\
-    \\EOT\EOT\STX\STX\v\DC2\EOT\139\SOH\EOTJ\SUBJ If this workflow was a continuation, indicates the type of continuation.\n\
+    \\EOT\EOT\STX\STX\v\DC2\EOT\165\SOH\EOTJ\SUBJ If this workflow was a continuation, indicates the type of continuation.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\v\ACK\DC2\EOT\139\SOH\EOT0\n\
+    \\ENQ\EOT\STX\STX\v\ACK\DC2\EOT\165\SOH\EOT0\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\v\SOH\DC2\EOT\139\SOH1D\n\
+    \\ENQ\EOT\STX\STX\v\SOH\DC2\EOT\165\SOH1D\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\v\ETX\DC2\EOT\139\SOHGI\n\
+    \\ENQ\EOT\STX\STX\v\ETX\DC2\EOT\165\SOHGI\n\
     \f\n\
-    \\EOT\EOT\STX\STX\f\DC2\EOT\141\SOH\EOT;\SUBX If this workflow was a continuation and that continuation failed, the details of that.\n\
+    \\EOT\EOT\STX\STX\f\DC2\EOT\167\SOH\EOT;\SUBX If this workflow was a continuation and that continuation failed, the details of that.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\f\ACK\DC2\EOT\141\SOH\EOT#\n\
+    \\ENQ\EOT\STX\STX\f\ACK\DC2\EOT\167\SOH\EOT#\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\f\SOH\DC2\EOT\141\SOH$5\n\
+    \\ENQ\EOT\STX\STX\f\SOH\DC2\EOT\167\SOH$5\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\f\ETX\DC2\EOT\141\SOH8:\n\
+    \\ENQ\EOT\STX\STX\f\ETX\DC2\EOT\167\SOH8:\n\
     \i\n\
-    \\EOT\EOT\STX\STX\r\DC2\EOT\143\SOH\EOT@\SUB[ If this workflow was a continuation and that continuation completed, the details of that.\n\
+    \\EOT\EOT\STX\STX\r\DC2\EOT\169\SOH\EOT@\SUB[ If this workflow was a continuation and that continuation completed, the details of that.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\r\ACK\DC2\EOT\143\SOH\EOT#\n\
+    \\ENQ\EOT\STX\STX\r\ACK\DC2\EOT\169\SOH\EOT#\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\r\SOH\DC2\EOT\143\SOH$:\n\
+    \\ENQ\EOT\STX\STX\r\SOH\DC2\EOT\169\SOH$:\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\r\ETX\DC2\EOT\143\SOH=?\n\
+    \\ENQ\EOT\STX\STX\r\ETX\DC2\EOT\169\SOH=?\n\
     \c\n\
-    \\EOT\EOT\STX\STX\SO\DC2\EOT\145\SOH\EOT'\SUBU This is the very first run id the workflow ever had, following continuation chains.\n\
+    \\EOT\EOT\STX\STX\SO\DC2\EOT\171\SOH\EOT'\SUBU This is the very first run id the workflow ever had, following continuation chains.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\SO\ENQ\DC2\EOT\145\SOH\EOT\n\
+    \\ENQ\EOT\STX\STX\SO\ENQ\DC2\EOT\171\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\SO\SOH\DC2\EOT\145\SOH\v!\n\
+    \\ENQ\EOT\STX\STX\SO\SOH\DC2\EOT\171\SOH\v!\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\SO\ETX\DC2\EOT\145\SOH$&\n\
+    \\ENQ\EOT\STX\STX\SO\ETX\DC2\EOT\171\SOH$&\n\
     \,\n\
-    \\EOT\EOT\STX\STX\SI\DC2\EOT\147\SOH\EOT9\SUB\RS This workflow's retry policy\n\
+    \\EOT\EOT\STX\STX\SI\DC2\EOT\173\SOH\EOT9\SUB\RS This workflow's retry policy\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\SI\ACK\DC2\EOT\147\SOH\EOT&\n\
+    \\ENQ\EOT\STX\STX\SI\ACK\DC2\EOT\173\SOH\EOT&\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\SI\SOH\DC2\EOT\147\SOH'3\n\
+    \\ENQ\EOT\STX\STX\SI\SOH\DC2\EOT\173\SOH'3\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\SI\ETX\DC2\EOT\147\SOH68\n\
+    \\ENQ\EOT\STX\STX\SI\ETX\DC2\EOT\173\SOH68\n\
     \Y\n\
-    \\EOT\EOT\STX\STX\DLE\DC2\EOT\149\SOH\EOT\ETB\SUBK Starting at 1, the number of times we have tried to execute this workflow\n\
+    \\EOT\EOT\STX\STX\DLE\DC2\EOT\175\SOH\EOT\ETB\SUBK Starting at 1, the number of times we have tried to execute this workflow\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\DLE\ENQ\DC2\EOT\149\SOH\EOT\t\n\
+    \\ENQ\EOT\STX\STX\DLE\ENQ\DC2\EOT\175\SOH\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\DLE\SOH\DC2\EOT\149\SOH\n\
+    \\ENQ\EOT\STX\STX\DLE\SOH\DC2\EOT\175\SOH\n\
     \\DC1\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\DLE\ETX\DC2\EOT\149\SOH\DC4\SYN\n\
+    \\ENQ\EOT\STX\STX\DLE\ETX\DC2\EOT\175\SOH\DC4\SYN\n\
     \M\n\
-    \\EOT\EOT\STX\STX\DC1\DC2\EOT\151\SOH\EOT\RS\SUB? If this workflow runs on a cron schedule, it will appear here\n\
+    \\EOT\EOT\STX\STX\DC1\DC2\EOT\177\SOH\EOT\RS\SUB? If this workflow runs on a cron schedule, it will appear here\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\DC1\ENQ\DC2\EOT\151\SOH\EOT\n\
+    \\ENQ\EOT\STX\STX\DC1\ENQ\DC2\EOT\177\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\DC1\SOH\DC2\EOT\151\SOH\v\CAN\n\
+    \\ENQ\EOT\STX\STX\DC1\SOH\DC2\EOT\177\SOH\v\CAN\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\DC1\ETX\DC2\EOT\151\SOH\ESC\GS\n\
+    \\ENQ\EOT\STX\STX\DC1\ETX\DC2\EOT\177\SOH\ESC\GS\n\
     \\143\SOH\n\
-    \\EOT\EOT\STX\STX\DC2\DC2\EOT\154\SOH\EOTF\SUB\128\SOH The absolute time at which the workflow will be timed out.\n\
+    \\EOT\EOT\STX\STX\DC2\DC2\EOT\180\SOH\EOTF\SUB\128\SOH The absolute time at which the workflow will be timed out.\n\
     \ This is passed without change to the next run/retry of a workflow.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\DC2\ACK\DC2\EOT\154\SOH\EOT\GS\n\
+    \\ENQ\EOT\STX\STX\DC2\ACK\DC2\EOT\180\SOH\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\DC2\SOH\DC2\EOT\154\SOH\RS@\n\
+    \\ENQ\EOT\STX\STX\DC2\SOH\DC2\EOT\180\SOH\RS@\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\DC2\ETX\DC2\EOT\154\SOHCE\n\
+    \\ENQ\EOT\STX\STX\DC2\ETX\DC2\EOT\180\SOHCE\n\
     \\185\SOH\n\
-    \\EOT\EOT\STX\STX\DC3\DC2\EOT\157\SOH\EOTE\SUB\170\SOH For a cron workflow, this contains the amount of time between when this iteration of\n\
+    \\EOT\EOT\STX\STX\DC3\DC2\EOT\183\SOH\EOTE\SUB\170\SOH For a cron workflow, this contains the amount of time between when this iteration of\n\
     \ the cron workflow was scheduled and when it should run next per its cron_schedule.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\DC3\ACK\DC2\EOT\157\SOH\EOT\FS\n\
+    \\ENQ\EOT\STX\STX\DC3\ACK\DC2\EOT\183\SOH\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\DC3\SOH\DC2\EOT\157\SOH\GS?\n\
+    \\ENQ\EOT\STX\STX\DC3\SOH\DC2\EOT\183\SOH\GS?\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\DC3\ETX\DC2\EOT\157\SOHBD\n\
+    \\ENQ\EOT\STX\STX\DC3\ETX\DC2\EOT\183\SOHBD\n\
     \!\n\
-    \\EOT\EOT\STX\STX\DC4\DC2\EOT\159\SOH\EOT*\SUB\DC3 User-defined memo\n\
+    \\EOT\EOT\STX\STX\DC4\DC2\EOT\185\SOH\EOT*\SUB\DC3 User-defined memo\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\DC4\ACK\DC2\EOT\159\SOH\EOT\US\n\
+    \\ENQ\EOT\STX\STX\DC4\ACK\DC2\EOT\185\SOH\EOT\US\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\DC4\SOH\DC2\EOT\159\SOH $\n\
+    \\ENQ\EOT\STX\STX\DC4\SOH\DC2\EOT\185\SOH $\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\DC4\ETX\DC2\EOT\159\SOH')\n\
+    \\ENQ\EOT\STX\STX\DC4\ETX\DC2\EOT\185\SOH')\n\
     \P\n\
-    \\EOT\EOT\STX\STX\NAK\DC2\EOT\161\SOH\EOTC\SUBB Search attributes created/updated when this workflow was started\n\
+    \\EOT\EOT\STX\STX\NAK\DC2\EOT\187\SOH\EOTC\SUBB Search attributes created/updated when this workflow was started\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\NAK\ACK\DC2\EOT\161\SOH\EOT+\n\
+    \\ENQ\EOT\STX\STX\NAK\ACK\DC2\EOT\187\SOH\EOT+\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\NAK\SOH\DC2\EOT\161\SOH,=\n\
+    \\ENQ\EOT\STX\STX\NAK\SOH\DC2\EOT\187\SOH,=\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\NAK\ETX\DC2\EOT\161\SOH@B\n\
+    \\ENQ\EOT\STX\STX\NAK\ETX\DC2\EOT\187\SOH@B\n\
     \K\n\
-    \\EOT\EOT\STX\STX\SYN\DC2\EOT\163\SOH\EOT.\SUB= When the workflow execution started event was first written\n\
+    \\EOT\EOT\STX\STX\SYN\DC2\EOT\189\SOH\EOT.\SUB= When the workflow execution started event was first written\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\SYN\ACK\DC2\EOT\163\SOH\EOT\GS\n\
+    \\ENQ\EOT\STX\STX\SYN\ACK\DC2\EOT\189\SOH\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\SYN\SOH\DC2\EOT\163\SOH\RS(\n\
+    \\ENQ\EOT\STX\STX\SYN\SOH\DC2\EOT\189\SOH\RS(\n\
     \\r\n\
-    \\ENQ\EOT\STX\STX\SYN\ETX\DC2\EOT\163\SOH+-\n\
+    \\ENQ\EOT\STX\STX\SYN\ETX\DC2\EOT\189\SOH+-\n\
+    \\182\EOT\n\
+    \\EOT\EOT\STX\STX\ETB\DC2\EOT\200\SOH\EOT@\SUB\167\EOT Contains information about the root workflow execution. It is possible for the namespace to\n\
+    \ be different than this workflow if using OSS and cross-namespace children, but this\n\
+    \ information is not retained. Users should take care to track it by other means in such\n\
+    \ situations.\n\
+    \\n\
+    \ The root workflow execution is defined as follows:\n\
+    \   1. A workflow without parent workflow is its own root workflow.\n\
+    \   2. A workflow that has a parent workflow has the same root workflow as its parent workflow.\n\
+    \\n\
+    \ See field in WorkflowExecutionStarted for more detail.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\ETB\ACK\DC2\EOT\200\SOH\EOT,\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\ETB\SOH\DC2\EOT\200\SOH-:\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\ETB\ETX\DC2\EOT\200\SOH=?\n\
+    \3\n\
+    \\EOT\EOT\STX\STX\CAN\DC2\EOT\202\SOH\EOT2\SUB% Priority of this workflow execution\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\CAN\ACK\DC2\EOT\202\SOH\EOT#\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\CAN\SOH\DC2\EOT\202\SOH$,\n\
+    \\r\n\
+    \\ENQ\EOT\STX\STX\CAN\ETX\DC2\EOT\202\SOH/1\n\
     \8\n\
-    \\STX\EOT\ETX\DC2\ACK\167\SOH\NUL\170\SOH\SOH\SUB* Notify a workflow that a timer has fired\n\
+    \\STX\EOT\ETX\DC2\ACK\206\SOH\NUL\209\SOH\SOH\SUB* Notify a workflow that a timer has fired\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\ETX\SOH\DC2\EOT\167\SOH\b\DC1\n\
+    \\ETX\EOT\ETX\SOH\DC2\EOT\206\SOH\b\DC1\n\
     \[\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\EOT\169\SOH\EOT\DC3\SUBM Sequence number as provided by lang in the corresponding StartTimer command\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\EOT\208\SOH\EOT\DC3\SUBM Sequence number as provided by lang in the corresponding StartTimer command\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\EOT\169\SOH\EOT\n\
+    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\EOT\208\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\EOT\169\SOH\v\SO\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\EOT\208\SOH\v\SO\n\
     \\r\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\EOT\169\SOH\DC1\DC2\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\EOT\208\SOH\DC1\DC2\n\
     \D\n\
-    \\STX\EOT\EOT\DC2\ACK\173\SOH\NUL\177\SOH\SOH\SUB6 Notify a workflow that an activity has been resolved\n\
+    \\STX\EOT\EOT\DC2\ACK\212\SOH\NUL\219\SOH\SOH\SUB6 Notify a workflow that an activity has been resolved\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\EOT\SOH\DC2\EOT\173\SOH\b\ETB\n\
+    \\ETX\EOT\EOT\SOH\DC2\EOT\212\SOH\b\ETB\n\
     \a\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\EOT\175\SOH\EOT\DC3\SUBS Sequence number as provided by lang in the corresponding ScheduleActivity command\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\EOT\214\SOH\EOT\DC3\SUBS Sequence number as provided by lang in the corresponding ScheduleActivity command\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\EOT\175\SOH\EOT\n\
+    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\EOT\214\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\EOT\175\SOH\v\SO\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\EOT\214\SOH\v\SO\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\EOT\175\SOH\DC1\DC2\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\EOT\214\SOH\DC1\DC2\n\
     \\f\n\
-    \\EOT\EOT\EOT\STX\SOH\DC2\EOT\176\SOH\EOT2\n\
+    \\EOT\EOT\EOT\STX\SOH\DC2\EOT\215\SOH\EOT2\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\SOH\ACK\DC2\EOT\176\SOH\EOT&\n\
+    \\ENQ\EOT\EOT\STX\SOH\ACK\DC2\EOT\215\SOH\EOT&\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\EOT\176\SOH'-\n\
+    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\EOT\215\SOH'-\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\EOT\176\SOH01\n\
+    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\EOT\215\SOH01\n\
+    \\145\SOH\n\
+    \\EOT\EOT\EOT\STX\STX\DC2\EOT\218\SOH\EOT\SYN\SUB\130\SOH Set to true if the resolution is for a local activity. This is used internally by Core and\n\
+    \ lang does not need to care about it.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\STX\ENQ\DC2\EOT\218\SOH\EOT\b\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\STX\SOH\DC2\EOT\218\SOH\t\DC1\n\
+    \\r\n\
+    \\ENQ\EOT\EOT\STX\STX\ETX\DC2\EOT\218\SOH\DC4\NAK\n\
     \x\n\
-    \\STX\EOT\ENQ\DC2\ACK\181\SOH\NUL\189\SOH\SOH\SUBj Notify a workflow that a start child workflow execution request has succeeded, failed or was\n\
+    \\STX\EOT\ENQ\DC2\ACK\223\SOH\NUL\231\SOH\SOH\SUBj Notify a workflow that a start child workflow execution request has succeeded, failed or was\n\
     \ cancelled.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\ENQ\SOH\DC2\EOT\181\SOH\b*\n\
+    \\ETX\EOT\ENQ\SOH\DC2\EOT\223\SOH\b*\n\
     \l\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\EOT\183\SOH\EOT\DC3\SUB^ Sequence number as provided by lang in the corresponding StartChildWorkflowExecution command\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\EOT\225\SOH\EOT\DC3\SUB^ Sequence number as provided by lang in the corresponding StartChildWorkflowExecution command\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\EOT\183\SOH\EOT\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\EOT\225\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\EOT\183\SOH\v\SO\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\EOT\225\SOH\v\SO\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\EOT\183\SOH\DC1\DC2\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\EOT\225\SOH\DC1\DC2\n\
     \\SO\n\
-    \\EOT\EOT\ENQ\b\NUL\DC2\ACK\184\SOH\EOT\188\SOH\ENQ\n\
+    \\EOT\EOT\ENQ\b\NUL\DC2\ACK\226\SOH\EOT\230\SOH\ENQ\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\b\NUL\SOH\DC2\EOT\184\SOH\n\
+    \\ENQ\EOT\ENQ\b\NUL\SOH\DC2\EOT\226\SOH\n\
     \\DLE\n\
     \\f\n\
-    \\EOT\EOT\ENQ\STX\SOH\DC2\EOT\185\SOH\b@\n\
+    \\EOT\EOT\ENQ\STX\SOH\DC2\EOT\227\SOH\b@\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ACK\DC2\EOT\185\SOH\b1\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ACK\DC2\EOT\227\SOH\b1\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\EOT\185\SOH2;\n\
+    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\EOT\227\SOH2;\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\EOT\185\SOH>?\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\EOT\227\SOH>?\n\
     \\f\n\
-    \\EOT\EOT\ENQ\STX\STX\DC2\EOT\186\SOH\b=\n\
+    \\EOT\EOT\ENQ\STX\STX\DC2\EOT\228\SOH\b=\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\STX\ACK\DC2\EOT\186\SOH\b1\n\
+    \\ENQ\EOT\ENQ\STX\STX\ACK\DC2\EOT\228\SOH\b1\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\EOT\186\SOH28\n\
+    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\EOT\228\SOH28\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\EOT\186\SOH;<\n\
+    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\EOT\228\SOH;<\n\
     \\f\n\
-    \\EOT\EOT\ENQ\STX\ETX\DC2\EOT\187\SOH\bB\n\
+    \\EOT\EOT\ENQ\STX\ETX\DC2\EOT\229\SOH\bB\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\ETX\ACK\DC2\EOT\187\SOH\b3\n\
+    \\ENQ\EOT\ENQ\STX\ETX\ACK\DC2\EOT\229\SOH\b3\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\ETX\SOH\DC2\EOT\187\SOH4=\n\
+    \\ENQ\EOT\ENQ\STX\ETX\SOH\DC2\EOT\229\SOH4=\n\
     \\r\n\
-    \\ENQ\EOT\ENQ\STX\ETX\ETX\DC2\EOT\187\SOH@A\n\
+    \\ENQ\EOT\ENQ\STX\ETX\ETX\DC2\EOT\229\SOH@A\n\
     \.\n\
-    \\STX\EOT\ACK\DC2\ACK\192\SOH\NUL\194\SOH\SOH\SUB  Simply pass the run_id to lang\n\
+    \\STX\EOT\ACK\DC2\ACK\234\SOH\NUL\236\SOH\SOH\SUB  Simply pass the run_id to lang\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\ACK\SOH\DC2\EOT\192\SOH\b1\n\
+    \\ETX\EOT\ACK\SOH\DC2\EOT\234\SOH\b1\n\
     \\f\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\EOT\193\SOH\EOT\SYN\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\EOT\235\SOH\EOT\SYN\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\EOT\193\SOH\EOT\n\
+    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\EOT\235\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\EOT\193\SOH\v\DC1\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\EOT\235\SOH\v\DC1\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\EOT\193\SOH\DC4\NAK\n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\EOT\235\SOH\DC4\NAK\n\
     \1\n\
-    \\STX\EOT\a\DC2\ACK\197\SOH\NUL\203\SOH\SOH\SUB# Provide lang the cause of failure\n\
+    \\STX\EOT\a\DC2\ACK\239\SOH\NUL\245\SOH\SOH\SUB# Provide lang the cause of failure\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\a\SOH\DC2\EOT\197\SOH\b1\n\
+    \\ETX\EOT\a\SOH\DC2\EOT\239\SOH\b1\n\
     \\132\SOH\n\
-    \\EOT\EOT\a\STX\NUL\DC2\EOT\200\SOH\EOT\ESC\SUBv Lang should have this information but it's more convenient to pass it back\n\
+    \\EOT\EOT\a\STX\NUL\DC2\EOT\242\SOH\EOT\ESC\SUBv Lang should have this information but it's more convenient to pass it back\n\
     \ for error construction on the lang side.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\EOT\200\SOH\EOT\n\
+    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\EOT\242\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\EOT\200\SOH\v\SYN\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\EOT\242\SOH\v\SYN\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\EOT\200\SOH\EM\SUB\n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\EOT\242\SOH\EM\SUB\n\
     \\f\n\
-    \\EOT\EOT\a\STX\SOH\DC2\EOT\201\SOH\EOT\GS\n\
+    \\EOT\EOT\a\STX\SOH\DC2\EOT\243\SOH\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\SOH\ENQ\DC2\EOT\201\SOH\EOT\n\
+    \\ENQ\EOT\a\STX\SOH\ENQ\DC2\EOT\243\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\SOH\SOH\DC2\EOT\201\SOH\v\CAN\n\
+    \\ENQ\EOT\a\STX\SOH\SOH\DC2\EOT\243\SOH\v\CAN\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\SOH\ETX\DC2\EOT\201\SOH\ESC\FS\n\
+    \\ENQ\EOT\a\STX\SOH\ETX\DC2\EOT\243\SOH\ESC\FS\n\
     \\f\n\
-    \\EOT\EOT\a\STX\STX\DC2\EOT\202\SOH\EOTD\n\
+    \\EOT\EOT\a\STX\STX\DC2\EOT\244\SOH\EOTD\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\STX\ACK\DC2\EOT\202\SOH\EOT9\n\
+    \\ENQ\EOT\a\STX\STX\ACK\DC2\EOT\244\SOH\EOT9\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\STX\SOH\DC2\EOT\202\SOH:?\n\
+    \\ENQ\EOT\a\STX\STX\SOH\DC2\EOT\244\SOH:?\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\STX\ETX\DC2\EOT\202\SOHBC\n\
+    \\ENQ\EOT\a\STX\STX\ETX\DC2\EOT\244\SOHBC\n\
     \\153\SOH\n\
-    \\STX\EOT\b\DC2\ACK\207\SOH\NUL\209\SOH\SOH\SUB\138\SOH `failure` should be ChildWorkflowFailure with cause set to CancelledFailure.\n\
+    \\STX\EOT\b\DC2\ACK\249\SOH\NUL\251\SOH\SOH\SUB\138\SOH `failure` should be ChildWorkflowFailure with cause set to CancelledFailure.\n\
     \ The failure is constructed in core for lang's convenience.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\b\SOH\DC2\EOT\207\SOH\b3\n\
+    \\ETX\EOT\b\SOH\DC2\EOT\249\SOH\b3\n\
     \\f\n\
-    \\EOT\EOT\b\STX\NUL\DC2\EOT\208\SOH\EOT0\n\
+    \\EOT\EOT\b\STX\NUL\DC2\EOT\250\SOH\EOT0\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\NUL\ACK\DC2\EOT\208\SOH\EOT#\n\
+    \\ENQ\EOT\b\STX\NUL\ACK\DC2\EOT\250\SOH\EOT#\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\EOT\208\SOH$+\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\EOT\250\SOH$+\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\EOT\208\SOH./\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\EOT\250\SOH./\n\
     \S\n\
-    \\STX\EOT\t\DC2\ACK\212\SOH\NUL\216\SOH\SOH\SUBE Notify a workflow that a child workflow execution has been resolved\n\
+    \\STX\EOT\t\DC2\ACK\254\SOH\NUL\130\STX\SOH\SUBE Notify a workflow that a child workflow execution has been resolved\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\t\SOH\DC2\EOT\212\SOH\b%\n\
+    \\ETX\EOT\t\SOH\DC2\EOT\254\SOH\b%\n\
     \l\n\
-    \\EOT\EOT\t\STX\NUL\DC2\EOT\214\SOH\EOT\DC3\SUB^ Sequence number as provided by lang in the corresponding StartChildWorkflowExecution command\n\
+    \\EOT\EOT\t\STX\NUL\DC2\EOT\128\STX\EOT\DC3\SUB^ Sequence number as provided by lang in the corresponding StartChildWorkflowExecution command\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\NUL\ENQ\DC2\EOT\214\SOH\EOT\n\
+    \\ENQ\EOT\t\STX\NUL\ENQ\DC2\EOT\128\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\NUL\SOH\DC2\EOT\214\SOH\v\SO\n\
+    \\ENQ\EOT\t\STX\NUL\SOH\DC2\EOT\128\STX\v\SO\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\NUL\ETX\DC2\EOT\214\SOH\DC1\DC2\n\
+    \\ENQ\EOT\t\STX\NUL\ETX\DC2\EOT\128\STX\DC1\DC2\n\
     \\f\n\
-    \\EOT\EOT\t\STX\SOH\DC2\EOT\215\SOH\EOT2\n\
+    \\EOT\EOT\t\STX\SOH\DC2\EOT\129\STX\EOT2\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\SOH\ACK\DC2\EOT\215\SOH\EOT&\n\
+    \\ENQ\EOT\t\STX\SOH\ACK\DC2\EOT\129\STX\EOT&\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\SOH\SOH\DC2\EOT\215\SOH'-\n\
+    \\ENQ\EOT\t\STX\SOH\SOH\DC2\EOT\129\STX'-\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\SOH\ETX\DC2\EOT\215\SOH01\n\
+    \\ENQ\EOT\t\STX\SOH\ETX\DC2\EOT\129\STX01\n\
     \1\n\
     \\STX\EOT\n\
-    \\DC2\ACK\219\SOH\NUL\221\SOH\SOH\SUB# Update the workflow's random seed\n\
+    \\DC2\ACK\133\STX\NUL\135\STX\SOH\SUB# Update the workflow's random seed\n\
     \\n\
     \\v\n\
     \\ETX\EOT\n\
-    \\SOH\DC2\EOT\219\SOH\b\CAN\n\
+    \\SOH\DC2\EOT\133\STX\b\CAN\n\
     \\f\n\
     \\EOT\EOT\n\
-    \\STX\NUL\DC2\EOT\220\SOH\EOT\US\n\
+    \\STX\NUL\DC2\EOT\134\STX\EOT\US\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ENQ\DC2\EOT\220\SOH\EOT\n\
+    \\STX\NUL\ENQ\DC2\EOT\134\STX\EOT\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\SOH\DC2\EOT\220\SOH\v\SUB\n\
+    \\STX\NUL\SOH\DC2\EOT\134\STX\v\SUB\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ETX\DC2\EOT\220\SOH\GS\RS\n\
+    \\STX\NUL\ETX\DC2\EOT\134\STX\GS\RS\n\
     \ \n\
-    \\STX\EOT\v\DC2\ACK\224\SOH\NUL\234\SOH\SOH\SUB\DC2 Query a workflow\n\
+    \\STX\EOT\v\DC2\ACK\138\STX\NUL\148\STX\SOH\SUB\DC2 Query a workflow\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\v\SOH\DC2\EOT\224\SOH\b\NAK\n\
+    \\ETX\EOT\v\SOH\DC2\EOT\138\STX\b\NAK\n\
     \\137\STX\n\
-    \\EOT\EOT\v\STX\NUL\DC2\EOT\228\SOH\EOT\CAN\SUB\250\SOH For PollWFTResp `query` field, this will be set to the special value `legacy`. For the\n\
+    \\EOT\EOT\v\STX\NUL\DC2\EOT\142\STX\EOT\CAN\SUB\250\SOH For PollWFTResp `query` field, this will be set to the special value `legacy`. For the\n\
     \ `queries` field, the server provides a unique identifier. If it is a `legacy` query,\n\
     \ lang cannot issue any commands in response other than to answer the query.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\NUL\ENQ\DC2\EOT\228\SOH\EOT\n\
+    \\ENQ\EOT\v\STX\NUL\ENQ\DC2\EOT\142\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\NUL\SOH\DC2\EOT\228\SOH\v\DC3\n\
+    \\ENQ\EOT\v\STX\NUL\SOH\DC2\EOT\142\STX\v\DC3\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\NUL\ETX\DC2\EOT\228\SOH\SYN\ETB\n\
+    \\ENQ\EOT\v\STX\NUL\ETX\DC2\EOT\142\STX\SYN\ETB\n\
     \4\n\
-    \\EOT\EOT\v\STX\SOH\DC2\EOT\230\SOH\EOT\SUB\SUB& The query's function/method/etc name\n\
+    \\EOT\EOT\v\STX\SOH\DC2\EOT\144\STX\EOT\SUB\SUB& The query's function/method/etc name\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\ENQ\DC2\EOT\230\SOH\EOT\n\
+    \\ENQ\EOT\v\STX\SOH\ENQ\DC2\EOT\144\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\SOH\DC2\EOT\230\SOH\v\NAK\n\
+    \\ENQ\EOT\v\STX\SOH\SOH\DC2\EOT\144\STX\v\NAK\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\ETX\DC2\EOT\230\SOH\CAN\EM\n\
+    \\ENQ\EOT\v\STX\SOH\ETX\DC2\EOT\144\STX\CAN\EM\n\
     \\f\n\
-    \\EOT\EOT\v\STX\STX\DC2\EOT\231\SOH\EOT:\n\
+    \\EOT\EOT\v\STX\STX\DC2\EOT\145\STX\EOT:\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\STX\EOT\DC2\EOT\231\SOH\EOT\f\n\
+    \\ENQ\EOT\v\STX\STX\EOT\DC2\EOT\145\STX\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\STX\ACK\DC2\EOT\231\SOH\r+\n\
+    \\ENQ\EOT\v\STX\STX\ACK\DC2\EOT\145\STX\r+\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\STX\SOH\DC2\EOT\231\SOH,5\n\
+    \\ENQ\EOT\v\STX\STX\SOH\DC2\EOT\145\STX,5\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\STX\ETX\DC2\EOT\231\SOH89\n\
+    \\ENQ\EOT\v\STX\STX\ETX\DC2\EOT\145\STX89\n\
     \-\n\
-    \\EOT\EOT\v\STX\ETX\DC2\EOT\233\SOH\EOT<\SUB\US Headers attached to the query\n\
+    \\EOT\EOT\v\STX\ETX\DC2\EOT\147\STX\EOT<\SUB\US Headers attached to the query\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\ETX\ACK\DC2\EOT\233\SOH\EOT/\n\
+    \\ENQ\EOT\v\STX\ETX\ACK\DC2\EOT\147\STX\EOT/\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\ETX\SOH\DC2\EOT\233\SOH07\n\
+    \\ENQ\EOT\v\STX\ETX\SOH\DC2\EOT\147\STX07\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\ETX\ETX\DC2\EOT\233\SOH:;\n\
+    \\ENQ\EOT\v\STX\ETX\ETX\DC2\EOT\147\STX:;\n\
     \)\n\
-    \\STX\EOT\f\DC2\ACK\237\SOH\NUL\240\SOH\SOH\SUB\ESC Cancel a running workflow\n\
+    \\STX\EOT\f\DC2\ACK\151\STX\NUL\154\STX\SOH\SUB\ESC Cancel a running workflow\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\f\SOH\DC2\EOT\237\SOH\b\SYN\n\
-    \9\n\
-    \\EOT\EOT\f\STX\NUL\DC2\EOT\239\SOH\EOT8\SUB+ Information from the cancellation request\n\
+    \\ETX\EOT\f\SOH\DC2\EOT\151\STX\b\SYN\n\
+    \C\n\
+    \\EOT\EOT\f\STX\NUL\DC2\EOT\153\STX\EOT\SYN\SUB5 User-specified reason the cancel request was issued\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\EOT\DC2\EOT\239\SOH\EOT\f\n\
+    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\EOT\153\STX\EOT\n\
+    \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\ACK\DC2\EOT\239\SOH\r+\n\
+    \\ENQ\EOT\f\STX\NUL\SOH\DC2\EOT\153\STX\v\DC1\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\SOH\DC2\EOT\239\SOH,3\n\
-    \\r\n\
-    \\ENQ\EOT\f\STX\NUL\ETX\DC2\EOT\239\SOH67\n\
+    \\ENQ\EOT\f\STX\NUL\ETX\DC2\EOT\153\STX\DC4\NAK\n\
     \+\n\
-    \\STX\EOT\r\DC2\ACK\243\SOH\NUL\250\SOH\SOH\SUB\GS Send a signal to a workflow\n\
+    \\STX\EOT\r\DC2\ACK\157\STX\NUL\164\STX\SOH\SUB\GS Send a signal to a workflow\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\r\SOH\DC2\EOT\243\SOH\b\SYN\n\
+    \\ETX\EOT\r\SOH\DC2\EOT\157\STX\b\SYN\n\
     \\f\n\
-    \\EOT\EOT\r\STX\NUL\DC2\EOT\244\SOH\EOT\ESC\n\
+    \\EOT\EOT\r\STX\NUL\DC2\EOT\158\STX\EOT\ESC\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\NUL\ENQ\DC2\EOT\244\SOH\EOT\n\
+    \\ENQ\EOT\r\STX\NUL\ENQ\DC2\EOT\158\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\NUL\SOH\DC2\EOT\244\SOH\v\SYN\n\
+    \\ENQ\EOT\r\STX\NUL\SOH\DC2\EOT\158\STX\v\SYN\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\NUL\ETX\DC2\EOT\244\SOH\EM\SUB\n\
+    \\ENQ\EOT\r\STX\NUL\ETX\DC2\EOT\158\STX\EM\SUB\n\
     \\f\n\
-    \\EOT\EOT\r\STX\SOH\DC2\EOT\245\SOH\EOT6\n\
+    \\EOT\EOT\r\STX\SOH\DC2\EOT\159\STX\EOT6\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SOH\EOT\DC2\EOT\245\SOH\EOT\f\n\
+    \\ENQ\EOT\r\STX\SOH\EOT\DC2\EOT\159\STX\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SOH\ACK\DC2\EOT\245\SOH\r+\n\
+    \\ENQ\EOT\r\STX\SOH\ACK\DC2\EOT\159\STX\r+\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SOH\SOH\DC2\EOT\245\SOH,1\n\
+    \\ENQ\EOT\r\STX\SOH\SOH\DC2\EOT\159\STX,1\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SOH\ETX\DC2\EOT\245\SOH45\n\
+    \\ENQ\EOT\r\STX\SOH\ETX\DC2\EOT\159\STX45\n\
     \4\n\
-    \\EOT\EOT\r\STX\STX\DC2\EOT\247\SOH\EOT\CAN\SUB& Identity of the sender of the signal\n\
+    \\EOT\EOT\r\STX\STX\DC2\EOT\161\STX\EOT\CAN\SUB& Identity of the sender of the signal\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\STX\ENQ\DC2\EOT\247\SOH\EOT\n\
+    \\ENQ\EOT\r\STX\STX\ENQ\DC2\EOT\161\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\STX\SOH\DC2\EOT\247\SOH\v\DC3\n\
+    \\ENQ\EOT\r\STX\STX\SOH\DC2\EOT\161\STX\v\DC3\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\STX\ETX\DC2\EOT\247\SOH\SYN\ETB\n\
+    \\ENQ\EOT\r\STX\STX\ETX\DC2\EOT\161\STX\SYN\ETB\n\
     \.\n\
-    \\EOT\EOT\r\STX\ETX\DC2\EOT\249\SOH\EOT<\SUB  Headers attached to the signal\n\
+    \\EOT\EOT\r\STX\ETX\DC2\EOT\163\STX\EOT<\SUB  Headers attached to the signal\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ETX\ACK\DC2\EOT\249\SOH\EOT/\n\
+    \\ENQ\EOT\r\STX\ETX\ACK\DC2\EOT\163\STX\EOT/\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ETX\SOH\DC2\EOT\249\SOH07\n\
+    \\ENQ\EOT\r\STX\ETX\SOH\DC2\EOT\163\STX07\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ETX\ETX\DC2\EOT\249\SOH:;\n\
+    \\ENQ\EOT\r\STX\ETX\ETX\DC2\EOT\163\STX:;\n\
     \\176\SOH\n\
-    \\STX\EOT\SO\DC2\ACK\254\SOH\NUL\128\STX\SOH\SUB\161\SOH Inform lang what the result of a call to `patched` or similar API should be -- this is always\n\
+    \\STX\EOT\SO\DC2\ACK\168\STX\NUL\170\STX\SOH\SUB\161\SOH Inform lang what the result of a call to `patched` or similar API should be -- this is always\n\
     \ sent pre-emptively, so any time it is sent the change is present\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\SO\SOH\DC2\EOT\254\SOH\b\SYN\n\
+    \\ETX\EOT\SO\SOH\DC2\EOT\168\STX\b\SYN\n\
     \\f\n\
-    \\EOT\EOT\SO\STX\NUL\DC2\EOT\255\SOH\EOT\CAN\n\
+    \\EOT\EOT\SO\STX\NUL\DC2\EOT\169\STX\EOT\CAN\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\ENQ\DC2\EOT\255\SOH\EOT\n\
+    \\ENQ\EOT\SO\STX\NUL\ENQ\DC2\EOT\169\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\EOT\255\SOH\v\DC3\n\
+    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\EOT\169\STX\v\DC3\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\EOT\255\SOH\SYN\ETB\n\
+    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\EOT\169\STX\SYN\ETB\n\
     \\f\n\
-    \\STX\EOT\SI\DC2\ACK\130\STX\NUL\137\STX\SOH\n\
+    \\STX\EOT\SI\DC2\ACK\172\STX\NUL\179\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\SI\SOH\DC2\EOT\130\STX\b%\n\
+    \\ETX\EOT\SI\SOH\DC2\EOT\172\STX\b%\n\
     \q\n\
-    \\EOT\EOT\SI\STX\NUL\DC2\EOT\133\STX\EOT\DC3\SUBc Sequence number as provided by lang in the corresponding SignalExternalWorkflowExecution\n\
+    \\EOT\EOT\SI\STX\NUL\DC2\EOT\175\STX\EOT\DC3\SUBc Sequence number as provided by lang in the corresponding SignalExternalWorkflowExecution\n\
     \ command\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\EOT\133\STX\EOT\n\
+    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\EOT\175\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\EOT\133\STX\v\SO\n\
+    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\EOT\175\STX\v\SO\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\EOT\133\STX\DC1\DC2\n\
+    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\EOT\175\STX\DC1\DC2\n\
     \v\n\
-    \\EOT\EOT\SI\STX\SOH\DC2\EOT\136\STX\EOT0\SUBh If populated, this signal either failed to be sent or was cancelled depending on failure\n\
+    \\EOT\EOT\SI\STX\SOH\DC2\EOT\178\STX\EOT0\SUBh If populated, this signal either failed to be sent or was cancelled depending on failure\n\
     \ type / info.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\SOH\ACK\DC2\EOT\136\STX\EOT#\n\
+    \\ENQ\EOT\SI\STX\SOH\ACK\DC2\EOT\178\STX\EOT#\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\SOH\SOH\DC2\EOT\136\STX$+\n\
+    \\ENQ\EOT\SI\STX\SOH\SOH\DC2\EOT\178\STX$+\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\SOH\ETX\DC2\EOT\136\STX./\n\
+    \\ENQ\EOT\SI\STX\SOH\ETX\DC2\EOT\178\STX./\n\
     \\f\n\
-    \\STX\EOT\DLE\DC2\ACK\139\STX\NUL\146\STX\SOH\n\
+    \\STX\EOT\DLE\DC2\ACK\181\STX\NUL\188\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\DLE\SOH\DC2\EOT\139\STX\b,\n\
+    \\ETX\EOT\DLE\SOH\DC2\EOT\181\STX\b,\n\
     \x\n\
-    \\EOT\EOT\DLE\STX\NUL\DC2\EOT\142\STX\EOT\DC3\SUBj Sequence number as provided by lang in the corresponding\n\
+    \\EOT\EOT\DLE\STX\NUL\DC2\EOT\184\STX\EOT\DC3\SUBj Sequence number as provided by lang in the corresponding\n\
     \ RequestCancelExternalWorkflowExecution command\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\ENQ\DC2\EOT\142\STX\EOT\n\
+    \\ENQ\EOT\DLE\STX\NUL\ENQ\DC2\EOT\184\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\SOH\DC2\EOT\142\STX\v\SO\n\
+    \\ENQ\EOT\DLE\STX\NUL\SOH\DC2\EOT\184\STX\v\SO\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\ETX\DC2\EOT\142\STX\DC1\DC2\n\
+    \\ENQ\EOT\DLE\STX\NUL\ETX\DC2\EOT\184\STX\DC1\DC2\n\
     \v\n\
-    \\EOT\EOT\DLE\STX\SOH\DC2\EOT\145\STX\EOT0\SUBh If populated, this signal either failed to be sent or was cancelled depending on failure\n\
+    \\EOT\EOT\DLE\STX\SOH\DC2\EOT\187\STX\EOT0\SUBh If populated, this signal either failed to be sent or was cancelled depending on failure\n\
     \ type / info.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\SOH\ACK\DC2\EOT\145\STX\EOT#\n\
+    \\ENQ\EOT\DLE\STX\SOH\ACK\DC2\EOT\187\STX\EOT#\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\SOH\SOH\DC2\EOT\145\STX$+\n\
+    \\ENQ\EOT\DLE\STX\SOH\SOH\DC2\EOT\187\STX$+\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\SOH\ETX\DC2\EOT\145\STX./\n\
+    \\ENQ\EOT\DLE\STX\SOH\ETX\DC2\EOT\187\STX./\n\
     \\160\STX\n\
-    \\STX\EOT\DC1\DC2\ACK\151\STX\NUL\169\STX\SOH\SUB\145\STX Lang is requested to invoke an update handler on the workflow. Lang should invoke the update\n\
+    \\STX\EOT\DC1\DC2\ACK\193\STX\NUL\211\STX\SOH\SUB\145\STX Lang is requested to invoke an update handler on the workflow. Lang should invoke the update\n\
     \ validator first (if requested). If it accepts the update, immediately invoke the update handler.\n\
     \ Lang must reply to the activation containing this job with an `UpdateResponse`.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\DC1\SOH\DC2\EOT\151\STX\b\DLE\n\
+    \\ETX\EOT\DC1\SOH\DC2\EOT\193\STX\b\DLE\n\
     \<\n\
-    \\EOT\EOT\DC1\STX\NUL\DC2\EOT\153\STX\EOT\DC2\SUB. A workflow-unique identifier for this update\n\
+    \\EOT\EOT\DC1\STX\NUL\DC2\EOT\195\STX\EOT\DC2\SUB. A workflow-unique identifier for this update\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\NUL\ENQ\DC2\EOT\153\STX\EOT\n\
+    \\ENQ\EOT\DC1\STX\NUL\ENQ\DC2\EOT\195\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\NUL\SOH\DC2\EOT\153\STX\v\r\n\
+    \\ENQ\EOT\DC1\STX\NUL\SOH\DC2\EOT\195\STX\v\r\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\NUL\ETX\DC2\EOT\153\STX\DLE\DC1\n\
+    \\ENQ\EOT\DC1\STX\NUL\ETX\DC2\EOT\195\STX\DLE\DC1\n\
     \u\n\
-    \\EOT\EOT\DC1\STX\SOH\DC2\EOT\156\STX\EOT$\SUBg The protocol message instance ID - this is used to uniquely track the ID server side and\n\
+    \\EOT\EOT\DC1\STX\SOH\DC2\EOT\198\STX\EOT$\SUBg The protocol message instance ID - this is used to uniquely track the ID server side and\n\
     \ internally.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\SOH\ENQ\DC2\EOT\156\STX\EOT\n\
+    \\ENQ\EOT\DC1\STX\SOH\ENQ\DC2\EOT\198\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\SOH\SOH\DC2\EOT\156\STX\v\US\n\
+    \\ENQ\EOT\DC1\STX\SOH\SOH\DC2\EOT\198\STX\v\US\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\SOH\ETX\DC2\EOT\156\STX\"#\n\
+    \\ENQ\EOT\DC1\STX\SOH\ETX\DC2\EOT\198\STX\"#\n\
     \.\n\
-    \\EOT\EOT\DC1\STX\STX\DC2\EOT\158\STX\EOT\DC4\SUB  The name of the update handler\n\
+    \\EOT\EOT\DC1\STX\STX\DC2\EOT\200\STX\EOT\DC4\SUB  The name of the update handler\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\STX\ENQ\DC2\EOT\158\STX\EOT\n\
+    \\ENQ\EOT\DC1\STX\STX\ENQ\DC2\EOT\200\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\STX\SOH\DC2\EOT\158\STX\v\SI\n\
+    \\ENQ\EOT\DC1\STX\STX\SOH\DC2\EOT\200\STX\v\SI\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\STX\ETX\DC2\EOT\158\STX\DC2\DC3\n\
+    \\ENQ\EOT\DC1\STX\STX\ETX\DC2\EOT\200\STX\DC2\DC3\n\
     \'\n\
-    \\EOT\EOT\DC1\STX\ETX\DC2\EOT\160\STX\EOT6\SUB\EM The input to the update\n\
+    \\EOT\EOT\DC1\STX\ETX\DC2\EOT\202\STX\EOT6\SUB\EM The input to the update\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\ETX\EOT\DC2\EOT\160\STX\EOT\f\n\
+    \\ENQ\EOT\DC1\STX\ETX\EOT\DC2\EOT\202\STX\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\ETX\ACK\DC2\EOT\160\STX\r+\n\
+    \\ENQ\EOT\DC1\STX\ETX\ACK\DC2\EOT\202\STX\r+\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\ETX\SOH\DC2\EOT\160\STX,1\n\
+    \\ENQ\EOT\DC1\STX\ETX\SOH\DC2\EOT\202\STX,1\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\ETX\ETX\DC2\EOT\160\STX45\n\
+    \\ENQ\EOT\DC1\STX\ETX\ETX\DC2\EOT\202\STX45\n\
     \.\n\
-    \\EOT\EOT\DC1\STX\EOT\DC2\EOT\162\STX\EOT<\SUB  Headers attached to the update\n\
+    \\EOT\EOT\DC1\STX\EOT\DC2\EOT\204\STX\EOT<\SUB  Headers attached to the update\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\EOT\ACK\DC2\EOT\162\STX\EOT/\n\
+    \\ENQ\EOT\DC1\STX\EOT\ACK\DC2\EOT\204\STX\EOT/\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\EOT\SOH\DC2\EOT\162\STX07\n\
+    \\ENQ\EOT\DC1\STX\EOT\SOH\DC2\EOT\204\STX07\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\EOT\ETX\DC2\EOT\162\STX:;\n\
+    \\ENQ\EOT\DC1\STX\EOT\ETX\DC2\EOT\204\STX:;\n\
     \\165\SOH\n\
-    \\EOT\EOT\DC1\STX\ENQ\DC2\EOT\165\STX\EOT)\SUB\150\SOH Remaining metadata associated with the update. The `update_id` field is stripped from here\n\
+    \\EOT\EOT\DC1\STX\ENQ\DC2\EOT\207\STX\EOT)\SUB\150\SOH Remaining metadata associated with the update. The `update_id` field is stripped from here\n\
     \ and moved to `id`, since it is guaranteed to be present.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\ENQ\ACK\DC2\EOT\165\STX\EOT\US\n\
+    \\ENQ\EOT\DC1\STX\ENQ\ACK\DC2\EOT\207\STX\EOT\US\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\ENQ\SOH\DC2\EOT\165\STX $\n\
+    \\ENQ\EOT\DC1\STX\ENQ\SOH\DC2\EOT\207\STX $\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\ENQ\ETX\DC2\EOT\165\STX'(\n\
+    \\ENQ\EOT\DC1\STX\ENQ\ETX\DC2\EOT\207\STX'(\n\
     \\179\SOH\n\
-    \\EOT\EOT\DC1\STX\ACK\DC2\EOT\168\STX\EOT\ESC\SUB\164\SOH If set true, lang must run the update's validator before running the handler. This will be\n\
+    \\EOT\EOT\DC1\STX\ACK\DC2\EOT\210\STX\EOT\ESC\SUB\164\SOH If set true, lang must run the update's validator before running the handler. This will be\n\
     \ set false during replay, since validation is not re-run during replay.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\ACK\ENQ\DC2\EOT\168\STX\EOT\b\n\
+    \\ENQ\EOT\DC1\STX\ACK\ENQ\DC2\EOT\210\STX\EOT\b\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\ACK\SOH\DC2\EOT\168\STX\t\SYN\n\
+    \\ENQ\EOT\DC1\STX\ACK\SOH\DC2\EOT\210\STX\t\SYN\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\ACK\ETX\DC2\EOT\168\STX\EM\SUB\n\
+    \\ENQ\EOT\DC1\STX\ACK\ETX\DC2\EOT\210\STX\EM\SUB\n\
     \\f\n\
-    \\STX\EOT\DC2\DC2\ACK\171\STX\NUL\200\STX\SOH\n\
+    \\STX\EOT\DC2\DC2\ACK\213\STX\NUL\229\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\DC2\SOH\DC2\EOT\171\STX\b\ETB\n\
+    \\ETX\EOT\DC2\SOH\DC2\EOT\213\STX\b\"\n\
+    \g\n\
+    \\EOT\EOT\DC2\STX\NUL\DC2\EOT\215\STX\EOT\DC3\SUBY Sequence number as provided by lang in the corresponding ScheduleNexusOperation command\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DC2\STX\NUL\ENQ\DC2\EOT\215\STX\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DC2\STX\NUL\SOH\DC2\EOT\215\STX\v\SO\n\
+    \\r\n\
+    \\ENQ\EOT\DC2\STX\NUL\ETX\DC2\EOT\215\STX\DC1\DC2\n\
+    \\SO\n\
+    \\EOT\EOT\DC2\b\NUL\DC2\ACK\216\STX\EOT\228\STX\ENQ\n\
+    \\r\n\
+    \\ENQ\EOT\DC2\b\NUL\SOH\DC2\EOT\216\STX\n\
+    \\DLE\n\
+    \\209\SOH\n\
+    \\EOT\EOT\DC2\STX\SOH\DC2\EOT\220\STX\b \SUB\194\SOH The operation started asynchronously. Contains an ID that can be used to perform\n\
+    \ operations on the started operation by, ex, clients. A `ResolveNexusOperation` job will\n\
+    \ follow at some point.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DC2\STX\SOH\ENQ\DC2\EOT\220\STX\b\SO\n\
+    \\r\n\
+    \\ENQ\EOT\DC2\STX\SOH\SOH\DC2\EOT\220\STX\SI\ESC\n\
+    \\r\n\
+    \\ENQ\EOT\DC2\STX\SOH\ETX\DC2\EOT\220\STX\RS\US\n\
+    \\156\SOH\n\
+    \\EOT\EOT\DC2\STX\STX\DC2\EOT\223\STX\b\RS\SUB\141\SOH If true the operation \"started\" but only because it's also already resolved. A\n\
+    \ `ResolveNexusOperation` job will be in the same activation.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DC2\STX\STX\ENQ\DC2\EOT\223\STX\b\f\n\
+    \\r\n\
+    \\ENQ\EOT\DC2\STX\STX\SOH\DC2\EOT\223\STX\r\EM\n\
+    \\r\n\
+    \\ENQ\EOT\DC2\STX\STX\ETX\DC2\EOT\223\STX\FS\GS\n\
+    \\244\SOH\n\
+    \\EOT\EOT\DC2\STX\ETX\DC2\EOT\227\STX\bC\SUB\229\SOH The operation was cancelled before it was ever sent to server (same WFT).\n\
+    \ Note that core will still send a `ResolveNexusOperation` job in the same activation, so\n\
+    \ there does not need to be an exceptional case for this in lang.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DC2\STX\ETX\ACK\DC2\EOT\227\STX\b'\n\
+    \\r\n\
+    \\ENQ\EOT\DC2\STX\ETX\SOH\DC2\EOT\227\STX(>\n\
+    \\r\n\
+    \\ENQ\EOT\DC2\STX\ETX\ETX\DC2\EOT\227\STXAB\n\
     \\f\n\
-    \\EOT\EOT\DC2\STX\NUL\DC2\EOT\172\STX\EOT\ETB\n\
-    \\r\n\
-    \\ENQ\EOT\DC2\STX\NUL\ENQ\DC2\EOT\172\STX\EOT\n\
+    \\STX\EOT\DC3\DC2\ACK\231\STX\NUL\235\STX\SOH\n\
+    \\v\n\
+    \\ETX\EOT\DC3\SOH\DC2\EOT\231\STX\b\GS\n\
+    \g\n\
+    \\EOT\EOT\DC3\STX\NUL\DC2\EOT\233\STX\EOT\DC3\SUBY Sequence number as provided by lang in the corresponding ScheduleNexusOperation command\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DC2\STX\NUL\SOH\DC2\EOT\172\STX\v\DC2\n\
+    \\ENQ\EOT\DC3\STX\NUL\ENQ\DC2\EOT\233\STX\EOT\n\
+    \\n\
     \\r\n\
-    \\ENQ\EOT\DC2\STX\NUL\ETX\DC2\EOT\172\STX\NAK\SYN\n\
-    \\SO\n\
-    \\EOT\EOT\DC2\EOT\NUL\DC2\ACK\174\STX\EOT\198\STX\ENQ\n\
+    \\ENQ\EOT\DC3\STX\NUL\SOH\DC2\EOT\233\STX\v\SO\n\
     \\r\n\
-    \\ENQ\EOT\DC2\EOT\NUL\SOH\DC2\EOT\174\STX\t\ETB\n\
+    \\ENQ\EOT\DC3\STX\NUL\ETX\DC2\EOT\233\STX\DC1\DC2\n\
+    \\f\n\
+    \\EOT\EOT\DC3\STX\SOH\DC2\EOT\234\STX\EOT*\n\
+    \\r\n\
+    \\ENQ\EOT\DC3\STX\SOH\ACK\DC2\EOT\234\STX\EOT\RS\n\
+    \\r\n\
+    \\ENQ\EOT\DC3\STX\SOH\SOH\DC2\EOT\234\STX\US%\n\
+    \\r\n\
+    \\ENQ\EOT\DC3\STX\SOH\ETX\DC2\EOT\234\STX()\n\
+    \\f\n\
+    \\STX\EOT\DC4\DC2\ACK\237\STX\NUL\141\ETX\SOH\n\
+    \\v\n\
+    \\ETX\EOT\DC4\SOH\DC2\EOT\237\STX\b\ETB\n\
+    \\f\n\
+    \\EOT\EOT\DC4\STX\NUL\DC2\EOT\238\STX\EOT\ETB\n\
+    \\r\n\
+    \\ENQ\EOT\DC4\STX\NUL\ENQ\DC2\EOT\238\STX\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DC4\STX\NUL\SOH\DC2\EOT\238\STX\v\DC2\n\
+    \\r\n\
+    \\ENQ\EOT\DC4\STX\NUL\ETX\DC2\EOT\238\STX\NAK\SYN\n\
     \\SO\n\
-    \\ACK\EOT\DC2\EOT\NUL\STX\NUL\DC2\EOT\175\STX\b\CAN\n\
+    \\EOT\EOT\DC4\EOT\NUL\DC2\ACK\240\STX\EOT\139\ETX\ENQ\n\
+    \\r\n\
+    \\ENQ\EOT\DC4\EOT\NUL\SOH\DC2\EOT\240\STX\t\ETB\n\
+    \\SO\n\
+    \\ACK\EOT\DC4\EOT\NUL\STX\NUL\DC2\EOT\241\STX\b\CAN\n\
     \\SI\n\
-    \\a\EOT\DC2\EOT\NUL\STX\NUL\SOH\DC2\EOT\175\STX\b\DC3\n\
+    \\a\EOT\DC4\EOT\NUL\STX\NUL\SOH\DC2\EOT\241\STX\b\DC3\n\
     \\SI\n\
-    \\a\EOT\DC2\EOT\NUL\STX\NUL\STX\DC2\EOT\175\STX\SYN\ETB\n\
+    \\a\EOT\DC4\EOT\NUL\STX\NUL\STX\DC2\EOT\241\STX\SYN\ETB\n\
     \(\n\
-    \\ACK\EOT\DC2\EOT\NUL\STX\SOH\DC2\EOT\177\STX\b\ETB\SUB\CAN Workflow cache is full\n\
+    \\ACK\EOT\DC4\EOT\NUL\STX\SOH\DC2\EOT\243\STX\b\ETB\SUB\CAN Workflow cache is full\n\
     \\n\
     \\SI\n\
-    \\a\EOT\DC2\EOT\NUL\STX\SOH\SOH\DC2\EOT\177\STX\b\DC2\n\
+    \\a\EOT\DC4\EOT\NUL\STX\SOH\SOH\DC2\EOT\243\STX\b\DC2\n\
     \\SI\n\
-    \\a\EOT\DC2\EOT\NUL\STX\SOH\STX\DC2\EOT\177\STX\NAK\SYN\n\
+    \\a\EOT\DC4\EOT\NUL\STX\SOH\STX\DC2\EOT\243\STX\NAK\SYN\n\
     \\176\SOH\n\
-    \\ACK\EOT\DC2\EOT\NUL\STX\STX\DC2\EOT\180\STX\b\ETB\SUB\159\SOH Workflow received a partial task but was not in the cache. Typically it won't be in the\n\
+    \\ACK\EOT\DC4\EOT\NUL\STX\STX\DC2\EOT\246\STX\b\ETB\SUB\159\SOH Workflow received a partial task but was not in the cache. Typically it won't be in the\n\
     \ lang cache either at this point, but we send an eviction to be sure.\n\
     \\n\
     \\SI\n\
-    \\a\EOT\DC2\EOT\NUL\STX\STX\SOH\DC2\EOT\180\STX\b\DC2\n\
+    \\a\EOT\DC4\EOT\NUL\STX\STX\SOH\DC2\EOT\246\STX\b\DC2\n\
     \\SI\n\
-    \\a\EOT\DC2\EOT\NUL\STX\STX\STX\DC2\EOT\180\STX\NAK\SYN\n\
+    \\a\EOT\DC4\EOT\NUL\STX\STX\STX\DC2\EOT\246\STX\NAK\SYN\n\
     \J\n\
-    \\ACK\EOT\DC2\EOT\NUL\STX\ETX\DC2\EOT\182\STX\b\ESC\SUB: The workflow produced results inconsistent with history.\n\
+    \\ACK\EOT\DC4\EOT\NUL\STX\ETX\DC2\EOT\248\STX\b\ESC\SUB: The workflow produced results inconsistent with history.\n\
     \\n\
     \\SI\n\
-    \\a\EOT\DC2\EOT\NUL\STX\ETX\SOH\DC2\EOT\182\STX\b\SYN\n\
+    \\a\EOT\DC4\EOT\NUL\STX\ETX\SOH\DC2\EOT\248\STX\b\SYN\n\
     \\SI\n\
-    \\a\EOT\DC2\EOT\NUL\STX\ETX\STX\DC2\EOT\182\STX\EM\SUB\n\
+    \\a\EOT\DC4\EOT\NUL\STX\ETX\STX\DC2\EOT\248\STX\EM\SUB\n\
     \Q\n\
-    \\ACK\EOT\DC2\EOT\NUL\STX\EOT\DC2\EOT\184\STX\b\SYN\SUBA The lang side completed the workflow activation with a failure.\n\
+    \\ACK\EOT\DC4\EOT\NUL\STX\EOT\DC2\EOT\250\STX\b\SYN\SUBA The lang side completed the workflow activation with a failure.\n\
     \\n\
     \\SI\n\
-    \\a\EOT\DC2\EOT\NUL\STX\EOT\SOH\DC2\EOT\184\STX\b\DC1\n\
+    \\a\EOT\DC4\EOT\NUL\STX\EOT\SOH\DC2\EOT\250\STX\b\DC1\n\
     \\SI\n\
-    \\a\EOT\DC2\EOT\NUL\STX\EOT\STX\DC2\EOT\184\STX\DC4\NAK\n\
+    \\a\EOT\DC4\EOT\NUL\STX\EOT\STX\DC2\EOT\250\STX\DC4\NAK\n\
     \N\n\
-    \\ACK\EOT\DC2\EOT\NUL\STX\ENQ\DC2\EOT\186\STX\b\ESC\SUB> The lang side explicitly requested this workflow be evicted.\n\
+    \\ACK\EOT\DC4\EOT\NUL\STX\ENQ\DC2\EOT\252\STX\b\ESC\SUB> The lang side explicitly requested this workflow be evicted.\n\
     \\n\
     \\SI\n\
-    \\a\EOT\DC2\EOT\NUL\STX\ENQ\SOH\DC2\EOT\186\STX\b\SYN\n\
+    \\a\EOT\DC4\EOT\NUL\STX\ENQ\SOH\DC2\EOT\252\STX\b\SYN\n\
     \\SI\n\
-    \\a\EOT\DC2\EOT\NUL\STX\ENQ\STX\DC2\EOT\186\STX\EM\SUB\n\
+    \\a\EOT\DC4\EOT\NUL\STX\ENQ\STX\DC2\EOT\252\STX\EM\SUB\n\
     \\173\SOH\n\
-    \\ACK\EOT\DC2\EOT\NUL\STX\ACK\DC2\EOT\189\STX\b\ESC\SUB\156\SOH The workflow task we tried to respond to didn't exist. The workflow might have already\n\
+    \\ACK\EOT\DC4\EOT\NUL\STX\ACK\DC2\EOT\255\STX\b\ESC\SUB\156\SOH The workflow task we tried to respond to didn't exist. The workflow might have already\n\
     \ finished, or the WFT timed out but we didn't learn about that yet.\n\
     \\n\
     \\SI\n\
-    \\a\EOT\DC2\EOT\NUL\STX\ACK\SOH\DC2\EOT\189\STX\b\SYN\n\
+    \\a\EOT\DC4\EOT\NUL\STX\ACK\SOH\DC2\EOT\255\STX\b\SYN\n\
     \\SI\n\
-    \\a\EOT\DC2\EOT\NUL\STX\ACK\STX\DC2\EOT\189\STX\EM\SUB\n\
+    \\a\EOT\DC4\EOT\NUL\STX\ACK\STX\DC2\EOT\255\STX\EM\SUB\n\
     \\163\SOH\n\
-    \\ACK\EOT\DC2\EOT\NUL\STX\a\DC2\EOT\192\STX\b\RS\SUB\146\SOH There was new work that must be handled while we attempted to complete the WFT. Ex:\n\
+    \\ACK\EOT\DC4\EOT\NUL\STX\a\DC2\EOT\130\ETX\b\RS\SUB\146\SOH There was new work that must be handled while we attempted to complete the WFT. Ex:\n\
     \ a new signal came in while trying to complete the workflow.\n\
     \\n\
     \\SI\n\
-    \\a\EOT\DC2\EOT\NUL\STX\a\SOH\DC2\EOT\192\STX\b\EM\n\
+    \\a\EOT\DC4\EOT\NUL\STX\a\SOH\DC2\EOT\130\ETX\b\EM\n\
     \\SI\n\
-    \\a\EOT\DC2\EOT\NUL\STX\a\STX\DC2\EOT\192\STX\FS\GS\n\
+    \\a\EOT\DC4\EOT\NUL\STX\a\STX\DC2\EOT\130\ETX\FS\GS\n\
     \\186\SOH\n\
-    \\ACK\EOT\DC2\EOT\NUL\STX\b\DC2\EOT\195\STX\b\DC2\SUB\169\SOH There was some fatal error processing the workflow, typically an internal error, but\n\
+    \\ACK\EOT\DC4\EOT\NUL\STX\b\DC2\EOT\133\ETX\b\DC2\SUB\169\SOH There was some fatal error processing the workflow, typically an internal error, but\n\
     \ can also happen if then network drops out while paginating. Check message string.\n\
     \\n\
     \\SI\n\
-    \\a\EOT\DC2\EOT\NUL\STX\b\SOH\DC2\EOT\195\STX\b\r\n\
+    \\a\EOT\DC4\EOT\NUL\STX\b\SOH\DC2\EOT\133\ETX\b\r\n\
     \\SI\n\
-    \\a\EOT\DC2\EOT\NUL\STX\b\STX\DC2\EOT\195\STX\DLE\DC1\n\
+    \\a\EOT\DC4\EOT\NUL\STX\b\STX\DC2\EOT\133\ETX\DLE\DC1\n\
     \O\n\
-    \\ACK\EOT\DC2\EOT\NUL\STX\t\DC2\EOT\197\STX\b(\SUB? Something went wrong attempting to fetch more history events.\n\
+    \\ACK\EOT\DC4\EOT\NUL\STX\t\DC2\EOT\135\ETX\b(\SUB? Something went wrong attempting to fetch more history events.\n\
     \\n\
     \\SI\n\
-    \\a\EOT\DC2\EOT\NUL\STX\t\SOH\DC2\EOT\197\STX\b#\n\
+    \\a\EOT\DC4\EOT\NUL\STX\t\SOH\DC2\EOT\135\ETX\b#\n\
     \\SI\n\
-    \\a\EOT\DC2\EOT\NUL\STX\t\STX\DC2\EOT\197\STX&'\n\
+    \\a\EOT\DC4\EOT\NUL\STX\t\STX\DC2\EOT\135\ETX&'\n\
+    \\129\SOH\n\
+    \\ACK\EOT\DC4\EOT\NUL\STX\n\
+    \\DC2\EOT\138\ETX\b'\SUBq The workflow is being completed with a terminal command and we sent the WFT completion\n\
+    \ to server successfully.\n\
+    \\n\
+    \\SI\n\
+    \\a\EOT\DC4\EOT\NUL\STX\n\
+    \\SOH\DC2\EOT\138\ETX\b!\n\
+    \\SI\n\
+    \\a\EOT\DC4\EOT\NUL\STX\n\
+    \\STX\DC2\EOT\138\ETX$&\n\
     \\f\n\
-    \\EOT\EOT\DC2\STX\SOH\DC2\EOT\199\STX\EOT\RS\n\
+    \\EOT\EOT\DC4\STX\SOH\DC2\EOT\140\ETX\EOT\RS\n\
     \\r\n\
-    \\ENQ\EOT\DC2\STX\SOH\ACK\DC2\EOT\199\STX\EOT\DC2\n\
+    \\ENQ\EOT\DC4\STX\SOH\ACK\DC2\EOT\140\ETX\EOT\DC2\n\
     \\r\n\
-    \\ENQ\EOT\DC2\STX\SOH\SOH\DC2\EOT\199\STX\DC3\EM\n\
+    \\ENQ\EOT\DC4\STX\SOH\SOH\DC2\EOT\140\ETX\DC3\EM\n\
     \\r\n\
-    \\ENQ\EOT\DC2\STX\SOH\ETX\DC2\EOT\199\STX\FS\GSb\ACKproto3"
+    \\ENQ\EOT\DC4\STX\SOH\ETX\DC2\EOT\140\ETX\FS\GSb\ACKproto3"

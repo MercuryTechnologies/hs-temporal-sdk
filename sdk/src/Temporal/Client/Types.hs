@@ -144,6 +144,7 @@ data WorkflowHandle a = WorkflowHandle
   , workflowHandleClient :: WorkflowClient
   , workflowHandleWorkflowId :: WorkflowId
   , workflowHandleRunId :: Maybe RunId
+  , workflowHandleFirstExecutionRunId :: Maybe RunId
   }
 
 

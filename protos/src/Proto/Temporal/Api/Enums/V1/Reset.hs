@@ -41,12 +41,17 @@ data ResetReapplyExcludeType
   = RESET_REAPPLY_EXCLUDE_TYPE_UNSPECIFIED |
     RESET_REAPPLY_EXCLUDE_TYPE_SIGNAL |
     RESET_REAPPLY_EXCLUDE_TYPE_UPDATE |
+    RESET_REAPPLY_EXCLUDE_TYPE_NEXUS |
+    RESET_REAPPLY_EXCLUDE_TYPE_CANCEL_REQUEST |
     ResetReapplyExcludeType'Unrecognized !ResetReapplyExcludeType'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum ResetReapplyExcludeType where
   maybeToEnum 0 = Prelude.Just RESET_REAPPLY_EXCLUDE_TYPE_UNSPECIFIED
   maybeToEnum 1 = Prelude.Just RESET_REAPPLY_EXCLUDE_TYPE_SIGNAL
   maybeToEnum 2 = Prelude.Just RESET_REAPPLY_EXCLUDE_TYPE_UPDATE
+  maybeToEnum 3 = Prelude.Just RESET_REAPPLY_EXCLUDE_TYPE_NEXUS
+  maybeToEnum 4
+    = Prelude.Just RESET_REAPPLY_EXCLUDE_TYPE_CANCEL_REQUEST
   maybeToEnum k
     = Prelude.Just
         (ResetReapplyExcludeType'Unrecognized
@@ -58,6 +63,10 @@ instance Data.ProtoLens.MessageEnum ResetReapplyExcludeType where
     = "RESET_REAPPLY_EXCLUDE_TYPE_SIGNAL"
   showEnum RESET_REAPPLY_EXCLUDE_TYPE_UPDATE
     = "RESET_REAPPLY_EXCLUDE_TYPE_UPDATE"
+  showEnum RESET_REAPPLY_EXCLUDE_TYPE_NEXUS
+    = "RESET_REAPPLY_EXCLUDE_TYPE_NEXUS"
+  showEnum RESET_REAPPLY_EXCLUDE_TYPE_CANCEL_REQUEST
+    = "RESET_REAPPLY_EXCLUDE_TYPE_CANCEL_REQUEST"
   showEnum
     (ResetReapplyExcludeType'Unrecognized (ResetReapplyExcludeType'UnrecognizedValue k))
     = Prelude.show k
@@ -68,11 +77,15 @@ instance Data.ProtoLens.MessageEnum ResetReapplyExcludeType where
     = Prelude.Just RESET_REAPPLY_EXCLUDE_TYPE_SIGNAL
     | (Prelude.==) k "RESET_REAPPLY_EXCLUDE_TYPE_UPDATE"
     = Prelude.Just RESET_REAPPLY_EXCLUDE_TYPE_UPDATE
+    | (Prelude.==) k "RESET_REAPPLY_EXCLUDE_TYPE_NEXUS"
+    = Prelude.Just RESET_REAPPLY_EXCLUDE_TYPE_NEXUS
+    | (Prelude.==) k "RESET_REAPPLY_EXCLUDE_TYPE_CANCEL_REQUEST"
+    = Prelude.Just RESET_REAPPLY_EXCLUDE_TYPE_CANCEL_REQUEST
     | Prelude.otherwise
     = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
 instance Prelude.Bounded ResetReapplyExcludeType where
   minBound = RESET_REAPPLY_EXCLUDE_TYPE_UNSPECIFIED
-  maxBound = RESET_REAPPLY_EXCLUDE_TYPE_UPDATE
+  maxBound = RESET_REAPPLY_EXCLUDE_TYPE_CANCEL_REQUEST
 instance Prelude.Enum ResetReapplyExcludeType where
   toEnum k__
     = Prelude.maybe
@@ -84,16 +97,22 @@ instance Prelude.Enum ResetReapplyExcludeType where
   fromEnum RESET_REAPPLY_EXCLUDE_TYPE_UNSPECIFIED = 0
   fromEnum RESET_REAPPLY_EXCLUDE_TYPE_SIGNAL = 1
   fromEnum RESET_REAPPLY_EXCLUDE_TYPE_UPDATE = 2
+  fromEnum RESET_REAPPLY_EXCLUDE_TYPE_NEXUS = 3
+  fromEnum RESET_REAPPLY_EXCLUDE_TYPE_CANCEL_REQUEST = 4
   fromEnum
     (ResetReapplyExcludeType'Unrecognized (ResetReapplyExcludeType'UnrecognizedValue k))
     = Prelude.fromIntegral k
-  succ RESET_REAPPLY_EXCLUDE_TYPE_UPDATE
+  succ RESET_REAPPLY_EXCLUDE_TYPE_CANCEL_REQUEST
     = Prelude.error
-        "ResetReapplyExcludeType.succ: bad argument RESET_REAPPLY_EXCLUDE_TYPE_UPDATE. This value would be out of bounds."
+        "ResetReapplyExcludeType.succ: bad argument RESET_REAPPLY_EXCLUDE_TYPE_CANCEL_REQUEST. This value would be out of bounds."
   succ RESET_REAPPLY_EXCLUDE_TYPE_UNSPECIFIED
     = RESET_REAPPLY_EXCLUDE_TYPE_SIGNAL
   succ RESET_REAPPLY_EXCLUDE_TYPE_SIGNAL
     = RESET_REAPPLY_EXCLUDE_TYPE_UPDATE
+  succ RESET_REAPPLY_EXCLUDE_TYPE_UPDATE
+    = RESET_REAPPLY_EXCLUDE_TYPE_NEXUS
+  succ RESET_REAPPLY_EXCLUDE_TYPE_NEXUS
+    = RESET_REAPPLY_EXCLUDE_TYPE_CANCEL_REQUEST
   succ (ResetReapplyExcludeType'Unrecognized _)
     = Prelude.error
         "ResetReapplyExcludeType.succ: bad argument: unrecognized value"
@@ -104,6 +123,10 @@ instance Prelude.Enum ResetReapplyExcludeType where
     = RESET_REAPPLY_EXCLUDE_TYPE_UNSPECIFIED
   pred RESET_REAPPLY_EXCLUDE_TYPE_UPDATE
     = RESET_REAPPLY_EXCLUDE_TYPE_SIGNAL
+  pred RESET_REAPPLY_EXCLUDE_TYPE_NEXUS
+    = RESET_REAPPLY_EXCLUDE_TYPE_UPDATE
+  pred RESET_REAPPLY_EXCLUDE_TYPE_CANCEL_REQUEST
+    = RESET_REAPPLY_EXCLUDE_TYPE_NEXUS
   pred (ResetReapplyExcludeType'Unrecognized _)
     = Prelude.error
         "ResetReapplyExcludeType.pred: bad argument: unrecognized value"
