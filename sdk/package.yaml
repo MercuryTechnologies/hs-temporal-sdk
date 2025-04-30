@@ -45,7 +45,6 @@ dependencies:
 - these
 - first-class-families
 - validation-selective
-- resourcet
 - vault
 
 ghc-options:

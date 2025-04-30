@@ -120,7 +120,6 @@ library
     , proto-lens-protobuf-types
     , random
     , require-callstack
-    , resourcet
     , scientific
     , split
     , stm
