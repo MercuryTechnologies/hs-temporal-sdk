@@ -566,7 +566,16 @@ startFromPayloads k wfId opts payloads = do
     res <- startWorkflowExecution c.clientCore req
     case res of
       Left err -> throwIO err
-      Right swer -> runReaderT (getHandle k wfId' (Just (RunId $ swer ^. WF.runId))) c
+      Right swer ->
+        runReaderT
+          ( do
+              let r = RunId $ swer ^. WF.runId
+              getHandle k wfId' $
+                GetHandleOptions
+                  (Just r)
+                  (Just r)
+          )
+          c
 
 
 {- | Begin a new Workflow Execution.
@@ -679,7 +688,19 @@ signalWithStart (workflowRef -> k@(KnownWorkflow codec _)) wfId opts (signalRef 
             msg
         case res of
           Left err -> throwIO err
-          Right swer -> runReaderT (getHandle k opts'.signalWithStartWorkflowId (Just (RunId $ swer ^. WF.runId))) c
+          Right swer ->
+            runReaderT
+              ( do
+                  let r = RunId $ swer ^. WF.runId
+                  getHandle
+                    k
+                    opts'.signalWithStartWorkflowId
+                    ( GetHandleOptions
+                        (Just r)
+                        (Just r)
+                    )
+              )
+              c
 
 
 data TerminationOptions = TerminationOptions

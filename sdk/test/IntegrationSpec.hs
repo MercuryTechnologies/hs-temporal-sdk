@@ -2126,7 +2126,6 @@ terminateTests = do
               )
             `shouldThrow` \case
               RpcError {} -> True
-              _ -> False
     describe "when both runId and firstExecutionRunId are provided" $ do
       it "returns if both runId and firstExecutionRunId match a workflow" $ \TestEnv {..} -> do
         let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
@@ -2173,7 +2172,6 @@ terminateTests = do
             )
             `shouldThrow` \case
               RpcError {} -> True
-              _ -> False
       it "throws if firstExecutionRunId does not match a workflow" $ \TestEnv {..} -> do
         let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
               baseConf
@@ -2196,7 +2194,6 @@ terminateTests = do
               )
             `shouldThrow` \case
               RpcError {} -> True
-              _ -> False
 
 -- describe "WorkflowClient" $ do
 --   specify "WorkflowExecutionAlreadyStartedError" pending
