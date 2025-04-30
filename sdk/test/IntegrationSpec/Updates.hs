@@ -18,17 +18,6 @@ import Temporal.TH
 import Temporal.Workflow
 
 
--- - Workflow that throws an exception
---   - If it throws before the update, the update shouldn't run
---   - If it throws after, the update shouldn't be effected (it already ran)
--- - Punting a little bit:
---   - Workflow canceled while running update (see ts-sdk's handling)
---   - Workflow exits while running update (see ts-sdk's handling)
---   - We'll want to use the resource management work that Ian has in progress
---
--- - Ideas:
---   - Start vs execute semantics for update
-
 testUpdate :: KnownUpdate '[Int] Int SomeException
 testUpdate =
   KnownUpdate
