@@ -956,7 +956,7 @@ update h@(WorkflowHandle _ _ c _ _ _) (KnownUpdate updateCodec updateName) opts 
                     & Common.workflowId .~ rawWorkflowId input.updateWorkflowWorkflowId
                     & Common.runId .~ maybe "" rawRunId input.updateWorkflowRunId
                  )
-            & WF.firstExecutionRunId .~ "" -- TODO: get this
+            & WF.firstExecutionRunId .~ maybe "" rawRunId h.workflowHandleFirstExecutionRunId
             & WF.waitPolicy
               .~ ( defMessage
                     & Update.lifecycleStage .~ case opts.waitPolicy of
