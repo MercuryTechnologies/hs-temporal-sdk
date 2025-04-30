@@ -237,11 +237,6 @@ makeOpenTelemetryInterceptor = do
                       defaultSpanArguments
                         { kind = Server
                         , attributes = mempty
-                        -- HashMap.fromList
-                        --   [ ("temporal.workflow_id", toAttribute $ rawWorkflowId $ input.handleQueryInputInfo.workflowId)
-                        --   , ("temporal.run_id", toAttribute $ rawRunId $ input.handleQueryInputInfo.runId)
-                        --   , ("temporal.workflow_type", toAttribute $ input.handleQueryInputType)
-                        --   ]
                         }
                 ctxt <- performUnsafeNonDeterministicIO $ extract headersPropagator input.handleUpdateInputHeaders Ctxt.empty
                 _ <- performUnsafeNonDeterministicIO $ attachContext ctxt
@@ -265,11 +260,6 @@ makeOpenTelemetryInterceptor = do
                       defaultSpanArguments
                         { kind = Server
                         , attributes = mempty
-                        -- HashMap.fromList
-                        --   [ ("temporal.workflow_id", toAttribute $ rawWorkflowId $ input.handleQueryInputInfo.workflowId)
-                        --   , ("temporal.run_id", toAttribute $ rawRunId $ input.handleQueryInputInfo.runId)
-                        --   , ("temporal.workflow_type", toAttribute $ input.handleQueryInputType)
-                        --   ]
                         }
                 ctxt <- extract headersPropagator input.handleUpdateInputHeaders Ctxt.empty
                 _ <- attachContext ctxt
