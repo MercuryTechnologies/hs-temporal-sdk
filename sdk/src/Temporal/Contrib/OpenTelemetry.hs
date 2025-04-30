@@ -23,8 +23,6 @@ import qualified Data.HashMap.Strict as HashMap
 import Data.Int
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as T
--- TODO rework WorkflowExitVariant to not expose internals
-
 import qualified Data.Vault.Strict as Vault
 import Data.Version (showVersion)
 import Data.Word (Word32)
@@ -36,6 +34,7 @@ import OpenTelemetry.Propagator.W3CTraceContext
 import OpenTelemetry.Trace.Core
 import Paths_temporal_sdk
 import Temporal.Activity.Types
+-- TODO rework WorkflowExitVariant to not expose internals
 import qualified Temporal.Client.Types as C
 import Temporal.Common
 import Temporal.Duration
