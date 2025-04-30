@@ -543,12 +543,12 @@ data PendingJob
 
 
 data JobGroups = JobGroups
-  { patchNotifications :: InstanceM ()
-  , updateWorkflows :: [Workflow ()]
-  , signalWorkflows :: [Workflow ()]
-  , queryWorkflows :: InstanceM ()
-  , resolutions :: [PendingJob]
-  , otherJobs :: InstanceM ()
+  { patchNotifications :: !(InstanceM ())
+  , updateWorkflows :: ![Workflow ()]
+  , signalWorkflows :: ![Workflow ()]
+  , queryWorkflows :: !(InstanceM ())
+  , resolutions :: ![PendingJob]
+  , otherJobs :: !(InstanceM ())
   }
 
 
