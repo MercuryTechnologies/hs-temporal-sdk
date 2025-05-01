@@ -4,7 +4,6 @@ module Temporal.Workflow.Internal.Monad where
 
 import Control.Applicative
 import Control.Concurrent.Async
--- import Debug.Trace
 import Control.Monad
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
@@ -20,6 +19,7 @@ import Data.Time.Clock.System (SystemTime)
 import Data.Vault.Strict
 import Data.Vector (Vector)
 import Data.Word (Word32)
+-- import Debug.Trace
 import GHC.Stack
 import GHC.TypeLits
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
@@ -263,13 +263,15 @@ raise env e = raiseImpl env (toException e)
 -- | Catch an exception in the Workflow monad
 catch :: Exception e => Workflow a -> (e -> Workflow a) -> Workflow a
 catch (Workflow m) h = Workflow $ \env -> do
-  r <- m env
+  r <- UnliftIO.try $ m env
   case r of
-    Done a -> pure $ Done a
-    Throw e
-      | Just e' <- fromException e -> unWorkflow (h e') env
-      | otherwise -> liftIO $ raise env e
-    Blocked ivar k -> return $ Blocked ivar $ Cont $ Temporal.Workflow.Internal.Monad.catch (toWf k) h
+    Left e -> unWorkflow (h e) env
+    Right r' -> case r' of
+      Done a -> pure $ Done a
+      Throw e
+        | Just e' <- fromException e -> unWorkflow (h e') env
+        | otherwise -> liftIO $ raise env e
+      Blocked ivar k -> return $ Blocked ivar $ Cont $ Temporal.Workflow.Internal.Monad.catch (toWf k) h
 
 
 -- | Catch exceptions that satisfy a predicate
@@ -525,6 +527,11 @@ newtype Condition a = Condition
   deriving newtype (Functor, Applicative, Monad)
 
 
+newtype Validation a = Validation
+  {unValidation :: IO a}
+  deriving newtype (Functor, Applicative, Monad, Catch.MonadThrow, Catch.MonadCatch)
+
+
 {- | 'StateVar' values are mutable variables scoped to a Workflow run.
 
 'Workflow's are deterministic, so you may not use normal IORefs, since the IORef
@@ -596,6 +603,10 @@ instance MonadReadStateVar Condition where
     readIORef var.stateVarRef
 
 
+instance MonadReadStateVar Validation where
+  readStateVar var = Validation $ readIORef var.stateVarRef
+
+
 instance MonadReadStateVar Workflow where
   readStateVar var = Workflow $ \_ -> Done <$> readIORef var.stateVarRef
 
@@ -660,6 +671,12 @@ updateCallStackW = Workflow $ \_ -> do
   pure $ Done ()
 
 
+data WorkflowUpdateImplementation = WorkflowUpdateImplementation
+  { updateImplementation :: {-# UNPACK #-} !(UpdateId -> Vector Payload -> Map Text Payload -> Workflow Payload)
+  , updateValidationImplementation :: {-# UNPACK #-} !(Maybe (UpdateId -> Vector Payload -> Map Text Payload -> Validation (Either SomeException ())))
+  }
+
+
 data WorkflowInstance = WorkflowInstance
   { workflowInstanceInfo :: {-# UNPACK #-} !(IORef Info)
   , workflowInstanceLogger :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
@@ -673,6 +690,7 @@ data WorkflowInstance = WorkflowInstance
   , workflowSequenceMaps :: {-# UNPACK #-} !(TVar SequenceMaps)
   , workflowSignalHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (Vector Payload -> Workflow ())))
   , workflowQueryHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (QueryId -> Vector Payload -> Map Text Payload -> IO (Either SomeException Payload))))
+  , workflowUpdateHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) WorkflowUpdateImplementation))
   , workflowCallStack :: {-# UNPACK #-} !(IORef CallStack)
   , workflowCompleteActivation :: !(Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
   , workflowInstanceContinuationEnv :: {-# UNPACK #-} !ContinuationEnv
@@ -817,6 +835,14 @@ data HandleQueryInput = HandleQueryInput
   }
 
 
+data HandleUpdateInput = HandleUpdateInput
+  { handleUpdateId :: UpdateId
+  , handleUpdateInputType :: Text
+  , handleUpdateInputArgs :: Vector Payload
+  , handleUpdateInputHeaders :: Map Text Payload
+  }
+
+
 data WorkflowInboundInterceptor = WorkflowInboundInterceptor
   { executeWorkflow
       :: ExecuteWorkflowInput
@@ -826,6 +852,14 @@ data WorkflowInboundInterceptor = WorkflowInboundInterceptor
       :: HandleQueryInput
       -> (HandleQueryInput -> IO (Either SomeException Payload))
       -> IO (Either SomeException Payload)
+  , handleUpdate
+      :: HandleUpdateInput
+      -> (HandleUpdateInput -> Workflow Payload)
+      -> Workflow Payload
+  , validateUpdate
+      :: HandleUpdateInput
+      -> (HandleUpdateInput -> IO (Either SomeException ()))
+      -> IO (Either SomeException ())
   }
 
 
@@ -834,6 +868,8 @@ instance Semigroup WorkflowInboundInterceptor where
     WorkflowInboundInterceptor
       { executeWorkflow = \input cont -> a.executeWorkflow input $ \input' -> b.executeWorkflow input' cont
       , handleQuery = \input cont -> a.handleQuery input $ \input' -> b.handleQuery input' cont
+      , handleUpdate = \input cont -> a.handleUpdate input $ \input' -> b.handleUpdate input' cont
+      , validateUpdate = \input cont -> a.validateUpdate input $ \input' -> b.validateUpdate input' cont
       }
 
 
@@ -842,6 +878,8 @@ instance Monoid WorkflowInboundInterceptor where
     WorkflowInboundInterceptor
       { executeWorkflow = \input cont -> cont input
       , handleQuery = \input cont -> cont input
+      , handleUpdate = \input cont -> cont input
+      , validateUpdate = \input cont -> cont input
       }
 
 

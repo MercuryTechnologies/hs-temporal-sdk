@@ -52,6 +52,7 @@ module Temporal.Interceptor (
   ExecuteWorkflowInput (..),
   WorkflowInboundInterceptor (..),
   HandleQueryInput (..),
+  HandleUpdateInput (..),
   WorkflowOutboundInterceptor (..),
   ActivityInput (..),
   ActivityInboundInterceptor (..),
@@ -60,16 +61,18 @@ module Temporal.Interceptor (
   WorkflowExitVariant (..),
   ClientInterceptors (..),
   QueryWorkflowInput (..),
+  UpdateWorkflowInput (..),
   SignalWithStartWorkflowInput (..),
   ScheduleClientInterceptors (..),
+  StartWorkflowOptions (..),
   interceptorConvertChildWorkflowHandle,
 ) where
 
+import Data.Vault.Strict
 import Temporal.Client.Types
 import Temporal.Payload
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
-import Data.Vault.Strict
 
 
 data ActivityInboundInterceptor env = ActivityInboundInterceptor

@@ -26,28 +26,36 @@ import Control.Monad (replicateM, when)
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
-import Data.Aeson (FromJSON, ToJSON, Value)
+import Data.Aeson (FromJSON, ToJSON, Value, toJSON)
 import qualified Data.ByteString as BS
 import Data.Either (isLeft, isRight)
 import Data.Foldable (traverse_)
 import Data.Functor
+import Data.IORef
 import Data.Int
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
-import qualified Data.Maybe as M
+import Data.Maybe (fromJust, isJust)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Time (Day (ModifiedJulianDay))
 import Data.Time.Clock (UTCTime)
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
+import Data.Vector (Vector)
+import qualified Data.Vector as V
 import DiscoverInstances (discoverInstances)
 import GHC.Generics
 import GHC.Stack (SrcLoc (..), callStack, fromCallSiteList)
 import IntegrationSpec.HangingWorkflow
 import IntegrationSpec.NoOpWorkflow
 import IntegrationSpec.TimeoutsInWorkflows
+import IntegrationSpec.Updates
+import Lens.Family2
 import OpenTelemetry.Trace
+import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as Failure
+import Proto.Temporal.Api.History.V1.Message (WorkflowExecutionFailedEventAttributes (..))
+import qualified Proto.Temporal.Api.History.V1.Message_Fields as History
 import RequireCallStack
 import System.Directory
 import System.Environment (lookupEnv)
@@ -68,6 +76,7 @@ import Temporal.SearchAttributes
 import Temporal.TH (ActivityFn, WorkflowFn, discoverDefinitions)
 import Temporal.Worker
 import qualified Temporal.Workflow as W
+import Temporal.Workflow.Unsafe (performUnsafeNonDeterministicIO)
 import Test.Hspec
 
 
@@ -223,6 +232,50 @@ instance ToJSON TemporalWorkflowJobPayload
 instance FromJSON TemporalWorkflowJobPayload
 
 
+withServer :: (PortNumber -> IO a) -> IO a
+withServer f = do
+  lookupEnv "HS_TEMPORAL_SDK_LOCAL_TEST_SERVER" >>= \case
+    Just _ -> f 7233
+    _ -> do
+      fp <- getFreePort
+      mTemporalPath <- findExecutable "temporal"
+      conf <- case mTemporalPath of
+        Nothing -> error "Could not find the 'temporal' executable in PATH"
+        Just temporalPath -> do
+          let serverConfig =
+                defaultTemporalDevServerConfig
+                  { port = Just $ fromIntegral fp
+                  , exe = ExistingPath temporalPath
+                  }
+          pure serverConfig
+      withDevServer globalRuntime conf $ \_ -> do
+        f fp
+
+
+setup :: Interceptors () -> PortNumber -> (TestEnv -> IO ()) -> IO ()
+setup additionalInterceptors fp go = do
+  otelInterceptors <- makeOpenTelemetryInterceptor
+  let interceptors = otelInterceptors <> additionalInterceptors
+  (client, coreClient) <- makeClient fp interceptors
+
+  SearchAttributes {customAttributes} <- either throwIO pure =<< listSearchAttributes coreClient (W.Namespace "default")
+  let allTestAttributes =
+        Map.fromList
+          [ ("attr1", Temporal.Operator.Bool)
+          , ("attr2", Temporal.Operator.Int)
+          ]
+  _ <- addSearchAttributes coreClient (W.Namespace "default") (allTestAttributes `Map.difference` customAttributes)
+
+  (conf, taskQueue) <- mkBaseConf interceptors
+  go
+    TestEnv
+      { useClient = flip runReaderT client
+      , withWorker = mkWithWorker fp
+      , baseConf = conf
+      , taskQueue
+      }
+
+
 spec :: Spec
 spec = do
   describe "Exception converters" $ do
@@ -317,49 +370,10 @@ spec = do
               appFailure.stack
               (Just $ seconds 2)
 
-  aroundAll setup needsClient
-  aroundAll setup terminateTests
-  where
-    setup :: (TestEnv -> IO ()) -> IO ()
-    setup go = do
-      let withServer f = do
-            lookupEnv "HS_TEMPORAL_SDK_LOCAL_TEST_SERVER" >>= \case
-              Just _ -> f 7233
-              _ -> do
-                fp <- getFreePort
-                mTemporalPath <- findExecutable "temporal"
-                conf <- case mTemporalPath of
-                  Nothing -> error "Could not find the 'temporal' executable in PATH"
-                  Just temporalPath -> do
-                    let serverConfig =
-                          defaultTemporalDevServerConfig
-                            { port = Just $ fromIntegral fp
-                            , exe = ExistingPath temporalPath
-                            }
-                    pure serverConfig
-                withDevServer globalRuntime conf $ \_ -> do
-                  f fp
-
-      withServer $ \fp -> do
-        interceptors <- makeOpenTelemetryInterceptor
-        (client, coreClient) <- makeClient fp interceptors
-
-        SearchAttributes {customAttributes} <- either throwIO pure =<< listSearchAttributes coreClient (W.Namespace "default")
-        let allTestAttributes =
-              Map.fromList
-                [ ("attr1", Temporal.Operator.Bool)
-                , ("attr2", Temporal.Operator.Int)
-                ]
-        _ <- addSearchAttributes coreClient (W.Namespace "default") (allTestAttributes `Map.difference` customAttributes)
-
-        (conf, taskQueue) <- mkBaseConf interceptors
-        go
-          TestEnv
-            { useClient = flip runReaderT client
-            , withWorker = mkWithWorker fp
-            , baseConf = conf
-            , taskQueue
-            }
+  aroundAll withServer $ do
+    aroundAllWith (flip $ setup mempty) needsClient
+    aroundAllWith (flip $ setup mempty) terminateTests
+    updatesWithInterceptors
 
 
 type MyWorkflow a = W.RequireCallStack => W.Workflow a
@@ -1538,6 +1552,493 @@ needsClient = do
       incompatibleReplayResult <- runReplayHistory globalRuntime incompatibleConf history
       incompatibleReplayResult `shouldSatisfy` isLeft
 
+  describe "Update" $ do
+    it "works with no validator" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                }
+        let updateOpts =
+              C.UpdateOptions
+                { updateId = "update-with-no-validator"
+                , updateHeaders = mempty
+                , waitPolicy = C.UpdateLifecycleStageCompleted
+                }
+        (updateResult, workflowResult) <- useClient do
+          h <- C.start UpdateWithoutValidator "update-with-no-validator" opts
+          updateResult <- C.update h testUpdate updateOpts 12
+          workflowResult <- C.waitWorkflowResult h
+          pure (updateResult, workflowResult)
+        updateResult `shouldBe` 12
+        workflowResult `shouldBe` 12
+    it "works with a validator" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                }
+        let updateOpts =
+              C.UpdateOptions
+                { updateId = "update-with-a-validator"
+                , updateHeaders = mempty
+                , waitPolicy = C.UpdateLifecycleStageCompleted
+                }
+        (updateResult, workflowResult) <- useClient do
+          h <- C.start UpdateWithValidator "update-with-a-validator" opts
+          updateResult <- C.update h testUpdate updateOpts 12
+          workflowResult <- C.waitWorkflowResult h
+          pure (updateResult, workflowResult)
+        updateResult `shouldBe` 12
+        workflowResult `shouldBe` 12
+    it "propagates validation failures" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                }
+        let updateOpts =
+              C.UpdateOptions
+                { updateId = "update-with-a-validator-that-rejects"
+                , updateHeaders = mempty
+                , waitPolicy = C.UpdateLifecycleStageCompleted
+                }
+        ( useClient do
+            h <- C.start UpdateWithValidator "update-with-a-validator-that-rejects" opts
+            C.update h testUpdate updateOpts (-12)
+          )
+          `shouldThrow` \case
+            UpdateFailure _ -> True
+            _ -> False
+    it "propagates validation exceptions if the validator throws" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                }
+        let updateOpts =
+              C.UpdateOptions
+                { updateId = "update-with-a-validator-that-throws"
+                , updateHeaders = mempty
+                , waitPolicy = C.UpdateLifecycleStageCompleted
+                }
+        ( useClient do
+            h <- C.start UpdateWithValidator "update-with-a-validator-that-throws" opts
+            C.update h testUpdate updateOpts 5
+          )
+          `shouldThrow` \case
+            UpdateFailure _ -> True
+            _ -> False
+    it "propogates update exceptions if the update throws" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                }
+        let updateOpts =
+              C.UpdateOptions
+                { updateId = "update-that-throws"
+                , updateHeaders = mempty
+                , waitPolicy = C.UpdateLifecycleStageCompleted
+                }
+        ( useClient do
+            h <- C.start UpdateThatThrows "update-that-throws" opts
+            C.update h testUpdate updateOpts 5
+          )
+          `shouldThrow` \case
+            UpdateFailure _ -> True
+            _ -> False
+    it "should fail if the args don't parse correctly" $ \TestEnv {..} -> do
+      -- state <- runIO $ newIORef (0 :: Int)
+      let testUpdateFn :: Int -> W.Workflow Int
+          testUpdateFn arg = do
+            -- performUnsafeNonDeterministicIO $ modifyIORef state (+ arg)
+            -- performUnsafeNonDeterministicIO $ readIORef state
+            pure arg
+          testWorkflowFn :: W.Workflow Int
+          testWorkflowFn = provideCallStack do
+            W.setUpdateHandler testUpdate testUpdateFn Nothing
+            -- W.waitCondition do
+            --   x <- performUnsafeNonDeterministicIO $ readIORef state
+            --   pure $ x > 0
+            -- performUnsafeNonDeterministicIO $ readIORef state
+            W.sleep $ seconds 1
+            pure 1
+          wfRef = W.provideWorkflow defaultCodec "test" testWorkflowFn
+          updateRef = W.provideUpdate defaultCodec "test" testUpdateFn
+          badUpdateRef = W.KnownUpdate @'[String] @String defaultCodec "test"
+          conf = configure () wfRef $ do
+            baseConf
+          opts =
+            (C.startWorkflowOptions taskQueue)
+              { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+              , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+              }
+          updateOpts =
+            C.UpdateOptions
+              { updateId = "update-args-do-not-parse"
+              , updateHeaders = mempty
+              , waitPolicy = C.UpdateLifecycleStageCompleted
+              }
+      withWorker conf $ do
+        ( useClient do
+            h <- C.start wfRef "update-args-do-not-parse" opts
+            C.update h badUpdateRef updateOpts "ruhroh"
+          )
+          `shouldThrow` \case
+            UpdateFailure _ -> True
+            _ -> False
+
+    it "works with an update that causes the workflow to suspend" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                }
+        let updateOpts =
+              C.UpdateOptions
+                { updateId = "update-that-suspends"
+                , updateHeaders = mempty
+                , waitPolicy = C.UpdateLifecycleStageCompleted
+                }
+        (updateResult, workflowResult) <- useClient do
+          h <- C.start UpdateWithValidatorThatSleeps "update-that-suspends" opts
+          updateResult <- C.update h testUpdate updateOpts 12
+          workflowResult <- C.waitWorkflowResult h
+          pure (updateResult, workflowResult)
+        updateResult `shouldBe` 12
+        workflowResult `shouldBe` 12
+    it "does not process the update if the workflow throws first" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                }
+        let updateOpts =
+              C.UpdateOptions
+                { updateId = "no-update-if-workflow-throws-first"
+                , updateHeaders = mempty
+                , waitPolicy = C.UpdateLifecycleStageCompleted
+                }
+        (eUpdateResult, eWorkflowResult) <- useClient do
+          h <- C.start WorkflowThatThrowsBeforeTheUpdate "no-update-if-workflow-throws-first" opts
+          liftIO $ threadDelay 1_000_000
+          liftIO $ putStrLn "BEFORE UPDATE"
+          updateResult <- Catch.try $ C.update h testUpdate updateOpts 12
+          liftIO $ putStrLn "AFTER UPDATE"
+          workflowResult <- Catch.try $ C.waitWorkflowResult h
+          let _ = show (updateResult :: Either RpcError Int)
+          let _ = show (workflowResult :: Either WorkflowExecutionClosed Int)
+          pure (updateResult, workflowResult)
+        eUpdateResult `shouldSatisfy` \case
+          Left (RpcError _ message _) -> message == "workflow execution already completed"
+          _ -> False
+        eWorkflowResult `shouldSatisfy` \case
+          Left (WorkflowExecutionFailed attrs) -> (attrs ^. History.failure . Failure.message) == "Current state var: 0"
+          _ -> False
+    it "does process the update if the workflow only fails later" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                }
+        let updateOpts =
+              C.UpdateOptions
+                { updateId = "yes-update-if-workflow-throws-later"
+                , updateHeaders = mempty
+                , waitPolicy = C.UpdateLifecycleStageCompleted
+                }
+        (eUpdateResult, eWorkflowResult) <- useClient do
+          h <- C.start WorkflowThatThrowsAfterTheUpdate "yes-update-if-workflow-throws-later" opts
+          liftIO $ threadDelay 1_000_000
+          updateResult <- Catch.try $ C.update h testUpdate updateOpts 12
+          workflowResult <- Catch.try $ C.waitWorkflowResult h
+          let _ = show (updateResult :: Either RpcError Int)
+          let _ = show (workflowResult :: Either WorkflowExecutionClosed Int)
+          pure (updateResult, workflowResult)
+        eUpdateResult `shouldSatisfy` \case
+          Right 12 -> True
+          _ -> False
+        eWorkflowResult `shouldSatisfy` \case
+          Left (WorkflowExecutionFailed attrs) -> (attrs ^. History.failure . Failure.message) == "Current state var: 12"
+          _ -> False
+
+
+updatesWithInterceptors :: SpecWith PortNumber
+updatesWithInterceptors = do
+  describe "Update interceptors" do
+    handleUpdateWasCalled <- runIO $ newIORef False
+    validateUpdateWasCalled <- runIO $ newIORef False
+    updateWorkflowWasCalled <- runIO $ newIORef False
+    let
+      captureIfCalledInterceptors :: Interceptors ()
+      captureIfCalledInterceptors =
+        mempty
+          { workflowInboundInterceptors =
+              mempty
+                { handleUpdate = \input next -> do
+                    performUnsafeNonDeterministicIO $ writeIORef handleUpdateWasCalled True
+                    next input
+                , validateUpdate = \input next -> do
+                    writeIORef validateUpdateWasCalled True
+                    next input
+                }
+          , clientInterceptors =
+              mempty
+                { updateWorkflow = \input next -> do
+                    writeIORef updateWorkflowWasCalled True
+                    next input
+                }
+          }
+    withInterceptors captureIfCalledInterceptors do
+      it "should call update interceptors" $ \TestEnv {..} -> do
+        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+              baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                  }
+          let updateOpts =
+                C.UpdateOptions
+                  { updateId = "update-interceptors-are-called"
+                  , updateHeaders = mempty
+                  , waitPolicy = C.UpdateLifecycleStageCompleted
+                  }
+          (updateResult, workflowResult) <- useClient do
+            h <- C.start UpdateWithValidator "update-interceptors-are-called" opts
+            updateResult <- C.update h testUpdate updateOpts 12
+            workflowResult <- C.waitWorkflowResult h
+            pure (updateResult, workflowResult)
+          updateResult `shouldBe` 12
+          workflowResult `shouldBe` 12
+          readIORef handleUpdateWasCalled `shouldReturn` True
+          readIORef validateUpdateWasCalled `shouldReturn` True
+          readIORef updateWorkflowWasCalled `shouldReturn` True
+    handleUpdateArgs <- runIO $ newIORef (Nothing :: Maybe (Vector Payload))
+    validateUpdateArgs <- runIO $ newIORef (Nothing :: Maybe (Vector Payload))
+    updateWorkflowArgs <- runIO $ newIORef (Nothing :: Maybe (Vector Payload))
+    let
+      captureArgsInterceptors :: Interceptors ()
+      captureArgsInterceptors =
+        mempty
+          { workflowInboundInterceptors =
+              mempty
+                { handleUpdate = \input next -> do
+                    performUnsafeNonDeterministicIO $ writeIORef handleUpdateArgs $ Just input.handleUpdateInputArgs
+                    next input
+                , validateUpdate = \input next -> do
+                    writeIORef validateUpdateArgs $ Just input.handleUpdateInputArgs
+                    next input
+                }
+          , clientInterceptors =
+              mempty
+                { updateWorkflow = \input next -> do
+                    writeIORef updateWorkflowArgs $ Just input.updateWorkflowArgs
+                    next input
+                }
+          }
+    withInterceptors captureArgsInterceptors do
+      it "calls update interceptors with the expected args" $ \TestEnv {..} -> do
+        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+              baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                  }
+          let updateOpts =
+                C.UpdateOptions
+                  { updateId = "update-interceptors-get-expected-args"
+                  , updateHeaders = mempty
+                  , waitPolicy = C.UpdateLifecycleStageCompleted
+                  }
+          (updateResult, workflowResult) <- useClient do
+            h <- C.start UpdateWithValidator "update-interceptors-get-expected-args" opts
+            updateResult <- C.update h testUpdate updateOpts 12
+            workflowResult <- C.waitWorkflowResult h
+            pure (updateResult, workflowResult)
+          updateResult `shouldBe` 12
+          workflowResult `shouldBe` 12
+          updateArgsPayload <- readIORef handleUpdateArgs
+          let updateArg = payloadData $ V.head $ fromJust updateArgsPayload
+          updateArg `shouldBe` "12"
+          validatorArgsPayload <- readIORef validateUpdateArgs
+          let validatorArg = payloadData $ V.head $ fromJust validatorArgsPayload
+          validatorArg `shouldBe` "12"
+          updateWorkflowPayload <- readIORef updateWorkflowArgs
+          let updateWorkflowArg = payloadData $ V.head $ fromJust updateWorkflowPayload
+          updateWorkflowArg `shouldBe` "12"
+    handleUpdateOrdering <- runIO $ newIORef ([] :: [Text])
+    validateUpdateOrdering <- runIO $ newIORef ([] :: [Text])
+    updateWorkflowOrdering <- runIO $ newIORef ([] :: [Text])
+    let
+      captureOrderingInterceptors0 :: Interceptors ()
+      captureOrderingInterceptors0 =
+        mempty
+          { workflowInboundInterceptors =
+              mempty
+                { handleUpdate = \input next -> do
+                    performUnsafeNonDeterministicIO $ modifyIORef handleUpdateOrdering (++ ["a"])
+                    next input
+                , validateUpdate = \input next -> do
+                    modifyIORef validateUpdateOrdering (++ ["a"])
+                    next input
+                }
+          , clientInterceptors =
+              mempty
+                { updateWorkflow = \input next -> do
+                    modifyIORef updateWorkflowOrdering (++ ["a"])
+                    next input
+                }
+          }
+      captureOrderingInterceptors1 :: Interceptors ()
+      captureOrderingInterceptors1 =
+        mempty
+          { workflowInboundInterceptors =
+              mempty
+                { handleUpdate = \input next -> do
+                    performUnsafeNonDeterministicIO $ modifyIORef handleUpdateOrdering (++ ["b"])
+                    next input
+                , validateUpdate = \input next -> do
+                    modifyIORef validateUpdateOrdering (++ ["b"])
+                    next input
+                }
+          , clientInterceptors =
+              mempty
+                { updateWorkflow = \input next -> do
+                    modifyIORef updateWorkflowOrdering (++ ["b"])
+                    next input
+                }
+          }
+      captureOrderingInterceptors :: Interceptors ()
+      captureOrderingInterceptors = captureOrderingInterceptors0 <> captureOrderingInterceptors1
+    withInterceptors captureOrderingInterceptors do
+      it "calls update interceptors in the expected order" $ \TestEnv {..} -> do
+        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+              baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                  }
+          let updateOpts =
+                C.UpdateOptions
+                  { updateId = "update-interceptors-are-called-in-expected-order"
+                  , updateHeaders = mempty
+                  , waitPolicy = C.UpdateLifecycleStageCompleted
+                  }
+          (updateResult, workflowResult) <- useClient do
+            h <- C.start UpdateWithValidator "update-interceptors-are-called-in-expected-order" opts
+            updateResult <- C.update h testUpdate updateOpts 12
+            workflowResult <- C.waitWorkflowResult h
+            pure (updateResult, workflowResult)
+          updateResult `shouldBe` 12
+          workflowResult `shouldBe` 12
+          readIORef handleUpdateOrdering `shouldReturn` ["a", "b"]
+          readIORef validateUpdateOrdering `shouldReturn` ["a", "b"]
+          readIORef updateWorkflowOrdering `shouldReturn` ["a", "b"]
+    let
+      modifyArgsInterceptors :: Interceptors ()
+      modifyArgsInterceptors =
+        mempty
+          { workflowInboundInterceptors =
+              mempty
+                { handleUpdate = \input next -> do
+                    let metadata = payloadMetadata $ V.head input.handleUpdateInputArgs
+                    next $ input {handleUpdateInputArgs = V.singleton Payload {payloadData = "24", payloadMetadata = metadata}}
+                }
+          , clientInterceptors = mempty
+          }
+    withInterceptors modifyArgsInterceptors do
+      it "supports modifying the args passed to update" $ \TestEnv {..} -> do
+        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+              baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                  }
+          let updateOpts =
+                C.UpdateOptions
+                  { updateId = "update-interceptors-can-modify-args"
+                  , updateHeaders = mempty
+                  , waitPolicy = C.UpdateLifecycleStageCompleted
+                  }
+          (updateResult, workflowResult) <- useClient do
+            h <- C.start UpdateWithValidator "update-interceptors-can-modify-args" opts
+            updateResult <- C.update h testUpdate updateOpts 12
+            workflowResult <- C.waitWorkflowResult h
+            pure (updateResult, workflowResult)
+          updateResult `shouldBe` 24
+          workflowResult `shouldBe` 24
+    let
+      modifyArgsOnClientInterceptors :: Interceptors ()
+      modifyArgsOnClientInterceptors =
+        mempty
+          { clientInterceptors =
+              mempty
+                { updateWorkflow = \input next -> do
+                    let metadata = payloadMetadata $ V.head input.updateWorkflowArgs
+                    next $ input {updateWorkflowArgs = V.singleton Payload {payloadData = "24", payloadMetadata = metadata}}
+                }
+          }
+    withInterceptors modifyArgsOnClientInterceptors do
+      it "supports modifying the args passed to update client-side" $ \TestEnv {..} -> do
+        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+              baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                  }
+          let updateOpts =
+                C.UpdateOptions
+                  { updateId = "update-client-interceptors-can-modify-args"
+                  , updateHeaders = mempty
+                  , waitPolicy = C.UpdateLifecycleStageCompleted
+                  }
+          (updateResult, workflowResult) <- useClient do
+            h <- C.start UpdateWithValidator "update-client-interceptors-can-modify-args" opts
+            updateResult <- C.update h testUpdate updateOpts 12
+            workflowResult <- C.waitWorkflowResult h
+            pure (updateResult, workflowResult)
+          updateResult `shouldBe` 24
+          workflowResult `shouldBe` 24
+
+
+withInterceptors :: Interceptors () -> SpecWith TestEnv -> SpecWith PortNumber
+withInterceptors interceptors = aroundAllWith $ flip $ setup interceptors
+
 
 terminateTests :: SpecWith TestEnv
 terminateTests = do
@@ -1603,7 +2104,7 @@ terminateTests = do
                 (workflowRef NoOpWorkflow)
                 "test-terminate-works-with-good-first-execution-run-id"
                 Nothing
-                $ Just C.GetHandleOptions {C.firstExecutionRunId = Just $ M.fromJust h.workflowHandleFirstExecutionRunId}
+                $ Just C.GetHandleOptions {C.firstExecutionRunId = Just $ fromJust h.workflowHandleFirstExecutionRunId}
             C.terminate h' C.TerminationOptions {terminationReason = "testing", terminationDetails = []}
       it "throws if firstExecutionRunId does not match a workflow" $ \TestEnv {..} -> do
         let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
@@ -1645,7 +2146,7 @@ terminateTests = do
                 h.workflowHandleRunId
                 $ Just
                   C.GetHandleOptions
-                    { C.firstExecutionRunId = Just $ M.fromJust h.workflowHandleFirstExecutionRunId
+                    { C.firstExecutionRunId = Just $ fromJust h.workflowHandleFirstExecutionRunId
                     }
             C.terminate h' C.TerminationOptions {terminationReason = "testing", terminationDetails = []}
       it "throws if runId does not match a workflow" $ \TestEnv {..} -> do
@@ -1666,7 +2167,7 @@ terminateTests = do
                     (Just "bad-run-id")
                     ( Just
                         C.GetHandleOptions
-                          { C.firstExecutionRunId = Just $ M.fromJust h.workflowHandleFirstExecutionRunId
+                          { C.firstExecutionRunId = Just $ fromJust h.workflowHandleFirstExecutionRunId
                           }
                     )
                 C.terminate h' C.TerminationOptions {terminationReason = "testing", terminationDetails = []}
@@ -1690,7 +2191,7 @@ terminateTests = do
                     C.getHandle
                       (workflowRef NoOpWorkflow)
                       "test-terminate-throws-with-good-run-id-bad-first-execution-run-id"
-                      (Just $ M.fromJust h.workflowHandleRunId)
+                      (Just $ fromJust h.workflowHandleRunId)
                       (Just C.GetHandleOptions {C.firstExecutionRunId = Just "bad-first-execution-run-id"})
                   C.terminate h' C.TerminationOptions {terminationReason = "testing", terminationDetails = []}
               )

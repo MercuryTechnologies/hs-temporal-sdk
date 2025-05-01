@@ -160,6 +160,24 @@ instance Exception QueryNotFound where
   fromException = workerExceptionFromException
 
 
+data UpdateNotFound = UpdateNotFound Text
+  deriving stock (Show)
+
+
+instance Exception UpdateNotFound where
+  toException = workerExceptionToException
+  fromException = workerExceptionFromException
+
+
+-- TODO: Convert this into something more user-friendly where we're
+-- not exposing the protobuf thing to users
+data UpdateFailure = UpdateFailure F.Failure
+  deriving stock (Show)
+
+
+instance Exception UpdateFailure
+
+
 ---------------------------------------------------------------------
 -- Workflow exceptions
 

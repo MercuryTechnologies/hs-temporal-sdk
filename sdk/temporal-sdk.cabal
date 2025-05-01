@@ -36,6 +36,7 @@ library
       Temporal.Workflow
       Temporal.Workflow.Saga
       Temporal.Workflow.Unsafe
+      Temporal.Workflow.Update
   other-modules:
       Temporal.Activity.Definition
       Temporal.Activity.Worker
@@ -145,7 +146,7 @@ test-suite temporal-sdk-tests
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
-      Spec, ConcurrentAccessSpec, AsyncCompletionSpec, DurationSpec, IntegrationSpec, IntegrationSpec.HangingWorkflow, IntegrationSpec.NoOpWorkflow, IntegrationSpec.TimeoutsInWorkflows, Common, THCompiles
+      Spec, ConcurrentAccessSpec, AsyncCompletionSpec, DurationSpec, IntegrationSpec, IntegrationSpec.HangingWorkflow, IntegrationSpec.NoOpWorkflow, IntegrationSpec.TimeoutsInWorkflows, IntegrationSpec.Updates, Common, THCompiles
   hs-source-dirs:
       test
   default-extensions:

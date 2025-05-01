@@ -279,8 +279,8 @@ rethrowAsyncExceptions e
 
 -- experimental. should help ensure that signals blocking and resuming interop
 -- properly with the main workflow execution.
-injectWorkflowSignal :: Workflow () -> InstanceM ()
-injectWorkflowSignal signal = do
+injectWorkflowSignalOrUpdate :: Workflow a -> InstanceM ()
+injectWorkflowSignalOrUpdate signal = do
   result <- newIVar
   inst <- ask
   let env@(ContinuationEnv jobList) = inst.workflowInstanceContinuationEnv

@@ -19,11 +19,14 @@ module Temporal.Workflow.Definition (
   WorkflowRef (..),
   WorkflowDefinition (..),
   KnownWorkflow (..),
+  KnownUpdate (..),
   SignalRef (..),
   WorkflowSignalDefinition (..),
   -- , StartChildWorkflow(..)
   provideWorkflow,
   ProvidedWorkflow (..),
+  provideUpdate,
+  ProvidedUpdate (..),
   GatherArgs,
 ) where
 
@@ -38,6 +41,7 @@ import Temporal.Payload
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Signal
 import Temporal.Workflow.Types (StartChildWorkflowOptions)
+import Temporal.Workflow.Update
 
 
 {- | This is a Workflow function that can be called from the outside world.
@@ -95,6 +99,19 @@ data ProvidedWorkflow f = ProvidedWorkflow
   { definition :: WorkflowDefinition
   , reference :: KnownWorkflow (ArgsOf f) (ResultOf Workflow f)
   }
+
+
+data ProvidedUpdate f error = ProvidedUpdate
+  { updateDefinition :: WorkflowUpdateDefinition
+  , updateReference :: KnownUpdate (ArgsOf f) (ResultOf Workflow f) error
+  }
+
+
+instance VarArgs (ArgsOf f) => UpdateRef (ProvidedUpdate f) where
+  type UpdateArgs (ProvidedUpdate f) = ArgsOf f
+  type UpdateResult (ProvidedUpdate f) = ResultOf Workflow f
+  updateRef :: ProvidedUpdate f error -> KnownUpdate (UpdateArgs (ProvidedUpdate f)) (UpdateResult (ProvidedUpdate f)) error
+  updateRef = updateReference
 
 
 instance WorkflowDef (ProvidedWorkflow f) where
@@ -156,6 +173,43 @@ provideWorkflow codec name f =
       }
 
 
+-- TODO: Support a validator
+provideUpdate
+  :: forall codec f error
+   . ( f ~ (ArgsOf f :->: Workflow (ResultOf Workflow f))
+     , FunctionSupportsCodec codec (ArgsOf f) (ResultOf Workflow f)
+     )
+  => codec
+  -> Text
+  -> f
+  -> ProvidedUpdate f error
+provideUpdate codec name f =
+  provideCallStack $
+    ProvidedUpdate
+      { updateDefinition =
+          WorkflowUpdateDefinition
+            { updateName = name
+            , updateCodec = codec
+            , updateFunction = f
+            , updateValidator = Nothing
+            , updateRunner = \f' payloads -> do
+                eRes <-
+                  applyPayloads
+                    codec
+                    (Proxy @(ArgsOf f))
+                    (Proxy @(Workflow (ResultOf Workflow f)))
+                    f'
+                    payloads
+                pure $ fmap (\wf -> wf >>= \result -> ilift (liftIO $ encode codec result)) eRes
+            }
+      , updateReference =
+          KnownUpdate
+            { knownUpdateCodec = codec
+            , knownUpdateName = name
+            }
+      }
+
+
 {- |
 A Signal is an asynchronous request to a Workflow Execution.
 
@@ -182,6 +236,17 @@ data WorkflowSignalDefinition
       f
       (f -> Vector Payload -> IO (Either String (Workflow ())))
 
+
 -- { workflowSignalName :: Text
 -- , workflowSignalHandler :: [Payload] -> IO ()
 -- }
+
+data WorkflowUpdateDefinition = forall codec f.
+  (FunctionSupportsCodec codec (ArgsOf f) (ResultOf Workflow f)) =>
+  WorkflowUpdateDefinition
+  { updateName :: Text -- name
+  , updateCodec :: codec
+  , updateFunction :: f
+  , updateValidator :: Maybe (ArgsOf f :->: Condition Bool)
+  , updateRunner :: f -> Vector Payload -> IO (Either String (Workflow Payload))
+  }

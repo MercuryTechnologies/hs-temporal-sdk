@@ -193,6 +193,13 @@ module Temporal.Workflow (
   Condition,
   waitCondition,
 
+  -- ** Updates
+  -- $updates
+  setUpdateHandler,
+  provideUpdate,
+  ProvidedUpdate (..),
+  KnownUpdate (..),
+
   -- * Other utilities
   unsafeAsyncEffectSink,
 
@@ -305,6 +312,7 @@ import Temporal.Workflow.Query
 import Temporal.Workflow.Signal
 import Temporal.Workflow.Types
 import Temporal.Workflow.Unsafe.Handle
+import Temporal.Workflow.Update
 import Temporal.Workflow.WorkflowInstance
 import Temporal.WorkflowInstance
 import UnliftIO
@@ -1134,6 +1142,69 @@ setQueryHandler (queryRef -> KnownQuery n codec) f = ilift $ do
           case eResult of
             Left err -> pure $ Left err
             Right result -> liftIO $ UnliftIO.try $ encode codec result
+
+
+{- | Register an update handler, optionally with a validator.
+
+The validator will be called when an update with the given name is received. If it returns true,
+the update handler will be called, and its result returned to the client.
+-}
+setUpdateHandler
+  :: forall update f validator e
+   . ( UpdateRef update
+     , f ~ (UpdateArgs update :->: Workflow (UpdateResult update))
+     , Exception e
+     , validator ~ (UpdateArgs update :->: Validation (Either e ()))
+     , RequireCallStack
+     )
+  => update e
+  -> f
+  -> Maybe validator
+  -> Workflow ()
+setUpdateHandler (updateRef -> KnownUpdate codec n) f mValidator = ilift $ do
+  updateCallStack
+  inst <- ask
+  let updateImplementation =
+        WorkflowUpdateImplementation
+          { updateImplementation = updateHandler
+          , updateValidationImplementation = fmap updateValidatorHandler mValidator
+          }
+  liftIO $ modifyIORef' inst.workflowUpdateHandlers $ \handles ->
+    HashMap.insert (Just n) updateImplementation handles
+  where
+    updateHandler :: UpdateId -> Vector Payload -> Map Text Payload -> Workflow Payload
+    updateHandler updateId vec hdrs = do
+      ePayloads <-
+        ilift $
+          liftIO $
+            applyPayloads
+              codec
+              (Proxy @(UpdateArgs update))
+              (Proxy @(Workflow (UpdateResult update)))
+              f
+              vec
+      case ePayloads of
+        Left err -> Workflow $ \_env -> do
+          $(logDebug) "Hit a decoding error"
+          pure $ Throw $ toException $ ValueError err
+        Right w -> w >>= \result -> ilift (liftIO $ encode codec result)
+    updateValidatorHandler :: validator -> UpdateId -> Vector Payload -> Map Text Payload -> Validation (Either SomeException ())
+    updateValidatorHandler v updateId vec hdrs = do
+      eResult <-
+        Validation $
+          applyPayloads
+            codec
+            (Proxy @(UpdateArgs update))
+            (Proxy @(Validation (Either e ())))
+            v
+            vec
+      case eResult of
+        Left err -> pure $ Left $ toException $ ValueError err
+        Right result -> do
+          x <- result
+          case x of
+            Left err' -> pure $ Left $ toException err'
+            Right result' -> pure $ Right result'
 
 
 type ValidSignalHandler f =
