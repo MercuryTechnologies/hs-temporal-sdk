@@ -1,13 +1,7 @@
-defaults: { local: ../hpack-defaults.yaml }
+<<: !include ../hpack-defaults.yaml
 
 name:         temporal-sdk-codec-server
-version:      "0.0.1.0"
-author:       Ian Duncan
-maintainer:   temporal@mercury.com
-license-file: LICENSE
-license:      BSD-3-Clause
 build-type:   Simple
-language:     Haskell2010
 
 dependencies:
 - base
