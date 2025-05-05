@@ -48,9 +48,9 @@ flowchart TD
         G --> H[Mark Thread as Blocked]
 
         I[Scheduler Thread] --> J{All Threads<br>Blocked?}
-        J -->|Yes| K[Flush Commands]
+        J -->|Yes| K[Process Signals/Queries<br>& Flush Commands]
 
-        L[Flusher Thread] --> M[Send Commands to Temporal]
+        K --> L[Send Commands to Temporal]
     end
 
     C --> N[Process Activation]
@@ -76,21 +76,50 @@ sequenceDiagram
     participant T as Thread Manager
     participant I as IVar
     participant Q as Command Queue
-    participant F as Flusher
-    participant S as Temporal Service
+    participant S as Scheduler Thread
+    participant TS as Temporal Service
 
     W->>I: waitIVar
     I->>T: Mark thread as blocked
 
     T->>T: Check if all threads blocked
-    T->>Q: Signal ready to flush
-    Q->>F: Collect commands
-    F->>S: Send commands
+    T->>S: All threads blocked
+    S->>Q: getCommands
+    Q-->>S: Commands list
+    S->>TS: Send commands
 
-    S->>W: Send activation
-    W->>I: putIVar
+    TS->>S: Send activation
+    S->>I: putIVar
     I->>T: Mark thread as unblocked
     I->>W: Return value to thread
+```
+
+## Workflow Execution Cycle
+
+```mermaid
+sequenceDiagram
+    participant WF as Workflow
+    participant RT as Runtime
+    participant SH as Scheduler Thread
+    participant TS as Temporal Service
+
+    WF->>RT: Create operations (activities, timers, etc.)
+    RT->>RT: Generate sequence numbers
+    RT->>RT: Create IVars for results
+    RT->>RT: Add commands to queue
+    WF->>RT: Wait on IVars (blocks threads)
+
+    Note over WF,RT: All workflow threads are blocked
+
+    SH->>RT: Detect all threads blocked
+    SH->>RT: Process buffered signals and queries
+    SH->>TS: Flush commands to Temporal
+
+    TS->>RT: Send activation (activity completed, timer fired, etc.)
+    RT->>RT: Resolve sequences, put results in IVars
+    RT->>WF: Unblock waiting threads
+
+    WF->>WF: Continue execution
 ```
 
 ## Key Implementation Challenges & Solutions
@@ -101,6 +130,31 @@ Our STM approach solves several challenges:
 2. **Concurrency** - Multiple operations run concurrently while maintaining determinism
 3. **Blocking** - Threads block without consuming resources or affecting determinism
 4. **Error Handling** - Errors propagate naturally like normal results
+5. **Signal and Query Processing** - Buffering and processing when the workflow is in a consistent state
+6. **Activation Job Management** - Tracking job completion to ensure all jobs are processed
+
+## Core Runtime Components
+
+```mermaid
+flowchart TD
+    subgraph WorkflowRuntime
+        A[WorkflowInstance] --- B[ThreadManager]
+        A --- C[Command Queue]
+        A --- D[SequenceMaps]
+        A --- E[Activation Channel]
+        A --- F[Signal Support]
+        A --- G[Query Support]
+        A --- H[Cancel Requested IVar]
+    end
+
+    I[Main Thread] --- B
+    J[Worker Threads] --- B
+    K[Scheduler Thread] --- B
+    K --- C
+    K --- E
+
+    L[Temporal Service] --- E
+```
 
 ## See Also
 

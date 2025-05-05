@@ -7,7 +7,6 @@ import Control.Monad
 import Control.Monad.Catch (MonadCatch)
 import Control.Monad.Logger
 import Control.Monad.Reader
-import Control.Monad.Trans.Resource (closeInternalState)
 import Data.Functor
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
@@ -292,8 +291,6 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                         worker.workerVault
                         worker.processor
                         workflowInfo
-
-                    liftIO $ addStackTraceHandler inst
 
                     wf <- runWorkflow inst $ f payloads
                     registerRunningWorkflow runId_ wf

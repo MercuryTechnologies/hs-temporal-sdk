@@ -184,18 +184,18 @@ spec = do
       waitThreadBlocked runtime $ asyncThreadId thread1
       waitThreadBlocked runtime $ asyncThreadId thread2
 
-      -- Verify that waitAllBlocked completes when all threads are blocked
-      _everythingIsInFactBlocked <- atomically $ waitAllBlocked runtime
+      -- Verify that waitAllThreadsBlocked completes when all threads are blocked
+      _everythingIsInFactBlocked <- atomically $ waitAllThreadsBlocked runtime
 
       -- Unblock the first thread. Once it has completed,
-      -- waitAllBlocked should block again.
+      -- waitAllThreadsBlocked should block again.
       atomically $ putIVar ivar1 ("Value 1" :: String)
       wait thread1 `shouldReturn` "Value 1"
 
-      atomically $ waitAllBlocked runtime
+      atomically $ waitAllThreadsBlocked runtime
       atomically $ putIVar ivar2 ("Value 2" :: String)
       wait thread2 `shouldReturn` "Value 2"
 
     it "should not block if no threads exist" $ do
       runtime <- newTestRuntime
-      atomically $ waitAllBlocked runtime
+      atomically $ waitAllThreadsBlocked runtime

@@ -38,7 +38,7 @@ It has:
 ```mermaid
 flowchart TD
     A[Workflow Code] -->|"addCommand"| B[Command Queue]
-    B -->|"getCommands"| C[Flusher Thread]
+    B -->|"getCommands"| C[Scheduler Thread]
     C -->|"WorkflowActivationCompletion"| D[Temporal Service]
     D -->|Response too large| E[pushbackCommands]
     E --> B
@@ -49,16 +49,17 @@ flowchart TD
 When a workflow operation needs to send a command to Temporal (like starting an activity), it adds it to the queue:
 
 ```haskell
-addCommand :: HasCommandQueue a => a -> WorkflowCommand -> STM ()
-addCommand runtime command = do
-  writeTQueue (getCommandQueue runtime).commandQueue command
+addCommand :: WorkflowCommand -> InstanceM ()
+addCommand command = do
+  inst <- ask
+  atomically $ CommandQueue.addCommand inst command
 ```
 
 This happens in an STM transaction for atomicity.
 
 ### Flushing Commands
 
-When the workflow is in a blocked state (all threads waiting for external input), the flusher thread collects and sends all commands:
+When the workflow is in a blocked state (all threads waiting for external input), the scheduler thread collects and sends all commands:
 
 ```haskell
 getCommands :: HasCommandQueue a => a -> STM [WorkflowCommand]
@@ -92,7 +93,7 @@ The command queue is tightly connected to the workflow lifecycle:
 
 1. **Command Generation**: Normal workflow execution adds commands to the queue
 2. **Blocked State Detection**: When all threads block, the scheduler triggers a flush
-3. **Command Flushing**: The flusher thread sends commands to Temporal
+3. **Command Flushing**: The scheduler thread sends commands to Temporal
 4. **Activation Processing**: New activations unblock threads, which may generate more commands
 
 The [Sequence Management](sequence-management.md) system matches responses back to the original requests, letting workflows know when operations complete.
@@ -101,15 +102,15 @@ The [Sequence Management](sequence-management.md) system matches responses back 
 sequenceDiagram
     participant W as Workflow
     participant Q as Command Queue
-    participant F as Flusher
+    participant S as Scheduler Thread
     participant T as Temporal
 
     W->>Q: Add commands (schedule activity, etc.)
     W->>W: All threads block
-    F->>Q: getCommands()
-    Q-->>F: Commands list
-    F->>T: WorkflowActivationCompletion
-    T-->>F: Acknowledge
+    S->>Q: getCommands()
+    Q-->>S: Commands list
+    S->>T: WorkflowActivationCompletion
+    T-->>S: Acknowledge
     T->>W: New activation
     W->>W: Process activation, unblock threads
     W->>Q: Add more commands
@@ -124,8 +125,8 @@ flowchart TD
     C --> D{All threads<br>blocked?}
     D -->|No| E[Continue execution]
     E --> B
-    D -->|Yes| F[Mark ready to flush]
-    F --> G[Flusher detects ready state]
+    D -->|Yes| F[Scheduler detects blocked state]
+    F --> G[Process buffered signals/queries]
     G --> H[Get all commands from queue]
     H --> I[Create activation completion]
     I --> J[Send to Temporal]
@@ -151,7 +152,6 @@ flowchart TD
         D[Command Queue]
         E[Thread Manager]
         F[Scheduler Thread]
-        G[Flusher Thread]
     end
 
     subgraph "Temporal Service"
@@ -165,11 +165,44 @@ flowchart TD
     B <--> E
     C <--> E
     E <--> F
-    F --> G
-    G <--> D
-    G <--> H
+    F <--> D
+    F <--> H
     H --> F
 ```
+
+## Implementation of Command Flushing
+
+The scheduler thread is responsible for flushing commands when all threads are blocked:
+
+```haskell
+flushCommands :: (HasCallStack, MonadIO m) => WorkflowRuntime -> m ()
+flushCommands runtime = do
+  (info, cmds) <- atomically do
+    info <- readTVar runtime.workflowRuntimeInstance.workflowInstanceInfo
+    cmds <- CommandQueue.getCommands runtime.workflowRuntimeCommandQueue
+    pure (info, cmds)
+  let completionSuccessful :: Core.Success
+      completionSuccessful = defMessage & Completion.commands .~ cmds
+      completionMessage :: Core.WorkflowActivationCompletion
+      completionMessage =
+        defMessage
+          & Completion.runId .~ rawRunId info.runId
+          & Completion.successful .~ completionSuccessful
+  res <- liftIO $ runtime.workflowRuntimeInstance.workflowCompleteActivation completionMessage
+  case res of
+    Left err -> throwIO err
+    Right () -> pure ()
+```
+
+The scheduler handles this as part of its main loop, which runs as follows:
+
+1. Apply any pending activations
+2. Wait for all jobs to be handled
+3. Wait for all threads to block
+4. Process any buffered signals
+5. Process any buffered queries
+6. Flush commands to Temporal
+7. Wait for the next activation
 
 ## Best Practices
 

@@ -198,9 +198,6 @@ module Temporal.Workflow (
   ProvidedUpdate (..),
   KnownUpdate (..),
 
-  -- * Other utilities
-  unsafeAsyncEffectSink,
-
   -- * State vars
   StateVar,
   newStateVar,
@@ -1105,11 +1102,11 @@ setQueryHandler
   => query
   -> f
   -> Workflow ()
-setQueryHandler (queryRef -> KnownQuery n codec) f = ilift $ do
+setQueryHandler (queryRef -> KnownQuery n codec) f = Workflow do
   updateCallStack
-  inst <- asks workflowRuntimeInstance
+  runtime <- ask
   withRunInIO $ \runInIO -> do
-    atomically $ modifyTVar' inst.workflowQueryHandlers $ \handles ->
+    atomically $ modifyTVar' runtime.queries.queryHandlers $ \handles ->
       HashMap.insert (Just n) (\qId vec hdrs -> runInIO $ qHandler qId vec hdrs) handles
   where
     qHandler :: QueryId -> Vector Payload -> Map Text Payload -> InstanceM (Either SomeException Payload)
@@ -1211,11 +1208,11 @@ setSignalHandler
   => ref
   -> f
   -> Workflow ()
-setSignalHandler (signalRef -> KnownSignal n codec) f = ilift $ do
+setSignalHandler (signalRef -> KnownSignal n codec) f = Workflow do
   updateCallStack
   -- TODO ^ inner callstack?
   runtime <- ask
-  atomically $ modifyTVar' runtime.workflowRuntimeInstance.workflowSignalHandlers $ \handlers ->
+  atomically $ modifyTVar' runtime.signals.signalHandlers $ \handlers ->
     HashMap.insert (Just n) handle' handlers
   where
     handle' :: Vector Payload -> InstanceM ()
@@ -1409,19 +1406,6 @@ getExternalWorkflowHandle wfId mrId = do
       }
 
 
-{- | While workflows are deterministic, there are categories of operational concerns (metrics, logging, tracing, etc.) that require
-access to IO operations like the network or filesystem. The 'IO' monad is not generally available in the 'Workflow' monad, but you
-can use 'sink' to run an 'IO' action in a workflow. In order to maintain determinism, the operation will be executed asynchronously
-and does not return a value. Be sure that the sink operation terminates, or else you will leak memory and/or threads.
-
-Do not use 'sink' for any Workflow logic, or else you will violate determinism.
--}
-unsafeAsyncEffectSink :: RequireCallStack => IO () -> Workflow ()
-unsafeAsyncEffectSink m = do
-  updateCallStackW
-  ilift $ liftIO $ void $ forkIO m
-
-
 -- -----------------------------------------------------------------------------
 -- Parallel operations
 
@@ -1439,20 +1423,24 @@ race
   => Workflow a
   -> Workflow b
   -> Workflow (Either a b)
-race l r = Workflow do
+race l r = Workflow $ UnliftIO.mask $ \restore -> do
   runtime <- ask
   lh <- asyncWorkflow l
   rh <- asyncWorkflow r
+  -- This takes a bit of thought to get right.
+  --
+  -- We can mark this thread as blocked, because the asyncWorkflow threads
+  -- start off unblocked, so we can ensure that we don't accidentally flush
+  -- commands before the asyncWorkflow threads have a chance to run.
+  --
+  -- By ensuring that we unblock this thread in the `finally` block in the
+  -- same transaction as deregistering the asyncWorkflow threads, we can ensure
+  -- a consistent view of the world.
   atomically $ markBlockedState runtime True
-  waitEither lh rh `UnliftIO.finally` atomically do
+  restore (waitEither lh rh) `UnliftIO.finally` atomically do
     markBlockedState runtime False
-    let deregisterThread :: forall x. Async x -> STM ()
-        deregisterThread t =
-          modifyTVar'
-            (threadManager $ getThreadManager runtime)
-            (HashMap.delete $ asyncThreadId t)
-    deregisterThread lh
-    deregisterThread rh
+    deregisterThread runtime $ asyncThreadId lh
+    deregisterThread runtime $ asyncThreadId rh
 
 
 {- | Run two Workflow actions concurrently, and return the first to finish.

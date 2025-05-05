@@ -69,8 +69,9 @@ When a workflow needs to send a command to Temporal (like starting an activity),
 
 ```haskell
 -- Example for activity sequences
-nextActivitySequence :: WorkflowRuntime -> STM Sequence
-nextActivitySequence runtime = do
+nextActivitySequence :: InstanceM Sequence
+nextActivitySequence = atomically do
+  runtime <- ask
   Sequence <$> stateTVar
     runtime.workflowRuntimeSequenceMaps.counters.activity
     (\s -> (s, s + 1))
@@ -84,15 +85,18 @@ The operation creates an IVar to hold the eventual result and registers it:
 
 ```haskell
 -- Example for activities
-scheduleActivity :: ActivityOptions -> ... -> Workflow a
-scheduleActivity options ... = Workflow $ do
+startActivityFromPayloads :: KnownActivity args result -> StartActivityOptions -> Vector Payload -> Workflow (Task result)
+startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = Workflow $ withRunInIO $ \runInIO -> runInIO $ do
   runtime <- ask
-  seq <- atomically $ nextActivitySequence runtime
-  resultVar <- newIVar runtime.workflowRuntimeThreads
-  atomically $ modifyTVar' runtime.workflowRuntimeSequenceMaps.activities $
-    HashMap.insert seq resultVar
-  -- Send command with the sequence number
-  -- Wait on the IVar
+  s@(Sequence actSeq) <- nextActivitySequence
+  resultSlot <- newIVar $ getThreadManager runtime
+  atomically $
+    modifyTVar'
+      runtime.workflowRuntimeSequenceMaps.activities
+      (HashMap.insert s resultSlot)
+
+  -- Create and add command with sequence number
+  -- Return Task that waits on the resultSlot
 ```
 
 ### Resolving Sequences
@@ -102,6 +106,7 @@ When an activation returns from Temporal with a sequence number, the handler loo
 ```haskell
 handleResolveActivity :: WorkflowRuntime -> ResolveActivity -> STM (IO ())
 handleResolveActivity runtime msg = do
+  markJobHandled runtime
   let a = msg ^. Activation.seq . to Sequence
   mvar <- resolveSequence runtime.workflowRuntimeSequenceMaps.activities a
   case mvar of
@@ -133,7 +138,7 @@ sequenceDiagram
     participant R as Runtime
     participant T as Temporal
 
-    W->>R: sleepFor(duration)
+    W->>R: createTimer(duration)
     R->>R: Generate timer sequence
     R->>R: Create timer IVar
     R->>T: Send StartTimer command with sequence
@@ -183,7 +188,7 @@ sequenceDiagram
 
     W->>R: startChildWorkflow(...)
     R->>R: Generate child workflow sequence
-    R->>R: Create child workflow handle
+    R->>R: Create child workflow handle (with 3 IVars)
     R->>T: Send StartChildWorkflow command with sequence
     W->>R: Wait on start handle (blocks)
 
@@ -198,6 +203,19 @@ sequenceDiagram
     R->>R: Find child workflow handle again
     R->>R: Put result in result handle
     R-->>W: Continue execution with result
+```
+
+Child workflow handles have more complexity since they manage the full lifecycle:
+
+```haskell
+ChildWorkflowHandle
+  { childWorkflowSequence = s
+  , startHandle = startSlot                -- IVar for start completion
+  , resultHandle = resultSlot              -- IVar for workflow result
+  , firstExecutionRunId = firstExecutionRunId  -- IVar for RunId
+  , childWorkflowResultConverter = pure    -- Function to convert result
+  , childWorkflowId = wfId                 -- Workflow ID
+  }
 ```
 
 ### 4. External Signal Sequences
@@ -256,6 +274,29 @@ The sequence system works directly with the [thread blocking mechanism](workflow
 2. When all threads are blocked, commands get flushed to Temporal
 3. When an activation comes back with a sequence number, it resolves the IVar
 4. This unblocks the waiting thread, letting workflow execution continue
+
+## Activation Job Handlers
+
+Each activation job type has a specialized handler that resolves the appropriate sequence:
+
+```haskell
+handleFireTimer runtime msg = do
+  markJobHandled runtime
+  let t = msg ^. Activation.seq . to Sequence
+  mvar <- resolveSequence runtime.workflowRuntimeSequenceMaps.timers t
+  case mvar of
+    Nothing -> Catch.throwM $ RuntimeError "Timer not found"
+    Just ivar' -> do
+      putIVar ivar' ()
+      pure $ pure ()
+```
+
+The handler:
+1. Marks the job as handled (decrements the job counter)
+2. Extracts the sequence number from the activation
+3. Resolves the sequence to find the corresponding IVar
+4. Puts the result in the IVar, unblocking any waiting threads
+5. Returns any IO operations that need to be performed
 
 ## Error Handling
 

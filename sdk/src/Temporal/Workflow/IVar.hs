@@ -83,10 +83,11 @@ tryReadIVar IVar {ivar} = tryReadTMVar ivar
 
 
 -- | Use this to determine when we want to flush things to the server.
-waitAllBlocked :: HasThreadManager r => r -> STM ()
-waitAllBlocked runtime = do
+waitAllThreadsBlocked :: HasThreadManager r => r -> STM ()
+waitAllThreadsBlocked runtime = do
   threads <- readTVar $ threadManager $ getThreadManager runtime
-  allBlocked <- and <$> mapM (readTVar . workflowThreadBlocked) threads
+  blockingState <- mapM (readTVar . workflowThreadBlocked) threads
+  let allBlocked = and blockingState
   guard allBlocked
 
 
@@ -97,3 +98,16 @@ markBlockedState runtime blockedOrNot = do
   case HashMap.lookup tid threads of
     Just thread -> writeTVar thread.workflowThreadBlocked blockedOrNot
     Nothing -> error ("markBlockedState: " <> show tid <> " not found")
+
+
+deregisterThread :: HasThreadManager r => r -> ThreadId -> STM ()
+deregisterThread runtime tid = do
+  modifyTVar' (threadManager $ getThreadManager runtime) $ HashMap.delete tid
+
+
+registerThread :: HasThreadManager r => r -> ThreadId -> STM ()
+registerThread runtime tid = do
+  isBlocked <- newTVar False
+  modifyTVar'
+    (threadManager $ getThreadManager runtime)
+    (HashMap.insert tid $ WorkflowThread isBlocked)

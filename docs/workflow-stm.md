@@ -18,8 +18,7 @@ Every workflow has multiple threads:
 
 - **Main thread**: Runs the workflow implementation
 - **Scheduler thread**: Waits for all threads to block, then triggers command flushing
-- **Flusher thread**: Sends commands to Temporal
-- **Worker threads**: Handle signals, timers, etc.
+- **Worker threads**: Handle signals, timers, queries, etc.
 
 We track every thread's state through a `ThreadManager`:
 
@@ -52,22 +51,28 @@ When a thread waits on an `IVar`:
 ```haskell
 waitIVar IVar{..} = do
   tid <- myThreadId
-  atomically do
-    -- Find our thread state
-    -- If value isn't available:
-    --   Mark thread as blocked
-    --   Register in blocks map
-    -- Otherwise just return the value
+  join $ do
+    atomically do
+      threads <- readTVar $ threadManager manager
+      let threadState = case HashMap.lookup tid threads of
+            Just thread -> thread
+            Nothing -> error ("waitIVar: Thread in map should exist " <> show tid)
+      mval <- tryReadTMVar ivar
+      case mval of
+        Nothing -> do
+          writeTVar threadState.workflowThreadBlocked True
+          modifyTVar' blocks $ HashMap.insert tid threadState
+          pure $ atomically $ readTMVar ivar
+        Just val -> pure $ pure val
 ```
 
 When an `IVar` gets a value:
 
 ```haskell
-putIVar IVar{ivar, blocks} x = void do
+putIVar IVar {ivar, blocks} x = void do
   _ <- tryPutTMVar ivar x
   currentlyBlocked <- readTVar blocks
-  for_ currentlyBlocked (\blocked ->
-    writeTVar blocked.workflowThreadBlocked False)
+  for_ currentlyBlocked (\blocked -> writeTVar blocked.workflowThreadBlocked False)
   writeTVar blocks mempty
 ```
 
@@ -79,7 +84,6 @@ sequenceDiagram
     participant W as Workflow Worker
     participant M as Main Thread
     participant S as Scheduler Thread
-    participant F as Flusher Thread
     participant A as Async Threads
 
     C->>W: Activation (InitializeWorkflow)
@@ -87,8 +91,6 @@ sequenceDiagram
     activate M
     M->>S: Start Scheduler
     activate S
-    M->>F: Start Flusher
-    activate F
 
     M->>M: Execute workflow code
     M-->>A: Spawn async threads<br>(signals, timers, etc.)
@@ -99,8 +101,7 @@ sequenceDiagram
     A->>A: Mark thread(s) as blocked
 
     S->>S: Wait for all threads to block
-    S->>F: Signal ready to flush
-    F->>C: Send commands
+    S->>C: Flush commands
 
     C->>W: New Activation (e.g., FireTimer)
     W->>S: Process Activation
@@ -110,11 +111,9 @@ sequenceDiagram
     Note over M,A: Continue execution
 
     M->>M: Complete workflow
-    M->>F: Signal completion
-    F->>C: Send completion command
+    M->>C: Send completion command
     deactivate M
     deactivate S
-    deactivate F
     deactivate A
 ```
 
@@ -132,7 +131,9 @@ flowchart TD
 
     F --> H[Wait for activation]
     H --> I[Process activation jobs]
-    I --> J[Unblock relevant threads]
+    I --> J1[Apply signals]
+    J1 --> J2[Apply queries]
+    J2 --> J[Unblock relevant threads]
     J --> K[Continue execution]
 
     D --> B
@@ -151,19 +152,29 @@ flowchart TD
 
     D -->|FireTimer| E[Resolve timer sequence]
     D -->|ResolveActivity| F[Resolve activity sequence]
-    D -->|SignalWorkflow| G[Execute signal handler]
-    D -->|QueryWorkflow| H[Execute query handler]
+    D -->|SignalWorkflow| G[Buffer or execute signal handler]
+    D -->|QueryWorkflow| H[Buffer or execute query handler]
+    D -->|CancelWorkflow| I1[Put value in cancelRequested IVar]
     D -->|Others| I[Process other job types]
 
     E --> J[Put result in IVar]
     F --> J
     G --> J
     H --> K[Send query response]
+    I1 --> J
     I --> J
 
     J --> L[Unblock waiting threads]
     K --> M[Continue workflow execution]
     L --> M
+
+    subgraph "After all jobs processed"
+        N[Wait for all threads to block]
+        N --> O[Process buffered signals]
+        O --> P[Process buffered queries]
+        P --> Q[Wait for all threads to block again]
+        Q --> R[Flush commands]
+    end
 ```
 
 The `activate` function processes incoming activations:
@@ -171,9 +182,9 @@ The `activate` function processes incoming activations:
 ```haskell
 activate :: WorkflowRuntime -> WorkflowActivation -> ThreadId -> STM (IO ())
 activate runtime act tid = do
-  -- Update workflow state
-  -- Apply jobs atomically to ensure all threads can unblock together
-  -- Handle any errors during job processing
+  -- Update workflow state (timestamp, history length, etc.)
+  -- Process activation jobs
+  -- Return non-STM operations that need to be executed
 ```
 
 Each job type has a specific handler that:
@@ -187,12 +198,37 @@ Once all threads are blocked, we flush commands to Temporal using the [Command Q
 
 ```mermaid
 flowchart TD
-    A[All threads blocked] --> B[Mark ready to flush]
-    B --> C[Flusher thread detects ready state]
-    C --> D[Collect commands from queue]
-    D --> E[Create WorkflowActivationCompletion]
-    E --> F[Send to Temporal Core]
-    F --> G[Wait for next activation]
+    A[All threads blocked] --> B[Scheduler thread detects blocked state]
+    B --> C[Get commands from command queue]
+    C --> D[Create WorkflowActivationCompletion]
+    D --> E[Send to Temporal Core]
+    E --> F[Wait for next activation]
+```
+
+The scheduler thread runs this cycle repeatedly:
+
+```haskell
+schedule mainThread = do
+  -- Wait for main thread to be added to thread manager
+  forever do
+    -- Apply activations fully before blocking again
+    join $ atomically $ applyActivations tid
+    atomically do
+      waitAllJobsHandled
+      waitAllThreadsBlocked runtime
+    -- Process buffered signals and queries
+    untilM_ do
+      (handleCount, m) <- atomically $ applyQueuedSignals tid
+      m
+      atomically do
+        waitAllJobsHandled
+        waitAllThreadsBlocked runtime
+      pure (handleCount == 0)
+    join $ atomically $ applyQueuedQueries tid
+    atomically do
+      waitAllJobsHandled
+      waitAllThreadsBlocked runtime
+    flushCommands runtime
 ```
 
 ## Concurrency Primitives
@@ -241,13 +277,15 @@ We include optional deadlock detection:
 
 ```haskell
 eResult <- case inst.workflowDeadlockTimeout of
-  Nothing -> apply
+  Nothing -> do
+    apply
   Just timeoutDuration -> do
     res <- UnliftIO.timeout timeoutDuration apply
     case res of
-      Nothing -> pure $ Left $ toException $
-                 LogicBug WorkflowActivationDeadlock
-      Just res' -> pure res'
+      Nothing -> do
+        pure $ Left $ toException $ LogicBug WorkflowActivationDeadlock
+      Just res' -> do
+        pure res'
 ```
 
 ### Cancellation
@@ -256,6 +294,7 @@ Workflow cancellation propagates to all active threads:
 
 ```haskell
 handleCancelWorkflow runtime _ = do
+  markJobHandled runtime
   putIVar runtime.workflowRuntimeCancelRequested ()
   pure $ pure ()
 ```

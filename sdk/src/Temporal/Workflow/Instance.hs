@@ -50,9 +50,6 @@ data WorkflowInstance = WorkflowInstance
   , workflowMemoizedPatches :: {-# UNPACK #-} !(TVar (HashMap PatchId Bool))
   , workflowTime :: {-# UNPACK #-} !(TVar SystemTime)
   , workflowIsReplaying :: {-# UNPACK #-} !(TVar Bool)
-  , workflowSignalHandlers :: {-# UNPACK #-} !(TVar (HashMap (Maybe Text) (Vector Payload -> InstanceM ())))
-  , workflowQueryHandlers :: {-# UNPACK #-} !(TVar (HashMap (Maybe Text) (QueryId -> Vector Payload -> Map Text Payload -> IO (Either SomeException Payload))))
-  , workflowUpdateHandlers :: {-# UNPACK #-} !(TVar (HashMap (Maybe Text) WorkflowUpdateImplementation))
   , workflowCallStack :: {-# UNPACK #-} !(IORef CallStack)
   , workflowCompleteActivation :: !(Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
   , workflowDeadlockTimeout :: Maybe Int
@@ -69,14 +66,49 @@ data WorkflowInstance = WorkflowInstance
 
 data WorkflowRuntime = WorkflowRuntime
   { workflowRuntimeInstance :: {-# UNPACK #-} !WorkflowInstance
-  , -- , workflowRuntimeImpl :: !(Vector Payload -> InstanceM Payload)
-    workflowRuntimeThreads :: {-# UNPACK #-} !ThreadManager
+  , workflowRuntimeThreads :: {-# UNPACK #-} !ThreadManager
   , workflowRuntimeCommandQueue :: {-# UNPACK #-} !CommandQueue
-  , workflowRuntimeReadyToFlush :: {-# UNPACK #-} !(TVar Bool)
-  , workflowRuntimeCancelRequested :: {-# UNPACK #-} !(TVar Bool)
+  , workflowRuntimeCancelRequested :: {-# UNPACK #-} !(IVar ())
   , workflowRuntimeSequenceMaps :: {-# UNPACK #-} !SequenceMaps
+  , workflowRuntimeUnappliedJobs :: {-# UNPACK #-} !(TVar Int)
+  , signals :: {-# UNPACK #-} !SignalSupport
+  , queries :: {-# UNPACK #-} !QuerySupport
+  , updates :: {-# UNPACK #-} !UpdateSupport
   }
 
+
+data SignalSupport = SignalSupport
+  { bufferedSignals :: {-# UNPACK #-} !(TVar [SignalWorkflow])
+  -- ^ Since in this SDK, signals are registered during the execution of a workflow,
+  -- we can't kick off signal requests until the workflow has had a chance to register
+  -- handlers.
+  --
+  -- So, we buffer signals here that are processed prior to the Workflow having a chance
+  -- to process them.
+  --
+  -- When should we start handling these signals? We can't kick them off _immediately_
+  -- upon registration, because the Workflow may not have had a chance to register subsequent
+  -- signal handlers.
+  --
+  -- We also need to respect the order that signals are received, so we can't just
+  -- drain the queue for only recognized signals.
+  --
+  -- So, I think the best option is that up until we hit a signal that we don't recognize,
+  -- we just enqueue the signals into the queue, and treat them as dealt with by decrementing
+  -- the unappliedJobs counter.
+  , signalHandlers :: {-# UNPACK #-} !(TVar (HashMap (Maybe Text) (Vector Payload -> InstanceM ())))
+  }
+
+
+data QuerySupport = QuerySupport
+  { bufferedQueries :: {-# UNPACK #-} !(TVar [QueryWorkflow])
+  , queryHandlers :: {-# UNPACK #-} !(TVar (HashMap (Maybe Text) (QueryId -> Vector Payload -> Map Text Payload -> IO (Either SomeException Payload))))
+  }
+
+data UpdateSupport = UpdateSupport
+  { bufferedUpdates :: {-# UNPACK #-} !(TVar [DoUpdate])
+  , updateHandlers :: {-# UNPACK #-} !(TVar (HashMap (Maybe Text) WorkflowUpdateImplementation))
+  }
 
 instance HasThreadManager WorkflowRuntime where
   getThreadManager = workflowRuntimeThreads

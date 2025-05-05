@@ -22,7 +22,6 @@ module Temporal.Workflow.Unsafe (
 
 import Control.Monad.IO.Class
 import Control.Monad.Reader (ask)
-import Control.Monad.Trans.Resource (ResourceT, runInternalState)
 import Temporal.Workflow
 import Temporal.Workflow.Monad
 
