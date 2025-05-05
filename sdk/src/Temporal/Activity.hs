@@ -34,8 +34,10 @@ them while keeping the following principles in mind:
 module Temporal.Activity (
   Activity,
 
-  -- * Built-in Acitivity primitives
-  heartbeat,
+  -- * Built-in Activity primitives
+  withHeartbeat,
+  rawHeartbeat,
+  getRawHeartbeat,
   ActivityInfo (..),
   askActivityInfo,
   ActivityCancelReason (..),
@@ -63,6 +65,7 @@ import Control.Monad.Reader.Class
 import Data.ProtoLens
 import Data.Proxy
 import Data.Text (Text)
+import qualified Data.Vector as V
 import Lens.Family2
 import qualified Proto.Temporal.Sdk.Core.CoreInterface_Fields as Proto
 import Temporal.Activity.Definition
@@ -74,6 +77,7 @@ import Temporal.Core.Worker (getWorkerClient, recordActivityHeartbeat)
 import Temporal.Exception
 import Temporal.Payload
 import Temporal.Workflow.Types
+import UnliftIO
 
 
 {- | A utility function for constructing an 'ActivityDefinition' from a function as well as
@@ -130,16 +134,74 @@ Activity Cancellations are delivered to Activities from the Cluster when they He
 
 Heartbeats can contain payloads describing the Activity's current progress. If an Activity gets retried, the Activity can access the details from the last Heartbeat that was sent to the Cluster.
 -}
-heartbeat :: [Payload] -> Activity env ()
-heartbeat baseDetails = do
+rawHeartbeat :: V.Vector Payload -> Activity env ()
+rawHeartbeat baseDetails = do
   (TaskToken token) <- taskToken <$> askActivityInfo
   worker <- askActivityWorker
+  info <- askActivityInfo
   let details =
         defMessage
           & Proto.taskToken .~ token
-          & Proto.details .~ fmap convertToProtoPayload baseDetails
+          & Proto.vec'details .~ fmap convertToProtoPayload baseDetails
   -- TODO throw exception if this fails?
-  void $ liftIO $ recordActivityHeartbeat worker details
+  void $ liftIO do
+    writeIORef info.rawHeartbeatDetails baseDetails
+    recordActivityHeartbeat worker details
+
+
+getRawHeartbeat :: Activity env (V.Vector Payload)
+getRawHeartbeat = do
+  info <- askActivityInfo
+  liftIO $ readIORef info.rawHeartbeatDetails
+
+
+{- |
+This function is useful for writing activities that need to send and receive
+heartbeat details.
+
+This function provides a safer interface for ensuring that the heartbeat details
+are properly encoded and decoded using the given codec into the given type that
+you want to use.
+
+Example:
+
+@
+data CursorState = CursorState
+  { cursorOffset :: String
+  } deriving (Generic, Show, Eq)
+
+instance ToJSON CursorState
+instance FromJSON CursorState
+
+yourActivity :: Activity env ()
+yourActivity = withHeartbeat JSON $ \heartbeat readHeartbeat -> do
+  mCursor <- readHeartbeat
+  case mCursor of
+    Nothing -> do
+      -- do something with the cursor
+      heartbeat (CursorState "0")
+    Just cursor -> do
+      -- do something with the cursor, recovering from some previous activity failure
+      heartbeat cursor
+@
+-}
+withHeartbeat :: forall a b env codec. Codec codec a => codec -> ((a -> Activity env ()) -> Activity env (Maybe a) -> Activity env b) -> Activity env b
+withHeartbeat codec f = do
+  act <- askActivityInfo
+  let performHeartbeat x = do
+        res <- liftIO $ encode codec x
+        rawHeartbeat $ pure res
+
+      readHeartbeatValue = do
+        details <- liftIO $ readIORef act.rawHeartbeatDetails
+        case details V.!? 0 of
+          Nothing -> pure Nothing
+          Just payload -> do
+            res <- liftIO $ decode codec payload
+            case res of
+              Left err -> throwIO $ ValueError err
+              Right a -> pure $ Just a
+  f performHeartbeat readHeartbeatValue
 
 
 {- | It is very common for an Activity to do things that interact

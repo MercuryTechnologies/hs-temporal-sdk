@@ -145,7 +145,6 @@ data ExecuteActivityInput = ExecuteActivityInput
   , activityHeaders :: Map Text Payload
   , activityInfo :: ActivityInfo
   }
-  deriving stock (Show)
 
 
 -- | Controls at which point to report back when a child workflow is cancelled.

@@ -97,6 +97,7 @@ activityInfoFromProto tt msg = do
   w <- ask
   hdrs <- processorDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload (msg ^. AT.headerFields))
   heartbeats <- processorDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload (msg ^. AT.vec'heartbeatDetails))
+  heartbeatsRef <- newIORef heartbeats
   pure $
     ActivityInfo
       { workflowNamespace = Namespace $ msg ^. AT.workflowNamespace
@@ -106,7 +107,7 @@ activityInfoFromProto tt msg = do
       , activityId = ActivityId $ msg ^. AT.activityId
       , activityType = msg ^. AT.activityType
       , headerFields = hdrs
-      , heartbeatDetails = heartbeats
+      , rawHeartbeatDetails = heartbeatsRef
       , scheduledTime = msg ^. AT.scheduledTime . to timespecFromTimestamp
       , currentAttemptScheduledTime = msg ^. AT.currentAttemptScheduledTime . to timespecFromTimestamp
       , startedTime = msg ^. AT.startedTime . to timespecFromTimestamp
