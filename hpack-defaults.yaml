@@ -1,5 +1,13 @@
 verbatim: { cabal-version: 3.0 }
 
+version:      0.0.1.0
+author:       Ian Duncan
+maintainer:   temporal@mercury.com
+license-file: LICENSE
+license:      BSD-3-Clause
+language:     Haskell2010
+category:     Concurrency
+
 default-extensions:
   - BangPatterns
   - BlockArguments
