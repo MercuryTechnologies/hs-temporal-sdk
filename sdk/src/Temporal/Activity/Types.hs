@@ -1,5 +1,6 @@
 module Temporal.Activity.Types where
 
+import Data.IORef (IORef)
 import Data.Map (Map)
 import Data.Text (Text)
 import Data.Time.Clock.System (SystemTime)
@@ -22,8 +23,9 @@ data ActivityInfo = ActivityInfo
   , activityId :: ActivityId
   , activityType :: Text
   , headerFields :: Map Text Payload
-  , -- input
-    heartbeatDetails :: Vector Payload
+  , rawHeartbeatDetails :: IORef (Vector Payload)
+  -- ^ Generally, you should use 'getHeartbeatDetails' to get the heartbeat details,
+  -- as that provides a simpler interface.
   , scheduledTime :: SystemTime
   , currentAttemptScheduledTime :: SystemTime
   , startedTime :: SystemTime
@@ -37,4 +39,4 @@ data ActivityInfo = ActivityInfo
   , isLocal :: Bool
   , taskToken :: TaskToken
   }
-  deriving stock (Show, Eq)
+  deriving stock (Eq)

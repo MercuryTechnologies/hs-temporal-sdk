@@ -439,8 +439,8 @@ testImpls =
           $logDebug "waiting for activity"
           W.wait (h :: W.Task Int)
       , basicActivity = pure 1
-      , heartbeatWorks = do
-          heartbeat []
+      , heartbeatWorks = withHeartbeat JSON $ \heartbeat _readHeartbeat -> do
+          heartbeat ()
           liftIO $ threadDelay 1_000_000
           pure 1
       , runHeartbeat = do
@@ -640,8 +640,8 @@ needsClient = do
             `shouldReturn` 1
       specify "Immediate activity cancellation returns the expected result to workflows" $ \TestEnv {..} -> do
         let testActivity :: Activity () Int
-            testActivity = do
-              heartbeat []
+            testActivity = withHeartbeat JSON $ \heartbeat _readHeartbeat -> do
+              heartbeat ()
               pure 0
 
             testActivityAct :: ProvidedActivity () (Activity () Int)
@@ -674,9 +674,9 @@ needsClient = do
             `shouldReturn` 1
       specify "Activity cancellation on heartbeat returns the expected result to workflows" $ \TestEnv {..} -> do
         let testActivity :: Activity () Int
-            testActivity = do
+            testActivity = withHeartbeat JSON $ \heartbeat _readHeartbeat -> do
               liftIO $ threadDelay 2_000_000
-              heartbeat []
+              heartbeat ()
               pure 0
 
             testActivityAct :: ProvidedActivity () (Activity () Int)
