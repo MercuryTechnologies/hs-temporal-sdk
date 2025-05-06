@@ -22,6 +22,11 @@ buildGoModule (finalAttrs: {
     installShellCompletion --cmd tcld --zsh ${./zsh_autocomplete}
   '';
 
+
+  # NOTE: Test suite appears to require some form of (local) networking, which
+  # doesn't work with the Nix sandbox.
+  doCheck = false;
+
   meta = {
     description = "todo";
     homepage = "https://www.github.com/temporalio/tcld";
