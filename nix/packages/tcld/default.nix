@@ -1,4 +1,4 @@
-{ buildGoModule, fetchFromGitHub, lib, ... }:
+{ buildGoModule, fetchFromGitHub, lib, stdenvNoCC, installShellFiles, ... }:
 
 buildGoModule (finalAttrs: {
   pname = "tcld";
@@ -11,6 +11,16 @@ buildGoModule (finalAttrs: {
   };
   vendorHash = "sha256-GOko8nboj7eN4W84dqP3yLD6jK7GA0bANV0Tj+1GpgY=";
   ldFlags = ["-s" "-w"];
+
+  # TODO: PR upstream.
+  patches = [ ./compgen.patch ];
+
+  nativeBuildInputs = [ installShellFiles ];
+
+  postInstall = lib.optionalString (stdenvNoCC.buildPlatform.canExecute stdenvNoCC.hostPlatform) ''
+    installShellCompletion --cmd tcld --bash ${./bash_autocomplete}
+    installShellCompletion --cmd tcld --zsh ${./zsh_autocomplete}
+  '';
 
   meta = {
     description = "todo";
