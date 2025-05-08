@@ -159,6 +159,14 @@ newtype InstanceM (a :: Type) = InstanceM {unInstanceM :: ReaderT WorkflowRuntim
     )
 
 
+instance Semigroup a => Semigroup (InstanceM a) where
+  (<>) = liftA2 (<>)
+
+
+instance Monoid a => Monoid (InstanceM a) where
+  mempty = InstanceM $ pure mempty
+
+
 instance MonadLogger InstanceM where
   monadLoggerLog loc src lvl msg = do
     logger <- asks (workflowInstanceLogger . workflowRuntimeInstance)

@@ -9,8 +9,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
-{-# HLINT ignore "Use >=>" #-}
-
 {- |
 Module: Temporal.Client
 Description: Invoke and interact with Temporal Workflows.
@@ -138,7 +136,7 @@ import UnliftIO
 -- WorkflowClient stuff
 
 workflowClient
-  :: MonadIO m
+  :: (MonadIO m)
   => Core.Client
   -> WorkflowClientConfig
   -> m WorkflowClient
@@ -265,7 +263,7 @@ This function will block until the workflow completes, and will return the resul
 or throw a 'WorkflowExecutionClosed' exception if the workflow was closed without returning a result.
 -}
 waitWorkflowResult :: (Typeable a, MonadIO m) => WorkflowHandle a -> m a
-waitWorkflowResult h@(WorkflowHandle readResult _ c wf r) = do
+waitWorkflowResult (WorkflowHandle readResult _ c wf r _) = do
   mev <- runReaderT (waitResult wf r c.clientConfig.namespace) c
   case mev of
     Nothing -> error "Unexpected empty history"
@@ -330,7 +328,7 @@ signal
   -> (SignalArgs sig :->: m ())
 signal (WorkflowHandle _ _t c wf r _) (signalRef -> (KnownSignal sName sCodec)) opts = withArgs @(SignalArgs sig) @(m ()) sCodec $ \inputs -> liftIO $ do
   inputs' <- processorEncodePayloads c.clientConfig.payloadProcessor =<< liftIO (sequence inputs)
-  hdrs <- processorEncodePayloads c.clientConfig.payloadProcessor opts.headers
+  let hdrs = opts.headers
   result <-
     signalWorkflowExecution c.clientCore $
       defMessage
@@ -406,8 +404,8 @@ query h (queryRef -> KnownQuery qn codec) opts = withArgs @(QueryArgs query) @(m
           }
   eRes <- h.workflowHandleClient.clientConfig.interceptors.queryWorkflow baseInput $ \input -> do
     queryArgs <- processorEncodePayloads processor input.queryWorkflowArgs
-    headerPayloads <- processorEncodePayloads processor input.queryWorkflowHeaders
-    let msg :: QueryWorkflowRequest
+    let headerPayloads = input.queryWorkflowHeaders
+        msg :: QueryWorkflowRequest
         msg =
           defMessage
             & WF.namespace .~ rawNamespace h.workflowHandleClient.clientConfig.namespace
@@ -521,23 +519,21 @@ startFromPayloads k wfId opts payloads = do
     reqId <- UUID.nextRandom
     searchAttrs <- searchAttributesToProto opts'.searchAttributes
     payloads'' <- processorEncodePayloads c.clientConfig.payloadProcessor payloads'
-    hdrs <- processorEncodePayloads c.clientConfig.payloadProcessor opts'.headers
-    let tq = rawTaskQueue opts'.taskQueue
+    let hdrs = opts'.headers
+        tq = rawTaskQueue opts'.taskQueue
         req =
           defMessage
             & WF.namespace .~ rawNamespace c.clientConfig.namespace
             & WF.workflowId .~ rawWorkflowId wfId'
             & WF.workflowType
-              .~ ( defMessage & Common.name .~ rawWorkflowType wfName
-                 )
+              .~ (defMessage & Common.name .~ rawWorkflowType wfName)
             & WF.taskQueue
               .~ ( defMessage
                     & Common.name .~ tq
                     & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
                  )
             & WF.input
-              .~ ( defMessage & Common.vec'payloads .~ (convertToProtoPayload <$> payloads'')
-                 )
+              .~ (defMessage & Common.vec'payloads .~ (convertToProtoPayload <$> payloads''))
             & WF.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts'.timeouts.executionTimeout)
             & WF.maybe'workflowRunTimeout .~ (durationToProto <$> opts'.timeouts.runTimeout)
             & WF.maybe'workflowTaskTimeout .~ (durationToProto <$> opts'.timeouts.taskTimeout)
@@ -652,8 +648,7 @@ signalWithStart (workflowRef -> k@(KnownWorkflow codec _)) wfId opts (signalRef 
                 & RR.namespace .~ rawNamespace c.clientConfig.namespace
                 & RR.workflowId .~ rawWorkflowId opts'.signalWithStartWorkflowId
                 & RR.workflowType
-                  .~ ( defMessage & Common.name .~ rawWorkflowType opts'.signalWithStartWorkflowType
-                     )
+                  .~ (defMessage & Common.name .~ rawWorkflowType opts'.signalWithStartWorkflowType)
                 & WF.requestId .~ UUID.toText reqId
                 & RR.searchAttributes .~ (defMessage & Common.indexedFields .~ searchAttrs)
                 & RR.taskQueue
@@ -662,8 +657,7 @@ signalWithStart (workflowRef -> k@(KnownWorkflow codec _)) wfId opts (signalRef 
                         & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
                      )
                 & RR.input
-                  .~ ( defMessage & Common.vec'payloads .~ fmap convertToProtoPayload wfArgs'
-                     )
+                  .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload wfArgs')
                 & RR.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts'.signalWithStartOptions.timeouts.executionTimeout)
                 & RR.maybe'workflowRunTimeout .~ (durationToProto <$> opts'.signalWithStartOptions.timeouts.runTimeout)
                 & RR.maybe'workflowTaskTimeout .~ (durationToProto <$> opts'.signalWithStartOptions.timeouts.taskTimeout)

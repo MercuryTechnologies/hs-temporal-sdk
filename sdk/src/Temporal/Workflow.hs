@@ -353,7 +353,7 @@ The Event is added to the Workflow Execution's Event History.
 
 startActivityFromPayloads
   :: forall args result
-   . RequireCallStack
+   . (RequireCallStack)
   => KnownActivity args result
   -> StartActivityOptions
   -> Vector Payload
@@ -373,7 +373,7 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = Workfl
         (HashMap.insert s resultSlot)
 
     i <- readTVarIO inst.workflowInstanceInfo
-    hdrs <- processorEncodePayloads inst.payloadProcessor activityInput.options.headers
+    let hdrs = activityInput.options.headers
     args <- processorEncodePayloads inst.payloadProcessor activityInput.args
     let actId = maybe (Text.pack $ show actSeq) rawActivityId (activityInput.options.activityId)
         scheduleActivity =
@@ -567,7 +567,7 @@ startChildWorkflowFromPayloads (workflowRef -> k@(KnownWorkflow codec _)) opts p
   wfId <- case opts.workflowId of
     Nothing -> WorkflowId . UUID.toText <$> uuid4
     Just wfId -> pure wfId
-  ilift $ go ps wfId
+  Workflow $ go ps wfId
   where
     go :: Vector Payload -> WorkflowId -> InstanceM (ChildWorkflowHandle (WorkflowResult wf))
     go typedPayloads wfId = do
@@ -851,7 +851,7 @@ lookupMemoValue k = Map.lookup k <$> getMemoValues
 
 Using this function will overwrite any existing Search Attributes with the same key.
 -}
-upsertSearchAttributes :: RequireCallStack => Map SearchAttributeKey SearchAttributeType -> Workflow ()
+upsertSearchAttributes :: (RequireCallStack) => Map SearchAttributeKey SearchAttributeType -> Workflow ()
 upsertSearchAttributes values = Workflow do
   updateCallStack
   attrs <- liftIO $ searchAttributesToProto values
@@ -916,12 +916,12 @@ You may need to patch if:
 
 
 applyPatch
-  :: RequireCallStack
+  :: (RequireCallStack)
   => PatchId
   -> Bool
   -- ^ whether the patch is deprecated
   -> Workflow Bool
-applyPatch pid deprecated = ilift $ do
+applyPatch pid deprecated = Workflow do
   updateCallStack
   inst <- asks workflowRuntimeInstance
   join $ atomically do
@@ -955,7 +955,7 @@ If the workflow is not currently replaying, then this call always returns true.
 Your workflow code should run the "new" code if this returns true, if it returns false,
 you should run the "old" code. By doing this, you can maintain determinism.
 -}
-patched :: RequireCallStack => PatchId -> Workflow Bool
+patched :: (RequireCallStack) => PatchId -> Workflow Bool
 patched pid = do
   updateCallStackW
   applyPatch pid False
@@ -972,7 +972,7 @@ If either kind of worker encounters a history produced by the other, their behav
 Once all live workflow runs have been produced by workers with this call, you can deploy workers which are free of either kind of
 patch call for this ID. Workers with and without this call may coexist, as long as they are both running the "new" code.
 -}
-deprecatePatch :: RequireCallStack => PatchId -> Workflow ()
+deprecatePatch :: (RequireCallStack) => PatchId -> Workflow ()
 deprecatePatch pid = do
   updateCallStackW
   void $ applyPatch pid True
@@ -1029,7 +1029,7 @@ uuid4 = do
 {- | Generates a UUIDv7 using the current time (from 'time') and
 random data (from 'workflowRandomnessSeed').
 -}
-uuid7 :: RequireCallStack => Workflow UUID
+uuid7 :: (RequireCallStack) => Workflow UUID
 uuid7 = do
   t <- time
   wft <- workflowRandomnessSeed <$> askInstance
@@ -1234,8 +1234,8 @@ setSignalHandler (signalRef -> KnownSignal n codec) f = Workflow do
 
 The value is relative to epoch time.
 -}
-time :: RequireCallStack => Workflow SystemTime
-time = ilift $ do
+time :: (RequireCallStack) => Workflow SystemTime
+time = Workflow do
   updateCallStack
   wft <- asks (workflowTime . workflowRuntimeInstance)
   readTVarIO wft
@@ -1261,7 +1261,7 @@ by any operation, such as 'sleep', 'awaitCondition', 'awaitActivity', 'awaitWork
 If the duration is less than or equal to zero, the timer will not be created.
 -}
 createTimer :: Duration -> Workflow (Maybe Timer)
-createTimer ts = provideCallStack $ ilift $ do
+createTimer ts = provideCallStack $ Workflow do
   runtime <- ask
   s@(Sequence seqId) <- nextTimerSequence
   if ts <= mempty
@@ -1297,7 +1297,7 @@ block the workflow thread in a busy-wait.
 
 If the duration is less than or equal to zero, the function will return immediately.
 -}
-sleep :: RequireCallStack => Duration -> Workflow ()
+sleep :: (RequireCallStack) => Duration -> Workflow ()
 sleep ts = do
   updateCallStackW
   t <- createTimer ts
@@ -1310,7 +1310,7 @@ If the target time is in the past, the function will return immediately.
 
 See 'sleep' for details about timer behavior and workflow suspension.
 -}
-sleepUntilSystemTime :: RequireCallStack => SystemTime -> Workflow ()
+sleepUntilSystemTime :: (RequireCallStack) => SystemTime -> Workflow ()
 sleepUntilSystemTime t = do
   updateCallStackW
   currentTime <- time
@@ -1324,13 +1324,13 @@ If the target time is in the past, the function will return immediately.
 
 See 'sleep' for details about timer behavior and workflow suspension.
 -}
-sleepUntilUTCTime :: RequireCallStack => UTCTime -> Workflow ()
+sleepUntilUTCTime :: (RequireCallStack) => UTCTime -> Workflow ()
 sleepUntilUTCTime = sleepUntilSystemTime . utcToSystemTime
 
 
 instance Wait Timer where
   type WaitResult Timer = Workflow ()
-  wait :: RequireCallStack => Timer -> WaitResult Timer
+  wait :: (RequireCallStack) => Timer -> WaitResult Timer
   wait t = Workflow do
     updateCallStack
     waitIVar $ timerHandle t
@@ -1378,7 +1378,7 @@ TODO, don't make this an exception, make it a return value
 -}
 continueAsNew
   :: forall wf
-   . WorkflowRef wf
+   . (WorkflowRef wf)
   => wf
   -- ^ The workflow to continue as new. It doesn't have to be the same as the current workflow.
   -> ContinueAsNewOptions
@@ -1396,7 +1396,7 @@ continueAsNew (workflowRef -> k@(KnownWorkflow codec _)) opts = withWorkflowArgs
 
 
 -- | Returns a client-side handle that can be used to signal and cancel an existing Workflow execution. It takes a Workflow ID and optional run ID.
-getExternalWorkflowHandle :: RequireCallStack => WorkflowId -> Maybe RunId -> Workflow (ExternalWorkflowHandle result)
+getExternalWorkflowHandle :: (RequireCallStack) => WorkflowId -> Maybe RunId -> Workflow (ExternalWorkflowHandle result)
 getExternalWorkflowHandle wfId mrId = do
   updateCallStackW
   pure $
@@ -1419,7 +1419,7 @@ so you should be careful about ensuring that incomplete
 computations are not problematic for your problem domain.
 -}
 race
-  :: RequireCallStack
+  :: (RequireCallStack)
   => Workflow a
   -> Workflow b
   -> Workflow (Either a b)
@@ -1436,7 +1436,9 @@ race l r = Workflow $ UnliftIO.mask $ \restore -> do
   -- By ensuring that we unblock this thread in the `finally` block in the
   -- same transaction as deregistering the asyncWorkflow threads, we can ensure
   -- a consistent view of the world.
-  atomically $ markBlockedState runtime True
+  atomically do
+    waitThreadsRegistered runtime [asyncThreadId lh, asyncThreadId rh]
+    markBlockedState runtime True
   restore (waitEither lh rh) `UnliftIO.finally` atomically do
     markBlockedState runtime False
     deregisterThread runtime $ asyncThreadId lh
@@ -1449,7 +1451,7 @@ Unlike 'Control.Concurrent.Async.race, this function doesn't explicitly cancel
 the other computation. If you want to cancel the other computation,
 you should return sufficient context to do so manually
 -}
-race_ :: RequireCallStack => Workflow a -> Workflow b -> Workflow ()
+race_ :: (RequireCallStack) => Workflow a -> Workflow b -> Workflow ()
 race_ l r = void $ Temporal.Workflow.race l r
 
 
@@ -1471,12 +1473,12 @@ returning the original data structure with the arguments replaced with the resul
 This is actually a bit of a misnomer, since it's really 'traverseConcurrently', but this is copied to mimic the 'async' package's naming
 to slightly ease adoption.
 -}
-mapConcurrently :: Traversable t => (a -> Workflow b) -> t a -> Workflow (t b)
+mapConcurrently :: (Traversable t) => (a -> Workflow b) -> t a -> Workflow (t b)
 mapConcurrently = traverseConcurrently
 
 
 -- | Alias for 'traverseConcurrently_'
-mapConcurrently_ :: Foldable t => (a -> Workflow b) -> t a -> Workflow ()
+mapConcurrently_ :: (Foldable t) => (a -> Workflow b) -> t a -> Workflow ()
 mapConcurrently_ = traverseConcurrently_
 
 
@@ -1491,31 +1493,31 @@ replicateConcurrently_ n = runConcurrentWorkflowActions . fold . replicate n . C
 
 
 -- | Evaluate the action in the given number of evaluation branches, accumulating the results
-traverseConcurrently :: Traversable t => (a -> Workflow b) -> t a -> Workflow (t b)
+traverseConcurrently :: (Traversable t) => (a -> Workflow b) -> t a -> Workflow (t b)
 traverseConcurrently f xs = runConcurrentWorkflowActions $ traverse (ConcurrentWorkflow . f) xs
 
 
-traverseConcurrently_ :: Foldable t => (a -> Workflow b) -> t a -> Workflow ()
+traverseConcurrently_ :: (Foldable t) => (a -> Workflow b) -> t a -> Workflow ()
 traverseConcurrently_ f xs = runConcurrentWorkflowActions $ traverse_ (ConcurrentWorkflow . f) xs
 
 
 -- | Evaluate each Workflow action in the structure concurrently, and collect the results.
-sequenceConcurrently :: Traversable t => t (Workflow a) -> Workflow (t a)
+sequenceConcurrently :: (Traversable t) => t (Workflow a) -> Workflow (t a)
 sequenceConcurrently = runConcurrentWorkflowActions . traverse ConcurrentWorkflow
 
 
 -- | Evaluate each Workflow action in the structure concurrently, and ignore the results.
-sequenceConcurrently_ :: Foldable t => t (Workflow a) -> Workflow ()
+sequenceConcurrently_ :: (Foldable t) => t (Workflow a) -> Workflow ()
 sequenceConcurrently_ = runConcurrentWorkflowActions . traverse_ ConcurrentWorkflow
 
 
 -- | 'traverseConcurrently' with the arguments flipped.
-forConcurrently :: Traversable t => t a -> (a -> Workflow b) -> Workflow (t b)
+forConcurrently :: (Traversable t) => t a -> (a -> Workflow b) -> Workflow (t b)
 forConcurrently = flip traverseConcurrently
 
 
 -- | 'traverseConcurrently_' with the arguments flipped.
-forConcurrently_ :: Foldable t => t a -> (a -> Workflow b) -> Workflow ()
+forConcurrently_ :: (Foldable t) => t a -> (a -> Workflow b) -> Workflow ()
 forConcurrently_ = flip traverseConcurrently_
 
 
@@ -1544,7 +1546,7 @@ In order to opt in to cancellation handling, you can call 'isCancelRequested'
 periodically within your workflow code to check whether a cancellation request
 has been received.
 -}
-isCancelRequested :: RequireCallStack => Workflow Bool
+isCancelRequested :: (RequireCallStack) => Workflow Bool
 isCancelRequested = Workflow do
   updateCallStack
   runtime <- ask
@@ -1562,7 +1564,7 @@ and/or respond to queries, but otherwise need to remain idle on their main codep
 
 N.B. It is likely not safe to call this in a signal handler.
 -}
-waitCancellation :: RequireCallStack => Workflow ()
+waitCancellation :: (RequireCallStack) => Workflow ()
 waitCancellation = Workflow do
   updateCallStack
   runtime <- ask

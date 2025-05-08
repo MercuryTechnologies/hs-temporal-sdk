@@ -12,6 +12,7 @@ import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Dynamic
+import Data.Either (isRight)
 import Data.Foldable
 import qualified Data.HashMap.Strict as HashMap
 import Data.HashSet (HashSet)
@@ -24,6 +25,7 @@ import qualified Data.Set as Set
 import qualified Data.Text as Text
 import Data.Traversable
 import Data.Vector (Vector)
+import Data.Word
 import GHC.Conc (unsafeIOToSTM)
 import GHC.Exts (Any)
 import GHC.Stack
@@ -64,10 +66,6 @@ import Temporal.Workflow.Types
 import UnliftIO
 import UnliftIO.Concurrent
 import Unsafe.Coerce (unsafeCoerce)
-
-
-ilift :: InstanceM a -> Workflow a
-ilift = Workflow
 
 
 {- | The Workflow monad is a constrained execution environment that helps
@@ -213,7 +211,6 @@ waitCondition m@(Condition c) = Workflow do
     pure (result, thread)
   untilM_ $ atomically do
     isBlocked <- readTVar thread.workflowThreadBlocked
-    -- Suspend until a StateVar is updated if we're blocked.
     when isBlocked retry
     conditionSatisfied <- c
     writeTVar thread.workflowThreadBlocked (not conditionSatisfied)
@@ -297,16 +294,19 @@ asyncWorkflow (Workflow m) = do
   wf <- ask
   -- TODO support propagating trace context, etc via interceptor config options
   let threadWrapper _restore = id
-  asyncWithUnmask $ \restore' -> do
+  h <- asyncWithUnmask $ \restore' -> do
     threadWrapper restore' do
       tid <- myThreadId
       atomically $ registerThread wf tid
       restore' m
+  atomically $ waitThreadsRegistered wf [asyncThreadId h]
+  pure h
 
 
 waitAsyncWorkflow :: Async a -> Workflow a
 waitAsyncWorkflow a = Workflow do
   runtime <- ask
+  tid <- myThreadId
   let waitForResultAndRethrow = do
         markBlockedState runtime False
         deregisterThread runtime (asyncThreadId a)
@@ -326,11 +326,15 @@ waitAsyncWorkflow a = Workflow do
 parallelAp :: Workflow (a -> b) -> Workflow a -> Workflow b
 parallelAp ff aa = Workflow $ UnliftIO.mask $ \restore -> do
   runtime <- ask
+  tid <- myThreadId
   fh <- asyncWorkflow ff
   ah <- asyncWorkflow aa
-  atomically $ markBlockedState runtime True
+  atomically do
+    markBlockedState runtime True
+    waitThreadsRegistered runtime [asyncThreadId fh, asyncThreadId ah]
   (f, a) <-
     restore (waitBoth fh ah) `finally` atomically do
+      tid' <- unsafeIOToSTM myThreadId
       markBlockedState runtime False
       deregisterThread runtime $ asyncThreadId fh
       deregisterThread runtime $ asyncThreadId ah
@@ -394,6 +398,48 @@ addStackTraceHandler runtime = do
   atomically $ modifyTVar' runtime.queries.queryHandlers (HashMap.insert (Just "__stack_trace") specialHandler)
 
 
+newtype ApplyM a = ApplyM
+  { unApplyM :: ReaderT (WorkflowRuntime, Async (WorkflowExitVariant Payload), TVar (InstanceM ())) STM a
+  -- ^ Main worker thread, actions to apply on once out of the STM block
+  }
+  deriving newtype (Functor, Applicative, Monad)
+
+
+instance MonadIVar ApplyM where
+  putIVar i = ApplyM . lift . putIVar i
+  tryReadIVar = ApplyM . lift . tryReadIVar
+
+
+runApplyM :: WorkflowRuntime -> Async (WorkflowExitVariant Payload) -> ApplyM a -> STM (a, IO ())
+runApplyM runtime mainThread (ApplyM m) = do
+  actionVar <- newTVar mempty
+  x <- runReaderT m (runtime, mainThread, actionVar)
+  m <- readTVar actionVar
+  pure (x, runInstanceM runtime m)
+
+
+applyIO :: InstanceM () -> ApplyM ()
+applyIO action = ApplyM $ do
+  (_, _, actionVar) <- ask
+  lift $ modifyTVar' actionVar (>> action)
+
+
+applySTM :: STM a -> ApplyM a
+applySTM = ApplyM . lift
+
+
+askRuntime :: ApplyM WorkflowRuntime
+askRuntime = ApplyM $ do
+  (runtime, _, _) <- ask
+  pure runtime
+
+
+askMainThread :: ApplyM (Async (WorkflowExitVariant Payload))
+askMainThread = ApplyM $ do
+  (_, mainThread, _) <- ask
+  pure mainThread
+
+
 runWorkflow :: (MonadIO m, HasCallStack) => WorkflowInstance -> Workflow Payload -> m RunningWorkflow
 runWorkflow inst m = liftIO do
   runtime <- atomically $ initializeRuntime inst
@@ -421,6 +467,15 @@ runWorkflow inst m = liftIO do
                         pure $ WorkflowExitFailed e
                     ]
 
+      shutdownThreads myTid = do
+        -- Theoretically, you could have threads created after taking all of these,
+        -- but that shouldn't happen in practice.
+        ts <- atomically do
+          deregisterThread runtime myTid
+          readTVar $ threadManager $ getThreadManager runtime
+        -- TODO, report abandoned signals and updates to user
+        mapM_ cancelWorkflowThreadNoWait $ HashMap.keys ts
+
       eval :: InstanceM (WorkflowExitVariant Payload)
       eval = mask $ \restore -> do
         tid <- myThreadId
@@ -437,6 +492,46 @@ runWorkflow inst m = liftIO do
         $(logDebug) $ "Thread " <> tidText <> ": exiting"
         pure result
 
+      applyActivations mainThreadId = do
+        activation <- readTQueue runtime.workflowRuntimeInstance.activationChannel
+        activate runtime activation mainThreadId
+
+      applyQueuedSignals :: Async (WorkflowExitVariant Payload) -> STM (Int, IO ())
+      applyQueuedSignals mainThread = do
+        signalHandlers <- readTVar runtime.signals.signalHandlers
+        handleableSignals <- stateTVar runtime.signals.bufferedSignals $ \signals ->
+          span (\signal -> (Just (signal ^. Activation.signalName) `HashMap.member` signalHandlers) || (Nothing `HashMap.member` signalHandlers)) signals
+        let signalCount = length handleableSignals
+        if signalCount > 0
+          then runApplyM runtime mainThread do
+            applySTM $ modifyTVar' runtime.workflowRuntimeUnappliedJobs (+ length handleableSignals)
+            mapM_ handleSignalWorkflow handleableSignals
+            pure signalCount
+          else pure (signalCount, pure ())
+
+      applyQueuedQueries :: Async (WorkflowExitVariant Payload) -> STM (Int, IO ())
+      applyQueuedQueries mainThread = do
+        queryHandlers <- readTVar runtime.queries.queryHandlers
+        queriesToProcess <- stateTVar runtime.queries.bufferedQueries $ \queries -> (queries, [])
+        let (goodQueries, badQueries) =
+              span
+                ( \query ->
+                    (Just (query ^. Activation.queryType) `HashMap.member` queryHandlers) || (Nothing `HashMap.member` queryHandlers)
+                )
+                queriesToProcess
+        -- TODO, do we need to count unapplied jobs here. I think so.
+        modifyTVar' runtime.workflowRuntimeUnappliedJobs (+ length goodQueries)
+        res@(_, actions) <- runApplyM runtime mainThread $ mapM handleQueryWorkflow goodQueries
+        for_ badQueries $ \query -> do
+          CommandQueue.addCommand runtime $
+            defMessage
+              & Command.respondToQuery
+                .~ ( defMessage
+                      & Command.queryId .~ query ^. Activation.queryId
+                      & Command.failed .~ (defMessage & Failure.message .~ "Query not found")
+                   )
+        pure (length goodQueries, actions)
+
       -- If the workflow is blocked, then we necessarily have to signal the temporal-core
       -- that we are stuck. Once we get unstuck (e.g. something is in the activation channel)
       -- then we can resume the workflow.
@@ -447,14 +542,15 @@ runWorkflow inst m = liftIO do
       --
       -- Once we're blocked in that way, then we should flush the commands and wait for
       -- the next activation(s?).
+      schedule :: Async (WorkflowExitVariant Payload) -> IO ()
       schedule mainThread = do
-        tid <- myThreadId
         let mainThreadId = asyncThreadId mainThread
         -- We need something to be started in order to ensure that we don't immediately
         -- hit 'waitAllThreadsBlocked' is True.
         --
         -- It's also ideal to wait for the main thread to be blocked, because then it's
         -- had a chance to register its signal handlers, etc.
+        tid <- myThreadId
         atomically do
           threads <- readTVar (getThreadManager runtime).threadManager
           mainThreadOutcome <- pollSTM mainThread
@@ -466,6 +562,7 @@ runWorkflow inst m = liftIO do
               Nothing -> do
                 retry -- Waiting for the main thread to get added to the thread manager.
             Just _ -> do
+              tid' <- unsafeIOToSTM myThreadId
               pure ()
 
         -- It's important that 'activate' fully consumes the activation from the channel
@@ -480,79 +577,34 @@ runWorkflow inst m = liftIO do
           -- We use activations and flushes are 1:1, and we want to
           -- ensure that we flush in the face of errors before failing out.
           ( do
-              join $ atomically $ applyActivations tid
+              tid' <- myThreadId
+              join $ atomically $ applyActivations mainThread
               atomically do
-                waitAllJobsHandled
+                waitAllJobsHandled runtime
                 waitAllThreadsBlocked runtime
               untilM_ do
-                (handleCount, m) <- atomically $ applyQueuedSignals tid
+                (handleCount, m) <- atomically $ applyQueuedSignals mainThread
                 m
                 atomically do
-                  waitAllJobsHandled
+                  waitAllJobsHandled runtime
                   waitAllThreadsBlocked runtime
                 pure (handleCount == 0)
               -- By the time we've applied all the signals that we can,
               -- all of the queries we can possibly handle must have been
               -- defined.
-              join $ atomically $ applyQueuedQueries tid
+              snd =<< atomically (applyQueuedQueries mainThread)
               atomically do
-                waitAllJobsHandled
+                waitAllJobsHandled runtime
                 waitAllThreadsBlocked runtime
             )
             `finally` do
+              tid' <- myThreadId
               flushCommands runtime
 
-      applyActivations tid = do
-        activation <- readTQueue runtime.workflowRuntimeInstance.activationChannel
-        activate runtime activation tid
-
-      applyQueuedSignals :: ThreadId -> STM (Int, IO ())
-      applyQueuedSignals tid = do
-        signalHandlers <- readTVar runtime.signals.signalHandlers
-        handleableSignals <- stateTVar runtime.signals.bufferedSignals $ \signals ->
-          span (\signal -> (Just (signal ^. Activation.signalName) `HashMap.member` signalHandlers) || (Nothing `HashMap.member` signalHandlers)) signals
-        let signalCount = length handleableSignals
-        if signalCount > 0
-          then do
-            modifyTVar' runtime.workflowRuntimeUnappliedJobs (+ length handleableSignals)
-            actions <- mapM (handleSignalWorkflow runtime) handleableSignals
-            pure (signalCount, sequence_ actions)
-          else pure (signalCount, pure ())
-
-      applyQueuedQueries tid = do
-        queryHandlers <- readTVar runtime.queries.queryHandlers
-        queriesToProcess <- stateTVar runtime.queries.bufferedQueries $ \queries -> (queries, [])
-        let (goodQueries, badQueries) =
-              span
-                ( \query ->
-                    (Just (query ^. Activation.queryType) `HashMap.member` queryHandlers) || (Nothing `HashMap.member` queryHandlers)
-                )
-                queriesToProcess
-        -- TODO, do we need to count unapplied jobs here. I think so.
-        modifyTVar' runtime.workflowRuntimeUnappliedJobs (+ length goodQueries)
-        actions <- mapM (handleQueryWorkflow runtime) goodQueries
-        for_ badQueries $ \query -> do
-          CommandQueue.addCommand runtime $
-            defMessage
-              & Command.respondToQuery
-                .~ ( defMessage
-                      & Command.queryId .~ query ^. Activation.queryId
-                      & Command.failed .~ (defMessage & Failure.message .~ "Query not found")
-                   )
-        pure $ sequence_ actions
-
-      waitAllJobsHandled = do
+      waitAllJobsHandled runtime = do
         unappliedJobs <- readTVar runtime.workflowRuntimeUnappliedJobs
+        tid <- unsafeIOToSTM myThreadId
         guard (unappliedJobs == 0)
-
-      shutdownThreads myTid = do
-        -- Theoretically, you could have threads created after taking all of these,
-        -- but that shouldn't happen in practice.
-        ts <- atomically do
-          deregisterThread runtime myTid
-          readTVar $ threadManager $ getThreadManager runtime
-        -- TODO, report abandoned signals and updates to user
-        mapM_ cancelWorkflowThreadNoWait $ HashMap.keys ts
 
     e <- async eval
     s <- async (liftIO (schedule e) `finally` $(logDebug) "Schedule thread exiting")
@@ -563,6 +615,7 @@ runWorkflow inst m = liftIO do
 
 flushCommands :: (HasCallStack, MonadIO m) => WorkflowRuntime -> m ()
 flushCommands runtime = do
+  tid <- liftIO myThreadId
   (info, cmds) <- atomically do
     info <- readTVar runtime.workflowRuntimeInstance.workflowInstanceInfo
     cmds <- CommandQueue.getCommands runtime.workflowRuntimeCommandQueue
@@ -582,9 +635,10 @@ flushCommands runtime = do
       pure ()
 
 
-activate :: WorkflowRuntime -> WorkflowActivation -> ThreadId -> STM (IO ())
-activate runtime act tid = do
+activate :: WorkflowRuntime -> WorkflowActivation -> Async (WorkflowExitVariant Payload) -> STM (IO ())
+activate runtime act mainThread = do
   let inst = runtime.workflowRuntimeInstance
+  tid <- unsafeIOToSTM myThreadId
   info <- do
     info <- readTVar inst.workflowInstanceInfo
     let info' =
@@ -601,22 +655,20 @@ activate runtime act tid = do
   pure do
     let apply = try do
           runReaderT
-            (unInstanceM $ unWorkflow $ applyJobs (act ^. Activation.vec'jobs))
+            (unInstanceM $ applyJobs mainThread (act ^. Activation.vec'jobs))
             runtime
     eResult <- case inst.workflowDeadlockTimeout of
       Nothing -> do
         apply
       Just timeoutDuration -> do
         res <- UnliftIO.timeout timeoutDuration apply
-        case res of
-          Nothing -> do
-            pure $ Left $ toException $ LogicBug WorkflowActivationDeadlock
-          Just res' -> do
-            pure res'
+        pure $ case res of
+          Nothing ->
+            Left $ toException $ LogicBug WorkflowActivationDeadlock
+          Just res' ->
+            res'
     case eResult of
       Left err -> do
-        -- TODO, failures should have source / stack trace info
-        -- TODO, convert failure type using a supplied payload converter
         let failure =
               defMessage
                 & Completion.failure .~ (defMessage & Failure.message .~ Text.pack (show err))
@@ -636,80 +688,89 @@ markJobHandled runtime = do
   writeTVar runtime.workflowRuntimeUnappliedJobs (jobCount - 1)
 
 
-applyJobs :: Vector WorkflowActivationJob -> Workflow ()
-applyJobs jobs = Workflow $ do
+applyJobHandled :: ApplyM ()
+applyJobHandled = do
+  runtime <- askRuntime
+  applySTM $ markJobHandled runtime
+
+
+applyJobs :: Async (WorkflowExitVariant Payload) -> Vector WorkflowActivationJob -> InstanceM ()
+applyJobs mainThread jobs = do
   runtime <- ask
+  tid <- myThreadId
   let jobCount = Data.Foldable.length jobs
   -- We want the atomicity here because we want to ensure that all the Workflow threads get the ability to
   -- unblock at the same time.
-  jobActions <- atomically $ do
-    writeTVar runtime.workflowRuntimeUnappliedJobs jobCount
+  (_, jobActions) <- atomically $ runApplyM runtime mainThread $ do
+    applySTM $ writeTVar runtime.workflowRuntimeUnappliedJobs jobCount
     for jobs $ \job -> do
       case fromMaybe (error "applyJobs: Job has no variant") (job ^. Activation.maybe'variant) of
         WorkflowActivationJob'NotifyHasPatch n -> do
-          handleNotifyHasPatch runtime n
+          handleNotifyHasPatch n
         WorkflowActivationJob'SignalWorkflow sig -> do
-          handleSignalWorkflow runtime sig
+          handleSignalWorkflow sig
         WorkflowActivationJob'QueryWorkflow q -> do
-          handleQueryWorkflow runtime q
+          handleQueryWorkflow q
         WorkflowActivationJob'FireTimer r -> do
-          handleFireTimer runtime r
+          handleFireTimer r
         WorkflowActivationJob'ResolveActivity r -> do
-          handleResolveActivity runtime r
+          handleResolveActivity r
         WorkflowActivationJob'ResolveChildWorkflowExecutionStart r -> do
-          handleResolveChildWorkflowExecutionStart runtime r
+          handleResolveChildWorkflowExecutionStart r
         WorkflowActivationJob'ResolveChildWorkflowExecution r -> do
-          handleResolveChildWorkflowExecution runtime r
+          handleResolveChildWorkflowExecution r
         WorkflowActivationJob'ResolveSignalExternalWorkflow r -> do
-          handleResolveSignalExternalWorkflow runtime r
+          handleResolveSignalExternalWorkflow r
         WorkflowActivationJob'ResolveRequestCancelExternalWorkflow r -> do
-          handleResolveRequestCancelExternalWorkflow runtime r
+          handleResolveRequestCancelExternalWorkflow r
         WorkflowActivationJob'UpdateRandomSeed updateRandomSeed -> do
-          handleUpdateRandomSeed runtime updateRandomSeed
+          handleUpdateRandomSeed updateRandomSeed
         WorkflowActivationJob'CancelWorkflow cancelWorkflow -> do
-          handleCancelWorkflow runtime cancelWorkflow
+          handleCancelWorkflow cancelWorkflow
         WorkflowActivationJob'InitializeWorkflow startWorkflow -> do
-          handleStartWorkflow runtime startWorkflow
+          handleStartWorkflow startWorkflow
         WorkflowActivationJob'RemoveFromCache removeFromCache -> do
-          handleRemoveFromCache runtime removeFromCache
+          handleRemoveFromCache removeFromCache
         WorkflowActivationJob'DoUpdate doUpdate -> do
-          handleDoUpdate runtime doUpdate
+          handleDoUpdate doUpdate
         WorkflowActivationJob'ResolveNexusOperationStart _ -> do
-          markJobHandled runtime >> pure (pure ())
+          applyJobHandled
         WorkflowActivationJob'ResolveNexusOperation _ -> do
-          markJobHandled runtime >> pure (pure ())
+          applyJobHandled
 
-  liftIO $ sequence_ jobActions
+  liftIO jobActions
 
 
-handleNotifyHasPatch :: WorkflowRuntime -> NotifyHasPatch -> STM (IO ())
-handleNotifyHasPatch runtime n = do
-  markJobHandled runtime
+handleNotifyHasPatch :: NotifyHasPatch -> ApplyM ()
+handleNotifyHasPatch n = do
+  runtime <- askRuntime
+  applySTM do
+    markJobHandled runtime
+    let inst = runtime.workflowRuntimeInstance
+    modifyTVar' inst.workflowNotifiedPatches $ \patchSet ->
+      Set.insert (n ^. Activation.patchId . to PatchId) patchSet
+
+
+handleSignalWorkflow :: SignalWorkflow -> ApplyM ()
+handleSignalWorkflow sig = do
+  runtime <- askRuntime
   let inst = runtime.workflowRuntimeInstance
-  modifyTVar' inst.workflowNotifiedPatches $ \patchSet ->
-    Set.insert (n ^. Activation.patchId . to PatchId) patchSet
-  pure $ pure ()
-
-
-handleSignalWorkflow :: WorkflowRuntime -> SignalWorkflow -> STM (IO ())
-handleSignalWorkflow runtime sig = do
-  let inst = runtime.workflowRuntimeInstance
-  handlers <- readTVar runtime.signals.signalHandlers
+  handlers <- applySTM $ readTVar runtime.signals.signalHandlers
   let handlerOrDefault =
         HashMap.lookup (Just (sig ^. Activation.signalName)) handlers
           <|> HashMap.lookup Nothing handlers
   case handlerOrDefault of
-    Nothing -> do
+    Nothing -> applySTM do
       -- TODO, if there's a huge amount of signals, this is algorithmically inefficient.
       modifyTVar' runtime.signals.bufferedSignals (++ [sig])
       markJobHandled runtime
-      pure $ pure ()
-    Just handler -> pure do
-      -- signals can block (via sleep, or waiting on a condition), so we run them
-      -- in a separate thread.
-      --
-      -- TODO use link(2) to connect the thrown exception to the main workflow thread?
-      void $ runInstanceM runtime $ do
+    Just handler -> do
+      mainThread <- askMainThread
+      applyIO $ mask_ do
+        -- signals can block (via sleep, or waiting on a condition), so we run them
+        -- in a separate thread.
+        --
+        -- TODO use link(2) to connect the thrown exception to the main workflow thread?
         h <- asyncWithUnmask $ \restore -> do
           tid <- myThreadId
           args <-
@@ -721,21 +782,19 @@ handleSignalWorkflow runtime sig = do
             registerThread runtime tid
           restore (handler args) `finally` atomically do
             deregisterThread runtime tid
+        link2 mainThread h
 
-        pure ()
 
-
--- link2 h
-
-handleQueryWorkflow :: WorkflowRuntime -> QueryWorkflow -> STM (IO ())
-handleQueryWorkflow runtime q = do
+handleQueryWorkflow :: QueryWorkflow -> ApplyM ()
+handleQueryWorkflow q = do
+  runtime <- askRuntime
   let inst = runtime.workflowRuntimeInstance
-  handlers <- readTVar runtime.queries.queryHandlers
+  handlers <- applySTM $ readTVar runtime.queries.queryHandlers
   let handlerOrDefault =
         HashMap.lookup (Just (q ^. Activation.queryType)) handlers
           <|> HashMap.lookup Nothing handlers
   case handlerOrDefault of
-    Nothing -> do
+    Nothing -> applySTM do
       -- If there's a huge amount of queries, this is algorithmically inefficient.
       --
       -- This is not likely to be an issue in practice, because queries are unlikely to show
@@ -743,8 +802,7 @@ handleQueryWorkflow runtime q = do
       -- Workflow implementations
       modifyTVar' runtime.queries.bufferedQueries (++ [q])
       markJobHandled runtime
-      pure $ pure ()
-    Just handler -> pure do
+    Just handler -> applyIO do
       args <- processorDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (q ^. Command.vec'arguments))
       let baseInput =
             HandleQueryInput
@@ -753,7 +811,7 @@ handleQueryWorkflow runtime q = do
               , handleQueryInputArgs = args
               , handleQueryInputHeaders = fmap convertFromProtoPayload (q ^. Activation.headers)
               }
-      res <- inst.inboundInterceptor.handleQuery baseInput $ \input -> do
+      res <- liftIO $ inst.inboundInterceptor.handleQuery baseInput $ \input -> do
         handler (QueryId input.handleQueryId) input.handleQueryInputArgs input.handleQueryInputHeaders
       cmd <- case res of
         Left err -> do
@@ -767,138 +825,138 @@ handleQueryWorkflow runtime q = do
         CommandQueue.addCommand runtime $ defMessage & Command.respondToQuery .~ cmd
 
 
-handleFireTimer :: WorkflowRuntime -> FireTimer -> STM (IO ())
-handleFireTimer runtime msg = do
-  markJobHandled runtime
-  let t = msg ^. Activation.seq . to Sequence
-  mvar <- resolveSequence runtime.workflowRuntimeSequenceMaps.timers t
-  case mvar of
-    Nothing -> Catch.throwM $ RuntimeError "Timer not found"
-    Just ivar' -> do
-      putIVar ivar' ()
-      pure $ pure ()
+handleFireTimer :: FireTimer -> ApplyM ()
+handleFireTimer msg = do
+  runtime <- askRuntime
+  applySTM do
+    markJobHandled runtime
+    let t = msg ^. Activation.seq . to Sequence
+    mvar <- resolveSequence runtime.workflowRuntimeSequenceMaps.timers t
+    case mvar of
+      Nothing -> Catch.throwM $ RuntimeError "Timer not found"
+      Just ivar' -> putIVar ivar' ()
 
 
-handleResolveActivity :: WorkflowRuntime -> ResolveActivity -> STM (IO ())
-handleResolveActivity runtime msg = do
-  markJobHandled runtime
-  let a = msg ^. Activation.seq . to Sequence
-  mvar <- resolveSequence runtime.workflowRuntimeSequenceMaps.activities a
-  case mvar of
-    Nothing -> Catch.throwM $ RuntimeError "Activity handle not found"
-    Just existing -> do
-      putIVar existing msg
-      pure $ pure ()
+handleResolveActivity :: ResolveActivity -> ApplyM ()
+handleResolveActivity msg = do
+  runtime <- askRuntime
+  applySTM do
+    markJobHandled runtime
+    let a = msg ^. Activation.seq . to Sequence
+    mvar <- resolveSequence runtime.workflowRuntimeSequenceMaps.activities a
+    case mvar of
+      Nothing -> Catch.throwM $ RuntimeError "Activity handle not found"
+      Just existing -> putIVar existing msg
 
 
-handleResolveChildWorkflowExecutionStart :: WorkflowRuntime -> ResolveChildWorkflowExecutionStart -> STM (IO ())
-handleResolveChildWorkflowExecutionStart runtime msg = do
-  markJobHandled runtime
-  wfs <- readTVar runtime.workflowRuntimeSequenceMaps.childWorkflows
-  let mHandle = HashMap.lookup (msg ^. Activation.seq . to Sequence) wfs
-      unregisterOnFailure =
-        modifyTVar' runtime.workflowRuntimeSequenceMaps.childWorkflows $ HashMap.delete (msg ^. Activation.seq . to Sequence)
-  case mHandle of
-    Nothing -> Catch.throwM $ RuntimeError "Child workflow not found"
-    Just existing -> case msg ^. Activation.maybe'status of
-      Nothing -> do
-        unregisterOnFailure
-        Catch.throwM $ RuntimeError "Child workflow start did not have a known status"
-      Just status -> do
-        let eResult = case status of
-              ResolveChildWorkflowExecutionStart'Succeeded succeeded -> Right (succeeded ^. Activation.runId . to RunId)
-              ResolveChildWorkflowExecutionStart'Failed failed -> case failed ^. Activation.cause of
-                START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS ->
-                  Left $
-                    toException $
-                      WorkflowAlreadyStarted
-                        { workflowAlreadyStartedWorkflowId = WorkflowId (failed ^. Activation.workflowId)
-                        , workflowAlreadyStartedWorkflowType = WorkflowType (failed ^. Activation.workflowType)
-                        }
-                _ -> Left $ toException $ RuntimeError ("Unhandled child workflow start failure: " <> show (failed ^. Activation.cause))
-              ResolveChildWorkflowExecutionStart'Cancelled _cancelled -> Left $ toException ChildWorkflowCancelled
-        case eResult of
-          Left err -> do
-            unregisterOnFailure
-            putIVar existing.startHandle (E.throw err)
-            putIVar existing.firstExecutionRunId (E.throw err)
-            putIVar existing.resultHandle (E.throw err)
-          Right runId -> do
-            putIVar existing.startHandle ()
-            putIVar existing.firstExecutionRunId runId
-  pure $ pure ()
+handleResolveChildWorkflowExecutionStart :: ResolveChildWorkflowExecutionStart -> ApplyM ()
+handleResolveChildWorkflowExecutionStart msg = do
+  runtime <- askRuntime
+  applySTM do
+    markJobHandled runtime
+    wfs <- readTVar runtime.workflowRuntimeSequenceMaps.childWorkflows
+    let mHandle = HashMap.lookup (msg ^. Activation.seq . to Sequence) wfs
+        unregisterOnFailure =
+          modifyTVar' runtime.workflowRuntimeSequenceMaps.childWorkflows $ HashMap.delete (msg ^. Activation.seq . to Sequence)
+    case mHandle of
+      Nothing -> Catch.throwM $ RuntimeError "Child workflow not found"
+      Just existing -> case msg ^. Activation.maybe'status of
+        Nothing -> do
+          unregisterOnFailure
+          Catch.throwM $ RuntimeError "Child workflow start did not have a known status"
+        Just status -> do
+          let eResult = case status of
+                ResolveChildWorkflowExecutionStart'Succeeded succeeded -> Right (succeeded ^. Activation.runId . to RunId)
+                ResolveChildWorkflowExecutionStart'Failed failed -> case failed ^. Activation.cause of
+                  START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS ->
+                    Left $
+                      toException $
+                        WorkflowAlreadyStarted
+                          { workflowAlreadyStartedWorkflowId = WorkflowId (failed ^. Activation.workflowId)
+                          , workflowAlreadyStartedWorkflowType = WorkflowType (failed ^. Activation.workflowType)
+                          }
+                  _ -> Left $ toException $ RuntimeError ("Unhandled child workflow start failure: " <> show (failed ^. Activation.cause))
+                ResolveChildWorkflowExecutionStart'Cancelled _cancelled -> Left $ toException ChildWorkflowCancelled
+          case eResult of
+            Left err -> do
+              unregisterOnFailure
+              putIVar existing.startHandle (E.throw err)
+              putIVar existing.firstExecutionRunId (E.throw err)
+              putIVar existing.resultHandle (E.throw err)
+            Right runId -> do
+              putIVar existing.startHandle ()
+              putIVar existing.firstExecutionRunId runId
 
 
-handleResolveChildWorkflowExecution :: WorkflowRuntime -> ResolveChildWorkflowExecution -> STM (IO ())
-handleResolveChildWorkflowExecution runtime msg = do
-  markJobHandled runtime
-  let r = msg ^. Activation.seq . to Sequence
-  mHandle <- resolveSequence runtime.workflowRuntimeSequenceMaps.childWorkflows r
-  case mHandle of
-    Nothing ->
-      Catch.throwM $ RuntimeError "Child workflow handle not found"
-    Just existing -> putIVar existing.resultHandle msg
-  pure $ pure ()
+handleResolveChildWorkflowExecution :: ResolveChildWorkflowExecution -> ApplyM ()
+handleResolveChildWorkflowExecution msg = do
+  runtime <- askRuntime
+  applySTM do
+    markJobHandled runtime
+    let r = msg ^. Activation.seq . to Sequence
+    mHandle <- resolveSequence runtime.workflowRuntimeSequenceMaps.childWorkflows r
+    case mHandle of
+      Nothing ->
+        Catch.throwM $ RuntimeError "Child workflow handle not found"
+      Just existing -> putIVar existing.resultHandle msg
 
 
-handleResolveSignalExternalWorkflow :: WorkflowRuntime -> ResolveSignalExternalWorkflow -> STM (IO ())
-handleResolveSignalExternalWorkflow runtime msg = do
-  markJobHandled runtime
-  let r = msg ^. Activation.seq . to Sequence
-  mvar <- resolveSequence runtime.workflowRuntimeSequenceMaps.externalSignals r
-  case mvar of
-    Nothing -> Catch.throwM $ RuntimeError "External signal handle not found"
-    Just ivar -> putIVar ivar msg
-  pure $ pure ()
+handleResolveSignalExternalWorkflow :: ResolveSignalExternalWorkflow -> ApplyM ()
+handleResolveSignalExternalWorkflow msg = do
+  runtime <- askRuntime
+  applySTM do
+    markJobHandled runtime
+    let r = msg ^. Activation.seq . to Sequence
+    mvar <- resolveSequence runtime.workflowRuntimeSequenceMaps.externalSignals r
+    case mvar of
+      Nothing -> Catch.throwM $ RuntimeError "External signal handle not found"
+      Just ivar -> putIVar ivar msg
 
 
-handleResolveRequestCancelExternalWorkflow :: WorkflowRuntime -> ResolveRequestCancelExternalWorkflow -> STM (IO ())
-handleResolveRequestCancelExternalWorkflow runtime msg = do
-  markJobHandled runtime
-  let r = msg ^. Activation.seq . to Sequence
-  mvar <- resolveSequence runtime.workflowRuntimeSequenceMaps.externalCancels r
-  case mvar of
-    Nothing -> Catch.throwM $ RuntimeError "External cancel handle not found"
-    Just ivar -> putIVar ivar msg
-  pure $ pure ()
+handleResolveRequestCancelExternalWorkflow :: ResolveRequestCancelExternalWorkflow -> ApplyM ()
+handleResolveRequestCancelExternalWorkflow msg = do
+  runtime <- askRuntime
+  applySTM do
+    markJobHandled runtime
+    let r = msg ^. Activation.seq . to Sequence
+    mvar <- resolveSequence runtime.workflowRuntimeSequenceMaps.externalCancels r
+    case mvar of
+      Nothing -> Catch.throwM $ RuntimeError "External cancel handle not found"
+      Just ivar -> putIVar ivar msg
 
 
-handleUpdateRandomSeed :: WorkflowRuntime -> UpdateRandomSeed -> STM (IO ())
-handleUpdateRandomSeed runtime r = pure do
+handleUpdateRandomSeed :: UpdateRandomSeed -> ApplyM ()
+handleUpdateRandomSeed r = do
+  runtime <- askRuntime
   let inst = runtime.workflowRuntimeInstance
-  writeIORef
-    (unWorkflowGenM inst.workflowRandomnessSeed)
-    (mkStdGen $ fromIntegral $ r ^. Activation.randomnessSeed)
-  atomically $ markJobHandled runtime
+  applyIO do
+    tid <- myThreadId
+    writeIORef
+      (unWorkflowGenM inst.workflowRandomnessSeed)
+      (mkStdGen $ fromIntegral $ r ^. Activation.randomnessSeed)
+    atomically $ markJobHandled runtime
 
 
-handleCancelWorkflow :: WorkflowRuntime -> CancelWorkflow -> STM (IO ())
-handleCancelWorkflow runtime _ = do
-  markJobHandled runtime
-  putIVar runtime.workflowRuntimeCancelRequested ()
-  pure $ pure ()
+handleCancelWorkflow :: CancelWorkflow -> ApplyM ()
+handleCancelWorkflow _ = do
+  runtime <- askRuntime
+  applySTM do
+    markJobHandled runtime
+    putIVar runtime.workflowRuntimeCancelRequested ()
 
 
 handleStartWorkflow
-  :: WorkflowRuntime
-  -> StartWorkflow
-  -> STM (IO ())
-handleStartWorkflow runtime _ = do
-  markJobHandled runtime
-  pure $ pure ()
+  :: InitializeWorkflow
+  -> ApplyM ()
+handleStartWorkflow _ = applyJobHandled
 
 
-handleRemoveFromCache :: WorkflowRuntime -> RemoveFromCache -> STM (IO ())
-handleRemoveFromCache runtime _ = do
-  markJobHandled runtime
-  pure $ pure () -- Implementation provided elsewhere
+handleRemoveFromCache :: RemoveFromCache -> ApplyM ()
+handleRemoveFromCache _ = applyJobHandled
 
 
-handleDoUpdate :: WorkflowRuntime -> DoUpdate -> STM (IO ())
-handleDoUpdate runtime _ = do
-  -- TODO, implement this
-  markJobHandled runtime
-  pure $ pure () -- Not implemented yet
+handleDoUpdate :: DoUpdate -> ApplyM ()
+handleDoUpdate _ = applyJobHandled
 
 
 convertExitVariantToCommand :: WorkflowExitVariant Payload -> InstanceM Command.WorkflowCommand

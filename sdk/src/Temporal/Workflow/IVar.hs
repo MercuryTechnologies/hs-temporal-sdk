@@ -4,6 +4,7 @@ import Control.Monad
 import Control.Monad.Logger
 import Data.Foldable
 import qualified Data.HashMap.Strict as HashMap
+import Data.Maybe (isJust)
 import Data.Typeable
 import GHC.Conc (unsafeIOToSTM)
 import UnliftIO
@@ -52,12 +53,20 @@ newIVarSTM manager = do
   pure $ IVar ivar blocks manager
 
 
-putIVar :: IVar a -> a -> STM ()
-putIVar IVar {ivar, blocks} x = void do
-  _ <- tryPutTMVar ivar x
-  currentlyBlocked <- readTVar blocks
-  for_ currentlyBlocked (\blocked -> writeTVar blocked.workflowThreadBlocked False)
-  writeTVar blocks mempty
+class MonadIVar m where
+  putIVar :: IVar a -> a -> m ()
+  tryReadIVar :: IVar a -> m (Maybe a)
+
+
+instance MonadIVar STM where
+  putIVar IVar {ivar, blocks} x = void do
+    _ <- tryPutTMVar ivar x
+    currentlyBlocked <- readTVar blocks
+    for_ currentlyBlocked (\blocked -> writeTVar blocked.workflowThreadBlocked False)
+    writeTVar blocks mempty
+
+
+  tryReadIVar IVar {ivar} = tryReadTMVar ivar
 
 
 waitIVar :: (MonadLogger m, MonadIO m, Typeable a) => IVar a -> m a
@@ -75,11 +84,8 @@ waitIVar IVar {..} = do
           writeTVar threadState.workflowThreadBlocked True
           modifyTVar' blocks $ HashMap.insert tid threadState
           pure $ atomically $ readTMVar ivar
-        Just val -> pure $ pure val
-
-
-tryReadIVar :: IVar a -> STM (Maybe a)
-tryReadIVar IVar {ivar} = tryReadTMVar ivar
+        Just val -> do
+          pure $ pure val
 
 
 -- | Use this to determine when we want to flush things to the server.
@@ -111,3 +117,9 @@ registerThread runtime tid = do
   modifyTVar'
     (threadManager $ getThreadManager runtime)
     (HashMap.insert tid $ WorkflowThread isBlocked)
+
+
+waitThreadsRegistered :: (HasThreadManager r, Foldable t) => r -> t ThreadId -> STM ()
+waitThreadsRegistered runtime threads = do
+  tm <- readTVar $ threadManager $ getThreadManager runtime
+  guard $ all (`HashMap.member` tm) threads
