@@ -161,6 +161,14 @@ data ExecuteWorkflowInput = ExecuteWorkflowInput
   }
 
 
+data HandleUpdateInput = HandleUpdateInput
+  { handleUpdateId :: UpdateId
+  , handleUpdateInputType :: Text
+  , handleUpdateInputArgs :: Vector Payload
+  , handleUpdateInputHeaders :: Map Text Payload
+  }
+
+
 data WorkflowInboundInterceptor = WorkflowInboundInterceptor
   { executeWorkflow
       :: ExecuteWorkflowInput
@@ -172,8 +180,8 @@ data WorkflowInboundInterceptor = WorkflowInboundInterceptor
       -> IO (Either SomeException Payload)
   , handleUpdate
       :: HandleUpdateInput
-      -> (HandleUpdateInput -> Workflow Payload)
-      -> Workflow Payload
+      -> (HandleUpdateInput -> IO (Either SomeException Payload))
+      -> IO (Either SomeException Payload)
   , validateUpdate
       :: HandleUpdateInput
       -> (HandleUpdateInput -> IO (Either SomeException ()))

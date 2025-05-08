@@ -450,7 +450,8 @@ query h (queryRef -> KnownQuery qn codec) opts = withArgs @(QueryArgs query) @(m
 
 
 data GetHandleOptions = GetHandleOptions
-  { firstExecutionRunId :: Maybe RunId
+  { runId :: Maybe RunId
+  , firstExecutionRunId :: Maybe RunId
   -- ^ If specified, later calls referencing the handle may error if the (most recent | specified workflow
   -- run id) is not part of the same execution chain as this id. Only some operations (namely terminate)
   -- respect firstExecutionRunId, while others (e.g. signal and query) ignore it.
@@ -469,10 +470,9 @@ getHandle
   :: (HasWorkflowClient m, MonadIO m)
   => KnownWorkflow args a
   -> WorkflowId
-  -> Maybe RunId
-  -> Maybe GetHandleOptions
+  -> GetHandleOptions
   -> m (WorkflowHandle a)
-getHandle (KnownWorkflow {knownWorkflowCodec, knownWorkflowName}) wfId runId opts = do
+getHandle (KnownWorkflow {knownWorkflowCodec, knownWorkflowName}) wfId opts = do
   c <- askWorkflowClient
   pure $
     WorkflowHandle
@@ -481,9 +481,9 @@ getHandle (KnownWorkflow {knownWorkflowCodec, knownWorkflowName}) wfId runId opt
           either (throwIO . ValueError) pure result
       , workflowHandleClient = c
       , workflowHandleWorkflowId = wfId
-      , workflowHandleRunId = runId
+      , workflowHandleRunId = opts.runId
       , workflowHandleType = WorkflowType knownWorkflowName
-      , workflowHandleFirstExecutionRunId = (.firstExecutionRunId) =<< opts
+      , workflowHandleFirstExecutionRunId = opts.firstExecutionRunId
       }
 
 

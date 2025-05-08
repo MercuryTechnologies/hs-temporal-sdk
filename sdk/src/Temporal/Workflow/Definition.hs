@@ -199,7 +199,7 @@ provideUpdate codec name f =
                     (Proxy @(Workflow (ResultOf Workflow f)))
                     f'
                     payloads
-                pure $ fmap (\wf -> wf >>= \result -> ilift (liftIO $ encode codec result)) eRes
+                pure $ fmap (\wf -> wf >>= \result -> Workflow (liftIO $ encode codec result)) eRes
             }
       , updateReference =
           KnownUpdate

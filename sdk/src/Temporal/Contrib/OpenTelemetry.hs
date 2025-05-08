@@ -17,6 +17,7 @@ the interceptor to your Temporal client and worker configuration.
 -}
 module Temporal.Contrib.OpenTelemetry where
 
+import Control.Exception
 import Control.Monad.IO.Class
 import qualified Data.HashMap.Strict as HashMap
 import Data.Int
@@ -240,22 +241,22 @@ makeOpenTelemetryInterceptor = do
                         { kind = Server
                         , attributes = mempty
                         }
-                ctxt <- performUnsafeNonDeterministicIO $ extract headersPropagator input.handleUpdateInputHeaders Ctxt.empty
-                _ <- performUnsafeNonDeterministicIO $ attachContext ctxt
+                ctxt <- extract headersPropagator input.handleUpdateInputHeaders Ctxt.empty
+                _ <- attachContext ctxt
                 case Ctxt.lookupSpan ctxt of
                   Nothing -> next input
                   Just _ -> do
-                    span <- performUnsafeNonDeterministicIO $ createSpan tracer ctxt ("HandleUpdate:" <> input.handleUpdateInputType) spanArgs
+                    span <- createSpan tracer ctxt ("HandleUpdate:" <> input.handleUpdateInputType) spanArgs
                     result <- try $ next input
                     case result of
                       Left err -> do
-                        performUnsafeNonDeterministicIO do
+                        do
                           setStatus span (Error $ T.pack $ show err)
                           recordException span mempty Nothing err
                           endSpan span Nothing
-                        throwM (err :: SomeException)
+                        throwIO (err :: SomeException)
                       Right res -> do
-                        performUnsafeNonDeterministicIO $ endSpan span Nothing
+                        endSpan span Nothing
                         pure res
             , validateUpdate = \input next -> do
                 let spanArgs =
@@ -357,7 +358,7 @@ makeOpenTelemetryInterceptor = do
                 inSpan'' tracer ("SignalWithStartWorkflow:" <> rawWorkflowType (signalWithStartWorkflowType input)) spanArgs $ \_ -> do
                   ctxt <- getContext
                   hdrs <- inject headersPropagator ctxt input.signalWithStartOptions.headers
-                  next (input {signalWithStartOptions = (signalWithStartOptions input) {C.headers = hdrs}})
+                  next (input {signalWithStartOptions = (signalWithStartOptions input) {headers = hdrs}})
             , updateWorkflow = \input next -> do
                 let spanArgs =
                       defaultSpanArguments

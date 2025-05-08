@@ -151,7 +151,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
     then do
       mInst <- createOrFetchRunningWorkflow
       forM_ mInst $ \wf -> do
-        let withoutStart = filter (\job -> isNothing (job ^. Activation.maybe'startWorkflow)) (activation ^. Activation.jobs)
+        let withoutStart = filter (\job -> isNothing (job ^. Activation.maybe'initializeWorkflow)) (activation ^. Activation.jobs)
         atomically $ writeTQueue wf.runningWorkflowRuntime.workflowRuntimeInstance.activationChannel (activation & Activation.jobs .~ withoutStart)
     else do
       $(logDebug) "Workflow does not need to run."
@@ -196,9 +196,9 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
               searchAttrs <- liftIO $ do
                 decodedAttrs <- initializeWorkflow ^. Activation.searchAttributes . Message.indexedFields . to searchAttributesFromProto
                 either (throwIO . ValueError) pure decodedAttrs
-              hdrs <- processorDecodePayloads worker.processor (startWorkflow ^. Activation.headers . to (fmap convertFromProtoPayload))
-              memo <- processorDecodePayloads worker.processor (startWorkflow ^. Activation.memo . Message.fields . to (fmap convertFromProtoPayload))
-              payloads <- processorDecodePayloads worker.processor (startWorkflow ^. Activation.vec'arguments . to (fmap convertFromProtoPayload))
+              hdrs <- processorDecodePayloads worker.processor (initializeWorkflow ^. Activation.headers . to (fmap convertFromProtoPayload))
+              memo <- processorDecodePayloads worker.processor (initializeWorkflow ^. Activation.memo . Message.fields . to (fmap convertFromProtoPayload))
+              payloads <- processorDecodePayloads worker.processor (initializeWorkflow ^. Activation.vec'arguments . to (fmap convertFromProtoPayload))
 
               pure (searchAttrs, hdrs, memo, payloads)
             case ePayloads of

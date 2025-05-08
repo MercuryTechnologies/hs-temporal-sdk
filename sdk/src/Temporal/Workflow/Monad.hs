@@ -359,6 +359,7 @@ initializeRuntime inst = do
   unappliedJobs <- newTVar 0
   signalSupport <- SignalSupport <$> newTVar [] <*> newTVar mempty
   querySupport <- QuerySupport <$> newTVar [] <*> newTVar mempty
+  updateSupport <- UpdateSupport <$> newTVar [] <*> newTVar mempty
   pure
     WorkflowRuntime
       { workflowRuntimeInstance = inst
@@ -369,6 +370,7 @@ initializeRuntime inst = do
       , workflowRuntimeUnappliedJobs = unappliedJobs
       , signals = signalSupport
       , queries = querySupport
+      , updates = updateSupport
       }
 
 
@@ -1032,6 +1034,7 @@ convertExitVariantToCommand variant = do
             .~ ( defMessage
                   & Command.failure .~ enrichedApplicationFailure
                )
+
 
 -- applyDoUpdateWorkflow :: DoUpdate -> Workflow ()
 -- applyDoUpdateWorkflow doUpdate = provideCallStack do

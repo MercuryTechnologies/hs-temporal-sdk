@@ -37,10 +37,17 @@ import UnliftIO.STM
 
 newtype WorkflowGenM = WorkflowGenM {unWorkflowGenM :: IORef StdGen}
 
+
+newtype Validation a = Validation
+  {unValidation :: IO a}
+  deriving newtype (Functor, Applicative, Monad, Catch.MonadThrow, Catch.MonadCatch)
+
+
 data WorkflowUpdateImplementation = WorkflowUpdateImplementation
-  { updateImplementation :: {-# UNPACK #-} !(UpdateId -> Vector Payload -> Map Text Payload -> Workflow Payload)
+  { updateImplementation :: {-# UNPACK #-} !(UpdateId -> Vector Payload -> Map Text Payload -> InstanceM Payload)
   , updateValidationImplementation :: {-# UNPACK #-} !(Maybe (UpdateId -> Vector Payload -> Map Text Payload -> Validation (Either SomeException ())))
   }
+
 
 data WorkflowInstance = WorkflowInstance
   { workflowInstanceInfo :: {-# UNPACK #-} !(TVar Info)
@@ -105,10 +112,12 @@ data QuerySupport = QuerySupport
   , queryHandlers :: {-# UNPACK #-} !(TVar (HashMap (Maybe Text) (QueryId -> Vector Payload -> Map Text Payload -> IO (Either SomeException Payload))))
   }
 
+
 data UpdateSupport = UpdateSupport
   { bufferedUpdates :: {-# UNPACK #-} !(TVar [DoUpdate])
   , updateHandlers :: {-# UNPACK #-} !(TVar (HashMap (Maybe Text) WorkflowUpdateImplementation))
   }
+
 
 instance HasThreadManager WorkflowRuntime where
   getThreadManager = workflowRuntimeThreads

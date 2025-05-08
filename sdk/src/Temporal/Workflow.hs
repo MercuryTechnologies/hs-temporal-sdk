@@ -1146,21 +1146,21 @@ setUpdateHandler
   -> f
   -> Maybe validator
   -> Workflow ()
-setUpdateHandler (updateRef -> KnownUpdate codec n) f mValidator = ilift $ do
+setUpdateHandler (updateRef -> KnownUpdate codec n) f mValidator = Workflow do
   updateCallStack
-  inst <- ask
+  runtime <- ask
   let updateImplementation =
         WorkflowUpdateImplementation
-          { updateImplementation = updateHandler
+          { updateImplementation = coerce updateHandler
           , updateValidationImplementation = fmap updateValidatorHandler mValidator
           }
-  liftIO $ modifyIORef' inst.workflowUpdateHandlers $ \handles ->
+  atomically $ modifyTVar' runtime.updates.updateHandlers $ \handles ->
     HashMap.insert (Just n) updateImplementation handles
   where
     updateHandler :: UpdateId -> Vector Payload -> Map Text Payload -> Workflow Payload
     updateHandler updateId vec hdrs = do
       ePayloads <-
-        ilift $
+        Workflow $
           liftIO $
             applyPayloads
               codec
@@ -1169,10 +1169,9 @@ setUpdateHandler (updateRef -> KnownUpdate codec n) f mValidator = ilift $ do
               f
               vec
       case ePayloads of
-        Left err -> Workflow $ \_env -> do
-          $(logDebug) "Hit a decoding error"
-          pure $ Throw $ toException $ ValueError err
-        Right w -> w >>= \result -> ilift (liftIO $ encode codec result)
+        Left err -> Workflow do
+          throwM $ ValueError err
+        Right w -> w >>= \result -> Workflow (liftIO $ encode codec result)
     updateValidatorHandler :: validator -> UpdateId -> Vector Payload -> Map Text Payload -> Validation (Either SomeException ())
     updateValidatorHandler v updateId vec hdrs = do
       eResult <-
@@ -1550,7 +1549,7 @@ isCancelRequested :: (RequireCallStack) => Workflow Bool
 isCancelRequested = Workflow do
   updateCallStack
   runtime <- ask
-  readTVarIO runtime.workflowRuntimeCancelRequested
+  isJust <$> atomically (tryReadIVar runtime.workflowRuntimeCancelRequested)
 
 
 {- | Block the current workflow's main execution thread until the workflow is cancelled.
@@ -1568,9 +1567,7 @@ waitCancellation :: (RequireCallStack) => Workflow ()
 waitCancellation = Workflow do
   updateCallStack
   runtime <- ask
-  atomically do
-    res <- readTVar runtime.workflowRuntimeCancelRequested
-    guard res
+  waitIVar runtime.workflowRuntimeCancelRequested
   throwM WorkflowCancelRequested
 
 
