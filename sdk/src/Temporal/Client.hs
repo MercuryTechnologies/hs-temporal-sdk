@@ -934,7 +934,7 @@ update h@(WorkflowHandle _ _ c _ _ _) (KnownUpdate updateCodec updateName) opts 
           }
   eRes <- h.workflowHandleClient.clientConfig.interceptors.updateWorkflow baseInput $ \input -> do
     updateArgs <- processorEncodePayloads processor input.updateWorkflowArgs
-    headerPayloads <- processorEncodePayloads processor input.updateWorkflowHeaders
+    let headerPayloads = input.updateWorkflowHeaders
     let msg :: UpdateWorkflowExecutionRequest
         msg =
           defMessage

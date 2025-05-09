@@ -17,6 +17,7 @@ import Data.Foldable
 import qualified Data.HashMap.Strict as HashMap
 import Data.HashSet (HashSet)
 import qualified Data.HashSet as HashSet
+import Data.Hashable (Hashable)
 import Data.Kind
 import qualified Data.Map.Strict as Map
 import Data.Maybe
@@ -262,8 +263,13 @@ instance MonadReadStateVar Condition where
     readTVar ref.stateVarRef
 
 
+instance MonadReadStateVar Validation where
+  readStateVar = Validation . readTVarIO . stateVarRef
+
+
 class MonadWriteStateVar m where
   writeStateVar :: StateVar a -> a -> m ()
+  modifyStateVar :: StateVar a -> (a -> a) -> m ()
 
 
 instance MonadWriteStateVar Workflow where
@@ -273,6 +279,14 @@ instance MonadWriteStateVar Workflow where
       unblockableThreads <- stateTVar ref.stateVarBlocks $ \blocks -> (blocks, mempty)
       writeTVar ref.stateVarRef x
       threadManager <- readTVar (getThreadManager runtime).threadManager
+      for_ unblockableThreads $ \thread -> do
+        writeTVar (threadManager HashMap.! thread).workflowThreadBlocked False
+  modifyStateVar ref f = Workflow do
+    runtime <- ask
+    atomically do
+      threadManager <- readTVar (getThreadManager runtime).threadManager
+      unblockableThreads <- stateTVar ref.stateVarBlocks $ \blocks -> (blocks, mempty)
+      modifyTVar' ref.stateVarRef f
       for_ unblockableThreads $ \thread -> do
         writeTVar (threadManager HashMap.! thread).workflowThreadBlocked False
 
@@ -442,6 +456,10 @@ askMainThread = ApplyM $ do
   pure mainThread
 
 
+specificHandlerOrDefault :: Hashable k => HashMap.HashMap (Maybe k) v -> k -> Maybe v
+specificHandlerOrDefault handlers key = HashMap.lookup (Just key) handlers <|> HashMap.lookup Nothing handlers
+
+
 runWorkflow :: (MonadIO m, HasCallStack) => WorkflowInstance -> Workflow Payload -> m RunningWorkflow
 runWorkflow inst m = liftIO do
   runtime <- atomically $ initializeRuntime inst
@@ -460,14 +478,13 @@ runWorkflow inst m = liftIO do
 
       -}
       runTopLevel :: Workflow Payload -> InstanceM (WorkflowExitVariant Payload)
-      runTopLevel (Workflow ma) = do
-        (WorkflowExitSuccess <$> ma)
-          `catches` [ Handler $ \e@(ContinueAsNewException {}) -> pure $ WorkflowExitContinuedAsNew e
-                    , Handler $ \WorkflowCancelRequested -> do
-                        pure $ WorkflowExitCancelled WorkflowCancelRequested
-                    , Handler $ \(e :: SomeException) -> do
-                        pure $ WorkflowExitFailed e
-                    ]
+      runTopLevel (Workflow ma) = withRunInIO $ \runInIO -> liftIO do
+        (WorkflowExitSuccess <$> runInIO ma)
+          `E.catches` [ E.Handler $ \e@(ContinueAsNewException {}) -> pure $ WorkflowExitContinuedAsNew e
+                      , E.Handler $ \WorkflowCancelRequested -> pure $ WorkflowExitCancelled WorkflowCancelRequested
+                      , E.Handler $ \AsyncCancelled -> E.throwIO AsyncCancelled
+                      , E.Handler $ \(e :: SomeException) -> pure $ WorkflowExitFailed e
+                      ]
 
       shutdownThreads myTid = do
         -- Theoretically, you could have threads created after taking all of these,
@@ -490,9 +507,7 @@ runWorkflow inst m = liftIO do
               atomically do
                 CommandQueue.addCommand runtime cmd
               pure result
-        result <- threadWrapper restore runner `finally` shutdownThreads tid
-        $(logDebug) $ "Thread " <> tidText <> ": exiting"
-        pure result
+        threadWrapper restore runner `finally` shutdownThreads tid
 
       applyActivations mainThreadId = do
         activation <- readTQueue runtime.workflowRuntimeInstance.activationChannel
@@ -544,8 +559,8 @@ runWorkflow inst m = liftIO do
       --
       -- Once we're blocked in that way, then we should flush the commands and wait for
       -- the next activation(s?).
-      schedule :: Async (WorkflowExitVariant Payload) -> IO ()
-      schedule mainThread = do
+      schedule :: Async (WorkflowExitVariant Payload) -> InstanceM ()
+      schedule mainThread = mask $ \restore -> do
         let mainThreadId = asyncThreadId mainThread
         -- We need something to be started in order to ensure that we don't immediately
         -- hit 'waitAllThreadsBlocked' is True.
@@ -563,9 +578,7 @@ runWorkflow inst m = liftIO do
                 unless blocked retry
               Nothing -> do
                 retry -- Waiting for the main thread to get added to the thread manager.
-            Just _ -> do
-              tid' <- unsafeIOToSTM myThreadId
-              pure ()
+            Just _ -> pure ()
 
         -- It's important that 'activate' fully consumes the activation from the channel
         -- before we block again. Otherwise, we might end up in a situation where
@@ -579,14 +592,13 @@ runWorkflow inst m = liftIO do
           -- We use activations and flushes are 1:1, and we want to
           -- ensure that we flush in the face of errors before failing out.
           ( do
-              tid' <- myThreadId
-              join $ atomically $ applyActivations mainThread
+              liftIO $ join $ atomically $ applyActivations mainThread
               atomically do
                 waitAllJobsHandled runtime
                 waitAllThreadsBlocked runtime
               untilM_ do
                 (handleCount, m) <- atomically $ applyQueuedSignals mainThread
-                m
+                liftIO m
                 atomically do
                   waitAllJobsHandled runtime
                   waitAllThreadsBlocked runtime
@@ -594,13 +606,12 @@ runWorkflow inst m = liftIO do
               -- By the time we've applied all the signals that we can,
               -- all of the queries we can possibly handle must have been
               -- defined.
-              snd =<< atomically (applyQueuedQueries mainThread)
-              atomically do
+              liftIO . snd =<< atomically (applyQueuedQueries mainThread)
+              restore $ atomically do
                 waitAllJobsHandled runtime
                 waitAllThreadsBlocked runtime
             )
             `finally` do
-              tid' <- myThreadId
               flushCommands runtime
 
       waitAllJobsHandled runtime = do
@@ -609,13 +620,14 @@ runWorkflow inst m = liftIO do
         guard (unappliedJobs == 0)
 
     e <- async eval
-    s <- async (liftIO (schedule e) `finally` $(logDebug) "Schedule thread exiting")
+    s <- async (schedule e `finally` $(logDebug) "Schedule thread exiting")
+    -- We want these threads
     link e
     link s
     pure $ RunningWorkflow s e runtime
 
 
-flushCommands :: (HasCallStack, MonadIO m) => WorkflowRuntime -> m ()
+flushCommands :: (HasCallStack, MonadLogger m, MonadIO m) => WorkflowRuntime -> m ()
 flushCommands runtime = do
   tid <- liftIO myThreadId
   (info, cmds) <- atomically do
@@ -758,10 +770,7 @@ handleSignalWorkflow sig = do
   runtime <- askRuntime
   let inst = runtime.workflowRuntimeInstance
   handlers <- applySTM $ readTVar runtime.signals.signalHandlers
-  let handlerOrDefault =
-        HashMap.lookup (Just (sig ^. Activation.signalName)) handlers
-          <|> HashMap.lookup Nothing handlers
-  case handlerOrDefault of
+  case specificHandlerOrDefault handlers (sig ^. Activation.signalName) of
     Nothing -> applySTM do
       -- TODO, if there's a huge amount of signals, this is algorithmically inefficient.
       modifyTVar' runtime.signals.bufferedSignals (++ [sig])
@@ -771,9 +780,7 @@ handleSignalWorkflow sig = do
       applyIO $ mask_ do
         -- signals can block (via sleep, or waiting on a condition), so we run them
         -- in a separate thread.
-        --
-        -- TODO use link(2) to connect the thrown exception to the main workflow thread?
-        h <- asyncWithUnmask $ \restore -> do
+        void $ asyncWithUnmask $ \restore -> do
           tid <- myThreadId
           args <-
             processorDecodePayloads
@@ -784,7 +791,6 @@ handleSignalWorkflow sig = do
             registerThread runtime tid
           restore (handler args) `finally` atomically do
             deregisterThread runtime tid
-        link2 mainThread h
 
 
 handleQueryWorkflow :: QueryWorkflow -> ApplyM ()
@@ -792,10 +798,7 @@ handleQueryWorkflow q = do
   runtime <- askRuntime
   let inst = runtime.workflowRuntimeInstance
   handlers <- applySTM $ readTVar runtime.queries.queryHandlers
-  let handlerOrDefault =
-        HashMap.lookup (Just (q ^. Activation.queryType)) handlers
-          <|> HashMap.lookup Nothing handlers
-  case handlerOrDefault of
+  case specificHandlerOrDefault handlers (q ^. Activation.queryType) of
     Nothing -> applySTM do
       -- If there's a huge amount of queries, this is algorithmically inefficient.
       --
@@ -958,7 +961,100 @@ handleRemoveFromCache _ = applyJobHandled
 
 
 handleDoUpdate :: DoUpdate -> ApplyM ()
-handleDoUpdate _ = applyJobHandled
+handleDoUpdate doUpdate = do
+  runtime <- askRuntime
+  mainThread <- askMainThread
+  let inst = runtime.workflowRuntimeInstance
+      acceptUpdate =
+        CommandQueue.addCommand runtime $
+          defMessage
+            & Command.updateResponse
+              .~ ( defMessage
+                    & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
+                    & Command.accepted .~ defMessage
+                 )
+      rejectUpdate :: forall e. Exception e => e -> STM ()
+      rejectUpdate err =
+        CommandQueue.addCommand runtime $
+          defMessage
+            & Command.updateResponse
+              .~ ( defMessage
+                    & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
+                    & Command.rejected .~ applicationFailureToFailureProto (mkApplicationFailure (toException err) inst.errorConverters)
+                 )
+      completeUpdate payload =
+        CommandQueue.addCommand runtime $
+          defMessage
+            & Command.updateResponse
+              .~ ( defMessage
+                    & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
+                    & Command.completed .~ convertToProtoPayload payload
+                 )
+
+  -- (validator, updateAction) <- do
+  handlers <- applySTM $ readTVar runtime.updates.updateHandlers
+  case specificHandlerOrDefault handlers (doUpdate ^. Activation.name) of
+    Nothing -> applySTM do
+      let errMessage = Text.pack ("No update handler found for update: " <> show (doUpdate ^. Activation.name))
+      let err = UpdateNotFound errMessage
+      markJobHandled runtime
+      rejectUpdate err
+    Just WorkflowUpdateImplementation {..} -> applyIO do
+      updateArgs <- UnliftIO.try $ processorDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (doUpdate ^. Activation.vec'input))
+      let runValidator = doUpdate ^. Activation.runValidator
+          updateId = UpdateId $ doUpdate ^. Activation.id
+          updateHeaders = fmap convertFromProtoPayload (doUpdate ^. Activation.headers)
+      case updateArgs of
+        Left err -> atomically do
+          markJobHandled runtime
+          rejectUpdate (err :: SomeException)
+        Right args -> do
+          let baseInput =
+                HandleUpdateInput
+                  { handleUpdateId = updateId
+                  , handleUpdateInputType = doUpdate ^. Activation.name
+                  , handleUpdateInputArgs = args
+                  , handleUpdateInputHeaders = updateHeaders
+                  }
+              runUpdateTopLevel :: IO (Either SomeException Payload) -> InstanceM ()
+              runUpdateTopLevel m = do
+                void $ asyncWithUnmask $ \restore -> do
+                  tid <- myThreadId
+                  atomically do
+                    acceptUpdate
+                    markJobHandled runtime
+                    registerThread runtime tid
+                  ePayload <- restore (liftIO m)
+                  case ePayload of
+                    Left err -> do
+                      atomically do
+                        rejectUpdate err
+                        deregisterThread runtime tid
+                      throwM err
+                    Right payload -> do
+                      payload' <- liftIO $ payloadProcessorEncode inst.payloadProcessor payload
+                      atomically do
+                        completeUpdate payload'
+                        deregisterThread runtime tid
+              runUpdate :: InstanceM ()
+              runUpdate = runUpdateTopLevel $ handleUpdate inst.inboundInterceptor baseInput $ \input ->
+                UnliftIO.try $ runInstanceM runtime $ updateImplementation input.handleUpdateId input.handleUpdateInputArgs input.handleUpdateInputHeaders
+          if runValidator
+            then do
+              eValidatorResult <- case updateValidationImplementation of
+                Nothing -> pure $ Right ()
+                Just f -> do
+                  eResult <- UnliftIO.try $
+                    liftIO $
+                      inst.inboundInterceptor.validateUpdate baseInput $ \input ->
+                        unValidation $ f input.handleUpdateId input.handleUpdateInputArgs input.handleUpdateInputHeaders
+                  pure $ join eResult
+              case eValidatorResult of
+                Left err -> atomically do
+                  markJobHandled runtime
+                  rejectUpdate (err :: SomeException)
+                Right () -> runUpdate
+            else runUpdate
 
 
 convertExitVariantToCommand :: WorkflowExitVariant Payload -> InstanceM Command.WorkflowCommand
@@ -1035,131 +1131,6 @@ convertExitVariantToCommand variant = do
                   & Command.failure .~ enrichedApplicationFailure
                )
 
-
--- applyDoUpdateWorkflow :: DoUpdate -> Workflow ()
--- applyDoUpdateWorkflow doUpdate = provideCallStack do
---   (validator, updateAction) <- ilift do
---     inst <- ask
---     handlers <- readIORef inst.workflowUpdateHandlers
---     let handlerAndValidatorOrDefault =
---           HashMap.lookup (Just (doUpdate ^. Activation.name)) handlers
---             <|> HashMap.lookup Nothing handlers
---     case handlerAndValidatorOrDefault of
---       Nothing -> do
---         let errMessage = Text.pack ("No update handler found for update: " <> show (doUpdate ^. Activation.name))
---         let err = mkApplicationFailure (toException $ UpdateNotFound errMessage) inst.errorConverters
---         $(logWarn) errMessage
---         let cmd =
---               defMessage
---                 & Command.updateResponse
---                   .~ ( defMessage
---                         & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
---                         & Command.rejected .~ applicationFailureToFailureProto err
---                      )
---         addCommand cmd
---         pure (pure False, error "This should never happen")
---       Just WorkflowUpdateImplementation {..} -> do
---         updateArgs <- UnliftIO.try $ processorDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (doUpdate ^. Activation.vec'input))
---         let runValidator = doUpdate ^. Activation.runValidator
---             updateId = UpdateId $ doUpdate ^. Activation.id
---             updateHeaders = fmap convertFromProtoPayload (doUpdate ^. Activation.headers)
---         case updateArgs of
---           Left err ->
---             pure
---               ( do
---                   addCommand $
---                     defMessage
---                       & Command.updateResponse
---                         .~ ( defMessage
---                               & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
---                               & Command.rejected .~ applicationFailureToFailureProto (mkApplicationFailure err inst.errorConverters)
---                            )
---                   pure False
---               , error "Error processing update args"
---               )
---           Right args -> do
---             let baseInput =
---                   HandleUpdateInput
---                     { handleUpdateId = updateId
---                     , handleUpdateInputType = doUpdate ^. Activation.name
---                     , handleUpdateInputArgs = args
---                     , handleUpdateInputHeaders = updateHeaders
---                     }
---             let runUpdate = inst.inboundInterceptor.handleUpdate baseInput $ \input ->
---                   updateImplementation input.handleUpdateId input.handleUpdateInputArgs input.handleUpdateInputHeaders
---             pure $
---               if runValidator
---                 then
---                   ( do
---                       eValidatorResult <- case updateValidationImplementation of
---                         Nothing -> pure $ Right ()
---                         Just f -> do
---                           eResult <- UnliftIO.try $
---                             liftIO $
---                               inst.inboundInterceptor.validateUpdate baseInput $ \input ->
---                                 unValidation $ f input.handleUpdateId input.handleUpdateInputArgs input.handleUpdateInputHeaders
---                           pure $ join eResult
---                       case eValidatorResult of
---                         Left err -> do
---                           addCommand $
---                             defMessage
---                               & Command.updateResponse
---                                 .~ ( defMessage
---                                       & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
---                                       & Command.rejected .~ applicationFailureToFailureProto (mkApplicationFailure err inst.errorConverters)
---                                    )
---                           pure False
---                         Right () -> do
---                           addCommand $
---                             defMessage
---                               & Command.updateResponse
---                                 .~ ( defMessage
---                                       & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
---                                       & Command.accepted .~ defMessage
---                                    )
---                           pure True
---                   , runUpdate
---                   )
---                 else
---                   ( do
---                       addCommand $
---                         defMessage
---                           & Command.updateResponse
---                             .~ ( defMessage
---                                   & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
---                                   & Command.accepted .~ defMessage
---                                )
---                       pure True
---                   , runUpdate
---                   )
---   runAction <- ilift validator
---   when runAction $ do
---     ePayload <- Temporal.Workflow.Internal.Monad.try updateAction
---     $(logDebug) "we executed the update!"
---     Workflow $ \_env -> do
---       inst <- ask
---       case ePayload of
---         Left err -> do
---           $(logDebug) "gonna send an update rejected message!"
---           addCommand $
---             defMessage
---               & Command.updateResponse
---                 .~ ( defMessage
---                       & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
---                       & Command.rejected .~ applicationFailureToFailureProto (mkApplicationFailure err inst.errorConverters)
---                    )
---           pure $ Throw err
---         Right payload -> do
---           $(logDebug) "gonna send an update completed message!"
---           payload' <- liftIO $ payloadProcessorEncode inst.payloadProcessor payload
---           addCommand $
---             defMessage
---               & Command.updateResponse
---                 .~ ( defMessage
---                       & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
---                       & Command.completed .~ convertToProtoPayload payload'
---                    )
---           pure $ Done ()
 
 addCommand :: WorkflowCommand -> InstanceM ()
 addCommand command = do
