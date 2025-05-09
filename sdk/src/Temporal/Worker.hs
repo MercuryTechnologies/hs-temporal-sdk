@@ -699,7 +699,6 @@ in-flight tasks to complete before finalizing the shutdown.
 shutdown :: (MonadUnliftIO m) => Temporal.Worker.Worker actEnv -> m ()
 shutdown worker@Temporal.Worker.Worker {workerCore, workerTracer, workerType, workerActivityWorker} = OT.inSpan workerTracer "shutdown" defaultSpanArguments $ UnliftIO.mask $ \restore -> do
   OT.inSpan workerTracer "initiateShutdown" defaultSpanArguments $ liftIO $ Core.initiateShutdown workerCore
-  liftIO yield
 
   -- Worker shutdown will wait on all activities to complete, so if a long-running activity does not respect cancellation,
   -- the shutdown may never complete. However, we do issue a shutdown notification to the activities in the form of an

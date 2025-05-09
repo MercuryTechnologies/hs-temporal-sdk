@@ -374,30 +374,3 @@ makeOpenTelemetryInterceptor = do
         scheduleClientInterceptors = mempty
       , interceptorVault = Vault.insert tracerKey tracer mempty
       }
-
--- inSpan :: T.Text -> SpanArguments -> Workflow a -> Workflow a
--- inSpan = undefined
-
--- inSpan' :: T.Text -> SpanArguments -> Workflow a -> Workflow a
--- inSpan' = undefined
-
--- inSpan'' :: HasCallStack => T.Text -> SpanArguments -> (Span -> Workflow a) -> Workflow a
--- inSpan'' n args f = do
---   (k, s) <- performUnsafeNonDeterministicResourceT $ allocate
---     (do
---       ctx <- getContext
---       s <- createSpanWithoutCallStack t ctx n args
---     )
---     (\s -> endSpan s Nothing)
---   try $ f s
---   case eRes of
---     Left e -> do
---       performUnsafeNonDeterministicResourceT $ do
---         setStatus s $ Error $ T.pack $ displayException inner
---         recordException s [("exception.escaped", toAttribute True)] Nothing inner
---         endSpan s Nothing
---         unprotect k
---       throwM e
---     Right x -> do
---       endSpan s Nothing
---       pure x
