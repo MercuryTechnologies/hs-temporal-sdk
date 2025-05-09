@@ -99,6 +99,18 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = Workfl
   -- Return Task that waits on the resultSlot
 ```
 
+### Selective Thread Unblocking
+
+The sequence system is tightly integrated with the thread blocking detection system:
+
+1. When a workflow operation (like activity execution) is started, a thread blocks waiting for the result by waiting on an IVar
+2. The scheduler thread detects that all threads are blocked and flushes commands
+3. When an activation arrives, it uses the sequence number to find the exact IVar that needs to be resolved
+4. Only the specific thread waiting on that IVar is unblocked, while other threads remain blocked
+5. This selective unblocking is what enables deterministic concurrency even with multiple parallel operations
+
+This precision in tracking which threads are waiting for which results is the key to maintaining determinism.
+
 ### Resolving Sequences
 
 When an activation returns from Temporal with a sequence number, the handler looks up and resolves the corresponding IVar:
@@ -266,14 +278,26 @@ sequenceDiagram
     R-->>W: Continue execution
 ```
 
-## Integration with Thread Blocking
+## Concurrency and Determinism
 
-The sequence system works directly with the [thread blocking mechanism](workflow-stm.md#blocking-and-unblocking):
+The sequence system provides the backbone for safe concurrency in workflows:
 
-1. When a thread waits on an IVar in a sequence map, it marks itself as blocked
-2. When all threads are blocked, commands get flushed to Temporal
-3. When an activation comes back with a sequence number, it resolves the IVar
-4. This unblocks the waiting thread, letting workflow execution continue
+1. **Targeted Unblocking**: Only the exact threads waiting for a specific result are unblocked
+2. **Independent Blocking**: Multiple threads can block on different sequences without interference
+3. **Deterministic Ordering**: Sequence generation and resolution happen in a consistent order
+4. **Controlled Parallelism**: Allows effective parallel execution while maintaining determinism
+
+This is what powers higher-level concurrency primitives like `race`, `concurrently`, and `mapConcurrently` - they ultimately rely on the sequence system to precisely control which threads are unblocked in response to which events.
+
+## Integration with Thread Blocking Detection
+
+The sequence system works directly with the [thread blocking detection](workflow-stm.md#thread-blocking-detection):
+
+1. When a thread waits on an IVar in a sequence map, it marks itself as blocked in the ThreadManager
+2. When all threads are blocked, the scheduler detects this and flushes commands to Temporal
+3. When an activation comes back with a sequence number, it resolves the IVar associated with that sequence
+4. This selectively unblocks only the thread waiting on that specific IVar
+5. The cycle repeats as threads continue executing until they block again
 
 ## Activation Job Handlers
 

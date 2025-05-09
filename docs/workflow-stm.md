@@ -76,6 +76,8 @@ putIVar IVar {ivar, blocks} x = void do
   writeTVar blocks mempty
 ```
 
+This blocking mechanism is central to the workflow execution model - it allows us to detect when the workflow is "stuck" waiting for external input, which is when we should flush commands and wait for activations.
+
 ## Execution Flow
 
 ```mermaid
