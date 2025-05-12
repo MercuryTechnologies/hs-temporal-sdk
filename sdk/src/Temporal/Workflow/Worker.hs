@@ -7,12 +7,14 @@ import Control.Monad
 import Control.Monad.Catch (MonadCatch)
 import Control.Monad.Logger
 import Control.Monad.Reader
+import Data.Functor
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import Data.Maybe
 import Data.ProtoLens
 import Data.Text (Text)
 import qualified Data.Text as Text
+import Data.Vault.Strict (Vault)
 import qualified Data.Vector as V
 import Lens.Family2
 import OpenTelemetry.Context.ThreadLocal
@@ -33,13 +35,14 @@ import Temporal.Core.Worker (InactiveForReplay)
 import qualified Temporal.Core.Worker as Core
 import Temporal.Duration (durationFromProto)
 import qualified Temporal.Exception as Err
+import Temporal.Interceptor
 import Temporal.Payload
 import Temporal.SearchAttributes.Internal
 import Temporal.Workflow.Definition
-import Temporal.Workflow.Internal.Monad hiding (try)
+import Temporal.Workflow.Instance
+import Temporal.Workflow.Monad hiding (try)
 import Temporal.WorkflowInstance
 import UnliftIO
-import Data.Vault.Strict (Vault)
 
 
 data EvictionWithRunID = EvictionWithRunID
@@ -53,7 +56,7 @@ data WorkflowWorker = forall ty.
   Core.KnownWorkerType ty =>
   WorkflowWorker
   { workerWorkflowFunctions :: {-# UNPACK #-} !(HashMap Text WorkflowDefinition)
-  , runningWorkflows :: {-# UNPACK #-} !(TVar (HashMap RunId WorkflowInstance))
+  , runningWorkflows :: {-# UNPACK #-} !(TVar (HashMap RunId RunningWorkflow))
   , workerClient :: InactiveForReplay ty C.Client
   , workerCore :: Core.Worker ty
   , workerInboundInterceptors :: {-# UNPACK #-} !WorkflowInboundInterceptor
@@ -73,19 +76,10 @@ pollWorkflowActivation = do
   liftIO $ Core.pollWorkflowActivation workerCore
 
 
-upsertWorkflowInstance :: (MonadLoggerIO m) => RunId -> WorkflowInstance -> ReaderT WorkflowWorker m WorkflowInstance
-upsertWorkflowInstance r inst = do
+registerRunningWorkflow :: (MonadLoggerIO m) => RunId -> RunningWorkflow -> ReaderT WorkflowWorker m ()
+registerRunningWorkflow r inst = do
   worker <- ask
-  liftIO $ atomically $ do
-    workflows <- readTVar worker.runningWorkflows
-    case HashMap.lookup r workflows of
-      Nothing -> do
-        let workflows' = HashMap.insert r inst workflows
-        writeTVar worker.runningWorkflows workflows'
-        pure inst
-      Just existingInstance -> do
-        writeTVar worker.runningWorkflows workflows
-        pure existingInstance
+  atomically $ modifyTVar' worker.runningWorkflows (HashMap.insert r inst)
 
 
 -- | Execute an action repeatedly as long as it returns True.
@@ -110,6 +104,7 @@ execute worker@WorkflowWorker {workerCore} = flip runReaderT worker $ do
   where
     c = Core.getWorkerConfig workerCore
     go = inSpan' "Workflow activation step" defaultSpanArguments $ \s -> do
+      $(logDebug) "Polling for workflow activation"
       -- logs <- liftIO $ fetchLogs globalRuntime
       -- forM_ logs $ \l -> case l.level of
       --   Trace -> $(logDebug) l.message
@@ -123,22 +118,14 @@ execute worker@WorkflowWorker {workerCore} = flip runReaderT worker $ do
         (Left (Core.WorkerError Core.PollShutdown _)) -> do
           $(logDebug) "Poller shutting down"
           runningWorkflows <- readTVarIO worker.runningWorkflows
-          mapM_ (cancel <=< readIORef . executionThread) runningWorkflows
+          mapM_ shutdownRunningWorkflow runningWorkflows
           pure False
         (Left err) -> do
           $(logError) $ Text.pack $ show err
           recordException s mempty Nothing err
           pure True
         (Right activation) -> do
-          $(logDebug) $ Text.pack ("Got activation " <> show activation)
-          -- We want to handle activations as fast as possible, so we don't want to block
-          -- on dispatching jobs. We link the activator thread to the run-loop so that any
-          -- unhandled exceptions in that logic aren't ignored.
-          activationCtxt <- getContext
-          activator <- asyncLabelled (Text.unpack $ Text.concat ["temporal/worker/workflow/activate", Core.namespace c, "/", Core.taskQueue c]) $ do
-            _ <- attachContext activationCtxt
-            handleActivation activation
-          link activator
+          handleActivation activation
           pure True
 
 
@@ -153,12 +140,10 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
   -}
   if shouldRun
     then do
-      mInst <- createOrFetchWorkflowInstance
-      forM_ mInst $ \inst -> do
+      mInst <- createOrFetchRunningWorkflow
+      forM_ mInst $ \wf -> do
         let withoutStart = filter (\job -> isNothing (job ^. Activation.maybe'initializeWorkflow)) (activation ^. Activation.jobs)
-        case withoutStart of
-          [] -> pure ()
-          otherJobs -> atomically $ writeTQueue inst.activationChannel (activation & Activation.jobs .~ otherJobs)
+        atomically $ writeTQueue wf.runningWorkflowRuntime.workflowRuntimeInstance.activationChannel (activation & Activation.jobs .~ withoutStart)
     else do
       $(logDebug) "Workflow does not need to run."
       let completionMessage =
@@ -186,8 +171,8 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
         )
         (activation ^. Activation.vec'jobs)
 
-    createOrFetchWorkflowInstance :: ReaderT WorkflowWorker m (Maybe WorkflowInstance)
-    createOrFetchWorkflowInstance = inSpan' "createOrFetchWorkflowInstance" (defaultSpanArguments {attributes = HashMap.fromList [("temporal.activation.run_id", toAttribute $ activation ^. Activation.runId)]}) $ \s -> do
+    createOrFetchRunningWorkflow :: ReaderT WorkflowWorker m (Maybe RunningWorkflow)
+    createOrFetchRunningWorkflow = inSpan' "createOrFetchRunningWorkflow" (defaultSpanArguments {attributes = HashMap.fromList [("temporal.activation.run_id", toAttribute $ activation ^. Activation.runId)]}) $ \s -> do
       worker@WorkflowWorker {workerCore} <- ask
       runningWorkflows_ <- atomically $ readTVar worker.runningWorkflows
       case HashMap.lookup (RunId $ activation ^. Activation.runId) runningWorkflows_ of
@@ -204,7 +189,9 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                 either (throwIO . ValueError) pure decodedAttrs
               hdrs <- processorDecodePayloads worker.processor (initializeWorkflow ^. Activation.headers . to (fmap convertFromProtoPayload))
               memo <- processorDecodePayloads worker.processor (initializeWorkflow ^. Activation.memo . Message.fields . to (fmap convertFromProtoPayload))
-              pure (searchAttrs, hdrs, memo)
+              payloads <- processorDecodePayloads worker.processor (initializeWorkflow ^. Activation.vec'arguments . to (fmap convertFromProtoPayload))
+
+              pure (searchAttrs, hdrs, memo, payloads)
             case ePayloads of
               Left err -> do
                 let appFailure = Err.mkApplicationFailure err worker.workerErrorConverters
@@ -227,18 +214,16 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                         & Completion.failed .~ failureProto
                 liftIO $ Core.completeWorkflowActivation workerCore completionMessage
                 pure Nothing
-              Right (searchAttrs, hdrs, memo) -> do
+              Right (searchAttrs, hdrs, memo, payloads) -> do
                 let runId_ = RunId $ activation ^. CommonProto.runId
                     parentProto = initializeWorkflow ^. Activation.maybe'parentWorkflowInfo
-                    parentInfo = case parentProto of
-                      Nothing -> Nothing
-                      Just parent ->
-                        Just
-                          ParentInfo
-                            { parentNamespace = Namespace $ parent ^. CommonProto.namespace
-                            , parentRunId = RunId $ parent ^. CommonProto.runId
-                            , parentWorkflowId = WorkflowId $ parent ^. CommonProto.workflowId
-                            }
+                    parentInfo =
+                      parentProto <&> \parent ->
+                        ParentInfo
+                          { parentNamespace = Namespace $ parent ^. CommonProto.namespace
+                          , parentRunId = RunId $ parent ^. CommonProto.runId
+                          , parentWorkflowId = WorkflowId $ parent ^. CommonProto.workflowId
+                          }
                     workflowInfo =
                       Temporal.WorkflowInstance.Info
                         { historyLength = activation ^. Activation.historyLength
@@ -246,7 +231,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                         , taskQueue = worker.workerTaskQueue
                         , workflowId = WorkflowId $ initializeWorkflow ^. Activation.workflowId
                         , workflowType = initializeWorkflow ^. Activation.workflowType . to WorkflowType
-                        , continuedRunId = fmap RunId $ initializeWorkflow  ^. Activation.continuedFromExecutionRunId . to nonEmptyString
+                        , continuedRunId = fmap RunId $ initializeWorkflow ^. Activation.continuedFromExecutionRunId . to nonEmptyString
                         , cronSchedule = initializeWorkflow ^. Activation.cronSchedule . to nonEmptyString
                         , taskTimeout = initializeWorkflow ^. Activation.workflowTaskTimeout . to durationFromProto
                         , executionTimeout = fmap durationFromProto $ initializeWorkflow ^. Activation.maybe'workflowExecutionTimeout
@@ -289,10 +274,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                   Just (WorkflowDefinition _ f) -> do
                     inst <-
                       create
-                        ( \wf -> do
-                            Core.completeWorkflowActivation workerCore wf
-                        )
-                        f
+                        (Core.completeWorkflowActivation workerCore)
                         worker.workerDeadlockTimeout
                         worker.workerErrorConverters
                         worker.workerInboundInterceptors
@@ -300,9 +282,11 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                         worker.workerVault
                         worker.processor
                         workflowInfo
-                        initializeWorkflow
-                    liftIO $ addStackTraceHandler inst
-                    Just <$> upsertWorkflowInstance runId_ inst
+
+                    wf <- runWorkflow inst $ f payloads
+                    registerRunningWorkflow runId_ wf
+
+                    pure $ Just wf
           pure $ join (vExistingInstance V.!? 0)
 
     removeEvictedWorkflowInstances :: ReaderT WorkflowWorker m ()
@@ -329,6 +313,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                     $(logDebug) msg
                 Just wf -> do
                   pure $ do
-                    cancel =<< readIORef wf.executionThread
                     $(logDebug) $ Text.pack ("Evicting workflow instance with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
-        _ -> pure ()
+                    shutdownRunningWorkflow wf
+                    $(logDebug) ("Evicted workflow instance with run ID " <> Text.pack (show runId_))
+        _ -> $(logDebug) "Nothing to evict this time"

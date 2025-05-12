@@ -17,12 +17,13 @@ As such, these functions are not exported from the Temporal module to discourage
 inadvisable use.
 -}
 module Temporal.Workflow.Unsafe (
-  performUnsafeNonDeterministicIO
+  performUnsafeNonDeterministicIO,
 ) where
 
 import Control.Monad.IO.Class
+import Control.Monad.Reader (ask)
 import Temporal.Workflow
-import Temporal.Workflow.Internal.Monad
+import Temporal.Workflow.Monad
 
 
 {- | Perform an arbitrary IO action in the Workflow monad.
@@ -55,5 +56,5 @@ Temporal SDK:
 * For side effects, use 'Workflow.sideEffect'
 -}
 performUnsafeNonDeterministicIO :: IO a -> Workflow a
-performUnsafeNonDeterministicIO m = Workflow (\_ -> Done <$> liftIO m)
+performUnsafeNonDeterministicIO = Workflow . liftIO
 {-# INLINE performUnsafeNonDeterministicIO #-}

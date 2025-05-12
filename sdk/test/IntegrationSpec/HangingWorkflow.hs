@@ -81,22 +81,6 @@ defaultActivityOptions :: StartActivityOptions
 defaultActivityOptions = defaultStartActivityOptions $ StartToClose $ minutes 1
 
 
-opts :: StartChildWorkflowOptions
-opts =
-  defaultChildWorkflowOptions
-    { timeoutOptions =
-        TimeoutOptions
-          { -- Total time allowed across all workflow runs, including retries.
-            executionTimeout = Just $ minutes 5
-          , -- Inherits from executionTimeout.
-            runTimeout = Nothing
-          , -- Defaults to 10 seconds.
-            taskTimeout = Just $ minutes 1
-          }
-    , workflowIdReusePolicy = WorkflowIdReusePolicyAllowDuplicate
-    }
-
-
 timeUntilMidnightOn :: Day -> UTCTime -> Duration
 timeUntilMidnightOn date now =
   nominalDiffTimeToDuration $ diffUTCTime midnight now
@@ -326,6 +310,20 @@ attemptFundTransfer transferParams = do
       requestData
 
   pure transferResult
+  where
+    opts =
+      defaultChildWorkflowOptions
+        { timeoutOptions =
+            TimeoutOptions
+              { -- Total time allowed across all workflow runs, including retries.
+                executionTimeout = Just $ minutes 5
+              , -- Inherits from executionTimeout.
+                runTimeout = Nothing
+              , -- Defaults to 10 seconds.
+                taskTimeout = Just $ minutes 1
+              }
+        , workflowIdReusePolicy = WorkflowIdReusePolicyAllowDuplicate
+        }
 
 
 -- migrate an organization to a new partner bank

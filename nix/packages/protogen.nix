@@ -7,7 +7,6 @@
   hpack,
   ...
 }:
-
 writeShellApplication {
   name = "protogen";
   runtimeInputs = [
@@ -33,7 +32,7 @@ writeShellApplication {
       ${temporal-sdk-core-src}/sdk-core-protos/protos/testsrv_upstream/temporal/**/*.proto
     # Remove codegen for well-known types (`proto-lens` provides these).
     rm -rf "$package_dir/src/Proto/Google/Protobuf"
-    # Re-generate cabal file to include new/updated modules. 
+    # Re-generate cabal file to include new/updated modules.
     hpack "$package_dir"
   '';
 }
