@@ -125,15 +125,6 @@ execute worker@WorkflowWorker {workerCore} = flip runReaderT worker $ do
           recordException s mempty Nothing err
           pure True
         (Right activation) -> do
-          $(logDebug) $ Text.pack ("Got activation " <> show activation)
-          -- We want to handle activations as fast as possible, so we don't want to block
-          -- on dispatching jobs. We link the activator thread to the run-loop so that any
-          -- unhandled exceptions in that logic aren't ignored.
-          -- activationCtxt <- getContext
-          -- activator <- asyncLabelled (Text.unpack $ Text.concat ["temporal/worker/workflow/activate", Core.namespace c, "/", Core.taskQueue c]) $ do
-          --   _ <- attachContext activationCtxt
-          --   $(logDebug) "Activator async finished"
-          -- link activator
           handleActivation activation
           pure True
 
