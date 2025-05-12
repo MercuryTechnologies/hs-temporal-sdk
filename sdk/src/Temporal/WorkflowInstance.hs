@@ -67,7 +67,6 @@ import RequireCallStack (provideCallStack)
 import System.Random (mkStdGen)
 import Temporal.Common
 import qualified Temporal.Core.Worker as Core
-import Temporal.Coroutine
 import Temporal.Duration
 import Temporal.Exception
 import qualified Temporal.Exception as Err

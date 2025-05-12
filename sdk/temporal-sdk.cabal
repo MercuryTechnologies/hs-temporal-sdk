@@ -49,7 +49,6 @@ library
       Temporal.Common
       Temporal.Common.Async
       Temporal.Common.TimeoutType
-      Temporal.Coroutine
       Temporal.Workflow.Definition
       Temporal.WorkflowInstance
       Temporal.Workflow.Worker
