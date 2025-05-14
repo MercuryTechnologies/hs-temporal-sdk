@@ -36,6 +36,7 @@ module Temporal.Client (
   WorkflowHandle (..),
   execute,
   waitWorkflowResult,
+  WorkflowIdReusePolicy (..),
 
   -- * Closing Workflows
   TerminationOptions (..),
