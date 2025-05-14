@@ -67,6 +67,11 @@
     within: [
       Test.Main
     ]
+- ignore:
+    name: "Redundant bracket"
+    within: [
+      Test.IntegrationSpec.Helpers
+    ]
 # Define some custom infix operators
 # - fixity: infixr 3 ~^#^~
 

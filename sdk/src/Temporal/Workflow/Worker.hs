@@ -7,18 +7,22 @@ import Control.Monad
 import Control.Monad.Catch (MonadCatch)
 import Control.Monad.Logger
 import Control.Monad.Reader
+import qualified Data.ByteString as BS
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import Data.Maybe
 import Data.ProtoLens
 import Data.Text (Text)
 import qualified Data.Text as Text
+import Data.Vault.Strict (Vault)
 import qualified Data.Vector as V
 import Lens.Family2
 import OpenTelemetry.Context.ThreadLocal
 import OpenTelemetry.Trace.Core hiding (inSpan, inSpan')
 import OpenTelemetry.Trace.Monad
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Message
+import Proto.Temporal.Api.Enums.V1.FailedCause
+import qualified Proto.Temporal.Api.Failure.V1.Message as F
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as CommonProto
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
@@ -39,7 +43,6 @@ import Temporal.Workflow.Definition
 import Temporal.Workflow.Internal.Monad hiding (try)
 import Temporal.WorkflowInstance
 import UnliftIO
-import Data.Vault.Strict (Vault)
 
 
 data EvictionWithRunID = EvictionWithRunID
@@ -118,6 +121,7 @@ execute worker@WorkflowWorker {workerCore} = flip runReaderT worker $ do
       --   Warn -> $(logWarn) l.message
       --   Error -> $(logError) l.message
       eActivation <- pollWorkflowActivation
+      $(logDebug) $ Text.pack ("Got activation " <> show eActivation)
       case eActivation of
         -- TODO should we do anything else on shutdown?
         (Left (Core.WorkerError Core.PollShutdown _)) -> do
@@ -137,7 +141,8 @@ execute worker@WorkflowWorker {workerCore} = flip runReaderT worker $ do
           activationCtxt <- getContext
           activator <- asyncLabelled (Text.unpack $ Text.concat ["temporal/worker/workflow/activate", Core.namespace c, "/", Core.taskQueue c]) $ do
             _ <- attachContext activationCtxt
-            handleActivation activation
+            handleActivation activation `finally` do
+              $(logDebug) "Activation completed???"
           link activator
           pure True
 
@@ -246,7 +251,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                         , taskQueue = worker.workerTaskQueue
                         , workflowId = WorkflowId $ initializeWorkflow ^. Activation.workflowId
                         , workflowType = initializeWorkflow ^. Activation.workflowType . to WorkflowType
-                        , continuedRunId = fmap RunId $ initializeWorkflow  ^. Activation.continuedFromExecutionRunId . to nonEmptyString
+                        , continuedRunId = fmap RunId $ initializeWorkflow ^. Activation.continuedFromExecutionRunId . to nonEmptyString
                         , cronSchedule = initializeWorkflow ^. Activation.cronSchedule . to nonEmptyString
                         , taskTimeout = initializeWorkflow ^. Activation.workflowTaskTimeout . to durationFromProto
                         , executionTimeout = fmap durationFromProto $ initializeWorkflow ^. Activation.maybe'workflowExecutionTimeout
@@ -287,10 +292,33 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                     liftIO (Core.completeWorkflowActivation workerCore completionMessage >>= either throwIO pure)
                     pure Nothing
                   Just (WorkflowDefinition _ f) -> do
+                    let maximumGrpcSize = 4194304
                     inst <-
                       create
                         ( \wf -> do
-                            Core.completeWorkflowActivation workerCore wf
+                            let msgSize = BS.length $ encodeMessage wf
+                                failureProto :: Completion.Failure
+                                failureProto =
+                                  defMessage
+                                    & Completion.forceCause .~ WORKFLOW_TASK_FAILED_CAUSE_WORKFLOW_WORKER_UNHANDLED_FAILURE
+                                    & Completion.failure
+                                      .~ ( defMessage
+                                            & F.message .~ "Workflow Activation Completion request exceeds maximum gRPC body size"
+                                            & F.applicationFailureInfo
+                                              .~ ( defMessage
+                                                    & F.type' .~ "PayloadTooLarge"
+                                                    & F.nonRetryable .~ True
+                                                 )
+                                         )
+                                tooLargeCompletion :: Completion.WorkflowActivationCompletion
+                                tooLargeCompletion =
+                                  defMessage
+                                    & Completion.runId .~ (activation ^. Activation.runId)
+                                    & Completion.failed .~ failureProto
+                            Core.completeWorkflowActivation workerCore $
+                              if msgSize > maximumGrpcSize
+                                then tooLargeCompletion
+                                else wf
                         )
                         f
                         worker.workerDeadlockTimeout
