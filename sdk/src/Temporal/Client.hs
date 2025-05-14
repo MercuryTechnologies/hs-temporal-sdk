@@ -61,6 +61,7 @@ module Temporal.Client (
   UpdateLifecycleStage (..),
   startUpdate,
   executeUpdate,
+  waitUpdateResult,
 
   -- * Producing handles for existing workflows
   getHandle,
@@ -973,7 +974,7 @@ startUpdateFromPayloads h@(WorkflowHandle _ _ c _ _ _) (KnownUpdate updateCodec 
 
     res <- either throwIO pure =<< Temporal.Core.Client.WorkflowService.updateWorkflowExecution h.workflowHandleClient.clientCore msg
 
-    -- We're not going to look for a successful result yet (waitForUpdateOutcome will do that), but we do want to check for failures
+    -- We're not going to look for a successful result yet (waitUpdateResult will do that), but we do want to check for failures
     -- so that we can report validataion failures via UpdateFailure rather than RpcError.
     case res ^. Update.maybe'outcome of
       Just outcome -> do
@@ -1029,8 +1030,8 @@ startUpdate wfH u@(KnownUpdate updateCodec _) opts = withArgs @args @(m (UpdateH
 This function will block until the update completes, and will return the result of the update
 or throw an exception if the update failed.
 -}
-waitForUpdateOutcome :: (MonadIO m) => UpdateHandle a -> m a
-waitForUpdateOutcome h = do
+waitUpdateResult :: (MonadIO m) => UpdateHandle a -> m a
+waitUpdateResult h = do
   let msg :: PollWorkflowExecutionUpdateRequest
       msg =
         defMessage
@@ -1079,4 +1080,4 @@ executeUpdate
     :->: m result
 executeUpdate wfH u@(KnownUpdate updateCodec _) opts = withArgs @args @(m result) updateCodec $ \inputs -> do
   updateHandle <- startUpdateFromPayloads wfH u opts inputs
-  waitForUpdateOutcome updateHandle
+  waitUpdateResult updateHandle
