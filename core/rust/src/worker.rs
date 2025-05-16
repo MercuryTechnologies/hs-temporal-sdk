@@ -7,10 +7,13 @@ use std::sync::Arc;
 use std::time::Duration;
 use temporal_sdk_core::replay::{HistoryForReplay, ReplayWorkerInput};
 use temporal_sdk_core_api::errors::{PollError, WorkflowErrorType};
+use temporal_sdk_core_api::worker::{WorkerDeploymentOptions, WorkerDeploymentVersion, WorkerVersioningStrategy as CoreWorkerVersioningStrategy};
 use temporal_sdk_core_api::Worker;
+use temporal_sdk_core_api::worker::PollerBehavior;
 use temporal_sdk_core_protos::coresdk::workflow_completion::WorkflowActivationCompletion;
 use temporal_sdk_core_protos::coresdk::{ActivityHeartbeat, ActivityTaskCompletion};
 use temporal_sdk_core_protos::temporal::api::history::v1::History;
+use temporal_sdk_core_protos::temporal::api::enums::v1::VersioningBehavior as CoreVersioningBehavior;
 use tokio::sync::mpsc::{channel, Sender};
 use tokio_stream::wrappers::ReceiverStream;
 
@@ -24,45 +27,181 @@ pub struct WorkerRef {
 }
 
 #[derive(Serialize, Deserialize)]
+pub enum WorkerPollerBehavior {
+    SimpleMaximum(u64),
+    Autoscaling {
+        minimum: u64,
+        maximum: u64,
+        initial: u64,
+    },
+}
+
+impl TryFrom<WorkerPollerBehavior> for PollerBehavior {
+    type Error = WorkerError;
+
+    fn try_from(behavior: WorkerPollerBehavior) -> Result<Self, WorkerError> {
+        match behavior {
+            WorkerPollerBehavior::SimpleMaximum(max) => {
+                if max < 1 {
+                    return Err(WorkerError {
+                        code: WorkerErrorCode::InvalidWorkerConfig,
+                        message: "SimpleMaximum poller behavior must be at least 1".to_string(),
+                    });
+                }
+                Ok(PollerBehavior::SimpleMaximum(max as usize))
+            }
+            WorkerPollerBehavior::Autoscaling { minimum, maximum, initial } => {
+                if minimum < 1 {
+                    return Err(WorkerError {
+                        code: WorkerErrorCode::InvalidWorkerConfig,
+                        message: "Autoscaling minimum poller behavior must be at least 1".to_string(),
+                    });
+                }
+                if maximum < minimum {
+                    return Err(WorkerError {
+                        code: WorkerErrorCode::InvalidWorkerConfig,
+                        message: "Autoscaling maximum must be greater than or equal to minimum".to_string(),
+                    });
+                }
+                if initial < minimum || initial > maximum {
+                    return Err(WorkerError {
+                        code: WorkerErrorCode::InvalidWorkerConfig,
+                        message: "Autoscaling initial must be between minimum and maximum".to_string(),
+                    });
+                }
+                Ok(PollerBehavior::Autoscaling {
+                    minimum: minimum as usize,
+                    maximum: maximum as usize,
+                    initial: initial as usize,
+                })
+            }
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum WorkerVersioningStrategy {
+    NoVersioning {
+        build_id: String,
+    },
+    WorkerDeploymentBased {
+        deployment_name: String,
+        build_id: String,
+        use_worker_versioning: bool,
+        default_versioning_behavior: Option<VersioningBehavior>,
+    },
+    LegacyBuildIdBased {
+        build_id: String,
+    },
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum VersioningBehavior {
+    Pinned,
+    AutoUpgrade,
+}
+
+impl TryFrom<VersioningBehavior> for CoreVersioningBehavior {
+    type Error = WorkerError;
+
+    fn try_from(behavior: VersioningBehavior) -> Result<Self, WorkerError> {
+        match behavior {
+            VersioningBehavior::Pinned => Ok(CoreVersioningBehavior::Pinned),
+            VersioningBehavior::AutoUpgrade => Ok(CoreVersioningBehavior::AutoUpgrade),
+        }
+    }
+}
+
+impl TryFrom<WorkerVersioningStrategy> for CoreWorkerVersioningStrategy {
+    type Error = WorkerError;
+
+    fn try_from(strategy: WorkerVersioningStrategy) -> Result<Self, WorkerError> {
+        match strategy {
+            WorkerVersioningStrategy::NoVersioning { build_id } => {
+                Ok(CoreWorkerVersioningStrategy::None { build_id })
+            }
+            WorkerVersioningStrategy::WorkerDeploymentBased {
+                deployment_name,
+                build_id,
+                use_worker_versioning,
+                default_versioning_behavior,
+            } => {
+                let version = WorkerDeploymentVersion {
+                    deployment_name,
+                    build_id,
+                };
+                let behavior = default_versioning_behavior.map(|b| {
+                    CoreVersioningBehavior::try_from(b)
+                        .expect("Failed to convert versioning behavior")
+                });
+                Ok(CoreWorkerVersioningStrategy::WorkerDeploymentBased(
+                    WorkerDeploymentOptions {
+                        version,
+                        use_worker_versioning,
+                        default_versioning_behavior: behavior,
+                    },
+                ))
+            }
+            WorkerVersioningStrategy::LegacyBuildIdBased { build_id } => {
+                if build_id.is_empty() {
+                    return Err(WorkerError {
+                        code: WorkerErrorCode::InvalidWorkerConfig,
+                        message: "LegacyBuildIdBased versioning requires a non-empty build ID".to_string(),
+                    });
+                }
+                Ok(CoreWorkerVersioningStrategy::LegacyBuildIdBased { build_id })
+            }
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct WorkerConfig {
     namespace: String,
     task_queue: String,
-    build_id: String,
-    identity_override: Option<String>,
+    client_identity_override: Option<String>,
     max_cached_workflows: usize,
+    // TODO tuner
     max_outstanding_workflow_tasks: usize,
     max_outstanding_activities: usize,
     max_outstanding_local_activities: usize,
-    max_concurrent_workflow_task_polls: usize,
+    workflow_task_poller_behavior: WorkerPollerBehavior,
     nonsticky_to_sticky_poll_ratio: f32,
-    max_concurrent_activity_task_polls: usize,
+    activity_task_poller_behavior: WorkerPollerBehavior,
     no_remote_activities: bool,
     sticky_queue_schedule_to_start_timeout_millis: u64,
     max_heartbeat_throttle_interval_millis: u64,
     default_heartbeat_throttle_interval_millis: u64,
-    max_activities_per_second: Option<f64>,
     max_task_queue_activities_per_second: Option<f64>,
+    max_activities_per_second: Option<f64>,
     graceful_shutdown_period_millis: u64,
     nondeterminism_as_workflow_fail: bool,
     nondeterminism_as_workflow_fail_for_types: Vec<String>,
+    ignore_evicts_on_shutdown: bool,
+    fetching_concurrency: usize,
+    local_timeout_buffer_for_activities_millis: u64,
+    versioning_strategy: WorkerVersioningStrategy,
 }
 
 impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
     type Error = WorkerError;
 
     fn try_from(conf: WorkerConfig) -> Result<Self, WorkerError> {
+        let workflow_poller = PollerBehavior::try_from(conf.workflow_task_poller_behavior)?;
+        let activity_poller = PollerBehavior::try_from(conf.activity_task_poller_behavior)?;
+        let versioning_strategy = CoreWorkerVersioningStrategy::try_from(conf.versioning_strategy)?;
+
         temporal_sdk_core::WorkerConfigBuilder::default()
             .namespace(conf.namespace)
             .task_queue(conf.task_queue)
-            .worker_build_id(conf.build_id)
-            .client_identity_override(conf.identity_override)
+            .client_identity_override(conf.client_identity_override)
             .max_cached_workflows(conf.max_cached_workflows)
             .max_outstanding_workflow_tasks(conf.max_outstanding_workflow_tasks)
             .max_outstanding_activities(conf.max_outstanding_activities)
             .max_outstanding_local_activities(conf.max_outstanding_local_activities)
-            .max_concurrent_wft_polls(conf.max_concurrent_workflow_task_polls)
+            .workflow_task_poller_behavior(workflow_poller)
             .nonsticky_to_sticky_poll_ratio(conf.nonsticky_to_sticky_poll_ratio)
-            .max_concurrent_at_polls(conf.max_concurrent_activity_task_polls)
+            .activity_task_poller_behavior(activity_poller)
             .no_remote_activities(conf.no_remote_activities)
             .sticky_queue_schedule_to_start_timeout(Duration::from_millis(
                 conf.sticky_queue_schedule_to_start_timeout_millis,
@@ -75,9 +214,6 @@ impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
             ))
             .max_worker_activities_per_second(conf.max_activities_per_second)
             .max_task_queue_activities_per_second(conf.max_task_queue_activities_per_second)
-            // Even though grace period is optional, if it is not set then the
-            // auto-cancel-activity behavior of shutdown will not occur, so we
-            // always set it even if 0.
             .graceful_shutdown_period(Duration::from_millis(conf.graceful_shutdown_period_millis))
             .workflow_failure_errors(if conf.nondeterminism_as_workflow_fail {
                 HashSet::from([WorkflowErrorType::Nondeterminism])
@@ -95,6 +231,12 @@ impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
                     })
                     .collect::<HashMap<String, HashSet<WorkflowErrorType>>>(),
             )
+            .ignore_evicts_on_shutdown(conf.ignore_evicts_on_shutdown)
+            .fetching_concurrency(conf.fetching_concurrency)
+            .local_timeout_buffer_for_activities(Duration::from_millis(
+                conf.local_timeout_buffer_for_activities_millis,
+            ))
+            .versioning_strategy(versioning_strategy)
             .build()
             .map_err(|err| WorkerError {
                 code: WorkerErrorCode::InvalidWorkerConfig,
@@ -293,8 +435,8 @@ fn new_replay_worker(
                     code: WorkerErrorCode::InitReplayWorkerFailed,
                     message: format!("Failed creating replay worker: {}", err),
                 },
-            )?,
-        )),
+            )?),
+        ),
         runtime: runtime_ref.runtime.clone(),
     };
 
