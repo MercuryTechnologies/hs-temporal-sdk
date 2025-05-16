@@ -60,6 +60,8 @@ module Temporal.Worker (
   -- Core.pushHistory,
   -- Core.closeHistory,
 
+  WorkflowId (..),
+
   -- ** Worker options
   WorkflowDef (..),
   ActivityDef (..),
@@ -68,15 +70,12 @@ module Temporal.Worker (
   setTracerProvider,
   setNamespace,
   setTaskQueue,
-  setBuildId,
   setIdentity,
   setMaxCachedWorkflows,
   setMaxOutstandingWorkflowTasks,
   setMaxOutstandingActivities,
   setMaxOutstandingLocalActivities,
-  setMaxConcurrentWorkflowTaskPolls,
   setNonstickyToStickyPollRatio,
-  setMaxConcurrentActivityTaskPolls,
   setNoRemoteActivities,
   setStickyQueueScheduleToStartTimeoutMillis,
   setMaxHeartbeatThrottleIntervalMillis,
@@ -86,7 +85,18 @@ module Temporal.Worker (
   setGracefulShutdownPeriodMillis,
   addInterceptors,
   setPayloadProcessor,
-  WorkflowId (..),
+  Core.PollerBehavior (..),
+  setWorkflowTaskPollerBehavior,
+  setActivityTaskPollerBehavior,
+  setNondeterminismAsWorkflowFail,
+  setNondeterminismAsWorkflowFailForTypes,
+  setIgnoreEvictsOnShutdown,
+  setFetchingConcurrency,
+  setLocalTimeoutBufferForActivitiesMillis,
+  setVersioningStrategy,
+  setWorkerDeploymentVersioning,
+  setLegacyBuildIdVersioning,
+  Core.VersioningBehavior(..),
 ) where
 
 import Control.Concurrent
@@ -279,29 +289,10 @@ setTaskQueue (TaskQueue tq) = modifyCore $ \conf ->
     }
 
 
-{- | A string that should be unique to the exact worker code/binary being executed.
-
-This is used to uniquely identify the worker's code for a handful of purposes,
-including the worker versioning feature if you have opted into that with useVersioning.
-It will also populate the binaryChecksum field on older servers.
-
-N.B. this is not the same as the worker's identity, which is a string that identifies
-the worker instance. The identity is used to identify the worker instance in logs and
-in the Temporal UI. The buildId is used to identify the exact version of the code and
-its dependencies. In e.g. Nix, the executable path in the Nix store would be a useful
-buildId.
--}
-setBuildId :: Text -> ConfigM actEnv ()
-setBuildId bid = modifyCore $ \conf ->
-  conf
-    { Core.buildId = bid
-    }
-
-
 setIdentity :: Text -> ConfigM actEnv ()
 setIdentity ident = modifyCore $ \conf ->
   conf
-    { Core.identityOverride = Just ident
+    { Core.clientIdentityOverride = Just ident
     }
 
 
@@ -333,11 +324,6 @@ setMaxOutstandingLocalActivities n = modifyCore $ \conf ->
     }
 
 
-setMaxConcurrentWorkflowTaskPolls :: Word64 -> ConfigM actEnv ()
-setMaxConcurrentWorkflowTaskPolls n = modifyCore $ \conf ->
-  conf
-    { Core.maxConcurrentWorkflowTaskPolls = n
-    }
 
 
 setNonstickyToStickyPollRatio :: Float -> ConfigM actEnv ()
@@ -346,19 +332,6 @@ setNonstickyToStickyPollRatio n = modifyCore $ \conf ->
     { Core.nonstickyToStickyPollRatio = n
     }
 
-
-{- | Maximum number of Activity tasks to poll concurrently.
-
-Increase this setting if your Worker is failing to fill in all
-of its maxConcurrentActivityTaskExecutions slots despite a
-backlog of Activity Tasks in the Task Queue (ie. due to network latency).
-Can't be higher than maxConcurrentActivityTaskExecutions.
--}
-setMaxConcurrentActivityTaskPolls :: Word64 -> ConfigM actEnv ()
-setMaxConcurrentActivityTaskPolls n = modifyCore $ \conf ->
-  conf
-    { Core.maxConcurrentActivityTaskPolls = n
-    }
 
 
 setNoRemoteActivities :: Bool -> ConfigM actEnv ()
@@ -749,3 +722,105 @@ replaceEnvironment Temporal.Worker.Worker {..} env = do
     Core.SReal -> do
       liftIO $ writeIORef workerActivityWorker.activityEnv env
     Core.SReplay -> pure ()
+
+
+{- | Sets the behavior for workflow task polling. This can be either a simple maximum number of concurrent polls,
+or an autoscaling configuration that will adjust the number of concurrent polls based on load.
+-}
+setWorkflowTaskPollerBehavior :: Core.PollerBehavior -> ConfigM actEnv ()
+setWorkflowTaskPollerBehavior behavior = modifyCore $ \conf ->
+  conf
+    { Core.workflowTaskPollerBehavior = behavior
+    }
+
+
+{- | Sets the behavior for activity task polling. This can be either a simple maximum number of concurrent polls,
+or an autoscaling configuration that will adjust the number of concurrent polls based on load.
+-}
+setActivityTaskPollerBehavior :: Core.PollerBehavior -> ConfigM actEnv ()
+setActivityTaskPollerBehavior behavior = modifyCore $ \conf ->
+  conf
+    { Core.activityTaskPollerBehavior = behavior
+    }
+
+
+{- | Sets whether nondeterministic workflow execution should be treated as a workflow failure.
+When enabled, any nondeterministic behavior in a workflow will cause the workflow to fail
+with a nondeterminism error.
+-}
+setNondeterminismAsWorkflowFail :: Bool -> ConfigM actEnv ()
+setNondeterminismAsWorkflowFail b = modifyCore $ \conf ->
+  conf
+    { Core.nondeterminismAsWorkflowFail = b
+    }
+
+
+{- | Sets specific workflow types that should fail on nondeterminism, even if
+setNondeterminismAsWorkflowFail is False. This allows for selective enforcement
+of determinism requirements.
+-}
+setNondeterminismAsWorkflowFailForTypes :: [Text] -> ConfigM actEnv ()
+setNondeterminismAsWorkflowFailForTypes types = modifyCore $ \conf ->
+  conf
+    { Core.nondeterminismAsWorkflowFailForTypes = types
+    }
+
+
+{- | Sets whether to ignore workflow evictions during shutdown. When enabled,
+workflows will not be evicted from the cache during worker shutdown.
+-}
+setIgnoreEvictsOnShutdown :: Bool -> ConfigM actEnv ()
+setIgnoreEvictsOnShutdown b = modifyCore $ \conf ->
+  conf
+    { Core.ignoreEvictsOnShutdown = b
+    }
+
+
+{- | Sets the number of concurrent history fetches allowed. This controls how many
+workflow histories can be fetched simultaneously.
+-}
+setFetchingConcurrency :: Word64 -> ConfigM actEnv ()
+setFetchingConcurrency n = modifyCore $ \conf ->
+  conf
+    { Core.fetchingConcurrency = n
+    }
+
+
+{- | Sets the buffer time in milliseconds to add to activity timeouts for local activities.
+This helps prevent timeouts due to clock skew between the worker and the Temporal server.
+-}
+setLocalTimeoutBufferForActivitiesMillis :: Word64 -> ConfigM actEnv ()
+setLocalTimeoutBufferForActivitiesMillis n = modifyCore $ \conf ->
+  conf
+    { Core.localTimeoutBufferForActivitiesMillis = n
+    }
+
+
+{- | Sets the versioning strategy for the worker. This controls how the worker handles
+versioning of workflows and activities.
+-}
+setVersioningStrategy :: Core.WorkerVersioningStrategy -> ConfigM actEnv ()
+setVersioningStrategy strategy = modifyCore $ \conf ->
+  conf
+    { Core.versioningStrategy = strategy
+    }
+
+{- | Sets up worker deployment-based versioning. This is the recommended approach for
+versioning workflows and activities. It allows for more granular control over
+versioning behavior and better compatibility with the Temporal server.
+-}
+setWorkerDeploymentVersioning :: Text -> Text -> Bool -> Maybe Core.VersioningBehavior -> ConfigM actEnv ()
+setWorkerDeploymentVersioning deploymentName buildId useVersioning defaultBehavior =
+  setVersioningStrategy $ Core.WorkerDeploymentBased
+    { Core.deploymentName = deploymentName
+    , Core.buildId = buildId
+    , Core.useWorkerVersioning = useVersioning
+    , Core.defaultVersioningBehavior = defaultBehavior
+    }
+
+{- | Sets up legacy build ID-based versioning. This is the older approach to versioning
+that is still supported but not recommended for new deployments.
+-}
+setLegacyBuildIdVersioning :: Text -> ConfigM actEnv ()
+setLegacyBuildIdVersioning buildId =
+  setVersioningStrategy $ Core.LegacyBuildIdBased { Core.buildId = buildId }
