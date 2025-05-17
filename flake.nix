@@ -27,6 +27,7 @@
                 ./nix/devenv/temporal-bridge.nix
                 ./nix/devenv/temporal-dev-server.nix
                 (import ./nix/devenv/haskell.nix ghcVersion)
+                ({ pkgs, ... }: { packages = [self.packages.${pkgs.system}.tcld]; })
               ];
             };
           shells = inputs.nixpkgs.lib.genAttrs ghcVersions (version: mkShell version);
@@ -41,6 +42,7 @@
         in
         haskellUtils.localPackageMatrix
         // {
+          tcld = pkgs.callPackage ./nix/packages/tcld { };
           temporal-bridge = pkgs.temporal_bridge;
         }
       );
