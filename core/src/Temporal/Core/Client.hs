@@ -49,6 +49,7 @@ module Temporal.Core.Client (
 import Control.Concurrent
 import Control.Exception
 import Control.Monad
+import Control.Monad.Logger
 import Data.Aeson
 import Data.Aeson.TH
 import Data.ByteString (ByteString)
@@ -258,13 +259,15 @@ connectClient rt conf = do
             case result of
               Left errFP -> do
                 err <- withForeignPtr errFP $ peek >=> cArrayToText
+                let err' = "Error connecting to Temporal server: " <> err
+                runStdoutLoggingT $ $(logWarn) err'
                 case retryConfig conf of
-                  Nothing -> putMVar clientPtrSlot (throw $ ClientConnectionError err)
+                  Nothing -> putMVar clientPtrSlot (throw $ ClientConnectionError err')
                   Just retryConf -> do
                     let delayMillis = fromIntegral (initialIntervalMillis retryConf) * multiplier retryConf ^ attempt
                         delayMicros = delayMillis * 1000
                     if (fmap fromIntegral (maxElapsedTimeMillis retryConf) < Just delayMillis) || (maxRetries retryConf <= attempt)
-                      then putMVar clientPtrSlot (throw $ ClientConnectionError err)
+                      then putMVar clientPtrSlot (throw $ ClientConnectionError err')
                       else do
                         threadDelay $ round delayMicros
                         go (attempt + 1)
