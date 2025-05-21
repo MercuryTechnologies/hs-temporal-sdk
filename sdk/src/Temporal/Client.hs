@@ -7,6 +7,7 @@
 {-# LANGUAGE TypeFamilyDependencies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE OverloadedLabels #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
 {-# HLINT ignore "Use >=>" #-}
@@ -71,6 +72,12 @@ module Temporal.Client (
   fetchHistory,
   streamEvents,
   FollowOption (..),
+
+  -- * List workflows
+  Temporal.Client.listClosedWorkflowExecutions,
+  Temporal.Client.listOpenWorkflowExecutions,
+  Temporal.Client.scanWorkflowExecutions,
+  Temporal.Client.countWorkflowExecutions,
 ) where
 
 import Conduit
@@ -121,6 +128,11 @@ import Proto.Temporal.Api.Workflowservice.V1.RequestResponse (
   QueryWorkflowResponse,
   UpdateWorkflowExecutionRequest,
   UpdateWorkflowExecutionResponse,
+  ListClosedWorkflowExecutionsRequest,
+  ListOpenWorkflowExecutionsRequest,
+  ScanWorkflowExecutionsRequest,
+  CountWorkflowExecutionsRequest,
+  CountWorkflowExecutionsResponse,
  )
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as RR
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as WF
@@ -136,6 +148,7 @@ import Temporal.Workflow (KnownQuery (..), KnownSignal (..), QueryRef (..))
 import Temporal.Workflow.Definition
 import UnliftIO
 import Unsafe.Coerce
+import Proto.Temporal.Api.Workflow.V1.Message (WorkflowExecutionInfo)
 
 
 ---------------------------------------------------------------------------------
@@ -821,7 +834,7 @@ streamEvents
   :: (MonadIO m, HasWorkflowClient m)
   => FollowOption
   -> GetWorkflowExecutionHistoryRequest
-  -> ConduitT () HistoryEvent m ()
+  -> ConduitT i HistoryEvent m ()
 streamEvents followOpt baseReq = askWorkflowClient >>= \c -> go c baseReq
   where
     go c req = do
@@ -891,25 +904,58 @@ waitResult wfId mrId (Namespace ns) = do
   connect (streamEvents FollowRuns startingReq) lastC
 
 
--- listOpenWorkflowExecutions
---   :: (MonadIO m, HasWorkflowClient m)
---   => ListOpenWorkflowExecutionsRequest
---   -> ConduitT () WorkflowExecutionInfo m ()
+listOpenWorkflowExecutions
+  :: (MonadIO m, HasWorkflowClient m)
+  => ListOpenWorkflowExecutionsRequest
+  -> ConduitT i WorkflowExecutionInfo m ()
+listOpenWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq & #namespace .~ rawNamespace c.clientConfig.namespace)
+  where
+    go c req = do
+      res <- liftIO $ Temporal.Core.Client.WorkflowService.listOpenWorkflowExecutions c.clientCore req
+      case res of
+        Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+        Right x -> do
+          yieldMany (x ^. #vec'executions)
+          unless (x ^. #nextPageToken == "") do
+            go c (req & #nextPageToken .~ (x ^. #nextPageToken))
 
--- listClosedWorkflowExecutions
---   :: (MonadIO m, HasWorkflowClient m)
---   => ListClosedWorkflowExecutionsRequest
---   -> ConduitT () WorkflowExecutionInfo m ()
+listClosedWorkflowExecutions :: (MonadIO m, HasWorkflowClient m) => ListClosedWorkflowExecutionsRequest -> ConduitT i WorkflowExecutionInfo m ()
+listClosedWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq & #namespace .~ rawNamespace c.clientConfig.namespace)
+  where
+    go c req = do
+      res <- liftIO $ Temporal.Core.Client.WorkflowService.listClosedWorkflowExecutions c.clientCore req
+      case res of
+        Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+        Right x -> do
+          yieldMany (x ^. #vec'executions)
+          unless (x ^. #nextPageToken == "") do
+            go c (req & #nextPageToken .~ (x ^. #nextPageToken))
 
--- scanWorkflowExecutions
---   :: (MonadIO m, HasWorkflowClient m)
---   => ScanWorkflowExecutionsRequest
---   -> ConduitT () WorkflowExecutionInfo m ()
+-- TODO, replace with newer listWorkflowExecutions API, this is deprecated in the proto
+scanWorkflowExecutions
+  :: (MonadIO m, HasWorkflowClient m)
+  => ScanWorkflowExecutionsRequest
+  -> ConduitT i WorkflowExecutionInfo m ()
+scanWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq & #namespace .~ rawNamespace c.clientConfig.namespace)
+  where
+    go c req = do
+      res <- liftIO $ Temporal.Core.Client.WorkflowService.scanWorkflowExecutions c.clientCore req
+      case res of
+        Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+        Right x -> do
+          yieldMany (x ^. #vec'executions)
+          unless (x ^. #nextPageToken == "") do
+            go c (req & #nextPageToken .~ (x ^. #nextPageToken))
 
--- countWorkflowExecutions
---   :: (MonadIO m, HasWorkflowClient m)
---   => CountWorkflowExecutionsRequest
---   -> m Int64
+countWorkflowExecutions
+  :: (MonadIO m, HasWorkflowClient m)
+  => CountWorkflowExecutionsRequest
+  -> m CountWorkflowExecutionsResponse
+countWorkflowExecutions baseReq = askWorkflowClient >>= \c -> liftIO do
+  res <- Temporal.Core.Client.WorkflowService.countWorkflowExecutions c.clientCore baseReq
+  case res of
+    Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+    Right x -> pure x
 
 data UpdateLifecycleStage
   = UpdateLifecycleStageUnspecified
