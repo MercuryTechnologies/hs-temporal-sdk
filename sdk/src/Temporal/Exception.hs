@@ -1,5 +1,4 @@
 {-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Temporal.Exception (
@@ -74,6 +73,7 @@ import qualified Data.HashMap.Strict as HashMap
 import Data.Int
 import Data.ProtoLens (Message (..), SomeMessageType(..), decodeMessage, decodeMessageOrDie)
 import qualified Data.ProtoLens.Any as Any
+import Data.ProtoLens.Field (field)
 import Data.Text
 import Data.Typeable
 import Data.Vector (Vector)
@@ -818,7 +818,7 @@ errorRegistry = HashMap.fromList
       )
 
 applyRegistry :: HashMap.HashMap Text (Any.Any -> Either Any.UnpackError RpcErrorDetails) -> Any.Any -> RpcErrorDetails
-applyRegistry m x = case HashMap.lookup (x ^. #typeUrl) m of
+applyRegistry m x = case HashMap.lookup (x ^. field @"typeUrl") m of
   Nothing -> RpcErrorUnrecognized x
   Just f -> case f x of
     Left _ -> RpcErrorUnrecognized x
@@ -852,6 +852,6 @@ coreRpcErrorToRpcError :: Temporal.Core.Client.RpcError -> Temporal.Exception.Rp
 coreRpcErrorToRpcError err = Temporal.Exception.RpcError
   { code = toEnum $ fromIntegral err.code
   , message = err.message
-  , details = fmap (applyRegistry errorRegistry) ((decodeMessageOrDie @Status err.details) ^. #details)
+  , details = fmap (applyRegistry errorRegistry) ((decodeMessageOrDie @Status err.details) ^. field @"details")
   }
 
