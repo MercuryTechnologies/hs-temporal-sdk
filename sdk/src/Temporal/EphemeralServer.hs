@@ -1,3 +1,5 @@
+{-# LANGUAGE DuplicateRecordFields #-}
+
 {- |
 Module: Temporal.EphemeralServer
 Description: Run an Temporal server in a programatically for testing and development.
@@ -18,6 +20,7 @@ module Temporal.EphemeralServer (
   EphemeralExe (..),
   SDKDefault (..),
   TemporalDevServerConfig (..),
+  TemporalTestServerConfig (..),
   defaultTemporalDevServerConfig,
   EphemeralServer,
   shutdownEphemeralServer,
@@ -48,7 +51,7 @@ withDevServer rt conf =
     (\e -> liftIO (shutdownEphemeralServer e) >>= either (throwIO . EphemeralServerError) pure)
 
 
-withTestServer :: MonadUnliftIO m => Runtime -> TestServerConfig -> (EphemeralServer -> m a) -> m a
+withTestServer :: MonadUnliftIO m => Runtime -> TemporalTestServerConfig -> (EphemeralServer -> m a) -> m a
 withTestServer rt conf =
   bracket
     (liftIO (startTestServer rt conf) >>= either (throwIO . EphemeralServerError) pure)
@@ -97,7 +100,7 @@ launchTestServer rt extraArgs = do
   bimap EphemeralServerError (\srv -> (freePort, srv)) <$> startTestServer rt (hackyConfig freePort)
   where
     hackyConfig port =
-      TestServerConfig
+      TemporalTestServerConfig
         { exe = CachedDownload (Default $ SDKDefault "community-haskell" "0.1.0.0") Nothing Nothing
         , port = Just $ fromIntegral port
         , extraArgs

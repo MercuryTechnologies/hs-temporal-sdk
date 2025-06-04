@@ -38,7 +38,7 @@ import qualified Data.Map.Strict as Map
 import Data.Maybe (fromJust, isJust)
 import Data.Text (Text)
 import qualified Data.Text as Text
-import Data.Time (Day (ModifiedJulianDay))
+import Data.Time (Day (ModifiedJulianDay), diffUTCTime, getCurrentTime)
 import Data.Time.Clock (UTCTime)
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
@@ -49,6 +49,7 @@ import GHC.Generics
 import GHC.Stack (SrcLoc (..), callStack, fromCallSiteList)
 import IntegrationSpec.HangingWorkflow
 import IntegrationSpec.NoOpWorkflow
+import IntegrationSpec.TimeSkipping
 import IntegrationSpec.TimeoutsInWorkflows
 import IntegrationSpec.Updates
 import Lens.Family2
@@ -68,10 +69,12 @@ import Temporal.Contrib.OpenTelemetry
 import Temporal.Core.Client hiding (RpcError)
 import Temporal.Duration
 import Temporal.EphemeralServer
+import qualified Temporal.EphemeralServer as TemporalDevServerConfig (TemporalDevServerConfig (..))
+import qualified Temporal.EphemeralServer as TemporalTestServerConfig (TemporalTestServerConfig (..))
 import Temporal.Exception
 import Temporal.Interceptor
 import Temporal.Operator (IndexedValueType (..), SearchAttributes (..), addSearchAttributes, listSearchAttributes)
-import Temporal.Payload
+import Temporal.Payload hiding (around)
 import Temporal.SearchAttributes
 import Temporal.TH (ActivityFn, WorkflowFn, discoverDefinitions)
 import Temporal.Worker
@@ -186,7 +189,15 @@ sillyEncryptionPayloadProcessor = PayloadProcessor incr decr
 
 
 makeClient :: PortNumber -> Interceptors env -> IO (C.WorkflowClient, Client)
-makeClient pn Interceptors {..} = do
+makeClient pn interceptors = makeClient' pn interceptors False
+
+
+makeTimeSkippingClient :: PortNumber -> Interceptors env -> IO (C.WorkflowClient, Client)
+makeTimeSkippingClient pn interceptors = makeClient' pn interceptors True
+
+
+makeClient' :: PortNumber -> Interceptors env -> Bool -> IO (C.WorkflowClient, Client)
+makeClient' pn Interceptors {..} enableTimeSkipping = do
   let conf = configWithRetry pn
   c <- runStdoutLoggingT $ connectClient globalRuntime conf
   (,)
@@ -196,6 +207,7 @@ makeClient pn Interceptors {..} = do
           { namespace = "default"
           , interceptors = clientInterceptors
           , payloadProcessor = sillyEncryptionPayloadProcessor
+          , enableTimeSkipping
           }
       )
     <*> pure c
@@ -244,11 +256,31 @@ withServer f = do
         Just temporalPath -> do
           let serverConfig =
                 defaultTemporalDevServerConfig
-                  { port = Just $ fromIntegral fp
-                  , exe = ExistingPath temporalPath
+                  { TemporalDevServerConfig.port = Just $ fromIntegral fp
+                  , TemporalDevServerConfig.exe = ExistingPath temporalPath
                   }
           pure serverConfig
       withDevServer globalRuntime conf $ \_ -> do
+        f fp
+
+
+withTimeSkippingServer :: (PortNumber -> IO a) -> IO a
+withTimeSkippingServer f = do
+  lookupEnv "HS_TEMPORAL_SDK_LOCAL_TIME_SKIPPING_TEST_SERVER" >>= \case
+    Just _ -> f 7234
+    _ -> do
+      fp <- getFreePort
+      mTemporalPath <- findExecutable "temporal-test-server"
+      conf <- case mTemporalPath of
+        Nothing -> error "Could not find the 'temporal-test-server' (time-skipping) executable in PATH"
+        Just temporalPath -> do
+          pure
+            TemporalTestServerConfig
+              { TemporalTestServerConfig.exe = ExistingPath temporalPath
+              , TemporalTestServerConfig.port = Just $ fromIntegral fp
+              , TemporalTestServerConfig.extraArgs = []
+              }
+      withTestServer globalRuntime conf $ \_ -> do
         f fp
 
 
@@ -265,6 +297,22 @@ setup additionalInterceptors fp go = do
           , ("attr2", Temporal.Operator.Int)
           ]
   _ <- addSearchAttributes coreClient (W.Namespace "default") (allTestAttributes `Map.difference` customAttributes)
+
+  (conf, taskQueue) <- mkBaseConf interceptors
+  go
+    TestEnv
+      { useClient = flip runReaderT client
+      , withWorker = mkWithWorker fp
+      , baseConf = conf
+      , taskQueue
+      }
+
+
+setupTimeSkipping :: Interceptors () -> PortNumber -> (TestEnv -> IO ()) -> IO ()
+setupTimeSkipping additionalInterceptors fp go = do
+  otelInterceptors <- makeOpenTelemetryInterceptor
+  let interceptors = otelInterceptors <> additionalInterceptors
+  (client, _) <- makeTimeSkippingClient fp interceptors
 
   (conf, taskQueue) <- mkBaseConf interceptors
   go
@@ -374,6 +422,9 @@ spec = do
     aroundAllWith (flip $ setup mempty) needsClient
     aroundAllWith (flip $ setup mempty) terminateTests
     updatesWithInterceptors
+
+  around withTimeSkippingServer $ do
+    aroundWith (flip $ setupTimeSkipping mempty) needsTimeSkipping
 
 
 type MyWorkflow a = W.RequireCallStack => W.Workflow a
@@ -1813,6 +1864,46 @@ needsClient = do
         eWorkflowResult `shouldSatisfy` \case
           Left (WorkflowExecutionFailed attrs) -> (attrs ^. History.failure . Failure.message) == "Current state var: 12"
           _ -> False
+
+
+needsTimeSkipping :: SpecWith TestEnv
+needsTimeSkipping = do
+  fdescribe "Workflow" $ do
+    it "should run a workflow" $ \TestEnv {..} -> do
+      let conf = configure () testConf $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts =
+                    C.TimeoutOptions
+                      { C.runTimeout = Just $ seconds 4
+                      , C.executionTimeout = Nothing
+                      , C.taskTimeout = Nothing
+                      }
+                }
+        useClient (C.execute testRefs.shouldRunWorkflowTest "basicWf" opts)
+          `shouldReturn` ()
+    it "should skip over sleeps in a workflow" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts =
+                    C.TimeoutOptions
+                      { C.runTimeout = Just $ seconds 15
+                      , C.executionTimeout = Nothing
+                      , C.taskTimeout = Nothing
+                      }
+                }
+        startTime <- getCurrentTime
+        useClient (C.execute VariableSleepWorkflow "variable-sleep-workflow" opts 10)
+        endTime <- getCurrentTime
+        let secondsElapsed = diffUTCTime endTime startTime
+        secondsElapsed `shouldSatisfy` (< 1)
 
 
 updatesWithInterceptors :: SpecWith PortNumber
