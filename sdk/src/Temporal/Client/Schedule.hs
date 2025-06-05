@@ -177,7 +177,6 @@ module Temporal.Client.Schedule (
 ) where
 
 import Control.Monad
-import Data.Bifunctor
 import Data.ByteString (ByteString)
 import Data.Conduit
 import Data.Int (Int32, Int64)
@@ -208,19 +207,12 @@ import Temporal.Common
 import Temporal.Core.Client
 import qualified Temporal.Core.Client.WorkflowService as Core
 import Temporal.Duration
+import Temporal.Exception
 import Temporal.Payload
 import Temporal.SearchAttributes
 import Temporal.SearchAttributes.Internal
 import Temporal.Workflow
 import UnliftIO
-
-
-throwEither :: (MonadIO m, Exception e) => m (Either e a) -> m a
-throwEither m = do
-  e <- m
-  case e of
-    Left err -> throwIO err
-    Right ok -> pure ok
 
 
 ---------------------------------------------------------------------------------
@@ -269,20 +261,22 @@ createSchedule
   -> m ByteString
 createSchedule s opts = liftIO $ do
   searchAttributes <- searchAttributesToProto opts.searchAttributes
-  resp <-
-    throwEither $
-      Core.createSchedule
-        (scheduleClient s)
-        ( defMessage
-            & WF.namespace .~ rawNamespace s.scheduleClientNamespace
-            & WF.scheduleId .~ rawScheduleId opts.scheduleId
-            & WF.schedule .~ scheduleToProto opts.schedule
-            & WF.identity .~ s.identity
-            & WF.maybe'initialPatch .~ fmap schedulePatchToProto opts.initialPatch
-            & WF.memo .~ convertToProtoMemo opts.memo
-            & WF.requestId .~ opts.requestId
-            & WF.searchAttributes .~ (defMessage & C.indexedFields .~ searchAttributes)
-        )
+  resp <- do
+    eResp <- Core.createSchedule
+      (scheduleClient s)
+      ( defMessage
+          & WF.namespace .~ rawNamespace s.scheduleClientNamespace
+          & WF.scheduleId .~ rawScheduleId opts.scheduleId
+          & WF.schedule .~ scheduleToProto opts.schedule
+          & WF.identity .~ s.identity
+          & WF.maybe'initialPatch .~ fmap schedulePatchToProto opts.initialPatch
+          & WF.memo .~ convertToProtoMemo opts.memo
+          & WF.requestId .~ opts.requestId
+          & WF.searchAttributes .~ (defMessage & C.indexedFields .~ searchAttributes)
+      )
+    case eResp of
+      Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+      Right resp -> pure resp
   pure $ resp ^. WF.conflictToken
 
 
@@ -293,17 +287,16 @@ deleteSchedule
   -> ScheduleId
   -> m ()
 deleteSchedule c sId = do
-  _resp <-
-    liftIO $
-      throwEither $
-        Core.deleteSchedule
-          c.scheduleClient
-          ( defMessage
-              & WF.namespace .~ rawNamespace c.scheduleClientNamespace
-              & WF.identity .~ c.identity
-              & WF.scheduleId .~ rawScheduleId sId
-          )
-  pure ()
+  eResp <- liftIO $ Core.deleteSchedule
+    c.scheduleClient
+      ( defMessage
+          & WF.namespace .~ rawNamespace c.scheduleClientNamespace
+          & WF.identity .~ c.identity
+          & WF.scheduleId .~ rawScheduleId sId
+      )
+  case eResp of
+    Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+    Right _ -> pure ()
 
 
 data ListSchedulesOptions = ListSchedulesOptions
@@ -363,9 +356,11 @@ scheduleListEntryFromProto :: S.ScheduleListEntry -> IO ScheduleListEntry
 scheduleListEntryFromProto p = do
   let searchAttrs :: Map Text C.Payload
       searchAttrs = p ^. S.searchAttributes . C.indexedFields
-  searchAttributes <- throwEither $ do
+  searchAttributes <- do
     res <- searchAttributesFromProto searchAttrs
-    pure $ first ValueError res
+    case res of
+      Left err -> throwIO $ ValueError err
+      Right attrs -> pure attrs
 
   pure $
     ScheduleListEntry
@@ -385,16 +380,17 @@ listSchedules
 listSchedules c opts = go ""
   where
     go tok = do
-      resp <-
-        liftIO $
-          throwEither $
-            Core.listSchedules
-              c.scheduleClient
-              ( defMessage
-                  & WF.namespace .~ rawNamespace c.scheduleClientNamespace
-                  & WF.maximumPageSize .~ opts.maximumPageSize
-                  & WF.nextPageToken .~ tok
-              )
+      resp <- liftIO do
+        eResp <- Core.listSchedules
+          c.scheduleClient
+          ( defMessage
+              & WF.namespace .~ rawNamespace c.scheduleClientNamespace
+              & WF.maximumPageSize .~ opts.maximumPageSize
+              & WF.nextPageToken .~ tok
+          )
+        case eResp of
+          Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+          Right resp -> pure resp
       unless (V.null (resp ^. WF.vec'schedules)) $ do
         liftIO (traverse scheduleListEntryFromProto (resp ^. WF.vec'schedules)) >>= yield
       if resp ^. WF.nextPageToken == "" || V.null (resp ^. WF.vec'schedules)
@@ -418,16 +414,18 @@ listScheduleMatchingTimes
   -> m (Vector SystemTime)
 listScheduleMatchingTimes c opts = do
   resp <-
-    liftIO $
-      throwEither $
-        Core.listScheduleMatchingTimes
-          c.scheduleClient
+    liftIO do
+      eResp <- Core.listScheduleMatchingTimes
+        c.scheduleClient
           ( defMessage
               & WF.namespace .~ rawNamespace c.scheduleClientNamespace
               & WF.scheduleId .~ rawScheduleId opts.scheduleId
               & WF.startTime .~ timespecToTimestamp opts.startTime
               & WF.endTime .~ timespecToTimestamp opts.endTime
           )
+      case eResp of
+        Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+        Right resp -> pure resp
   pure $ fmap timespecFromTimestamp (resp ^. WF.vec'startTime)
 
 
@@ -728,25 +726,26 @@ describeSchedule
   -> ScheduleId
   -> m DescribeScheduleResponse
 describeSchedule c (ScheduleId s) = liftIO $ do
-  res <-
-    throwEither $
-      Core.describeSchedule
+  eResp <- Core.describeSchedule
         c.scheduleClient
         ( defMessage
             & WF.namespace .~ rawNamespace c.scheduleClientNamespace
             & WF.scheduleId .~ s
         )
-  searchAttributes <- throwEither $ do
-    resp <- searchAttributesFromProto (res ^. S.searchAttributes . C.indexedFields)
-    pure $ first ValueError resp
-  pure $
-    DescribeScheduleResponse
-      { schedule = scheduleFromProto (res ^. WF.schedule)
-      , info = scheduleInfoFromProto (res ^. S.info)
-      , memo = convertFromProtoMemo (res ^. WF.memo)
-      , searchAttributes = searchAttributes
-      , conflictToken = res ^. WF.conflictToken
-      }
+  case eResp of
+    Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+    Right res -> do
+      resp <- searchAttributesFromProto (res ^. S.searchAttributes . C.indexedFields)
+      case resp of
+        Left err -> throwIO $ ValueError err
+        Right searchAttributes -> pure $
+          DescribeScheduleResponse
+            { schedule = scheduleFromProto (res ^. WF.schedule)
+            , info = scheduleInfoFromProto (res ^. S.info)
+            , memo = convertFromProtoMemo (res ^. WF.memo)
+            , searchAttributes = searchAttributes
+            , conflictToken = res ^. WF.conflictToken
+            }
 
 
 data TriggerImmediatelyRequest = TriggerImmediatelyRequest
@@ -830,19 +829,19 @@ patchSchedule
   -> SchedulePatch
   -> m ()
 patchSchedule c (ScheduleId s) p = liftIO $ do
-  _resp <-
-    throwEither $
-      Core.patchSchedule
-        c.scheduleClient
-        ( defMessage
-            & WF.namespace .~ rawNamespace c.scheduleClientNamespace
-            & WF.scheduleId .~ s
-            & WF.patch .~ schedulePatchToProto p
-            & WF.identity .~ c.identity
-            -- TODO
-            & WF.requestId .~ p.requestId
-        )
-  pure ()
+  eResp <- Core.patchSchedule
+    c.scheduleClient
+    ( defMessage
+        & WF.namespace .~ rawNamespace c.scheduleClientNamespace
+        & WF.scheduleId .~ s
+        & WF.patch .~ schedulePatchToProto p
+        & WF.identity .~ c.identity
+        -- TODO
+        & WF.requestId .~ p.requestId
+    )
+  case eResp of
+    Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+    Right _ -> pure ()
 
 
 data UpdateScheduleRequest = UpdateScheduleRequest
@@ -867,9 +866,8 @@ updateSchedule
   -> UpdateScheduleRequest
   -> m ()
 updateSchedule c (ScheduleId s) u = liftIO $ do
-  _resp <-
-    throwEither $
-      Core.updateSchedule
+  _resp <- do
+    eResp <- Core.updateSchedule
         c.scheduleClient
         ( defMessage
             & WF.namespace .~ rawNamespace c.scheduleClientNamespace
@@ -879,6 +877,9 @@ updateSchedule c (ScheduleId s) u = liftIO $ do
             & WF.identity .~ c.identity
             & WF.requestId .~ u.requestId
         )
+    case eResp of
+      Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+      Right _ -> pure ()
   pure ()
 
 
