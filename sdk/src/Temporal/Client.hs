@@ -242,6 +242,10 @@ instance HasWorkflowClient ((->) WorkflowClient) where
   askWorkflowClient = id
 
 
+throwEither :: (MonadIO m, Exception e) => IO (Either e a) -> m a
+throwEither = either throwIO pure <=< liftIO
+
+
 {- | Run a workflow, synchronously waiting for it to complete.
 
 This function will block until the workflow completes, and will return the result of the workflow
@@ -357,7 +361,7 @@ signal (WorkflowHandle _ _t c wf r _) (signalRef -> (KnownSignal sName sCodec)) 
   -- FIXME: Can we just ignore this now that it's no longer present?
   -- & WF.skipGenerateWorkflowTask .~ opts.skipGenerateWorkflowTask
   case result of
-    Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+    Left err -> throwIO err
     Right _ -> pure ()
 
 
@@ -434,11 +438,7 @@ query h (queryRef -> KnownQuery qn codec) opts = withArgs @(QueryArgs query) @(m
               QueryRejectConditionNotOpen -> Query.QUERY_REJECT_CONDITION_NOT_OPEN
               QueryRejectConditionNotCompletedCleanly -> Query.QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY
 
-    (res :: QueryWorkflowResponse) <- do
-      eRes <- liftIO $ Temporal.Core.Client.WorkflowService.queryWorkflow h.workflowHandleClient.clientCore msg
-      case eRes of
-        Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
-        Right res -> pure res
+    (res :: QueryWorkflowResponse) <- either throwIO pure =<< Temporal.Core.Client.WorkflowService.queryWorkflow h.workflowHandleClient.clientCore msg
     case res ^. WF.maybe'queryRejected of
       Just rejection -> do
         let status = queryRejectionStatusFromProto (rejection ^. Query.status)
@@ -573,7 +573,7 @@ startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
             & WF.maybe'workflowStartDelay .~ (durationToProto <$> workflowStartDelay opts')
     res <- startWorkflowExecution c.clientCore req
     case res of
-      Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+      Left err -> throwIO err
       Right swer ->
         let runId = RunId $ swer ^. WF.runId
         in pure $
@@ -701,7 +701,7 @@ signalWithStart (workflowRef -> k@(KnownWorkflow codec _)) wfId opts (signalRef 
             c.clientCore
             msg
         case res of
-          Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+          Left err -> throwIO err
           Right swer ->
             pure $
               WorkflowHandle
@@ -734,13 +734,11 @@ cease execution. The workflow will not be given a chance to react to the termina
 -}
 terminate :: (MonadIO m) => WorkflowHandle a -> TerminationOptions -> m ()
 terminate h req =
-  void do
-    res <- liftIO $ terminateWorkflowExecution
-      h.workflowHandleClient.clientCore
-      msg
-    case res of
-      Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
-      Right _ -> pure ()
+  void $
+    throwEither $
+      terminateWorkflowExecution
+        h.workflowHandleClient.clientCore
+        msg
   where
     msg =
       defMessage
@@ -827,7 +825,7 @@ streamEvents followOpt baseReq = askWorkflowClient >>= \c -> go c baseReq
     go c req = do
       res <- liftIO $ getWorkflowExecutionHistory c.clientCore req
       case res of
-        Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+        Left err -> throwIO err
         Right x -> do
           yieldMany (x ^. RR.history . History.events)
           for_ (decideLoop baseReq x) (go c)
@@ -975,14 +973,7 @@ startUpdateFromPayloads h@(WorkflowHandle _ _ c _ _ _) (KnownUpdate updateCodec 
                          )
                  )
 
-    (res :: UpdateWorkflowExecutionResponse) <- do
-      eRes <- liftIO $ Temporal.Core.Client.WorkflowService.updateWorkflowExecution h.workflowHandleClient.clientCore msg
-      case eRes of
-        Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
-        Right res -> pure res
-
-    -- We're not going to look for a successful result yet (waitUpdateResult will do that), but we do want to check for failures
-    -- so that we can report validataion failures via UpdateFailure rather than RpcError.
+    (res :: UpdateWorkflowExecutionResponse) <- either throwIO pure =<< Temporal.Core.Client.WorkflowService.updateWorkflowExecution h.workflowHandleClient.clientCore msg
     case res ^. Update.maybe'outcome of
       Just outcome -> do
         case outcome ^. Update.maybe'value of
@@ -1060,7 +1051,7 @@ waitUpdateResult h = do
       go = do
         eRes <- Temporal.Core.Client.WorkflowService.pollWorkflowExecutionUpdate h.updateHandleWorkflowClient.clientCore msg
         case eRes of
-          Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+          Left err -> throwIO err
           Right res -> do
             case res ^. Update.maybe'outcome of
               Nothing -> go

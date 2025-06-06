@@ -26,7 +26,6 @@ import qualified Data.Vector as V
 import Temporal.Duration (Duration, durationFromProto)
 import Temporal.Client (HasWorkflowClient (..))
 import Temporal.Core.Client.WorkflowService (listNamespaces)
-import Temporal.Exception
 import Lens.Family2
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse as RR
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as RR
@@ -244,7 +243,7 @@ listNamespaces req = do
   let go reqMsg = do
         res <- liftIO $ Temporal.Core.Client.WorkflowService.listNamespaces client.clientCore reqMsg
         case res of
-          Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+          Left err -> throwIO err
           Right x -> do
             let namespaces = x ^. RR.vec'namespaces
             yieldMany $ describeNamespaceResponseFromProto <$> namespaces
