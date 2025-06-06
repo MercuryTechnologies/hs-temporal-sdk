@@ -48,7 +48,6 @@ library:
     - aeson
     - async
     - lens-family
-    - monad-logger
     - network-bsd
     - proto-lens
     - unliftio
@@ -58,3 +57,4 @@ library:
   when:
     - condition: os(darwin)
       frameworks: [Security, CoreFoundation, SystemConfiguration]
+
