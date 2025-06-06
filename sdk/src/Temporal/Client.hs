@@ -909,7 +909,7 @@ listOpenWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq &
     go c req = do
       res <- liftIO $ Temporal.Core.Client.WorkflowService.listOpenWorkflowExecutions c.clientCore req
       case res of
-        Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+        Left err -> throwIO err
         Right x -> do
           yieldMany (x ^. field @"vec'executions")
           unless (x ^. field @"nextPageToken" == "") do
@@ -921,7 +921,7 @@ listClosedWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq
     go c req = do
       res <- liftIO $ Temporal.Core.Client.WorkflowService.listClosedWorkflowExecutions c.clientCore req
       case res of
-        Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+        Left err -> throwIO err
         Right x -> do
           yieldMany (x ^. field @"vec'executions")
           unless (x ^. field @"nextPageToken" == "") do
@@ -937,7 +937,7 @@ scanWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq & fie
     go c req = do
       res <- liftIO $ Temporal.Core.Client.WorkflowService.scanWorkflowExecutions c.clientCore req
       case res of
-        Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+        Left err -> throwIO err
         Right x -> do
           yieldMany (x ^. field @"vec'executions")
           unless (x ^. field @"nextPageToken" == "") do
@@ -950,7 +950,7 @@ countWorkflowExecutions
 countWorkflowExecutions baseReq = askWorkflowClient >>= \c -> liftIO do
   res <- Temporal.Core.Client.WorkflowService.countWorkflowExecutions c.clientCore baseReq
   case res of
-    Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+    Left err -> throwIO err
     Right x -> pure x
 
 data UpdateLifecycleStage
