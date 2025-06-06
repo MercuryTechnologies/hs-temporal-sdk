@@ -28,6 +28,6 @@ libc = "0.2.172"
 
 [profile.release]
 opt-level = 3
-debug = false
+debug = true
 lto = true
 incremental = true
