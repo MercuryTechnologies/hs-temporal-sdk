@@ -88,7 +88,6 @@ library
     , bytestring
     , containers
     , lens-family
-    , monad-logger
     , mtl
     , network-bsd
     , proto-lens
