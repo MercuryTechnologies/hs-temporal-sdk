@@ -258,7 +258,7 @@ setup additionalInterceptors fp go = do
   let interceptors = otelInterceptors <> additionalInterceptors
   (client, coreClient) <- makeClient fp interceptors
 
-  SearchAttributes {customAttributes} <- either throwIO pure =<< listSearchAttributes coreClient (W.Namespace "default")
+  SearchAttributes {customAttributes} <- either (throwIO . coreRpcErrorToRpcError) pure =<< listSearchAttributes coreClient (W.Namespace "default")
   let allTestAttributes =
         Map.fromList
           [ ("attr1", Temporal.Operator.Bool)
