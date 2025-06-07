@@ -171,7 +171,7 @@ configWithRetry pn =
 mkWithWorker :: PortNumber -> WorkerConfig actEnv -> IO a -> IO a
 mkWithWorker pn conf m = do
   let clientConfig_ = configWithRetry pn
-  c <- runStdoutLoggingT $ connectClient globalRuntime clientConfig_
+  c <- connectClient globalRuntime clientConfig_
   bracket (startWorker c (conf {payloadProcessor = sillyEncryptionPayloadProcessor})) shutdown (const m)
 
 
@@ -188,7 +188,7 @@ sillyEncryptionPayloadProcessor = PayloadProcessor incr decr
 makeClient :: PortNumber -> Interceptors env -> IO (C.WorkflowClient, Client)
 makeClient pn Interceptors {..} = do
   let conf = configWithRetry pn
-  c <- runStdoutLoggingT $ connectClient globalRuntime conf
+  c <- connectClient globalRuntime conf
   (,)
     <$> C.workflowClient
       c
