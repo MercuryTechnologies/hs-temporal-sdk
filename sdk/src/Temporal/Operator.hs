@@ -10,7 +10,6 @@ module Temporal.Operator where
 
 import Control.Monad
 import Control.Monad.IO.Class
-import Data.Bifunctor (bimap)
 import Data.Map.Strict (Map)
 import Data.ProtoLens (Message (defMessage))
 import Data.Text (Text)
@@ -19,7 +18,6 @@ import qualified Proto.Temporal.Api.Enums.V1.Common as Proto
 import qualified Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields as Proto
 import Temporal.Core.Client
 import qualified Temporal.Core.Client.OperatorService as Core
-import qualified Temporal.Exception
 import Temporal.SearchAttributes (SearchAttributeKey (..))
 import Temporal.SearchAttributes.Internal
 import Temporal.Workflow (Namespace (..))
@@ -69,10 +67,10 @@ searchAttributeTypeToProto = \case
   KeywordList -> Proto.INDEXED_VALUE_TYPE_KEYWORD_LIST
 
 
-listSearchAttributes :: MonadIO m => Client -> Namespace -> m (Either Temporal.Exception.RpcError SearchAttributes)
+listSearchAttributes :: MonadIO m => Client -> Namespace -> m (Either RpcError SearchAttributes)
 listSearchAttributes c (Namespace n) = do
   res <- liftIO $ Core.listSearchAttributes c (defMessage & Proto.namespace .~ n)
-  pure $ bimap Temporal.Exception.coreRpcErrorToRpcError convert res
+  pure $ fmap convert res
   where
     convert res =
       SearchAttributes
@@ -82,7 +80,7 @@ listSearchAttributes c (Namespace n) = do
         }
 
 
-addSearchAttributes :: MonadIO m => Client -> Namespace -> Map SearchAttributeKey IndexedValueType -> m (Either Temporal.Exception.RpcError ())
+addSearchAttributes :: MonadIO m => Client -> Namespace -> Map SearchAttributeKey IndexedValueType -> m (Either RpcError ())
 addSearchAttributes c (Namespace n) newAttrs = do
   if null newAttrs
     then pure $ Right ()
@@ -95,6 +93,6 @@ addSearchAttributes c (Namespace n) newAttrs = do
                 & Proto.namespace .~ n
                 & Proto.searchAttributes .~ converted
             )
-      pure $ bimap Temporal.Exception.coreRpcErrorToRpcError (const ()) res
+      pure $ void res
   where
     converted = rawKeys $ fmap searchAttributeTypeToProto newAttrs
