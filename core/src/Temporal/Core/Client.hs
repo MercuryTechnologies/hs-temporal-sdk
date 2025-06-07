@@ -49,7 +49,6 @@ module Temporal.Core.Client (
 import Control.Concurrent
 import Control.Exception
 import Control.Monad
-import Control.Monad.Logger
 import Data.Aeson
 import Data.Aeson.TH
 import Data.ByteString (ByteString)
@@ -260,7 +259,6 @@ connectClient rt conf = do
               Left errFP -> do
                 err <- withForeignPtr errFP $ peek >=> cArrayToText
                 let err' = "Error connecting to Temporal server: " <> err
-                runStdoutLoggingT $ $(logWarn) err'
                 case retryConfig conf of
                   Nothing -> putMVar clientPtrSlot (throw $ ClientConnectionError err')
                   Just retryConf -> do
