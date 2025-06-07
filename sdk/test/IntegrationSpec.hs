@@ -65,7 +65,7 @@ import Temporal.Bundle
 import Temporal.Bundle.TH
 import qualified Temporal.Client as C
 import Temporal.Contrib.OpenTelemetry
-import Temporal.Core.Client hiding (RpcError)
+import Temporal.Core.Client
 import Temporal.Duration
 import Temporal.EphemeralServer
 import Temporal.Exception
