@@ -22,10 +22,17 @@ import Temporal.Workflow
 
 variableSleepWorkflow :: Int -> Workflow Int
 variableSleepWorkflow n = provideCallStack do
-  a <- now
   sleep $ seconds $ fromIntegral n
-  b <- now
   pure n
 
 
 registerWorkflow 'variableSleepWorkflow
+
+
+variableSleepFromChildWorkflow :: Int -> Workflow Int
+variableSleepFromChildWorkflow n = provideCallStack do
+  void $ executeChildWorkflow VariableSleepWorkflow defaultChildWorkflowOptions n
+  pure n
+
+
+registerWorkflow 'variableSleepFromChildWorkflow
