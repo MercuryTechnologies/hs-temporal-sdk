@@ -286,25 +286,24 @@ or throw a 'WorkflowExecutionClosed' exception if the workflow was closed withou
 -}
 waitWorkflowResult :: (Typeable a, MonadIO m) => WorkflowHandle a -> m a
 waitWorkflowResult h =
-  let c = h.workflowHandleClient
-  in if h.workflowHandleClient.clientConfig.enableTimeSkipping
-      then
-        liftIO $
-          Control.Exception.bracket
-            (unlockTimeSkipping c.clientCore)
-            (lockTimeSkipping c.clientCore)
-            (const $ waitWorkflowResult' h)
-      else waitWorkflowResult' h
+  if h.workflowHandleClient.clientConfig.enableTimeSkipping
+    then
+      liftIO $
+        Control.Exception.bracket
+          unlockTimeSkipping
+          lockTimeSkipping
+          (const $ waitWorkflowResult' h)
+    else waitWorkflowResult' h
   where
-    unlockTimeSkipping clientCore = do
+    unlockTimeSkipping = do
       let msg :: UnlockTimeSkippingRequest
           msg = defMessage
-      res <- TestService.unlockTimeSkipping clientCore msg
+      res <- TestService.unlockTimeSkipping h.workflowHandleClient.clientCore msg
       either (throwIO . Temporal.Exception.coreRpcErrorToRpcError) pure res
-    lockTimeSkipping clientCore _ = do
+    lockTimeSkipping _ = do
       let msg :: LockTimeSkippingRequest
           msg = defMessage
-      res <- TestService.lockTimeSkipping clientCore msg
+      res <- TestService.lockTimeSkipping h.workflowHandleClient.clientCore msg
       either (throwIO . Temporal.Exception.coreRpcErrorToRpcError) pure res
 
 
