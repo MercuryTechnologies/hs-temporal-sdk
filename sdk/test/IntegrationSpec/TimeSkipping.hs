@@ -18,16 +18,13 @@ import Temporal.Duration
 import Temporal.Payload
 import Temporal.TH
 import Temporal.Workflow
-import Temporal.Workflow.Unsafe
 
 
 variableSleepWorkflow :: Int -> Workflow Int
 variableSleepWorkflow n = provideCallStack do
   a <- now
-  performUnsafeNonDeterministicIO $ putStrLn $ "!!! Starting sleep at " ++ show a
   sleep $ seconds $ fromIntegral n
   b <- now
-  performUnsafeNonDeterministicIO $ putStrLn $ "!!! Starting sleep at " ++ show b
   pure n
 
 

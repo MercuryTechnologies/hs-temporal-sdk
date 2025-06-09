@@ -1868,7 +1868,7 @@ needsClient = do
 
 needsTimeSkipping :: SpecWith TestEnv
 needsTimeSkipping = do
-  fdescribe "Workflow" $ do
+  describe "Workflow" $ do
     it "should run a workflow" $ \TestEnv {..} -> do
       let conf = configure () testConf $ do
             baseConf
