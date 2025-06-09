@@ -313,7 +313,6 @@ setupTimeSkipping additionalInterceptors fp go = do
   otelInterceptors <- makeOpenTelemetryInterceptor
   let interceptors = otelInterceptors <> additionalInterceptors
   (client, _) <- makeTimeSkippingClient fp interceptors
-
   (conf, taskQueue) <- mkBaseConf interceptors
   go
     TestEnv
@@ -423,6 +422,9 @@ spec = do
     aroundAllWith (flip $ setup mempty) terminateTests
     updatesWithInterceptors
 
+  -- Whether time-skipping is enabled is global state in the test server (it's not tracked
+  -- per workflow or anything) so we need to use around (rather than aroundAll) to get a
+  -- distinct server for each test
   around withTimeSkippingServer $ do
     aroundWith (flip $ setupTimeSkipping mempty) needsTimeSkipping
 
