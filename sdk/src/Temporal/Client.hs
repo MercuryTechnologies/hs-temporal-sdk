@@ -307,10 +307,6 @@ waitWorkflowResult h =
       either (throwIO . Temporal.Exception.coreRpcErrorToRpcError) pure res
 
 
-{- | Given a 'WorkflowHandle', wait for the workflow to complete and return the result.
-This function will block until the workflow completes, and will return the result of the workflow
-or throw a 'WorkflowExecutionClosed' exception if the workflow was closed without returning a result.
--}
 waitWorkflowResult' :: (Typeable a, MonadIO m) => WorkflowHandle a -> m a
 waitWorkflowResult' h@(WorkflowHandle readResult _ c wf r _) = do
   mev <- runReaderT (waitResult wf r c.clientConfig.namespace) c
