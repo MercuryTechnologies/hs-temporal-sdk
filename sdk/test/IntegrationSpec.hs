@@ -1904,6 +1904,25 @@ needsTimeSkipping = do
         endTime <- getCurrentTime
         let secondsElapsed = diffUTCTime endTime startTime
         secondsElapsed `shouldSatisfy` (< 1)
+    it "should skip over sleeps in a child workflow" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts =
+                    C.TimeoutOptions
+                      { C.runTimeout = Just $ seconds 15
+                      , C.executionTimeout = Nothing
+                      , C.taskTimeout = Nothing
+                      }
+                }
+        startTime <- getCurrentTime
+        useClient (C.execute VariableSleepFromChildWorkflow "variable-sleep-from-child-workflow" opts 10)
+        endTime <- getCurrentTime
+        let secondsElapsed = diffUTCTime endTime startTime
+        secondsElapsed `shouldSatisfy` (< 1)
 
 
 updatesWithInterceptors :: SpecWith PortNumber
