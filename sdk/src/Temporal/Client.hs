@@ -297,16 +297,14 @@ waitWorkflowResult h =
       else waitWorkflowResult' h
   where
     unlockTimeSkipping clientCore = do
-      let msg :: LockTimeSkippingRequest
-          msg = defMessage
-      putStrLn "!!! unlocking time skipping !!!"
-      res <- TestService.lockTimeSkipping clientCore msg
-      either (throwIO . Temporal.Exception.coreRpcErrorToRpcError) pure res
-    lockTimeSkipping clientCore _ = do
       let msg :: UnlockTimeSkippingRequest
           msg = defMessage
-      putStrLn "!!! locking time skipping !!!"
       res <- TestService.unlockTimeSkipping clientCore msg
+      either (throwIO . Temporal.Exception.coreRpcErrorToRpcError) pure res
+    lockTimeSkipping clientCore _ = do
+      let msg :: LockTimeSkippingRequest
+          msg = defMessage
+      res <- TestService.lockTimeSkipping clientCore msg
       either (throwIO . Temporal.Exception.coreRpcErrorToRpcError) pure res
 
 
