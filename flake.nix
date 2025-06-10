@@ -27,7 +27,6 @@
                 ./nix/devenv/temporal-bridge.nix
                 ./nix/devenv/temporal-dev-server.nix
                 (import ./nix/devenv/haskell.nix ghcVersion)
-                ({pkgs, ...}: {packages = [self.packages.${pkgs.system}.temporal-test-server];})
               ];
             };
           shells = inputs.nixpkgs.lib.genAttrs ghcVersions (version: mkShell version);
@@ -43,7 +42,6 @@
         haskellUtils.localPackageMatrix
         // {
           temporal-bridge = pkgs.temporal_bridge;
-          temporal-test-server = pkgs.callPackage ./nix/packages/temporal-test-server.nix { };
         }
       );
 

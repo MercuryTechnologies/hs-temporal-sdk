@@ -2,10 +2,6 @@ builds:
   - include:
       - 'packages.*.*'
     exclude:
-      # Temporal doesn't distribute test server binaries for `aarch64-linux`,
-      # and it's too much of a hassle to selectively exclude them from our
-      # `forAllSystems` package definition.
-      - 'packages.aarch64-linux.temporal-test-server'
       # `x86_64-darwin` isn't a supported architecture.
       - 'packages.x86_64-darwin.*'
       # Unable to build because devenv is impure.
