@@ -1576,6 +1576,7 @@ needsClient = do
             )
             `shouldThrow` \case
               UpdateFailure _ -> True
+              _ -> False
       it "propagates validation exceptions if the validator throws" $ \TestEnv {..} -> do
         let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
               baseConf
@@ -1596,6 +1597,7 @@ needsClient = do
             )
             `shouldThrow` \case
               UpdateFailure _ -> True
+              _ -> False
     it "works with no validator" $ \TestEnv {..} -> do
       let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
             baseConf
@@ -1658,6 +1660,7 @@ needsClient = do
           )
           `shouldThrow` \case
             UpdateFailure _ -> True
+            _ -> False
     it "propagates validation exceptions if the validator throws" $ \TestEnv {..} -> do
       let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
             baseConf
@@ -1678,6 +1681,7 @@ needsClient = do
           )
           `shouldThrow` \case
             UpdateFailure _ -> True
+            _ -> False
     it "propogates update exceptions if the update throws" $ \TestEnv {..} -> do
       let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
             baseConf
@@ -1698,6 +1702,7 @@ needsClient = do
           )
           `shouldThrow` \case
             UpdateFailure _ -> True
+            _ -> False
     it "should fail if the args don't parse correctly" $ \TestEnv {..} -> do
       -- state <- runIO $ newIORef (0 :: Int)
       let testUpdateFn :: Int -> W.Workflow Int
@@ -1736,6 +1741,8 @@ needsClient = do
           )
           `shouldThrow` \case
             UpdateFailure _ -> True
+            _ -> False
+
     it "works with an update that causes the workflow to suspend" $ \TestEnv {..} -> do
       let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
             baseConf
