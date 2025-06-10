@@ -181,20 +181,6 @@ data UpdateWorkflowInput = UpdateWorkflowInput
   }
 
 
-data UpdateHandle a = UpdateHandle
-  { updateHandleUpdateId :: UpdateId
-  , updateHandleWorkflowId :: WorkflowId
-  , updateHandleWorkflowRunId :: Maybe RunId
-  , updateHandleReadResult :: Payload -> IO a
-  , updateHandleWorkflowClient :: WorkflowClient
-  , updateHandleType :: Text
-  }
-
-
-instance Functor UpdateHandle where
-  fmap x y = y {updateHandleReadResult = fmap x . updateHandleReadResult y}
-
-
 data WorkflowExecutionStatus
   = Running
   | Completed
@@ -227,7 +213,7 @@ data ClientInterceptors = ClientInterceptors
   { start :: WorkflowType -> WorkflowId -> StartWorkflowOptions -> Vector Payload -> (WorkflowType -> WorkflowId -> StartWorkflowOptions -> Vector Payload -> IO (WorkflowHandle Payload)) -> IO (WorkflowHandle Payload)
   , queryWorkflow :: QueryWorkflowInput -> (QueryWorkflowInput -> IO (Either QueryRejected Payload)) -> IO (Either QueryRejected Payload)
   , signalWithStart :: SignalWithStartWorkflowInput -> (SignalWithStartWorkflowInput -> IO (WorkflowHandle Payload)) -> IO (WorkflowHandle Payload)
-  , updateWorkflow :: UpdateWorkflowInput -> (UpdateWorkflowInput -> IO (UpdateHandle Payload)) -> IO (UpdateHandle Payload)
+  , updateWorkflow :: UpdateWorkflowInput -> (UpdateWorkflowInput -> IO Payload) -> IO Payload
   -- TODO
   -- signal
   -- terminate
