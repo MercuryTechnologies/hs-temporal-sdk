@@ -6,6 +6,7 @@ in
 {
   if-instance = markUnbroken hprev.if-instance;
 } // (packageSourceOverrides {
+  base64 = "1.0";
   hs-opentelemetry-api = "0.1.0.0";
   hs-opentelemetry-exporter-in-memory = "0.0.1.3";
   hs-opentelemetry-exporter-otlp = "0.0.1.5";
