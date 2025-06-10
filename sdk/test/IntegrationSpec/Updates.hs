@@ -97,8 +97,8 @@ updateWithValidatorThatThrows = provideCallStack do
 registerWorkflow 'updateWithValidatorThatThrows
 
 
-updateThatSleeps :: Workflow Int
-updateThatSleeps = provideCallStack do
+updateWithValidatorThatSleeps :: Workflow Int
+updateWithValidatorThatSleeps = provideCallStack do
   stateVar <- newStateVar (0 :: Int)
   let handleUpdate arg = do
         sleep $ seconds 1
@@ -111,7 +111,7 @@ updateThatSleeps = provideCallStack do
   readStateVar stateVar
 
 
-registerWorkflow 'updateThatSleeps
+registerWorkflow 'updateWithValidatorThatSleeps
 
 
 workflowThatThrowsBeforeTheUpdate :: Workflow Int
