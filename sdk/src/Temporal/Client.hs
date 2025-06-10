@@ -7,6 +7,7 @@
 {-# LANGUAGE TypeFamilyDependencies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE OverloadedLabels #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
 {-# HLINT ignore "Use >=>" #-}
@@ -907,44 +908,44 @@ listOpenWorkflowExecutions
   :: (MonadIO m, HasWorkflowClient m)
   => ListOpenWorkflowExecutionsRequest
   -> ConduitT i WorkflowExecutionInfo m ()
-listOpenWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq & field @"namespace" .~ rawNamespace c.clientConfig.namespace)
+listOpenWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq & #namespace .~ rawNamespace c.clientConfig.namespace)
   where
     go c req = do
       res <- liftIO $ Temporal.Core.Client.WorkflowService.listOpenWorkflowExecutions c.clientCore req
       case res of
         Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
         Right x -> do
-          yieldMany (x ^. field @"vec'executions")
-          unless (x ^. field @"nextPageToken" == "") do
-            go c (req & field @"nextPageToken" .~ (x ^. field @"nextPageToken"))
+          yieldMany (x ^. #vec'executions)
+          unless (x ^. #nextPageToken == "") do
+            go c (req & #nextPageToken .~ (x ^. #nextPageToken))
 
 listClosedWorkflowExecutions :: (MonadIO m, HasWorkflowClient m) => ListClosedWorkflowExecutionsRequest -> ConduitT i WorkflowExecutionInfo m ()
-listClosedWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq & field @"namespace" .~ rawNamespace c.clientConfig.namespace)
+listClosedWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq & #namespace .~ rawNamespace c.clientConfig.namespace)
   where
     go c req = do
       res <- liftIO $ Temporal.Core.Client.WorkflowService.listClosedWorkflowExecutions c.clientCore req
       case res of
         Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
         Right x -> do
-          yieldMany (x ^. field @"vec'executions")
-          unless (x ^. field @"nextPageToken" == "") do
-            go c (req & field @"nextPageToken" .~ (x ^. field @"nextPageToken"))
+          yieldMany (x ^. #vec'executions)
+          unless (x ^. #nextPageToken == "") do
+            go c (req & #nextPageToken .~ (x ^. #nextPageToken))
 
 -- TODO, replace with newer listWorkflowExecutions API, this is deprecated in the proto
 scanWorkflowExecutions
   :: (MonadIO m, HasWorkflowClient m)
   => ScanWorkflowExecutionsRequest
   -> ConduitT i WorkflowExecutionInfo m ()
-scanWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq & field @"namespace" .~ rawNamespace c.clientConfig.namespace)
+scanWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq & #namespace .~ rawNamespace c.clientConfig.namespace)
   where
     go c req = do
       res <- liftIO $ Temporal.Core.Client.WorkflowService.scanWorkflowExecutions c.clientCore req
       case res of
         Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
         Right x -> do
-          yieldMany (x ^. field @"vec'executions")
-          unless (x ^. field @"nextPageToken" == "") do
-            go c (req & field @"nextPageToken" .~ (x ^. field @"nextPageToken"))
+          yieldMany (x ^. #vec'executions)
+          unless (x ^. #nextPageToken == "") do
+            go c (req & #nextPageToken .~ (x ^. #nextPageToken))
 
 countWorkflowExecutions
   :: (MonadIO m, HasWorkflowClient m)
