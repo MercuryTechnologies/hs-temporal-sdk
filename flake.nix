@@ -9,86 +9,88 @@
     };
   };
 
-  outputs = inputs @ {self, ...}: let
-    flakeUtils = import ./nix/utils/flake.nix inputs;
-  in {
-    devShells = flakeUtils.forAllSystems (
-      {pkgs, ...}: let
-        inherit (import ./nix/utils/matrix.nix) ghcVersions;
-        mkShell = ghcVersion:
-          inputs.devenv.lib.mkShell {
-            inherit inputs pkgs;
-            modules = [
-              ./nix/devenv/temporal-bridge.nix
-              ./nix/devenv/temporal-dev-server.nix
-              (pkgs.lib.modules.importApply ./nix/devenv/haskell.nix ghcVersion)
-              ./nix/devenv/repo-wide-checks.nix
-              ({pkgs, ...}: {packages = [self.packages.${pkgs.system}.temporal-test-server];})
-            ];
-          };
-        shells = inputs.nixpkgs.lib.genAttrs ghcVersions (version: mkShell version);
-      in
-        shells // {default = shells.ghc910;}
-    );
+  outputs =
+    inputs@{ self, ... }:
+    let
+      flakeUtils = import ./nix/utils/flake.nix inputs;
+    in
+    {
+      devShells = flakeUtils.forAllSystems (
+        { pkgs, ... }:
+        let
+          inherit (import ./nix/utils/matrix.nix) ghcVersions;
+          mkShell =
+            ghcVersion:
+            inputs.devenv.lib.mkShell {
+              inherit inputs pkgs;
+              modules = [
+                ./nix/devenv/temporal-bridge.nix
+                ./nix/devenv/temporal-dev-server.nix
+                (pkgs.lib.modules.importApply ./nix/devenv/haskell.nix ghcVersion)
+                ./nix/devenv/repo-wide-checks.nix
+                ({pkgs, ...}: {packages = [self.packages.${pkgs.system}.temporal-test-server];})
+              ];
+            };
+          shells = inputs.nixpkgs.lib.genAttrs ghcVersions (version: mkShell version);
+        in
+        shells // { default = shells.ghc910; }
+      );
 
-    packages = flakeUtils.forAllSystems (
-      {pkgs, ...}: let
-        haskellUtils = import ./nix/utils/haskell.nix pkgs;
-      in
+      packages = flakeUtils.forAllSystems (
+        { pkgs, ... }:
+        let
+          haskellUtils = import ./nix/utils/haskell.nix pkgs;
+        in
         haskellUtils.localPackageMatrix
         // {
           temporal-bridge = pkgs.temporal_bridge;
           temporal-test-server = pkgs.callPackage ./nix/packages/temporal-test-server.nix { };
         }
-    );
+      );
 
-    haskellOverlays = {
-      hs-temporal-sdk = import ./nix/overlays/haskell/hs-temporal-sdk.nix;
-      dependencies = {
-        default = import ./nix/overlays/haskell/deps.nix;
-        ghc910 = import ./nix/overlays/haskell/ghc910-deps.nix;
+      haskellOverlays = {
+        hs-temporal-sdk = import ./nix/overlays/haskell/hs-temporal-sdk.nix;
+        dependencies = {
+          default = import ./nix/overlays/haskell/deps.nix;
+          ghc910 = import ./nix/overlays/haskell/ghc910-deps.nix;
+        };
       };
-    };
 
-    overlays = {
-      temporal-bridge = import ./nix/overlays/temporal-bridge/overlay.nix;
-      # A top-level nixpkgs overlay that extends supported GHC package sets with
-      # `hs-temporal-sdk` packages & any dependency modifications required for
-      # development.
-      #
-      # NOTE: This is _not_ intendedd for downstream consumption, and is
-      # primarily exposed to support our development & CI environments.
-      haskell-development = final: prev: {
-        haskell =
-          (prev.haskell or {})
-          // {
-            packages =
-              (prev.haskell.packages or {})
-              // {
-                ghc96 = prev.haskell.packages.ghc96.extend (
-                  prev.lib.composeManyExtensions [
-                    (self.haskellOverlays.dependencies.default final)
-                    (self.haskellOverlays.hs-temporal-sdk final)
-                  ]
-                );
-                ghc98 = prev.haskell.packages.ghc98.extend (
-                  prev.lib.composeManyExtensions [
-                    (self.haskellOverlays.dependencies.default final)
-                    (self.haskellOverlays.hs-temporal-sdk final)
-                  ]
-                );
-                ghc910 = prev.haskell.packages.ghc910.extend (
-                  prev.lib.composeManyExtensions [
-                    (self.haskellOverlays.dependencies.default final)
-                    (self.haskellOverlays.dependencies.ghc910 final)
-                    (self.haskellOverlays.hs-temporal-sdk final)
-                  ]
-                );
-              };
+      overlays = {
+        temporal-bridge = import ./nix/overlays/temporal-bridge/overlay.nix;
+        # A top-level nixpkgs overlay that extends supported GHC package sets with
+        # `hs-temporal-sdk` packages & any dependency modifications required for
+        # development.
+        #
+        # NOTE: This is _not_ intendedd for downstream consumption, and is
+        # primarily exposed to support our development & CI environments.
+        haskell-development = final: prev: {
+          haskell = (prev.haskell or { }) // {
+            packages = (prev.haskell.packages or { }) // {
+              ghc96 = prev.haskell.packages.ghc96.extend (
+                prev.lib.composeManyExtensions [
+                  (self.haskellOverlays.dependencies.default final)
+                  (self.haskellOverlays.hs-temporal-sdk final)
+                ]
+              );
+              ghc98 = prev.haskell.packages.ghc98.extend (
+                prev.lib.composeManyExtensions [
+                  (self.haskellOverlays.dependencies.default final)
+                  (self.haskellOverlays.hs-temporal-sdk final)
+                ]
+              );
+              ghc910 = prev.haskell.packages.ghc910.extend (
+                prev.lib.composeManyExtensions [
+                  (self.haskellOverlays.dependencies.default final)
+                  (self.haskellOverlays.dependencies.ghc910 final)
+                  (self.haskellOverlays.hs-temporal-sdk final)
+                ]
+              );
+            };
           };
+        };
       };
     };
-  };
 
   # --- Flake Local Nix Configuration -----------------------------------------
   nixConfig = {
