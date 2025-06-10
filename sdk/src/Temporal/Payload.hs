@@ -1,5 +1,6 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE DeriveLift #-}
@@ -71,9 +72,16 @@ import Control.Monad
 import Control.Monad.IO.Class
 import Data.Aeson hiding (decode, encode)
 import qualified Data.Aeson as Aeson
+#if MIN_VERSION_base64(1,0,0)
+import qualified Data.Base64.Types as Base64.Types (extractBase64)
+#endif
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
-import Data.ByteString.Base64 (decodeBase64, encodeBase64)
+#if MIN_VERSION_base64(1,0,0)
+import qualified Data.ByteString.Base64 as Base64 (decodeBase64Untyped, encodeBase64)
+#else
+import qualified Data.ByteString.Base64 as Base64 (decodeBase64, encodeBase64)
+#endif
 import qualified Data.ByteString.Char8 as C
 import qualified Data.ByteString.Lazy as BL
 import Data.Kind
@@ -441,10 +449,32 @@ data Payload = Payload
   deriving stock (Show, Eq, Ord, Lift)
 
 
+-- Note: You'd think `decodeBase64Untyped` is the wrong function to use, but
+-- there's actually no way to check the invariants that the typed versions
+-- encode.
+--
+-- See: https://github.com/emilypi/base64/issues/65#issuecomment-2960385097
+-- | Internal compatibility shim to bridge support for `base64 < 1.0`.
 base64DecodeFromText :: MonadFail m => T.Text -> m ByteString
-base64DecodeFromText txt = case decodeBase64 $ Text.encodeUtf8 txt of
-  Left err -> fail $ Text.unpack err
-  Right ok -> pure ok
+base64DecodeFromText txt =
+  either (fail . Text.unpack) pure (decodeBase64 txt)
+  where
+    decodeBase64 =
+#if MIN_VERSION_base64(1,0,0)
+      Base64.decodeBase64Untyped . Text.encodeUtf8
+#else
+      Base64.decodeBase64 . Text.encodeUtf8
+#endif
+
+
+-- | Internal compatibility shim to bridge support for `base64 < 1.0`.
+base64EncodeToText :: ByteString -> T.Text
+base64EncodeToText =
+#if MIN_VERSION_base64(1,0,0)
+  Base64.Types.extractBase64 . Base64.encodeBase64
+#else
+  Base64.encodeBase64
+#endif
 
 
 instance FromJSON Payload where
@@ -459,13 +489,13 @@ instance FromJSON Payload where
 instance ToJSON Payload where
   toJSON Payload {..} =
     object $
-      (if payloadData == "" then id else (("data" .= encodeBase64 payloadData) :)) $
-        (if Map.null payloadMetadata then id else (("metadata" .= fmap encodeBase64 payloadMetadata) :))
+      (if payloadData == "" then id else (("data" .= base64EncodeToText payloadData) :)) $
+        (if Map.null payloadMetadata then id else (("metadata" .= fmap base64EncodeToText payloadMetadata) :))
           []
   toEncoding Payload {..} =
     pairs $
-      (if payloadData == "" then mempty else "data" .= encodeBase64 payloadData)
-        <> (if Map.null payloadMetadata then mempty else "metadata" .= fmap encodeBase64 payloadMetadata)
+      (if payloadData == "" then mempty else "data" .= base64EncodeToText payloadData)
+        <> (if Map.null payloadMetadata then mempty else "metadata" .= fmap base64EncodeToText payloadMetadata)
 
 
 convertFromProtoPayload :: Proto.Payload -> Payload
