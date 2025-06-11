@@ -4,13 +4,9 @@
       pkgs.crate2nix
       pkgs.protobuf
       pkgs.rust-cbindgen
-    ]
-    ++ (with pkgs;
-      lib.optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [
-        Security
-        CoreFoundation
-        SystemConfiguration
-      ]));
+    ] ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
+      pkgs.apple-sdk
+    ];
 
   languages.rust = {
     enable = true;

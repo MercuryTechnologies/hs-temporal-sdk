@@ -17,14 +17,7 @@ let
           PROTOC_INCLUDE = "${pkgs.protobuf}/include";
         };
         temporal_bridge = attrs: {
-          buildInputs = pkgs.lib.optionals pkgs.stdenv.isDarwin (
-            with pkgs.darwin.apple_sdk.frameworks;
-            [
-              Security
-              CoreFoundation
-              SystemConfiguration
-            ]
-          );
+          buildInputs = pkgs.lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ pkgs.apple-sdk ];
           postInstall = ''
             ${attrs.postInstall or ""}
             ${pkgs.lib.optionalString pkgs.stdenv.isDarwin ''
