@@ -53,8 +53,7 @@
     };
 
     overlays = {
-      temporal-bridge = import ./nix/overlays/temporal-bridge/overlay.nix;
-      temporal-test-server = import ./nix/overlays/temporal-test-server.nix;
+      native = import ./nix/overlays/native.nix;
       # A top-level nixpkgs overlay that extends supported GHC package sets with
       # `hs-temporal-sdk` packages & any dependency modifications required for
       # development.

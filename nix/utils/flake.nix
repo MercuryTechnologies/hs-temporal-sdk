@@ -11,8 +11,7 @@ let
         pkgs = import nixpkgs {
           inherit system;
           overlays = [
-            self.overlays.temporal-bridge
-            self.overlays.temporal-test-server
+            self.overlays.native
             self.overlays.haskell-development
           ];
         };
