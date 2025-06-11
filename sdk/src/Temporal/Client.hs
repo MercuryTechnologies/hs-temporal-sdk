@@ -239,6 +239,7 @@ instance HasWorkflowClient ((->) WorkflowClient) where
   askWorkflowClient = id
 
 
+-- | FIXME: This comment exists to invalidate the Nix cache & trigger a rebuild.
 throwEither :: (MonadIO m, Exception e) => IO (Either e a) -> m a
 throwEither = either throwIO pure <=< liftIO
 
