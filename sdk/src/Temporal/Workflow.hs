@@ -116,10 +116,10 @@ module Temporal.Workflow (
   StartActivityTimeoutOption (..),
   defaultStartActivityOptions,
   startActivity,
-  executeActivity,
+  Temporal.Workflow.executeActivity,
   StartLocalActivityOptions (..),
   defaultStartLocalActivityOptions,
-  startLocalActivity,
+  -- startLocalActivity,
 
   -- ** Child workflow operations
   -- $childWorkflow
@@ -172,8 +172,6 @@ module Temporal.Workflow (
   sequenceConcurrently_,
   ConcurrentWorkflow (..),
   independently,
-  biselect,
-  biselectOpt,
 
   -- * Interacting with running Workflows
 
@@ -199,9 +197,6 @@ module Temporal.Workflow (
   provideUpdate,
   ProvidedUpdate (..),
   KnownUpdate (..),
-
-  -- * Other utilities
-  unsafeAsyncEffectSink,
 
   -- * State vars
   StateVar,
@@ -256,7 +251,7 @@ module Temporal.Workflow (
 ) where
 
 import Control.Applicative (Alternative (..))
-import Control.Concurrent (forkIO)
+import Control.Concurrent (forkIO, myThreadId)
 import Control.Exception.Annotated (throwWithCallStack)
 import Control.Monad
 import Control.Monad.Catch
@@ -286,6 +281,7 @@ import Data.UUID.Types.Internal (buildFromBytes)
 import Data.Vector (Vector)
 import qualified Data.Vector as V
 import Data.Word (Word32, Word64, Word8)
+import GHC.Exts
 import GHC.Stack
 import Lens.Family2
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Payloads
@@ -303,41 +299,25 @@ import Temporal.Common
 import Temporal.Common.TimeoutType
 import Temporal.Duration (Duration (..), diffSystemTime, durationFromProto, durationToProto, nanoseconds, seconds)
 import Temporal.Exception
+import Temporal.Interceptor
 import Temporal.Payload
 import Temporal.SearchAttributes
 import Temporal.SearchAttributes.Internal
+import Temporal.Workflow.ChildWorkflowHandle
 import Temporal.Workflow.Definition
-import Temporal.Workflow.Internal.Monad
+import Temporal.Workflow.IVar
+import Temporal.Workflow.Instance
+import Temporal.Workflow.Monad
 import Temporal.Workflow.Query
 import Temporal.Workflow.Signal
+import Temporal.Workflow.Task
 import Temporal.Workflow.Types
 import Temporal.Workflow.Unsafe.Handle
 import Temporal.Workflow.Update
 import Temporal.Workflow.WorkflowInstance
 import Temporal.WorkflowInstance
 import UnliftIO
-
-
--- class MonadWorkflow m where
--- startChildWorkflowFromPayloads :: forall args result. RequireCallStack => KnownWorkflow args result -> StartChildWorkflowOptions -> [IO Payload] -> m (ChildWorkflowHandle result)
--- startActivityFromPayloads :: forall args result. RequireCallStack => KnownActivity args result -> StartActivityOptions -> [IO Payload] -> m (Task result)
--- askInfo :: m Info
--- getMemoValues :: m (Map Text Payload)
--- upsertSearchAttributes :: RequireCallStack => Map Text SearchAttributeType -> m ()
--- applyPatch :: RequireCallStack => PatchId -> Bool -> m Bool
--- randomGen :: m StdGen
--- uuid4 :: m UUID
--- setQueryHandler
--- setSignalHandler
--- time
--- createTimer
--- continueAsNew
--- getExternalWorkflowHandle
--- waitCondition
--- unsafeEffectSink
-
-newtype WorkflowInternal a = WorkflowInternal (ReaderT ContinuationEnv InstanceM a)
-  deriving newtype (Functor, Applicative, Monad, MonadIO)
+import Unsafe.Coerce
 
 
 -- | We need a specialized version of 'withArgs' since we aren't supposed to introduce arbitrary effects in the 'Workflow' monad.
@@ -345,18 +325,13 @@ withWorkflowArgs :: forall args result codec. (VarArgs args, AllArgs (Codec code
 withWorkflowArgs c f =
   mapResult
     @args
-    @(WorkflowInternal (Result result))
+    @(InstanceM result)
     @(Workflow result)
-    safely
-    $ withArgs @args @(WorkflowInternal (Result result)) c
+    Workflow
+    $ withArgs @args @(InstanceM result) c
     $ \args -> do
       args' <- liftIO $ sequence args
-      unsafely $ f args'
-  where
-    unsafely :: Workflow a -> WorkflowInternal (Result a)
-    unsafely = coerce
-    safely :: WorkflowInternal (Result a) -> Workflow a
-    safely = coerce
+      unWorkflow $ f args'
 
 
 {- $activityBasics
@@ -378,25 +353,27 @@ The Event is added to the Workflow Execution's Event History.
 
 startActivityFromPayloads
   :: forall args result
-   . RequireCallStack
+   . (RequireCallStack)
   => KnownActivity args result
   -> StartActivityOptions
   -> Vector Payload
   -> Workflow (Task result)
-startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift $ do
-  runInIO <- askRunInIO
+startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = Workflow $ withRunInIO $ \runInIO -> runInIO $ do
   updateCallStack
-  inst <- ask
+  runtime <- ask
+  let inst = runtime.workflowRuntimeInstance
   let intercept :: ActivityInput -> (ActivityInput -> IO (Task Payload)) -> IO (Task Payload)
       intercept = inst.outboundInterceptor.scheduleActivity
   s@(Sequence actSeq) <- nextActivitySequence
   rawTask <- liftIO $ intercept (ActivityInput name typedPayloads opts s) $ \activityInput -> runInIO $ do
-    resultSlot <- newIVar
-    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-      seqMaps {activities = HashMap.insert s resultSlot (activities seqMaps)}
+    resultSlot <- newIVar $ getThreadManager runtime
+    atomically $
+      modifyTVar'
+        runtime.workflowRuntimeSequenceMaps.activities
+        (HashMap.insert s resultSlot)
 
-    i <- readIORef inst.workflowInstanceInfo
-    hdrs <- processorEncodePayloads inst.payloadProcessor activityInput.options.headers
+    i <- readTVarIO inst.workflowInstanceInfo
+    let hdrs = activityInput.options.headers
     args <- processorEncodePayloads inst.payloadProcessor activityInput.args
     let actId = maybe (Text.pack $ show actSeq) rawActivityId (activityInput.options.activityId)
         scheduleActivity =
@@ -425,62 +402,59 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift 
     addCommand cmd
     pure $
       Task
-        { waitAction = do
-            res <- getIVar resultSlot
-            $(logInfo) ("Activity result: " <> Text.pack (show res))
-            Workflow $ \_ -> case res ^. Activation.result . ActivityResult.maybe'status of
+        { waitAction = runInIO do
+            res <- waitIVar resultSlot
+            case res ^. Activation.result . ActivityResult.maybe'status of
               Nothing -> error "Activity result missing status"
               Just (ActivityResult.ActivityResolution'Completed success) -> do
                 res <- liftIO $ payloadProcessorDecode inst.payloadProcessor $ convertFromProtoPayload (success ^. ActivityResult.result)
-                pure $ case res of
-                  Left err -> Throw $ toException $ ValueError err
-                  Right val -> Done val
+                case res of
+                  Left err -> throwM $ toException $ ValueError err
+                  Right val -> pure val
               Just (ActivityResult.ActivityResolution'Failed failure_) ->
                 let failure = failure_ ^. ActivityResult.failure
-                in pure $
-                    Throw $
-                      toException $
-                        ActivityFailure
-                          { message = failure ^. Failure.message
-                          , activityType = ActivityType activityInput.activityType
-                          , activityId = ActivityId actId
-                          , retryState = retryStateFromProto $ failure ^. Failure.activityFailureInfo . Failure.retryState
-                          , identity = failure ^. Failure.activityFailureInfo . Failure.identity
-                          , cause =
-                              let cause_ = failure ^. Failure.cause
-                              in ApplicationFailure
-                                  { type' = cause_ ^. Failure.applicationFailureInfo . Failure.type'
-                                  , message = cause_ ^. Failure.message
-                                  , nonRetryable = cause_ ^. Failure.applicationFailureInfo . Failure.nonRetryable
-                                  , details = cause_ ^. Failure.applicationFailureInfo . Failure.details . Payloads.payloads . to (fmap convertFromProtoPayload)
-                                  , stack = cause_ ^. Failure.stackTrace
-                                  , nextRetryDelay = fmap durationFromProto (cause_ ^. Failure.applicationFailureInfo . Failure.maybe'nextRetryDelay)
-                                  }
-                          , scheduledEventId = failure ^. Failure.activityFailureInfo . Failure.scheduledEventId
-                          , startedEventId = failure ^. Failure.activityFailureInfo . Failure.startedEventId
-                          , original = failure ^. Failure.activityFailureInfo
-                          , stack = Text.pack $ Temporal.Exception.prettyCallStack callStack
-                          }
-              Just (ActivityResult.ActivityResolution'Cancelled details) -> pure $ Throw $ toException $ ActivityCancelled (details ^. ActivityResult.failure)
+                in throwM
+                    ActivityFailure
+                      { message = failure ^. Failure.message
+                      , activityType = ActivityType activityInput.activityType
+                      , activityId = ActivityId actId
+                      , retryState = retryStateFromProto $ failure ^. Failure.activityFailureInfo . Failure.retryState
+                      , identity = failure ^. Failure.activityFailureInfo . Failure.identity
+                      , cause =
+                          let cause_ = failure ^. Failure.cause
+                          in ApplicationFailure
+                              { type' = cause_ ^. Failure.applicationFailureInfo . Failure.type'
+                              , message = cause_ ^. Failure.message
+                              , nonRetryable = cause_ ^. Failure.applicationFailureInfo . Failure.nonRetryable
+                              , details = cause_ ^. Failure.applicationFailureInfo . Failure.details . Payloads.payloads . to (fmap convertFromProtoPayload)
+                              , stack = cause_ ^. Failure.stackTrace
+                              , nextRetryDelay = fmap durationFromProto (cause_ ^. Failure.applicationFailureInfo . Failure.maybe'nextRetryDelay)
+                              }
+                      , scheduledEventId = failure ^. Failure.activityFailureInfo . Failure.scheduledEventId
+                      , startedEventId = failure ^. Failure.activityFailureInfo . Failure.startedEventId
+                      , original = failure ^. Failure.activityFailureInfo
+                      , stack = Text.pack $ Temporal.Exception.prettyCallStack callStack
+                      }
+              Just (ActivityResult.ActivityResolution'Cancelled details) -> throwM $ toException $ ActivityCancelled (details ^. ActivityResult.failure)
               Just (ActivityResult.ActivityResolution'Backoff _doBackoff) -> error "not implemented"
-        , cancelAction = do
+        , cancelAction = runInIO do
             let cancelCmd =
                   defMessage
                     & Command.requestCancelActivity
                       .~ ( defMessage
                             & Command.seq .~ actSeq
                          )
-            ilift $ addCommand cancelCmd
+            addCommand cancelCmd
         }
   pure
-    ( rawTask
-        `bindTask` ( \payload -> Workflow $ \_ -> do
-                      result <- liftIO $ decode codec payload
-                      case result of
-                        Left err -> pure $ Throw $ toException $ ValueError err
-                        Right val -> pure $ Done val
-                   )
-    )
+    rawTask
+      { waitAction = do
+          val <- rawTask.waitAction
+          result <- liftIO $ decode codec val
+          case result of
+            Left err -> throwM $ ValueError err
+            Right val -> pure val
+      }
 
 
 startActivity
@@ -540,43 +514,46 @@ signalWorkflow
   -> (Command.SignalExternalWorkflowExecution -> Command.SignalExternalWorkflowExecution)
   -> ref
   -> (SignalArgs ref :->: Workflow (Task ()))
-signalWorkflow _ f (signalRef -> KnownSignal signalName signalCodec) = withWorkflowArgs @(SignalArgs ref) @(Task ()) signalCodec $ \ps -> do
-  ilift $ do
-    updateCallStack
-    resVar <- newIVar
-    inst <- ask
-    s <- nextExternalSignalSequence
-    args <- processorEncodePayloads inst.payloadProcessor ps
-    let cmd =
-          defMessage
-            & Command.signalExternalWorkflowExecution
-              .~ f
-                ( defMessage
-                    & Command.seq .~ rawSequence s
-                    & Command.signalName .~ signalName
-                    & Command.vec'args .~ fmap convertToProtoPayload args
-                    -- TODO
-                    -- & Command.headers .~ _
-                )
-    addCommand cmd
-    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-      seqMaps {externalSignals = HashMap.insert s resVar seqMaps.externalSignals}
-    pure $
-      Task
-        { waitAction = do
-            res <- getIVar resVar
-            case res ^. Activation.maybe'failure of
-              Nothing -> pure ()
-              Just failureInfo -> throw $ SignalExternalWorkflowFailed failureInfo
-        , cancelAction = do
-            let cancelCmd =
-                  defMessage
-                    & Command.cancelSignalWorkflow
-                      .~ ( defMessage
-                            & Command.seq .~ rawSequence s
-                         )
-            ilift $ addCommand cancelCmd
-        }
+signalWorkflow _ f (signalRef -> KnownSignal signalName signalCodec) = withWorkflowArgs @(SignalArgs ref) @(Task ()) signalCodec $ \ps -> Workflow do
+  updateCallStack
+  runtime <- ask
+  resVar <- newIVar $ getThreadManager runtime
+  let inst = runtime.workflowRuntimeInstance
+  runInIO <- askRunInIO
+  s <- nextExternalSignalSequence
+  args <- processorEncodePayloads inst.payloadProcessor ps
+  let cmd =
+        defMessage
+          & Command.signalExternalWorkflowExecution
+            .~ f
+              ( defMessage
+                  & Command.seq .~ rawSequence s
+                  & Command.signalName .~ signalName
+                  & Command.vec'args .~ fmap convertToProtoPayload args
+                  -- TODO
+                  -- & Command.headers .~ _
+              )
+  addCommand cmd
+  atomically $
+    modifyTVar'
+      runtime.workflowRuntimeSequenceMaps.externalSignals
+      (HashMap.insert s resVar)
+  pure $
+    Task
+      { waitAction = runInIO do
+          res <- waitIVar resVar
+          case res ^. Activation.maybe'failure of
+            Nothing -> pure ()
+            Just failureInfo -> throwM $ SignalExternalWorkflowFailed failureInfo
+      , cancelAction = runInIO do
+          let cancelCmd =
+                defMessage
+                  & Command.cancelSignalWorkflow
+                    .~ ( defMessage
+                          & Command.seq .~ rawSequence s
+                       )
+          addCommand cancelCmd
+      }
 
 
 startChildWorkflowFromPayloads
@@ -590,27 +567,30 @@ startChildWorkflowFromPayloads (workflowRef -> k@(KnownWorkflow codec _)) opts p
   wfId <- case opts.workflowId of
     Nothing -> WorkflowId . UUID.toText <$> uuid4
     Just wfId -> pure wfId
-  ilift $ go ps wfId
+  Workflow $ go ps wfId
   where
     go :: Vector Payload -> WorkflowId -> InstanceM (ChildWorkflowHandle (WorkflowResult wf))
     go typedPayloads wfId = do
       updateCallStack
       sendChildWorkflowCommand typedPayloads wfId
     sendChildWorkflowCommand typedPayloads wfId = do
-      inst <- ask
+      runtime <- ask
+      let inst = runtime.workflowRuntimeInstance
       -- TODO these need to pass through the interceptor
       runInIO <- askRunInIO
       wfHandle <- liftIO $ inst.outboundInterceptor.startChildWorkflowExecution (knownWorkflowName k) opts $ \wfName opts' -> runInIO $ do
         args <- processorEncodePayloads inst.payloadProcessor typedPayloads
-        let convertedPayloads = fmap convertToProtoPayload args
-        hdrs <- processorEncodePayloads inst.payloadProcessor opts'.headers
         memo <- processorEncodePayloads inst.payloadProcessor opts'.initialMemo
 
+        let convertedPayloads = fmap convertToProtoPayload args
+            hdrs = opts'.headers
+
         s@(Sequence wfSeq) <- nextChildWorkflowSequence
-        startSlot <- newIVar
-        resultSlot <- newIVar
-        firstExecutionRunId <- newIVar
-        i <- readIORef inst.workflowInstanceInfo
+        let tm = getThreadManager runtime
+        startSlot <- newIVar tm
+        resultSlot <- newIVar tm
+        firstExecutionRunId <- newIVar tm
+        i <- readTVarIO inst.workflowInstanceInfo
         searchAttrs <- liftIO $ searchAttributesToProto opts'.searchAttributes
         let childWorkflowOptions =
               defMessage
@@ -646,8 +626,12 @@ startChildWorkflowFromPayloads (workflowRef -> k@(KnownWorkflow codec _)) opts p
                 , childWorkflowId = wfId
                 }
 
-        atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-          seqMaps {childWorkflows = HashMap.insert s (SomeChildWorkflowHandle wfHandle) seqMaps.childWorkflows}
+        let anyHandle :: forall h. ChildWorkflowHandle h -> ChildWorkflowHandle Any
+            anyHandle = unsafeCoerce
+        atomically $
+          modifyTVar'
+            runtime.workflowRuntimeSequenceMaps.childWorkflows
+            (HashMap.insert s $ anyHandle wfHandle)
 
         addCommand cmd
         pure wfHandle
@@ -746,94 +730,94 @@ defaultStartLocalActivityOptions =
     }
 
 
-startLocalActivity
-  :: forall act
-   . (RequireCallStack, ActivityRef act)
-  => act
-  -> StartLocalActivityOptions
-  -> (ActivityArgs act :->: Workflow (Task (ActivityResult act)))
-startLocalActivity (activityRef -> KnownActivity codec n) opts = withWorkflowArgs @(ActivityArgs act) @(Task (ActivityResult act)) codec $ \typedPayloads -> do
-  updateCallStackW
-  originalTime <- time
-  ilift $ do
-    inst <- ask
-    let ps = fmap convertToProtoPayload typedPayloads
-    s@(Sequence actSeq) <- nextActivitySequence
-    resultSlot <- newIVar
-    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-      seqMaps {activities = HashMap.insert s resultSlot (activities seqMaps)}
-    -- TODO, seems like `attempt` and `originalScheduledTime`
-    -- imply that we are in charge of retrying local activities ourselves?
-    let actId = maybe (Text.pack $ show actSeq) rawActivityId opts.activityId
-        cmd =
-          defMessage
-            & Command.scheduleLocalActivity
-              .~ ( defMessage
-                    & Command.seq .~ actSeq
-                    & Command.activityId .~ actId
-                    & Command.activityType .~ n
-                    -- & attempt .~ _
-                    -- & headers .~ _
-                    & Command.originalScheduleTime .~ timespecToTimestamp originalTime
-                    & Command.vec'arguments .~ ps
-                    & Command.maybe'scheduleToCloseTimeout .~ (durationToProto <$> opts.scheduleToCloseTimeout)
-                    & Command.maybe'scheduleToStartTimeout .~ (durationToProto <$> opts.scheduleToStartTimeout)
-                    & Command.maybe'startToCloseTimeout .~ (durationToProto <$> opts.startToCloseTimeout)
-                    & Command.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retryPolicy)
-                    & Command.maybe'localRetryThreshold .~ (durationToProto <$> opts.localRetryThreshold)
-                    & Command.cancellationType .~ activityCancellationTypeToProto opts.cancellationType
-                 )
-    addCommand cmd
-    pure $
-      Task
-        { waitAction = do
-            res <- getIVar resultSlot
-            Workflow $ \_ -> case res ^. Activation.result . ActivityResult.maybe'status of
-              Nothing -> error "Activity result missing status"
-              Just (ActivityResult.ActivityResolution'Completed success) -> do
-                result <- liftIO $ decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
-                case result of
-                  -- TODO handle properly
-                  Left err -> error $ "Failed to decode activity result: " <> show err
-                  Right val -> pure $ Done val
-              Just (ActivityResult.ActivityResolution'Failed failure_) ->
-                let failure = failure_ ^. ActivityResult.failure
-                in pure $
-                    Throw $
-                      toException $
-                        ActivityFailure
-                          { message = failure ^. Failure.message
-                          , activityType = ActivityType n
-                          , activityId = ActivityId actId
-                          , retryState = retryStateFromProto $ failure ^. Failure.activityFailureInfo . Failure.retryState
-                          , identity = failure ^. Failure.activityFailureInfo . Failure.identity
-                          , cause =
-                              let cause_ = failure ^. Failure.cause
-                              in ApplicationFailure
-                                  { type' = cause_ ^. Failure.applicationFailureInfo . Failure.type'
-                                  , message = cause_ ^. Failure.message
-                                  , nonRetryable = cause_ ^. Failure.applicationFailureInfo . Failure.nonRetryable
-                                  , details = cause_ ^. Failure.applicationFailureInfo . Failure.details . Payloads.payloads . to (fmap convertFromProtoPayload)
-                                  , stack = cause_ ^. Failure.stackTrace
-                                  , nextRetryDelay = Nothing
-                                  }
-                          , scheduledEventId = failure ^. Failure.activityFailureInfo . Failure.scheduledEventId
-                          , startedEventId = failure ^. Failure.activityFailureInfo . Failure.startedEventId
-                          , original = failure ^. Failure.activityFailureInfo
-                          , stack = Text.pack $ Temporal.Exception.prettyCallStack callStack
-                          }
-              Just (ActivityResult.ActivityResolution'Cancelled details) -> pure $ Throw $ toException $ ActivityCancelled (details ^. ActivityResult.failure)
-              Just (ActivityResult.ActivityResolution'Backoff _doBackoff) -> error "not implemented"
-        , cancelAction = do
-            let cancelCmd =
-                  defMessage
-                    & Command.requestCancelLocalActivity
-                      .~ ( defMessage
-                            & Command.seq .~ actSeq
-                         )
-            ilift $ addCommand cancelCmd
-        }
+-- startLocalActivity
+--   :: forall act
+--    . (RequireCallStack, ActivityRef act)
+--   => act
+--   -> StartLocalActivityOptions
+--   -> (ActivityArgs act :->: Workflow (Task (ActivityResult act)))
+-- startLocalActivity (activityRef -> KnownActivity codec n) opts = withWorkflowArgs @(ActivityArgs act) @(Task (ActivityResult act)) codec $ \typedPayloads -> Workflow do
+--   updateCallStack
+--   originalTime <- unWorkflow time
+--   inst <- ask
+--   runInIO <- askRunInIO
+--   let ps = fmap convertToProtoPayload typedPayloads
+--   s@(Sequence actSeq) <- nextActivitySequence
+--   resultSlot <- newIVar
+--   atomically $ modifyTVar'
+--     inst.workflowSequenceMaps.activities
+--     (HashMap.insert s resultSlot)
+--   -- TODO, seems like `attempt` and `originalScheduledTime`
+--   -- imply that we are in charge of retrying local activities ourselves?
+--   let actId = maybe (Text.pack $ show actSeq) rawActivityId opts.activityId
+--       cmd =
+--         defMessage
+--           & Command.scheduleLocalActivity
+--             .~ ( defMessage
+--                   & Command.seq .~ actSeq
+--                   & Command.activityId .~ actId
+--                   & Command.activityType .~ n
+--                   -- & attempt .~ _
+--                   -- & headers .~ _
+--                   & Command.originalScheduleTime .~ timespecToTimestamp originalTime
+--                   & Command.vec'arguments .~ ps
+--                   & Command.maybe'scheduleToCloseTimeout .~ (durationToProto <$> opts.scheduleToCloseTimeout)
+--                   & Command.maybe'scheduleToStartTimeout .~ (durationToProto <$> opts.scheduleToStartTimeout)
+--                   & Command.maybe'startToCloseTimeout .~ (durationToProto <$> opts.startToCloseTimeout)
+--                   & Command.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retryPolicy)
+--                   & Command.maybe'localRetryThreshold .~ (durationToProto <$> opts.localRetryThreshold)
+--                   & Command.cancellationType .~ activityCancellationTypeToProto opts.cancellationType
+--                 )
+--   addCommand cmd
+--   let t :: Task (ActivityResult act)
+--       t = Task
+--         { waitAction = runInIO do
+--             res <- waitIVar resultSlot
+--             case res ^. Activation.result . ActivityResult.maybe'status of
+--               Nothing -> error "Activity result missing status"
+--               Just (ActivityResult.ActivityResolution'Completed success) -> do
+--                 result <- liftIO $ decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
+--                 case result of
+--                   -- TODO handle properly
+--                   Left err -> error $ "Failed to decode activity result: " <> show err
+--                   Right val -> pure val
+--               Just (ActivityResult.ActivityResolution'Failed failure_) ->
+--                 let failure = failure_ ^. ActivityResult.failure
+--                 in throwM $
+--                         ActivityFailure
+--                           { message = failure ^. Failure.message
+--                           , activityType = ActivityType n
+--                           , activityId = ActivityId actId
+--                           , retryState = retryStateFromProto $ failure ^. Failure.activityFailureInfo . Failure.retryState
+--                           , identity = failure ^. Failure.activityFailureInfo . Failure.identity
+--                           , cause =
+--                               let cause_ = failure ^. Failure.cause
+--                               in ApplicationFailure
+--                                   { type' = cause_ ^. Failure.applicationFailureInfo . Failure.type'
+--                                   , message = cause_ ^. Failure.message
+--                                   , nonRetryable = cause_ ^. Failure.applicationFailureInfo . Failure.nonRetryable
+--                                   , details = cause_ ^. Failure.applicationFailureInfo . Failure.details . Payloads.payloads . to (fmap convertFromProtoPayload)
+--                                   , stack = cause_ ^. Failure.stackTrace
+--                                   , nextRetryDelay = Nothing
+--                                   }
+--                           , scheduledEventId = failure ^. Failure.activityFailureInfo . Failure.scheduledEventId
+--                           , startedEventId = failure ^. Failure.activityFailureInfo . Failure.startedEventId
+--                           , original = failure ^. Failure.activityFailureInfo
+--                           , stack = Text.pack $ Temporal.Exception.prettyCallStack callStack
+--                           }
+--               Just (ActivityResult.ActivityResolution'Cancelled details) -> throwM $ ActivityCancelled (details ^. ActivityResult.failure)
+--               Just (ActivityResult.ActivityResolution'Backoff _doBackoff) -> error "not implemented"
+--         , cancelAction = runInIO do
+--             let cancelCmd =
+--                   defMessage
+--                     & Command.requestCancelLocalActivity
+--                       .~ ( defMessage
+--                             & Command.seq .~ actSeq
+--                           )
+--             addCommand cancelCmd
+--       }
 
+--   pure $
 
 {- $metadata
 
@@ -848,7 +832,7 @@ making decisions about how to proceed (like using 'info' to decide whether to co
 like historyLength and searchAttributes— and some may be changeable in the future— like taskQueue.
 -}
 info :: Workflow Info
-info = askInstance >>= (\m -> Workflow $ \_ -> Done <$> m) . readIORef . workflowInstanceInfo
+info = askInstance >>= Workflow . readTVarIO . workflowInstanceInfo
 
 
 -- (ask >>= readIORef) workflowInstanceInfo <$> askInstance
@@ -867,8 +851,8 @@ lookupMemoValue k = Map.lookup k <$> getMemoValues
 
 Using this function will overwrite any existing Search Attributes with the same key.
 -}
-upsertSearchAttributes :: RequireCallStack => Map SearchAttributeKey SearchAttributeType -> Workflow ()
-upsertSearchAttributes values = ilift $ do
+upsertSearchAttributes :: (RequireCallStack) => Map SearchAttributeKey SearchAttributeType -> Workflow ()
+upsertSearchAttributes values = Workflow do
   updateCallStack
   attrs <- liftIO $ searchAttributesToProto values
   let cmd =
@@ -878,8 +862,8 @@ upsertSearchAttributes values = ilift $ do
                   & Command.searchAttributes .~ attrs
                )
   addCommand cmd
-  inst <- ask
-  modifyIORef' inst.workflowInstanceInfo $ \Info {..} ->
+  inst <- asks workflowRuntimeInstance
+  atomically $ modifyTVar' inst.workflowInstanceInfo $ \Info {..} ->
     Info {searchAttributes = searchAttributes <> values, ..}
 
 
@@ -892,11 +876,10 @@ are 'sleep', 'awaitCondition', 'awaitActivity', 'awaitWorkflow', etc.
 Equivalent to `getCurrentTime` from the `time` package.
 -}
 now :: Workflow UTCTime
-now = Workflow $ \_ ->
-  Done <$> do
-    wft <- asks workflowTime
-    t <- readIORef wft
-    pure $! systemToUTCTime t
+now = Workflow do
+  wft <- asks (workflowTime . workflowRuntimeInstance)
+  t <- readTVarIO wft
+  pure $! systemToUTCTime t
 
 
 {- | When using the "Schedules" feature of Temporal, this is the effective time that an instance was scheduled to run,
@@ -933,27 +916,29 @@ You may need to patch if:
 
 
 applyPatch
-  :: RequireCallStack
+  :: (RequireCallStack)
   => PatchId
   -> Bool
   -- ^ whether the patch is deprecated
   -> Workflow Bool
-applyPatch pid deprecated = ilift $ do
+applyPatch pid deprecated = Workflow do
   updateCallStack
-  inst <- ask
-  memoized <- readIORef inst.workflowMemoizedPatches
-  case HashMap.lookup pid memoized of
-    Just val -> pure val
-    Nothing -> do
-      isReplaying <- readIORef inst.workflowIsReplaying
-      notifiedPatches <- readIORef inst.workflowNotifiedPatches
-      let usePatch = not isReplaying || Set.member pid notifiedPatches
-      writeIORef inst.workflowMemoizedPatches $ HashMap.insert pid usePatch memoized
-      when usePatch $ do
-        addCommand $
-          defMessage
-            & Command.setPatchMarker .~ (defMessage & Command.patchId .~ rawPatchId pid & Command.deprecated .~ deprecated)
-      pure usePatch
+  inst <- asks workflowRuntimeInstance
+  join $ atomically do
+    memoized <- readTVar inst.workflowMemoizedPatches
+    case HashMap.lookup pid memoized of
+      Just val -> pure $ pure val
+      Nothing -> do
+        isReplaying <- readTVar inst.workflowIsReplaying
+        notifiedPatches <- readTVar inst.workflowNotifiedPatches
+        let usePatch = not isReplaying || Set.member pid notifiedPatches
+        writeTVar inst.workflowMemoizedPatches $ HashMap.insert pid usePatch memoized
+        pure do
+          when usePatch $ do
+            addCommand $
+              defMessage
+                & Command.setPatchMarker .~ (defMessage & Command.patchId .~ rawPatchId pid & Command.deprecated .~ deprecated)
+          pure usePatch
 
 
 {- | Patch or upgrade workflow code by checking or stating that this workflow has a certain patch.
@@ -970,7 +955,7 @@ If the workflow is not currently replaying, then this call always returns true.
 Your workflow code should run the "new" code if this returns true, if it returns false,
 you should run the "old" code. By doing this, you can maintain determinism.
 -}
-patched :: RequireCallStack => PatchId -> Workflow Bool
+patched :: (RequireCallStack) => PatchId -> Workflow Bool
 patched pid = do
   updateCallStackW
   applyPatch pid False
@@ -987,7 +972,7 @@ If either kind of worker encounters a history produced by the other, their behav
 Once all live workflow runs have been produced by workers with this call, you can deploy workers which are free of either kind of
 patch call for this ID. Workers with and without this call may coexist, as long as they are both running the "new" code.
 -}
-deprecatePatch :: RequireCallStack => PatchId -> Workflow ()
+deprecatePatch :: (RequireCallStack) => PatchId -> Workflow ()
 deprecatePatch pid = do
   updateCallStackW
   void $ applyPatch pid True
@@ -1018,7 +1003,7 @@ This function is cryptographically insecure.
 -}
 uuid4 :: Workflow UUID
 uuid4 = do
-  wft <- workflowRandomnessSeed <$> askInstance
+  wft <- randomGen
   sbs <- uniformShortByteString 16 wft
   pure $
     buildFromBytes
@@ -1044,7 +1029,7 @@ uuid4 = do
 {- | Generates a UUIDv7 using the current time (from 'time') and
 random data (from 'workflowRandomnessSeed').
 -}
-uuid7 :: RequireCallStack => Workflow UUID
+uuid7 :: (RequireCallStack) => Workflow UUID
 uuid7 = do
   t <- time
   wft <- workflowRandomnessSeed <$> askInstance
@@ -1117,11 +1102,11 @@ setQueryHandler
   => query
   -> f
   -> Workflow ()
-setQueryHandler (queryRef -> KnownQuery n codec) f = ilift $ do
+setQueryHandler (queryRef -> KnownQuery n codec) f = Workflow do
   updateCallStack
-  inst <- ask
+  runtime <- ask
   withRunInIO $ \runInIO -> do
-    liftIO $ modifyIORef' inst.workflowQueryHandlers $ \handles ->
+    atomically $ modifyTVar' runtime.queries.queryHandlers $ \handles ->
       HashMap.insert (Just n) (\qId vec hdrs -> runInIO $ qHandler qId vec hdrs) handles
   where
     qHandler :: QueryId -> Vector Payload -> Map Text Payload -> InstanceM (Either SomeException Payload)
@@ -1138,7 +1123,7 @@ setQueryHandler (queryRef -> KnownQuery n codec) f = ilift $ do
       case eHandler of
         Left err -> pure $ Left $ toException $ ValueError err
         Right (Query r) -> do
-          eResult <- UnliftIO.try r
+          eResult <- UnliftIO.try $ atomically r
           case eResult of
             Left err -> pure $ Left err
             Right result -> liftIO $ UnliftIO.try $ encode codec result
@@ -1161,21 +1146,21 @@ setUpdateHandler
   -> f
   -> Maybe validator
   -> Workflow ()
-setUpdateHandler (updateRef -> KnownUpdate codec n) f mValidator = ilift $ do
+setUpdateHandler (updateRef -> KnownUpdate codec n) f mValidator = Workflow do
   updateCallStack
-  inst <- ask
+  runtime <- ask
   let updateImplementation =
         WorkflowUpdateImplementation
-          { updateImplementation = updateHandler
+          { updateImplementation = coerce updateHandler
           , updateValidationImplementation = fmap updateValidatorHandler mValidator
           }
-  liftIO $ modifyIORef' inst.workflowUpdateHandlers $ \handles ->
+  atomically $ modifyTVar' runtime.updates.updateHandlers $ \handles ->
     HashMap.insert (Just n) updateImplementation handles
   where
     updateHandler :: UpdateId -> Vector Payload -> Map Text Payload -> Workflow Payload
     updateHandler updateId vec hdrs = do
       ePayloads <-
-        ilift $
+        Workflow $
           liftIO $
             applyPayloads
               codec
@@ -1184,10 +1169,9 @@ setUpdateHandler (updateRef -> KnownUpdate codec n) f mValidator = ilift $ do
               f
               vec
       case ePayloads of
-        Left err -> Workflow $ \_env -> do
-          $(logDebug) "Hit a decoding error"
-          pure $ Throw $ toException $ ValueError err
-        Right w -> w >>= \result -> ilift (liftIO $ encode codec result)
+        Left err -> Workflow do
+          throwM $ ValueError err
+        Right w -> w >>= \result -> Workflow (liftIO $ encode codec result)
     updateValidatorHandler :: validator -> UpdateId -> Vector Payload -> Map Text Payload -> Validation (Either SomeException ())
     updateValidatorHandler v updateId vec hdrs = do
       eResult <-
@@ -1223,38 +1207,37 @@ setSignalHandler
   => ref
   -> f
   -> Workflow ()
-setSignalHandler (signalRef -> KnownSignal n codec) f = ilift $ do
+setSignalHandler (signalRef -> KnownSignal n codec) f = Workflow do
   updateCallStack
   -- TODO ^ inner callstack?
-  inst <- ask
-  liftIO $ modifyIORef' inst.workflowSignalHandlers $ \handlers ->
+  runtime <- ask
+  atomically $ modifyTVar' runtime.signals.signalHandlers $ \handlers ->
     HashMap.insert (Just n) handle' handlers
   where
-    handle' :: Vector Payload -> Workflow ()
+    handle' :: Vector Payload -> InstanceM ()
     handle' vec = do
-      eWorkflow <- Workflow $ \_env ->
+      eWorkflow <- do
         liftIO $
-          Done
-            <$> applyPayloads
-              codec
-              (Proxy @(ArgsOf f))
-              (Proxy @(Workflow ()))
-              f
-              vec
+          applyPayloads
+            codec
+            (Proxy @(ArgsOf f))
+            (Proxy @(Workflow ()))
+            f
+            vec
       case eWorkflow of
-        Left err -> throw $ ValueError err
-        Right w -> w
+        Left err -> throwM $ ValueError err
+        Right w -> unWorkflow w
 
 
 {- | Current time from the workflow perspective.
 
 The value is relative to epoch time.
 -}
-time :: RequireCallStack => Workflow SystemTime
-time = ilift $ do
+time :: (RequireCallStack) => Workflow SystemTime
+time = Workflow do
   updateCallStack
-  wft <- asks workflowTime
-  readIORef wft
+  wft <- asks (workflowTime . workflowRuntimeInstance)
+  readTVarIO wft
 
 
 data Timer = Timer
@@ -1277,8 +1260,8 @@ by any operation, such as 'sleep', 'awaitCondition', 'awaitActivity', 'awaitWork
 If the duration is less than or equal to zero, the timer will not be created.
 -}
 createTimer :: Duration -> Workflow (Maybe Timer)
-createTimer ts = provideCallStack $ ilift $ do
-  inst <- ask
+createTimer ts = provideCallStack $ Workflow do
+  runtime <- ask
   s@(Sequence seqId) <- nextTimerSequence
   if ts <= mempty
     then pure Nothing
@@ -1292,9 +1275,9 @@ createTimer ts = provideCallStack $ ilift $ do
                       & Command.startToFireTimeout .~ durationToProto ts'
                    )
       $(logDebug) "Add command: sleep"
-      res <- newIVar
-      atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-        seqMaps {timers = HashMap.insert s res seqMaps.timers}
+      res <- newIVar $ getThreadManager runtime
+      atomically $ modifyTVar' runtime.workflowRuntimeSequenceMaps.timers $ \seqMaps ->
+        HashMap.insert s res seqMaps
       addCommand cmd
       pure $ Just $ Timer {timerSequence = s, timerHandle = res}
 
@@ -1313,7 +1296,7 @@ block the workflow thread in a busy-wait.
 
 If the duration is less than or equal to zero, the function will return immediately.
 -}
-sleep :: RequireCallStack => Duration -> Workflow ()
+sleep :: (RequireCallStack) => Duration -> Workflow ()
 sleep ts = do
   updateCallStackW
   t <- createTimer ts
@@ -1326,7 +1309,7 @@ If the target time is in the past, the function will return immediately.
 
 See 'sleep' for details about timer behavior and workflow suspension.
 -}
-sleepUntilSystemTime :: RequireCallStack => SystemTime -> Workflow ()
+sleepUntilSystemTime :: (RequireCallStack) => SystemTime -> Workflow ()
 sleepUntilSystemTime t = do
   updateCallStackW
   currentTime <- time
@@ -1340,25 +1323,25 @@ If the target time is in the past, the function will return immediately.
 
 See 'sleep' for details about timer behavior and workflow suspension.
 -}
-sleepUntilUTCTime :: RequireCallStack => UTCTime -> Workflow ()
+sleepUntilUTCTime :: (RequireCallStack) => UTCTime -> Workflow ()
 sleepUntilUTCTime = sleepUntilSystemTime . utcToSystemTime
 
 
 instance Wait Timer where
   type WaitResult Timer = Workflow ()
-  wait :: RequireCallStack => Timer -> WaitResult Timer
-  wait t = do
-    updateCallStackW
-    getIVar $ timerHandle t
+  wait :: (RequireCallStack) => Timer -> WaitResult Timer
+  wait t = Workflow do
+    updateCallStack
+    waitIVar $ timerHandle t
 
 
 instance Cancel Timer where
   type CancelResult Timer = Workflow ()
 
 
-  cancel t = Workflow $ \_ -> do
+  cancel t = Workflow do
     updateCallStack
-    inst <- ask
+    runtime <- ask
     let cmd =
           defMessage
             & Command.cancelTimer
@@ -1366,18 +1349,11 @@ instance Cancel Timer where
                     & Command.seq .~ rawSequence (timerSequence t)
                  )
     addCommand cmd
-    $(logDebug) "about to putIVar: cancelTimer"
-    liftIO $
-      putIVar
-        t.timerHandle
-        (Ok ())
-        inst.workflowInstanceContinuationEnv
-
-    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-      seqMaps {timers = HashMap.delete t.timerSequence seqMaps.timers}
-
-    $(logDebug) "finished putIVar: cancelTimer"
-    pure $ Done ()
+    atomically $ do
+      putIVar t.timerHandle ()
+      modifyTVar'
+        runtime.workflowRuntimeSequenceMaps.timers
+        (HashMap.delete t.timerSequence)
 
 
 {- | Continue-As-New is a mechanism by which the latest relevant state is passed to a new Workflow Execution, with a fresh Event History.
@@ -1401,25 +1377,25 @@ TODO, don't make this an exception, make it a return value
 -}
 continueAsNew
   :: forall wf
-   . WorkflowRef wf
+   . (WorkflowRef wf)
   => wf
   -- ^ The workflow to continue as new. It doesn't have to be the same as the current workflow.
   -> ContinueAsNewOptions
   -> (WorkflowArgs wf :->: Workflow (WorkflowResult wf))
 continueAsNew (workflowRef -> k@(KnownWorkflow codec _)) opts = withWorkflowArgs @(WorkflowArgs wf) @(WorkflowResult wf) codec $ \args -> do
-  Workflow $ \_ -> do
-    inst <- ask
-    res <- liftIO $ (Temporal.Workflow.Internal.Monad.continueAsNew inst.outboundInterceptor) (knownWorkflowName k) opts $ \wfName (opts' :: ContinueAsNewOptions) -> do
+  Workflow do
+    inst <- asks workflowRuntimeInstance
+    let continueAsNewInterceptor = Temporal.Interceptor.continueAsNew (outboundInterceptor inst)
+    liftIO $ continueAsNewInterceptor (knownWorkflowName k) opts $ \wfName (opts' :: ContinueAsNewOptions) -> do
       -- searchAttrs <- searchAttributesToProto
       --     (if opts'.searchAttributes == mempty
       --       then i.searchAttributes
       --       else opts'.searchAttributes)
-      throwIO $ ContinueAsNewException (WorkflowType wfName) args opts'
-    pure $ Done res
+      throwM $ ContinueAsNewException (WorkflowType wfName) args opts'
 
 
 -- | Returns a client-side handle that can be used to signal and cancel an existing Workflow execution. It takes a Workflow ID and optional run ID.
-getExternalWorkflowHandle :: RequireCallStack => WorkflowId -> Maybe RunId -> Workflow (ExternalWorkflowHandle result)
+getExternalWorkflowHandle :: (RequireCallStack) => WorkflowId -> Maybe RunId -> Workflow (ExternalWorkflowHandle result)
 getExternalWorkflowHandle wfId mrId = do
   updateCallStackW
   pure $
@@ -1429,167 +1405,8 @@ getExternalWorkflowHandle wfId mrId = do
       }
 
 
-{- | Wait on a condition to become true before continuing.
-
-This must be used with signals, steps executed concurrently via the Applicative instance,
-or with the `race` command, as those are the only way for
-state to change in a workflow while a portion of the workflow itself is
-in this blocking condition.
-
-N.B. this should be used with care, as it can lead to the workflow
-suspending indefinitely if the condition is never met.
-(e.g. if there is no signal handler that changes the state appropriately)
--}
-waitCondition :: RequireCallStack => Condition Bool -> Workflow ()
-waitCondition c@(Condition m) = do
-  updateCallStackW
-  (conditionSatisfied, touchedVars) <- ilift $ do
-    sRef <- newIORef mempty
-    sat <- runReaderT m sRef
-    (,) sat <$> readIORef sRef
-  if conditionSatisfied
-    then pure ()
-    else go touchedVars
-  where
-    -- When blocked, the condition needs to be rechecked every time a signal is received
-    -- or a new resolutions are received from a workflow activation.
-    go touchedVars = do
-      blockedVar <- ilift $ do
-        inst <- ask
-        res <- newIVar
-        conditionSeq <- nextConditionSequence
-        atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-          seqMaps
-            { conditionsAwaitingSignal = HashMap.insert conditionSeq (res, touchedVars) seqMaps.conditionsAwaitingSignal
-            }
-        pure res
-      -- Wait for the condition to be signaled. Once signalled, we just try again.
-      -- writeStateVar and friends are in charge of filling the ivar and clearing out the seqmaps between rechecks
-      getIVar blockedVar
-      waitCondition c
-
-
-{- | While workflows are deterministic, there are categories of operational concerns (metrics, logging, tracing, etc.) that require
-access to IO operations like the network or filesystem. The 'IO' monad is not generally available in the 'Workflow' monad, but you
-can use 'sink' to run an 'IO' action in a workflow. In order to maintain determinism, the operation will be executed asynchronously
-and does not return a value. Be sure that the sink operation terminates, or else you will leak memory and/or threads.
-
-Do not use 'sink' for any Workflow logic, or else you will violate determinism.
--}
-unsafeAsyncEffectSink :: RequireCallStack => IO () -> Workflow ()
-unsafeAsyncEffectSink m = do
-  updateCallStackW
-  ilift $ liftIO $ void $ forkIO m
-
-
 -- -----------------------------------------------------------------------------
 -- Parallel operations
-
-{-
-If either workflow completes with a Left a result, the computation will short-circuit and immediately return @Left a@.
-This means that if one branch produces a 'Left' result, the other branch's computation will be aborted if it hasn't already completed.
-
-If both workflows complete with Right results, the function will return @Right (b, c)@.
-In this case, both branches will be fully evaluated.
--}
-biselect
-  :: RequireCallStack
-  => Workflow (Either a b)
-  -> Workflow (Either a c)
-  -> Workflow (Either a (b, c))
-biselect = biselectOpt id id Left Right
-
-
-{- | The 'biselectOpt' function combines two workflows and applies optimized selection logic.
-
-This function is inspired by the 'Haxl' library's Haxl.Core.Parallel functions. It takes two workflows
-and combines them, applying discrimination functions to their results to determine the final outcome.
-The function works as follows:
-
-1. It explores both workflows concurrently.
-
-2. If the left workflow completes first:
-   - If the first argument returns 'Left', the result is immediately returned using the third function.
-   - If the first argument returns 'Right', it waits for the right workflow to complete.
-
-3. If the right workflow completes first:
-   - If the second argument returns 'Left', the result is immediately returned using the third function.
-   - If the second argument returns 'Right', it waits for the left workflow to complete.
-
-4. If both workflows complete:
-   - The results are combined using the fourth function if both discriminators return 'Right'.
-
-5. If either workflow throws an exception, the exception is propagated.
-
-6. If either workflow is blocked, the function manages the blocking and resumption of computation.
-
-This function optimizes the execution by short-circuiting when possible and managing concurrency
-efficiently. Be cautious when using this function, as exceptions and evaluation order can be
-unpredictable depending on the discriminator functions provided.
--}
-{-# INLINE biselectOpt #-}
-biselectOpt
-  :: RequireCallStack
-  => (l -> Either a b)
-  -> (r -> Either a c)
-  -> (a -> t)
-  -> ((b, c) -> t)
-  -> Workflow l
-  -> Workflow r
-  -> Workflow t
-biselectOpt discrimA discrimB left right wfL wfR =
-  let go (Workflow wfA) (Workflow wfB) = Workflow $ \env -> do
-        ra <- wfA env
-        case ra of
-          Done ea ->
-            case discrimA ea of
-              Left a -> return (Done (left a))
-              Right b -> do
-                rb <- wfB env
-                case rb of
-                  Done eb ->
-                    case discrimB eb of
-                      Left a -> return (Done (left a))
-                      Right c -> return (Done (right (b, c)))
-                  Throw e -> return (Throw e)
-                  Blocked ib wfB' ->
-                    return
-                      ( Blocked
-                          ib
-                          (wfB' :>>= \b' -> goRight b b')
-                      )
-          Throw e -> return (Throw e)
-          Blocked ia wfA' -> do
-            rb <- wfB env
-            case rb of
-              Done eb ->
-                case discrimB eb of
-                  Left a -> return (Done (left a))
-                  Right c ->
-                    return (Blocked ia (wfA' :>>= \a' -> goLeft a' c))
-              Throw e -> return (Throw e)
-              Blocked ib wfB' -> do
-                i <- newIVar
-                addJob env (return ()) i ia
-                addJob env (return ()) i ib
-                return (Blocked i (Cont (go (toWf wfA') (toWf wfB'))))
-      -- The code above makes sure that the computation
-      -- wakes up whenever either 'ia' or 'ib' is filled.
-      -- The ivar 'i' is used as a synchronisation point
-      -- for the whole computation, and we make sure that
-      -- whenever 'ia' or 'ib' are filled in then 'i' will
-      -- also be filled.
-
-      goRight b eb =
-        case discrimB eb of
-          Left a -> return (left a)
-          Right c -> return (right (b, c))
-      goLeft ea c =
-        case discrimA ea of
-          Left a -> return (left a)
-          Right b -> return (right (b, c))
-  in go wfL wfR
-
 
 {- | This function takes two Workflow computations as input, and returns the
 output of whichever computation finished first. The evaluation of the remaining
@@ -1601,19 +1418,30 @@ so you should be careful about ensuring that incomplete
 computations are not problematic for your problem domain.
 -}
 race
-  :: RequireCallStack
+  :: (RequireCallStack)
   => Workflow a
   -> Workflow b
   -> Workflow (Either a b)
-race = biselectOpt discrimX discrimY id right
-  where
-    discrimX :: a -> Either (Either a b) ()
-    discrimX a = Left (Left a)
-
-    discrimY :: b -> Either (Either a b) ()
-    discrimY b = Left (Right b)
-
-    right _ = error "race: We should never have a 'Right ()'"
+race l r = Workflow $ UnliftIO.mask $ \restore -> do
+  runtime <- ask
+  lh <- asyncWorkflow l
+  rh <- asyncWorkflow r
+  -- This takes a bit of thought to get right.
+  --
+  -- We can mark this thread as blocked, because the asyncWorkflow threads
+  -- start off unblocked, so we can ensure that we don't accidentally flush
+  -- commands before the asyncWorkflow threads have a chance to run.
+  --
+  -- By ensuring that we unblock this thread in the `finally` block in the
+  -- same transaction as deregistering the asyncWorkflow threads, we can ensure
+  -- a consistent view of the world.
+  atomically do
+    waitThreadsRegistered runtime [asyncThreadId lh, asyncThreadId rh]
+    markBlockedState runtime True
+  restore (waitEither lh rh) `UnliftIO.finally` atomically do
+    markBlockedState runtime False
+    deregisterThread runtime $ asyncThreadId lh
+    deregisterThread runtime $ asyncThreadId rh
 
 
 {- | Run two Workflow actions concurrently, and return the first to finish.
@@ -1622,7 +1450,7 @@ Unlike 'Control.Concurrent.Async.race, this function doesn't explicitly cancel
 the other computation. If you want to cancel the other computation,
 you should return sufficient context to do so manually
 -}
-race_ :: RequireCallStack => Workflow a -> Workflow b -> Workflow ()
+race_ :: (RequireCallStack) => Workflow a -> Workflow b -> Workflow ()
 race_ l r = void $ Temporal.Workflow.race l r
 
 
@@ -1644,12 +1472,12 @@ returning the original data structure with the arguments replaced with the resul
 This is actually a bit of a misnomer, since it's really 'traverseConcurrently', but this is copied to mimic the 'async' package's naming
 to slightly ease adoption.
 -}
-mapConcurrently :: Traversable t => (a -> Workflow b) -> t a -> Workflow (t b)
+mapConcurrently :: (Traversable t) => (a -> Workflow b) -> t a -> Workflow (t b)
 mapConcurrently = traverseConcurrently
 
 
 -- | Alias for 'traverseConcurrently_'
-mapConcurrently_ :: Foldable t => (a -> Workflow b) -> t a -> Workflow ()
+mapConcurrently_ :: (Foldable t) => (a -> Workflow b) -> t a -> Workflow ()
 mapConcurrently_ = traverseConcurrently_
 
 
@@ -1664,31 +1492,31 @@ replicateConcurrently_ n = runConcurrentWorkflowActions . fold . replicate n . C
 
 
 -- | Evaluate the action in the given number of evaluation branches, accumulating the results
-traverseConcurrently :: Traversable t => (a -> Workflow b) -> t a -> Workflow (t b)
+traverseConcurrently :: (Traversable t) => (a -> Workflow b) -> t a -> Workflow (t b)
 traverseConcurrently f xs = runConcurrentWorkflowActions $ traverse (ConcurrentWorkflow . f) xs
 
 
-traverseConcurrently_ :: Foldable t => (a -> Workflow b) -> t a -> Workflow ()
+traverseConcurrently_ :: (Foldable t) => (a -> Workflow b) -> t a -> Workflow ()
 traverseConcurrently_ f xs = runConcurrentWorkflowActions $ traverse_ (ConcurrentWorkflow . f) xs
 
 
 -- | Evaluate each Workflow action in the structure concurrently, and collect the results.
-sequenceConcurrently :: Traversable t => t (Workflow a) -> Workflow (t a)
+sequenceConcurrently :: (Traversable t) => t (Workflow a) -> Workflow (t a)
 sequenceConcurrently = runConcurrentWorkflowActions . traverse ConcurrentWorkflow
 
 
 -- | Evaluate each Workflow action in the structure concurrently, and ignore the results.
-sequenceConcurrently_ :: Foldable t => t (Workflow a) -> Workflow ()
+sequenceConcurrently_ :: (Foldable t) => t (Workflow a) -> Workflow ()
 sequenceConcurrently_ = runConcurrentWorkflowActions . traverse_ ConcurrentWorkflow
 
 
 -- | 'traverseConcurrently' with the arguments flipped.
-forConcurrently :: Traversable t => t a -> (a -> Workflow b) -> Workflow (t b)
+forConcurrently :: (Traversable t) => t a -> (a -> Workflow b) -> Workflow (t b)
 forConcurrently = flip traverseConcurrently
 
 
 -- | 'traverseConcurrently_' with the arguments flipped.
-forConcurrently_ :: Foldable t => t a -> (a -> Workflow b) -> Workflow ()
+forConcurrently_ :: (Foldable t) => t a -> (a -> Workflow b) -> Workflow ()
 forConcurrently_ = flip traverseConcurrently_
 
 
@@ -1717,14 +1545,11 @@ In order to opt in to cancellation handling, you can call 'isCancelRequested'
 periodically within your workflow code to check whether a cancellation request
 has been received.
 -}
-isCancelRequested :: RequireCallStack => Workflow Bool
-isCancelRequested = do
-  updateCallStackW
-  inst <- askInstance
-  res <- tryReadIVar inst.workflowCancellationVar
-  case res of
-    Nothing -> pure False
-    Just () -> pure True
+isCancelRequested :: (RequireCallStack) => Workflow Bool
+isCancelRequested = Workflow do
+  updateCallStack
+  runtime <- ask
+  isJust <$> atomically (tryReadIVar runtime.workflowRuntimeCancelRequested)
 
 
 {- | Block the current workflow's main execution thread until the workflow is cancelled.
@@ -1738,12 +1563,12 @@ and/or respond to queries, but otherwise need to remain idle on their main codep
 
 N.B. It is likely not safe to call this in a signal handler.
 -}
-waitCancellation :: RequireCallStack => Workflow ()
-waitCancellation = do
-  updateCallStackW
-  inst <- askInstance
-  getIVar inst.workflowCancellationVar
-  throw WorkflowCancelRequested
+waitCancellation :: (RequireCallStack) => Workflow ()
+waitCancellation = Workflow do
+  updateCallStack
+  runtime <- ask
+  waitIVar runtime.workflowRuntimeCancelRequested
+  throwM WorkflowCancelRequested
 
 
 defaultRetryPolicy :: RetryPolicy

@@ -21,7 +21,7 @@ import Temporal.Exception (ApplicationFailureHandler)
 import Temporal.Interceptor
 import Temporal.Payload
 import Temporal.Workflow.Definition (WorkflowDefinition)
-import Temporal.Workflow.Internal.Monad
+import Temporal.Workflow.Monad
 import Temporal.Workflow.Worker (WorkflowWorker)
 import UnliftIO hiding (race)
 
@@ -66,18 +66,6 @@ instance MonadLoggerIO (WorkerM ty activityEnv) where
   askLoggerIO = do
     worker <- ask
     pure worker.workerLogFn
-
-
-{- | Values that were blocking waiting for an activation, and have now
-been unblocked.  The worker adds these to a queue ('activationResults') using
-'putResult'; the scheduler collects them from the queue and unblocks
-the relevant computations.
--}
-data ActivationResult
-  = forall a.
-    ActivationResult
-      (ResultVal a)
-      !(IVar a)
 
 
 runWorkerM :: Worker ty actEnv -> WorkerM ty actEnv a -> IO a
