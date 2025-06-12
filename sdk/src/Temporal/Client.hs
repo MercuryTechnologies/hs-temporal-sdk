@@ -120,6 +120,7 @@ import Proto.Temporal.Api.Workflowservice.V1.RequestResponse (
   QueryWorkflowRequest,
   QueryWorkflowResponse,
   UpdateWorkflowExecutionRequest,
+  UpdateWorkflowExecutionResponse,
  )
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as RR
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as WF
@@ -974,7 +975,11 @@ startUpdateFromPayloads h@(WorkflowHandle _ _ c _ _ _) (KnownUpdate updateCodec 
                          )
                  )
 
-    res <- either throwIO pure =<< Temporal.Core.Client.WorkflowService.updateWorkflowExecution h.workflowHandleClient.clientCore msg
+    (res :: UpdateWorkflowExecutionResponse) <- do
+      eRes <- liftIO $ Temporal.Core.Client.WorkflowService.updateWorkflowExecution h.workflowHandleClient.clientCore msg
+      case eRes of
+        Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+        Right res -> pure res
 
     -- We're not going to look for a successful result yet (waitUpdateResult will do that), but we do want to check for failures
     -- so that we can report validataion failures via UpdateFailure rather than RpcError.
@@ -1053,16 +1058,19 @@ waitUpdateResult h = do
                   & Update.lifecycleStage .~ Update.UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED
                )
       go = do
-        res <- either throwIO pure =<< Temporal.Core.Client.WorkflowService.pollWorkflowExecutionUpdate h.updateHandleWorkflowClient.clientCore msg
-        case res ^. Update.maybe'outcome of
-          Nothing -> go
-          Just outcome -> do
-            case outcome ^. Update.maybe'value of
-              Just (Update.Outcome'Success payloads) -> case (payloads ^. Common.vec'payloads) V.!? 0 of
-                Nothing -> throwIO $ ValueError "No return value payloads provided by update response"
-                Just p -> pure $ convertFromProtoPayload p
-              Just (Update.Outcome'Failure failure) -> throwIO $ UpdateFailure failure
-              Nothing -> error "Unsupported update result"
+        eRes <- Temporal.Core.Client.WorkflowService.pollWorkflowExecutionUpdate h.updateHandleWorkflowClient.clientCore msg
+        case eRes of
+          Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+          Right res -> do
+            case res ^. Update.maybe'outcome of
+              Nothing -> go
+              Just outcome -> do
+                case outcome ^. Update.maybe'value of
+                  Just (Update.Outcome'Success payloads) -> case (payloads ^. Common.vec'payloads) V.!? 0 of
+                    Nothing -> throwIO $ ValueError "No return value payloads provided by update response"
+                    Just p -> pure $ convertFromProtoPayload p
+                  Just (Update.Outcome'Failure failure) -> throwIO $ UpdateFailure failure
+                  Nothing -> error "Unsupported update result"
   payload <- liftIO go
   liftIO $ h.updateHandleReadResult payload
 
