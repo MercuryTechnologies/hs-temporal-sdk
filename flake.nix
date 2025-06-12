@@ -26,7 +26,8 @@
               modules = [
                 ./nix/devenv/temporal-bridge.nix
                 ./nix/devenv/temporal-dev-server.nix
-                (import ./nix/devenv/haskell.nix ghcVersion)
+                (pkgs.lib.modules.importApply ./nix/devenv/haskell.nix ghcVersion)
+                ./nix/devenv/repo-wide-checks.nix
                 ({pkgs, ...}: {packages = [self.packages.${pkgs.system}.temporal-test-server];})
               ];
             };
