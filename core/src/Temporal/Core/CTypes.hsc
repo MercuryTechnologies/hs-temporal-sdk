@@ -146,8 +146,6 @@ data RpcError = RpcError
   }
   deriving (Show)
 
-instance Exception RpcError
-
 data CRPCError = CRPCError
   { code :: Word32
   , message :: CString
