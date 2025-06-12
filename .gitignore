@@ -20,4 +20,5 @@ core/rust/lib*
 .devenv
 .idea/
 .pre-commit-config.yaml
-.helix
+.helix/
+.zed/
