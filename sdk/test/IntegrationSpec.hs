@@ -65,7 +65,7 @@ import Temporal.Bundle
 import Temporal.Bundle.TH
 import qualified Temporal.Client as C
 import Temporal.Contrib.OpenTelemetry
-import Temporal.Core.Client
+import Temporal.Core.Client hiding (RpcError)
 import Temporal.Duration
 import Temporal.EphemeralServer
 import Temporal.Exception
@@ -1553,6 +1553,49 @@ needsClient = do
       incompatibleReplayResult `shouldSatisfy` isLeft
 
   describe "Update" $ do
+    describe "startUpdate" $ do
+      -- All the tests that call executeUpdate indirectly exercise startUpdate, but confirm here that validation failures are
+      -- thrown immediately from startUpdate (without needing to wait for the update outcome)
+      it "propagates validation failures" $ \TestEnv {..} -> do
+        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+              baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                  }
+          let updateOpts =
+                C.UpdateOptions
+                  { updateId = "start-update-with-a-validator-that-rejects"
+                  , updateHeaders = mempty
+                  }
+          ( useClient do
+              h <- C.start UpdateWithValidator "start-update-with-a-validator-that-rejects" opts
+              C.startUpdate h testUpdate updateOpts (-12)
+            )
+            `shouldThrow` \case
+              UpdateFailure _ -> True
+      it "propagates validation exceptions if the validator throws" $ \TestEnv {..} -> do
+        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+              baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  , C.timeouts = C.TimeoutOptions {C.runTimeout = Just $ seconds 10, C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                  }
+          let updateOpts =
+                C.UpdateOptions
+                  { updateId = "start-update-with-a-validator-that-throws"
+                  , updateHeaders = mempty
+                  }
+          ( useClient do
+              h <- C.start UpdateWithValidator "start-update-with-a-validator-that-throws" opts
+              C.startUpdate h testUpdate updateOpts 5
+            )
+            `shouldThrow` \case
+              UpdateFailure _ -> True
     it "works with no validator" $ \TestEnv {..} -> do
       let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
             baseConf
@@ -1566,11 +1609,10 @@ needsClient = do
               C.UpdateOptions
                 { updateId = "update-with-no-validator"
                 , updateHeaders = mempty
-                , waitPolicy = C.UpdateLifecycleStageCompleted
                 }
         (updateResult, workflowResult) <- useClient do
           h <- C.start UpdateWithoutValidator "update-with-no-validator" opts
-          updateResult <- C.update h testUpdate updateOpts 12
+          updateResult <- C.executeUpdate h testUpdate updateOpts 12
           workflowResult <- C.waitWorkflowResult h
           pure (updateResult, workflowResult)
         updateResult `shouldBe` 12
@@ -1588,11 +1630,10 @@ needsClient = do
               C.UpdateOptions
                 { updateId = "update-with-a-validator"
                 , updateHeaders = mempty
-                , waitPolicy = C.UpdateLifecycleStageCompleted
                 }
         (updateResult, workflowResult) <- useClient do
           h <- C.start UpdateWithValidator "update-with-a-validator" opts
-          updateResult <- C.update h testUpdate updateOpts 12
+          updateResult <- C.executeUpdate h testUpdate updateOpts 12
           workflowResult <- C.waitWorkflowResult h
           pure (updateResult, workflowResult)
         updateResult `shouldBe` 12
@@ -1610,15 +1651,13 @@ needsClient = do
               C.UpdateOptions
                 { updateId = "update-with-a-validator-that-rejects"
                 , updateHeaders = mempty
-                , waitPolicy = C.UpdateLifecycleStageCompleted
                 }
         ( useClient do
             h <- C.start UpdateWithValidator "update-with-a-validator-that-rejects" opts
-            C.update h testUpdate updateOpts (-12)
+            C.executeUpdate h testUpdate updateOpts (-12)
           )
           `shouldThrow` \case
             UpdateFailure _ -> True
-            _ -> False
     it "propagates validation exceptions if the validator throws" $ \TestEnv {..} -> do
       let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
             baseConf
@@ -1632,15 +1671,13 @@ needsClient = do
               C.UpdateOptions
                 { updateId = "update-with-a-validator-that-throws"
                 , updateHeaders = mempty
-                , waitPolicy = C.UpdateLifecycleStageCompleted
                 }
         ( useClient do
             h <- C.start UpdateWithValidator "update-with-a-validator-that-throws" opts
-            C.update h testUpdate updateOpts 5
+            C.executeUpdate h testUpdate updateOpts 5
           )
           `shouldThrow` \case
             UpdateFailure _ -> True
-            _ -> False
     it "propogates update exceptions if the update throws" $ \TestEnv {..} -> do
       let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
             baseConf
@@ -1654,15 +1691,13 @@ needsClient = do
               C.UpdateOptions
                 { updateId = "update-that-throws"
                 , updateHeaders = mempty
-                , waitPolicy = C.UpdateLifecycleStageCompleted
                 }
         ( useClient do
             h <- C.start UpdateThatThrows "update-that-throws" opts
-            C.update h testUpdate updateOpts 5
+            C.executeUpdate h testUpdate updateOpts 5
           )
           `shouldThrow` \case
             UpdateFailure _ -> True
-            _ -> False
     it "should fail if the args don't parse correctly" $ \TestEnv {..} -> do
       -- state <- runIO $ newIORef (0 :: Int)
       let testUpdateFn :: Int -> W.Workflow Int
@@ -1693,17 +1728,14 @@ needsClient = do
             C.UpdateOptions
               { updateId = "update-args-do-not-parse"
               , updateHeaders = mempty
-              , waitPolicy = C.UpdateLifecycleStageCompleted
               }
       withWorker conf $ do
         ( useClient do
             h <- C.start wfRef "update-args-do-not-parse" opts
-            C.update h badUpdateRef updateOpts "ruhroh"
+            C.executeUpdate h badUpdateRef updateOpts "ruhroh"
           )
           `shouldThrow` \case
             UpdateFailure _ -> True
-            _ -> False
-
     it "works with an update that causes the workflow to suspend" $ \TestEnv {..} -> do
       let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
             baseConf
@@ -1717,11 +1749,10 @@ needsClient = do
               C.UpdateOptions
                 { updateId = "update-that-suspends"
                 , updateHeaders = mempty
-                , waitPolicy = C.UpdateLifecycleStageCompleted
                 }
         (updateResult, workflowResult) <- useClient do
-          h <- C.start UpdateWithValidatorThatSleeps "update-that-suspends" opts
-          updateResult <- C.update h testUpdate updateOpts 12
+          h <- C.start UpdateThatSleeps "update-that-suspends" opts
+          updateResult <- C.executeUpdate h testUpdate updateOpts 12
           workflowResult <- C.waitWorkflowResult h
           pure (updateResult, workflowResult)
         updateResult `shouldBe` 12
@@ -1739,14 +1770,11 @@ needsClient = do
               C.UpdateOptions
                 { updateId = "no-update-if-workflow-throws-first"
                 , updateHeaders = mempty
-                , waitPolicy = C.UpdateLifecycleStageCompleted
                 }
         (eUpdateResult, eWorkflowResult) <- useClient do
           h <- C.start WorkflowThatThrowsBeforeTheUpdate "no-update-if-workflow-throws-first" opts
           liftIO $ threadDelay 1_000_000
-          liftIO $ putStrLn "BEFORE UPDATE"
-          updateResult <- Catch.try $ C.update h testUpdate updateOpts 12
-          liftIO $ putStrLn "AFTER UPDATE"
+          updateResult <- Catch.try $ C.executeUpdate h testUpdate updateOpts 12
           workflowResult <- Catch.try $ C.waitWorkflowResult h
           let _ = show (updateResult :: Either RpcError Int)
           let _ = show (workflowResult :: Either WorkflowExecutionClosed Int)
@@ -1770,12 +1798,11 @@ needsClient = do
               C.UpdateOptions
                 { updateId = "yes-update-if-workflow-throws-later"
                 , updateHeaders = mempty
-                , waitPolicy = C.UpdateLifecycleStageCompleted
                 }
         (eUpdateResult, eWorkflowResult) <- useClient do
           h <- C.start WorkflowThatThrowsAfterTheUpdate "yes-update-if-workflow-throws-later" opts
           liftIO $ threadDelay 1_000_000
-          updateResult <- Catch.try $ C.update h testUpdate updateOpts 12
+          updateResult <- Catch.try $ C.executeUpdate h testUpdate updateOpts 12
           workflowResult <- Catch.try $ C.waitWorkflowResult h
           let _ = show (updateResult :: Either RpcError Int)
           let _ = show (workflowResult :: Either WorkflowExecutionClosed Int)
@@ -1828,11 +1855,10 @@ updatesWithInterceptors = do
                 C.UpdateOptions
                   { updateId = "update-interceptors-are-called"
                   , updateHeaders = mempty
-                  , waitPolicy = C.UpdateLifecycleStageCompleted
                   }
           (updateResult, workflowResult) <- useClient do
             h <- C.start UpdateWithValidator "update-interceptors-are-called" opts
-            updateResult <- C.update h testUpdate updateOpts 12
+            updateResult <- C.executeUpdate h testUpdate updateOpts 12
             workflowResult <- C.waitWorkflowResult h
             pure (updateResult, workflowResult)
           updateResult `shouldBe` 12
@@ -1877,11 +1903,10 @@ updatesWithInterceptors = do
                 C.UpdateOptions
                   { updateId = "update-interceptors-get-expected-args"
                   , updateHeaders = mempty
-                  , waitPolicy = C.UpdateLifecycleStageCompleted
                   }
           (updateResult, workflowResult) <- useClient do
             h <- C.start UpdateWithValidator "update-interceptors-get-expected-args" opts
-            updateResult <- C.update h testUpdate updateOpts 12
+            updateResult <- C.executeUpdate h testUpdate updateOpts 12
             workflowResult <- C.waitWorkflowResult h
             pure (updateResult, workflowResult)
           updateResult `shouldBe` 12
@@ -1953,11 +1978,10 @@ updatesWithInterceptors = do
                 C.UpdateOptions
                   { updateId = "update-interceptors-are-called-in-expected-order"
                   , updateHeaders = mempty
-                  , waitPolicy = C.UpdateLifecycleStageCompleted
                   }
           (updateResult, workflowResult) <- useClient do
             h <- C.start UpdateWithValidator "update-interceptors-are-called-in-expected-order" opts
-            updateResult <- C.update h testUpdate updateOpts 12
+            updateResult <- C.executeUpdate h testUpdate updateOpts 12
             workflowResult <- C.waitWorkflowResult h
             pure (updateResult, workflowResult)
           updateResult `shouldBe` 12
@@ -1991,11 +2015,10 @@ updatesWithInterceptors = do
                 C.UpdateOptions
                   { updateId = "update-interceptors-can-modify-args"
                   , updateHeaders = mempty
-                  , waitPolicy = C.UpdateLifecycleStageCompleted
                   }
           (updateResult, workflowResult) <- useClient do
             h <- C.start UpdateWithValidator "update-interceptors-can-modify-args" opts
-            updateResult <- C.update h testUpdate updateOpts 12
+            updateResult <- C.executeUpdate h testUpdate updateOpts 12
             workflowResult <- C.waitWorkflowResult h
             pure (updateResult, workflowResult)
           updateResult `shouldBe` 24
@@ -2025,11 +2048,10 @@ updatesWithInterceptors = do
                 C.UpdateOptions
                   { updateId = "update-client-interceptors-can-modify-args"
                   , updateHeaders = mempty
-                  , waitPolicy = C.UpdateLifecycleStageCompleted
                   }
           (updateResult, workflowResult) <- useClient do
             h <- C.start UpdateWithValidator "update-client-interceptors-can-modify-args" opts
-            updateResult <- C.update h testUpdate updateOpts 12
+            updateResult <- C.executeUpdate h testUpdate updateOpts 12
             workflowResult <- C.waitWorkflowResult h
             pure (updateResult, workflowResult)
           updateResult `shouldBe` 24

@@ -59,7 +59,9 @@ module Temporal.Client (
   -- * Sending Updates to Workflows
   UpdateOptions (..),
   UpdateLifecycleStage (..),
-  update,
+  startUpdate,
+  executeUpdate,
+  waitUpdateResult,
 
   -- * Producing handles for existing workflows
   getHandle,
@@ -69,6 +71,12 @@ module Temporal.Client (
   fetchHistory,
   streamEvents,
   FollowOption (..),
+
+  -- * List workflows
+  Temporal.Client.listClosedWorkflowExecutions,
+  Temporal.Client.listOpenWorkflowExecutions,
+  Temporal.Client.scanWorkflowExecutions,
+  Temporal.Client.countWorkflowExecutions,
 ) where
 
 import Conduit
@@ -114,10 +122,16 @@ import qualified Proto.Temporal.Api.Update.V1.Message_Fields as Update
 import Proto.Temporal.Api.Workflowservice.V1.RequestResponse (
   GetWorkflowExecutionHistoryRequest,
   GetWorkflowExecutionHistoryResponse,
+  PollWorkflowExecutionUpdateRequest,
   QueryWorkflowRequest,
   QueryWorkflowResponse,
   UpdateWorkflowExecutionRequest,
   UpdateWorkflowExecutionResponse,
+  ListClosedWorkflowExecutionsRequest,
+  ListOpenWorkflowExecutionsRequest,
+  ScanWorkflowExecutionsRequest,
+  CountWorkflowExecutionsRequest,
+  CountWorkflowExecutionsResponse,
  )
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as RR
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as WF
@@ -133,13 +147,14 @@ import Temporal.Workflow (KnownQuery (..), KnownSignal (..), QueryRef (..))
 import Temporal.Workflow.Definition
 import UnliftIO
 import Unsafe.Coerce
+import Proto.Temporal.Api.Workflow.V1.Message (WorkflowExecutionInfo)
 
 
 ---------------------------------------------------------------------------------
 -- WorkflowClient stuff
 
 workflowClient
-  :: MonadIO m
+  :: (MonadIO m)
   => Core.Client
   -> WorkflowClientConfig
   -> m WorkflowClient
@@ -155,7 +170,7 @@ class HasWorkflowClient m where
   askWorkflowClient :: m WorkflowClient
 
 
-instance {-# OVERLAPS #-} Monad m => HasWorkflowClient (ReaderT WorkflowClient m) where
+instance {-# OVERLAPS #-} (Monad m) => HasWorkflowClient (ReaderT WorkflowClient m) where
   askWorkflowClient = ask
 
 
@@ -237,10 +252,6 @@ instance (Monad m, HasWorkflowClient m) => HasWorkflowClient (ConduitT i o m) wh
 
 instance HasWorkflowClient ((->) WorkflowClient) where
   askWorkflowClient = id
-
-
-throwEither :: (MonadIO m, Exception e) => IO (Either e a) -> m a
-throwEither = either throwIO pure <=< liftIO
 
 
 {- | Run a workflow, synchronously waiting for it to complete.
@@ -358,7 +369,7 @@ signal (WorkflowHandle _ _t c wf r _) (signalRef -> (KnownSignal sName sCodec)) 
   -- FIXME: Can we just ignore this now that it's no longer present?
   -- & WF.skipGenerateWorkflowTask .~ opts.skipGenerateWorkflowTask
   case result of
-    Left err -> throwIO err
+    Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
     Right _ -> pure ()
 
 
@@ -435,7 +446,11 @@ query h (queryRef -> KnownQuery qn codec) opts = withArgs @(QueryArgs query) @(m
               QueryRejectConditionNotOpen -> Query.QUERY_REJECT_CONDITION_NOT_OPEN
               QueryRejectConditionNotCompletedCleanly -> Query.QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY
 
-    (res :: QueryWorkflowResponse) <- either throwIO pure =<< Temporal.Core.Client.WorkflowService.queryWorkflow h.workflowHandleClient.clientCore msg
+    (res :: QueryWorkflowResponse) <- do
+      eRes <- liftIO $ Temporal.Core.Client.WorkflowService.queryWorkflow h.workflowHandleClient.clientCore msg
+      case eRes of
+        Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+        Right res -> pure res
     case res ^. WF.maybe'queryRejected of
       Just rejection -> do
         let status = queryRejectionStatusFromProto (rejection ^. Query.status)
@@ -535,16 +550,14 @@ startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
             & WF.namespace .~ rawNamespace c.clientConfig.namespace
             & WF.workflowId .~ rawWorkflowId wfId'
             & WF.workflowType
-              .~ ( defMessage & Common.name .~ rawWorkflowType wfName
-                 )
+              .~ (defMessage & Common.name .~ rawWorkflowType wfName)
             & WF.taskQueue
               .~ ( defMessage
                     & Common.name .~ tq
                     & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
                  )
             & WF.input
-              .~ ( defMessage & Common.vec'payloads .~ (convertToProtoPayload <$> payloads'')
-                 )
+              .~ (defMessage & Common.vec'payloads .~ (convertToProtoPayload <$> payloads''))
             & WF.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts'.timeouts.executionTimeout)
             & WF.maybe'workflowRunTimeout .~ (durationToProto <$> opts'.timeouts.runTimeout)
             & WF.maybe'workflowTaskTimeout .~ (durationToProto <$> opts'.timeouts.taskTimeout)
@@ -572,7 +585,7 @@ startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
             & WF.maybe'workflowStartDelay .~ (durationToProto <$> workflowStartDelay opts')
     res <- startWorkflowExecution c.clientCore req
     case res of
-      Left err -> throwIO err
+      Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
       Right swer ->
         let runId = RunId $ swer ^. WF.runId
         in pure $
@@ -667,8 +680,7 @@ signalWithStart (workflowRef -> k@(KnownWorkflow codec _)) wfId opts (signalRef 
                 & RR.namespace .~ rawNamespace c.clientConfig.namespace
                 & RR.workflowId .~ rawWorkflowId opts'.signalWithStartWorkflowId
                 & RR.workflowType
-                  .~ ( defMessage & Common.name .~ rawWorkflowType opts'.signalWithStartWorkflowType
-                     )
+                  .~ (defMessage & Common.name .~ rawWorkflowType opts'.signalWithStartWorkflowType)
                 & WF.requestId .~ UUID.toText reqId
                 & RR.searchAttributes .~ (defMessage & Common.indexedFields .~ searchAttrs)
                 & RR.taskQueue
@@ -677,8 +689,7 @@ signalWithStart (workflowRef -> k@(KnownWorkflow codec _)) wfId opts (signalRef 
                         & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
                      )
                 & RR.input
-                  .~ ( defMessage & Common.vec'payloads .~ fmap convertToProtoPayload wfArgs'
-                     )
+                  .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload wfArgs')
                 & RR.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts'.signalWithStartOptions.timeouts.executionTimeout)
                 & RR.maybe'workflowRunTimeout .~ (durationToProto <$> opts'.signalWithStartOptions.timeouts.runTimeout)
                 & RR.maybe'workflowTaskTimeout .~ (durationToProto <$> opts'.signalWithStartOptions.timeouts.taskTimeout)
@@ -702,7 +713,7 @@ signalWithStart (workflowRef -> k@(KnownWorkflow codec _)) wfId opts (signalRef 
             c.clientCore
             msg
         case res of
-          Left err -> throwIO err
+          Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
           Right swer ->
             pure $
               WorkflowHandle
@@ -733,13 +744,15 @@ data TerminationOptions = TerminationOptions
 {- | Terminating a workflow immediately signals to the worker that the workflow should
 cease execution. The workflow will not be given a chance to react to the termination.
 -}
-terminate :: MonadIO m => WorkflowHandle a -> TerminationOptions -> m ()
+terminate :: (MonadIO m) => WorkflowHandle a -> TerminationOptions -> m ()
 terminate h req =
-  void $
-    throwEither $
-      terminateWorkflowExecution
-        h.workflowHandleClient.clientCore
-        msg
+  void do
+    res <- liftIO $ terminateWorkflowExecution
+      h.workflowHandleClient.clientCore
+      msg
+    case res of
+      Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+      Right _ -> pure ()
   where
     msg =
       defMessage
@@ -773,7 +786,7 @@ instance Exception WorkflowContinuedAsNewException
 
 This is useful for Workflow replay tests.
 -}
-fetchHistory :: MonadIO m => WorkflowHandle a -> m History
+fetchHistory :: (MonadIO m) => WorkflowHandle a -> m History
 fetchHistory h = do
   let startingReq :: GetWorkflowExecutionHistoryRequest
       startingReq =
@@ -795,7 +808,7 @@ fetchHistory h = do
 
 
 applyNewExecutionRunId
-  :: HasField s "newExecutionRunId" Text
+  :: (HasField s "newExecutionRunId" Text)
   => s
   -> GetWorkflowExecutionHistoryRequest
   -> Maybe GetWorkflowExecutionHistoryRequest
@@ -820,13 +833,13 @@ streamEvents
   :: (MonadIO m, HasWorkflowClient m)
   => FollowOption
   -> GetWorkflowExecutionHistoryRequest
-  -> ConduitT () HistoryEvent m ()
+  -> ConduitT i HistoryEvent m ()
 streamEvents followOpt baseReq = askWorkflowClient >>= \c -> go c baseReq
   where
     go c req = do
       res <- liftIO $ getWorkflowExecutionHistory c.clientCore req
       case res of
-        Left err -> throwIO err
+        Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
         Right x -> do
           yieldMany (x ^. RR.history . History.events)
           for_ (decideLoop baseReq x) (go c)
@@ -890,25 +903,58 @@ waitResult wfId mrId (Namespace ns) = do
   connect (streamEvents FollowRuns startingReq) lastC
 
 
--- listOpenWorkflowExecutions
---   :: (MonadIO m, HasWorkflowClient m)
---   => ListOpenWorkflowExecutionsRequest
---   -> ConduitT () WorkflowExecutionInfo m ()
+listOpenWorkflowExecutions
+  :: (MonadIO m, HasWorkflowClient m)
+  => ListOpenWorkflowExecutionsRequest
+  -> ConduitT i WorkflowExecutionInfo m ()
+listOpenWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq & field @"namespace" .~ rawNamespace c.clientConfig.namespace)
+  where
+    go c req = do
+      res <- liftIO $ Temporal.Core.Client.WorkflowService.listOpenWorkflowExecutions c.clientCore req
+      case res of
+        Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+        Right x -> do
+          yieldMany (x ^. field @"vec'executions")
+          unless (x ^. field @"nextPageToken" == "") do
+            go c (req & field @"nextPageToken" .~ (x ^. field @"nextPageToken"))
 
--- listClosedWorkflowExecutions
---   :: (MonadIO m, HasWorkflowClient m)
---   => ListClosedWorkflowExecutionsRequest
---   -> ConduitT () WorkflowExecutionInfo m ()
+listClosedWorkflowExecutions :: (MonadIO m, HasWorkflowClient m) => ListClosedWorkflowExecutionsRequest -> ConduitT i WorkflowExecutionInfo m ()
+listClosedWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq & field @"namespace" .~ rawNamespace c.clientConfig.namespace)
+  where
+    go c req = do
+      res <- liftIO $ Temporal.Core.Client.WorkflowService.listClosedWorkflowExecutions c.clientCore req
+      case res of
+        Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+        Right x -> do
+          yieldMany (x ^. field @"vec'executions")
+          unless (x ^. field @"nextPageToken" == "") do
+            go c (req & field @"nextPageToken" .~ (x ^. field @"nextPageToken"))
 
--- scanWorkflowExecutions
---   :: (MonadIO m, HasWorkflowClient m)
---   => ScanWorkflowExecutionsRequest
---   -> ConduitT () WorkflowExecutionInfo m ()
+-- TODO, replace with newer listWorkflowExecutions API, this is deprecated in the proto
+scanWorkflowExecutions
+  :: (MonadIO m, HasWorkflowClient m)
+  => ScanWorkflowExecutionsRequest
+  -> ConduitT i WorkflowExecutionInfo m ()
+scanWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq & field @"namespace" .~ rawNamespace c.clientConfig.namespace)
+  where
+    go c req = do
+      res <- liftIO $ Temporal.Core.Client.WorkflowService.scanWorkflowExecutions c.clientCore req
+      case res of
+        Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+        Right x -> do
+          yieldMany (x ^. field @"vec'executions")
+          unless (x ^. field @"nextPageToken" == "") do
+            go c (req & field @"nextPageToken" .~ (x ^. field @"nextPageToken"))
 
--- countWorkflowExecutions
---   :: (MonadIO m, HasWorkflowClient m)
---   => CountWorkflowExecutionsRequest
---   -> m Int64
+countWorkflowExecutions
+  :: (MonadIO m, HasWorkflowClient m)
+  => CountWorkflowExecutionsRequest
+  -> m CountWorkflowExecutionsResponse
+countWorkflowExecutions baseReq = askWorkflowClient >>= \c -> liftIO do
+  res <- Temporal.Core.Client.WorkflowService.countWorkflowExecutions c.clientCore baseReq
+  case res of
+    Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+    Right x -> pure x
 
 data UpdateLifecycleStage
   = UpdateLifecycleStageUnspecified
@@ -921,35 +967,18 @@ data UpdateLifecycleStage
 data UpdateOptions = UpdateOptions
   { updateId :: UpdateId
   , updateHeaders :: Map Text Payload
-  , waitPolicy :: UpdateLifecycleStage
   }
 
 
-{- | An Update is a synchronous message to a Workflow Execution, which waits until the message
-handling is complete, and returns a result or error response.
-
-The Update handler can do anything that normal Workflow code can do.
-
-Conceptually, an Update is similar to a combination of Signal (which can do anything normal
-Workflow code can do, but cannot return a result) and Query (which can return a result, but
-cannot affect the Workflow state or execution). By combining those capabilities it supports
-operations that neither Signal nor Query can.
-
-Update handlers can optionally include a validator, which can return a boolean indicating whether
-the update is valid and should be processed by the Workflow. If the validator returns true,
-the update handler is called. If it returns false (or throws an exception), an error is returned
-to the client.
--}
-update
-  :: forall m args result a error
-   . (MonadIO m, HasWorkflowClient m)
+startUpdateFromPayloads
+  :: (MonadIO m, HasWorkflowClient m)
   => WorkflowHandle a
   -> KnownUpdate args result error
   -> UpdateOptions
-  -> args
-    :->: m result
-update h@(WorkflowHandle _ _ c _ _ _) (KnownUpdate updateCodec updateName) opts = withArgs @args @(m result) updateCodec $ \inputs -> liftIO $ do
-  inputs' <- sequence inputs
+  -> V.Vector UnencodedPayload
+  -> m (UpdateHandle result)
+startUpdateFromPayloads h@(WorkflowHandle _ _ c _ _ _) (KnownUpdate updateCodec updateName) opts payloads = do
+  payloads' <- liftIO $ sequence payloads
   let processor = h.workflowHandleClient.clientConfig.payloadProcessor
       baseInput =
         UpdateWorkflowInput
@@ -957,9 +986,9 @@ update h@(WorkflowHandle _ _ c _ _ _) (KnownUpdate updateCodec updateName) opts 
           , updateWorkflowRunId = h.workflowHandleRunId
           , updateWorkflowWorkflowId = h.workflowHandleWorkflowId
           , updateWorkflowHeaders = opts.updateHeaders
-          , updateWorkflowArgs = inputs'
+          , updateWorkflowArgs = payloads'
           }
-  eRes <- h.workflowHandleClient.clientConfig.interceptors.updateWorkflow baseInput $ \input -> do
+  updateHandle <- liftIO $ h.workflowHandleClient.clientConfig.interceptors.updateWorkflow baseInput $ \input -> do
     updateArgs <- processorEncodePayloads processor input.updateWorkflowArgs
     headerPayloads <- processorEncodePayloads processor input.updateWorkflowHeaders
     let msg :: UpdateWorkflowExecutionRequest
@@ -974,11 +1003,7 @@ update h@(WorkflowHandle _ _ c _ _ _) (KnownUpdate updateCodec updateName) opts 
             & WF.firstExecutionRunId .~ maybe "" rawRunId h.workflowHandleFirstExecutionRunId
             & WF.waitPolicy
               .~ ( defMessage
-                    & Update.lifecycleStage .~ case opts.waitPolicy of
-                      UpdateLifecycleStageUnspecified -> Update.UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_UNSPECIFIED
-                      UpdateLifecycleStageAdmitted -> Update.UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ADMITTED
-                      UpdateLifecycleStageAccepted -> Update.UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED
-                      UpdateLifecycleStageCompleted -> Update.UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED
+                    & Update.lifecycleStage .~ Update.UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED
                  )
             & WF.request
               .~ ( defMessage
@@ -995,14 +1020,119 @@ update h@(WorkflowHandle _ _ c _ _ _) (KnownUpdate updateCodec updateName) opts 
                          )
                  )
 
-    (res :: UpdateWorkflowExecutionResponse) <- either throwIO pure =<< Temporal.Core.Client.WorkflowService.updateWorkflowExecution h.workflowHandleClient.clientCore msg
+    (res :: UpdateWorkflowExecutionResponse) <- do
+      eRes <- liftIO $ Temporal.Core.Client.WorkflowService.updateWorkflowExecution h.workflowHandleClient.clientCore msg
+      case eRes of
+        Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+        Right res -> pure res
+
+    -- We're not going to look for a successful result yet (waitUpdateResult will do that), but we do want to check for failures
+    -- so that we can report validataion failures via UpdateFailure rather than RpcError.
     case res ^. Update.maybe'outcome of
-      Nothing -> throwIO $ ValueError "No return value payloads provided by update response"
       Just outcome -> do
         case outcome ^. Update.maybe'value of
-          Just (Update.Outcome'Success payloads) -> case (payloads ^. Common.vec'payloads) V.!? 0 of
-            Nothing -> throwIO $ ValueError "No return value payloads provided by update response"
-            Just p -> pure $ convertFromProtoPayload p
           Just (Update.Outcome'Failure failure) -> throwIO $ UpdateFailure failure
-          Nothing -> error "Unsupported update result"
-  payloadProcessorDecode processor eRes >>= either (throwIO . ValueError) pure >>= decode updateCodec >>= either (throwIO . ValueError) pure
+          _ -> pure ()
+      Nothing -> pure ()
+
+    let updateId = UpdateId (res ^. (RR.updateRef . Update.updateId))
+        workflowId = WorkflowId (res ^. (RR.updateRef . WF.workflowExecution . WF.workflowId))
+        runId = RunId (res ^. (RR.updateRef . WF.workflowExecution . WF.runId))
+
+    pure $
+      UpdateHandle
+        { updateHandleUpdateId = updateId
+        , updateHandleWorkflowId = workflowId
+        , updateHandleWorkflowRunId = Just runId
+        , updateHandleReadResult = either (throwIO . ValueError) pure <=< payloadProcessorDecode processor
+        , updateHandleWorkflowClient = c
+        , updateHandleType = updateName
+        }
+  pure $
+    updateHandle
+      { updateHandleReadResult = \a -> do
+          updateHandleReadResult updateHandle a >>= \b -> do
+            result <- decode updateCodec b
+            either (throwIO . ValueError) pure result
+      }
+
+
+{- | Begin a new Update operation.
+
+This function does not wait for the Update to complete. Instead, it returns an 'UpdateHandle'
+that can be used to wait for the Update to complete or perform other operations. However, it
+throws an UpdateFailed exception if an update's validator fails.
+
+This can be used to "fire-and-forget" an Update by discarding the handle.
+-}
+startUpdate
+  :: forall m args result a error
+   . (MonadIO m, HasWorkflowClient m)
+  => WorkflowHandle a
+  -> KnownUpdate args result error
+  -> UpdateOptions
+  -> args
+    :->: m (UpdateHandle result)
+startUpdate wfH u@(KnownUpdate updateCodec _) opts = withArgs @args @(m (UpdateHandle result)) updateCodec $ \inputs -> do
+  startUpdateFromPayloads wfH u opts inputs
+
+
+{- | Given an 'UpdateHandle', wait for the update operation to complete and return the result.
+
+This function will block until the update completes, and will return the result of the update
+or throw an exception if the update failed.
+-}
+waitUpdateResult :: (MonadIO m) => UpdateHandle a -> m a
+waitUpdateResult h = do
+  let msg :: PollWorkflowExecutionUpdateRequest
+      msg =
+        defMessage
+          & WF.namespace .~ rawNamespace h.updateHandleWorkflowClient.clientConfig.namespace
+          & WF.updateRef
+            .~ ( defMessage
+                  & WF.workflowExecution
+                    .~ ( defMessage
+                          & WF.workflowId .~ rawWorkflowId h.updateHandleWorkflowId
+                          & WF.runId .~ maybe "" rawRunId h.updateHandleWorkflowRunId
+                       )
+                  & Update.updateId .~ rawUpdateId h.updateHandleUpdateId
+               )
+          & WF.identity .~ Core.identity (Core.clientConfig h.updateHandleWorkflowClient.clientCore)
+          & WF.waitPolicy
+            .~ ( defMessage
+                  & Update.lifecycleStage .~ Update.UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED
+               )
+      go = do
+        eRes <- Temporal.Core.Client.WorkflowService.pollWorkflowExecutionUpdate h.updateHandleWorkflowClient.clientCore msg
+        case eRes of
+          Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+          Right res -> do
+            case res ^. Update.maybe'outcome of
+              Nothing -> go
+              Just outcome -> do
+                case outcome ^. Update.maybe'value of
+                  Just (Update.Outcome'Success payloads) -> case (payloads ^. Common.vec'payloads) V.!? 0 of
+                    Nothing -> throwIO $ ValueError "No return value payloads provided by update response"
+                    Just p -> pure $ convertFromProtoPayload p
+                  Just (Update.Outcome'Failure failure) -> throwIO $ UpdateFailure failure
+                  Nothing -> error "Unsupported update result"
+  payload <- liftIO go
+  liftIO $ h.updateHandleReadResult payload
+
+
+{- | Run an Update operation, synchronously waiting for it to complete.
+
+This function will block until the update completes, and will return the result of the update
+or throw an exception if the update or its validator failed.
+-}
+executeUpdate
+  :: forall m args result a error
+   . (MonadIO m, HasWorkflowClient m)
+  => WorkflowHandle a
+  -> KnownUpdate args result error
+  -> UpdateOptions
+  -> args
+    :->: m result
+executeUpdate wfH u@(KnownUpdate updateCodec _) opts = withArgs @args @(m result) updateCodec $ \inputs -> do
+  updateHandle <- startUpdateFromPayloads wfH u opts inputs
+  waitUpdateResult updateHandle

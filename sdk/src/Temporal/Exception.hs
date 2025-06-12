@@ -1,24 +1,89 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 
 module Temporal.Exception (
-  module Temporal.Exception,
+  -- * Common types
   ActivityType (..),
   RetryState (..),
+
+  -- * Runtime errors
+  RuntimeError (..),
+  WorkflowNotFound (..),
+  ActivityNotFound (..),
+  QueryNotFound (..),
+  UpdateNotFound (..),
+  UpdateFailure (..),
+
+  -- * Workflow exceptions
+  LogicBug (..),
+  LogicBugType (..),
+  WorkflowAlreadyStarted (..),
+  ChildWorkflowFailed (..),
+  ChildWorkflowCancelled (..),
+  SignalExternalWorkflowFailed (..),
+  ContinueAsNewException (..),
+  AlternativeInstanceFailure (..),
+  CancelExternalWorkflowFailed (..),
+  WorkflowCancelRequested (..),
+
+  -- * Activity exceptions
+  ActivityCancelled (..),
+  ApplicationFailure (..),
+  ActivityFailure (..),
+  CompleteAsync (..),
+  ActivityCancelReason (..),
+
+  -- * Annotations for errors
+  NonRetryableError (..),
+  annotateNonRetryableError,
+  annotateRetryableError,
+  NextRetryDelay (..),
+  annotateNextRetryDelay,
+  annotateNoRetryDelay,
+
+  -- * Execution closure
+  WorkflowExecutionClosed (..),
+  WorkflowExecutionFailedAttributes (..),
+
+  -- * RPC errors
+  RPCStatusCode (..),
+  Temporal.Exception.RpcError (..),
+  RpcErrorDetails (..),
+  coreRpcErrorToRpcError,
+
+  -- * ApplicationFailure conversion
+  applicationFailureToException,
+  applicationFailureFromException,
+  ToApplicationFailure (..),
+  SomeApplicationFailure (..),
+  ApplicationFailureHandler (..),
+  mkApplicationFailure,
+  applicationFailureToFailureProto,
+  Temporal.Exception.prettyCallStack,
+  standardApplicationFailureHandlers,
+  mkAnnotatedHandlers,
 ) where
 
 import Control.Applicative (Alternative (..))
 import Control.Exception
 import Control.Exception.Annotated
 import Data.Annotation
+import qualified Data.ByteString as BS
+import qualified Data.HashMap.Strict as HashMap
 import Data.Int
-import Data.ProtoLens (Message (..))
+import Data.ProtoLens (Message (..), decodeMessage, decodeMessageOrDie)
+import Data.ProtoLens.Field (field)
 import Data.Text
 import Data.Typeable
 import Data.Vector (Vector)
+import qualified Data.Vector as V
 import GHC.Stack
 import Lens.Family2
+import Proto.Google.Protobuf.Any (Any)
+import Proto.Rpc.Status (Status)
+import qualified Proto.Rpc.Status_Fields as Status
 import qualified Proto.Temporal.Api.Common.V1.Message as Common
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Common
+import Proto.Temporal.Api.Errordetails.V1.Message
 import Proto.Temporal.Api.Failure.V1.Message
 import qualified Proto.Temporal.Api.Failure.V1.Message as F
 import qualified Proto.Temporal.Api.Failure.V1.Message as Proto
@@ -26,9 +91,51 @@ import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import Proto.Temporal.Api.History.V1.Message
 import System.IO.Unsafe (unsafePerformIO)
 import Temporal.Common
+import Temporal.Core.Client (RpcError (..))
 import Temporal.Duration
 import Temporal.Payload
 import Temporal.Workflow.Types
+
+
+---------------------------------------------------------------------
+-- Unpacking errors from protobuf Any values
+
+{- | A description of a failure during `unpack` to decode an `Any` message
+into the expected type.
+-}
+data UnpackError
+  = DifferentType
+      { expectedMessageType :: Text
+      -- ^ The expected @packagename.messagename@
+      , actualUrl :: Text
+      -- ^ The typeUrl in the 'Any' being unpacked
+      }
+  | -- | The error from decodeMessage
+    DecodingError Text
+  deriving stock (Show, Eq)
+
+
+instance Exception UnpackError
+
+
+{- | Unpacks the given 'Any' into the given message type.  Returns 'Nothing'
+if the type doesn't match or parsing the payload has failed.
+
+Ignores the type URL prefix.
+-}
+unpackAny :: forall a. Message a => Any -> Either UnpackError a
+unpackAny a
+  | expectedName /= snd (breakOnEnd "/" $ a ^. field @"typeUrl") =
+      Left
+        DifferentType
+          { expectedMessageType = expectedName
+          , actualUrl = a ^. field @"typeUrl"
+          }
+  | otherwise = case decodeMessage (a ^. field @"value") of
+      Left e -> Left $ DecodingError $ pack e
+      Right x -> Right x
+  where
+    expectedName = messageName (Proxy @a)
 
 
 ---------------------------------------------------------------------
@@ -533,7 +640,7 @@ The intended use-case for this feature is when an external system has the final 
 
 Consider using Asynchronous Activities instead of Signals if the external process is unreliable and might fail to send critical status updates through a Signal.
 
-Consider using Signals as an alternative to Asynchronous Activities to return data back to a Workflow Execution if there is a human in the process loop. The reason is that a human in the loop means multiple steps in the process. The first is the Activity Function that stores state in an external system and at least one other step where a human would “complete” the activity. If the first step fails, you want to detect that quickly and retry instead of waiting for the entire process, which could be significantly longer when humans are involved.
+Consider using Signals as an alternative to Asynchronous Activities to return data back to a Workflow Execution if there is a human in the process loop. The reason is that a human in the loop means multiple steps in the process. The first is the Activity Function that stores state in an external system and at least one other step where a human would "complete" the activity. If the first step fails, you want to detect that quickly and retry instead of waiting for the entire process, which could be significantly longer when humans are involved.
 -}
 data CompleteAsync = CompleteAsync
   deriving stock (Show)
@@ -563,3 +670,242 @@ data WorkflowExecutionFailedAttributes = WorkflowExecutionFailedAttributes
   , newExecutionRunId :: Maybe RunId
   }
   deriving stock (Show, Eq)
+
+
+data RPCStatusCode
+  = -- | Not an error; returned on success. Use 'StatusOk' for successful operations.
+    StatusOk
+  | -- | The operation was cancelled, typically by the caller. Use 'StatusCancelled' when operations are aborted.
+    StatusCancelled
+  | -- | Unknown error. For example, use 'StatusUnknown' when a Status value received from another address
+    -- space belongs to an error space that is not known in this address space. Also errors raised by APIs that do
+    -- not return enough error information may be converted to this error.
+    StatusUnknown
+  | -- | The client specified an invalid argument. Note that this differs from 'StatusFailedPrecondition'.
+    -- 'StatusInvalidArgument' indicates arguments that are problematic regardless of the state of the system
+    -- (e.g., a malformed file name).
+    StatusInvalidArgument
+  | -- | The deadline expired before the operation could complete. For operations that change the state
+    -- of the system, 'StatusDeadlineExceeded' may be returned even if the operation has completed successfully. For example,
+    -- a successful response from a server could have been delayed long enough for the deadline to expire.
+    StatusDeadlineExceeded
+  | -- | Some requested entity (e.g., file or directory) was not found. Note to server developers: if a request
+    -- is denied for an entire class of users, such as gradual feature rollout or undocumented allowlist,
+    -- 'StatusNotFound' may be used. If a request is denied for some users within a class of users, such as user-based access control, 'StatusPermissionDenied' must be used.
+    StatusNotFound
+  | -- | The entity that a client attempted to create (e.g., file or directory) already exists.
+    StatusAlreadyExists
+  | -- | The caller does not have permission to execute the specified operation. 'StatusPermissionDenied' must not be
+    -- used for rejections caused by exhausting some resource (use 'StatusResourceExhausted' instead for those errors).
+    -- 'StatusPermissionDenied' must not be used if the caller cannot be identified (use 'StatusUnauthenticated' instead for those errors).
+    -- This error code does not imply the request is valid or the requested entity exists or satisfies other pre-conditions.
+    StatusPermissionDenied
+  | -- | Some resource has been exhausted, perhaps a per-user quota, or perhaps the entire file system is out of space.
+    StatusResourceExhausted
+  | -- | The operation was rejected because the system is not in a state required for the operation's execution.
+    -- For example, the directory to be deleted is non-empty, an rmdir operation is applied to a non-directory, etc.
+    -- Service implementors can use the following guidelines to decide between 'StatusFailedPrecondition', 'StatusAborted', and 'StatusUnavailable':
+    --
+    -- (a) Use 'StatusUnavailable' if the client can retry just the failing call.
+    -- (b) Use 'StatusAborted' if the client should retry at a higher level (e.g., when a client-specified test-and-set fails,
+    -- indicating the client should restart a read-modify-write sequence).
+    -- (c) Use 'StatusFailedPrecondition' if the client should not retry until the system state has been explicitly fixed.
+    -- E.g., if an "rmdir" fails because the directory is non-empty, 'StatusFailedPrecondition' should be returned since the
+    -- client should not retry unless the files are deleted from the directory.
+    StatusFailedPrecondition
+  | -- | The operation was aborted, typically due to a concurrency issue such as a sequencer check failure or
+    -- transaction abort. See the guidelines above for deciding between 'StatusFailedPrecondition', 'StatusAborted', and 'StatusUnavailable'.
+    StatusAborted
+  | -- | The operation was attempted past the valid range. E.g., seeking or reading past end-of-file.
+    -- Unlike 'StatusInvalidArgument', this error indicates a problem that may be fixed if the system state changes.
+    -- For example, a 32-bit file system will generate 'StatusInvalidArgument' if asked to read at an offset that is not in
+    -- the range [0,2^32-1], but it will generate 'StatusOutOfRange' if asked to read from an offset past the current
+    -- file size.
+    StatusOutOfRange
+  | -- | The operation is not implemented or is not supported/enabled in this service.
+    StatusUnimplemented
+  | -- | Internal errors. This means that some invariants expected by the underlying system have been broken.
+    -- This error code is reserved for serious errors.
+    StatusInternal
+  | -- | The service is currently unavailable. This is most likely a transient condition, which can be
+    -- corrected by retrying with a backoff. Note that it is not always safe to retry non-idempotent operations.
+    StatusUnavailable
+  | -- | Unrecoverable data loss or corruption.
+    StatusDataLoss
+  | -- | The request does not have valid authentication credentials for the operation.
+    StatusUnauthenticated
+  deriving stock (Show, Eq)
+
+
+instance Enum RPCStatusCode where
+  fromEnum = \case
+    StatusOk -> 0
+    StatusCancelled -> 1
+    StatusUnknown -> 2
+    StatusInvalidArgument -> 3
+    StatusDeadlineExceeded -> 4
+    StatusNotFound -> 5
+    StatusAlreadyExists -> 6
+    StatusPermissionDenied -> 7
+    StatusResourceExhausted -> 8
+    StatusFailedPrecondition -> 9
+    StatusAborted -> 10
+    StatusOutOfRange -> 11
+    StatusUnimplemented -> 12
+    StatusInternal -> 13
+    StatusUnavailable -> 14
+    StatusDataLoss -> 15
+    StatusUnauthenticated -> 16
+  toEnum = \case
+    0 -> StatusOk
+    1 -> StatusCancelled
+    2 -> StatusUnknown
+    3 -> StatusInvalidArgument
+    4 -> StatusDeadlineExceeded
+    5 -> StatusNotFound
+    6 -> StatusAlreadyExists
+    7 -> StatusPermissionDenied
+    8 -> StatusResourceExhausted
+    9 -> StatusFailedPrecondition
+    10 -> StatusAborted
+    11 -> StatusOutOfRange
+    12 -> StatusUnimplemented
+    13 -> StatusInternal
+    14 -> StatusUnavailable
+    15 -> StatusDataLoss
+    16 -> StatusUnauthenticated
+    n -> error $ "Invalid RPCStatusCode: " <> show n
+
+
+instance Bounded RPCStatusCode where
+  minBound = minBound
+  maxBound = maxBound
+
+
+rpcErrorToStatus :: Temporal.Core.Client.RpcError -> Status
+rpcErrorToStatus = decodeMessageOrDie . (.details)
+
+
+unpackStatus :: Message msg => Status -> Either UnpackError msg
+unpackStatus s = unpackAny $ V.head (s ^. Status.vec'details)
+
+
+decodeFromProof :: Message msg => Proxy msg -> BS.ByteString -> Either String msg
+decodeFromProof _ = decodeMessage
+
+
+{- | Detailed error information for various types of RPC errors returned by the Temporal server.
+This type provides specific error payloads depending on the kind of error that occurred.
+The Temporal API returns these details within the gRPC status, which this SDK unpacks
+into this more usable form.
+-}
+data RpcErrorDetails
+  = -- | Indicates that a cancellation was already requested for the target execution.
+    RpcErrorCancellationAlreadyRequested CancellationAlreadyRequestedFailure
+  | -- | The client version is not supported by the server.
+    RpcErrorClientVersionNotSupported ClientVersionNotSupportedFailure
+  | -- | Multiple operations on the same workflow execution were attempted concurrently.
+    RpcErrorMultiOperationExecution MultiOperationExecutionFailure
+  | -- | A namespace creation was attempted, but the namespace already exists.
+    RpcErrorNamespaceAlreadyExists NamespaceAlreadyExistsFailure
+  | -- | The namespace is in an invalid state for the requested operation.
+    RpcErrorNamespaceInvalidState NamespaceInvalidStateFailure
+  | -- | The namespace is not in active state.
+    RpcErrorNamespaceNotActive NamespaceNotActiveFailure
+  | -- | The specified namespace was not found.
+    RpcErrorNamespaceNotFound NamespaceNotFoundFailure
+  | -- | The namespace is currently unavailable.
+    RpcErrorNamespaceUnavailable NamespaceUnavailableFailure
+  | -- | A newer build exists for the workflow type.
+    RpcErrorNewerBuildExists NewerBuildExistsFailure
+  | -- | The requested entity was not found.
+    RpcErrorNotFound NotFoundFailure
+  | -- | The caller doesn't have permission to perform the operation.
+    RpcErrorPermissionDenied PermissionDeniedFailure
+  | -- | A query to the workflow failed.
+    RpcErrorQueryFailed QueryFailedFailure
+  | -- | The server is experiencing resource exhaustion (e.g., rate limits exceeded).
+    RpcErrorResourceExhausted ResourceExhaustedFailure
+  | -- | The server version is not supported by the client.
+    RpcErrorServerVersionNotSupported ServerVersionNotSupportedFailure
+  | -- | The operation was attempted on a system workflow.
+    RpcErrorSystemWorkflow SystemWorkflowFailure
+  | -- | A workflow execution with the same ID is already running.
+    RpcErrorWorkflowExecutionAlreadyStarted WorkflowExecutionAlreadyStartedFailure
+  | -- | The workflow is not ready to handle the operation.
+    RpcErrorWorkflowNotReady WorkflowNotReadyFailure
+  | -- | An unrecognized error type was received from the server.
+    RpcErrorUnrecognized Any
+  deriving stock (Show, Eq)
+
+
+errorRegistry :: HashMap.HashMap Text (Any -> Either UnpackError RpcErrorDetails)
+errorRegistry =
+  HashMap.fromList
+    [ register RpcErrorCancellationAlreadyRequested
+    , register RpcErrorClientVersionNotSupported
+    , register RpcErrorMultiOperationExecution
+    , register RpcErrorNamespaceAlreadyExists
+    , register RpcErrorNamespaceInvalidState
+    , register RpcErrorNamespaceNotActive
+    , register RpcErrorNamespaceNotFound
+    , register RpcErrorNamespaceUnavailable
+    , register RpcErrorNewerBuildExists
+    , register RpcErrorNotFound
+    , register RpcErrorPermissionDenied
+    , register RpcErrorQueryFailed
+    , register RpcErrorResourceExhausted
+    , register RpcErrorServerVersionNotSupported
+    , register RpcErrorSystemWorkflow
+    , register RpcErrorWorkflowExecutionAlreadyStarted
+    , register RpcErrorWorkflowNotReady
+    ]
+  where
+    register :: forall msg. Message msg => (msg -> RpcErrorDetails) -> (Text, Any -> Either UnpackError RpcErrorDetails)
+    register f =
+      ( "type.googleapis.com/" <> messageName (Proxy @msg)
+      , fmap f . unpackAny
+      )
+
+
+applyRegistry :: HashMap.HashMap Text (Any -> Either UnpackError RpcErrorDetails) -> Any -> RpcErrorDetails
+applyRegistry m x = case HashMap.lookup (x ^. field @"typeUrl") m of
+  Nothing -> RpcErrorUnrecognized x
+  Just f -> case f x of
+    Left _ -> RpcErrorUnrecognized x
+    Right details -> details
+
+
+{- | Represents an RPC error returned from the Temporal server.
+
+RPC errors can occur during any communication with the server, and provide
+both a status code indicating the general category of error, a human-readable
+message, and structured details with more specific error information.
+
+For workflow execution operations, common errors include:
+- Workflow already exists
+- Namespace not found
+- Permission denied
+- Resource exhausted (often due to rate limiting or request/response body size limits)
+-}
+data RpcError = RpcError
+  { code :: RPCStatusCode
+  -- ^ The status code of the error, providing the general category
+  , message :: Text
+  -- ^ A human-readable message describing the error
+  , details :: [RpcErrorDetails]
+  -- ^ Detailed, structured information about the error(s)
+  }
+  deriving stock (Show, Eq)
+
+
+instance Exception Temporal.Exception.RpcError
+
+
+coreRpcErrorToRpcError :: Temporal.Core.Client.RpcError -> Temporal.Exception.RpcError
+coreRpcErrorToRpcError err =
+  Temporal.Exception.RpcError
+    { code = toEnum $ fromIntegral err.code
+    , message = err.message
+    , details = fmap (applyRegistry errorRegistry) ((decodeMessageOrDie @Status err.details) ^. field @"details")
+    }
