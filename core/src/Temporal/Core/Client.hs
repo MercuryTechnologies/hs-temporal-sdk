@@ -49,6 +49,7 @@ module Temporal.Core.Client (
 import Control.Concurrent
 import Control.Exception
 import Control.Monad
+import Control.Monad.IO.Class
 import Control.Monad.Logger
 import Data.Aeson
 import Data.Aeson.TH
@@ -73,6 +74,8 @@ import System.Posix.Process
 import Temporal.Core.CTypes
 import Temporal.Internal.FFI
 import Temporal.Runtime
+import UnliftIO (MonadUnliftIO, withRunInIO)
+import qualified UnliftIO
 
 
 foreign import ccall "hs_temporal_connect_client" raw_connectClient :: Ptr Runtime -> CString -> TokioCall (CArray Word8) CoreClient
@@ -237,54 +240,55 @@ defaultClientIdentity = do
 
 Throws 'ClientConnectionError' if the connection fails.
 -}
-connectClient :: Runtime -> ClientConfig -> IO Client
+connectClient :: (MonadIO m, MonadLogger m, MonadUnliftIO m) => Runtime -> ClientConfig -> m Client
 connectClient rt conf = do
   conf' <-
     if identity conf == ""
       then do
-        ident <- defaultClientIdentity
+        ident <- liftIO defaultClientIdentity
         pure $ conf {identity = ident}
       else pure conf
 
-  clientPtrSlot <- newEmptyMVar
-  _ <- forkIO $ do
-    withRuntime rt $ \rtPtr -> BS.useAsCString (BL.toStrict $ encode conf') $ \confPtr -> do
-      let tryConnect =
-            makeTokioAsyncCall
-              (raw_connectClient rtPtr confPtr)
-              (Just rust_dropByteArray)
-              (Just raw_freeClient)
-          go attempt = do
-            result <- tryConnect
-            case result of
-              Left errFP -> do
-                err <- withForeignPtr errFP $ peek >=> cArrayToText
-                let err' = "Error connecting to Temporal server: " <> err
-                runStdoutLoggingT $ $(logWarn) err'
-                case retryConfig conf of
-                  Nothing -> putMVar clientPtrSlot (throw $ ClientConnectionError err')
-                  Just retryConf -> do
-                    let delayMillis = fromIntegral (initialIntervalMillis retryConf) * multiplier retryConf ^ attempt
-                        delayMicros = delayMillis * 1000
-                    if (fmap fromIntegral (maxElapsedTimeMillis retryConf) < Just delayMillis) || (maxRetries retryConf <= attempt)
-                      then putMVar clientPtrSlot (throw $ ClientConnectionError err')
-                      else do
-                        threadDelay $ round delayMicros
-                        go (attempt + 1)
-              Right client_ -> putMVar clientPtrSlot (CoreClient client_)
-      go 1
+  clientPtrSlot <- liftIO newEmptyMVar
+  withRunInIO $ \runInIO -> do
+    forkIO $ runInIO $ do
+      liftIO $ withRuntime rt $ \rtPtr -> BS.useAsCString (BL.toStrict $ encode conf') $ \confPtr -> do
+        let tryConnect =
+              makeTokioAsyncCall
+                (raw_connectClient rtPtr confPtr)
+                (Just rust_dropByteArray)
+                (Just raw_freeClient)
+            go attempt = do
+              result <- tryConnect
+              case result of
+                Left errFP -> do
+                  err <- withForeignPtr errFP $ peek >=> cArrayToText
+                  let err' = "Error connecting to Temporal server: " <> err
+                  runInIO $ $(logWarn) err'
+                  case retryConfig conf of
+                    Nothing -> liftIO $ putMVar clientPtrSlot (throw $ ClientConnectionError err')
+                    Just retryConf -> do
+                      let delayMillis = fromIntegral (initialIntervalMillis retryConf) * multiplier retryConf ^ attempt
+                          delayMicros = delayMillis * 1000
+                      if (fmap fromIntegral (maxElapsedTimeMillis retryConf) < Just delayMillis) || (maxRetries retryConf <= attempt)
+                        then liftIO $ putMVar clientPtrSlot (throw $ ClientConnectionError err')
+                        else do
+                          liftIO $ threadDelay $ round delayMicros
+                          go (attempt + 1)
+                Right client_ -> liftIO $ putMVar clientPtrSlot (CoreClient client_)
+        go 1
   pure $ Client clientPtrSlot rt conf'
 
 
-reconnectClient :: Client -> IO ()
-reconnectClient (Client clientPtrSlot rt conf) = mask $ \restore -> do
-  (CoreClient clientPtr) <- takeMVar clientPtrSlot
-  (Client newClientPtr _ _) <- restore (connectClient rt conf) `catch` (\c -> putMVar clientPtrSlot (throw (c :: ClientError)) >> throwIO c)
-  takeMVar newClientPtr >>= putMVar clientPtrSlot
+reconnectClient :: (MonadIO m, MonadLogger m, MonadUnliftIO m) => Client -> m ()
+reconnectClient (Client clientPtrSlot rt conf) = UnliftIO.mask $ \restore -> do
+  (CoreClient clientPtr) <- liftIO $ takeMVar clientPtrSlot
+  (Client newClientPtr _ _) <- restore (connectClient rt conf) `UnliftIO.catch` (\c -> liftIO $ putMVar clientPtrSlot (throw (c :: ClientError)) >> throwIO c)
+  liftIO $ takeMVar newClientPtr >>= putMVar clientPtrSlot
 
 
-closeClient :: Client -> IO ()
-closeClient (Client clientPtrSlot _ _) = mask_ $ do
+closeClient :: MonadIO m => Client -> m ()
+closeClient (Client clientPtrSlot _ _) = liftIO $ mask_ $ do
   (CoreClient clientPtr) <- takeMVar clientPtrSlot
   finalizeForeignPtr clientPtr
   putMVar clientPtrSlot (throw ClientClosedError)
