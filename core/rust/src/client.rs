@@ -211,7 +211,6 @@ pub fn connect_client(
                     runtime,
                 }),
                 Err(e) => {
-                    eprintln!("Error: {:?}", e);
                     let err_message = e.to_string().into_bytes();
                     Err(CArray::c_repr_of(err_message).unwrap())
                 }
