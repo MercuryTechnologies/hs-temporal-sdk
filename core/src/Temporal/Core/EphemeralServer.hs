@@ -144,14 +144,14 @@ shutdownEphemeralServer (EphemeralServer e) = withForeignPtr e $ \ep -> do
 -- TODO
 -- startDevServerWithOutput
 
-data TestServerConfig = TestServerConfig
+data TemporalTestServerConfig = TemporalTestServerConfig
   { exe :: EphemeralExe
   , port :: Maybe Word16
   , extraArgs :: [String]
   }
 
 
-deriveToJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''TestServerConfig
+deriveToJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''TemporalTestServerConfig
 
 
 foreign import ccall "hs_temporal_start_test_server"
@@ -161,7 +161,7 @@ foreign import ccall "hs_temporal_start_test_server"
     -> TokioCall (CArray Word8) EphemeralServer
 
 
-startTestServer :: Runtime -> TestServerConfig -> IO (Either ByteString EphemeralServer)
+startTestServer :: Runtime -> TemporalTestServerConfig -> IO (Either ByteString EphemeralServer)
 startTestServer r conf = withRuntime r $ \rp -> useAsCString (BL.toStrict $ encode conf) $ \cstr -> do
   res <-
     makeTokioAsyncCall
