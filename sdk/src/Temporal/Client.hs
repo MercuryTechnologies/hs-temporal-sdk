@@ -143,10 +143,10 @@ import Proto.Temporal.Api.Workflowservice.V1.RequestResponse (
  )
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as RR
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as WF
+import qualified Temporal.Client.TestService as TestService
 import Temporal.Client.Types
 import Temporal.Common
 import qualified Temporal.Core.Client as Core
-import qualified Temporal.Core.Client.TestService as TestService
 import Temporal.Core.Client.WorkflowService
 import Temporal.Duration (durationToProto)
 import Temporal.Exception
@@ -296,15 +296,11 @@ waitWorkflowResult h =
     else waitWorkflowResult' h
   where
     unlockTimeSkipping = do
-      let msg :: UnlockTimeSkippingRequest
-          msg = defMessage
-      res <- TestService.unlockTimeSkipping h.workflowHandleClient.clientCore msg
-      either (throwIO . Temporal.Exception.coreRpcErrorToRpcError) pure res
+      res <- TestService.unlockTimeSkipping h.workflowHandleClient.clientCore
+      either throwIO pure res
     lockTimeSkipping _ = do
-      let msg :: LockTimeSkippingRequest
-          msg = defMessage
-      res <- TestService.lockTimeSkipping h.workflowHandleClient.clientCore msg
-      either (throwIO . Temporal.Exception.coreRpcErrorToRpcError) pure res
+      res <- TestService.lockTimeSkipping h.workflowHandleClient.clientCore
+      either throwIO pure res
 
 
 waitWorkflowResult' :: (Typeable a, MonadIO m) => WorkflowHandle a -> m a
