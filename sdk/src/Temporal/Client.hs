@@ -11,6 +11,8 @@
 
 {-# HLINT ignore "Use >=>" #-}
 
+-- This is a comment
+
 {- |
 Module: Temporal.Client
 Description: Invoke and interact with Temporal Workflows.
@@ -119,19 +121,20 @@ import qualified Proto.Temporal.Api.Query.V1.Message_Fields as Query
 import qualified Proto.Temporal.Api.Taskqueue.V1.Message_Fields as TQ
 import qualified Proto.Temporal.Api.Update.V1.Message as Update
 import qualified Proto.Temporal.Api.Update.V1.Message_Fields as Update
+import Proto.Temporal.Api.Workflow.V1.Message (WorkflowExecutionInfo)
 import Proto.Temporal.Api.Workflowservice.V1.RequestResponse (
+  CountWorkflowExecutionsRequest,
+  CountWorkflowExecutionsResponse,
   GetWorkflowExecutionHistoryRequest,
   GetWorkflowExecutionHistoryResponse,
+  ListClosedWorkflowExecutionsRequest,
+  ListOpenWorkflowExecutionsRequest,
   PollWorkflowExecutionUpdateRequest,
   QueryWorkflowRequest,
   QueryWorkflowResponse,
+  ScanWorkflowExecutionsRequest,
   UpdateWorkflowExecutionRequest,
   UpdateWorkflowExecutionResponse,
-  ListClosedWorkflowExecutionsRequest,
-  ListOpenWorkflowExecutionsRequest,
-  ScanWorkflowExecutionsRequest,
-  CountWorkflowExecutionsRequest,
-  CountWorkflowExecutionsResponse,
  )
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as RR
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as WF
@@ -147,7 +150,6 @@ import Temporal.Workflow (KnownQuery (..), KnownSignal (..), QueryRef (..))
 import Temporal.Workflow.Definition
 import UnliftIO
 import Unsafe.Coerce
-import Proto.Temporal.Api.Workflow.V1.Message (WorkflowExecutionInfo)
 
 
 ---------------------------------------------------------------------------------
@@ -747,9 +749,11 @@ cease execution. The workflow will not be given a chance to react to the termina
 terminate :: (MonadIO m) => WorkflowHandle a -> TerminationOptions -> m ()
 terminate h req =
   void do
-    res <- liftIO $ terminateWorkflowExecution
-      h.workflowHandleClient.clientCore
-      msg
+    res <-
+      liftIO $
+        terminateWorkflowExecution
+          h.workflowHandleClient.clientCore
+          msg
     case res of
       Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
       Right _ -> pure ()
@@ -918,6 +922,7 @@ listOpenWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq &
           unless (x ^. field @"nextPageToken" == "") do
             go c (req & field @"nextPageToken" .~ (x ^. field @"nextPageToken"))
 
+
 listClosedWorkflowExecutions :: (MonadIO m, HasWorkflowClient m) => ListClosedWorkflowExecutionsRequest -> ConduitT i WorkflowExecutionInfo m ()
 listClosedWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq & field @"namespace" .~ rawNamespace c.clientConfig.namespace)
   where
@@ -929,6 +934,7 @@ listClosedWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq
           yieldMany (x ^. field @"vec'executions")
           unless (x ^. field @"nextPageToken" == "") do
             go c (req & field @"nextPageToken" .~ (x ^. field @"nextPageToken"))
+
 
 -- TODO, replace with newer listWorkflowExecutions API, this is deprecated in the proto
 scanWorkflowExecutions
@@ -946,15 +952,18 @@ scanWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq & fie
           unless (x ^. field @"nextPageToken" == "") do
             go c (req & field @"nextPageToken" .~ (x ^. field @"nextPageToken"))
 
+
 countWorkflowExecutions
   :: (MonadIO m, HasWorkflowClient m)
   => CountWorkflowExecutionsRequest
   -> m CountWorkflowExecutionsResponse
-countWorkflowExecutions baseReq = askWorkflowClient >>= \c -> liftIO do
-  res <- Temporal.Core.Client.WorkflowService.countWorkflowExecutions c.clientCore baseReq
-  case res of
-    Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
-    Right x -> pure x
+countWorkflowExecutions baseReq =
+  askWorkflowClient >>= \c -> liftIO do
+    res <- Temporal.Core.Client.WorkflowService.countWorkflowExecutions c.clientCore baseReq
+    case res of
+      Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+      Right x -> pure x
+
 
 data UpdateLifecycleStage
   = UpdateLifecycleStageUnspecified
