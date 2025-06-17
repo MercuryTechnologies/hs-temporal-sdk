@@ -32,6 +32,7 @@ library
       Temporal.Payload
       Temporal.Replay
       Temporal.SearchAttributes
+      Temporal.Testing.MockActivityEnvironment
       Temporal.TH
       Temporal.Worker
       Temporal.Workflow
@@ -147,7 +148,7 @@ test-suite temporal-sdk-tests
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
-      Spec, ConcurrentAccessSpec, AsyncCompletionSpec, DurationSpec, IntegrationSpec, IntegrationSpec.HangingWorkflow, IntegrationSpec.NoOpWorkflow, IntegrationSpec.TimeoutsInWorkflows, IntegrationSpec.Updates, Common, THCompiles
+      Spec, ConcurrentAccessSpec, AsyncCompletionSpec, DurationSpec, IntegrationSpec, IntegrationSpec.HangingWorkflow, IntegrationSpec.NoOpWorkflow, IntegrationSpec.TimeoutsInWorkflows, IntegrationSpec.Updates, MockActivityEnvironmentSpec, Common, THCompiles
   hs-source-dirs:
       test
   default-extensions:
