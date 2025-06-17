@@ -137,7 +137,7 @@ Heartbeats can contain payloads describing the Activity's current progress. If a
 rawHeartbeat :: V.Vector Payload -> Activity env ()
 rawHeartbeat baseDetails = do
   (TaskToken token) <- taskToken <$> askActivityInfo
-  worker <- askActivityWorker
+  recordHeartbeat <- askActivityRecordHeartbeat
   info <- askActivityInfo
   let details =
         defMessage
@@ -146,7 +146,7 @@ rawHeartbeat baseDetails = do
   -- TODO throw exception if this fails?
   void $ liftIO do
     writeIORef info.rawHeartbeatDetails baseDetails
-    recordActivityHeartbeat worker details
+    recordHeartbeat details
 
 
 getRawHeartbeat :: Activity env (V.Vector Payload)
@@ -211,7 +211,7 @@ provides a 'WorkflowClient' that can be used to accomplish that.
 activityWorkflowClient :: Activity env WorkflowClient
 activityWorkflowClient = Activity $ do
   e <- ask
-  workflowClient (getWorkerClient e.activityWorker) $
+  workflowClient e.activityWorkerClient $
     WorkflowClientConfig
       { namespace = e.activityInfo.workflowNamespace
       , interceptors = e.activityClientInterceptors

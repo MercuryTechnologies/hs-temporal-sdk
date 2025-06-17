@@ -14,7 +14,7 @@ import GHC.TypeLits
 import Temporal.Activity.Types
 import Temporal.Client.Types
 import Temporal.Core.Client (Client)
-import Temporal.Core.Worker (Worker, WorkerType (Real), getWorkerClient)
+import Temporal.Core.Worker (ActivityHeartbeat, Worker, WorkerConfig, WorkerError, WorkerType (Real), getWorkerClient)
 import Temporal.Payload
 import Temporal.Workflow.Types
 import UnliftIO
@@ -57,10 +57,18 @@ data ActivityDefinition env = ActivityDefinition
 
 
 data ActivityEnv env = ActivityEnv
-  { activityWorker :: {-# UNPACK #-} !(Worker 'Real)
-  , activityInfo :: {-# UNPACK #-} !ActivityInfo
+  { activityInfo :: {-# UNPACK #-} !ActivityInfo
   , activityClientInterceptors :: {-# UNPACK #-} !ClientInterceptors
   , activityPayloadProcessor :: {-# UNPACK #-} !PayloadProcessor
+  , activityRecordHeartbeat :: ActivityHeartbeat -> IO (Either WorkerError ())
+  , activityWorkerConfig :: {-# UNPACK #-} !WorkerConfig
+  , activityWorkerClient :: Client
+  -- ^ __NOTE__: This field is /deliberately/ lazy in order to support the
+  -- 'MockActivityEnvironment' type.
+  --
+  -- When 'runMockActivity' translates the mocked environment to 'ActivityEnv',
+  -- initializes this field with a lazy exception that will only throw if the
+  -- activity-under-test (illegally) accesses the worker client.
   , activityEnv :: env
   }
 
@@ -157,8 +165,8 @@ askActivityInfo :: Activity env ActivityInfo
 askActivityInfo = Activity $ asks (.activityInfo)
 
 
-askActivityWorker :: Activity env (Worker 'Real)
-askActivityWorker = Activity $ asks (.activityWorker)
+askActivityRecordHeartbeat :: Activity env (ActivityHeartbeat -> IO (Either WorkerError ()))
+askActivityRecordHeartbeat = Activity $ asks (.activityRecordHeartbeat)
 
 
 {- | The Activity monad provides access to the underlying Temporal client
@@ -171,7 +179,7 @@ Using the provided client ensures that a consistent set of interceptors are used
 for all relevant actions.
 -}
 askActivityClient :: Activity env Client
-askActivityClient = Activity $ asks (getWorkerClient . (.activityWorker))
+askActivityClient = Activity $ asks (.activityWorkerClient)
 
 
 instance MonadReader env (Activity env) where

@@ -162,7 +162,14 @@ applyActivityTaskStart tsk tt msg = do
     args <- processorDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload (msg ^. AT.vec'input))
     env <- readIORef w.activityEnv
     let
-      actEnv = ActivityEnv w.workerCore info w.clientInterceptors w.payloadProcessor
+      actEnv =
+        ActivityEnv
+          info
+          w.clientInterceptors
+          w.payloadProcessor
+          (Core.recordActivityHeartbeat w.workerCore)
+          (Core.getWorkerConfig w.workerCore)
+          (Core.getWorkerClient w.workerCore)
       input =
         ExecuteActivityInput
           args
