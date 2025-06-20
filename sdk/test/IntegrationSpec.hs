@@ -65,6 +65,7 @@ import Temporal.Activity
 import Temporal.Bundle
 import Temporal.Bundle.TH
 import qualified Temporal.Client as C
+import qualified Temporal.Client.TestService
 import Temporal.Contrib.OpenTelemetry
 import Temporal.Core.Client hiding (RpcError)
 import Temporal.Duration
@@ -1866,6 +1867,25 @@ needsClient = do
         eWorkflowResult `shouldSatisfy` \case
           Left (WorkflowExecutionFailed attrs) -> (attrs ^. History.failure . Failure.message) == "Current state var: 12"
           _ -> False
+  describe "Time Skipping" do
+    it "fails if not connected to the time-skipping server" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts =
+                    C.TimeoutOptions
+                      { C.runTimeout = Just $ seconds 15
+                      , C.executionTimeout = Nothing
+                      , C.taskTimeout = Nothing
+                      }
+                }
+        h <- useClient (C.start VariableSleepWorkflow "variable-sleep-workflow" opts 10)
+        (Temporal.Client.TestService.unlockTimeSkippingWithSleep (C.clientCore (C.workflowHandleClient h)) (seconds 10))
+          `shouldThrow` \case
+            Temporal.Client.TestService.TimeSkippingNotSupported -> True
 
 
 needsTimeSkipping :: SpecWith TestEnv

@@ -21,7 +21,7 @@ They are used to start new workflows and to signal existing workflows.
 -}
 module Temporal.Client (
   -- * Workflow Client
-  WorkflowClient,
+  WorkflowClient (..),
   workflowClient,
   WorkflowClientConfig (..),
   mkWorkflowClientConfig,
@@ -289,18 +289,11 @@ waitWorkflowResult h =
   if h.workflowHandleClient.clientConfig.enableTimeSkipping
     then
       liftIO $
-        Control.Exception.bracket
-          unlockTimeSkipping
-          lockTimeSkipping
-          (const $ waitWorkflowResult' h)
+        Control.Exception.bracket_
+          (TestService.unlockTimeSkipping h.workflowHandleClient.clientCore)
+          (TestService.lockTimeSkipping h.workflowHandleClient.clientCore)
+          (waitWorkflowResult' h)
     else waitWorkflowResult' h
-  where
-    unlockTimeSkipping = do
-      res <- TestService.unlockTimeSkipping h.workflowHandleClient.clientCore
-      either throwIO pure res
-    lockTimeSkipping _ = do
-      res <- TestService.lockTimeSkipping h.workflowHandleClient.clientCore
-      either throwIO pure res
 
 
 waitWorkflowResult' :: (Typeable a, MonadIO m) => WorkflowHandle a -> m a
