@@ -216,6 +216,7 @@ activityWorkflowClient = Activity $ do
       { namespace = e.activityInfo.workflowNamespace
       , interceptors = e.activityClientInterceptors
       , payloadProcessor = e.activityPayloadProcessor
+      , enableTimeSkipping = False
       }
 
 

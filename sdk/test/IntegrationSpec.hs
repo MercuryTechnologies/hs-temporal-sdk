@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingVia #-}
@@ -38,7 +39,7 @@ import qualified Data.Map.Strict as Map
 import Data.Maybe (fromJust, isJust)
 import Data.Text (Text)
 import qualified Data.Text as Text
-import Data.Time (Day (ModifiedJulianDay))
+import Data.Time (Day (ModifiedJulianDay), diffUTCTime, getCurrentTime)
 import Data.Time.Clock (UTCTime)
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
@@ -49,6 +50,7 @@ import GHC.Generics
 import GHC.Stack (SrcLoc (..), callStack, fromCallSiteList)
 import IntegrationSpec.HangingWorkflow
 import IntegrationSpec.NoOpWorkflow
+import IntegrationSpec.TimeSkipping
 import IntegrationSpec.TimeoutsInWorkflows
 import IntegrationSpec.Updates
 import Lens.Family2
@@ -64,14 +66,17 @@ import Temporal.Activity
 import Temporal.Bundle
 import Temporal.Bundle.TH
 import qualified Temporal.Client as C
+import qualified Temporal.Client.TestService
 import Temporal.Contrib.OpenTelemetry
 import Temporal.Core.Client hiding (RpcError)
 import Temporal.Duration
 import Temporal.EphemeralServer
+import qualified Temporal.EphemeralServer as TemporalDevServerConfig (TemporalDevServerConfig (..))
+import qualified Temporal.EphemeralServer as TemporalTestServerConfig (TemporalTestServerConfig (..))
 import Temporal.Exception
 import Temporal.Interceptor
 import Temporal.Operator (IndexedValueType (..), SearchAttributes (..), addSearchAttributes, listSearchAttributes)
-import Temporal.Payload
+import Temporal.Payload hiding (around)
 import Temporal.SearchAttributes
 import Temporal.TH (ActivityFn, WorkflowFn, discoverDefinitions)
 import Temporal.Worker
@@ -186,7 +191,15 @@ sillyEncryptionPayloadProcessor = PayloadProcessor incr decr
 
 
 makeClient :: PortNumber -> Interceptors env -> IO (C.WorkflowClient, Client)
-makeClient pn Interceptors {..} = do
+makeClient pn interceptors = makeClient' pn interceptors False
+
+
+makeTimeSkippingClient :: PortNumber -> Interceptors env -> IO (C.WorkflowClient, Client)
+makeTimeSkippingClient pn interceptors = makeClient' pn interceptors True
+
+
+makeClient' :: PortNumber -> Interceptors env -> Bool -> IO (C.WorkflowClient, Client)
+makeClient' pn Interceptors {..} enableTimeSkipping = do
   let conf = configWithRetry pn
   c <- runStdoutLoggingT $ connectClient globalRuntime conf
   (,)
@@ -196,6 +209,7 @@ makeClient pn Interceptors {..} = do
           { namespace = "default"
           , interceptors = clientInterceptors
           , payloadProcessor = sillyEncryptionPayloadProcessor
+          , enableTimeSkipping
           }
       )
     <*> pure c
@@ -244,11 +258,31 @@ withServer f = do
         Just temporalPath -> do
           let serverConfig =
                 defaultTemporalDevServerConfig
-                  { port = Just $ fromIntegral fp
-                  , exe = ExistingPath temporalPath
+                  { TemporalDevServerConfig.port = Just $ fromIntegral fp
+                  , TemporalDevServerConfig.exe = ExistingPath temporalPath
                   }
           pure serverConfig
       withDevServer globalRuntime conf $ \_ -> do
+        f fp
+
+
+withTimeSkippingServer :: (PortNumber -> IO a) -> IO a
+withTimeSkippingServer f = do
+  lookupEnv "HS_TEMPORAL_SDK_LOCAL_TIME_SKIPPING_TEST_SERVER" >>= \case
+    Just _ -> f 7234
+    _ -> do
+      fp <- getFreePort
+      mTemporalPath <- findExecutable "temporal-test-server"
+      conf <- case mTemporalPath of
+        Nothing -> error "Could not find the 'temporal-test-server' (time-skipping) executable in PATH"
+        Just temporalPath -> do
+          pure
+            TemporalTestServerConfig
+              { TemporalTestServerConfig.exe = ExistingPath temporalPath
+              , TemporalTestServerConfig.port = Just $ fromIntegral fp
+              , TemporalTestServerConfig.extraArgs = []
+              }
+      withTestServer globalRuntime conf $ \_ -> do
         f fp
 
 
@@ -266,6 +300,21 @@ setup additionalInterceptors fp go = do
           ]
   _ <- addSearchAttributes coreClient (W.Namespace "default") (allTestAttributes `Map.difference` customAttributes)
 
+  (conf, taskQueue) <- mkBaseConf interceptors
+  go
+    TestEnv
+      { useClient = flip runReaderT client
+      , withWorker = mkWithWorker fp
+      , baseConf = conf
+      , taskQueue
+      }
+
+
+setupTimeSkipping :: Interceptors () -> PortNumber -> (TestEnv -> IO ()) -> IO ()
+setupTimeSkipping additionalInterceptors fp go = do
+  otelInterceptors <- makeOpenTelemetryInterceptor
+  let interceptors = otelInterceptors <> additionalInterceptors
+  (client, _) <- makeTimeSkippingClient fp interceptors
   (conf, taskQueue) <- mkBaseConf interceptors
   go
     TestEnv
@@ -374,6 +423,30 @@ spec = do
     aroundAllWith (flip $ setup mempty) needsClient
     aroundAllWith (flip $ setup mempty) terminateTests
     updatesWithInterceptors
+
+-- FIXME [aarch64-linux-temporal-test-server]
+--
+-- Temporal's time-skipping test server is a sub-component of their Java SDK,
+-- compiled to native code with GraalVM and (at the time of writing) only
+-- distributed for x86_64 platforms.
+--
+-- Upstream has recently added support for building this executable on ARM64
+-- platforms, but there is currently no ETA for a new release. macOS users can
+-- invoke the x86_64 test server via Rosetta2, so in the meantime we'll treat
+-- Linux ARM64 systems as only partially supported.
+--
+-- The rest of the SDK will still be tested, and should continue working as-
+-- expected on Linux ARM64, but invoking 'withTestServer' with
+-- 'enableTimeSkipping = True' will fail to find the appropriate executable
+-- (unless you have manually configured your shell to provide a copy of the
+-- x86_64 test server binary wrapped in some form of userspace emulation).
+#if !(defined(linux_HOST_OS) && defined(aarch64_HOST_ARCH))
+  -- Whether time-skipping is enabled is global state in the test server (it's not tracked
+  -- per workflow or anything) so we need to use around (rather than aroundAll) to get a
+  -- distinct server for each test
+  around withTimeSkippingServer $ do
+    aroundWith (flip $ setupTimeSkipping mempty) needsTimeSkipping
+#endif
 
 
 type MyWorkflow a = W.RequireCallStack => W.Workflow a
@@ -1813,6 +1886,84 @@ needsClient = do
         eWorkflowResult `shouldSatisfy` \case
           Left (WorkflowExecutionFailed attrs) -> (attrs ^. History.failure . Failure.message) == "Current state var: 12"
           _ -> False
+  describe "Time Skipping" do
+    it "fails if not connected to the time-skipping server" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts =
+                    C.TimeoutOptions
+                      { C.runTimeout = Just $ seconds 15
+                      , C.executionTimeout = Nothing
+                      , C.taskTimeout = Nothing
+                      }
+                }
+        h <- useClient (C.start VariableSleepWorkflow "variable-sleep-workflow" opts 10)
+        (Temporal.Client.TestService.unlockTimeSkippingWithSleep (C.clientCore (C.workflowHandleClient h)) (seconds 10))
+          `shouldThrow` \case
+            Temporal.Client.TestService.TimeSkippingNotSupported -> True
+
+
+needsTimeSkipping :: SpecWith TestEnv
+needsTimeSkipping = do
+  describe "Workflow" $ do
+    it "should run a workflow" $ \TestEnv {..} -> do
+      let conf = configure () testConf $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts =
+                    C.TimeoutOptions
+                      { C.runTimeout = Just $ seconds 4
+                      , C.executionTimeout = Nothing
+                      , C.taskTimeout = Nothing
+                      }
+                }
+        useClient (C.execute testRefs.shouldRunWorkflowTest "basicWf" opts)
+          `shouldReturn` ()
+    it "should skip over sleeps in a workflow" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts =
+                    C.TimeoutOptions
+                      { C.runTimeout = Just $ seconds 15
+                      , C.executionTimeout = Nothing
+                      , C.taskTimeout = Nothing
+                      }
+                }
+        startTime <- getCurrentTime
+        useClient (C.execute VariableSleepWorkflow "variable-sleep-workflow" opts 10)
+        endTime <- getCurrentTime
+        let secondsElapsed = diffUTCTime endTime startTime
+        secondsElapsed `shouldSatisfy` (< 1)
+    it "should skip over sleeps in a child workflow" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts =
+                    C.TimeoutOptions
+                      { C.runTimeout = Just $ seconds 15
+                      , C.executionTimeout = Nothing
+                      , C.taskTimeout = Nothing
+                      }
+                }
+        startTime <- getCurrentTime
+        useClient (C.execute VariableSleepFromChildWorkflow "variable-sleep-from-child-workflow" opts 10)
+        endTime <- getCurrentTime
+        let secondsElapsed = diffUTCTime endTime startTime
+        secondsElapsed `shouldSatisfy` (< 1)
 
 
 updatesWithInterceptors :: SpecWith PortNumber

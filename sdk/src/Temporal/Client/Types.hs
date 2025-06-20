@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveLift #-}
+{-# LANGUAGE DuplicateRecordFields #-}
 
 module Temporal.Client.Types where
 
@@ -117,6 +118,8 @@ data WorkflowClientConfig = WorkflowClientConfig
   -- ^ The payload processor to be used by the client.
   --
   -- This can be used to apply encryption and compression to payloads.
+  , enableTimeSkipping :: !Bool
+  -- ^ Whether to enable "time-skipping" for testing.
   }
 
 
@@ -129,7 +132,14 @@ mkWorkflowClientConfig ns =
     { namespace = ns
     , interceptors = mempty
     , payloadProcessor = PayloadProcessor pure (pure . Right)
+    , enableTimeSkipping = False
     }
+
+
+mkTimeSkippingWorkflowClientConfig :: Namespace -> WorkflowClientConfig
+mkTimeSkippingWorkflowClientConfig ns =
+  let c = mkWorkflowClientConfig ns
+  in c {enableTimeSkipping = True}
 
 
 data WorkflowClient = WorkflowClient
