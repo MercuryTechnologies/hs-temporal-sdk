@@ -29,7 +29,11 @@ in
   ];
 
   temporal-sdk = lib.pipe (hfinal.callCabal2nix "temporal-sdk" ../../../sdk { }) [
-    (addTestToolDepends [temporal-cli temporal-test-server])
+    # FIXME [aarch64-linux-temporal-test-server]
+    (addTestToolDepends (lib.filter (lib.meta.availableOn stdenv.hostPlatform) [
+      temporal-cli
+      temporal-test-server
+    ]))
     (
       drv:
       drv.overrideAttrs (_: {
