@@ -1,7 +1,12 @@
 {
   description = "Haskell bindings to the Temporal Core library as well as an SDK built on top of it.";
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    # 2025-06-10: Pinned to the last commit before #411741, from 2025-05-30.
+    #
+    # PR that broke `ghcWithPackages`: https://github.com/NixOS/nixpkgs/pull/411741
+    # Upstream issue: https://github.com/NixOS/nixpkgs/issues/415436
+    # Proposed fix: https://github.com/NixOS/nixpkgs/pull/415434
+    nixpkgs.url = "github:NixOS/nixpkgs/81da63bafe32b705c40deb62a1ce1ae73836ff8b";
     devenv.url = "github:cachix/devenv/v1.0.5";
     fenix = {
       url = "github:nix-community/fenix";
