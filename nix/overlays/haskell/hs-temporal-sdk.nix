@@ -4,11 +4,12 @@
   stdenv,
   darwin,
   temporal-cli,
+  temporal-test-server,
   ...
 }:
 hfinal: hprev:
 let
-  inherit (haskell.lib.compose) addTestToolDepend enableCabalFlag overrideCabal;
+  inherit (haskell.lib.compose) addTestToolDepends enableCabalFlag overrideCabal;
 in
 {
   temporal-api-protos = hfinal.callCabal2nix "temporal-api-protos" ../../../protos { };
@@ -28,7 +29,11 @@ in
   ];
 
   temporal-sdk = lib.pipe (hfinal.callCabal2nix "temporal-sdk" ../../../sdk { }) [
-    (addTestToolDepend temporal-cli)
+    # FIXME [aarch64-linux-temporal-test-server]
+    (addTestToolDepends (lib.filter (lib.meta.availableOn stdenv.hostPlatform) [
+      temporal-cli
+      temporal-test-server
+    ]))
     (
       drv:
       drv.overrideAttrs (_: {

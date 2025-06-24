@@ -1,6 +1,9 @@
 {
   stdenv,
   fetchurl,
+  lib,
+  autoPatchelfHook,
+  fixDarwinDylibNames,
   ...
 }: let
   # The 'temporal-test-server' is a component of the Java SDK, with compiled
@@ -23,10 +26,20 @@ in
       hash = if stdenv.hostPlatform.isDarwin then "sha256-0EO5nmotVM8RjVPjJfN3oK9pr+9e3oo23rBm65T4Cs4=" else "sha256-cE83Dp8ZFofpiDs6d7TyshUynylOYq1rsehHpw2i9Lk=";
     };
 
+    nativeBuildInputs = lib.optionals stdenv.hostPlatform.isDarwin [
+      fixDarwinDylibNames
+    ] ++ lib.optionals stdenv.hostPlatform.isLinux [
+      autoPatchelfHook
+    ];
+
     installPhase = ''
+      runHook preInstall
+
       mkdir -p $out/bin
       mv temporal-test-server $out/bin/temporal-test-server
       chmod +x $out/bin/temporal-test-server
+
+      runHook postInstall
     '';
 
     meta = {

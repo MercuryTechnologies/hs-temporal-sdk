@@ -23,7 +23,12 @@
               ./nix/devenv/temporal-dev-server.nix
               (pkgs.lib.modules.importApply ./nix/devenv/haskell.nix ghcVersion)
               ./nix/devenv/repo-wide-checks.nix
-              ({pkgs, ...}: {packages = [self.packages.${pkgs.system}.temporal-test-server];})
+              # FIXME [aarch64-linux-temporal-test-server]
+              ({pkgs, ...}: {
+                packages = builtins.filter (pkgs.lib.meta.availableOn pkgs.stdenv.hostPlatform) [
+                  pkgs.temporal-test-server
+                ];
+              })
             ];
           };
         shells = inputs.nixpkgs.lib.genAttrs ghcVersions (version: mkShell version);
@@ -38,7 +43,7 @@
         haskellUtils.localPackageMatrix
         // {
           temporal-bridge = pkgs.temporal_bridge;
-          temporal-test-server = pkgs.callPackage ./nix/packages/temporal-test-server.nix { };
+          temporal-test-server = pkgs.temporal-test-server;
         }
     );
 
@@ -52,6 +57,7 @@
 
     overlays = {
       temporal-bridge = import ./nix/overlays/temporal-bridge/overlay.nix;
+      temporal-test-server = import ./nix/overlays/temporal-test-server.nix;
       # A top-level nixpkgs overlay that extends supported GHC package sets with
       # `hs-temporal-sdk` packages & any dependency modifications required for
       # development.

@@ -152,5 +152,6 @@ tests:
       IntegrationSpec.TimeoutsInWorkflows,
       IntegrationSpec.Updates,
       MockActivityEnvironmentSpec,
+      IntegrationSpec.TimeSkipping,
       Common,
       THCompiles
