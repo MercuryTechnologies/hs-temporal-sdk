@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingVia #-}
@@ -424,29 +423,11 @@ spec = do
     aroundAllWith (flip $ setup mempty) terminateTests
     updatesWithInterceptors
 
--- FIXME [aarch64-linux-temporal-test-server]
---
--- Temporal's time-skipping test server is a sub-component of their Java SDK,
--- compiled to native code with GraalVM and (at the time of writing) only
--- distributed for x86_64 platforms.
---
--- Upstream has recently added support for building this executable on ARM64
--- platforms, but there is currently no ETA for a new release. macOS users can
--- invoke the x86_64 test server via Rosetta2, so in the meantime we'll treat
--- Linux ARM64 systems as only partially supported.
---
--- The rest of the SDK will still be tested, and should continue working as-
--- expected on Linux ARM64, but invoking 'withTestServer' with
--- 'enableTimeSkipping = True' will fail to find the appropriate executable
--- (unless you have manually configured your shell to provide a copy of the
--- x86_64 test server binary wrapped in some form of userspace emulation).
-#if !(defined(linux_HOST_OS) && defined(aarch64_HOST_ARCH))
   -- Whether time-skipping is enabled is global state in the test server (it's not tracked
   -- per workflow or anything) so we need to use around (rather than aroundAll) to get a
   -- distinct server for each test
   around withTimeSkippingServer $ do
     aroundWith (flip $ setupTimeSkipping mempty) needsTimeSkipping
-#endif
 
 
 type MyWorkflow a = W.RequireCallStack => W.Workflow a
