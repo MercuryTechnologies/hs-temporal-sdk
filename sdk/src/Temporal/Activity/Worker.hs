@@ -187,7 +187,7 @@ applyActivityTaskStart tsk tt msg = do
             case HashMap.lookup info.activityType w.definitions of
               Nothing -> throwIO $ RuntimeError ("Activity type not found: " <> T.unpack info.activityType)
               Just ActivityDefinition {..} ->
-                activityRun (actEnv env') input'
+                runReaderT (unActivity $ activityRun input') (actEnv env')
                   `finally` (takeMVar syncPoint *> atomically (modifyTVar' w.runningActivities (HashMap.delete tt)))
         completionMsg <- case ef >>= first (toException . ValueError) of
           Left err@(SomeException _wrappedErr) -> do

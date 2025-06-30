@@ -43,12 +43,15 @@ module Temporal.Activity (
   ActivityCancelReason (..),
   activityWorkflowClient,
   askActivityClient,
+  mapActivityEnv,
 
   -- * Defining Activities
   provideActivity,
   ProvidedActivity (..),
+  mapProvidedActivityEnv,
   KnownActivity (..),
   ActivityDefinition (..),
+  mapActivityDefinitionEnv,
 
   -- * Asynchronous Completion
   TaskToken (..),
@@ -107,15 +110,16 @@ provideActivity codec name f =
     { definition =
         ActivityDefinition
           { activityName = name
-          , activityRun = \actEnv input -> do
+          , activityRun = \input -> do
               eAct <-
-                applyPayloads
-                  codec
-                  (Proxy @(ArgsOf f))
-                  (Proxy @(Activity env (ResultOf (Activity env) f)))
-                  f
-                  input.activityArgs
-              traverse (runActivity actEnv >=> encode codec) eAct
+                liftIO $
+                  applyPayloads
+                    codec
+                    (Proxy @(ArgsOf f))
+                    (Proxy @(Activity env (ResultOf (Activity env) f)))
+                    f
+                    input.activityArgs
+              traverse (>>= (liftIO . encode codec)) eAct
           }
     , reference =
         KnownActivity
