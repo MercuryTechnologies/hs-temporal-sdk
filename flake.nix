@@ -23,11 +23,8 @@
               ./nix/devenv/temporal-dev-server.nix
               (pkgs.lib.modules.importApply ./nix/devenv/haskell.nix ghcVersion)
               ./nix/devenv/repo-wide-checks.nix
-              # FIXME [aarch64-linux-temporal-test-server]
               ({pkgs, ...}: {
-                packages = builtins.filter (pkgs.lib.meta.availableOn pkgs.stdenv.hostPlatform) [
-                  pkgs.temporal-test-server
-                ];
+                packages = [ pkgs.temporal-test-server ];
               })
             ];
           };

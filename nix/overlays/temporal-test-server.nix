@@ -1,3 +1,3 @@
 final: _prev: {
-  temporal-test-server = final.callPackage ../packages/temporal-test-server.nix { };
+  temporal-test-server = final.callPackage ../packages/temporal-test-server { };
 }
