@@ -293,15 +293,16 @@ instance
   defFromFunction _ codec name f =
     ActivityDefinition
       (Text.pack name)
-      ( \actEnv input -> do
+      ( \input -> do
           eAct <-
-            applyPayloads
-              codec
-              (Proxy @(ArgsOf original))
-              (Proxy @(Activity env (ResultOf (Activity env) original)))
-              f
-              input.activityArgs
-          traverse (runActivity actEnv >=> encode codec) eAct
+            liftIO $
+              applyPayloads
+                codec
+                (Proxy @(ArgsOf original))
+                (Proxy @(Activity env (ResultOf (Activity env) original)))
+                f
+                input.activityArgs
+          traverse (>>= (liftIO . encode codec)) eAct
       )
 
 

@@ -37,6 +37,7 @@ module Temporal.Worker (
   WorkerConfig (..),
   Definitions (..),
   ToDefinitions (..),
+  mapDefinitionsEnv,
   ConfigM,
   configure,
 
@@ -179,6 +180,14 @@ data Definitions env = Definitions
   { workflowDefinitions :: {-# UNPACK #-} !(HashMap Text WorkflowDefinition)
   , activityDefinitions :: {-# UNPACK #-} !(HashMap Text (ActivityDefinition env))
   }
+
+
+{- | If you have a worker that needs to run activities derived from a larger environment context,
+you can apply this function to the definitions to get a new set of definitions that will run
+the activities in the right environment.
+-}
+mapDefinitionsEnv :: (env' -> env) -> Definitions env -> Definitions env'
+mapDefinitionsEnv f (Definitions w a) = Definitions w (fmap (mapActivityDefinitionEnv f) a)
 
 
 instance Semigroup (Definitions env) where

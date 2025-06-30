@@ -1,4 +1,5 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Temporal.Activity.Definition where
 
@@ -18,6 +19,7 @@ import Temporal.Core.Worker (ActivityHeartbeat, Worker, WorkerConfig, WorkerErro
 import Temporal.Payload
 import Temporal.Workflow.Types
 import UnliftIO
+import Unsafe.Coerce
 
 
 class ActivityDef a where
@@ -36,6 +38,30 @@ data ProvidedActivity env f = ProvidedActivity
   }
 
 
+-- | Transform the environment of an Activity.
+mapActivityEnv :: (env' -> env) -> Activity env a -> Activity env' a
+mapActivityEnv f (Activity m) = Activity (withReaderT (\a -> a {activityEnv = f $ activityEnv a}) m)
+
+
+mapProvidedActivityEnv
+  :: forall env env' f
+   . ()
+  => (env' -> env)
+  -> ProvidedActivity env f
+  -> ProvidedActivity env' (ArgsOf f :->: Activity env' (ResultOf (Activity env) f))
+mapProvidedActivityEnv f (ProvidedActivity def ref) =
+  ProvidedActivity
+    (mapActivityDefinitionEnv f def)
+    -- This seems sketchy on the face of it, but is safe because the parameters of `KnownActivity` have nothing
+    -- to do with the environment. Sometimes env creeps in, but we can safely reason that reconstructing an
+    -- Activity function with just a different environment is safe in terms of inputs and outputs matching types.
+    (unsafeCoerce ref)
+
+
+mapActivityDefinitionEnv :: (env' -> env) -> ActivityDefinition env -> ActivityDefinition env'
+mapActivityDefinitionEnv f (ActivityDefinition name run) = ActivityDefinition name (mapActivityEnv f . run)
+
+
 instance ActivityDef (ProvidedActivity env f) where
   type ActivityDefinitionEnv (ProvidedActivity env f) = env
   activityDefinition (ProvidedActivity def _) = def
@@ -52,7 +78,7 @@ data KnownActivity (args :: [Type]) (result :: Type) = forall codec.
 
 data ActivityDefinition env = ActivityDefinition
   { activityName :: Text
-  , activityRun :: ActivityEnv env -> ExecuteActivityInput -> IO (Either String Payload)
+  , activityRun :: ExecuteActivityInput -> Activity env (Either String Payload)
   }
 
 
