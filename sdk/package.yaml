@@ -154,4 +154,5 @@ tests:
       MockActivityEnvironmentSpec,
       IntegrationSpec.TimeSkipping,
       Common,
+      RegisterWorkflowsSpec,
       THCompiles
