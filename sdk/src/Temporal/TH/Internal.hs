@@ -50,7 +50,12 @@ fnSingDataAndConName n
 
 makeFnDecls :: forall m. (TH.Quote m, TH.Quasi m) => TH.Name -> TH.Type -> m [TH.Dec]
 makeFnDecls n t = do
+  (TH.Module _ (TH.ModName modName)) <- TH.runQ TH.thisModule
   let dName = fnSingDataAndConName n
+      determinedName = case TH.nameModule n of
+        Nothing -> mconcat [modName, ".", TH.nameBase n]
+        Just existing -> mconcat [existing, ".", TH.nameBase n]
+
   dataDec <-
     dataD
       (cxt [])
@@ -64,7 +69,7 @@ makeFnDecls n t = do
     [d|
       instance Fn $(conT dName) where
         type FnType $(conT dName) = $(pure t)
-        fnName _ = Text.pack $(TH.litE (TH.stringL $ show n))
+        fnName _ = Text.pack $(TH.litE (TH.stringL determinedName))
         fnDefinition _ = $(varE n)
         fnSing = $(TH.conE dName)
       |]

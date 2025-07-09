@@ -95,4 +95,8 @@ testActivityReferences = provideCallStack do
 
 
 spec :: Spec
-spec = pure ()
+spec = do
+  describe "fnName" do
+    it "works the same as registerWorkflow does for names" do
+      fnName SimpleWorkflow `shouldBe` "RegisterWorkflowsSpec.simpleWorkflow"
+      fnName SimpleActivity `shouldBe` "RegisterWorkflowsSpec.simpleActivity"
