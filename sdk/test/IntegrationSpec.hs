@@ -78,6 +78,7 @@ import Temporal.Operator (IndexedValueType (..), SearchAttributes (..), addSearc
 import Temporal.Payload hiding (around)
 import Temporal.SearchAttributes
 import Temporal.TH (ActivityFn, WorkflowFn, discoverDefinitions)
+import Temporal.Testing.Assertions
 import Temporal.Worker
 import qualified Temporal.Workflow as W
 import Temporal.Workflow.Unsafe (performUnsafeNonDeterministicIO)
@@ -614,6 +615,36 @@ needsClient = do
                 }
         useClient (C.execute testRefs.shouldRunWorkflowTest "basicWf" opts)
           `shouldReturn` ()
+
+    describe "Workflow existence assertions" $ do
+      specify "checkWorkflowExecutionExists returns correct values" $ \TestEnv {..} -> do
+        let wfId = WorkflowId "test-existence-check"
+            opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                }
+
+        exists1 <- useClient $ C.checkWorkflowExecutionExists testRefs.shouldRunWorkflowTest wfId
+        exists1 `shouldBe` False
+
+        _ <- useClient $ C.start testRefs.shouldRunWorkflowTest wfId opts
+
+        exists2 <- useClient $ C.checkWorkflowExecutionExists testRefs.shouldRunWorkflowTest wfId
+        exists2 `shouldBe` True
+
+      specify "assertWorkflowExecutionExists and assertWorkflowExecutionDoesNotExist work correctly" $ \TestEnv {..} -> do
+        let wfId = WorkflowId "test-assertion-existence"
+            opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                }
+
+        useClient $ assertWorkflowExecutionDoesNotExist testRefs.shouldRunWorkflowTest wfId
+
+        _ <- useClient $ C.start testRefs.shouldRunWorkflowTest wfId opts
+
+        useClient $ assertWorkflowExecutionExists testRefs.shouldRunWorkflowTest wfId
+
     describe "race" $ do
       specify "block on left side works" $ \TestEnv {..} -> do
         let conf = configure () testConf $ do
