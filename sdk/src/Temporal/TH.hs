@@ -366,7 +366,7 @@ import qualified Temporal.Activity as Act
 import Temporal.Activity.Definition (ActivityDef (..))
 import Temporal.Payload (Codec, JSON (..))
 import Temporal.TH.Classes
-import Temporal.TH.Internal (fnSingDataAndConName, fnSingE, isActivityFunction, isWorkflowFunction, makeFnDecls)
+import Temporal.TH.Internal (fnQualifiedNameString, fnSingDataAndConName, fnSingE, isActivityFunction, isWorkflowFunction, makeFnDecls)
 import Temporal.Worker (Definitions (..))
 import Temporal.Workflow
 import qualified Temporal.Workflow as Wf
@@ -381,11 +381,13 @@ registerActivityWithOptions n conf = do
 
 registerActivityWithOptionsAndType :: forall codec m. (TH.Quote m, TH.Quasi m, TH.Lift codec) => TH.Name -> ActivityConfig codec -> TH.Type -> m [TH.Dec]
 registerActivityWithOptionsAndType n conf fnType = do
+  let s = pure $ TH.LitT $ TH.StrTyLit $ fnQualifiedNameString n
   let dataName = conT $ fnSingDataAndConName n
   baseDecls <- makeFnDecls n fnType
   actDefs <-
     [d|
       instance Temporal.TH.Classes.ActivityFn $dataName where
+        type ActivityFnName _ = $s
         activityConfig _ = conf
 
 
@@ -409,11 +411,13 @@ registerWorkflowWithOptions n conf = do
 
 registerWorkflowWithOptionsAndType :: forall codec m. (TH.Quote m, TH.Quasi m, TH.Lift codec) => TH.Name -> WorkflowConfig codec -> TH.Type -> m [TH.Dec]
 registerWorkflowWithOptionsAndType n conf fnType = do
+  let s = pure $ TH.LitT $ TH.StrTyLit $ fnQualifiedNameString n
   let dataName = conT $ fnSingDataAndConName n
   baseDecls <- makeFnDecls n fnType
   additionalDecls <-
     [d|
       instance Temporal.TH.Classes.WorkflowFn $dataName where
+        type WorkflowFnName _ = $s
         workflowConfig _ = conf
 
 

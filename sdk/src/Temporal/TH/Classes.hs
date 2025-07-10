@@ -9,7 +9,7 @@
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeFamilyDependencies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
@@ -21,6 +21,7 @@ import Data.Kind (Type)
 import Data.Maybe (fromMaybe)
 import qualified Data.Text as Text
 import Data.Typeable
+import GHC.TypeLits (Symbol)
 import qualified Language.Haskell.TH.Syntax as TH
 import RequireCallStack (provideCallStack)
 import Temporal.Activity
@@ -54,6 +55,9 @@ data WorkflowConfig codec = WorkflowConfig
 
 
 class (Fn f) => WorkflowFn (f :: Type) where
+  type WorkflowFnName f = (r :: Symbol) | r -> f
+
+
   type WorkflowCodec f :: Type
   type WorkflowCodec _ = JSON
 
@@ -124,6 +128,9 @@ type family FnActivityEnv f where
 
 
 class (Fn f, Typeable (FnActivityEnv (FnType f))) => ActivityFn f where
+  type ActivityFnName f = (r :: Symbol) | r -> f
+
+
   type ActivityCodec f :: Type
   type ActivityCodec _ = JSON
 

@@ -21,6 +21,7 @@
 module Temporal.TH.Internal where
 
 import Data.Char
+import Data.Maybe (catMaybes)
 import qualified Data.Text as Text
 import qualified Language.Haskell.TH as TH
 import Language.Haskell.TH.Lib
@@ -35,6 +36,15 @@ isOperator name =
   case TH.nameBase name of
     (c : _) -> (isSymbol c || isPunctuation c) && c /= '_'
     _ -> False
+
+
+fnQualifiedNameString :: TH.Name -> String
+fnQualifiedNameString n =
+  concat . catMaybes $
+    [ fmap (\p -> p ++ ":") (TH.namePackage n)
+    , fmap (\m -> m ++ ".") (TH.nameModule n)
+    , Just (TH.nameBase n)
+    ]
 
 
 -- N.B. This is used for declaring an instance in the current module,
