@@ -33,6 +33,7 @@ library
       Temporal.Payload
       Temporal.Replay
       Temporal.SearchAttributes
+      Temporal.Testing.Assertions
       Temporal.Testing.MockActivityEnvironment
       Temporal.TH
       Temporal.Worker
