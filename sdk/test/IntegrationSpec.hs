@@ -632,7 +632,7 @@ needsClient = do
         exists2 <- useClient $ C.checkWorkflowExecutionExists testRefs.shouldRunWorkflowTest wfId
         exists2 `shouldBe` True
 
-      specify "assertWorkflowExecutionExists and assertWorkflowExecutionDoesNotExist work correctly" $ \TestEnv {..} -> do
+      specify "check that workflow existence assertions throw correct exceptions" $ \TestEnv {..} -> do
         let wfId = WorkflowId "test-assertion-existence"
             opts =
               (C.startWorkflowOptions taskQueue)
@@ -644,6 +644,21 @@ needsClient = do
         _ <- useClient $ C.start testRefs.shouldRunWorkflowTest wfId opts
 
         useClient $ assertWorkflowExecutionExists testRefs.shouldRunWorkflowTest wfId
+
+      specify "check that workflow existence assertions throw correct exceptions when assertions fail" $ \TestEnv {..} -> do
+        let wfId = WorkflowId "test-assertion-failure"
+            opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                }
+
+        useClient (assertWorkflowExecutionExists testRefs.shouldRunWorkflowTest wfId)
+          `shouldThrow` (== WorkflowShouldExist wfId)
+
+        _ <- useClient $ C.start testRefs.shouldRunWorkflowTest wfId opts
+
+        useClient (assertWorkflowExecutionDoesNotExist testRefs.shouldRunWorkflowTest wfId)
+          `shouldThrow` (== WorkflowShouldNotExist wfId)
 
     describe "race" $ do
       specify "block on left side works" $ \TestEnv {..} -> do
