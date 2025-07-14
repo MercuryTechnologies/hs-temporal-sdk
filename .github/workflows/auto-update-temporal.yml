@@ -39,7 +39,7 @@ jobs:
         id: check-revision
         run: |
           # Enter devenv shell and check for updates
-          nix develop . --command '
+          nix develop . --impure --accept-flake-config --command '
             # Get current revision
             CURRENT_REV=$(./scripts/update-temporal-revision.sh --dry-run next 2>&1 | grep "Target revision:" | cut -d" " -f3)
 
@@ -73,7 +73,7 @@ jobs:
         if: steps.check-revision.outputs.has_update == 'true'
         run: |
           # Enter nix develop shell and run the update
-          nix develop . --command '
+          nix develop . --impure --accept-flake-config --command '
             ./scripts/update-temporal-revision.sh ${{ steps.check-revision.outputs.new_revision }}
           '
 
