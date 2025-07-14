@@ -3,7 +3,7 @@ name: Auto-update Temporal SDK
 on:
   push:
     branches:
-      - auto-update
+      - auto-updater
   workflow_dispatch:
     # Allow manual triggering
 
