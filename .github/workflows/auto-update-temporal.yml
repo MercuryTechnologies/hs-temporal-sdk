@@ -32,9 +32,6 @@ jobs:
         with:
           name: devenv
 
-      - name: Install devenv.sh
-        run: nix profile install nixpkgs#devenv
-
       - name: Make script executable
         run: chmod +x scripts/update-temporal-revision.sh
 
@@ -42,7 +39,7 @@ jobs:
         id: check-revision
         run: |
           # Enter devenv shell and check for updates
-          devenv shell -- bash -c '
+          nix develop . --command '
             # Get current revision
             CURRENT_REV=$(./scripts/update-temporal-revision.sh --dry-run next 2>&1 | grep "Target revision:" | cut -d" " -f3)
 
@@ -75,8 +72,8 @@ jobs:
       - name: Update Temporal revision
         if: steps.check-revision.outputs.has_update == 'true'
         run: |
-          # Enter devenv shell and run the update
-          devenv shell -- bash -c '
+          # Enter nix develop shell and run the update
+          nix develop . --command '
             ./scripts/update-temporal-revision.sh ${{ steps.check-revision.outputs.new_revision }}
           '
 
