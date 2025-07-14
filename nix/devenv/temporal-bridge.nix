@@ -4,7 +4,8 @@
       pkgs.crate2nix
       pkgs.protobuf
       pkgs.rust-cbindgen
-    ] ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
+    ]
+    ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
       pkgs.apple-sdk
     ];
 
@@ -12,6 +13,8 @@
     enable = true;
     channel = "nightly";
   };
+
+  scripts.update-temporal-revision.exec = "${pkgs.lib.getExe pkgs.bash} ./scripts/update-temporal-revision.sh";
 
   pre-commit.hooks = {
     crate2nix = {
