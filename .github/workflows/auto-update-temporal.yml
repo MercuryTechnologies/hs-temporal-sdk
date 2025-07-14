@@ -1,9 +1,9 @@
 name: Auto-update Temporal SDK
 
 on:
-  schedule:
-    # Run daily at 2 AM UTC
-    - cron: '0 2 * * *'
+  push:
+    branches:
+      - auto-update
   workflow_dispatch:
     # Allow manual triggering
 
