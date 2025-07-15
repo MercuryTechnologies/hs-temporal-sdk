@@ -77,6 +77,9 @@ module Temporal.Client (
   Temporal.Client.listOpenWorkflowExecutions,
   Temporal.Client.scanWorkflowExecutions,
   Temporal.Client.countWorkflowExecutions,
+
+  -- * Workflow existence
+  checkWorkflowExecutionExists,
 ) where
 
 import Conduit
@@ -1163,3 +1166,27 @@ executeUpdate
 executeUpdate wfH u@(KnownUpdate updateCodec _) opts = withArgs @args @(m result) updateCodec $ \inputs -> do
   updateHandle <- startUpdateFromPayloads wfH u opts inputs
   waitUpdateResult updateHandle
+
+
+{- | Check if a workflow execution exists on the Temporal server.
+Uses describeWorkflowExecution to query the server - returns False if the workflow
+is not found, True if it exists, and throws an exception for other errors.
+-}
+checkWorkflowExecutionExists :: (MonadIO m, HasWorkflowClient m, WorkflowRef wf) => wf -> WorkflowId -> m Bool
+checkWorkflowExecutionExists wfRef wfId = do
+  c <- askWorkflowClient
+  liftIO $ do
+    let req =
+          defMessage
+            & field @"namespace" .~ rawNamespace c.clientConfig.namespace
+            & field @"execution"
+              .~ ( defMessage
+                    & field @"workflowId" .~ rawWorkflowId wfId
+                    & field @"runId" .~ ""
+                 )
+    res <- Temporal.Core.Client.WorkflowService.describeWorkflowExecution c.clientCore req
+    case res of
+      Left err -> case err of
+        Core.RpcError status _ _ | fromIntegral status == fromEnum StatusNotFound -> pure False
+        _ -> throwIO $ coreRpcErrorToRpcError err
+      Right _ -> pure True
