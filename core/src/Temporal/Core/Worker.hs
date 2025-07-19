@@ -41,6 +41,9 @@ module Temporal.Core.Worker (
   pushHistory,
   closeHistory,
   KnownWorkerType (..),
+  PollerBehavior(..),
+  WorkerVersioningStrategy(..),
+  VersioningBehavior(..),
 ) where
 
 import Control.Exception
@@ -69,6 +72,84 @@ import Temporal.Core.Client
 import Temporal.Internal.FFI
 import Temporal.Runtime
 
+
+data PollerBehavior
+  = SimpleMaximum Word64
+  | Autoscaling
+      { minimum :: Word64
+      , maximum :: Word64
+      , initial :: Word64
+      }
+  deriving stock (Show, Eq)
+
+deriveJSON (defaultOptions
+  { fieldLabelModifier = camelTo2 '_'
+  , sumEncoding = ObjectWithSingleField
+  }) ''PollerBehavior
+
+data VersioningBehavior
+  = Pinned
+  | AutoUpgrade
+  deriving stock (Show, Eq)
+
+deriveJSON (defaultOptions
+  { fieldLabelModifier = camelTo2 '_'
+  }) ''VersioningBehavior
+
+data WorkerVersioningStrategy
+  = NoVersioning
+      { buildId :: Text
+      }
+  | WorkerDeploymentBased
+      { deploymentName :: Text
+      , buildId :: Text
+      , useWorkerVersioning :: Bool
+      , defaultVersioningBehavior :: Maybe VersioningBehavior
+      }
+  | LegacyBuildIdBased
+      { buildId :: Text
+      }
+  deriving stock (Show, Eq)
+
+deriveJSON (defaultOptions
+  { fieldLabelModifier = camelTo2 '_'
+  , sumEncoding = ObjectWithSingleField
+  }) ''WorkerVersioningStrategy
+
+
+data WorkerConfig = WorkerConfig
+  { namespace :: Text
+  , taskQueue :: Text
+  , clientIdentityOverride :: Maybe Text
+  , maxCachedWorkflows :: Word64
+  , maxOutstandingWorkflowTasks :: Word64
+  , maxOutstandingActivities :: Word64
+  , maxOutstandingLocalActivities :: Word64
+  , workflowTaskPollerBehavior :: PollerBehavior
+  , nonstickyToStickyPollRatio :: Float
+  , activityTaskPollerBehavior :: PollerBehavior
+  , noRemoteActivities :: Bool
+  , stickyQueueScheduleToStartTimeoutMillis :: Word64
+  , maxHeartbeatThrottleIntervalMillis :: Word64
+  , defaultHeartbeatThrottleIntervalMillis :: Word64
+  , maxActivitiesPerSecond :: Maybe Double
+  , maxTaskQueueActivitiesPerSecond :: Maybe Double
+  , gracefulShutdownPeriodMillis :: Word64
+  , nondeterminismAsWorkflowFail :: Bool
+  , nondeterminismAsWorkflowFailForTypes :: [Text]
+  , ignoreEvictsOnShutdown :: Bool
+  , fetchingConcurrency :: Word64
+  , localTimeoutBufferForActivitiesMillis :: Word64
+  , versioningStrategy :: WorkerVersioningStrategy
+  -- TODO:
+  -- tuner
+  -- nexus_task_poller_behavior
+  -- max_outstanding_nexus_tasks
+  -- versioning_strategy
+  }
+
+
+deriveJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''WorkerConfig
 
 data WorkerType = Real | Replay
 
@@ -147,59 +228,32 @@ type RunId = ByteString
 type WorkflowId = ByteString
 
 
-data WorkerConfig = WorkerConfig
-  { namespace :: Text
-  , taskQueue :: Text
-  , buildId :: Text
-  , identityOverride :: Maybe Text
-  , maxCachedWorkflows :: Word64
-  , maxOutstandingWorkflowTasks :: Word64
-  , maxOutstandingActivities :: Word64
-  , maxOutstandingLocalActivities :: Word64
-  , maxConcurrentWorkflowTaskPolls :: Word64
-  , nonstickyToStickyPollRatio :: Float
-  , maxConcurrentActivityTaskPolls :: Word64
-  , noRemoteActivities :: Bool
-  , stickyQueueScheduleToStartTimeoutMillis :: Word64
-  , maxHeartbeatThrottleIntervalMillis :: Word64
-  , defaultHeartbeatThrottleIntervalMillis :: Word64
-  , maxActivitiesPerSecond :: Maybe Double
-  , maxTaskQueueActivitiesPerSecond :: Maybe Double
-  , gracefulShutdownPeriodMillis :: Word64
-  , nondeterminismAsWorkflowFail :: Bool
-  , nondeterminismAsWorkflowFailForTypes :: [Text]
-  -- TODO:
-  -- useWorkerVersioning
-  -- tuner
-  }
-
-
-deriveJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''WorkerConfig
-
-
 defaultWorkerConfig :: WorkerConfig
 defaultWorkerConfig =
   WorkerConfig
     { namespace = "default"
     , taskQueue = "default"
-    , buildId = ""
-    , identityOverride = Nothing
-    , maxCachedWorkflows = 100000
+    , clientIdentityOverride = Nothing
+    , maxCachedWorkflows = 0  -- Default from Rust SDK
     , maxOutstandingWorkflowTasks = 1000
     , maxOutstandingActivities = 1000
     , maxOutstandingLocalActivities = 1000
-    , maxConcurrentWorkflowTaskPolls = 5
-    , nonstickyToStickyPollRatio = 0.85
-    , maxConcurrentActivityTaskPolls = 5
+    , workflowTaskPollerBehavior = SimpleMaximum 5
+    , nonstickyToStickyPollRatio = 0.2  -- Default from Rust SDK
+    , activityTaskPollerBehavior = SimpleMaximum 5
     , noRemoteActivities = False
-    , stickyQueueScheduleToStartTimeoutMillis = 60000
-    , maxHeartbeatThrottleIntervalMillis = 300000
-    , defaultHeartbeatThrottleIntervalMillis = 300000
+    , stickyQueueScheduleToStartTimeoutMillis = 10000  -- 10 seconds from Rust SDK
+    , maxHeartbeatThrottleIntervalMillis = 60000  -- 60 seconds from Rust SDK
+    , defaultHeartbeatThrottleIntervalMillis = 30000  -- 30 seconds from Rust SDK
     , maxActivitiesPerSecond = Nothing
     , maxTaskQueueActivitiesPerSecond = Nothing
     , gracefulShutdownPeriodMillis = 0
     , nondeterminismAsWorkflowFail = False
     , nondeterminismAsWorkflowFailForTypes = []
+    , ignoreEvictsOnShutdown = False
+    , fetchingConcurrency = 5  -- Default from Rust SDK
+    , localTimeoutBufferForActivitiesMillis = 5000  -- 5 seconds from Rust SDK
+    , versioningStrategy = NoVersioning {buildId = ""}
     }
 
 
