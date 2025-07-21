@@ -24,7 +24,7 @@
               (pkgs.lib.modules.importApply ./nix/devenv/haskell.nix ghcVersion)
               ./nix/devenv/repo-wide-checks.nix
               ({pkgs, ...}: {
-                packages = [ pkgs.temporal-test-server ];
+                packages = [pkgs.temporal-test-server];
               })
             ];
           };
@@ -41,6 +41,7 @@
         // {
           temporal-bridge = pkgs.temporal_bridge;
           temporal-test-server = pkgs.temporal-test-server;
+          update-temporal-revision = import ./nix/packages/update-temporal-revision.nix {inherit pkgs;};
         }
     );
 
