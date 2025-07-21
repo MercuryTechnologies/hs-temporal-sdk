@@ -215,7 +215,7 @@ get_next_revision() {
     done
 
     if [[ $current_index -ge 0 ]]; then
-      # Found the current revision, get the prior commit (previous in the array since it's reverse chronological)
+      # Found the current revision, get the next commit (previous in the array since it's reverse chronological)
       if [[ $current_index -gt 0 ]]; then
         next_commit=$(echo "$response" | jq -r ".[$((current_index - 1))].sha")
         log_info "Found next commit: $next_commit" >&2
