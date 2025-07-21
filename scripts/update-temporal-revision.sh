@@ -76,7 +76,7 @@ EOF
 check_dependencies() {
   local missing_tools=()
 
-  for tool in curl jq cargo crate2nix; do
+  for tool in curl jq tomlq cargo crate2nix; do
     if ! command -v "$tool" >/dev/null 2>&1; then
       missing_tools+=("$tool")
     fi

@@ -1,0 +1,36 @@
+name: Manual Update Temporal Revision
+
+on:
+  workflow_dispatch:  # Only runs when triggered manually
+
+jobs:
+  update-temporal:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # needed for branch creation
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
+
+      - name: Run update script
+        run: nix run .#update-temporal-revision
+
+      - name: Check for changes and create branch
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet; then
+            branch="auto/update-temporal-revision-$(date +%Y%m%d)"
+            git checkout -b "$branch"
+            git add .
+            git commit -m "chore: auto-update temporal revision"
+            git push origin "$branch"
+            echo "Created branch: $branch"
+          else
+            echo "No changes to commit."
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
