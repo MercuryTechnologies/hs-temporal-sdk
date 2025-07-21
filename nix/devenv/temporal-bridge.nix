@@ -4,7 +4,9 @@
       pkgs.crate2nix
       pkgs.protobuf
       pkgs.rust-cbindgen
-    ] ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
+      pkgs.yq
+    ]
+    ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
       pkgs.apple-sdk
     ];
 
