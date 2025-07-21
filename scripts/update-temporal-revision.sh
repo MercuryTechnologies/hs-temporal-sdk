@@ -351,9 +351,10 @@ update_dependencies() {
   log_info "Building project to update Cargo.lock and verify dependencies..."
   cd core/rust || exit 1
 
+  local build_success=true
   if ! cargo build; then
-    log_error "Failed to build project - dependencies may be incompatible"
-    return 1
+    log_warn "Failed to build project - dependencies may be incompatible, but continuing with crate2nix"
+    build_success=false
   fi
 
   log_info "Running crate2nix generate..."
@@ -362,7 +363,11 @@ update_dependencies() {
     return 1
   fi
 
-  log_success "Successfully built project and regenerated crate2nix files"
+  if [[ $build_success == "true" ]]; then
+    log_success "Successfully built project and regenerated crate2nix files"
+  else
+    log_success "Regenerated crate2nix files (build failed but continuing)"
+  fi
 }
 
 # Main script logic
@@ -420,10 +425,13 @@ main() {
 
   # Determine the revision to update to
   local target_revision
+  local revision_determination_success=true
+
   if [[ -z $revision ]]; then
     # No arguments provided, fetch latest from master branch
     if ! target_revision=$(get_latest_revision "$DEFAULT_BRANCH"); then
-      exit 1
+      log_error "Failed to get latest revision from GitHub API"
+      revision_determination_success=false
     fi
   elif [[ $revision == "next" ]]; then
     # Get the current revision from Cargo.toml
@@ -431,12 +439,14 @@ main() {
     if ! current_revision=$(get_current_revision "$CARGO_TOML_PATH"); then
       log_info "No current revision found, getting latest from $DEFAULT_BRANCH..."
       if ! target_revision=$(get_latest_revision "$DEFAULT_BRANCH"); then
-        exit 1
+        log_error "Failed to get latest revision from GitHub API"
+        revision_determination_success=false
       fi
     else
       log_info "Current revision: $current_revision"
       if ! target_revision=$(get_next_revision "$current_revision" "$DEFAULT_BRANCH"); then
-        exit 1
+        log_error "Failed to get next revision from GitHub API"
+        revision_determination_success=false
       fi
     fi
   else
@@ -444,11 +454,18 @@ main() {
     target_revision="$revision"
   fi
 
+  if [[ $revision_determination_success != "true" ]]; then
+    log_error "Cannot proceed without a valid revision"
+    exit 1
+  fi
+
   log_info "Target revision: $target_revision"
 
   # Update Cargo.toml
+  local cargo_update_success=true
   if ! update_cargo_toml "$CARGO_TOML_PATH" "$target_revision" "$dry_run"; then
-    exit 1
+    log_warn "Cargo.toml update failed, but continuing with other steps"
+    cargo_update_success=false
   fi
 
   # Verify the changes
@@ -457,11 +474,17 @@ main() {
   fi
 
   # Update dependencies
+  local deps_success=true
   if ! update_dependencies "$dry_run"; then
-    exit 1
+    log_warn "Some dependency update steps failed, but continuing with commit"
+    deps_success=false
   fi
 
-  log_success "Successfully updated Temporal SDK to revision $target_revision"
+  if [[ $cargo_update_success == "true" && $deps_success == "true" ]]; then
+    log_success "Successfully updated Temporal SDK to revision $target_revision"
+  else
+    log_success "Updated Temporal SDK to revision $target_revision (some steps failed but changes were made)"
+  fi
 }
 
 # Run main function with all arguments

@@ -12,7 +12,7 @@
 
   languages.rust = {
     enable = true;
-    channel = "nightly";
+    channel = "stable";
   };
 
   pre-commit.hooks = {
