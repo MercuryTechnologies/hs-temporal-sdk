@@ -249,17 +249,16 @@ get_next_revision() {
 # Function to extract current revision from Cargo.toml
 get_current_revision() {
   local cargo_toml="$1"
-
-  # Look for any temporal dependency and extract its revision
-  local current_revision
-  current_revision=$(grep -A 1 "temporal.*= { git = " "$cargo_toml" | grep "rev = " | head -1 | sed 's/.*rev = "\([^"]*\)".*/\1/' | tr -d '\n')
-
-  if [[ -z $current_revision ]]; then
-    log_warn "No current revision found in $cargo_toml"
-    return 1
-  fi
-
-  echo "$current_revision"
+  for dep in "${TEMPORAL_DEPENDENCIES[@]}"; do
+    local rev
+    rev=$(tomlq ".dependencies.\"$dep\".rev" "$cargo_toml" 2>/dev/null | tr -d '"')
+    if [[ -n $rev && $rev != "null" ]]; then
+      echo "$rev"
+      return 0
+    fi
+  done
+  log_warn "No current revision found in $cargo_toml"
+  return 1
 }
 
 # Function to update Cargo.toml with new revision
