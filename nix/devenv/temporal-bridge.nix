@@ -15,8 +15,6 @@
     channel = "nightly";
   };
 
-  scripts.update-temporal-revision.exec = "${pkgs.lib.getExe pkgs.bash} ./scripts/update-temporal-revision.sh";
-
   pre-commit.hooks = {
     crate2nix = {
       enable = false;
