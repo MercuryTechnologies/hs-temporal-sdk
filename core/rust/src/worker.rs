@@ -9,9 +9,11 @@ use temporal_sdk_core::replay::{HistoryForReplay, ReplayWorkerInput};
 use temporal_sdk_core_api::errors::{PollError, WorkflowErrorType};
 use temporal_sdk_core_api::Worker;
 use temporal_sdk_core_api::worker::PollerBehavior;
+use temporal_sdk_core_api::worker::{WorkerDeploymentOptions, WorkerDeploymentVersion, WorkerVersioningStrategy as CoreWorkerVersioningStrategy};
 use temporal_sdk_core_protos::coresdk::workflow_completion::WorkflowActivationCompletion;
 use temporal_sdk_core_protos::coresdk::{ActivityHeartbeat, ActivityTaskCompletion};
 use temporal_sdk_core_protos::temporal::api::history::v1::History;
+use temporal_sdk_core_protos::temporal::api::enums::v1::VersioningBehavior as CoreVersioningBehavior;
 use tokio::sync::mpsc::{channel, Sender};
 use tokio_stream::wrappers::ReceiverStream;
 
@@ -76,12 +78,86 @@ impl TryFrom<WorkerPollerBehavior> for PollerBehavior {
         }
     }
 }
+#[derive(Serialize, Deserialize)]
+pub enum WorkerVersioningStrategy {
+    NoVersioning {
+        build_id: String,
+    },
+    WorkerDeploymentBased {
+        deployment_name: String,
+        build_id: String,
+        use_worker_versioning: bool,
+        default_versioning_behavior: Option<VersioningBehavior>,
+    },
+    LegacyBuildIdBased {
+        build_id: String,
+    },
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum VersioningBehavior {
+    Pinned,
+    AutoUpgrade,
+}
+
+impl TryFrom<VersioningBehavior> for CoreVersioningBehavior {
+    type Error = WorkerError;
+
+    fn try_from(behavior: VersioningBehavior) -> Result<Self, WorkerError> {
+        match behavior {
+            VersioningBehavior::Pinned => Ok(CoreVersioningBehavior::Pinned),
+            VersioningBehavior::AutoUpgrade => Ok(CoreVersioningBehavior::AutoUpgrade),
+        }
+    }
+}
+
+impl TryFrom<WorkerVersioningStrategy> for CoreWorkerVersioningStrategy {
+    type Error = WorkerError;
+
+    fn try_from(strategy: WorkerVersioningStrategy) -> Result<Self, WorkerError> {
+        match strategy {
+            WorkerVersioningStrategy::NoVersioning { build_id } => {
+                Ok(CoreWorkerVersioningStrategy::None { build_id })
+            }
+            WorkerVersioningStrategy::WorkerDeploymentBased {
+                deployment_name,
+                build_id,
+                use_worker_versioning,
+                default_versioning_behavior,
+            } => {
+                let version = WorkerDeploymentVersion {
+                    deployment_name,
+                    build_id,
+                };
+                let behavior = default_versioning_behavior.map(|b| {
+                    CoreVersioningBehavior::try_from(b)
+                        .expect("Failed to convert versioning behavior")
+                });
+                Ok(CoreWorkerVersioningStrategy::WorkerDeploymentBased(
+                    WorkerDeploymentOptions {
+                        version,
+                        use_worker_versioning,
+                        default_versioning_behavior: behavior,
+                    },
+                ))
+            }
+            WorkerVersioningStrategy::LegacyBuildIdBased { build_id } => {
+                if build_id.is_empty() {
+                    return Err(WorkerError {
+                        code: WorkerErrorCode::InvalidWorkerConfig,
+                        message: "LegacyBuildIdBased versioning requires a non-empty build ID".to_string(),
+                    });
+                }
+                Ok(CoreWorkerVersioningStrategy::LegacyBuildIdBased { build_id })
+            }
+        }
+    }
+}
 
 #[derive(Serialize, Deserialize)]
 pub struct WorkerConfig {
     namespace: String,
     task_queue: String,
-    build_id: String,
     identity_override: Option<String>,
     max_cached_workflows: usize,
     max_outstanding_workflow_tasks: usize,
@@ -99,6 +175,7 @@ pub struct WorkerConfig {
     graceful_shutdown_period_millis: u64,
     nondeterminism_as_workflow_fail: bool,
     nondeterminism_as_workflow_fail_for_types: Vec<String>,
+    versioning_strategy: WorkerVersioningStrategy,
     // TODO nexus task poller behavior
 }
 
@@ -108,11 +185,11 @@ impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
     fn try_from(conf: WorkerConfig) -> Result<Self, WorkerError> {
         let workflow_poller = PollerBehavior::try_from(conf.workflow_task_poller_behavior)?;
         let activity_poller = PollerBehavior::try_from(conf.activity_task_poller_behavior)?;
+        let versioning_strategy = CoreWorkerVersioningStrategy::try_from(conf.versioning_strategy)?;
 
         temporal_sdk_core::WorkerConfigBuilder::default()
             .namespace(conf.namespace)
             .task_queue(conf.task_queue)
-            .worker_build_id(conf.build_id)
             .client_identity_override(conf.identity_override)
             .max_cached_workflows(conf.max_cached_workflows)
             .max_outstanding_workflow_tasks(conf.max_outstanding_workflow_tasks)
@@ -153,6 +230,7 @@ impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
                     })
                     .collect::<HashMap<String, HashSet<WorkflowErrorType>>>(),
             )
+            .versioning_strategy(versioning_strategy)
             .build()
             .map_err(|err| WorkerError {
                 code: WorkerErrorCode::InvalidWorkerConfig,

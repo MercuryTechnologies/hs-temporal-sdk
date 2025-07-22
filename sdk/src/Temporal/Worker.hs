@@ -69,7 +69,6 @@ module Temporal.Worker (
   setTracerProvider,
   setNamespace,
   setTaskQueue,
-  setBuildId,
   setIdentity,
   setMaxCachedWorkflows,
   setMaxOutstandingWorkflowTasks,
@@ -89,6 +88,11 @@ module Temporal.Worker (
   addInterceptors,
   setPayloadProcessor,
   WorkflowId (..),
+  setVersioningStrategy,
+  setWorkerDeploymentVersioning,
+  setLegacyBuildIdVersioning,
+  Core.VersioningBehavior (..),
+  Core.WorkerVersioningStrategy (..),
 ) where
 
 import Control.Concurrent
@@ -286,25 +290,6 @@ setTaskQueue :: TaskQueue -> ConfigM actEnv ()
 setTaskQueue (TaskQueue tq) = modifyCore $ \conf ->
   conf
     { Core.taskQueue = tq
-    }
-
-
-{- | A string that should be unique to the exact worker code/binary being executed.
-
-This is used to uniquely identify the worker's code for a handful of purposes,
-including the worker versioning feature if you have opted into that with useVersioning.
-It will also populate the binaryChecksum field on older servers.
-
-N.B. this is not the same as the worker's identity, which is a string that identifies
-the worker instance. The identity is used to identify the worker instance in logs and
-in the Temporal UI. The buildId is used to identify the exact version of the code and
-its dependencies. In e.g. Nix, the executable path in the Nix store would be a useful
-buildId.
--}
-setBuildId :: Text -> ConfigM actEnv ()
-setBuildId bid = modifyCore $ \conf ->
-  conf
-    { Core.buildId = bid
     }
 
 
@@ -758,3 +743,36 @@ replaceEnvironment Temporal.Worker.Worker {..} env = do
     Core.SReal -> do
       liftIO $ writeIORef workerActivityWorker.activityEnv env
     Core.SReplay -> pure ()
+
+
+{- | Sets the versioning strategy for the worker. This controls how the worker handles
+versioning of workflows and activities.
+-}
+setVersioningStrategy :: Core.WorkerVersioningStrategy -> ConfigM actEnv ()
+setVersioningStrategy strategy = modifyCore $ \conf ->
+  conf
+    { Core.versioningStrategy = strategy
+    }
+
+
+{- | Sets up worker deployment-based versioning. This is the recommended approach for
+versioning workflows and activities. It allows for more granular control over
+versioning behavior and better compatibility with the Temporal server.
+-}
+setWorkerDeploymentVersioning :: Text -> Text -> Bool -> Maybe Core.VersioningBehavior -> ConfigM actEnv ()
+setWorkerDeploymentVersioning deploymentName buildId useVersioning defaultBehavior =
+  setVersioningStrategy $
+    Core.WorkerDeploymentBased
+      { Core.deploymentName = deploymentName
+      , Core.buildId = buildId
+      , Core.useWorkerVersioning = useVersioning
+      , Core.defaultVersioningBehavior = defaultBehavior
+      }
+
+
+{- | Sets up legacy build ID-based versioning. This is the older approach to versioning
+that is still supported but not recommended for new deployments.
+-}
+setLegacyBuildIdVersioning :: Text -> ConfigM actEnv ()
+setLegacyBuildIdVersioning buildId =
+  setVersioningStrategy $ Core.LegacyBuildIdBased {Core.buildId = buildId}

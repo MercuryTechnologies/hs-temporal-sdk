@@ -42,6 +42,8 @@ module Temporal.Core.Worker (
   closeHistory,
   KnownWorkerType (..),
   PollerBehavior (..),
+  WorkerVersioningStrategy (..),
+  VersioningBehavior (..),
 ) where
 
 import Control.Exception
@@ -88,6 +90,56 @@ deriveJSON
       }
   )
   ''PollerBehavior
+
+
+data VersioningBehavior
+  = Pinned
+  | AutoUpgrade
+  deriving stock (Show, Eq)
+
+
+deriveJSON
+  ( defaultOptions
+      { fieldLabelModifier = camelTo2 '_'
+      }
+  )
+  ''VersioningBehavior
+
+
+data WorkerVersioningStrategy
+  = NoVersioning
+      { buildId :: Text
+      }
+  | WorkerDeploymentBased
+      { deploymentName :: Text
+      , buildId :: Text
+      -- ^ A string that should be unique to the exact worker code/binary being executed.
+      --
+      --         This is used to uniquely identify the worker's code for a handful of purposes,
+      --         including the worker versioning feature if you have opted into that with useVersioning.
+      --         It will also populate the binaryChecksum field on older servers.
+      --
+      --         N.B. this is not the same as the worker's identity, which is a string that identifies
+      --         the worker instance. The identity is used to identify the worker instance in logs and
+      --         in the Temporal UI. The buildId is used to identify the exact version of the code and
+      --         its dependencies. In e.g. Nix, the executable path in the Nix store would be a useful
+      --         buildId.
+      , useWorkerVersioning :: Bool
+      , defaultVersioningBehavior :: Maybe VersioningBehavior
+      }
+  | LegacyBuildIdBased
+      { buildId :: Text
+      }
+  deriving stock (Show, Eq)
+
+
+deriveJSON
+  ( defaultOptions
+      { fieldLabelModifier = camelTo2 '_'
+      , sumEncoding = ObjectWithSingleField
+      }
+  )
+  ''WorkerVersioningStrategy
 
 
 data WorkerType = Real | Replay
@@ -170,7 +222,6 @@ type WorkflowId = ByteString
 data WorkerConfig = WorkerConfig
   { namespace :: Text
   , taskQueue :: Text
-  , buildId :: Text
   , identityOverride :: Maybe Text
   , maxCachedWorkflows :: Word64
   , maxOutstandingWorkflowTasks :: Word64
@@ -188,8 +239,11 @@ data WorkerConfig = WorkerConfig
   , gracefulShutdownPeriodMillis :: Word64
   , nondeterminismAsWorkflowFail :: Bool
   , nondeterminismAsWorkflowFailForTypes :: [Text]
+  , versioningStrategy :: WorkerVersioningStrategy
   -- TODO:
   -- useWorkerVersioning
+  -- maxOutstandingNexusTasks
+  -- nexusTaskPollerBehavior
   -- tuner
   }
 
@@ -202,24 +256,24 @@ defaultWorkerConfig =
   WorkerConfig
     { namespace = "default"
     , taskQueue = "default"
-    , buildId = ""
     , identityOverride = Nothing
     , maxCachedWorkflows = 100000
     , maxOutstandingWorkflowTasks = 1000
     , maxOutstandingActivities = 1000
     , maxOutstandingLocalActivities = 1000
     , workflowTaskPollerBehavior = SimpleMaximum 5
-    , nonstickyToStickyPollRatio = 0.85
+    , nonstickyToStickyPollRatio = 0.2 -- Default from Rust SDK
     , activityTaskPollerBehavior = SimpleMaximum 5
     , noRemoteActivities = False
-    , stickyQueueScheduleToStartTimeoutMillis = 60000
-    , maxHeartbeatThrottleIntervalMillis = 300000
-    , defaultHeartbeatThrottleIntervalMillis = 300000
+    , stickyQueueScheduleToStartTimeoutMillis = 10000 -- 10 seconds from Rust SDK
+    , maxHeartbeatThrottleIntervalMillis = 60000 -- 60 seconds from Rust SDK
+    , defaultHeartbeatThrottleIntervalMillis = 30000 -- 30 seconds from Rust SDK   , maxActivitiesPerSecond = Nothing
     , maxActivitiesPerSecond = Nothing
     , maxTaskQueueActivitiesPerSecond = Nothing
     , gracefulShutdownPeriodMillis = 0
     , nondeterminismAsWorkflowFail = False
     , nondeterminismAsWorkflowFailForTypes = []
+    , versioningStrategy = NoVersioning {buildId = ""}
     }
 
 
