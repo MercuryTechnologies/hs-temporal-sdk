@@ -73,11 +73,12 @@ module Temporal.Worker (
   setIdentity,
   setMaxCachedWorkflows,
   setMaxOutstandingWorkflowTasks,
+  Core.PollerBehavior (..),
   setMaxOutstandingActivities,
   setMaxOutstandingLocalActivities,
-  setMaxConcurrentWorkflowTaskPolls,
+  setWorkflowTaskPollerBehavior,
+  setActivityTaskPollerBehavior,
   setNonstickyToStickyPollRatio,
-  setMaxConcurrentActivityTaskPolls,
   setNoRemoteActivities,
   setStickyQueueScheduleToStartTimeoutMillis,
   setMaxHeartbeatThrottleIntervalMillis,
@@ -342,31 +343,10 @@ setMaxOutstandingLocalActivities n = modifyCore $ \conf ->
     }
 
 
-setMaxConcurrentWorkflowTaskPolls :: Word64 -> ConfigM actEnv ()
-setMaxConcurrentWorkflowTaskPolls n = modifyCore $ \conf ->
-  conf
-    { Core.maxConcurrentWorkflowTaskPolls = n
-    }
-
-
 setNonstickyToStickyPollRatio :: Float -> ConfigM actEnv ()
 setNonstickyToStickyPollRatio n = modifyCore $ \conf ->
   conf
     { Core.nonstickyToStickyPollRatio = n
-    }
-
-
-{- | Maximum number of Activity tasks to poll concurrently.
-
-Increase this setting if your Worker is failing to fill in all
-of its maxConcurrentActivityTaskExecutions slots despite a
-backlog of Activity Tasks in the Task Queue (ie. due to network latency).
-Can't be higher than maxConcurrentActivityTaskExecutions.
--}
-setMaxConcurrentActivityTaskPolls :: Word64 -> ConfigM actEnv ()
-setMaxConcurrentActivityTaskPolls n = modifyCore $ \conf ->
-  conf
-    { Core.maxConcurrentActivityTaskPolls = n
     }
 
 
@@ -722,6 +702,26 @@ shutdown worker@Temporal.Worker.Worker {workerCore, workerTracer, workerType, wo
   case err' of
     Left err -> throwIO err
     Right () -> pure ()
+
+
+{- | Sets the behavior for workflow task polling. This can be either a simple maximum number of concurrent polls,
+or an autoscaling configuration that will adjust the number of concurrent polls based on load.
+-}
+setWorkflowTaskPollerBehavior :: Core.PollerBehavior -> ConfigM actEnv ()
+setWorkflowTaskPollerBehavior behavior = modifyCore $ \conf ->
+  conf
+    { Core.workflowTaskPollerBehavior = behavior
+    }
+
+
+{- | Sets the behavior for activity task polling. This can be either a simple maximum number of concurrent polls,
+or an autoscaling configuration that will adjust the number of concurrent polls based on load.
+-}
+setActivityTaskPollerBehavior :: Core.PollerBehavior -> ConfigM actEnv ()
+setActivityTaskPollerBehavior behavior = modifyCore $ \conf ->
+  conf
+    { Core.activityTaskPollerBehavior = behavior
+    }
 
 
 -- logs <- liftIO $ fetchLogs globalRuntime

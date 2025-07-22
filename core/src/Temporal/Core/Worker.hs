@@ -41,6 +41,7 @@ module Temporal.Core.Worker (
   pushHistory,
   closeHistory,
   KnownWorkerType (..),
+  PollerBehavior (..),
 ) where
 
 import Control.Exception
@@ -68,6 +69,25 @@ import Temporal.Core.CTypes
 import Temporal.Core.Client
 import Temporal.Internal.FFI
 import Temporal.Runtime
+
+
+data PollerBehavior
+  = SimpleMaximum Word64
+  | Autoscaling
+      { minimum :: Word64
+      , maximum :: Word64
+      , initial :: Word64
+      }
+  deriving stock (Show, Eq)
+
+
+deriveJSON
+  ( defaultOptions
+      { fieldLabelModifier = camelTo2 '_'
+      , sumEncoding = ObjectWithSingleField
+      }
+  )
+  ''PollerBehavior
 
 
 data WorkerType = Real | Replay
@@ -156,9 +176,9 @@ data WorkerConfig = WorkerConfig
   , maxOutstandingWorkflowTasks :: Word64
   , maxOutstandingActivities :: Word64
   , maxOutstandingLocalActivities :: Word64
-  , maxConcurrentWorkflowTaskPolls :: Word64
+  , workflowTaskPollerBehavior :: PollerBehavior
   , nonstickyToStickyPollRatio :: Float
-  , maxConcurrentActivityTaskPolls :: Word64
+  , activityTaskPollerBehavior :: PollerBehavior
   , noRemoteActivities :: Bool
   , stickyQueueScheduleToStartTimeoutMillis :: Word64
   , maxHeartbeatThrottleIntervalMillis :: Word64
@@ -188,9 +208,9 @@ defaultWorkerConfig =
     , maxOutstandingWorkflowTasks = 1000
     , maxOutstandingActivities = 1000
     , maxOutstandingLocalActivities = 1000
-    , maxConcurrentWorkflowTaskPolls = 5
+    , workflowTaskPollerBehavior = SimpleMaximum 5
     , nonstickyToStickyPollRatio = 0.85
-    , maxConcurrentActivityTaskPolls = 5
+    , activityTaskPollerBehavior = SimpleMaximum 5
     , noRemoteActivities = False
     , stickyQueueScheduleToStartTimeoutMillis = 60000
     , maxHeartbeatThrottleIntervalMillis = 300000
