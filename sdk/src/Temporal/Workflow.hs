@@ -127,6 +127,7 @@ module Temporal.Workflow (
   defaultChildWorkflowOptions,
   WorkflowRef (..),
   startChildWorkflow,
+  startChildWorkflowFromPayloads,
   executeChildWorkflow,
   ChildWorkflowHandle,
   Wait (..),
