@@ -2128,7 +2128,7 @@ checksum = "357703d41365b4b27c590e3ed91eabb1b663f07c4c084095e60cbed4362dff0d"
 [[package]]
 name = "rustfsm"
 version = "0.1.0"
-source = "git+https://github.com/temporalio/sdk-core?rev=aebb0a56426880b208341eef47820a8f13dec1a9#aebb0a56426880b208341eef47820a8f13dec1a9"
+source = "git+https://github.com/temporalio/sdk-core?rev=c8230579d82f360372abb6c3081b2583de271b5b#c8230579d82f360372abb6c3081b2583de271b5b"
 dependencies = [
  "rustfsm_procmacro",
  "rustfsm_trait",
@@ -2137,7 +2137,7 @@ dependencies = [
 [[package]]
 name = "rustfsm_procmacro"
 version = "0.1.0"
-source = "git+https://github.com/temporalio/sdk-core?rev=aebb0a56426880b208341eef47820a8f13dec1a9#aebb0a56426880b208341eef47820a8f13dec1a9"
+source = "git+https://github.com/temporalio/sdk-core?rev=c8230579d82f360372abb6c3081b2583de271b5b#c8230579d82f360372abb6c3081b2583de271b5b"
 dependencies = [
  "derive_more",
  "proc-macro2",
@@ -2149,7 +2149,7 @@ dependencies = [
 [[package]]
 name = "rustfsm_trait"
 version = "0.1.0"
-source = "git+https://github.com/temporalio/sdk-core?rev=aebb0a56426880b208341eef47820a8f13dec1a9#aebb0a56426880b208341eef47820a8f13dec1a9"
+source = "git+https://github.com/temporalio/sdk-core?rev=c8230579d82f360372abb6c3081b2583de271b5b#c8230579d82f360372abb6c3081b2583de271b5b"
 
 [[package]]
 name = "rustix"
@@ -2504,7 +2504,7 @@ dependencies = [
 [[package]]
 name = "temporal-client"
 version = "0.1.0"
-source = "git+https://github.com/temporalio/sdk-core?rev=aebb0a56426880b208341eef47820a8f13dec1a9#aebb0a56426880b208341eef47820a8f13dec1a9"
+source = "git+https://github.com/temporalio/sdk-core?rev=c8230579d82f360372abb6c3081b2583de271b5b#c8230579d82f360372abb6c3081b2583de271b5b"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2535,7 +2535,7 @@ dependencies = [
 [[package]]
 name = "temporal-sdk-core"
 version = "0.1.0"
-source = "git+https://github.com/temporalio/sdk-core?rev=aebb0a56426880b208341eef47820a8f13dec1a9#aebb0a56426880b208341eef47820a8f13dec1a9"
+source = "git+https://github.com/temporalio/sdk-core?rev=c8230579d82f360372abb6c3081b2583de271b5b#c8230579d82f360372abb6c3081b2583de271b5b"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2595,7 +2595,7 @@ dependencies = [
 [[package]]
 name = "temporal-sdk-core-api"
 version = "0.1.0"
-source = "git+https://github.com/temporalio/sdk-core?rev=aebb0a56426880b208341eef47820a8f13dec1a9#aebb0a56426880b208341eef47820a8f13dec1a9"
+source = "git+https://github.com/temporalio/sdk-core?rev=c8230579d82f360372abb6c3081b2583de271b5b#c8230579d82f360372abb6c3081b2583de271b5b"
 dependencies = [
  "async-trait",
  "derive_builder",
@@ -2614,7 +2614,7 @@ dependencies = [
 [[package]]
 name = "temporal-sdk-core-protos"
 version = "0.1.0"
-source = "git+https://github.com/temporalio/sdk-core?rev=aebb0a56426880b208341eef47820a8f13dec1a9#aebb0a56426880b208341eef47820a8f13dec1a9"
+source = "git+https://github.com/temporalio/sdk-core?rev=c8230579d82f360372abb6c3081b2583de271b5b#c8230579d82f360372abb6c3081b2583de271b5b"
 dependencies = [
  "anyhow",
  "base64",
