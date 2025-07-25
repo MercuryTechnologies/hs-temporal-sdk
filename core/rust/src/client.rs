@@ -181,13 +181,13 @@ impl RawPointerConverter<ClientRef> for ClientRef {
     }
 
     unsafe fn from_raw_pointer(ptr: *const ClientRef) -> Result<Self, UnexpectedNullPointerError> {
-        take_back_from_raw_pointer(ptr)
+        unsafe { take_back_from_raw_pointer(ptr) }
     }
 
     unsafe fn from_raw_pointer_mut(
         ptr: *mut ClientRef,
     ) -> Result<Self, UnexpectedNullPointerError> {
-        take_back_from_raw_pointer_mut(ptr)
+        unsafe { take_back_from_raw_pointer_mut(ptr) }
     }
 }
 
@@ -222,7 +222,7 @@ pub fn connect_client(
 /// # Safety
 ///
 /// Haskell <-> Tokio FFI bridge invariants.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn hs_temporal_connect_client(
     runtime_ref: *const runtime::RuntimeRef,
     config_json: *const libc::c_char,
@@ -247,7 +247,7 @@ pub unsafe extern "C" fn hs_temporal_connect_client(
 /// # Safety
 ///
 /// Haskell FFI bridge invariants.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn hs_temporal_drop_client(client: *mut ClientRef) {
     unsafe {
         drop(Box::from_raw(client));
@@ -305,7 +305,7 @@ impl From<String> for CRPCError {
 /// # Safety
 ///
 /// Haskell FFI bridge invariants.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn hs_temporal_drop_rpc_error(error: *mut CRPCError) {
     unsafe {
         CRPCError::drop_raw_pointer(error).unwrap();

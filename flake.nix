@@ -41,7 +41,10 @@
         // {
           temporal-bridge = pkgs.temporal_bridge;
           temporal-test-server = pkgs.temporal-test-server;
-          update-temporal-revision = import ./nix/packages/update-temporal-revision.nix {inherit pkgs;};
+          update-temporal-revision = import ./nix/packages/update-temporal-revision.nix {
+            inherit pkgs;
+            rustToolchain = inputs.fenix.packages.${pkgs.system}.stable.toolchain;
+          };
         }
     );
 

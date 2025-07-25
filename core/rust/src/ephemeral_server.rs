@@ -23,13 +23,13 @@ impl RawPointerConverter<EphemeralServerRef> for EphemeralServerRef {
     unsafe fn from_raw_pointer(
         ptr: *const EphemeralServerRef,
     ) -> Result<Self, UnexpectedNullPointerError> {
-        take_back_from_raw_pointer(ptr)
+        unsafe { take_back_from_raw_pointer(ptr) }
     }
 
     unsafe fn from_raw_pointer_mut(
         ptr: *mut EphemeralServerRef,
     ) -> Result<Self, UnexpectedNullPointerError> {
-        take_back_from_raw_pointer_mut(ptr)
+        unsafe { take_back_from_raw_pointer_mut(ptr) }
     }
 }
 
@@ -93,7 +93,7 @@ pub struct TemporalDevServerConfigDef {
 /// # Safety
 ///
 /// Haskell FFI bridge invariants.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn hs_temporal_start_dev_server(
     runtime: *mut RuntimeRef,
     json_string: *const c_char,
@@ -134,7 +134,7 @@ pub unsafe extern "C" fn hs_temporal_start_dev_server(
 /// # Safety
 ///
 /// Haskell FFI bridge invariants.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn hs_temporal_shutdown_ephemeral_server(
     server: *mut EphemeralServerRef,
     mvar: *mut MVar,
@@ -179,7 +179,7 @@ pub struct TestServerConfigDef {
 /// # Safety
 ///
 /// Haskell FFI bridge invariants.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn hs_temporal_start_test_server(
     runtime: *mut RuntimeRef,
     json_string: *const c_char,

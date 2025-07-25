@@ -16,17 +16,35 @@ jobs:
         uses: cachix/install-nix-action@v27
 
       - name: Run update script
+        id: update-script
+        continue-on-error: true
         run: nix run .#update-temporal-revision
 
       - name: Check for changes and create branch
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Log the script outcome
+          if [[ "${{ steps.update-script.outcome }}" == "success" ]]; then
+            echo "Update script completed successfully"
+          else
+            echo "Update script completed with errors (but continuing to commit any changes)"
+          fi
+
           if ! git diff --quiet; then
             branch="auto/update-temporal-revision-$(date +%Y%m%d)"
             git checkout -b "$branch"
             git add .
-            git commit -m "chore: auto-update temporal revision"
+
+            # Create appropriate commit message based on script success
+            if [[ "${{ steps.update-script.outcome }}" == "success" ]]; then
+              commit_msg="chore: auto-update temporal revision"
+            else
+              commit_msg="chore: auto-update temporal revision (partial - some steps failed)"
+            fi
+
+            git commit -m "$commit_msg"
             git push origin "$branch"
             echo "Created branch: $branch"
           else

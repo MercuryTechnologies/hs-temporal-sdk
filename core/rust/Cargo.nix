@@ -8697,7 +8697,7 @@ rec {
       "temporal_bridge" = rec {
         crateName = "temporal_bridge";
         version = "0.1.0";
-        edition = "2021";
+        edition = "2024";
         src = lib.cleanSourceWith { filter = sourceFilter;  src = ./.; };type = [ "cdylib" "staticlib" ];
         dependencies = [
           {
