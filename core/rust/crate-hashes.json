@@ -1,9 +1,9 @@
 {
-  "git+https://github.com/temporalio/sdk-core?rev=f2e056c2763bee7ed1ca0f9ffad64faa3b458826#rustfsm@0.1.0": "09rw5xx68cb8cwf3vidwwkr5kdwdssn0nr8d6c87b2v6nl8hnav4",
-  "git+https://github.com/temporalio/sdk-core?rev=f2e056c2763bee7ed1ca0f9ffad64faa3b458826#rustfsm_procmacro@0.1.0": "09rw5xx68cb8cwf3vidwwkr5kdwdssn0nr8d6c87b2v6nl8hnav4",
-  "git+https://github.com/temporalio/sdk-core?rev=f2e056c2763bee7ed1ca0f9ffad64faa3b458826#rustfsm_trait@0.1.0": "09rw5xx68cb8cwf3vidwwkr5kdwdssn0nr8d6c87b2v6nl8hnav4",
-  "git+https://github.com/temporalio/sdk-core?rev=f2e056c2763bee7ed1ca0f9ffad64faa3b458826#temporal-client@0.1.0": "09rw5xx68cb8cwf3vidwwkr5kdwdssn0nr8d6c87b2v6nl8hnav4",
-  "git+https://github.com/temporalio/sdk-core?rev=f2e056c2763bee7ed1ca0f9ffad64faa3b458826#temporal-sdk-core-api@0.1.0": "09rw5xx68cb8cwf3vidwwkr5kdwdssn0nr8d6c87b2v6nl8hnav4",
-  "git+https://github.com/temporalio/sdk-core?rev=f2e056c2763bee7ed1ca0f9ffad64faa3b458826#temporal-sdk-core-protos@0.1.0": "09rw5xx68cb8cwf3vidwwkr5kdwdssn0nr8d6c87b2v6nl8hnav4",
-  "git+https://github.com/temporalio/sdk-core?rev=f2e056c2763bee7ed1ca0f9ffad64faa3b458826#temporal-sdk-core@0.1.0": "09rw5xx68cb8cwf3vidwwkr5kdwdssn0nr8d6c87b2v6nl8hnav4"
+  "git+https://github.com/temporalio/sdk-core?rev=42cc51ad199996320460572566a6cb4102c1fea1#rustfsm@0.1.0": "1px54fmh7lpmxzhhqbj39rw6qfzg5srvh9xcx2bgsd8axmjlbn10",
+  "git+https://github.com/temporalio/sdk-core?rev=42cc51ad199996320460572566a6cb4102c1fea1#rustfsm_procmacro@0.1.0": "1px54fmh7lpmxzhhqbj39rw6qfzg5srvh9xcx2bgsd8axmjlbn10",
+  "git+https://github.com/temporalio/sdk-core?rev=42cc51ad199996320460572566a6cb4102c1fea1#rustfsm_trait@0.1.0": "1px54fmh7lpmxzhhqbj39rw6qfzg5srvh9xcx2bgsd8axmjlbn10",
+  "git+https://github.com/temporalio/sdk-core?rev=42cc51ad199996320460572566a6cb4102c1fea1#temporal-client@0.1.0": "1px54fmh7lpmxzhhqbj39rw6qfzg5srvh9xcx2bgsd8axmjlbn10",
+  "git+https://github.com/temporalio/sdk-core?rev=42cc51ad199996320460572566a6cb4102c1fea1#temporal-sdk-core-api@0.1.0": "1px54fmh7lpmxzhhqbj39rw6qfzg5srvh9xcx2bgsd8axmjlbn10",
+  "git+https://github.com/temporalio/sdk-core?rev=42cc51ad199996320460572566a6cb4102c1fea1#temporal-sdk-core-protos@0.1.0": "1px54fmh7lpmxzhhqbj39rw6qfzg5srvh9xcx2bgsd8axmjlbn10",
+  "git+https://github.com/temporalio/sdk-core?rev=42cc51ad199996320460572566a6cb4102c1fea1#temporal-sdk-core@0.1.0": "1px54fmh7lpmxzhhqbj39rw6qfzg5srvh9xcx2bgsd8axmjlbn10"
 }
