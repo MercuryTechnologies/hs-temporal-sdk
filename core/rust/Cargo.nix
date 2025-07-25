@@ -1411,9 +1411,9 @@ rec {
       };
       "derive_more" = rec {
         crateName = "derive_more";
-        version = "1.0.0";
+        version = "2.0.1";
         edition = "2021";
-        sha256 = "01cd8pskdjg10dvfchi6b8a9pa1ja1ic0kbn45dl8jdyrfwrk6sa";
+        sha256 = "0y3n97cc7rsvgnj211p92y1ppzh6jzvq5kvk6340ghkhfp7l4ch9";
         authors = [
           "Jelte Fennema <github-tech@jeltef.nl>"
         ];
@@ -1456,9 +1456,9 @@ rec {
       };
       "derive_more-impl" = rec {
         crateName = "derive_more-impl";
-        version = "1.0.0";
+        version = "2.0.1";
         edition = "2021";
-        sha256 = "08mxyd456ygk68v5nfn4dyisn82k647w9ri2jl19dqpvmnp30wyb";
+        sha256 = "1wqxcb7d5lzvpplz9szp4rwy1r23f5wmixz0zd2vcjscqknji9mx";
         procMacro = true;
         libName = "derive_more_impl";
         authors = [
@@ -2494,9 +2494,9 @@ rec {
       };
       "governor" = rec {
         crateName = "governor";
-        version = "0.7.0";
+        version = "0.8.1";
         edition = "2018";
-        sha256 = "17qkr13r9h1ww865vxw3pyasayxmccb24x7ga4a552xpbmvalih7";
+        sha256 = "1sz8xc6qzfrfalrcfjjy1v1ahqnx1hswgh34j96v04275vnb94xy";
         authors = [
           "Andreas Fuchs <asf@boinkor.net>"
         ];
@@ -2528,6 +2528,11 @@ rec {
             features = [ "std" "sink" ];
           }
           {
+            name = "getrandom";
+            packageId = "getrandom 0.3.2";
+            features = [ "wasm_js" ];
+          }
+          {
             name = "no-std-compat";
             packageId = "no-std-compat";
             features = [ "alloc" ];
@@ -2554,7 +2559,7 @@ rec {
           }
           {
             name = "rand";
-            packageId = "rand 0.8.5";
+            packageId = "rand 0.9.1";
             optional = true;
           }
           {
@@ -2564,6 +2569,10 @@ rec {
           {
             name = "spinning_top";
             packageId = "spinning_top";
+          }
+          {
+            name = "web-time";
+            packageId = "web-time";
           }
         ];
         features = {
@@ -3846,28 +3855,7 @@ rec {
         };
         resolvedDefaultFeatures = [ "default" "std" ];
       };
-      "itertools 0.13.0" = rec {
-        crateName = "itertools";
-        version = "0.13.0";
-        edition = "2018";
-        sha256 = "11hiy3qzl643zcigknclh446qb9zlg4dpdzfkjaa9q9fqpgyfgj1";
-        authors = [
-          "bluss"
-        ];
-        dependencies = [
-          {
-            name = "either";
-            packageId = "either";
-            usesDefaultFeatures = false;
-          }
-        ];
-        features = {
-          "default" = [ "use_std" ];
-          "use_std" = [ "use_alloc" "either/use_std" ];
-        };
-        resolvedDefaultFeatures = [ "default" "use_alloc" "use_std" ];
-      };
-      "itertools 0.14.0" = rec {
+      "itertools" = rec {
         crateName = "itertools";
         version = "0.14.0";
         edition = "2018";
@@ -4096,9 +4084,9 @@ rec {
       };
       "lru" = rec {
         crateName = "lru";
-        version = "0.12.5";
+        version = "0.13.0";
         edition = "2015";
-        sha256 = "0f1a7cgqxbyhrmgaqqa11m3azwhcc36w0v5r4izgbhadl3sg8k13";
+        sha256 = "0ra4jcfgij99z02rg5zy292ncsybk0vn5zc7bmrv82igbzalhxr2";
         authors = [
           "Jerome Froelich <jeromefroelic@hotmail.com>"
         ];
@@ -5493,7 +5481,7 @@ rec {
           }
           {
             name = "itertools";
-            packageId = "itertools 0.14.0";
+            packageId = "itertools";
             usesDefaultFeatures = false;
             features = [ "use_alloc" ];
           }
@@ -5574,7 +5562,7 @@ rec {
           }
           {
             name = "itertools";
-            packageId = "itertools 0.14.0";
+            packageId = "itertools";
           }
           {
             name = "proc-macro2";
@@ -6970,12 +6958,12 @@ rec {
       "rustfsm" = rec {
         crateName = "rustfsm";
         version = "0.1.0";
-        edition = "2021";
+        edition = "2024";
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "6e601115daa3b9ccaa9d0d383f926aaa5953ea3d";
-          sha256 = "1p0inavqz35kq6lkkkcsshw0s3dgg5dc9ca0ih8ghdryy03hyy9a";
+          rev = "583fe155d0f24842c58f09d965060a2f364f6f44";
+          sha256 = "1x83svwcq5fv02my30warwnnqjalrsi70knqgscp4byxjkb1sbdb";
         };
         authors = [
           "Spencer Judge <spencer@temporal.io>"
@@ -6995,12 +6983,12 @@ rec {
       "rustfsm_procmacro" = rec {
         crateName = "rustfsm_procmacro";
         version = "0.1.0";
-        edition = "2021";
+        edition = "2024";
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "6e601115daa3b9ccaa9d0d383f926aaa5953ea3d";
-          sha256 = "1p0inavqz35kq6lkkkcsshw0s3dgg5dc9ca0ih8ghdryy03hyy9a";
+          rev = "583fe155d0f24842c58f09d965060a2f364f6f44";
+          sha256 = "1x83svwcq5fv02my30warwnnqjalrsi70knqgscp4byxjkb1sbdb";
         };
         procMacro = true;
         authors = [
@@ -7035,12 +7023,12 @@ rec {
       "rustfsm_trait" = rec {
         crateName = "rustfsm_trait";
         version = "0.1.0";
-        edition = "2021";
+        edition = "2024";
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "6e601115daa3b9ccaa9d0d383f926aaa5953ea3d";
-          sha256 = "1p0inavqz35kq6lkkkcsshw0s3dgg5dc9ca0ih8ghdryy03hyy9a";
+          rev = "583fe155d0f24842c58f09d965060a2f364f6f44";
+          sha256 = "1x83svwcq5fv02my30warwnnqjalrsi70knqgscp4byxjkb1sbdb";
         };
         authors = [
           "Spencer Judge <spencer@temporal.io>"
@@ -7998,9 +7986,9 @@ rec {
       };
       "sysinfo" = rec {
         crateName = "sysinfo";
-        version = "0.32.1";
+        version = "0.33.1";
         edition = "2021";
-        sha256 = "1bzlj3afjz4ibdsfchjk1f4md6djffw668f3npiykwph38jcscsc";
+        sha256 = "00bcbj9rk39n07ylclj9klggkshxyianv2lfkpqnc6x0iqj5ij2g";
         authors = [
           "Guillaume Gomez <guillaume1.gomez@gmail.com>"
         ];
@@ -8131,12 +8119,12 @@ rec {
       "temporal-client" = rec {
         crateName = "temporal-client";
         version = "0.1.0";
-        edition = "2021";
+        edition = "2024";
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "6e601115daa3b9ccaa9d0d383f926aaa5953ea3d";
-          sha256 = "1p0inavqz35kq6lkkkcsshw0s3dgg5dc9ca0ih8ghdryy03hyy9a";
+          rev = "583fe155d0f24842c58f09d965060a2f364f6f44";
+          sha256 = "1x83svwcq5fv02my30warwnnqjalrsi70knqgscp4byxjkb1sbdb";
         };
         libName = "temporal_client";
         authors = [
@@ -8198,10 +8186,6 @@ rec {
             packageId = "parking_lot";
           }
           {
-            name = "prost-types";
-            packageId = "prost-types";
-          }
-          {
             name = "slotmap";
             packageId = "slotmap";
           }
@@ -8252,12 +8236,12 @@ rec {
       "temporal-sdk-core" = rec {
         crateName = "temporal-sdk-core";
         version = "0.1.0";
-        edition = "2021";
+        edition = "2024";
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "6e601115daa3b9ccaa9d0d383f926aaa5953ea3d";
-          sha256 = "1p0inavqz35kq6lkkkcsshw0s3dgg5dc9ca0ih8ghdryy03hyy9a";
+          rev = "583fe155d0f24842c58f09d965060a2f364f6f44";
+          sha256 = "1x83svwcq5fv02my30warwnnqjalrsi70knqgscp4byxjkb1sbdb";
         };
         libName = "temporal_sdk_core";
         authors = [
@@ -8344,7 +8328,7 @@ rec {
           }
           {
             name = "itertools";
-            packageId = "itertools 0.13.0";
+            packageId = "itertools";
           }
           {
             name = "lru";
@@ -8405,7 +8389,7 @@ rec {
           }
           {
             name = "rand";
-            packageId = "rand 0.8.5";
+            packageId = "rand 0.9.1";
           }
           {
             name = "reqwest";
@@ -8531,12 +8515,12 @@ rec {
       "temporal-sdk-core-api" = rec {
         crateName = "temporal-sdk-core-api";
         version = "0.1.0";
-        edition = "2021";
+        edition = "2024";
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "6e601115daa3b9ccaa9d0d383f926aaa5953ea3d";
-          sha256 = "1p0inavqz35kq6lkkkcsshw0s3dgg5dc9ca0ih8ghdryy03hyy9a";
+          rev = "583fe155d0f24842c58f09d965060a2f364f6f44";
+          sha256 = "1x83svwcq5fv02my30warwnnqjalrsi70knqgscp4byxjkb1sbdb";
         };
         libName = "temporal_sdk_core_api";
         authors = [
@@ -8565,10 +8549,6 @@ rec {
           {
             name = "prost";
             packageId = "prost";
-          }
-          {
-            name = "prost-types";
-            packageId = "prost-types";
           }
           {
             name = "serde_json";
@@ -8603,12 +8583,12 @@ rec {
       "temporal-sdk-core-protos" = rec {
         crateName = "temporal-sdk-core-protos";
         version = "0.1.0";
-        edition = "2021";
+        edition = "2024";
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "6e601115daa3b9ccaa9d0d383f926aaa5953ea3d";
-          sha256 = "1p0inavqz35kq6lkkkcsshw0s3dgg5dc9ca0ih8ghdryy03hyy9a";
+          rev = "583fe155d0f24842c58f09d965060a2f364f6f44";
+          sha256 = "1x83svwcq5fv02my30warwnnqjalrsi70knqgscp4byxjkb1sbdb";
         };
         libName = "temporal_sdk_core_protos";
         authors = [
@@ -8633,10 +8613,6 @@ rec {
             packageId = "prost";
           }
           {
-            name = "prost-types";
-            packageId = "prost-types";
-          }
-          {
             name = "prost-wkt";
             packageId = "prost-wkt";
           }
@@ -8646,7 +8622,7 @@ rec {
           }
           {
             name = "rand";
-            packageId = "rand 0.8.5";
+            packageId = "rand 0.9.1";
             optional = true;
           }
           {
