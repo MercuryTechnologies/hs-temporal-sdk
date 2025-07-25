@@ -256,58 +256,6 @@ rec {
         };
         resolvedDefaultFeatures = [ "derive" "derive_arbitrary" ];
       };
-      "async-stream" = rec {
-        crateName = "async-stream";
-        version = "0.3.6";
-        edition = "2021";
-        sha256 = "0xl4zqncrdmw2g6241wgr11dxdg4h7byy6bz3l6si03qyfk72nhb";
-        libName = "async_stream";
-        authors = [
-          "Carl Lerche <me@carllerche.com>"
-        ];
-        dependencies = [
-          {
-            name = "async-stream-impl";
-            packageId = "async-stream-impl";
-          }
-          {
-            name = "futures-core";
-            packageId = "futures-core";
-          }
-          {
-            name = "pin-project-lite";
-            packageId = "pin-project-lite";
-          }
-        ];
-
-      };
-      "async-stream-impl" = rec {
-        crateName = "async-stream-impl";
-        version = "0.3.6";
-        edition = "2021";
-        sha256 = "0kaplfb5axsvf1gfs2gk6c4zx6zcsns0yf3ssk7iwni7bphlvhn7";
-        procMacro = true;
-        libName = "async_stream_impl";
-        authors = [
-          "Carl Lerche <me@carllerche.com>"
-        ];
-        dependencies = [
-          {
-            name = "proc-macro2";
-            packageId = "proc-macro2";
-          }
-          {
-            name = "quote";
-            packageId = "quote";
-          }
-          {
-            name = "syn";
-            packageId = "syn 2.0.100";
-            features = [ "full" "visit-mut" ];
-          }
-        ];
-
-      };
       "async-trait" = rec {
         crateName = "async-trait";
         version = "0.1.88";
@@ -360,123 +308,7 @@ rec {
         ];
 
       };
-      "axum 0.7.9" = rec {
-        crateName = "axum";
-        version = "0.7.9";
-        edition = "2021";
-        sha256 = "07z7wqczi9i8xb4460rvn39p4wjqwr32hx907crd1vwb2fy8ijpd";
-        dependencies = [
-          {
-            name = "async-trait";
-            packageId = "async-trait";
-          }
-          {
-            name = "axum-core";
-            packageId = "axum-core 0.4.5";
-          }
-          {
-            name = "bytes";
-            packageId = "bytes";
-          }
-          {
-            name = "futures-util";
-            packageId = "futures-util";
-            usesDefaultFeatures = false;
-            features = [ "alloc" ];
-          }
-          {
-            name = "http";
-            packageId = "http";
-          }
-          {
-            name = "http-body";
-            packageId = "http-body";
-          }
-          {
-            name = "http-body-util";
-            packageId = "http-body-util";
-          }
-          {
-            name = "itoa";
-            packageId = "itoa";
-          }
-          {
-            name = "matchit";
-            packageId = "matchit 0.7.3";
-          }
-          {
-            name = "memchr";
-            packageId = "memchr";
-          }
-          {
-            name = "mime";
-            packageId = "mime";
-          }
-          {
-            name = "percent-encoding";
-            packageId = "percent-encoding";
-          }
-          {
-            name = "pin-project-lite";
-            packageId = "pin-project-lite";
-          }
-          {
-            name = "rustversion";
-            packageId = "rustversion";
-          }
-          {
-            name = "serde";
-            packageId = "serde";
-          }
-          {
-            name = "sync_wrapper";
-            packageId = "sync_wrapper";
-          }
-          {
-            name = "tower";
-            packageId = "tower 0.5.2";
-            usesDefaultFeatures = false;
-            features = [ "util" ];
-          }
-          {
-            name = "tower-layer";
-            packageId = "tower-layer";
-          }
-          {
-            name = "tower-service";
-            packageId = "tower-service";
-          }
-        ];
-        devDependencies = [
-          {
-            name = "serde";
-            packageId = "serde";
-            features = [ "derive" ];
-          }
-          {
-            name = "tower";
-            packageId = "tower 0.5.2";
-            rename = "tower";
-            features = [ "util" "timeout" "limit" "load-shed" "steer" "filter" ];
-          }
-        ];
-        features = {
-          "__private_docs" = [ "axum-core/__private_docs" "tower/full" "dep:tower-http" ];
-          "default" = [ "form" "http1" "json" "matched-path" "original-uri" "query" "tokio" "tower-log" "tracing" ];
-          "form" = [ "dep:serde_urlencoded" ];
-          "http1" = [ "dep:hyper" "hyper?/http1" "hyper-util?/http1" ];
-          "http2" = [ "dep:hyper" "hyper?/http2" "hyper-util?/http2" ];
-          "json" = [ "dep:serde_json" "dep:serde_path_to_error" ];
-          "macros" = [ "dep:axum-macros" ];
-          "multipart" = [ "dep:multer" ];
-          "query" = [ "dep:serde_urlencoded" ];
-          "tokio" = [ "dep:hyper-util" "dep:tokio" "tokio/net" "tokio/rt" "tower/make" "tokio/macros" ];
-          "tower-log" = [ "tower/log" ];
-          "tracing" = [ "dep:tracing" "axum-core/tracing" ];
-          "ws" = [ "dep:hyper" "tokio" "dep:tokio-tungstenite" "dep:sha1" "dep:base64" ];
-        };
-      };
-      "axum 0.8.4" = rec {
+      "axum" = rec {
         crateName = "axum";
         version = "0.8.4";
         edition = "2021";
@@ -484,7 +316,7 @@ rec {
         dependencies = [
           {
             name = "axum-core";
-            packageId = "axum-core 0.5.2";
+            packageId = "axum-core";
           }
           {
             name = "bytes";
@@ -514,7 +346,7 @@ rec {
           }
           {
             name = "matchit";
-            packageId = "matchit 0.8.4";
+            packageId = "matchit";
           }
           {
             name = "memchr";
@@ -546,7 +378,7 @@ rec {
           }
           {
             name = "tower";
-            packageId = "tower 0.5.2";
+            packageId = "tower";
             usesDefaultFeatures = false;
             features = [ "util" ];
           }
@@ -567,7 +399,7 @@ rec {
           }
           {
             name = "tower";
-            packageId = "tower 0.5.2";
+            packageId = "tower";
             rename = "tower";
             features = [ "util" "timeout" "limit" "load-shed" "steer" "filter" ];
           }
@@ -589,78 +421,7 @@ rec {
           "ws" = [ "dep:hyper" "tokio" "dep:tokio-tungstenite" "dep:sha1" "dep:base64" ];
         };
       };
-      "axum-core 0.4.5" = rec {
-        crateName = "axum-core";
-        version = "0.4.5";
-        edition = "2021";
-        sha256 = "16b1496c4gm387q20hkv5ic3k5bd6xmnvk50kwsy6ymr8rhvvwh9";
-        libName = "axum_core";
-        dependencies = [
-          {
-            name = "async-trait";
-            packageId = "async-trait";
-          }
-          {
-            name = "bytes";
-            packageId = "bytes";
-          }
-          {
-            name = "futures-util";
-            packageId = "futures-util";
-            usesDefaultFeatures = false;
-            features = [ "alloc" ];
-          }
-          {
-            name = "http";
-            packageId = "http";
-          }
-          {
-            name = "http-body";
-            packageId = "http-body";
-          }
-          {
-            name = "http-body-util";
-            packageId = "http-body-util";
-          }
-          {
-            name = "mime";
-            packageId = "mime";
-          }
-          {
-            name = "pin-project-lite";
-            packageId = "pin-project-lite";
-          }
-          {
-            name = "rustversion";
-            packageId = "rustversion";
-          }
-          {
-            name = "sync_wrapper";
-            packageId = "sync_wrapper";
-          }
-          {
-            name = "tower-layer";
-            packageId = "tower-layer";
-          }
-          {
-            name = "tower-service";
-            packageId = "tower-service";
-          }
-        ];
-        devDependencies = [
-          {
-            name = "futures-util";
-            packageId = "futures-util";
-            usesDefaultFeatures = false;
-            features = [ "alloc" ];
-          }
-        ];
-        features = {
-          "__private_docs" = [ "dep:tower-http" ];
-          "tracing" = [ "dep:tracing" ];
-        };
-      };
-      "axum-core 0.5.2" = rec {
+      "axum-core" = rec {
         crateName = "axum-core";
         version = "0.5.2";
         edition = "2021";
@@ -2784,7 +2545,7 @@ rec {
           }
           {
             name = "indexmap";
-            packageId = "indexmap 2.9.0";
+            packageId = "indexmap";
             features = [ "std" ];
           }
           {
@@ -2817,28 +2578,6 @@ rec {
         ];
         features = {
         };
-      };
-      "hashbrown 0.12.3" = rec {
-        crateName = "hashbrown";
-        version = "0.12.3";
-        edition = "2021";
-        sha256 = "1268ka4750pyg2pbgsr43f0289l5zah4arir2k4igx5a8c6fg7la";
-        authors = [
-          "Amanieu d'Antras <amanieu@gmail.com>"
-        ];
-        features = {
-          "ahash" = [ "dep:ahash" ];
-          "ahash-compile-time-rng" = [ "ahash/compile-time-rng" ];
-          "alloc" = [ "dep:alloc" ];
-          "bumpalo" = [ "dep:bumpalo" ];
-          "compiler_builtins" = [ "dep:compiler_builtins" ];
-          "core" = [ "dep:core" ];
-          "default" = [ "ahash" "inline-more" ];
-          "rayon" = [ "dep:rayon" ];
-          "rustc-dep-of-std" = [ "nightly" "core" "compiler_builtins" "alloc" "rustc-internal-api" ];
-          "serde" = [ "dep:serde" ];
-        };
-        resolvedDefaultFeatures = [ "raw" ];
       };
       "hashbrown 0.14.5" = rec {
         crateName = "hashbrown";
@@ -3878,35 +3617,7 @@ rec {
         };
         resolvedDefaultFeatures = [ "compiled_data" ];
       };
-      "indexmap 1.9.3" = rec {
-        crateName = "indexmap";
-        version = "1.9.3";
-        edition = "2021";
-        sha256 = "16dxmy7yvk51wvnih3a3im6fp5lmx0wx76i03n06wyak6cwhw1xx";
-        dependencies = [
-          {
-            name = "hashbrown";
-            packageId = "hashbrown 0.12.3";
-            usesDefaultFeatures = false;
-            features = [ "raw" ];
-          }
-        ];
-        buildDependencies = [
-          {
-            name = "autocfg";
-            packageId = "autocfg";
-          }
-        ];
-        features = {
-          "arbitrary" = [ "dep:arbitrary" ];
-          "quickcheck" = [ "dep:quickcheck" ];
-          "rayon" = [ "dep:rayon" ];
-          "rustc-rayon" = [ "dep:rustc-rayon" ];
-          "serde" = [ "dep:serde" ];
-          "serde-1" = [ "serde" ];
-        };
-      };
-      "indexmap 2.9.0" = rec {
+      "indexmap" = rec {
         crateName = "indexmap";
         version = "2.9.0";
         edition = "2021";
@@ -4335,19 +4046,7 @@ rec {
         ];
 
       };
-      "matchit 0.7.3" = rec {
-        crateName = "matchit";
-        version = "0.7.3";
-        edition = "2021";
-        sha256 = "156bgdmmlv4crib31qhgg49nsjk88dxkdqp80ha2pk2rk6n6ax0f";
-        authors = [
-          "Ibraheem Ahmed <ibraheem@ibraheem.ca>"
-        ];
-        features = {
-        };
-        resolvedDefaultFeatures = [ "default" ];
-      };
-      "matchit 0.8.4" = rec {
+      "matchit" = rec {
         crateName = "matchit";
         version = "0.8.4";
         edition = "2021";
@@ -4880,7 +4579,7 @@ rec {
           }
           {
             name = "tonic";
-            packageId = "tonic 0.13.1";
+            packageId = "tonic";
             optional = true;
             usesDefaultFeatures = false;
           }
@@ -4900,7 +4599,7 @@ rec {
           }
           {
             name = "tonic";
-            packageId = "tonic 0.13.1";
+            packageId = "tonic";
             usesDefaultFeatures = false;
             features = [ "router" "server" ];
           }
@@ -4962,7 +4661,7 @@ rec {
           }
           {
             name = "tonic";
-            packageId = "tonic 0.13.1";
+            packageId = "tonic";
             optional = true;
             usesDefaultFeatures = false;
             features = [ "codegen" "prost" ];
@@ -5228,7 +4927,7 @@ rec {
           }
           {
             name = "indexmap";
-            packageId = "indexmap 2.9.0";
+            packageId = "indexmap";
           }
         ];
         features = {
@@ -6307,7 +6006,7 @@ rec {
           "std" = [ "rand_core/std" "rand_chacha/std" "alloc" "getrandom" "libc" ];
           "std_rng" = [ "rand_chacha" ];
         };
-        resolvedDefaultFeatures = [ "alloc" "default" "getrandom" "libc" "rand_chacha" "small_rng" "std" "std_rng" ];
+        resolvedDefaultFeatures = [ "alloc" "default" "getrandom" "libc" "rand_chacha" "std" "std_rng" ];
       };
       "rand 0.9.1" = rec {
         crateName = "rand";
@@ -6866,7 +6565,7 @@ rec {
           }
           {
             name = "tower";
-            packageId = "tower 0.5.2";
+            packageId = "tower";
             usesDefaultFeatures = false;
             target = { target, features }: (!("wasm32" == target."arch" or null));
             features = [ "timeout" "util" ];
@@ -6950,7 +6649,7 @@ rec {
           }
           {
             name = "tower";
-            packageId = "tower 0.5.2";
+            packageId = "tower";
             usesDefaultFeatures = false;
             features = [ "limit" ];
           }
@@ -7130,8 +6829,8 @@ rec {
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "42cc51ad199996320460572566a6cb4102c1fea1";
-          sha256 = "1px54fmh7lpmxzhhqbj39rw6qfzg5srvh9xcx2bgsd8axmjlbn10";
+          rev = "49a0af54ff88b13c5b906a74df8f283601c2b962";
+          sha256 = "1mv27b6lvf8fvspfd1mavxs7ad55cjjqsxsh637qs6z2lpa9lzck";
         };
         authors = [
           "Spencer Judge <spencer@temporal.io>"
@@ -7155,8 +6854,8 @@ rec {
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "42cc51ad199996320460572566a6cb4102c1fea1";
-          sha256 = "1px54fmh7lpmxzhhqbj39rw6qfzg5srvh9xcx2bgsd8axmjlbn10";
+          rev = "49a0af54ff88b13c5b906a74df8f283601c2b962";
+          sha256 = "1mv27b6lvf8fvspfd1mavxs7ad55cjjqsxsh637qs6z2lpa9lzck";
         };
         procMacro = true;
         authors = [
@@ -7195,8 +6894,8 @@ rec {
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "42cc51ad199996320460572566a6cb4102c1fea1";
-          sha256 = "1px54fmh7lpmxzhhqbj39rw6qfzg5srvh9xcx2bgsd8axmjlbn10";
+          rev = "49a0af54ff88b13c5b906a74df8f283601c2b962";
+          sha256 = "1mv27b6lvf8fvspfd1mavxs7ad55cjjqsxsh637qs6z2lpa9lzck";
         };
         authors = [
           "Spencer Judge <spencer@temporal.io>"
@@ -8291,8 +7990,8 @@ rec {
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "42cc51ad199996320460572566a6cb4102c1fea1";
-          sha256 = "1px54fmh7lpmxzhhqbj39rw6qfzg5srvh9xcx2bgsd8axmjlbn10";
+          rev = "49a0af54ff88b13c5b906a74df8f283601c2b962";
+          sha256 = "1mv27b6lvf8fvspfd1mavxs7ad55cjjqsxsh637qs6z2lpa9lzck";
         };
         libName = "temporal_client";
         authors = [
@@ -8379,12 +8078,12 @@ rec {
           }
           {
             name = "tonic";
-            packageId = "tonic 0.13.1";
+            packageId = "tonic";
             features = [ "tls-ring" "tls-native-roots" ];
           }
           {
             name = "tower";
-            packageId = "tower 0.5.2";
+            packageId = "tower";
             features = [ "util" ];
           }
           {
@@ -8412,8 +8111,8 @@ rec {
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "42cc51ad199996320460572566a6cb4102c1fea1";
-          sha256 = "1px54fmh7lpmxzhhqbj39rw6qfzg5srvh9xcx2bgsd8axmjlbn10";
+          rev = "49a0af54ff88b13c5b906a74df8f283601c2b962";
+          sha256 = "1mv27b6lvf8fvspfd1mavxs7ad55cjjqsxsh637qs6z2lpa9lzck";
         };
         libName = "temporal_sdk_core";
         authors = [
@@ -8635,7 +8334,7 @@ rec {
           }
           {
             name = "tonic";
-            packageId = "tonic 0.13.1";
+            packageId = "tonic";
             features = [ "tls-ring" "tls-native-roots" ];
           }
           {
@@ -8688,8 +8387,8 @@ rec {
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "42cc51ad199996320460572566a6cb4102c1fea1";
-          sha256 = "1px54fmh7lpmxzhhqbj39rw6qfzg5srvh9xcx2bgsd8axmjlbn10";
+          rev = "49a0af54ff88b13c5b906a74df8f283601c2b962";
+          sha256 = "1mv27b6lvf8fvspfd1mavxs7ad55cjjqsxsh637qs6z2lpa9lzck";
         };
         libName = "temporal_sdk_core_api";
         authors = [
@@ -8733,7 +8432,7 @@ rec {
           }
           {
             name = "tonic";
-            packageId = "tonic 0.13.1";
+            packageId = "tonic";
           }
           {
             name = "tracing";
@@ -8761,8 +8460,8 @@ rec {
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "42cc51ad199996320460572566a6cb4102c1fea1";
-          sha256 = "1px54fmh7lpmxzhhqbj39rw6qfzg5srvh9xcx2bgsd8axmjlbn10";
+          rev = "49a0af54ff88b13c5b906a74df8f283601c2b962";
+          sha256 = "1mv27b6lvf8fvspfd1mavxs7ad55cjjqsxsh637qs6z2lpa9lzck";
         };
         libName = "temporal_sdk_core_protos";
         authors = [
@@ -8814,7 +8513,7 @@ rec {
           }
           {
             name = "tonic";
-            packageId = "tonic 0.13.1";
+            packageId = "tonic";
           }
           {
             name = "uuid";
@@ -8906,7 +8605,7 @@ rec {
           }
           {
             name = "tonic";
-            packageId = "tonic 0.12.3";
+            packageId = "tonic";
           }
           {
             name = "tracing";
@@ -9448,154 +9147,7 @@ rec {
         };
         resolvedDefaultFeatures = [ "codec" "default" "io" "io-util" ];
       };
-      "tonic 0.12.3" = rec {
-        crateName = "tonic";
-        version = "0.12.3";
-        edition = "2021";
-        sha256 = "0ljd1lfjpw0vrm5wbv15x6nq2i38llsanls5rkzmdn2n0wrmnz47";
-        authors = [
-          "Lucio Franco <luciofranco14@gmail.com>"
-        ];
-        dependencies = [
-          {
-            name = "async-stream";
-            packageId = "async-stream";
-            optional = true;
-          }
-          {
-            name = "async-trait";
-            packageId = "async-trait";
-            optional = true;
-          }
-          {
-            name = "axum";
-            packageId = "axum 0.7.9";
-            optional = true;
-            usesDefaultFeatures = false;
-          }
-          {
-            name = "base64";
-            packageId = "base64";
-          }
-          {
-            name = "bytes";
-            packageId = "bytes";
-          }
-          {
-            name = "h2";
-            packageId = "h2";
-            optional = true;
-          }
-          {
-            name = "http";
-            packageId = "http";
-          }
-          {
-            name = "http-body";
-            packageId = "http-body";
-          }
-          {
-            name = "http-body-util";
-            packageId = "http-body-util";
-          }
-          {
-            name = "hyper";
-            packageId = "hyper";
-            optional = true;
-            features = [ "http1" "http2" ];
-          }
-          {
-            name = "hyper-timeout";
-            packageId = "hyper-timeout";
-            optional = true;
-          }
-          {
-            name = "hyper-util";
-            packageId = "hyper-util";
-            optional = true;
-            features = [ "tokio" ];
-          }
-          {
-            name = "percent-encoding";
-            packageId = "percent-encoding";
-          }
-          {
-            name = "pin-project";
-            packageId = "pin-project";
-          }
-          {
-            name = "prost";
-            packageId = "prost";
-            optional = true;
-            usesDefaultFeatures = false;
-            features = [ "std" ];
-          }
-          {
-            name = "socket2";
-            packageId = "socket2";
-            optional = true;
-            features = [ "all" ];
-          }
-          {
-            name = "tokio";
-            packageId = "tokio";
-            optional = true;
-            usesDefaultFeatures = false;
-          }
-          {
-            name = "tokio-stream";
-            packageId = "tokio-stream";
-            usesDefaultFeatures = false;
-          }
-          {
-            name = "tower";
-            packageId = "tower 0.4.13";
-            optional = true;
-            usesDefaultFeatures = false;
-          }
-          {
-            name = "tower-layer";
-            packageId = "tower-layer";
-          }
-          {
-            name = "tower-service";
-            packageId = "tower-service";
-          }
-          {
-            name = "tracing";
-            packageId = "tracing";
-          }
-        ];
-        devDependencies = [
-          {
-            name = "tokio";
-            packageId = "tokio";
-            features = [ "rt" "macros" ];
-          }
-          {
-            name = "tower";
-            packageId = "tower 0.4.13";
-            features = [ "full" ];
-          }
-        ];
-        features = {
-          "channel" = [ "dep:hyper" "hyper?/client" "dep:hyper-util" "hyper-util?/client-legacy" "dep:tower" "tower?/balance" "tower?/buffer" "tower?/discover" "tower?/limit" "tower?/util" "dep:tokio" "tokio?/time" "dep:hyper-timeout" ];
-          "codegen" = [ "dep:async-trait" ];
-          "default" = [ "transport" "codegen" "prost" ];
-          "gzip" = [ "dep:flate2" ];
-          "prost" = [ "dep:prost" ];
-          "router" = [ "dep:axum" "dep:tower" "tower?/util" ];
-          "server" = [ "router" "dep:async-stream" "dep:h2" "dep:hyper" "hyper?/server" "dep:hyper-util" "hyper-util?/service" "hyper-util?/server-auto" "dep:socket2" "dep:tokio" "tokio?/macros" "tokio?/net" "tokio?/time" "tokio-stream/net" "dep:tower" "tower?/util" "tower?/limit" ];
-          "tls" = [ "dep:rustls-pemfile" "dep:tokio-rustls" "dep:tokio" "tokio?/rt" "tokio?/macros" ];
-          "tls-native-roots" = [ "tls" "channel" "dep:rustls-native-certs" ];
-          "tls-roots" = [ "tls-native-roots" ];
-          "tls-webpki-roots" = [ "tls" "channel" "dep:webpki-roots" ];
-          "transport" = [ "server" "channel" ];
-          "zstd" = [ "dep:zstd" ];
-        };
-        resolvedDefaultFeatures = [ "channel" "codegen" "default" "prost" "router" "server" "transport" ];
-      };
-      "tonic 0.13.1" = rec {
+      "tonic" = rec {
         crateName = "tonic";
         version = "0.13.1";
         edition = "2021";
@@ -9611,7 +9163,7 @@ rec {
           }
           {
             name = "axum";
-            packageId = "axum 0.8.4";
+            packageId = "axum";
             optional = true;
             usesDefaultFeatures = false;
           }
@@ -9703,7 +9255,7 @@ rec {
           }
           {
             name = "tower";
-            packageId = "tower 0.5.2";
+            packageId = "tower";
             optional = true;
             usesDefaultFeatures = false;
           }
@@ -9728,7 +9280,7 @@ rec {
           }
           {
             name = "tower";
-            packageId = "tower 0.5.2";
+            packageId = "tower";
             features = [ "full" ];
           }
         ];
@@ -9796,128 +9348,7 @@ rec {
         };
         resolvedDefaultFeatures = [ "default" "prost" "prost-build" "transport" ];
       };
-      "tower 0.4.13" = rec {
-        crateName = "tower";
-        version = "0.4.13";
-        edition = "2018";
-        sha256 = "073wncyqav4sak1p755hf6vl66njgfc1z1g1di9rxx3cvvh9pymq";
-        authors = [
-          "Tower Maintainers <team@tower-rs.com>"
-        ];
-        dependencies = [
-          {
-            name = "futures-core";
-            packageId = "futures-core";
-            optional = true;
-          }
-          {
-            name = "futures-util";
-            packageId = "futures-util";
-            optional = true;
-            usesDefaultFeatures = false;
-            features = [ "alloc" ];
-          }
-          {
-            name = "indexmap";
-            packageId = "indexmap 1.9.3";
-            optional = true;
-          }
-          {
-            name = "pin-project";
-            packageId = "pin-project";
-            optional = true;
-          }
-          {
-            name = "pin-project-lite";
-            packageId = "pin-project-lite";
-            optional = true;
-          }
-          {
-            name = "rand";
-            packageId = "rand 0.8.5";
-            optional = true;
-            features = [ "small_rng" ];
-          }
-          {
-            name = "slab";
-            packageId = "slab";
-            optional = true;
-          }
-          {
-            name = "tokio";
-            packageId = "tokio";
-            optional = true;
-            features = [ "sync" ];
-          }
-          {
-            name = "tokio-util";
-            packageId = "tokio-util";
-            optional = true;
-            usesDefaultFeatures = false;
-          }
-          {
-            name = "tower-layer";
-            packageId = "tower-layer";
-          }
-          {
-            name = "tower-service";
-            packageId = "tower-service";
-          }
-          {
-            name = "tracing";
-            packageId = "tracing";
-            optional = true;
-            usesDefaultFeatures = false;
-            features = [ "std" ];
-          }
-        ];
-        devDependencies = [
-          {
-            name = "pin-project-lite";
-            packageId = "pin-project-lite";
-          }
-          {
-            name = "tokio";
-            packageId = "tokio";
-            features = [ "macros" "sync" "test-util" "rt-multi-thread" ];
-          }
-        ];
-        features = {
-          "__common" = [ "futures-core" "pin-project-lite" ];
-          "balance" = [ "discover" "load" "ready-cache" "make" "rand" "slab" ];
-          "buffer" = [ "__common" "tokio/sync" "tokio/rt" "tokio-util" "tracing" ];
-          "default" = [ "log" ];
-          "discover" = [ "__common" ];
-          "filter" = [ "__common" "futures-util" ];
-          "full" = [ "balance" "buffer" "discover" "filter" "hedge" "limit" "load" "load-shed" "make" "ready-cache" "reconnect" "retry" "spawn-ready" "steer" "timeout" "util" ];
-          "futures-core" = [ "dep:futures-core" ];
-          "futures-util" = [ "dep:futures-util" ];
-          "hdrhistogram" = [ "dep:hdrhistogram" ];
-          "hedge" = [ "util" "filter" "futures-util" "hdrhistogram" "tokio/time" "tracing" ];
-          "indexmap" = [ "dep:indexmap" ];
-          "limit" = [ "__common" "tokio/time" "tokio/sync" "tokio-util" "tracing" ];
-          "load" = [ "__common" "tokio/time" "tracing" ];
-          "load-shed" = [ "__common" ];
-          "log" = [ "tracing/log" ];
-          "make" = [ "futures-util" "pin-project-lite" "tokio/io-std" ];
-          "pin-project" = [ "dep:pin-project" ];
-          "pin-project-lite" = [ "dep:pin-project-lite" ];
-          "rand" = [ "dep:rand" ];
-          "ready-cache" = [ "futures-core" "futures-util" "indexmap" "tokio/sync" "tracing" "pin-project-lite" ];
-          "reconnect" = [ "make" "tokio/io-std" "tracing" ];
-          "retry" = [ "__common" "tokio/time" ];
-          "slab" = [ "dep:slab" ];
-          "spawn-ready" = [ "__common" "futures-util" "tokio/sync" "tokio/rt" "util" "tracing" ];
-          "timeout" = [ "pin-project-lite" "tokio/time" ];
-          "tokio" = [ "dep:tokio" ];
-          "tokio-stream" = [ "dep:tokio-stream" ];
-          "tokio-util" = [ "dep:tokio-util" ];
-          "tracing" = [ "dep:tracing" ];
-          "util" = [ "__common" "futures-util" "pin-project" ];
-        };
-        resolvedDefaultFeatures = [ "__common" "balance" "buffer" "discover" "futures-core" "futures-util" "indexmap" "limit" "load" "make" "pin-project" "pin-project-lite" "rand" "ready-cache" "slab" "tokio" "tokio-util" "tracing" "util" ];
-      };
-      "tower 0.5.2" = rec {
+      "tower" = rec {
         crateName = "tower";
         version = "0.5.2";
         edition = "2018";
@@ -9940,7 +9371,7 @@ rec {
           }
           {
             name = "indexmap";
-            packageId = "indexmap 2.9.0";
+            packageId = "indexmap";
             optional = true;
           }
           {
@@ -13516,7 +12947,7 @@ rec {
           }
           {
             name = "indexmap";
-            packageId = "indexmap 2.9.0";
+            packageId = "indexmap";
           }
           {
             name = "lzma-rs";
