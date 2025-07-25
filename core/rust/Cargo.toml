@@ -9,11 +9,11 @@ edition = "2024"
 crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
-temporal-client = { git = "https://github.com/temporalio/sdk-core", rev = "49a0af54ff88b13c5b906a74df8f283601c2b962" }
-temporal-sdk-core = { git = "https://github.com/temporalio/sdk-core", rev = "49a0af54ff88b13c5b906a74df8f283601c2b962", features = ["ephemeral-server"] }
-temporal-sdk-core-api = { git = "https://github.com/temporalio/sdk-core", rev = "49a0af54ff88b13c5b906a74df8f283601c2b962" }
-temporal-sdk-core-protos = { git = "https://github.com/temporalio/sdk-core", rev = "49a0af54ff88b13c5b906a74df8f283601c2b962" }
-rustfsm = { git = "https://github.com/temporalio/sdk-core", rev = "49a0af54ff88b13c5b906a74df8f283601c2b962" }
+temporal-client = { git = "https://github.com/temporalio/sdk-core", rev = "b90202240e003d05fbfa91846b9a4e0614b04aa7" }
+temporal-sdk-core = { git = "https://github.com/temporalio/sdk-core", rev = "b90202240e003d05fbfa91846b9a4e0614b04aa7", features = ["ephemeral-server"] }
+temporal-sdk-core-api = { git = "https://github.com/temporalio/sdk-core", rev = "b90202240e003d05fbfa91846b9a4e0614b04aa7" }
+temporal-sdk-core-protos = { git = "https://github.com/temporalio/sdk-core", rev = "b90202240e003d05fbfa91846b9a4e0614b04aa7" }
+rustfsm = { git = "https://github.com/temporalio/sdk-core", rev = "b90202240e003d05fbfa91846b9a4e0614b04aa7" }
 tokio = "~1.44"
 tokio-stream = "~0.1"
 tonic = "~0.13"
