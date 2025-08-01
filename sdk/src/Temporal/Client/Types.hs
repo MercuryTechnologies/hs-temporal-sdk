@@ -29,6 +29,9 @@ data StartWorkflowOptions = StartWorkflowOptions
   --
   -- It is not possible for a new Workflow Execution to spawn with the same Workflow Id as another Open Workflow Execution, regardless of the Workflow Id Reuse Policy. In some cases, an attempt to spawn a Workflow
   -- Execution with a Workflow Id that is the same as the Id of a currently Open Workflow Execution results in a @Workflow execution already started@ error.
+  , workflowIdConflictPolicy :: Maybe WorkflowIdConflictPolicy
+  -- ^ A Workflow Id Conflict Policy determines how to resolve a conflict when spawning
+  -- a new Workflow Execution with a particular Workflow Id used by an existing Open Workflow Execution.
   , retryPolicy :: Maybe RetryPolicy
   -- ^ A Retry Policy can work in cooperation with the timeouts to provide fine controls to optimize the execution experience.
   --
@@ -93,6 +96,7 @@ startWorkflowOptions tq =
     { taskQueue = tq
     , followRuns = True
     , workflowIdReusePolicy = Nothing
+    , workflowIdConflictPolicy = Nothing
     , retryPolicy = Nothing
     , cronSchedule = Nothing
     , memo = mempty

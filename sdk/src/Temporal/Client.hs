@@ -80,6 +80,9 @@ module Temporal.Client (
 
   -- * Workflow existence
   checkWorkflowExecutionExists,
+
+  -- * Common types
+  WorkflowIdConflictPolicy (..),
 ) where
 
 import Conduit
@@ -589,6 +592,9 @@ startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
             & WF.workflowIdReusePolicy
               .~ workflowIdReusePolicyToProto
                 (fromMaybe WorkflowIdReusePolicyAllowDuplicateFailedOnly opts'.workflowIdReusePolicy)
+            & WF.workflowIdConflictPolicy
+              .~ workflowIdConflictPolicyToProto
+                (fromMaybe WorkflowIdConflictPolicyFail opts'.workflowIdConflictPolicy)
             & WF.maybe'retryPolicy .~ (retryPolicyToProto <$> opts'.retryPolicy)
             & WF.cronSchedule .~ fromMaybe "" opts'.cronSchedule
             & WF.memo .~ convertToProtoMemo opts'.memo
