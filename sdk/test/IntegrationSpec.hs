@@ -2399,6 +2399,57 @@ terminateTests = do
               RpcError {} -> True
               _ -> False
 
+  describe "WorkflowIdConflictPolicy" $ do
+    specify "Fail policy prevents duplicate workflows" $ \TestEnv {..} -> do
+      let wfId = WorkflowId "test-conflict-fail"
+          opts =
+            (C.startWorkflowOptions taskQueue)
+              { C.workflowIdConflictPolicy = Just C.WorkflowIdConflictPolicyFail
+              }
+
+      -- Start first workflow
+      h1 <- useClient (C.start testRefs.shouldRunWorkflowTest wfId opts)
+
+      -- Try to start second with same ID - should fail
+      useClient (C.start testRefs.shouldRunWorkflowTest wfId opts)
+        `shouldThrow` \case
+          RpcError {} -> True
+          _ -> False
+
+    specify "UseExisting policy returns existing workflow" $ \TestEnv {..} -> do
+      let wfId = WorkflowId "test-conflict-use-existing"
+          opts =
+            (C.startWorkflowOptions taskQueue)
+              { C.workflowIdConflictPolicy = Just C.WorkflowIdConflictPolicyUseExisting
+              }
+
+      -- Start first workflow
+      h1 <- useClient (C.start testRefs.shouldRunWorkflowTest wfId opts)
+
+      -- Start second with same ID - should return handle to existing
+      h2 <- useClient (C.start testRefs.shouldRunWorkflowTest wfId opts)
+
+      -- Both handles should refer to same execution
+      h1.workflowHandleWorkflowId `shouldBe` h2.workflowHandleWorkflowId
+      h1.workflowHandleRunId `shouldBe` h2.workflowHandleRunId
+
+    specify "TerminateExisting policy terminates old workflow" $ \TestEnv {..} -> do
+      let wfId = WorkflowId "test-conflict-terminate"
+          opts =
+            (C.startWorkflowOptions taskQueue)
+              { C.workflowIdConflictPolicy = Just C.WorkflowIdConflictPolicyTerminateExisting
+              }
+
+      -- Start first workflow
+      h1 <- useClient (C.start testRefs.shouldRunWorkflowTest wfId opts)
+
+      -- Start second with same ID - should terminate first and start new
+      h2 <- useClient (C.start testRefs.shouldRunWorkflowTest wfId opts)
+
+      -- Should have different run IDs but same workflow ID
+      h1.workflowHandleRunId `shouldNotBe` h2.workflowHandleRunId
+      h1.workflowHandleWorkflowId `shouldBe` h2.workflowHandleWorkflowId
+
 -- describe "WorkflowClient" $ do
 --   specify "WorkflowExecutionAlreadyStartedError" pending
 --   specify "follows only own execution chain" pending

@@ -284,12 +284,51 @@ data WorkflowIdReusePolicy
   deriving stock (Eq, Ord, Read, Show, Enum, Bounded, Generic, Lift, Data)
 
 
+{- | A Workflow Id Conflict Policy determines how to resolve a conflict when spawning
+a new Workflow Execution with a particular `Workflow.RunId` used by an existing Open Workflow Execution.
+
+By default, this results in a Workflow execution already started error.
+-}
+data WorkflowIdConflictPolicy
+  = WorkflowIdConflictPolicyUnspecified
+  | -- | Prevents the Workflow Execution from spawning and returns a Workflow execution already started error.
+    -- This is the default policy, if one isn't specified.
+    WorkflowIdConflictPolicyFail
+  | -- | Prevents the Workflow Execution from spawning and returns a successful response
+    -- with the Open Workflow Execution's 'RunId'.
+    WorkflowIdConflictPolicyUseExisting
+  | -- | Terminates the Open Workflow Execution then spawns the new Workflow Execution
+    -- with the same 'WorkflowId'.
+    WorkflowIdConflictPolicyTerminateExisting
+  deriving stock (Eq, Ord, Read, Show, Enum, Bounded, Generic, Lift, Data)
+
+
 instance ToJSON WorkflowIdReusePolicy
 
 
 instance FromJSON WorkflowIdReusePolicy
 
 
+-- | Convert a 'WorkflowIdConflictPolicy' to its protobuf representation.
+workflowIdConflictPolicyToProto :: WorkflowIdConflictPolicy -> Workflow.WorkflowIdConflictPolicy
+workflowIdConflictPolicyToProto = \case
+  WorkflowIdConflictPolicyUnspecified -> Workflow.WORKFLOW_ID_CONFLICT_POLICY_UNSPECIFIED
+  WorkflowIdConflictPolicyFail -> Workflow.WORKFLOW_ID_CONFLICT_POLICY_FAIL
+  WorkflowIdConflictPolicyUseExisting -> Workflow.WORKFLOW_ID_CONFLICT_POLICY_USE_EXISTING
+  WorkflowIdConflictPolicyTerminateExisting -> Workflow.WORKFLOW_ID_CONFLICT_POLICY_TERMINATE_EXISTING
+
+
+-- | Convert a protobuf 'Workflow.WorkflowIdConflictPolicy' to its Haskell representation.
+workflowIdConflictPolicyFromProto :: Workflow.WorkflowIdConflictPolicy -> WorkflowIdConflictPolicy
+workflowIdConflictPolicyFromProto = \case
+  Workflow.WORKFLOW_ID_CONFLICT_POLICY_UNSPECIFIED -> WorkflowIdConflictPolicyUnspecified
+  Workflow.WORKFLOW_ID_CONFLICT_POLICY_FAIL -> WorkflowIdConflictPolicyFail
+  Workflow.WORKFLOW_ID_CONFLICT_POLICY_USE_EXISTING -> WorkflowIdConflictPolicyUseExisting
+  Workflow.WORKFLOW_ID_CONFLICT_POLICY_TERMINATE_EXISTING -> WorkflowIdConflictPolicyTerminateExisting
+  (Workflow.WorkflowIdConflictPolicy'Unrecognized _) -> WorkflowIdConflictPolicyUnspecified
+
+
+-- | Convert a 'WorkflowIdReusePolicy' to its protobuf representation.
 workflowIdReusePolicyToProto :: WorkflowIdReusePolicy -> Workflow.WorkflowIdReusePolicy
 workflowIdReusePolicyToProto = \case
   WorkflowIdReusePolicyUnspecified -> Workflow.WORKFLOW_ID_REUSE_POLICY_UNSPECIFIED
