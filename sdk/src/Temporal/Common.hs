@@ -295,7 +295,7 @@ data WorkflowIdConflictPolicy
     -- This is the default policy, if one isn't specified.
     WorkflowIdConflictPolicyFail
   | -- | Prevents the Workflow Execution from spawning and returns a successful response
-    -- with the Open Workflow Execution's `Workflow.RunId`.
+    -- with the Open Workflow Execution's 'RunId'.
     WorkflowIdConflictPolicyUseExisting
   | -- | Terminates the Open Workflow Execution then spawns the new Workflow Execution
     -- with the same 'WorkflowId'.
