@@ -303,6 +303,12 @@ data WorkflowIdConflictPolicy
   deriving stock (Eq, Ord, Read, Show, Enum, Bounded, Generic, Lift, Data)
 
 
+instance ToJSON WorkflowIdConflictPolicy
+
+
+instance FromJSON WorkflowIdConflictPolicy
+
+
 instance ToJSON WorkflowIdReusePolicy
 
 
