@@ -2450,6 +2450,23 @@ terminateTests = do
       h1.workflowHandleRunId `shouldNotBe` h2.workflowHandleRunId
       h1.workflowHandleWorkflowId `shouldBe` h2.workflowHandleWorkflowId
 
+    specify "Default conflict policy works with TerminateIfRunning reuse policy" $ \TestEnv {..} -> do
+      let wfId = WorkflowId "test-terminate-if-running-no-conflict-policy"
+          opts =
+            (C.startWorkflowOptions taskQueue)
+              { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyTerminateIfRunning
+              }
+
+      -- Start first workflow
+      h1 <- useClient (C.start testRefs.shouldRunWorkflowTest wfId opts)
+
+      -- Start second with same ID - should terminate first and start new
+      h2 <- useClient (C.start testRefs.shouldRunWorkflowTest wfId opts)
+
+      -- Should have different run IDs but same workflow ID
+      h1.workflowHandleRunId `shouldNotBe` h2.workflowHandleRunId
+      h1.workflowHandleWorkflowId `shouldBe` h2.workflowHandleWorkflowId
+
 -- describe "WorkflowClient" $ do
 --   specify "WorkflowExecutionAlreadyStartedError" pending
 --   specify "follows only own execution chain" pending
