@@ -594,7 +594,7 @@ startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
                 (fromMaybe WorkflowIdReusePolicyAllowDuplicateFailedOnly opts'.workflowIdReusePolicy)
             & WF.workflowIdConflictPolicy
               .~ workflowIdConflictPolicyToProto
-                (fromMaybe WorkflowIdConflictPolicyFail opts'.workflowIdConflictPolicy)
+                (fromMaybe WorkflowIdConflictPolicyUnspecified opts'.workflowIdConflictPolicy)
             & WF.maybe'retryPolicy .~ (retryPolicyToProto <$> opts'.retryPolicy)
             & WF.cronSchedule .~ fromMaybe "" opts'.cronSchedule
             & WF.memo .~ convertToProtoMemo opts'.memo
