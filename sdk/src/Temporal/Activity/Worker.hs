@@ -156,7 +156,7 @@ requireActivityNotRunning tt m = do
 applyActivityTaskStart :: (MonadUnliftIO m, MonadLogger m) => AT.ActivityTask -> TaskToken -> AT.Start -> ActivityWorkerM actEnv m ()
 applyActivityTaskStart tsk tt msg = do
   w <- ask
-  $logDebug $ "Starting activity: " <> T.pack (show tsk)
+  $logInfo $ "Starting activity: " <> T.pack (show tsk)
   requireActivityNotRunning tt $ do
     info <- activityInfoFromProto tt msg
     args <- processorDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload (msg ^. AT.vec'input))
