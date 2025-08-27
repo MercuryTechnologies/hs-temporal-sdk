@@ -5,7 +5,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 {- |
 Module: Temporal.Worker
@@ -91,7 +90,6 @@ module Temporal.Worker (
 ) where
 
 import Control.Concurrent
-import Control.Exception (Exception (..))
 import Control.Monad
 import Control.Monad.Catch
 import Control.Monad.Logger
@@ -105,12 +103,10 @@ import Data.ProtoLens (encodeMessage)
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
-import Data.UUID (UUID)
 import qualified Data.UUID as UUID
 import Data.UUID.V4 (nextRandom)
 import Data.Word
 import Lens.Family2
-import OpenTelemetry.Attributes (emptyAttributes)
 import OpenTelemetry.Trace.Core hiding (inSpan)
 import qualified OpenTelemetry.Trace.Core as OT
 import OpenTelemetry.Trace.Monad
@@ -124,8 +120,9 @@ import Temporal.Activity.Definition
 import qualified Temporal.Activity.Worker as Activity
 import Temporal.Common
 import Temporal.Common.Async
+import qualified Temporal.Common.Logging as Logging
 import Temporal.Core.Client
-import Temporal.Core.Worker (InactiveForReplay, WorkerError)
+import Temporal.Core.Worker (InactiveForReplay)
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
 import Temporal.Interceptor
@@ -498,10 +495,10 @@ data Worker env = forall ty.
 
 startReplayWorker :: (MonadUnliftIO m, MonadCatch m) => Runtime -> WorkerConfig actEnv -> m (Temporal.Worker.Worker actEnv, Core.HistoryPusher)
 startReplayWorker rt conf = provideCallStack $ runWorkerContext conf $ do
-  $(logDebug) "Starting worker"
+  Logging.logDebug "Starting worker"
   let coreConfig' = conf.coreConfig {Core.nondeterminismAsWorkflowFail = True}
   (workerCore, replay) <- either throwIO pure =<< liftIO (Core.newReplayWorker rt coreConfig')
-  $(logDebug) "Instantiated core"
+  Logging.logDebug "Instantiated core"
   workerEvictionEmitter <- newBroadcastTChanIO
   runningWorkflows <- newTVarIO mempty
   uuid <- liftIO nextRandom
@@ -520,9 +517,9 @@ startReplayWorker rt conf = provideCallStack $ runWorkerContext conf $ do
       workerType = Core.SReplay
       workerTracer = makeTracer conf.tracerProvider "hs-temporal-sdk" tracerOptions
   workerWorkflowLoop <- asyncLabelled (T.unpack $ T.concat ["temporal/worker/workflow/", Core.namespace conf.coreConfig, "/", Core.taskQueue conf.coreConfig]) $ do
-    $(logDebug) "Starting workflow worker loop"
+    Logging.logDebug "Starting workflow worker loop"
     Workflow.execute workflowWorker
-      `UnliftIO.finally` $(logDebug) "Exiting workflow worker loop"
+      `UnliftIO.finally` Logging.logDebug "Exiting workflow worker loop"
   pure (Temporal.Worker.Worker {..}, replay)
 
 
@@ -541,10 +538,10 @@ runReplayHistory rt conf history = runWorkerContext conf $ UnliftIO.bracket (sta
   evictions <- subscribeToEvictions worker
   let mWfId = history ^? vec'events . traverse . maybe'workflowExecutionStartedEventAttributes . traverse . workflowId . to T.encodeUtf8
   wfId <- maybe (throwIO $ userError "No workflow ID found in history") pure mWfId
-  $(logDebug) $ "Pushing history for workflow ID " <> T.pack (show wfId)
-  $(logDebug) $ T.pack $ show history
+  Logging.logDebug $ "Pushing history for workflow ID " <> T.pack (show wfId)
+  Logging.logDebug $ T.pack $ show history
   res <- liftIO $ Core.pushHistory pusher wfId (Left $ encodeMessage history)
-  $(logDebug) $ "Pushed history for workflow ID " <> T.pack (show wfId)
+  Logging.logDebug $ "Pushed history for workflow ID " <> T.pack (show wfId)
   case res of
     Left e -> pure $ Left $ ReplayHistoryFailure {message = e.message}
     Right () -> do
@@ -612,19 +609,19 @@ startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "sta
   let workerType = Core.SReal
   -- logs <- liftIO $ fetchLogs globalRuntime
   -- forM_ logs $ \l -> case l.level of
-  --   Trace -> $(logDebug) l.message
-  --   Debug -> $(logDebug) l.message
-  --   Info -> $(logInfo) l.message
-  --   Warn -> $(logWarn) l.message
-  --   Error -> $(logError) l.message
+  --   Trace -> Logging.logDebug l.message
+  --   Debug -> Logging.logDebug l.message
+  --   Info -> Logging.logInfo l.message
+  --   Warn -> Logging.logWarn l.message
+  --   Error -> Logging.logError l.message
   workerWorkflowLoop <- asyncLabelled (T.unpack $ T.concat ["temporal/worker/workflow/", Core.namespace conf.coreConfig, "/", Core.taskQueue conf.coreConfig]) $ do
-    $(logDebug) "Starting workflow worker loop"
+    Logging.logDebug "Starting workflow worker loop"
     Workflow.execute workflowWorker
-      `UnliftIO.finally` $(logDebug) "Exiting workflow worker loop"
+      `UnliftIO.finally` Logging.logDebug "Exiting workflow worker loop"
   workerActivityLoop <- asyncLabelled (T.unpack $ T.concat ["temporal/worker/activity/", Core.namespace conf.coreConfig, "/", Core.taskQueue conf.coreConfig]) $ do
-    $(logDebug) "Starting activity worker loop"
+    Logging.logDebug "Starting activity worker loop"
     Activity.execute workerActivityWorker
-      `UnliftIO.finally` $(logDebug) "Exiting activity worker loop"
+      `UnliftIO.finally` Logging.logDebug "Exiting activity worker loop"
   pure Temporal.Worker.Worker {..}
 
 
@@ -648,7 +645,7 @@ waitWorker (Temporal.Worker.Worker {workerType, workerWorkflowLoop, workerActivi
 
 -- logs <- liftIO $ fetchLogs globalRuntime
 -- forM_ logs $ \l -> do
---   $(logInfo) $ Text.pack $ show l
+--   Logging.logInfo $ Text.pack $ show l
 
 {- | Link a worker to the current thread. This will cause uncaught worker exceptions to be rethrown in the current thread.
 
@@ -726,7 +723,7 @@ shutdown worker@Temporal.Worker.Worker {workerCore, workerTracer, workerType, wo
 
 -- logs <- liftIO $ fetchLogs globalRuntime
 -- forM_ logs $ \l -> do
---   $(logInfo) $ Text.pack $ show l
+--   Logging.logInfo $ Text.pack $ show l
 
 -- | Subscribe to evictions from the worker. This is not generally needed, but can be useful for debugging.
 subscribeToEvictions :: MonadIO m => Temporal.Worker.Worker actEnv -> m (TChan Workflow.EvictionWithRunID)

@@ -2,7 +2,6 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Temporal.Workflow.Saga (
@@ -24,12 +23,13 @@ import qualified Control.Monad.Catch as Catch
 import Control.Monad.Cont
 import Control.Monad.Error.Class (MonadError)
 import Control.Monad.Fix (MonadFix)
-import Control.Monad.Logger (MonadLogger, logError)
+import Control.Monad.Logger (MonadLogger)
 import Control.Monad.RWS (MonadReader)
 import Control.Monad.State
 import Control.Monad.Writer
 import Data.Functor.Contravariant
 import qualified Data.Text as T
+import qualified Temporal.Common.Logging as Logging
 
 
 {- | The saga pattern is a failure management pattern that helps establish consistency in distributed applications,
@@ -142,7 +142,7 @@ compensate compensationExceptionHandler = SagaT $ do
     case res of
       Left (e :: Catch.SomeException) -> do
         Catch.catchAll (compensationExceptionHandler e) $ \e' -> do
-          $(logError) $ T.pack $ "Saga compensation error handler threw exception: " <> show e'
+          Logging.logError $ T.pack $ "Saga compensation error handler threw exception: " <> show e'
       Right () -> pure ()
 
 

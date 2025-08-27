@@ -2,12 +2,9 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
 {-# LANGUAGE TypeOperators #-}
@@ -301,6 +298,7 @@ import RequireCallStack
 import System.Random.Stateful
 import Temporal.Activity.Definition (ActivityRef (..), KnownActivity (..))
 import Temporal.Common
+import qualified Temporal.Common.Logging as Logging
 import Temporal.Common.TimeoutType
 import Temporal.Duration (Duration (..), diffSystemTime, durationFromProto, durationToProto, nanoseconds, seconds)
 import Temporal.Exception
@@ -428,7 +426,7 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift 
       Task
         { waitAction = do
             res <- getIVar resultSlot
-            $(logInfo) ("Activity result: " <> Text.pack (show res))
+            Logging.logInfo ("Activity result: " <> Text.pack (show res))
             Workflow $ \_ -> case res ^. Activation.result . ActivityResult.maybe'status of
               Nothing -> error "Activity result missing status"
               Just (ActivityResult.ActivityResolution'Completed success) -> do
@@ -1186,7 +1184,7 @@ setUpdateHandler (updateRef -> KnownUpdate codec n) f mValidator = ilift $ do
               vec
       case ePayloads of
         Left err -> Workflow $ \_env -> do
-          $(logDebug) "Hit a decoding error"
+          Logging.logDebug "Hit a decoding error"
           pure $ Throw $ toException $ ValueError err
         Right w -> w >>= \result -> ilift (liftIO $ encode codec result)
     updateValidatorHandler :: validator -> UpdateId -> Vector Payload -> Map Text Payload -> Validation (Either SomeException ())
@@ -1292,7 +1290,7 @@ createTimer ts = provideCallStack $ ilift $ do
                       & Command.seq .~ seqId
                       & Command.startToFireTimeout .~ durationToProto ts'
                    )
-      $(logDebug) "Add command: sleep"
+      Logging.logDebug "Add command: sleep"
       res <- newIVar
       atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
         seqMaps {timers = HashMap.insert s res seqMaps.timers}
@@ -1367,7 +1365,7 @@ instance Cancel Timer where
                     & Command.seq .~ rawSequence (timerSequence t)
                  )
     addCommand cmd
-    $(logDebug) "about to putIVar: cancelTimer"
+    Logging.logDebug "about to putIVar: cancelTimer"
     liftIO $
       putIVar
         t.timerHandle
@@ -1377,7 +1375,7 @@ instance Cancel Timer where
     atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
       seqMaps {timers = HashMap.delete t.timerSequence seqMaps.timers}
 
-    $(logDebug) "finished putIVar: cancelTimer"
+    Logging.logDebug "finished putIVar: cancelTimer"
     pure $ Done ()
 
 

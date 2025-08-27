@@ -2,7 +2,6 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module Temporal.Activity.Worker where
 
@@ -27,6 +26,7 @@ import Temporal.Activity.Definition
 import Temporal.Activity.Types
 import Temporal.Common
 import Temporal.Common.Async
+import qualified Temporal.Common.Logging as Logging
 import qualified Temporal.Core.Worker as Core
 import Temporal.Duration (durationFromProto)
 import Temporal.Exception
@@ -85,7 +85,7 @@ execute worker = runActivityWorker worker go
         Left (Core.WorkerError Core.PollShutdown _) -> do
           pure ()
         Left e -> do
-          $logError (T.pack (show e))
+          Logging.logError (T.pack (show e))
           throwIO e
         Right task -> do
           applyActivityTask task
@@ -156,7 +156,7 @@ requireActivityNotRunning tt m = do
 applyActivityTaskStart :: (MonadUnliftIO m, MonadLogger m) => AT.ActivityTask -> TaskToken -> AT.Start -> ActivityWorkerM actEnv m ()
 applyActivityTaskStart tsk tt msg = do
   w <- ask
-  $logInfo $ "Starting activity: " <> T.pack (show tsk)
+  Logging.logInfo $ "Starting activity: " <> T.pack (show tsk)
   requireActivityNotRunning tt $ do
     info <- activityInfoFromProto tt msg
     args <- processorDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload (msg ^. AT.vec'input))
@@ -191,7 +191,7 @@ applyActivityTaskStart tsk tt msg = do
                   `finally` (takeMVar syncPoint *> atomically (modifyTVar' w.runningActivities (HashMap.delete tt)))
         completionMsg <- case ef >>= first (toException . ValueError) of
           Left err@(SomeException _wrappedErr) -> do
-            $logDebug (T.pack (show err))
+            Logging.logDebug (T.pack (show err))
             let appFailure = mkApplicationFailure err w.activityErrorConverters
                 enrichedApplicationFailure = applicationFailureToFailureProto appFailure
             pure $
@@ -217,7 +217,7 @@ applyActivityTaskStart tsk tt msg = do
                       & AR.failed
                         .~ (defMessage & AR.failure .~ enrichedApplicationFailure)
           Right ok -> do
-            $logDebug "Got activity result"
+            Logging.logDebug "Got activity result"
             ok' <- liftIO $ payloadProcessorEncode w.payloadProcessor ok
             pure $
               defMessage
@@ -227,7 +227,7 @@ applyActivityTaskStart tsk tt msg = do
                         & AR.completed
                           .~ (defMessage & AR.result .~ convertToProtoPayload ok')
                      )
-        $logDebug ("Activity completion message: " <> T.pack (show completionMsg))
+        Logging.logDebug ("Activity completion message: " <> T.pack (show completionMsg))
         completionResult <- liftIO $ Core.completeActivityTask w.workerCore completionMsg
         case completionResult of
           Left err -> throwIO err
@@ -246,7 +246,7 @@ applyActivityTaskStart tsk tt msg = do
 applyActivityTaskCancel :: (MonadUnliftIO m, MonadLogger m) => TaskToken -> AT.Cancel -> ActivityWorkerM actEnv m ()
 applyActivityTaskCancel tt msg = do
   w <- ask
-  $logDebug $ "Cancelling activity: " <> T.pack (show tt)
+  Logging.logDebug $ "Cancelling activity: " <> T.pack (show tt)
   running <- readTVarIO w.runningActivities
   let cancelReason = case msg ^. AT.reason of
         AT.NOT_FOUND -> NotFound

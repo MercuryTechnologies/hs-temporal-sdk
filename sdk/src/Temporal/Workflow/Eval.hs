@@ -3,18 +3,17 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Temporal.Workflow.Eval where
 
-import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Text (Text)
 import qualified Data.Text as Text
 import GHC.Stack
 import RequireCallStack
 import Temporal.Common
+import qualified Temporal.Common.Logging as Logging
 import Temporal.Coroutine
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
@@ -133,7 +132,7 @@ runWorkflow wf = provideCallStack $ do
       lift $ do
         cs <- readIORef inst.workflowCallStack
         logMsg <- withRunId (Text.pack $ printf "schedule: %d\n%s" (1 + lengthJobList rq) $ prettyCallStack cs)
-        $logDebug logMsg
+        Logging.logDebug logMsg
       let {-# INLINE result #-}
           result r = do
             e <- lift $ readIORef ref
@@ -177,13 +176,13 @@ runWorkflow wf = provideCallStack $ do
         Right (Done a) -> result $ Ok a
         Right (Throw ex) -> result $ ThrowWorkflow ex
         Right (Blocked i fn) -> do
-          lift ($logDebug =<< withRunId "scheduled job blocked")
+          lift (Logging.logDebug =<< withRunId "scheduled job blocked")
           lift $ addJob env (toWf fn) ivar i
           reschedule env rq
 
     reschedule :: ContinuationEnv -> JobList -> SuspendableWorkflowExecution ()
     reschedule env@ContinuationEnv {..} jobs = do
-      lift ($logDebug =<< withRunId "reschedule")
+      lift (Logging.logDebug =<< withRunId "reschedule")
       case jobs of
         JobNil -> do
           rq <- lift $ readIORef runQueueRef
@@ -199,7 +198,7 @@ runWorkflow wf = provideCallStack $ do
     emptyRunQueue env = do
       lift $ do
         logMsg <- withRunId "emptyRunQueue"
-        $logDebug logMsg
+        Logging.logDebug logMsg
       workflowActions <- checkActivationResults env
       case workflowActions of
         JobNil -> awaitActivation env
@@ -207,28 +206,28 @@ runWorkflow wf = provideCallStack $ do
 
     awaitActivation :: ContinuationEnv -> SuspendableWorkflowExecution ()
     awaitActivation env = do
-      lift ($logDebug =<< withRunId "flushCommandsAndAwaitActivation")
+      lift (Logging.logDebug =<< withRunId "flushCommandsAndAwaitActivation")
       waitActivationResults env
 
     checkActivationResults :: ContinuationEnv -> SuspendableWorkflowExecution JobList
     checkActivationResults _env = lift $ do
-      $logDebug =<< withRunId "checkActivationResults"
+      Logging.logDebug =<< withRunId "checkActivationResults"
       comps <- atomically $ do
         c <- readTVar pendingActivations
         writeTVar pendingActivations []
         pure c
       case comps of
         [] -> do
-          $logDebug =<< withRunId "No new activation results"
+          Logging.logDebug =<< withRunId "No new activation results"
           return JobNil
         _ -> do
-          $logDebug =<< withRunId (Text.pack $ printf "%d complete" (length comps))
+          Logging.logDebug =<< withRunId (Text.pack $ printf "%d complete" (length comps))
           let
             getComplete (ActivationResult a IVar {ivarRef = cr}) = do
               r <- readIORef cr
               case r of
                 IVarFull _ -> do
-                  $logDebug =<< withRunId "existing result"
+                  Logging.logDebug =<< withRunId "existing result"
                   return JobNil
                 -- this happens if a data source reports a result,
                 -- and then throws an exception.  We call putResult
@@ -244,7 +243,7 @@ runWorkflow wf = provideCallStack $ do
 
     waitActivationResults :: ContinuationEnv -> SuspendableWorkflowExecution ()
     waitActivationResults env = do
-      lift ($logDebug =<< withRunId "waitActivationResults")
+      lift (Logging.logDebug =<< withRunId "waitActivationResults")
       newActivations <- do
         activations <- lift $ readTVarIO pendingActivations
         if null activations
