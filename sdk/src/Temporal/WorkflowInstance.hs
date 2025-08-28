@@ -309,7 +309,21 @@ applyStartWorkflow :: ExecuteWorkflowInput -> (Vector Payload -> IO (Either Stri
 applyStartWorkflow execInput workflowFn = do
   inst <- ask
   let executeWorkflowBase input = runInstanceM inst $ do
-        Logging.logInfo $ "Starting workflow: " <> input.executeWorkflowInputType
+        Logging.logInfo $
+          Text.concat
+            [ "Starting workflow: "
+            , "namespace="
+            , rawNamespace input.executeWorkflowInputInfo.namespace
+            , " "
+            , "taskQueue="
+            , rawTaskQueue input.executeWorkflowInputInfo.taskQueue
+            , " "
+            , "workflowType="
+            , input.executeWorkflowInputType
+            , " "
+            , "workflowId="
+            , rawWorkflowId input.executeWorkflowInputInfo.workflowId
+            ]
         eAct <- liftIO (workflowFn =<< processorDecodePayloads inst.payloadProcessor input.executeWorkflowInputArgs)
         case eAct of
           Left msg -> do

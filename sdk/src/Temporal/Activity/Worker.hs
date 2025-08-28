@@ -156,9 +156,30 @@ requireActivityNotRunning tt m = do
 applyActivityTaskStart :: (MonadUnliftIO m, MonadLogger m) => AT.ActivityTask -> TaskToken -> AT.Start -> ActivityWorkerM actEnv m ()
 applyActivityTaskStart tsk tt msg = do
   w <- ask
-  Logging.logInfo $ "Starting activity: " <> T.pack (show tsk)
+  let c = Core.getWorkerConfig w.workerCore
+  info <- activityInfoFromProto tt msg
+  Logging.logInfo $
+    T.concat
+      [ "Starting activity: "
+      , "namespace="
+      , Core.namespace c
+      , " "
+      , "taskQueue="
+      , Core.taskQueue c
+      , " "
+      , "workflowType="
+      , rawWorkflowType info.workflowType
+      , " "
+      , "workflowId="
+      , rawWorkflowId info.workflowId
+      , " "
+      , "activityType="
+      , info.activityType
+      , " "
+      , "activityId="
+      , rawActivityId info.activityId
+      ]
   requireActivityNotRunning tt $ do
-    info <- activityInfoFromProto tt msg
     args <- processorDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload (msg ^. AT.vec'input))
     env <- readIORef w.activityEnv
     let
@@ -180,7 +201,6 @@ applyActivityTaskStart tsk tt msg = do
     -- it later if the orchestrator requests it.
     mask_ $ do
       syncPoint <- newEmptyMVar
-      let c = Core.getWorkerConfig w.workerCore
       runningActivity <- asyncLabelled (T.unpack $ T.concat ["temporal/worker/activity/start/", Core.namespace c, "/", Core.taskQueue c]) $ do
         (ef :: Either SomeException (Either String Payload)) <- liftIO $ UnliftIO.trySyncOrAsync $ do
           w.activityInboundInterceptors.executeActivity env input $ \env' input' -> do

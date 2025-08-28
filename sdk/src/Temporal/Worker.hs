@@ -495,7 +495,7 @@ data Worker env = forall ty.
 
 startReplayWorker :: (MonadUnliftIO m, MonadCatch m) => Runtime -> WorkerConfig actEnv -> m (Temporal.Worker.Worker actEnv, Core.HistoryPusher)
 startReplayWorker rt conf = provideCallStack $ runWorkerContext conf $ do
-  Logging.logDebug "Starting worker"
+  Logging.logDebug "Starting replay worker"
   let coreConfig' = conf.coreConfig {Core.nondeterminismAsWorkflowFail = True}
   (workerCore, replay) <- either throwIO pure =<< liftIO (Core.newReplayWorker rt coreConfig')
   Logging.logDebug "Instantiated core"
@@ -517,9 +517,40 @@ startReplayWorker rt conf = provideCallStack $ runWorkerContext conf $ do
       workerType = Core.SReplay
       workerTracer = makeTracer conf.tracerProvider "hs-temporal-sdk" tracerOptions
   workerWorkflowLoop <- asyncLabelled (T.unpack $ T.concat ["temporal/worker/workflow/", Core.namespace conf.coreConfig, "/", Core.taskQueue conf.coreConfig]) $ do
-    Logging.logDebug "Starting workflow worker loop"
-    Workflow.execute workflowWorker
-      `UnliftIO.finally` Logging.logDebug "Exiting workflow worker loop"
+    Logging.logInfo $
+      T.concat
+        [ "Starting replay workflow worker loop:"
+        , "namespace="
+        , Core.namespace conf.coreConfig
+        , " "
+        , "taskQueue="
+        , Core.taskQueue conf.coreConfig
+        ]
+    res <- UnliftIO.try $ Workflow.execute workflowWorker
+    case res of
+      Left (e :: SomeException) ->
+        Logging.logError $
+          T.concat
+            [ "Exiting replay workflow worker loop with error: "
+            , "namespace="
+            , Core.namespace conf.coreConfig
+            , " "
+            , "taskQueue="
+            , Core.taskQueue conf.coreConfig
+            , " "
+            , "error="
+            , T.pack $ show e
+            ]
+      Right _ ->
+        Logging.logInfo $
+          T.concat
+            [ "Exiting replay workflow worker loop normally: "
+            , "namespace="
+            , Core.namespace conf.coreConfig
+            , " "
+            , "taskQueue="
+            , Core.taskQueue conf.coreConfig
+            ]
   pure (Temporal.Worker.Worker {..}, replay)
 
 
@@ -615,13 +646,67 @@ startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "sta
   --   Warn -> Logging.logWarn l.message
   --   Error -> Logging.logError l.message
   workerWorkflowLoop <- asyncLabelled (T.unpack $ T.concat ["temporal/worker/workflow/", Core.namespace conf.coreConfig, "/", Core.taskQueue conf.coreConfig]) $ do
-    Logging.logDebug "Starting workflow worker loop"
-    Workflow.execute workflowWorker
-      `UnliftIO.finally` Logging.logDebug "Exiting workflow worker loop"
+    Logging.logInfo $
+      T.concat
+        [ "Starting replay workflow worker loop:"
+        , "namespace="
+        , Core.namespace conf.coreConfig
+        , " "
+        , "taskQueue="
+        , Core.taskQueue conf.coreConfig
+        ]
+    res <- UnliftIO.try $ Workflow.execute workflowWorker
+    case res of
+      Left (e :: SomeException) ->
+        Logging.logError $
+          T.concat
+            [ "Exiting workflow worker loop with error: "
+            , "namespace="
+            , Core.namespace conf.coreConfig
+            , " "
+            , "taskQueue="
+            , Core.taskQueue conf.coreConfig
+            , " "
+            , "error="
+            , T.pack $ show e
+            ]
+      Right _ ->
+        Logging.logInfo $
+          T.concat
+            [ "Exiting workflow worker loop normally: "
+            , "namespace="
+            , Core.namespace conf.coreConfig
+            , " "
+            , "taskQueue="
+            , Core.taskQueue conf.coreConfig
+            ]
   workerActivityLoop <- asyncLabelled (T.unpack $ T.concat ["temporal/worker/activity/", Core.namespace conf.coreConfig, "/", Core.taskQueue conf.coreConfig]) $ do
     Logging.logDebug "Starting activity worker loop"
-    Activity.execute workerActivityWorker
-      `UnliftIO.finally` Logging.logDebug "Exiting activity worker loop"
+    res <- UnliftIO.try $ Activity.execute workerActivityWorker
+    case res of
+      Left (e :: SomeException) ->
+        Logging.logError $
+          T.concat
+            [ "Exiting activity worker loop with error: "
+            , "namespace="
+            , Core.namespace conf.coreConfig
+            , " "
+            , "taskQueue="
+            , Core.taskQueue conf.coreConfig
+            , " "
+            , "error="
+            , T.pack $ show e
+            ]
+      Right _ ->
+        Logging.logInfo $
+          T.concat
+            [ "Exiting activity worker loop normally: "
+            , "namespace="
+            , Core.namespace conf.coreConfig
+            , " "
+            , "taskQueue="
+            , Core.taskQueue conf.coreConfig
+            ]
   pure Temporal.Worker.Worker {..}
 
 
