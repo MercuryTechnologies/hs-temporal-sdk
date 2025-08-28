@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 module Temporal.Workflow.Internal.Instance (
   InstanceM,
   runInstanceM,
@@ -19,7 +17,6 @@ module Temporal.Workflow.Internal.Instance (
   nextConditionSequence,
 ) where
 
-import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.ProtoLens
 import qualified Data.Text as T
@@ -28,6 +25,7 @@ import Lens.Family2
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Core
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
 import Temporal.Common
+import qualified Temporal.Common.Logging as Logging
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
 import UnliftIO
@@ -52,11 +50,11 @@ flushCommands = do
         defMessage
           & Completion.runId .~ rawRunId info.runId
           & Completion.successful .~ completionSuccessful
-  $(logDebug) ("flushCommands: " <> T.pack (show completionMessage) <> " " <> T.pack (prettyCallStack callStack))
+  Logging.logDebug ("flushCommands: " <> T.pack (show completionMessage) <> " " <> T.pack (prettyCallStack callStack))
   res <- liftIO $ inst.workflowCompleteActivation completionMessage
   case res of
     Left err -> do
-      $(logError) ("flushCommands: failed: " <> T.pack (show err))
+      Logging.logError ("flushCommands: failed: " <> T.pack (show err))
       throwIO err
     Right () -> pure ()
 

@@ -24,6 +24,7 @@ library
       Temporal.Client.Namespace
       Temporal.Client.Schedule
       Temporal.Client.TestService
+      Temporal.Common.Logging
       Temporal.Contrib.OpenTelemetry
       Temporal.Duration
       Temporal.EphemeralServer
