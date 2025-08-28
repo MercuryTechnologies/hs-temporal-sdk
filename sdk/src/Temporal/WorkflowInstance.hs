@@ -1,7 +1,5 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeApplications #-}
 
 module Temporal.WorkflowInstance (
   WorkflowInstance,
@@ -73,6 +71,7 @@ import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_F
 import RequireCallStack (provideCallStack)
 import System.Random (mkStdGen)
 import Temporal.Common
+import qualified Temporal.Common.Logging as Logging
 import qualified Temporal.Core.Worker as Core
 import Temporal.Coroutine
 import Temporal.Duration
@@ -112,7 +111,7 @@ create
   payloadProcessor
   info
   start = do
-    $logDebug "Instantiating workflow instance"
+    Logging.logDebug "Instantiating workflow instance"
     workflowInstanceLogger <- askLoggerIO
     workflowRandomnessSeed <- WorkflowGenM <$> newIORef (mkStdGen 0)
     workflowNotifiedPatches <- newIORef mempty
@@ -147,16 +146,16 @@ create
     -- is allowed to interact with the instance.
     let inst = WorkflowInstance {..}
     workerThread <- liftIO $ async $ runInstanceM inst $ do
-      $logDebug "Start workflow execution thread"
+      Logging.logDebug "Start workflow execution thread"
       exec <- setUpWorkflowExecution start
       res <- liftIO $ inboundInterceptor.executeWorkflow exec $ \exec' -> runInstanceM inst $ runTopLevel $ do
-        $logDebug "Executing workflow"
+        Logging.logDebug "Executing workflow"
         wf <- applyStartWorkflow exec' workflowFn
         runWorkflowToCompletion wf
-      $logDebug "Workflow execution completed"
+      Logging.logDebug "Workflow execution completed"
       addCommand =<< convertExitVariantToCommand res
       flushCommands
-      $logDebug "Handling leftover queries"
+      Logging.logDebug "Handling leftover queries"
       handleQueriesAfterCompletion
     -- If we have an exception crash the workflow thread, then we need to throw to the worker too,
     -- otherwise it will just hang forever.
@@ -170,7 +169,7 @@ runWorkflowToCompletion wf = do
   inst <- ask
   let completeStep :: Await [ActivationResult] (SuspendableWorkflowExecution Payload) -> InstanceM (SuspendableWorkflowExecution Payload)
       completeStep suspension = do
-        $logDebug "Awaiting activation results from workflow"
+        Logging.logDebug "Awaiting activation results from workflow"
         -- If the workflow is blocked, then we necessarily have to signal the temporal-core
         -- that we are stuck. Once we get unstuck (e.g. something is in the activation channel)
         -- then we can resume the workflow.
@@ -209,7 +208,7 @@ handleQueriesAfterCompletion = forever $ do
 
   case completion of
     Left err -> do
-      $(logDebug) ("Workflow failure: " <> Text.pack (show err))
+      Logging.logDebug ("Workflow failure: " <> Text.pack (show err))
       let appFailure = mkApplicationFailure err w.errorConverters
           enrichedApplicationFailure = applicationFailureToFailureProto appFailure
 
@@ -265,7 +264,7 @@ activate act suspension = do
       res <- UnliftIO.timeout timeoutDuration $ applyJobs (act ^. Activation.vec'jobs) suspension
       case res of
         Nothing -> do
-          $(logError) "Deadlock detected"
+          Logging.logError "Deadlock detected"
           pure $ Left $ toException $ LogicBug WorkflowActivationDeadlock
         Just res' -> pure res'
   -- TODO: Can the completion send both successful commands and a failure
@@ -273,7 +272,7 @@ activate act suspension = do
   -- a workflow, but still fail at some point?
   case eResult of
     Left err -> do
-      $(logWarn) "Failed activation on workflow" -- <> toLogStr (show $ workflowType info) <> " with ID " <> toLogStr (workflowId info) <> " and run ID " <> toLogStr (runId info))
+      Logging.logWarn "Failed activation on workflow" -- <> toLogStr (show $ workflowType info) <> " with ID " <> toLogStr (workflowId info) <> " and run ID " <> toLogStr (runId info))
       -- TODO, failures should have source / stack trace info
       -- TODO, convert failure type using a supplied payload converter
       let failure =
@@ -310,14 +309,28 @@ applyStartWorkflow :: ExecuteWorkflowInput -> (Vector Payload -> IO (Either Stri
 applyStartWorkflow execInput workflowFn = do
   inst <- ask
   let executeWorkflowBase input = runInstanceM inst $ do
-        $(logInfo) $ "Starting workflow: " <> input.executeWorkflowInputType
+        Logging.logInfo $
+          Text.concat
+            [ "Starting workflow: "
+            , "namespace="
+            , rawNamespace input.executeWorkflowInputInfo.namespace
+            , " "
+            , "taskQueue="
+            , rawTaskQueue input.executeWorkflowInputInfo.taskQueue
+            , " "
+            , "workflowType="
+            , input.executeWorkflowInputType
+            , " "
+            , "workflowId="
+            , rawWorkflowId input.executeWorkflowInputInfo.workflowId
+            ]
         eAct <- liftIO (workflowFn =<< processorDecodePayloads inst.payloadProcessor input.executeWorkflowInputArgs)
         case eAct of
           Left msg -> do
-            $(logError) $ Text.pack ("Failed to decode workflow arguments: " <> msg)
+            Logging.logError $ Text.pack ("Failed to decode workflow arguments: " <> msg)
             throwIO (ValueError msg)
           Right act -> do
-            $(logDebug) "Calling runWorkflow"
+            Logging.logDebug "Calling runWorkflow"
             pure (runWorkflow act)
 
   liftIO $ executeWorkflowBase execInput
@@ -334,7 +347,7 @@ applyQueryWorkflow :: HasCallStack => QueryWorkflow -> InstanceM ()
 applyQueryWorkflow queryWorkflow = do
   inst <- ask
   handles <- readIORef inst.workflowQueryHandlers
-  $logDebug $ Text.pack ("Applying query: " <> show (queryWorkflow ^. Activation.queryType))
+  Logging.logDebug $ Text.pack ("Applying query: " <> show (queryWorkflow ^. Activation.queryType))
   let processor = inst.payloadProcessor
   args <- processorDecodePayloads processor (fmap convertFromProtoPayload (queryWorkflow ^. Command.vec'arguments))
   let baseInput =
@@ -388,14 +401,14 @@ applySignalWorkflow signalWorkflow = join $ do
             <|> HashMap.lookup Nothing handlers
     case handlerOrDefault of
       Nothing -> pure $ Done $ do
-        $(logWarn) $ Text.pack ("No signal handler found for signal: " <> show (signalWorkflow ^. Activation.signalName))
+        Logging.logWarn $ Text.pack ("No signal handler found for signal: " <> show (signalWorkflow ^. Activation.signalName))
         pure ()
       Just handler -> do
         eInputs <- UnliftIO.try $ processorDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (signalWorkflow ^. Command.vec'input))
         case eInputs of
           Left err -> pure $ Throw err
           Right args -> pure $ Done $ do
-            $(logDebug) $ Text.pack ("Applying signal handler for signal: " <> show (signalWorkflow ^. Activation.signalName))
+            Logging.logDebug $ Text.pack ("Applying signal handler for signal: " <> show (signalWorkflow ^. Activation.signalName))
             handler args
 
 
@@ -411,7 +424,7 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
       Nothing -> do
         let errMessage = Text.pack ("No update handler found for update: " <> show (doUpdate ^. Activation.name))
         let err = mkApplicationFailure (toException $ UpdateNotFound errMessage) inst.errorConverters
-        $(logWarn) errMessage
+        Logging.logWarn errMessage
         let cmd =
               defMessage
                 & Command.updateResponse
@@ -498,12 +511,12 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
   runAction <- ilift validator
   when runAction $ do
     ePayload <- Temporal.Workflow.Internal.Monad.try updateAction
-    $(logDebug) "we executed the update!"
+    Logging.logDebug "we executed the update!"
     Workflow $ \_env -> do
       inst <- ask
       case ePayload of
         Left err -> do
-          $(logDebug) "gonna send an update rejected message!"
+          Logging.logDebug "gonna send an update rejected message!"
           addCommand $
             defMessage
               & Command.updateResponse
@@ -513,7 +526,7 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
                    )
           pure $ Throw err
         Right payload -> do
-          $(logDebug) "gonna send an update completed message!"
+          Logging.logDebug "gonna send an update completed message!"
           payload' <- liftIO $ payloadProcessorEncode inst.payloadProcessor payload
           addCommand $
             defMessage
@@ -562,7 +575,7 @@ applyJobs
   -> f (Await [ActivationResult] (SuspendableWorkflowExecution Payload))
   -> InstanceM (Either SomeException (f (SuspendableWorkflowExecution Payload)))
 applyJobs jobs fAwait = UnliftIO.try $ do
-  $logDebug $ Text.pack ("Applying jobs: " <> show jobs)
+  Logging.logDebug $ Text.pack ("Applying jobs: " <> show jobs)
   let JobGroups {..} = jobGroups
   patchNotifications
   queryWorkflows

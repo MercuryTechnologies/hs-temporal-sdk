@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 module Temporal.Workflow.Worker where
 
 import qualified Control.Exception.Annotated as Ann
@@ -13,6 +11,7 @@ import Data.Maybe
 import Data.ProtoLens
 import Data.Text (Text)
 import qualified Data.Text as Text
+import Data.Vault.Strict (Vault)
 import qualified Data.Vector as V
 import Lens.Family2
 import OpenTelemetry.Context.ThreadLocal
@@ -28,6 +27,7 @@ import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_F
 import RequireCallStack
 import Temporal.Common
 import Temporal.Common.Async
+import qualified Temporal.Common.Logging as Logging
 import qualified Temporal.Core.Client as C
 import Temporal.Core.Worker (InactiveForReplay)
 import qualified Temporal.Core.Worker as Core
@@ -39,7 +39,6 @@ import Temporal.Workflow.Definition
 import Temporal.Workflow.Internal.Monad hiding (try)
 import Temporal.WorkflowInstance
 import UnliftIO
-import Data.Vault.Strict (Vault)
 
 
 data EvictionWithRunID = EvictionWithRunID
@@ -105,32 +104,32 @@ The Async handle only completes successfully on poller shutdown.
 -}
 execute :: (MonadLoggerIO m, MonadUnliftIO m, MonadCatch m, MonadTracer m, RequireCallStack) => WorkflowWorker -> m ()
 execute worker@WorkflowWorker {workerCore} = flip runReaderT worker $ do
-  $(logDebug) "Starting workflow worker"
+  Logging.logDebug "Starting workflow worker"
   whileM_ go
   where
     c = Core.getWorkerConfig workerCore
     go = inSpan' "Workflow activation step" defaultSpanArguments $ \s -> do
       -- logs <- liftIO $ fetchLogs globalRuntime
       -- forM_ logs $ \l -> case l.level of
-      --   Trace -> $(logDebug) l.message
-      --   Debug -> $(logDebug) l.message
-      --   Temporal.Runtime.Info -> $(logInfo) l.message
-      --   Warn -> $(logWarn) l.message
-      --   Error -> $(logError) l.message
+      --   Trace -> Logging.logDebug l.message
+      --   Debug -> Logging.logDebug l.message
+      --   Temporal.Runtime.Info -> Logging.logInfo l.message
+      --   Warn -> Logging.logWarn l.message
+      --   Error -> Logging.logError l.message
       eActivation <- pollWorkflowActivation
       case eActivation of
         -- TODO should we do anything else on shutdown?
         (Left (Core.WorkerError Core.PollShutdown _)) -> do
-          $(logDebug) "Poller shutting down"
+          Logging.logDebug "Poller shutting down"
           runningWorkflows <- readTVarIO worker.runningWorkflows
           mapM_ (cancel <=< readIORef . executionThread) runningWorkflows
           pure False
         (Left err) -> do
-          $(logError) $ Text.pack $ show err
+          Logging.logError $ Text.pack $ show err
           recordException s mempty Nothing err
           pure True
         (Right activation) -> do
-          $(logDebug) $ Text.pack ("Got activation " <> show activation)
+          Logging.logDebug $ Text.pack ("Got activation " <> show activation)
           -- We want to handle activations as fast as possible, so we don't want to block
           -- on dispatching jobs. We link the activator thread to the run-loop so that any
           -- unhandled exceptions in that logic aren't ignored.
@@ -144,9 +143,9 @@ execute worker@WorkflowWorker {workerCore} = flip runReaderT worker $ do
 
 handleActivation :: forall m. (MonadUnliftIO m, MonadLoggerIO m, MonadCatch m, MonadTracer m) => Core.WorkflowActivation -> ReaderT WorkflowWorker m ()
 handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {attributes = HashMap.fromList [("temporal.activation.run_id", toAttribute $ activation ^. Activation.runId)]}) $ \_s -> do
-  $(logDebug) ("Handling activation: RunId " <> Text.pack (show (activation ^. Activation.runId)))
+  Logging.logDebug ("Handling activation: RunId " <> Text.pack (show (activation ^. Activation.runId)))
   forM_ (activation ^. Activation.jobs) $ \job -> do
-    $(logDebug) ("Job: " <> Text.pack (show job))
+    Logging.logDebug ("Job: " <> Text.pack (show job))
   WorkflowWorker {workerCore} <- ask
   {-
   Run jobs
@@ -160,7 +159,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
           [] -> pure ()
           otherJobs -> atomically $ writeTQueue inst.activationChannel (activation & Activation.jobs .~ otherJobs)
     else do
-      $(logDebug) "Workflow does not need to run."
+      Logging.logDebug "Workflow does not need to run."
       let completionMessage =
             defMessage
               & Completion.runId .~ activation ^. Activation.runId
@@ -246,7 +245,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                         , taskQueue = worker.workerTaskQueue
                         , workflowId = WorkflowId $ initializeWorkflow ^. Activation.workflowId
                         , workflowType = initializeWorkflow ^. Activation.workflowType . to WorkflowType
-                        , continuedRunId = fmap RunId $ initializeWorkflow  ^. Activation.continuedFromExecutionRunId . to nonEmptyString
+                        , continuedRunId = fmap RunId $ initializeWorkflow ^. Activation.continuedFromExecutionRunId . to nonEmptyString
                         , cronSchedule = initializeWorkflow ^. Activation.cronSchedule . to nonEmptyString
                         , taskTimeout = initializeWorkflow ^. Activation.workflowTaskTimeout . to durationFromProto
                         , executionTimeout = fmap durationFromProto $ initializeWorkflow ^. Activation.maybe'workflowExecutionTimeout
@@ -268,7 +267,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                 case HashMap.lookup (initializeWorkflow ^. Activation.workflowType) worker.workerWorkflowFunctions of
                   Nothing -> do
                     setStatus s (Error "No workflow definition found")
-                    $logInfo "No workflow definition found"
+                    Logging.logInfo "No workflow definition found"
                     let failureProto =
                           defMessage
                             & Completion.failure
@@ -326,9 +325,9 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                   let msg = Text.pack ("Eviction request on an unknown workflow with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
                   pure $ do
                     setStatus s $ Error msg
-                    $(logDebug) msg
+                    Logging.logDebug msg
                 Just wf -> do
                   pure $ do
                     cancel =<< readIORef wf.executionThread
-                    $(logDebug) $ Text.pack ("Evicting workflow instance with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
+                    Logging.logDebug $ Text.pack ("Evicting workflow instance with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
         _ -> pure ()
