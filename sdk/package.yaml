@@ -4,7 +4,6 @@ name:         temporal-sdk
 build-type:   Simple
 
 dependencies:
-- aeson
 - base
 - proto-lens
 - proto-lens-protobuf-types
