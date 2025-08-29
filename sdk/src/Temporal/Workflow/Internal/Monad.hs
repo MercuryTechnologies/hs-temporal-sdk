@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
 module Temporal.Workflow.Internal.Monad where
@@ -34,7 +35,11 @@ import System.Random (
   genWord64R,
   genWord8,
  )
-import System.Random.Stateful (FrozenGen (..), RandomGenM (..), StatefulGen (..), StdGen)
+import System.Random.Stateful (FrozenGen (..), RandomGenM (..), StatefulGen (..), StdGen
+#if MIN_VERSION_random(1,3,0)
+                              , ThawedGen (..)
+#endif
+                              )
 import Temporal.Common
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
@@ -337,6 +342,10 @@ instance RandomGenM WorkflowGenM StdGen Workflow where
 instance FrozenGen StdGen Workflow where
   type MutableGen StdGen Workflow = WorkflowGenM
   freezeGen g = Workflow $ \_ -> Done <$> readIORef (unWorkflowGenM g)
+
+#if MIN_VERSION_random(1,3,0)
+instance ThawedGen StdGen Workflow where
+#endif
   thawGen = newWorkflowGenM
 
 
