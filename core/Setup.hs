@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 import Control.Monad
 import Data.Char (toLower)
 import Data.Functor (($>))
@@ -29,9 +30,16 @@ import System.Directory (
   getCurrentDirectory,
  )
 import System.Environment (getEnv)
-import System.FilePath ((</>))
 import System.Posix.Files (createSymbolicLink)
+#if MIN_VERSION_Cabal(3,14,0)
+import Distribution.Utils.Path ((</>), coerceSymbolicPath, getSymbolicPath)
+#else
+import System.FilePath ((</>))
+#endif
 
+#if !MIN_VERSION_Cabal(3,14,0)
+getSymbolicPath = id
+#endif
 
 main :: IO ()
 main = defaultMainWithHooks hooks
@@ -44,7 +52,7 @@ main = defaultMainWithHooks hooks
         , confHook = \a flags -> do
             lbi <- confHook simpleUserHooks a flags >>= rsAddLibraryInfo flags
             unless (cabalFlag externalLibFlag flags) $ do
-              copyTemporalBridge lbi (buildDir lbi)
+              copyTemporalBridge lbi (getSymbolicPath $ buildDir lbi)
             pure lbi
         , postClean = \_ flags _ _ ->
             rsClean (fromFlag $ cleanVerbosity flags)
@@ -84,7 +92,12 @@ rsMake verbosity = execCargo verbosity "build" ["--release", "--lib"]
 
 rsAddLibraryInfo :: ConfigFlags -> LocalBuildInfo -> IO LocalBuildInfo
 rsAddLibraryInfo fl lbi' = do
+#if MIN_VERSION_Cabal(3,14,0)
+  let extraLibDir = coerceSymbolicPath $ buildDir lbi'
+#else
   dir <- getCurrentDirectory
+  let extraLibDir = dir </> buildDir lbi'
+#endif
   let external = getCabalFlag externalLibFlagStr fl
   let updateLbi lbi =
         lbi
@@ -103,7 +116,7 @@ rsAddLibraryInfo fl lbi' = do
           { extraLibDirs =
               if external
                 then extraLibDirs libBuild
-                else (dir </> buildDir lbi') : extraLibDirs libBuild
+                else extraLibDir : extraLibDirs libBuild
           }
   pure $ updateLbi lbi'
 
