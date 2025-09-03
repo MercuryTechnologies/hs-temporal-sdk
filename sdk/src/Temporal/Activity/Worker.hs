@@ -18,6 +18,7 @@ import qualified Data.Text as T
 import Lens.Family2
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as P
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
+import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult as AR
 import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields as AR
 import qualified Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask as AT
 import qualified Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields as AT
@@ -248,6 +249,30 @@ applyActivityTaskStart tsk tt msg = do
                           .~ (defMessage & AR.result .~ convertToProtoPayload ok')
                      )
         Logging.logDebug ("Activity completion message: " <> T.pack (show completionMsg))
+        Logging.logInfo $
+          T.concat
+            [ "Completed activity: "
+            , "namespace="
+            , Core.namespace c
+            , " "
+            , "taskQueue="
+            , Core.taskQueue c
+            , " "
+            , "workflowType="
+            , rawWorkflowType info.workflowType
+            , " "
+            , "workflowId="
+            , rawWorkflowId info.workflowId
+            , " "
+            , "activityType="
+            , info.activityType
+            , " "
+            , "activityId="
+            , rawActivityId info.activityId
+            , " "
+            , "status="
+            , statusFromCompletion completionMsg
+            ]
         completionResult <- liftIO $ Core.completeActivityTask w.workerCore completionMsg
         case completionResult of
           Left err -> throwIO err
@@ -261,6 +286,17 @@ applyActivityTaskStart tsk tt msg = do
       -- We use link here to kill the worker thread if the activity throws an exception.
       link runningActivity
       putMVar syncPoint ()
+  where
+    statusFromCompletion :: Core.ActivityTaskCompletion -> Text
+    statusFromCompletion completionMsg = case completionMsg ^. C.maybe'result of
+      Just result -> case result ^. AR.maybe'status of
+        Just status -> case status of
+          AR.ActivityExecutionResult'Completed _ -> "success"
+          AR.ActivityExecutionResult'Failed _ -> "failed"
+          AR.ActivityExecutionResult'Cancelled _ -> "cancelled"
+          AR.ActivityExecutionResult'WillCompleteAsync _ -> "will-complete-async"
+        Nothing -> "unknown"
+      Nothing -> "unknown"
 
 
 applyActivityTaskCancel :: (MonadUnliftIO m, MonadLogger m) => TaskToken -> AT.Cancel -> ActivityWorkerM actEnv m ()
