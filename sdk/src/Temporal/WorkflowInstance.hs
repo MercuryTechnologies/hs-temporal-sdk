@@ -148,9 +148,9 @@ create
     workerThread <- liftIO $ async $ runInstanceM inst $ do
       Logging.logDebug "Start workflow execution thread"
       exec <- setUpWorkflowExecution start
-      res <- liftIO $ inboundInterceptor.executeWorkflow exec $ \exec' -> runInstanceM inst $ runTopLevel $ do
+      res <- liftIO $ inboundInterceptor.executeWorkflowWrapped exec id $ \exec' wrap -> runInstanceM inst $ runTopLevel $ do
         Logging.logDebug "Executing workflow"
-        wf <- applyStartWorkflow exec' workflowFn
+        wf <- applyStartWorkflowWithWrapper exec' wrap workflowFn
         runWorkflowToCompletion wf
       Logging.logDebug "Workflow execution completed"
       addCommand =<< convertExitVariantToCommand res
@@ -333,6 +333,41 @@ applyStartWorkflow execInput workflowFn = do
             Logging.logDebug "Calling runWorkflow"
             pure (runWorkflow act)
 
+  liftIO $ executeWorkflowBase execInput
+
+
+-- Same behavior as applyStartWorkflow, except we allow a start time wrapper
+applyStartWorkflowWithWrapper
+  :: ExecuteWorkflowInput
+  -> (Workflow Payload -> Workflow Payload)
+  -> (Vector Payload -> IO (Either String (Workflow Payload)))
+  -> InstanceM (SuspendableWorkflowExecution Payload)
+applyStartWorkflowWithWrapper execInput wrap workflowFn = do
+  inst <- ask
+  let executeWorkflowBase input = runInstanceM inst $ do
+        Logging.logInfo $
+          Text.concat
+            [ "Starting workflow: "
+            , "namespace="
+            , rawNamespace input.executeWorkflowInputInfo.namespace
+            , " "
+            , "taskQueue="
+            , rawTaskQueue input.executeWorkflowInputInfo.taskQueue
+            , " "
+            , "workflowType="
+            , input.executeWorkflowInputType
+            , " "
+            , "workflowId="
+            , rawWorkflowId input.executeWorkflowInputInfo.workflowId
+            ]
+        eAct <- liftIO (workflowFn =<< processorDecodePayloads inst.payloadProcessor input.executeWorkflowInputArgs)
+        case eAct of
+          Left msg -> do
+            Logging.logError $ Text.pack ("Failed to decode workflow arguments: " <> msg)
+            throwIO (ValueError msg)
+          Right act -> do
+            Logging.logDebug "Calling runWorkflow (with wrapper)"
+            pure (runWorkflow (wrap act))
   liftIO $ executeWorkflowBase execInput
 
 

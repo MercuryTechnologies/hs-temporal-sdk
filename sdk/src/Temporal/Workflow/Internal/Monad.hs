@@ -848,6 +848,15 @@ data WorkflowInboundInterceptor = WorkflowInboundInterceptor
       :: ExecuteWorkflowInput
       -> (ExecuteWorkflowInput -> IO (WorkflowExitVariant Payload))
       -> IO (WorkflowExitVariant Payload)
+  , -- Same semantics as executeWorkflow, but with a start-time wrapper
+    executeWorkflowWrapped
+      :: ExecuteWorkflowInput
+      -> (Workflow Payload -> Workflow Payload)
+      -> ( ExecuteWorkflowInput
+           -> (Workflow Payload -> Workflow Payload)
+           -> IO (WorkflowExitVariant Payload)
+         )
+      -> IO (WorkflowExitVariant Payload)
   , handleQuery
       :: HandleQueryInput
       -> (HandleQueryInput -> IO (Either SomeException Payload))
@@ -867,6 +876,7 @@ instance Semigroup WorkflowInboundInterceptor where
   a <> b =
     WorkflowInboundInterceptor
       { executeWorkflow = \input cont -> a.executeWorkflow input $ \input' -> b.executeWorkflow input' cont
+      , executeWorkflowWrapped = \input wrap cont -> a.executeWorkflowWrapped input wrap $ \input' wrap' -> b.executeWorkflowWrapped input' wrap' cont
       , handleQuery = \input cont -> a.handleQuery input $ \input' -> b.handleQuery input' cont
       , handleUpdate = \input cont -> a.handleUpdate input $ \input' -> b.handleUpdate input' cont
       , validateUpdate = \input cont -> a.validateUpdate input $ \input' -> b.validateUpdate input' cont
@@ -877,6 +887,7 @@ instance Monoid WorkflowInboundInterceptor where
   mempty =
     WorkflowInboundInterceptor
       { executeWorkflow = \input cont -> cont input
+      , executeWorkflowWrapped = \input wrap cont -> cont input wrap
       , handleQuery = \input cont -> cont input
       , handleUpdate = \input cont -> cont input
       , validateUpdate = \input cont -> cont input
