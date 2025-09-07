@@ -426,6 +426,17 @@ data TimeoutOptions = TimeoutOptions
   deriving stock (Show, Eq, Lift, Data)
 
 
+{- |
+Default options for timeouts.
+
+@
+'TimeoutOptions'
+  { executionTimeout = 'Nothing'
+  , runTimeout = 'Nothing'
+  , taskTimeout = 'Nothing'
+  }
+@
+-}
 defaultTimeoutOptions :: TimeoutOptions
 defaultTimeoutOptions =
   TimeoutOptions

@@ -343,6 +343,17 @@ data SignalOptions = SignalOptions
   }
 
 
+{- |
+Default options for sending a signal.
+
+@
+'SignalOptions'
+  { skipGenerateWorkflowTask = 'False'
+  , requestId = 'Nothing'
+  , headers = 'mempty'
+  }
+@
+-}
 defaultSignalOptions :: SignalOptions
 defaultSignalOptions =
   SignalOptions
