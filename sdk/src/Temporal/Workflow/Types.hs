@@ -230,10 +230,11 @@ Default options for starting a child workflow.
 'StartChildWorkflowOptions'
   { cancellationType = 'ChildWorkflowCancellationAbandon'
   , parentClosePolicy = 'ParentClosePolicyUnspecified'
-  , timeoutOptions = 'TimeoutOptions'
-      { executionTimeout = 'Nothing'
-      , runTimeout = 'Nothing'
-      , taskTimeout = 'Nothing'
+  , timeoutOptions =
+      'TimeoutOptions'
+        { executionTimeout = 'Nothing'
+        , runTimeout = 'Nothing'
+        , taskTimeout = 'Nothing'
   }
   , retryPolicy = 'Nothing'
   , cronSchedule = 'Nothing'
