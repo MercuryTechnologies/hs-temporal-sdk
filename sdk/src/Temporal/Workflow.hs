@@ -731,6 +731,22 @@ data StartLocalActivityOptions = StartLocalActivityOptions
   }
 
 
+{- |
+Default options for starting a local activity.
+
+@
+'StartLocalActivityOptions'
+  { activityId = 'Nothing'
+  , scheduleToCloseTimeout = 'Nothing'
+  , scheduleToStartTimeout = 'Nothing'
+  , startToCloseTimeout = 'Nothing'
+  , retryPolicy = 'Nothing'
+  , localRetryThreshold = 'Nothing'
+  , cancellationType = 'ActivityCancellationWaitCancellationCompleted'
+  , headers = 'mempty'
+  }
+@
+-}
 defaultStartLocalActivityOptions :: StartLocalActivityOptions
 defaultStartLocalActivityOptions =
   StartLocalActivityOptions
@@ -1745,6 +1761,19 @@ waitCancellation = do
   throw WorkflowCancelRequested
 
 
+{- |
+Default retry policy.
+
+@
+'RetryPolicy'
+  { initialInterval = 'seconds' 1
+  , backoffCoefficient = 2
+  , maximumInterval = 'Nothing'
+  , maximumAttempts = 0
+  , nonRetryableErrorTypes = 'mempty'
+  }
+@
+-}
 defaultRetryPolicy :: RetryPolicy
 defaultRetryPolicy =
   RetryPolicy

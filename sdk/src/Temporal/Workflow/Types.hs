@@ -106,6 +106,24 @@ instance StartActivityTimeoutOption (Either ScheduleToClose StartToClose) where
   toStartActivityTimeoutOption = either toStartActivityTimeoutOption toStartActivityTimeoutOption
 
 
+{- |
+Default options for starting an activity. Takes a 'StartActivityTimeoutOption'
+@t@ and returns a 'StartActivityOptions'.
+
+@
+'StartActivityOptions'
+  { activityId = 'Nothing'
+  , taskQueue = 'Nothing'
+  , timeout = 'toStartActivityTimeoutOption' t
+  , scheduleToStartTimeout = 'Nothing'
+  , heartbeatTimeout = 'Nothing'
+  , retryPolicy = 'Nothing'
+  , cancellationType = 'ActivityCancellationTryCancel'
+  , headers = 'mempty'
+  , disableEagerExecution = 'False'
+  }
+@
+-}
 defaultStartActivityOptions :: StartActivityTimeoutOption timeout => timeout -> StartActivityOptions
 defaultStartActivityOptions t =
   StartActivityOptions
@@ -205,6 +223,30 @@ data StartChildWorkflowOptions = StartChildWorkflowOptions
   deriving stock (Show, Lift)
 
 
+{- |
+Default options for starting a child workflow.
+
+@
+'StartChildWorkflowOptions'
+  { cancellationType = 'ChildWorkflowCancellationAbandon'
+  , parentClosePolicy = 'ParentClosePolicyUnspecified'
+  , timeoutOptions =
+      'TimeoutOptions'
+        { executionTimeout = 'Nothing'
+        , runTimeout = 'Nothing'
+        , taskTimeout = 'Nothing'
+  }
+  , retryPolicy = 'Nothing'
+  , cronSchedule = 'Nothing'
+  , initialMemo = 'mempty'
+  , searchAttributes = 'mempty'
+  , headers = 'mempty'
+  , workflowIdReusePolicy = 'WorkflowIdReusePolicyUnspecified'
+  , workflowId = 'Nothing'
+  , taskQueue = 'Nothing'
+  }
+@
+-}
 defaultChildWorkflowOptions :: StartChildWorkflowOptions
 defaultChildWorkflowOptions =
   StartChildWorkflowOptions
@@ -239,6 +281,21 @@ data ContinueAsNewOptions = ContinueAsNewOptions
   deriving stock (Eq, Show, Lift)
 
 
+{- |
+Default options for continuing a workflow as new.
+
+@
+'ContinueAsNewOptions'
+  { taskQueue = 'Nothing'
+  , runTimeout = 'Nothing'
+  , taskTimeout = 'Nothing'
+  , retryPolicy = 'Nothing'
+  , memo = 'mempty'
+  , searchAttributes = 'mempty'
+  , headers = 'mempty'
+  }
+@
+-}
 defaultContinueAsNewOptions :: ContinueAsNewOptions
 defaultContinueAsNewOptions =
   ContinueAsNewOptions
