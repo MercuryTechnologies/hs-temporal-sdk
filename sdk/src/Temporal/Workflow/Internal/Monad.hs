@@ -832,6 +832,7 @@ data HandleQueryInput = HandleQueryInput
   , handleQueryInputType :: Text
   , handleQueryInputArgs :: Vector Payload
   , handleQueryInputHeaders :: Map Text Payload
+  , handleQueryWorkflowType :: Text
   }
 
 
@@ -840,6 +841,7 @@ data HandleUpdateInput = HandleUpdateInput
   , handleUpdateInputType :: Text
   , handleUpdateInputArgs :: Vector Payload
   , handleUpdateInputHeaders :: Map Text Payload
+  , handleUpdateWorkflowType :: Text
   }
 
 

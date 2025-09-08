@@ -346,6 +346,7 @@ applyUpdateRandomSeed updateRandomSeed = do
 applyQueryWorkflow :: HasCallStack => QueryWorkflow -> InstanceM ()
 applyQueryWorkflow queryWorkflow = do
   inst <- ask
+  instInfo <- readIORef inst.workflowInstanceInfo
   handles <- readIORef inst.workflowQueryHandlers
   Logging.logDebug $ Text.pack ("Applying query: " <> show (queryWorkflow ^. Activation.queryType))
   let processor = inst.payloadProcessor
@@ -356,6 +357,7 @@ applyQueryWorkflow queryWorkflow = do
           , handleQueryInputType = queryWorkflow ^. Activation.queryType
           , handleQueryInputArgs = args
           , handleQueryInputHeaders = fmap convertFromProtoPayload (queryWorkflow ^. Activation.headers)
+          , handleQueryWorkflowType = rawWorkflowType instInfo.workflowType
           }
   res <- liftIO $ inst.inboundInterceptor.handleQuery baseInput $ \input -> do
     let handlerOrDefault =
@@ -416,6 +418,7 @@ applyDoUpdateWorkflow :: DoUpdate -> Workflow ()
 applyDoUpdateWorkflow doUpdate = provideCallStack do
   (validator, updateAction) <- ilift do
     inst <- ask
+    instInfo <- readIORef inst.workflowInstanceInfo
     handlers <- readIORef inst.workflowUpdateHandlers
     let handlerAndValidatorOrDefault =
           HashMap.lookup (Just (doUpdate ^. Activation.name)) handlers
@@ -460,6 +463,7 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
                     , handleUpdateInputType = doUpdate ^. Activation.name
                     , handleUpdateInputArgs = args
                     , handleUpdateInputHeaders = updateHeaders
+                    , handleUpdateWorkflowType = rawWorkflowType instInfo.workflowType
                     }
             let runUpdate = inst.inboundInterceptor.handleUpdate baseInput $ \input ->
                   updateImplementation input.handleUpdateId input.handleUpdateInputArgs input.handleUpdateInputHeaders
