@@ -298,7 +298,7 @@ setUpWorkflowExecution initializeWorkflow = do
 
   pure $
     ExecuteWorkflowInput
-      { executeWorkflowInputType = initializeWorkflow ^. Activation.workflowType
+      { executeWorkflowInputType = WorkflowType (initializeWorkflow ^. Activation.workflowType)
       , executeWorkflowInputArgs = fmap convertFromProtoPayload (initializeWorkflow ^. Command.vec'arguments)
       , executeWorkflowInputHeaders = fmap convertFromProtoPayload (initializeWorkflow ^. Activation.headers)
       , executeWorkflowInputInfo = info
@@ -319,7 +319,7 @@ applyStartWorkflow execInput workflowFn = do
             , rawTaskQueue input.executeWorkflowInputInfo.taskQueue
             , " "
             , "workflowType="
-            , input.executeWorkflowInputType
+            , rawWorkflowType input.executeWorkflowInputType
             , " "
             , "workflowId="
             , rawWorkflowId input.executeWorkflowInputInfo.workflowId
@@ -357,7 +357,7 @@ applyQueryWorkflow queryWorkflow = do
           , handleQueryInputType = queryWorkflow ^. Activation.queryType
           , handleQueryInputArgs = args
           , handleQueryInputHeaders = fmap convertFromProtoPayload (queryWorkflow ^. Activation.headers)
-          , handleQueryWorkflowType = rawWorkflowType instInfo.workflowType
+          , handleQueryWorkflowInfo = instInfo
           }
   res <- liftIO $ inst.inboundInterceptor.handleQuery baseInput $ \input -> do
     let handlerOrDefault =
@@ -463,7 +463,7 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
                     , handleUpdateInputType = doUpdate ^. Activation.name
                     , handleUpdateInputArgs = args
                     , handleUpdateInputHeaders = updateHeaders
-                    , handleUpdateWorkflowType = rawWorkflowType instInfo.workflowType
+                    , handleUpdateWorkflowInfo = instInfo
                     }
             let runUpdate = inst.inboundInterceptor.handleUpdate baseInput $ \input ->
                   updateImplementation input.handleUpdateId input.handleUpdateInputArgs input.handleUpdateInputHeaders
