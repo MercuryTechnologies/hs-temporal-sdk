@@ -813,7 +813,7 @@ interceptorConvertChildWorkflowHandle h f =
 
 
 data ExecuteWorkflowInput = ExecuteWorkflowInput
-  { executeWorkflowInputType :: Text
+  { executeWorkflowInputType :: WorkflowType
   , executeWorkflowInputArgs :: Vector Payload
   , executeWorkflowInputHeaders :: Map Text Payload
   , executeWorkflowInputInfo :: Info
@@ -832,6 +832,7 @@ data HandleQueryInput = HandleQueryInput
   , handleQueryInputType :: Text
   , handleQueryInputArgs :: Vector Payload
   , handleQueryInputHeaders :: Map Text Payload
+  , handleQueryWorkflowInfo :: Info
   }
 
 
@@ -840,6 +841,7 @@ data HandleUpdateInput = HandleUpdateInput
   , handleUpdateInputType :: Text
   , handleUpdateInputArgs :: Vector Payload
   , handleUpdateInputHeaders :: Map Text Payload
+  , handleUpdateWorkflowInfo :: Info
   }
 
 

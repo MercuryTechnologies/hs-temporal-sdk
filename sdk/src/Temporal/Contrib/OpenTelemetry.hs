@@ -146,7 +146,7 @@ makeOpenTelemetryInterceptor = do
                                 [
                                   [ ("temporal.workflow_id", toAttribute $ rawWorkflowId input.executeWorkflowInputInfo.workflowId)
                                   , ("temporal.run_id", toAttribute $ rawRunId input.executeWorkflowInputInfo.runId)
-                                  , ("temporal.workflow_type", toAttribute input.executeWorkflowInputType)
+                                  , ("temporal.workflow_type", toAttribute $ rawWorkflowType input.executeWorkflowInputType)
                                   , ("temporal.attempt", toAttribute input.executeWorkflowInputInfo.attempt)
                                   , ("temporal.namespace", toAttribute $ rawNamespace input.executeWorkflowInputInfo.namespace)
                                   , ("temporal.task_queue", toAttribute $ rawTaskQueue input.executeWorkflowInputInfo.taskQueue)
@@ -192,7 +192,7 @@ makeOpenTelemetryInterceptor = do
                                     input.executeWorkflowInputInfo.retryPolicy
                                 ]
                         }
-                inSpan'' tracer ("RunWorkflow:" <> input.executeWorkflowInputType) spanArgs $ \span -> do
+                inSpan'' tracer ("RunWorkflow:" <> rawWorkflowType input.executeWorkflowInputType) spanArgs $ \span -> do
                   execution <- next input
                   case execution of
                     WorkflowExitFailed e -> do
