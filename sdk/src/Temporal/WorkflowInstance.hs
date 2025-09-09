@@ -148,9 +148,10 @@ create
     workerThread <- liftIO $ async $ runInstanceM inst $ do
       Logging.logDebug "Start workflow execution thread"
       exec <- setUpWorkflowExecution start
-      res <- liftIO $ inboundInterceptor.executeWorkflowWrapped exec id $ \exec' wrap -> runInstanceM inst $ runTopLevel $ do
+      res <- liftIO $ inboundInterceptor.executeWorkflow exec $ \exec' -> runInstanceM inst $ runTopLevel $ do
         Logging.logDebug "Executing workflow"
-        wf <- applyStartWorkflowWithWrapper exec' wrap workflowFn
+        let hookWrap = inboundInterceptor.startExecuteWorkflowHook exec'
+        wf <- applyStartWorkflowWithWrapper exec' hookWrap workflowFn
         runWorkflowToCompletion wf
       Logging.logDebug "Workflow execution completed"
       addCommand =<< convertExitVariantToCommand res
