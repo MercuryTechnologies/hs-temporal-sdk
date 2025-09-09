@@ -1932,6 +1932,59 @@ needsClient = do
         (Temporal.Client.TestService.unlockTimeSkippingWithSleep (C.clientCore (C.workflowHandleClient h)) (seconds 10))
           `shouldThrow` \case
             Temporal.Client.TestService.TimeSkippingNotSupported -> True
+  describe "Memo" $ do
+    specify "can read memo set at start" $ \TestEnv {..} -> do
+      let workflow :: W.Workflow (Map Text Payload)
+          workflow = W.getMemoValues
+          wf = W.provideWorkflow JSON "readMemo" workflow
+          conf = configure () wf $ do
+            baseConf
+      withWorker conf $ do
+        p1 <- encode JSON ("v1" :: Text)
+        p2 <- encode JSON (1 :: Int)
+
+        let dec (Payload bs meta) = Payload (BS.map (\x -> x - 1) bs) meta
+            expected = Map.fromList [("string1", dec p1), ("string2", dec p2)]
+
+            opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.memo = Map.fromList [("string1", p1), ("string2", p2)]
+                }
+
+        useClient (C.execute wf.reference "memo-read" opts)
+          `shouldReturn` expected
+    specify "can upsert memo" $ \TestEnv {taskQueue = tq, ..} -> do
+      pTwo <- encode JSON ("two" :: Text)
+      pTrue <- encode JSON True
+      p1 <- encode JSON ("v1" :: Text)
+      p2 <- encode JSON (1 :: Int)
+
+      let workflow :: MyWorkflow (Map Text Payload)
+          workflow = do
+            W.upsertMemo (Map.fromList [("string2", pTwo), ("string3", pTrue)])
+            i <- W.info
+            pure i.rawMemo
+
+          wf = W.provideWorkflow JSON "upsertMemo" workflow
+          conf = configure () wf $ do
+            baseConf
+
+          dec (Payload bs meta) = Payload (BS.map (\x -> x - 1) bs) meta
+
+          expected =
+            Map.fromList [("string2", pTwo), ("string3", pTrue)]
+              <> Map.fromList [("string1", dec p1), ("string2", dec p2)]
+
+          opts =
+            (C.startWorkflowOptions tq)
+              { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+              , C.memo = Map.fromList [("string1", p1), ("string2", p2)]
+              }
+
+      withWorker conf $ do
+        useClient (C.execute wf.reference "memo-upsert" opts)
+          `shouldReturn` expected
 
 
 needsTimeSkipping :: SpecWith TestEnv
@@ -2238,6 +2291,39 @@ updatesWithInterceptors = do
 
 withInterceptors :: Interceptors () -> SpecWith TestEnv -> SpecWith PortNumber
 withInterceptors interceptors = aroundAllWith $ flip $ setup interceptors
+
+
+-- Validates the wrapper: executeWorkflowWrapped injects a Workflow wrapper that calls upsertMemo at start
+wrapperPlumbingWithWorkflowInboundInterceptor :: SpecWith PortNumber
+wrapperPlumbingWithWorkflowInboundInterceptor = do
+  describe "Wrapper plumbing" do
+    let
+      injectMemoInterceptors :: Interceptors ()
+      injectMemoInterceptors =
+        mempty
+          { workflowInboundInterceptors =
+              mempty
+                { executeWorkflowWrapped = \input _wrap next -> do
+                    p <- encode defaultCodec True
+                    next input $ \wf -> provideCallStack $ do
+                      W.upsertMemo (Map.fromList [("fromWrapper", p)])
+                      wf
+                }
+          }
+    withInterceptors injectMemoInterceptors do
+      specify "wrapper upserts memo at start" $ \TestEnv {..} -> do
+        let workflow = W.getMemoValues
+            wf = W.provideWorkflow defaultCodec "wrapperUpsertsMemo" workflow
+            conf = configure () wf $ do
+              baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  }
+          p <- encode defaultCodec True
+          useClient (C.execute wf.reference "wrapper-upsert-memo" opts)
+            `shouldReturn` Map.fromList [("fromWrapper", p)]
 
 
 terminateTests :: SpecWith TestEnv
