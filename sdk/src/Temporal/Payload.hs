@@ -64,6 +64,10 @@ module Temporal.Payload (
   FunctionSupportsCodec,
   FunctionSupportsCodec',
   ValueError (..),
+
+  -- * Internal
+  encodeJSON,
+  decodeJSON,
 ) where
 
 import Codec.Compression.Zlib.Internal hiding (Format (..))
@@ -156,9 +160,24 @@ data JSON = JSON
 
 instance (Typeable a, Aeson.ToJSON a, Aeson.FromJSON a) => Codec JSON a where
   encoding _ _ = "json/plain"
-  encode c x = pure $ insertStandardMetadata c x $ Payload (BL.toStrict $ Aeson.encode x) mempty
-  decode _ = pure . Aeson.eitherDecodeStrict' . payloadData
+  encode _ = pure . encodeJSON
+  decode _ = pure . decodeJSON
 
+-- | Pure implementation of 'encode'@ @'JSON', exposed here so that functions
+-- without access to 'IO' can encode 'JSON' payloads.
+--
+-- For example, a function which needs to produce a 'Payload' from within a
+-- 'Workflow' can call 'encodeJSON' without introducing non-determinism.
+encodeJSON :: (Typeable a, Aeson.ToJSON a, Aeson.FromJSON a) => a -> Payload
+encodeJSON x = insertStandardMetadata JSON x $ Payload (BL.toStrict $ Aeson.encode x) mempty
+
+-- | Pure implementation of 'decode'@ @'JSON', exposed here so that functions
+-- without access to 'IO' can decode 'JSON' payloads.
+--
+-- For example, a function which retrieves a 'Payload' from within a
+-- 'Workflow' can call 'decodeJSON' without having to unsafely lift 'IO'.
+decodeJSON :: Aeson.FromJSON a => Payload -> Either String a
+decodeJSON = Aeson.eitherDecodeStrict' . payloadData
 
 data Null = Null
   deriving stock (Eq, Show, Lift)

@@ -89,7 +89,6 @@ import qualified Proto.Temporal.Api.Failure.V1.Message as F
 import qualified Proto.Temporal.Api.Failure.V1.Message as Proto
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import Proto.Temporal.Api.History.V1.Message
-import System.IO.Unsafe (unsafePerformIO)
 import Temporal.Common
 import Temporal.Core.Client (RpcError (..))
 import Temporal.Duration
@@ -500,7 +499,7 @@ mkApplicationFailure e@(SomeException e') = Prelude.foldr tryHandler (basicHandl
 
 
 annToPayload :: Annotation -> Payload
-annToPayload ann = unsafePerformIO $ encode JSON $ show ann
+annToPayload = encodeJSON . show
 
 
 annotationHandler :: Exception e => (e -> ApplicationFailure) -> AnnotatedException e -> ApplicationFailure
