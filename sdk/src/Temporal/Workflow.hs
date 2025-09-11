@@ -147,6 +147,7 @@ module Temporal.Workflow (
   getMemoValues,
   lookupMemoValue,
   upsertSearchAttributes,
+  upsertMemo,
 
   -- * Versioning workflows
   -- $versioning
@@ -896,6 +897,24 @@ upsertSearchAttributes values = ilift $ do
   inst <- ask
   modifyIORef' inst.workflowInstanceInfo $ \Info {..} ->
     Info {searchAttributes = searchAttributes <> values, ..}
+
+
+{- | Updates this Workflow's Memo by merging the provided values with the existing Memo.
+Using this function will overwrite any existing Memo entries with the same key.
+-}
+upsertMemo :: RequireCallStack => Map Text Payload -> Workflow ()
+upsertMemo values = ilift $ do
+  updateCallStack
+  let cmd =
+        defMessage
+          & Command.modifyWorkflowProperties
+            .~ ( defMessage
+                  & Command.upsertedMemo .~ convertToProtoMemo values
+               )
+  addCommand cmd
+  inst <- ask
+  modifyIORef' inst.workflowInstanceInfo $ \Info {..} ->
+    Info {rawMemo = values <> rawMemo, ..}
 
 
 {- | Current time from the workflow perspective.
