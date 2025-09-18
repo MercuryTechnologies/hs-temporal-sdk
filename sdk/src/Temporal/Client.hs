@@ -108,7 +108,6 @@ import Data.Map (Map)
 import Data.Maybe
 import Data.ProtoLens.Field
 import Data.ProtoLens.Message
-import Data.Proxy
 import Data.Text (Text)
 import Data.Typeable
 import qualified Data.UUID as UUID
@@ -124,12 +123,6 @@ import Proto.Temporal.Api.History.V1.Message (History, HistoryEvent, HistoryEven
 import qualified Proto.Temporal.Api.History.V1.Message_Fields as History
 import qualified Proto.Temporal.Api.Query.V1.Message_Fields as Query
 import qualified Proto.Temporal.Api.Taskqueue.V1.Message_Fields as TQ
-import Proto.Temporal.Api.Testservice.V1.RequestResponse (
-  LockTimeSkippingRequest,
-  LockTimeSkippingResponse,
-  UnlockTimeSkippingRequest,
-  UnlockTimeSkippingResponse,
- )
 import qualified Proto.Temporal.Api.Update.V1.Message as Update
 import qualified Proto.Temporal.Api.Update.V1.Message_Fields as Update
 import Proto.Temporal.Api.Workflow.V1.Message (WorkflowExecutionInfo)
@@ -664,6 +657,97 @@ start (workflowRef -> k@(KnownWorkflow codec _)) wfId opts = withArgs @(Workflow
   startFromPayloads k wfId opts inputs
 
 
+signalWithStartFromPayloads
+  :: (MonadIO m, HasWorkflowClient m)
+  => KnownSignal signalArgs
+  -> KnownWorkflow wfArgs result
+  -> WorkflowId
+  -> StartWorkflowOptions
+  -> V.Vector UnencodedPayload
+  -> V.Vector UnencodedPayload
+  -> m (WorkflowHandle result)
+signalWithStartFromPayloads (KnownSignal sigName _) w@(KnownWorkflow codec _) wfId opts sigPayloads wfPayloads = do
+  c <- askWorkflowClient
+  sigPayloads' <- liftIO (sequence sigPayloads)
+  wfPayloads' <- liftIO (sequence wfPayloads)
+  let processor = c.clientConfig.payloadProcessor
+      interceptorOpts =
+        SignalWithStartWorkflowInput
+          { signalWithStartWorkflowType = WorkflowType $ knownWorkflowName w
+          , signalWithStartSignalName = sigName
+          , signalWithStartSignalArgs = sigPayloads'
+          , signalWithStartArgs = wfPayloads'
+          , signalWithStartOptions = opts
+          , signalWithStartWorkflowId = wfId
+          }
+  wfH <- liftIO $ Temporal.Client.Types.signalWithStart c.clientConfig.interceptors interceptorOpts $ \opts' -> do
+    reqId <- UUID.nextRandom
+    searchAttrs <- searchAttributesToProto opts'.signalWithStartOptions.searchAttributes
+    sigPayloads'' <- processorEncodePayloads processor opts'.signalWithStartSignalArgs
+    wfPayloads'' <- processorEncodePayloads processor opts'.signalWithStartArgs
+    hdrs <- processorEncodePayloads processor opts'.signalWithStartOptions.headers
+    memo' <- processorEncodePayloads processor opts'.signalWithStartOptions.memo
+    let tq = rawTaskQueue opts'.signalWithStartOptions.taskQueue
+        msg =
+          defMessage
+            & RR.namespace .~ rawNamespace c.clientConfig.namespace
+            & RR.workflowId .~ rawWorkflowId opts'.signalWithStartWorkflowId
+            & RR.workflowType
+              .~ (defMessage & Common.name .~ rawWorkflowType opts'.signalWithStartWorkflowType)
+            & WF.requestId .~ UUID.toText reqId
+            & RR.searchAttributes .~ (defMessage & Common.indexedFields .~ searchAttrs)
+            & RR.taskQueue
+              .~ ( defMessage
+                    & Common.name .~ tq
+                    & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
+                 )
+            & RR.input
+              .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload wfPayloads'')
+            & RR.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts'.signalWithStartOptions.timeouts.executionTimeout)
+            & RR.maybe'workflowRunTimeout .~ (durationToProto <$> opts'.signalWithStartOptions.timeouts.runTimeout)
+            & RR.maybe'workflowTaskTimeout .~ (durationToProto <$> opts'.signalWithStartOptions.timeouts.taskTimeout)
+            & RR.identity .~ Core.identity (Core.clientConfig c.clientCore)
+            & RR.requestId .~ UUID.toText reqId
+            & RR.workflowIdReusePolicy
+              .~ workflowIdReusePolicyToProto
+                (fromMaybe WorkflowIdReusePolicyAllowDuplicateFailedOnly opts'.signalWithStartOptions.workflowIdReusePolicy)
+            & RR.signalName .~ sigName
+            & RR.signalInput .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload sigPayloads'')
+            -- Deprecated, no need to set
+            -- & RR.control .~ _
+            & RR.maybe'retryPolicy .~ (retryPolicyToProto <$> opts'.signalWithStartOptions.retryPolicy)
+            & RR.cronSchedule .~ fromMaybe "" opts'.signalWithStartOptions.cronSchedule
+            & RR.memo .~ convertToProtoMemo memo'
+            & RR.header .~ headerToProto (fmap convertToProtoPayload hdrs)
+    -- & RR.workflowStartDelay .~ _
+    -- & RR.skipGenerateWorkflowTask .~ _
+    res <-
+      signalWithStartWorkflowExecution
+        c.clientCore
+        msg
+    case res of
+      Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+      Right swer ->
+        pure $
+          WorkflowHandle
+            { workflowHandleReadResult = pure
+            , workflowHandleType = WorkflowType $ knownWorkflowName w
+            , workflowHandleClient = c
+            , workflowHandleWorkflowId = opts'.signalWithStartWorkflowId
+            , workflowHandleRunId = Just (RunId $ swer ^. WF.runId)
+            , -- We don't know if this handle represents a new workflow or an already-running one, so we don't
+              -- know if the current run ID is for its first execution or not
+              workflowHandleFirstExecutionRunId = Nothing
+            }
+  pure $
+    wfH
+      { workflowHandleReadResult = \a ->
+          workflowHandleReadResult wfH a >>= \b -> do
+            result <- decode codec =<< either (throwIO . ValueError) pure =<< payloadProcessorDecode c.clientConfig.payloadProcessor b
+            either (throwIO . ValueError) pure result
+      }
+
+
 {- | If there is a running Workflow Execution with the given Workflow Id, it will be Signaled.
 
 Otherwise, a new Workflow Execution is started and immediately send the Signal.
@@ -676,103 +760,10 @@ signalWithStart
   -> StartWorkflowOptions
   -> sig
   -> (WorkflowArgs wf :->: (SignalArgs sig :->: m (WorkflowHandle (WorkflowResult wf))))
-signalWithStart (workflowRef -> k@(KnownWorkflow codec _)) wfId opts (signalRef -> KnownSignal n sigCodec) = unnestedArgs
-  where
-    signalArgsMaker :: m (SignalArgs sig :->: m (WorkflowHandle (WorkflowResult wf))) -> SignalArgs sig :->: m (WorkflowHandle (WorkflowResult wf))
-    signalArgsMaker = sequenceArgs @(SignalArgs sig) @m (Proxy @(m (WorkflowHandle (WorkflowResult wf))))
-
-    unnestedArgs :: WorkflowArgs wf :->: (SignalArgs sig :->: m (WorkflowHandle (WorkflowResult wf)))
-    unnestedArgs =
-      mapResult
-        @(WorkflowArgs wf)
-        signalArgsMaker
-        nestedArgs
-
-    nestedArgs = withArgs @(WorkflowArgs wf) @(m (SignalArgs sig :->: m (WorkflowHandle (WorkflowResult wf)))) codec $ \wfArgs -> do
-      c <- askWorkflowClient
-      wfArgs' <- processorEncodePayloads c.clientConfig.payloadProcessor =<< liftIO (sequence wfArgs)
-      pure $ signalArgs wfArgs'
-
-    signalArgs :: V.Vector Payload -> SignalArgs sig :->: m (WorkflowHandle (WorkflowResult wf))
-    signalArgs wfArgs = withArgs @(SignalArgs sig) @(m (WorkflowHandle (WorkflowResult wf))) sigCodec $ \sa -> do
-      c <- askWorkflowClient
-      sigArgs' <- liftIO $ sequence sa
-      let processor = c.clientConfig.payloadProcessor
-          interceptorOpts =
-            SignalWithStartWorkflowInput
-              { signalWithStartWorkflowType = WorkflowType $ knownWorkflowName k
-              , signalWithStartSignalName = n
-              , signalWithStartSignalArgs = sigArgs'
-              , signalWithStartArgs = wfArgs
-              , signalWithStartOptions = opts
-              , signalWithStartWorkflowId = wfId
-              }
-      wfH <- liftIO $ Temporal.Client.Types.signalWithStart c.clientConfig.interceptors interceptorOpts $ \opts' -> do
-        reqId <- UUID.nextRandom
-        searchAttrs <- searchAttributesToProto opts'.signalWithStartOptions.searchAttributes
-        signalArgs' <- processorEncodePayloads processor opts'.signalWithStartSignalArgs
-        wfArgs' <- processorEncodePayloads processor opts'.signalWithStartArgs
-        hdrs <- processorEncodePayloads processor opts'.signalWithStartOptions.headers
-        memo' <- processorEncodePayloads processor opts'.signalWithStartOptions.memo
-        let tq = rawTaskQueue opts'.signalWithStartOptions.taskQueue
-            msg =
-              defMessage
-                & RR.namespace .~ rawNamespace c.clientConfig.namespace
-                & RR.workflowId .~ rawWorkflowId opts'.signalWithStartWorkflowId
-                & RR.workflowType
-                  .~ (defMessage & Common.name .~ rawWorkflowType opts'.signalWithStartWorkflowType)
-                & WF.requestId .~ UUID.toText reqId
-                & RR.searchAttributes .~ (defMessage & Common.indexedFields .~ searchAttrs)
-                & RR.taskQueue
-                  .~ ( defMessage
-                        & Common.name .~ tq
-                        & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
-                     )
-                & RR.input
-                  .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload wfArgs')
-                & RR.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts'.signalWithStartOptions.timeouts.executionTimeout)
-                & RR.maybe'workflowRunTimeout .~ (durationToProto <$> opts'.signalWithStartOptions.timeouts.runTimeout)
-                & RR.maybe'workflowTaskTimeout .~ (durationToProto <$> opts'.signalWithStartOptions.timeouts.taskTimeout)
-                & RR.identity .~ Core.identity (Core.clientConfig c.clientCore)
-                & RR.requestId .~ UUID.toText reqId
-                & RR.workflowIdReusePolicy
-                  .~ workflowIdReusePolicyToProto
-                    (fromMaybe WorkflowIdReusePolicyAllowDuplicateFailedOnly opts'.signalWithStartOptions.workflowIdReusePolicy)
-                & RR.signalName .~ n
-                & RR.signalInput .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload signalArgs')
-                -- Deprecated, no need to set
-                -- & RR.control .~ _
-                & RR.maybe'retryPolicy .~ (retryPolicyToProto <$> opts'.signalWithStartOptions.retryPolicy)
-                & RR.cronSchedule .~ fromMaybe "" opts'.signalWithStartOptions.cronSchedule
-                & RR.memo .~ convertToProtoMemo memo'
-                & RR.header .~ headerToProto (fmap convertToProtoPayload hdrs)
-        -- & RR.workflowStartDelay .~ _
-        -- & RR.skipGenerateWorkflowTask .~ _
-        res <-
-          signalWithStartWorkflowExecution
-            c.clientCore
-            msg
-        case res of
-          Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
-          Right swer ->
-            pure $
-              WorkflowHandle
-                { workflowHandleReadResult = pure
-                , workflowHandleType = WorkflowType $ knownWorkflowName k
-                , workflowHandleClient = c
-                , workflowHandleWorkflowId = opts'.signalWithStartWorkflowId
-                , workflowHandleRunId = Just (RunId $ swer ^. WF.runId)
-                , -- We don't know if this handle represents a new workflow or an already-running one, so we don't
-                  -- know if the current run ID is for its first execution or not
-                  workflowHandleFirstExecutionRunId = Nothing
-                }
-      pure $
-        wfH
-          { workflowHandleReadResult = \a ->
-              workflowHandleReadResult wfH a >>= \b -> do
-                result <- decode codec b
-                either (throwIO . ValueError) pure result
-          }
+signalWithStart (workflowRef -> w@(KnownWorkflow wfCodec _)) wfId opts (signalRef -> s@(KnownSignal _ sigCodec)) = do
+  withArgs @(WorkflowArgs wf) @(SignalArgs sig :->: m (WorkflowHandle (WorkflowResult wf))) wfCodec $ \wfArgs -> do
+    withArgs @(SignalArgs sig) @(m (WorkflowHandle (WorkflowResult wf))) sigCodec $ \sigArgs -> do
+      signalWithStartFromPayloads s w wfId opts sigArgs wfArgs
 
 
 data TerminationOptions = TerminationOptions
