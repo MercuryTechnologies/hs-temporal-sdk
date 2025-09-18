@@ -1952,13 +1952,11 @@ needsClient = do
         m <- useClient (C.execute wf.reference "memo-read" opts)
         m `shouldBe` expected
     specify "can upsert memo" $ \TestEnv {..} -> do
-      pTwo <- encode JSON ("two" :: Text)
-      pTrue <- encode JSON True
       p1 <- encode JSON ("v1" :: Text)
       p2 <- encode JSON (1 :: Int)
       let workflow :: MyWorkflow (Map Text Payload)
           workflow = do
-            W.upsertMemo (Map.fromList [("b", pTwo), ("c", pTrue)])
+            W.upsertMemo (Map.fromList [("b", toJSON ("two" :: Text)), ("c", toJSON True)])
             i <- W.info
             pure i.rawMemo
           wf = W.provideWorkflow JSON "upsertMemo" workflow
@@ -1972,24 +1970,29 @@ needsClient = do
       withWorker conf $ do
         m <- useClient (C.execute wf.reference "memo-upsert" opts)
         let dec (Payload bs meta) = Payload (BS.map (\x -> x - 1) bs) meta
-        m Map.! "b" `shouldBe` pTwo
-        m Map.! "c" `shouldBe` pTrue
-        m Map.! "a" `shouldBe` dec p1
+            expectedB = encodeJSON (toJSON ("two" :: Text))
+            expectedC = encodeJSON (toJSON True)
+            expected =
+              Map.fromList
+                [ ("a", dec p1)
+                , ("b", expectedB)
+                , ("c", expectedC)
+                ]
+        m `shouldBe` expected
     specify "multiple upserts work" $ \TestEnv {..} -> do
-      p1 <- encode JSON ("v1" :: Text)
-      p2 <- encode JSON ("v2" :: Text)
-      p3 <- encode JSON ("v3" :: Text)
       let workflow :: MyWorkflow (Map Text Payload)
           workflow = do
-            W.upsertMemo (Map.fromList [("a", p1)])
-            W.upsertMemo (Map.fromList [("b", p2)])
-            W.upsertMemo (Map.fromList [("a", p3)])
+            W.upsertMemo (Map.fromList [("a", toJSON ("v1" :: Text))])
+            W.upsertMemo (Map.fromList [("b", toJSON ("v2" :: Text))])
+            W.upsertMemo (Map.fromList [("a", toJSON ("v3" :: Text))])
             i <- W.info
             pure i.rawMemo
           wf = W.provideWorkflow JSON "memo-upsert-many" workflow
           conf = configure () wf $ do baseConf
       withWorker conf $ do
-        let expected = Map.fromList [("a", p3), ("b", p2)]
+        let expectedA = encodeJSON (toJSON ("v3" :: Text))
+            expectedB = encodeJSON (toJSON ("v2" :: Text))
+            expected = Map.fromList [("a", expectedA), ("b", expectedB)]
             opts =
               (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate

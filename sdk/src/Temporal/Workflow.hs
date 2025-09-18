@@ -261,6 +261,7 @@ import Control.Monad
 import Control.Monad.Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
+import Data.Aeson (Value)
 import qualified Data.Bits as Bits
 import qualified Data.ByteString.Short as SBS
 import Data.Coerce
@@ -902,19 +903,20 @@ upsertSearchAttributes values = ilift $ do
 {- | Updates this Workflow's Memo by merging the provided values with the existing Memo.
 Using this function will overwrite any existing Memo entries with the same key.
 -}
-upsertMemo :: RequireCallStack => Map Text Payload -> Workflow ()
+upsertMemo :: RequireCallStack => Map Text Value -> Workflow ()
 upsertMemo values = ilift $ do
   updateCallStack
+  let encodedMap = fmap encodeJSON values
   let cmd =
         defMessage
           & Command.modifyWorkflowProperties
             .~ ( defMessage
-                  & Command.upsertedMemo .~ convertToProtoMemo values
+                  & Command.upsertedMemo .~ convertToProtoMemo encodedMap
                )
   addCommand cmd
   inst <- ask
   modifyIORef' inst.workflowInstanceInfo $ \Info {..} ->
-    Info {rawMemo = values <> rawMemo, ..}
+    Info {rawMemo = encodedMap <> rawMemo, ..}
 
 
 {- | Current time from the workflow perspective.
