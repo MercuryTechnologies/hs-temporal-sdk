@@ -12,7 +12,7 @@ import Control.Monad.Logger (LogLevel (..), LogSource, LogStr, MonadLogger (..),
 import Data.Aeson (ToJSON (..))
 import qualified Data.Aeson as A
 import qualified Data.Aeson.Encoding as A
-import Data.Text
+import Data.Text (Text, pack)
 import GHC.Stack (CallStack, HasCallStack, SrcLoc (..), callStack, getCallStack, withFrozenCallStack)
 import qualified Language.Haskell.TH as TH
 import Prelude hiding (log)

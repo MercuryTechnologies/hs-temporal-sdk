@@ -72,7 +72,7 @@ import qualified Data.HashMap.Strict as HashMap
 import Data.Int
 import Data.ProtoLens (Message (..), decodeMessage, decodeMessageOrDie)
 import Data.ProtoLens.Field (field)
-import Data.Text
+import Data.Text (Text, breakOnEnd, pack)
 import Data.Typeable
 import Data.Vector (Vector)
 import qualified Data.Vector as V
