@@ -49,6 +49,7 @@ import GHC.Generics
 import GHC.Stack (SrcLoc (..), callStack, fromCallSiteList)
 import IntegrationSpec.HangingWorkflow
 import IntegrationSpec.NoOpWorkflow
+import IntegrationSpec.Signals
 import IntegrationSpec.TimeSkipping
 import IntegrationSpec.TimeoutsInWorkflows
 import IntegrationSpec.Updates
@@ -85,10 +86,6 @@ import Temporal.Workflow.Unsafe (performUnsafeNonDeterministicIO)
 import Test.Hspec
 
 
-unblockWorkflowSignal :: W.KnownSignal '[]
-unblockWorkflowSignal = W.KnownSignal "unblockWorkflow" JSON
-
-
 temporalBundle
   [d|
     data WorkflowTests = WorkflowTests
@@ -104,7 +101,6 @@ temporalBundle
       , runHeartbeat :: W.Workflow Int
       , faultyActivity :: Activity () Int
       , faultyWorkflow :: W.Workflow Int
-      , workflowWaitConditionWorks :: W.Workflow ()
       , simpleWait :: W.Workflow ()
       , multipleArgs :: Int -> Text -> Bool -> W.Workflow (Int, Text, Bool)
       , nonRetryableFailureTest :: W.Workflow ()
@@ -521,13 +517,6 @@ testImpls =
               (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
           _ <- W.wait @(W.Task Int) h1
           W.wait @(W.Task Int) h2
-      , workflowWaitConditionWorks = do
-          st <- W.newStateVar False
-          W.setSignalHandler unblockWorkflowSignal $ do
-            $(logDebug) "unblocking workflow"
-            W.writeStateVar st True
-          W.waitCondition (W.readStateVar st)
-          pure ()
       , simpleWait = do
           st <- W.newStateVar False
           W.concurrently_ (W.waitCondition (W.readStateVar st)) (W.writeStateVar st True)
@@ -1137,14 +1126,14 @@ needsClient = do
     -- specify "query and unblock" pending
     describe "Await condition" $ do
       it "signal handlers can unblock workflows" $ \TestEnv {..} -> do
-        let conf = configure () testConf $ do
+        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
               baseConf
         withWorker conf $ do
           let opts =
                 (C.startWorkflowOptions taskQueue)
                   { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                   }
-          wfH <- useClient (C.start testRefs.workflowWaitConditionWorks "signalHandlerUnblock" opts)
+          wfH <- useClient (C.start SignalUnblocksWorkflow "signalHandlerUnblock" opts)
           C.signal wfH unblockWorkflowSignal C.defaultSignalOptions
           C.waitWorkflowResult wfH `shouldReturn` ()
 
@@ -1447,7 +1436,7 @@ needsClient = do
     -- specify "to different workflow can set memo and search attributes" pending
     describe "signalWithStart" do
       it "works" $ \TestEnv {..} -> do
-        let conf = configure () testConf baseConf
+        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) baseConf
         withWorker conf $ do
           let opts =
                 (C.startWorkflowOptions taskQueue)
@@ -1463,11 +1452,35 @@ needsClient = do
             liftIO $ putStrLn "signalWithStart call"
             wfH <-
               C.signalWithStart
-                testRefs.workflowWaitConditionWorks
+                SignalUnblocksWorkflow
                 "signalWithStart"
                 opts
                 unblockWorkflowSignal
             lift $ C.waitWorkflowResult wfH `shouldReturn` ()
+      it "works with workflow and signal arguments" $ \TestEnv {..} -> do
+        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  , C.timeouts =
+                      C.TimeoutOptions
+                        { C.runTimeout = Just $ seconds 4
+                        , C.executionTimeout = Nothing
+                        , C.taskTimeout = Nothing
+                        }
+                  }
+          useClient $ do
+            liftIO $ putStrLn "signalWithStart call"
+            wfH <-
+              C.signalWithStart
+                SignalWithArgsWorkflow
+                "signalWithStartWithArgs"
+                opts
+                signalWithArgs
+                50
+                2
+            lift $ C.waitWorkflowResult wfH `shouldReturn` 25
 
   --     specify "works as intended and returns correct runId" pending
   describe "RetryPolicy" $ do
