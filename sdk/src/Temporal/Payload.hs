@@ -276,15 +276,18 @@ data PayloadProcessor = PayloadProcessor
   , payloadProcessorDecode :: Payload -> IO (Either String Payload)
   }
 
+instance Semigroup PayloadProcessor where
+  PayloadProcessor e1 d1 <> PayloadProcessor e2 d2 = PayloadProcessor
+    { payloadProcessorEncode = e1 >=> e2
+    , payloadProcessorDecode = \p -> do
+        p' <- d1 p
+        case p' of
+          Left err -> pure $ Left err
+          Right ok -> d2 ok
+    }
 
--- TODO, need to make sure to unit test this before using it. The ordering guarantees have me confused.
--- instance Semigroup PayloadProcessor where
---   PayloadProcessor e1 d1 <> PayloadProcessor e2 d2 = PayloadProcessor
---     { PayloadProcessorEncode =
---     , PayloadProcessorDecode =
---     }
--- instance Monoid PayloadProcessor where
---   mempty = PayloadProcessor pure (pure . Right)
+instance Monoid PayloadProcessor where
+  mempty = PayloadProcessor pure (pure . Right)
 
 mkPayloadProcessor :: Codec fmt Payload => fmt -> PayloadProcessor
 mkPayloadProcessor fmt =
