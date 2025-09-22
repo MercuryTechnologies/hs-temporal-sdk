@@ -1947,8 +1947,7 @@ needsClient = do
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 , C.memo = Map.fromList [("a", p1), ("b", p2)]
                 }
-        let dec (Payload bs meta) = Payload (BS.map (\x -> x - 1) bs) meta
-            expected = Map.fromList [("a", dec p1), ("b", dec p2)]
+        let expected = Map.fromList [("a", p1), ("b", p2)]
         m <- useClient (C.execute wf.reference "memo-read" opts)
         m `shouldBe` expected
     specify "can upsert memo" $ \TestEnv {..} -> do
@@ -1969,12 +1968,11 @@ needsClient = do
               }
       withWorker conf $ do
         m <- useClient (C.execute wf.reference "memo-upsert" opts)
-        let dec (Payload bs meta) = Payload (BS.map (\x -> x - 1) bs) meta
-            expectedB = encodeJSON (toJSON ("two" :: Text))
+        let expectedB = encodeJSON (toJSON ("two" :: Text))
             expectedC = encodeJSON (toJSON True)
             expected =
               Map.fromList
-                [ ("a", dec p1)
+                [ ("a", p1)
                 , ("b", expectedB)
                 , ("c", expectedC)
                 ]
