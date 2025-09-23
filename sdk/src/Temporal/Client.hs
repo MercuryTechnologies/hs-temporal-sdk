@@ -574,6 +574,7 @@ startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
     searchAttrs <- searchAttributesToProto opts'.searchAttributes
     payloads'' <- processorEncodePayloads c.clientConfig.payloadProcessor payloads'
     hdrs <- processorEncodePayloads c.clientConfig.payloadProcessor opts'.headers
+    memo' <- processorEncodePayloads c.clientConfig.payloadProcessor opts'.memo
     let tq = rawTaskQueue opts'.taskQueue
         req =
           defMessage
@@ -601,7 +602,7 @@ startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
                 (fromMaybe WorkflowIdConflictPolicyUnspecified opts'.workflowIdConflictPolicy)
             & WF.maybe'retryPolicy .~ (retryPolicyToProto <$> opts'.retryPolicy)
             & WF.cronSchedule .~ fromMaybe "" opts'.cronSchedule
-            & WF.memo .~ convertToProtoMemo opts'.memo
+            & WF.memo .~ convertToProtoMemo memo'
             & WF.searchAttributes .~ (defMessage & Common.indexedFields .~ searchAttrs)
             --     TODO Not sure how to use these yet
             & WF.header .~ headerToProto (fmap convertToProtoPayload hdrs)

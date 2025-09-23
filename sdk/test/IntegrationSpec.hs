@@ -1945,6 +1945,71 @@ needsClient = do
         (Temporal.Client.TestService.unlockTimeSkippingWithSleep (C.clientCore (C.workflowHandleClient h)) (seconds 10))
           `shouldThrow` \case
             Temporal.Client.TestService.TimeSkippingNotSupported -> True
+  describe "Memo" $ do
+    specify "able to read memo set at start" $ \TestEnv {..} -> do
+      let workflow :: W.Workflow (Map Text Payload)
+          workflow = W.getMemoValues
+          wf = W.provideWorkflow JSON "readMemo" workflow
+          conf = configure () wf $ do
+            baseConf
+      withWorker conf $ do
+        p1 <- encode JSON ("v1" :: Text)
+        p2 <- encode JSON (1 :: Int)
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.memo = Map.fromList [("a", p1), ("b", p2)]
+                }
+        let expected = Map.fromList [("a", p1), ("b", p2)]
+        m <- useClient (C.execute wf.reference "memo-read" opts)
+        m `shouldBe` expected
+    specify "can upsert memo" $ \TestEnv {..} -> do
+      p1 <- encode JSON ("v1" :: Text)
+      p2 <- encode JSON (1 :: Int)
+      let workflow :: MyWorkflow (Map Text Payload)
+          workflow = do
+            W.upsertMemo (Map.fromList [("b", toJSON ("two" :: Text)), ("c", toJSON True)])
+            i <- W.info
+            pure i.rawMemo
+          wf = W.provideWorkflow JSON "upsertMemo" workflow
+          conf = configure () wf $ do
+            baseConf
+          opts =
+            (C.startWorkflowOptions taskQueue)
+              { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+              , C.memo = Map.fromList [("a", p1), ("b", p2)]
+              }
+      withWorker conf $ do
+        m <- useClient (C.execute wf.reference "memo-upsert" opts)
+        let expectedB = encodeJSON (toJSON ("two" :: Text))
+            expectedC = encodeJSON (toJSON True)
+            expected =
+              Map.fromList
+                [ ("a", p1)
+                , ("b", expectedB)
+                , ("c", expectedC)
+                ]
+        m `shouldBe` expected
+    specify "multiple upserts work" $ \TestEnv {..} -> do
+      let workflow :: MyWorkflow (Map Text Payload)
+          workflow = do
+            W.upsertMemo (Map.fromList [("a", toJSON ("v1" :: Text))])
+            W.upsertMemo (Map.fromList [("b", toJSON ("v2" :: Text))])
+            W.upsertMemo (Map.fromList [("a", toJSON ("v3" :: Text))])
+            i <- W.info
+            pure i.rawMemo
+          wf = W.provideWorkflow JSON "memo-upsert-many" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        let expectedA = encodeJSON (toJSON ("v3" :: Text))
+            expectedB = encodeJSON (toJSON ("v2" :: Text))
+            expected = Map.fromList [("a", expectedA), ("b", expectedB)]
+            opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                }
+        m <- useClient (C.execute wf.reference "memo-upsert-many" opts)
+        m `shouldBe` expected
 
 
 needsTimeSkipping :: SpecWith TestEnv
