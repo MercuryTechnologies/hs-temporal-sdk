@@ -276,14 +276,21 @@ data PayloadProcessor = PayloadProcessor
   , payloadProcessorDecode :: Payload -> IO (Either String Payload)
   }
 
+-- | The order of the payload processors is important.
+--
+-- When encoding, the first payload processor is applied first, then the second.
+--
+-- When decoding, the second payload processor is applied first, then the first.
+--
+-- This matters because things like encryption and compression need to be applied in the correct order.
 instance Semigroup PayloadProcessor where
   PayloadProcessor e1 d1 <> PayloadProcessor e2 d2 = PayloadProcessor
     { payloadProcessorEncode = e1 >=> e2
     , payloadProcessorDecode = \p -> do
-        p' <- d1 p
+        p' <- d2 p
         case p' of
           Left err -> pure $ Left err
-          Right ok -> d2 ok
+          Right ok -> d1 ok
     }
 
 instance Monoid PayloadProcessor where
