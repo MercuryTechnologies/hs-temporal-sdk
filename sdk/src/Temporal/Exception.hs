@@ -404,7 +404,9 @@ applicationFailureToFailureProto appFailure =
          )
 
 
-instance Exception ApplicationFailure
+instance Exception ApplicationFailure where
+  fromException (SomeException e) =
+    cast e <|> (cause <$> cast e)
 
 
 class ToApplicationFailure e where
