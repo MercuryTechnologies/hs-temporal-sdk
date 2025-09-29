@@ -55,6 +55,7 @@ module Temporal.Client (
   signal,
   defaultSignalOptions,
   Temporal.Client.signalWithStart,
+  signalWithStartFromPayloads,
 
   -- * Sending Updates to Workflows
   UpdateOptions (..),
