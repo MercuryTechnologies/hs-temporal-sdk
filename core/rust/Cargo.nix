@@ -6962,8 +6962,8 @@ rec {
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "97093c5ea4b0d933513f4c8999f7960f0c16f05f";
-          sha256 = "1h72b55wz80rm15w5l8b7ialr9n80k8qafl5nxq11fi9gzm9x9mq";
+          rev = "95db75dc950cf07a99c79e6794172572dd34e6a6";
+          sha256 = "09cn8z6nlxmfsgdg2i04scw2qjdahn0cz19v9kigym3r537sdb7n";
         };
         authors = [
           "Spencer Judge <spencer@temporal.io>"
@@ -6987,8 +6987,8 @@ rec {
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "97093c5ea4b0d933513f4c8999f7960f0c16f05f";
-          sha256 = "1h72b55wz80rm15w5l8b7ialr9n80k8qafl5nxq11fi9gzm9x9mq";
+          rev = "95db75dc950cf07a99c79e6794172572dd34e6a6";
+          sha256 = "09cn8z6nlxmfsgdg2i04scw2qjdahn0cz19v9kigym3r537sdb7n";
         };
         procMacro = true;
         authors = [
@@ -7027,8 +7027,8 @@ rec {
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "97093c5ea4b0d933513f4c8999f7960f0c16f05f";
-          sha256 = "1h72b55wz80rm15w5l8b7ialr9n80k8qafl5nxq11fi9gzm9x9mq";
+          rev = "95db75dc950cf07a99c79e6794172572dd34e6a6";
+          sha256 = "09cn8z6nlxmfsgdg2i04scw2qjdahn0cz19v9kigym3r537sdb7n";
         };
         authors = [
           "Spencer Judge <spencer@temporal.io>"
@@ -8123,8 +8123,8 @@ rec {
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "97093c5ea4b0d933513f4c8999f7960f0c16f05f";
-          sha256 = "1h72b55wz80rm15w5l8b7ialr9n80k8qafl5nxq11fi9gzm9x9mq";
+          rev = "95db75dc950cf07a99c79e6794172572dd34e6a6";
+          sha256 = "09cn8z6nlxmfsgdg2i04scw2qjdahn0cz19v9kigym3r537sdb7n";
         };
         libName = "temporal_client";
         authors = [
@@ -8240,8 +8240,8 @@ rec {
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "97093c5ea4b0d933513f4c8999f7960f0c16f05f";
-          sha256 = "1h72b55wz80rm15w5l8b7ialr9n80k8qafl5nxq11fi9gzm9x9mq";
+          rev = "95db75dc950cf07a99c79e6794172572dd34e6a6";
+          sha256 = "09cn8z6nlxmfsgdg2i04scw2qjdahn0cz19v9kigym3r537sdb7n";
         };
         libName = "temporal_sdk_core";
         authors = [
@@ -8519,8 +8519,8 @@ rec {
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "97093c5ea4b0d933513f4c8999f7960f0c16f05f";
-          sha256 = "1h72b55wz80rm15w5l8b7ialr9n80k8qafl5nxq11fi9gzm9x9mq";
+          rev = "95db75dc950cf07a99c79e6794172572dd34e6a6";
+          sha256 = "09cn8z6nlxmfsgdg2i04scw2qjdahn0cz19v9kigym3r537sdb7n";
         };
         libName = "temporal_sdk_core_api";
         authors = [
@@ -8587,8 +8587,8 @@ rec {
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "97093c5ea4b0d933513f4c8999f7960f0c16f05f";
-          sha256 = "1h72b55wz80rm15w5l8b7ialr9n80k8qafl5nxq11fi9gzm9x9mq";
+          rev = "95db75dc950cf07a99c79e6794172572dd34e6a6";
+          sha256 = "09cn8z6nlxmfsgdg2i04scw2qjdahn0cz19v9kigym3r537sdb7n";
         };
         libName = "temporal_sdk_core_protos";
         authors = [
