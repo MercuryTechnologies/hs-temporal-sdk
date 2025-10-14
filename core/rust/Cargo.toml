@@ -14,7 +14,7 @@ temporal-sdk-core = { git = "https://github.com/temporalio/sdk-core", rev = "970
 temporal-sdk-core-api = { git = "https://github.com/temporalio/sdk-core", rev = "97093c5ea4b0d933513f4c8999f7960f0c16f05f" }
 temporal-sdk-core-protos = { git = "https://github.com/temporalio/sdk-core", rev = "97093c5ea4b0d933513f4c8999f7960f0c16f05f" }
 rustfsm = { git = "https://github.com/temporalio/sdk-core", rev = "97093c5ea4b0d933513f4c8999f7960f0c16f05f" }
-tokio = "~1.44"
+tokio = "~1.48.0"
 tokio-stream = "~0.1"
 tonic = "~0.12"
 tracing = "~0.1"
