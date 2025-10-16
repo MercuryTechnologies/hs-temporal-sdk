@@ -357,6 +357,7 @@ module Temporal.TH (
 
 import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Map.Strict as Map
+import Data.Proxy (Proxy (..))
 import Data.Typeable
 import DiscoverInstances
 import qualified Language.Haskell.TH as TH
@@ -371,29 +372,82 @@ import Temporal.Worker (Definitions (..))
 import Temporal.Workflow
 import qualified Temporal.Workflow as Wf
 import Temporal.Workflow.Definition (WorkflowDef (..))
+import Text.Read (readMaybe)
 
 
-registerActivityWithOptions :: forall codec m. (TH.Quote m, TH.Quasi m, TH.Lift codec) => TH.Name -> ActivityConfig codec -> m [TH.Dec]
+{- | Utility to convert "Data.Typeable" 'TypeRep' to a 'Type'. Note that
+this function is known to not yet work for many cases, but it does
+work for normal user datatypes.
+-}
+typeRepToType :: TypeRep -> TH.Q TH.Type
+typeRepToType tr = do
+  let (con, args) = splitTyConApp tr
+      modName = tyConModule con
+      name pn mn cn = TH.Name (TH.OccName cn) (TH.NameG TH.TcClsName (TH.PkgName pn) (TH.ModName mn))
+      conName = tyConName con
+      t
+        | modName == tupleMod = TH.TupleT $ length args
+        | modName == listMod && conName == listCon = TH.ListT
+        | modName == typeLitsMod =
+            case tyConName con of
+              s@('"' : _) -> TH.LitT . TH.StrTyLit $ read s
+              s -> case readMaybe s of
+                Just n -> TH.LitT $ TH.NumTyLit n
+                _ -> error $ "Unrecognized type literal name: " ++ s
+        | otherwise = TH.ConT $ name (tyConPackage con) modName conName
+  resultArgs <- mapM typeRepToType args
+  return (appsT t resultArgs)
+  where
+    typeLitsMod = tyConModule . typeRepTyCon . typeRep $ Proxy @42
+    tupleMod = tyConModule . typeRepTyCon . typeRep $ Proxy @((), ())
+    listMod = tyConModule . typeRepTyCon . typeRep $ Proxy @[()]
+    listCon = tyConName . typeRepTyCon . typeRep $ Proxy @[()]
+    appsT t [] = t
+    appsT t (x : xs) = appsT (TH.AppT t x) xs
+
+
+registerActivityWithOptions :: forall codec m. (TH.Quote m, TH.Quasi m, TH.Lift codec, Typeable codec) => TH.Name -> ActivityConfig codec -> m [TH.Dec]
 registerActivityWithOptions n conf = do
   fnType <- TH.qReifyType n
   registerActivityWithOptionsAndType n conf fnType
 
 
-registerActivityWithOptionsAndType :: forall codec m. (TH.Quote m, TH.Quasi m, TH.Lift codec) => TH.Name -> ActivityConfig codec -> TH.Type -> m [TH.Dec]
+registerActivityWithOptionsAndType :: forall codec m. (TH.Quote m, TH.Quasi m, TH.Lift codec, Typeable codec) => TH.Name -> ActivityConfig codec -> TH.Type -> m [TH.Dec]
 registerActivityWithOptionsAndType n conf fnType = do
   let dataName = conT $ fnSingDataAndConName n
   baseDecls <- makeFnDecls n fnType
+  -- Check if codec is JSON by comparing TypeReps
+  let codecRep = typeRep (Proxy @codec)
+      jsonRep = typeRep (Proxy @JSON)
+      isDefaultCodec = codecRep == jsonRep
   actDefs <-
-    [d|
-      instance Temporal.TH.Classes.ActivityFn $dataName where
-        activityConfig _ = conf
+    if isDefaultCodec
+      then -- Use default (no type family instance needed)
+
+        [d|
+          instance Temporal.TH.Classes.ActivityFn $dataName where
+            activityConfig _ = conf
 
 
-      deriving via (Temporal.TH.Classes.ActivityImpl $dataName) instance ActivityRef $dataName
+          deriving via (Temporal.TH.Classes.ActivityImpl $dataName) instance ActivityRef $dataName
 
 
-      deriving via (Temporal.TH.Classes.ActivityImpl $dataName) instance ActivityDef $dataName
-      |]
+          deriving via (Temporal.TH.Classes.ActivityImpl $dataName) instance ActivityDef $dataName
+          |]
+      else do
+        -- Custom codec: set the type family
+        codecType <- TH.runQ $ typeRepToType codecRep
+        [d|
+          instance Temporal.TH.Classes.ActivityFn $dataName where
+            type ActivityCodec $dataName = $(pure codecType)
+            activityConfig _ = conf
+
+
+          deriving via (Temporal.TH.Classes.ActivityImpl $dataName) instance ActivityRef $dataName
+
+
+          deriving via (Temporal.TH.Classes.ActivityImpl $dataName) instance ActivityDef $dataName
+          |]
   pure $ concat [baseDecls, actDefs]
 
 
@@ -401,27 +455,48 @@ registerActivity :: forall m. (TH.Quote m, TH.Quasi m) => TH.Name -> m [TH.Dec]
 registerActivity n = registerActivityWithOptions n defaultActivityConfig
 
 
-registerWorkflowWithOptions :: forall codec m. (TH.Quote m, TH.Quasi m, TH.Lift codec) => TH.Name -> WorkflowConfig codec -> m [TH.Dec]
+registerWorkflowWithOptions :: forall codec m. (TH.Quote m, TH.Quasi m, TH.Lift codec, Typeable codec) => TH.Name -> WorkflowConfig codec -> m [TH.Dec]
 registerWorkflowWithOptions n conf = do
   fnType <- TH.qReifyType n
   registerWorkflowWithOptionsAndType n conf fnType
 
 
-registerWorkflowWithOptionsAndType :: forall codec m. (TH.Quote m, TH.Quasi m, TH.Lift codec) => TH.Name -> WorkflowConfig codec -> TH.Type -> m [TH.Dec]
+registerWorkflowWithOptionsAndType :: forall codec m. (TH.Quote m, TH.Quasi m, TH.Lift codec, Typeable codec) => TH.Name -> WorkflowConfig codec -> TH.Type -> m [TH.Dec]
 registerWorkflowWithOptionsAndType n conf fnType = do
   let dataName = conT $ fnSingDataAndConName n
   baseDecls <- makeFnDecls n fnType
+  -- Check if codec is JSON by comparing TypeReps
+  let codecRep = typeRep (Proxy @codec)
+      jsonRep = typeRep (Proxy @JSON)
+      isDefaultCodec = codecRep == jsonRep
   additionalDecls <-
-    [d|
-      instance Temporal.TH.Classes.WorkflowFn $dataName where
-        workflowConfig _ = conf
+    if isDefaultCodec
+      then -- Use default (no type family instance needed)
+
+        [d|
+          instance Temporal.TH.Classes.WorkflowFn $dataName where
+            workflowConfig _ = conf
 
 
-      deriving via (Temporal.TH.Classes.WorkflowImpl $dataName) instance WorkflowRef $dataName
+          deriving via (Temporal.TH.Classes.WorkflowImpl $dataName) instance WorkflowRef $dataName
 
 
-      deriving via (Temporal.TH.Classes.WorkflowImpl $dataName) instance WorkflowDef $dataName
-      |]
+          deriving via (Temporal.TH.Classes.WorkflowImpl $dataName) instance WorkflowDef $dataName
+          |]
+      else do
+        -- Custom codec: set the type family
+        codecType <- TH.runQ $ typeRepToType codecRep
+        [d|
+          instance Temporal.TH.Classes.WorkflowFn $dataName where
+            type WorkflowCodec $dataName = $(pure codecType)
+            workflowConfig _ = conf
+
+
+          deriving via (Temporal.TH.Classes.WorkflowImpl $dataName) instance WorkflowRef $dataName
+
+
+          deriving via (Temporal.TH.Classes.WorkflowImpl $dataName) instance WorkflowDef $dataName
+          |]
 
   pure $ concat [baseDecls, additionalDecls]
 
@@ -841,7 +916,7 @@ Example with type-based configuration:
 
 registerWithConfig
   :: forall codec m
-   . (TH.Quote m, TH.Quasi m, TH.Lift codec)
+   . (TH.Quote m, TH.Quasi m, TH.Lift codec, Typeable codec)
   => RegistrationConfig codec
   -- ^ Configuration record with functions to generate configs
   -> m [TH.Dec]
