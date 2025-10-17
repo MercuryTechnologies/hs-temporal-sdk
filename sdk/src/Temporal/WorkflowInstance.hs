@@ -113,28 +113,56 @@ create
   start = do
     Logging.logDebug "Instantiating workflow instance"
     workflowInstanceLogger <- askLoggerIO
-    workflowRandomnessSeed <- WorkflowGenM <$> newIORef (mkStdGen 0)
-    workflowNotifiedPatches <- newIORef mempty
-    workflowMemoizedPatches <- newIORef mempty
-    workflowSequences <-
-      newIORef
-        Sequences
-          { externalCancel = 1
-          , childWorkflow = 1
-          , externalSignal = 1
-          , timer = 1
-          , activity = 1
-          , condition = 1
-          , varId = 1
-          }
-    workflowTime <- newIORef $ MkSystemTime 0 0
-    workflowIsReplaying <- newIORef False
-    workflowSequenceMaps <- newTVarIO $ SequenceMaps mempty mempty mempty mempty mempty mempty
+
+    -- Initialize deterministic state
+    deterministicTime <- newIORef $ MkSystemTime 0 0
+    isReplaying <- newIORef False
+    randomnessSeed <- WorkflowGenM <$> newIORef (mkStdGen 0)
+    notifiedPatches <- newIORef mempty
+    memoizedPatches <- newIORef mempty
+    let deterministicState = DeterministicState {..}
+
+    -- Initialize async operation tracking
+    timerSeqCounter <- newIORef 1
+    activeTimers <- newTVarIO mempty
+    let timerTracking = TimerTracking {..}
+
+    activitySequence <- newIORef 1
+    activeActivities <- newTVarIO mempty
+    let activityTracking = ActivityTracking {..}
+
+    childWorkflowSeqCounter <- newIORef 1
+    activeChildWorkflows <- newTVarIO mempty
+    let childWorkflowTracking = ChildWorkflowTracking {..}
+
+    externalCancelSequence <- newIORef 1
+    activeExternalCancels <- newTVarIO mempty
+    let externalCancelTracking = ExternalCancelTracking {..}
+
+    conditionSequence <- newIORef 1
+    conditionsAwaitingSignal <- newTVarIO mempty
+    let conditionTracking = ConditionTracking {..}
+
+    externalSignalSequence <- newIORef 1
+    activeExternalSignals <- newTVarIO mempty
+    let externalSignalTracking = ExternalSignalTracking {..}
+
+    varIdSequence <- newIORef 1
+    let stateVarTracking = StateVarTracking {..}
+
+    let asyncOperations = AsyncOperationTracking {..}
+
     workflowCommands <- newTVarIO $ Reversed []
-    workflowSignalHandlers <- newIORef mempty
+
+    -- Initialize handler sub-types
+    signalHandlers <- newIORef mempty
+    signalSequence <- newIORef 1
+    let signalHandling = SignalHandling {..}
+    queryHandlers <- newIORef mempty
+    let queryHandling = QueryHandling {..}
+    updateHandlers <- newIORef mempty
+    let updateHandling = UpdateHandling {..}
     workflowCallStack <- newIORef emptyCallStack
-    workflowQueryHandlers <- newIORef mempty
-    workflowUpdateHandlers <- newIORef mempty
     workflowInstanceInfo <- newIORef info
     workflowInstanceContinuationEnv <- ContinuationEnv <$> newIORef JobNil
     workflowCancellationVar <- newIVar
@@ -236,7 +264,7 @@ addStackTraceHandler inst = do
   let specialHandler _ _ _ = do
         cs <- readIORef inst.workflowCallStack
         Right <$> Temporal.Payload.encode JSON (Text.pack $ Temporal.Exception.prettyCallStack cs)
-  modifyIORef' inst.workflowQueryHandlers (HashMap.insert (Just "__stack_trace") specialHandler)
+  modifyIORef' inst.queryHandling.queryHandlers (HashMap.insert (Just "__stack_trace") specialHandler)
 
 
 -- This should never raise an exception, but instead catch all exceptions
@@ -256,8 +284,8 @@ activate act suspension = do
             }
     in (info', info')
   let completionBase = defMessage & Completion.runId .~ rawRunId info.runId
-  writeIORef inst.workflowTime (act ^. Activation.timestamp . to timespecFromTimestamp)
-  writeIORef inst.workflowIsReplaying (act ^. Activation.isReplaying)
+  writeIORef inst.deterministicState.deterministicTime (act ^. Activation.timestamp . to timespecFromTimestamp)
+  writeIORef inst.deterministicState.isReplaying (act ^. Activation.isReplaying)
   eResult <- case inst.workflowDeadlockTimeout of
     Nothing -> applyJobs (act ^. Activation.vec'jobs) suspension
     Just timeoutDuration -> do
@@ -291,9 +319,9 @@ activate act suspension = do
 setUpWorkflowExecution :: InitializeWorkflow -> InstanceM ExecuteWorkflowInput
 setUpWorkflowExecution initializeWorkflow = do
   inst <- ask
-  let (WorkflowGenM genRef) = inst.workflowRandomnessSeed
+  let (WorkflowGenM genRef) = inst.deterministicState.randomnessSeed
   writeIORef genRef (mkStdGen $ fromIntegral $ initializeWorkflow ^. Activation.randomnessSeed)
-  writeIORef inst.workflowTime (initializeWorkflow ^. Activation.startTime . to timespecFromTimestamp)
+  writeIORef inst.deterministicState.deterministicTime (initializeWorkflow ^. Activation.startTime . to timespecFromTimestamp)
   info <- readIORef inst.workflowInstanceInfo
 
   pure $
@@ -339,7 +367,7 @@ applyStartWorkflow execInput workflowFn = do
 applyUpdateRandomSeed :: UpdateRandomSeed -> InstanceM ()
 applyUpdateRandomSeed updateRandomSeed = do
   inst <- ask
-  let (WorkflowGenM genRef) = inst.workflowRandomnessSeed
+  let (WorkflowGenM genRef) = inst.deterministicState.randomnessSeed
   writeIORef genRef (mkStdGen $ fromIntegral $ updateRandomSeed ^. Activation.randomnessSeed)
 
 
@@ -347,7 +375,7 @@ applyQueryWorkflow :: HasCallStack => QueryWorkflow -> InstanceM ()
 applyQueryWorkflow queryWorkflow = do
   inst <- ask
   instInfo <- readIORef inst.workflowInstanceInfo
-  handles <- readIORef inst.workflowQueryHandlers
+  handles <- readIORef inst.queryHandling.queryHandlers
   Logging.logDebug $ Text.pack ("Applying query: " <> show (queryWorkflow ^. Activation.queryType))
   let processor = inst.payloadProcessor
   args <- processorDecodePayloads processor (fmap convertFromProtoPayload (queryWorkflow ^. Command.vec'arguments))
@@ -397,7 +425,7 @@ applySignalWorkflow :: SignalWorkflow -> Workflow ()
 applySignalWorkflow signalWorkflow = join $ do
   Workflow $ \_ -> do
     inst <- ask
-    handlers <- readIORef inst.workflowSignalHandlers
+    handlers <- readIORef inst.signalHandling.signalHandlers
     let handlerOrDefault =
           HashMap.lookup (Just (signalWorkflow ^. Activation.signalName)) handlers
             <|> HashMap.lookup Nothing handlers
@@ -419,7 +447,7 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
   (validator, updateAction) <- ilift do
     inst <- ask
     instInfo <- readIORef inst.workflowInstanceInfo
-    handlers <- readIORef inst.workflowUpdateHandlers
+    handlers <- readIORef inst.updateHandling.updateHandlers
     let handlerAndValidatorOrDefault =
           HashMap.lookup (Just (doUpdate ^. Activation.name)) handlers
             <|> HashMap.lookup Nothing handlers
@@ -546,7 +574,7 @@ applyNotifyHasPatch :: NotifyHasPatch -> InstanceM ()
 applyNotifyHasPatch notifyHasPatch = do
   inst <- ask
   let patches :: IORef (Set PatchId)
-      patches = inst.workflowNotifiedPatches
+      patches = inst.deterministicState.notifiedPatches
   atomicModifyIORef' patches $ \patchSet -> (Set.insert (notifyHasPatch ^. Activation.patchId . to PatchId) patchSet, ())
 
 
@@ -567,6 +595,17 @@ data JobGroups = JobGroups
   , queryWorkflows :: !(InstanceM ())
   , resolutions :: ![PendingJob]
   , otherJobs :: !(InstanceM ())
+  }
+
+
+-- | Helper record for batching sequence map updates during resolution processing
+data ResolutionMaps = ResolutionMaps
+  { resTimers :: !(SequenceMap (IVar ()))
+  , resActivities :: !(SequenceMap (IVar ResolveActivity))
+  , resChildWorkflows :: !(SequenceMap SomeChildWorkflowHandle)
+  , resExternalSignals :: !(SequenceMap (IVar ResolveSignalExternalWorkflow))
+  , resExternalCancels :: !(SequenceMap (IVar ResolveRequestCancelExternalWorkflow))
+  , resConditionsAwaitingSignal :: !(SequenceMap (IVar (), Set Sequence))
   }
 
 
@@ -647,115 +686,140 @@ applyResolutions [] = pure []
 applyResolutions rs = do
   inst <- ask
   atomically $ do
-    sequenceMaps <- readTVar inst.workflowSequenceMaps
-    let makeCompletion :: ([ActivationResult], SequenceMaps) -> PendingJob -> ([ActivationResult], SequenceMaps)
-        makeCompletion (!completions, !sequenceMaps') pj = case pj of
-          PendingJobResolveActivity msg -> do
-            let existingIVar = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.activities
-            case existingIVar of
-              Nothing ->
-                E.throw $ RuntimeError "Activity handle not found"
-              Just existing ->
-                ( ActivationResult (Ok msg) existing : completions
-                , sequenceMaps'
-                    { activities = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.activities
-                    }
-                )
-          PendingJobResolveChildWorkflowExecutionStart msg -> do
-            let existingHandle = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
-            case existingHandle of
-              Nothing ->
-                E.throw $ RuntimeError "Child workflow not found"
-              Just (SomeChildWorkflowHandle existing) -> case msg ^. Activation.maybe'status of
-                Nothing ->
-                  E.throw $ RuntimeError "Child workflow start did not have a known status"
-                Just status -> case status of
-                  ResolveChildWorkflowExecutionStart'Succeeded succeeded ->
-                    ( ActivationResult (Ok ()) existing.startHandle
-                        : ActivationResult (Ok (succeeded ^. Activation.runId . to RunId)) existing.firstExecutionRunId
-                        : completions
-                    , sequenceMaps'
-                    )
-                  ResolveChildWorkflowExecutionStart'Failed failed ->
-                    let updatedMaps =
-                          sequenceMaps'
-                            { childWorkflows = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
-                            }
-                    in case failed ^. Activation.cause of
-                        START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS ->
-                          let failure :: forall v. ResultVal v
-                              failure =
-                                ThrowWorkflow $
-                                  toException $
-                                    WorkflowAlreadyStarted
-                                      { workflowAlreadyStartedWorkflowId = WorkflowId (failed ^. Activation.workflowId)
-                                      , workflowAlreadyStartedWorkflowType = WorkflowType (failed ^. Activation.workflowType)
-                                      }
-                          in ( ActivationResult failure existing.startHandle
-                                : ActivationResult failure existing.firstExecutionRunId
-                                : completions
-                             , updatedMaps
-                             )
-                        _ ->
-                          ( ActivationResult
-                              (ThrowInternal $ toException $ RuntimeError ("Unknown child workflow start failure: " <> show (failed ^. Activation.cause)))
-                              existing.startHandle
-                              : completions
-                          , updatedMaps
-                          )
-                  ResolveChildWorkflowExecutionStart'Cancelled _cancelled ->
-                    ( ActivationResult (Ok ()) existing.startHandle
-                        : ActivationResult (ThrowWorkflow $ toException ChildWorkflowCancelled) existing.firstExecutionRunId
-                        : ActivationResult (ThrowWorkflow $ toException ChildWorkflowCancelled) existing.resultHandle
-                        : completions
-                    , sequenceMaps'
-                        { childWorkflows = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
-                        }
-                    )
-          PendingWorkflowCancellation _ -> (ActivationResult (Ok ()) inst.workflowCancellationVar : completions, sequenceMaps')
-          PendingJobResolveChildWorkflowExecution msg -> do
-            let existingHandle = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
-            case existingHandle of
-              Nothing -> E.throw $ RuntimeError "Child Workflow Execution not found"
-              Just (SomeChildWorkflowHandle h) ->
-                ( ActivationResult (Ok msg) h.resultHandle : completions
-                , sequenceMaps'
-                    { childWorkflows = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
-                    }
-                )
-          PendingJobResolveSignalExternalWorkflow msg -> do
-            let mresVar = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalSignals
-            case mresVar of
-              Nothing -> E.throw $ RuntimeError "External Signal IVar for sequence not found"
-              Just resVar ->
-                ( ActivationResult (Ok msg) resVar : completions
-                , sequenceMaps'
-                    { externalSignals = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalSignals
-                    }
-                )
-          PendingJobResolveRequestCancelExternalWorkflow msg -> do
-            let mresVar = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalCancels
-            case mresVar of
-              Nothing -> E.throw $ RuntimeError "External Cancel IVar for sequence not found"
-              Just resVar ->
-                ( ActivationResult (Ok msg) resVar : completions
-                , sequenceMaps'
-                    { externalCancels = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalCancels
-                    }
-                )
-          PendingJobFireTimer msg -> do
-            let existingIVar = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.timers
-            case existingIVar of
-              Nothing -> E.throw $ RuntimeError "Timer not found"
-              Just existing ->
-                ( ActivationResult (Ok ()) existing : completions
-                , sequenceMaps'
-                    { timers = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.timers
-                    }
-                )
+    -- Read all individual sequence maps from their TVars
+    timers <- readTVar inst.asyncOperations.timerTracking.activeTimers
+    activities <- readTVar inst.asyncOperations.activityTracking.activeActivities
+    childWorkflows <- readTVar inst.asyncOperations.childWorkflowTracking.activeChildWorkflows
+    externalSignals <- readTVar inst.asyncOperations.externalSignalTracking.activeExternalSignals
+    externalCancels <- readTVar inst.asyncOperations.externalCancelTracking.activeExternalCancels
+    conditionsAwaitingSignal <- readTVar inst.asyncOperations.conditionTracking.conditionsAwaitingSignal
 
-    let (newCompletions, updatedSequenceMaps) = foldl' makeCompletion ([], sequenceMaps) rs
-    writeTVar inst.workflowSequenceMaps updatedSequenceMaps
+    let initialMaps =
+          ResolutionMaps
+            { resTimers = timers
+            , resActivities = activities
+            , resChildWorkflows = childWorkflows
+            , resExternalSignals = externalSignals
+            , resExternalCancels = externalCancels
+            , resConditionsAwaitingSignal = conditionsAwaitingSignal
+            }
+
+    -- Helper to delete from a map and generate a write action
+    let deleteAndWrite :: Sequence -> SequenceMap a -> TVar (SequenceMap a) -> (SequenceMap a, STM ())
+        deleteAndWrite seq map' tvar =
+          let updated = HashMap.delete seq map'
+          in (updated, writeTVar tvar updated)
+
+    -- Helper to lookup, delete, and prepare result with write action
+    let lookupAndDelete :: String -> Sequence -> SequenceMap a -> TVar (SequenceMap a) -> (a, SequenceMap a, STM ())
+        lookupAndDelete errorMsg seq map' tvar =
+          case HashMap.lookup seq map' of
+            Nothing -> E.throw $ RuntimeError errorMsg
+            Just val ->
+              let (updated, writeAction) = deleteAndWrite seq map' tvar
+              in (val, updated, writeAction)
+
+    let makeCompletion :: ([ActivationResult], ResolutionMaps, [STM ()]) -> PendingJob -> ([ActivationResult], ResolutionMaps, [STM ()])
+        makeCompletion (!completions, !maps, !writeActions) pj = case pj of
+          PendingJobResolveActivity msg ->
+            let seq = msg ^. Activation.seq . to Sequence
+                (existing, updatedActivities, writeAction) = lookupAndDelete "Activity handle not found" seq maps.resActivities inst.asyncOperations.activityTracking.activeActivities
+            in ( ActivationResult (Ok msg) existing : completions
+               , maps {resActivities = updatedActivities}
+               , writeAction : writeActions
+               )
+          PendingJobResolveChildWorkflowExecutionStart msg ->
+            let seq = msg ^. Activation.seq . to Sequence
+                existingHandle = HashMap.lookup seq maps.resChildWorkflows
+            in case existingHandle of
+                Nothing ->
+                  E.throw $ RuntimeError "Child workflow not found"
+                Just (SomeChildWorkflowHandle existing) -> case msg ^. Activation.maybe'status of
+                  Nothing ->
+                    E.throw $ RuntimeError "Child workflow start did not have a known status"
+                  Just status -> case status of
+                    ResolveChildWorkflowExecutionStart'Succeeded succeeded ->
+                      ( ActivationResult (Ok ()) existing.startHandle
+                          : ActivationResult (Ok (succeeded ^. Activation.runId . to RunId)) existing.firstExecutionRunId
+                          : completions
+                      , maps
+                      , writeActions
+                      )
+                    ResolveChildWorkflowExecutionStart'Failed failed ->
+                      let (updatedChildWorkflows, writeAction) = deleteAndWrite seq maps.resChildWorkflows inst.asyncOperations.childWorkflowTracking.activeChildWorkflows
+                          updatedMaps = maps {resChildWorkflows = updatedChildWorkflows}
+                          updatedActions = writeAction : writeActions
+                      in case failed ^. Activation.cause of
+                          START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS ->
+                            let failure :: forall v. ResultVal v
+                                failure =
+                                  ThrowWorkflow $
+                                    toException $
+                                      WorkflowAlreadyStarted
+                                        { workflowAlreadyStartedWorkflowId = WorkflowId (failed ^. Activation.workflowId)
+                                        , workflowAlreadyStartedWorkflowType = WorkflowType (failed ^. Activation.workflowType)
+                                        }
+                            in ( ActivationResult failure existing.startHandle
+                                  : ActivationResult failure existing.firstExecutionRunId
+                                  : completions
+                               , updatedMaps
+                               , updatedActions
+                               )
+                          _ ->
+                            ( ActivationResult
+                                (ThrowInternal $ toException $ RuntimeError ("Unknown child workflow start failure: " <> show (failed ^. Activation.cause)))
+                                existing.startHandle
+                                : completions
+                            , updatedMaps
+                            , updatedActions
+                            )
+                    ResolveChildWorkflowExecutionStart'Cancelled _cancelled ->
+                      let (updatedChildWorkflows, writeAction) = deleteAndWrite seq maps.resChildWorkflows inst.asyncOperations.childWorkflowTracking.activeChildWorkflows
+                      in ( ActivationResult (Ok ()) existing.startHandle
+                            : ActivationResult (ThrowWorkflow $ toException ChildWorkflowCancelled) existing.firstExecutionRunId
+                            : ActivationResult (ThrowWorkflow $ toException ChildWorkflowCancelled) existing.resultHandle
+                            : completions
+                         , maps {resChildWorkflows = updatedChildWorkflows}
+                         , writeAction : writeActions
+                         )
+          PendingWorkflowCancellation _ ->
+            (ActivationResult (Ok ()) inst.workflowCancellationVar : completions, maps, writeActions)
+          PendingJobResolveChildWorkflowExecution msg ->
+            let seq = msg ^. Activation.seq . to Sequence
+                existingHandle = HashMap.lookup seq maps.resChildWorkflows
+            in case existingHandle of
+                Nothing -> E.throw $ RuntimeError "Child Workflow Execution not found"
+                Just (SomeChildWorkflowHandle h) ->
+                  let (updatedChildWorkflows, writeAction) = deleteAndWrite seq maps.resChildWorkflows inst.asyncOperations.childWorkflowTracking.activeChildWorkflows
+                  in ( ActivationResult (Ok msg) h.resultHandle : completions
+                     , maps {resChildWorkflows = updatedChildWorkflows}
+                     , writeAction : writeActions
+                     )
+          PendingJobResolveSignalExternalWorkflow msg ->
+            let seq = msg ^. Activation.seq . to Sequence
+                (resVar, updatedExternalSignals, writeAction) = lookupAndDelete "External Signal IVar for sequence not found" seq maps.resExternalSignals inst.asyncOperations.externalSignalTracking.activeExternalSignals
+            in ( ActivationResult (Ok msg) resVar : completions
+               , maps {resExternalSignals = updatedExternalSignals}
+               , writeAction : writeActions
+               )
+          PendingJobResolveRequestCancelExternalWorkflow msg ->
+            let seq = msg ^. Activation.seq . to Sequence
+                (resVar, updatedExternalCancels, writeAction) = lookupAndDelete "External Cancel IVar for sequence not found" seq maps.resExternalCancels inst.asyncOperations.externalCancelTracking.activeExternalCancels
+            in ( ActivationResult (Ok msg) resVar : completions
+               , maps {resExternalCancels = updatedExternalCancels}
+               , writeAction : writeActions
+               )
+          PendingJobFireTimer msg ->
+            let seq = msg ^. Activation.seq . to Sequence
+                (existing, updatedTimers, writeAction) = lookupAndDelete "Timer not found" seq maps.resTimers inst.asyncOperations.timerTracking.activeTimers
+            in ( ActivationResult (Ok ()) existing : completions
+               , maps {resTimers = updatedTimers}
+               , writeAction : writeActions
+               )
+
+    let (newCompletions, _finalMaps, writeActions) = foldl' makeCompletion ([], initialMaps, []) rs
+    -- Execute all accumulated write actions
+    sequence_ writeActions
     pure newCompletions
 
 
