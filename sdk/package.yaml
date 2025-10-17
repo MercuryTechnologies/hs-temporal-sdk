@@ -2,9 +2,10 @@
 
 name:         temporal-sdk
 build-type:   Simple
+description:  Temporal is a durable execution system that transparently makes your code durable, fault-tolerant, and simple. This is the high-level Temporal SDK that provides a higher-level API for building Temporal workflows and activities.
 
 dependencies:
-- base
+- base >= 4.7 && < 5
 - proto-lens
 - proto-lens-protobuf-types
 - temporal-api-protos

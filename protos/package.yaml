@@ -1,13 +1,14 @@
 verbatim: { cabal-version: 3.0 }
 
 name:         temporal-api-protos
-version:      0.1.0.0
+version:      2025.10.1.0
 author:       Ian Duncan
 maintainer:   temporal@mercury.com
 license-file: LICENSE
 license:      BSD-3-Clause
 build-type:   Simple
 language:     Haskell2010
+description:  Temporal is a durable execution system that transparently makes your code durable, fault-tolerant, and simple. These are low-level protocol buffer definitions for the Temporal API.
 
 library:
   source-dirs: src
