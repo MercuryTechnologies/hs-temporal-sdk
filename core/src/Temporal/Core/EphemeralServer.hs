@@ -114,32 +114,32 @@ foreign import ccall "hs_temporal_start_dev_server"
 
 
 startDevServer :: Runtime -> TemporalDevServerConfig -> IO (Either ByteString EphemeralServer)
-startDevServer r c = withRuntime r $ \rp -> useAsCString (BL.toStrict (encode c)) $ \cstr -> do
-  res <- makeTokioAsyncCall (raw_startDevServer rp cstr)
-  case res of
-    Left errPtr -> do
+startDevServer r c = withRuntime r $ \rp -> useAsCString (BL.toStrict (encode c)) $ \cstr ->
+  -- Exception-safe: use makeTokioAsyncCallSafe for automatic cleanup
+  makeTokioAsyncCallSafe
+    (raw_startDevServer rp cstr)
+    rust_dropByteArray
+    (\_ -> pure ())  -- Server pointer doesn't need freeing here (managed by Rust)
+    (\errPtr -> do
       arr <- peek errPtr
-      err <- cArrayToByteString arr
-      rust_dropByteArray errPtr
-      return (Left err)
-    Right srvPtr -> pure $ Right $ EphemeralServer srvPtr
+      cArrayToByteString arr)
+    (\srvPtr -> pure $ EphemeralServer srvPtr)
 
 
 foreign import ccall "hs_temporal_shutdown_ephemeral_server" raw_shutdownEphemeralServer :: Ptr EphemeralServer -> TokioCall (CArray Word8) CUnit
 
 
 shutdownEphemeralServer :: EphemeralServer -> IO (Either ByteString ())
-shutdownEphemeralServer (EphemeralServer ep) = do
-  res <- makeTokioAsyncCall (raw_shutdownEphemeralServer ep)
-  case res of
-    Left errPtr -> do
+shutdownEphemeralServer (EphemeralServer ep) =
+  -- Exception-safe: use makeTokioAsyncCallSafe for automatic cleanup
+  makeTokioAsyncCallSafe
+    (raw_shutdownEphemeralServer ep)
+    rust_dropByteArray
+    rust_dropUnit
+    (\errPtr -> do
       arr <- peek errPtr
-      err <- cArrayToByteString arr
-      rust_dropByteArray errPtr
-      return (Left err)
-    Right unitPtr -> do
-      rust_dropUnit unitPtr
-      return (Right ())
+      cArrayToByteString arr)
+    (\_ -> return ())
 
 
 -- TODO
@@ -163,12 +163,13 @@ foreign import ccall "hs_temporal_start_test_server"
 
 
 startTestServer :: Runtime -> TemporalTestServerConfig -> IO (Either ByteString EphemeralServer)
-startTestServer r conf = withRuntime r $ \rp -> useAsCString (BL.toStrict $ encode conf) $ \cstr -> do
-  res <- makeTokioAsyncCall (raw_startTestServer rp cstr)
-  case res of
-    Left errPtr -> do
+startTestServer r conf = withRuntime r $ \rp -> useAsCString (BL.toStrict $ encode conf) $ \cstr ->
+  -- Exception-safe: use makeTokioAsyncCallSafe for automatic cleanup
+  makeTokioAsyncCallSafe
+    (raw_startTestServer rp cstr)
+    rust_dropByteArray
+    (\_ -> pure ())  -- Server pointer doesn't need freeing here (managed by Rust)
+    (\errPtr -> do
       arr <- peek errPtr
-      err <- cArrayToByteString arr
-      rust_dropByteArray errPtr
-      return (Left err)
-    Right srvPtr -> pure $ Right $ EphemeralServer srvPtr
+      cArrayToByteString arr)
+    (\srvPtr -> pure $ EphemeralServer srvPtr)
