@@ -13,7 +13,6 @@ import Data.ByteString (ByteString, useAsCString)
 import qualified Data.ByteString.Lazy as BL
 import Data.Word
 import Foreign.C.String hiding (withCString)
-import Foreign.ForeignPtr
 import Foreign.Ptr
 import Foreign.Storable
 import Temporal.Core.CTypes
@@ -104,7 +103,7 @@ defaultTemporalDevServerConfig =
     }
 
 
-newtype EphemeralServer = EphemeralServer {ephemeralServerPtr :: ForeignPtr EphemeralServer}
+newtype EphemeralServer = EphemeralServer {ephemeralServerPtr :: Ptr EphemeralServer}
 
 
 foreign import ccall "hs_temporal_start_dev_server"
@@ -115,30 +114,30 @@ foreign import ccall "hs_temporal_start_dev_server"
 
 
 startDevServer :: Runtime -> TemporalDevServerConfig -> IO (Either ByteString EphemeralServer)
-startDevServer r c = withRuntime r $ \rp -> useAsCString (BL.toStrict (encode c)) $ \cstr -> do
-  res <-
-    makeTokioAsyncCall
-      (raw_startDevServer rp cstr)
-      (Just rust_dropByteArray)
-      Nothing
-  case res of
-    Left err -> Left <$> withForeignPtr err (peek >=> cArrayToByteString)
-    Right srv -> pure $ Right $ EphemeralServer srv
+startDevServer r c = withRuntime r $ \rp -> useAsCString (BL.toStrict (encode c)) $ \cstr ->
+  withTokioAsyncCall
+    (raw_startDevServer rp cstr)
+    rust_dropByteArray
+    (\_ -> pure ())  -- Server pointer doesn't need freeing here (managed by Rust)
+    (\errPtr -> do
+      arr <- peek errPtr
+      cArrayToByteString arr)
+    (\srvPtr -> pure $ EphemeralServer srvPtr)
 
 
 foreign import ccall "hs_temporal_shutdown_ephemeral_server" raw_shutdownEphemeralServer :: Ptr EphemeralServer -> TokioCall (CArray Word8) CUnit
 
 
 shutdownEphemeralServer :: EphemeralServer -> IO (Either ByteString ())
-shutdownEphemeralServer (EphemeralServer e) = withForeignPtr e $ \ep -> do
-  res <-
-    makeTokioAsyncCall
-      (raw_shutdownEphemeralServer ep)
-      (Just rust_dropByteArray)
-      (Just rust_dropUnit)
-  case res of
-    Left err -> Left <$> withForeignPtr err (peek >=> cArrayToByteString)
-    Right _ -> pure $ Right ()
+shutdownEphemeralServer (EphemeralServer ep) =
+  withTokioAsyncCall
+    (raw_shutdownEphemeralServer ep)
+    rust_dropByteArray
+    rust_dropUnit
+    (\errPtr -> do
+      arr <- peek errPtr
+      cArrayToByteString arr)
+    (\_ -> return ())
 
 
 -- TODO
@@ -162,12 +161,12 @@ foreign import ccall "hs_temporal_start_test_server"
 
 
 startTestServer :: Runtime -> TemporalTestServerConfig -> IO (Either ByteString EphemeralServer)
-startTestServer r conf = withRuntime r $ \rp -> useAsCString (BL.toStrict $ encode conf) $ \cstr -> do
-  res <-
-    makeTokioAsyncCall
-      (raw_startTestServer rp cstr)
-      (Just rust_dropByteArray)
-      Nothing
-  case res of
-    Left err -> Left <$> withForeignPtr err (peek >=> cArrayToByteString)
-    Right srv -> pure $ Right $ EphemeralServer srv
+startTestServer r conf = withRuntime r $ \rp -> useAsCString (BL.toStrict $ encode conf) $ \cstr ->
+  withTokioAsyncCall
+    (raw_startTestServer rp cstr)
+    rust_dropByteArray
+    (\_ -> pure ())  -- Server pointer doesn't need freeing here (managed by Rust)
+    (\errPtr -> do
+      arr <- peek errPtr
+      cArrayToByteString arr)
+    (\srvPtr -> pure $ EphemeralServer srvPtr)

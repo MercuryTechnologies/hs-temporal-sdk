@@ -15,7 +15,6 @@ module Temporal.Core.Client (
   defaultClientConfig,
   closeClient,
   clientRuntime,
-  touchClient,
   CoreClient,
   ClientConfig (..),
   ClientTlsConfig (..),
@@ -44,6 +43,9 @@ module Temporal.Core.Client (
   PrimRpcCall,
   -- | Use the underlying Rust client pointer
   withClient,
+
+  -- * Resource-safe wrappers
+  bracketClient,
 ) where
 
 import Control.Concurrent
@@ -65,7 +67,6 @@ import qualified Data.Text as T
 import qualified Data.Vector.Storable as V
 import Data.Word
 import Foreign.C.String
-import Foreign.ForeignPtr
 import Foreign.Marshal
 import Foreign.Ptr
 import Foreign.Storable
@@ -81,7 +82,7 @@ import qualified UnliftIO
 foreign import ccall "hs_temporal_connect_client" raw_connectClient :: Ptr Runtime -> CString -> TokioCall (CArray Word8) CoreClient
 
 
-foreign import ccall "&hs_temporal_drop_client" raw_freeClient :: FinalizerPtr CoreClient
+foreign import ccall "hs_temporal_drop_client" raw_freeClient :: Ptr CoreClient -> IO ()
 
 
 data ClientConfig = ClientConfig
@@ -154,31 +155,18 @@ withClient :: Client -> (Ptr CoreClient -> IO a) -> IO a
 withClient (Client cc r _) f =
   withMVar cc $ \(CoreClient c) ->
     withRuntime r $ \_ ->
-      withForeignPtr c f
-
-
-touchClient :: Client -> IO ()
-touchClient (Client cc _ _) = do
-  mcc <- tryReadMVar cc
-  case mcc of
-    Nothing -> return ()
-    Just (CoreClient c) -> touchForeignPtr c
+      f c
 
 
 newtype ByteVector = ByteVector {byteVector :: ByteString}
 
 
 byteStringToVector :: BS.ByteString -> V.Vector Word8
-byteStringToVector bs = vec
-  where
-    vec = V.unsafeFromForeignPtr (castForeignPtr fptr) off len
-    (fptr, off, len) = BS.toForeignPtr bs
+byteStringToVector = V.fromList . BS.unpack
 
 
 vectorToByteString :: V.Vector Word8 -> BS.ByteString
-vectorToByteString vec = BS.fromForeignPtr (castForeignPtr fptr) off len
-  where
-    (fptr, off, len) = V.unsafeToForeignPtr vec
+vectorToByteString = BS.pack . V.toList
 
 
 instance ToJSON ByteVector where
@@ -253,16 +241,18 @@ connectClient rt conf = do
   withRunInIO $ \runInIO -> do
     forkIO $ runInIO $ do
       liftIO $ withRuntime rt $ \rtPtr -> BS.useAsCString (BL.toStrict $ encode conf') $ \confPtr -> do
-        let tryConnect =
-              makeTokioAsyncCall
-                (raw_connectClient rtPtr confPtr)
-                (Just rust_dropByteArray)
-                (Just raw_freeClient)
+        let tryConnect = makeTokioAsyncCall (raw_connectClient rtPtr confPtr)
             go attempt = do
               result <- tryConnect
               case result of
-                Left errFP -> do
-                  err <- withForeignPtr errFP $ peek >=> cArrayToText
+                Left errPtr -> do
+                  -- Exception-safe: use bracket to ensure error is freed
+                  err <- bracket
+                    (pure errPtr)
+                    rust_dropByteArray
+                    (\ptr -> do
+                      errArr <- peek ptr
+                      cArrayToText errArr)
                   let err' = "Error connecting to Temporal server: " <> err
                   runInIO $ $(logWarn) err'
                   case retryConfig conf of
@@ -275,29 +265,43 @@ connectClient rt conf = do
                         else do
                           liftIO $ threadDelay $ round delayMicros
                           go (attempt + 1)
-                Right client_ -> liftIO $ putMVar clientPtrSlot (CoreClient client_)
+                Right clientPtr -> liftIO $ putMVar clientPtrSlot (CoreClient clientPtr)
         go 1
   pure $ Client clientPtrSlot rt conf'
 
 
 reconnectClient :: (MonadIO m, MonadLogger m, MonadUnliftIO m) => Client -> m ()
 reconnectClient (Client clientPtrSlot rt conf) = UnliftIO.mask $ \restore -> do
-  (CoreClient clientPtr) <- liftIO $ takeMVar clientPtrSlot
-  (Client newClientPtr _ _) <- restore (connectClient rt conf) `UnliftIO.catch` (\c -> liftIO $ putMVar clientPtrSlot (throw (c :: ClientError)) >> throwIO c)
-  liftIO $ takeMVar newClientPtr >>= putMVar clientPtrSlot
+  (CoreClient oldClientPtr) <- liftIO $ takeMVar clientPtrSlot
+  -- Exception-safe: if connectClient fails, restore old client and free it properly
+  (Client newClientPtr _ _) <- restore (connectClient rt conf) `UnliftIO.catch`
+    (\c -> liftIO $ do
+      putMVar clientPtrSlot (throw (c :: ClientError))
+      raw_freeClient oldClientPtr  -- Free old client even on failure
+      throwIO c)
+  liftIO $ do
+    -- Success path: free old client and install new one
+    raw_freeClient oldClientPtr
+    takeMVar newClientPtr >>= putMVar clientPtrSlot
 
 
+-- | Explicitly close a client connection.
+--
+-- After calling this, the client must not be used again.
 closeClient :: MonadIO m => Client -> m ()
 closeClient (Client clientPtrSlot _ _) = liftIO $ mask_ $ do
   (CoreClient clientPtr) <- takeMVar clientPtrSlot
-  finalizeForeignPtr clientPtr
+  raw_freeClient clientPtr
   putMVar clientPtrSlot (throw ClientClosedError)
 
 
 type PrimRpcCall = Ptr CoreClient -> Ptr CRpcCall -> TokioCall CRPCError (CArray Word8)
 
 
--- TODO how should we use mask here?
+-- | Make an RPC call through the client.
+--
+-- This function is async-exception-safe: all Rust allocations are properly
+-- freed even if an async exception occurs during processing.
 call :: forall svc t. (HasMethodImpl svc t) => PrimRpcCall -> Client -> MethodInput svc t -> IO (Either RpcError (MethodOutput svc t))
 call f c req_ = withClient c $ \cPtr -> do
   let msgBytes = encodeMessage req_
@@ -313,11 +317,24 @@ call f c req_ = withClient c $ \cPtr -> do
               }
       alloca $ \rpcCallPtr -> do
         poke rpcCallPtr rpcCall
-        result <-
-          makeTokioAsyncCall
-            (f cPtr rpcCallPtr)
-            (Just rust_drop_rpc_error)
-            (Just rust_dropByteArray)
-        case result of
-          Left err -> Left <$> withForeignPtr err (peek >=> peekCRPCError)
-          Right r -> Right . decodeMessageOrDie <$> withForeignPtr r (peek >=> cArrayToByteString)
+        withTokioAsyncCall
+          (f cPtr rpcCallPtr)
+          rust_drop_rpc_error
+          rust_dropByteArray
+          (\errPtr -> peek errPtr >>= peekCRPCError)
+          (\resultPtr -> do
+            arr <- peek resultPtr
+            bs <- cArrayToByteString arr
+            return (decodeMessageOrDie bs))
+
+
+-- | Bracket-style wrapper for Client that ensures proper cleanup.
+--
+-- Example:
+--
+-- @
+-- bracketClient rt clientConfig $ \\client -> do
+--   ...
+-- @
+bracketClient :: (MonadUnliftIO m, MonadLogger m) => Runtime -> ClientConfig -> (Client -> m a) -> m a
+bracketClient rt conf = UnliftIO.bracket (connectClient rt conf) closeClient

@@ -11,6 +11,7 @@ import Control.Monad
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as ByteString
 import Data.Coerce
+import Data.IORef
 import Data.Kind (Type)
 import Data.Proxy
 import Data.Text (Text)
@@ -20,7 +21,6 @@ import qualified Data.Vector.Storable as Vector
 import Data.Word
 import Foreign.C.String
 import Foreign.C.Types
-import Foreign.ForeignPtr
 import Foreign.Marshal.Alloc
 import qualified Foreign.Marshal.Utils as Marshal
 import Foreign.Ptr
@@ -45,21 +45,14 @@ withCArrayText txt f = Text.withCStringLen txt $ \(bytes, len) ->
   Marshal.with (CArray (castPtr bytes) (fromIntegral len)) f
 
 
-withTokioResult :: TokioResult a -> (Ptr (Ptr a) -> IO b) -> IO b
-withTokioResult fp f = withForeignPtr fp $ \ptr -> do
-  poke ptr nullPtr
-  f ptr
-
-
-peekTokioResult :: TokioSlot a -> Maybe (FinalizerPtr a) -> IO (Maybe (ForeignPtr a))
-peekTokioResult slot mfp = do
+-- | Peek the result from a Tokio slot. Returns the raw pointer or Nothing.
+-- The caller is responsible for freeing the pointer using the appropriate drop function.
+peekTokioResult :: TokioSlot a -> IO (Maybe (Ptr a))
+peekTokioResult slot = do
   inner <- peek slot
   if inner == nullPtr
     then return Nothing
-    else
-      Just <$> case mfp of
-        Nothing -> newForeignPtr_ inner
-        Just fp -> newForeignPtr fp inner
+    else return (Just inner)
 
 
 type TokioCall e a = StablePtr PrimMVar -> Int -> TokioSlot e -> TokioSlot a -> IO ()
@@ -68,39 +61,108 @@ type TokioCall e a = StablePtr PrimMVar -> Int -> TokioSlot e -> TokioSlot a -> 
 type TokioSlot a = Ptr (Ptr a)
 
 
-type TokioResult a = ForeignPtr (Ptr a)
+-- | Storage for Tokio async operation results
+type TokioResult a = Ptr (Ptr a)
 
 
-{- | Dropping can't be done automatically if the result is returned without async exceptions
-intervening, because we don't want to drop things like `Client` while they're still in use.
-So we should return ForeignPtrs for things that need to stay alive, and then we can drop when we're done.
+{- | Make an async call to Rust via Tokio. Returns raw Ptr that MUST be freed by the caller
+using the appropriate drop function.
+
+The caller is responsible for:
+1. Calling the appropriate rust_drop* function on the result
+2. Not using the pointer after freeing it
+
+IMPORTANT: This is a low-level function. Prefer using withTokioAsyncCall
+for automatic memory management and exception safety.
 -}
 makeTokioAsyncCall
   :: TokioCall err res
-  -> Maybe (FinalizerPtr err)
-  -> Maybe (FinalizerPtr res)
-  -> IO (Either (ForeignPtr err) (ForeignPtr res))
-makeTokioAsyncCall call readErr readSuccess = uninterruptibleMask $ \restore -> do
-  mvar <- newEmptyMVar
-  sp <- newStablePtrPrimMVar mvar
-  errorSlot <- mallocForeignPtr
-  resultSlot <- mallocForeignPtr
-  withTokioResult errorSlot $ \err -> withTokioResult resultSlot $ \res -> do
-    let peekEither = do
-          e <- peekTokioResult err readErr
-          case e of
-            Nothing -> do
-              r <- peekTokioResult res readSuccess
-              case r of
-                Nothing -> error "Both error and result are null"
-                Just r -> return (Right r)
-            Just e -> return (Left e)
-
+  -> IO (Either (Ptr err) (Ptr res))
+makeTokioAsyncCall call = bracket
+  (do
+    errorSlot <- malloc
+    resultSlot <- malloc
+    poke errorSlot nullPtr
+    poke resultSlot nullPtr
+    return (errorSlot, resultSlot))
+  (\(errorSlot, resultSlot) -> do
+    free errorSlot
+    free resultSlot)
+  (\(errorSlot, resultSlot) -> uninterruptibleMask $ \restore -> do
+    mvar <- newEmptyMVar
+    sp <- newStablePtrPrimMVar mvar
     (cap, _) <- threadCapability =<< myThreadId
-    call sp cap err res
-    let handleCleanup = forkIO $ do
-          takeMVar mvar
-          -- We still need to get the result out of the slot and into a ForeignPtr so that we can drop it
-          void peekEither
-    () <- restore (takeMVar mvar) `onException` handleCleanup
-    peekEither
+    call sp cap errorSlot resultSlot
+
+    -- Wait for completion
+    () <- restore (takeMVar mvar)
+
+    -- Read results before slots are freed
+    errPtr <- peek errorSlot
+    if errPtr /= nullPtr
+      then return (Left errPtr)
+      else do
+        resPtr <- peek resultSlot
+        if resPtr /= nullPtr
+          then return (Right resPtr)
+          else error "Both error and result are null from Tokio call")
+
+
+{- | Exception-safe wrapper for Tokio async calls.
+
+This function ensures that Rust-allocated memory is properly freed even if an async
+exception occurs during processing. It uses bracket to guarantee cleanup.
+
+Parameters:
+  - call: The FFI call to make
+  - freeErr: Function to free error pointers
+  - freeRes: Function to free result pointers
+  - processErr: Function to extract Haskell value from error pointer
+  - processRes: Function to extract Haskell value from result pointer
+-}
+withTokioAsyncCall
+  :: TokioCall err res
+  -> (Ptr err -> IO ())  -- ^ Free error
+  -> (Ptr res -> IO ())  -- ^ Free result
+  -> (Ptr err -> IO e)   -- ^ Process error
+  -> (Ptr res -> IO a)   -- ^ Process result
+  -> IO (Either e a)
+withTokioAsyncCall call freeErr freeRes processErr processRes =
+  mask $ \restore ->
+    alloca $ \errorSlot -> alloca $ \resultSlot -> do
+      poke errorSlot nullPtr
+      poke resultSlot nullPtr
+      mvar <- newEmptyMVar
+      sp <- newStablePtrPrimMVar mvar
+      (cap, _) <- threadCapability =<< myThreadId
+      call sp cap errorSlot resultSlot
+
+      -- Wait for Rust to complete, but spawn cleanup thread if interrupted
+      let spawnCleanupThread = void $ forkIO $ do
+            -- Wait for Rust to finish and clean up
+            takeMVar mvar
+            errPtr <- peek errorSlot
+            resPtr <- peek resultSlot
+            when (errPtr /= nullPtr) (freeErr errPtr)
+            when (resPtr /= nullPtr) (freeRes resPtr)
+
+      (do
+        -- Allow interruption during the wait
+        restore (takeMVar mvar)
+
+        -- Now process the result, masked
+        errPtr <- peek errorSlot
+        if errPtr /= nullPtr
+          then do
+            result <- processErr errPtr
+            freeErr errPtr
+            return (Left result)
+          else do
+            resPtr <- peek resultSlot
+            if resPtr /= nullPtr
+              then do
+                result <- processRes resPtr
+                freeRes resPtr
+                return (Right result)
+              else error "Both error and result are null from Tokio call"
+        ) `onException` spawnCleanupThread
