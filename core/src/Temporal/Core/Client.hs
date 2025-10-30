@@ -67,6 +67,7 @@ import qualified Data.Text as T
 import qualified Data.Vector.Storable as V
 import Data.Word
 import Foreign.C.String
+import Foreign.ForeignPtr (castForeignPtr)
 import Foreign.Marshal
 import Foreign.Ptr
 import Foreign.Storable
@@ -161,12 +162,22 @@ withClient (Client cc r _) f =
 newtype ByteVector = ByteVector {byteVector :: ByteString}
 
 
+-- | Safety: we're handed a 'BS.ByteString' and are converting it directly to
+-- a 'V.Vector Word8'; we can use conversion functions that do not take offsets
+-- into account.
 byteStringToVector :: BS.ByteString -> V.Vector Word8
-byteStringToVector = V.fromList . BS.unpack
+byteStringToVector bs = V.unsafeFromForeignPtr0 (castForeignPtr fptr) len
+  where
+    (fptr, len) = BS.toForeignPtr0 bs
 
 
+-- | Safety: we're handed a 'V.Vector Word8' and are converting it directly to
+-- a 'BS.ByteString'; we can use conversion functions that do not take offsets
+-- into account.
 vectorToByteString :: V.Vector Word8 -> BS.ByteString
-vectorToByteString = BS.pack . V.toList
+vectorToByteString vec = BS.fromForeignPtr0 (castForeignPtr fptr) len
+  where
+    (fptr, len) = V.unsafeToForeignPtr0 vec
 
 
 instance ToJSON ByteVector where
