@@ -26,7 +26,7 @@ import Temporal.Internal.FFI
 
 -- | Initialize the Rust runtime and thread-pool.
 --
--- IMPORTANT: You must call 'destroyRuntime' when done, or use 'acquireRuntime'/'bracketRuntime'
+-- IMPORTANT: You must call 'destroyRuntime' when done, or use 'withRuntime'/'bracketRuntime'
 -- for automatic cleanup.
 initializeRuntime :: TelemetryOptions -> IO Runtime
 initializeRuntime opts = withCArrayBS (BL.toStrict $ encode opts) $ \optsP ->
