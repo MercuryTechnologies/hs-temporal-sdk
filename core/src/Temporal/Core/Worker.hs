@@ -41,6 +41,8 @@ module Temporal.Core.Worker (
   pushHistory,
   closeHistory,
   KnownWorkerType (..),
+  -- * Resource-safe wrappers
+  bracketWorker,
 ) where
 
 import Control.Exception
@@ -55,7 +57,6 @@ import Data.Text (Text)
 import Data.Void (Void)
 import Data.Word
 import Foreign.C.String
-import Foreign.ForeignPtr
 import Foreign.Marshal
 import Foreign.Ptr
 import Foreign.Storable
@@ -68,6 +69,8 @@ import Temporal.Core.CTypes
 import Temporal.Core.Client
 import Temporal.Internal.FFI
 import Temporal.Runtime
+import UnliftIO (MonadIO, MonadUnliftIO, liftIO)
+import qualified UnliftIO
 
 
 data WorkerType = Real | Replay
@@ -106,7 +109,7 @@ singFor _ = knownWorkerType
 
 
 data Worker (ty :: WorkerType) = Worker
-  { workerPtr :: {-# UNPACK #-} !(IORef (ForeignPtr (Worker ty)))
+  { workerPtr :: {-# UNPACK #-} !(IORef (Ptr (Worker ty)))
   , workerConfig :: !WorkerConfig
   , workerClient :: !(InactiveForReplay ty Client)
   , workerRuntime :: {-# UNPACK #-} !Runtime
@@ -119,12 +122,12 @@ withWorker w@(Worker ptrRef _ c r) f = withRuntime r $ \_ ->
       keepClientAlive = case singFor w of
         SReal -> \m -> do
           a <- m
-          touchClient c
+          touchClient c  -- This is now a no-op but keep for API compat
           pure a
         SReplay -> id
   in keepClientAlive $ do
       ptr <- readIORef ptrRef
-      withForeignPtr ptr f
+      f ptr
 
 
 getWorkerClient :: Worker 'Real -> Client
@@ -211,19 +214,25 @@ foreign import ccall "hs_temporal_validate_worker" raw_validateWorker :: Ptr (Wo
 
 validateWorker :: Worker 'Real -> IO (Either WorkerValidationError ())
 validateWorker w = withWorker w $ \wp -> do
-  res <- makeTokioAsyncCall (raw_validateWorker wp) (Just rust_dropWorkerValidationError) (Just rust_dropUnit)
+  res <- makeTokioAsyncCall (raw_validateWorker wp)
   case res of
-    Left err -> Left <$> withForeignPtr err (peek >=> peekWorkerValidationError)
-    Right _ -> pure $ Right ()
+    Left errPtr -> do
+      err <- peek errPtr >>= peekWorkerValidationError
+      rust_dropWorkerValidationError errPtr
+      return (Left err)
+    Right unitPtr -> do
+      rust_dropUnit unitPtr
+      return (Right ())
 
 
-foreign import ccall "&hs_temporal_drop_worker" raw_closeWorker :: FinalizerPtr (Worker ty)
+foreign import ccall "hs_temporal_drop_worker" raw_closeWorker :: Ptr (Worker ty) -> IO ()
 
 
 getWorkerError :: Ptr CWorkerError -> IO WorkerError
 getWorkerError errPtr = do
-  fp <- newForeignPtr rust_dropWorkerError errPtr
-  withForeignPtr fp (peek >=> peekWorkerError)
+  err <- peek errPtr >>= peekWorkerError
+  rust_dropWorkerError errPtr
+  return err
 
 
 -- note: removed the Runtime argument from the C function since the runtime can be accessed from the client. Might want to add it back later if
@@ -231,10 +240,8 @@ getWorkerError errPtr = do
 newWorker :: Client -> WorkerConfig -> IO (Either WorkerError (Worker 'Real))
 newWorker c wc = withClient c $ \cPtr -> do
   withCArrayBS (BL.toStrict $ encode wc) $ \wcPtr -> do
-    wPtrPtrFP <- mallocForeignPtr
-    errPtrPtrFP <- mallocForeignPtr
-    withForeignPtr wPtrPtrFP $ \wPtrPtr -> do
-      withForeignPtr errPtrPtrFP $ \errPtrPtr -> do
+    alloca $ \wPtrPtr -> do
+      alloca $ \errPtrPtr -> do
         poke wPtrPtr nullPtr
         poke errPtrPtr nullPtr
 
@@ -244,8 +251,7 @@ newWorker c wc = withClient c $ \cPtr -> do
           if errPtr == nullPtr
             then do
               wPtr <- peek wPtrPtr
-              wPtrFP <- newForeignPtr raw_closeWorker wPtr
-              wPtrRef <- newIORef wPtrFP
+              wPtrRef <- newIORef wPtr
               pure $ Right $ Worker wPtrRef wc c (clientRuntime c)
             else Left <$> getWorkerError errPtr
 
@@ -257,10 +263,14 @@ data WorkerAlreadyClosed = WorkerAlreadyClosed
 instance Exception WorkerAlreadyClosed
 
 
+-- | Explicitly close a worker.
+--
+-- Explicitly close a worker, freeing its resources immediately.
+-- After calling this, the worker must not be used again.
 closeWorker :: Worker ty -> IO ()
 closeWorker (Worker w _ _ _) = mask_ $ do
   wp <- atomicModifyIORef' w $ \wp -> (throw WorkerAlreadyClosed, wp)
-  finalizeForeignPtr wp
+  raw_closeWorker wp
 
 
 foreign import ccall "hs_temporal_new_replay_worker" raw_newReplayWorker :: Ptr Runtime -> Ptr (CArray Word8) -> Ptr (Ptr (Worker 'Replay)) -> Ptr (Ptr HistoryPusher) -> Ptr (Ptr CWorkerError) -> IO ()
@@ -282,8 +292,7 @@ newReplayWorker r conf = withRuntime r $ \rPtr -> do
             then do
               wPtr <- peek wPtrPtr
               hpPtr <- peek hpPtrPtr
-              w <- newForeignPtr raw_closeWorker wPtr
-              wRef <- newIORef w
+              wRef <- newIORef wPtr
               pure $ Right (Worker wRef conf () r, HistoryPusher hpPtr)
             else Left <$> getWorkerError errPtr
 
@@ -293,14 +302,17 @@ foreign import ccall "hs_temporal_worker_poll_workflow_activation" raw_pollWorkf
 
 pollWorkflowActivation :: KnownWorkerType ty => Worker ty -> IO (Either WorkerError WorkflowActivation)
 pollWorkflowActivation w = withWorker w $ \wp -> do
-  res <-
-    makeTokioAsyncCall
-      (raw_pollWorkflowActivation wp)
-      (Just rust_dropWorkerError)
-      (Just rust_dropByteArray)
+  res <- makeTokioAsyncCall (raw_pollWorkflowActivation wp)
   case res of
-    Left err -> Left <$> withForeignPtr err (peek >=> peekWorkerError)
-    Right ok -> Right . decodeMessageOrDie <$> withForeignPtr ok (peek >=> cArrayToByteString)
+    Left errPtr -> do
+      err <- peek errPtr >>= peekWorkerError
+      rust_dropWorkerError errPtr
+      return (Left err)
+    Right resPtr -> do
+      arr <- peek resPtr
+      bs <- cArrayToByteString arr
+      rust_dropByteArray resPtr
+      return (Right (decodeMessageOrDie bs))
 
 
 foreign import ccall "hs_temporal_worker_poll_activity_task" raw_pollActivityTask :: Ptr (Worker ty) -> TokioCall CWorkerError (CArray Word8)
@@ -308,14 +320,17 @@ foreign import ccall "hs_temporal_worker_poll_activity_task" raw_pollActivityTas
 
 pollActivityTask :: KnownWorkerType ty => Worker ty -> IO (Either WorkerError ActivityTask)
 pollActivityTask w = withWorker w $ \wp -> do
-  res <-
-    makeTokioAsyncCall
-      (raw_pollActivityTask wp)
-      (Just rust_dropWorkerError)
-      (Just rust_dropByteArray)
+  res <- makeTokioAsyncCall (raw_pollActivityTask wp)
   case res of
-    Left err -> Left <$> withForeignPtr err (peek >=> peekWorkerError)
-    Right res -> Right . decodeMessageOrDie <$> withForeignPtr res (peek >=> cArrayToByteString)
+    Left errPtr -> do
+      err <- peek errPtr >>= peekWorkerError
+      rust_dropWorkerError errPtr
+      return (Left err)
+    Right resPtr -> do
+      arr <- peek resPtr
+      bs <- cArrayToByteString arr
+      rust_dropByteArray resPtr
+      return (Right (decodeMessageOrDie bs))
 
 
 foreign import ccall "hs_temporal_worker_complete_workflow_activation" raw_completeWorkflowActivation :: Ptr (Worker ty) -> Ptr (CArray Word8) -> TokioCall CWorkerError CUnit
@@ -324,14 +339,15 @@ foreign import ccall "hs_temporal_worker_complete_workflow_activation" raw_compl
 completeWorkflowActivation :: KnownWorkerType ty => Worker ty -> WorkflowActivationCompletion -> IO (Either WorkerError ())
 completeWorkflowActivation w p = withWorker w $ \wp ->
   withCArrayBS (encodeMessage p) $ \pPtr -> do
-    res <-
-      makeTokioAsyncCall
-        (raw_completeWorkflowActivation wp pPtr)
-        (Just rust_dropWorkerError)
-        (Just rust_dropUnit)
+    res <- makeTokioAsyncCall (raw_completeWorkflowActivation wp pPtr)
     case res of
-      Left err -> Left <$> withForeignPtr err (peek >=> peekWorkerError)
-      Right _ -> pure $ Right ()
+      Left errPtr -> do
+        err <- peek errPtr >>= peekWorkerError
+        rust_dropWorkerError errPtr
+        return (Left err)
+      Right unitPtr -> do
+        rust_dropUnit unitPtr
+        return (Right ())
 
 
 foreign import ccall "hs_temporal_worker_complete_activity_task" raw_completeActivityTask :: Ptr (Worker ty) -> Ptr (CArray Word8) -> TokioCall CWorkerError CUnit
@@ -340,14 +356,15 @@ foreign import ccall "hs_temporal_worker_complete_activity_task" raw_completeAct
 completeActivityTask :: KnownWorkerType ty => Worker ty -> ActivityTaskCompletion -> IO (Either WorkerError ())
 completeActivityTask w p = withWorker w $ \wp ->
   withCArrayBS (encodeMessage p) $ \pPtr -> do
-    res <-
-      makeTokioAsyncCall
-        (raw_completeActivityTask wp pPtr)
-        (Just rust_dropWorkerError)
-        (Just rust_dropUnit)
+    res <- makeTokioAsyncCall (raw_completeActivityTask wp pPtr)
     case res of
-      Left err -> Left <$> withForeignPtr err (peek >=> peekWorkerError)
-      Right _ -> pure $ Right ()
+      Left errPtr -> do
+        err <- peek errPtr >>= peekWorkerError
+        rust_dropWorkerError errPtr
+        return (Left err)
+      Right unitPtr -> do
+        rust_dropUnit unitPtr
+        return (Right ())
 
 
 foreign import ccall "hs_temporal_worker_record_activity_heartbeat" raw_recordActivityHeartbeat :: Ptr (Worker ty) -> Ptr (CArray Word8) -> Ptr (Ptr CWorkerError) -> Ptr (Ptr CUnit) -> IO ()
@@ -364,7 +381,8 @@ recordActivityHeartbeat w p = withWorker w $ \wp ->
         errPtr <- peek errPtrPtr
         if errPtr == nullPtr
           then do
-            rust_dropUnitNow =<< peek resPtrPtr
+            unitPtr <- peek resPtrPtr
+            rust_dropUnit unitPtr
             pure $ Right ()
           else Left <$> getWorkerError errPtr
 
@@ -398,14 +416,15 @@ functions have returned `ShutDown` errors.
 -}
 finalizeShutdown :: KnownWorkerType ty => Worker ty -> IO (Either WorkerError ())
 finalizeShutdown w = withWorker w $ \wp -> do
-  res <-
-    makeTokioAsyncCall
-      (raw_finalizeShutdown wp)
-      (Just rust_dropWorkerError)
-      (Just rust_dropUnit)
+  res <- makeTokioAsyncCall (raw_finalizeShutdown wp)
   case res of
-    Left err -> Left <$> withForeignPtr err (peek >=> peekWorkerError)
-    Right _ -> pure $ Right ()
+    Left errPtr -> do
+      err <- peek errPtr >>= peekWorkerError
+      rust_dropWorkerError errPtr
+      return (Left err)
+    Right unitPtr -> do
+      rust_dropUnit unitPtr
+      return (Right ())
 
 
 foreign import ccall "hs_temporal_history_pusher_push_history" raw_pushHistory :: Ptr HistoryPusher -> Ptr (CArray Word8) -> Ptr (CArray Word8) -> TokioCall CWorkerError CUnit
@@ -415,14 +434,15 @@ pushHistory :: HistoryPusher -> WorkflowId -> Either ByteString History -> IO (E
 pushHistory (HistoryPusher hp) wf p =
   withCArrayBS wf $ \wfPtr -> do
     withCArrayBS (either id encodeMessage p) $ \pPtr -> do
-      res <-
-        makeTokioAsyncCall
-          (raw_pushHistory hp wfPtr pPtr)
-          (Just rust_dropWorkerError)
-          (Just rust_dropUnit)
+      res <- makeTokioAsyncCall (raw_pushHistory hp wfPtr pPtr)
       case res of
-        Left err -> Left <$> withForeignPtr err (peek >=> peekWorkerError)
-        Right _ -> pure $ Right ()
+        Left errPtr -> do
+          err <- peek errPtr >>= peekWorkerError
+          rust_dropWorkerError errPtr
+          return (Left err)
+        Right unitPtr -> do
+          rust_dropUnit unitPtr
+          return (Right ())
 
 
 foreign import ccall "hs_temporal_history_pusher_close" raw_closeHistoryPusher :: Ptr HistoryPusher -> IO ()
@@ -431,3 +451,18 @@ foreign import ccall "hs_temporal_history_pusher_close" raw_closeHistoryPusher :
 closeHistory :: HistoryPusher -> IO ()
 closeHistory (HistoryPusher hp) =
   raw_closeHistoryPusher hp
+
+
+-- | Bracket-style wrapper for Worker that ensures proper cleanup.
+--
+-- Example:
+--
+-- @
+-- result <- newWorker client workerConfig
+-- case result of
+--   Left err -> error $ show err
+--   Right worker -> bracketWorker worker $ \\w -> do
+--     ...
+-- @
+bracketWorker :: Worker ty -> (Worker ty -> IO a) -> IO a
+bracketWorker worker = UnliftIO.bracket (return worker) closeWorker
