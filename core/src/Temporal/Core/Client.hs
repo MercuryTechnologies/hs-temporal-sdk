@@ -15,7 +15,6 @@ module Temporal.Core.Client (
   defaultClientConfig,
   closeClient,
   clientRuntime,
-  touchClient,
   CoreClient,
   ClientConfig (..),
   ClientTlsConfig (..),
@@ -159,10 +158,6 @@ withClient (Client cc r _) f =
       f c
 
 
-touchClient :: Client -> IO ()
-touchClient _ = return ()  -- No-op since we're not using ForeignPtr anymore
-
-
 newtype ByteVector = ByteVector {byteVector :: ByteString}
 
 
@@ -251,9 +246,13 @@ connectClient rt conf = do
               result <- tryConnect
               case result of
                 Left errPtr -> do
-                  errArr <- peek errPtr
-                  err <- cArrayToText errArr
-                  rust_dropByteArray errPtr  -- Free the error
+                  -- Exception-safe: use bracket to ensure error is freed
+                  err <- bracket
+                    (pure errPtr)
+                    rust_dropByteArray
+                    (\ptr -> do
+                      errArr <- peek ptr
+                      cArrayToText errArr)
                   let err' = "Error connecting to Temporal server: " <> err
                   runInIO $ $(logWarn) err'
                   case retryConfig conf of
@@ -274,9 +273,15 @@ connectClient rt conf = do
 reconnectClient :: (MonadIO m, MonadLogger m, MonadUnliftIO m) => Client -> m ()
 reconnectClient (Client clientPtrSlot rt conf) = UnliftIO.mask $ \restore -> do
   (CoreClient oldClientPtr) <- liftIO $ takeMVar clientPtrSlot
-  (Client newClientPtr _ _) <- restore (connectClient rt conf) `UnliftIO.catch` (\c -> liftIO $ putMVar clientPtrSlot (throw (c :: ClientError)) >> throwIO c)
+  -- Exception-safe: if connectClient fails, restore old client and free it properly
+  (Client newClientPtr _ _) <- restore (connectClient rt conf) `UnliftIO.catch`
+    (\c -> liftIO $ do
+      putMVar clientPtrSlot (throw (c :: ClientError))
+      raw_freeClient oldClientPtr  -- Free old client even on failure
+      throwIO c)
   liftIO $ do
-    raw_freeClient oldClientPtr  -- Free the old client before replacing it
+    -- Success path: free old client and install new one
+    raw_freeClient oldClientPtr
     takeMVar newClientPtr >>= putMVar clientPtrSlot
 
 
@@ -293,7 +298,10 @@ closeClient (Client clientPtrSlot _ _) = liftIO $ mask_ $ do
 type PrimRpcCall = Ptr CoreClient -> Ptr CRpcCall -> TokioCall CRPCError (CArray Word8)
 
 
--- TODO how should we use mask here?
+-- | Make an RPC call through the client.
+--
+-- This function is async-exception-safe: all Rust allocations are properly
+-- freed even if an async exception occurs during processing.
 call :: forall svc t. (HasMethodImpl svc t) => PrimRpcCall -> Client -> MethodInput svc t -> IO (Either RpcError (MethodOutput svc t))
 call f c req_ = withClient c $ \cPtr -> do
   let msgBytes = encodeMessage req_
@@ -309,17 +317,15 @@ call f c req_ = withClient c $ \cPtr -> do
               }
       alloca $ \rpcCallPtr -> do
         poke rpcCallPtr rpcCall
-        result <- makeTokioAsyncCall (f cPtr rpcCallPtr)
-        case result of
-          Left errPtr -> do
-            err <- peek errPtr >>= peekCRPCError
-            rust_drop_rpc_error errPtr  -- Free the error
-            return (Left err)
-          Right resultPtr -> do
+        withTokioAsyncCall
+          (f cPtr rpcCallPtr)
+          rust_drop_rpc_error
+          rust_dropByteArray
+          (\errPtr -> peek errPtr >>= peekCRPCError)
+          (\resultPtr -> do
             arr <- peek resultPtr
             bs <- cArrayToByteString arr
-            rust_dropByteArray resultPtr  -- Free the result
-            return (Right (decodeMessageOrDie bs))
+            return (decodeMessageOrDie bs))
 
 
 -- | Bracket-style wrapper for Client that ensures proper cleanup.

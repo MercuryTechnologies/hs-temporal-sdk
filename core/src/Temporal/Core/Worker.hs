@@ -117,17 +117,9 @@ data Worker (ty :: WorkerType) = Worker
 
 
 withWorker :: forall ty a. KnownWorkerType ty => Worker ty -> (Ptr (Worker ty) -> IO a) -> IO a
-withWorker w@(Worker ptrRef _ c r) f = withRuntime r $ \_ ->
-  let keepClientAlive :: IO a -> IO a
-      keepClientAlive = case singFor w of
-        SReal -> \m -> do
-          a <- m
-          touchClient c  -- This is now a no-op but keep for API compat
-          pure a
-        SReplay -> id
-  in keepClientAlive $ do
-      ptr <- readIORef ptrRef
-      f ptr
+withWorker (Worker ptrRef _ _ r) f = withRuntime r $ \_ -> do
+  ptr <- readIORef ptrRef
+  f ptr
 
 
 getWorkerClient :: Worker 'Real -> Client
@@ -213,16 +205,13 @@ foreign import ccall "hs_temporal_validate_worker" raw_validateWorker :: Ptr (Wo
 
 
 validateWorker :: Worker 'Real -> IO (Either WorkerValidationError ())
-validateWorker w = withWorker w $ \wp -> do
-  res <- makeTokioAsyncCall (raw_validateWorker wp)
-  case res of
-    Left errPtr -> do
-      err <- peek errPtr >>= peekWorkerValidationError
-      rust_dropWorkerValidationError errPtr
-      return (Left err)
-    Right unitPtr -> do
-      rust_dropUnit unitPtr
-      return (Right ())
+validateWorker w = withWorker w $ \wp ->
+  withTokioAsyncCall
+    (raw_validateWorker wp)
+    rust_dropWorkerValidationError
+    rust_dropUnit
+    (\errPtr -> peek errPtr >>= peekWorkerValidationError)
+    (\_ -> return ())
 
 
 foreign import ccall "hs_temporal_drop_worker" raw_closeWorker :: Ptr (Worker ty) -> IO ()
@@ -301,36 +290,32 @@ foreign import ccall "hs_temporal_worker_poll_workflow_activation" raw_pollWorkf
 
 
 pollWorkflowActivation :: KnownWorkerType ty => Worker ty -> IO (Either WorkerError WorkflowActivation)
-pollWorkflowActivation w = withWorker w $ \wp -> do
-  res <- makeTokioAsyncCall (raw_pollWorkflowActivation wp)
-  case res of
-    Left errPtr -> do
-      err <- peek errPtr >>= peekWorkerError
-      rust_dropWorkerError errPtr
-      return (Left err)
-    Right resPtr -> do
+pollWorkflowActivation w = withWorker w $ \wp ->
+  withTokioAsyncCall
+    (raw_pollWorkflowActivation wp)
+    rust_dropWorkerError
+    rust_dropByteArray
+    (\errPtr -> peek errPtr >>= peekWorkerError)
+    (\resPtr -> do
       arr <- peek resPtr
       bs <- cArrayToByteString arr
-      rust_dropByteArray resPtr
-      return (Right (decodeMessageOrDie bs))
+      return (decodeMessageOrDie bs))
 
 
 foreign import ccall "hs_temporal_worker_poll_activity_task" raw_pollActivityTask :: Ptr (Worker ty) -> TokioCall CWorkerError (CArray Word8)
 
 
 pollActivityTask :: KnownWorkerType ty => Worker ty -> IO (Either WorkerError ActivityTask)
-pollActivityTask w = withWorker w $ \wp -> do
-  res <- makeTokioAsyncCall (raw_pollActivityTask wp)
-  case res of
-    Left errPtr -> do
-      err <- peek errPtr >>= peekWorkerError
-      rust_dropWorkerError errPtr
-      return (Left err)
-    Right resPtr -> do
+pollActivityTask w = withWorker w $ \wp ->
+  withTokioAsyncCall
+    (raw_pollActivityTask wp)
+    rust_dropWorkerError
+    rust_dropByteArray
+    (\errPtr -> peek errPtr >>= peekWorkerError)
+    (\resPtr -> do
       arr <- peek resPtr
       bs <- cArrayToByteString arr
-      rust_dropByteArray resPtr
-      return (Right (decodeMessageOrDie bs))
+      return (decodeMessageOrDie bs))
 
 
 foreign import ccall "hs_temporal_worker_complete_workflow_activation" raw_completeWorkflowActivation :: Ptr (Worker ty) -> Ptr (CArray Word8) -> TokioCall CWorkerError CUnit
@@ -338,16 +323,13 @@ foreign import ccall "hs_temporal_worker_complete_workflow_activation" raw_compl
 
 completeWorkflowActivation :: KnownWorkerType ty => Worker ty -> WorkflowActivationCompletion -> IO (Either WorkerError ())
 completeWorkflowActivation w p = withWorker w $ \wp ->
-  withCArrayBS (encodeMessage p) $ \pPtr -> do
-    res <- makeTokioAsyncCall (raw_completeWorkflowActivation wp pPtr)
-    case res of
-      Left errPtr -> do
-        err <- peek errPtr >>= peekWorkerError
-        rust_dropWorkerError errPtr
-        return (Left err)
-      Right unitPtr -> do
-        rust_dropUnit unitPtr
-        return (Right ())
+  withCArrayBS (encodeMessage p) $ \pPtr ->
+    withTokioAsyncCall
+      (raw_completeWorkflowActivation wp pPtr)
+      rust_dropWorkerError
+      rust_dropUnit
+      (\errPtr -> peek errPtr >>= peekWorkerError)
+      (\_ -> return ())
 
 
 foreign import ccall "hs_temporal_worker_complete_activity_task" raw_completeActivityTask :: Ptr (Worker ty) -> Ptr (CArray Word8) -> TokioCall CWorkerError CUnit
@@ -355,16 +337,13 @@ foreign import ccall "hs_temporal_worker_complete_activity_task" raw_completeAct
 
 completeActivityTask :: KnownWorkerType ty => Worker ty -> ActivityTaskCompletion -> IO (Either WorkerError ())
 completeActivityTask w p = withWorker w $ \wp ->
-  withCArrayBS (encodeMessage p) $ \pPtr -> do
-    res <- makeTokioAsyncCall (raw_completeActivityTask wp pPtr)
-    case res of
-      Left errPtr -> do
-        err <- peek errPtr >>= peekWorkerError
-        rust_dropWorkerError errPtr
-        return (Left err)
-      Right unitPtr -> do
-        rust_dropUnit unitPtr
-        return (Right ())
+  withCArrayBS (encodeMessage p) $ \pPtr ->
+    withTokioAsyncCall
+      (raw_completeActivityTask wp pPtr)
+      rust_dropWorkerError
+      rust_dropUnit
+      (\errPtr -> peek errPtr >>= peekWorkerError)
+      (\_ -> return ())
 
 
 foreign import ccall "hs_temporal_worker_record_activity_heartbeat" raw_recordActivityHeartbeat :: Ptr (Worker ty) -> Ptr (CArray Word8) -> Ptr (Ptr CWorkerError) -> Ptr (Ptr CUnit) -> IO ()
@@ -382,9 +361,9 @@ recordActivityHeartbeat w p = withWorker w $ \wp ->
         if errPtr == nullPtr
           then do
             unitPtr <- peek resPtrPtr
-            rust_dropUnit unitPtr
-            pure $ Right ()
-          else Left <$> getWorkerError errPtr
+            bracket (pure unitPtr) rust_dropUnit (\_ -> pure $ Right ())
+          else do
+            Left <$> getWorkerError errPtr
 
 
 foreign import ccall "hs_temporal_worker_request_workflow_eviction" raw_requestWorkflowEviction :: Ptr (Worker ty) -> Ptr (CArray Word8) -> IO ()
@@ -415,16 +394,13 @@ This should be called only after 'initiateShutdown' has resolved and/or both pol
 functions have returned `ShutDown` errors.
 -}
 finalizeShutdown :: KnownWorkerType ty => Worker ty -> IO (Either WorkerError ())
-finalizeShutdown w = withWorker w $ \wp -> do
-  res <- makeTokioAsyncCall (raw_finalizeShutdown wp)
-  case res of
-    Left errPtr -> do
-      err <- peek errPtr >>= peekWorkerError
-      rust_dropWorkerError errPtr
-      return (Left err)
-    Right unitPtr -> do
-      rust_dropUnit unitPtr
-      return (Right ())
+finalizeShutdown w = withWorker w $ \wp ->
+  withTokioAsyncCall
+    (raw_finalizeShutdown wp)
+    rust_dropWorkerError
+    rust_dropUnit
+    (\errPtr -> peek errPtr >>= peekWorkerError)
+    (\_ -> return ())
 
 
 foreign import ccall "hs_temporal_history_pusher_push_history" raw_pushHistory :: Ptr HistoryPusher -> Ptr (CArray Word8) -> Ptr (CArray Word8) -> TokioCall CWorkerError CUnit
@@ -432,17 +408,14 @@ foreign import ccall "hs_temporal_history_pusher_push_history" raw_pushHistory :
 
 pushHistory :: HistoryPusher -> WorkflowId -> Either ByteString History -> IO (Either WorkerError ())
 pushHistory (HistoryPusher hp) wf p =
-  withCArrayBS wf $ \wfPtr -> do
-    withCArrayBS (either id encodeMessage p) $ \pPtr -> do
-      res <- makeTokioAsyncCall (raw_pushHistory hp wfPtr pPtr)
-      case res of
-        Left errPtr -> do
-          err <- peek errPtr >>= peekWorkerError
-          rust_dropWorkerError errPtr
-          return (Left err)
-        Right unitPtr -> do
-          rust_dropUnit unitPtr
-          return (Right ())
+  withCArrayBS wf $ \wfPtr ->
+    withCArrayBS (either id encodeMessage p) $ \pPtr ->
+      withTokioAsyncCall
+        (raw_pushHistory hp wfPtr pPtr)
+        rust_dropWorkerError
+        rust_dropUnit
+        (\errPtr -> peek errPtr >>= peekWorkerError)
+        (\_ -> return ())
 
 
 foreign import ccall "hs_temporal_history_pusher_close" raw_closeHistoryPusher :: Ptr HistoryPusher -> IO ()

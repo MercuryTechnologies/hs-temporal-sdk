@@ -72,8 +72,8 @@ The caller is responsible for:
 1. Calling the appropriate rust_drop* function on the result
 2. Not using the pointer after freeing it
 
-IMPORTANT: This is a low-level function. Prefer using makeTokioAsyncCallSafe or
-withTokioAsyncCall for automatic memory management and exception safety.
+IMPORTANT: This is a low-level function. Prefer using withTokioAsyncCall
+for automatic memory management and exception safety.
 -}
 makeTokioAsyncCall
   :: TokioCall err res
@@ -127,33 +127,42 @@ withTokioAsyncCall
   -> (Ptr err -> IO e)   -- ^ Process error
   -> (Ptr res -> IO a)   -- ^ Process result
   -> IO (Either e a)
-withTokioAsyncCall call freeErr freeRes processErr processRes = mask $ \_ -> do
-  result <- makeTokioAsyncCall call
-  case result of
-    Left errPtr ->
-      bracket (pure errPtr) freeErr processErr >>= \e -> pure (Left e)
-    Right resPtr ->
-      bracket (pure resPtr) freeRes processRes >>= \r -> pure (Right r)
+withTokioAsyncCall call freeErr freeRes processErr processRes =
+  mask $ \restore ->
+    alloca $ \errorSlot -> alloca $ \resultSlot -> do
+      poke errorSlot nullPtr
+      poke resultSlot nullPtr
+      mvar <- newEmptyMVar
+      sp <- newStablePtrPrimMVar mvar
+      (cap, _) <- threadCapability =<< myThreadId
+      call sp cap errorSlot resultSlot
 
+      -- Wait for Rust to complete, but spawn cleanup thread if interrupted
+      let spawnCleanupThread = void $ forkIO $ do
+            -- Wait for Rust to finish and clean up
+            takeMVar mvar
+            errPtr <- peek errorSlot
+            resPtr <- peek resultSlot
+            when (errPtr /= nullPtr) (freeErr errPtr)
+            when (resPtr /= nullPtr) (freeRes resPtr)
 
-{- | Exception-safe wrapper for Tokio async calls that return Either.
+      (do
+        -- Allow interruption during the wait
+        restore (takeMVar mvar)
 
-Automatically handles cleanup of Rust pointers with exception safety.
-Use this instead of makeTokioAsyncCall when you need to process the results.
-
-Example:
-  makeTokioAsyncCallSafe
-    (raw_someCall ptr)
-    rust_dropError
-    rust_dropResult
-    peekError
-    peekResult
--}
-makeTokioAsyncCallSafe
-  :: TokioCall err res
-  -> (Ptr err -> IO ())  -- ^ Free error
-  -> (Ptr res -> IO ())  -- ^ Free result
-  -> (Ptr err -> IO e)   -- ^ Process error (peek/convert)
-  -> (Ptr res -> IO a)   -- ^ Process result (peek/convert)
-  -> IO (Either e a)
-makeTokioAsyncCallSafe = withTokioAsyncCall
+        -- Now process the result, masked
+        errPtr <- peek errorSlot
+        if errPtr /= nullPtr
+          then do
+            result <- processErr errPtr
+            freeErr errPtr
+            return (Left result)
+          else do
+            resPtr <- peek resultSlot
+            if resPtr /= nullPtr
+              then do
+                result <- processRes resPtr
+                freeRes resPtr
+                return (Right result)
+              else error "Both error and result are null from Tokio call"
+        ) `onException` spawnCleanupThread
