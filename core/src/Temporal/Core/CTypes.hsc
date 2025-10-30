@@ -21,7 +21,6 @@ import Data.Text.Foreign
 import Data.Word
 import Foreign.C.String
 import Foreign.C.Types
-import Foreign.ForeignPtr
 import Foreign.Ptr
 import Foreign.Storable
 
@@ -57,7 +56,7 @@ instance Storable a => Storable (CArray a) where
     #{poke CArray_u8, data_ptr} ptr dataPtr
     #{poke CArray_u8, size} ptr size
 
-foreign import ccall "&hs_temporal_drop_byte_array" rust_dropByteArray :: FinalizerPtr (CArray Word8)
+foreign import ccall "hs_temporal_drop_byte_array" rust_dropByteArray :: Ptr (CArray Word8) -> IO ()
 
 type TryPutMVarFFI = FunPtr (Ptr CInt -> Ptr (MVar ()) -> IO ())
 foreign import ccall "&hs_try_putmvar" tryPutMVarPtr :: TryPutMVarFFI
@@ -66,7 +65,10 @@ foreign import ccall "&hs_try_putmvar" tryPutMVarPtr :: TryPutMVarFFI
 --
 -- You almost always should use the 'globalRuntime' value, which is initialized
 -- once for the entire process.
-newtype Runtime = Runtime (ForeignPtr Runtime)
+--
+-- This now wraps a raw Ptr instead of ForeignPtr. Use ResourceT or bracket
+-- wrappers to ensure proper cleanup.
+newtype Runtime = Runtime (Ptr Runtime)
 
 data Periodicity
   = Periodicity
@@ -98,7 +100,7 @@ data TelemetryOptions
 deriveToJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''TelemetryOptions
 
 foreign import ccall "hs_temporal_init_runtime" initRuntime :: Ptr (CArray Word8) -> TryPutMVarFFI -> IO (Ptr Runtime)
-foreign import ccall "&hs_temporal_free_runtime" freeRuntime :: FinalizerPtr Runtime
+foreign import ccall "hs_temporal_free_runtime" freeRuntime :: Ptr Runtime -> IO ()
 
 data LogLevel
   = Trace
@@ -165,16 +167,17 @@ instance Storable CRPCError where
     #{poke CRPCError, message} ptr message
     #{poke CRPCError, details} ptr details
 
-foreign import ccall "&hs_temporal_drop_rpc_error" rust_drop_rpc_error :: FinalizerPtr CRPCError
+foreign import ccall "hs_temporal_drop_rpc_error" rust_drop_rpc_error :: Ptr CRPCError -> IO ()
 
 peekCRPCError :: CRPCError -> IO RpcError
-peekCRPCError CRPCError{..} = do
-  message <- fromPtr0 $ castPtr message
-  details <- cArrayToByteString =<< peek details
-  pure RpcError{..}
+peekCRPCError CRPCError{code = c, message = msgPtr, details = detPtr} = do
+  message <- fromPtr0 $ castPtr msgPtr
+  details <- cArrayToByteString =<< peek detPtr
+  pure RpcError{code = c, ..}
 
+-- | Raw pointer to Rust CoreClient. Use ResourceT or bracket wrappers for safe management.
 newtype CoreClient = CoreClient
-  { coreClientPtr :: ForeignPtr CoreClient
+  { coreClientPtr :: Ptr CoreClient
   }
 
 -- TODO, this would be better as a pair of vectors instead of a linked list
@@ -293,9 +296,9 @@ data WorkerError = WorkerError
 instance Exception WorkerError
 
 peekWorkerError :: CWorkerError -> IO WorkerError
-peekWorkerError CWorkerError{..} = do
-  message <- fromPtr0 $ castPtr message
-  pure WorkerError{..}
+peekWorkerError CWorkerError{code = c, message = msgPtr} = do
+  message <- fromPtr0 $ castPtr msgPtr
+  pure WorkerError{code = c, ..}
 
 data CWorkerValidationError = CWorkerValidationError
   { message :: CString
@@ -307,6 +310,8 @@ instance Storable CWorkerValidationError where
   peek ptr = do
     message <- #{peek CWorkerValidationError, message} ptr
     pure CWorkerValidationError {..}
+  poke ptr CWorkerValidationError {..} = do
+    #{poke CWorkerValidationError, message} ptr message
 
 data WorkerValidationError = WorkerValidationError
   { message :: Text
@@ -315,15 +320,14 @@ data WorkerValidationError = WorkerValidationError
 instance Exception WorkerValidationError
 
 peekWorkerValidationError :: CWorkerValidationError -> IO WorkerValidationError
-peekWorkerValidationError CWorkerValidationError{..} = do
-  message <- fromPtr0 $ castPtr message
+peekWorkerValidationError CWorkerValidationError{message = msgPtr} = do
+  message <- fromPtr0 $ castPtr msgPtr
   pure WorkerValidationError{..}
 
-foreign import ccall "hs_temporal_drop_worker_validation_error" rust_dropWorkerValidationError :: FinalizerPtr CWorkerValidationError
+foreign import ccall "hs_temporal_drop_worker_validation_error" rust_dropWorkerValidationError :: Ptr CWorkerValidationError -> IO ()
 
-foreign import ccall "&hs_temporal_drop_worker_error" rust_dropWorkerError :: FinalizerPtr CWorkerError
+foreign import ccall "hs_temporal_drop_worker_error" rust_dropWorkerError :: Ptr CWorkerError -> IO ()
 
 data CUnit = CUnit
 
-foreign import ccall "hs_temporal_drop_unit" rust_dropUnitNow :: Ptr CUnit -> IO ()
-foreign import ccall "&hs_temporal_drop_unit" rust_dropUnit :: FinalizerPtr CUnit
+foreign import ccall "hs_temporal_drop_unit" rust_dropUnit :: Ptr CUnit -> IO ()
