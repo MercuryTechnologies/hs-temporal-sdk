@@ -6,7 +6,7 @@ use std::ffi::CStr;
 use std::str::{from_utf8_unchecked, FromStr};
 use std::time::Duration;
 use temporal_client::{
-    ClientOptions, ClientOptionsBuilder, ClientOptionsBuilderError, ConfiguredClient, RetryClient,
+    ClientOptions, ClientOptionsBuilder, ConfiguredClient, RetryClient,
     RetryConfig, TemporalServiceClientWithMetrics, TlsConfig,
 };
 use tonic::metadata::{errors::InvalidMetadataValue, MetadataKey};
@@ -46,10 +46,12 @@ struct ClientRetryConfig {
 
 fn client_config_to_options(
     client_config: ClientConfig,
-) -> Result<ClientOptions, ClientOptionsBuilderError> {
+) -> Result<ClientOptions, String> {
     let mut defaults = ClientOptionsBuilder::default();
+    let target_url = Url::parse(&client_config.target_url)
+        .map_err(|e| format!("Invalid URL: {}", e))?;
     let mut options_builder = defaults
-        .target_url(Url::parse(&client_config.target_url).unwrap())
+        .target_url(target_url)
         .client_name(client_config.client_name)
         .client_version(client_config.client_version)
         .identity(client_config.identity);
@@ -88,7 +90,7 @@ fn client_config_to_options(
         options_builder = options_builder.api_key(client_config.api_key)
     }
 
-    options_builder.build()
+    options_builder.build().map_err(|e| format!("Failed to build client options: {}", e))
 }
 
 #[repr(C)]
@@ -153,7 +155,10 @@ impl From<&RpcCall> for TemporalCall {
             req: unsafe {
                 let req_array = rpc_call.req;
                 let rust_vec = (*req_array).as_rust();
-                rust_vec.unwrap().clone()
+                rust_vec.unwrap_or_else(|e| {
+                    eprintln!("Failed to convert RPC request: {:?}", e);
+                    vec![]
+                }).clone()
             },
             retry: rpc_call.retry,
             metadata: unsafe { convert_hashmap(rpc_call.metadata) },
@@ -196,11 +201,20 @@ pub fn connect_client(
     config: ClientConfig,
     hs_callback: HsCallback<ClientRef, CArray<u8>>,
 ) {
-    let opts: ClientOptions = client_config_to_options(config).unwrap();
+    let opts_result = client_config_to_options(config);
     let runtime = runtime_ref.runtime.clone();
+
     runtime_ref
         .runtime
         .future_result_into_hs(hs_callback, async move {
+            let opts = opts_result.map_err(|e| {
+                let err_message = format!("Invalid client options: {}", e).into_bytes();
+                CArray::c_repr_of(err_message).unwrap_or_else(|conv_err| {
+                    eprintln!("Failed to convert error message: {:?}", conv_err);
+                    CArray { data_ptr: std::ptr::null_mut(), size: 0 }
+                })
+            })?;
+
             let retry_client_result = opts
                 .connect_no_namespace(runtime.core.as_ref().telemetry().get_metric_meter())
                 .await;
@@ -212,7 +226,10 @@ pub fn connect_client(
                 }),
                 Err(e) => {
                     let err_message = e.to_string().into_bytes();
-                    Err(CArray::c_repr_of(err_message).unwrap())
+                    Err(CArray::c_repr_of(err_message).unwrap_or_else(|conv_err| {
+                        eprintln!("Failed to convert error message: {:?}", conv_err);
+                        CArray { data_ptr: std::ptr::null_mut(), size: 0 }
+                    }))
                 }
             }
         })
@@ -233,7 +250,23 @@ pub unsafe extern "C" fn hs_temporal_connect_client(
 ) {
     let runtime_ref = unsafe { &*runtime_ref };
     let config_json = unsafe { CStr::from_ptr(config_json) };
-    let config: ClientConfig = serde_json::from_slice(config_json.to_bytes()).unwrap();
+    let config: ClientConfig = match serde_json::from_slice(config_json.to_bytes()) {
+        Ok(cfg) => cfg,
+        Err(e) => {
+            eprintln!("Failed to parse client config: {}", e);
+            let err_message = format!("Failed to parse client config: {}", e).into_bytes();
+            let err_array = CArray::c_repr_of(err_message).unwrap_or_else(|conv_err| {
+                eprintln!("Failed to convert error message: {:?}", conv_err);
+                CArray { data_ptr: std::ptr::null_mut(), size: 0 }
+            });
+            unsafe {
+                *error_slot = err_array.into_raw_pointer_mut();
+                *result_slot = std::ptr::null_mut();
+            }
+            runtime_ref.runtime.put_mvar(cap, mvar);
+            return;
+        }
+    };
     let hs_callback = runtime::HsCallback {
         cap,
         mvar,
@@ -294,10 +327,17 @@ impl From<String> for CRPCError {
     fn from(err: String) -> Self {
         CRPCError::c_repr_of(RPCError {
             code: 0,
-            message: err,
+            message: err.clone(),
             details: vec![],
         })
-        .unwrap()
+        .unwrap_or_else(|e| {
+            eprintln!("Failed to convert RPC error '{}': {:?}", err, e);
+            CRPCError {
+                code: 0,
+                message: std::ptr::null(),
+                details: std::ptr::null(),
+            }
+        })
     }
 }
 
@@ -308,7 +348,9 @@ impl From<String> for CRPCError {
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn hs_temporal_drop_rpc_error(error: *mut CRPCError) {
     unsafe {
-        CRPCError::drop_raw_pointer(error).unwrap();
+        if let Err(e) = CRPCError::drop_raw_pointer(error) {
+            eprintln!("Failed to drop RPC error: {:?}", e);
+        }
     }
 }
 
@@ -328,7 +370,14 @@ where
                 message: err.message().to_owned(),
                 details: err.details().into(),
             })
-            .unwrap())
+            .unwrap_or_else(|e| {
+                eprintln!("Failed to convert RPC error: {:?}", e);
+                CRPCError {
+                    code: err.code() as u32,
+                    message: std::ptr::null(),
+                    details: std::ptr::null(),
+                }
+            }))
         }
     }
 }
