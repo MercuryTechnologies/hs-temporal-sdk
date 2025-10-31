@@ -105,9 +105,12 @@ impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
 
 macro_rules! enter_sync {
     ($runtime:expr) => {
-        if let Some(subscriber) = $runtime.core.telemetry().trace_subscriber() {
-            temporal_sdk_core::telemetry::set_trace_subscriber_for_current_thread(subscriber);
-        }
+        // DISABLED: Thread-local subscribers cause span registry conflicts in GHCi
+        // when the runtime persists across reloads. Worker threads keep stale span registries
+        // that conflict with new spans created after reload.
+        // if let Some(subscriber) = $runtime.core.telemetry().trace_subscriber() {
+        //     temporal_sdk_core::telemetry::set_trace_subscriber_for_current_thread(subscriber);
+        // }
         let _guard = $runtime.core.tokio_handle().enter();
     };
 }
@@ -124,6 +127,7 @@ pub enum WorkerErrorCode {
     PollFailure = 7,
     CompletionFailure = 8,
     InvalidWorkerConfig = 9,
+    PanicError = 10,
 }
 
 impl AsRust<WorkerErrorCode> for WorkerErrorCode {
@@ -148,6 +152,24 @@ impl CReprOf<WorkerErrorCode> for WorkerErrorCode {
 pub struct WorkerError {
     code: WorkerErrorCode,
     message: String,
+}
+
+impl WorkerError {
+    /// Create a WorkerError from a caught panic payload
+    pub(crate) fn from_panic(panic_payload: Box<dyn std::any::Any + Send>) -> Self {
+        let panic_msg = if let Some(s) = panic_payload.downcast_ref::<&str>() {
+            (*s).to_string()
+        } else if let Some(s) = panic_payload.downcast_ref::<String>() {
+            s.clone()
+        } else {
+            "Unknown panic occurred in async operation".to_string()
+        };
+
+        WorkerError {
+            code: WorkerErrorCode::PanicError,
+            message: format!("Panic caught at FFI boundary: {}", panic_msg),
+        }
+    }
 }
 
 #[repr(C)]
@@ -486,15 +508,41 @@ impl WorkerRef {
                 ),
             }),
         };
-        self.runtime.clone().future_result_into_hs(hs, async move {
-            match core_worker {
-                Ok(worker) => {
-                    worker.finalize_shutdown().await;
-                    Ok(CUnit {})
+        let runtime = self.runtime.clone();
+
+        // Catch panics to prevent abort at FFI boundary
+        // We need to save the callback fields to reconstruct it if we catch a panic
+        let cap = hs.cap;
+        let mvar = hs.mvar;
+        let result_slot = hs.result_slot;
+        let error_slot = hs.error_slot;
+
+        let panic_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            runtime.future_result_into_hs(hs, async move {
+                match core_worker {
+                    Ok(worker) => {
+                        worker.finalize_shutdown().await;
+                        Ok(CUnit {})
+                    }
+                    Err(err) => Err(CWorkerError::c_repr_of(err).unwrap()),
                 }
-                Err(err) => Err(CWorkerError::c_repr_of(err).unwrap()),
-            }
-        })
+            })
+        }));
+
+        if let Err(panic_payload) = panic_result {
+            eprintln!("ERROR: Panic caught in finalize_shutdown FFI boundary");
+            let worker_error = WorkerError::from_panic(panic_payload);
+            let c_error = CWorkerError::c_repr_of(worker_error).unwrap();
+
+            // Reconstruct callback to signal error to Haskell
+            let error_callback = HsCallback {
+                cap,
+                mvar,
+                result_slot,
+                error_slot,
+            };
+            error_callback.put_failure(&runtime, c_error);
+        }
     }
 }
 
