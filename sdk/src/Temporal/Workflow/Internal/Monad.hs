@@ -566,9 +566,8 @@ reevaluateDependentConditions :: StateVar a -> InstanceM ()
 reevaluateDependentConditions cref = do
   inst <- ask
   join $ atomically $ do
-    seqMaps <- readTVar inst.workflowSequenceMaps
-    let pendingConds = seqMaps.conditionsAwaitingSignal
-        (reactivateConds, unactivatedConds) =
+    pendingConds <- readTVar inst.asyncOperations.conditionTracking.conditionsAwaitingSignal
+    let (reactivateConds, unactivatedConds) =
           HashMap.foldlWithKey'
             ( \(reactivateConds', unactivatedConds') k v@(ivar, varDependencies) ->
                 if cref.stateVarId `Set.member` varDependencies
@@ -583,7 +582,7 @@ reevaluateDependentConditions cref = do
             )
             (pure (), mempty)
             pendingConds
-    writeTVar inst.workflowSequenceMaps (seqMaps {conditionsAwaitingSignal = unactivatedConds})
+    writeTVar inst.asyncOperations.conditionTracking.conditionsAwaitingSignal unactivatedConds
     pure reactivateConds
 
 
@@ -677,20 +676,104 @@ data WorkflowUpdateImplementation = WorkflowUpdateImplementation
   }
 
 
+-- | Encapsulates signal handling state for a workflow instance
+data SignalHandling = SignalHandling
+  { signalHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (Vector Payload -> Workflow ())))
+  , signalSequence :: {-# UNPACK #-} !(IORef Word32)
+  }
+
+
+-- | Encapsulates query handling state for a workflow instance
+data QueryHandling = QueryHandling
+  { queryHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (QueryId -> Vector Payload -> Map Text Payload -> IO (Either SomeException Payload))))
+  }
+
+
+-- | Encapsulates update handling state for a workflow instance
+data UpdateHandling = UpdateHandling
+  { updateHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) WorkflowUpdateImplementation))
+  }
+
+
+-- | Encapsulates deterministic state needed for workflow replay
+data DeterministicState = DeterministicState
+  { deterministicTime :: {-# UNPACK #-} !(IORef SystemTime)
+  , isReplaying :: {-# UNPACK #-} !(IORef Bool)
+  , randomnessSeed :: !WorkflowGenM
+  , notifiedPatches :: {-# UNPACK #-} !(IORef (Set PatchId))
+  , memoizedPatches :: {-# UNPACK #-} !(IORef (HashMap PatchId Bool))
+  }
+
+
+-- | Encapsulates timer sequence tracking and active timers
+data TimerTracking = TimerTracking
+  { timerSeqCounter :: {-# UNPACK #-} !(IORef Word32)
+  , activeTimers :: {-# UNPACK #-} !(TVar (SequenceMap (IVar ())))
+  }
+
+
+-- | Encapsulates activity sequence tracking and active activities
+data ActivityTracking = ActivityTracking
+  { activitySequence :: {-# UNPACK #-} !(IORef Word32)
+  , activeActivities :: {-# UNPACK #-} !(TVar (SequenceMap (IVar ResolveActivity)))
+  }
+
+
+-- | Encapsulates child workflow sequence tracking and active child workflows
+data ChildWorkflowTracking = ChildWorkflowTracking
+  { childWorkflowSeqCounter :: {-# UNPACK #-} !(IORef Word32)
+  , activeChildWorkflows :: {-# UNPACK #-} !(TVar (SequenceMap SomeChildWorkflowHandle))
+  }
+
+
+-- | Encapsulates external cancel sequence tracking and active cancels
+data ExternalCancelTracking = ExternalCancelTracking
+  { externalCancelSequence :: {-# UNPACK #-} !(IORef Word32)
+  , activeExternalCancels :: {-# UNPACK #-} !(TVar (SequenceMap (IVar ResolveRequestCancelExternalWorkflow)))
+  }
+
+
+-- | Encapsulates condition sequence tracking and conditions awaiting signals
+data ConditionTracking = ConditionTracking
+  { conditionSequence :: {-# UNPACK #-} !(IORef Word32)
+  , conditionsAwaitingSignal :: {-# UNPACK #-} !(TVar (SequenceMap (IVar (), Set Sequence)))
+  }
+
+
+-- | Encapsulates external signal tracking (active signals stored in SequenceMaps)
+data ExternalSignalTracking = ExternalSignalTracking
+  { externalSignalSequence :: {-# UNPACK #-} !(IORef Word32)
+  , activeExternalSignals :: {-# UNPACK #-} !(TVar (SequenceMap (IVar ResolveSignalExternalWorkflow)))
+  }
+
+
+-- | Encapsulates state var ID generation
+data StateVarTracking = StateVarTracking
+  { varIdSequence :: {-# UNPACK #-} !(IORef Word32)
+  }
+
+
+-- | Unified tracking for all async operations in a workflow
+data AsyncOperationTracking = AsyncOperationTracking
+  { timerTracking :: !TimerTracking
+  , activityTracking :: !ActivityTracking
+  , childWorkflowTracking :: !ChildWorkflowTracking
+  , externalCancelTracking :: !ExternalCancelTracking
+  , conditionTracking :: !ConditionTracking
+  , externalSignalTracking :: !ExternalSignalTracking
+  , stateVarTracking :: !StateVarTracking
+  }
+
+
 data WorkflowInstance = WorkflowInstance
   { workflowInstanceInfo :: {-# UNPACK #-} !(IORef Info)
   , workflowInstanceLogger :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
-  , workflowRandomnessSeed :: WorkflowGenM
-  , workflowNotifiedPatches :: {-# UNPACK #-} !(IORef (Set PatchId))
-  , workflowMemoizedPatches :: {-# UNPACK #-} !(IORef (HashMap PatchId Bool))
-  , workflowSequences :: {-# UNPACK #-} !(IORef Sequences)
-  , workflowTime :: {-# UNPACK #-} !(IORef SystemTime)
-  , workflowIsReplaying :: {-# UNPACK #-} !(IORef Bool)
+  , deterministicState :: {-# UNPACK #-} !DeterministicState
+  , asyncOperations :: !AsyncOperationTracking
   , workflowCommands :: {-# UNPACK #-} !(TVar (Reversed WorkflowCommand))
-  , workflowSequenceMaps :: {-# UNPACK #-} !(TVar SequenceMaps)
-  , workflowSignalHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (Vector Payload -> Workflow ())))
-  , workflowQueryHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (QueryId -> Vector Payload -> Map Text Payload -> IO (Either SomeException Payload))))
-  , workflowUpdateHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) WorkflowUpdateImplementation))
+  , signalHandling :: {-# UNPACK #-} !SignalHandling
+  , queryHandling :: {-# UNPACK #-} !QueryHandling
+  , updateHandling :: {-# UNPACK #-} !UpdateHandling
   , workflowCallStack :: {-# UNPACK #-} !(IORef CallStack)
   , workflowCompleteActivation :: !(Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
   , workflowInstanceContinuationEnv :: {-# UNPACK #-} !ContinuationEnv
@@ -714,17 +797,6 @@ data SomeChildWorkflowHandle = forall result. SomeChildWorkflowHandle (ChildWork
 type SequenceMap a = HashMap Sequence a
 
 
-data Sequences = Sequences
-  { externalCancel :: {-# UNPACK #-} !Word32
-  , childWorkflow :: {-# UNPACK #-} !Word32
-  , externalSignal :: {-# UNPACK #-} !Word32
-  , timer :: {-# UNPACK #-} !Word32
-  , activity :: {-# UNPACK #-} !Word32
-  , condition :: {-# UNPACK #-} !Word32
-  , varId :: {-# UNPACK #-} !Word32
-  }
-
-
 -- Newtyped because the list is reversed
 newtype Reversed a = Reversed [a]
   deriving newtype (Functor, Show, Eq)
@@ -736,16 +808,6 @@ fromReversed (Reversed xs) = reverse xs
 
 push :: a -> Reversed a -> Reversed a
 push x (Reversed xs) = Reversed (x : xs)
-
-
-data SequenceMaps = SequenceMaps
-  { timers :: {-# UNPACK #-} !(SequenceMap (IVar ()))
-  , activities :: {-# UNPACK #-} !(SequenceMap (IVar ResolveActivity))
-  , childWorkflows :: {-# UNPACK #-} !(SequenceMap SomeChildWorkflowHandle)
-  , externalSignals :: {-# UNPACK #-} !(SequenceMap (IVar ResolveSignalExternalWorkflow))
-  , externalCancels :: {-# UNPACK #-} !(SequenceMap (IVar ResolveRequestCancelExternalWorkflow))
-  , conditionsAwaitingSignal :: {-# UNPACK #-} !(SequenceMap (IVar (), Set Sequence))
-  }
 
 
 -- | An async action handle that can be awaited or cancelled.
@@ -921,6 +983,5 @@ instance Monoid WorkflowOutboundInterceptor where
 nextVarIdSequence :: InstanceM Sequence
 nextVarIdSequence = do
   inst <- ask
-  atomicModifyIORef' inst.workflowSequences $ \seqs ->
-    let seq' = varId seqs
-    in (seqs {varId = succ seq'}, Sequence seq')
+  atomicModifyIORef' inst.asyncOperations.stateVarTracking.varIdSequence $ \seq' ->
+    (succ seq', Sequence seq')

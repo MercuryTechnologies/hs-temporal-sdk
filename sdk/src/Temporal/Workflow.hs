@@ -393,8 +393,8 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift 
   s@(Sequence actSeq) <- nextActivitySequence
   rawTask <- liftIO $ intercept (ActivityInput name typedPayloads opts s) $ \activityInput -> runInIO $ do
     resultSlot <- newIVar
-    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-      seqMaps {activities = HashMap.insert s resultSlot (activities seqMaps)}
+    atomically $ modifyTVar' inst.asyncOperations.activityTracking.activeActivities $ \activities ->
+      HashMap.insert s resultSlot activities
 
     i <- readIORef inst.workflowInstanceInfo
     hdrs <- processorEncodePayloads inst.payloadProcessor activityInput.options.headers
@@ -560,8 +560,8 @@ signalWorkflow _ f (signalRef -> KnownSignal signalName signalCodec) = withWorkf
                     -- & Command.headers .~ _
                 )
     addCommand cmd
-    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-      seqMaps {externalSignals = HashMap.insert s resVar seqMaps.externalSignals}
+    atomically $ modifyTVar' inst.asyncOperations.externalSignalTracking.activeExternalSignals $ \externalSignals ->
+      HashMap.insert s resVar externalSignals
     pure $
       Task
         { waitAction = do
@@ -647,8 +647,8 @@ startChildWorkflowFromPayloads (workflowRef -> k@(KnownWorkflow codec _)) opts p
                 , childWorkflowId = wfId
                 }
 
-        atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-          seqMaps {childWorkflows = HashMap.insert s (SomeChildWorkflowHandle wfHandle) seqMaps.childWorkflows}
+        atomically $ modifyTVar' inst.asyncOperations.childWorkflowTracking.activeChildWorkflows $ \childWorkflows ->
+          HashMap.insert s (SomeChildWorkflowHandle wfHandle) childWorkflows
 
         addCommand cmd
         pure wfHandle
@@ -777,8 +777,8 @@ startLocalActivity (activityRef -> KnownActivity codec n) opts = withWorkflowArg
     let ps = fmap convertToProtoPayload typedPayloads
     s@(Sequence actSeq) <- nextActivitySequence
     resultSlot <- newIVar
-    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-      seqMaps {activities = HashMap.insert s resultSlot (activities seqMaps)}
+    atomically $ modifyTVar' inst.asyncOperations.activityTracking.activeActivities $ \activities ->
+      HashMap.insert s resultSlot activities
     -- TODO, seems like `attempt` and `originalScheduledTime`
     -- imply that we are in charge of retrying local activities ourselves?
     let actId = maybe (Text.pack $ show actSeq) rawActivityId opts.activityId
@@ -930,7 +930,7 @@ Equivalent to `getCurrentTime` from the `time` package.
 now :: Workflow UTCTime
 now = Workflow $ \_ ->
   Done <$> do
-    wft <- asks workflowTime
+    wft <- asks (deterministicTime . deterministicState)
     t <- readIORef wft
     pure $! systemToUTCTime t
 
@@ -977,14 +977,14 @@ applyPatch
 applyPatch pid deprecated = ilift $ do
   updateCallStack
   inst <- ask
-  memoized <- readIORef inst.workflowMemoizedPatches
+  memoized <- readIORef inst.deterministicState.memoizedPatches
   case HashMap.lookup pid memoized of
     Just val -> pure val
     Nothing -> do
-      isReplaying <- readIORef inst.workflowIsReplaying
-      notifiedPatches <- readIORef inst.workflowNotifiedPatches
+      isReplaying <- readIORef inst.deterministicState.isReplaying
+      notifiedPatches <- readIORef inst.deterministicState.notifiedPatches
       let usePatch = not isReplaying || Set.member pid notifiedPatches
-      writeIORef inst.workflowMemoizedPatches $ HashMap.insert pid usePatch memoized
+      writeIORef inst.deterministicState.memoizedPatches $ HashMap.insert pid usePatch memoized
       when usePatch $ do
         addCommand $
           defMessage
@@ -1043,7 +1043,7 @@ functions from the 'System.Random' and 'System.Random.Stateful' modules.
 
 -- | Get a mutable randomness generator for the workflow.
 randomGen :: Workflow WorkflowGenM
-randomGen = workflowRandomnessSeed <$> askInstance
+randomGen = randomnessSeed . deterministicState <$> askInstance
 
 
 {- | Generate an RFC compliant V4 uuid.
@@ -1054,7 +1054,7 @@ This function is cryptographically insecure.
 -}
 uuid4 :: Workflow UUID
 uuid4 = do
-  wft <- workflowRandomnessSeed <$> askInstance
+  wft <- randomnessSeed . deterministicState <$> askInstance
   sbs <- uniformShortByteString 16 wft
   pure $
     buildFromBytes
@@ -1083,7 +1083,7 @@ random data (from 'workflowRandomnessSeed').
 uuid7 :: RequireCallStack => Workflow UUID
 uuid7 = do
   t <- time
-  wft <- workflowRandomnessSeed <$> askInstance
+  wft <- randomnessSeed . deterministicState <$> askInstance
   -- Note that we only need 74 bits (12 + 62) of randomness. That's a little
   -- more than 9 bytes (72 bits), so we have to request 10 bytes (80 bits) of
   -- entropy. The extra 6 bits are discarded.
@@ -1157,7 +1157,7 @@ setQueryHandler (queryRef -> KnownQuery n codec) f = ilift $ do
   updateCallStack
   inst <- ask
   withRunInIO $ \runInIO -> do
-    liftIO $ modifyIORef' inst.workflowQueryHandlers $ \handles ->
+    liftIO $ modifyIORef' inst.queryHandling.queryHandlers $ \handles ->
       HashMap.insert (Just n) (\qId vec hdrs -> runInIO $ qHandler qId vec hdrs) handles
   where
     qHandler :: QueryId -> Vector Payload -> Map Text Payload -> InstanceM (Either SomeException Payload)
@@ -1205,7 +1205,7 @@ setUpdateHandler (updateRef -> KnownUpdate codec n) f mValidator = ilift $ do
           { updateImplementation = updateHandler
           , updateValidationImplementation = fmap updateValidatorHandler mValidator
           }
-  liftIO $ modifyIORef' inst.workflowUpdateHandlers $ \handles ->
+  liftIO $ modifyIORef' inst.updateHandling.updateHandlers $ \handles ->
     HashMap.insert (Just n) updateImplementation handles
   where
     updateHandler :: UpdateId -> Vector Payload -> Map Text Payload -> Workflow Payload
@@ -1263,7 +1263,7 @@ setSignalHandler (signalRef -> KnownSignal n codec) f = ilift $ do
   updateCallStack
   -- TODO ^ inner callstack?
   inst <- ask
-  liftIO $ modifyIORef' inst.workflowSignalHandlers $ \handlers ->
+  liftIO $ modifyIORef' inst.signalHandling.signalHandlers $ \handlers ->
     HashMap.insert (Just n) handle' handlers
   where
     handle' :: Vector Payload -> Workflow ()
@@ -1289,7 +1289,7 @@ The value is relative to epoch time.
 time :: RequireCallStack => Workflow SystemTime
 time = ilift $ do
   updateCallStack
-  wft <- asks workflowTime
+  wft <- asks (deterministicTime . deterministicState)
   readIORef wft
 
 
@@ -1329,8 +1329,8 @@ createTimer ts = provideCallStack $ ilift $ do
                    )
       Logging.logDebug "Add command: sleep"
       res <- newIVar
-      atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-        seqMaps {timers = HashMap.insert s res seqMaps.timers}
+      atomically $ modifyTVar' inst.asyncOperations.timerTracking.activeTimers $ \timers ->
+        HashMap.insert s res timers
       addCommand cmd
       pure $ Just $ Timer {timerSequence = s, timerHandle = res}
 
@@ -1409,8 +1409,8 @@ instance Cancel Timer where
         (Ok ())
         inst.workflowInstanceContinuationEnv
 
-    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-      seqMaps {timers = HashMap.delete t.timerSequence seqMaps.timers}
+    atomically $ modifyTVar' inst.asyncOperations.timerTracking.activeTimers $ \timers ->
+      HashMap.delete t.timerSequence timers
 
     Logging.logDebug "finished putIVar: cancelTimer"
     pure $ Done ()
@@ -1494,10 +1494,8 @@ waitCondition c@(Condition m) = do
         inst <- ask
         res <- newIVar
         conditionSeq <- nextConditionSequence
-        atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-          seqMaps
-            { conditionsAwaitingSignal = HashMap.insert conditionSeq (res, touchedVars) seqMaps.conditionsAwaitingSignal
-            }
+        atomically $ modifyTVar' inst.asyncOperations.conditionTracking.conditionsAwaitingSignal $ \conditionsAwaitingSignal ->
+          HashMap.insert conditionSeq (res, touchedVars) conditionsAwaitingSignal
         pure res
       -- Wait for the condition to be signaled. Once signalled, we just try again.
       -- writeStateVar and friends are in charge of filling the ivar and clearing out the seqmaps between rechecks

@@ -70,8 +70,8 @@ instance Cancel (ExternalWorkflowHandle a) where
     inst <- ask
     s@(Sequence sVal) <- nextExternalSignalSequence
     res <- newIVar
-    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-      seqMaps {externalSignals = HashMap.insert s res (externalSignals seqMaps)}
+    atomically $ modifyTVar' inst.asyncOperations.externalSignalTracking.activeExternalSignals $ \externalSignals ->
+      HashMap.insert s res externalSignals
     addCommand
       ( defMessage
           & Command.requestCancelExternalWorkflowExecution

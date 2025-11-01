@@ -3,7 +3,6 @@ module Temporal.Workflow.Internal.Instance (
   runInstanceM,
   WorkflowInstance (..),
   Info (..),
-  Sequences (..),
   Sequence (..),
   Reversed,
   fromReversed,
@@ -62,46 +61,40 @@ flushCommands = do
 nextExternalCancelSequence :: InstanceM Sequence
 nextExternalCancelSequence = do
   inst <- ask
-  atomicModifyIORef' inst.workflowSequences $ \seqs ->
-    let seq' = externalCancel seqs
-    in (seqs {externalCancel = succ seq'}, Sequence seq')
+  atomicModifyIORef' inst.asyncOperations.externalCancelTracking.externalCancelSequence $ \seq' ->
+    (succ seq', Sequence seq')
 
 
 nextChildWorkflowSequence :: InstanceM Sequence
 nextChildWorkflowSequence = do
   inst <- ask
-  atomicModifyIORef' inst.workflowSequences $ \seqs ->
-    let seq' = childWorkflow seqs
-    in (seqs {childWorkflow = succ seq'}, Sequence seq')
+  atomicModifyIORef' inst.asyncOperations.childWorkflowTracking.childWorkflowSeqCounter $ \seq' ->
+    (succ seq', Sequence seq')
 
 
 nextExternalSignalSequence :: InstanceM Sequence
 nextExternalSignalSequence = do
   inst <- ask
-  atomicModifyIORef' inst.workflowSequences $ \seqs ->
-    let seq' = externalSignal seqs
-    in (seqs {externalSignal = succ seq'}, Sequence seq')
+  atomicModifyIORef' inst.asyncOperations.externalSignalTracking.externalSignalSequence $ \seq' ->
+    (succ seq', Sequence seq')
 
 
 nextTimerSequence :: InstanceM Sequence
 nextTimerSequence = do
   inst <- ask
-  atomicModifyIORef' inst.workflowSequences $ \seqs ->
-    let seq' = timer seqs
-    in (seqs {timer = succ seq'}, Sequence seq')
+  atomicModifyIORef' inst.asyncOperations.timerTracking.timerSeqCounter $ \seq' ->
+    (succ seq', Sequence seq')
 
 
 nextActivitySequence :: InstanceM Sequence
 nextActivitySequence = do
   inst <- ask
-  atomicModifyIORef' inst.workflowSequences $ \seqs ->
-    let seq' = activity seqs
-    in (seqs {activity = succ seq'}, Sequence seq')
+  atomicModifyIORef' inst.asyncOperations.activityTracking.activitySequence $ \seq' ->
+    (succ seq', Sequence seq')
 
 
 nextConditionSequence :: InstanceM Sequence
 nextConditionSequence = do
   inst <- ask
-  atomicModifyIORef' inst.workflowSequences $ \seqs ->
-    let seq' = condition seqs
-    in (seqs {condition = succ seq'}, Sequence seq')
+  atomicModifyIORef' inst.asyncOperations.conditionTracking.conditionSequence $ \seq' ->
+    (succ seq', Sequence seq')
