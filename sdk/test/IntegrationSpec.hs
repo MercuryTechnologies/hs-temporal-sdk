@@ -48,6 +48,7 @@ import DiscoverInstances (discoverInstances)
 import GHC.Generics
 import GHC.Stack (SrcLoc (..), callStack, fromCallSiteList)
 import IntegrationSpec.HangingWorkflow
+import IntegrationSpec.NestedWorkflowActivity
 import IntegrationSpec.NoOpWorkflow
 import IntegrationSpec.Signals
 import IntegrationSpec.TimeSkipping
@@ -814,6 +815,24 @@ needsClient = do
                   }
           useClient (C.execute ActivityTimeoutInWorkflow (WorkflowId wfId) opts)
             `shouldReturn` False
+
+      specify "Nested workflow-activity chain works" $ \TestEnv {..} -> do
+        wfId <- uuidText
+        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+              baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  , C.timeouts =
+                      C.TimeoutOptions
+                        { C.runTimeout = Just $ seconds 60
+                        , C.executionTimeout = Nothing
+                        , C.taskTimeout = Nothing
+                        }
+                  }
+          result <- useClient (C.execute OuterWorkflow (WorkflowId wfId) opts taskQueue)
+          result `shouldSatisfy` Text.isInfixOf "Outer workflow completed"
 
     describe "Args and return values" $ do
       specify "args should be passed to the workflow in the correct order" $ \TestEnv {..} -> do
