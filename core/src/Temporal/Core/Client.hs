@@ -6,6 +6,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE PolyKinds #-}
 
 module Temporal.Core.Client (
   -- * Connecting to the server
@@ -78,7 +79,9 @@ import Temporal.Internal.FFI
 import Temporal.Runtime
 import UnliftIO (MonadUnliftIO, withRunInIO)
 import qualified UnliftIO
-
+import Data.Proxy
+import Debug.Trace
+import GHC.TypeLits
 
 foreign import ccall "hs_temporal_connect_client" raw_connectClient :: Ptr Runtime -> CString -> TokioCall (CArray Word8) CoreClient
 
@@ -314,29 +317,32 @@ type PrimRpcCall = Ptr CoreClient -> Ptr CRpcCall -> TokioCall CRPCError (CArray
 -- This function is async-exception-safe: all Rust allocations are properly
 -- freed even if an async exception occurs during processing.
 call :: forall svc t. (HasMethodImpl svc t) => PrimRpcCall -> Client -> MethodInput svc t -> IO (Either RpcError (MethodOutput svc t))
-call f c req_ = withClient c $ \cPtr -> do
-  let msgBytes = encodeMessage req_
-  BS.useAsCStringLen msgBytes $ \(msgPtr, msgLen) -> do
-    alloca $ \cArrayPtr -> do
-      poke cArrayPtr (CArray msgPtr (fromIntegral msgLen))
-      let rpcCall =
-            CRpcCall
-              { rpcCallReq = castPtr cArrayPtr
-              , rpcCallRetry = if False then 0 else 1
-              , rpcCallMetadata = nullPtr
-              , rpcCallTimeoutMillis = nullPtr
-              }
-      alloca $ \rpcCallPtr -> do
-        poke rpcCallPtr rpcCall
-        withTokioAsyncCall
-          (f cPtr rpcCallPtr)
-          rust_drop_rpc_error
-          rust_dropByteArray
-          (\errPtr -> peek errPtr >>= peekCRPCError)
-          (\resultPtr -> do
-            arr <- peek resultPtr
-            bs <- cArrayToByteString arr
-            return (decodeMessageOrDie bs))
+call f c req_ = do
+  traceIO $ "about to grab client for call: " <> symbolVal (Proxy :: Proxy (Data.ProtoLens.Service.Types.ServiceName svc)) <> " , method:" <> symbolVal (Proxy :: Proxy (MethodName svc t))
+  withClient c $ \cPtr -> do
+    traceIO $ "client grabbed for call: " <> symbolVal (Proxy :: Proxy (Data.ProtoLens.Service.Types.ServiceName svc)) <> " , method:" <> symbolVal (Proxy :: Proxy (MethodName svc t))
+    let msgBytes = encodeMessage req_
+    BS.useAsCStringLen msgBytes $ \(msgPtr, msgLen) -> do
+      alloca $ \cArrayPtr -> do
+        poke cArrayPtr (CArray msgPtr (fromIntegral msgLen))
+        let rpcCall =
+              CRpcCall
+                { rpcCallReq = castPtr cArrayPtr
+                , rpcCallRetry = if False then 0 else 1
+                , rpcCallMetadata = nullPtr
+                , rpcCallTimeoutMillis = nullPtr
+                }
+        alloca $ \rpcCallPtr -> do
+          poke rpcCallPtr rpcCall
+          withTokioAsyncCall
+            (f cPtr rpcCallPtr)
+            rust_drop_rpc_error
+            rust_dropByteArray
+            (\errPtr -> peek errPtr >>= peekCRPCError)
+            (\resultPtr -> do
+              arr <- peek resultPtr
+              bs <- cArrayToByteString arr
+              return (decodeMessageOrDie bs))
 
 
 -- | Bracket-style wrapper for Client that ensures proper cleanup.

@@ -48,8 +48,8 @@ import DiscoverInstances (discoverInstances)
 import GHC.Generics
 import GHC.Stack (SrcLoc (..), callStack, fromCallSiteList)
 import IntegrationSpec.HangingWorkflow
-import IntegrationSpec.NestedWorkflowActivity
 import IntegrationSpec.NoOpWorkflow
+import IntegrationSpec.NestedWorkflowActivity
 import IntegrationSpec.Signals
 import IntegrationSpec.TimeSkipping
 import IntegrationSpec.TimeoutsInWorkflows
@@ -176,6 +176,9 @@ mkWithWorker pn conf m = do
   c <- runStdoutLoggingT $ connectClient globalRuntime clientConfig_
   bracket (startWorker c (conf {payloadProcessor = sillyEncryptionPayloadProcessor})) shutdown (const m)
 
+mkWithWorker' :: Client -> WorkerConfig actEnv -> IO a -> IO a
+mkWithWorker' c conf m = do
+  bracket (startWorker c (conf {payloadProcessor = sillyEncryptionPayloadProcessor})) shutdown (const m)
 
 -- Increment the bytestring words by 1 on encode, and decrement by 1 on decode
 --
@@ -301,7 +304,7 @@ setup additionalInterceptors fp go = do
   go
     TestEnv
       { useClient = flip runReaderT client
-      , withWorker = mkWithWorker fp
+      , withWorker = mkWithWorker' coreClient -- fp
       , baseConf = conf
       , taskQueue
       }
