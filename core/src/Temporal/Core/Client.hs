@@ -156,10 +156,10 @@ clientRuntime = runtime
 
 
 withClient :: Client -> (Ptr CoreClient -> IO a) -> IO a
-withClient (Client cc r _) f =
-  withMVar cc $ \(CoreClient c) ->
-    withRuntime r $ \_ ->
-      f c
+withClient (Client cc r _) f = do
+  (CoreClient c) <- readMVar cc
+  withRuntime r $ \_ ->
+    f c
 
 
 newtype ByteVector = ByteVector {byteVector :: ByteString}
