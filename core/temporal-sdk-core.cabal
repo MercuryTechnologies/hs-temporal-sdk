@@ -50,6 +50,9 @@ library
       Temporal.Core.CTypes
       Temporal.Core.Client.HealthService
       Temporal.Internal.FFI
+      Paths_temporal_sdk_core
+  autogen-modules:
+      Paths_temporal_sdk_core
   hs-source-dirs:
       src
   default-extensions:

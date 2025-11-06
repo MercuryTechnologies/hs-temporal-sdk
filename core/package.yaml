@@ -35,6 +35,7 @@ library:
     - Temporal.Core.CTypes
     - Temporal.Core.Client.HealthService # NOTE: WIP stub, don't expose it
     - Temporal.Internal.FFI
+    - Paths_temporal_sdk_core
   dependencies:
     # core libraries
     - base >= 4.14 && < 5
