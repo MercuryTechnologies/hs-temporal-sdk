@@ -65,6 +65,7 @@ import Data.ProtoLens.Service.Types
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Vector.Storable as V
+import Data.Version (showVersion)
 import Data.Word
 import Foreign.C.String
 import Foreign.ForeignPtr (castForeignPtr)
@@ -72,6 +73,7 @@ import Foreign.Marshal
 import Foreign.Ptr
 import Foreign.Storable
 import Network.BSD
+import Paths_temporal_sdk_core (version)
 import System.Posix.Process
 import Temporal.Core.CTypes
 import Temporal.Internal.FFI
@@ -219,7 +221,7 @@ defaultClientConfig =
   ClientConfig
     { targetUrl = "http://localhost:7233"
     , clientName = "temporal-haskell"
-    , clientVersion = "0.0.1"
+    , clientVersion = T.pack (showVersion version)
     , metadata = mempty
     , identity = ""
     , tlsConfig = Nothing
