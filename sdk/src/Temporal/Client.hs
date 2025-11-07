@@ -40,6 +40,12 @@ module Temporal.Client (
   -- * Closing Workflows
   TerminationOptions (..),
   terminate,
+  cancel,
+  ResetOptions (..),
+  ResetReapplyType (..),
+  ResetReapplyExcludeType (..),
+  EventId (..),
+  resetWorkflowExecution,
 
   -- * Querying Workflows
   QueryOptions (..),
@@ -67,6 +73,10 @@ module Temporal.Client (
   -- * Producing handles for existing workflows
   getHandle,
   GetHandleOptions (..),
+
+  -- * Workflow inspection
+  WorkflowExecutionDescription (..),
+  describeWorkflowExecution,
 
   -- * Workflow history utilities
   fetchHistory,
@@ -117,6 +127,7 @@ import qualified Data.Vector as V
 import Lens.Family2
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Common
 import qualified Proto.Temporal.Api.Enums.V1.Query as Query
+import qualified Proto.Temporal.Api.Enums.V1.Reset as Reset
 import Proto.Temporal.Api.Enums.V1.TaskQueue (TaskQueueKind (..))
 import qualified Proto.Temporal.Api.Enums.V1.Update as Update
 import Proto.Temporal.Api.Enums.V1.Workflow (HistoryEventFilterType (..), WorkflowExecutionStatus (..))
@@ -147,14 +158,15 @@ import qualified Temporal.Client.TestService as TestService
 import Temporal.Client.Types
 import Temporal.Common
 import qualified Temporal.Core.Client as Core
-import Temporal.Core.Client.WorkflowService
+import Temporal.Core.Client.WorkflowService hiding (deleteWorkflowExecution, describeWorkflowExecution, resetWorkflowExecution)
+import qualified Temporal.Core.Client.WorkflowService as WS
 import Temporal.Duration (durationToProto)
 import Temporal.Exception
 import Temporal.Payload
 import Temporal.SearchAttributes.Internal
 import Temporal.Workflow (KnownQuery (..), KnownSignal (..), QueryRef (..))
 import Temporal.Workflow.Definition
-import UnliftIO
+import UnliftIO hiding (cancel)
 import Unsafe.Coerce
 
 
@@ -804,6 +816,126 @@ terminate h req =
         & RR.firstExecutionRunId .~ maybe "" rawRunId h.workflowHandleFirstExecutionRunId
 
 
+{- | Request cancellation of a Workflow Execution.
+
+This sends a cancellation request to the workflow, which will be delivered as a cancellation
+signal. Unlike 'terminate', the workflow has the opportunity to clean up and react to the
+cancellation before completing.
+
+The workflow code can catch the cancellation and perform cleanup operations. If the workflow
+does not handle cancellation, it will be terminated.
+-}
+cancel :: (MonadIO m) => WorkflowHandle a -> m ()
+cancel h =
+  void do
+    res <-
+      liftIO $
+        requestCancelWorkflowExecution
+          h.workflowHandleClient.clientCore
+          msg
+    case res of
+      Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+      Right _ -> pure ()
+  where
+    msg =
+      defMessage
+        & RR.namespace .~ rawNamespace h.workflowHandleClient.clientConfig.namespace
+        & RR.workflowExecution
+          .~ ( defMessage
+                & Common.workflowId .~ rawWorkflowId h.workflowHandleWorkflowId
+                & Common.runId .~ maybe "" rawRunId h.workflowHandleRunId
+             )
+        & RR.identity .~ Core.identity (Core.clientConfig h.workflowHandleClient.clientCore)
+        & RR.firstExecutionRunId .~ maybe "" rawRunId h.workflowHandleFirstExecutionRunId
+
+
+{- | Reset a Workflow Execution to a previous point in its history.
+
+This operation allows you to "replay" a workflow from a specific point, which is useful
+for recovering from bad deployments or other issues. The workflow will be reset to the
+state immediately after the specified WorkflowTaskCompleted event.
+
+After reset, a new run will be created with a new Run ID but the same Workflow ID.
+-}
+resetWorkflowExecution :: (MonadIO m, HasWorkflowClient m) => WorkflowHandle a -> ResetOptions -> m (WorkflowHandle a)
+resetWorkflowExecution h opts = do
+  reqId <- liftIO UUID.nextRandom
+  let msg =
+        defMessage
+          & RR.namespace .~ rawNamespace h.workflowHandleClient.clientConfig.namespace
+          & RR.workflowExecution
+            .~ ( defMessage
+                  & Common.workflowId .~ rawWorkflowId h.workflowHandleWorkflowId
+                  & Common.runId .~ maybe "" rawRunId h.workflowHandleRunId
+               )
+          & RR.reason .~ opts.resetReason
+          & RR.workflowTaskFinishEventId .~ fromIntegral (rawEventId opts.resetToWorkflowTaskFinishEventId)
+          & RR.requestId .~ UUID.toText reqId
+          & RR.resetReapplyType .~ resetReapplyTypeToProto opts.resetReapplyType
+          & RR.vec'resetReapplyExcludeTypes .~ V.fromList (fmap resetReapplyExcludeTypeToProto opts.resetReapplyExcludeTypes)
+  res <-
+    liftIO $
+      WS.resetWorkflowExecution
+        h.workflowHandleClient.clientCore
+        msg
+  case res of
+    Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+    Right response -> do
+      let newRunId = RunId $ response ^. RR.runId
+      pure $
+        h
+          { workflowHandleRunId = Just newRunId
+          , workflowHandleFirstExecutionRunId = Just newRunId
+          }
+  where
+    resetReapplyTypeToProto = \case
+      ResetReapplySignal -> Reset.RESET_REAPPLY_TYPE_SIGNAL
+      ResetReapplyNone -> Reset.RESET_REAPPLY_TYPE_NONE
+      ResetReapplyAllEligible -> Reset.RESET_REAPPLY_TYPE_ALL_ELIGIBLE
+
+    resetReapplyExcludeTypeToProto = \case
+      ResetReapplyExcludeSignal -> Reset.RESET_REAPPLY_EXCLUDE_TYPE_SIGNAL
+      ResetReapplyExcludeUpdate -> Reset.RESET_REAPPLY_EXCLUDE_TYPE_UPDATE
+      ResetReapplyExcludeNexus -> Reset.RESET_REAPPLY_EXCLUDE_TYPE_NEXUS
+      ResetReapplyExcludeCancelRequest -> Reset.RESET_REAPPLY_EXCLUDE_TYPE_CANCEL_REQUEST
+
+
+{- | Get detailed information about a workflow execution.
+
+Returns comprehensive information about the workflow including its current status,
+pending operations, and configuration.
+-}
+describeWorkflowExecution :: (MonadIO m, HasWorkflowClient m) => WorkflowHandle a -> m WorkflowExecutionDescription
+describeWorkflowExecution h = do
+  res <-
+    liftIO $
+      WS.describeWorkflowExecution
+        h.workflowHandleClient.clientCore
+        msg
+  case res of
+    Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+    Right response ->
+      pure $
+        WorkflowExecutionDescription
+          { workflowExecutionInfo = fromMaybe (error "Missing workflowExecutionInfo") (response ^. RR.maybe'workflowExecutionInfo)
+          , executionConfig = response ^. RR.maybe'executionConfig
+          , pendingActivities = response ^. RR.vec'pendingActivities
+          , pendingChildren = response ^. RR.vec'pendingChildren
+          , pendingWorkflowTask = response ^. RR.maybe'pendingWorkflowTask
+          , callbacks = response ^. RR.vec'callbacks
+          , pendingNexusOperations = response ^. RR.vec'pendingNexusOperations
+          }
+  where
+    msg =
+      defMessage
+        & RR.namespace .~ rawNamespace h.workflowHandleClient.clientConfig.namespace
+        & RR.execution
+          .~ ( defMessage
+                & Common.workflowId .~ rawWorkflowId h.workflowHandleWorkflowId
+                & Common.runId .~ maybe "" rawRunId h.workflowHandleRunId
+             )
+
+
 data FollowOption = FollowRuns | ThisRunOnly
 
 
@@ -1194,7 +1326,7 @@ checkWorkflowExecutionExists wfRef wfId = do
                     & field @"workflowId" .~ rawWorkflowId wfId
                     & field @"runId" .~ ""
                  )
-    res <- Temporal.Core.Client.WorkflowService.describeWorkflowExecution c.clientCore req
+    res <- WS.describeWorkflowExecution c.clientCore req
     case res of
       Left err -> case err of
         Core.RpcError status _ _ | fromIntegral status == fromEnum StatusNotFound -> pure False
