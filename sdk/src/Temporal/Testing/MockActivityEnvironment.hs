@@ -44,14 +44,12 @@ Temporal runtime — and return its result in 'IO'.
 See 'MockActivityEnvironment' and 'mkMockActivityEnvironment' for additional
 usage details.
 
-__NOTE__: Any 'Activity' that makes Temporal Worker Client calls will throw
-an impure exception.
+__NOTE__: Any 'Activity' that makes Temporal Worker Client calls (e.g. via
+'askActivityClient') will lazily throw an 'IllegalWorkerClientException'.
 -}
 runMockActivity :: MonadIO m => MockActivityEnvironment env -> Activity env a -> m a
 runMockActivity env activity = do
   let
-    -- NOTE: 'IllegalWorkerClientException' is thrown lazily, and will only be
-    -- surfaced to the end-user if a call is made to 'askActivityClient'.
     actEnv =
       ActivityEnv
         env.info
@@ -65,6 +63,7 @@ runMockActivity env activity = do
 
 
 {- | Create a 'MockActivityEnvironment' with reasonable defaults for testing:
+
     * scheduled and started times set to the Unix Epoch
     * all durations set to 1 second
     * empty 'headerFields'
