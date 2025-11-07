@@ -1494,6 +1494,37 @@ pub unsafe extern "C" fn hs_terminate_workflow_execution(
 ///
 /// Haskell <-> Tokio FFI bridge invariants.
 #[unsafe(no_mangle)]
+pub unsafe extern "C" fn hs_delete_workflow_execution(
+    client: *mut ClientRef,
+    c_call: *const RpcCall,
+    mvar: *mut MVar,
+    cap: Capability,
+    error_slot: *mut *mut CRPCError,
+    result_slot: *mut *mut CArray<u8>,
+) {
+    let client = unsafe { &mut *client };
+    let mut retry_client = client.retry_client.clone();
+    let call: TemporalCall = unsafe { (&*c_call).into() };
+
+    let callback: HsCallback<CArray<u8>, CRPCError> = HsCallback {
+        cap,
+        mvar,
+        result_slot,
+        error_slot,
+    };
+    client.runtime.future_result_into_hs(callback, async move {
+        match rpc_call!(retry_client, call, delete_workflow_execution) {
+            Ok(resp) => Ok(CArray::c_repr_of(resp).unwrap()),
+            Err(err) => Err(err),
+        }
+    });
+}
+
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn hs_update_namespace(
     client: *mut ClientRef,
     c_call: *const RpcCall,
