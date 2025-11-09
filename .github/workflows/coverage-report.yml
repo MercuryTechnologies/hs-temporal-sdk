@@ -1,0 +1,102 @@
+name: Code Coverage Report
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        with:
+          path: pr
+
+      - name: Checkout main branch
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        with:
+          ref: main
+          path: main
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@7ec16f2c061ab07b235a7245e06ed46fe9a1cab6 # v31.8.3
+        with:
+          extra_nix_config: |
+            extra-substituters = https://cache.garnix.io
+            extra-trusted-public-keys = cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=
+
+      - name: Build coverage report for main
+        run: |
+          cd main
+          nix build --impure '.#coverage-ghc910' --print-build-logs || echo "Main branch coverage build failed, will show PR coverage only"
+          if [ -L result ]; then
+            cp result/share/hpc/coverage.md ../main-coverage.md || echo "No main coverage found"
+          fi
+
+      - name: Build coverage report for PR
+        run: |
+          cd pr
+          nix build --impure '.#coverage-ghc910' --print-build-logs
+
+      - name: Extract PR coverage markdown
+        run: |
+          cp pr/result/share/hpc/coverage.md pr-coverage.md
+
+      - name: Generate coverage diff
+        run: |
+          cat > coverage-report.md <<'EOF'
+          # 📊 Code Coverage Report
+          
+          ## Current PR Coverage
+          
+          EOF
+          
+          cat pr-coverage.md | tail -n +2 >> coverage-report.md
+          
+          if [ -f main-coverage.md ]; then
+            echo "" >> coverage-report.md
+            echo "---" >> coverage-report.md
+            echo "" >> coverage-report.md
+            echo "## 📈 Coverage Comparison vs. Main" >> coverage-report.md
+            echo "" >> coverage-report.md
+            
+            # Extract overall percentages
+            PR_PCT=$(grep "Overall Coverage" pr-coverage.md | grep -oE "[0-9]+\.[0-9]+" | head -1)
+            MAIN_PCT=$(grep "Overall Coverage" main-coverage.md | grep -oE "[0-9]+\.[0-9]+" | head -1)
+            
+            if [ -n "$PR_PCT" ] && [ -n "$MAIN_PCT" ]; then
+              DIFF=$(echo "$PR_PCT - $MAIN_PCT" | bc)
+              if (( $(echo "$DIFF > 0" | bc -l) )); then
+                echo "✅ **Coverage increased by ${DIFF}%** (${MAIN_PCT}% → ${PR_PCT}%)" >> coverage-report.md
+              elif (( $(echo "$DIFF < 0" | bc -l) )); then
+                echo "⚠️ **Coverage decreased by ${DIFF#-}%** (${MAIN_PCT}% → ${PR_PCT}%)" >> coverage-report.md
+              else
+                echo "➡️ **Coverage unchanged** at ${PR_PCT}%" >> coverage-report.md
+              fi
+            fi
+            
+            echo "" >> coverage-report.md
+            echo "<details>" >> coverage-report.md
+            echo "<summary>Main Branch Coverage (for comparison)</summary>" >> coverage-report.md
+            echo "" >> coverage-report.md
+            cat main-coverage.md | tail -n +2 >> coverage-report.md
+            echo "</details>" >> coverage-report.md
+          fi
+
+      - name: Upload HTML report as artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: coverage-html-report
+          path: pr/result/share/hpc/html/
+          retention-days: 14
+
+      - name: Comment coverage report on PR
+        uses: marocchino/sticky-pull-request-comment@773744901bac0e8cbb5a0dc842800d45e9b2b405 # v2.9.4
+        with:
+          recreate: true
+          path: coverage-report.md

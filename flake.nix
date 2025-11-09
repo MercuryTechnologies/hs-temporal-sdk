@@ -36,8 +36,22 @@
     packages = flakeUtils.forAllSystems (
       {pkgs, ...}: let
         haskellUtils = import ./nix/utils/haskell.nix pkgs;
+        inherit (import ./nix/utils/matrix.nix) ghcVersions;
+
+        # Generate coverage packages for each GHC version
+        coveragePackages = builtins.listToAttrs (
+          builtins.map (ghcVersion: {
+            name = "coverage-${ghcVersion}";
+            value = import ./nix/packages/coverage.nix {
+              inherit pkgs ghcVersion;
+              haskellPackages = pkgs.haskell.packages.${ghcVersion};
+            };
+          })
+          ghcVersions
+        );
       in
         haskellUtils.localPackageMatrix
+        // coveragePackages
         // {
           temporal-bridge = pkgs.temporal_bridge;
           temporal-test-server = pkgs.temporal-test-server;
