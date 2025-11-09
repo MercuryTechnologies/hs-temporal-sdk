@@ -1,45 +1,44 @@
 {
   lib,
   haskell,
-  stdenv,
-  darwin,
   temporal-cli,
   temporal-test-server,
   ...
-}:
-hfinal: hprev:
-let
+}: hfinal: _hprev: let
   inherit (haskell.lib.compose) addTestToolDepends enableCabalFlag;
-in
-{
-  temporal-api-protos = hfinal.callCabal2nix "temporal-api-protos" ../../../protos { };
+in {
+  temporal-api-protos = hfinal.callCabal2nix "temporal-api-protos" ../../../protos {};
 
-  temporal-sdk-core = lib.pipe (hfinal.callCabal2nix "temporal-sdk-core" ../../../core { }) [
+  temporal-sdk-core = lib.pipe (hfinal.callCabal2nix "temporal-sdk-core" ../../../core {}) [
     (enableCabalFlag "external_lib")
   ];
 
-  temporal-sdk = lib.pipe (hfinal.callCabal2nix "temporal-sdk" ../../../sdk { }) [
+  temporal-sdk = lib.pipe (hfinal.callCabal2nix "temporal-sdk" ../../../sdk {}) [
     (addTestToolDepends [
       temporal-cli
       temporal-test-server
     ])
     (
       drv:
-      drv.overrideAttrs (_: {
-        __darwinAllowLocalNetworking = true;
-      })
+        drv.overrideAttrs (_: {
+          __darwinAllowLocalNetworking = true;
+        })
     )
   ];
 
   temporal-sdk-codec-server =
     hfinal.callCabal2nix "temporal-sdk-codec-server" ../../../codec-server
-      { };
+    {};
 
   temporal-codec-encryption =
     hfinal.callCabal2nix "temporal-codec-encryption" ../../../codec-encryption
-      { };
+    {};
 
   temporal-sdk-optimal-codec =
     hfinal.callCabal2nix "temporal-sdk-optimal-codec" ../../../optimal-codec
-      { };
+    {};
+
+  tix-to-markdown =
+    hfinal.callCabal2nix "tix-to-markdown" ../../../tools/tix-to-markdown
+    {};
 }
