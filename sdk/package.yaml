@@ -153,6 +153,7 @@ tests:
       Spec,
       ContinueAsNewSpec,
       DurationSpec,
+      ExceptionSpec,
       IntegrationSpec,
       IntegrationSpec.HangingWorkflow,
       IntegrationSpec.NoOpWorkflow,
@@ -168,4 +169,5 @@ tests:
       SignalSpec,
       TestHelpers,
       THCompiles,
-      WorkerTunerSpec
+      WorkerTunerSpec,
+      VisibilityQuerySpec
