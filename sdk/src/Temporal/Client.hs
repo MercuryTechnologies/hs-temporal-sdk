@@ -80,19 +80,28 @@ module Temporal.Client (
 
   -- * Workflow history utilities
   fetchHistory,
+  fetchHistoryReverse,
   streamEvents,
+  streamEventsReverse,
   FollowOption (..),
 
   -- * List workflows
   Temporal.Client.listClosedWorkflowExecutions,
   Temporal.Client.listOpenWorkflowExecutions,
+  Temporal.Client.listWorkflowExecutions,
+  Temporal.Client.listArchivedWorkflowExecutions,
   Temporal.Client.scanWorkflowExecutions,
   Temporal.Client.countWorkflowExecutions,
+
+  -- * Visibility Query Builders
+  module Temporal.Client.VisibilityQuery,
 
   -- * Workflow existence
   checkWorkflowExecutionExists,
 
   -- * Common types
+  WorkflowId (..),
+  WorkflowType (..),
   WorkflowIdConflictPolicy (..),
 ) where
 
@@ -143,8 +152,12 @@ import Proto.Temporal.Api.Workflowservice.V1.RequestResponse (
   CountWorkflowExecutionsResponse,
   GetWorkflowExecutionHistoryRequest,
   GetWorkflowExecutionHistoryResponse,
+  GetWorkflowExecutionHistoryReverseRequest,
+  GetWorkflowExecutionHistoryReverseResponse,
+  ListArchivedWorkflowExecutionsRequest,
   ListClosedWorkflowExecutionsRequest,
   ListOpenWorkflowExecutionsRequest,
+  ListWorkflowExecutionsRequest,
   PollWorkflowExecutionUpdateRequest,
   QueryWorkflowRequest,
   QueryWorkflowResponse,
@@ -156,6 +169,7 @@ import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as WF
 import qualified Temporal.Client.TestService as TestService
 import Temporal.Client.Types
+import Temporal.Client.VisibilityQuery
 import Temporal.Common
 import qualified Temporal.Core.Client as Core
 import Temporal.Core.Client.WorkflowService hiding (deleteWorkflowExecution, describeWorkflowExecution, resetWorkflowExecution)
@@ -974,6 +988,32 @@ fetchHistory h = do
   pure $ build (History.events .~ allEvents)
 
 
+{- | Fetch the history of a Workflow execution in reverse order (from most recent to oldest).
+
+This is useful for inspecting the most recent events of a workflow without fetching
+the entire history, especially for long-running workflows.
+
+Note: Unlike 'fetchHistory', this does not follow workflow chains (Continue-As-New).
+It only fetches events from the current run.
+-}
+fetchHistoryReverse :: (MonadIO m) => WorkflowHandle a -> m History
+fetchHistoryReverse h = do
+  let startingReq :: GetWorkflowExecutionHistoryReverseRequest
+      startingReq =
+        defMessage
+          & RR.namespace .~ rawNamespace h.workflowHandleClient.clientConfig.namespace
+          & RR.execution
+            .~ ( defMessage
+                  & Common.workflowId .~ rawWorkflowId h.workflowHandleWorkflowId
+                  & case h.workflowHandleRunId of
+                    Nothing -> Prelude.id
+                    Just rId -> Common.runId .~ rawRunId rId
+               )
+          & RR.maximumPageSize .~ 100
+  allEvents <- runReaderT (sourceToList (streamEventsReverse startingReq)) h.workflowHandleClient
+  pure $ build (History.events .~ allEvents)
+
+
 applyNewExecutionRunId
   :: (HasField s "newExecutionRunId" Text)
   => s
@@ -1043,6 +1083,45 @@ streamEvents followOpt baseReq = askWorkflowClient >>= \c -> go c baseReq
           if res ^. RR.nextPageToken == ""
             then Nothing
             else Just (req & RR.nextPageToken .~ (res ^. RR.nextPageToken))
+
+
+{- | Stream workflow execution history events in reverse order (from most recent to oldest).
+
+This is useful for inspecting the most recent events of a workflow without fetching
+the entire history, especially for long-running workflows.
+
+Note: Unlike 'streamEvents', this does not support following workflow chains (Continue-As-New).
+It only streams events from the specified workflow execution.
+
+Example:
+
+@
+import Temporal.Client
+import Conduit
+import Data.ProtoLens
+
+let req = defMessage
+      & field @"namespace" .~ "my-namespace"
+      & field @"execution" .~ (defMessage & field @"workflowId" .~ "my-workflow-id")
+      & field @"maximumPageSize" .~ 100
+
+runConduit $ streamEventsReverse req .| takeC 10 .| mapM_C print
+@
+-}
+streamEventsReverse
+  :: (MonadIO m, HasWorkflowClient m)
+  => GetWorkflowExecutionHistoryReverseRequest
+  -> ConduitT i HistoryEvent m ()
+streamEventsReverse baseReq = askWorkflowClient >>= \c -> go c (baseReq & field @"namespace" .~ rawNamespace c.clientConfig.namespace)
+  where
+    go c req = do
+      res <- liftIO $ Temporal.Core.Client.WorkflowService.getWorkflowExecutionHistoryReverse c.clientCore req
+      case res of
+        Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+        Right x -> do
+          yieldMany (x ^. RR.history . History.events)
+          unless (x ^. RR.nextPageToken == "") do
+            go c (req & RR.nextPageToken .~ (x ^. RR.nextPageToken))
 
 
 waitResult
@@ -1126,6 +1205,84 @@ countWorkflowExecutions baseReq =
     case res of
       Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
       Right x -> pure x
+
+
+{- | List workflow executions using the unified list API.
+
+This is the recommended way to list workflow executions, replacing the older
+'listOpenWorkflowExecutions', 'listClosedWorkflowExecutions', and 'scanWorkflowExecutions' APIs.
+
+Use visibility queries to filter the results. See 'Temporal.Client.VisibilityQuery' for
+query building utilities.
+
+Example:
+
+@
+import Temporal.Client
+import Temporal.Client.VisibilityQuery
+import Conduit
+
+let query = renderQuery $ AndQuery
+      [ WorkflowTypeQuery "MyWorkflow"
+      , StatusQuery Running
+      ]
+    req = defMessage
+      & field @"query" .~ query
+      & field @"pageSize" .~ 100
+
+runConduit $ listWorkflowExecutions req .| mapM_C print
+@
+-}
+listWorkflowExecutions
+  :: (MonadIO m, HasWorkflowClient m)
+  => ListWorkflowExecutionsRequest
+  -> ConduitT i WorkflowExecutionInfo m ()
+listWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq & field @"namespace" .~ rawNamespace c.clientConfig.namespace)
+  where
+    go c req = do
+      res <- liftIO $ Temporal.Core.Client.WorkflowService.listWorkflowExecutions c.clientCore req
+      case res of
+        Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+        Right x -> do
+          yieldMany (x ^. field @"vec'executions")
+          unless (x ^. field @"nextPageToken" == "") do
+            go c (req & field @"nextPageToken" .~ (x ^. field @"nextPageToken"))
+
+
+{- | List archived workflow executions.
+
+Archived executions are workflows that have been moved to long-term storage
+and are no longer part of the primary visibility index.
+
+This requires that the Temporal server has been configured with an archival provider.
+
+Example:
+
+@
+import Temporal.Client
+import Conduit
+
+let req = defMessage
+      & field @"query" .~ "WorkflowType='MyWorkflow'"
+      & field @"pageSize" .~ 100
+
+runConduit $ listArchivedWorkflowExecutions req .| mapM_C print
+@
+-}
+listArchivedWorkflowExecutions
+  :: (MonadIO m, HasWorkflowClient m)
+  => ListArchivedWorkflowExecutionsRequest
+  -> ConduitT i WorkflowExecutionInfo m ()
+listArchivedWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq & field @"namespace" .~ rawNamespace c.clientConfig.namespace)
+  where
+    go c req = do
+      res <- liftIO $ Temporal.Core.Client.WorkflowService.listArchivedWorkflowExecutions c.clientCore req
+      case res of
+        Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+        Right x -> do
+          yieldMany (x ^. field @"vec'executions")
+          unless (x ^. field @"nextPageToken" == "") do
+            go c (req & field @"nextPageToken" .~ (x ^. field @"nextPageToken"))
 
 
 data UpdateLifecycleStage
