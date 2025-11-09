@@ -147,6 +147,7 @@ tests:
       ConcurrentAccessSpec,
       AsyncCompletionSpec,
       DurationSpec,
+      ExceptionSpec,
       IntegrationSpec,
       IntegrationSpec.HangingWorkflow,
       IntegrationSpec.NoOpWorkflow,
@@ -156,4 +157,5 @@ tests:
       IntegrationSpec.TimeSkipping,
       Common,
       RegisterWorkflowsSpec,
-      THCompiles
+      THCompiles,
+      VisibilityQuerySpec
