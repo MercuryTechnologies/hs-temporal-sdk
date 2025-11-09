@@ -2015,3 +2015,127 @@ pub unsafe extern "C" fn hs_remove_search_attributes(
         }
     });
 }
+
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn hs_start_batch_operation(
+    client: *mut ClientRef,
+    c_call: *const RpcCall,
+    mvar: *mut MVar,
+    cap: Capability,
+    error_slot: *mut *mut CRPCError,
+    result_slot: *mut *mut CArray<u8>,
+) {
+    let client = unsafe { &mut *client };
+    let mut retry_client = client.retry_client.clone();
+    let call: TemporalCall = unsafe { (&*c_call).into() };
+
+    let callback: HsCallback<CArray<u8>, CRPCError> = HsCallback {
+        cap,
+        mvar,
+        result_slot,
+        error_slot,
+    };
+    client.runtime.future_result_into_hs(callback, async move {
+        match rpc_call!(retry_client, call, start_batch_operation) {
+            Ok(resp) => Ok(CArray::c_repr_of(resp).unwrap()),
+            Err(err) => Err(err),
+        }
+    });
+}
+
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn hs_stop_batch_operation(
+    client: *mut ClientRef,
+    c_call: *const RpcCall,
+    mvar: *mut MVar,
+    cap: Capability,
+    error_slot: *mut *mut CRPCError,
+    result_slot: *mut *mut CArray<u8>,
+) {
+    let client = unsafe { &mut *client };
+    let mut retry_client = client.retry_client.clone();
+    let call: TemporalCall = unsafe { (&*c_call).into() };
+
+    let callback: HsCallback<CArray<u8>, CRPCError> = HsCallback {
+        cap,
+        mvar,
+        result_slot,
+        error_slot,
+    };
+    client.runtime.future_result_into_hs(callback, async move {
+        match rpc_call!(retry_client, call, stop_batch_operation) {
+            Ok(resp) => Ok(CArray::c_repr_of(resp).unwrap()),
+            Err(err) => Err(err),
+        }
+    });
+}
+
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn hs_describe_batch_operation(
+    client: *mut ClientRef,
+    c_call: *const RpcCall,
+    mvar: *mut MVar,
+    cap: Capability,
+    error_slot: *mut *mut CRPCError,
+    result_slot: *mut *mut CArray<u8>,
+) {
+    let client = unsafe { &mut *client };
+    let mut retry_client = client.retry_client.clone();
+    let call: TemporalCall = unsafe { (&*c_call).into() };
+
+    let callback: HsCallback<CArray<u8>, CRPCError> = HsCallback {
+        cap,
+        mvar,
+        result_slot,
+        error_slot,
+    };
+    client.runtime.future_result_into_hs(callback, async move {
+        match rpc_call!(retry_client, call, describe_batch_operation) {
+            Ok(resp) => Ok(CArray::c_repr_of(resp).unwrap()),
+            Err(err) => Err(err),
+        }
+    });
+}
+
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn hs_list_batch_operations(
+    client: *mut ClientRef,
+    c_call: *const RpcCall,
+    mvar: *mut MVar,
+    cap: Capability,
+    error_slot: *mut *mut CRPCError,
+    result_slot: *mut *mut CArray<u8>,
+) {
+    let client = unsafe { &mut *client };
+    let mut retry_client = client.retry_client.clone();
+    let call: TemporalCall = unsafe { (&*c_call).into() };
+
+    let callback: HsCallback<CArray<u8>, CRPCError> = HsCallback {
+        cap,
+        mvar,
+        result_slot,
+        error_slot,
+    };
+    client.runtime.future_result_into_hs(callback, async move {
+        match rpc_call!(retry_client, call, list_batch_operations) {
+            Ok(resp) => Ok(CArray::c_repr_of(resp).unwrap()),
+            Err(err) => Err(err),
+        }
+    });
+}

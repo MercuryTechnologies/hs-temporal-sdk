@@ -13,6 +13,7 @@ module Temporal.Core.Client.WorkflowService (
   describeSchedule,
   describeTaskQueue,
   describeWorkflowExecution,
+  describeBatchOperation,
   getClusterInfo,
   getSearchAttributes,
   getSystemInfo,
@@ -20,6 +21,7 @@ module Temporal.Core.Client.WorkflowService (
   getWorkflowExecutionHistory,
   getWorkflowExecutionHistoryReverse,
   listArchivedWorkflowExecutions,
+  listBatchOperations,
   listClosedWorkflowExecutions,
   listNamespaces,
   listOpenWorkflowExecutions,
@@ -50,7 +52,9 @@ module Temporal.Core.Client.WorkflowService (
   scanWorkflowExecutions,
   signalWithStartWorkflowExecution,
   signalWorkflowExecution,
+  startBatchOperation,
   startWorkflowExecution,
+  stopBatchOperation,
   terminateWorkflowExecution,
   updateNamespace,
   updateSchedule,
@@ -617,3 +621,53 @@ members are compatible with one another.
 -}
 updateWorkerBuildIdCompatibility :: Client -> UpdateWorkerBuildIdCompatibilityRequest -> IO (Either RpcError UpdateWorkerBuildIdCompatibilityResponse)
 updateWorkerBuildIdCompatibility = call @WorkflowService @"updateWorkerBuildIdCompatibility" hs_update_worker_build_id_compatibility
+
+
+foreign import ccall "hs_start_batch_operation" hs_start_batch_operation :: PrimRpcCall
+
+
+{- |
+StartBatchOperation starts a new batch operation that applies to multiple workflow executions.
+
+Batch operations allow you to perform actions like terminate, cancel, signal, or delete on
+multiple workflow executions that match a visibility query.
+-}
+startBatchOperation :: Client -> StartBatchOperationRequest -> IO (Either RpcError StartBatchOperationResponse)
+startBatchOperation = call @WorkflowService @"startBatchOperation" hs_start_batch_operation
+
+
+foreign import ccall "hs_stop_batch_operation" hs_stop_batch_operation :: PrimRpcCall
+
+
+{- |
+StopBatchOperation stops an ongoing batch operation.
+
+This will prevent the batch operation from processing any additional workflow executions,
+but will not undo operations that have already been performed.
+-}
+stopBatchOperation :: Client -> StopBatchOperationRequest -> IO (Either RpcError StopBatchOperationResponse)
+stopBatchOperation = call @WorkflowService @"stopBatchOperation" hs_stop_batch_operation
+
+
+foreign import ccall "hs_describe_batch_operation" hs_describe_batch_operation :: PrimRpcCall
+
+
+{- |
+DescribeBatchOperation returns information about a batch operation.
+
+This includes the current state, progress statistics, and operation details.
+-}
+describeBatchOperation :: Client -> DescribeBatchOperationRequest -> IO (Either RpcError DescribeBatchOperationResponse)
+describeBatchOperation = call @WorkflowService @"describeBatchOperation" hs_describe_batch_operation
+
+
+foreign import ccall "hs_list_batch_operations" hs_list_batch_operations :: PrimRpcCall
+
+
+{- |
+ListBatchOperations lists all batch operations in a namespace.
+
+Results can be filtered and paginated using the request parameters.
+-}
+listBatchOperations :: Client -> ListBatchOperationsRequest -> IO (Either RpcError ListBatchOperationsResponse)
+listBatchOperations = call @WorkflowService @"listBatchOperations" hs_list_batch_operations
