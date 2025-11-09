@@ -22,6 +22,7 @@ library
       Temporal.Bundle
       Temporal.Bundle.TH
       Temporal.Client
+      Temporal.Client.BatchOperation
       Temporal.Client.Namespace
       Temporal.Client.Schedule
       Temporal.Client.TestService
@@ -39,6 +40,7 @@ library
       Temporal.Testing.Assertions
       Temporal.Testing.MockActivityEnvironment
       Temporal.TH
+      Temporal.Timestamp
       Temporal.Worker
       Temporal.Workflow
       Temporal.Workflow.Saga
