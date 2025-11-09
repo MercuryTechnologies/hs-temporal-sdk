@@ -60,6 +60,11 @@ module Temporal.Core.Client.WorkflowService (
   updateSchedule,
   updateWorkflowExecution,
   updateWorkerBuildIdCompatibility,
+  createWorkflowRule,
+  describeWorkflowRule,
+  deleteWorkflowRule,
+  listWorkflowRules,
+  triggerWorkflowRule,
 ) where
 
 import Proto.Temporal.Api.Workflowservice.V1.RequestResponse
@@ -671,3 +676,64 @@ Results can be filtered and paginated using the request parameters.
 -}
 listBatchOperations :: Client -> ListBatchOperationsRequest -> IO (Either RpcError ListBatchOperationsResponse)
 listBatchOperations = call @WorkflowService @"listBatchOperations" hs_list_batch_operations
+
+
+foreign import ccall "hs_create_workflow_rule" hs_create_workflow_rule :: PrimRpcCall
+
+
+{- |
+CreateWorkflowRule creates a new workflow rule in a namespace.
+
+Workflow rules allow automatic actions to be taken on workflows that match certain criteria
+when specific events occur (e.g., activity starts).
+-}
+createWorkflowRule :: Client -> CreateWorkflowRuleRequest -> IO (Either RpcError CreateWorkflowRuleResponse)
+createWorkflowRule = call @WorkflowService @"createWorkflowRule" hs_create_workflow_rule
+
+
+foreign import ccall "hs_describe_workflow_rule" hs_describe_workflow_rule :: PrimRpcCall
+
+
+{- |
+DescribeWorkflowRule returns detailed information about a specific workflow rule.
+
+This includes the rule's specification, creation time, and current state.
+-}
+describeWorkflowRule :: Client -> DescribeWorkflowRuleRequest -> IO (Either RpcError DescribeWorkflowRuleResponse)
+describeWorkflowRule = call @WorkflowService @"describeWorkflowRule" hs_describe_workflow_rule
+
+
+foreign import ccall "hs_delete_workflow_rule" hs_delete_workflow_rule :: PrimRpcCall
+
+
+{- |
+DeleteWorkflowRule removes a workflow rule from the namespace.
+
+Once deleted, the rule will no longer trigger or take actions on workflows.
+-}
+deleteWorkflowRule :: Client -> DeleteWorkflowRuleRequest -> IO (Either RpcError DeleteWorkflowRuleResponse)
+deleteWorkflowRule = call @WorkflowService @"deleteWorkflowRule" hs_delete_workflow_rule
+
+
+foreign import ccall "hs_list_workflow_rules" hs_list_workflow_rules :: PrimRpcCall
+
+
+{- |
+ListWorkflowRules lists all workflow rules in a namespace.
+
+Results can be filtered and paginated using the request parameters.
+-}
+listWorkflowRules :: Client -> ListWorkflowRulesRequest -> IO (Either RpcError ListWorkflowRulesResponse)
+listWorkflowRules = call @WorkflowService @"listWorkflowRules" hs_list_workflow_rules
+
+
+foreign import ccall "hs_trigger_workflow_rule" hs_trigger_workflow_rule :: PrimRpcCall
+
+
+{- |
+TriggerWorkflowRule manually triggers evaluation of a workflow rule for a specific workflow execution.
+
+This is useful for testing rules or manually applying rule actions to workflows.
+-}
+triggerWorkflowRule :: Client -> TriggerWorkflowRuleRequest -> IO (Either RpcError TriggerWorkflowRuleResponse)
+triggerWorkflowRule = call @WorkflowService @"triggerWorkflowRule" hs_trigger_workflow_rule

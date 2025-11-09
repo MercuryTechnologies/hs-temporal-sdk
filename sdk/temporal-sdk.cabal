@@ -52,6 +52,7 @@ library
       Temporal.Client.Types
       Temporal.Client.AsyncActivity
       Temporal.Client.Workflow
+      Temporal.Client.WorkflowRule
       Temporal.Common
       Temporal.Common.Async
       Temporal.Common.TimeoutType
