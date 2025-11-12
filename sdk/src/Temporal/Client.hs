@@ -40,6 +40,8 @@ module Temporal.Client (
   -- * Closing Workflows
   TerminationOptions (..),
   terminate,
+  CancellationOptions (..),
+  cancel,
 
   -- * Querying Workflows
   QueryOptions (..),
@@ -154,7 +156,7 @@ import Temporal.Payload
 import Temporal.SearchAttributes.Internal
 import Temporal.Workflow (KnownQuery (..), KnownSignal (..), QueryRef (..))
 import Temporal.Workflow.Definition
-import UnliftIO
+import UnliftIO hiding (cancel)
 import Unsafe.Coerce
 
 
@@ -800,6 +802,45 @@ terminate h req =
         & RR.reason .~ req.terminationReason
         & RR.details
           .~ (defMessage & Common.payloads .~ fmap convertToProtoPayload req.terminationDetails)
+        & RR.identity .~ Core.identity (Core.clientConfig h.workflowHandleClient.clientCore)
+        & RR.firstExecutionRunId .~ maybe "" rawRunId h.workflowHandleFirstExecutionRunId
+
+
+data CancellationOptions = CancellationOptions
+  { cancellationReason :: Text
+  }
+
+
+{- | Canceling a workflow sends a cancellation request to the workflow. Unlike
+'terminate', cancellation is cooperative - the workflow must check for cancellation
+and react to it. The workflow can perform cleanup operations when it detects the
+cancellation request.
+
+The workflow will only transition to a canceled state if it explicitly checks for
+and handles the cancellation. If the workflow does not check for cancellation, it
+will continue running normally.
+-}
+cancel :: (MonadIO m) => WorkflowHandle a -> CancellationOptions -> m ()
+cancel h req =
+  void do
+    res <-
+      liftIO $
+        requestCancelWorkflowExecution
+          h.workflowHandleClient.clientCore
+          msg
+    case res of
+      Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+      Right _ -> pure ()
+  where
+    msg =
+      defMessage
+        & RR.namespace .~ rawNamespace h.workflowHandleClient.clientConfig.namespace
+        & RR.workflowExecution
+          .~ ( defMessage
+                & Common.workflowId .~ rawWorkflowId h.workflowHandleWorkflowId
+                & Common.runId .~ maybe "" rawRunId h.workflowHandleRunId
+             )
+        & RR.reason .~ req.cancellationReason
         & RR.identity .~ Core.identity (Core.clientConfig h.workflowHandleClient.clientCore)
         & RR.firstExecutionRunId .~ maybe "" rawRunId h.workflowHandleFirstExecutionRunId
 
