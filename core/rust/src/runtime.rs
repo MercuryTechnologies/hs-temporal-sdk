@@ -1,10 +1,11 @@
 use ffi_convert::*;
+use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::future::Future;
 use std::net::SocketAddr;
 use std::os::raw::c_int;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::time::{Duration, SystemTime};
 use temporal_sdk_core::telemetry::{
     build_otlp_metric_exporter, construct_filter_string, start_prometheus_metric_exporter,
@@ -27,11 +28,63 @@ pub(crate) struct Runtime {
     pub(crate) try_put_mvar: extern "C" fn(capability: Capability, mvar: *mut MVar) -> (),
 }
 
-fn init_runtime(
+/// Global registry to keep runtimes alive across GHCi reloads.
+/// This prevents expensive re-initialization and avoids issues with
+/// persistent Rust state when the dylib stays loaded but Haskell reloads.
+///
+/// We always reuse runtimes to avoid tracing-subscriber span management issues.
+/// See: https://github.com/tokio-rs/tracing/issues/1656
+/// When spans are closed while a different subscriber is the default, it can cause
+/// panics due to Registry asking the wrong dispatch to close span IDs.
+static RUNTIME_REGISTRY: Lazy<Mutex<Option<Arc<CoreRuntime>>>> = Lazy::new(|| Mutex::new(None));
+
+/// Attempts to reuse an existing runtime from the global registry.
+/// Returns None if no compatible runtime exists.
+fn try_reuse_runtime() -> Option<Arc<CoreRuntime>> {
+    RUNTIME_REGISTRY
+        .lock()
+        .ok()?
+        .as_ref()
+        .cloned()
+}
+
+/// Stores a runtime in the global registry for potential reuse.
+fn register_runtime(runtime: Arc<CoreRuntime>) {
+    if let Ok(mut registry) = RUNTIME_REGISTRY.lock() {
+        *registry = Some(runtime);
+    }
+}
+
+/// Clears the global runtime registry, forcing new runtimes to be created.
+fn clear_runtime_registry() {
+    if let Ok(mut registry) = RUNTIME_REGISTRY.lock() {
+        *registry = None;
+    }
+}
+
+/// Initialize a runtime, reusing an existing one from the registry if available.
+///
+/// We always attempt to reuse runtimes to avoid tracing-subscriber span management issues.
+/// See: https://github.com/tokio-rs/tracing/issues/1656
+fn init_runtime_impl(
     telemetry_config: TelemetryOptions,
     late_telemetry_options: HsTelemetryOptions,
     try_put_mvar: extern "C" fn(capability: Capability, mvar: *mut MVar) -> (),
 ) -> Box<RuntimeRef> {
+    // Always try to reuse existing runtime to avoid tracing span issues
+    if let Some(existing_runtime) = try_reuse_runtime() {
+        eprintln!("[TEMPORAL-DEBUG] Reusing existing CoreRuntime from RUNTIME_REGISTRY");
+        eprintln!("[TEMPORAL-DEBUG] Arc strong_count: {}", Arc::strong_count(&existing_runtime));
+        return Box::new(RuntimeRef {
+            runtime: Runtime {
+                core: existing_runtime,
+                try_put_mvar,
+            },
+        });
+    }
+
+    // Create new runtime only if we couldn't reuse an existing one
+    eprintln!("[TEMPORAL-DEBUG] Creating NEW CoreRuntime (no existing runtime in registry)");
     let mut runtime = CoreRuntime::new(telemetry_config, TokioRuntimeBuilder::default()).unwrap();
 
     let _guard = runtime.tokio_handle().enter();
@@ -75,13 +128,25 @@ fn init_runtime(
     };
     runtime.telemetry_mut().attach_late_init_metrics(core_meter);
 
-    // TODO need to figure out how to handle errors here
+    let core_runtime = Arc::new(runtime);
+
+    // Store the new runtime in the registry for future reuse
+    register_runtime(core_runtime.clone());
+
     Box::new(RuntimeRef {
         runtime: Runtime {
-            core: Arc::new(runtime),
+            core: core_runtime,
             try_put_mvar,
         },
     })
+}
+
+fn init_runtime(
+    telemetry_config: TelemetryOptions,
+    late_telemetry_options: HsTelemetryOptions,
+    try_put_mvar: extern "C" fn(capability: Capability, mvar: *mut MVar) -> (),
+) -> Box<RuntimeRef> {
+    init_runtime_impl(telemetry_config, late_telemetry_options, try_put_mvar)
 }
 
 #[derive(Serialize, Deserialize)]
@@ -146,6 +211,20 @@ pub unsafe extern "C" fn hs_temporal_free_runtime(runtime: *mut RuntimeRef) {
     unsafe { safe_drop_runtime(Box::from_raw(runtime)) };
 }
 
+// TODO: [publish-crate]
+/// Clears the global runtime registry, forcing subsequent init calls to create fresh runtimes.
+///
+/// This is useful for explicit cleanup in test scenarios or when you want to ensure
+/// a completely fresh runtime is created.
+///
+/// # Safety
+///
+/// Haskell FFI bridge invariants. This function is safe to call multiple times.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn hs_temporal_clear_runtime_registry() {
+    clear_runtime_registry();
+}
+
 #[repr(C)]
 pub struct MVar {
     _data: [u8; 0],
@@ -153,6 +232,7 @@ pub struct MVar {
 }
 
 #[repr(C)]
+#[derive(Copy, Clone)]
 pub struct Capability {
     pub cap_num: c_int,
 }
