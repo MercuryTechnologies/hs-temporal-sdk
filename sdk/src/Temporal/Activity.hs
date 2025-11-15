@@ -90,8 +90,8 @@ in sync with each other so that changes to the function are reflected at their u
 > myActivity :: Activity env ()
 > myActivity = liftIO $ putStrLn "Hello world!"
 >
-> myActivityDef :: ActivityDefinition env (Activity env ())
-> myActivityDef = provideWorkflow
+> myActivityDef :: ProvidedActivity env (Activity env ())
+> myActivityDef = provideActivity
 >   JSON -- codec for serializing arguments and results
 >   "myActivity" -- visible name of the workflow
 >   myActivity -- the workflow function
