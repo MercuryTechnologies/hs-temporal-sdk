@@ -13,7 +13,7 @@ jobs:
           fetch-depth: 0  # needed for branch creation
 
       - name: Install Nix
-        uses: cachix/install-nix-action@ba0dd844c9180cbf77aa72a116d6fbc515d0e87b # V27
+        uses: cachix/install-nix-action@7e5978947b7efba56e96c43fd785691980aca924 # V27
 
       - name: Run update script
         id: update-script
