@@ -9,10 +9,9 @@
 
 module IntegrationSpec.Signals where
 
-import Control.Exception
-import Control.Monad
-import Control.Monad.Logger
+import Control.Monad.Logger (logDebug)
 import RequireCallStack (provideCallStack)
+import Temporal.Activity (Activity)
 import Temporal.Duration
 import Temporal.Payload
 import Temporal.TH
@@ -125,3 +124,23 @@ signalOrderingWorkflow = provideCallStack do
 
 
 registerWorkflow 'signalOrderingWorkflow
+
+
+signalWithActivityA :: Activity () ()
+signalWithActivityA = pure ()
+
+registerActivity 'signalWithActivityA
+
+signalWithActivityWorkflow :: Workflow Int
+signalWithActivityWorkflow = provideCallStack do
+  executeActivity SignalWithActivityA (defaultStartActivityOptions $ StartToClose $ seconds 2)
+
+  var <- newStateVar []
+  setSignalHandler signalWithArgs $ \i -> do
+    $(logDebug) "updating value and unblocking workflow"
+    readStateVar var >>= \s -> writeStateVar var (i : s)
+
+  waitCondition $ (not . null) <$> readStateVar var
+  head <$> readStateVar var
+
+registerWorkflow 'signalWithActivityWorkflow
