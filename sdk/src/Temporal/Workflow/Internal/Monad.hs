@@ -337,7 +337,7 @@ instance RandomGenM WorkflowGenM StdGen Workflow where
 instance FrozenGen StdGen Workflow where
   type MutableGen StdGen Workflow = WorkflowGenM
   freezeGen g = Workflow $ \_ -> Done <$> readIORef (unWorkflowGenM g)
-  thawGen = newWorkflowGenM
+  modifyGen g f = Workflow $ \_ -> atomicModifyIORef' (unWorkflowGenM g) (\gen -> let (a, gen') = f gen in (gen', Done a))
 
 
 {-# INLINE addJob #-}

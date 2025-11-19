@@ -89,6 +89,7 @@ module Temporal.Worker (
   WorkflowId (..),
 ) where
 
+import Control.Applicative (liftA2)
 import Control.Concurrent
 import Control.Monad
 import Control.Monad.Catch

@@ -247,19 +247,20 @@ data SearchAttributeType
   | KeywordList (Vector Text)
   deriving stock (Show, Eq, Ord, Lift, Data)
 
-#if MIN_VERSION_time(1,14,0)
-#else
-deriving stock instance Lift UTCTime
-instance Lift DiffTime where
-  lift t = let t' = toRational t in [| fromRational t' |]
-  liftTyped t = let t' = toRational t in [|| (fromRational t' :: DiffTime) ||]
-instance Lift NominalDiffTime where
-  lift t = let t' = toRational t in [| fromRational t' |]
-  liftTyped t = let t' = toRational t in [|| (fromRational t' :: NominalDiffTime) ||]
-instance Lift Day where
-  lift t = let t' = toModifiedJulianDay t in [| ModifiedJulianDay t' |]
-  liftTyped t = let t' = toModifiedJulianDay t in [|| ModifiedJulianDay t' ||]
-#endif
+-- These instances are now provided by time-compat library
+-- #if MIN_VERSION_time(1,14,0)
+-- #else
+-- deriving stock instance Lift UTCTime
+-- instance Lift DiffTime where
+--   lift t = let t' = toRational t in [| fromRational t' |]
+--   liftTyped t = let t' = toRational t in [|| (fromRational t' :: DiffTime) ||]
+-- instance Lift NominalDiffTime where
+--   lift t = let t' = toRational t in [| fromRational t' |]
+--   liftTyped t = let t' = toRational t in [|| (fromRational t' :: NominalDiffTime) ||]
+-- instance Lift Day where
+--   lift t = let t' = toModifiedJulianDay t in [| ModifiedJulianDay t' |]
+--   liftTyped t = let t' = toModifiedJulianDay t in [|| ModifiedJulianDay t' ||]
+-- #endif
 
 
 instance A.ToJSON SearchAttributeType where
