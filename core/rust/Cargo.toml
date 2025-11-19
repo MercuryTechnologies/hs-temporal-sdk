@@ -9,11 +9,11 @@ edition = "2024"
 crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
-temporal-client = { git = "https://github.com/temporalio/sdk-core", rev = "97093c5ea4b0d933513f4c8999f7960f0c16f05f" }
-temporal-sdk-core = { git = "https://github.com/temporalio/sdk-core", rev = "97093c5ea4b0d933513f4c8999f7960f0c16f05f", features = ["ephemeral-server"] }
-temporal-sdk-core-api = { git = "https://github.com/temporalio/sdk-core", rev = "97093c5ea4b0d933513f4c8999f7960f0c16f05f" }
-temporal-sdk-core-protos = { git = "https://github.com/temporalio/sdk-core", rev = "97093c5ea4b0d933513f4c8999f7960f0c16f05f" }
-rustfsm = { git = "https://github.com/temporalio/sdk-core", rev = "97093c5ea4b0d933513f4c8999f7960f0c16f05f" }
+temporal-client = { path = "../../vendor/temporal-sdk-core/client" }
+temporal-sdk-core = { path = "../../vendor/temporal-sdk-core/core", features = ["ephemeral-server"] }
+temporal-sdk-core-api = { path = "../../vendor/temporal-sdk-core/core-api" }
+temporal-sdk-core-protos = { path = "../../vendor/temporal-sdk-core/sdk-core-protos" }
+rustfsm = { path = "../../vendor/temporal-sdk-core/fsm" }
 tokio = "~1.44"
 tokio-stream = "~0.1"
 tonic = "~0.12"

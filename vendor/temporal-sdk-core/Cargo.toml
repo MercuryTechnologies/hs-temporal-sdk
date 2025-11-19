@@ -1,0 +1,20 @@
+[workspace]
+members = ["core", "client", "core-api", "fsm", "test-utils", "sdk-core-protos", "sdk"]
+resolver = "2"
+
+[workspace.package]
+license = "MIT"
+license-file = "LICENSE.txt"
+
+[workspace.dependencies]
+derive_builder = "0.20"
+derive_more = { version = "2.0", features = ["constructor", "display", "from", "into", "debug"] }
+thiserror = "2"
+tonic = "0.12"
+tonic-build = "0.12"
+opentelemetry = { version = "0.26", features = ["metrics"] }
+prost = "0.13"
+prost-types = "0.13"
+
+[workspace.lints.rust]
+unreachable_pub = "warn"

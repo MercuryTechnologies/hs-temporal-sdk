@@ -1,0 +1,282 @@
+// The MIT License
+//
+// Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+syntax = "proto3";
+
+package temporal.api.common.v1;
+
+option go_package = "go.temporal.io/api/common/v1;common";
+option java_package = "io.temporal.api.common.v1";
+option java_multiple_files = true;
+option java_outer_classname = "MessageProto";
+option ruby_package = "Temporalio::Api::Common::V1";
+option csharp_namespace = "Temporalio.Api.Common.V1";
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/empty.proto";
+
+import "temporal/api/enums/v1/common.proto";
+import "temporal/api/enums/v1/event_type.proto";
+import "temporal/api/enums/v1/reset.proto";
+
+message DataBlob {
+    temporal.api.enums.v1.EncodingType encoding_type = 1;
+    bytes data = 2;
+}
+
+// See `Payload`
+message Payloads {
+    repeated Payload payloads = 1;
+}
+
+// Represents some binary (byte array) data (ex: activity input parameters or workflow result) with
+// metadata which describes this binary data (format, encoding, encryption, etc). Serialization
+// of the data may be user-defined.
+message Payload {
+    map<string,bytes> metadata = 1;
+    bytes data = 2;
+}
+
+// A user-defined set of *indexed* fields that are used/exposed when listing/searching workflows.
+// The payload is not serialized in a user-defined way.
+message SearchAttributes {
+    map<string, Payload> indexed_fields = 1;
+}
+
+// A user-defined set of *unindexed* fields that are exposed when listing/searching workflows
+message Memo {
+    map<string, Payload> fields = 1;
+}
+
+// Contains metadata that can be attached to a variety of requests, like starting a workflow, and
+// can be propagated between, for example, workflows and activities.
+message Header {
+    map<string, Payload> fields = 1;
+}
+
+// Identifies a specific workflow within a namespace. Practically speaking, because run_id is a
+// uuid, a workflow execution is globally unique. Note that many commands allow specifying an empty
+// run id as a way of saying "target the latest run of the workflow".
+message WorkflowExecution {
+    string workflow_id = 1;
+    string run_id = 2;
+}
+
+// Represents the identifier used by a workflow author to define the workflow. Typically, the
+// name of a function. This is sometimes referred to as the workflow's "name"
+message WorkflowType {
+    string name = 1;
+}
+
+// Represents the identifier used by a activity author to define the activity. Typically, the
+// name of a function. This is sometimes referred to as the activity's "name"
+message ActivityType {
+    string name = 1;
+}
+
+// How retries ought to be handled, usable by both workflows and activities
+message RetryPolicy {
+    // Interval of the first retry. If retryBackoffCoefficient is 1.0 then it is used for all retries.
+    google.protobuf.Duration initial_interval = 1;
+    // Coefficient used to calculate the next retry interval.
+    // The next retry interval is previous interval multiplied by the coefficient.
+    // Must be 1 or larger.
+    double backoff_coefficient = 2;
+    // Maximum interval between retries. Exponential backoff leads to interval increase.
+    // This value is the cap of the increase. Default is 100x of the initial interval.
+    google.protobuf.Duration maximum_interval = 3;
+    // Maximum number of attempts. When exceeded the retries stop even if not expired yet.
+    // 1 disables retries. 0 means unlimited (up to the timeouts)
+    int32 maximum_attempts = 4;
+    // Non-Retryable errors types. Will stop retrying if the error type matches this list. Note that
+    // this is not a substring match, the error *type* (not message) must match exactly.
+    repeated string non_retryable_error_types = 5;
+}
+
+// Metadata relevant for metering purposes
+message MeteringMetadata {
+    // Count of local activities which have begun an execution attempt during this workflow task,
+    // and whose first attempt occurred in some previous task. This is used for metering
+    // purposes, and does not affect workflow state.
+    //
+    // (-- api-linter: core::0141::forbidden-types=disabled
+    //     aip.dev/not-precedent: Negative values make no sense to represent. --)
+    uint32 nonfirst_local_activity_execution_attempts = 13;
+}
+
+// Deprecated. This message is replaced with `Deployment` and `VersioningBehavior`.
+// Identifies the version(s) of a worker that processed a task
+message WorkerVersionStamp {
+    // An opaque whole-worker identifier. Replaces the deprecated `binary_checksum` field when this
+    // message is included in requests which previously used that.
+    string build_id = 1;
+
+    // If set, the worker is opting in to worker versioning. Otherwise, this is used only as a
+    // marker for workflow reset points and the BuildIDs search attribute.
+    bool use_versioning = 3;
+
+    // Later, may include bundle id that could be used for WASM and/or JS dynamically loadable bundles.
+}
+
+// Identifies the version that a worker is compatible with when polling or identifying itself,
+// and whether or not this worker is opting into the build-id based versioning feature. This is
+// used by matching to determine which workers ought to receive what tasks.
+// Deprecated. Use WorkerDeploymentOptions instead.
+message WorkerVersionCapabilities {
+    // An opaque whole-worker identifier
+    string build_id = 1;
+
+    // If set, the worker is opting in to worker versioning, and wishes to only receive appropriate
+    // tasks.
+    bool use_versioning = 2;
+
+    // Must be sent if user has set a deployment series name (versioning-3).
+    string deployment_series_name = 4;
+
+    // Later, may include info like "I can process WASM and/or JS bundles"
+}
+
+// Describes where and how to reset a workflow, used for batch reset currently
+// and may be used for single-workflow reset later.
+message ResetOptions {
+    // Which workflow task to reset to.
+    oneof target {
+        // Resets to the first workflow task completed or started event.
+        google.protobuf.Empty first_workflow_task = 1;
+        // Resets to the last workflow task completed or started event.
+        google.protobuf.Empty last_workflow_task = 2;
+        // The id of a specific `WORKFLOW_TASK_COMPLETED`,`WORKFLOW_TASK_TIMED_OUT`, `WORKFLOW_TASK_FAILED`, or
+        // `WORKFLOW_TASK_STARTED` event to reset to.
+        // Note that this option doesn't make sense when used as part of a batch request.
+        int64 workflow_task_id = 3;
+        // Resets to the first workflow task processed by this build id.
+        // If the workflow was not processed by the build id, or the workflow task can't be
+        // determined, no reset will be performed.
+        // Note that by default, this reset is allowed to be to a prior run in a chain of
+        // continue-as-new.
+        string build_id = 4;
+    }
+
+    // Event types to be reapplied (deprecated)
+    // Default: RESET_REAPPLY_TYPE_SIGNAL
+    temporal.api.enums.v1.ResetReapplyType reset_reapply_type = 10;
+
+    // If true, limit the reset to only within the current run. (Applies to build_id targets and
+    // possibly others in the future.)
+    bool current_run_only = 11;
+
+    // Event types not to be reapplied
+    repeated temporal.api.enums.v1.ResetReapplyExcludeType reset_reapply_exclude_types = 12;
+}
+
+// Callback to attach to various events in the system, e.g. workflow run completion.
+message Callback {
+    message Nexus {
+        // Callback URL.
+        string url = 1;
+        // Header to attach to callback request.
+        map<string, string> header = 2;
+    }
+
+    // Callbacks to be delivered internally within the system.
+    // This variant is not settable in the API and will be rejected by the service with an INVALID_ARGUMENT error.
+    // The only reason that this is exposed is because callbacks are replicated across clusters via the
+    // WorkflowExecutionStarted event, which is defined in the public API.
+    message Internal {
+        // Opaque internal data.
+        bytes data = 1;
+    }
+
+    reserved 1; // For a generic callback mechanism to be added later.
+    oneof variant {
+        Nexus nexus = 2;
+        Internal internal = 3;
+    }
+}
+
+// Link can be associated with history events. It might contain information about an external entity
+// related to the history event. For example, workflow A makes a Nexus call that starts workflow B:
+// in this case, a history event in workflow A could contain a Link to the workflow started event in
+// workflow B, and vice-versa.
+message Link {
+    message WorkflowEvent {
+        message EventReference {
+            int64 event_id = 1;
+            temporal.api.enums.v1.EventType event_type = 2;
+        }
+
+        string namespace = 1;
+        string workflow_id = 2;
+        string run_id = 3;
+
+        // Additional information about the workflow event.
+        // Eg: the caller workflow can send the history event details that made the Nexus call.
+        oneof reference {
+            EventReference event_ref = 100;
+        }
+    }
+
+    // A link to a built-in batch job.
+    // Batch jobs can be used to perform operations on a set of workflows (e.g. terminate, signal, cancel, etc).
+    // This link can be put on workflow history events generated by actions taken by a batch job.
+    message BatchJob {
+        string job_id = 1;
+    }
+
+    oneof variant {
+        WorkflowEvent workflow_event = 1;
+        BatchJob batch_job = 2;
+    }
+}
+
+// Priority contains metadata that controls relative ordering of task processing
+// when tasks are backlogged in a queue. Initially, Priority will be used in
+// activity and workflow task queues, which are typically where backlogs exist.
+// Other queues in the server (such as transfer and timer queues) and rate
+// limiting decisions do not use Priority, but may in the future.
+//
+// Priority is attached to workflows and activities. Activities and child
+// workflows inherit Priority from the workflow that created them, but may
+// override fields when they are started or modified. For each field of a
+// Priority on an activity/workflow, not present or equal to zero/empty string
+// means to inherit the value from the calling workflow, or if there is no
+// calling workflow, then use the default (documented below).
+//
+// Despite being named "Priority", this message will also contains fields that
+// control "fairness" mechanisms.
+//
+// The overall semantics of Priority are:
+// 1. First, consider "priority_key": lower number goes first.
+// (more will be added here later)
+message Priority {
+    // Priority key is a positive integer from 1 to n, where smaller integers
+    // correspond to higher priorities (tasks run sooner). In general, tasks in
+    // a queue should be processed in close to priority order, although small
+    // deviations are possible.
+    //
+    // The maximum priority value (minimum priority) is determined by server
+    // configuration, and defaults to 5.
+    //
+    // The default priority is (min+max)/2. With the default max of 5 and min of
+    // 1, that comes out to 3.
+    int32 priority_key = 1;
+}
