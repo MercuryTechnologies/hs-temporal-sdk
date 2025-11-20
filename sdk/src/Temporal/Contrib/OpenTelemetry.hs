@@ -312,6 +312,7 @@ makeOpenTelemetryInterceptor = do
                               , ("temporal.attempt", toAttribute $ fromIntegral @Word32 @Int attempt)
                               , -- , ("temporal.namespace", toAttribute $ rawNamespace $ input.activityInfo.namespace)
                                 ("temporal.activity_is_local", toAttribute isLocal)
+                              , ("temporal.task_queue", toAttribute $ rawTaskQueue taskQueue)
                               ]
                         }
 
