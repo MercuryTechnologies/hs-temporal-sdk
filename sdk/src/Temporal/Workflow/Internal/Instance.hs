@@ -18,6 +18,7 @@ module Temporal.Workflow.Internal.Instance (
 ) where
 
 import Control.Monad.Reader
+import Data.Atomics (atomicModifyIORefCAS)
 import Data.ProtoLens
 import qualified Data.Text as T
 import GHC.Stack
@@ -62,7 +63,7 @@ flushCommands = do
 nextExternalCancelSequence :: InstanceM Sequence
 nextExternalCancelSequence = do
   inst <- ask
-  atomicModifyIORef' inst.workflowSequences $ \seqs ->
+  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
     let seq' = externalCancel seqs
     in (seqs {externalCancel = succ seq'}, Sequence seq')
 
@@ -70,7 +71,7 @@ nextExternalCancelSequence = do
 nextChildWorkflowSequence :: InstanceM Sequence
 nextChildWorkflowSequence = do
   inst <- ask
-  atomicModifyIORef' inst.workflowSequences $ \seqs ->
+  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
     let seq' = childWorkflow seqs
     in (seqs {childWorkflow = succ seq'}, Sequence seq')
 
@@ -78,7 +79,7 @@ nextChildWorkflowSequence = do
 nextExternalSignalSequence :: InstanceM Sequence
 nextExternalSignalSequence = do
   inst <- ask
-  atomicModifyIORef' inst.workflowSequences $ \seqs ->
+  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
     let seq' = externalSignal seqs
     in (seqs {externalSignal = succ seq'}, Sequence seq')
 
@@ -86,7 +87,7 @@ nextExternalSignalSequence = do
 nextTimerSequence :: InstanceM Sequence
 nextTimerSequence = do
   inst <- ask
-  atomicModifyIORef' inst.workflowSequences $ \seqs ->
+  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
     let seq' = timer seqs
     in (seqs {timer = succ seq'}, Sequence seq')
 
@@ -94,7 +95,7 @@ nextTimerSequence = do
 nextActivitySequence :: InstanceM Sequence
 nextActivitySequence = do
   inst <- ask
-  atomicModifyIORef' inst.workflowSequences $ \seqs ->
+  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
     let seq' = activity seqs
     in (seqs {activity = succ seq'}, Sequence seq')
 
@@ -102,6 +103,6 @@ nextActivitySequence = do
 nextConditionSequence :: InstanceM Sequence
 nextConditionSequence = do
   inst <- ask
-  atomicModifyIORef' inst.workflowSequences $ \seqs ->
+  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
     let seq' = condition seqs
     in (seqs {condition = succ seq'}, Sequence seq')

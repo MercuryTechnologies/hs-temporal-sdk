@@ -49,6 +49,7 @@ import Control.Exception
 import Control.Monad
 import Data.Aeson
 import Data.Aeson.TH
+import Data.Atomics (atomicModifyIORefCAS)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as BL
 import Data.IORef
@@ -258,7 +259,7 @@ instance Exception WorkerAlreadyClosed
 -- After calling this, the worker must not be used again.
 closeWorker :: Worker ty -> IO ()
 closeWorker (Worker w _ _ _) = mask_ $ do
-  wp <- atomicModifyIORef' w $ \wp -> (throw WorkerAlreadyClosed, wp)
+  wp <- liftIO $ atomicModifyIORefCAS w $ \wp -> (throw WorkerAlreadyClosed, wp)
   raw_closeWorker wp
 
 
