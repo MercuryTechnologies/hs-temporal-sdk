@@ -17,6 +17,7 @@ import Temporal.Duration
 import Temporal.Payload
 import Temporal.TH
 import Temporal.Workflow
+import qualified Data.PQueue.Prio.Min as MinPQueue
 
 
 unblockWorkflowSignal :: KnownSignal '[]
@@ -125,3 +126,18 @@ signalOrderingWorkflow = provideCallStack do
 
 
 registerWorkflow 'signalOrderingWorkflow
+
+signalEnqueuesItemWorkflow :: Workflow [Int]
+signalEnqueuesItemWorkflow = provideCallStack do
+  var <- newStateVar MinPQueue.empty
+  setSignalHandler signalWithArgs $ \i -> do
+    $(logDebug) "updating value and unblocking workflow"
+    t <- now
+    readStateVar var >>= \s -> writeStateVar var (MinPQueue.insert t i s)
+
+  sleep (seconds 2)
+
+  waitCondition $ (not . MinPQueue.null) <$> readStateVar var
+  (map snd . MinPQueue.toList) <$> readStateVar var
+
+registerWorkflow 'signalEnqueuesItemWorkflow

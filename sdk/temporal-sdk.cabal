@@ -216,6 +216,7 @@ test-suite temporal-sdk-tests
     , monad-logger
     , mtl
     , network
+    , pqueue
     , proto-lens
     , proto-lens-protobuf-types
     , random
