@@ -50,6 +50,7 @@ library:
     # hackage dependencies
     - aeson
     - async
+    - atomic-primops
     - lens-family
     - monad-logger
     - network-bsd

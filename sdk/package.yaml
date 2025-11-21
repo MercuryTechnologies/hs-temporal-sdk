@@ -10,6 +10,7 @@ dependencies:
 - proto-lens-protobuf-types
 - temporal-api-protos
 - temporal-sdk-core
+- atomic-primops
 - bytestring
 - discover-instances
 - mtl

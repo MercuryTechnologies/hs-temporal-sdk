@@ -8,6 +8,7 @@ import Control.Monad
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
+import Data.Atomics (atomicModifyIORefCAS, atomicModifyIORefCAS_)
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import Data.Kind
@@ -19,7 +20,6 @@ import Data.Time.Clock.System (SystemTime)
 import Data.Vault.Strict
 import Data.Vector (Vector)
 import Data.Word (Word32)
--- import Debug.Trace
 import GHC.Stack
 import GHC.TypeLits
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
@@ -343,7 +343,7 @@ instance FrozenGen StdGen Workflow where
 {-# INLINE addJob #-}
 addJob :: ContinuationEnv -> Workflow b -> IVar b -> IVar a -> InstanceM ()
 addJob env !wf !resultIVar IVar {ivarRef = !ref} =
-  join $ atomicModifyIORef' ref $ \case
+  join $ liftIO $ atomicModifyIORefCAS ref $ \case
     IVarEmpty list -> (IVarEmpty (JobCons env wf resultIVar list), pure ())
     full -> (full, modifyIORef' env.runQueueRef (JobCons env wf resultIVar))
 
@@ -921,6 +921,6 @@ instance Monoid WorkflowOutboundInterceptor where
 nextVarIdSequence :: InstanceM Sequence
 nextVarIdSequence = do
   inst <- ask
-  atomicModifyIORef' inst.workflowSequences $ \seqs ->
+  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
     let seq' = varId seqs
     in (seqs {varId = succ seq'}, Sequence seq')
