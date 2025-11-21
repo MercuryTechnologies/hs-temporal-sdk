@@ -93,8 +93,8 @@ execute worker = runActivityWorker worker go
           go
 
 
-activityInfoFromProto :: MonadIO m => TaskToken -> AT.Start -> ActivityWorkerM actEnv m ActivityInfo
-activityInfoFromProto tt msg = do
+activityInfoFromProto :: MonadIO m => TaskToken -> TaskQueue -> AT.Start -> ActivityWorkerM actEnv m ActivityInfo
+activityInfoFromProto tt tq msg = do
   w <- ask
   hdrs <- processorDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload (msg ^. AT.headerFields))
   heartbeats <- processorDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload (msg ^. AT.vec'heartbeatDetails))
@@ -119,6 +119,7 @@ activityInfoFromProto tt msg = do
       , retryPolicy = fmap retryPolicyFromProto (msg ^. AT.maybe'retryPolicy)
       , isLocal = msg ^. AT.isLocal
       , taskToken = tt
+      , taskQueue = tq
       }
 
 
@@ -158,7 +159,8 @@ applyActivityTaskStart :: (MonadUnliftIO m, MonadLogger m) => AT.ActivityTask ->
 applyActivityTaskStart tsk tt msg = do
   w <- ask
   let c = Core.getWorkerConfig w.workerCore
-  info <- activityInfoFromProto tt msg
+      tq = Core.taskQueue c
+  info <- activityInfoFromProto tt (TaskQueue tq) msg
   Logging.logInfo $
     T.concat
       [ "Starting activity: "

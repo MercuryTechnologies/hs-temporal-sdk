@@ -94,6 +94,7 @@ mkMockActivityEnvironment env = do
           , scheduledTime = utcToSystemTime $ UTCTime systemEpochDay 0
           , startToCloseTimeout = Just $ Duration.seconds 1
           , startedTime = utcToSystemTime $ UTCTime systemEpochDay 0
+          , taskQueue = "test"
           , taskToken = "test"
           , workflowId = "test"
           , workflowNamespace = "default"

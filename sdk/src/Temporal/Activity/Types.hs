@@ -38,5 +38,6 @@ data ActivityInfo = ActivityInfo
   , retryPolicy :: Maybe RetryPolicy
   , isLocal :: Bool
   , taskToken :: TaskToken
+  , taskQueue :: TaskQueue
   }
   deriving stock (Eq)
