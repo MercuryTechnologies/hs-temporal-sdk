@@ -1,5 +1,8 @@
 final: prev:
-({
+let
+  temporalBridgeDrvs = final.callPackage ../packages/temporal-bridge.nix { };
+in
+{
   temporal-test-server = final.callPackage ../packages/temporal-test-server { };
-})
-// (import ../packages/temporal-bridge.nix final)
+  inherit (temporalBridgeDrvs) temporal_bridge temporal-sdk-core-src;
+}
