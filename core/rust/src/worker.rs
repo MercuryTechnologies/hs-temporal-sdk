@@ -6,12 +6,13 @@ use std::str;
 use std::sync::Arc;
 use std::time::Duration;
 use temporal_sdk_core::replay::{HistoryForReplay, ReplayWorkerInput};
-use temporal_sdk_core_api::errors::{PollError, WorkflowErrorType};
 use temporal_sdk_core_api::Worker;
+use temporal_sdk_core_api::errors::{PollError, WorkflowErrorType};
+use temporal_sdk_core_api::worker::{PollerBehavior, WorkerVersioningStrategy};
 use temporal_sdk_core_protos::coresdk::workflow_completion::WorkflowActivationCompletion;
 use temporal_sdk_core_protos::coresdk::{ActivityHeartbeat, ActivityTaskCompletion};
 use temporal_sdk_core_protos::temporal::api::history::v1::History;
-use tokio::sync::mpsc::{channel, Sender};
+use tokio::sync::mpsc::{Sender, channel};
 use tokio_stream::wrappers::ReceiverStream;
 
 use crate::client;
@@ -54,15 +55,21 @@ impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
         temporal_sdk_core::WorkerConfigBuilder::default()
             .namespace(conf.namespace)
             .task_queue(conf.task_queue)
-            .worker_build_id(conf.build_id)
+            .versioning_strategy(WorkerVersioningStrategy::None {
+                build_id: conf.build_id,
+            })
             .client_identity_override(conf.identity_override)
             .max_cached_workflows(conf.max_cached_workflows)
             .max_outstanding_workflow_tasks(conf.max_outstanding_workflow_tasks)
             .max_outstanding_activities(conf.max_outstanding_activities)
             .max_outstanding_local_activities(conf.max_outstanding_local_activities)
-            .max_concurrent_wft_polls(conf.max_concurrent_workflow_task_polls)
+            .workflow_task_poller_behavior(PollerBehavior::SimpleMaximum(
+                conf.max_concurrent_workflow_task_polls,
+            ))
             .nonsticky_to_sticky_poll_ratio(conf.nonsticky_to_sticky_poll_ratio)
-            .max_concurrent_at_polls(conf.max_concurrent_activity_task_polls)
+            .activity_task_poller_behavior(PollerBehavior::SimpleMaximum(
+                conf.max_concurrent_activity_task_polls,
+            ))
             .no_remote_activities(conf.no_remote_activities)
             .sticky_queue_schedule_to_start_timeout(Duration::from_millis(
                 conf.sticky_queue_schedule_to_start_timeout_millis,
@@ -105,9 +112,7 @@ impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
 
 macro_rules! enter_sync {
     ($runtime:expr) => {
-        if let Some(subscriber) = $runtime.core.telemetry().trace_subscriber() {
-            temporal_sdk_core::telemetry::set_trace_subscriber_for_current_thread(subscriber);
-        }
+        let _trace_guard = $runtime.core.telemetry().trace_subscriber().map(|s| tracing::subscriber::set_default(s));
         let _guard = $runtime.core.tokio_handle().enter();
     };
 }
@@ -389,11 +394,7 @@ impl WorkerRef {
         })
     }
 
-    fn complete_workflow_activation(
-        &self,
-        hs: HsCallback<CUnit, CWorkerError>,
-        proto: &[u8],
-    ) {
+    fn complete_workflow_activation(&self, hs: HsCallback<CUnit, CWorkerError>, proto: &[u8]) {
         let worker = self.worker.as_ref().unwrap().clone();
         let completion = WorkflowActivationCompletion::decode(proto);
         self.runtime.future_result_into_hs(hs, async move {
@@ -751,7 +752,8 @@ impl HistoryPusher {
                 .map_err(|_| {
                     CWorkerError::c_repr_of(WorkerError {
                         code: WorkerErrorCode::SDKError,
-                        message: "Channel for history replay was dropped, this is an SDK bug.".to_string(),
+                        message: "Channel for history replay was dropped, this is an SDK bug."
+                            .to_string(),
                     })
                     .unwrap()
                 })?;
