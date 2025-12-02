@@ -1,4 +1,4 @@
-{ nixpkgs, self, ... }:
+{ nixpkgs, self, fenix, ... }:
 
 let
   forAllSystems = forTheseSystems (import ./matrix.nix).systems;
@@ -11,6 +11,7 @@ let
         pkgs = import nixpkgs {
           inherit system;
           overlays = [
+            fenix.overlays.default
             self.overlays.native
             self.overlays.haskell-development
           ];

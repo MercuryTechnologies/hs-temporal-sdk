@@ -1,8 +1,14 @@
-pkgs:
+{ callPackage, fenix, lib, ... }:
 let
+  toolchain = fenix.toolchainOf {
+    channel = "stable";
+    date = "2025-11-10";
+    sha256 = "sha256-SDu4snEWjuZU475PERvu+iO50Mi39KVjqCeJeNvpguU=";
+  };
   customBuildRustCrateForPkgs =
     pkgs:
     pkgs.buildRustCrate.override {
+      inherit (toolchain) rustc cargo;
       defaultCrateOverrides = pkgs.defaultCrateOverrides // {
         prost = _attrs: {
           PROTOC = "${pkgs.protobuf}/bin/protoc";
@@ -35,7 +41,7 @@ let
         };
       };
     };
-  cargoNix = pkgs.callPackage ../../core/rust/Cargo.nix {
+  cargoNix = callPackage ../../core/rust/Cargo.nix {
     buildRustCrateForPkgs = customBuildRustCrateForPkgs;
   };
 in
