@@ -12,6 +12,7 @@ let
           inherit system;
           overlays = [
             fenix.overlays.default
+            self.overlays.development
             self.overlays.native
             self.overlays.haskell-development
           ];
