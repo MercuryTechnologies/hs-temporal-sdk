@@ -13,7 +13,7 @@ temporal-client = { git = "https://github.com/temporalio/sdk-core", rev = "aebb0
 temporal-sdk-core = { git = "https://github.com/temporalio/sdk-core", rev = "aebb0a56426880b208341eef47820a8f13dec1a9", features = ["ephemeral-server"] }
 temporal-sdk-core-api = { git = "https://github.com/temporalio/sdk-core", rev = "aebb0a56426880b208341eef47820a8f13dec1a9" }
 temporal-sdk-core-protos = { git = "https://github.com/temporalio/sdk-core", rev = "aebb0a56426880b208341eef47820a8f13dec1a9" }
-rustfsm = { git = "https://github.com/temporalio/sdk-core", rev = "aebb0a56426880b208341eef47820a8f13dec1a9" }
+rustfsm = { git = "https://github.com/temporalio/sdk-core", rev = "44a6576bbaac589b28afa173ca6d60757a4d821d" }
 tokio = "~1.48"
 tokio-stream = "~0.1"
 tonic = "~0.13"
