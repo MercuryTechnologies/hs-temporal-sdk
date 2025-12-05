@@ -25,7 +25,7 @@ serde = { version = "~1.0", features = ["derive"] }
 serde_json = "~1.0"
 prost = "~0.13"
 prost-types = "~0.13"
-libc = "0.2.172"
+libc = "0.2.178"
 
 [profile.release]
 opt-level = 3
