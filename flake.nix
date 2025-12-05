@@ -71,6 +71,7 @@
     };
 
     overlays = {
+      development = import ./nix/overlays/development.nix;
       native = import ./nix/overlays/native.nix;
       # A top-level nixpkgs overlay that extends supported GHC package sets with
       # `hs-temporal-sdk` packages & any dependency modifications required for
