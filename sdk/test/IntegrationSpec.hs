@@ -1482,6 +1482,33 @@ needsClient = do
                 2
             lift $ C.waitWorkflowResult wfH `shouldReturn` 25
 
+       it "processes signals in order of delivery" $ \TestEnv {..} -> do
+         let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) baseConf
+         withWorker conf $ do
+           let opts =
+                 (C.startWorkflowOptions taskQueue)
+                   { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                   , C.timeouts =
+                       C.TimeoutOptions
+                         { C.runTimeout = Just $ seconds 4
+                         , C.executionTimeout = Nothing
+                         , C.taskTimeout = Nothing
+                         }
+                   }
+           useClient $ do
+             liftIO $ putStrLn "signalWithStart call"
+             wfH <-
+               C.signalWithStart
+                 SignalEnqueuesItemWorkflow
+                 "signalWithStartWithQueue"
+                 opts
+                 signalWithArgs
+                 1
+ 
+             C.signal wfH signalWithArgs C.defaultSignalOptions 2
+             lift $ C.waitWorkflowResult wfH `shouldReturn` [1, 2]
+ 
+ 
   --     specify "works as intended and returns correct runId" pending
   describe "RetryPolicy" $ do
     specify "is used for retryable failures" $ \TestEnv {..} -> do
