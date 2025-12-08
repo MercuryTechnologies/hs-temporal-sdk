@@ -2,9 +2,6 @@ builds:
   - include:
       - 'packages.*.*'
     exclude:
-      # FIXME: Garnix CI fails for 'aarch64-darwin' when using an updated Rust
-      # toolchain, but succeeds when run locally
-      - 'packages.aarch64-darwin.*'
       # Unable to build because devenv is impure.
       - 'devShells.*.*'
       - 'packages.*.devenv-up'
