@@ -34,6 +34,7 @@ import Temporal.Exception
 import Temporal.Interceptor
 import Temporal.Payload
 import UnliftIO
+import UnliftIO.Async (forConcurrently_)
 import UnliftIO.Concurrent (threadDelay)
 
 
@@ -50,14 +51,14 @@ data ActivityWorker env = ActivityWorker
   }
 
 
-notifyShutdown :: MonadIO m => ActivityWorker env -> m ()
+notifyShutdown :: MonadUnliftIO m => ActivityWorker env -> m ()
 notifyShutdown worker = do
   let shutdownGracePeriod = fromIntegral (Core.gracefulShutdownPeriodMillis $ Core.getWorkerConfig worker.workerCore)
   -- TODO logging here
   when (shutdownGracePeriod > 0) $ do
     threadDelay (shutdownGracePeriod * 1000)
   running <- readTVarIO worker.runningActivities
-  forM_ running $ \thread -> cancelWith thread WorkerShutdown
+  forConcurrently_ running $ \thread -> cancelWith thread WorkerShutdown
 
 
 newtype ActivityWorkerM env m a = ActivityWorkerM {unActivityWorkerM :: ReaderT (ActivityWorker env) m a}
