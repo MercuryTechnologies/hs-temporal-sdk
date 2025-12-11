@@ -141,6 +141,7 @@ tests:
       - require-callstack
       - hs-opentelemetry-sdk
       - resourcet
+      - pqueue
     main: Main.hs
     source-dirs: test
     other-modules:
