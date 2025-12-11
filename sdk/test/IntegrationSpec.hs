@@ -1482,6 +1482,33 @@ needsClient = do
                 2
             lift $ C.waitWorkflowResult wfH `shouldReturn` 25
 
+      it "properly handles a signalWithStart invocation" $ \TestEnv {..} -> do
+        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  , C.timeouts =
+                      C.TimeoutOptions
+                        { C.runTimeout = Just $ seconds 5
+                        , C.executionTimeout = Nothing
+                        , C.taskTimeout = Nothing
+                        }
+                  }
+          useClient $ do
+            liftIO $ putStrLn "signalWithStart call"
+            wfH <-
+              C.signalWithStart
+                SignalWithActivityWorkflow
+                "signalWithStartWithActivity"
+                opts
+                signalWithArgs
+                0
+            liftIO $ threadDelay 1_000_000
+
+            -- C.signal wfH signalWithArgs C.defaultSignalOptions 1
+            lift $ C.waitWorkflowResult wfH
+
   --     specify "works as intended and returns correct runId" pending
   describe "RetryPolicy" $ do
     specify "is used for retryable failures" $ \TestEnv {..} -> do

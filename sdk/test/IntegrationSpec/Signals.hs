@@ -11,8 +11,10 @@ module IntegrationSpec.Signals where
 
 import Control.Exception
 import Control.Monad
+import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Logger
 import RequireCallStack (provideCallStack)
+import Temporal.Activity (Activity)
 import Temporal.Duration
 import Temporal.Payload
 import Temporal.TH
@@ -53,3 +55,30 @@ signalWithArgsWorkflow init = provideCallStack do
 
 
 registerWorkflow 'signalWithArgsWorkflow
+
+signalWithActivityA :: Int -> Activity () ()
+signalWithActivityA i = do
+  liftIO . print $ "----------------------"
+  liftIO . print $ "execution: " <> show i
+  liftIO . print $ "----------------------"
+
+registerActivity 'signalWithActivityA
+
+signalWithActivityWorkflow :: Workflow ()
+signalWithActivityWorkflow = provideCallStack do
+  var <- newStateVar []
+  setSignalHandler signalWithArgs $ \i ->
+    modifyStateVar var \s -> (s <> [i])
+
+  let loop = do
+        readStateVar var >>= \case
+          [] -> do
+            waitCondition $ (not . null) <$> readStateVar var
+            loop
+          (x:xs) -> do
+            writeStateVar var xs
+            executeActivity SignalWithActivityA (defaultStartActivityOptions $ StartToClose $ seconds 2) x
+            loop
+  loop
+
+registerWorkflow 'signalWithActivityWorkflow
