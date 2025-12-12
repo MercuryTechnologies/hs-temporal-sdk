@@ -13,7 +13,9 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Vault.Strict (Vault)
 import qualified Data.Vector as V
+import qualified Focus
 import Lens.Family2
+import qualified ListT
 import OpenTelemetry.Context.ThreadLocal
 import OpenTelemetry.Trace.Core hiding (inSpan, inSpan')
 import OpenTelemetry.Trace.Monad
@@ -25,6 +27,7 @@ import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_F
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Completion
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
 import RequireCallStack
+import qualified StmContainers.Map as StmMap
 import Temporal.Common
 import Temporal.Common.Async
 import qualified Temporal.Common.Logging as Logging
@@ -52,7 +55,7 @@ data WorkflowWorker = forall ty.
   Core.KnownWorkerType ty =>
   WorkflowWorker
   { workerWorkflowFunctions :: {-# UNPACK #-} !(HashMap Text WorkflowDefinition)
-  , runningWorkflows :: {-# UNPACK #-} !(TVar (HashMap RunId WorkflowInstance))
+  , runningWorkflows :: {-# UNPACK #-} !(StmMap.Map RunId WorkflowInstance)
   , workerClient :: InactiveForReplay ty C.Client
   , workerCore :: Core.Worker ty
   , workerInboundInterceptors :: {-# UNPACK #-} !WorkflowInboundInterceptor
@@ -76,15 +79,14 @@ upsertWorkflowInstance :: (MonadLoggerIO m) => RunId -> WorkflowInstance -> Read
 upsertWorkflowInstance r inst = do
   worker <- ask
   liftIO $ atomically $ do
-    workflows <- readTVar worker.runningWorkflows
-    case HashMap.lookup r workflows of
-      Nothing -> do
-        let workflows' = HashMap.insert r inst workflows
-        writeTVar worker.runningWorkflows workflows'
-        pure inst
-      Just existingInstance -> do
-        writeTVar worker.runningWorkflows workflows
-        pure existingInstance
+    let modifier =
+          \case
+            Nothing ->
+              Just inst
+            Just exists ->
+              Just exists
+
+    StmMap.focus (Focus.alter modifier >> Focus.lookupWithDefault inst) r worker.runningWorkflows
 
 
 -- | Execute an action repeatedly as long as it returns True.
@@ -121,8 +123,8 @@ execute worker@WorkflowWorker {workerCore} = flip runReaderT worker $ do
         -- TODO should we do anything else on shutdown?
         (Left (Core.WorkerError Core.PollShutdown _)) -> do
           Logging.logDebug "Poller shutting down"
-          runningWorkflows <- readTVarIO worker.runningWorkflows
-          mapM_ (cancel <=< readIORef . executionThread) runningWorkflows
+          runningWorkflows <- liftIO $ ListT.toList $ StmMap.listTNonAtomic $ worker.runningWorkflows
+          mapConcurrently_ (cancel <=< readIORef . executionThread . snd) runningWorkflows
           pure False
         (Left err) -> do
           Logging.logError $ Text.pack $ show err
@@ -188,8 +190,8 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
     createOrFetchWorkflowInstance :: ReaderT WorkflowWorker m (Maybe WorkflowInstance)
     createOrFetchWorkflowInstance = inSpan' "createOrFetchWorkflowInstance" (defaultSpanArguments {attributes = HashMap.fromList [("temporal.activation.run_id", toAttribute $ activation ^. Activation.runId)]}) $ \s -> do
       worker@WorkflowWorker {workerCore} <- ask
-      runningWorkflows_ <- atomically $ readTVar worker.runningWorkflows
-      case HashMap.lookup (RunId $ activation ^. Activation.runId) runningWorkflows_ of
+      minst <- atomically $ StmMap.lookup (RunId $ activation ^. Activation.runId) worker.runningWorkflows
+      case minst of
         Just inst -> do
           addAttribute s "temporal.workflow.worker.instance_state" ("existing" :: Text)
           pure $ Just inst
@@ -317,10 +319,9 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
             worker <- ask
             let runId_ = RunId $ activation ^. CommonProto.runId
             join $ atomically $ do
-              currentWorkflows <- readTVar worker.runningWorkflows
-              writeTVar worker.runningWorkflows $ HashMap.delete runId_ currentWorkflows
+              mworkflow <- StmMap.focus Focus.lookupAndDelete runId_ worker.runningWorkflows
               writeTChan worker.workerEvictionEmitter EvictionWithRunID {runId = runId_, eviction = removeFromCache}
-              case HashMap.lookup runId_ currentWorkflows of
+              case mworkflow of
                 Nothing -> do
                   let msg = Text.pack ("Eviction request on an unknown workflow with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
                   pure $ do

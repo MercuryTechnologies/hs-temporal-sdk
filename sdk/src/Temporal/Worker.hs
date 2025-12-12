@@ -115,6 +115,7 @@ import Proto.Temporal.Api.History.V1.Message_Fields (maybe'workflowExecutionStar
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
 import RequireCallStack
+import qualified StmContainers.Map as StmMap
 import System.IO.Unsafe
 import Temporal.Activity.Definition
 import qualified Temporal.Activity.Worker as Activity
@@ -500,7 +501,7 @@ startReplayWorker rt conf = provideCallStack $ runWorkerContext conf $ do
   (workerCore, replay) <- either throwIO pure =<< liftIO (Core.newReplayWorker rt coreConfig')
   Logging.logDebug "Instantiated core"
   workerEvictionEmitter <- newBroadcastTChanIO
-  runningWorkflows <- newTVarIO mempty
+  runningWorkflows <- liftIO StmMap.newIO
   uuid <- liftIO nextRandom
   let workerWorkflowFunctions = conf.wfDefs
       workerTaskQueue = TaskQueue (Core.taskQueue conf.coreConfig <> "-" <> UUID.toText uuid)
@@ -615,8 +616,8 @@ startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "sta
   case validationRes of
     Left err -> throwIO err
     Right () -> pure ()
-  runningWorkflows <- newTVarIO mempty
-  runningActivities <- newTVarIO mempty
+  runningWorkflows <- liftIO StmMap.newIO
+  runningActivities <- liftIO StmMap.newIO
   activityEnv <- newIORef conf.actEnv
   let errorConverters = mkAnnotatedHandlers conf.applicationErrorConverters
       workerWorkflowFunctions = conf.wfDefs

@@ -111,11 +111,13 @@ library
     , discover-instances
     , exceptions
     , first-class-families
+    , focus
     , ghc
     , hashable
     , hs-opentelemetry-api
     , hs-opentelemetry-propagator-w3c
     , lens-family
+    , list-t
     , monad-logger
     , mtl
     , network
@@ -126,6 +128,7 @@ library
     , scientific
     , split
     , stm
+    , stm-containers
     , template-haskell
     , temporal-api-protos
     , temporal-sdk-core
@@ -198,6 +201,7 @@ test-suite temporal-sdk-tests
     , discover-instances
     , exceptions
     , first-class-families
+    , focus
     , ghc
     , hashable
     , hedgehog
@@ -208,6 +212,7 @@ test-suite temporal-sdk-tests
     , hspec-api
     , hspec-hedgehog
     , lens-family
+    , list-t
     , monad-logger
     , mtl
     , network
@@ -219,6 +224,7 @@ test-suite temporal-sdk-tests
     , scientific
     , split
     , stm
+    , stm-containers
     , template-haskell
     , temporal-api-protos
     , temporal-sdk
