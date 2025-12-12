@@ -16,6 +16,7 @@ import Data.ProtoLens
 import Data.Text (Text)
 import qualified Data.Text as T
 import Lens.Family2
+import qualified ListT
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as P
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult as AR
@@ -23,6 +24,7 @@ import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields as
 import qualified Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask as AT
 import qualified Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields as AT
 import qualified Proto.Temporal.Sdk.Core.CoreInterface_Fields as C
+import qualified StmContainers.Map as StmMap
 import Temporal.Activity.Definition
 import Temporal.Activity.Types
 import Temporal.Common
@@ -41,7 +43,7 @@ import UnliftIO.Concurrent (threadDelay)
 data ActivityWorker env = ActivityWorker
   { activityEnv :: {-# UNPACK #-} !(IORef env)
   , definitions :: {-# UNPACK #-} !(HashMap Text (ActivityDefinition env))
-  , runningActivities :: {-# UNPACK #-} !(TVar (HashMap TaskToken (Async ())))
+  , runningActivities :: {-# UNPACK #-} !(StmMap.Map TaskToken (Async ()))
   , workerCore :: {-# UNPACK #-} !(Core.Worker 'Core.Real)
   , activityInboundInterceptors :: {-# UNPACK #-} !(ActivityInboundInterceptor env)
   , activityOutboundInterceptors :: {-# UNPACK #-} !(ActivityOutboundInterceptor env)
@@ -57,8 +59,8 @@ notifyShutdown worker = do
   -- TODO logging here
   when (shutdownGracePeriod > 0) $ do
     threadDelay (shutdownGracePeriod * 1000)
-  running <- readTVarIO worker.runningActivities
-  forConcurrently_ running $ \thread -> cancelWith thread WorkerShutdown
+  running <- liftIO $ ListT.toList $ StmMap.listTNonAtomic $ worker.runningActivities
+  forConcurrently_ running $ \thread -> cancelWith (snd thread) WorkerShutdown
 
 
 newtype ActivityWorkerM env m a = ActivityWorkerM {unActivityWorkerM :: ReaderT (ActivityWorker env) m a}
@@ -149,8 +151,8 @@ applyActivityTask task = case task ^. AT.maybe'variant of
 requireActivityNotRunning :: MonadUnliftIO m => TaskToken -> ActivityWorkerM actEnv m () -> ActivityWorkerM actEnv m ()
 requireActivityNotRunning tt m = do
   w <- ask
-  running <- readTVarIO w.runningActivities
-  case HashMap.lookup tt running of
+  running <- atomically $ StmMap.lookup tt w.runningActivities
+  case running of
     Just _ -> throwIO $ RuntimeError "Activity task already running"
     Nothing -> m
 
@@ -212,7 +214,7 @@ applyActivityTaskStart tsk tt msg = do
               Nothing -> throwIO $ RuntimeError ("Activity type not found: " <> T.unpack info.activityType)
               Just ActivityDefinition {..} ->
                 runReaderT (unActivity $ activityRun input') (actEnv env')
-                  `finally` (takeMVar syncPoint *> atomically (modifyTVar' w.runningActivities (HashMap.delete tt)))
+                  `finally` (takeMVar syncPoint *> atomically (StmMap.delete tt w.runningActivities))
         completionMsg <- case ef >>= first (toException . ValueError) of
           Left err@(SomeException _wrappedErr) -> do
             Logging.logDebug (T.pack (show err))
@@ -281,7 +283,7 @@ applyActivityTaskStart tsk tt msg = do
           Left err -> throwIO err
           Right _ -> pure ()
 
-      atomically $ modifyTVar' w.runningActivities (HashMap.insert tt runningActivity)
+      atomically $ StmMap.insert runningActivity tt w.runningActivities
       -- We should only be throwing this exception if the activity has a logical error
       -- that is an internal error to the Temporal worker. If the activity throws an
       -- exception, that should be caught and fed to completeActivityTask.
@@ -306,12 +308,12 @@ applyActivityTaskCancel :: (MonadUnliftIO m, MonadLogger m) => TaskToken -> AT.C
 applyActivityTaskCancel tt msg = do
   w <- ask
   Logging.logDebug $ "Cancelling activity: " <> T.pack (show tt)
-  running <- readTVarIO w.runningActivities
+  running <- atomically $ StmMap.lookup tt w.runningActivities
   let cancelReason = case msg ^. AT.reason of
         AT.NOT_FOUND -> NotFound
         AT.CANCELLED -> CancelRequested
         AT.TIMED_OUT -> Timeout
         AT.WORKER_SHUTDOWN -> WorkerShutdown
         AT.ActivityCancelReason'Unrecognized _ -> UnknownCancellationReason
-  forM_ (HashMap.lookup tt running) $ \a ->
-    cancelWith a cancelReason `finally` atomically (modifyTVar' w.runningActivities (HashMap.delete tt))
+  forM_ running $ \a ->
+    cancelWith a cancelReason `finally` atomically (StmMap.delete tt w.runningActivities)
