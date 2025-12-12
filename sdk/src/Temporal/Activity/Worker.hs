@@ -315,5 +315,5 @@ applyActivityTaskCancel tt msg = do
         AT.TIMED_OUT -> Timeout
         AT.WORKER_SHUTDOWN -> WorkerShutdown
         AT.ActivityCancelReason'Unrecognized _ -> UnknownCancellationReason
-  forConcurrently_ running $ \a ->
+  forM_ running $ \a ->
     cancelWith a cancelReason `finally` atomically (StmMap.delete tt w.runningActivities)
