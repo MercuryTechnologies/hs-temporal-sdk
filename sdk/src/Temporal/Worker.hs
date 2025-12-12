@@ -23,7 +23,7 @@ multiple task queues, you will need to start multiple workers. Multiple workers
 may run in the same process.
 -}
 module Temporal.Worker (
-  Temporal.Worker.Worker,
+  Temporal.Worker.Worker(..),
   startWorker,
   waitWorker,
   shutdown,

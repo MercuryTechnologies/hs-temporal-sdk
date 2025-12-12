@@ -19,6 +19,7 @@ library
       Data.EvalRecord
       Data.EvalRecord.TH
       Temporal.Activity
+      Temporal.Activity.Worker
       Temporal.Bundle
       Temporal.Bundle.TH
       Temporal.Client
@@ -45,7 +46,6 @@ library
       Temporal.Workflow.Update
   other-modules:
       Temporal.Activity.Definition
-      Temporal.Activity.Worker
       Temporal.Client.Types
       Temporal.Client.AsyncActivity
       Temporal.Client.Workflow
