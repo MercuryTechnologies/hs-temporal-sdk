@@ -27,6 +27,9 @@ dependencies:
 - uuid
 - uuid-types
 - stm
+- stm-containers
+- focus
+- list-t
 - time
 - containers
 - hashable
