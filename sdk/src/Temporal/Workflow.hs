@@ -271,6 +271,7 @@ import Data.Int (Int64)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe
+import Data.Monoid (Endo (..))
 import Data.ProtoLens
 import Data.Proxy
 import qualified Data.Set as Set
@@ -1259,12 +1260,20 @@ setSignalHandler
   => ref
   -> f
   -> Workflow ()
-setSignalHandler (signalRef -> KnownSignal n codec) f = ilift $ do
-  updateCallStack
-  -- TODO ^ inner callstack?
-  inst <- ask
-  liftIO $ modifyIORef' inst.workflowSignalHandlers $ \handlers ->
-    HashMap.insert (Just n) handle' handlers
+setSignalHandler (signalRef -> KnownSignal n codec) f = do
+  -- Register the handler and get any buffered signals
+  bufferedSignals <- ilift $ do
+    updateCallStack
+    inst <- ask
+    -- Register the handler
+    liftIO $ modifyIORef' inst.workflowSignalHandlers $ \handlers ->
+      HashMap.insert (Just n) handle' handlers
+    -- Get and clear any buffered signals for this signal name
+    -- Uses appEndo to convert the Endo diff-list back to a regular list
+    liftIO $ atomicModifyIORef' inst.workflowBufferedSignals $ \buf ->
+      (HashMap.delete n buf, maybe [] (`appEndo` []) $ HashMap.lookup n buf)
+  -- Process any buffered signals (matching TypeScript SDK behavior)
+  forM_ bufferedSignals handle'
   where
     handle' :: Vector Payload -> Workflow ()
     handle' vec = do

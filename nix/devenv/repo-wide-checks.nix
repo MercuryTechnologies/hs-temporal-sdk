@@ -29,6 +29,7 @@
         [
           "^sdk/src/Temporal/Client/Namespace\\.hs"
           "^sdk/src/Temporal/Client/Workflow\\.hs"
+          "^sdk/src/Temporal/Workflow/Internal/Monad\\.hs" # CPP not supported by fourmolu
           "^sdk/test/Spec\\.hs"
         ]
         ++ attrs.excludes or [];

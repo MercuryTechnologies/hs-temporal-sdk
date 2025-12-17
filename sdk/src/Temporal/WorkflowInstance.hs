@@ -28,6 +28,7 @@ import Data.Foldable (foldl')
 #endif
 import Data.Functor.Identity
 import qualified Data.HashMap.Strict as HashMap
+import Data.Monoid (Endo (..))
 import Data.ProtoLens
 import Data.Proxy
 import Data.Set (Set)
@@ -132,6 +133,7 @@ create
     workflowSequenceMaps <- newTVarIO $ SequenceMaps mempty mempty mempty mempty mempty mempty
     workflowCommands <- newTVarIO $ Reversed []
     workflowSignalHandlers <- newIORef mempty
+    workflowBufferedSignals <- newIORef mempty
     workflowCallStack <- newIORef emptyCallStack
     workflowQueryHandlers <- newIORef mempty
     workflowUpdateHandlers <- newIORef mempty
@@ -398,20 +400,27 @@ applySignalWorkflow signalWorkflow = join $ do
   Workflow $ \_ -> do
     inst <- ask
     handlers <- readIORef inst.workflowSignalHandlers
-    let handlerOrDefault =
-          HashMap.lookup (Just (signalWorkflow ^. Activation.signalName)) handlers
+    let signalName = signalWorkflow ^. Activation.signalName
+        handlerOrDefault =
+          HashMap.lookup (Just signalName) handlers
             <|> HashMap.lookup Nothing handlers
-    case handlerOrDefault of
-      Nothing -> pure $ Done $ do
-        Logging.logWarn $ Text.pack ("No signal handler found for signal: " <> show (signalWorkflow ^. Activation.signalName))
-        pure ()
-      Just handler -> do
-        eInputs <- UnliftIO.try $ processorDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (signalWorkflow ^. Command.vec'input))
-        case eInputs of
-          Left err -> pure $ Throw err
-          Right args -> pure $ Done $ do
-            Logging.logDebug $ Text.pack ("Applying signal handler for signal: " <> show (signalWorkflow ^. Activation.signalName))
-            handler args
+    -- Decode inputs first - we need them whether we have a handler or are buffering
+    eInputs <- UnliftIO.try $ processorDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (signalWorkflow ^. Command.vec'input))
+    case eInputs of
+      Left err -> pure $ Throw err
+      Right args -> case handlerOrDefault of
+        Nothing -> do
+          -- Buffer the signal until a handler is registered (matching TypeScript SDK behavior)
+          -- Uses Endo for O(1) append (diff-list style), maintaining FIFO order
+          -- flip (<>) ensures old signals come before new: old <> new
+          Logging.logDebug $ Text.pack ("Buffering signal (no handler registered yet): " <> show signalName)
+          liftIO $
+            modifyIORef' inst.workflowBufferedSignals $
+              HashMap.insertWith (flip (<>)) signalName (Endo (args :))
+          pure $ Done $ pure ()
+        Just handler -> pure $ Done $ do
+          Logging.logDebug $ Text.pack ("Applying signal handler for signal: " <> show signalName)
+          handler args
 
 
 applyDoUpdateWorkflow :: DoUpdate -> Workflow ()
@@ -601,7 +610,6 @@ applyJobs jobs fAwait = UnliftIO.try $ do
           _ -> case updateWorkflows ++ signalWorkflows of
             [] -> wf activations
             jobs -> lift (mapM_ injectWorkflowSignalOrUpdate jobs) *> wf activations
-            {- TODO: we need to run the signal workflows without messing up ContinuationEnv: runWorkflow signalWorkflows -}
     )
       <$> fAwait
   where
