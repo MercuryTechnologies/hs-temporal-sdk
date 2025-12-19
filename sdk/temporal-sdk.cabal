@@ -156,7 +156,7 @@ test-suite temporal-sdk-tests
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
-      Spec, ConcurrentAccessSpec, AsyncCompletionSpec, DurationSpec, IntegrationSpec, IntegrationSpec.HangingWorkflow, IntegrationSpec.NoOpWorkflow, IntegrationSpec.TimeoutsInWorkflows, IntegrationSpec.Updates, MockActivityEnvironmentSpec, IntegrationSpec.TimeSkipping, Common, RegisterWorkflowsSpec, THCompiles
+      Spec, ConcurrentAccessSpec, AsyncCompletionSpec, DurationSpec, ExceptionSpec, IntegrationSpec, IntegrationSpec.ActivityLifecycle, IntegrationSpec.ClientOperations, IntegrationSpec.ErrorHandling, IntegrationSpec.ExceptionConversionTests, IntegrationSpec.HangingWorkflow, IntegrationSpec.HangingWorkflowTests, IntegrationSpec.NoOpWorkflow, IntegrationSpec.RegressionTests, IntegrationSpec.RetryPolicyTests, IntegrationSpec.Signals, IntegrationSpec.SignalsTests, IntegrationSpec.TerminateTests, IntegrationSpec.TimeoutsInWorkflows, IntegrationSpec.TimeSkipping, IntegrationSpec.TimeSkippingIntegrationTests, IntegrationSpec.TimeSkippingWorkflowTests, IntegrationSpec.UpdateInterceptorTests, IntegrationSpec.Updates, IntegrationSpec.Utils, IntegrationSpec.WorkerManagement, IntegrationSpec.WorkflowExecution, MockActivityEnvironmentSpec, Common, RegisterWorkflowsSpec, RegisterWorkflowsSpec.CustomCodec, THCompiles
   hs-source-dirs:
       test
   default-extensions:
