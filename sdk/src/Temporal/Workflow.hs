@@ -262,10 +262,11 @@ import Control.Monad.Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Aeson (Value)
+import Data.Atomics (atomicModifyIORefCAS)
 import qualified Data.Bits as Bits
 import qualified Data.ByteString.Short as SBS
 import Data.Coerce
-import Data.Foldable (Foldable (..), traverse_)
+import Data.Foldable (Foldable (..), for_, traverse_)
 import qualified Data.HashMap.Strict as HashMap
 import Data.Int (Int64)
 import Data.Map.Strict (Map)
@@ -1270,10 +1271,10 @@ setSignalHandler (signalRef -> KnownSignal n codec) f = do
       HashMap.insert (Just n) handle' handlers
     -- Get and clear any buffered signals for this signal name
     -- Uses appEndo to convert the Endo diff-list back to a regular list
-    liftIO $ atomicModifyIORef' inst.workflowBufferedSignals $ \buf ->
-      (HashMap.delete n buf, maybe [] (`appEndo` []) $ HashMap.lookup n buf)
+    liftIO $ atomicModifyIORefCAS inst.workflowBufferedSignals $ \buf ->
+      (HashMap.delete n buf, foldMap (`appEndo` []) $ HashMap.lookup n buf)
   -- Process any buffered signals (matching TypeScript SDK behavior)
-  forM_ bufferedSignals handle'
+  for_ bufferedSignals handle'
   where
     handle' :: Vector Payload -> Workflow ()
     handle' vec = do
