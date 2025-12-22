@@ -276,11 +276,12 @@ rethrowAsyncExceptions e
   | otherwise = return ()
 
 
--- experimental. should help ensure that signals blocking and resuming interop
--- properly with the main workflow execution.
+-- Injects a signal or update workflow into the job queue.
+-- Uses append (FIFO) so signals/updates are processed in arrival order.
 injectWorkflowSignalOrUpdate :: Workflow a -> InstanceM ()
 injectWorkflowSignalOrUpdate signal = do
   result <- newIVar
   inst <- ask
   let env@(ContinuationEnv jobList) = inst.workflowInstanceContinuationEnv
-  modifyIORef' jobList $ \j -> JobCons env signal result j
+  -- Append to end (FIFO) to preserve arrival order for signals/updates
+  modifyIORef' jobList $ \j -> appendJobList j (JobCons env signal result JobNil)

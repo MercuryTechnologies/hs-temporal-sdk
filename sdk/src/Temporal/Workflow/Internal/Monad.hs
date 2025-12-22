@@ -14,6 +14,7 @@ import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import Data.Kind
 import Data.Map.Strict (Map)
+import Data.Monoid (Endo (..))
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Text (Text)
@@ -698,6 +699,10 @@ data WorkflowInstance = WorkflowInstance
   , workflowCommands :: {-# UNPACK #-} !(TVar (Reversed WorkflowCommand))
   , workflowSequenceMaps :: {-# UNPACK #-} !(TVar SequenceMaps)
   , workflowSignalHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (Vector Payload -> Workflow ())))
+  , -- | Signals that arrived before their handler was registered.
+    -- These are buffered and delivered when setSignalHandler is called.
+    -- Uses Endo for O(1) append (diff-list style).
+    workflowBufferedSignals :: {-# UNPACK #-} !(IORef (HashMap Text (Endo [Vector Payload])))
   , workflowQueryHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (QueryId -> Vector Payload -> Map Text Payload -> IO (Either SomeException Payload))))
   , workflowUpdateHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) WorkflowUpdateImplementation))
   , workflowCallStack :: {-# UNPACK #-} !(IORef CallStack)

@@ -17,7 +17,7 @@ As such, these functions are not exported from the Temporal module to discourage
 inadvisable use.
 -}
 module Temporal.Workflow.Unsafe (
-  performUnsafeNonDeterministicIO
+  performUnsafeNonDeterministicIO,
 ) where
 
 import Control.Monad.IO.Class

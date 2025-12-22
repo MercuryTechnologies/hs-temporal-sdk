@@ -1482,6 +1482,63 @@ needsClient = do
                 2
             lift $ C.waitWorkflowResult wfH `shouldReturn` 25
 
+      -- Test for signal buffering: signals sent via signalWithStart should be
+      -- buffered until the handler is registered, not dropped.
+      it "buffers signals until handler is registered" $ \TestEnv {..} -> do
+        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  , C.timeouts =
+                      C.TimeoutOptions
+                        { -- Short timeout so test fails fast if signal is dropped
+                          C.runTimeout = Just $ seconds 3
+                        , C.executionTimeout = Nothing
+                        , C.taskTimeout = Nothing
+                        }
+                  }
+          useClient $ do
+            wfH <-
+              C.signalWithStart
+                SignalBufferingWorkflow
+                "signalBufferingTest"
+                opts
+                signalBufferingSignal
+                42
+            -- If signal buffering works, workflow completes with signal value
+            -- If signal is dropped, workflow times out waiting for the signal
+            lift $ C.waitWorkflowResult wfH `shouldReturn` 42
+
+      -- Test that buffered signals are delivered in FIFO order
+      it "delivers buffered signals in FIFO order" $ \TestEnv {..} -> do
+        let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  , C.timeouts =
+                      C.TimeoutOptions
+                        { C.runTimeout = Just $ seconds 5
+                        , C.executionTimeout = Nothing
+                        , C.taskTimeout = Nothing
+                        }
+                  }
+          useClient $ do
+            -- Start workflow with first signal (value 1)
+            wfH <-
+              C.signalWithStart
+                SignalOrderingWorkflow
+                "signalOrderingTest"
+                opts
+                signalBufferingSignal
+                (1 :: Int)
+            -- Immediately send second signal (value 2)
+            C.signal wfH signalBufferingSignal C.defaultSignalOptions (2 :: Int)
+            -- Workflow should return signals in order [1, 2]
+            -- If order is wrong, we'd get [2, 1]
+            lift $ C.waitWorkflowResult wfH `shouldReturn` [1, 2]
+
   --     specify "works as intended and returns correct runId" pending
   describe "RetryPolicy" $ do
     specify "is used for retryable failures" $ \TestEnv {..} -> do
