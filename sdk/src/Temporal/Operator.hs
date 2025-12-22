@@ -8,7 +8,6 @@ tasks.
 -}
 module Temporal.Operator where
 
-import Control.Monad
 import Control.Monad.IO.Class
 import Data.Bifunctor (bimap)
 import Data.Map.Strict (Map)

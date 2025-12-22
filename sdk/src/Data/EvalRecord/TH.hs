@@ -41,18 +41,20 @@ module Data.EvalRecord.TH
 -- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 -- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 -- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+import Control.Monad (void)
+import qualified Data.EvalRecord as Rec
+#if __GLASGOW_HASKELL__ < 910
+import Data.Foldable (foldl')
+#endif
+import Data.List (partition, nub)
+import Data.List.Split
+import qualified Data.List.NonEmpty as NE
+import Data.Maybe
+import Data.String
+import GHC.Generics (Generic)
+import Fcf
 import Language.Haskell.TH hiding (cxt)
 import Language.Haskell.TH.Syntax (Name(..), mkOccName, occString)
-import Control.Monad (void)
-import Data.String
-import Data.Foldable (foldl')
-import Data.List (partition, nub)
-import qualified Data.List.NonEmpty as NE
-import qualified Data.EvalRecord as Rec
-import GHC.Generics (Generic)
-import Data.List.Split
-import Data.Maybe
-import Fcf
 
 data DeclareRecordConfig = DeclareRecordConfig
   { friends :: [Name] -- ^ Members with these types won't be wrapped with 'f @@'

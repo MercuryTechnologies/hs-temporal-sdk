@@ -145,7 +145,6 @@ import Data.Scientific (floatingOrInteger)
 import Data.String (IsString)
 import Data.Text (Text)
 import Data.Time
-import Data.Time.Clock
 import Data.Vector (Vector)
 import Data.Word
 import GHC.TypeLits

@@ -158,7 +158,6 @@ module Temporal.Bundle (
   ApplyRef,
 ) where
 
-import Control.Monad
 import Control.Monad.Catch
 import Control.Monad.Logger
 import Control.Monad.Reader

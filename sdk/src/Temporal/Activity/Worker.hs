@@ -36,7 +36,6 @@ import Temporal.Exception
 import Temporal.Interceptor
 import Temporal.Payload
 import UnliftIO
-import UnliftIO.Async (forConcurrently_)
 import UnliftIO.Concurrent (threadDelay)
 
 

@@ -9,7 +9,7 @@ import Control.Monad
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
-import Data.Atomics (atomicModifyIORefCAS, atomicModifyIORefCAS_)
+import Data.Atomics (atomicModifyIORefCAS)
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import Data.Kind
@@ -682,7 +682,7 @@ updateCallStackW = Workflow $ \_ -> do
 
 
 data WorkflowUpdateImplementation = WorkflowUpdateImplementation
-  { updateImplementation :: {-# UNPACK #-} !(UpdateId -> Vector Payload -> Map Text Payload -> Workflow Payload)
+  { updateImplementation :: !(UpdateId -> Vector Payload -> Map Text Payload -> Workflow Payload)
   , updateValidationImplementation :: {-# UNPACK #-} !(Maybe (UpdateId -> Vector Payload -> Map Text Payload -> Validation (Either SomeException ())))
   }
 

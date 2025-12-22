@@ -36,11 +36,9 @@ import Data.Text (Text)
 import Data.Typeable
 import Data.Vector (Vector)
 import RequireCallStack
-import Temporal.Client.Types
 import Temporal.Payload
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Signal
-import Temporal.Workflow.Types (StartChildWorkflowOptions)
 import Temporal.Workflow.Update
 
 

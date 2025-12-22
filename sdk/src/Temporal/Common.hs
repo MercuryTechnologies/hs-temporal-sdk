@@ -23,7 +23,7 @@ import Data.Typeable
 import Data.Vector (Vector)
 import Data.Word (Word32)
 import GHC.Generics (Generic)
-import Instances.TH.Lift
+import Instances.TH.Lift ()
 import Language.Haskell.TH.Syntax (Lift)
 import Lens.Family2
 import qualified Proto.Google.Protobuf.Timestamp as Timestamp

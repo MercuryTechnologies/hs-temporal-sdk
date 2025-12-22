@@ -357,7 +357,6 @@ module Temporal.TH (
 
 import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Map.Strict as Map
-import Data.Proxy (Proxy (..))
 import Data.Typeable
 import DiscoverInstances
 import qualified Language.Haskell.TH as TH
@@ -365,7 +364,7 @@ import Language.Haskell.TH.Lib
 import qualified Language.Haskell.TH.Syntax as TH
 import qualified Temporal.Activity as Act
 import Temporal.Activity.Definition (ActivityDef (..))
-import Temporal.Payload (Codec, JSON (..))
+import Temporal.Payload (JSON (..))
 import Temporal.TH.Classes
 import Temporal.TH.Internal (fnSingDataAndConName, fnSingE, isActivityFunction, isWorkflowFunction, makeFnDecls)
 import Temporal.Worker (Definitions (..))
