@@ -15,7 +15,7 @@ import GHC.TypeLits
 import Temporal.Activity.Types
 import Temporal.Client.Types
 import Temporal.Core.Client (Client)
-import Temporal.Core.Worker (ActivityHeartbeat, Worker, WorkerConfig, WorkerError, WorkerType (Real), getWorkerClient)
+import Temporal.Core.Worker (ActivityHeartbeat, WorkerConfig, WorkerError)
 import Temporal.Payload
 import Temporal.Workflow.Types
 import UnliftIO

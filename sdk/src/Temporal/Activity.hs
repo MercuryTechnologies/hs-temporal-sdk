@@ -76,7 +76,6 @@ import Temporal.Activity.Types
 import Temporal.Activity.Worker
 import Temporal.Client
 import Temporal.Common
-import Temporal.Core.Worker (getWorkerClient, recordActivityHeartbeat)
 import Temporal.Exception
 import Temporal.Payload
 import Temporal.Workflow.Types

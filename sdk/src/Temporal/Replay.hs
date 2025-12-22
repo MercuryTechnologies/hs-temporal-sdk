@@ -18,21 +18,9 @@ module Temporal.Replay (
 
 import Control.Exception
 import Control.Monad.IO.Class
-import Data.Aeson
--- import Data.List.Split (wordsBy)
-
 import qualified Data.ByteString as BS
-import Data.Char
-import Data.List (intersperse)
 import Data.ProtoLens
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as T
-import Data.Vector (Vector)
-import Lens.Family2
 import Proto.Temporal.Api.History.V1.Message
-import Proto.Temporal.Api.History.V1.Message_Fields
-import Temporal.Common (WorkflowId (..))
-import Temporal.Core.Worker (HistoryPusher, closeHistory, newReplayWorker, pushHistory)
 
 
 data InvalidHistoryException = InvalidHistoryProtobufException String

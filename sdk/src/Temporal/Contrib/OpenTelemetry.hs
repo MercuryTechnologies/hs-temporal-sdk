@@ -24,7 +24,6 @@ import Data.Int
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as T
 import qualified Data.Vault.Strict as Vault
-import Data.Version (showVersion)
 import Data.Word (Word32)
 import GHC.IO (unsafePerformIO)
 import qualified OpenTelemetry.Context as Ctxt
@@ -32,7 +31,6 @@ import OpenTelemetry.Context.ThreadLocal (attachContext, getContext)
 import OpenTelemetry.Propagator
 import OpenTelemetry.Propagator.W3CTraceContext
 import OpenTelemetry.Trace.Core
-import Paths_temporal_sdk
 import Temporal.Activity.Types
 -- TODO rework WorkflowExitVariant to not expose internals
 import qualified Temporal.Client.Types as C
