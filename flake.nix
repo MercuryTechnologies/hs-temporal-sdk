@@ -2,10 +2,14 @@
   description = "Haskell bindings to the Temporal Core library as well as an SDK built on top of it.";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    devenv.url = "github:cachix/devenv/v1.0.5";
     fenix = {
       url = "github:nix-community/fenix";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+    devenv.url = "github:cachix/devenv/v1.11.2";
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "devenv/nixpkgs";
     };
   };
 

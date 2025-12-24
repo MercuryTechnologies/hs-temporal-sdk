@@ -15,7 +15,7 @@
     channel = "stable";
   };
 
-  pre-commit.hooks = {
+  git-hooks.hooks = {
     crate2nix = {
       enable = false;
       name = "crate2nix";

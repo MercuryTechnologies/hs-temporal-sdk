@@ -35,7 +35,7 @@
         ++ attrs.excludes or [];
     };
 in {
-  pre-commit.hooks = {
+  git-hooks.hooks = {
     alejandra = ignoreCrate2Nix {
       enable = true;
     };
